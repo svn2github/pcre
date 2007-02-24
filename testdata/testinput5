@@ -182,4 +182,14 @@
     \x{100}
     Ā 
 
+/[\xFF]/D
+    >\xff<
+
+/[\xff]/D8
+    >\x{ff}<
+
+/[^\xFF]/D
+
+/[^\xff]/8D
+
 / End of testinput5 /

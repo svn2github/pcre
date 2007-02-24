@@ -1,4 +1,4 @@
-PCRE version 4.1 12-Mar-2003
+PCRE version 4.2 14-Apr-2003
 
 /\x{100}/8DM
 Memory allocation (code space): 11
@@ -773,6 +773,58 @@ No need char
  0: \x{100}
     Ā 
  0: \x{100}
+
+/[\xFF]/D
+------------------------------------------------------------------
+  0   6 Bra 0
+  3   1 \xff
+  6   6 Ket
+  9     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+First char = 255
+No need char
+    >\xff<
+ 0: \xff
+
+/[\xff]/D8
+------------------------------------------------------------------
+  0  36 Bra 0
+  3     [\xff]
+ 36  36 Ket
+ 39     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf8
+No first char
+No need char
+    >\x{ff}<
+ 0: \x{ff}
+
+/[^\xFF]/D
+------------------------------------------------------------------
+  0   5 Bra 0
+  3     [^\xff]
+  5   5 Ket
+  8     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[^\xff]/8D
+------------------------------------------------------------------
+  0  36 Bra 0
+  3     [\x00-\xfe] (neg)
+ 36  36 Ket
+ 39     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf8
+No first char
+No need char
 
 / End of testinput5 /
 

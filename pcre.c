@@ -221,14 +221,14 @@ we know we are in UTF-8 mode. */
   c = *eptr; \
   if ((c & 0xc0) == 0xc0) \
     { \
-    int i; \
-    int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int s = 6*a; \
-    c = (c & utf8_table3[a]) << s; \
-    for (i = 1; i <= a; i++) \
+    int gcii; \
+    int gcaa = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int gcss = 6*gcaa; \
+    c = (c & utf8_table3[gcaa]) << gcss; \
+    for (gcii = 1; gcii <= gcaa; gcii++) \
       { \
-      s -= 6; \
-      c |= (eptr[i] & 0x3f) << s; \
+      gcss -= 6; \
+      c |= (eptr[gcii] & 0x3f) << gcss; \
       } \
     }
 
@@ -239,13 +239,13 @@ know we are in UTF-8 mode. */
   c = *eptr++; \
   if ((c & 0xc0) == 0xc0) \
     { \
-    int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int s = 6*a; \
-    c = (c & utf8_table3[a]) << s; \
-    while (a-- > 0) \
+    int gcaa = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int gcss = 6*gcaa; \
+    c = (c & utf8_table3[gcaa]) << gcss; \
+    while (gcaa-- > 0) \
       { \
-      s -= 6; \
-      c |= (*eptr++ & 0x3f) << s; \
+      gcss -= 6; \
+      c |= (*eptr++ & 0x3f) << gcss; \
       } \
     }
 
@@ -255,13 +255,13 @@ know we are in UTF-8 mode. */
   c = *eptr++; \
   if (md->utf8 && (c & 0xc0) == 0xc0) \
     { \
-    int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int s = 6*a; \
-    c = (c & utf8_table3[a]) << s; \
-    while (a-- > 0) \
+    int gcaa = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int gcss = 6*gcaa; \
+    c = (c & utf8_table3[gcaa]) << gcss; \
+    while (gcaa-- > 0) \
       { \
-      s -= 6; \
-      c |= (*eptr++ & 0x3f) << s; \
+      gcss -= 6; \
+      c |= (*eptr++ & 0x3f) << gcss; \
       } \
     }
 
@@ -272,16 +272,16 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
   c = *eptr; \
   if ((c & 0xc0) == 0xc0) \
     { \
-    int i; \
-    int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int s = 6*a; \
-    c = (c & utf8_table3[a]) << s; \
-    for (i = 1; i <= a; i++) \
+    int gcii; \
+    int gcaa = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int gcss = 6*gcaa; \
+    c = (c & utf8_table3[gcaa]) << gcss; \
+    for (gcii = 1; gcii <= gcaa; gcii++) \
       { \
-      s -= 6; \
-      c |= (eptr[i] & 0x3f) << s; \
+      gcss -= 6; \
+      c |= (eptr[gcii] & 0x3f) << gcss; \
       } \
-    len += a; \
+    len += gcaa; \
     }
 
 /* If the pointer is not at the start of a character, move it back until
@@ -1643,7 +1643,10 @@ for (;; ptr++)
     do
       {
 #ifdef SUPPORT_UTF8
-      if (utf8 && c > 127) GETCHARLEN(c, ptr, ptr);
+      if (utf8 && c > 127)
+        {                           /* Braces are required because the */
+        GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
+        }
 #endif
 
       /* Inside \Q...\E everything is literal except \E */
@@ -1936,7 +1939,9 @@ for (;; ptr++)
     reqbyte, save the previous value for reinstating. */
 
 #ifdef SUPPORT_UTF8
-    if (!class_utf8 && class_charcount == 1 && class_lastchar < 128)
+    if (class_charcount == 1 &&
+          (!utf8 ||
+          (!class_utf8 && class_lastchar < 128)))
 #else
     if (class_charcount == 1)
 #endif
@@ -2645,17 +2650,17 @@ for (;; ptr++)
 
           for (i = 0; i < cd->names_found; i++)
             {
-            int c = memcmp(name, slot+2, namelen);
-            if (c == 0)
+            int crc = memcmp(name, slot+2, namelen);
+            if (crc == 0)
               {
               if (slot[2+namelen] == 0)
                 {
                 *errorptr = ERR43;
                 goto FAILED;
                 }
-              c = -1;             /* Current name is substring */
+              crc = -1;             /* Current name is substring */
               }
-            if (c < 0)
+            if (crc < 0)
               {
               memmove(slot + cd->name_entry_size, slot,
                 (cd->names_found - i) * cd->name_entry_size);
@@ -3153,7 +3158,7 @@ for (;; ptr++)
 
       else
         {
-        uschar *t = code - 1;               /* After this code, t is at the */
+        t = code - 1;                       /* After this code, t is at the */
         while ((*t & 0xc0) == 0x80) t--;    /* start of the last character */
 
         /* If no previous first byte, set it from the first character, and
@@ -4048,11 +4053,11 @@ while ((c = *(++ptr)) != 0)
 #ifdef SUPPORT_UTF8
         if (utf8)
           {
-          int c;
+          int ch;
           int extra = 0;
-          GETCHARLEN(c, ptr, extra);
-          if (c > 127) class_optcount = 10;   /* No optimization possible */
-          if (c > 255)
+          GETCHARLEN(ch, ptr, extra);
+          if (ch > 127) class_optcount = 10;   /* No optimization possible */
+          if (ch > 255)
             {
             if (!class_utf8)
               {
@@ -5599,7 +5604,7 @@ for (;;)
       It takes a bit more work in UTF-8 mode. Characters > 255 are assumed to
       be "non-word" characters. */
 
-#if SUPPORT_UTF8
+#ifdef SUPPORT_UTF8
       if (md->utf8)
         {
         if (eptr == md->start_subject) prev_is_word = FALSE; else

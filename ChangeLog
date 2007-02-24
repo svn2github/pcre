@@ -1,6 +1,60 @@
 ChangeLog for PCRE
 ------------------
 
+Version 4.2 14-Apr-03
+---------------------
+
+1. Typo "#if SUPPORT_UTF8" instead of "#ifdef SUPPORT_UTF8" fixed.
+
+2. Changes to the building process, supplied by Ronald Landheer-Cieslak
+     [ON_WINDOWS]: new variable, "#" on non-Windows platforms
+     [NOT_ON_WINDOWS]: new variable, "#" on Windows platforms
+     [WIN_PREFIX]: new variable, "cyg" for Cygwin
+     * Makefile.in: use autoconf substitution for OBJEXT, EXEEXT, BUILD_OBJEXT
+       and BUILD_EXEEXT
+     Note: automatic setting of the BUILD variables is not yet working
+     set CPPFLAGS and BUILD_CPPFLAGS (but don't use yet) - should be used at
+       compile-time but not at link-time
+     [LINK]: use for linking executables only
+     make different versions for Windows and non-Windows
+     [LINKLIB]: new variable, copy of UNIX-style LINK, used for linking
+       libraries
+     [LINK_FOR_BUILD]: new variable
+     [OBJEXT]: use throughout
+     [EXEEXT]: use throughout
+     <winshared>: new target
+     <wininstall>: new target
+     <dftables.o>: use native compiler
+     <dftables>: use native linker
+     <install>: handle Windows platform correctly
+     <clean>: ditto
+     <check>: ditto
+     copy DLL to top builddir before testing
+
+   As part of these changes, -no-undefined was removed again. This was reported
+   to give trouble on HP-UX 11.0, so getting rid of it seems like a good idea
+   in any case.
+
+3. Some tidies to get rid of compiler warnings:
+
+   . In the match_data structure, match_limit was an unsigned long int, whereas
+     match_call_count was an int. I've made them both unsigned long ints.
+
+   . In pcretest the fact that a const uschar * doesn't automatically cast to
+     a void * provoked a warning.
+
+   . Turning on some more compiler warnings threw up some "shadow" variables
+     and a few more missing casts.
+
+4. If PCRE was complied with UTF-8 support, but called without the PCRE_UTF8
+   option, a class that contained a single character with a value between 128
+   and 255 (e.g. /[\xFF]/) caused PCRE to crash.
+
+5. If PCRE was compiled with UTF-8 support, but called without the PCRE_UTF8
+   option, a class that contained several characters, but with at least one
+   whose value was between 128 and 255 caused PCRE to crash.
+
+
 Version 4.1 12-Mar-03
 ---------------------
 

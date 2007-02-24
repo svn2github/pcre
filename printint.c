@@ -137,9 +137,9 @@ for(;;)
       fprintf(f, "%3d ", charlength);
       while (charlength > 0)
         {
-        int extra = print_char(f, ccode, utf8);
-        ccode += 1 + extra;
-        charlength -= 1 + extra;
+        int extrabytes = print_char(f, ccode, utf8);
+        ccode += 1 + extrabytes;
+        charlength -= 1 + extrabytes;
         }
       }
     break;
@@ -301,11 +301,11 @@ for(;;)
 
       if (*code == OP_XCLASS)
         {
-        int c;
-        while ((c = *ccode++) != XCL_END)
+        int ch;
+        while ((ch = *ccode++) != XCL_END)
           {
           ccode += 1 + print_char(f, ccode, TRUE);
-          if (c == XCL_RANGE)
+          if (ch == XCL_RANGE)
             {
             fprintf(f, "-");
             ccode += 1 + print_char(f, ccode, TRUE);

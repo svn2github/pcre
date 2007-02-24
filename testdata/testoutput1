@@ -1,4 +1,4 @@
-PCRE version 4.1 12-Mar-2003
+PCRE version 4.2 14-Apr-2003
 
 /the quick brown fox/
     the quick brown fox
@@ -6247,5 +6247,25 @@ No match
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
 No match
     
+/(?i)reg(?:ul(?:[aд]|ae)r|ex)/
+    REGular
+ 0: REGular
+    regulaer
+ 0: regulaer
+    Regex  
+ 0: Regex
+    regulдr 
+ 0: regul\xe4r
+
+/≈жед[а-€ј-я]+/
+    ≈жеда
+ 0: \xc5\xe6\xe5\xe4\xe0
+    ≈жед€
+ 0: \xc5\xe6\xe5\xe4\xff
+    ≈жедј
+ 0: \xc5\xe6\xe5\xe4\xc0
+    ≈жедя
+ 0: \xc5\xe6\xe5\xe4\xdf
+
 / End of testinput1 /
 

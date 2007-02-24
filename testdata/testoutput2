@@ -1,4 +1,4 @@
-PCRE version 4.1 12-Mar-2003
+PCRE version 4.2 14-Apr-2003
 
 /(a)b|/
 Capturing subpattern count = 1

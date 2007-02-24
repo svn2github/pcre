@@ -45,7 +45,7 @@ static int callout_extra;
 static int callout_fail_count;
 static int callout_fail_id;
 static int first_callout;
-static int utf8;
+static int use_utf8;
 static size_t gotten_store;
 
 
@@ -155,7 +155,7 @@ Returns:   >  0 => the number of bytes consumed
            -6 to 0 => malformed UTF-8 character at offset = (-return)
 */
 
-int
+static int
 utf82ord(unsigned char *buffer, int *vptr)
 {
 int c = *buffer++;
@@ -213,7 +213,7 @@ int yield = 0;
 
 while (length-- > 0)
   {
-  if (utf8)
+  if (use_utf8)
     {
     int rc = utf82ord(p, &c);
 
@@ -270,7 +270,6 @@ int i, pre_start, post_start;
 
 if (callout_extra)
   {
-  int i;
   fprintf(f, "Callout %d: last capture = %d\n",
     cb->callout_number, cb->capture_last);
 
@@ -516,7 +515,7 @@ while (!done)
   int do_showrest = 0;
   int erroroffset, len, delimiter;
 
-  utf8 = 0;
+  use_utf8 = 0;
 
   if (infile == stdin) printf("  re> ");
   if (fgets((char *)buffer, sizeof(buffer), infile) == NULL) break;
@@ -609,7 +608,7 @@ while (!done)
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
-      case '8': options |= PCRE_UTF8; utf8 = 1; break;
+      case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
 
       case 'L':
       ppp = pp;
@@ -737,7 +736,7 @@ while (!done)
       new_info(re, NULL, PCRE_INFO_LASTLITERAL, &need_char);
       new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &nameentrysize);
       new_info(re, NULL, PCRE_INFO_NAMECOUNT, &namecount);
-      new_info(re, NULL, PCRE_INFO_NAMETABLE, &nametable);
+      new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable);
 
       old_count = pcre_info(re, &old_options, &old_first_char);
       if (count < 0) fprintf(outfile,
@@ -803,7 +802,7 @@ while (!done)
       else
         {
         int ch = first_char & 255;
-        char *caseless = ((first_char & REQ_CASELESS) == 0)?
+        const char *caseless = ((first_char & REQ_CASELESS) == 0)?
           "" : " (caseless)";
         if (isprint(ch))
           fprintf(outfile, "First char = \'%c\'%s\n", ch, caseless);
@@ -818,7 +817,7 @@ while (!done)
       else
         {
         int ch = need_char & 255;
-        char *caseless = ((need_char & REQ_CASELESS) == 0)?
+        const char *caseless = ((need_char & REQ_CASELESS) == 0)?
           "" : " (caseless)";
         if (isprint(ch))
           fprintf(outfile, "Need char = \'%c\'%s\n", ch, caseless);
@@ -973,11 +972,11 @@ while (!done)
             c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'W');
           if (*pt == '}')
             {
-            unsigned char buffer[8];
+            unsigned char buff8[8];
             int ii, utn;
-            utn = ord2utf8(c, buffer);
-            for (ii = 0; ii < utn - 1; ii++) *q++ = buffer[ii];
-            c = buffer[ii];   /* Last byte */
+            utn = ord2utf8(c, buff8);
+            for (ii = 0; ii < utn - 1; ii++) *q++ = buff8[ii];
+            c = buff8[ii];   /* Last byte */
             p = pt + 1;
             break;
             }
@@ -1015,9 +1014,9 @@ while (!done)
         else if (isalnum(*p))
           {
           uschar name[256];
-          uschar *pp = name;
-          while (isalnum(*p)) *pp++ = *p++;
-          *pp = 0;
+          uschar *npp = name;
+          while (isalnum(*p)) *npp++ = *p++;
+          *npp = 0;
           n = pcre_get_stringnumber(re, (char *)name);
           if (n < 0)
             fprintf(outfile, "no parentheses with name \"%s\"\n", name);
@@ -1068,9 +1067,9 @@ while (!done)
         else if (isalnum(*p))
           {
           uschar name[256];
-          uschar *pp = name;
-          while (isalnum(*p)) *pp++ = *p++;
-          *pp = 0;
+          uschar *npp = name;
+          while (isalnum(*p)) *npp++ = *p++;
+          *npp = 0;
           n = pcre_get_stringnumber(re, (char *)name);
           if (n < 0)
             fprintf(outfile, "no parentheses with name \"%s\"\n", name);

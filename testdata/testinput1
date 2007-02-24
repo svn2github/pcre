@@ -3823,4 +3823,16 @@
 /(a+)*b/
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
     
+/(?i)reg(?:ul(?:[aд]|ae)r|ex)/
+    REGular
+    regulaer
+    Regex  
+    regulдr 
+
+/≈жед[а-€ј-я]+/
+    ≈жеда
+    ≈жед€
+    ≈жедј
+    ≈жедя
+
 / End of testinput1 /

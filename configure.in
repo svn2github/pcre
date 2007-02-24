@@ -5,6 +5,10 @@ dnl it should be seeing, to verify it is in the same directory.
 
 AC_INIT(dftables.c)
 
+dnl A safety precaution
+
+AC_PREREQ(2.57)
+
 dnl Arrange to build config.h from config.in. Note that pcre.h is
 dnl built differently, as it is just a "substitution" file.
 dnl Manual says this macro should come right after AC_INIT.
@@ -17,8 +21,8 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=4
-PCRE_MINOR=1
-PCRE_DATE=12-Mar-2003
+PCRE_MINOR=2
+PCRE_DATE=14-Apr-2003
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
@@ -38,15 +42,19 @@ AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-dnl This is the compiler for compiling a program to run on the local host
+dnl We need to find a compiler for compiling a program to run on the local host
 dnl while building. It needs to be different from CC when cross-compiling.
 dnl There is a macro called AC_PROG_CC_FOR_BUILD in the GNU archive for
-dnl figuring this out automatically, but I could not get it to work and I
-dnl ran out of time. Therefore, these values will have to be set manually
-dnl by people who are cross-compiling.
+dnl figuring this out automatically. Unfortunately, it does not work with the
+dnl latest versions of autoconf. So for the moment, we just default to the
+dnl same values as the "main" compiler. People who are corss-compiling will
+dnl just have to adjust the Makefile by hand or set these values when they
+dnl run "configure".
 
 CC_FOR_BUILD=${CC_FOR_BUILD:-'$(CC)'}
 CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD:-'$(CFLAGS)'}
+BUILD_EXEEXT=${BUILD_EXEEXT:-'$(EXEEXT)'}
+BUILD_OBJEXT=${BUILD_OBJEXT:-'$(OBJEXT)'}
 
 dnl Checks for header files.
 
@@ -120,6 +128,8 @@ AC_PROG_LIBTOOL
 
 dnl "Export" these variables
 
+AC_SUBST(BUILD_EXEEXT)
+AC_SUBST(BUILD_OBJEXT)
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(HAVE_MEMMOVE)
@@ -143,13 +153,30 @@ mingw* )
     POSIX_OBJ=pcreposix.o
     POSIX_LOBJ=pcreposix.lo
     POSIX_LIB=
+    ON_WINDOWS=
+    NOT_ON_WINDOWS="#"
+    WIN_PREFIX=
+    ;;
+cygwin* )
+    ON_WINDOWS=
+    POSIX_OBJ=pcreposix.o
+    POSIX_LOBJ=pcreposix.lo
+    POSIX_LIB=
+    WIN_PREFIX=cyg
+    NOT_ON_WINDOWS="#"
     ;;
 * )
+    ON_WINDOWS="#"
+    NOT_ON_WINDOWS=
     POSIX_OBJ=
     POSIX_LOBJ=
     POSIX_LIB=libpcreposix.la
+    WIN_PREFIX=
     ;;
 esac
+AC_SUBST(WIN_PREFIX)
+AC_SUBST(ON_WINDOWS)
+AC_SUBST(NOT_ON_WINDOWS)
 AC_SUBST(POSIX_OBJ)
 AC_SUBST(POSIX_LOBJ)
 AC_SUBST(POSIX_LIB)

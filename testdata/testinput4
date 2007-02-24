@@ -482,4 +482,17 @@
     \x{101}
     y    
 
+/[\xFF]/
+    >\xff<
+
+/[\xff]/8
+    >\x{ff}<
+
+/[^\xFF]/
+    XYZ
+
+/[^\xff]/8
+    XYZ
+    \x{123} 
+
 / End of testinput4 /

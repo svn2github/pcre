@@ -598,7 +598,7 @@ typedef struct recursion_info {
 doing the matching, so that they are thread-safe. */
 
 typedef struct match_data {
-  int    match_call_count;      /* As it says */
+  unsigned long int match_call_count; /* As it says */
   unsigned long int match_limit;/* As it says */
   int   *offset_vector;         /* Offset vector */
   int    offset_end;            /* One past the end */
