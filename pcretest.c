@@ -46,12 +46,33 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define PCRE_SPY        /* For Win32 build, import data, not export */
 
-/* We need the internal info for displaying the results of pcre_study() and
-other internal data; pcretest also uses some of the fixed tables, and generally
-has "inside information" compared to a program that strictly follows the PCRE
-API. */
+/* We include pcre_internal.h because we need the internal info for displaying
+the results of pcre_study() and we also need to know about the internal
+macros, structures, and other internal data values; pcretest has "inside
+information" compared to a program that strictly follows the PCRE API. */
 
 #include "pcre_internal.h"
+
+/* We need access to the data tables that PCRE uses. So as not to have to keep
+two copies, we include the source file here, changing the names of the external
+symbols to prevent clashes. */
+
+#define _pcre_utf8_table1      utf8_table1
+#define _pcre_utf8_table1_size utf8_table1_size
+#define _pcre_utf8_table2      utf8_table2
+#define _pcre_utf8_table3      utf8_table3
+#define _pcre_utf8_table4      utf8_table4
+#define _pcre_utt              utt
+#define _pcre_utt_size         utt_size
+#define _pcre_OP_lengths       OP_lengths
+
+#include "pcre_tables.c"
+
+/* We also need the pcre_printint() function for printing out compiled
+patterns. This function is in a separate file so that it can be included in
+pcre_compile.c when that module is compiled with debugging enabled. */
+
+#include "pcre_printint.src"
 
 
 /* It is possible to compile this test program without including support for
@@ -68,6 +89,8 @@ to the DFA matcher (NODFA), and without the doublecheck of the old "info"
 function (define NOINFOCHECK). */
 
 
+/* Other parameters */
+
 #ifndef CLOCKS_PER_SEC
 #ifdef CLK_TCK
 #define CLOCKS_PER_SEC CLK_TCK
@@ -82,6 +105,8 @@ function (define NOINFOCHECK). */
 #define PBUFFER_SIZE BUFFER_SIZE
 #define DBUFFER_SIZE BUFFER_SIZE
 
+
+/* Static variables */
 
 static FILE *outfile;
 static int log_store = 0;
@@ -162,7 +187,7 @@ if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
 /* i now has a value in the range 1-5 */
 
 s = 6*i;
-d = (c & _pcre_utf8_table3[i]) << s;
+d = (c & utf8_table3[i]) << s;
 
 for (j = 0; j < i; j++)
   {
@@ -174,8 +199,8 @@ for (j = 0; j < i; j++)
 
 /* Check that encoding was the correct unique one */
 
-for (j = 0; j < _pcre_utf8_table1_size; j++)
-  if (d <= _pcre_utf8_table1[j]) break;
+for (j = 0; j < utf8_table1_size; j++)
+  if (d <= utf8_table1[j]) break;
 if (j != i) return -(i+1);
 
 /* Valid value */
@@ -189,6 +214,38 @@ return i+1;
 
 
 /*************************************************
+*       Convert character value to UTF-8         *
+*************************************************/
+
+/* This function takes an integer value in the range 0 - 0x7fffffff
+and encodes it as a UTF-8 character in 0 to 6 bytes.
+
+Arguments:
+  cvalue     the character value
+  buffer     pointer to buffer for result - at least 6 bytes long
+
+Returns:     number of characters placed in the buffer
+*/
+
+static int
+ord2utf8(int cvalue, uschar *buffer)
+{
+register int i, j;
+for (i = 0; i < utf8_table1_size; i++)
+  if (cvalue <= utf8_table1[i]) break;
+buffer += i;
+for (j = i; j > 0; j--)
+ {
+ *buffer-- = 0x80 | (cvalue & 0x3f);
+ cvalue >>= 6;
+ }
+*buffer = utf8_table2[i] | cvalue;
+return i + 1;
+}
+
+
+
+/*************************************************
 *             Print character string             *
 *************************************************/
 
@@ -198,7 +255,7 @@ chars without printing. */
 
 static int pchars(unsigned char *p, int length, FILE *f)
 {
-int c;
+int c = 0;
 int yield = 0;
 
 while (length-- > 0)
@@ -988,7 +1045,7 @@ while (!done)
       if (do_debug)
         {
         fprintf(outfile, "------------------------------------------------------------------\n");
-        _pcre_printint(re, outfile);
+        pcre_printint(re, outfile);
         }
 
       new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
@@ -1290,7 +1347,7 @@ while (!done)
             {
             unsigned char buff8[8];
             int ii, utn;
-            utn = _pcre_ord2utf8(c, buff8);
+            utn = ord2utf8(c, buff8);
             for (ii = 0; ii < utn - 1; ii++) *q++ = buff8[ii];
             c = buff8[ii];   /* Last byte */
             p = pt + 1;

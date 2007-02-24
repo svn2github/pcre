@@ -1,6 +1,28 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.4 05-Sep-05
+---------------------
+
+ 1. Change 6.0/10/(l) to pcregrep introduced a bug that caused separator lines
+    "--" to be printed when multiple files were scanned, even when none of the
+    -A, -B, or -C options were used. This is not compatible with Gnu grep, so I
+    consider it to be a bug, and have restored the previous behaviour.
+
+ 2. A couple of code tidies to get rid of compiler warnings.
+
+ 3. The pcretest program used to cheat by referring to symbols in the library
+    whose names begin with _pcre_. These are internal symbols that are not
+    really supposed to be visible externally, and in some environments it is
+    possible to suppress them. The cheating is now confined to including
+    certain files from the library's source, which is a bit cleaner.
+
+ 4. Renamed pcre.in as pcre.h.in to go with pcrecpp.h.in; it also makes the
+    file's purpose clearer.
+
+ 5. Reorganized pcre_ucp_findchar().
+
+
 Version 6.3 15-Aug-05
 ---------------------
 

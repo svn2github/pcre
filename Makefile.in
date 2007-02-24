@@ -105,7 +105,7 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) -I. -I$(top_srcdir) $(N
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) -c $(CXXFLAGS) -I. -I$(top_srcdir) $(NEWLINE) $(LINK_SIZE) $(MATCH_LIMIT) $(NO_RECURSE) $(EBCDIC)
 @ON_WINDOWS@LINK = $(CC) $(LDFLAGS) -I. -I$(top_srcdir) -L.libs
 @NOT_ON_WINDOWS@LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -I. -I$(top_srcdir)
-LINKLIB = $(LIBTOOL) --mode=link $(CC) -export-symbols-regex '^[^_]|__?pcre_.*utf8|__?pcre_printint' $(LDFLAGS) -I. -I$(top_srcdir)
+LINKLIB = $(LIBTOOL) --mode=link $(CC) -export-symbols-regex '^[^_]' $(LDFLAGS) -I. -I$(top_srcdir)
 LINK_FOR_BUILD = $(LIBTOOL) --mode=link $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -I. -I$(top_srcdir)
 @ON_WINDOWS@CXXLINK = $(CXX) $(LDFLAGS) -I. -I$(top_srcdir) -L.libs
 @NOT_ON_WINDOWS@CXXLINK = $(LIBTOOL) --mode=link $(CXX) $(LDFLAGS) -I. -I$(top_srcdir)
@@ -131,7 +131,6 @@ OBJ = pcre_chartables.@OBJEXT@ \
   pcre_info.@OBJEXT@ \
   pcre_maketables.@OBJEXT@ \
   pcre_ord2utf8.@OBJEXT@ \
-  pcre_printint.@OBJEXT@ \
   pcre_refcount.@OBJEXT@ \
   pcre_study.@OBJEXT@ \
   pcre_tables.@OBJEXT@ \
@@ -153,7 +152,6 @@ LOBJ = pcre_chartables.lo \
   pcre_info.lo \
   pcre_maketables.lo \
   pcre_ord2utf8.lo \
-  pcre_printint.lo \
   pcre_refcount.lo \
   pcre_study.lo \
   pcre_tables.lo \
@@ -268,11 +266,6 @@ pcre_ord2utf8.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_ord2utf8.c
 		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_ord2utf8.c
-
-pcre_printint.@OBJEXT@: Makefile config.h pcre.h \
-		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_printint.c
-		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
-		$(top_srcdir)/pcre_printint.c
 
 pcre_refcount.@OBJEXT@:   Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_refcount.c

@@ -55,7 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef int BOOL;
 
-#define VERSION "4.0 07-Jun-2005"
+#define VERSION "4.1 05-Sep-2005"
 #define MAX_PATTERN_COUNT 100
 
 #if BUFSIZ > 8192
@@ -531,9 +531,11 @@ while (ptr < endptr)
         }
 
       /* Now print the matching line(s); ensure we set hyphenpending at the end
-      of the file. */
+      of the file if any context lines are being output. */
 
-      endhyphenpending = TRUE;
+      if (after_context > 0 || before_context > 0)
+        endhyphenpending = TRUE;
+
       if (printname != NULL) fprintf(stdout, "%s:", printname);
       if (number) fprintf(stdout, "%d:", linenumber);
 
