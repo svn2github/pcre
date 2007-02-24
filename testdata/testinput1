@@ -1441,10 +1441,6 @@
     ABCabc
     abcABC
 
-/(main(O)?)+/
-    mainmain
-    mainOmain
-
 /ab{3cd/
     ab{3cd
 
@@ -1917,5 +1913,26 @@
 /a.b/s
     acb
     a\nb  
+
+/^(b+?|a){1,2}?c/
+    bac
+    bbac
+    bbbac
+    bbbbac
+    bbbbbac 
+
+/^(b+|a){1,2}?c/
+    bac
+    bbac
+    bbbac
+    bbbbac
+    bbbbbac 
+    
+/(?!\A)x/m
+    x\nb\n
+    a\bx\n  
+    
+/\x0{ab}/
+    \0{ab} 
 
 / End of testinput1 /

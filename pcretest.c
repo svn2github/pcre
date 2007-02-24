@@ -159,7 +159,7 @@ static const char *OP_names[] = {
   "class", "Ref", "Recurse",
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",
   "AssertB", "AssertB not", "Reverse", "Once", "Cond", "Cref",
-  "Brazero", "Braminzero", "Bra"
+  "Brazero", "Braminzero", "Branumber", "Bra"
 };
 
 
@@ -178,7 +178,10 @@ for(;;)
 
   if (*code >= OP_BRA)
     {
-    fprintf(outfile, "%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
+    if (*code - OP_BRA > EXTRACT_BASIC_MAX)
+      fprintf(outfile, "%3d Bra extra", (code[1] << 8) + code[2]);
+    else
+      fprintf(outfile, "%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
     code += 2;
     }
 
@@ -191,16 +194,6 @@ for(;;)
 
     case OP_OPT:
     fprintf(outfile, " %.2x %s", code[1], OP_names[*code]);
-    code++;
-    break;
-
-    case OP_COND:
-    fprintf(outfile, "%3d Cond", (code[1] << 8) + code[2]);
-    code += 2;
-    break;
-
-    case OP_CREF:
-    fprintf(outfile, " %.2d %s", code[1], OP_names[*code]);
     code++;
     break;
 
@@ -221,11 +214,10 @@ for(;;)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
-    fprintf(outfile, "%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
-    code += 2;
-    break;
-
+    case OP_COND:
+    case OP_BRANUMBER:
     case OP_REVERSE:
+    case OP_CREF:
     fprintf(outfile, "%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
     code += 2;
     break;
@@ -298,8 +290,8 @@ for(;;)
     break;
 
     case OP_REF:
-    fprintf(outfile, "    \\%d", *(++code));
-    code++;
+    fprintf(outfile, "    \\%d", (code[1] << 8) | code[2]);
+    code += 3;
     goto CLASS_REF_REPEAT;
 
     case OP_CLASS:
@@ -441,7 +433,12 @@ int op = 1;
 int timeit = 0;
 int showinfo = 0;
 int showstore = 0;
+int size_offsets = 45;
+int size_offsets_max;
+int *offsets;
+#if !defined NOPOSIX
 int posix = 0;
+#endif
 int debug = 0;
 int done = 0;
 unsigned char buffer[30000];
@@ -455,25 +452,49 @@ outfile = stdout;
 
 while (argc > 1 && argv[op][0] == '-')
   {
+  char *endptr;
+
   if (strcmp(argv[op], "-s") == 0 || strcmp(argv[op], "-m") == 0)
     showstore = 1;
   else if (strcmp(argv[op], "-t") == 0) timeit = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
+  else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
+      ((size_offsets = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
+    {
+    op++;
+    argc--;
+    }
+#if !defined NOPOSIX
   else if (strcmp(argv[op], "-p") == 0) posix = 1;
+#endif
   else
     {
-    printf("*** Unknown option %s\n", argv[op]);
-    printf("Usage: pcretest [-d] [-i] [-p] [-s] [-t] [<input> [<output>]]\n");
-    printf("  -d   debug: show compiled code; implies -i\n"
-           "  -i   show information about compiled pattern\n"
-           "  -p   use POSIX interface\n"
-           "  -s   output store information\n"
-           "  -t   time compilation and execution\n");
+    printf("** Unknown or malformed option %s\n", argv[op]);
+    printf("Usage:   pcretest [-d] [-i] [-o <n>] [-p] [-s] [-t] [<input> [<output>]]\n");
+    printf("  -d     debug: show compiled code; implies -i\n"
+           "  -i     show information about compiled pattern\n"
+           "  -o <n> set size of offsets vector to <n>\n");
+#if !defined NOPOSIX
+    printf("  -p     use POSIX interface\n");
+#endif
+    printf("  -s     output store information\n"
+           "  -t     time compilation and execution\n");
     return 1;
     }
   op++;
   argc--;
+  }
+
+/* Get the store for the offsets vector, and remember what it was */
+
+size_offsets_max = size_offsets;
+offsets = malloc(size_offsets_max * sizeof(int));
+if (offsets == NULL)
+  {
+  printf("** Failed to get %d bytes of memory for offsets vector\n",
+    size_offsets_max * sizeof(int));
+  return 1;
   }
 
 /* Sort out the input and output files */
@@ -520,7 +541,7 @@ while (!done)
 
   const char *error;
   unsigned char *p, *pp, *ppp;
-  unsigned const char *tables = NULL;
+  const unsigned char *tables = NULL;
   int do_study = 0;
   int do_debug = debug;
   int do_G = 0;
@@ -720,13 +741,14 @@ while (!done)
 
     if (do_showinfo)
       {
+      unsigned long int get_options;
       int old_first_char, old_options, old_count;
       int count, backrefmax, first_char, need_char;
       size_t size;
 
       if (do_debug) print_internals(re);
 
-      new_info(re, NULL, PCRE_INFO_OPTIONS, &options);
+      new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
       new_info(re, NULL, PCRE_INFO_SIZE, &size);
       new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
       new_info(re, NULL, PCRE_INFO_BACKREFMAX, &backrefmax);
@@ -746,9 +768,9 @@ while (!done)
           "First char disagreement: pcre_fullinfo=%d pcre_info=%d\n",
             first_char, old_first_char);
 
-        if (old_options != options) fprintf(outfile,
-          "Options disagreement: pcre_fullinfo=%d pcre_info=%d\n", options,
-            old_options);
+        if (old_options != (int)get_options) fprintf(outfile,
+          "Options disagreement: pcre_fullinfo=%ld pcre_info=%d\n",
+            get_options, old_options);
         }
 
       if (size != gotten_store) fprintf(outfile,
@@ -758,17 +780,17 @@ while (!done)
       fprintf(outfile, "Capturing subpattern count = %d\n", count);
       if (backrefmax > 0)
         fprintf(outfile, "Max back reference = %d\n", backrefmax);
-      if (options == 0) fprintf(outfile, "No options\n");
+      if (get_options == 0) fprintf(outfile, "No options\n");
         else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s\n",
-          ((options & PCRE_ANCHORED) != 0)? " anchored" : "",
-          ((options & PCRE_CASELESS) != 0)? " caseless" : "",
-          ((options & PCRE_EXTENDED) != 0)? " extended" : "",
-          ((options & PCRE_MULTILINE) != 0)? " multiline" : "",
-          ((options & PCRE_DOTALL) != 0)? " dotall" : "",
-          ((options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
-          ((options & PCRE_EXTRA) != 0)? " extra" : "",
-          ((options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
-          ((options & PCRE_UTF8) != 0)? " utf8" : "");
+          ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
+          ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
+          ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
+          ((get_options & PCRE_MULTILINE) != 0)? " multiline" : "",
+          ((get_options & PCRE_DOTALL) != 0)? " dotall" : "",
+          ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
+          ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
+          ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
+          ((get_options & PCRE_UTF8) != 0)? " utf8" : "");
 
       if (((((real_pcre *)re)->options) & PCRE_ICHANGED) != 0)
         fprintf(outfile, "Case state changes\n");
@@ -871,6 +893,7 @@ while (!done)
     {
     unsigned char *q;
     unsigned char *bptr = dbuffer;
+    int use_size_offsets = size_offsets;
     int count, c;
     int copystrings = 0;
     int getstrings = 0;
@@ -878,8 +901,6 @@ while (!done)
     int gmatched = 0;
     int start_offset = 0;
     int g_notempty = 0;
-    int offsets[45];
-    int size_offsets = sizeof(offsets)/sizeof(int);
 
     options = 0;
 
@@ -987,7 +1008,19 @@ while (!done)
 
         case 'O':
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
-        if (n <= (int)(sizeof(offsets)/sizeof(int))) size_offsets = n;
+        if (n > size_offsets_max)
+          {
+          free(offsets);
+          size_offsets_max = n;
+          offsets = malloc(size_offsets_max * sizeof(int));
+          if (offsets == NULL)
+            {
+            printf("** Failed to get %d bytes of memory for offsets vector\n",
+              size_offsets_max * sizeof(int));
+            return 1;
+            }
+          }
+        use_size_offsets = n;
         continue;
 
         case 'Z':
@@ -1007,11 +1040,11 @@ while (!done)
       {
       int rc;
       int eflags = 0;
-      regmatch_t pmatch[sizeof(offsets)/sizeof(int)];
+      regmatch_t *pmatch = malloc(sizeof(regmatch_t) * use_size_offsets);
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
 
-      rc = regexec(&preg, (const char *)bptr, size_offsets, pmatch, eflags);
+      rc = regexec(&preg, (const char *)bptr, use_size_offsets, pmatch, eflags);
 
       if (rc != 0)
         {
@@ -1021,7 +1054,7 @@ while (!done)
       else
         {
         size_t i;
-        for (i = 0; i < size_offsets; i++)
+        for (i = 0; i < use_size_offsets; i++)
           {
           if (pmatch[i].rm_so >= 0)
             {
@@ -1038,6 +1071,7 @@ while (!done)
             }
           }
         }
+      free(pmatch);
       }
 
     /* Handle matching via the native interface - repeats for /g and /G */
@@ -1054,7 +1088,7 @@ while (!done)
         clock_t start_time = clock();
         for (i = 0; i < LOOPREPEAT; i++)
           count = pcre_exec(re, extra, (char *)bptr, len,
-            start_offset, options | g_notempty, offsets, size_offsets);
+            start_offset, options | g_notempty, offsets, use_size_offsets);
         time_taken = clock() - start_time;
         fprintf(outfile, "Execute time %.3f milliseconds\n",
           ((double)time_taken * 1000.0)/
@@ -1062,12 +1096,12 @@ while (!done)
         }
 
       count = pcre_exec(re, extra, (char *)bptr, len,
-        start_offset, options | g_notempty, offsets, size_offsets);
+        start_offset, options | g_notempty, offsets, use_size_offsets);
 
       if (count == 0)
         {
         fprintf(outfile, "Matched, but too many substrings\n");
-        count = size_offsets/3;
+        count = use_size_offsets/3;
         }
 
       /* Matched */
