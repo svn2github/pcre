@@ -1,4 +1,4 @@
-PCRE version 3.5 15-Aug-2001
+PCRE version 3.6 23-Oct-2001
 
 /the quick brown fox/
     the quick brown fox
@@ -2996,5 +2996,23 @@ No match
     \0{ab} 
  0: \x00{ab}
 
+/(A|B)*?CD/
+    CD 
+ 0: CD
+    
+/(A|B)*CD/
+    CD 
+ 0: CD
+
+/(AB)*?\1/
+    ABABAB
+ 0: ABAB
+ 1: AB
+
+/(AB)*\1/
+    ABABAB
+ 0: ABABAB
+ 1: AB
+    
 / End of testinput1 /
 

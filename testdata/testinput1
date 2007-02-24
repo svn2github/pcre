@@ -1935,4 +1935,16 @@
 /\x0{ab}/
     \0{ab} 
 
+/(A|B)*?CD/
+    CD 
+    
+/(A|B)*CD/
+    CD 
+
+/(AB)*?\1/
+    ABABAB
+
+/(AB)*\1/
+    ABABAB
+    
 / End of testinput1 /

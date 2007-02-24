@@ -5144,7 +5144,7 @@ do
 
   rc = match_block.offset_overflow? 0 : match_block.end_offset_top/2;
 
-  if (match_block.offset_end < 2) rc = 0; else
+  if (offsetcount < 2) rc = 0; else
     {
     offsets[0] = start_match - match_block.start_subject;
     offsets[1] = match_block.end_match_ptr - match_block.start_subject;

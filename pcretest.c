@@ -1010,6 +1010,9 @@ while (!done)
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
         if (n > size_offsets_max)
           {
+
+if (offsets != NULL)
+
           free(offsets);
           size_offsets_max = n;
           offsets = malloc(size_offsets_max * sizeof(int));
@@ -1021,6 +1024,14 @@ while (!done)
             }
           }
         use_size_offsets = n;
+
+if (n == 0)
+  {
+  free(offsets);
+  offsets = NULL;
+  size_offsets_max = 0;
+  }
+
         continue;
 
         case 'Z':
