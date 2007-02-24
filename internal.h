@@ -35,10 +35,14 @@ restrictions:
 /* This header contains definitions that are shared between the different
 modules, but which are not relevant to the outside. */
 
-/* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
-define a macro for memmove() if USE_BCOPY is defined. */
+/* Get the definitions provided by running "configure" */
 
-#ifdef USE_BCOPY
+#include "config.h"
+
+/* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
+define a macro for memmove() if HAVE_MEMMOVE is not defined. */
+
+#ifndef HAVE_MEMMOVE
 #undef  memmove        /* some systems may have a macro */
 #define memmove(a, b, c) bcopy(b, a, c)
 #endif

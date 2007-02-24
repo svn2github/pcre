@@ -1886,4 +1886,16 @@
     the \"quick\" brown fox
     \"the \\\"quick\\\" brown fox\" 
 
+/.*?/g+
+    abc
+  
+/\b/g+
+    abc 
+
+/\b/+g
+    abc 
+
+//g
+    abc
+
 / End of test input /

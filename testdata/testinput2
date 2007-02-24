@@ -583,7 +583,13 @@
     *** Failers
     \Nabc     
 
-/.*?/g+
-  abc
+/a*(b+)(z)(z)/P
+    aaaabbbbzzzz
+    aaaabbbbzzzz\O0
+    aaaabbbbzzzz\O1
+    aaaabbbbzzzz\O2
+    aaaabbbbzzzz\O3
+    aaaabbbbzzzz\O4
+    aaaabbbbzzzz\O5
 
 / End of test input /

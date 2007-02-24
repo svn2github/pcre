@@ -1,0 +1,20 @@
+
+/* config.in is converted by configure into config.h. PCRE is written in
+Standard C, but there are a few non-standard things it can cope with, allowing
+it to run on SunOS4 and other "close to standard" systems. The defaults below
+are the correct ones on a Standard C system. On a non-Unix system you can just
+copy this file into config.h. */
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define to `unsigned' if <stddef.h> doesn't define size_t.  */
+#undef size_t
+
+/* Undefine if you don't have the strerror function.  */
+#define HAVE_STRERROR
+
+/* Undefine if you don't have the memmove function. */
+#define HAVE_MEMMOVE
+
+/* End */

@@ -2882,5 +2882,43 @@ No match
  0: "the \"quick\" brown fox"
  1:  brown fox
 
+/.*?/g+
+    abc
+ 0: 
+ 0+ abc
+ 0: a
+ 0+ bc
+ 0: 
+ 0+ bc
+ 0: b
+ 0+ c
+ 0: 
+ 0+ c
+ 0: c
+ 0+ 
+ 0: 
+ 0+ 
+  
+/\b/g+
+    abc 
+ 0: 
+ 0+ abc
+ 0: 
+ 0+ 
+
+/\b/+g
+    abc 
+ 0: 
+ 0+ abc
+ 0: 
+ 0+ 
+
+//g
+    abc
+ 0: 
+ 0: 
+ 0: 
+ 0: 
+
 / End of test input /
 

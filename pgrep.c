@@ -6,8 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include "config.h"
 #include "pcre.h"
-
 
 #define FALSE 0
 #define TRUE 1
@@ -32,7 +32,7 @@ static BOOL whole_lines = FALSE;
 
 
 
-#ifdef STRERROR_FROM_ERRLIST
+#ifndef HAVE_STRERROR
 /*************************************************
 *     Provide strerror() for non-ANSI libraries  *
 *************************************************/
@@ -50,7 +50,7 @@ strerror(int n)
 if (n < 0 || n >= sys_nerr) return "unknown error number";
 return sys_errlist[n];
 }
-#endif /* STRERROR_FROM_ERRLIST */
+#endif /* HAVE_STRERROR */
 
 
 

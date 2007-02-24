@@ -2,6 +2,28 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.09 14-Sep-99
+----------------------
+
+1. Add support for the /+ modifier to perltest (to output $` like it does in
+pcretest).
+
+2. Add support for the /g modifier to perltest.
+
+3. Fix pcretest so that it behaves even more like Perl for /g when the pattern
+matches null strings.
+
+4. Fix perltest so that it doesn't do unwanted things when fed an empty
+pattern. Perl treats empty patterns specially - it reuses the most recent
+pattern, which is not what we want. Replace // by /(?#)/ in order to avoid this
+effect.
+
+5. The POSIX interface was broken in that it was just handing over the POSIX
+captured string vector to pcre_exec(), but (since release 2.00) PCRE has
+required a bigger vector, with some working space on the end. This means that
+the POSIX wrapper now has to get and free some memory, and copy the results.
+
+
 Version 2.08 31-Aug-99
 ----------------------
 

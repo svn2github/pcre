@@ -706,6 +706,7 @@ while (!done)
     int getlist = 0;
     int gmatched = 0;
     int start_offset = 0;
+    int g_notempty = 0;
     int offsets[45];
     int size_offsets = sizeof(offsets)/sizeof(int);
 
@@ -811,12 +812,11 @@ while (!done)
       {
       int rc;
       int eflags = 0;
-      regmatch_t pmatch[30];
+      regmatch_t pmatch[sizeof(offsets)/sizeof(int)];
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
 
-      rc = regexec(&preg, (const char *)bptr,
-        sizeof(pmatch)/sizeof(regmatch_t), pmatch, eflags);
+      rc = regexec(&preg, (const char *)bptr, size_offsets, pmatch, eflags);
 
       if (rc != 0)
         {
@@ -826,7 +826,7 @@ while (!done)
       else
         {
         size_t i;
-        for (i = 0; i < sizeof(pmatch)/sizeof(regmatch_t); i++)
+        for (i = 0; i < size_offsets; i++)
           {
           if (pmatch[i].rm_so >= 0)
             {
@@ -859,7 +859,7 @@ while (!done)
         clock_t start_time = clock();
         for (i = 0; i < LOOPREPEAT; i++)
           count = pcre_exec(re, extra, (char *)bptr, len,
-            start_offset, options, offsets, size_offsets);
+            start_offset, options | g_notempty, offsets, size_offsets);
         time_taken = clock() - start_time;
         fprintf(outfile, "Execute time %.3f milliseconds\n",
           ((double)time_taken * 1000.0)/
@@ -867,7 +867,7 @@ while (!done)
         }
 
       count = pcre_exec(re, extra, (char *)bptr, len,
-        start_offset, options, offsets, size_offsets);
+        start_offset, options | g_notempty, offsets, size_offsets);
 
       if (count == 0)
         {
@@ -950,29 +950,46 @@ while (!done)
           }
         }
 
-      /* Failed to match */
+      /* Failed to match. If this is a /g or /G loop and we previously set
+      PCRE_NOTEMPTY after a null match, this is not necessarily the end.
+      We want to advance the start offset, and continue. Fudge the offset
+      values to achieve this. We won't be at the end of the string - that
+      was checked before setting PCRE_NOTEMPTY. */
 
       else
         {
-        if (gmatched == 0)
+        if (g_notempty != 0)
           {
-          if (count == -1) fprintf(outfile, "No match\n");
-            else fprintf(outfile, "Error %d\n", count);
+          offsets[0] = start_offset;
+          offsets[1] = start_offset + 1;
           }
-        break;  /* Out of the /g loop */
+        else
+          {
+          if (gmatched == 0)   /* Error if no previous matches */
+            {
+            if (count == -1) fprintf(outfile, "No match\n");
+              else fprintf(outfile, "Error %d\n", count);
+            }
+          break;  /* Out of the /g loop */
+          }
         }
 
       /* If not /g or /G we are done */
 
       if (!do_g && !do_G) break;
 
-      /* If we have matched an empty string, set PCRE_NOTEMPTY for the next
-      match. This mimics what Perl's /g option does. */
+      /* If we have matched an empty string, first check to see if we are at
+      the end of the subject. If so, the /g loop is over. Otherwise, mimic
+      what Perl's /g options does. This turns out to be rather cunning. First
+      we set PCRE_NOTEMPTY and try the match again at the same point. If this
+      fails (picked up above) we advance to the next character. */
 
-      if (offsets[1] == offsets[0])
-        options |= PCRE_NOTEMPTY;
-      else
-        options &= ~PCRE_NOTEMPTY;
+      g_notempty = 0;
+      if (offsets[0] == offsets[1])
+        {
+        if (offsets[0] == len) break;
+        g_notempty = PCRE_NOTEMPTY;
+        }
 
       /* For /g, update the start offset, leaving the rest alone */
 

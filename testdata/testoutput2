@@ -1595,26 +1595,32 @@ No req char
     \Nabc     
 No match
 
-/.*?/g+
-Identifying subpattern count = 0
-No options
-First char at start or follows \n
-No req char
-  abc
- 0: 
- 0+ abc
- 0: a
- 0+ bc
- 0: 
- 0+ bc
- 0: b
- 0+ c
- 0: 
- 0+ c
- 0: c
- 0+ 
- 0: 
- 0+ 
+/a*(b+)(z)(z)/P
+    aaaabbbbzzzz
+ 0: aaaabbbbzz
+ 1: bbbb
+ 2: z
+ 3: z
+    aaaabbbbzzzz\O0
+    aaaabbbbzzzz\O1
+ 0: aaaabbbbzz
+    aaaabbbbzzzz\O2
+ 0: aaaabbbbzz
+ 1: bbbb
+    aaaabbbbzzzz\O3
+ 0: aaaabbbbzz
+ 1: bbbb
+ 2: z
+    aaaabbbbzzzz\O4
+ 0: aaaabbbbzz
+ 1: bbbb
+ 2: z
+ 3: z
+    aaaabbbbzzzz\O5
+ 0: aaaabbbbzz
+ 1: bbbb
+ 2: z
+ 3: z
 
 / End of test input /
 Identifying subpattern count = 0
