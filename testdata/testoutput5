@@ -1,4 +1,4 @@
-PCRE version 4.4 21-August-2003
+PCRE version 4.5 01-December-2003
 
 /\x{100}/8DM
 Memory allocation (code space): 11
@@ -863,14 +863,201 @@ First char = 195
 Need char = 'x'
 
 /abc/8
-   ร]
+    ร]
 Error -10
-   ร
+    ร
 Error -10
-   รรร
+    รรร
 Error -10
-   รรร\?
+    รรร\?
 No match
 
-/ End of testinput5 /
+/anything/8
+    \xc0\x80
+Error -10
+    \xc1\x8f 
+Error -10
+    \xe0\x9f\x80
+Error -10
+    \xf0\x8f\x80\x80 
+Error -10
+    \xf8\x87\x80\x80\x80  
+Error -10
+    \xfc\x83\x80\x80\x80\x80
+Error -10
+    \xfe\x80\x80\x80\x80\x80  
+Error -10
+    \xff\x80\x80\x80\x80\x80  
+Error -10
+    \xc3\x8f
+No match
+    \xe0\xaf\x80
+No match
+    \xe1\x80\x80
+No match
+    \xf0\x9f\x80\x80 
+No match
+    \xf1\x8f\x80\x80 
+No match
+    \xf8\x88\x80\x80\x80  
+No match
+    \xf9\x87\x80\x80\x80  
+No match
+    \xfc\x84\x80\x80\x80\x80
+No match
+    \xfd\x83\x80\x80\x80\x80
+No match
 
+/\x{100}abc(xyz(?1))/8D
+------------------------------------------------------------------
+  0  24 Bra 0
+  3   5 \x{100}abc
+ 10  11 Bra 1
+ 13   3 xyz
+ 18  10 Recurse
+ 21  11 Ket
+ 24  24 Ket
+ 27     End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options: utf8
+First char = 196
+Need char = 'z'
+
+/[^\x{100}]abc(xyz(?1))/8D
+------------------------------------------------------------------
+  0  30 Bra 0
+  3     [^\x{100}]
+ 11   3 abc
+ 16  11 Bra 1
+ 19   3 xyz
+ 24  16 Recurse
+ 27  11 Ket
+ 30  30 Ket
+ 33     End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options: utf8
+No first char
+Need char = 'z'
+
+/[ab\x{100}]abc(xyz(?1))/8D
+------------------------------------------------------------------
+  0  62 Bra 0
+  3     [a-b\x{100}]
+ 43   3 abc
+ 48  11 Bra 1
+ 51   3 xyz
+ 56  48 Recurse
+ 59  11 Ket
+ 62  62 Ket
+ 65     End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options: utf8
+No first char
+Need char = 'z'
+
+/(\x{100}(b(?2)c))?/D8
+------------------------------------------------------------------
+  0  29 Bra 0
+  3     Brazero
+  4  22 Bra 1
+  7   2 \x{100}
+ 11  12 Bra 2
+ 14   1 b
+ 17  11 Recurse
+ 20   1 c
+ 23  12 Ket
+ 26  22 Ket
+ 29  29 Ket
+ 32     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+Options: utf8
+No first char
+No need char
+
+/(\x{100}(b(?2)c)){0,2}/D8
+------------------------------------------------------------------
+  0  61 Bra 0
+  3     Brazero
+  4  54 Bra 0
+  7  22 Bra 1
+ 10   2 \x{100}
+ 14  12 Bra 2
+ 17   1 b
+ 20  14 Recurse
+ 23   1 c
+ 26  12 Ket
+ 29  22 Ket
+ 32     Brazero
+ 33  22 Bra 1
+ 36   2 \x{100}
+ 40  12 Bra 2
+ 43   1 b
+ 46  14 Recurse
+ 49   1 c
+ 52  12 Ket
+ 55  22 Ket
+ 58  54 Ket
+ 61  61 Ket
+ 64     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+Options: utf8
+No first char
+No need char
+
+/(\x{100}(b(?1)c))?/D8
+------------------------------------------------------------------
+  0  29 Bra 0
+  3     Brazero
+  4  22 Bra 1
+  7   2 \x{100}
+ 11  12 Bra 2
+ 14   1 b
+ 17   4 Recurse
+ 20   1 c
+ 23  12 Ket
+ 26  22 Ket
+ 29  29 Ket
+ 32     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+Options: utf8
+No first char
+No need char
+
+/(\x{100}(b(?1)c)){0,2}/D8
+------------------------------------------------------------------
+  0  61 Bra 0
+  3     Brazero
+  4  54 Bra 0
+  7  22 Bra 1
+ 10   2 \x{100}
+ 14  12 Bra 2
+ 17   1 b
+ 20   7 Recurse
+ 23   1 c
+ 26  12 Ket
+ 29  22 Ket
+ 32     Brazero
+ 33  22 Bra 1
+ 36   2 \x{100}
+ 40  12 Bra 2
+ 43   1 b
+ 46   7 Recurse
+ 49   1 c
+ 52  12 Ket
+ 55  22 Ket
+ 58  54 Ket
+ 61  61 Ket
+ 64     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+Options: utf8
+No first char
+No need char
+
+/ End of testinput5 /

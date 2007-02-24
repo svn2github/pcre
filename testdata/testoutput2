@@ -1,4 +1,4 @@
-PCRE version 4.4 21-August-2003
+PCRE version 4.5 01-December-2003
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -4397,9 +4397,179 @@ Failed: two named groups have the same name at offset 16
 /(?P<abc>abc(?P<def>def)(?P<abc>xyz))/
 Failed: two named groups have the same name at offset 31
 
+"\[((?P<elem>\d+)(,(?P>elem))*)\]"
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  elem   2
+No options
+First char = '['
+Need char = ']'
+    [10,20,30,5,5,4,4,2,43,23,4234]
+ 0: [10,20,30,5,5,4,4,2,43,23,4234]
+ 1: 10,20,30,5,5,4,4,2,43,23,4234
+ 2: 10
+ 3: ,4234
+    *** Failers
+No match
+    []  
+No match
+
+"\[((?P<elem>\d+)(,(?P>elem))*)?\]"
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  elem   2
+No options
+First char = '['
+Need char = ']'
+    [10,20,30,5,5,4,4,2,43,23,4234]
+ 0: [10,20,30,5,5,4,4,2,43,23,4234]
+ 1: 10,20,30,5,5,4,4,2,43,23,4234
+ 2: 10
+ 3: ,4234
+    [] 
+ 0: []
+
+/(a(b(?2)c))?/D
+------------------------------------------------------------------
+  0  28 Bra 0
+  3     Brazero
+  4  21 Bra 1
+  7   1 a
+ 10  12 Bra 2
+ 13   1 b
+ 16  10 Recurse
+ 19   1 c
+ 22  12 Ket
+ 25  21 Ket
+ 28  28 Ket
+ 31     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+
+/(a(b(?2)c))*/D
+------------------------------------------------------------------
+  0  28 Bra 0
+  3     Brazero
+  4  21 Bra 1
+  7   1 a
+ 10  12 Bra 2
+ 13   1 b
+ 16  10 Recurse
+ 19   1 c
+ 22  12 Ket
+ 25  21 KetRmax
+ 28  28 Ket
+ 31     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+
+/(a(b(?2)c)){0,2}/D
+------------------------------------------------------------------
+  0  59 Bra 0
+  3     Brazero
+  4  52 Bra 0
+  7  21 Bra 1
+ 10   1 a
+ 13  12 Bra 2
+ 16   1 b
+ 19  13 Recurse
+ 22   1 c
+ 25  12 Ket
+ 28  21 Ket
+ 31     Brazero
+ 32  21 Bra 1
+ 35   1 a
+ 38  12 Bra 2
+ 41   1 b
+ 44  13 Recurse
+ 47   1 c
+ 50  12 Ket
+ 53  21 Ket
+ 56  52 Ket
+ 59  59 Ket
+ 62     End
+------------------------------------------------------------------
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+
+/[ab]{1}+/D
+------------------------------------------------------------------
+  0  47 Bra 0
+  3  41 Once
+  6     [a-b]{1,1}
+ 44  41 Ket
+ 47  47 Ket
+ 50     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/i
+Capturing subpattern count = 3
+Options: caseless
+No first char
+Need char = 'g' (caseless)
+     Baby Bjorn Active Carrier - With free SHIPPING!!
+ 0: Baby Bjorn Active Carrier - With free SHIPPING!!
+ 1: Baby Bjorn Active Carrier - With free SHIPPING!!
+
+/((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/iS
+Capturing subpattern count = 3
+Options: caseless
+No first char
+Need char = 'g' (caseless)
+Study returned NULL
+     Baby Bjorn Active Carrier - With free SHIPPING!!
+ 0: Baby Bjorn Active Carrier - With free SHIPPING!!
+ 1: Baby Bjorn Active Carrier - With free SHIPPING!!
+     
+/a*.*b/SD
+------------------------------------------------------------------
+  0  10 Bra 0
+  3     a*
+  5     Any*
+  7   1 b
+ 10  10 Ket
+ 13     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+Study returned NULL
+
+/(a|b)*.?c/SD 
+------------------------------------------------------------------
+  0  24 Bra 0
+  3     Brazero
+  4   6 Bra 1
+  7   1 a
+ 10   6 Alt
+ 13   1 b
+ 16  12 KetRmax
+ 19     Any?
+ 21   1 c
+ 24  24 Ket
+ 27     End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+No options
+No first char
+Need char = 'c'
+Study returned NULL
+
 / End of testinput2 /
 Capturing subpattern count = 0
 No options
 First char = ' '
 Need char = ' '
-

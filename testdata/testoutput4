@@ -1,4 +1,4 @@
-PCRE version 4.4 21-August-2003
+PCRE version 4.5 01-December-2003
 
 /-- Do not use the \x{} construct except with patterns that have the --/
 /-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
@@ -874,5 +874,36 @@ No match
   xb 
 No match
 
-/ End of testinput4 /
+/(|a)/g8
+    catac
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+    a\x{256}a 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
 
+/ End of testinput4 /

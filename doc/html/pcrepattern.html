@@ -955,7 +955,7 @@ special parenthesis, starting with (?&#62; as in this example:
 </P>
 <P>
 <pre>
-  (?&#62;\d+)bar
+  (?&#62;\d+)foo
 </PRE>
 </P>
 <P>
@@ -1474,7 +1474,7 @@ named parentheses). We could rewrite the above example as follows:
 </P>
 <P>
 <pre>
-  (?&#60;pn&#62; \( ( (?&#62;[^()]+) | (?P&#62;pn) )* \) )
+  (?P&#60;pn&#62; \( ( (?&#62;[^()]+) | (?P&#62;pn) )* \) )
 </PRE>
 </P>
 <P>

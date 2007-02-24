@@ -38,7 +38,7 @@ Makefile. */
 #define LOOPREPEAT 50000
 
 #define BUFFER_SIZE 30000
-#define DBUFFER_SIZE 1024
+#define DBUFFER_SIZE BUFFER_SIZE
 
 
 static FILE *outfile;
@@ -48,6 +48,7 @@ static int callout_extra;
 static int callout_fail_count;
 static int callout_fail_id;
 static int first_callout;
+static int show_malloc;
 static int use_utf8;
 static size_t gotten_store;
 
@@ -338,7 +339,7 @@ return (cb->callout_number != callout_fail_id)? 0 :
 
 
 /*************************************************
-*            Local malloc function               *
+*            Local malloc functions              *
 *************************************************/
 
 /* Alternative malloc function, to test functionality and show the size of the
@@ -346,10 +347,37 @@ compiled re. */
 
 static void *new_malloc(size_t size)
 {
+void *block = malloc(size);
 gotten_store = size;
-return malloc(size);
+if (show_malloc)
+  fprintf(outfile, "malloc       %3d %p\n", size, block);
+return block;
 }
 
+static void new_free(void *block)
+{
+if (show_malloc)
+  fprintf(outfile, "free             %p\n", block);
+free(block);
+}
+
+
+/* For recursion malloc/free, to test stacking calls */
+
+static void *stack_malloc(size_t size)
+{
+void *block = malloc(size);
+if (show_malloc)
+  fprintf(outfile, "stack_malloc %3d %p\n", size, block);
+return block;
+}
+
+static void stack_free(void *block)
+{
+if (show_malloc)
+  fprintf(outfile, "stack_free       %p\n", block);
+free(block);
+}
 
 
 /*************************************************
@@ -442,6 +470,8 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  POSIX malloc threshold = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT, &rc);
     printf("  Default match limit = %d\n", rc);
+    (void)pcre_config(PCRE_CONFIG_STACKRECURSE, &rc);
+    printf("  Match recursion uses %s\n", rc? "stack" : "heap");
     exit(0);
     }
   else
@@ -499,6 +529,9 @@ if (argc > 2)
 /* Set alternative malloc function */
 
 pcre_malloc = new_malloc;
+pcre_free = new_free;
+pcre_stack_malloc = stack_malloc;
+pcre_stack_free = stack_free;
 
 /* Heading line, then prompt for first regex if stdin */
 
@@ -937,6 +970,7 @@ while (!done)
     callout_count = 0;
     callout_fail_count = 999999;
     callout_fail_id = -1;
+    show_malloc = 0;
 
     if (infile == stdin) printf("data> ");
     if (fgets((char *)buffer, BUFFER_SIZE, infile) == NULL)
@@ -1123,6 +1157,10 @@ while (!done)
           }
         use_size_offsets = n;
         if (n == 0) use_offsets = NULL;   /* Ensures it can't write to it */
+        continue;
+
+        case 'S':
+        show_malloc = 1;
         continue;
 
         case 'Z':
@@ -1357,24 +1395,36 @@ while (!done)
 
       /* Failed to match. If this is a /g or /G loop and we previously set
       g_notempty after a null match, this is not necessarily the end.
-      We want to advance the start offset, and continue. Fudge the offset
-      values to achieve this. We won't be at the end of the string - that
-      was checked before setting g_notempty. */
+      We want to advance the start offset, and continue. In the case of UTF-8
+      matching, the advance must be one character, not one byte. Fudge the
+      offset values to achieve this. We won't be at the end of the string -
+      that was checked before setting g_notempty. */
 
       else
         {
         if (g_notempty != 0)
           {
+          int onechar = 1;
           use_offsets[0] = start_offset;
-          use_offsets[1] = start_offset + 1;
+          if (use_utf8)
+            {
+            while (start_offset + onechar < len)
+              {
+              int tb = bptr[start_offset+onechar];
+              if (tb <= 127) break;
+              tb &= 0xc0;
+              if (tb != 0 && tb != 0xc0) onechar++;
+              }
+            }
+          use_offsets[1] = start_offset + onechar;
           }
         else
           {
-          if (gmatched == 0)   /* Error if no previous matches */
+          if (count == PCRE_ERROR_NOMATCH)
             {
-            if (count == -1) fprintf(outfile, "No match\n");
-              else fprintf(outfile, "Error %d\n", count);
+            if (gmatched == 0) fprintf(outfile, "No match\n");
             }
+          else fprintf(outfile, "Error %d\n", count);
           break;  /* Out of the /g loop */
           }
         }
@@ -1426,7 +1476,7 @@ while (!done)
     }
   }
 
-fprintf(outfile, "\n");
+if (infile == stdin) fprintf(outfile, "\n");
 return 0;
 }
 

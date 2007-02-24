@@ -1229,4 +1229,31 @@
 
 /(?P<abc>abc(?P<def>def)(?P<abc>xyz))/
 
+"\[((?P<elem>\d+)(,(?P>elem))*)\]"
+    [10,20,30,5,5,4,4,2,43,23,4234]
+    *** Failers
+    []  
+
+"\[((?P<elem>\d+)(,(?P>elem))*)?\]"
+    [10,20,30,5,5,4,4,2,43,23,4234]
+    [] 
+
+/(a(b(?2)c))?/D
+
+/(a(b(?2)c))*/D
+
+/(a(b(?2)c)){0,2}/D
+
+/[ab]{1}+/D
+
+/((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/i
+     Baby Bjorn Active Carrier - With free SHIPPING!!
+
+/((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/iS
+     Baby Bjorn Active Carrier - With free SHIPPING!!
+     
+/a*.*b/SD
+
+/(a|b)*.?c/SD 
+
 / End of testinput2 /

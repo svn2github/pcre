@@ -510,4 +510,8 @@
 /^\d*b/8
   xb 
 
+/(|a)/g8
+    catac
+    a\x{256}a 
+
 / End of testinput4 /

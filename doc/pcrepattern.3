@@ -750,7 +750,7 @@ If we use atomic grouping for the previous example, the matcher would give up
 immediately on failing to match "foo" the first time. The notation is a kind of
 special parenthesis, starting with (?> as in this example:
 
-  (?>\\d+)bar
+  (?>\\d+)foo
 
 This kind of parenthesis "locks up" the  part of the pattern it contains once
 it has matched, and a failure further into the pattern is prevented from
@@ -1125,7 +1125,7 @@ parentheses instead. For this, PCRE uses (?P>name), which is an extension to
 the Python syntax that PCRE uses for named parentheses (Perl does not provide
 named parentheses). We could rewrite the above example as follows:
 
-  (?<pn> \\( ( (?>[^()]+) | (?P>pn) )* \\) )
+  (?P<pn> \\( ( (?>[^()]+) | (?P>pn) )* \\) )
 
 This particular example pattern contains nested unlimited repeats, and so the
 use of atomic grouping for matching strings of non-parentheses is important

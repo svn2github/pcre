@@ -22,14 +22,15 @@ arguments are as follows:
 
 The available codes are:
 
-  PCRE_CONFIG_LINK_SIZE    Internal link size: 2, 3, or 4
-  PCRE_CONFIG_MATCH_LIMIT  Internal resource limit
-  PCRE_CONFIG_NEWLINE      Value of the newline character
+  PCRE_CONFIG_LINK_SIZE     Internal link size: 2, 3, or 4
+  PCRE_CONFIG_MATCH_LIMIT   Internal resource limit
+  PCRE_CONFIG_NEWLINE       Value of the newline character
   PCRE_CONFIG_POSIX_MALLOC_THRESHOLD
-                           Threshold of return slots, above
-                             which \fBmalloc()\fR is used by
-                             the POSIX API
-  PCRE_CONFIG_UTF8         Availability of UTF-8 support
+                            Threshold of return slots, above
+                              which \fBmalloc()\fR is used by
+                              the POSIX API
+  PCRE_CONFIG_STACKRECURSE  Recursion implementation (1=stack 0=heap)
+  PCRE_CONFIG_UTF8          Availability of UTF-8 support (1=yes 0=no)
 
 The function yields 0 on success or PCRE_ERROR_BADOPTION otherwise.
 

@@ -21,8 +21,8 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=4
-PCRE_MINOR=4
-PCRE_DATE=21-August-2003
+PCRE_MINOR=5
+PCRE_DATE=01-December-2003
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
@@ -97,6 +97,23 @@ if test "$enableval" = "yes"; then
 fi
 )
 
+dnl Handle --enable-ebcdic
+
+AC_ARG_ENABLE(ebcdic,
+[  --enable-ebcdic         assume EBCDIC coding rather than ASCII],
+if test "$enableval" == "yes"; then
+  EBCDIC=-DEBCDIC=1
+fi
+)
+
+dnl Handle --disable-stack-for-recursion
+AC_ARG_ENABLE(recursion,
+[  --disable-stack-for-recursion  disable use of stack recursion when matching],
+if test "$enableval" = "no"; then
+  NO_RECURSE=-DNO_RECURSE
+fi
+)
+
 dnl There doesn't seem to be a straightforward way of having parameters
 dnl that set values, other than fudging the --with thing. So that's what
 dnl I've done.
@@ -132,11 +149,13 @@ AC_SUBST(BUILD_EXEEXT)
 AC_SUBST(BUILD_OBJEXT)
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
+AC_SUBST(EBCDIC)
 AC_SUBST(HAVE_MEMMOVE)
 AC_SUBST(HAVE_STRERROR)
 AC_SUBST(LINK_SIZE)
 AC_SUBST(MATCH_LIMIT)
 AC_SUBST(NEWLINE)
+AC_SUBST(NO_RECURSE)
 AC_SUBST(PCRE_MAJOR)
 AC_SUBST(PCRE_MINOR)
 AC_SUBST(PCRE_DATE)

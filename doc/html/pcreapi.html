@@ -98,6 +98,12 @@ conversion went wrong.<br>
 <b>void (*pcre_free)(void *);</b>
 </P>
 <P>
+<b>void *(*pcre_stack_malloc)(size_t);</b>
+</P>
+<P>
+<b>void (*pcre_stack_free)(void *);</b>
+</P>
+<P>
 <b>int (*pcre_callout)(pcre_callout_block *);</b>
 </P>
 <br><a name="SEC2" href="#TOC1">PCRE API</a><br>
@@ -156,6 +162,17 @@ so a calling program can replace them if it wishes to intercept the calls. This
 should be done before calling any PCRE functions.
 </P>
 <P>
+The global variables <b>pcre_stack_malloc</b> and <b>pcre_stack_free</b> are also
+indirections to memory management functions. These special functions are used
+only when PCRE is compiled to use the heap for remembering data, instead of
+recursive function calls. This is a non-standard way of building PCRE, for use
+in environments that have limited stacks. Because of the greater use of memory
+management, it runs more slowly. Separate functions are provided so that
+special-purpose external code can be used for this case. When used, these
+functions are always called in a stack-like manner (last obtained, first
+freed), and always for memory blocks of the same size.
+</P>
+<P>
 The global variable <b>pcre_callout</b> initially contains NULL. It can be set
 by the caller to a "callout" function, which PCRE will then call at specified
 points during a matching operation. Details are given in the <b>pcrecallout</b>
@@ -164,9 +181,9 @@ documentation.
 <br><a name="SEC3" href="#TOC1">MULTITHREADING</a><br>
 <P>
 The PCRE functions can be used in multi-threading applications, with the
-proviso that the memory management functions pointed to by <b>pcre_malloc</b>
-and <b>pcre_free</b>, and the callout function pointed to by <b>pcre_callout</b>,
-are shared by all threads.
+proviso that the memory management functions pointed to by <b>pcre_malloc</b>,
+<b>pcre_free</b>, <b>pcre_stack_malloc</b>, and <b>pcre_stack_free</b>, and the
+callout function pointed to by <b>pcre_callout</b>, are shared by all threads.
 </P>
 <P>
 The compiled form of a regular expression is not altered during matching, so
@@ -237,6 +254,19 @@ the <b>pcreposix</b> documentation.
 The output is an integer that gives the default limit for the number of
 internal matching function calls in a <b>pcre_exec()</b> execution. Further
 details are given with <b>pcre_exec()</b> below.
+</P>
+<P>
+<pre>
+  PCRE_CONFIG_STACKRECURSE
+</PRE>
+</P>
+<P>
+The output is an integer that is set to one if internal recursion is
+implemented by recursive function calls that use the stack to remember their
+state. This is the usual way that PCRE is compiled. The output is zero if PCRE
+was compiled to use blocks of data on the heap instead of recursive function
+calls. In this case, <b>pcre_stack_malloc</b> and <b>pcre_stack_free</b> are
+called to manage memory blocks on the heap, thus avoiding the use of the stack.
 </P>
 <br><a name="SEC5" href="#TOC1">COMPILING A PATTERN</a><br>
 <P>
@@ -878,12 +908,22 @@ unachored at matching time.
 </P>
 <P>
 When PCRE_UTF8 was set at compile time, the validity of the subject as a UTF-8
-string is automatically checked. If an invalid UTF-8 sequence of bytes is
-found, <b>pcre_exec()</b> returns the error PCRE_ERROR_BADUTF8. If you already
-know that your subject is valid, and you want to skip this check for
-performance reasons, you can set the PCRE_NO_UTF8_CHECK option when calling
-<b>pcre_exec()</b>. When this option is set, the effect of passing an invalid
-UTF-8 string as a subject is undefined. It may cause your program to crash.
+string is automatically checked, and the value of <i>startoffset</i> is also
+checked to ensure that it points to the start of a UTF-8 character. If an
+invalid UTF-8 sequence of bytes is found, <b>pcre_exec()</b> returns the error
+PCRE_ERROR_BADUTF8. If <i>startoffset</i> contains an invalid value,
+PCRE_ERROR_BADUTF8_OFFSET is returned.
+</P>
+<P>
+If you already know that your subject is valid, and you want to skip these
+checks for performance reasons, you can set the PCRE_NO_UTF8_CHECK option when
+calling <b>pcre_exec()</b>. You might want to do this for the second and
+subsequent calls to <b>pcre_exec()</b> if you are making repeated calls to find
+all the matches in a single subject string. However, you should be sure that
+the value of <i>startoffset</i> points to the start of a UTF-8 character. When
+PCRE_NO_UTF8_CHECK is set, the effect of passing an invalid UTF-8 string as a
+subject, or a value of <i>startoffset</i> that does not point to the start of a
+UTF-8 character, is undefined. Your program may crash.
 </P>
 <P>
 There are also three further options that can be set only at matching time:
@@ -939,15 +979,18 @@ below) and trying an ordinary match again.
 </P>
 <P>
 The subject string is passed to <b>pcre_exec()</b> as a pointer in
-<i>subject</i>, a length in <i>length</i>, and a starting offset in
+<i>subject</i>, a length in <i>length</i>, and a starting byte offset in
 <i>startoffset</i>. Unlike the pattern string, the subject may contain binary
 zero bytes. When the starting offset is zero, the search for a match starts at
 the beginning of the subject, and this is by far the most common case.
 </P>
 <P>
 If the pattern was compiled with the PCRE_UTF8 option, the subject must be a
-sequence of bytes that is a valid UTF-8 string. If an invalid UTF-8 string is
-passed, PCRE's behaviour is not defined.
+sequence of bytes that is a valid UTF-8 string, and the starting offset must
+point to the beginning of a UTF-8 character. If an invalid UTF-8 string or
+offset is passed, an error (either PCRE_ERROR_BADUTF8 or
+PCRE_ERROR_BADUTF8_OFFSET) is returned, unless the option PCRE_NO_UTF8_CHECK is
+set, in which case PCRE's behaviour is not defined.
 </P>
 <P>
 A non-zero starting offset is useful when searching for another match in the
@@ -1132,11 +1175,20 @@ use by callout functions that want to yield a distinctive error code. See the
 </P>
 <P>
 <pre>
-  PCRE_ERROR_BADUTF8       (-10)
+  PCRE_ERROR_BADUTF8        (-10)
 </PRE>
 </P>
 <P>
 A string that contains an invalid UTF-8 byte sequence was passed as a subject.
+</P>
+<P>
+<pre>
+  PCRE_ERROR_BADUTF8_OFFSET (-11)
+</PRE>
+</P>
+<P>
+The UTF-8 byte sequence that was passed as a subject was valid, but the value
+of <i>startoffset</i> did not point to the beginning of a UTF-8 character.
 </P>
 <br><a name="SEC11" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
 <P>
@@ -1289,6 +1341,6 @@ then call <i>pcre_copy_substring()</i> or <i>pcre_get_substring()</i>, as
 appropriate.
 </P>
 <P>
-Last updated: 20 August 2003
+Last updated: 09 December 2003
 <br>
 Copyright &copy; 1997-2003 University of Cambridge.
