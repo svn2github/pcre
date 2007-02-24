@@ -123,10 +123,10 @@ study.o:        $(top_srcdir)/study.c $(top_srcdir)/internal.h \
 		$(LTCOMPILE) $(UTF8) $(top_srcdir)/study.c
 
 pcretest.o:     $(top_srcdir)/pcretest.c $(top_srcdir)/internal.h pcre.h config.h Makefile
-		$(LTCOMPILE) $(UTF8) $(top_srcdir)/pcretest.c
+		$(CC) -c $(CFLAGS) -I. $(UTF8) $(top_srcdir)/pcretest.c
 
 pcregrep.o:     $(top_srcdir)/pcregrep.c pcre.h Makefile config.h
-		$(LTCOMPILE) $(UTF8) $(PCREGREP_OSTYPE) $(top_srcdir)/pcregrep.c
+		$(CC) -c $(CFLAGS) -I. $(UTF8) $(PCREGREP_OSTYPE) $(top_srcdir)/pcregrep.c
 
 # An auxiliary program makes the default character table source
 

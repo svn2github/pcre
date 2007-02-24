@@ -1,6 +1,16 @@
 ChangeLog for PCRE
 ------------------
 
+Version 3.0 02-Jan-02
+---------------------
+
+1. A bit of extraneous text had somehow crept into the pcregrep documentation.
+
+2. If --disable-static was given, the building process failed when trying to
+build pcretest and pcregrep. (For some reason it was using libtool to compile
+them, which is not right, as they aren't part of the library.)
+
+
 Version 3.8 18-Dec-01
 ---------------------
 
