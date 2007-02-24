@@ -208,6 +208,7 @@ do
       according to the repeat count. */
 
       case OP_CLASS:
+      case OP_NEGCLASS:
         {
         tcode++;
         for (c = 0; c < 32; c++) start_bits[c] |= tcode[c];

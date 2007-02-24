@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.04 22-Dec-1997
+PCRE version 1.05 23-Dec-1997
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -604,6 +604,42 @@ Failed: unmatched brackets at offset 0
 
 /a[]b/
 Failed: missing terminating ] for character class at offset 4
+
+/[^a]/
+Identifying subpattern count = 0
+No options
+No first char
+    \Iaaaabcd
+ 0: b
+    \IaaAabcd 
+ 0: b
+
+/[^az]/
+Identifying subpattern count = 0
+No options
+No first char
+    \Iaaaabcd
+ 0: b
+    \IaaAabcd 
+ 0: b
+
+/[^az]/
+Identifying subpattern count = 0
+No options
+No first char
+    \Izazabcd
+ 0: b
+    \IAaZabcd 
+ 0: b
+    
+/[^aeiou ]{3,}/
+Identifying subpattern count = 0
+No options
+No first char
+    co-processors, and for 
+ 0: -pr
+    \Ico-processors, and for 
+ 0: -pr
 
 / End of test input /
 Identifying subpattern count = 0

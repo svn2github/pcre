@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.04 22-Dec-1997
+PCRE version 1.05 23-Dec-1997
 
 /the quick brown fox/
     the quick brown fox
@@ -2341,6 +2341,30 @@ No match
 No match
     aaaaaaa   
 No match
+
+/[^a]/
+    aaaabcd
+ 0: b
+    aaAabcd 
+ 0: A
+
+/[^a]/i
+    aaaabcd
+ 0: b
+    aaAabcd 
+ 0: b
+
+/[^az]/
+    aaaabcd
+ 0: b
+    aaAabcd 
+ 0: A
+
+/[^az]/i
+    aaaabcd
+ 0: b
+    aaAabcd 
+ 0: b
 
 / End of test input /
 

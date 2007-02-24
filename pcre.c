@@ -54,7 +54,7 @@ the external pcre header. */
 static char rep_min[] = { 0, 0, 1, 1, 0, 0 };
 static char rep_max[] = { 0, 0, 0, 0, 1, 1 };
 
-/* Text forms of OP_ values and things, for debugging */
+/* Text forms of OP_ values and things, for debugging (not all used) */
 
 #ifdef DEBUG
 static const char *OP_names[] = {
@@ -65,7 +65,7 @@ static const char *OP_names[] = {
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{",
-  "class", "Ref",
+  "class", "negclass", "Ref",
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not", "Once",
   "Brazero", "Braminzero", "Bra"
 };
@@ -91,7 +91,8 @@ static short int escapes[] = {
 
 /* Definition to allow mutual recursion */
 
-static BOOL compile_regex(int, int *, uschar **, const uschar **, const char **);
+static BOOL
+  compile_regex(int, int *, uschar **, const uschar **, const char **);
 
 /* Structure for passing "static" information around between the functions
 doing the matching, so that they are thread-safe. */
@@ -306,6 +307,7 @@ do {
       /* Check a class or a back reference for a zero minimum */
 
       case OP_CLASS:
+      case OP_NEGCLASS:
       case OP_REF:
       cc += (*cc == OP_REF)? 2 : 33;
 
@@ -670,16 +672,22 @@ for (;; ptr++)
 
     case '[':
     previous = code;
-    *code++ = OP_CLASS;
 
-    /* If the first character is '^', set the negation flag */
+    /* If the first character is '^', set the negation flag, and use a
+    different opcode. This only matters if caseless matching is specified at
+    runtime. */
 
     if ((c = *(++ptr)) == '^')
       {
       negate_class = TRUE;
+      *code++ = OP_NEGCLASS;
       c = *(++ptr);
       }
-    else negate_class = FALSE;
+    else
+      {
+      negate_class = FALSE;
+      *code++ = OP_CLASS;
+      }
 
     /* Keep a count of chars so that we can optimize the case of just a single
     character. */
@@ -1015,7 +1023,8 @@ for (;; ptr++)
     /* If previous was a character class or a back reference, we put the repeat
     stuff after it. */
 
-    else if (*previous == OP_CLASS || *previous == OP_REF)
+    else if (*previous == OP_CLASS || *previous == OP_NEGCLASS ||
+             *previous == OP_REF)
       {
       if (repeat_min == 0 && repeat_max == -1)
         *code++ = OP_CRSTAR + repeat_type;
@@ -2090,11 +2099,12 @@ while (code < code_end)
     goto CLASS_REF_REPEAT;
 
     case OP_CLASS:
+    case OP_NEGCLASS:
       {
       int i, min, max;
 
-      code++;
-      printf("    [");
+      if (*code++ == OP_CLASS) printf("    [");
+        else printf("   ^[");
 
       for (i = 0; i < 256; i++)
         {
@@ -2714,10 +2724,14 @@ for (;;)
     item to see if there is repeat information following. Then obey similar
     code to character type repeats - written out again for speed. If caseless
     matching was set at runtime but not at compile time, we have to check both
-    versions of a character. */
+    versions of a character, and we have to behave differently for positive and
+    negative classes. This is the only time where OP_CLASS and OP_NEGCLASS are
+    treated differently. */
 
     case OP_CLASS:
+    case OP_NEGCLASS:
       {
+      BOOL nasty_case = *ecode == OP_NEGCLASS && md->runtime_caseless;
       const uschar *data = ecode + 1;  /* Save for matching */
       ecode += 33;                     /* Advance past the item */
 
@@ -2746,15 +2760,8 @@ for (;;)
         break;
 
         default:               /* No repeat follows */
-        if (eptr >= md->end_subject) return FALSE;
-        c = *eptr++;
-        if ((data[c/8] & (1 << (c&7))) != 0) continue;    /* With main loop */
-        if (md->runtime_caseless)
-          {
-          c = pcre_fcc[c];
-          if ((data[c/8] & (1 << (c&7))) != 0) continue;  /* With main loop */
-          }
-        return FALSE;
+        min = max = 1;
+        break;
         }
 
       /* First, ensure the minimum number of matches are present. */
@@ -2763,12 +2770,30 @@ for (;;)
         {
         if (eptr >= md->end_subject) return FALSE;
         c = *eptr++;
-        if ((data[c/8] & (1 << (c&7))) != 0) continue;
-        if (md->runtime_caseless)
+
+        /* Either not runtime caseless, or it was a positive class. For
+        runtime caseless, continue if either case is in the map. */
+
+        if (!nasty_case)
           {
+          if ((data[c/8] & (1 << (c&7))) != 0) continue;
+          if (md->runtime_caseless)
+            {
+            c = pcre_fcc[c];
+            if ((data[c/8] & (1 << (c&7))) != 0) continue;
+            }
+          }
+
+        /* Runtime caseless and it was a negative class. Continue only if
+        both cases are in the map. */
+
+        else
+          {
+          if ((data[c/8] & (1 << (c&7))) == 0) return FALSE;
           c = pcre_fcc[c];
           if ((data[c/8] & (1 << (c&7))) != 0) continue;
           }
+
         return FALSE;
         }
 
@@ -2787,12 +2812,30 @@ for (;;)
           if (match(eptr, ecode, offset_top, md)) return TRUE;
           if (i >= max || eptr >= md->end_subject) return FALSE;
           c = *eptr++;
-          if ((data[c/8] & (1 << (c&7))) != 0) continue;
-          if (md->runtime_caseless)
+
+          /* Either not runtime caseless, or it was a positive class. For
+          runtime caseless, continue if either case is in the map. */
+
+          if (!nasty_case)
             {
+            if ((data[c/8] & (1 << (c&7))) != 0) continue;
+            if (md->runtime_caseless)
+              {
+              c = pcre_fcc[c];
+              if ((data[c/8] & (1 << (c&7))) != 0) continue;
+              }
+            }
+
+          /* Runtime caseless and it was a negative class. Continue only if
+          both cases are in the map. */
+
+          else
+            {
+            if ((data[c/8] & (1 << (c&7))) == 0) return FALSE;
             c = pcre_fcc[c];
             if ((data[c/8] & (1 << (c&7))) != 0) continue;
             }
+
           return FALSE;
           }
         /* Control never gets here */
@@ -2807,12 +2850,30 @@ for (;;)
           {
           if (eptr >= md->end_subject) break;
           c = *eptr;
-          if ((data[c/8] & (1 << (c&7))) != 0) continue;
-          if (md->runtime_caseless)
+
+          /* Either not runtime caseless, or it was a positive class. For
+          runtime caseless, continue if either case is in the map. */
+
+          if (!nasty_case)
             {
+            if ((data[c/8] & (1 << (c&7))) != 0) continue;
+            if (md->runtime_caseless)
+              {
+              c = pcre_fcc[c];
+              if ((data[c/8] & (1 << (c&7))) != 0) continue;
+              }
+            }
+
+          /* Runtime caseless and it was a negative class. Continue only if
+          both cases are in the map. */
+
+          else
+            {
+            if ((data[c/8] & (1 << (c&7))) == 0) break;
             c = pcre_fcc[c];
             if ((data[c/8] & (1 << (c&7))) != 0) continue;
             }
+
           break;
           }
 

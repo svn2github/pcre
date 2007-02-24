@@ -1575,4 +1575,20 @@
     *** Failers
     aaaaaaa   
 
+/[^a]/
+    aaaabcd
+    aaAabcd 
+
+/[^a]/i
+    aaaabcd
+    aaAabcd 
+
+/[^az]/
+    aaaabcd
+    aaAabcd 
+
+/[^az]/i
+    aaaabcd
+    aaAabcd 
+
 / End of test input /

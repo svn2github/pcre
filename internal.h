@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "1.04 22-Dec-1997"
+#define PCRE_VERSION       "1.05 23-Dec-1997"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -181,6 +181,7 @@ enum {
   OP_CRMINRANGE,
 
   OP_CLASS,          /* Match a character class */
+  OP_NEGCLASS,       /* Match a character class, specified negatively */
   OP_REF,            /* Match a back reference */
 
   OP_ALT,            /* Start of alternation */

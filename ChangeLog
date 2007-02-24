@@ -2,6 +2,13 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.05 23-Dec-97
+----------------------
+
+1. Negated character classes containing more than one character were failing if
+PCRE_CASELESS was set at run time.
+
+
 Version 1.04 19-Dec-97
 ----------------------
 

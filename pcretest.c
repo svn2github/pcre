@@ -38,7 +38,7 @@ static const char *OP_names[] = {
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{",
-  "class", "Ref",
+  "class", "negclass", "Ref",
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not", "Once",
   "Brazero", "Braminzero", "Bra"
 };
@@ -161,11 +161,11 @@ for(;;)
     goto CLASS_REF_REPEAT;
 
     case OP_CLASS:
+    case OP_NEGCLASS:
       {
       int i, min, max;
-
-      code++;
-      printf("    [");
+      if (*code++ == OP_CLASS) printf("    [");
+        else printf("   ^[");
 
       for (i = 0; i < 256; i++)
         {

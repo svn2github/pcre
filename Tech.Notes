@@ -117,9 +117,21 @@ instances of OP_CHARS are used.
 Character classes
 -----------------
 
-OP_CLASS is used for a character class. It is followed by a 32-byte bit map
-containing a 1 bit for every character that is acceptable. The bits are counted
-from the least significant end of each byte.
+OP_CLASS is used for a character class, and OP_NEGCLASS for a negated character
+class, provided there are at least two characters in the class. If there is
+only one character, OP_CHARS is used for a positive class, and OP_NOT for a
+negative one. A set of repeating opcodes (OP_NOTSTAR etc.) are used for a
+repeated, negated, single-character class.
+
+Both OP_CLASS and OP_NEGCLASS are followed by a 32-byte bit map containing a 1
+bit for every character that is acceptable. The bits are counted from the least
+significant end of each byte. The reason for having two opcodes is to cope with
+negated character classes when caseless matching is specified at run time but
+not at compile time. If it is specified at compile time, the bit map is built
+appropriately. This is the only time that a distinction is made between
+OP_CLASS and OP_NEGCLASS, when the bit map was built in a caseful manner but
+matching must be caseless. For OP_CLASS, a character matches if either of its
+cases is in the bit map, but for OP_NEGCLASS, both of them must be present.
 
 
 Back references
@@ -196,4 +208,4 @@ OP_ONCE.
 
 
 Philip Hazel
-October 1997
+December 1997
