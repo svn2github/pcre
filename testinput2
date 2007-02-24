@@ -282,5 +282,9 @@
 /[^aeiou ]{3,}/
     co-processors, and for 
     \Ico-processors, and for 
+    
+/((a)*)*/
+ 
+/((a|b|c)*)*/
 
 / End of test input /

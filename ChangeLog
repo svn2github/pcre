@@ -2,6 +2,13 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.07 16-Feb-98
+----------------------
+
+1. A pattern such as /((a)*)*/ was not being diagnosed as in error (unlimited
+repeat of a potentially empty string).
+
+
 Version 1.06 23-Jan-98
 ----------------------
 
