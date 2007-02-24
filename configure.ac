@@ -10,6 +10,7 @@ dnl This is required at the start; the name is the name of a file
 dnl it should be seeing, to verify it is in the same directory.
 
 AC_INIT(dftables.c)
+AC_CONFIG_SRCDIR([pcre.h])
 
 dnl A safety precaution
 
@@ -33,9 +34,9 @@ PCRE_CPPLIB_VERSION=0:0:0
 dnl Find the PCRE version from the pcre.h file. The PCRE_VERSION variable is
 dnl substituted in pcre-config.in.
 
-PCRE_MAJOR=`grep '#define PCRE_MAJOR' ./pcre.h | cut -c 29-`
-PCRE_MINOR=`grep '#define PCRE_MINOR' ./pcre.h | cut -c 29-`
-PCRE_PRERELEASE=`grep '#define PCRE_PRERELEASE' ./pcre.h | cut -c 29-`
+PCRE_MAJOR=`grep '#define PCRE_MAJOR' ${srcdir}/pcre.h | cut -c 29-`
+PCRE_MINOR=`grep '#define PCRE_MINOR' ${srcdir}/pcre.h | cut -c 29-`
+PCRE_PRERELEASE=`grep '#define PCRE_PRERELEASE' ${srcdir}/pcre.h | cut -c 29-`
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}${PCRE_PRERELEASE}
 
 dnl Handle --disable-cpp

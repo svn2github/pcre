@@ -53,11 +53,12 @@ cannot run ./configure. As it now stands, this file need not be edited in that
 circumstance. */
 
 #define PCRE_MAJOR          6
-#define PCRE_MINOR          5
+#define PCRE_MINOR          6
 #define PCRE_PRERELEASE
-#define PCRE_DATE           01-Feb-2006
+#define PCRE_DATE           06-Feb-2006
 
-/* Win32 uses DLL by default; it needs special stuff for exported functions. */
+/* Win32 uses DLL by default; it needs special stuff for exported functions
+when building PCRE. */
 
 #ifdef _WIN32
 #  ifdef PCRE_DEFINITION
@@ -71,7 +72,7 @@ circumstance. */
 #  endif
 #endif
 
-/* For other operating systems, we use the standard "extern". */
+/* Otherwise, we use the standard "extern". */
 
 #ifndef PCRE_DATA_SCOPE
 #  ifdef __cplusplus

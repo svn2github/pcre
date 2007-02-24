@@ -105,6 +105,33 @@ typedef struct {
   regoff_t rm_eo;
 } regmatch_t;
 
+/* Win32 uses DLL by default; it needs special stuff for exported functions
+when building PCRE. */
+
+#ifndef PCRE_DATA_SCOPE
+#ifdef _WIN32
+#  ifdef PCRE_DEFINITION
+#    ifdef DLL_EXPORT
+#      define PCRE_DATA_SCOPE __declspec(dllexport)
+#    endif
+#  else
+#    ifndef PCRE_STATIC
+#      define PCRE_DATA_SCOPE extern __declspec(dllimport)
+#    endif
+#  endif
+#endif
+#endif
+
+/* Otherwise, we use the standard "extern". */
+
+#ifndef PCRE_DATA_SCOPE
+#  ifdef __cplusplus
+#    define PCRE_DATA_SCOPE     extern "C"
+#  else
+#    define PCRE_DATA_SCOPE     extern
+#  endif
+#endif
+
 /* The functions */
 
 PCRE_DATA_SCOPE int regcomp(regex_t *, const char *, int);

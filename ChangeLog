@@ -1,6 +1,19 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.6 06-Feb-06
+---------------------
+
+ 1. Change 16(a) for 6.5 broke things, because PCRE_DATA_SCOPE was not defined
+    in pcreposix.h. I have copied the definition from pcre.h.
+
+ 2. Change 25 for 6.5 broke compilation in a build directory out-of-tree
+    because pcre.h is no longer a built file.
+
+ 3. Added Jeff Friedl's additional debugging patches to pcregrep. These are
+    not normally included in the compiled code.
+
+
 Version 6.5 01-Feb-06
 ---------------------
 

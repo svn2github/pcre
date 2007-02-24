@@ -94,6 +94,10 @@ regular code. */
 
 #ifdef JFRIEDL_DEBUG
 static int S_arg = -1;
+static unsigned int jfriedl_XR = 0; /* repeat regex attempt this many times */
+static unsigned int jfriedl_XT = 0; /* replicate text this many times */
+static const char *jfriedl_prefix = "";
+static const char *jfriedl_postfix = "";
 #endif
 
 static char *colour_string = (char *)"1;31";
@@ -564,6 +568,56 @@ while (ptr < endptr)
   linelength = 0;
   while (t < endptr && *t++ != '\n') linelength++;
   length = multiline? endptr - ptr : linelength;
+
+
+  /* Extra processing for Jeffrey Friedl's debugging. */
+
+#ifdef JFRIEDL_DEBUG
+  if (jfriedl_XT || jfriedl_XR)
+  {
+      #include <sys/time.h>
+      #include <time.h>
+      struct timeval start_time, end_time;
+      struct timezone dummy;
+
+      if (jfriedl_XT)
+      {
+          unsigned long newlen = length * jfriedl_XT + strlen(jfriedl_prefix) + strlen(jfriedl_postfix);
+          const char *orig = ptr;
+          ptr = malloc(newlen + 1);
+          if (!ptr) {
+                  printf("out of memory");
+                  exit(2);
+          }
+          endptr = ptr;
+          strcpy(endptr, jfriedl_prefix); endptr += strlen(jfriedl_prefix);
+          for (i = 0; i < jfriedl_XT; i++) {
+                  strncpy(endptr, orig,  length);
+                  endptr += length;
+          }
+          strcpy(endptr, jfriedl_postfix); endptr += strlen(jfriedl_postfix);
+          length = newlen;
+      }
+
+      if (gettimeofday(&start_time, &dummy) != 0)
+              perror("bad gettimeofday");
+
+
+      for (i = 0; i < jfriedl_XR; i++)
+          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0, 0, offsets, 99) >= 0);
+
+      if (gettimeofday(&end_time, &dummy) != 0)
+              perror("bad gettimeofday");
+
+      double delta = ((end_time.tv_sec + (end_time.tv_usec / 1000000.0))
+                      -
+                      (start_time.tv_sec + (start_time.tv_usec / 1000000.0)));
+
+      printf("%s TIMER[%.4f]\n", match ? "MATCH" : "FAIL", delta);
+      return 0;
+  }
+#endif
+
 
   /* Run through all the patterns until one matches. Note that we don't include
   the final newline in the subject string. */
@@ -1294,6 +1348,30 @@ for (i = 1; i < argc; i++)
       }
     }
 
+
+  /* Jeffrey Friedl's debugging harness uses these additional options which
+  are not in the right form for putting in the option table because they use
+  only one hyphen, yet are more than one character long. By putting them
+  separately here, they will not get displayed as part of the help() output,
+  but I don't think Jeffrey will care about that. */
+
+#ifdef JFRIEDL_DEBUG
+  else if (strcmp(argv[i], "-pre") == 0) {
+          jfriedl_prefix = argv[++i];
+          continue;
+  } else if (strcmp(argv[i], "-post") == 0) {
+          jfriedl_postfix = argv[++i];
+          continue;
+  } else if (strcmp(argv[i], "-XT") == 0) {
+          sscanf(argv[++i], "%d", &jfriedl_XT);
+          continue;
+  } else if (strcmp(argv[i], "-XR") == 0) {
+          sscanf(argv[++i], "%d", &jfriedl_XR);
+          continue;
+  }
+#endif
+
+
   /* One-char options; many that have no data may be in a single argument; we
   continue till we hit the last one or one that needs data. */
 
@@ -1333,7 +1411,7 @@ for (i = 1; i < argc; i++)
   /* If the option type is OP_OP_STRING or OP_OP_NUMBER, it's an option that
   either has a value or defaults to something. It cannot have data in a
   separate item. At the moment, the only such options are "colo(u)r" and
-  Jeffrey Friedl's special debugging option. */
+  Jeffrey Friedl's special -S debugging option. */
 
   if (*option_data == 0 &&
       (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER))
@@ -1490,13 +1568,18 @@ if (DEE_option != NULL)
     }
   }
 
-/* Check the value for Jeff Friedl's debugging option. */
+/* Check the values for Jeffrey Friedl's debugging options. */
 
 #ifdef JFRIEDL_DEBUG
 if (S_arg > 9)
   {
   fprintf(stderr, "pcregrep: bad value for -S option\n");
   return 2;
+  }
+if (jfriedl_XT != 0 || jfriedl_XR != 0)
+  {
+  if (jfriedl_XT == 0) jfriedl_XT = 1;
+  if (jfriedl_XR == 0) jfriedl_XR = 1;
   }
 #endif
 
