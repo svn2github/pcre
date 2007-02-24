@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.02 12-Dec-1997
+PCRE version 1.03 18-Dec-1997
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -598,6 +598,12 @@ Failed: operand of unlimited repeat could match the empty string at offset 8
 
 /((?>a*?))*/X
 Failed: operand of unlimited repeat could match the empty string at offset 9
+
+/)/
+Failed: unmatched brackets at offset 0
+
+/a[]b/
+Failed: missing terminating ] for character class at offset 4
 
 / End of test input /
 Identifying subpattern count = 0

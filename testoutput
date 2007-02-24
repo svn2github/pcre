@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.02 12-Dec-1997
+PCRE version 1.03 18-Dec-1997
 
 /the quick brown fox/
     the quick brown fox
@@ -2165,15 +2165,15 @@ No match
  1: abc
 
 /abc\81/
-   abc\081
+    abc\081
  0: abc\x0081
-   abc\0\x38\x31
+    abc\0\x38\x31
  0: abc\x0081
 
 /abc\91/
-   abc\091
+    abc\091
  0: abc\x0091
-   abc\0\x39\x31
+    abc\0\x39\x31
  0: abc\x0091
 
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)\12\123/
@@ -2275,24 +2275,72 @@ No match
 No match
 
 /[^a]/
-  Abc
+    Abc
  0: A
   
 /[^a]/i
-  Abc 
+    Abc 
  0: b
 
 /[^a]+/
-  AAAaAbc
+    AAAaAbc
  0: AAA
   
 /[^a]+/i
-  AAAaAbc 
+    AAAaAbc 
  0: bc
 
 /[^a]+/
-   bbb\nccc
+    bbb\nccc
  0: bbb\x0accc
+   
+/[^k]$/
+    abc
+ 0: c
+    *** Failers
+ 0: s
+    abk   
+No match
+   
+/[^k]{2,3}$/
+    abc
+ 0: abc
+    kbc
+ 0: bc
+    kabc 
+ 0: abc
+    *** Failers
+ 0: ers
+    abk
+No match
+    akb
+No match
+    akk 
+No match
+
+/^\d{8,}\@.+[^k]$/
+    12345678\@a.b.c.d
+ 0: 12345678@a.b.c.d
+    123456789\@x.y.z
+ 0: 123456789@x.y.z
+    *** Failers
+No match
+    12345678\@x.y.uk
+No match
+    1234567\@a.b.c.d       
+No match
+
+/(a)\1{8,}/
+    aaaaaaaaa
+ 0: aaaaaaaaa
+ 1: a
+    aaaaaaaaaa
+ 0: aaaaaaaaaa
+ 1: a
+    *** Failers
+No match
+    aaaaaaa   
+No match
 
 / End of test input /
 

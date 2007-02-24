@@ -12,7 +12,7 @@
 # lacks the strerror() function, but can provide the equivalent by indexing
 # into errlist.
 
-CC = gcc -O2
+CC = gcc -O2 -Wall
 CFLAGS =
 RANLIB = @true
 

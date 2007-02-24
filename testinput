@@ -1489,12 +1489,12 @@
     abc\100\60
 
 /abc\81/
-   abc\081
-   abc\0\x38\x31
+    abc\081
+    abc\0\x38\x31
 
 /abc\91/
-   abc\091
-   abc\0\x39\x31
+    abc\091
+    abc\0\x39\x31
 
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)\12\123/
     abcdefghijkllS
@@ -1534,18 +1534,45 @@
     baccd
 
 /[^a]/
-  Abc
+    Abc
   
 /[^a]/i
-  Abc 
+    Abc 
 
 /[^a]+/
-  AAAaAbc
+    AAAaAbc
   
 /[^a]+/i
-  AAAaAbc 
+    AAAaAbc 
 
 /[^a]+/
-   bbb\nccc
+    bbb\nccc
+   
+/[^k]$/
+    abc
+    *** Failers
+    abk   
+   
+/[^k]{2,3}$/
+    abc
+    kbc
+    kabc 
+    *** Failers
+    abk
+    akb
+    akk 
+
+/^\d{8,}\@.+[^k]$/
+    12345678\@a.b.c.d
+    123456789\@x.y.z
+    *** Failers
+    12345678\@x.y.uk
+    1234567\@a.b.c.d       
+
+/(a)\1{8,}/
+    aaaaaaaaa
+    aaaaaaaaaa
+    *** Failers
+    aaaaaaa   
 
 / End of test input /

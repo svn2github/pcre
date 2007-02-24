@@ -2,6 +2,52 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.03 18-Dec-97
+----------------------
+
+1. A erroneous regex with a missing opening parenthesis was correctly
+diagnosed, but PCRE attempted to access brastack[-1], which could cause crashes
+on some systems.
+
+2. Replaced offsetof(real_pcre, code) by offsetof(real_pcre, code[0]) because
+it was reported that one broken compiler failed on the former because "code" is
+also an independent variable.
+
+3. The erroneous regex a[]b caused an array overrun reference.
+
+4. A regex ending with a one-character negative class (e.g. /[^k]$/) did not
+fail on data ending with that character. (It was going on too far, and checking
+the next character, typically a binary zero.) This was specific to the
+optimized code for single-character negative classes.
+
+5. Added a contributed patch from the TIN world which does the following:
+
+  + Add an undef for memmove, in case the the system defines a macro for it.
+
+  + Add a definition of offsetof(), in case there isn't one. (I don't know
+    the reason behind this - offsetof() is part of the ANSI standard - but
+    it does no harm).
+
+  + Reduce the ifdef's in pcre.c using macro DPRINTF, thereby eliminating
+    most of the places where whitespace preceded '#'. I have given up and
+    allowed the remaining 2 cases to be at the margin.
+
+  + Rename some variables in pcre to eliminate shadowing. This seems very
+    pedantic, but does no harm, of course.
+
+6. Moved the call to setjmp() into its own function, to get rid of warnings
+from gcc -Wall, and avoided calling it at all unless PCRE_EXTRA is used.
+
+7. Constructs such as \d{8,} were compiling into the equivalent of
+\d{8}\d{65527} instead of \d{8}\d* which didn't make much difference to the
+outcome, but in this particular case used more store than had been allocated,
+which caused the bug to be discovered because it threw up an internal error.
+
+8. The debugging code in both pcre and pcretest for outputting the compiled
+form of a regex was going wrong in the case of back references followed by
+curly-bracketed repeats.
+
+
 Version 1.02 12-Dec-97
 ----------------------
 

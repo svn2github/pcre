@@ -263,4 +263,8 @@
 
 /((?>a*?))*/X
 
+/)/
+
+/a[]b/
+
 / End of test input /

@@ -157,7 +157,8 @@ for(;;)
 
     case OP_REF:
     printf("    \\%d", *(++code));
-    break;
+    code++;
+    goto CLASS_REF_REPEAT;
 
     case OP_CLASS:
       {
@@ -186,6 +187,8 @@ for(;;)
         }
       printf("]");
       code += 32;
+
+      CLASS_REF_REPEAT:
 
       switch(*code)
         {
@@ -581,7 +584,7 @@ for (;;)
 
   for (;;)
     {
-    unsigned char *pp;
+    unsigned char *q;
     int count, c;
     int offsets[30];
     int size_offsets = sizeof(offsets)/sizeof(int);
@@ -600,7 +603,7 @@ for (;;)
     p = buffer;
     while (isspace(*p)) p++;
 
-    pp = dbuffer;
+    q = dbuffer;
     while ((c = *p++) != 0)
       {
       int i = 0;
@@ -662,17 +665,17 @@ for (;;)
 
         case 'O':
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
-        if (n <= (int)sizeof(offsets)/sizeof(int)) size_offsets = n;
+        if (n <= (int)(sizeof(offsets)/sizeof(int))) size_offsets = n;
         continue;
 
         case 'Z':
         options |= PCRE_NOTEOL;
         continue;
         }
-      *pp++ = c;
+      *q++ = c;
       }
-    *pp = 0;
-    len = pp - dbuffer;
+    *q = 0;
+    len = q - dbuffer;
 
     /* Handle matching via the POSIX interface, which does not
     support timing. */
