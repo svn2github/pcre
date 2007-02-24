@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.00 18-Nov-1997
+PCRE version 1.01 19-Nov-1997
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -565,6 +565,39 @@ No first char
 No match
     12345+ 
 No match
+
+/([a]*)*/
+Failed: operand of unlimited repeat could match the empty string at offset 6
+
+/([ab]*)*/
+Failed: operand of unlimited repeat could match the empty string at offset 7
+
+/([^a]*)*/
+Failed: operand of unlimited repeat could match the empty string at offset 7
+
+/([^ab]*)*/
+Failed: operand of unlimited repeat could match the empty string at offset 8
+
+/([a]*?)*/
+Failed: operand of unlimited repeat could match the empty string at offset 7
+
+/([ab]*?)*/
+Failed: operand of unlimited repeat could match the empty string at offset 8
+
+/([^a]*?)*/
+Failed: operand of unlimited repeat could match the empty string at offset 8
+
+/([^ab]*?)*/
+Failed: operand of unlimited repeat could match the empty string at offset 9
+
+/(?>a*)*/X
+Failed: nothing to repeat at offset 6
+
+/((?>a*))*/X
+Failed: operand of unlimited repeat could match the empty string at offset 8
+
+/((?>a*?))*/X
+Failed: operand of unlimited repeat could match the empty string at offset 9
 
 / End of test input /
 Identifying subpattern count = 0

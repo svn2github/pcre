@@ -1,6 +1,26 @@
 ChangeLog for PCRE
 ------------------
 
+
+Version 1.01 19-Nov-97
+----------------------
+
+1. PCRE was failing to diagnose unlimited repeat of empty string for patterns
+like /([ab]*)*/, that is, for classes with more than one character in them.
+
+2. Likewise, it wasn't diagnosing patterns with "once-only" subpatterns, such
+as /((?>a*))*/ (a PCRE_EXTRA facility).
+
+
+Version 1.00 18-Nov-97
+----------------------
+
+1. Added compile-time macros to support systems such as SunOS4 which don't have
+memmove() or strerror() but have other things that can be used instead.
+
+2. Arranged that "make clean" removes the executables.
+
+
 Version 0.99 27-Oct-97
 ----------------------
 

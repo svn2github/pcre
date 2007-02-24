@@ -228,7 +228,7 @@ do {
     /* Test an embedded subpattern; if it could not be empty, break the
     loop. Otherwise carry on in the branch. */
 
-    if ((int)(*cc) >= OP_BRA)
+    if ((int)(*cc) >= OP_BRA || (int)(*cc) == OP_ONCE)
       {
       if (!could_be_empty(cc)) break;
       do cc += (cc[1] << 8) + cc[2]; while (*cc == OP_ALT);
@@ -272,6 +272,10 @@ do {
       case OP_MINSTAR:
       case OP_QUERY:
       case OP_MINQUERY:
+      case OP_NOTSTAR:
+      case OP_NOTMINSTAR:
+      case OP_NOTQUERY:
+      case OP_NOTMINQUERY:
       case OP_TYPESTAR:
       case OP_TYPEMINSTAR:
       case OP_TYPEQUERY:
@@ -292,7 +296,7 @@ do {
 
       case OP_CLASS:
       case OP_REF:
-      cc += (*cc == OP_REF)? 2 : 4 + 2 * cc[2] + cc[3];
+      cc += (*cc == OP_REF)? 2 : 33;
 
       switch (*cc)
         {
@@ -2360,7 +2364,7 @@ for (;;)
 
     /* "Once" brackets are like assertion brackets except that after a match,
     the point in the subject string is not moved back. Thus there can never be
-    a back into the brackets. Check the alternative branches in turn - the
+    a move back into the brackets. Check the alternative branches in turn - the
     matching won't pass the KET for this kind of subpattern. If any one branch
     matches, we carry on, leaving the subject pointer. */
 
