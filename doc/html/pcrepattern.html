@@ -123,8 +123,8 @@ The following sections describe the use of each of the metacharacters.
 <br><a name="SEC2" href="#TOC1">BACKSLASH</a><br>
 <P>
 The backslash character has several uses. Firstly, if it is followed by a
-non-alphanumeric character, it takes away any special meaning that character may
-have. This use of backslash as an escape character applies both inside and
+non-alphanumeric character, it takes away any special meaning that character
+may have. This use of backslash as an escape character applies both inside and
 outside character classes.
 </P>
 <P>
@@ -137,9 +137,8 @@ particular, if you want to match a backslash, you write \\.
 <P>
 If a pattern is compiled with the PCRE_EXTENDED option, whitespace in the
 pattern (other than in a character class) and characters between a # outside
-a character class and the next newline character are ignored. An escaping
-backslash can be used to include a whitespace or # character as part of the
-pattern.
+a character class and the next newline are ignored. An escaping backslash can
+be used to include a whitespace or # character as part of the pattern.
 </P>
 <P>
 If you want to remove the special meaning from a sequence of characters, you
@@ -198,11 +197,11 @@ syntaxes for \x. There is no difference in the way they are handled. For
 example, \xdc is exactly the same as \x{dc}.
 </P>
 <P>
-After \0 up to two further octal digits are read. In both cases, if there
-are fewer than two digits, just those that are present are used. Thus the
-sequence \0\x\07 specifies two binary zeros followed by a BEL character
-(code value 7). Make sure you supply two digits after the initial zero if the
-pattern character that follows is itself an octal digit.
+After \0 up to two further octal digits are read. If there are fewer than two
+digits, just those that are present are used. Thus the sequence \0\x\07
+specifies two binary zeros followed by a BEL character (code value 7). Make
+sure you supply two digits after the initial zero if the pattern character that
+follows is itself an octal digit.
 </P>
 <P>
 The handling of a backslash followed by a digit other than 0 is complicated.
@@ -217,9 +216,10 @@ following the discussion of
 <P>
 Inside a character class, or if the decimal number is greater than 9 and there
 have not been that many capturing subpatterns, PCRE re-reads up to three octal
-digits following the backslash, and generates a single byte from the least
-significant 8 bits of the value. Any subsequent digits stand for themselves.
-For example:
+digits following the backslash, ane uses them to generate a data character. Any
+subsequent digits stand for themselves. In non-UTF-8 mode, the value of a
+character specified in octal must be less than \400. In UTF-8 mode, values up
+to \777 are permitted. For example:
 <pre>
   \040   is another way of writing a space
   \40    is the same, provided there are fewer than 40 previous capturing subpatterns
@@ -235,12 +235,11 @@ Note that octal values of 100 or greater must not be introduced by a leading
 zero, because no more than three octal digits are ever read.
 </P>
 <P>
-All the sequences that define a single byte value or a single UTF-8 character
-(in UTF-8 mode) can be used both inside and outside character classes. In
-addition, inside a character class, the sequence \b is interpreted as the
-backspace character (hex 08), and the sequence \X is interpreted as the
-character "X". Outside a character class, these sequences have different
-meanings
+All the sequences that define a single character value can be used both inside
+and outside character classes. In addition, inside a character class, the
+sequence \b is interpreted as the backspace character (hex 08), and the
+sequence \X is interpreted as the character "X". Outside a character class,
+these sequences have different meanings
 <a href="#uniextseq">(see below).</a>
 </P>
 <br><b>
@@ -269,7 +268,9 @@ there is no character to match.
 <P>
 For compatibility with Perl, \s does not match the VT character (code 11).
 This makes it different from the the POSIX "space" class. The \s characters
-are HT (9), LF (10), FF (12), CR (13), and space (32).
+are HT (9), LF (10), FF (12), CR (13), and space (32). (If "use locale;" is
+included in a Perl script, \s may match the VT character. In PCRE, it never
+does.)
 </P>
 <P>
 A "word" character is an underscore or any character less than 256 that is a
@@ -447,7 +448,7 @@ a modifier or "other".
 </P>
 <P>
 The long synonyms for these properties that Perl supports (such as \p{Letter})
-are not supported by PCRE. Nor is is permitted to prefix any of these
+are not supported by PCRE, nor is it permitted to prefix any of these
 properties with "Is".
 </P>
 <P>
@@ -487,8 +488,7 @@ specifies a condition that has to be met at a particular point in a match,
 without consuming any characters from the subject string. The use of
 subpatterns for more complicated assertions is described
 <a href="#bigassertions">below.</a>
-The backslashed
-assertions are:
+The backslashed assertions are:
 <pre>
   \b     matches at a word boundary
   \B     matches when not at a word boundary
@@ -515,9 +515,8 @@ PCRE_NOTBOL or PCRE_NOTEOL options, which affect only the behaviour of the
 circumflex and dollar metacharacters. However, if the <i>startoffset</i>
 argument of <b>pcre_exec()</b> is non-zero, indicating that matching is to start
 at a point other than the beginning of the subject, \A can never match. The
-difference between \Z and \z is that \Z matches before a newline that is the
-last character of the string as well as at the end of the string, whereas \z
-matches only at the end.
+difference between \Z and \z is that \Z matches before a newline at the end
+of the string as well as at the very end, whereas \z matches only at the end.
 </P>
 <P>
 The \G assertion is true only when the current matching position is at the
@@ -561,10 +560,10 @@ to be anchored.)
 <P>
 A dollar character is an assertion that is true only if the current matching
 point is at the end of the subject string, or immediately before a newline
-character that is the last character in the string (by default). Dollar need
-not be the last character of the pattern if a number of alternatives are
-involved, but it should be the last item in any branch in which it appears.
-Dollar has no special meaning in a character class.
+at the end of the string (by default). Dollar need not be the last character of
+the pattern if a number of alternatives are involved, but it should be the last
+item in any branch in which it appears. Dollar has no special meaning in a
+character class.
 </P>
 <P>
 The meaning of dollar can be changed so that it matches only at the very end of
@@ -573,40 +572,54 @@ does not affect the \Z assertion.
 </P>
 <P>
 The meanings of the circumflex and dollar characters are changed if the
-PCRE_MULTILINE option is set. When this is the case, they match immediately
-after and immediately before an internal newline character, respectively, in
-addition to matching at the start and end of the subject string. For example,
-the pattern /^abc$/ matches the subject string "def\nabc" (where \n
-represents a newline character) in multiline mode, but not otherwise.
-Consequently, patterns that are anchored in single line mode because all
-branches start with ^ are not anchored in multiline mode, and a match for
-circumflex is possible when the <i>startoffset</i> argument of <b>pcre_exec()</b>
-is non-zero. The PCRE_DOLLAR_ENDONLY option is ignored if PCRE_MULTILINE is
-set.
+PCRE_MULTILINE option is set. When this is the case, a circumflex matches
+immediately after internal newlines as well as at the start of the subject
+string. It does not match after a newline that ends the string. A dollar
+matches before any newlines in the string, as well as at the very end, when
+PCRE_MULTILINE is set. When newline is specified as the two-character
+sequence CRLF, isolated CR and LF characters do not indicate newlines.
+</P>
+<P>
+For example, the pattern /^abc$/ matches the subject string "def\nabc" (where
+\n represents a newline) in multiline mode, but not otherwise. Consequently,
+patterns that are anchored in single line mode because all branches start with
+^ are not anchored in multiline mode, and a match for circumflex is possible
+when the <i>startoffset</i> argument of <b>pcre_exec()</b> is non-zero. The
+PCRE_DOLLAR_ENDONLY option is ignored if PCRE_MULTILINE is set.
 </P>
 <P>
 Note that the sequences \A, \Z, and \z can be used to match the start and
 end of the subject in both modes, and if all branches of a pattern start with
-\A it is always anchored, whether PCRE_MULTILINE is set or not.
+\A it is always anchored, whether or not PCRE_MULTILINE is set.
 </P>
 <br><a name="SEC4" href="#TOC1">FULL STOP (PERIOD, DOT)</a><br>
 <P>
 Outside a character class, a dot in the pattern matches any one character in
-the subject, including a non-printing character, but not (by default) newline.
-In UTF-8 mode, a dot matches any UTF-8 character, which might be more than one
-byte long, except (by default) newline. If the PCRE_DOTALL option is set,
-dots match newlines as well. The handling of dot is entirely independent of the
-handling of circumflex and dollar, the only relationship being that they both
-involve newline characters. Dot has no special meaning in a character class.
+the subject string except (by default) a character that signifies the end of a
+line. In UTF-8 mode, the matched character may be more than one byte long. When
+a line ending is defined as a single character (CR or LF), dot never matches
+that character; when the two-character sequence CRLF is used, dot does not
+match CR if it is immediately followed by LF, but otherwise it matches all
+characters (including isolated CRs and LFs).
+</P>
+<P>
+The behaviour of dot with regard to newlines can be changed. If the PCRE_DOTALL
+option is set, a dot matches any one character, without exception. If newline
+is defined as the two-character sequence CRLF, it takes two dots to match it.
+</P>
+<P>
+The handling of dot is entirely independent of the handling of circumflex and
+dollar, the only relationship being that they both involve newlines. Dot has no
+special meaning in a character class.
 </P>
 <br><a name="SEC5" href="#TOC1">MATCHING A SINGLE BYTE</a><br>
 <P>
 Outside a character class, the escape sequence \C matches any one byte, both
-in and out of UTF-8 mode. Unlike a dot, it can match a newline. The feature is
-provided in Perl in order to match individual bytes in UTF-8 mode. Because it
-breaks up UTF-8 characters into individual bytes, what remains in the string
-may be a malformed UTF-8 string. For this reason, the \C escape sequence is
-best avoided.
+in and out of UTF-8 mode. Unlike a dot, it always matches CR and LF. The
+feature is provided in Perl in order to match individual bytes in UTF-8 mode.
+Because it breaks up UTF-8 characters into individual bytes, what remains in
+the string may be a malformed UTF-8 string. For this reason, the \C escape
+sequence is best avoided.
 </P>
 <P>
 PCRE does not allow \C to appear in lookbehind assertions
@@ -657,9 +670,10 @@ ensure that PCRE is compiled with Unicode property support as well as with
 UTF-8 support.
 </P>
 <P>
-The newline character is never treated in any special way in character classes,
-whatever the setting of the PCRE_DOTALL or PCRE_MULTILINE options is. A class
-such as [^a] will always match a newline.
+Characters that might indicate line breaks (CR and LF) are never treated in any
+special way when matching character classes, whatever line-ending sequence is
+in use, and whatever setting of the PCRE_DOTALL and PCRE_MULTILINE options is
+used. A class such as [^a] always matches one of these characters.
 </P>
 <P>
 The minus (hyphen) character can be used to specify a range of characters in a
@@ -762,10 +776,9 @@ the pattern
   gilbert|sullivan
 </pre>
 matches either "gilbert" or "sullivan". Any number of alternatives may appear,
-and an empty alternative is permitted (matching the empty string).
-The matching process tries each alternative in turn, from left to right,
-and the first one that succeeds is used. If the alternatives are within a
-subpattern
+and an empty alternative is permitted (matching the empty string). The matching
+process tries each alternative in turn, from left to right, and the first one
+that succeeds is used. If the alternatives are within a subpattern
 <a href="#subpattern">(defined below),</a>
 "succeeds" means matching the rest of the main pattern as well as the
 alternative in the subpattern.
@@ -814,11 +827,9 @@ option settings happen at compile time. There would be some very weird
 behaviour otherwise.
 </P>
 <P>
-The PCRE-specific options PCRE_UNGREEDY and PCRE_EXTRA can be changed in the
-same way as the Perl-compatible options by using the characters U and X
-respectively. The (?X) flag setting is special in that it must always occur
-earlier in the pattern than any of the additional features it turns on, even
-when it is at top level. It is best to put it at the start.
+The PCRE-specific options PCRE_DUPNAMES, PCRE_UNGREEDY, and PCRE_EXTRA can be
+changed in the same way as the Perl-compatible options by using the characters
+J, U and X respectively.
 <a name="subpattern"></a></P>
 <br><a name="SEC10" href="#TOC1">SUBPATTERNS</a><br>
 <P>
@@ -881,14 +892,42 @@ Identifying capturing parentheses by number is simple, but it can be very hard
 to keep track of the numbers in complicated regular expressions. Furthermore,
 if an expression is modified, the numbers may change. To help with this
 difficulty, PCRE supports the naming of subpatterns, something that Perl does
-not provide. The Python syntax (?P&#60;name&#62;...) is used. Names consist of
-alphanumeric characters and underscores, and must be unique within a pattern.
+not provide. The Python syntax (?P&#60;name&#62;...) is used. References to capturing
+parentheses from other parts of the pattern, such as
+<a href="#backreferences">backreferences,</a>
+<a href="#recursion">recursion,</a>
+and
+<a href="#conditions">conditions,</a>
+can be made by name as well as by number.
 </P>
 <P>
-Named capturing parentheses are still allocated numbers as well as names. The
-PCRE API provides function calls for extracting the name-to-number translation
-table from a compiled pattern. There is also a convenience function for
-extracting a captured substring by name. For further details see the
+Names consist of up to 32 alphanumeric characters and underscores. Named
+capturing parentheses are still allocated numbers as well as names. The PCRE
+API provides function calls for extracting the name-to-number translation table
+from a compiled pattern. There is also a convenience function for extracting a
+captured substring by name.
+</P>
+<P>
+By default, a name must be unique within a pattern, but it is possible to relax
+this constraint by setting the PCRE_DUPNAMES option at compile time. This can
+be useful for patterns where only one instance of the named parentheses can
+match. Suppose you want to match the name of a weekday, either as a 3-letter
+abbreviation or as the full name, and in both cases you want to extract the
+abbreviation. This pattern (ignoring the line breaks) does the job:
+<pre>
+  (?P&#60;DN&#62;Mon|Fri|Sun)(?:day)?|
+  (?P&#60;DN&#62;Tue)(?:sday)?|
+  (?P&#60;DN&#62;Wed)(?:nesday)?|
+  (?P&#60;DN&#62;Thu)(?:rsday)?|
+  (?P&#60;DN&#62;Sat)(?:urday)?
+</pre>
+There are five capturing substrings, but only one is ever set after a match.
+The convenience function for extracting the data by name returns the substring
+for the first, and in this example, the only, subpattern of that name that
+matched. This saves searching to find which numbered subpattern it was. If you
+make a reference to a non-unique named subpattern from elsewhere in the
+pattern, the one that corresponds to the lowest number is used. For further
+details of the interfaces for handling named subpatterns, see the
 <a href="pcreapi.html"><b>pcreapi</b></a>
 documentation.
 </P>
@@ -1102,8 +1141,10 @@ atomic group. However, there is no difference in the meaning or processing of a
 possessive quantifier and the equivalent atomic group.
 </P>
 <P>
-The possessive quantifier syntax is an extension to the Perl syntax. It
-originates in Sun's Java package.
+The possessive quantifier syntax is an extension to the Perl syntax. Jeffrey
+Friedl originated the idea (and the name) in the first edition of his book.
+Mike McCloskey liked it, so implemented it when he built Sun's Java package,
+and PCRE copied it from there.
 </P>
 <P>
 When a pattern contains an unlimited repeat inside a subpattern that can itself
@@ -1144,7 +1185,15 @@ However, if the decimal number following the backslash is less than 10, it is
 always taken as a back reference, and causes an error only if there are not
 that many capturing left parentheses in the entire pattern. In other words, the
 parentheses that are referenced need not be to the left of the reference for
-numbers less than 10. See the subsection entitled "Non-printing characters"
+numbers less than 10. A "forward back reference" of this type can make sense
+when a repetition is involved and the subpattern to the right has participated
+in an earlier iteration.
+</P>
+<P>
+It is not possible to have a numerical "forward back reference" to subpattern
+whose number is 10 or more. However, a back reference to any subpattern is
+possible using named parentheses (see below). See also the subsection entitled
+"Non-printing characters"
 <a href="#digitsafterbackslash">above</a>
 for further details of the handling of digits following a backslash.
 </P>
@@ -1170,8 +1219,12 @@ capturing subpattern is matched caselessly.
 Back references to named subpatterns use the Python syntax (?P=name). We could
 rewrite the above example as follows:
 <pre>
-  (?&#60;p1&#62;(?i)rah)\s+(?P=p1)
+  (?P&#60;p1&#62;(?i)rah)\s+(?P=p1)
 </pre>
+A subpattern that is referenced by name may appear in the pattern before or
+after the reference.
+</P>
+<P>
 There may be more than one back reference to the same subpattern. If a
 subpattern has not actually been used in a particular match, any back
 references to it always fail. For example, the pattern
@@ -1227,8 +1280,8 @@ because it does not make sense for negative assertions.
 Lookahead assertions
 </b><br>
 <P>
-Lookahead assertions start
-with (?= for positive assertions and (?! for negative assertions. For example,
+Lookahead assertions start with (?= for positive assertions and (?! for
+negative assertions. For example,
 <pre>
   \w+(?=;)
 </pre>
@@ -1263,8 +1316,8 @@ negative assertions. For example,
 </pre>
 does find an occurrence of "bar" that is not preceded by "foo". The contents of
 a lookbehind assertion are restricted such that all the strings it matches must
-have a fixed length. However, if there are several alternatives, they do not
-all have to have the same fixed length. Thus
+have a fixed length. However, if there are several top-level alternatives, they
+do not all have to have the same fixed length. Thus
 <pre>
   (?&#60;=bullock|donkey)
 </pre>
@@ -1359,7 +1412,7 @@ preceded by "foo", while
 </pre>
 is another pattern that matches "foo" preceded by three digits and any three
 characters that are not "999".
-</P>
+<a name="conditions"></a></P>
 <br><a name="SEC16" href="#TOC1">CONDITIONAL SUBPATTERNS</a><br>
 <P>
 It is possible to cause the matching process to obey a subpattern
@@ -1376,11 +1429,19 @@ subpattern, a compile-time error occurs.
 </P>
 <P>
 There are three kinds of condition. If the text between the parentheses
-consists of a sequence of digits, the condition is satisfied if the capturing
-subpattern of that number has previously matched. The number must be greater
-than zero. Consider the following pattern, which contains non-significant white
-space to make it more readable (assume the PCRE_EXTENDED option) and to divide
-it into three parts for ease of discussion:
+consists of a sequence of digits, or a sequence of alphanumeric characters and
+underscores, the condition is satisfied if the capturing subpattern of that
+number or name has previously matched. There is a possible ambiguity here,
+because subpattern names may consist entirely of digits. PCRE looks first for a
+named subpattern; if it cannot find one and the text consists entirely of
+digits, it looks for a subpattern of that number, which must be greater than
+zero. Using subpattern names that consist entirely of digits is not
+recommended.
+</P>
+<P>
+Consider the following pattern, which contains non-significant white space to
+make it more readable (assume the PCRE_EXTENDED option) and to divide it into
+three parts for ease of discussion:
 <pre>
   ( \( )?    [^()]+    (?(1) \) )
 </pre>
@@ -1392,12 +1453,15 @@ or not. If they did, that is, if subject started with an opening parenthesis,
 the condition is true, and so the yes-pattern is executed and a closing
 parenthesis is required. Otherwise, since no-pattern is not present, the
 subpattern matches nothing. In other words, this pattern matches a sequence of
-non-parentheses, optionally enclosed in parentheses.
-</P>
-<P>
-If the condition is the string (R), it is satisfied if a recursive call to the
-pattern or subpattern has been made. At "top level", the condition is false.
-This is a PCRE extension. Recursive patterns are described in the next section.
+non-parentheses, optionally enclosed in parentheses. Rewriting it to use a
+named subpattern gives this:
+<pre>
+  (?P&#60;OPEN&#62; \( )?    [^()]+    (?(OPEN) \) )
+</pre>
+If the condition is the string (R), and there is no subpattern with the name R,
+the condition is satisfied if a recursive call to the pattern or subpattern has
+been made. At "top level", the condition is false. This is a PCRE extension.
+Recursive patterns are described in the next section.
 </P>
 <P>
 If the condition is not a sequence of digits or (R), it must be an assertion.
@@ -1423,9 +1487,9 @@ that make up a comment play no part in the pattern matching at all.
 </P>
 <P>
 If the PCRE_EXTENDED option is set, an unescaped # character outside a
-character class introduces a comment that continues up to the next newline
-character in the pattern.
-</P>
+character class introduces a comment that continues to immediately after the
+next newline in the pattern.
+<a name="recursion"></a></P>
 <br><a name="SEC18" href="#TOC1">RECURSIVE PATTERNS</a><br>
 <P>
 Consider the problem of matching a string in parentheses, allowing for
@@ -1544,8 +1608,8 @@ matches "sense and sensibility" and "response and responsibility", but not
   (sens|respons)e and (?1)ibility
 </pre>
 is used, it does match "sense and responsibility" as well as the other two
-strings. Such references must, however, follow the subpattern to which they
-refer.
+strings. Such references, if given numerically, must follow the subpattern to
+which they refer. However, named references can refer to later subpatterns.
 </P>
 <P>
 Like recursive subpatterns, a "subroutine" call is always treated as an atomic
@@ -1589,7 +1653,7 @@ description of the interface to the callout function is given in the
 documentation.
 </P>
 <P>
-Last updated: 24 January 2006
+Last updated: 06 June 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

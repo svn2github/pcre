@@ -124,4 +124,20 @@ a runtime method for setting a different limit. On systems that support it,
 #define MATCH_LIMIT_RECURSION MATCH_LIMIT
 #endif
 
+/* These three limits are parameterized just in case anybody ever wants to
+change them. Care must be taken if they are increased, because they guard
+against integer overflow caused by enormously large patterns. */
+
+#ifndef MAX_NAME_SIZE
+#define MAX_NAME_SIZE 32
+#endif
+
+#ifndef MAX_NAME_COUNT
+#define MAX_NAME_COUNT 10000
+#endif
+
+#ifndef MAX_DUPLENGTH
+#define MAX_DUPLENGTH 30000
+#endif
+
 /* End */

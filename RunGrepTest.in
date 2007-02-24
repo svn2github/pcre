@@ -184,6 +184,22 @@ echo "---------------------------- Test 48 ------------------------------" >>tes
 $valgrind ./pcregrep -F -e DATA -e "AB.VE
 elephant" $testdata/grepinput >>testtry
 
+echo "---------------------------- Test 49 ------------------------------" >>testtry
+$valgrind ./pcregrep "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test 50 ------------------------------" >>testtry
+$valgrind ./pcregrep -N CR "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test 51 ------------------------------" >>testtry
+$valgrind ./pcregrep --newline=crlf "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test 52 ------------------------------" >>testtry
+$valgrind ./pcregrep --newline=cr -F "defjkl" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test 53 ------------------------------" >>testtry
+$valgrind ./pcregrep --newline=crlf -F "xxx
+jkl" $testdata/grepinputx >>testtry
+
 # Now compare the results.
 
 $cf testtry $testdata/grepoutput

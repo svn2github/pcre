@@ -28,10 +28,9 @@ man page, in case the conversion went wrong.
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
-<b>pcretest [-C] [-d] [-dfa] [-i] [-m] [-o osize] [-p] [-t] [source]</b>
-<b>[destination]</b>
-</P>
-<P>
+<b>pcretest [options] [source] [destination]</b>
+<br>
+<br>
 <b>pcretest</b> was written as a test program for the PCRE regular expression
 library itself, but it can also be used for experimenting with regular
 expressions. This document describes the features of the test program; for
@@ -84,8 +83,13 @@ used to call PCRE. None of the other options has any effect when <b>-p</b> is
 set.
 </P>
 <P>
-\fP-q\fP
+<b>-q</b>
 Do not output the version number of <b>pcretest</b> at the start of execution.
+</P>
+<P>
+<b>-S</b> <i>size</i>
+On Unix-like systems, set the size of the runtime stack to <i>size</i>
+megabytes.
 </P>
 <P>
 <b>-t</b>
@@ -109,14 +113,15 @@ lines to be matched against the pattern.
 </P>
 <P>
 Each data line is matched separately and independently. If you want to do
-multiple-line matches, you have to use the \n escape sequence in a single line
-of input to encode the newline characters. The maximum length of data line is
-30,000 characters.
+multi-line matches, you have to use the \n escape sequence (or \r or \r\n,
+depending on the newline setting) in a single line of input to encode the
+newline characters. There is no limit on the length of data lines; the input
+buffer is automatically extended if it is too small.
 </P>
 <P>
 An empty line signals the end of the data lines, at which point a new regular
 expression is read. The regular expressions are given enclosed in any
-non-alphanumeric delimiters other than backslash, for example
+non-alphanumeric delimiters other than backslash, for example:
 <pre>
   /(a|bc)x+yz/
 </pre>
@@ -163,14 +168,27 @@ effect as they do in Perl. For example:
 The following table shows additional modifiers for setting PCRE options that do
 not correspond to anything in Perl:
 <pre>
-  <b>/A</b>    PCRE_ANCHORED
-  <b>/C</b>    PCRE_AUTO_CALLOUT
-  <b>/E</b>    PCRE_DOLLAR_ENDONLY
-  <b>/f</b>    PCRE_FIRSTLINE
-  <b>/N</b>    PCRE_NO_AUTO_CAPTURE
-  <b>/U</b>    PCRE_UNGREEDY
-  <b>/X</b>    PCRE_EXTRA
+  <b>/A</b>       PCRE_ANCHORED
+  <b>/C</b>       PCRE_AUTO_CALLOUT
+  <b>/E</b>       PCRE_DOLLAR_ENDONLY
+  <b>/f</b>       PCRE_FIRSTLINE
+  <b>/J</b>       PCRE_DUPNAMES
+  <b>/N</b>       PCRE_NO_AUTO_CAPTURE
+  <b>/U</b>       PCRE_UNGREEDY
+  <b>/X</b>       PCRE_EXTRA
+  <b>/&#60;cr&#62;</b>    PCRE_NEWLINE_CR
+  <b>/&#60;lf&#62;</b>    PCRE_NEWLINE_LF
+  <b>/&#60;crlf&#62;</b>  PCRE_NEWLINE_CRLF
 </pre>
+Those specifying line endings are literal strings as shown. Details of the
+meanings of these PCRE options are given in the
+<a href="pcreapi.html"><b>pcreapi</b></a>
+documentation.
+</P>
+<br><b>
+Finding all matches in a string
+</b><br>
+<P>
 Searching for all possible matches within each subject string can be requested
 by the <b>/g</b> or <b>/G</b> modifier. After finding a match, PCRE is called
 again to search the remainder of the subject string. The difference between
@@ -188,6 +206,9 @@ If this second match fails, the start offset is advanced by one, and the normal
 match is retried. This imitates the way Perl handles such cases when using the
 <b>/g</b> modifier or the <b>split()</b> function.
 </P>
+<br><b>
+Other modifiers
+</b><br>
 <P>
 There are yet more modifiers for controlling the way <b>pcretest</b>
 operates.
@@ -273,14 +294,15 @@ recognized:
   \e         escape
   \f         formfeed
   \n         newline
+  \qdd       set the PCRE_MATCH_LIMIT limit to dd (any number of digits)
   \r         carriage return
   \t         tab
   \v         vertical tab
   \nnn       octal character (up to 3 octal digits)
   \xhh       hexadecimal character (up to 2 hex digits)
   \x{hh...}  hexadecimal character, any number of digits in UTF-8 mode
-  \A         pass the PCRE_ANCHORED option to <b>pcre_exec()</b>
-  \B         pass the PCRE_NOTBOL option to <b>pcre_exec()</b>
+  \A         pass the PCRE_ANCHORED option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \B         pass the PCRE_NOTBOL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \Cdd       call pcre_copy_substring() for substring dd after a successful match (number less than 32)
   \Cname     call pcre_copy_named_substring() for substring "name" after a successful match (name termin-
                ated by next non alphanumeric character)
@@ -295,18 +317,22 @@ recognized:
   \Gname     call pcre_get_named_substring() for substring "name" after a successful match (name termin-
                ated by next non-alphanumeric character)
   \L         call pcre_get_substringlist() after a successful match
-  \M         discover the minimum MATCH_LIMIT and
-               MATCH_LIMIT_RECURSION settings
-  \N         pass the PCRE_NOTEMPTY option to <b>pcre_exec()</b>
+  \M         discover the minimum MATCH_LIMIT and MATCH_LIMIT_RECURSION settings
+  \N         pass the PCRE_NOTEMPTY option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \Odd       set the size of the output vector passed to <b>pcre_exec()</b> to dd (any number of digits)
   \P         pass the PCRE_PARTIAL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \Qdd       set the PCRE_MATCH_LIMIT_RECURSION limit to dd (any number of digits)
   \R         pass the PCRE_DFA_RESTART option to <b>pcre_dfa_exec()</b>
   \S         output details of memory get/free calls during matching
-  \Z         pass the PCRE_NOTEOL option to <b>pcre_exec()</b>
-  \?         pass the PCRE_NO_UTF8_CHECK option to <b>pcre_exec()</b>
+  \Z         pass the PCRE_NOTEOL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \?         pass the PCRE_NO_UTF8_CHECK option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#62;dd       start the match at offset dd (any number of digits);
-               this sets the <i>startoffset</i> argument for <b>pcre_exec()</b>
+               this sets the <i>startoffset</i> argument for <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \&#60;cr&#62;      pass the PCRE_NEWLINE_CR option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \&#60;lf&#62;      pass the PCRE_NEWLINE_LF option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \&#60;crlf&#62;    pass the PCRE_NEWLINE_CRLF option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
 </pre>
+The escapes that specify line endings are literal strings, exactly as shown.
 A backslash followed by anything else just escapes the anything else. If the
 very last character is a backslash, it is ignored. This gives a way of passing
 an empty line as data, since a real empty line terminates the data input.
@@ -417,7 +443,8 @@ parentheses after each string for <b>\C</b> and <b>\G</b>.
 <P>
 Note that while patterns can be continued over several lines (a plain "&#62;"
 prompt is used for continuations), data lines may not. However newlines can be
-included in data by means of the \n escape.
+included in data by means of the \n escape (or \r or \r\n for those newline
+settings).
 </P>
 <br><a name="SEC8" href="#TOC1">OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION</a><br>
 <P>
@@ -581,7 +608,7 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 18 January 2006
+Last updated: 29 June 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

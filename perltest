@@ -2,13 +2,12 @@
 
 # Program for testing regular expressions with perl to check that PCRE handles
 # them the same. This is the version that supports /8 for UTF-8 testing. As it
-# stands, it requires at least Perl 5.8 for UTF-8 support. For Perl 5.6, it
-# can be used as is for non-UTF-8 testing, but you have to uncomment the
-# "use utf8" lines in order to to UTF-8 stuff (and you mustn't uncomment them
-# for non-UTF-8 use).
+# stands, it requires at least Perl 5.8 for UTF-8 support. However, it needs to
+# have "use utf8" at the start for running the UTF-8 tests, but *not* for the
+# other tests. The only way I've found for doing this is to cat this line in
+# explicitly in the RunPerlTest script.
 
-use locale;
-
+# use locale;  # With this included, \x0b matches \s!
 
 # Function for turning a string into a string of printing chars. There are
 # currently problems with UTF-8 strings; this fudges round them.
@@ -18,7 +17,6 @@ my($t) = "";
 
 if ($utf8)
   {
-#  use utf8;                    <=============== For UTF-8 in Perl 5.6
   @p = unpack('U*', $_[0]);
   foreach $c (@p)
     {
@@ -38,7 +36,6 @@ else
 
 $t;
 }
-
 
 
 # Read lines from named file or stdin and write to named file or stdout; lines
@@ -90,23 +87,13 @@ for (;;)
 
   $showrest = ($pattern =~ s/\+(?=[a-z]*$)//);
 
-  # The private /8 modifier means "operate in UTF-8". Currently, Perl
-  # has bugs that we try to work around using this flag.
+  # Remove /8 from a UTF-8 pattern.
 
-  $utf8 = ($pattern =~ s/8(?=[a-z]*$)//);
+  $utf8 = $pattern =~ s/8(?=[a-z]*$)//;
 
   # Check that the pattern is valid
 
-  if ($utf8)
-    {
-#    use utf8;                    <=============== For UTF-8 in Perl 5.6
-    eval "\$_ =~ ${pattern}";
-    }
-  else
-    {
-    eval "\$_ =~ ${pattern}";
-    }
-
+  eval "\$_ =~ ${pattern}";
   if ($@)
     {
     printf $outfile "Error: $@";
@@ -140,7 +127,6 @@ for (;;)
     s/^\s+//;
 
     last if ($_ eq "");
-
     $x = eval "\"$_\"";   # To get escapes processed
 
     # Empty array for holding results, then do the matching.
@@ -166,15 +152,7 @@ for (;;)
          "push \@subs,\$16;" .
          "push \@subs,\$'; }";
 
-    if ($utf8)
-      {
-#      use utf8;                    <=============== For UTF-8 in Perl 5.6
-      eval "${cmd} (\$x =~ ${pattern}) {" . $pushes;
-      }
-    else
-      {
-      eval "${cmd} (\$x =~ ${pattern}) {" . $pushes;
-      }
+    eval "${cmd} (\$x =~ ${pattern}) {" . $pushes;
 
     if ($@)
       {

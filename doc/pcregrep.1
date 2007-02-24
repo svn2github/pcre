@@ -43,7 +43,8 @@ By default, each line that matches the pattern is copied to the standard
 output, and if there is more than one file, the file name is output at the
 start of each line. However, there are options that can change how
 \fBpcregrep\fP behaves. In particular, the \fB-M\fP option makes it possible to
-search for patterns that span line boundaries.
+search for patterns that span line boundaries. What defines a line boundary is
+controlled by the \fB-N\fP (\fB--newline\fP) option.
 .P
 Patterns are limited to 8K or BUFSIZ characters, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP.
@@ -218,6 +219,18 @@ that \fBpcregrep\fP buffers the input file as it scans it. However,
 the previous 8K characters (or all the previous characters, if fewer than 8K)
 are guaranteed to be available for lookbehind assertions.
 .TP
+\fB-N\fP \fInewline-type\fP, \fB--newline=\fP\fInewline-type\fP
+The PCRE library supports three different character sequences for indicating
+the ends of lines. They are the single-character sequences CR (carriage return)
+and LF (linefeed), and the two-character sequence CR, LF. When the library is
+built, a default line-ending sequence is specified. This is normally the
+standard sequence for the operating system. Unless otherwise specified by this
+option, \fBpcregrep\fP uses the default. The possible values for this option
+are CR, LF, or CRLF. This makes it possible to use \fBpcregrep\fP on files that
+have come from other environments without having to modify their line endings.
+If the data that is being scanned does not agree with the convention set by
+this option, \fBpcregrep\fP may behave in strange ways.
+.TP
 \fB-n\fP, \fB--line-number\fP
 Precede each output line by its line number in the file, followed by a colon
 and a space for matching lines or a hyphen and a space for context lines. If
@@ -275,6 +288,17 @@ The environment variables \fBLC_ALL\fP and \fBLC_CTYPE\fP are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
 by the \fB--locale\fP option. If no locale is set, the PCRE library's default
 (usually the "C" locale) is used.
+.
+.
+.SH "NEWLINES"
+.rs
+.sp
+The \fB-N\fP (\fB--newline\fP) option allows \fBpcregrep\fP to scan files with
+different newline conventions from the default. However, the setting of this
+option does not affect the way in which \fBpcregrep\fP writes information to
+the standard error and output streams. It uses the string "\en" in C
+\fBprintf()\fP calls to indicate newlines, relying on the C I/O library to
+convert this to an appropriate sequence if the output is sent to a file.
 .
 .
 .SH "OPTIONS COMPATIBILITY"
@@ -347,6 +371,6 @@ University Computing Service
 Cambridge CB2 3QG, England.
 .P
 .in 0
-Last updated: 23 January 2006
+Last updated: 06 June 2006
 .br
 Copyright (c) 1997-2006 University of Cambridge.

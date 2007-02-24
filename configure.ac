@@ -176,6 +176,15 @@ if test "$enableval" = "yes"; then
 fi
 )
 
+dnl Handle --enable-newline-is-crlf
+
+AC_ARG_ENABLE(newline-is-crlf,
+[  --enable-newline-is-crlf  use CRLF as the newline sequence],
+if test "$enableval" = "yes"; then
+  NEWLINE=-DNEWLINE=3338
+fi
+)
+
 dnl Handle --enable-ebcdic
 
 AC_ARG_ENABLE(ebcdic,

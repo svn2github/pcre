@@ -75,6 +75,11 @@ PCRE - Perl-compatible regular expressions
 .B const char *\fIname\fP);
 .PP
 .br
+.B int pcre_get_stringtable_entries(const pcre *\fIcode\fP,
+.ti +5n
+.B const char *\fIname\fP, char **\fIfirst\fP, char **\fIlast\fP);
+.PP
+.br
 .B int pcre_get_substring(const char *\fIsubject\fP, int *\fIovector\fP,
 .ti +5n
 .B int \fIstringcount\fP, int \fIstringnumber\fP,
@@ -164,8 +169,8 @@ documentation describes how to run it.
 .P
 A second matching function, \fBpcre_dfa_exec()\fP, which is not
 Perl-compatible, is also provided. This uses a different algorithm for the
-matching. This allows it to find all possible matches (at a given point in the
-subject), not just one. However, this algorithm does not return captured
+matching. The alternative algorithm finds all possible matches (at a given
+point in the subject). However, this algorithm does not return captured
 substrings. A description of the two matching algorithms and their advantages
 and disadvantages is given in the
 .\" HREF
@@ -183,6 +188,7 @@ matched by \fBpcre_exec()\fP. They are:
   \fBpcre_get_named_substring()\fP
   \fBpcre_get_substring_list()\fP
   \fBpcre_get_stringnumber()\fP
+  \fBpcre_get_stringtable_entries()\fP
 .sp
 \fBpcre_free_substring()\fP and \fBpcre_free_substring_list()\fP are also
 provided, to free the memory used for extracted strings.
@@ -212,13 +218,21 @@ should be done before calling any PCRE functions.
 The global variables \fBpcre_stack_malloc\fP and \fBpcre_stack_free\fP are also
 indirections to memory management functions. These special functions are used
 only when PCRE is compiled to use the heap for remembering data, instead of
-recursive function calls, when running the \fBpcre_exec()\fP function. This is
-a non-standard way of building PCRE, for use in environments that have limited
-stacks. Because of the greater use of memory management, it runs more slowly.
-Separate functions are provided so that special-purpose external code can be
-used for this case. When used, these functions are always called in a
-stack-like manner (last obtained, first freed), and always for memory blocks of
-the same size.
+recursive function calls, when running the \fBpcre_exec()\fP function. See the
+.\" HREF
+\fBpcrebuild\fP
+.\"
+documentation for details of how to do this. It is a non-standard way of
+building PCRE, for use in environments that have limited stacks. Because of the
+greater use of memory management, it runs more slowly. Separate functions are
+provided so that special-purpose external code can be used for this case. When
+used, these functions are always called in a stack-like manner (last obtained,
+first freed), and always for memory blocks of the same size. There is a
+discussion about PCRE's stack usage in the
+.\" HREF
+\fBpcrestack\fP
+.\"
+documentation.
 .P
 The global variable \fBpcre_callout\fP initially contains NULL. It can be set
 by the caller to a "callout" function, which PCRE will then call at specified
@@ -227,6 +241,18 @@ points during a matching operation. Details are given in the
 \fBpcrecallout\fP
 .\"
 documentation.
+.
+.
+.SH NEWLINES
+PCRE supports three different conventions for indicating line breaks in
+strings: a single CR character, a single LF character, or the two-character
+sequence CRLF. All three are used as "standard" by different operating systems.
+When PCRE is built, a default can be specified. The default default is LF,
+which is the Unix standard. When PCRE is run, the default can be overridden,
+either when a pattern is compiled, or when it is matched.
+.sp
+In the PCRE documentation the word "newline" is used to mean "the character or
+pair of characters that indicate a line break".
 .
 .
 .SH MULTITHREADING
@@ -281,9 +307,10 @@ properties is available; otherwise it is set to zero.
 .sp
   PCRE_CONFIG_NEWLINE
 .sp
-The output is an integer that is set to the value of the code that is used for
-the newline character. It is either linefeed (10) or carriage return (13), and
-should normally be the standard character for your operating system.
+The output is an integer whose value specifies the default character sequence
+that is recognized as meaning "newline". The three values that are supported
+are: 10 for LF, 13 for CR, and 3338 for CRLF. The default should normally be
+the standard sequence for your operating system.
 .sp
   PCRE_CONFIG_LINK_SIZE
 .sp
@@ -353,7 +380,7 @@ The pattern is a C string terminated by a binary zero, and is passed in the
 via \fBpcre_malloc\fP is returned. This contains the compiled code and related
 data. The \fBpcre\fP type is defined for the returned block; this is a typedef
 for a structure whose contents are not externally defined. It is up to the
-caller to free the memory when it is no longer required.
+caller to free the memory (via \fBpcre_free\fP) when it is no longer required.
 .P
 Although the compiled code of a PCRE regex is relocatable, that is, it does not
 depend on memory location, the complete \fBpcre\fP data block is not
@@ -370,8 +397,8 @@ the detailed description in the
 .\"
 documentation). For these options, the contents of the \fIoptions\fP argument
 specifies their initial settings at the start of compilation and execution. The
-PCRE_ANCHORED option can be set at the time of matching as well as at compile
-time.
+PCRE_ANCHORED and PCRE_NEWLINE_\fIxxx\fP options can be set at the time of
+matching as well as at compile time.
 .P
 If \fIerrptr\fP is NULL, \fBpcre_compile()\fP returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fP returns
@@ -442,27 +469,39 @@ with UTF-8 support.
 .sp
 If this bit is set, a dollar metacharacter in the pattern matches only at the
 end of the subject string. Without this option, a dollar also matches
-immediately before the final character if it is a newline (but not before any
-other newlines). The PCRE_DOLLAR_ENDONLY option is ignored if PCRE_MULTILINE is
-set. There is no equivalent to this option in Perl, and no way to set it within
-a pattern.
+immediately before a newline at the end of the string (but not before any other
+newlines). The PCRE_DOLLAR_ENDONLY option is ignored if PCRE_MULTILINE is set.
+There is no equivalent to this option in Perl, and no way to set it within a
+pattern.
 .sp
   PCRE_DOTALL
 .sp
 If this bit is set, a dot metacharater in the pattern matches all characters,
-including newlines. Without it, newlines are excluded. This option is
-equivalent to Perl's /s option, and it can be changed within a pattern by a
-(?s) option setting. A negative class such as [^a] always matches a newline
-character, independent of the setting of this option.
+including those that indicate newline. Without it, a dot does not match when
+the current position is at a newline. This option is equivalent to Perl's /s
+option, and it can be changed within a pattern by a (?s) option setting. A
+negative class such as [^a] always matches newlines, independent of the setting
+of this option.
+.sp
+  PCRE_DUPNAMES
+.sp
+If this bit is set, names used to identify capturing subpatterns need not be
+unique. This can be helpful for certain types of pattern when it is known that
+only one instance of the named subpattern can ever be matched. There are more
+details of named subpatterns below; see also the
+.\" HREF
+\fBpcrepattern\fP
+.\"
+documentation.
 .sp
   PCRE_EXTENDED
 .sp
 If this bit is set, whitespace data characters in the pattern are totally
 ignored except when escaped or inside a character class. Whitespace does not
 include the VT character (code 11). In addition, characters between an
-unescaped # outside a character class and the next newline character,
-inclusive, are also ignored. This is equivalent to Perl's /x option, and it can
-be changed within a pattern by a (?x) option setting.
+unescaped # outside a character class and the next newline, inclusive, are also
+ignored. This is equivalent to Perl's /x option, and it can be changed within a
+pattern by a (?x) option setting.
 .P
 This option makes it possible to include comments inside complicated patterns.
 Note, however, that this applies only to data characters. Whitespace characters
@@ -476,15 +515,15 @@ that is incompatible with Perl, but it is currently of very little use. When
 set, any backslash in a pattern that is followed by a letter that has no
 special meaning causes an error, thus reserving these combinations for future
 expansion. By default, as in Perl, a backslash followed by a letter with no
-special meaning is treated as a literal. There are at present no other features
-controlled by this option. It can also be set by a (?X) option setting within a
-pattern.
+special meaning is treated as a literal. (Perl can, however, be persuaded to
+give a warning for this.) There are at present no other features controlled by
+this option. It can also be set by a (?X) option setting within a pattern.
 .sp
   PCRE_FIRSTLINE
 .sp
 If this option is set, an unanchored pattern is required to match before or at
-the first newline character in the subject string, though the matched text may
-continue over the newline.
+the first newline in the subject string, though the matched text may continue
+over the newline.
 .sp
   PCRE_MULTILINE
 .sp
@@ -496,11 +535,27 @@ terminating newline (unless PCRE_DOLLAR_ENDONLY is set). This is the same as
 Perl.
 .P
 When PCRE_MULTILINE it is set, the "start of line" and "end of line" constructs
-match immediately following or immediately before any newline in the subject
-string, respectively, as well as at the very start and end. This is equivalent
-to Perl's /m option, and it can be changed within a pattern by a (?m) option
-setting. If there are no "\en" characters in a subject string, or no
+match immediately following or immediately before internal newlines in the
+subject string, respectively, as well as at the very start and end. This is
+equivalent to Perl's /m option, and it can be changed within a pattern by a
+(?m) option setting. If there are no newlines in a subject string, or no
 occurrences of ^ or $ in a pattern, setting PCRE_MULTILINE has no effect.
+.sp
+  PCRE_NEWLINE_CR
+  PCRE_NEWLINE_LF
+  PCRE_NEWLINE_CRLF
+.sp
+These options override the default newline definition that was chosen when PCRE
+was built. Setting the first or the second specifies that a newline is
+indicated by a single character (CR or LF, respectively). Setting both of them
+specifies that a newline is indicated by the two-character CRLF sequence. For
+convenience, PCRE_NEWLINE_CRLF is defined to contain both bits. The only time
+that a line break is relevant when compiling a pattern is if PCRE_EXTENDED is
+set, and an unescaped # outside a character class is encountered. This
+indicates a comment that lasts until after the next newline.
+.P
+The newline option set at compile time becomes the default that is used for
+\fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP, but it can be overridden.
 .sp
   PCRE_NO_AUTO_CAPTURE
 .sp
@@ -579,7 +634,7 @@ both compiling functions.
   23  internal error: code overflow
   24  unrecognized character after (?<
   25  lookbehind assertion is not fixed length
-  26  malformed number after (?(
+  26  malformed number or name after (?(
   27  conditional group contains more than two branches
   28  assertion expected after (?(
   29  (?R or (?digits must be followed by )
@@ -596,11 +651,15 @@ both compiling functions.
   40  recursive call could loop indefinitely
   41  unrecognized character after (?P
   42  syntax error after (?P
-  43  two named groups have the same name
+  43  two named subpatterns have the same name
   44  invalid UTF-8 string
   45  support for \eP, \ep, and \eX has not been compiled
   46  malformed \eP or \ep sequence
   47  unknown property name after \eP or \ep
+  48  subpattern name is too long (maximum 32 characters)
+  49  too many named subpatterns (maximum 10,000)
+  50  repeated subpattern is too long
+  51  octal value is greater than \e377 (not in UTF-8 mode)
 .
 .
 .SH "STUDYING A PATTERN"
@@ -731,7 +790,7 @@ check against passing an arbitrary memory pointer. Here is a typical call of
 \fBpcre_fullinfo()\fP, to obtain the length of the compiled pattern:
 .sp
   int rc;
-  unsigned long int length;
+  size_t length;
   rc = pcre_fullinfo(
     re,               /* result of pcre_compile() */
     pe,               /* result of pcre_study(), or NULL */
@@ -763,12 +822,12 @@ a NULL table pointer.
   PCRE_INFO_FIRSTBYTE
 .sp
 Return information about the first byte of any matched string, for a
-non-anchored pattern. (This option used to be called PCRE_INFO_FIRSTCHAR; the
-old name is still recognized for backwards compatibility.)
+non-anchored pattern. The fourth argument should point to an \fBint\fP
+variable. (This option used to be called PCRE_INFO_FIRSTCHAR; the old name is
+still recognized for backwards compatibility.)
 .P
 If there is a fixed first byte, for example, from a pattern such as
-(cat|cow|coyote), it is returned in the integer pointed to by \fIwhere\fP.
-Otherwise, if either
+(cat|cow|coyote). Otherwise, if either
 .sp
 (a) the pattern was compiled with the PCRE_MULTILINE option, and every branch
 starts with "^", or
@@ -803,12 +862,13 @@ is -1.
 .sp
 PCRE supports the use of named as well as numbered capturing parentheses. The
 names are just an additional way of identifying the parentheses, which still
-acquire numbers. A convenience function called \fBpcre_get_named_substring()\fP
-is provided for extracting an individual captured substring by name. It is also
-possible to extract the data directly, by first converting the name to a number
-in order to access the correct pointers in the output vector (described with
-\fBpcre_exec()\fP below). To do the conversion, you need to use the
-name-to-number map, which is described by these three values.
+acquire numbers. Several convenience functions such as
+\fBpcre_get_named_substring()\fP are provided for extracting captured
+substrings by name. It is also possible to extract the data directly, by first
+converting the name to a number in order to access the correct pointers in the
+output vector (described with \fBpcre_exec()\fP below). To do the conversion,
+you need to use the name-to-number map, which is described by these three
+values.
 .P
 The map consists of a number of fixed-size entries. PCRE_INFO_NAMECOUNT gives
 the number of entries, and PCRE_INFO_NAMEENTRYSIZE gives the size of each
@@ -817,7 +877,8 @@ length of the longest name. PCRE_INFO_NAMETABLE returns a pointer to the first
 entry of the table (a pointer to \fBchar\fP). The first two bytes of each entry
 are the number of the capturing parenthesis, most significant byte first. The
 rest of the entry is the corresponding name, zero terminated. The names are in
-alphabetical order. For example, consider the following pattern (assume
+alphabetical order. When PCRE_DUPNAMES is set, duplicate names are in order of
+their parentheses numbers. For example, consider the following pattern (assume
 PCRE_EXTENDED is set, so white space - including newlines - is ignored):
 .sp
 .\" JOIN
@@ -834,7 +895,7 @@ bytes shows in hexadecimal, and undefined bytes shown as ??:
   00 02 y  e  a  r  00 ??
 .sp
 When writing code to extract data from named subpatterns using the
-name-to-number map, remember that the length of each entry is likely to be
+name-to-number map, remember that the length of the entries is likely to be
 different for each compiled pattern.
 .sp
   PCRE_INFO_OPTIONS
@@ -1057,8 +1118,8 @@ documentation for a discussion of saving compiled patterns for later use.
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre_exec()\fP must be
-zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NOTBOL,
-PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
+zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
 .sp
   PCRE_ANCHORED
 .sp
@@ -1066,6 +1127,15 @@ The PCRE_ANCHORED option limits \fBpcre_exec()\fP to matching at the first
 matching position. If a pattern was compiled with PCRE_ANCHORED, or turned out
 to be anchored by virtue of its contents, it cannot be made unachored at
 matching time.
+.sp
+  PCRE_NEWLINE_CR
+  PCRE_NEWLINE_LF
+  PCRE_NEWLINE_CRLF
+.sp
+These options override the newline definition that was chosen or defaulted when
+the pattern was compiled. For details, see the description \fBpcre_compile()\fP
+above. During matching, the newline choice affects the behaviour of the dot,
+circumflex, and dollar metacharacters.
 .sp
   PCRE_NOTBOL
 .sp
@@ -1198,18 +1268,10 @@ is set to the offset of the first character after the end of a substring. The
 first pair, \fIovector[0]\fP and \fIovector[1]\fP, identify the portion of the
 subject string matched by the entire pattern. The next pair is used for the
 first capturing subpattern, and so on. The value returned by \fBpcre_exec()\fP
-is the number of pairs that have been set. If there are no capturing
-subpatterns, the return value from a successful match is 1, indicating that
-just the first pair of offsets has been set.
-.P
-Some convenience functions are provided for extracting the captured substrings
-as separate strings. These are described in the following section.
-.P
-It is possible for an capturing subpattern number \fIn+1\fP to match some
-part of the subject when subpattern \fIn\fP has not been used at all. For
-example, if the string "abc" is matched against the pattern (a|(z))(bc)
-subpatterns 1 and 3 are matched, but 2 is not. When this happens, both offset
-values corresponding to the unused subpattern are set to -1.
+is one more than the highest numbered pair that has been set. For example, if
+two substrings have been captured, the returned value is 3. If there are no
+capturing subpatterns, the return value from a successful match is 1,
+indicating that just the first pair of offsets has been set.
 .P
 If a capturing subpattern is matched repeatedly, it is the last portion of the
 string that it matched that is returned.
@@ -1223,13 +1285,31 @@ the \fIovector\fP is not big enough to remember the related substrings, PCRE
 has to get additional memory for use during matching. Thus it is usually
 advisable to supply an \fIovector\fP.
 .P
-Note that \fBpcre_info()\fP can be used to find out how many capturing
+The \fBpcre_info()\fP function can be used to find out how many capturing
 subpatterns there are in a compiled pattern. The smallest size for
 \fIovector\fP that will allow for \fIn\fP captured substrings, in addition to
 the offsets of the substring matched by the whole pattern, is (\fIn\fP+1)*3.
+.P
+It is possible for capturing subpattern number \fIn+1\fP to match some part of
+the subject when subpattern \fIn\fP has not been used at all. For example, if
+the string "abc" is matched against the pattern (a|(z))(bc) the return from the
+function is 4, and subpatterns 1 and 3 are matched, but 2 is not. When this
+happens, both values in the offset pairs corresponding to unused subpatterns
+are set to -1.
+.P
+Offset values that correspond to unused subpatterns at the end of the
+expression are also set to -1. For example, if the string "abc" is matched
+against the pattern (abc)(x(yz)?)? subpatterns 2 and 3 are not matched. The
+return from the function is 2, because the highest used capturing subpattern
+number is 1. However, you can refer to the offsets for the second and third
+capturing subpatterns if you wish (assuming the vector is large enough, of
+course).
+.P
+Some convenience functions are provided for extracting the captured substrings
+as separate strings. These are described below.
 .
 .\" HTML <a name="errorlist"></a>
-.SS "Return values from \fBpcre_exec()\fP"
+.SS "Error return values from \fBpcre_exec()\fP"
 .rs
 .sp
 If \fBpcre_exec()\fP fails, it returns a negative number. The following are
@@ -1360,9 +1440,15 @@ Captured substrings can be accessed directly by using the offsets returned by
 \fBpcre_get_substring_list()\fP are provided for extracting captured substrings
 as new, separate, zero-terminated strings. These functions identify substrings
 by number. The next section describes functions for extracting named
-substrings. A substring that contains a binary zero is correctly extracted and
-has a further zero added on the end, but the result is not, of course,
-a C string.
+substrings.
+.P
+A substring that contains a binary zero is correctly extracted and has a
+further zero added on the end, but the result is not, of course, a C string.
+However, you can process such a string by referring to the length that is
+returned by \fBpcre_copy_substring()\fP and \fBpcre_get_substring()\fP.
+Unfortunately, the interface to \fBpcre_get_substring_list()\fP is not adequate
+for handling strings containing binary zeros, because the end of the final
+string is not independently indicated.
 .P
 The first three arguments are the same for all three of these functions:
 \fIsubject\fP is the subject string that has just been successfully matched,
@@ -1417,7 +1503,7 @@ a previous call of \fBpcre_get_substring()\fP or
 \fBpcre_get_substring_list()\fP, respectively. They do nothing more than call
 the function pointed to by \fBpcre_free\fP, which of course could be called
 directly from a C program. However, PCRE is used in some situations where it is
-linked via a special interface to another programming language which cannot use
+linked via a special interface to another programming language that cannot use
 \fBpcre_free\fP directly; it is for these cases that the functions are
 provided.
 .
@@ -1452,9 +1538,10 @@ For example, for this pattern
 .sp
   (a+)b(?P<xxx>\ed+)...
 .sp
-the number of the subpattern called "xxx" is 2. You can find the number from
-the name by calling \fBpcre_get_stringnumber()\fP. The first argument is the
-compiled pattern, and the second is the name. The yield of the function is the
+the number of the subpattern called "xxx" is 2. If the name is known to be
+unique (PCRE_DUPNAMES was not set), you can find the number from the name by
+calling \fBpcre_get_stringnumber()\fP. The first argument is the compiled
+pattern, and the second is the name. The yield of the function is the
 subpattern number, or PCRE_ERROR_NOSUBSTRING (-7) if there is no subpattern of
 that name.
 .P
@@ -1462,8 +1549,8 @@ Given the number, you can extract the substring directly, or use one of the
 functions described in the previous section. For convenience, there are also
 two functions that do the whole job.
 .P
-Most of the arguments of \fIpcre_copy_named_substring()\fP and
-\fIpcre_get_named_substring()\fP are the same as those for the similarly named
+Most of the arguments of \fBpcre_copy_named_substring()\fP and
+\fBpcre_get_named_substring()\fP are the same as those for the similarly named
 functions that extract by number. As these are described in the previous
 section, they are not re-described here. There are just two differences:
 .P
@@ -1475,6 +1562,38 @@ translation table.
 These functions call \fBpcre_get_stringnumber()\fP, and if it succeeds, they
 then call \fIpcre_copy_substring()\fP or \fIpcre_get_substring()\fP, as
 appropriate.
+.
+.
+.SH "DUPLICATE SUBPATTERN NAMES"
+.rs
+.sp
+.B int pcre_get_stringtable_entries(const pcre *\fIcode\fP,
+.ti +5n
+.B const char *\fIname\fP, char **\fIfirst\fP, char **\fIlast\fP);
+.PP
+When a pattern is compiled with the PCRE_DUPNAMES option, names for subpatterns
+are not required to be unique. Normally, patterns with duplicate names are such
+that in any one match, only one of the named subpatterns participates. An
+example is shown in the
+.\" HREF
+\fBpcrepattern\fP
+.\"
+documentation. When duplicates are present, \fBpcre_copy_named_substring()\fP
+and \fBpcre_get_named_substring()\fP return the first substring corresponding
+to the given name that is set. If none are set, an empty string is returned.
+The \fBpcre_get_stringnumber()\fP function returns one of the numbers that are
+associated with the name, but it is not defined which it is.
+.sp
+If you want to get full details of all captured substrings for a given name,
+you must use the \fBpcre_get_stringtable_entries()\fP function. The first
+argument is the compiled pattern, and the second is the name. The third and
+fourth are pointers to variables which are updated by the function. After it
+has run, they point to the first and last entries in the name-to-number table
+for the given name. The function itself returns the length of each entry, or
+PCRE_ERROR_NOSUBSTRING if there are none. The format of the table is described
+above in the section entitled \fIInformation about a pattern\fP. Given all the
+relevant entries for the name, you can extract each of their numbers, and hence
+the captured data, if any.
 .
 .
 .SH "FINDING ALL POSSIBLE MATCHES"
@@ -1531,7 +1650,7 @@ here.
 The two additional arguments provide workspace for the function. The workspace
 vector should contain at least 20 elements. It is used for keeping track of
 multiple paths through the pattern tree. More workspace will be needed for
-patterns and subjects where there are a lot of possible matches.
+patterns and subjects where there are a lot of potential matches.
 .P
 Here is an example of a simple call to \fBpcre_dfa_exec()\fP:
 .sp
@@ -1554,8 +1673,8 @@ Here is an example of a simple call to \fBpcre_dfa_exec()\fP:
 .rs
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre_dfa_exec()\fP must be
-zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NOTBOL,
-PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL,
+zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL,
 PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last three of these are
 the same as for \fBpcre_exec()\fP, so their description is not repeated here.
 .sp
@@ -1665,6 +1784,6 @@ error is given if the output vector is not large enough. This should be
 extremely rare, as a vector of size 1000 is used.
 .P
 .in 0
-Last updated: 18 January 2006
+Last updated: 08 June 2006
 .br
 Copyright (c) 1997-2006 University of Cambridge.

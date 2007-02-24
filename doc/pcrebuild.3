@@ -67,15 +67,23 @@ documentation.
 .SH "CODE VALUE OF NEWLINE"
 .rs
 .sp
-By default, PCRE treats character 10 (linefeed) as the newline character. This
-is the normal newline character on Unix-like systems. You can compile PCRE to
-use character 13 (carriage return) instead by adding
+By default, PCRE interprets character 10 (linefeed, LF) as indicating the end
+of a line. This is the normal newline character on Unix-like systems. You can
+compile PCRE to use character 13 (carriage return, CR) instead, by adding
 .sp
   --enable-newline-is-cr
 .sp
-to the \fBconfigure\fP command. For completeness there is also a
---enable-newline-is-lf option, which explicitly specifies linefeed as the
-newline character.
+to the \fBconfigure\fP command. There is also a --enable-newline-is-lf option,
+which explicitly specifies linefeed as the newline character.
+.sp
+Alternatively, you can specify that line endings are to be indicated by the two
+character sequence CRLF. If you want this, add
+.sp
+  --enable-newline-is-crlf
+.sp
+to the \fBconfigure\fP command. Whatever line ending convention is selected
+when PCRE is built can be overridden when the library functions are called. At
+build time it is conventional to use the standard for your operating system.
 .
 .SH "BUILDING SHARED AND STATIC LIBRARIES"
 .rs
@@ -107,26 +115,6 @@ such as
 .sp
 to the \fBconfigure\fP command.
 .
-.SH "LIMITING PCRE RESOURCE USAGE"
-.rs
-.sp
-Internally, PCRE has a function called \fBmatch()\fP, which it calls repeatedly
-(possibly recursively) when matching a pattern with the \fBpcre_exec()\fP
-function. By controlling the maximum number of times this function may be
-called during a single matching operation, a limit can be placed on the
-resources used by a single call to \fBpcre_exec()\fP. The limit can be changed
-at run time, as described in the
-.\" HREF
-\fBpcreapi\fP
-.\"
-documentation. The default is 10 million, but this can be changed by adding a
-setting such as
-.sp
-  --with-match-limit=500000
-.sp
-to the \fBconfigure\fP command. This setting has no effect on the
-\fBpcre_dfa_exec()\fP matching function.
-.
 .SH "HANDLING VERY LARGE PATTERNS"
 .rs
 .sp
@@ -155,10 +143,15 @@ When matching with the \fBpcre_exec()\fP function, PCRE implements backtracking
 by making recursive calls to an internal function called \fBmatch()\fP. In
 environments where the size of the stack is limited, this can severely limit
 PCRE's operation. (The Unix environment does not usually suffer from this
-problem.) An alternative approach that uses memory from the heap to remember
-data, instead of using recursive function calls, has been implemented to work
-round this problem. If you want to build a version of PCRE that works this way,
-add
+problem, but it may sometimes be necessary to increase the maximum stack size.
+There is a discussion in the
+.\" HREF
+\fBpcrestack\fP
+.\"
+documentation.) An alternative approach to recursion that uses memory from the
+heap to remember data, instead of using recursive function calls, has been
+implemented to work round the problem of limited stack size. If you want to
+build a version of PCRE that works this way, add
 .sp
   --disable-stack-for-recursion
 .sp
@@ -172,6 +165,37 @@ optimized functions that perform better than the standard \fBmalloc()\fP and
 way. This option affects only the \fBpcre_exec()\fP function; it is not
 relevant for the the \fBpcre_dfa_exec()\fP function.
 .
+.SH "LIMITING PCRE RESOURCE USAGE"
+.rs
+.sp
+Internally, PCRE has a function called \fBmatch()\fP, which it calls repeatedly
+(sometimes recursively) when matching a pattern with the \fBpcre_exec()\fP
+function. By controlling the maximum number of times this function may be
+called during a single matching operation, a limit can be placed on the
+resources used by a single call to \fBpcre_exec()\fP. The limit can be changed
+at run time, as described in the
+.\" HREF
+\fBpcreapi\fP
+.\"
+documentation. The default is 10 million, but this can be changed by adding a
+setting such as
+.sp
+  --with-match-limit=500000
+.sp
+to the \fBconfigure\fP command. This setting has no effect on the
+\fBpcre_dfa_exec()\fP matching function.
+.P
+In some environments it is desirable to limit the depth of recursive calls of
+\fBmatch()\fP more strictly than the total number of calls, in order to
+restrict the maximum amount of stack (or heap, if --disable-stack-for-recursion
+is specified) that is used. A second limit controls this; it defaults to the
+value that is set for --with-match-limit, which imposes no additional
+constraints. However, you can set a lower limit by adding, for example,
+.sp
+  --with-match-limit-recursion=10000
+.sp
+to the \fBconfigure\fP command. This value can also be overridden at run time.
+.
 .SH "USING EBCDIC CODE"
 .rs
 .sp
@@ -184,6 +208,6 @@ compiled to run in an EBCDIC environment by adding
 to the \fBconfigure\fP command.
 .P
 .in 0
-Last updated: 15 August 2005
+Last updated: 06 June 2006
 .br
-Copyright (c) 1997-2005 University of Cambridge.
+Copyright (c) 1997-2006 University of Cambridge.

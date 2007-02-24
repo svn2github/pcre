@@ -95,6 +95,7 @@ follows:
   pcreposix         the POSIX-compatible C API
   pcreprecompile    details of saving and re-using precompiled patterns
   pcresample        discussion of the sample program
+  pcrestack         discussion of stack usage
   pcretest          description of the <b>pcretest</b> testing command
 </pre>
 In addition, in the "man" and HTML formats, there is a short page for each
@@ -116,8 +117,9 @@ documentation for details). In these cases the limit is substantially larger.
 However, the speed of execution will be slower.
 </P>
 <P>
-All values in repeating quantifiers must be less than 65536.
-The maximum number of capturing subpatterns is 65535.
+All values in repeating quantifiers must be less than 65536. The maximum
+compiled length of subpattern with an explicit repeat count is 30000 bytes. The
+maximum number of capturing subpatterns is 65535.
 </P>
 <P>
 There is no limit to the number of non-capturing subpatterns, but the maximum
@@ -125,11 +127,18 @@ depth of nesting of all kinds of parenthesized subpattern, including capturing
 subpatterns, assertions, and other types of subpattern, is 200.
 </P>
 <P>
+The maximum length of name for a named subpattern is 32, and the maximum number
+of named subpatterns is 10000.
+</P>
+<P>
 The maximum length of a subject string is the largest positive number that an
 integer variable can hold. However, when using the traditional matching
 function, PCRE uses recursion to handle subpatterns and indefinite repetition.
 This means that the available stack space may limit the size of a subject
-string that can be processed by certain patterns.
+string that can be processed by certain patterns. For a discussion of stack
+issues, see the
+<a href="pcrestack.html"><b>pcrestack</b></a>
+documentation.
 <a name="utf8support"></a></P>
 <br><a name="SEC4" href="#TOC1">UTF-8 AND UNICODE PROPERTY SUPPORT</a><br>
 <P>
@@ -184,19 +193,23 @@ may crash.
 UTF-8 character if the value is greater than 127.
 </P>
 <P>
-3. Repeat quantifiers apply to complete UTF-8 characters, not to individual
+3. Octal numbers up to \777 are recognized, and match two-byte UTF-8
+characters for values greater than \177.
+</P>
+<P>
+4. Repeat quantifiers apply to complete UTF-8 characters, not to individual
 bytes, for example: \x{100}{3}.
 </P>
 <P>
-4. The dot metacharacter matches one UTF-8 character instead of a single byte.
+5. The dot metacharacter matches one UTF-8 character instead of a single byte.
 </P>
 <P>
-5. The escape sequence \C can be used to match a single byte in UTF-8 mode,
+6. The escape sequence \C can be used to match a single byte in UTF-8 mode,
 but its use can lead to some strange effects. This facility is not available in
 the alternative matching function, <b>pcre_dfa_exec()</b>.
 </P>
 <P>
-6. The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly
+7. The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly
 test characters of any code value, but the characters that PCRE recognizes as
 digits, spaces, or word characters remain the same set as before, all with
 values less than 256. This remains true even when PCRE includes Unicode
@@ -205,11 +218,11 @@ cases. If you really want to test for a wider sense of, say, "digit", you
 must use Unicode property tests such as \p{Nd}.
 </P>
 <P>
-7. Similarly, characters that match the POSIX named character classes are all
+8. Similarly, characters that match the POSIX named character classes are all
 low-valued characters.
 </P>
 <P>
-8. Case-insensitive matching applies only to characters whose values are less
+9. Case-insensitive matching applies only to characters whose values are less
 than 128, unless PCRE is built with Unicode property support. Even when Unicode
 property support is available, PCRE still uses its own character tables when
 checking the case of low-valued characters, so as not to degrade performance.
@@ -231,7 +244,7 @@ Cambridge CB2 3QG, England.
 Putting an actual email address here seems to have been a spam magnet, so I've
 taken it away. If you want to email me, use my initial and surname, separated
 by a dot, at the domain ucs.cam.ac.uk.
-Last updated: 24 January 2006
+Last updated: 05 June 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

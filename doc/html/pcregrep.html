@@ -17,11 +17,12 @@ man page, in case the conversion went wrong.
 <li><a name="TOC2" href="#SEC2">DESCRIPTION</a>
 <li><a name="TOC3" href="#SEC3">OPTIONS</a>
 <li><a name="TOC4" href="#SEC4">ENVIRONMENT VARIABLES</a>
-<li><a name="TOC5" href="#SEC5">OPTIONS COMPATIBILITY</a>
-<li><a name="TOC6" href="#SEC6">OPTIONS WITH DATA</a>
-<li><a name="TOC7" href="#SEC7">MATCHING ERRORS</a>
-<li><a name="TOC8" href="#SEC8">DIAGNOSTICS</a>
-<li><a name="TOC9" href="#SEC9">AUTHOR</a>
+<li><a name="TOC5" href="#SEC5">NEWLINES</a>
+<li><a name="TOC6" href="#SEC6">OPTIONS COMPATIBILITY</a>
+<li><a name="TOC7" href="#SEC7">OPTIONS WITH DATA</a>
+<li><a name="TOC8" href="#SEC8">MATCHING ERRORS</a>
+<li><a name="TOC9" href="#SEC9">DIAGNOSTICS</a>
+<li><a name="TOC10" href="#SEC10">AUTHOR</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
@@ -66,7 +67,8 @@ By default, each line that matches the pattern is copied to the standard
 output, and if there is more than one file, the file name is output at the
 start of each line. However, there are options that can change how
 <b>pcregrep</b> behaves. In particular, the <b>-M</b> option makes it possible to
-search for patterns that span line boundaries.
+search for patterns that span line boundaries. What defines a line boundary is
+controlled by the <b>-N</b> (<b>--newline</b>) option.
 </P>
 <P>
 Patterns are limited to 8K or BUFSIZ characters, whichever is the greater.
@@ -265,6 +267,19 @@ the previous 8K characters (or all the previous characters, if fewer than 8K)
 are guaranteed to be available for lookbehind assertions.
 </P>
 <P>
+<b>-N</b> <i>newline-type</i>, <b>--newline=</b><i>newline-type</i>
+The PCRE library supports three different character sequences for indicating
+the ends of lines. They are the single-character sequences CR (carriage return)
+and LF (linefeed), and the two-character sequence CR, LF. When the library is
+built, a default line-ending sequence is specified. This is normally the
+standard sequence for the operating system. Unless otherwise specified by this
+option, <b>pcregrep</b> uses the default. The possible values for this option
+are CR, LF, or CRLF. This makes it possible to use <b>pcregrep</b> on files that
+have come from other environments without having to modify their line endings.
+If the data that is being scanned does not agree with the convention set by
+this option, <b>pcregrep</b> may behave in strange ways.
+</P>
+<P>
 <b>-n</b>, <b>--line-number</b>
 Precede each output line by its line number in the file, followed by a colon
 and a space for matching lines or a hyphen and a space for context lines. If
@@ -330,7 +345,16 @@ order, for a locale. The first one that is set is used. This can be overridden
 by the <b>--locale</b> option. If no locale is set, the PCRE library's default
 (usually the "C" locale) is used.
 </P>
-<br><a name="SEC5" href="#TOC1">OPTIONS COMPATIBILITY</a><br>
+<br><a name="SEC5" href="#TOC1">NEWLINES</a><br>
+<P>
+The <b>-N</b> (<b>--newline</b>) option allows <b>pcregrep</b> to scan files with
+different newline conventions from the default. However, the setting of this
+option does not affect the way in which <b>pcregrep</b> writes information to
+the standard error and output streams. It uses the string "\n" in C
+<b>printf()</b> calls to indicate newlines, relying on the C I/O library to
+convert this to an appropriate sequence if the output is sent to a file.
+</P>
+<br><a name="SEC6" href="#TOC1">OPTIONS COMPATIBILITY</a><br>
 <P>
 The majority of short and long forms of <b>pcregrep</b>'s options are the same
 as in the GNU <b>grep</b> program. Any long option of the form
@@ -338,7 +362,7 @@ as in the GNU <b>grep</b> program. Any long option of the form
 (PCRE terminology). However, the <b>--locale</b>, <b>-M</b>, <b>--multiline</b>,
 <b>-u</b>, and <b>--utf-8</b> options are specific to <b>pcregrep</b>.
 </P>
-<br><a name="SEC6" href="#TOC1">OPTIONS WITH DATA</a><br>
+<br><a name="SEC7" href="#TOC1">OPTIONS WITH DATA</a><br>
 <P>
 There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or in the next
@@ -365,7 +389,7 @@ for which the data is optional. If this option does have data, it must be given
 in the first form, using an equals character. Otherwise it will be assumed that
 it has no data.
 </P>
-<br><a name="SEC7" href="#TOC1">MATCHING ERRORS</a><br>
+<br><a name="SEC8" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
@@ -375,7 +399,7 @@ in these circumstances. If this happens, <b>pcregrep</b> outputs an error
 message and the line that caused the problem to the standard error stream. If
 there are more than 20 such errors, <b>pcregrep</b> gives up.
 </P>
-<br><a name="SEC8" href="#TOC1">DIAGNOSTICS</a><br>
+<br><a name="SEC9" href="#TOC1">DIAGNOSTICS</a><br>
 <P>
 Exit status is 0 if any matches were found, 1 if no matches were found, and 2
 for syntax errors and non-existent or inacessible files (even if matches were
@@ -383,7 +407,7 @@ found in other files) or too many matching errors. Using the <b>-s</b> option to
 suppress error messages about inaccessble files does not affect the return
 code.
 </P>
-<br><a name="SEC9" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC10" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -392,7 +416,7 @@ University Computing Service
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 23 January 2006
+Last updated: 06 June 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

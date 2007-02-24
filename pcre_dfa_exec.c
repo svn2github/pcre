@@ -43,6 +43,7 @@ alternative matching function that uses a DFA algorithm. This is NOT Perl-
 compatible, but it has advantages in certain applications. */
 
 
+#define NLBLOCK md           /* The block containing newline information */
 #include "pcre_internal.h"
 
 
@@ -423,7 +424,8 @@ ptr = current_subject;
 for (;;)
   {
   int i, j;
-  int c, d, clen, dlen;
+  int clen, dlen;
+  unsigned int c, d;
 
   /* Make the new state list into the active state list and empty the
   new state list. */
@@ -647,7 +649,10 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_CIRC:
       if ((ptr == start_subject && (md->moptions & PCRE_NOTBOL) == 0) ||
-          ((ims & PCRE_MULTILINE) != 0 && ptr[-1] == NEWLINE))
+          ((ims & PCRE_MULTILINE) != 0 &&
+            ptr >= start_subject + md->nllen &&
+            ptr != end_subject &&
+            IS_NEWLINE(ptr - md->nllen)))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 
@@ -681,13 +686,16 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_ANY:
-      if (clen > 0 && (c != NEWLINE || (ims & PCRE_DOTALL) != 0))
+      if (clen > 0 && ((ims & PCRE_DOTALL) != 0 ||
+                       ptr > end_subject - md->nllen ||
+                       !IS_NEWLINE(ptr)))
         { ADD_NEW(state_offset + 1, 0); }
       break;
 
       /*-----------------------------------------------------------------*/
       case OP_EODN:
-      if (clen == 0 || (c == NEWLINE && ptr + 1 == end_subject))
+      if (clen == 0 ||
+           (ptr == end_subject - md->nllen && IS_NEWLINE(ptr)))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 
@@ -695,11 +703,14 @@ for (;;)
       case OP_DOLL:
       if ((md->moptions & PCRE_NOTEOL) == 0)
         {
-        if (clen == 0 || (c == NEWLINE && (ptr + 1 == end_subject ||
-                                (ims & PCRE_MULTILINE) != 0)))
+        if (clen == 0 ||
+            (ptr <= end_subject - md->nllen && IS_NEWLINE(ptr) &&
+               ((ims & PCRE_MULTILINE) != 0 || ptr == end_subject - md->nllen)
+            ))
           { ADD_ACTIVE(state_offset + 1, 0); }
         }
-      else if (c == NEWLINE && (ims & PCRE_MULTILINE) != 0)
+      else if ((ims & PCRE_MULTILINE) != 0 &&
+               ptr <= end_subject - md->nllen && IS_NEWLINE(ptr))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 
@@ -811,7 +822,11 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY || c != '\n' || (ims & PCRE_DOTALL) != 0) &&
+              (d != OP_ANY ||
+               (ims & PCRE_DOTALL) != 0 ||
+               ptr > end_subject - md->nllen ||
+               !IS_NEWLINE(ptr)
+              ) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           count++;
@@ -828,7 +843,11 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY || c != '\n' || (ims & PCRE_DOTALL) != 0) &&
+              (d != OP_ANY ||
+               (ims & PCRE_DOTALL) != 0 ||
+               ptr > end_subject - md->nllen ||
+               !IS_NEWLINE(ptr)
+              ) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           ADD_NEW(state_offset + 2, 0);
@@ -844,7 +863,11 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY || c != '\n' || (ims & PCRE_DOTALL) != 0) &&
+              (d != OP_ANY ||
+               (ims & PCRE_DOTALL) != 0 ||
+               ptr > end_subject - md->nllen ||
+               !IS_NEWLINE(ptr)
+              ) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           ADD_NEW(state_offset, 0);
@@ -863,7 +886,11 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY || c != '\n' || (ims & PCRE_DOTALL) != 0) &&
+              (d != OP_ANY ||
+               (ims & PCRE_DOTALL) != 0 ||
+               ptr > end_subject - md->nllen ||
+               !IS_NEWLINE(ptr)
+              ) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (++count >= GET2(code, 1))
@@ -1220,7 +1247,7 @@ for (;;)
       if (clen > 0)
         {
         int otherd = -1;
-        if ((ims && PCRE_CASELESS) != 0)
+        if ((ims & PCRE_CASELESS) != 0)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -1247,7 +1274,7 @@ for (;;)
       if (clen > 0)
         {
         int otherd = -1;
-        if ((ims && PCRE_CASELESS) != 0)
+        if ((ims & PCRE_CASELESS) != 0)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -1370,7 +1397,8 @@ for (;;)
             { ADD_ACTIVE(next_state_offset + 5, 0); }
           if (isinclass)
             {
-            if (++count >= GET2(ecode, 3))
+            int max = GET2(ecode, 3);
+            if (++count >= max && max != 0)   /* Max 0 => no limit */
               { ADD_NEW(next_state_offset + 5, 0); }
             else
               { ADD_NEW(state_offset, count); }
@@ -1670,7 +1698,7 @@ for (;;)
     DPRINTF(("%.*sEnd of internal_dfa_exec %d: returning %d\n"
       "%.*s---------------------\n\n", rlevel*2-2, SP, rlevel, match_count,
       rlevel*2-2, SP));
-    return match_count;
+    break;        /* In effect, "return", but see the comment below */
     }
 
   /* One or more states are active for the next character. */
@@ -1678,11 +1706,13 @@ for (;;)
   ptr += clen;    /* Advance to next subject character */
   }               /* Loop to move along the subject string */
 
-/* Control never gets here, but we must keep the compiler happy. */
+/* Control gets here from "break" a few lines above. We do it this way because
+if we use "return" above, we have compiler trouble. Some compilers warn if
+there's nothing here because they think the function doesn't return a value. On
+the other hand, if we put a dummy statement here, some more clever compilers
+complain that it can't be reached. Sigh. */
 
-DPRINTF(("%.*s+++ Unexpected end of internal_dfa_exec %d +++\n"
-  "%.*s---------------------\n\n", rlevel*2-2, SP, rlevel, rlevel*2-2, SP));
-return PCRE_ERROR_NOMATCH;
+return match_count;
 }
 
 
@@ -1721,6 +1751,7 @@ pcre_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
 {
 real_pcre *re = (real_pcre *)argument_re;
 dfa_match_data match_block;
+dfa_match_data *md = &match_block;
 BOOL utf8, anchored, startline, firstline;
 const uschar *current_subject, *end_subject, *lcc;
 
@@ -1735,6 +1766,7 @@ BOOL req_byte_caseless = FALSE;
 int first_byte = -1;
 int req_byte = -1;
 int req_byte2 = -1;
+int newline;
 
 /* Plausibility checks */
 
@@ -1749,8 +1781,8 @@ flipping, so we scan the extra_data block first. This may set two fields in the
 match block, so we must initialize them beforehand. However, the other fields
 in the match block must not be set until after the byte flipping. */
 
-match_block.tables = re->tables;
-match_block.callout_data = NULL;
+md->tables = re->tables;
+md->callout_data = NULL;
 
 if (extra_data != NULL)
   {
@@ -1761,9 +1793,9 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION) != 0)
     return PCRE_ERROR_DFA_UMLIMIT;
   if ((flags & PCRE_EXTRA_CALLOUT_DATA) != 0)
-    match_block.callout_data = extra_data->callout_data;
+    md->callout_data = extra_data->callout_data;
   if ((flags & PCRE_EXTRA_TABLES) != 0)
-    match_block.tables = extra_data->tables;
+    md->tables = extra_data->tables;
   }
 
 /* Check that the first field in the block is the magic number. If it is not,
@@ -1784,19 +1816,48 @@ current_subject = (const unsigned char *)subject + start_offset;
 end_subject = (const unsigned char *)subject + length;
 req_byte_ptr = current_subject - 1;
 
+#ifdef SUPPORT_UTF8
 utf8 = (re->options & PCRE_UTF8) != 0;
+#else
+utf8 = FALSE;
+#endif
 
 anchored = (options & (PCRE_ANCHORED|PCRE_DFA_RESTART)) != 0 ||
   (re->options & PCRE_ANCHORED) != 0;
 
 /* The remaining fixed data for passing around. */
 
-match_block.start_code = (const uschar *)argument_re +
+md->start_code = (const uschar *)argument_re +
     re->name_table_offset + re->name_count * re->name_entry_size;
-match_block.start_subject = (const unsigned char *)subject;
-match_block.end_subject = end_subject;
-match_block.moptions = options;
-match_block.poptions = re->options;
+md->start_subject = (const unsigned char *)subject;
+md->end_subject = end_subject;
+md->moptions = options;
+md->poptions = re->options;
+
+/* Handle different types of newline. The two bits give four cases. If nothing
+is set at run time, whatever was used at compile time applies. */
+
+switch ((((options & PCRE_NEWLINE_CRLF) == 0)? re->options : options) &
+         PCRE_NEWLINE_CRLF)
+  {
+  default:              newline = NEWLINE; break;   /* Compile-time default */
+  case PCRE_NEWLINE_CR: newline = '\r'; break;
+  case PCRE_NEWLINE_LF: newline = '\n'; break;
+  case PCRE_NEWLINE_CR+
+       PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
+  }
+
+if (newline > 255)
+  {
+  md->nllen = 2;
+  md->nl[0] = (newline >> 8) & 255;
+  md->nl[1] = newline & 255;
+  }
+else
+  {
+  md->nllen = 1;
+  md->nl[0] = newline;
+  }
 
 /* Check a UTF-8 string if required. Unfortunately there's no way of passing
 back the character offset. */
@@ -1822,12 +1883,12 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
 is a feature that makes it possible to save compiled regex and re-use them
 in other programs later. */
 
-if (match_block.tables == NULL) match_block.tables = _pcre_default_tables;
+if (md->tables == NULL) md->tables = _pcre_default_tables;
 
 /* The lower casing table and the "must be at the start of a line" flag are
 used in a loop when finding where to start. */
 
-lcc = match_block.tables + lcc_offset;
+lcc = md->tables + lcc_offset;
 startline = (re->options & PCRE_STARTLINE) != 0;
 firstline = (re->options & PCRE_FIRSTLINE) != 0;
 
@@ -1860,7 +1921,7 @@ if ((re->options & PCRE_REQCHSET) != 0)
   {
   req_byte = re->req_byte & 255;
   req_byte_caseless = (re->req_byte & REQ_CASELESS) != 0;
-  req_byte2 = (match_block.tables + fcc_offset)[req_byte];  /* case flipped */
+  req_byte2 = (md->tables + fcc_offset)[req_byte];  /* case flipped */
   }
 
 /* Call the main matching function, looping for a non-anchored regex after a
@@ -1885,7 +1946,7 @@ for (;;)
     if (firstline)
       {
       const uschar *t = current_subject;
-      while (t < save_end_subject && *t != '\n') t++;
+      while (t <= save_end_subject - md->nllen && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
 
@@ -1900,13 +1961,15 @@ for (;;)
           current_subject++;
       }
 
-    /* Or to just after \n for a multiline match if possible */
+    /* Or to just after a linebreak for a multiline match if possible */
 
     else if (startline)
       {
-      if (current_subject > match_block.start_subject + start_offset)
+      if (current_subject > md->start_subject + md->nllen +
+          start_offset)
         {
-        while (current_subject < end_subject && current_subject[-1] != NEWLINE)
+        while (current_subject <= end_subject &&
+               !IS_NEWLINE(current_subject - md->nllen))
           current_subject++;
         }
       }
@@ -1987,17 +2050,17 @@ for (;;)
   /* OK, now we can do the business */
 
   rc = internal_dfa_exec(
-    &match_block,                              /* fixed match data */
-    match_block.start_code,                    /* this subexpression's code */
-    current_subject,                           /* where we currently are */
-    start_offset,                              /* start offset in subject */
-    offsets,                                   /* offset vector */
-    offsetcount,                               /* size of same */
-    workspace,                                 /* workspace vector */
-    wscount,                                   /* size of same */
+    md,                                /* fixed match data */
+    md->start_code,                    /* this subexpression's code */
+    current_subject,                   /* where we currently are */
+    start_offset,                      /* start offset in subject */
+    offsets,                           /* offset vector */
+    offsetcount,                       /* size of same */
+    workspace,                         /* workspace vector */
+    wscount,                           /* size of same */
     re->options & (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL), /* ims flags */
-    0,                                         /* function recurse level */
-    0);                                        /* regex recurse level */
+    0,                                 /* function recurse level */
+    0);                                /* regex recurse level */
 
   /* Anything other than "no match" means we are done, always; otherwise, carry
   on only if not anchored. */
@@ -2007,17 +2070,15 @@ for (;;)
   /* Advance to the next subject character unless we are at the end of a line
   and firstline is set. */
 
-  if (firstline && *current_subject == NEWLINE) break;
+  if (firstline &&
+      current_subject <= end_subject - md->nllen &&
+      IS_NEWLINE(current_subject)) break;
   current_subject++;
-
-#ifdef SUPPORT_UTF8
   if (utf8)
     {
     while (current_subject < end_subject && (*current_subject & 0xc0) == 0x80)
       current_subject++;
     }
-#endif
-
   if (current_subject > end_subject) break;
   }
 
