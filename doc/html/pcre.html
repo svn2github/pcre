@@ -23,13 +23,18 @@ man page, in case the conversion went wrong.
 <P>
 The PCRE library is a set of functions that implement regular expression
 pattern matching using the same syntax and semantics as Perl, with just a few
-differences. The current implementation of PCRE (release 6.x) corresponds
-approximately with Perl 5.8, including support for UTF-8 encoded strings and
-Unicode general category properties. However, this support has to be explicitly
-enabled; it is not the default.
+differences. (Certain features that appeared in Python and PCRE before they
+appeared in Perl are also available using the Python syntax.)
 </P>
 <P>
-In addition to the Perl-compatible matching function, PCRE also contains an
+The current implementation of PCRE (release 7.x) corresponds approximately with
+Perl 5.10, including support for UTF-8 encoded strings and Unicode general
+category properties. However, UTF-8 and Unicode support has to be explicitly
+enabled; it is not the default. The Unicode tables correspond to Unicode
+release 5.0.0.
+</P>
+<P>
+In addition to the Perl-compatible matching function, PCRE contains an
 alternative matching function that matches the same compiled patterns in a
 different way. In certain circumstances, the alternative function has some
 advantages. For a discussion of the two matching algorithms, see the
@@ -114,7 +119,7 @@ internal linkage size of 3 or 4 (see the <b>README</b> file in the source
 distribution and the
 <a href="pcrebuild.html"><b>pcrebuild</b></a>
 documentation for details). In these cases the limit is substantially larger.
-However, the speed of execution will be slower.
+However, the speed of execution is slower.
 </P>
 <P>
 All values in repeating quantifiers must be less than 65536. The maximum
@@ -122,13 +127,12 @@ compiled length of subpattern with an explicit repeat count is 30000 bytes. The
 maximum number of capturing subpatterns is 65535.
 </P>
 <P>
-There is no limit to the number of non-capturing subpatterns, but the maximum
-depth of nesting of all kinds of parenthesized subpattern, including capturing
-subpatterns, assertions, and other types of subpattern, is 200.
+There is no limit to the number of parenthesized subpatterns, but there can be
+no more than 65535 capturing subpatterns.
 </P>
 <P>
-The maximum length of name for a named subpattern is 32, and the maximum number
-of named subpatterns is 10000.
+The maximum length of name for a named subpattern is 32 characters, and the
+maximum number of named subpatterns is 10000.
 </P>
 <P>
 The maximum length of a subject string is the largest positive number that an
@@ -158,7 +162,7 @@ instead of just strings of bytes.
 <P>
 If you compile PCRE with UTF-8 support, but do not use it at run time, the
 library will be a bit bigger, but the additional run time overhead is limited
-to testing the PCRE_UTF8 flag in several places, so should not be very large.
+to testing the PCRE_UTF8 flag occasionally, so should not be very big.
 </P>
 <P>
 If PCRE is built with Unicode character property support (which implies UTF-8
@@ -238,13 +242,13 @@ Philip Hazel
 <br>
 University Computing Service,
 <br>
-Cambridge CB2 3QG, England.
+Cambridge CB2 3QH, England.
 </P>
 <P>
 Putting an actual email address here seems to have been a spam magnet, so I've
 taken it away. If you want to email me, use my initial and surname, separated
 by a dot, at the domain ucs.cam.ac.uk.
-Last updated: 05 June 2006
+Last updated: 23 November 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

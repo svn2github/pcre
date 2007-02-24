@@ -11,10 +11,10 @@ pcregrep - a grep with Perl-compatible regular expressions.
 grep commands do, but it uses the PCRE regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
 .\" HREF
-\fBpcrepattern\fP
+\fBpcrepattern\fP(3)
 .\"
-for a full description of syntax and semantics of the regular expressions that
-PCRE supports.
+for a full description of syntax and semantics of the regular expressions
+that PCRE supports.
 .P
 Patterns, whether supplied on the command line or in a separate file, are given
 without delimiters. For example:
@@ -220,16 +220,22 @@ the previous 8K characters (or all the previous characters, if fewer than 8K)
 are guaranteed to be available for lookbehind assertions.
 .TP
 \fB-N\fP \fInewline-type\fP, \fB--newline=\fP\fInewline-type\fP
-The PCRE library supports three different character sequences for indicating
+The PCRE library supports four different conventions for indicating
 the ends of lines. They are the single-character sequences CR (carriage return)
-and LF (linefeed), and the two-character sequence CR, LF. When the library is
-built, a default line-ending sequence is specified. This is normally the
-standard sequence for the operating system. Unless otherwise specified by this
-option, \fBpcregrep\fP uses the default. The possible values for this option
-are CR, LF, or CRLF. This makes it possible to use \fBpcregrep\fP on files that
-have come from other environments without having to modify their line endings.
-If the data that is being scanned does not agree with the convention set by
-this option, \fBpcregrep\fP may behave in strange ways.
+and LF (linefeed), the two-character sequence CRLF, and an "any" convention, in
+which any Unicode line ending sequence is assumed to end a line. The Unicode
+sequences are the three just mentioned, plus VT (vertical tab, U+000B), FF
+(formfeed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and
+PS (paragraph separator, U+0029).
+.sp
+When the PCRE library is built, a default line-ending sequence is specified.
+This is normally the standard sequence for the operating system. Unless
+otherwise specified by this option, \fBpcregrep\fP uses the library's default.
+The possible values for this option are CR, LF, CRLF, or ANY. This makes it
+possible to use \fBpcregrep\fP on files that have come from other environments
+without having to modify their line endings. If the data that is being scanned
+does not agree with the convention set by this option, \fBpcregrep\fP may
+behave in strange ways.
 .TP
 \fB-n\fP, \fB--line-number\fP
 Precede each output line by its line number in the file, followed by a colon
@@ -339,7 +345,7 @@ in the first form, using an equals character. Otherwise it will be assumed that
 it has no data.
 .
 .
-.SH MATCHING ERRORS
+.SH "MATCHING ERRORS"
 .rs
 .sp
 It is possible to supply a regular expression that takes a very long time to
@@ -361,6 +367,12 @@ suppress error messages about inaccessble files does not affect the return
 code.
 .
 .
+.SH "SEE ALSO"
+.rs
+.sp
+\fBpcrepattern\fP(3), \fBpcretest\fP(1).
+.
+.
 .SH AUTHOR
 .rs
 .sp
@@ -368,9 +380,9 @@ Philip Hazel
 .br
 University Computing Service
 .br
-Cambridge CB2 3QG, England.
+Cambridge CB2 3QH, England.
 .P
 .in 0
-Last updated: 06 June 2006
+Last updated: 29 November 2006
 .br
 Copyright (c) 1997-2006 University of Cambridge.

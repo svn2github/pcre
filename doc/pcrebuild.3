@@ -81,9 +81,15 @@ character sequence CRLF. If you want this, add
 .sp
   --enable-newline-is-crlf
 .sp
-to the \fBconfigure\fP command. Whatever line ending convention is selected
-when PCRE is built can be overridden when the library functions are called. At
-build time it is conventional to use the standard for your operating system.
+to the \fBconfigure\fP command. There is a fourth option, specified by
+.sp
+  --enable-newline-is-any
+.sp
+which causes PCRE to recognize any Unicode newline sequence.
+.P
+Whatever line ending convention is selected when PCRE is built can be
+overridden when the library functions are called. At build time it is
+conventional to use the standard for your operating system.
 .
 .SH "BUILDING SHARED AND STATIC LIBRARIES"
 .rs
@@ -206,8 +212,14 @@ compiled to run in an EBCDIC environment by adding
   --enable-ebcdic
 .sp
 to the \fBconfigure\fP command.
+.
+.
+.SH "SEE ALSO"
+.rs
+.sp
+\fBpcreapi\fP(3), \fBpcre_config\fP(3).
 .P
 .in 0
-Last updated: 06 June 2006
+Last updated: 30 November 2006
 .br
 Copyright (c) 1997-2006 University of Cambridge.

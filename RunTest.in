@@ -128,7 +128,7 @@ fi
 if [ $do2 = yes ] ; then
   if [ "@LINK_SIZE@" = "" -o "@LINK_SIZE@" = "-DLINK_SIZE=2" ] ; then
     echo "Test 2: API and error handling (not Perl compatible)"
-    $valgrind ./pcretest -q -i $testdata/testinput2 testtry
+    $valgrind ./pcretest -q $testdata/testinput2 testtry
     if [ $? = 0 ] ; then
       $cf testtry $testdata/testoutput2
       if [ $? != 0 ] ; then exit 1; fi

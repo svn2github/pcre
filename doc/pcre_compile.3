@@ -17,8 +17,9 @@ PCRE - Perl-compatible regular expressions
 .SH DESCRIPTION
 .rs
 .sp
-This function compiles a regular expression into an internal form. Its
-arguments are:
+This function compiles a regular expression into an internal form. It is the
+same as \fBpcre_compile2()\fP, except for the absence of the \fIerrorcodeptr\fP
+argument. Its arguments are:
 .sp
   \fIpattern\fR       A zero-terminated string containing the
                   regular expression to be compiled
@@ -41,6 +42,7 @@ The option bits are:
                           (not much use currently)
   PCRE_FIRSTLINE        Force matching to be before newline
   PCRE_MULTILINE        ^ and $ match newlines within data
+  PCRE_NEWLINE_ANY      Recognize any Unicode newline sequence
   PCRE_NEWLINE_CR       Set CR as the newline sequence
   PCRE_NEWLINE_CRLF     Set CRLF as the newline sequence
   PCRE_NEWLINE_LF       Set LF as the newline sequence

@@ -27,8 +27,9 @@ SYNOPSIS
 DESCRIPTION
 </b><br>
 <P>
-This function compiles a regular expression into an internal form. Its
-arguments are:
+This function compiles a regular expression into an internal form. It is the
+same as <b>pcre_compile2()</b>, except for the absence of the <i>errorcodeptr</i>
+argument. Its arguments are:
 <pre>
   <i>pattern</i>       A zero-terminated string containing the
                   regular expression to be compiled
@@ -51,6 +52,7 @@ The option bits are:
                           (not much use currently)
   PCRE_FIRSTLINE        Force matching to be before newline
   PCRE_MULTILINE        ^ and $ match newlines within data
+  PCRE_NEWLINE_ANY      Recognize any Unicode newline sequence
   PCRE_NEWLINE_CR       Set CR as the newline sequence
   PCRE_NEWLINE_CRLF     Set CRLF as the newline sequence
   PCRE_NEWLINE_LF       Set LF as the newline sequence

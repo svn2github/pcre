@@ -73,6 +73,11 @@ backtracking into the runs of non-"&#60;" characters, but that is not related to
 stack usage.
 </P>
 <P>
+This example shows that one way of avoiding stack problems when matching long
+subject strings is to write repeated parenthesized subpatterns to match more
+than one character whenever possible.
+</P>
+<P>
 In environments where stack memory is constrained, you might want to compile
 PCRE to use heap memory instead of stack for remembering back-up points. This
 makes it run a lot more slowly, however. Details of how to do this are given in
@@ -81,15 +86,16 @@ the
 documentation.
 </P>
 <P>
-In Unix-like environments, there is not often a problem with the stack, though
-the default limit on stack size varies from system to system. Values from 8Mb
-to 64Mb are common. You can find your default limit by running the command:
+In Unix-like environments, there is not often a problem with the stack unless
+very long strings are involved, though the default limit on stack size varies
+from system to system. Values from 8Mb to 64Mb are common. You can find your
+default limit by running the command:
 <pre>
   ulimit -s
 </pre>
-The effect of running out of stack is often SIGSEGV, though sometimes an error
-message is given. You can normally increase the limit on stack size by code
-such as this:
+Unfortunately, the effect of running out of stack is often SIGSEGV, though
+sometimes a more explicit error message is given. You can normally increase the
+limit on stack size by code such as this:
 <pre>
   struct rlimit rlim;
   getrlimit(RLIMIT_STACK, &rlim);
@@ -116,10 +122,10 @@ As a very rough rule of thumb, you should reckon on about 500 bytes per
 recursion. Thus, if you want to limit your stack usage to 8Mb, you
 should set the limit at 16000 recursions. A 64Mb stack, on the other hand, can
 support around 128000 recursions. The <b>pcretest</b> test program has a command
-line option (<b>-S</b>) that can be used to increase its stack.
+line option (<b>-S</b>) that can be used to increase the size of its stack.
 </P>
 <P>
-Last updated: 29 June 2006
+Last updated: 14 September 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

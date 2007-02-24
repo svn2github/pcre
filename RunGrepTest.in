@@ -25,6 +25,9 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
+./pcretest -C | ./pcregrep "No UTF-8 support" >/dev/null
+no_utf8=$?
+
 echo "---------------------------- Test 1 ------------------------------" >testtry
 $valgrind ./pcregrep PATTERN $testdata/grepinput >>testtry
 
@@ -200,9 +203,32 @@ echo "---------------------------- Test 53 ------------------------------" >>tes
 $valgrind ./pcregrep --newline=crlf -F "xxx
 jkl" $testdata/grepinputx >>testtry
 
+echo "---------------------------- Test 54 ------------------------------" >>testtry
+$valgrind ./pcregrep -n --newline=any "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
 # Now compare the results.
 
 $cf testtry $testdata/grepoutput
-if [ $? != 0 ] ; then exit 1; else exit 0; fi
+if [ $? != 0 ] ; then exit 1; fi
+
+# These tests require UTF-8 support
+
+if [ $no_utf8 -ne 0 ] ; then
+  echo "Testing pcregrep UTF-8 features"
+  
+  echo "---------------------------- Test U1 ------------------------------" >testtry
+  $valgrind ./pcregrep -n -u --newline=any "^X" $testdata/grepinput8 >>testtry
+
+  echo "---------------------------- Test U2 ------------------------------" >>testtry
+  $valgrind ./pcregrep -n -u -C 3 --newline=any "Match" $testdata/grepinput8 >>testtry
+
+  $cf testtry $testdata/grepoutput8
+  if [ $? != 0 ] ; then exit 1; fi
+
+else
+  echo "Skipping pcregrep UTF-8 tests: no UTF-8 support in PCRE library"
+fi
+
+exit 0 
 
 # End

@@ -24,6 +24,7 @@ man page, in case the conversion went wrong.
 <li><a name="TOC9" href="#SEC9">AVOIDING EXCESSIVE STACK USAGE</a>
 <li><a name="TOC10" href="#SEC10">LIMITING PCRE RESOURCE USAGE</a>
 <li><a name="TOC11" href="#SEC11">USING EBCDIC CODE</a>
+<li><a name="TOC12" href="#SEC12">SEE ALSO</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE BUILD-TIME OPTIONS</a><br>
 <P>
@@ -100,9 +101,16 @@ character sequence CRLF. If you want this, add
 <pre>
   --enable-newline-is-crlf
 </pre>
-to the <b>configure</b> command. Whatever line ending convention is selected
-when PCRE is built can be overridden when the library functions are called. At
-build time it is conventional to use the standard for your operating system.
+to the <b>configure</b> command. There is a fourth option, specified by
+<pre>
+  --enable-newline-is-any
+</pre>
+which causes PCRE to recognize any Unicode newline sequence.
+</P>
+<P>
+Whatever line ending convention is selected when PCRE is built can be
+overridden when the library functions are called. At build time it is
+conventional to use the standard for your operating system.
 </P>
 <br><a name="SEC6" href="#TOC1">BUILDING SHARED AND STATIC LIBRARIES</a><br>
 <P>
@@ -216,8 +224,12 @@ compiled to run in an EBCDIC environment by adding
 </pre>
 to the <b>configure</b> command.
 </P>
+<br><a name="SEC12" href="#TOC1">SEE ALSO</a><br>
 <P>
-Last updated: 06 June 2006
+<b>pcreapi</b>(3), <b>pcre_config</b>(3).
+</P>
+<P>
+Last updated: 30 November 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

@@ -14,8 +14,8 @@ DESCRIPTION
        pcregrep  searches  files  for  character  patterns, in the same way as
        other grep commands do, but it uses the PCRE regular expression library
        to support patterns that are compatible with the regular expressions of
-       Perl 5. See pcrepattern for a full description of syntax and  semantics
-       of the regular expressions that PCRE supports.
+       Perl 5. See pcrepattern(3) for a full description of syntax and  seman-
+       tics of the regular expressions that PCRE supports.
 
        Patterns,  whether  supplied on the command line or in a separate file,
        are given without delimiters. For example:
@@ -245,60 +245,67 @@ OPTIONS
                  lookbehind assertions.
 
        -N newline-type, --newline=newline-type
-                 The PCRE library supports three different character sequences
-                 for indicating the ends of lines. They are the single-charac-
-                 ter sequences CR (carriage return) and LF (linefeed), and the
-                 two-character sequence CR, LF. When the library is  built,  a
-                 default  line-ending  sequence is specified. This is normally
-                 the standard sequence for the operating system. Unless other-
-                 wise specified by this option, pcregrep uses the default. The
-                 possible values for this option are CR,  LF,  or  CRLF.  This
-                 makes  it  possible  to  use pcregrep on files that have come
-                 from other environments without having to modify  their  line
-                 endings.   If  the  data that is being scanned does not agree
-                 with the convention set by this option, pcregrep  may  behave
-                 in strange ways.
+                 The  PCRE  library  supports  four  different conventions for
+                 indicating the ends of lines. They are  the  single-character
+                 sequences  CR  (carriage  return) and LF (linefeed), the two-
+                 character sequence CRLF, and an "any"  convention,  in  which
+                 any  Unicode  line  ending sequence is assumed to end a line.
+                 The Unicode sequences are the three just mentioned,  plus  VT
+                 (vertical  tab,  U+000B),  FF  (formfeed,  U+000C), NEL (next
+                 line, U+0085), LS (line separator, U+2028), and PS (paragraph
+                 separator, U+0029).
+
+                 When  the  PCRE  library  is  built,  a  default  line-ending
+                 sequence  is  specified.   This  is  normally  the   standard
+                 sequence for the operating system. Unless otherwise specified
+                 by this option, pcregrep uses  the  library's  default.   The
+                 possible  values  for  this  option are CR, LF, CRLF, or ANY.
+                 This makes it possible to use pcregrep  on  files  that  have
+                 come  from  other environments without having to modify their
+                 line endings. If the data that  is  being  scanned  does  not
+                 agree  with  the  convention set by this option, pcregrep may
+                 behave in strange ways.
 
        -n, --line-number
                  Precede each output line by its line number in the file, fol-
-                 lowed by a colon and a space for matching lines or  a  hyphen
-                 and  a space for context lines. If the filename is also being
+                 lowed  by  a colon and a space for matching lines or a hyphen
+                 and a space for context lines. If the filename is also  being
                  output, it precedes the line number.
 
        -o, --only-matching
-                 Show only the part of the line that  matched  a  pattern.  In
-                 this  mode,  no context is shown. That is, the -A, -B, and -C
+                 Show  only  the  part  of the line that matched a pattern. In
+                 this mode, no context is shown. That is, the -A, -B,  and  -C
                  options are ignored.
 
        -q, --quiet
                  Work quietly, that is, display nothing except error messages.
-                 The  exit  status  indicates  whether or not any matches were
+                 The exit status indicates whether or  not  any  matches  were
                  found.
 
        -r, --recursive
-                 If any given path is a directory, recursively scan the  files
-                 it  contains, taking note of any --include and --exclude set-
-                 tings. By default, a directory is read as a normal  file;  in
-                 some  operating  systems this gives an immediate end-of-file.
-                 This option is a shorthand  for  setting  the  -d  option  to
+                 If  any given path is a directory, recursively scan the files
+                 it contains, taking note of any --include and --exclude  set-
+                 tings.  By  default, a directory is read as a normal file; in
+                 some operating systems this gives an  immediate  end-of-file.
+                 This  option  is  a  shorthand  for  setting the -d option to
                  "recurse".
 
        -s, --no-messages
-                 Suppress  error  messages  about  non-existent  or unreadable
-                 files. Such files are quietly skipped.  However,  the  return
+                 Suppress error  messages  about  non-existent  or  unreadable
+                 files.  Such  files  are quietly skipped. However, the return
                  code is still 2, even if matches were found in other files.
 
        -u, --utf-8
-                 Operate  in UTF-8 mode. This option is available only if PCRE
-                 has been compiled with UTF-8 support. Both patterns and  sub-
+                 Operate in UTF-8 mode. This option is available only if  PCRE
+                 has  been compiled with UTF-8 support. Both patterns and sub-
                  ject lines must be valid strings of UTF-8 characters.
 
        -V, --version
-                 Write  the  version  numbers of pcregrep and the PCRE library
+                 Write the version numbers of pcregrep and  the  PCRE  library
                  that is being used to the standard error stream.
 
        -v, --invert-match
-                 Invert the sense of the match, so that  lines  which  do  not
+                 Invert  the  sense  of  the match, so that lines which do not
                  match any of the patterns are the ones that are found.
 
        -w, --word-regex, --word-regexp
@@ -306,94 +313,99 @@ OPTIONS
                  lent to having \b at the start and end of the pattern.
 
        -x, --line-regex, --line-regexp
-                 Force the patterns to be anchored (each must  start  matching
-                 at  the beginning of a line) and in addition, require them to
-                 match entire lines. This is equivalent  to  having  ^  and  $
+                 Force  the  patterns to be anchored (each must start matching
+                 at the beginning of a line) and in addition, require them  to
+                 match  entire  lines.  This  is  equivalent to having ^ and $
                  characters at the start and end of each alternative branch in
                  every pattern.
 
 
 ENVIRONMENT VARIABLES
 
-       The environment variables LC_ALL and LC_CTYPE  are  examined,  in  that
-       order,  for  a  locale.  The first one that is set is used. This can be
-       overridden by the --locale option.  If  no  locale  is  set,  the  PCRE
+       The  environment  variables  LC_ALL  and LC_CTYPE are examined, in that
+       order, for a locale. The first one that is set is  used.  This  can  be
+       overridden  by  the  --locale  option.  If  no  locale is set, the PCRE
        library's default (usually the "C" locale) is used.
 
 
 NEWLINES
 
-       The  -N (--newline) option allows pcregrep to scan files with different
-       newline conventions from the default.  However,  the  setting  of  this
-       option  does not affect the way in which pcregrep writes information to
-       the standard error and output streams. It uses the  string  "\n"  in  C
-       printf()  calls  to  indicate newlines, relying on the C I/O library to
-       convert this to an appropriate sequence if the  output  is  sent  to  a
+       The -N (--newline) option allows pcregrep to scan files with  different
+       newline  conventions  from  the  default.  However, the setting of this
+       option does not affect the way in which pcregrep writes information  to
+       the  standard  error  and  output streams. It uses the string "\n" in C
+       printf() calls to indicate newlines, relying on the C  I/O  library  to
+       convert  this  to  an  appropriate  sequence if the output is sent to a
        file.
 
 
 OPTIONS COMPATIBILITY
 
        The majority of short and long forms of pcregrep's options are the same
-       as in the GNU grep program. Any long option of  the  form  --xxx-regexp
-       (GNU  terminology) is also available as --xxx-regex (PCRE terminology).
-       However, the --locale, -M, --multiline, -u,  and  --utf-8  options  are
+       as  in  the  GNU grep program. Any long option of the form --xxx-regexp
+       (GNU terminology) is also available as --xxx-regex (PCRE  terminology).
+       However,  the  --locale,  -M,  --multiline, -u, and --utf-8 options are
        specific to pcregrep.
 
 
 OPTIONS WITH DATA
 
        There are four different ways in which an option with data can be spec-
-       ified.  If a short form option is used, the  data  may  follow  immedi-
+       ified.   If  a  short  form option is used, the data may follow immedi-
        ately, or in the next command line item. For example:
 
          -f/some/file
          -f /some/file
 
-       If  a long form option is used, the data may appear in the same command
+       If a long form option is used, the data may appear in the same  command
        line item, separated by an equals character, or (with one exception) it
        may appear in the next command line item. For example:
 
          --file=/some/file
          --file /some/file
 
-       Note,  however, that if you want to supply a file name beginning with ~
-       as data in a shell command, and have the  shell  expand  ~  to  a  home
+       Note, however, that if you want to supply a file name beginning with  ~
+       as  data  in  a  shell  command,  and have the shell expand ~ to a home
        directory, you must separate the file name from the option, because the
-       shell does not treat ~ specially unless it is at the start of an  item.
+       shell  does not treat ~ specially unless it is at the start of an item.
 
-       The  exception  to  the  above is the --colour (or --color) option, for
-       which the data is optional. If this option does have data, it  must  be
-       given  in  the first form, using an equals character. Otherwise it will
+       The exception to the above is the --colour  (or  --color)  option,  for
+       which  the  data is optional. If this option does have data, it must be
+       given in the first form, using an equals character. Otherwise  it  will
        be assumed that it has no data.
 
 
 MATCHING ERRORS
 
-       It is possible to supply a regular expression that takes  a  very  long
-       time  to  fail  to  match certain lines. Such patterns normally involve
-       nested indefinite repeats, for example: (a+)*\d when matched against  a
-       line  of  a's  with  no  final  digit. The PCRE matching function has a
-       resource limit that causes it to abort in these circumstances. If  this
+       It  is  possible  to supply a regular expression that takes a very long
+       time to fail to match certain lines.  Such  patterns  normally  involve
+       nested  indefinite repeats, for example: (a+)*\d when matched against a
+       line of a's with no final digit.  The  PCRE  matching  function  has  a
+       resource  limit that causes it to abort in these circumstances. If this
        happens, pcregrep outputs an error message and the line that caused the
-       problem to the standard error stream. If there are more  than  20  such
+       problem  to  the  standard error stream. If there are more than 20 such
        errors, pcregrep gives up.
 
 
 DIAGNOSTICS
 
        Exit status is 0 if any matches were found, 1 if no matches were found,
-       and 2 for syntax errors and non-existent or inacessible files (even  if
-       matches  were  found in other files) or too many matching errors. Using
-       the -s option to suppress error messages about inaccessble  files  does
+       and  2 for syntax errors and non-existent or inacessible files (even if
+       matches were found in other files) or too many matching  errors.  Using
+       the  -s  option to suppress error messages about inaccessble files does
        not affect the return code.
+
+
+SEE ALSO
+
+       pcrepattern(3), pcretest(1).
 
 
 AUTHOR
 
        Philip Hazel
        University Computing Service
-       Cambridge CB2 3QG, England.
+       Cambridge CB2 3QH, England.
 
-Last updated: 06 June 2006
+Last updated: 29 November 2006
 Copyright (c) 1997-2006 University of Cambridge.

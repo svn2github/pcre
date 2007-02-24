@@ -185,11 +185,20 @@ if test "$enableval" = "yes"; then
 fi
 )
 
+dnl Handle --enable-newline-is-any
+
+AC_ARG_ENABLE(newline-is-any,
+[  --enable-newline-is-any  use any Unicode newline sequence],
+if test "$enableval" = "yes"; then
+  NEWLINE=-DNEWLINE=-1
+fi
+)
+
 dnl Handle --enable-ebcdic
 
 AC_ARG_ENABLE(ebcdic,
 [  --enable-ebcdic         assume EBCDIC coding rather than ASCII],
-if test "$enableval" == "yes"; then
+if test "$enableval" = "yes"; then
   EBCDIC=-DEBCDIC=1
 fi
 )
@@ -299,4 +308,4 @@ if test "x$enable_shared" = "xno" ; then
 fi
 
 dnl This must be last; it determines what files are written as well as config.h
-AC_OUTPUT(Makefile pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in pcrecpparg.h:pcrecpparg.h.in pcre_stringpiece.h:pcre_stringpiece.h.in RunGrepTest:RunGrepTest.in RunTest:RunTest.in,[chmod a+x RunTest RunGrepTest pcre-config])
+AC_OUTPUT(Makefile pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in libpcrecpp.pc:libpcrecpp.pc.in pcrecpparg.h:pcrecpparg.h.in pcre_stringpiece.h:pcre_stringpiece.h.in RunGrepTest:RunGrepTest.in RunTest:RunTest.in,[chmod a+x RunTest RunGrepTest pcre-config])

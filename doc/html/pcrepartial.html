@@ -112,8 +112,9 @@ uses the date example quoted above:
 </pre>
 The first data string is matched completely, so <b>pcretest</b> shows the
 matched substrings. The remaining four strings do not match the complete
-pattern, but the first two are partial matches. The same test, using DFA
-matching (by means of the \D escape sequence), produces the following output:
+pattern, but the first two are partial matches. The same test, using
+<b>pcre_dfa_exec()</b> matching (by means of the \D escape sequence), produces
+the following output:
 <pre>
     re&#62; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
   data&#62; 25jun04\P\D
@@ -134,11 +135,11 @@ available.
 <P>
 When a partial match has been found using <b>pcre_dfa_exec()</b>, it is possible
 to continue the match by providing additional subject data and calling
-<b>pcre_dfa_exec()</b> again with the PCRE_DFA_RESTART option and the same
-working space (where details of the previous partial match are stored). Here is
-an example using <b>pcretest</b>, where the \R escape sequence sets the
-PCRE_DFA_RESTART option and the \D escape sequence requests the use of
-<b>pcre_dfa_exec()</b>:
+<b>pcre_dfa_exec()</b> again with the same compiled regular expression, this
+time setting the PCRE_DFA_RESTART option. You must also pass the same working
+space as before, because this is where details of the previous partial match
+are stored. Here is an example using <b>pcretest</b>, using the \R escape
+sequence to set the PCRE_DFA_RESTART option (\P and \D are as above):
 <pre>
     re&#62; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
   data&#62; 23ja\P\D
@@ -153,9 +154,10 @@ not retain the previously partially-matched string. It is up to the calling
 program to do that if it needs to.
 </P>
 <P>
-This facility can be used to pass very long subject strings to
-<b>pcre_dfa_exec()</b>. However, some care is needed for certain types of
-pattern.
+You can set PCRE_PARTIAL with PCRE_DFA_RESTART to continue partial matching
+over multiple segments. This facility can be used to pass very long subject
+strings to <b>pcre_dfa_exec()</b>. However, some care is needed for certain
+types of pattern.
 </P>
 <P>
 1. If the pattern contains tests for the beginning or end of a line, you need
@@ -165,7 +167,7 @@ subject string for any call does not contain the beginning or end of a line.
 <P>
 2. If the pattern contains backward assertions (including \b or \B), you need
 to arrange for some overlap in the subject strings to allow for this. For
-example, you could pass the subject in chunks that were 500 bytes long, but in
+example, you could pass the subject in chunks that are 500 bytes long, but in
 a buffer of 700 bytes, with the starting offset set to 200 and the previous 200
 bytes at the start of the buffer.
 </P>
@@ -217,7 +219,7 @@ patterns or patterns such as:
 where no string can be a partial match for both alternatives.
 </P>
 <P>
-Last updated: 16 January 2006
+Last updated: 30 November 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

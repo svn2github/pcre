@@ -17,8 +17,9 @@ DIFFERENCES BETWEEN PCRE AND PERL
 </b><br>
 <P>
 This document describes the differences in the ways that PCRE and Perl handle
-regular expressions. The differences described here are with respect to Perl
-5.8.
+regular expressions. The differences described here are mainly with respect to
+Perl 5.8, though PCRE version 7.0 contains some features that are expected to
+be in the forthcoming Perl 5.10.
 </P>
 <P>
 1. PCRE has only a subset of Perl's UTF-8 and Unicode support. Details of what
@@ -76,20 +77,28 @@ following examples:
 The \Q...\E sequence is recognized both inside and outside character classes.
 </P>
 <P>
-8. Fairly obviously, PCRE does not support the (?{code}) and (?p{code})
-constructions. However, there is support for recursive patterns using the
-non-Perl items (?R), (?number), and (?P&#62;name). Also, the PCRE "callout" feature
-allows an external function to be called during pattern matching. See the
+8. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
+constructions. However, there is support for recursive patterns. This is not
+available in Perl 5.8, but will be in Perl 5.10. Also, the PCRE "callout"
+feature allows an external function to be called during pattern matching. See
+the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation for details.
 </P>
 <P>
-9. There are some differences that are concerned with the settings of captured
+9. Subpatterns that are called recursively or as "subroutines" are always
+treated as atomic groups in PCRE. This is like Python, but unlike Perl.
+</P>
+<P>
+10. There are some differences that are concerned with the settings of captured
 strings when part of a pattern is repeated. For example, matching "aba" against
 the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 </P>
 <P>
-10. PCRE provides some extensions to the Perl regular expression facilities:
+11. PCRE provides some extensions to the Perl regular expression facilities.
+Perl 5.10 will include new features that are not in earlier versions, some of
+which (such as named parentheses) have been in PCRE for some time. This list is
+with respect to Perl 5.10:
 <br>
 <br>
 (a) Although lookbehind assertions must match fixed length strings, each
@@ -119,36 +128,21 @@ only at the first matching position in the subject string.
 options for <b>pcre_exec()</b> have no Perl equivalents.
 <br>
 <br>
-(g) The (?R), (?number), and (?P&#62;name) constructs allows for recursive pattern
-matching (Perl can do this using the (?p{code}) construct, which PCRE cannot
-support.)
+(g) The callout facility is PCRE-specific.
 <br>
 <br>
-(h) PCRE supports named capturing substrings, using the Python syntax.
+(h) The partial matching facility is PCRE-specific.
 <br>
 <br>
-(i) PCRE supports the possessive quantifier "++" syntax, taken from Sun's Java
-package.
-<br>
-<br>
-(j) The (R) condition, for testing recursion, is a PCRE extension.
-<br>
-<br>
-(k) The callout facility is PCRE-specific.
-<br>
-<br>
-(l) The partial matching facility is PCRE-specific.
-<br>
-<br>
-(m) Patterns compiled by PCRE can be saved and re-used at a later time, even on
+(i) Patterns compiled by PCRE can be saved and re-used at a later time, even on
 different hosts that have the other endianness.
 <br>
 <br>
-(n) The alternative matching function (<b>pcre_dfa_exec()</b>) matches in a
+(j) The alternative matching function (<b>pcre_dfa_exec()</b>) matches in a
 different way and is not Perl-compatible.
 </P>
 <P>
-Last updated: 06 June 2006
+Last updated: 28 November 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>

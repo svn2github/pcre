@@ -36,7 +36,11 @@ and how it differs from the normal function, are discussed in the
 \fBpcrematching\fP
 .\"
 page.
-.P
+.
+.
+.SH "CHARACTERS AND METACHARACTERS"
+.rs
+.sp
 A regular expression is a pattern that is matched against a subject string from
 left to right. Most characters stand for themselves in a pattern, and match the
 corresponding characters in the subject. As a trivial example, the pattern
@@ -60,8 +64,8 @@ interpreted in some special way.
 .P
 There are two different sets of metacharacters: those that are recognized
 anywhere in the pattern except within square brackets, and those that are
-recognized in square brackets. Outside square brackets, the metacharacters are
-as follows:
+recognized within square brackets. Outside square brackets, the metacharacters
+are as follows:
 .sp
   \e      general escape character with several uses
   ^      assert start of string (or line, in multiline mode)
@@ -91,6 +95,7 @@ a character class the only metacharacters are:
   ]      terminates the character class
 .sp
 The following sections describe the use of each of the metacharacters.
+.
 .
 .SH BACKSLASH
 .rs
@@ -190,7 +195,7 @@ parenthesized subpatterns.
 .P
 Inside a character class, or if the decimal number is greater than 9 and there
 have not been that many capturing subpatterns, PCRE re-reads up to three octal
-digits following the backslash, ane uses them to generate a data character. Any
+digits following the backslash, and uses them to generate a data character. Any
 subsequent digits stand for themselves. In non-UTF-8 mode, the value of a
 character specified in octal must be less than \e400. In UTF-8 mode, values up
 to \e777 are permitted. For example:
@@ -221,18 +226,36 @@ zero, because no more than three octal digits are ever read.
 All the sequences that define a single character value can be used both inside
 and outside character classes. In addition, inside a character class, the
 sequence \eb is interpreted as the backspace character (hex 08), and the
-sequence \eX is interpreted as the character "X". Outside a character class,
-these sequences have different meanings
+sequences \eR and \eX are interpreted as the characters "R" and "X",
+respectively. Outside a character class, these sequences have different
+meanings
 .\" HTML <a href="#uniextseq">
 .\" </a>
 (see below).
 .\"
 .
 .
+.SS "Absolute and relative back references"
+.rs
+.sp
+The sequence \eg followed by a positive or negative number, optionally enclosed
+in braces, is an absolute or relative back reference. Back references are
+discussed
+.\" HTML <a href="#backreferences">
+.\" </a>
+later,
+.\"
+following the discussion of
+.\" HTML <a href="#subpattern">
+.\" </a>
+parenthesized subpatterns.
+.\"
+.
+.
 .SS "Generic character types"
 .rs
 .sp
-The third use of backslash is for specifying generic character types. The
+Another use of backslash is for specifying generic character types. The
 following are always recognized:
 .sp
   \ed     any decimal digit
@@ -277,6 +300,34 @@ character property support is available. The use of locales with Unicode is
 discouraged.
 .
 .
+.SS "Newline sequences"
+.rs
+.sp
+Outside a character class, the escape sequence \eR matches any Unicode newline
+sequence. This is an extension to Perl. In non-UTF-8 mode \eR is equivalent to
+the following:
+.sp
+  (?>\er\en|\en|\ex0b|\ef|\er|\ex85)
+.sp
+This is an example of an "atomic group", details of which are given
+.\" HTML <a href="#atomicgroup">
+.\" </a>
+below.
+.\"
+This particular group matches either the two-character sequence CR followed by
+LF, or one of the single characters LF (linefeed, U+000A), VT (vertical tab,
+U+000B), FF (formfeed, U+000C), CR (carriage return, U+000D), or NEL (next
+line, U+0085). The two-character sequence is treated as a single unit that
+cannot be split.
+.P
+In UTF-8 mode, two additional characters whose codepoints are greater than 255
+are added: LS (line separator, U+2028) and PS (paragraph separator, U+2029).
+Unicode character property support is not needed for these characters to be
+recognized.
+.P
+Inside a character class, \eR matches the letter "R".
+.
+.
 .\" HTML <a name="uniextseq"></a>
 .SS Unicode character properties
 .rs
@@ -307,6 +358,7 @@ Those that are not part of an identified script are lumped together as
 .P
 Arabic,
 Armenian,
+Balinese,
 Bengali,
 Bopomofo,
 Braille,
@@ -316,6 +368,7 @@ Canadian_Aboriginal,
 Cherokee,
 Common,
 Coptic,
+Cuneiform,
 Cypriot,
 Cyrillic,
 Deseret,
@@ -345,11 +398,14 @@ Malayalam,
 Mongolian,
 Myanmar,
 New_Tai_Lue,
+Nko,
 Ogham,
 Old_Italic,
 Old_Persian,
 Oriya,
 Osmanya,
+Phags_Pa,
+Phoenician,
 Runic,
 Shavian,
 Sinhala,
@@ -466,7 +522,7 @@ properties in PCRE.
 .SS "Simple assertions"
 .rs
 .sp
-The fourth use of backslash is for certain simple assertions. An assertion
+The final use of backslash is for certain simple assertions. An assertion
 specifies a condition that has to be met at a particular point in a match,
 without consuming any characters from the subject string. The use of
 subpatterns for more complicated assertions is described
@@ -478,10 +534,11 @@ The backslashed assertions are:
 .sp
   \eb     matches at a word boundary
   \eB     matches when not at a word boundary
-  \eA     matches at start of subject
-  \eZ     matches at end of subject or before newline at end
-  \ez     matches at end of subject
-  \eG     matches at first matching position in subject
+  \eA     matches at the start of the subject
+  \eZ     matches at the end of the subject
+          also matches before a newline at the end of the subject
+  \ez     matches only at the end of the subject
+  \eG     matches at the first matching position in the subject
 .sp
 These assertions may not appear in character classes (but note that \eb has a
 different meaning, namely the backspace character, inside a character class).
@@ -578,15 +635,19 @@ end of the subject in both modes, and if all branches of a pattern start with
 .sp
 Outside a character class, a dot in the pattern matches any one character in
 the subject string except (by default) a character that signifies the end of a
-line. In UTF-8 mode, the matched character may be more than one byte long. When
-a line ending is defined as a single character (CR or LF), dot never matches
-that character; when the two-character sequence CRLF is used, dot does not
-match CR if it is immediately followed by LF, but otherwise it matches all
-characters (including isolated CRs and LFs).
+line. In UTF-8 mode, the matched character may be more than one byte long.
+.P
+When a line ending is defined as a single character, dot never matches that
+character; when the two-character sequence CRLF is used, dot does not match CR
+if it is immediately followed by LF, but otherwise it matches all characters
+(including isolated CRs and LFs). When any Unicode line endings are being
+recognized, dot does not match CR or LF or any of the other line ending
+characters.
 .P
 The behaviour of dot with regard to newlines can be changed. If the PCRE_DOTALL
-option is set, a dot matches any one character, without exception. If newline
-is defined as the two-character sequence CRLF, it takes two dots to match it.
+option is set, a dot matches any one character, without exception. If the
+two-character sequence CRLF is present in the subject string, it takes two dots
+to match it.
 .P
 The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
@@ -597,11 +658,11 @@ special meaning in a character class.
 .rs
 .sp
 Outside a character class, the escape sequence \eC matches any one byte, both
-in and out of UTF-8 mode. Unlike a dot, it always matches CR and LF. The
-feature is provided in Perl in order to match individual bytes in UTF-8 mode.
-Because it breaks up UTF-8 characters into individual bytes, what remains in
-the string may be a malformed UTF-8 string. For this reason, the \eC escape
-sequence is best avoided.
+in and out of UTF-8 mode. Unlike a dot, it always matches any line-ending
+characters. The feature is provided in Perl in order to match individual bytes
+in UTF-8 mode. Because it breaks up UTF-8 characters into individual bytes,
+what remains in the string may be a malformed UTF-8 string. For this reason,
+the \eC escape sequence is best avoided.
 .P
 PCRE does not allow \eC to appear in lookbehind assertions
 .\" HTML <a href="#lookbehind">
@@ -652,10 +713,10 @@ If you want to use caseless matching for characters 128 and above, you must
 ensure that PCRE is compiled with Unicode property support as well as with
 UTF-8 support.
 .P
-Characters that might indicate line breaks (CR and LF) are never treated in any
-special way when matching character classes, whatever line-ending sequence is
-in use, and whatever setting of the PCRE_DOTALL and PCRE_MULTILINE options is
-used. A class such as [^a] always matches one of these characters.
+Characters that might indicate line breaks are never treated in any special way
+when matching character classes, whatever line-ending sequence is in use, and
+whatever setting of the PCRE_DOTALL and PCRE_MULTILINE options is used. A class
+such as [^a] always matches one of these characters.
 .P
 The minus (hyphen) character can be used to specify a range of characters in a
 character class. For example, [d-m] matches any letter between d and m,
@@ -790,8 +851,8 @@ If the change is placed right at the start of a pattern, PCRE extracts it into
 the global options (and it will therefore show up in data extracted by the
 \fBpcre_fullinfo()\fP function).
 .P
-An option change within a subpattern affects only that part of the current
-pattern that follows it, so
+An option change within a subpattern (see below for a description of
+subpatterns) affects only that part of the current pattern that follows it, so
 .sp
   (a(?i)b)c
 .sp
@@ -824,7 +885,7 @@ Turning part of a pattern into a subpattern does two things:
   cat(aract|erpillar|)
 .sp
 matches one of the words "cat", "cataract", or "caterpillar". Without the
-parentheses, it would match "cataract", "erpillar" or the empty string.
+parentheses, it would match "cataract", "erpillar" or an empty string.
 .sp
 2. It sets up the subpattern as a capturing subpattern. This means that, when
 the whole pattern matches, that portion of the subject string that matched the
@@ -849,8 +910,7 @@ the string "the white queen" is matched against the pattern
   the ((?:red|white) (king|queen))
 .sp
 the captured substrings are "white queen" and "queen", and are numbered 1 and
-2. The maximum number of capturing subpatterns is 65535, and the maximum depth
-of nesting of all subpatterns, both capturing and non-capturing, is 200.
+2. The maximum number of capturing subpatterns is 65535.
 .P
 As a convenient shorthand, if any option settings are required at the start of
 a non-capturing subpattern, the option letters may appear between the "?" and
@@ -871,8 +931,13 @@ the above patterns match "SUNDAY" as well as "Saturday".
 Identifying capturing parentheses by number is simple, but it can be very hard
 to keep track of the numbers in complicated regular expressions. Furthermore,
 if an expression is modified, the numbers may change. To help with this
-difficulty, PCRE supports the naming of subpatterns, something that Perl does
-not provide. The Python syntax (?P<name>...) is used. References to capturing
+difficulty, PCRE supports the naming of subpatterns. This feature was not
+added to Perl until release 5.10. Python had the feature earlier, and PCRE
+introduced it at release 4.0, using the Python syntax. PCRE now supports both
+the Perl and the Python syntax.
+.P
+In PCRE, a subpattern can be named in one of three ways: (?<name>...) or
+(?'name'...) as in Perl, or (?P<name>...) as in Python. References to capturing
 parentheses from other parts of the pattern, such as
 .\" HTML <a href="#backreferences">
 .\" </a>
@@ -890,10 +955,10 @@ conditions,
 can be made by name as well as by number.
 .P
 Names consist of up to 32 alphanumeric characters and underscores. Named
-capturing parentheses are still allocated numbers as well as names. The PCRE
-API provides function calls for extracting the name-to-number translation table
-from a compiled pattern. There is also a convenience function for extracting a
-captured substring by name.
+capturing parentheses are still allocated numbers as well as names, exactly as
+if the names were not present. The PCRE API provides function calls for
+extracting the name-to-number translation table from a compiled pattern. There
+is also a convenience function for extracting a captured substring by name.
 .P
 By default, a name must be unique within a pattern, but it is possible to relax
 this constraint by setting the PCRE_DUPNAMES option at compile time. This can
@@ -902,15 +967,15 @@ match. Suppose you want to match the name of a weekday, either as a 3-letter
 abbreviation or as the full name, and in both cases you want to extract the
 abbreviation. This pattern (ignoring the line breaks) does the job:
 .sp
-  (?P<DN>Mon|Fri|Sun)(?:day)?|
-  (?P<DN>Tue)(?:sday)?|
-  (?P<DN>Wed)(?:nesday)?|
-  (?P<DN>Thu)(?:rsday)?|
-  (?P<DN>Sat)(?:urday)?
+  (?<DN>Mon|Fri|Sun)(?:day)?|
+  (?<DN>Tue)(?:sday)?|
+  (?<DN>Wed)(?:nesday)?|
+  (?<DN>Thu)(?:rsday)?|
+  (?<DN>Sat)(?:urday)?
 .sp
 There are five capturing substrings, but only one is ever set after a match.
 The convenience function for extracting the data by name returns the substring
-for the first, and in this example, the only, subpattern of that name that
+for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was. If you
 make a reference to a non-unique named subpattern from elsewhere in the
 pattern, the one that corresponds to the lowest number is used. For further
@@ -928,9 +993,10 @@ Repetition is specified by quantifiers, which can follow any of the following
 items:
 .sp
   a literal data character
-  the . metacharacter
+  the dot metacharacter
   the \eC escape sequence
   the \eX escape sequence (in UTF-8 mode with Unicode properties)
+  the \eR escape sequence
   an escape such as \ed that matches a single character
   a character class
   a back reference (see next section)
@@ -968,8 +1034,8 @@ which may be several bytes long (and they may be of different lengths).
 The quantifier {0} is permitted, causing the expression to behave as if the
 previous item and the quantifier were not present.
 .P
-For convenience (and historical compatibility) the three most common
-quantifiers have single-character abbreviations:
+For convenience, the three most common quantifiers have single-character
+abbreviations:
 .sp
   *    is equivalent to {0,}
   +    is equivalent to {1,}
@@ -1017,7 +1083,7 @@ own right. Because it has two uses, it can sometimes appear doubled, as in
 which matches one digit by preference, but can match two if that is the only
 way the rest of the pattern matches.
 .P
-If the PCRE_UNGREEDY option is set (an option which is not available in Perl),
+If the PCRE_UNGREEDY option is set (an option that is not available in Perl),
 the quantifiers are not greedy by default, but individual ones can be made
 greedy by following them with a question mark. In other words, it inverts the
 default behaviour.
@@ -1027,7 +1093,7 @@ is greater than 1 or with a limited maximum, more memory is required for the
 compiled pattern, in proportion to the size of the minimum or maximum.
 .P
 If a pattern starts with .* or .{0,} and the PCRE_DOTALL option (equivalent
-to Perl's /s) is set, thus allowing the . to match newlines, the pattern is
+to Perl's /s) is set, thus allowing the dot to match newlines, the pattern is
 implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE normally treats such a
@@ -1039,8 +1105,8 @@ alternatively using ^ to indicate anchoring explicitly.
 .P
 However, there is one situation where the optimization cannot be used. When .*
 is inside capturing parentheses that are the subject of a backreference
-elsewhere in the pattern, a match at the start may fail, and a later one
-succeed. Consider, for example:
+elsewhere in the pattern, a match at the start may fail where a later one
+succeeds. Consider, for example:
 .sp
   (.*)abc\e1
 .sp
@@ -1066,12 +1132,12 @@ matches "aba" the value of the second captured substring is "b".
 .SH "ATOMIC GROUPING AND POSSESSIVE QUANTIFIERS"
 .rs
 .sp
-With both maximizing and minimizing repetition, failure of what follows
-normally causes the repeated item to be re-evaluated to see if a different
-number of repeats allows the rest of the pattern to match. Sometimes it is
-useful to prevent this, either to change the nature of the match, or to cause
-it fail earlier than it otherwise might, when the author of the pattern knows
-there is no point in carrying on.
+With both maximizing ("greedy") and minimizing ("ungreedy" or "lazy")
+repetition, failure of what follows normally causes the repeated item to be
+re-evaluated to see if a different number of repeats allows the rest of the
+pattern to match. Sometimes it is useful to prevent this, either to change the
+nature of the match, or to cause it fail earlier than it otherwise might, when
+the author of the pattern knows there is no point in carrying on.
 .P
 Consider, for example, the pattern \ed+foo when applied to the subject line
 .sp
@@ -1083,7 +1149,7 @@ item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
 (a term taken from Jeffrey Friedl's book) provides the means for specifying
 that once a subpattern has matched, it is not to be re-evaluated in this way.
 .P
-If we use atomic grouping for the previous example, the matcher would give up
+If we use atomic grouping for the previous example, the matcher gives up
 immediately on failing to match "foo" the first time. The notation is a kind of
 special parenthesis, starting with (?> as in this example:
 .sp
@@ -1115,13 +1181,19 @@ previous example can be rewritten as
 .sp
 Possessive quantifiers are always greedy; the setting of the PCRE_UNGREEDY
 option is ignored. They are a convenient notation for the simpler forms of
-atomic group. However, there is no difference in the meaning or processing of a
-possessive quantifier and the equivalent atomic group.
+atomic group. However, there is no difference in the meaning of a possessive
+quantifier and the equivalent atomic group, though there may be a performance
+difference; possessive quantifiers should be slightly faster.
 .P
-The possessive quantifier syntax is an extension to the Perl syntax. Jeffrey
-Friedl originated the idea (and the name) in the first edition of his book.
-Mike McCloskey liked it, so implemented it when he built Sun's Java package,
-and PCRE copied it from there.
+The possessive quantifier syntax is an extension to the Perl 5.8 syntax.
+Jeffrey Friedl originated the idea (and the name) in the first edition of his
+book. Mike McCloskey liked it, so implemented it when he built Sun's Java
+package, and PCRE copied it from there. It ultimately found its way into Perl
+at release 5.10.
+.P
+PCRE has an optimization that automatically "possessifies" certain simple
+pattern constructs. For example, the sequence A+B is treated as A++B because
+there is no point in backtracking into a sequence of A's when B must follow.
 .P
 When a pattern contains an unlimited repeat inside a subpattern that can itself
 be repeated an unlimited number of times, the use of an atomic group is the
@@ -1167,15 +1239,38 @@ numbers less than 10. A "forward back reference" of this type can make sense
 when a repetition is involved and the subpattern to the right has participated
 in an earlier iteration.
 .P
-It is not possible to have a numerical "forward back reference" to subpattern
-whose number is 10 or more. However, a back reference to any subpattern is
-possible using named parentheses (see below). See also the subsection entitled
+It is not possible to have a numerical "forward back reference" to a subpattern
+whose number is 10 or more using this syntax because a sequence such as \e50 is
+interpreted as a character defined in octal. See the subsection entitled
 "Non-printing characters"
 .\" HTML <a href="#digitsafterbackslash">
 .\" </a>
 above
 .\"
-for further details of the handling of digits following a backslash.
+for further details of the handling of digits following a backslash. There is
+no such problem when named parentheses are used. A back reference to any
+subpattern is possible using named parentheses (see below).
+.P
+Another way of avoiding the ambiguity inherent in the use of digits following a
+backslash is to use the \eg escape sequence, which is a feature introduced in
+Perl 5.10. This escape must be followed by a positive or a negative number,
+optionally enclosed in braces. These examples are all identical:
+.sp
+  (ring), \e1
+  (ring), \eg1
+  (ring), \eg{1}
+.sp
+A positive number specifies an absolute reference without the ambiguity that is
+present in the older syntax. It is also useful when literal digits follow the
+reference. A negative number is a relative reference. Consider this example:
+.sp
+  (abc(def)ghi)\eg{-1}
+.sp
+The sequence \eg{-1} is a reference to the most recently started capturing
+subpattern before \eg, that is, is it equivalent to \e2. Similarly, \eg{-2}
+would be equivalent to \e1. The use of relative references can be helpful in
+long patterns, and also in patterns that are created by joining together
+fragments that contain references within themselves.
 .P
 A back reference matches whatever actually matched the capturing subpattern in
 the current subject string, rather than anything matching the subpattern
@@ -1197,9 +1292,11 @@ back reference, the case of letters is relevant. For example,
 matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
 capturing subpattern is matched caselessly.
 .P
-Back references to named subpatterns use the Python syntax (?P=name). We could
-rewrite the above example as follows:
+Back references to named subpatterns use the Perl syntax \ek<name> or \ek'name'
+or the Python syntax (?P=name). We could rewrite the above example in either of
+the following ways:
 .sp
+  (?<p1>(?i)rah)\es+\ek<p1>
   (?P<p1>(?i)rah)\es+(?P=p1)
 .sp
 A subpattern that is referenced by name may appear in the pattern before or
@@ -1324,18 +1421,18 @@ lengths, but it is acceptable if rewritten to use two top-level branches:
   (?<=abc|abde)
 .sp
 The implementation of lookbehind assertions is, for each alternative, to
-temporarily move the current position back by the fixed width and then try to
+temporarily move the current position back by the fixed length and then try to
 match. If there are insufficient characters before the current position, the
-match is deemed to fail.
+assertion fails.
 .P
 PCRE does not allow the \eC escape (which matches a single byte in UTF-8 mode)
 to appear in lookbehind assertions, because it makes it impossible to calculate
-the length of the lookbehind. The \eX escape, which can match different numbers
-of bytes, is also not permitted.
+the length of the lookbehind. The \eX and \eR escapes, which can match
+different numbers of bytes, are also not permitted.
 .P
-Atomic groups can be used in conjunction with lookbehind assertions to specify
-efficient matching at the end of the subject string. Consider a simple pattern
-such as
+Possessive quantifiers can be used in conjunction with lookbehind assertions to
+specify efficient matching at the end of the subject string. Consider a simple
+pattern such as
 .sp
   abcd$
 .sp
@@ -1351,13 +1448,9 @@ then all but the last two characters, and so on. Once again the search for "a"
 covers the entire string, from right to left, so we are no better off. However,
 if the pattern is written as
 .sp
-  ^(?>.*)(?<=abcd)
-.sp
-or, equivalently, using the possessive quantifier syntax,
-.sp
   ^.*+(?<=abcd)
 .sp
-there can be no backtracking for the .* item; it can match only the entire
+there can be no backtracking for the .*+ item; it can match only the entire
 string. The subsequent lookbehind assertion does a single test on the last four
 characters. If it fails, the match fails immediately. For long strings, this
 approach makes a significant difference to the processing time.
@@ -1413,15 +1506,15 @@ If the condition is satisfied, the yes-pattern is used; otherwise the
 no-pattern (if present) is used. If there are more than two alternatives in the
 subpattern, a compile-time error occurs.
 .P
-There are three kinds of condition. If the text between the parentheses
-consists of a sequence of digits, or a sequence of alphanumeric characters and
-underscores, the condition is satisfied if the capturing subpattern of that
-number or name has previously matched. There is a possible ambiguity here,
-because subpattern names may consist entirely of digits. PCRE looks first for a
-named subpattern; if it cannot find one and the text consists entirely of
-digits, it looks for a subpattern of that number, which must be greater than
-zero. Using subpattern names that consist entirely of digits is not
-recommended.
+There are four kinds of condition: references to subpatterns, references to
+recursion, a pseudo-condition called DEFINE, and assertions.
+.
+.SS "Checking for a used subpattern by number"
+.rs
+.sp
+If the text between the parentheses consists of a sequence of digits, the
+condition is true if the capturing subpattern of that number has previously
+matched.
 .P
 Consider the following pattern, which contains non-significant white space to
 make it more readable (assume the PCRE_EXTENDED option) and to divide it into
@@ -1437,17 +1530,69 @@ or not. If they did, that is, if subject started with an opening parenthesis,
 the condition is true, and so the yes-pattern is executed and a closing
 parenthesis is required. Otherwise, since no-pattern is not present, the
 subpattern matches nothing. In other words, this pattern matches a sequence of
-non-parentheses, optionally enclosed in parentheses. Rewriting it to use a
-named subpattern gives this:
+non-parentheses, optionally enclosed in parentheses.
+.
+.SS "Checking for a used subpattern by name"
+.rs
 .sp
-  (?P<OPEN> \e( )?    [^()]+    (?(OPEN) \e) )
+Perl uses the syntax (?(<name>)...) or (?('name')...) to test for a used
+subpattern by name. For compatibility with earlier versions of PCRE, which had
+this facility before Perl, the syntax (?(name)...) is also recognized. However,
+there is a possible ambiguity with this syntax, because subpattern names may
+consist entirely of digits. PCRE looks first for a named subpattern; if it
+cannot find one and the name consists entirely of digits, PCRE looks for a
+subpattern of that number, which must be greater than zero. Using subpattern
+names that consist entirely of digits is not recommended.
+.P
+Rewriting the above example to use a named subpattern gives this:
+.sp
+  (?<OPEN> \e( )?    [^()]+    (?(<OPEN>) \e) )
+.sp
+.
+.SS "Checking for pattern recursion"
+.rs
 .sp
 If the condition is the string (R), and there is no subpattern with the name R,
-the condition is satisfied if a recursive call to the pattern or subpattern has
-been made. At "top level", the condition is false. This is a PCRE extension.
-Recursive patterns are described in the next section.
+the condition is true if a recursive call to the whole pattern or any
+subpattern has been made. If digits or a name preceded by ampersand follow the
+letter R, for example:
+.sp
+  (?(R3)...) or (?(R&name)...)
+.sp
+the condition is true if the most recent recursion is into the subpattern whose
+number or name is given. This condition does not check the entire recursion
+stack.
 .P
-If the condition is not a sequence of digits or (R), it must be an assertion.
+At "top level", all these recursion test conditions are false. Recursive
+patterns are described below.
+.
+.SS "Defining subpatterns for use by reference only"
+.rs
+.sp
+If the condition is the string (DEFINE), and there is no subpattern with the
+name DEFINE, the condition is always false. In this case, there may be only one
+alternative in the subpattern. It is always skipped if control reaches this
+point in the pattern; the idea of DEFINE is that it can be used to define
+"subroutines" that can be referenced from elsewhere. (The use of "subroutines"
+is described below.) For example, a pattern to match an IPv4 address could be
+written like this (ignore whitespace and line breaks):
+.sp
+  (?(DEFINE) (?<byte> 2[0-4]\ed | 25[0-5] | 1\ed\ed | [1-9]?\ed) )
+  \eb (?&byte) (\e.(?&byte)){3} \eb
+.sp
+The first part of the pattern is a DEFINE group inside which a another group
+named "byte" is defined. This matches an individual component of an IPv4
+address (a number less than 256). When matching takes place, this part of the
+pattern is skipped because DEFINE acts like a false condition.
+.P
+The rest of the pattern uses references to the named group to match the four
+dot-separated components of an IPv4 address, insisting on a word boundary at
+each end.
+.
+.SS "Assertion conditions"
+.rs
+.sp
+If the condition is not in any of the above formats, it must be an assertion.
 This may be a positive or negative lookahead or lookbehind assertion. Consider
 this pattern, again containing non-significant white space, and with the two
 alternatives on the second line:
@@ -1483,28 +1628,34 @@ next newline in the pattern.
 Consider the problem of matching a string in parentheses, allowing for
 unlimited nested parentheses. Without the use of recursion, the best that can
 be done is to use a pattern that matches up to some fixed depth of nesting. It
-is not possible to handle an arbitrary nesting depth. Perl provides a facility
-that allows regular expressions to recurse (amongst other things). It does this
-by interpolating Perl code in the expression at run time, and the code can
-refer to the expression itself. A Perl pattern to solve the parentheses problem
-can be created like this:
+is not possible to handle an arbitrary nesting depth.
+.P
+For some time, Perl has provided a facility that allows regular expressions to
+recurse (amongst other things). It does this by interpolating Perl code in the
+expression at run time, and the code can refer to the expression itself. A Perl
+pattern using code interpolation to solve the parentheses problem can be
+created like this:
 .sp
   $re = qr{\e( (?: (?>[^()]+) | (?p{$re}) )* \e)}x;
 .sp
 The (?p{...}) item interpolates Perl code at run time, and in this case refers
-recursively to the pattern in which it appears. Obviously, PCRE cannot support
-the interpolation of Perl code. Instead, it supports some special syntax for
-recursion of the entire pattern, and also for individual subpattern recursion.
+recursively to the pattern in which it appears.
 .P
-The special item that consists of (? followed by a number greater than zero and
-a closing parenthesis is a recursive call of the subpattern of the given
-number, provided that it occurs inside that subpattern. (If not, it is a
-"subroutine" call, which is described in the next section.) The special item
-(?R) is a recursive call of the entire regular expression.
+Obviously, PCRE cannot support the interpolation of Perl code. Instead, it
+supports special syntax for recursion of the entire pattern, and also for
+individual subpattern recursion. After its introduction in PCRE and Python,
+this kind of recursion was introduced into Perl at release 5.10.
 .P
-A recursive subpattern call is always treated as an atomic group. That is, once
-it has matched some of the subject string, it is never re-entered, even if
-it contains untried alternatives and there is a subsequent matching failure.
+A special item that consists of (? followed by a number greater than zero and a
+closing parenthesis is a recursive call of the subpattern of the given number,
+provided that it occurs inside that subpattern. (If not, it is a "subroutine"
+call, which is described in the next section.) The special item (?R) or (?0) is
+a recursive call of the entire regular expression.
+.P
+In PCRE (like Python, but unlike Perl), a recursive subpattern call is always
+treated as an atomic group. That is, once it has matched some of the subject
+string, it is never re-entered, even if it contains untried alternatives and
+there is a subsequent matching failure.
 .P
 This PCRE pattern solves the nested parentheses problem (assume the
 PCRE_EXTENDED option is set so that white space is ignored):
@@ -1524,14 +1675,15 @@ pattern, so instead you could use this:
 We have put the pattern into parentheses, and caused the recursion to refer to
 them instead of the whole pattern. In a larger pattern, keeping track of
 parenthesis numbers can be tricky. It may be more convenient to use named
-parentheses instead. For this, PCRE uses (?P>name), which is an extension to
-the Python syntax that PCRE uses for named parentheses (Perl does not provide
-named parentheses). We could rewrite the above example as follows:
+parentheses instead. The Perl syntax for this is (?&name); PCRE's earlier
+syntax (?P>name) is also supported. We could rewrite the above example as
+follows:
 .sp
-  (?P<pn> \e( ( (?>[^()]+) | (?P>pn) )* \e) )
+  (?<pn> \e( ( (?>[^()]+) | (?&pn) )* \e) )
 .sp
-This particular example pattern contains nested unlimited repeats, and so the
-use of atomic grouping for matching strings of non-parentheses is important
+If there is more than one subpattern with the same name, the earliest one is
+used. This particular example pattern contains nested unlimited repeats, and so
+the use of atomic grouping for matching strings of non-parentheses is important
 when applying the pattern to strings that do not match. For example, when this
 pattern is applied to
 .sp
@@ -1545,7 +1697,7 @@ before failure can be reported.
 At the end of a match, the values set for any capturing subpatterns are those
 from the outermost level of the recursion at which the subpattern value is set.
 If you want to obtain intermediate values, a callout function can be used (see
-the next section and the
+below and the
 .\" HREF
 \fBpcrecallout\fP
 .\"
@@ -1584,8 +1736,8 @@ is the actual recursive call.
 .sp
 If the syntax for a recursive subpattern reference (either by number or by
 name) is used outside the parentheses to which it refers, it operates like a
-subroutine in a programming language. An earlier example pointed out that the
-pattern
+subroutine in a programming language. The "called" subpattern may be defined
+before or after the reference. An earlier example pointed out that the pattern
 .sp
   (sens|respons)e and \e1ibility
 .sp
@@ -1595,13 +1747,21 @@ matches "sense and sensibility" and "response and responsibility", but not
   (sens|respons)e and (?1)ibility
 .sp
 is used, it does match "sense and responsibility" as well as the other two
-strings. Such references, if given numerically, must follow the subpattern to
-which they refer. However, named references can refer to later subpatterns.
+strings. Another example is given in the discussion of DEFINE above.
 .P
 Like recursive subpatterns, a "subroutine" call is always treated as an atomic
 group. That is, once it has matched some of the subject string, it is never
 re-entered, even if it contains untried alternatives and there is a subsequent
 matching failure.
+.P
+When a subpattern is used as a subroutine, processing options such as
+case-independence are fixed when the subpattern is defined. They cannot be
+changed for different calls. For example, consider this pattern:
+.sp
+  (abc)(?i:(?1))
+.sp
+It matches "abcabc". It does not match "abcABC" because the change of
+processing option does not affect the called subpattern.
 .
 .
 .SH CALLOUTS
@@ -1638,8 +1798,14 @@ description of the interface to the callout function is given in the
 \fBpcrecallout\fP
 .\"
 documentation.
+.
+.
+.SH "SEE ALSO"
+.rs
+.sp
+\fBpcreapi\fP(3), \fBpcrecallout\fP(3), \fBpcrematching\fP(3), \fBpcre\fP(3).
 .P
 .in 0
-Last updated: 06 June 2006
+Last updated: 06 December 2006
 .br
 Copyright (c) 1997-2006 University of Cambridge.

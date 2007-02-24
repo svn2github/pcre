@@ -131,6 +131,7 @@ OBJ = pcre_chartables.@OBJEXT@ \
   pcre_globals.@OBJEXT@ \
   pcre_info.@OBJEXT@ \
   pcre_maketables.@OBJEXT@ \
+  pcre_newline.@OBJEXT@ \
   pcre_ord2utf8.@OBJEXT@ \
   pcre_refcount.@OBJEXT@ \
   pcre_study.@OBJEXT@ \
@@ -152,6 +153,7 @@ LOBJ = pcre_chartables.lo \
   pcre_globals.lo \
   pcre_info.lo \
   pcre_maketables.lo \
+  pcre_newline.lo \
   pcre_ord2utf8.lo \
   pcre_refcount.lo \
   pcre_study.lo \
@@ -275,6 +277,11 @@ pcre_maketables.@OBJEXT@: Makefile config.h $(top_srcdir)/pcre.h \
 		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_maketables.c
 
+pcre_newline.@OBJEXT@: Makefile config.h $(top_srcdir)/pcre.h \
+		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_newline.c
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		$(top_srcdir)/pcre_newline.c
+
 pcre_ord2utf8.@OBJEXT@: Makefile config.h $(top_srcdir)/pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_ord2utf8.c
 		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
@@ -303,6 +310,7 @@ pcre_try_flipped.@OBJEXT@: Makefile config.h $(top_srcdir)/pcre.h \
 pcre_ucp_searchfuncs.@OBJEXT@: Makefile config.h $(top_srcdir)/pcre.h \
 		$(top_srcdir)/pcre_internal.h \
 		$(top_srcdir)/pcre_ucp_searchfuncs.c \
+		$(top_srcdir)/ucpinternal.h \
 		$(top_srcdir)/ucptable.c
 		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_ucp_searchfuncs.c
@@ -516,6 +524,7 @@ install:        all @ON_WINDOWS@ wininstall
 		$(INSTALL) pcre-config $(DESTDIR)$(BINDIR)/pcre-config
 		$(mkinstalldirs) $(DESTDIR)$(LIBDIR)/pkgconfig
 		$(INSTALL_DATA) libpcre.pc $(DESTDIR)$(LIBDIR)/pkgconfig/libpcre.pc
+		$(INSTALL_DATA) libpcrecpp.pc $(DESTDIR)$(LIBDIR)/pkgconfig/libpcrecpp.pc
 
 # The uninstall target removes all the files that were installed.
 
@@ -568,7 +577,8 @@ uninstall:;     -rm -rf \
 		$(DESTDIR)$(BINDIR)/pcregrep@EXEEXT@ \
 		$(DESTDIR)$(BINDIR)/pcretest@EXEEXT@ \
 		$(DESTDIR)$(BINDIR)/pcre-config \
-		$(DESTDIR)$(LIBDIR)/pkgconfig/libpcre.pc
+		$(DESTDIR)$(LIBDIR)/pkgconfig/libpcre.pc \
+		$(DESTDIR)$(LIBDIR)/pkgconfig/libpcrecpp.pc
 
 # We deliberately omit dftables and pcre_chartables.c from 'make clean'; once
 # made pcre_chartables.c shouldn't change, and if people have edited the tables
@@ -580,7 +590,7 @@ clean:;         -rm -rf *.@OBJEXT@ *.lo *.a *.la .libs pcretest@EXEEXT@ pcre_str
 
 distclean:      clean
 		-rm -f pcre_chartables.c libtool pcre-config libpcre.pc \
-		pcre_stringpiece.h pcrecpparg.h \
+		libpcrecpp.pc pcre_stringpiece.h pcrecpparg.h \
 		dftables@EXEEXT@ RunGrepTest RunTest \
 		Makefile config.h config.status config.log config.cache
 

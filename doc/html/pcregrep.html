@@ -22,7 +22,8 @@ man page, in case the conversion went wrong.
 <li><a name="TOC7" href="#SEC7">OPTIONS WITH DATA</a>
 <li><a name="TOC8" href="#SEC8">MATCHING ERRORS</a>
 <li><a name="TOC9" href="#SEC9">DIAGNOSTICS</a>
-<li><a name="TOC10" href="#SEC10">AUTHOR</a>
+<li><a name="TOC10" href="#SEC10">SEE ALSO</a>
+<li><a name="TOC11" href="#SEC11">AUTHOR</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
@@ -33,9 +34,9 @@ man page, in case the conversion went wrong.
 <b>pcregrep</b> searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
-<a href="pcrepattern.html"><b>pcrepattern</b></a>
-for a full description of syntax and semantics of the regular expressions that
-PCRE supports.
+<a href="pcrepattern.html"><b>pcrepattern</b>(3)</a>
+for a full description of syntax and semantics of the regular expressions
+that PCRE supports.
 </P>
 <P>
 Patterns, whether supplied on the command line or in a separate file, are given
@@ -268,16 +269,23 @@ are guaranteed to be available for lookbehind assertions.
 </P>
 <P>
 <b>-N</b> <i>newline-type</i>, <b>--newline=</b><i>newline-type</i>
-The PCRE library supports three different character sequences for indicating
+The PCRE library supports four different conventions for indicating
 the ends of lines. They are the single-character sequences CR (carriage return)
-and LF (linefeed), and the two-character sequence CR, LF. When the library is
-built, a default line-ending sequence is specified. This is normally the
-standard sequence for the operating system. Unless otherwise specified by this
-option, <b>pcregrep</b> uses the default. The possible values for this option
-are CR, LF, or CRLF. This makes it possible to use <b>pcregrep</b> on files that
-have come from other environments without having to modify their line endings.
-If the data that is being scanned does not agree with the convention set by
-this option, <b>pcregrep</b> may behave in strange ways.
+and LF (linefeed), the two-character sequence CRLF, and an "any" convention, in
+which any Unicode line ending sequence is assumed to end a line. The Unicode
+sequences are the three just mentioned, plus VT (vertical tab, U+000B), FF
+(formfeed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and
+PS (paragraph separator, U+0029).
+<br>
+<br>
+When the PCRE library is built, a default line-ending sequence is specified.
+This is normally the standard sequence for the operating system. Unless
+otherwise specified by this option, <b>pcregrep</b> uses the library's default.
+The possible values for this option are CR, LF, CRLF, or ANY. This makes it
+possible to use <b>pcregrep</b> on files that have come from other environments
+without having to modify their line endings. If the data that is being scanned
+does not agree with the convention set by this option, <b>pcregrep</b> may
+behave in strange ways.
 </P>
 <P>
 <b>-n</b>, <b>--line-number</b>
@@ -407,16 +415,20 @@ found in other files) or too many matching errors. Using the <b>-s</b> option to
 suppress error messages about inaccessble files does not affect the return
 code.
 </P>
-<br><a name="SEC10" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC10" href="#TOC1">SEE ALSO</a><br>
+<P>
+<b>pcrepattern</b>(3), <b>pcretest</b>(1).
+</P>
+<br><a name="SEC11" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
 University Computing Service
 <br>
-Cambridge CB2 3QG, England.
+Cambridge CB2 3QH, England.
 </P>
 <P>
-Last updated: 06 June 2006
+Last updated: 29 November 2006
 <br>
 Copyright &copy; 1997-2006 University of Cambridge.
 <p>
