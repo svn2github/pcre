@@ -94,6 +94,11 @@ cd /build/pcre/pcre-xxx
 There are some optional features that can be included or omitted from the PCRE
 library. You can read more about them in the pcrebuild man page.
 
+. If you want to suppress the building of the C++ wrapper library, you can add
+  --disable-cpp to the "configure" command. Otherwise, when "configure" is run,
+  will try to find a C++ compiler and C++ header files, and if it succeeds, it
+  will try to build the C++ wrapper.
+
 . If you want to make use of the support for UTF-8 character strings in PCRE,
   you must add --enable-utf8 to the "configure" command. Without it, the code
   for handling UTF-8 is not included in the library. (Even when included, it
@@ -486,4 +491,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-June 2005
+August 2005

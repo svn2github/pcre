@@ -68,7 +68,10 @@ found in the <b>README</b> file in the source distribution.
 The library contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-"_pcre_", which hopefully will not provoke any name clashes.
+"_pcre_", which hopefully will not provoke any name clashes. In some
+environments, it is possible to control which external symbols are exported
+when a shared library is built, and in these cases the undocumented symbols are
+not exported.
 </P>
 <br><a name="SEC2" href="#TOC1">USER DOCUMENTATION</a><br>
 <P>

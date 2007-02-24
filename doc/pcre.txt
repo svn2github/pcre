@@ -53,7 +53,9 @@ INTRODUCTION
        data  tables  that  are  used by more than one of the exported external
        functions, but which are not intended  for  use  by  external  callers.
        Their  names  all begin with "_pcre_", which hopefully will not provoke
-       any name clashes.
+       any name clashes. In some environments, it is possible to control which
+       external  symbols  are  exported when a shared library is built, and in
+       these cases the undocumented symbols are not exported.
 
 
 USER DOCUMENTATION
@@ -234,6 +236,17 @@ PCRE BUILD-TIME OPTIONS
        not described.
 
 
+C++ SUPPORT
+
+       By default, the configure script will search for a C++ compiler and C++
+       header files. If it finds them, it automatically builds the C++ wrapper
+       library for PCRE. You can disable this by adding
+
+         --disable-cpp
+
+       to the configure command.
+
+
 UTF-8 SUPPORT
 
        To build PCRE with support for UTF-8 character strings, add
@@ -381,7 +394,7 @@ USING EBCDIC CODE
 
        to the configure command.
 
-Last updated: 28 February 2005
+Last updated: 15 August 2005
 Copyright (c) 1997-2005 University of Cambridge.
 ------------------------------------------------------------------------------
 

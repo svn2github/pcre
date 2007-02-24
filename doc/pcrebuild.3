@@ -19,6 +19,17 @@ or --disable. These settings specify changes to the defaults for the
 --enable and --disable always come in pairs, so the complementary option always
 exists as well, but as it specifies the default, it is not described.
 .
+.SH "C++ SUPPORT"
+.rs
+.sp
+By default, the \fBconfigure\fP script will search for a C++ compiler and C++
+header files. If it finds them, it automatically builds the C++ wrapper library
+for PCRE. You can disable this by adding
+.sp
+  --disable-cpp
+.sp
+to the \fBconfigure\fP command.
+.
 .SH "UTF-8 SUPPORT"
 .rs
 .sp
@@ -173,6 +184,6 @@ compiled to run in an EBCDIC environment by adding
 to the \fBconfigure\fP command.
 .P
 .in 0
-Last updated: 28 February 2005
+Last updated: 15 August 2005
 .br
 Copyright (c) 1997-2005 University of Cambridge.

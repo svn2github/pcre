@@ -1,6 +1,39 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.3 15-Aug-05
+---------------------
+
+ 1. The file libpcre.pc.in did not have general read permission in the tarball.
+
+ 2. There were some problems when building without C++ support:
+
+    (a) If C++ support was not built, "make install" and "make test" still
+        tried to test it.
+
+    (b) There were problems when the value of CXX was explicitly set. Some
+        changes have been made to try to fix these, and ...
+
+    (c) --disable-cpp can now be used to explicitly disable C++ support.
+
+    (d) The use of @CPP_OBJ@ directly caused a blank line preceded by a
+        backslash in a target when C++ was disabled. This confuses some
+        versions of "make", apparently. Using an intermediate variable solves
+        this. (Same for CPP_LOBJ.)
+
+ 3. $(LINK_FOR_BUILD) now includes $(CFLAGS_FOR_BUILD) and $(LINK)
+    (non-Windows) now includes $(CFLAGS) because these flags are sometimes
+    necessary on certain architectures.
+
+ 4. Added a setting of -export-symbols-regex to the link command to remove
+    those symbols that are exported in the C sense, but actually are local
+    within the library, and not documented. Their names all begin with
+    "_pcre_". This is not a perfect job, because (a) we have to except some
+    symbols that pcretest ("illegally") uses, and (b) the facility isn't always
+    available (and never for static libraries). I have made a note to try to
+    find a way round (a) in the future.
+
+
 Version 6.2 01-Aug-05
 ---------------------
 

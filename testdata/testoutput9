@@ -1,4 +1,4 @@
-PCRE version 6.2 01-Aug-2005
+PCRE version 6.3 15-Aug-2005
 
 /\pL\P{Nd}/8
     AB

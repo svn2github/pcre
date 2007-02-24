@@ -1,5 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
+dnl This configure.in file has been hacked around quite a lot as a result of
+dnl patches that various people have sent to me (PH). Sometimes the information
+dnl I get is contradictory. I've tried to put in comments that explain things,
+dnl but in some cases the information is second-hand and I have no way of
+dnl verifying it. I am not an autoconf or libtool expert!
+
 dnl This is required at the start; the name is the name of a file
 dnl it should be seeing, to verify it is in the same directory.
 
@@ -21,8 +27,8 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=6
-PCRE_MINOR=2
-PCRE_DATE=01-Aug-2005
+PCRE_MINOR=3
+PCRE_DATE=15-Aug-2005
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
@@ -36,11 +42,22 @@ PCRE_LIB_VERSION=0:1:0
 PCRE_POSIXLIB_VERSION=0:0:0
 PCRE_CPPLIB_VERSION=0:0:0
 
+dnl Handle --disable-cpp
+
+AC_ARG_ENABLE(cpp,
+[  --disable-cpp           disable C++ support],
+want_cpp="$enableval", want_cpp=yes)
+
 dnl Checks for programs.
 
 AC_PROG_CC
 
-dnl For the C++ wrapper libpcrecpp.
+dnl Test for C++ for the C++ wrapper libpcrecpp. It seems, however, that
+dnl AC_PROC_CXX will set $CXX to "g++" when no C++ compiler is installed, even
+dnl though that is completely bogus. (This may happen only on certain systems
+dnl with certain versions of autoconf, of course.) An attempt to include this
+dnl test inside a check for want_cpp was criticized by a libtool expert, who
+dnl tells me that it isn't allowed.
 
 AC_PROG_CXX
 
@@ -60,7 +77,7 @@ dnl while building. It needs to be different from CC when cross-compiling.
 dnl There is a macro called AC_PROG_CC_FOR_BUILD in the GNU archive for
 dnl figuring this out automatically. Unfortunately, it does not work with the
 dnl latest versions of autoconf. So for the moment, we just default to the
-dnl same values as the "main" compiler. People who are corss-compiling will
+dnl same values as the "main" compiler. People who are cross-compiling will
 dnl just have to adjust the Makefile by hand or set these values when they
 dnl run "configure".
 
@@ -77,40 +94,50 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(limits.h)
 
-dnl These are C++ header files
+dnl The files below are C++ header files. One person told me (PH) that
+dnl AC_LANG_CPLUSPLUS unsets CXX if it was explicitly set to something which
+dnl doesn't work. However, this doesn't always seem to be the case.
 
+if test "x$want_cpp" = "xyes" -a -n "$CXX"
+then
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-dnl I could be more clever here, given I'm doing AC_SUBST with this
-dnl (eg set a var to be the name of the include file I want).  But I'm not
+
+dnl We could be more clever here, given we're doing AC_SUBST with this
+dnl (eg set a var to be the name of the include file we want).  But we're not
 dnl so it's easy to change back to 'regular' autoconf vars if we needed to.
-AC_CHECK_HEADERS(string, [pcre_has_cpp_headers="1"],
-                         [pcre_has_cpp_headers="0"])
-AC_CHECK_HEADERS(bits/type_traits.h, [pcre_has_bits_type_traits="1"],
-                                     [pcre_has_bits_type_traits="0"])
-AC_CHECK_HEADERS(type_traits.h, [pcre_has_type_traits="1"],
-                                [pcre_has_type_traits="0"])
+AC_CHECK_HEADERS(string, [pcre_have_cpp_headers="1"],
+                         [pcre_have_cpp_headers="0"])
+AC_CHECK_HEADERS(bits/type_traits.h, [pcre_have_bits_type_traits="1"],
+                                     [pcre_have_bits_type_traits="0"])
+AC_CHECK_HEADERS(type_traits.h, [pcre_have_type_traits="1"],
+                                [pcre_have_type_traits="0"])
 dnl Using AC_SUBST eliminates the need to include config.h in a public .h file
-AC_SUBST(pcre_has_bits_type_traits)
-AC_SUBST(pcre_has_type_traits)
+AC_SUBST(pcre_have_bits_type_traits)
+AC_SUBST(pcre_have_type_traits)
 AC_LANG_RESTORE
+fi
 
 dnl From the above, we now have enough info to know if C++ is fully installed
-if test -n "$ac_cv_prog_ac_ct_CXX" -a "$pcre_has_cpp_headers" = 1; then
+if test "x$want_cpp" = "xyes" -a -n "$CXX" -a "$pcre_have_cpp_headers" = 1; then
   MAYBE_CPP_TARGETS='$(CPP_TARGETS)'
+  HAVE_CPP=
+else
+  MAYBE_CPP_TARGETS=
+  HAVE_CPP="#"
 fi
 AC_SUBST(MAYBE_CPP_TARGETS)
-
+AC_SUBST(HAVE_CPP)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 
 AC_C_CONST
 AC_TYPE_SIZE_T
 
-AC_CHECK_TYPES([long long], [pcre_has_long_long="1"], [pcre_has_long_long="0"])
-AC_CHECK_TYPES([unsigned long long], [pcre_has_ulong_long="1"], [pcre_has_ulong_long="0"])
-AC_SUBST(pcre_has_long_long)
-AC_SUBST(pcre_has_ulong_long)
+AC_CHECK_TYPES([long long], [pcre_have_long_long="1"], [pcre_have_long_long="0"])
+AC_CHECK_TYPES([unsigned long long], [pcre_have_ulong_long="1"], [pcre_have_ulong_long="0"])
+AC_SUBST(pcre_have_long_long)
+AC_SUBST(pcre_have_ulong_long)
 
 dnl Checks for library functions.
 

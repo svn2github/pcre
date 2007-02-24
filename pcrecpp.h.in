@@ -690,10 +690,10 @@ class Arg {
   PCRE_MAKE_PARSER(unsigned int,       parse_uint);
   PCRE_MAKE_PARSER(long,               parse_long);
   PCRE_MAKE_PARSER(unsigned long,      parse_ulong);
-#if @pcre_has_long_long@
+#if @pcre_have_long_long@
   PCRE_MAKE_PARSER(long long,          parse_longlong);
 #endif
-#if @pcre_has_ulong_long@
+#if @pcre_have_ulong_long@
   PCRE_MAKE_PARSER(unsigned long long, parse_ulonglong);
 #endif
   PCRE_MAKE_PARSER(float,              parse_float);
@@ -769,10 +769,10 @@ MAKE_INTEGER_PARSER(int,                int);
 MAKE_INTEGER_PARSER(unsigned int,       uint);
 MAKE_INTEGER_PARSER(long,               long);
 MAKE_INTEGER_PARSER(unsigned long,      ulong);
-#if @pcre_has_long_long@
+#if @pcre_have_long_long@
 MAKE_INTEGER_PARSER(long long,          longlong);
 #endif
-#if @pcre_has_ulong_long@
+#if @pcre_have_ulong_long@
 MAKE_INTEGER_PARSER(unsigned long long, ulonglong);
 #endif
 

@@ -42,10 +42,10 @@
 #include <string>
 #include <iosfwd>    // for ostream forward-declaration
 
-#if @pcre_has_type_traits@
+#if @pcre_have_type_traits@
 #define HAVE_TYPE_TRAITS
 #include <type_traits.h>
-#elif @pcre_has_bits_type_traits@
+#elif @pcre_have_bits_type_traits@
 #define HAVE_TYPE_TRAITS
 #include <bits/type_traits.h>
 #endif

@@ -65,6 +65,12 @@ OBJEXT = @OBJEXT@
 BUILD_EXEEXT = @BUILD_EXEEXT@
 BUILD_OBJEXT = @BUILD_OBJEXT@
 
+# POSIX_OBJ and POSIX_LOBJ are either set empty, or to the names of the
+# POSIX object files.
+
+POSIX_OBJ = @POSIX_OBJ@
+POSIX_LOBJ = @POSIX_LOBJ@
+
 # The compiler, C flags, preprocessor flags, etc
 
 CC = @CC@
@@ -98,9 +104,9 @@ LIBTOOL = @LIBTOOL@
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) -I. -I$(top_srcdir) $(NEWLINE) $(LINK_SIZE) $(MATCH_LIMIT) $(NO_RECURSE) $(EBCDIC)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) -c $(CXXFLAGS) -I. -I$(top_srcdir) $(NEWLINE) $(LINK_SIZE) $(MATCH_LIMIT) $(NO_RECURSE) $(EBCDIC)
 @ON_WINDOWS@LINK = $(CC) $(LDFLAGS) -I. -I$(top_srcdir) -L.libs
-@NOT_ON_WINDOWS@LINK = $(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -I. -I$(top_srcdir)
-LINKLIB = $(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -I. -I$(top_srcdir)
-LINK_FOR_BUILD = $(LIBTOOL) --mode=link $(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -I. -I$(top_srcdir)
+@NOT_ON_WINDOWS@LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -I. -I$(top_srcdir)
+LINKLIB = $(LIBTOOL) --mode=link $(CC) -export-symbols-regex '^[^_]|__?pcre_.*utf8|__?pcre_printint' $(LDFLAGS) -I. -I$(top_srcdir)
+LINK_FOR_BUILD = $(LIBTOOL) --mode=link $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -I. -I$(top_srcdir)
 @ON_WINDOWS@CXXLINK = $(CXX) $(LDFLAGS) -I. -I$(top_srcdir) -L.libs
 @NOT_ON_WINDOWS@CXXLINK = $(LIBTOOL) --mode=link $(CXX) $(LDFLAGS) -I. -I$(top_srcdir)
 CXXLINKLIB = $(LIBTOOL) --mode=link $(CXX) $(LDFLAGS) -I. -I$(top_srcdir)
@@ -134,7 +140,7 @@ OBJ = pcre_chartables.@OBJEXT@ \
   pcre_valid_utf8.@OBJEXT@ \
   pcre_version.@OBJEXT@ \
   pcre_xclass.@OBJEXT@ \
-  @POSIX_OBJ@
+  $(POSIX_OBJ)
 
 LOBJ = pcre_chartables.lo \
   pcre_compile.lo \
@@ -156,7 +162,7 @@ LOBJ = pcre_chartables.lo \
   pcre_valid_utf8.lo \
   pcre_version.lo \
   pcre_xclass.lo \
-  @POSIX_LOBJ@
+  $(POSIX_LOBJ)
 
 CPPOBJ = pcrecpp.@OBJEXT@ \
   pcre_scanner.@OBJEXT@ \
@@ -409,11 +415,11 @@ wininstall : winshared
 	$(INSTALL) .libs/@WIN_PREFIX@pcreposix.dll $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcreposix.dll
 	$(INSTALL) .libs/@WIN_PREFIX@libpcreposix.dll.a $(DESTDIR)$(LIBDIR)/@WIN_PREFIX@libpcreposix.dll.a
 	$(INSTALL) .libs/@WIN_PREFIX@libpcre.dll.a $(DESTDIR)$(LIBDIR)/@WIN_PREFIX@libpcre.dll.a
-	$(INSTALL) .libs/@WIN_PREFIX@pcrecpp.dll $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcrecpp.dll
-	$(INSTALL) .libs/@WIN_PREFIX@libpcrecpp.dll.a $(DESTDIR)$(LIBDIR)/@WIN_PREFIX@libpcrecpp.dll.a
+@HAVE_CPP@	 $(INSTALL) .libs/@WIN_PREFIX@pcrecpp.dll $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcrecpp.dll
+@HAVE_CPP@	 $(INSTALL) .libs/@WIN_PREFIX@libpcrecpp.dll.a $(DESTDIR)$(LIBDIR)/@WIN_PREFIX@libpcrecpp.dll.a
 	-strip -g $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcre.dll
 	-strip -g $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcreposix.dll
-	-strip -g $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcrecpp.dll
+@HAVE_CPP@	 -strip -g $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcrecpp.dll
 	-strip $(DESTDIR)$(BINDIR)/pcregrep@EXEEXT@
 	-strip $(DESTDIR)$(BINDIR)/pcretest@EXEEXT@
 
@@ -437,22 +443,22 @@ install:        all @ON_WINDOWS@ wininstall
 @NOT_ON_WINDOWS@	       $(LIBTOOL) --mode=install $(INSTALL) libpcre.la $(DESTDIR)$(LIBDIR)/libpcre.la
 @NOT_ON_WINDOWS@	       echo "$(LIBTOOL) --mode=install $(INSTALL) libpcreposix.la $(DESTDIR)$(LIBDIR)/libpcreposix.la"
 @NOT_ON_WINDOWS@	       $(LIBTOOL) --mode=install $(INSTALL) libpcreposix.la $(DESTDIR)$(LIBDIR)/libpcreposix.la
-@NOT_ON_WINDOWS@	       echo "$(LIBTOOL) --mode=install $(INSTALL) libpcrecpp.la $(DESTDIR)$(LIBDIR)/libpcrecpp.la"
-@NOT_ON_WINDOWS@	       $(LIBTOOL) --mode=install $(INSTALL) libpcrecpp.la $(DESTDIR)$(LIBDIR)/libpcrecpp.la
+@NOT_ON_WINDOWS@@HAVE_CPP@		echo "$(LIBTOOL) --mode=install $(INSTALL) libpcrecpp.la $(DESTDIR)$(LIBDIR)/libpcrecpp.la"
+@NOT_ON_WINDOWS@@HAVE_CPP@		$(LIBTOOL) --mode=install $(INSTALL) libpcrecpp.la $(DESTDIR)$(LIBDIR)/libpcrecpp.la
 @NOT_ON_WINDOWS@	       $(LIBTOOL) --finish $(DESTDIR)$(LIBDIR)
 		$(mkinstalldirs) $(DESTDIR)$(INCDIR)
 		$(INSTALL_DATA) pcre.h $(DESTDIR)$(INCDIR)/pcre.h
 		$(INSTALL_DATA) $(top_srcdir)/pcreposix.h $(DESTDIR)$(INCDIR)/pcreposix.h
-		$(INSTALL_DATA) pcrecpp.h $(DESTDIR)$(INCDIR)/pcrecpp.h
-		$(INSTALL_DATA) pcre_stringpiece.h $(DESTDIR)$(INCDIR)/pcre_stringpiece.h
-		$(INSTALL_DATA) $(top_srcdir)/pcre_scanner.h $(DESTDIR)$(INCDIR)/pcre_scanner.h
+@HAVE_CPP@		 $(INSTALL_DATA) pcrecpp.h $(DESTDIR)$(INCDIR)/pcrecpp.h
+@HAVE_CPP@		 $(INSTALL_DATA) pcre_stringpiece.h $(DESTDIR)$(INCDIR)/pcre_stringpiece.h
+@HAVE_CPP@		 $(INSTALL_DATA) $(top_srcdir)/pcre_scanner.h $(DESTDIR)$(INCDIR)/pcre_scanner.h
 		$(mkinstalldirs) $(DESTDIR)$(MANDIR)/man3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcre.3 $(DESTDIR)$(MANDIR)/man3/pcre.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcreapi.3 $(DESTDIR)$(MANDIR)/man3/pcreapi.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcrebuild.3 $(DESTDIR)$(MANDIR)/man3/pcrebuild.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecallout.3 $(DESTDIR)$(MANDIR)/man3/pcrecallout.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecompat.3 $(DESTDIR)$(MANDIR)/man3/pcrecompat.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecpp.3 $(DESTDIR)$(MANDIR)/man3/pcrecpp.3
+@HAVE_CPP@		 $(INSTALL_DATA) $(top_srcdir)/doc/pcrecpp.3 $(DESTDIR)$(MANDIR)/man3/pcrecpp.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcrematching.3 $(DESTDIR)$(MANDIR)/man3/pcrematching.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcrepattern.3 $(DESTDIR)$(MANDIR)/man3/pcrepattern.3
 		$(INSTALL_DATA) $(top_srcdir)/doc/pcreperform.3 $(DESTDIR)$(MANDIR)/man3/pcreperform.3
@@ -557,13 +563,13 @@ test:           runtest
 runtest:        all @ON_WINDOWS@ @WIN_PREFIX@pcre.dll
 		@./RunTest
 		@./RunGrepTest
-		@echo ""
-		@echo "Testing C++ wrapper"
-		@echo ""; echo "Test 1++: stringpiece"
-		@./pcre_stringpiece_unittest@EXEEXT@
-		@echo ""; echo "Test 2++: RE class"
-		@./pcrecpp_unittest@EXEEXT@
-		@echo ""; echo "Test 3++: Scanner class"
-		@./pcre_scanner_unittest@EXEEXT@
+@HAVE_CPP@		 @echo ""
+@HAVE_CPP@		 @echo "Testing C++ wrapper"
+@HAVE_CPP@		 @echo ""; echo "Test 1++: stringpiece"
+@HAVE_CPP@		 @./pcre_stringpiece_unittest@EXEEXT@
+@HAVE_CPP@		 @echo ""; echo "Test 2++: RE class"
+@HAVE_CPP@		 @./pcrecpp_unittest@EXEEXT@
+@HAVE_CPP@		 @echo ""; echo "Test 3++: Scanner class"
+@HAVE_CPP@		 @./pcre_scanner_unittest@EXEEXT@
 
 # End
