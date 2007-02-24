@@ -2,6 +2,14 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 3.4 22-Aug-00
+---------------------
+
+1. Fixed typo in pcre.h: unsigned const char * changed to const unsigned char *.
+
+2. Diagnose condition (?(0) as an error instead of crashing on matching.
+
+
 Version 3.3 01-Aug-00
 ---------------------
 

@@ -83,7 +83,8 @@ static int eint[] = {
   REG_BADPAT,  /* "POSIX collating elements are not supported" */
   REG_INVARG,  /* "this version of PCRE is not compiled with PCRE_UTF8 support" */
   REG_BADPAT,  /* "characters with values > 255 are not yet supported in classes" */
-  REG_BADPAT   /* "character value in \x{...} sequence is too large" */
+  REG_BADPAT,  /* "character value in \x{...} sequence is too large" */
+  REG_BADPAT   /* "invalid condition (?(0)" */
 };
 
 /* Table of texts corresponding to POSIX error codes */

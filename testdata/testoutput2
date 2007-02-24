@@ -1,4 +1,4 @@
-PCRE version 3.3 01-Aug-2000
+PCRE version 3.4 22-Aug-2000
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -2063,6 +2063,9 @@ No match
 
 /[\200-\410]/
 Failed: range out of order in character class at offset 9
+
+/^(?(0)f|b)oo/
+Failed: invalid condition (?(0) at offset 5
 
 / End of testinput2 /
 Capturing subpattern count = 0

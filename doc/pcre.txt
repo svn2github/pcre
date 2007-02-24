@@ -1462,7 +1462,7 @@ REPETITION
 
        /* first command */  not comment  /* second comment */
 
-     fails, because it matches  the  entire  string  due  to  the
+     fails, because it matches the entire  string  owing  to  the
      greediness of the .*  item.
 
      However, if a quantifier is followed by a question mark,  it
@@ -1838,10 +1838,11 @@ CONDITIONAL SUBPATTERNS
      There are two kinds of condition. If the  text  between  the
      parentheses  consists of a sequence of digits, the condition
      is satisfied if the capturing subpattern of that number  has
-     previously  matched.  Consider  the following pattern, which
-     contains non-significant white space to make it  more  read-
-     able (assume the PCRE_EXTENDED option) and to divide it into
-     three parts for ease of discussion:
+     previously  matched.  The  number must be greater than zero.
+     Consider  the  following  pattern,   which   contains   non-
+     significant white space to make it more readable (assume the
+     PCRE_EXTENDED option) and to divide it into three parts  for
+     ease of discussion:
 
        ( \( )?    [^()]+    (?(1) \) )
 
@@ -2001,9 +2002,9 @@ PERFORMANCE
      repeat can match 0, 1, 2, 3, or 4 times,  and  for  each  of
      those  cases other than 0, the + repeats can match different
      numbers of times.) When the remainder of the pattern is such
-     that  the  entire  match  is  going  to  fail,  PCRE  has in
-     principle to try every possible variation, and this can take
-     an extremely long time.
+     that  the entire match is going to fail, PCRE has in princi-
+     ple to try every possible variation, and this  can  take  an
+     extremely long time.
 
      An optimization catches some of the more simple  cases  such
      as
@@ -2105,7 +2106,6 @@ UTF-8 SUPPORT
 
      The following UTF-8 features of  Perl  5.6  are  not  imple-
      mented:
-
      1. The escape sequence \C to match a single byte.
 
      2. The use of Unicode tables and properties and escapes  \p,

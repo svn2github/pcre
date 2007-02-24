@@ -1754,6 +1754,11 @@ for (;; ptr++)
           {
           condref = *ptr - '0';
           while (*(++ptr) != ')') condref = condref*10 + *ptr - '0';
+          if (condref == 0)
+            {
+            *errorptr = ERR35;
+            goto FAILED;
+            }
           ptr++;
           }
         else ptr--;
@@ -2095,7 +2100,7 @@ Argument:
   ptrptr      -> the address of the current pattern pointer
   errorptr    -> pointer to error message
   lookbehind  TRUE if this is a lookbehind assertion
-  condref     > 0 for OPT_CREF setting at start of conditional group
+  condref     >= 0 for OPT_CREF setting at start of conditional group
   reqchar     -> place to put the last required character, or a negative number
   countlits   -> place to put the shortest literal count of any branch
   cd          points to the data block with tables pointers
@@ -2123,7 +2128,7 @@ code += 3;
 /* At the start of a reference-based conditional group, insert the reference
 number as an OP_CREF item. */
 
-if (condref > 0)
+if (condref >= 0)
   {
   *code++ = OP_CREF;
   *code++ = condref;

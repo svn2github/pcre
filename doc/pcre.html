@@ -1621,7 +1621,7 @@ to the string
 </PRE>
 </P>
 <P>
-fails, because it matches the entire string due to the greediness of the .*
+fails, because it matches the entire string owing to the greediness of the .*
 item.
 </P>
 <P>
@@ -2078,9 +2078,10 @@ subpattern, a compile-time error occurs.
 <P>
 There are two kinds of condition. If the text between the parentheses consists
 of a sequence of digits, the condition is satisfied if the capturing subpattern
-of that number has previously matched. Consider the following pattern, which
-contains non-significant white space to make it more readable (assume the
-PCRE_EXTENDED option) and to divide it into three parts for ease of discussion:
+of that number has previously matched. The number must be greater than zero.
+Consider the following pattern, which contains non-significant white space to
+make it more readable (assume the PCRE_EXTENDED option) and to divide it into
+three parts for ease of discussion:
 </P>
 <P>
 <PRE>
@@ -2389,6 +2390,8 @@ Phone: +44 1223 334714
 <P>
 Last updated: 28 August 2000,
 <BR>
+<PRE>
   the 250th anniversary of the death of J.S. Bach.
 <BR>
+</PRE>
 Copyright (c) 1997-2000 University of Cambridge.

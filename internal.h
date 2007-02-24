@@ -277,6 +277,7 @@ just to accommodate the POSIX wrapper. */
 #define ERR32 "this version of PCRE is not compiled with PCRE_UTF8 support"
 #define ERR33 "characters with values > 255 are not yet supported in classes"
 #define ERR34 "character value in \\x{...} sequence is too large"
+#define ERR35 "invalid condition (?(0)"
 
 /* All character handling must be done as unsigned characters. Otherwise there
 are problems with top-bit-set characters and functions such as isspace().
