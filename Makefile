@@ -12,6 +12,7 @@
 # lacks the strerror() function, but can provide the equivalent by indexing
 # into errlist.
 
+AR = ar cq
 CC = gcc -O2 -Wall
 CFLAGS =
 RANLIB = @true
@@ -30,18 +31,18 @@ pcretest:       libpcre.a libpcreposix.a pcretest.o
 
 libpcre.a:      $(OBJ)
 		/bin/rm -f libpcre.a
-		ar cq libpcre.a $(OBJ)
+		$(AR) libpcre.a $(OBJ)
 		$(RANLIB) libpcre.a
 
 libpcreposix.a: pcreposix.o
 		/bin/rm -f libpcreposix.a
-		ar cq libpcreposix.a pcreposix.o
+		$(AR) libpcreposix.a pcreposix.o
 		$(RANLIB) libpcreposix.a
 
 pcre.o:         pcre.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) pcre.c
 
-pcreposix.o:    pcreposix.c pcreposix.h internal.h Makefile
+pcreposix.o:    pcreposix.c pcreposix.h internal.h pcre.h Makefile
 		$(CC) -c $(CFLAGS) pcreposix.c
 
 chartables.o:   chartables.c
@@ -70,13 +71,7 @@ maketables:     maketables.c Makefile
 
 clean:;         /bin/rm -f *.o *.a pcretest pgrep
 
-# Run the tests
-
 runtest:        all
-		./pcretest testinput testtry
-		diff testtry testoutput
-		./pcretest -i testinput2 testtry
-		diff testtry testoutput2
-		rm -f testtry
+		./RunTest
 
 # End

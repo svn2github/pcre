@@ -42,7 +42,7 @@ restrictions:
 static const char *estring[] = {
   ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
   ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
-  ERR21, ERR22, ERR23 };
+  ERR21, ERR22, ERR23, ERR24, ERR25 };
 
 static int eint[] = {
   REG_EESCAPE, /* "\\ at end of pattern" */
@@ -67,7 +67,12 @@ static int eint[] = {
   REG_ESIZE,   /* "regular expression too large" */
   REG_ESPACE,  /* "failed to get memory" */
   REG_EPAREN,  /* "unmatched brackets" */
-  REG_ASSERT   /* "internal error: code overflow" */
+  REG_ASSERT,  /* "internal error: code overflow" */
+  REG_BADPAT,  /* "unrecognized character after (?<" */
+  REG_BADPAT,  /* "lookbehind assertion is not fixed length" */
+  REG_BADPAT,  /* "malformed number after (?(" */
+  REG_BADPAT,  /* "conditional group containe more than two branches" */
+  REG_BADPAT   /* "assertion expected after (?(" */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -135,7 +140,7 @@ addlength = (preg != NULL && (int)preg->re_erroffset != -1)?
 if (errbuf_size > 0)
   {
   if (addlength > 0 && errbuf_size >= length + addlength)
-    sprintf(errbuf, "%s%s%-6d", message, addmessage, preg->re_erroffset);
+    sprintf(errbuf, "%s%s%-6d", message, addmessage, (int)preg->re_erroffset);
   else
     {
     strncpy(errbuf, message, errbuf_size - 1);
@@ -229,7 +234,6 @@ if (rc > 0)
 else switch(rc)
   {
   case PCRE_ERROR_NOMATCH: return REG_NOMATCH;
-  case PCRE_ERROR_BADREF: return REG_ESUBREG;
   case PCRE_ERROR_NULL: return REG_INVARG;
   case PCRE_ERROR_BADOPTION: return REG_INVARG;
   case PCRE_ERROR_BADMAGIC: return REG_INVARG;

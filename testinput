@@ -1383,11 +1383,12 @@
 
 /\Aabc\Z/m
     abc
+    abc\n 
     *** Failers
     qqq\nabc
     abc\nzzz
     qqq\nabc\nzzz
-
+    
 /\A(.)*\Z/s
     abc\ndef
 
@@ -1440,9 +1441,9 @@
     ABCabc
     abcABC
 
-/(main(OPT)?)+/
+/(main(O)?)+/
     mainmain
-    mainOPTmain
+    mainOmain
 
 /ab{3cd/
     ab{3cd
@@ -1599,5 +1600,60 @@
 
 /P[^*]TAIRE[^*]{1,}?LL/
     xxxxxxxxxxxPSTAIREISLLxxxxxxxxx
-  
+
+/(\.\d\d[1-9]?)\d+/
+    1.230003938
+    1.875000282   
+    1.235  
+                  
+/(\.\d\d((?=0)|\d(?=\d)))/
+    1.230003938      
+    1.875000282
+    *** Failers 
+    1.235 
+    
+/a(?)b/
+    ab 
+ 
+/\b(foo)\s+(\w+)/i
+    Food is on the foo table
+    
+/foo(.*)bar/
+    The food is under the bar in the barn.
+    
+/foo(.*?)bar/  
+    The food is under the bar in the barn.
+
+/(.*)(\d*)/
+    I have 2 numbers: 53147
+    
+/(.*)(\d+)/
+    I have 2 numbers: 53147
+ 
+/(.*?)(\d*)/
+    I have 2 numbers: 53147
+
+/(.*?)(\d+)/
+    I have 2 numbers: 53147
+
+/(.*)(\d+)$/
+    I have 2 numbers: 53147
+
+/(.*?)(\d+)$/
+    I have 2 numbers: 53147
+
+/(.*)\b(\d+)$/
+    I have 2 numbers: 53147
+
+/(.*\D)(\d+)$/
+    I have 2 numbers: 53147
+
+/^\D*(?!123)/
+    ABC123
+     
+/^(\D*)(?=\d)(?!123)/
+    ABC445
+    *** Failers
+    ABC123
+       
 / End of test input /

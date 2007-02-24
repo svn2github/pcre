@@ -22,10 +22,10 @@ extern "C" {
 /* Options */
 
 #define PCRE_CASELESS        0x0001
-#define PCRE_EXTENDED        0x0002
-#define PCRE_ANCHORED        0x0004
-#define PCRE_MULTILINE       0x0008
-#define PCRE_DOTALL          0x0010
+#define PCRE_MULTILINE       0x0002
+#define PCRE_DOTALL          0x0004
+#define PCRE_EXTENDED        0x0008
+#define PCRE_ANCHORED        0x0010
 #define PCRE_DOLLAR_ENDONLY  0x0020
 #define PCRE_EXTRA           0x0040
 #define PCRE_NOTBOL          0x0080
@@ -35,12 +35,11 @@ extern "C" {
 /* Exec-time error codes */
 
 #define PCRE_ERROR_NOMATCH        (-1)
-#define PCRE_ERROR_BADREF         (-2)
-#define PCRE_ERROR_NULL           (-3)
-#define PCRE_ERROR_BADOPTION      (-4)
-#define PCRE_ERROR_BADMAGIC       (-5)
-#define PCRE_ERROR_UNKNOWN_NODE   (-6)
-#define PCRE_ERROR_NOMEMORY       (-7)
+#define PCRE_ERROR_NULL           (-2)
+#define PCRE_ERROR_BADOPTION      (-3)
+#define PCRE_ERROR_BADMAGIC       (-4)
+#define PCRE_ERROR_UNKNOWN_NODE   (-5)
+#define PCRE_ERROR_NOMEMORY       (-6)
 
 /* Types */
 

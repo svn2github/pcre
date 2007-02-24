@@ -1,0 +1,69 @@
+#! /bin/sh
+
+# Run PCRE tests
+
+cf=diff
+
+# Select which tests to run; if no selection, run all
+
+do1=no
+do2=no
+do3=no
+
+while [ $# -gt 0 ] ; do
+  case $1 in
+    1) do1=yes;;
+    2) do2=yes;;
+    3) do3=yes;;
+    *) echo "Unknown test number $1"; exit 1;; 
+  esac
+  shift
+done
+
+if [ $do1 = no -a $do2 = no -a $do3 = no ] ; then
+  do1=yes
+  do2=yes
+  do3=yes
+fi     
+          
+# Primary test, Perl-compatible
+
+if [ $do1 = yes ] ; then
+  echo "Testing main functionality (Perl compatible)"
+  ./pcretest testinput testtry
+  if [ $? = 0 ] ; then 
+    $cf testtry testoutput
+    if [ $? != 0 ] ; then exit 1; fi 
+  else exit 1
+  fi
+fi
+
+# PCRE tests that are not Perl-compatible - API & error tests, mostly
+
+if [ $do2 = yes ] ; then
+  echo "Testing API and error handling (not Perl compatible)"
+  ./pcretest -i testinput2 testtry
+  if [ $? = 0 ] ; then 
+    $cf testtry testoutput2 
+    if [ $? != 0 ] ; then exit 1; fi 
+  else exit 1
+  fi
+fi
+
+# Additional Perl-compatible tests for Perl 5.005's new features
+
+if [ $do3 = yes ] ; then
+  echo "Testing Perl 5.005 features (Perl 5.005 compatible)"
+  ./pcretest testinput3 testtry
+  if [ $? = 0 ] ; then 
+    $cf testtry testoutput3
+    if [ $? != 0 ] ; then exit 1; fi 
+  else exit 1
+  fi
+fi
+
+if [ $do1 = yes -a $do2 = yes -a $do3 = yes ] ; then
+  echo "Tests all ran OK"
+fi   
+
+# End    

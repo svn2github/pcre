@@ -64,7 +64,7 @@ pgrep(FILE *in, char *name)
 int rc = 1;
 int linenumber = 0;
 int count = 0;
-int offsets[2];
+int offsets[99];
 char buffer[BUFSIZ];
 
 while (fgets(buffer, sizeof(buffer), in) != NULL)
@@ -74,7 +74,7 @@ while (fgets(buffer, sizeof(buffer), in) != NULL)
   if (length > 0 && buffer[length-1] == '\n') buffer[--length] = 0;
   linenumber++;
 
-  match = pcre_exec(pattern, hints, buffer, length, 0, offsets, 2) >= 0;
+  match = pcre_exec(pattern, hints, buffer, length, 0, offsets, 99) >= 0;
   if (match && whole_lines && offsets[1] != length) match = FALSE;
 
   if (match != invert)

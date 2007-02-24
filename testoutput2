@@ -1,16 +1,9 @@
-Testing Perl-Compatible Regular Expressions
-PCRE version 1.09 28-Apr-1998
+PCRE version 2.00 24-Sep-1998
 
 /(a)b|/
 Identifying subpattern count = 1
 No options
 No first char
-
-/(a*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 4
-
-/(abc|)+/
-Failed: operand of unlimited repeat could match the empty string at offset 6
 
 /abc/
 Identifying subpattern count = 0
@@ -22,8 +15,6 @@ First char = 'a'
  0: abc
     \Aabc
  0: abc
-    \IABC
- 0: ABC
     *** Failers
 No match
     \Adefabc
@@ -71,8 +62,6 @@ Identifying subpattern count = 0
 Options: anchored
 No first char
     abc
- 0: abc
-    \Mdef\nabc
  0: abc
     *** Failers
 No match
@@ -157,26 +146,6 @@ Starting character set: C D E c d e
     this sentences rambles on and on for a while to elephant ElePhant
  0: elephant
 
-/cat|dog|elephant/IS
-Identifying subpattern count = 0
-No options
-No first char
-Starting character set: C D E c d e 
-    this sentence eventually mentions a CAT cat
- 0: cat
-    this sentences rambles on and on for a while to elephant ElePhant
- 0: elephant
-
-/cat|dog|elephant/IS
-Identifying subpattern count = 0
-No options
-No first char
-Starting character set: C D E c d e 
-    \Ithis sentence eventually mentions a CAT cat
- 0: CAT
-    \Ithis sentences rambles on and on for a while to elephant ElePhant
- 0: elephant
-
 /a|[bcd]/S
 Identifying subpattern count = 0
 No options
@@ -209,7 +178,7 @@ No first char
 Starting character set: \x09 \x0a \x0b \x0c \x0d \x20 a b 
 
 /(ab\2)/
-Failed: back reference to non-existent subpattern at offset 4
+Failed: back reference to non-existent subpattern at offset 6
 
 /{4,5}abc/
 Failed: nothing to repeat at offset 4
@@ -225,19 +194,19 @@ First char = 'a'
  3: c
     \O0abcb
 Matched, but too many substrings
-    \O2abcb
+    \O3abcb
 Matched, but too many substrings
  0: abcb
-    \O4abcb
-Matched, but too many substrings
- 0: abcb
- 1: a
     \O6abcb
 Matched, but too many substrings
  0: abcb
  1: a
+    \O9abcb
+Matched, but too many substrings
+ 0: abcb
+ 1: a
  2: b
-    \O8abcb
+    \O12abcb 
  0: abcb
  1: a
  2: b
@@ -252,10 +221,10 @@ First char = 'a'
  1: a
     \O0abc
 Matched, but too many substrings
-    \O2abc
+    \O3abc
 Matched, but too many substrings
  0: abc
-    \O4abc
+    \O6abc
  0: abc
  1: a
     aba
@@ -265,30 +234,23 @@ Matched, but too many substrings
  3: b
     \O0aba
 Matched, but too many substrings
-    \O2aba
+    \O3aba
 Matched, but too many substrings
  0: aba
-    \O4aba
-Matched, but too many substrings
- 0: aba
- 1: <unset>
     \O6aba
 Matched, but too many substrings
  0: aba
  1: <unset>
+    \O9aba
+Matched, but too many substrings
+ 0: aba
+ 1: <unset>
  2: a
-    \O8aba
+    \O12aba
  0: aba
  1: <unset>
  2: a
  3: b
-
-/^a.b/
-Identifying subpattern count = 0
-Options: anchored
-No first char
-    \Sa\nb
- 0: a\x0ab
 
 /abc$/E
 Identifying subpattern count = 0
@@ -303,28 +265,8 @@ No match
     abc\ndef
 No match
 
-/abc$/
-Identifying subpattern count = 0
-No options
-First char = 'a'
-    *** Failers
-No match
-    \Eabc\n
-No match
-    \Eabc\ndef
-No match
-
-/abc$/m
-Identifying subpattern count = 0
-Options: multiline
-First char = 'a'
-    \Eabc\n
- 0: abc
-    \Eabc\ndef
- 0: abc
-
 /(a)(b)(c)(d)(e)\6/
-Failed: back reference to non-existent subpattern at offset 16
+Failed: back reference to non-existent subpattern at offset 17
 
 /the quick brown fox/
 Identifying subpattern count = 0
@@ -349,92 +291,6 @@ No match
 /ab(?z)cd/
 Failed: unrecognized character after (? at offset 4
 
-".*/\Xfoo"X
-Identifying subpattern count = 0
-Options: anchored extra
-No first char
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
-No match
-
-"(?X).*/\Xfoo"
-Identifying subpattern count = 0
-Options: anchored extra
-No first char
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
-No match
-
-".*/\Xfoo"X
-Identifying subpattern count = 0
-Options: anchored extra
-No first char
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
- 0: /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
-
-"(?X).*/\Xfoo"
-Identifying subpattern count = 0
-Options: anchored extra
-No first char
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
- 0: /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
-
-/(\.\d\d[1-9]?)\d+/
-Identifying subpattern count = 1
-No options
-First char = '.'
-    1.230003938
- 0: .230003938
- 1: .23
-    1.875000282
- 0: .875000282
- 1: .875
-    1.235 
- 0: .235
- 1: .23
-
-/(\.\d\d[1-9]?)\X\d+/X
-Identifying subpattern count = 1
-Options: extra
-First char = '.'
-    1.230003938
- 0: .230003938
- 1: .23
-    1.875000282
- 0: .875000282
- 1: .875
-    *** Failers 
-No match
-    1.235 
-No match
-
-/(\.\d\d((?=0)|\d(?=\d)))/
-Identifying subpattern count = 2
-No options
-First char = '.'
-    1.230003938
- 0: .23
- 1: .23
- 2: 
-    1.875000282
- 0: .875
- 1: .875
- 2: 5
-    *** Failers 
-No match
-    1.235 
-No match
-
-/^(\w+\X|\s+\X)*$/X
-Identifying subpattern count = 1
-Options: anchored extra
-No first char
-    now is the time for all good men to come to the aid of the party
- 0: now is the time for all good men to come to the aid of the party
- 1: party
-    *** Failers
-No match
-    this is not a line with only words and spaces!
-No match
-    
 /^abc|def/
 Identifying subpattern count = 0
 No options
@@ -510,160 +366,25 @@ No match: POSIX code 17: match failed
 Failed: POSIX code 9: bad escape sequence at offset 4     
 
 /(abc)\2/P
-Failed: POSIX code 15: bad back reference at offset 6     
+Failed: POSIX code 15: bad back reference at offset 7     
 
 /(abc\1)/P
     abc
-No match: POSIX code 15: bad back reference
-
-"(?>.*/)foo"X
-Identifying subpattern count = 0
-Options: anchored extra
-No first char
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
-No match
-
-"(?>.*/)foo"X
-Identifying subpattern count = 0
-Options: anchored extra
-No first char
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
- 0: /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
-
-/(?>(\.\d\d[1-9]?))\d+/X
-Identifying subpattern count = 1
-Options: extra
-No first char
-    1.230003938
- 0: .230003938
- 1: .23
-    1.875000282
- 0: .875000282
- 1: .875
-    *** Failers 
-No match
-    1.235 
-No match
-
-/^((?>\w+)|(?>\s+))*$/X
-Identifying subpattern count = 1
-Options: anchored extra
-No first char
-    now is the time for all good men to come to the aid of the party
- 0: now is the time for all good men to come to the aid of the party
- 1: party
-    *** Failers
-No match
-    this is not a line with only words and spaces!
-No match
-    
-/(\d+)(\w)/X
-Identifying subpattern count = 2
-Options: extra
-No first char
-    12345a
- 0: 12345a
- 1: 12345
- 2: a
-    12345+ 
- 0: 12345
- 1: 1234
- 2: 5
-
-/((?>\d+))(\w)/X
-Identifying subpattern count = 2
-Options: extra
-No first char
-    12345a
- 0: 12345a
- 1: 12345
- 2: a
-    *** Failers
-No match
-    12345+ 
-No match
-
-/([a]*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 6
-
-/([ab]*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 7
-
-/([^a]*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 7
-
-/([^ab]*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 8
-
-/([a]*?)*/
-Failed: operand of unlimited repeat could match the empty string at offset 7
-
-/([ab]*?)*/
-Failed: operand of unlimited repeat could match the empty string at offset 8
-
-/([^a]*?)*/
-Failed: operand of unlimited repeat could match the empty string at offset 8
-
-/([^ab]*?)*/
-Failed: operand of unlimited repeat could match the empty string at offset 9
-
-/(?>a*)*/X
-Failed: nothing to repeat at offset 6
-
-/((?>a*))*/X
-Failed: operand of unlimited repeat could match the empty string at offset 8
-
-/((?>a*?))*/X
-Failed: operand of unlimited repeat could match the empty string at offset 9
+No match: POSIX code 17: match failed
 
 /)/
-Failed: unmatched brackets at offset 0
+Failed: unmatched parentheses at offset 0
 
 /a[]b/
 Failed: missing terminating ] for character class at offset 4
 
-/[^a]/
-Identifying subpattern count = 0
-No options
-No first char
-    \Iaaaabcd
- 0: b
-    \IaaAabcd 
- 0: b
-
-/[^az]/
-Identifying subpattern count = 0
-No options
-No first char
-    \Iaaaabcd
- 0: b
-    \IaaAabcd 
- 0: b
-
-/[^az]/
-Identifying subpattern count = 0
-No options
-No first char
-    \Izazabcd
- 0: b
-    \IAaZabcd 
- 0: b
-    
 /[^aeiou ]{3,}/
 Identifying subpattern count = 0
 No options
 No first char
     co-processors, and for 
  0: -pr
-    \Ico-processors, and for 
- 0: -pr
     
-/((a)*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 6
-
-/((a|b|c)*)*/
-Failed: operand of unlimited repeat could match the empty string at offset 10
-
 /<.*>/
 Identifying subpattern count = 0
 No options
@@ -712,6 +433,432 @@ Options: ungreedy
 First char = '='
     abc========def
  0: ========
+    
+/(?<!bar|cattle)foo/
+Identifying subpattern count = 0
+No options
+First char = 'f'
+    foo
+ 0: foo
+    catfoo 
+ 0: foo
+    *** Failers
+No match
+    the barfoo
+No match
+    and cattlefoo   
+No match
+
+/(?<=a+)b/
+Failed: lookbehind assertion is not fixed length at offset 6
+
+/(?<=aaa|b{0,3})b/
+Failed: lookbehind assertion is not fixed length at offset 14
+
+/(?<!(foo)a\1)bar/
+Failed: lookbehind assertion is not fixed length at offset 12
+
+/(?i)abc/
+Identifying subpattern count = 0
+Options: caseless
+First char = 'a'
+
+/(a|(?m)a)/
+Identifying subpattern count = 1
+No options
+First char = 'a'
+
+/(?i)^1234/
+Identifying subpattern count = 0
+Options: anchored caseless
+No first char
+
+/(^b|(?i)^d)/
+Identifying subpattern count = 1
+Options: anchored
+No first char
+
+/(?s).*/
+Identifying subpattern count = 0
+Options: anchored dotall
+No first char
+
+/[abcd]/S
+Identifying subpattern count = 0
+No options
+No first char
+Starting character set: a b c d 
+
+/(?i)[abcd]/S
+Identifying subpattern count = 0
+Options: caseless
+No first char
+Starting character set: A B C D a b c d 
+
+/(?m)[xy]|(b|c)/S
+Identifying subpattern count = 1
+Options: multiline
+No first char
+Starting character set: b c x y 
+
+/(^a|^b)/m
+Identifying subpattern count = 1
+Options: multiline
+First char at start or follows \n
+
+/(?i)(^a|^b)/m
+Identifying subpattern count = 1
+Options: caseless multiline
+First char at start or follows \n
+
+/(a)(?(1)a|b|c)/
+Failed: conditional group contains more than two branches at offset 13
+
+/(?(?=a)a|b|c)/
+Failed: conditional group contains more than two branches at offset 12
+
+/(?(1a)/
+Failed: malformed number after (?( at offset 4
+
+/(?(?i))/
+Failed: assertion expected after (?( at offset 3
+
+/(?(abc))/
+Failed: assertion expected after (?( at offset 3
+
+/(?(?<ab))/
+Failed: unrecognized character after (?< at offset 2
+
+/((?s)blah)\s+\1/
+Identifying subpattern count = 1
+No options
+First char = 'b'
+
+/((?i)blah)\s+\1/
+Identifying subpattern count = 1
+No options
+No first char
+
+/((?i)b)/DS
+------------------------------------------------------------------
+  0  16 Bra 0
+  3   8 Bra 1
+  6  01 Opt
+  8   1 b
+ 11   8 Ket
+ 14  00 Opt
+ 16  16 Ket
+ 19     End
+------------------------------------------------------------------
+Identifying subpattern count = 1
+No options
+No first char
+Starting character set: B b 
+
+/(a*b|(?i:c*(?-i)d))/S
+Identifying subpattern count = 1
+No options
+No first char
+Starting character set: C a b c d 
+
+/a$/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+    a
+ 0: a
+    a\n
+ 0: a
+    *** Failers 
+No match
+    \Za
+No match
+    \Za\n   
+No match
+
+/a$/m
+Identifying subpattern count = 0
+Options: multiline
+First char = 'a'
+    a
+ 0: a
+    a\n
+ 0: a
+    \Za\n   
+ 0: a
+    *** Failers 
+No match
+    \Za
+No match
+    
+/\Aabc/m
+Identifying subpattern count = 0
+Options: anchored multiline
+No first char
+
+/^abc/m 
+Identifying subpattern count = 0
+Options: multiline
+First char at start or follows \n
+
+/^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/
+Identifying subpattern count = 5
+Options: anchored
+No first char
+  aaaaabbbbbcccccdef
+ 0: aaaaabbbbbcccccdef
+ 1: aaaaabbbbbcccccdef
+ 2: aaaaa
+ 3: b
+ 4: bbbbccccc
+ 5: def
+
+/(?<=foo)[ab]/S
+Identifying subpattern count = 0
+No options
+No first char
+Starting character set: a b 
+
+/(?<!foo)(alpha|omega)/S
+Identifying subpattern count = 1
+No options
+No first char
+Starting character set: a o 
+
+/(?!alphabet)[ab]/S
+Identifying subpattern count = 0
+No options
+No first char
+Starting character set: a b 
+
+/(?<=foo\n)^bar/m
+Identifying subpattern count = 0
+Options: multiline
+First char at start or follows \n
+
+/(?>^abc)/m
+Identifying subpattern count = 0
+Options: multiline
+First char at start or follows \n
+    abc
+ 0: abc
+    def\nabc
+ 0: abc
+    *** Failers
+No match
+    defabc   
+No match
+
+/(?<=ab(c+)d)ef/
+Failed: lookbehind assertion is not fixed length at offset 11
+
+/(?<=ab(?<=c+)d)ef/
+Failed: lookbehind assertion is not fixed length at offset 12
+
+/(?<=ab(c|de)f)g/
+Failed: lookbehind assertion is not fixed length at offset 13
+
+/The next two are in testinput2 because they have variable length branches/
+Identifying subpattern count = 0
+No options
+First char = 'T'
+
+/(?<=bullock|donkey)-cart/
+Identifying subpattern count = 0
+No options
+First char = '-'
+    the bullock-cart
+ 0: -cart
+    a donkey-cart race
+ 0: -cart
+    *** Failers
+No match
+    cart
+No match
+    horse-and-cart    
+No match
+      
+/(?<=ab(?i)x|y|z)/
+Identifying subpattern count = 0
+No options
+No first char
+
+/(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/
+Identifying subpattern count = 0
+No options
+First char = 'Z'
+    abxyZZ
+ 0: ZZ
+    abXyZZ
+ 0: ZZ
+    ZZZ
+ 0: ZZ
+    zZZ
+ 0: ZZ
+    bZZ
+ 0: ZZ
+    BZZ     
+ 0: ZZ
+    *** Failers
+No match
+    ZZ 
+No match
+    abXYZZ 
+No match
+    zzz
+No match
+    bzz  
+No match
+
+/(?<!(foo)a)bar/
+Identifying subpattern count = 1
+No options
+First char = 'b'
+    bar
+ 0: bar
+    foobbar 
+ 0: bar
+    *** Failers
+No match
+    fooabar  
+No match
+
+/This one is here because Perl 5.005_02 doesn't fail it/
+Identifying subpattern count = 0
+No options
+First char = 'T'
+
+/^(a)?(?(1)a|b)+$/
+Identifying subpattern count = 1
+Options: anchored
+No first char
+    *** Failers
+No match
+    a 
+No match
+
+/This one is here because I think Perl 5.005_02 gets the setting of $1 wrong/
+Identifying subpattern count = 0
+No options
+First char = 'T'
+
+/^(a\1?){4}$/
+Identifying subpattern count = 1
+Options: anchored
+No first char
+    aaaaaa
+ 0: aaaaaa
+ 1: aa
+    
+/These are syntax tests from Perl 5.005/
+Identifying subpattern count = 0
+No options
+First char = 'T'
+
+/a[b-a]/
+Failed: range out of order in character class at offset 4
+
+/a[]b/
+Failed: missing terminating ] for character class at offset 4
+
+/a[/
+Failed: missing terminating ] for character class at offset 2
+
+/*a/
+Failed: nothing to repeat at offset 0
+
+/(*)b/
+Failed: nothing to repeat at offset 1
+
+/a\/
+Failed: \ at end of pattern at offset 2
+
+/abc)/
+Failed: unmatched parentheses at offset 3
+
+/(abc/
+Failed: missing ) at offset 4
+
+/a**/
+Failed: nothing to repeat at offset 2
+
+/)(/
+Failed: unmatched parentheses at offset 0
+
+/\1/
+Failed: back reference to non-existent subpattern at offset 2
+
+/\2/
+Failed: back reference to non-existent subpattern at offset 2
+
+/(a)|\2/
+Failed: back reference to non-existent subpattern at offset 6
+
+/a[b-a]/i
+Failed: range out of order in character class at offset 4
+
+/a[]b/i
+Failed: missing terminating ] for character class at offset 4
+
+/a[/i
+Failed: missing terminating ] for character class at offset 2
+
+/*a/i
+Failed: nothing to repeat at offset 0
+
+/(*)b/i
+Failed: nothing to repeat at offset 1
+
+/a\/i
+Failed: \ at end of pattern at offset 2
+
+/abc)/i
+Failed: unmatched parentheses at offset 3
+
+/(abc/i
+Failed: missing ) at offset 4
+
+/a**/i
+Failed: nothing to repeat at offset 2
+
+/)(/i
+Failed: unmatched parentheses at offset 0
+
+/:(?:/
+Failed: missing ) at offset 4
+
+/(?<%)b/
+Failed: unrecognized character after (?< at offset 0
+
+/a(?{)b/
+Failed: unrecognized character after (? at offset 3
+
+/a(?{{})b/
+Failed: unrecognized character after (? at offset 3
+
+/a(?{}})b/
+Failed: unrecognized character after (? at offset 3
+
+/a(?{"{"})b/
+Failed: unrecognized character after (? at offset 3
+
+/a(?{"{"}})b/
+Failed: unrecognized character after (? at offset 3
+
+/(?(1?)a|b)/
+Failed: malformed number after (?( at offset 4
+
+/(?(1)a|b|c)/
+Failed: conditional group contains more than two branches at offset 10
+
+/[a[:xyz:/
+Failed: missing terminating ] for character class at offset 8
+
+/(?<=x+)y/
+Failed: lookbehind assertion is not fixed length at offset 6
+
+/a{37,17}/
+Failed: numbers out of order in {} quantifier at offset 7
 
 / End of test input /
 Identifying subpattern count = 0

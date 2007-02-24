@@ -1,5 +1,4 @@
-Testing Perl-Compatible Regular Expressions
-PCRE version 1.09 28-Apr-1998
+PCRE version 2.00 24-Sep-1998
 
 /the quick brown fox/
     the quick brown fox
@@ -1984,6 +1983,8 @@ No match
 /\Aabc\Z/m
     abc
  0: abc
+    abc\n 
+ 0: abc
     *** Failers
 No match
     qqq\nabc
@@ -1992,7 +1993,7 @@ No match
 No match
     qqq\nabc\nzzz
 No match
-
+    
 /\A(.)*\Z/s
     abc\ndef
  0: abc\x0adef
@@ -2078,14 +2079,14 @@ No match
  0: abcABC
  1: abc
 
-/(main(OPT)?)+/
+/(main(O)?)+/
     mainmain
  0: mainmain
  1: main
-    mainOPTmain
- 0: mainOPTmain
+    mainOmain
+ 0: mainOmain
  1: main
- 2: OPT
+ 2: O
 
 /ab{3cd/
     ab{3cd
@@ -2377,6 +2378,112 @@ No match
 /P[^*]TAIRE[^*]{1,}?LL/
     xxxxxxxxxxxPSTAIREISLLxxxxxxxxx
  0: PSTAIREISLL
-  
+
+/(\.\d\d[1-9]?)\d+/
+    1.230003938
+ 0: .230003938
+ 1: .23
+    1.875000282   
+ 0: .875000282
+ 1: .875
+    1.235  
+ 0: .235
+ 1: .23
+                  
+/(\.\d\d((?=0)|\d(?=\d)))/
+    1.230003938      
+ 0: .23
+ 1: .23
+ 2: 
+    1.875000282
+ 0: .875
+ 1: .875
+ 2: 5
+    *** Failers 
+No match
+    1.235 
+No match
+    
+/a(?)b/
+    ab 
+ 0: ab
+ 
+/\b(foo)\s+(\w+)/i
+    Food is on the foo table
+ 0: foo table
+ 1: foo
+ 2: table
+    
+/foo(.*)bar/
+    The food is under the bar in the barn.
+ 0: food is under the bar in the bar
+ 1: d is under the bar in the 
+    
+/foo(.*?)bar/  
+    The food is under the bar in the barn.
+ 0: food is under the bar
+ 1: d is under the 
+
+/(.*)(\d*)/
+    I have 2 numbers: 53147
+ 0: I have 2 numbers: 53147
+ 1: I have 2 numbers: 53147
+ 2: 
+    
+/(.*)(\d+)/
+    I have 2 numbers: 53147
+ 0: I have 2 numbers: 53147
+ 1: I have 2 numbers: 5314
+ 2: 7
+ 
+/(.*?)(\d*)/
+    I have 2 numbers: 53147
+ 0: 
+ 1: 
+ 2: 
+
+/(.*?)(\d+)/
+    I have 2 numbers: 53147
+ 0: I have 2
+ 1: I have 
+ 2: 2
+
+/(.*)(\d+)$/
+    I have 2 numbers: 53147
+ 0: I have 2 numbers: 53147
+ 1: I have 2 numbers: 5314
+ 2: 7
+
+/(.*?)(\d+)$/
+    I have 2 numbers: 53147
+ 0: I have 2 numbers: 53147
+ 1: I have 2 numbers: 
+ 2: 53147
+
+/(.*)\b(\d+)$/
+    I have 2 numbers: 53147
+ 0: I have 2 numbers: 53147
+ 1: I have 2 numbers: 
+ 2: 53147
+
+/(.*\D)(\d+)$/
+    I have 2 numbers: 53147
+ 0: I have 2 numbers: 53147
+ 1: I have 2 numbers: 
+ 2: 53147
+
+/^\D*(?!123)/
+    ABC123
+ 0: AB
+     
+/^(\D*)(?=\d)(?!123)/
+    ABC445
+ 0: ABC
+ 1: ABC
+    *** Failers
+No match
+    ABC123
+No match
+       
 / End of test input /
 

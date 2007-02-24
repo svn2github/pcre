@@ -18,22 +18,23 @@ expected in Unix and Perl-style regular expressions.
 By contrast, the code originally written by Henry Spencer and subsequently
 heavily modified for Perl actually compiles the expression twice: once in a
 dummy mode in order to find out how much store will be needed, and then for
-real. The execution function operates by backtracking and maximizing (or
-minimizing in Perl) the amount of the subject that matches individual wild
-portions of the pattern. This is a "NFA algorithm".
+real. The execution function operates by backtracking and maximizing (or,
+optionally, minimizing in Perl) the amount of the subject that matches
+individual wild portions of the pattern. This is an "NFA algorithm" in Friedl's
+terminology.
 
 For this set of functions, I tried at first to invent an algorithm that used an
 amount of store bounded by a multiple of the number of characters in the
 pattern, to save on compiling time. However, because of the greater complexity
 in Perl regular expressions, I couldn't do this. In any case, a first pass
 through the pattern is needed, in order to find internal flag settings like
-(?i). So it works by running a very degenerate first pass to calculate a
-maximum store size, and then a second pass to do the real compile - which may
-use a bit less than the predicted amount of store. The idea is that this is
-going to turn out faster because the first pass is degenerate and the second
-can just store stuff straight into the vector. It does make the compiling
-functions bigger, of course, but they have got quite big anyway to handle all
-the Perl stuff.
+(?i) at top level. So it works by running a very degenerate first pass to
+calculate a maximum store size, and then a second pass to do the real compile -
+which may use a bit less than the predicted amount of store. The idea is that
+this is going to turn out faster because the first pass is degenerate and the
+second can just store stuff straight into the vector. It does make the
+compiling functions bigger, of course, but they have got quite big anyway to
+handle all the Perl stuff.
 
 The compiled form of a pattern is a vector of bytes, containing items of
 variable length. The first byte in an item is an opcode, and the length of the
@@ -57,8 +58,8 @@ These items are all just one byte long
   OP_WHITESPACE          \s
   OP_NOT_WORDCHAR        \W
   OP_WORDCHAR            \w
-  OP_CUT                 analogue of Prolog's "cut"
-  OP_EOD                 match end of data: \Z
+  OP_EODN                match end of data or \n at end: \Z
+  OP_EOD                 match end of data: \z
   OP_DOLL                $ (end of data, or before \n in multiline)
 
 
@@ -196,8 +197,12 @@ minimum. In effect, (abc){2,5} becomes (abc)(abc)(abc)?(abc)?(abc)?.
 Assertions
 ----------
 
-Assertions are just like other subpatterns, but starting with one of the
-opcodes OP_ASSERT or OP_ASSERT_NOT.
+Forward assertions are just like other subpatterns, but starting with one of
+the opcodes OP_ASSERT or OP_ASSERT_NOT. Backward assertions use the opcodes
+OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
+is OP_REVERSE, followed by a two byte count of the number of characters to move
+back. A separate count is present in each alternative of a lookbehind
+assertion, allowing them to have different fixed lengths.
 
 
 Once-only subpatterns
@@ -207,5 +212,29 @@ These are also just like other subpatterns, but they start with the opcode
 OP_ONCE.
 
 
+Conditional subpatterns
+-----------------------
+
+These are like other subpatterns, but they start with the opcode OP_COND. If
+the condition is a back reference, this is stored at the start of the
+subpattern using the opcode OP_CREF followed by one byte containing the
+reference number. Otherwise, a conditional subpattern will always start with
+one of the assertions.
+
+
+Changing options
+----------------
+
+If any of the /i, /m, or /s options are changed within a parenthesized group,
+an OP_OPT opcode is compiled, followed by one byte containing the new settings
+of these flags. If there are several alternatives in a group, there is an
+occurrence of OP_OPT at the start of all those following the first options
+change, to set appropriate options for the start of the alternative.
+Immediately after the end of the group there is another such item to reset the
+flags to their previous values. Other changes of flag within the pattern can be
+handled entirely at compile time, and so do not cause anything to be put into
+the compiled data.
+
+
 Philip Hazel
-December 1997
+September 1998

@@ -2,7 +2,53 @@ ChangeLog for PCRE
 ------------------
 
 
-Version 1.09 28 Apr-98
+Version 2.00 24-Sep-98
+----------------------
+
+1. Since the (>?) facility is in Perl 5.005, don't require PCRE_EXTRA to enable
+it any more.
+
+2. Allow quantification of (?>) groups, and make it work correctly.
+
+3. The first character computation wasn't working for (?>) groups.
+
+4. Correct the implementation of \Z (it is permitted to match on the \n at the
+end of the subject) and add 5.005's \z, which really does match only at the
+very end of the subject.
+
+5. Remove the \X "cut" facility; Perl doesn't have it, and (?> is neater.
+
+6. Remove the ability to specify CASELESS, MULTILINE, DOTALL, and
+DOLLAR_END_ONLY at runtime, to make it possible to implement the Perl 5.005
+localized options. All options to pcre_study() were also removed.
+
+7. Add other new features from 5.005:
+
+   $(?<=           positive lookbehind
+   $(?<!           negative lookbehind
+   (?imsx-imsx)    added the unsetting capability
+                   such a setting is global if at outer level; local otherwise
+   (?imsx-imsx:)   non-capturing groups with option setting
+   (?(cond)re|re)  conditional pattern matching
+
+   A backreference to itself in a repeated group matches the previous
+   captured string.
+
+8. General tidying up of studying (both automatic and via "study")
+consequential on the addition of new assertions.
+
+9. As in 5.005, unlimited repeated groups that could match an empty substring
+are no longer faulted at compile time. Instead, the loop is forcibly broken at
+runtime if any iteration does actually match an empty substring.
+
+10. Include the RunTest script in the distribution.
+
+11. Added tests from the Perl 5.005_02 distribution. This showed up a few
+discrepancies, some of which were old and were also with respect to 5.004. They
+have now been fixed.
+
+
+Version 1.09 28-Apr-98
 ----------------------
 
 1. A negated single character class followed by a quantifier with a minimum

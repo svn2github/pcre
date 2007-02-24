@@ -37,6 +37,31 @@ the external pcre header. */
 
 
 /*************************************************
+*      Set a bit and maybe its alternate case    *
+*************************************************/
+
+/* Given a character, set its bit in the table, and also the bit for the other
+version of a letter if we are caseless.
+
+Arguments:
+  start_bits    points to the bit map
+  c             is the character
+  caseless      the caseless flag
+
+Returns:        nothing
+*/
+
+static void
+set_bit(uschar *start_bits, int c, BOOL caseless)
+{
+start_bits[c/8] |= (1 << (c&7));
+if (caseless && (pcre_ctypes[c] & ctype_letter) != 0)
+  start_bits[pcre_fcc[c]/8] |= (1 << (pcre_fcc[c]&7));
+}
+
+
+
+/*************************************************
 *          Create bitmap of starting chars       *
 *************************************************/
 
@@ -47,12 +72,13 @@ goes by, we may be able to get more clever at doing this.
 Arguments:
   code         points to an expression
   start_bits   points to a 32-byte table, initialized to 0
+  caseless     the current state of the caseless flag
 
 Returns:       TRUE if table built, FALSE otherwise
 */
 
 static BOOL
-set_start_bits(const uschar *code, uschar *start_bits)
+set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless)
 {
 register int c;
 
@@ -65,9 +91,12 @@ do
     {
     try_next = FALSE;
 
+    /* If a branch starts with a bracket or a positive lookahead assertion,
+    recurse to set bits from within them. That's all for this branch. */
+
     if ((int)*tcode >= OP_BRA || *tcode == OP_ASSERT)
       {
-      if (!set_start_bits(tcode, start_bits)) return FALSE;
+      if (!set_start_bits(tcode, start_bits, caseless)) return FALSE;
       }
 
     else switch(*tcode)
@@ -75,11 +104,29 @@ do
       default:
       return FALSE;
 
+      /* Skip over lookbehind and negative lookahead assertions */
+
+      case OP_ASSERT_NOT:
+      case OP_ASSERTBACK:
+      case OP_ASSERTBACK_NOT:
+      try_next = TRUE;
+      do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
+      tcode += 3;
+      break;
+
+      /* Skip over an option setting, changing the caseless flag */
+
+      case OP_OPT:
+      caseless = (tcode[1] & PCRE_CASELESS) != 0;
+      tcode += 2;
+      try_next = TRUE;
+      break;
+
       /* BRAZERO does the bracket, but carries on. */
 
       case OP_BRAZERO:
       case OP_BRAMINZERO:
-      if (!set_start_bits(++tcode, start_bits)) return FALSE;
+      if (!set_start_bits(++tcode, start_bits, caseless)) return FALSE;
       do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
       tcode += 3;
       try_next = TRUE;
@@ -91,7 +138,7 @@ do
       case OP_MINSTAR:
       case OP_QUERY:
       case OP_MINQUERY:
-      start_bits[tcode[1]/8] |= (1 << (tcode[1]&7));
+      set_bit(start_bits, tcode[1], caseless);
       tcode += 2;
       try_next = TRUE;
       break;
@@ -100,7 +147,7 @@ do
 
       case OP_UPTO:
       case OP_MINUPTO:
-      start_bits[tcode[3]/8] |= (1 << (tcode[3]&7));
+      set_bit(start_bits, tcode[3], caseless);
       tcode += 4;
       try_next = TRUE;
       break;
@@ -115,7 +162,7 @@ do
 
       case OP_PLUS:
       case OP_MINPLUS:
-      start_bits[tcode[1]/8] |= (1 << (tcode[1]&7));
+      set_bit(start_bits, tcode[1], caseless);
       break;
 
       /* Single character type sets the bits and stops */
@@ -208,7 +255,6 @@ do
       according to the repeat count. */
 
       case OP_CLASS:
-      case OP_NEGCLASS:
         {
         tcode++;
         for (c = 0; c < 32; c++) start_bits[c] |= tcode[c];
@@ -267,7 +313,6 @@ Returns:    pointer to a pcre_extra block,
 pcre_extra *
 pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
-BOOL caseless;
 uschar start_bits[32];
 real_pcre_extra *extra;
 const real_pcre *re = (const real_pcre *)external_re;
@@ -286,10 +331,6 @@ if ((options & ~PUBLIC_STUDY_OPTIONS) != 0)
   return NULL;
   }
 
-/* Caseless can either be from the compiled regex or from options. */
-
-caseless = ((re->options | options) & PCRE_CASELESS) != 0;
-
 /* For an anchored pattern, or an unchored pattern that has a first char, or a
 multiline pattern that matches only at "line starts", no further processing at
 present. */
@@ -300,24 +341,8 @@ if ((re->options & (PCRE_ANCHORED|PCRE_FIRSTSET|PCRE_STARTLINE)) != 0)
 /* See if we can find a fixed set of initial characters for the pattern. */
 
 memset(start_bits, 0, 32 * sizeof(uschar));
-if (!set_start_bits(re->code, start_bits)) return NULL;
-
-/* If this studying is caseless, scan the created bit map and duplicate the
-bits for any letters. */
-
-if (caseless)
-  {
-  register int c;
-  for (c = 0; c < 256; c++)
-    {
-    if ((start_bits[c/8] & (1 << (c&7))) != 0 &&
-        (pcre_ctypes[c] & ctype_letter) != 0)
-      {
-      int d = pcre_fcc[c];
-      start_bits[d/8] |= (1 << (d&7));
-      }
-    }
-  }
+if (!set_start_bits(re->code, start_bits, (re->options & PCRE_CASELESS) != 0))
+  return NULL;
 
 /* Get an "extra" block and put the information therein. */
 
@@ -329,7 +354,7 @@ if (extra == NULL)
   return NULL;
   }
 
-extra->options = PCRE_STUDY_MAPPED | (caseless? PCRE_STUDY_CASELESS : 0);
+extra->options = PCRE_STUDY_MAPPED;
 memcpy(extra->start_bits, start_bits, sizeof(start_bits));
 
 return (pcre_extra *)extra;

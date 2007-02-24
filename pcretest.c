@@ -21,6 +21,8 @@
 #endif
 #endif
 
+#define LOOPREPEAT 10000
+
 
 static FILE *outfile;
 static int log_store = 0;
@@ -32,49 +34,66 @@ code as contained in pcre.c under the DEBUG macro. */
 
 static const char *OP_names[] = {
   "End", "\\A", "\\B", "\\b", "\\D", "\\d",
-  "\\S", "\\s", "\\W", "\\w", "Cut", "\\Z", "^", "$", "Any", "chars",
-  "not",
+  "\\S", "\\s", "\\W", "\\w", "\\Z", "\\z",
+  "Opt", "^", "$", "Any", "chars", "not",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
   "*", "*?", "+", "+?", "?", "??", "{", "{",
-  "class", "negclass", "Ref",
-  "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not", "Once",
+  "class", "Ref",
+  "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",
+  "AssertB", "AssertB not", "Reverse", "Once", "Cond", "Cref",
   "Brazero", "Braminzero", "Bra"
 };
 
 
-static void print_internals(pcre *re)
+static void print_internals(pcre *re, FILE *outfile)
 {
 unsigned char *code = ((real_pcre *)re)->code;
 
-printf("------------------------------------------------------------------\n");
+fprintf(outfile, "------------------------------------------------------------------\n");
 
 for(;;)
   {
   int c;
   int charlength;
 
-  printf("%3d ", code - ((real_pcre *)re)->code);
+  fprintf(outfile, "%3d ", (int)(code - ((real_pcre *)re)->code));
 
   if (*code >= OP_BRA)
     {
-    printf("%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
+    fprintf(outfile, "%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
     code += 2;
     }
 
   else switch(*code)
     {
     case OP_END:
-    printf("    %s\n", OP_names[*code]);
-    printf("------------------------------------------------------------------\n");
+    fprintf(outfile, "    %s\n", OP_names[*code]);
+    fprintf(outfile, "------------------------------------------------------------------\n");
     return;
+
+    case OP_OPT:
+    fprintf(outfile, " %.2x %s", code[1], OP_names[*code]);
+    code++;
+    break;
+
+    case OP_COND:
+    fprintf(outfile, "%3d Cond", (code[1] << 8) + code[2]);
+    code += 2;
+    break;
+
+    case OP_CREF:
+    fprintf(outfile, " %.2d %s", code[1], OP_names[*code]);
+    code++;
+    break;
 
     case OP_CHARS:
     charlength = *(++code);
-    printf("%3d ", charlength);
+    fprintf(outfile, "%3d ", charlength);
     while (charlength-- > 0)
-      if (isprint(c = *(++code))) printf("%c", c); else printf("\\x%02x", c);
+      if (isprint(c = *(++code))) fprintf(outfile, "%c", c);
+        else fprintf(outfile, "\\x%02x", c);
     break;
 
     case OP_KETRMAX:
@@ -83,8 +102,15 @@ for(;;)
     case OP_KET:
     case OP_ASSERT:
     case OP_ASSERT_NOT:
+    case OP_ASSERTBACK:
+    case OP_ASSERTBACK_NOT:
     case OP_ONCE:
-    printf("%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
+    fprintf(outfile, "%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
+    code += 2;
+    break;
+
+    case OP_REVERSE:
+    fprintf(outfile, "%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
     code += 2;
     break;
 
@@ -101,36 +127,36 @@ for(;;)
     case OP_TYPEQUERY:
     case OP_TYPEMINQUERY:
     if (*code >= OP_TYPESTAR)
-      printf("    %s", OP_names[code[1]]);
-    else if (isprint(c = code[1])) printf("    %c", c);
-      else printf("    \\x%02x", c);
-    printf("%s", OP_names[*code++]);
+      fprintf(outfile, "    %s", OP_names[code[1]]);
+    else if (isprint(c = code[1])) fprintf(outfile, "    %c", c);
+      else fprintf(outfile, "    \\x%02x", c);
+    fprintf(outfile, "%s", OP_names[*code++]);
     break;
 
     case OP_EXACT:
     case OP_UPTO:
     case OP_MINUPTO:
-    if (isprint(c = code[3])) printf("    %c{", c);
-      else printf("    \\x%02x{", c);
-    if (*code != OP_EXACT) printf(",");
-    printf("%d}", (code[1] << 8) + code[2]);
-    if (*code == OP_MINUPTO) printf("?");
+    if (isprint(c = code[3])) fprintf(outfile, "    %c{", c);
+      else fprintf(outfile, "    \\x%02x{", c);
+    if (*code != OP_EXACT) fprintf(outfile, ",");
+    fprintf(outfile, "%d}", (code[1] << 8) + code[2]);
+    if (*code == OP_MINUPTO) fprintf(outfile, "?");
     code += 3;
     break;
 
     case OP_TYPEEXACT:
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
-    printf("    %s{", OP_names[code[3]]);
-    if (*code != OP_TYPEEXACT) printf("0,");
-    printf("%d}", (code[1] << 8) + code[2]);
-    if (*code == OP_TYPEMINUPTO) printf("?");
+    fprintf(outfile, "    %s{", OP_names[code[3]]);
+    if (*code != OP_TYPEEXACT) fprintf(outfile, "0,");
+    fprintf(outfile, "%d}", (code[1] << 8) + code[2]);
+    if (*code == OP_TYPEMINUPTO) fprintf(outfile, "?");
     code += 3;
     break;
 
     case OP_NOT:
-    if (isprint(c = *(++code))) printf("    [^%c]", c);
-      else printf("    [^\\x%02x]", c);
+    if (isprint(c = *(++code))) fprintf(outfile, "    [^%c]", c);
+      else fprintf(outfile, "    [^\\x%02x]", c);
     break;
 
     case OP_NOTSTAR:
@@ -139,33 +165,32 @@ for(;;)
     case OP_NOTMINPLUS:
     case OP_NOTQUERY:
     case OP_NOTMINQUERY:
-    if (isprint(c = code[1])) printf("    [^%c]", c);
-      else printf("    [^\\x%02x]", c);
-    printf("%s", OP_names[*code++]);
+    if (isprint(c = code[1])) fprintf(outfile, "    [^%c]", c);
+      else fprintf(outfile, "    [^\\x%02x]", c);
+    fprintf(outfile, "%s", OP_names[*code++]);
     break;
 
     case OP_NOTEXACT:
     case OP_NOTUPTO:
     case OP_NOTMINUPTO:
-    if (isprint(c = code[3])) printf("    [^%c]{", c);
-      else printf("    [^\\x%02x]{", c);
-    if (*code != OP_NOTEXACT) printf(",");
-    printf("%d}", (code[1] << 8) + code[2]);
-    if (*code == OP_NOTMINUPTO) printf("?");
+    if (isprint(c = code[3])) fprintf(outfile, "    [^%c]{", c);
+      else fprintf(outfile, "    [^\\x%02x]{", c);
+    if (*code != OP_NOTEXACT) fprintf(outfile, ",");
+    fprintf(outfile, "%d}", (code[1] << 8) + code[2]);
+    if (*code == OP_NOTMINUPTO) fprintf(outfile, "?");
     code += 3;
     break;
 
     case OP_REF:
-    printf("    \\%d", *(++code));
+    fprintf(outfile, "    \\%d", *(++code));
     code++;
     goto CLASS_REF_REPEAT;
 
     case OP_CLASS:
-    case OP_NEGCLASS:
       {
       int i, min, max;
-      if (*code++ == OP_CLASS) printf("    [");
-        else printf("   ^[");
+      code++;
+      fprintf(outfile, "    [");
 
       for (i = 0; i < 256; i++)
         {
@@ -174,18 +199,18 @@ for(;;)
           int j;
           for (j = i+1; j < 256; j++)
             if ((code[j/8] & (1 << (j&7))) == 0) break;
-          if (i == '-' || i == ']') printf("\\");
-          if (isprint(i)) printf("%c", i); else printf("\\x%02x", i);
+          if (i == '-' || i == ']') fprintf(outfile, "\\");
+          if (isprint(i)) fprintf(outfile, "%c", i); else fprintf(outfile, "\\x%02x", i);
           if (--j > i)
             {
-            printf("-");
-            if (j == '-' || j == ']') printf("\\");
-            if (isprint(j)) printf("%c", j); else printf("\\x%02x", j);
+            fprintf(outfile, "-");
+            if (j == '-' || j == ']') fprintf(outfile, "\\");
+            if (isprint(j)) fprintf(outfile, "%c", j); else fprintf(outfile, "\\x%02x", j);
             }
           i = j;
           }
         }
-      printf("]");
+      fprintf(outfile, "]");
       code += 32;
 
       CLASS_REF_REPEAT:
@@ -198,16 +223,16 @@ for(;;)
         case OP_CRMINPLUS:
         case OP_CRQUERY:
         case OP_CRMINQUERY:
-        printf("%s", OP_names[*code]);
+        fprintf(outfile, "%s", OP_names[*code]);
         break;
 
         case OP_CRRANGE:
         case OP_CRMINRANGE:
         min = (code[1] << 8) + code[2];
         max = (code[3] << 8) + code[4];
-        if (max == 0) printf("{%d,}", min);
-        else printf("{%d,%d}", min, max);
-        if (*code == OP_CRMINRANGE) printf("?");
+        if (max == 0) fprintf(outfile, "{%d,}", min);
+        else fprintf(outfile, "{%d,%d}", min, max);
+        if (*code == OP_CRMINRANGE) fprintf(outfile, "?");
         code += 4;
         break;
 
@@ -220,12 +245,12 @@ for(;;)
     /* Anything else is just a one-node item */
 
     default:
-    printf("    %s", OP_names[*code]);
+    fprintf(outfile, "    %s", OP_names[*code]);
     break;
     }
 
   code++;
-  printf("\n");
+  fprintf(outfile, "\n");
   }
 }
 
@@ -320,9 +345,8 @@ if (argc > 2)
 
 pcre_malloc = new_malloc;
 
-/* Heading line, then prompt for first re if stdin */
+/* Heading line, then prompt for first regex if stdin */
 
-fprintf(outfile, "Testing Perl-Compatible Regular Expressions\n");
 fprintf(outfile, "PCRE version %s\n\n", pcre_version());
 
 /* Main loop */
@@ -341,7 +365,7 @@ while (!done)
 
   if (infile == stdin) printf("  re> ");
   if (fgets((char *)buffer, sizeof(buffer), infile) == NULL) break;
-  if (infile != stdin) fprintf(outfile, (char *)buffer);
+  if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
 
   p = buffer;
   while (isspace(*p)) p++;
@@ -379,7 +403,7 @@ while (!done)
       done = 1;
       goto CONTINUE;
       }
-    if (infile != stdin) fprintf(outfile, (char *)pp);
+    if (infile != stdin) fprintf(outfile, "%s", (char *)pp);
     }
 
   /* Terminate the pattern at the delimiter */
@@ -403,7 +427,6 @@ while (!done)
       case 'E': options |= PCRE_DOLLAR_ENDONLY; break;
       case 'P': do_posix = 1; break;
       case 'S': do_study = 1; break;
-      case 'I': study_options |= PCRE_CASELESS; break;
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
       case '\n': case ' ': break;
@@ -444,7 +467,7 @@ while (!done)
       register int i;
       clock_t time_taken;
       clock_t start_time = clock();
-      for (i = 0; i < 4000; i++)
+      for (i = 0; i < LOOPREPEAT; i++)
         {
         re = pcre_compile((char *)p, options, &error, &erroroffset);
         if (re != NULL) free(re);
@@ -487,7 +510,7 @@ while (!done)
       {
       int first_char, count;
 
-      if (debug || do_debug) print_internals(re);
+      if (debug || do_debug) print_internals(re, outfile);
 
       count = pcre_info(re, &options, &first_char);
       if (count < 0) fprintf(outfile,
@@ -533,7 +556,7 @@ while (!done)
         register int i;
         clock_t time_taken;
         clock_t start_time = clock();
-        for (i = 0; i < 4000; i++)
+        for (i = 0; i < LOOPREPEAT; i++)
           extra = pcre_study(re, study_options, &error);
         time_taken = clock() - start_time;
         if (extra != NULL) free(extra);
@@ -593,7 +616,7 @@ while (!done)
     {
     unsigned char *q;
     int count, c;
-    int offsets[30];
+    int offsets[45];
     int size_offsets = sizeof(offsets)/sizeof(int);
 
     options = 0;
@@ -604,7 +627,7 @@ while (!done)
       done = 1;
       goto CONTINUE;
       }
-    if (infile != stdin) fprintf(outfile, (char *)buffer);
+    if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
 
     len = (int)strlen((char *)buffer);
     while (len > 0 && isspace(buffer[len-1])) len--;
@@ -658,22 +681,6 @@ while (!done)
         options |= PCRE_NOTBOL;
         continue;
 
-        case 'E':
-        options |= PCRE_DOLLAR_ENDONLY;
-        continue;
-
-        case 'I':
-        options |= PCRE_CASELESS;
-        continue;
-
-        case 'M':
-        options |= PCRE_MULTILINE;
-        continue;
-
-        case 'S':
-        options |= PCRE_DOTALL;
-        continue;
-
         case 'O':
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
         if (n <= (int)(sizeof(offsets)/sizeof(int))) size_offsets = n;
@@ -714,7 +721,7 @@ while (!done)
           {
           if (pmatch[i].rm_so >= 0)
             {
-            fprintf(outfile, "%2d: ", i);
+            fprintf(outfile, "%2d: ", (int)i);
             pchars(dbuffer + pmatch[i].rm_so,
               pmatch[i].rm_eo - pmatch[i].rm_so);
             fprintf(outfile, "\n");
@@ -746,7 +753,7 @@ while (!done)
       if (count == 0)
         {
         fprintf(outfile, "Matched, but too many substrings\n");
-        count = size_offsets/2;
+        count = size_offsets/3;
         }
 
       if (count >= 0)

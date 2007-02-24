@@ -1,14 +1,9 @@
 /(a)b|/
 
-/(a*)*/
-
-/(abc|)+/
-
 /abc/
     abc
     defabc
     \Aabc
-    \IABC
     *** Failers
     \Adefabc
     ABC
@@ -30,7 +25,6 @@
 
 /^abc$/
     abc
-    \Mdef\nabc
     *** Failers
     def\nabc
 
@@ -76,14 +70,6 @@
     this sentence eventually mentions a CAT cat
     this sentences rambles on and on for a while to elephant ElePhant
 
-/cat|dog|elephant/IS
-    this sentence eventually mentions a CAT cat
-    this sentences rambles on and on for a while to elephant ElePhant
-
-/cat|dog|elephant/IS
-    \Ithis sentence eventually mentions a CAT cat
-    \Ithis sentences rambles on and on for a while to elephant ElePhant
-
 /a|[bcd]/S
 
 /(a|[^\dZ])/S
@@ -97,40 +83,28 @@
 /(a)(b)(c)\2/
     abcb
     \O0abcb
-    \O2abcb
-    \O4abcb
+    \O3abcb
     \O6abcb
-    \O8abcb
+    \O9abcb
+    \O12abcb 
 
 /(a)bc|(a)(b)\2/
     abc
     \O0abc
-    \O2abc
-    \O4abc
+    \O3abc
+    \O6abc
     aba
     \O0aba
-    \O2aba
-    \O4aba
+    \O3aba
     \O6aba
-    \O8aba
-
-/^a.b/
-    \Sa\nb
+    \O9aba
+    \O12aba
 
 /abc$/E
     abc
     *** Failers
     abc\n
     abc\ndef
-
-/abc$/
-    *** Failers
-    \Eabc\n
-    \Eabc\ndef
-
-/abc$/m
-    \Eabc\n
-    \Eabc\ndef
 
 /(a)(b)(c)(d)(e)\6/
 
@@ -145,40 +119,6 @@
 
 /ab(?z)cd/
 
-".*/\Xfoo"X
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
-
-"(?X).*/\Xfoo"
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
-
-".*/\Xfoo"X
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
-
-"(?X).*/\Xfoo"
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
-
-/(\.\d\d[1-9]?)\d+/
-    1.230003938
-    1.875000282
-    1.235 
-
-/(\.\d\d[1-9]?)\X\d+/X
-    1.230003938
-    1.875000282
-    *** Failers 
-    1.235 
-
-/(\.\d\d((?=0)|\d(?=\d)))/
-    1.230003938
-    1.875000282
-    *** Failers 
-    1.235 
-
-/^(\w+\X|\s+\X)*$/X
-    now is the time for all good men to come to the aid of the party
-    *** Failers
-    this is not a line with only words and spaces!
-    
 /^abc|def/
     abcdef
     abcdef\B
@@ -223,78 +163,13 @@
 /(abc\1)/P
     abc
 
-"(?>.*/)foo"X
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
-
-"(?>.*/)foo"X
-    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
-
-/(?>(\.\d\d[1-9]?))\d+/X
-    1.230003938
-    1.875000282
-    *** Failers 
-    1.235 
-
-/^((?>\w+)|(?>\s+))*$/X
-    now is the time for all good men to come to the aid of the party
-    *** Failers
-    this is not a line with only words and spaces!
-    
-/(\d+)(\w)/X
-    12345a
-    12345+ 
-
-/((?>\d+))(\w)/X
-    12345a
-    *** Failers
-    12345+ 
-
-/([a]*)*/
-
-/([ab]*)*/
-
-/([^a]*)*/
-
-/([^ab]*)*/
-
-/([a]*?)*/
-
-/([ab]*?)*/
-
-/([^a]*?)*/
-
-/([^ab]*?)*/
-
-/(?>a*)*/X
-
-/((?>a*))*/X
-
-/((?>a*?))*/X
-
 /)/
 
 /a[]b/
 
-/[^a]/
-    \Iaaaabcd
-    \IaaAabcd 
-
-/[^az]/
-    \Iaaaabcd
-    \IaaAabcd 
-
-/[^az]/
-    \Izazabcd
-    \IAaZabcd 
-    
 /[^aeiou ]{3,}/
     co-processors, and for 
-    \Ico-processors, and for 
     
-/((a)*)*/
- 
-/((a|b|c)*)*/
-
 /<.*>/
     abc<def>ghi<klm>nop
 
@@ -315,5 +190,212 @@
     
 /(?U)={3,}?/
     abc========def
+    
+/(?<!bar|cattle)foo/
+    foo
+    catfoo 
+    *** Failers
+    the barfoo
+    and cattlefoo   
+
+/(?<=a+)b/
+
+/(?<=aaa|b{0,3})b/
+
+/(?<!(foo)a\1)bar/
+
+/(?i)abc/
+
+/(a|(?m)a)/
+
+/(?i)^1234/
+
+/(^b|(?i)^d)/
+
+/(?s).*/
+
+/[abcd]/S
+
+/(?i)[abcd]/S
+
+/(?m)[xy]|(b|c)/S
+
+/(^a|^b)/m
+
+/(?i)(^a|^b)/m
+
+/(a)(?(1)a|b|c)/
+
+/(?(?=a)a|b|c)/
+
+/(?(1a)/
+
+/(?(?i))/
+
+/(?(abc))/
+
+/(?(?<ab))/
+
+/((?s)blah)\s+\1/
+
+/((?i)blah)\s+\1/
+
+/((?i)b)/DS
+
+/(a*b|(?i:c*(?-i)d))/S
+
+/a$/
+    a
+    a\n
+    *** Failers 
+    \Za
+    \Za\n   
+
+/a$/m
+    a
+    a\n
+    \Za\n   
+    *** Failers 
+    \Za
+    
+/\Aabc/m
+
+/^abc/m 
+
+/^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/
+  aaaaabbbbbcccccdef
+
+/(?<=foo)[ab]/S
+
+/(?<!foo)(alpha|omega)/S
+
+/(?!alphabet)[ab]/S
+
+/(?<=foo\n)^bar/m
+
+/(?>^abc)/m
+    abc
+    def\nabc
+    *** Failers
+    defabc   
+
+/(?<=ab(c+)d)ef/
+
+/(?<=ab(?<=c+)d)ef/
+
+/(?<=ab(c|de)f)g/
+
+/The next two are in testinput2 because they have variable length branches/
+
+/(?<=bullock|donkey)-cart/
+    the bullock-cart
+    a donkey-cart race
+    *** Failers
+    cart
+    horse-and-cart    
+      
+/(?<=ab(?i)x|y|z)/
+
+/(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/
+    abxyZZ
+    abXyZZ
+    ZZZ
+    zZZ
+    bZZ
+    BZZ     
+    *** Failers
+    ZZ 
+    abXYZZ 
+    zzz
+    bzz  
+
+/(?<!(foo)a)bar/
+    bar
+    foobbar 
+    *** Failers
+    fooabar  
+
+/This one is here because Perl 5.005_02 doesn't fail it/
+
+/^(a)?(?(1)a|b)+$/
+    *** Failers
+    a 
+
+/This one is here because I think Perl 5.005_02 gets the setting of $1 wrong/
+
+/^(a\1?){4}$/
+    aaaaaa
+    
+/These are syntax tests from Perl 5.005/
+
+/a[b-a]/
+
+/a[]b/
+
+/a[/
+
+/*a/
+
+/(*)b/
+
+/a\/
+
+/abc)/
+
+/(abc/
+
+/a**/
+
+/)(/
+
+/\1/
+
+/\2/
+
+/(a)|\2/
+
+/a[b-a]/i
+
+/a[]b/i
+
+/a[/i
+
+/*a/i
+
+/(*)b/i
+
+/a\/i
+
+/abc)/i
+
+/(abc/i
+
+/a**/i
+
+/)(/i
+
+/:(?:/
+
+/(?<%)b/
+
+/a(?{)b/
+
+/a(?{{})b/
+
+/a(?{}})b/
+
+/a(?{"{"})b/
+
+/a(?{"{"}})b/
+
+/(?(1?)a|b)/
+
+/(?(1)a|b|c)/
+
+/[a[:xyz:/
+
+/(?<=x+)y/
+
+/a{37,17}/
 
 / End of test input /
