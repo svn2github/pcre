@@ -17,15 +17,13 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=4
-PCRE_MINOR=0
-PCRE_DATE=17-Feb-2003
+PCRE_MINOR=1
+PCRE_DATE=12-Mar-2003
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
 
 POSIX_MALLOC_THRESHOLD=-DPOSIX_MALLOC_THRESHOLD=10
-HOST_CC=${HOST_CC:-'$(CC)'}
-HOST_CFLAGS=${HOST_CFLAGS:-'$(CFLAGS)'}
 
 dnl Provide versioning information for libtool shared libraries that
 dnl are built by default on Unix systems.
@@ -39,6 +37,16 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+
+dnl This is the compiler for compiling a program to run on the local host
+dnl while building. It needs to be different from CC when cross-compiling.
+dnl There is a macro called AC_PROG_CC_FOR_BUILD in the GNU archive for
+dnl figuring this out automatically, but I could not get it to work and I
+dnl ran out of time. Therefore, these values will have to be set manually
+dnl by people who are cross-compiling.
+
+CC_FOR_BUILD=${CC_FOR_BUILD:-'$(CC)'}
+CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD:-'$(CFLAGS)'}
 
 dnl Checks for header files.
 
@@ -112,14 +120,13 @@ AC_PROG_LIBTOOL
 
 dnl "Export" these variables
 
+AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(HAVE_MEMMOVE)
 AC_SUBST(HAVE_STRERROR)
-AC_SUBST(HOST_CC)
-AC_SUBST(HOST_CFLAGS)
-AC_SUBST(NEWLINE)
 AC_SUBST(LINK_SIZE)
 AC_SUBST(MATCH_LIMIT)
-AC_SUBST(UTF8)
+AC_SUBST(NEWLINE)
 AC_SUBST(PCRE_MAJOR)
 AC_SUBST(PCRE_MINOR)
 AC_SUBST(PCRE_DATE)
@@ -127,6 +134,7 @@ AC_SUBST(PCRE_VERSION)
 AC_SUBST(PCRE_LIB_VERSION)
 AC_SUBST(PCRE_POSIXLIB_VERSION)
 AC_SUBST(POSIX_MALLOC_THRESHOLD)
+AC_SUBST(UTF8)
 
 dnl Stuff to make Win32 work better
 

@@ -68,7 +68,6 @@ compile time. */
 #define BRASTACK_SIZE 200
 
 
-
 /* Maximum number of ints of offset to save on the stack for recursive calls.
 If the offset vector is bigger, malloc is used. This should be a multiple of 3,
 because the offset vector is always a multiple of 3 long. */
@@ -82,6 +81,12 @@ could be 255 when UTF-8 support is excluded, but that means that some of the
 test output would be different, which just complicates things.) */
 
 #define MAXLIT 250
+
+
+/* The maximum remaining length of subject we are prepared to search for a
+req_byte match. */
+
+#define REQ_BYTE_MAX 1000
 
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
@@ -1138,6 +1143,10 @@ Returns:      pointer to the opcode for the bracket, or NULL if not found
 static const uschar *
 find_bracket(const uschar *code, BOOL utf8, int number)
 {
+#ifndef SUPPORT_UTF8
+utf8 = utf8;               /* Stop pedantic compilers complaining */
+#endif
+
 for (;;)
   {
   register int c = *code;
@@ -1453,7 +1462,7 @@ int length;
 int greedy_default, greedy_non_default;
 int firstbyte, reqbyte;
 int zeroreqbyte, zerofirstbyte;
-int req_caseopt;
+int req_caseopt, reqvary, tempreqvary;
 int condcount = 0;
 int options = *optionsptr;
 register int c;
@@ -1699,7 +1708,7 @@ for (;; ptr++)
         posix_class *= 3;
         for (i = 0; i < 3; i++)
           {
-          BOOL isblank = strncmp(ptr, "blank", 5) == 0;
+          BOOL isblank = strncmp((char *)ptr, "blank", 5) == 0;
           int taboffset = posix_class_maps[posix_class + i];
           if (taboffset < 0) break;
           if (local_negate)
@@ -1949,7 +1958,7 @@ for (;; ptr++)
         else
           {
           zerofirstbyte = firstbyte;
-          reqbyte = class_lastchar | req_caseopt;
+          reqbyte = class_lastchar | req_caseopt | cd->req_varyopt;
           }
         *code++ = OP_CHARS;
         *code++ = 1;
@@ -2053,9 +2062,13 @@ for (;; ptr++)
 
     if (repeat_min == 0)
       {
-      firstbyte = zerofirstbyte;   /* Adjust for zero repeat */
-      reqbyte = zeroreqbyte;       /* Ditto */
+      firstbyte = zerofirstbyte;    /* Adjust for zero repeat */
+      reqbyte = zeroreqbyte;        /* Ditto */
       }
+
+    /* Remember whether this is a variable length repeat */
+
+    reqvary = (repeat_min == repeat_max)? 0 : REQ_VARY;
 
     op_type = 0;                    /* Default single-char op codes */
     possessive_quantifier = FALSE;  /* Default not possessive quantifier */
@@ -2142,7 +2155,7 @@ for (;; ptr++)
         if (code == previous + 2)   /* There was only one character */
           {
           code = previous;              /* Abolish the previous item */
-          if (repeat_min > 1) reqbyte = c | req_caseopt;
+          if (repeat_min > 1) reqbyte = c | req_caseopt | cd->req_varyopt;
           }
         else
           {
@@ -2501,10 +2514,13 @@ for (;; ptr++)
       PUT(tempcode, 1, len);
       }
 
-    /* In all case we no longer have a previous item. */
+    /* In all case we no longer have a previous item. We also set the
+    "follows varying string" flag for subsequently encountered reqbytes if
+    it isn't already set and we have just passed a varying length item. */
 
     END_REPEAT:
     previous = NULL;
+    cd->req_varyopt |= reqvary;
     break;
 
 
@@ -2553,7 +2569,8 @@ for (;; ptr++)
 
         else if ((cd->ctypes[ptr[1]] & ctype_digit) != 0)
           {
-          int condref = *(++ptr) - '0';
+          int condref;                 /* Don't amalgamate; some compilers */
+          condref = *(++ptr) - '0';    /* grumble at autoincrement in declaration */
           while (*(++ptr) != ')') condref = condref*10 + *ptr - '0';
           if (condref == 0)
             {
@@ -2619,19 +2636,24 @@ for (;; ptr++)
         if (*(++ptr) == '<')      /* Definition */
           {
           int i, namelen;
-          const uschar *name = ++ptr;
           uschar *slot = cd->name_table;
+          const uschar *name;     /* Don't amalgamate; some compilers */
+          name = ++ptr;           /* grumble at autoincrement in declaration */
 
           while (*ptr++ != '>');
           namelen = ptr - name - 1;
 
           for (i = 0; i < cd->names_found; i++)
             {
-            int c = memcmp(name, slot+2, namelen + 1);
+            int c = memcmp(name, slot+2, namelen);
             if (c == 0)
               {
-              *errorptr = ERR43;
-              goto FAILED;
+              if (slot[2+namelen] == 0)
+                {
+                *errorptr = ERR43;
+                goto FAILED;
+                }
+              c = -1;             /* Current name is substring */
               }
             if (c < 0)
               {
@@ -2661,7 +2683,7 @@ for (;; ptr++)
 
           for (i = 0; i < cd->names_found; i++)
             {
-            if (strncmp(name, slot+2, namelen) == 0) break;
+            if (strncmp((char *)name, (char *)slot+2, namelen) == 0) break;
             slot += cd->name_entry_size;
             }
           if (i >= cd->names_found)
@@ -2839,6 +2861,7 @@ for (;; ptr++)
     previous = (bravalue >= OP_ONCE)? code : NULL;
     *code = bravalue;
     tempcode = code;
+    tempreqvary = cd->req_varyopt;     /* Save value before bracket */
 
     if (!compile_regex(
          newoptions,                   /* The complete new option state */
@@ -2917,12 +2940,14 @@ for (;; ptr++)
         }
 
       /* If firstbyte was previously set, convert the subpattern's firstbyte
-      into reqbyte if there wasn't one. */
+      into reqbyte if there wasn't one, using the vary flag that was in
+      existence beforehand. */
 
-      else if (subfirstbyte >= 0 && subreqbyte < 0) subreqbyte = subfirstbyte;
+      else if (subfirstbyte >= 0 && subreqbyte < 0)
+        subreqbyte = subfirstbyte | tempreqvary;
 
-      /* If the subpattern set a required char (or set a first char that isn't
-      really the first char - see above), set it. */
+      /* If the subpattern set a required byte (or set a first byte that isn't
+      really the first byte - see above), set it. */
 
       if (subreqbyte >= 0) reqbyte = subreqbyte;
       }
@@ -3140,7 +3165,8 @@ for (;; ptr++)
         if (firstbyte == REQ_UNSET)
           {
           zerofirstbyte = firstbyte = previous[2] | req_caseopt;
-          zeroreqbyte = (t - 1 == previous + 2)? reqbyte : t[-1] | req_caseopt;
+          zeroreqbyte = (t - 1 == previous + 2)?
+            reqbyte : t[-1] | req_caseopt | cd->req_varyopt;
           }
 
         /* If there was a previous first byte, leave it alone, and don't change
@@ -3150,14 +3176,14 @@ for (;; ptr++)
         else
           {
           zerofirstbyte = firstbyte;
-          zeroreqbyte = t[-1] | req_caseopt;
+          zeroreqbyte = t[-1] | req_caseopt | cd->req_varyopt;
           }
         }
 
       /* In all cases (we know length > 1), the new required byte is the last
       byte of the string. */
 
-      reqbyte = code[-1] | req_caseopt;
+      reqbyte = code[-1] | req_caseopt | cd->req_varyopt;
       }
 
     else   /* End of UTF-8 coding */
@@ -3180,8 +3206,9 @@ for (;; ptr++)
         else
           {
           zerofirstbyte = firstbyte = previous[2] | req_caseopt;
-          zeroreqbyte = (length > 2)? (code[-2] | req_caseopt) : reqbyte;
-          reqbyte = code[-1] | req_caseopt;
+          zeroreqbyte = (length > 2)?
+            (code[-2] | req_caseopt | cd->req_varyopt) : reqbyte;
+          reqbyte = code[-1] | req_caseopt | cd->req_varyopt;
           }
         }
 
@@ -3190,8 +3217,9 @@ for (;; ptr++)
       else
         {
         zerofirstbyte = firstbyte;
-        zeroreqbyte = (length == 1)? reqbyte : code[-2] | req_caseopt;
-        reqbyte = code[-1] | req_caseopt;
+        zeroreqbyte = (length == 1)? reqbyte :
+          code[-2] | req_caseopt | cd->req_varyopt;
+        reqbyte = code[-1] | req_caseopt | cd->req_varyopt;
         }
       }
 
@@ -3308,7 +3336,9 @@ for (;;)
     }
 
   /* If this is not the first branch, the first char and reqbyte have to
-  match the values from all the previous branches. */
+  match the values from all the previous branches, except that if the previous
+  value for reqbyte didn't have REQ_VARY set, it can still match, and we set
+  REQ_VARY for the regex. */
 
   else
     {
@@ -3330,7 +3360,9 @@ for (;;)
 
     /* Now ensure that the reqbytes match */
 
-    if (reqbyte != branchreqbyte) reqbyte = REQ_NONE;
+    if ((reqbyte & ~REQ_VARY) != (branchreqbyte & ~REQ_VARY))
+      reqbyte = REQ_NONE;
+    else reqbyte |= branchreqbyte;   /* To "or" REQ_VARY */
     }
 
   /* If lookbehind, check that this branch matches a fixed-length string,
@@ -4168,7 +4200,8 @@ while ((c = *(++ptr)) != 0)
         ptr += 3;
         if (*ptr == '<')
           {
-          const uschar *p = ++ptr;
+          const uschar *p;    /* Don't amalgamate; some compilers */
+          p = ++ptr;          /* grumble at autoincrement in declaration */
           while ((compile_block.ctypes[*ptr] & ctype_word) != 0) ptr++;
           if (*ptr != '>')
             {
@@ -4599,6 +4632,7 @@ compile_block.name_entry_size = max_name_size + 3;
 compile_block.name_table = (uschar *)re + sizeof(real_pcre);
 codestart = compile_block.name_table + re->name_entry_size * re->name_count;
 compile_block.start_code = codestart;
+compile_block.req_varyopt = 0;
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
 error, *errorptr will be set non-NULL, so we don't need to look at the result
@@ -4672,13 +4706,12 @@ if ((options & PCRE_ANCHORED) == 0)
     }
   }
 
-/* Save the last required character if any. Remove caseless flag for
-non-caseable chars. */
+/* For an anchored pattern, we use the "required byte" only if it follows a
+variable length item in the regex. Remove the caseless flag for non-caseable
+chars. */
 
-if ((re->options & PCRE_ANCHORED) != 0 && reqbyte < 0 && firstbyte >= 0)
-  reqbyte = firstbyte;
-
-if (reqbyte >= 0)
+if (reqbyte >= 0 &&
+     ((re->options & PCRE_ANCHORED) == 0 || (reqbyte & REQ_VARY) != 0))
   {
   int ch = reqbyte & 255;
   re->req_byte = ((reqbyte & REQ_CASELESS) != 0 &&
@@ -5263,7 +5296,7 @@ for (;;)
         (pcre_free)(new_recursive.offset_save);
       return MATCH_NOMATCH;
       }
-    break;
+    /* Control never reaches here */
 
     /* "Once" brackets are like assertion brackets except that after a match,
     the point in the subject string is not moved back. Thus there can never be
@@ -7370,9 +7403,14 @@ do
   optimization can save a huge amount of backtracking in patterns with nested
   unlimited repeats that aren't going to match. Writing separate code for
   cased/caseless versions makes it go faster, as does using an autoincrement
-  and backing off on a match. */
+  and backing off on a match.
 
-  if (req_byte >= 0)
+  HOWEVER: when the subject string is very, very long, searching to its end can
+  take a long time, and give bad performance on quite ordinary patterns. This
+  showed up when somebody was matching /^C/ on a 32-megabyte string... so we
+  don't do this when the string is sufficiently long. */
+
+  if (req_byte >= 0 && end_subject - start_match < REQ_BYTE_MAX)
     {
     register const uschar *p = start_match + ((first_byte >= 0)? 1 : 0);
 

@@ -214,10 +214,11 @@ time, run time or study time, respectively. */
 #define REQ_UNSET (-2)
 #define REQ_NONE  (-1)
 
-/* Flags added to firstchar or reqchar */
+/* Flags added to firstbyte or reqbyte; a "non-literal" item is either a
+variable-length repeat, or a anything other than literal characters. */
 
 #define REQ_CASELESS 0x0100    /* indicates caselessness */
-#define REQ_EOL      0x0200    /* indicates reqchar followed by $ */
+#define REQ_VARY     0x0200    /* reqbyte followed non-literal item */
 
 /* Miscellaneous definitions */
 
@@ -570,6 +571,7 @@ typedef struct compile_data {
   int  name_entry_size;         /* Size of each entry */
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
+  int  req_varyopt;             /* "After variable item" flag for reqbyte */
 } compile_data;
 
 /* Structure for maintaining a chain of pointers to the currently incomplete
@@ -597,7 +599,7 @@ doing the matching, so that they are thread-safe. */
 
 typedef struct match_data {
   int    match_call_count;      /* As it says */
-  int    match_limit;           /* As it says */
+  unsigned long int match_limit;/* As it says */
   int   *offset_vector;         /* Offset vector */
   int    offset_end;            /* One past the end */
   int    offset_max;            /* The maximum usable for return data */

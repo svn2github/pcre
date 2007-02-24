@@ -1,4 +1,4 @@
-PCRE version 4.0 17-Feb-2003
+PCRE version 4.1 12-Mar-2003
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -28,7 +28,7 @@ No match
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 'c'
+No need char
     abc
  0: abc
     \Aabc
@@ -68,7 +68,7 @@ No need char
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 'c'
+No need char
     abc
  0: abc
     *** Failers
@@ -302,7 +302,7 @@ Need char = 'x'
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 'x'
+No need char
     the quick brown fox
  0: the quick brown fox
     *** Failers
@@ -504,7 +504,7 @@ No need char
 Capturing subpattern count = 0
 Options: anchored caseless
 No first char
-Need char = '4'
+No need char
 
 /(^b|(?i)^d)/
 Capturing subpattern count = 1
@@ -651,7 +651,7 @@ No match
 Capturing subpattern count = 0
 Options: anchored multiline
 No first char
-Need char = 'c'
+No need char
 
 /^abc/m 
 Capturing subpattern count = 0
@@ -663,7 +663,7 @@ Need char = 'c'
 Capturing subpattern count = 5
 Options: anchored
 No first char
-Need char = 'a'
+No need char
   aaaaabbbbbcccccdef
  0: aaaaabbbbbcccccdef
  1: aaaaabbbbbcccccdef
@@ -837,7 +837,7 @@ Capturing subpattern count = 1
 Max back reference = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aaaaaa
  0: aaaaaa
  1: aa
@@ -1027,7 +1027,7 @@ copy substring 1 failed -6
 Capturing subpattern count = 3
 Options: anchored
 No first char
-Need char = 'f'
+No need char
     adef\G1\G2\G3\G4\L 
  0: adef
  1: a
@@ -1065,7 +1065,7 @@ get substring 4 failed -7
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 'f'
+No need char
     abc\00def\L\C0 
  0: abc\x00def
  0C abc (7)
@@ -1254,7 +1254,7 @@ Need char = 's'
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 's'
+No need char
     ississippi
  0: iss
  0+ issippi
@@ -1304,7 +1304,7 @@ Need char = 'i'
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 's'
+No need char
     Mississippi
  0: Mis
  0+ sissippi
@@ -1313,7 +1313,7 @@ Need char = 's'
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 10
+No need char
     ab\nab\ncd
  0: ab\x0a
  0+ ab\x0acd
@@ -2420,7 +2420,7 @@ Need char = 's'
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aba
  0: aba
  1: a
@@ -2430,7 +2430,7 @@ Need char = 'a'
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: aa
@@ -2440,7 +2440,7 @@ Need char = 'a'
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa 
  0: aabbaa
  1: aa
@@ -2450,7 +2450,7 @@ Need char = 'a'
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: aa
@@ -2460,7 +2460,7 @@ Need char = 'a'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: bb
@@ -2469,7 +2469,7 @@ Need char = 'a'
 Capturing subpattern count = 3
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: aa
@@ -2480,7 +2480,7 @@ Need char = 'a'
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: bb
@@ -2490,7 +2490,7 @@ Need char = 'a'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: bb
@@ -2499,7 +2499,7 @@ Need char = 'a'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbbaa    
  0: aabbbaa
  1: bbb
@@ -2508,7 +2508,7 @@ Need char = 'a'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbbaa    
  0: aabbbaa
  1: bbb
@@ -2517,7 +2517,7 @@ Need char = 'a'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbaa    
  0: aabbaa
  1: b
@@ -2526,7 +2526,7 @@ Need char = 'a'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbbaa    
  0: aabbbaa
  1: bb
@@ -2535,7 +2535,7 @@ Need char = 'a'
 Capturing subpattern count = 3
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbbaa    
  0: aabbbaa
  1: aa
@@ -2546,7 +2546,7 @@ Need char = 'a'
 Capturing subpattern count = 3
 Options: anchored
 No first char
-Need char = 'a'
+No need char
     aabbbbaa    
  0: aabbbbaa
  1: aa
@@ -3047,7 +3047,7 @@ Need char = 'b'
 Capturing subpattern count = 5
 Options: anchored
 No first char
-Need char = 'a'
+No need char
 
 /^x(?U)a+b/D
 ------------------------------------------------------------------
@@ -3735,7 +3735,7 @@ Need char = 'c'
 Capturing subpattern count = 0
 Options: anchored
 No first char
-Need char = 'c'
+No need char
 
 /(?C)a|b/S
 Capturing subpattern count = 0
@@ -3917,7 +3917,7 @@ No match
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = 'z'
+No need char
     xyz
  0: xyz
  1: xyz
@@ -3977,7 +3977,7 @@ Failed: reference to non-existent subpattern at offset 4
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = 'f'
+No need char
     abcdefabc
  0: abcdefabc
  1: abc
@@ -3986,7 +3986,7 @@ Need char = 'f'
 Capturing subpattern count = 1
 Options: anchored
 No first char
-Need char = '='
+No need char
     a=a
  0: a=a
  1: a
@@ -4001,7 +4001,7 @@ Need char = '='
 Capturing subpattern count = 2
 Options: anchored
 No first char
-Need char = '='
+No need char
     a=a
  0: a=a
  1: a
@@ -4407,6 +4407,12 @@ Need char = 'a'
  1: zz
  2: aa
  2C aa (2)
+
+/(?P<x>eks)(?P<x>eccs)/
+Failed: two named groups have the same name at offset 16
+
+/(?P<abc>abc(?P<def>def)(?P<abc>xyz))/
+Failed: two named groups have the same name at offset 31
 
 / End of testinput2 /
 Capturing subpattern count = 0

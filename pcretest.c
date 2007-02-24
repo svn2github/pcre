@@ -407,7 +407,8 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
   else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
-      ((size_offsets = get_value(argv[op+1], &endptr)), *endptr == 0))
+      ((size_offsets = get_value((unsigned char *)argv[op+1], &endptr)),
+        *endptr == 0))
     {
     op++;
     argc--;
@@ -1017,7 +1018,7 @@ while (!done)
           uschar *pp = name;
           while (isalnum(*p)) *pp++ = *p++;
           *pp = 0;
-          n = pcre_get_stringnumber(re, name);
+          n = pcre_get_stringnumber(re, (char *)name);
           if (n < 0)
             fprintf(outfile, "no parentheses with name \"%s\"\n", name);
           else copystrings |= 1 << n;
@@ -1070,7 +1071,7 @@ while (!done)
           uschar *pp = name;
           while (isalnum(*p)) *pp++ = *p++;
           *pp = 0;
-          n = pcre_get_stringnumber(re, name);
+          n = pcre_get_stringnumber(re, (char *)name);
           if (n < 0)
             fprintf(outfile, "no parentheses with name \"%s\"\n", name);
           else getstrings |= 1 << n;

@@ -1,8 +1,48 @@
 ChangeLog for PCRE
 ------------------
 
-Version 4.00 17-Feb-03
-----------------------
+Version 4.1 12-Mar-03
+---------------------
+
+1. Compiling with gcc -pedantic found a couple of places where casts were
+needed, and a string in dftables.c that was longer than standard compilers are
+required to support.
+
+2. Compiling with Sun's compiler found a few more places where the code could
+be tidied up in order to avoid warnings.
+
+3. The variables for cross-compiling were called HOST_CC and HOST_CFLAGS; the
+first of these names is deprecated in the latest Autoconf in favour of the name
+CC_FOR_BUILD, because "host" is typically used to mean the system on which the
+compiled code will be run. I can't find a reference for HOST_CFLAGS, but by
+analogy I have changed it to CFLAGS_FOR_BUILD.
+
+4. Added -no-undefined to the linking command in the Makefile, because this is
+apparently helpful for Windows. To make it work, also added "-L. -lpcre" to the
+linking step for the pcreposix library.
+
+5. PCRE was failing to diagnose the case of two named groups with the same
+name.
+
+6. A problem with one of PCRE's optimizations was discovered. PCRE remembers a
+literal character that is needed in the subject for a match, and scans along to
+ensure that it is present before embarking on the full matching process. This
+saves time in cases of nested unlimited repeats that are never going to match.
+Problem: the scan can take a lot of time if the subject is very long (e.g.
+megabytes), thus penalizing straightforward matches. It is now done only if the
+amount of subject to be scanned is less than 1000 bytes.
+
+7. A lesser problem with the same optimization is that it was recording the
+first character of an anchored pattern as "needed", thus provoking a search
+right along the subject, even when the first match of the pattern was going to
+fail. The "needed" character is now not set for anchored patterns, unless it
+follows something in the pattern that is of non-fixed length. Thus, it still
+fulfils its original purpose of finding quick non-matches in cases of nested
+unlimited repeats, but isn't used for simple anchored patterns such as /^abc/.
+
+
+Version 4.0 17-Feb-03
+---------------------
 
 1. If a comment in an extended regex that started immediately after a meta-item
 extended to the end of string, PCRE compiled incorrect data. This could lead to

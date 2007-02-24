@@ -125,6 +125,16 @@ included in makefiles for programs that use PCRE, saving the programmer from
 having to remember too many details.
 
 
+Cross-compiling PCRE on a Unix-like system
+------------------------------------------
+
+PCRE needs to compile and run an auxiliary program as part of the building
+process. Obviously, if the real compilation is for some other system, it can't
+use the same CC and CFLAGS values when it is doing this. For cross compilation,
+therefore, you must set CC_FOR_BUILD to the local host's compiler, and you can
+set flags in CFLAGS_FOR_BUILD if you need to.
+
+
 Shared libraries on Unix-like systems
 -------------------------------------
 

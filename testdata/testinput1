@@ -3820,4 +3820,7 @@
 /\M/
     M 
     
+/(a+)*b/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+    
 / End of testinput1 /

@@ -520,11 +520,13 @@ fourth argument should point to an \fBunsigned char *\fR variable.
 
   PCRE_INFO_LASTLITERAL
 
-For a non-anchored pattern, return the value of the rightmost literal byte
-which must exist in any matched string, other than at its start. The fourth
-argument should point to an \fBint\fR variable. If there is no such byte, or if
-the pattern is anchored, -1 is returned. For example, for the pattern
-/a\\d+z\\d+/ the returned value is 'z'.
+Return the value of the rightmost literal byte that must exist in any matched
+string, other than at its start, if such a byte has been recorded. The fourth
+argument should point to an \fBint\fR variable. If there is no such byte, -1 is
+returned. For anchored patterns, a last literal byte is recorded only if it
+follows something of variable length. For example, for the pattern
+/^a\\d+z\\d+/ the returned value is "z", but for /^a\\dz\\d/ the returned value
+is -1.
 
   PCRE_INFO_NAMECOUNT
   PCRE_INFO_NAMEENTRYSIZE

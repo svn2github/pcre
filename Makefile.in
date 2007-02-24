@@ -56,9 +56,9 @@ MANDIR = @mandir@
 
 CC = @CC@
 CFLAGS = @CFLAGS@
-HOST_CC = @HOST_CC@
-HOST_CFLAGS = @HOST_CFLAGS@
-UTF8   = @UTF8@
+CC_FOR_BUILD = @CC_FOR_BUILD@
+CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
+UTF8 = @UTF8@
 NEWLINE = @NEWLINE@
 POSIX_MALLOC_THRESHOLD = @POSIX_MALLOC_THRESHOLD@
 LINK_SIZE = @LINK_SIZE@
@@ -72,7 +72,7 @@ INSTALL_DATA = @INSTALL_DATA@
 
 LIBTOOL = @LIBTOOL@
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) -I. -I$(top_srcdir) $(NEWLINE) $(LINK_SIZE) $(MATCH_LIMIT)
-LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -I. -I$(top_srcdir)
+LINK = $(LIBTOOL) --mode=link $(CC) --no-undefined $(CFLAGS) -I. -I$(top_srcdir)
 
 # These are the version numbers for the shared libraries
 
@@ -101,7 +101,7 @@ libpcre.la:     $(OBJ)
 
 libpcreposix.la: pcreposix.o
 		-rm -f libpcreposix.la
-		$(LINK) -rpath $(LIBDIR) -version-info \
+		$(LINK) -rpath $(LIBDIR) -L. -lpcre -version-info \
 		'$(PCREPOSIXLIBVERSION)' -o libpcreposix.la pcreposix.lo
 
 pcre.o:         $(top_srcdir)/chartables.c $(top_srcdir)/pcre.c \
@@ -140,7 +140,7 @@ $(top_srcdir)/chartables.c:   dftables
 
 dftables.o:     $(top_srcdir)/dftables.c $(top_srcdir)/maketables.c \
 		$(top_srcdir)/internal.h pcre.h config.h Makefile
-		$(HOST_CC) -c $(HOST_CFLAGS) -I. $(top_srcdir)/dftables.c
+		$(CC_FOR_BUILD) -c $(CFLAGS_FOR_BUILD) -I. $(top_srcdir)/dftables.c
 
 dftables:       dftables.o
 		$(LINK) -o dftables dftables.o

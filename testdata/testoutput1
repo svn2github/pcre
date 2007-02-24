@@ -1,4 +1,4 @@
-PCRE version 4.0 17-Feb-2003
+PCRE version 4.1 12-Mar-2003
 
 /the quick brown fox/
     the quick brown fox
@@ -6242,6 +6242,10 @@ No match
 /\M/
     M 
  0: M
+    
+/(a+)*b/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+No match
     
 / End of testinput1 /
 

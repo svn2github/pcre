@@ -819,12 +819,14 @@ INFORMATION ABOUT A PATTERN
 
        PCRE_INFO_LASTLITERAL
 
-     For a non-anchored pattern, return the value of  the  right-
-     most  literal  byte  which must exist in any matched string,
-     other than at its start. The fourth argument should point to
-     an int variable. If there is no such byte, or if the pattern
-     is anchored, -1 is returned. For example,  for  the  pattern
-     /a\d+z\d+/ the returned value is 'z'.
+     Return the value of the rightmost  literal  byte  that  must
+     exist  in  any  matched  string, other than at its start, if
+     such a byte has been recorded. The  fourth  argument  should
+     point  to  an  int variable. If there is no such byte, -1 is
+     returned. For anchored patterns,  a  last  literal  byte  is
+     recorded  only  if  it follows something of variable length.
+     For example, for the pattern /^a\d+z\d+/ the returned  value
+     is "z", but for /^a\dz\d/ the returned value is -1.
 
        PCRE_INFO_NAMECOUNT
        PCRE_INFO_NAMEENTRYSIZE
@@ -1127,6 +1129,7 @@ MATCHING A PATTERN
      there  are no capturing subpatterns, the return value from a
      successful match is 1, indicating that just the  first  pair
      of offsets has been set.
+
      Some convenience functions are provided for  extracting  the
      captured substrings as separate strings. These are described
      in the following section.
@@ -1229,7 +1232,6 @@ EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
 
      int pcre_get_substring_list(const char *subject,
           int *ovector, int stringcount, const char ***listptr);
-
 
      Captured substrings can be accessed directly  by  using  the
      offsets returned by pcre_exec() in ovector. For convenience,

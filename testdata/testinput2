@@ -1225,4 +1225,8 @@
     zzaa\CZ
     zzaa\CA
 
+/(?P<x>eks)(?P<x>eccs)/
+
+/(?P<abc>abc(?P<def>def)(?P<abc>xyz))/
+
 / End of testinput2 /
