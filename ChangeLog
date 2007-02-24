@@ -2,6 +2,17 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 3.1 09-Feb-00
+---------------------
+
+The only change in this release is the fixing of some bugs in Makefile.in for
+the "install" target:
+
+(1) It was failing to install pcreposix.h.
+
+(2) It was overwriting the pcre.3 man page with the pcreposix.3 man page.
+
+
 Version 3.0 01-Feb-00
 ---------------------
 

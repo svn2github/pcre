@@ -160,8 +160,9 @@ install:        all
 		$(LIBTOOL) $(INSTALL_DATA) libpcre.$(LIBSUFFIX) $(LIBDIR)/libpcre.$(LIBSUFFIX)
 		$(LIBTOOL) $(INSTALL_DATA) libpcreposix.$(LIBSUFFIX) $(LIBDIR)/libpcreposix.$(LIBSUFFIX)
 		$(INSTALL_DATA) pcre.h $(INCDIR)/pcre.h
+		$(INSTALL_DATA) pcreposix.h $(INCDIR)/pcreposix.h
 		$(INSTALL_DATA) doc/pcre.3 $(MANDIR)/man3/pcre.3
-		$(INSTALL_DATA) doc/pcreposix.3 $(MANDIR)/man3/pcre.3
+		$(INSTALL_DATA) doc/pcreposix.3 $(MANDIR)/man3/pcreposix.3
 		$(INSTALL_DATA) doc/pgrep.1 $(MANDIR)/man1/pgrep.1
 		@if test "$(LIBTOOL)" = "libtool"; then \
 		  echo ' '; \

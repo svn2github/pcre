@@ -391,6 +391,7 @@ while (!done)
 
 #if !defined NOPOSIX  /* There are still compilers that require no indent */
   regex_t preg;
+  int do_posix = 0;
 #endif
 
   const char *error;
@@ -402,7 +403,6 @@ while (!done)
   int do_g = 0;
   int do_showinfo = showinfo;
   int do_showrest = 0;
-  int do_posix = 0;
   int erroroffset, len, delimiter;
 
   if (infile == stdin) printf("  re> ");
