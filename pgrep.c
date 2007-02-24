@@ -32,7 +32,7 @@ static BOOL whole_lines = FALSE;
 
 
 
-#ifndef HAVE_STRERROR
+#if ! HAVE_STRERROR
 /*************************************************
 *     Provide strerror() for non-ANSI libraries  *
 *************************************************/

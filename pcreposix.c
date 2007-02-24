@@ -12,7 +12,7 @@ functions.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-1999 University of Cambridge
+           Copyright (c) 1997-2000 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -46,7 +46,8 @@ restrictions:
 static const char *estring[] = {
   ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
   ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
-  ERR21, ERR22, ERR23, ERR24, ERR25 };
+  ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR29, ERR29, ERR30,
+  ERR31 };
 
 static int eint[] = {
   REG_EESCAPE, /* "\\ at end of pattern" */
@@ -76,7 +77,10 @@ static int eint[] = {
   REG_BADPAT,  /* "lookbehind assertion is not fixed length" */
   REG_BADPAT,  /* "malformed number after (?(" */
   REG_BADPAT,  /* "conditional group containe more than two branches" */
-  REG_BADPAT   /* "assertion expected after (?(" */
+  REG_BADPAT,  /* "assertion expected after (?(" */
+  REG_BADPAT,  /* "(?p must be followed by )" */
+  REG_ECTYPE,  /* "unknown POSIX class name" */
+  REG_BADPAT   /* "POSIX collating elements are not supported" */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -231,7 +235,7 @@ preg->re_erroffset = (size_t)(-1);   /* Only has meaning after compile */
 
 if (nmatch > 0)
   {
-  ovector = malloc(sizeof(int) * nmatch * 3);
+  ovector = (int *)malloc(sizeof(int) * nmatch * 3);
   if (ovector == NULL) return REG_ESPACE;
   }
 

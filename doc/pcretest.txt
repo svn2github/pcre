@@ -7,20 +7,23 @@ experimenting with regular expressions.
 If it is given two filename arguments, it reads from the first and writes to
 the second. If it is given only one filename argument, it reads from that file
 and writes to stdout. Otherwise, it reads from stdin and writes to stdout, and
-prompts for each line of input.
+prompts for each line of input, using "re>" to prompt for regular expressions,
+and "data>" to prompt for data lines.
 
 The program handles any number of sets of input on a single input file. Each
 set starts with a regular expression, and continues with any number of data
 lines to be matched against the pattern. An empty line signals the end of the
-set. The regular expressions are given enclosed in any non-alphameric
-delimiters other than backslash, for example
+data lines, at which point a new regular expression is read. The regular
+expressions are given enclosed in any non-alphameric delimiters other than
+backslash, for example
 
   /(a|bc)x+yz/
 
 White space before the initial delimiter is ignored. A regular expression may
 be continued over several input lines, in which case the newline characters are
-included within it. See the testinput files for many examples. It is possible
-to include the delimiter within the pattern by escaping it, for example
+included within it. See the test input files in the testdata directory for many
+examples. It is possible to include the delimiter within the pattern by
+escaping it, for example
 
   /abc\/def/
 
@@ -85,9 +88,9 @@ is, /L applies only to the expression on which it appears.
 
 The /I modifier requests that pcretest output information about the compiled
 expression (whether it is anchored, has a fixed first character, and so on). It
-does this by calling pcre_info() after compiling an expression, and outputting
-the information it gets back. If the pattern is studied, the results of that
-are also output.
+does this by calling pcre_fullinfo() after compiling an expression, and
+outputting the information it gets back. If the pattern is studied, the results
+of that are also output.
 
 The /D modifier is a PCRE debugging feature, which also assumes /I. It causes
 the internal form of compiled regular expressions to be output after

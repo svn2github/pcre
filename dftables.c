@@ -8,7 +8,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-1999 University of Cambridge
+           Copyright (c) 1997-2000 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -89,9 +89,11 @@ for (i = 0; i < 256; i++)
 printf(",\n\n");
 
 printf(
-  "/* This table contains bit maps for digits, 'word' chars, and white\n"
-  "space. Each map is 32 bytes long and the bits run from the least\n"
-  "significant end of each byte. */\n\n");
+  "/* This table contains bit maps for various character classes.\n"
+  "Each map is 32 bytes long and the bits run from the least\n"
+  "significant end of each byte. The classes that have their own\n"
+  "maps are: space, xdigit, digit, upper, lower, word, graph\n"
+  "print, punct, and cntrl. Other classes are built from combinations. */\n\n");
 
 printf("  ");
 for (i = 0; i < cbit_length; i++)
@@ -104,7 +106,7 @@ for (i = 0; i < cbit_length; i++)
   printf("0x%02x", *tables++);
   if (i != cbit_length - 1) printf(",");
   }
-printf(" ,\n\n");
+printf(",\n\n");
 
 printf(
   "/* This table identifies various classes of character by individual bits:\n"

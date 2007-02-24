@@ -1,6 +1,10 @@
 README file for PCRE (Perl-compatible regular expression library)
 -----------------------------------------------------------------
 
+The latest release of PCRE is always available from
+
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
+
 Please read the NEWS file if you are upgrading from a previous release.
 
 
@@ -17,34 +21,51 @@ CFLAGS='-O2 -Wall' ./configure --prefix=/opt/local
 
 specifies that the C compiler should be run with the flags '-O2 -Wall' instead
 of the default, and that "make install" should install PCRE under /opt/local
-instead of the default /usr/local. The "configure" script builds two files:
+instead of the default /usr/local. The "configure" script builds thre files:
 
-. Makefile is built by copying Makefile.in and making certain substitutions.
-. config.h is built by copying config.in and making certain substitutions.
+. Makefile is built by copying Makefile.in and making substitutions.
+. config.h is built by copying config.in and making substitutions.
+. pcre-config is built by copying pcre-config.in and making substitutions.
 
 Once "configure" has run, you can run "make". It builds two libraries called
-libpcre.a and libpcreposix.a, a test program called pcretest, and the pgrep
+libpcre and libpcreposix, a test program called pcretest, and the pgrep
 command. You can use "make install" to copy these, and the public header file
 pcre.h, to appropriate live directories on your system, in the normal way.
+
+Running "make install" also installs the command pcre-config, which can be used
+to recall information about the PCRE configuration and installation. For
+example,
+
+  pcre-config --version
+
+prints the version number, and
+
+ pcre-config --libs
+
+outputs information about where the library is installed. This command can be
+included in makefiles for programs that use PCRE, saving the programmer from
+having to remember too many details.
 
 
 Shared libraries on Unix systems
 --------------------------------
 
-The default distribution builds static libraries. It is also possible to build
-PCRE as two shared libraries. This support is new and experimental and may not
-work on all systems. It relies on the "libtool" scripts - these are distributed
-with PCRE. To build PCRE using shared libraries you must use --enable-shared
-when configuring it. For example
+The default distribution builds PCRE as two shared libraries. This support is
+new and experimental and may not work on all systems. It relies on the
+"libtool" scripts - these are distributed with PCRE. It should build a
+"libtool" script and use this to compile and link shared libraries, which are
+placed in a subdirectory called .libs. The programs pcretest and pgrep are
+built to use these uninstalled libraries by means of wrapper scripts. When you
+use "make install" to install shared libraries, pgrep and pcretest are
+automatically re-built to use the newly installed libraries. However, only
+pgrep is installed, as pcretest is really just a test program.
 
-./configure --prefix=/usr/gnu --enable-shared
+To build PCRE using static libraries you must use --disable-shared when
+configuring it. For example
 
-Then run "make" in the usual way. It should build a "libtool" script and use
-this to compile and link shared libraries, which are placed in a subdirectory
-called .libs. The programs pcretest and pgrep are built to use these
-uninstalled libraries by means of wrapper scripts. When you use "make install"
-to install shared libraries, pgrep is automatically re-built to use the newly
-installed library before it itself is installed.
+./configure --prefix=/usr/gnu --disable-shared
+
+Then run "make" in the usual way.
 
 
 Building on non-Unix systems
@@ -159,7 +180,8 @@ The distribution should contain the following files:
   study.c               ) source of
   pcre.c                )   the functions
   pcreposix.c           )
-  pcre.h                header for the external API
+  pcre.in               "source" for the header for the external API; pcre.h
+                          is built from this by "configure"
   pcreposix.h           header for the external POSIX wrapper API
   internal.h            header for internal use
   config.in             template for config.h, which is built by configure
@@ -170,6 +192,7 @@ The distribution should contain the following files:
   ChangeLog             log of changes to the code
   INSTALL               generic installation instructions
   LICENCE               conditions for the use of PCRE
+  COPYING               the same, using GNU's standard name
   Makefile.in           template for Unix Makefile, which is built by configure
   NEWS                  important changes in this release
   NON-UNIX-USE          notes on building PCRE on non-Unix systems
@@ -197,6 +220,7 @@ The distribution should contain the following files:
   pcretest.c            test program
   perltest              Perl test program
   pgrep.c               source of a grep utility that uses PCRE
+  pcre-config.in        source of script which retains PCRE information
   testdata/testinput1   test data, compatible with Perl 5.004 and 5.005
   testdata/testinput2   test data for error messages and non-Perl things
   testdata/testinput3   test data, compatible with Perl 5.005
@@ -212,4 +236,4 @@ The distribution should contain the following files:
   pcre.def
 
 Philip Hazel <ph10@cam.ac.uk>
-January 2000
+February 2000

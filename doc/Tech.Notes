@@ -23,18 +23,19 @@ optionally, minimizing in Perl) the amount of the subject that matches
 individual wild portions of the pattern. This is an "NFA algorithm" in Friedl's
 terminology.
 
-For this set of functions that forms PCRE, I tried at first to invent an
-algorithm that used an amount of store bounded by a multiple of the number of
-characters in the pattern, to save on compiling time. However, because of the
-greater complexity in Perl regular expressions, I couldn't do this. In any
-case, a first pass through the pattern is needed, in order to find internal
-flag settings like (?i) at top level. So it works by running a very degenerate
-first pass to calculate a maximum store size, and then a second pass to do the
-real compile - which may use a bit less than the predicted amount of store. The
-idea is that this is going to turn out faster because the first pass is
-degenerate and the second can just store stuff straight into the vector. It
-does make the compiling functions bigger, of course, but they have got quite
-big anyway to handle all the Perl stuff.
+For the set of functions that forms PCRE (which are unrelated to those
+mentioned above), I tried at first to invent an algorithm that used an amount
+of store bounded by a multiple of the number of characters in the pattern, to
+save on compiling time. However, because of the greater complexity in Perl
+regular expressions, I couldn't do this. In any case, a first pass through the
+pattern is needed, in order to find internal flag settings like (?i) at top
+level. So PCRE works by running a very degenerate first pass to calculate a
+maximum store size, and then a second pass to do the real compile - which may
+use a bit less than the predicted amount of store. The idea is that this is
+going to turn out faster because the first pass is degenerate and the second
+pass can just store stuff straight into the vector. It does make the compiling
+functions bigger, of course, but they have got quite big anyway to handle all
+the Perl stuff.
 
 The compiled form of a pattern is a vector of bytes, containing items of
 variable length. The first byte in an item is an opcode, and the length of the
@@ -61,6 +62,7 @@ These items are all just one byte long
   OP_EODN                match end of data or \n at end: \Z
   OP_EOD                 match end of data: \z
   OP_DOLL                $ (end of data, or before \n in multiline)
+  OP_RECURSE             match the pattern recursively
 
 
 Repeating single characters
@@ -125,9 +127,9 @@ positive class, and OP_NOT for a negative one (that is, for something like
 repeated, negated, single-character class. The normal ones (OP_STAR etc.) are
 used for a repeated positive single-character class.
 
-OP_CLASS is followed by a 32-byte bit map containing a 1
-bit for every character that is acceptable. The bits are counted from the least
-significant end of each byte.
+OP_CLASS is followed by a 32-byte bit map containing a 1 bit for every
+character that is acceptable. The bits are counted from the least significant
+end of each byte.
 
 
 Back references
@@ -159,11 +161,12 @@ four bytes of data, comprising the minimum and maximum repeat counts.
 Brackets and alternation
 ------------------------
 
-A pair of non-identifying (round) brackets is wrapped round each expression at
+A pair of non-capturing (round) brackets is wrapped round each expression at
 compile time, so alternation always happens in the context of brackets.
-Non-identifying brackets use the opcode OP_BRA, while identifying brackets use
+Non-capturing brackets use the opcode OP_BRA, while capturing brackets use
 OP_BRA+1, OP_BRA+2, etc. [Note for North Americans: "bracket" to some English
-speakers, including myself, can be round, square, or curly. Hence this usage.]
+speakers, including myself, can be round, square, curly, or pointy. Hence this
+usage.]
 
 A bracket opcode is followed by two bytes which give the offset to the next
 alternative OP_ALT or, if there aren't any branches, to the matching KET
@@ -236,4 +239,4 @@ the compiled data.
 
 
 Philip Hazel
-January 1999
+February 2000

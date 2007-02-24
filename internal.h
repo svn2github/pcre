@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-1999 University of Cambridge
+           Copyright (c) 1997-2000 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -40,9 +40,9 @@ modules, but which are not relevant to the outside. */
 #include "config.h"
 
 /* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
-define a macro for memmove() if HAVE_MEMMOVE is not defined. */
+define a macro for memmove() if HAVE_MEMMOVE is false. */
 
-#ifndef HAVE_MEMMOVE
+#if ! HAVE_MEMMOVE
 #undef  memmove        /* some systems may have a macro */
 #define memmove(a, b, c) bcopy(b, a, c)
 #endif
@@ -188,6 +188,7 @@ enum {
 
   OP_CLASS,          /* Match a character class */
   OP_REF,            /* Match a back reference */
+  OP_RECURSE,        /* Match this pattern recursively */
 
   OP_ALT,            /* Start of alternation */
   OP_KET,            /* End of group that doesn't have an unbounded repeat */
@@ -254,6 +255,9 @@ just to accommodate the POSIX wrapper. */
 #define ERR26 "malformed number after (?("
 #define ERR27 "conditional group contains more than two branches"
 #define ERR28 "assertion expected after (?("
+#define ERR29 "(?p must be followed by )"
+#define ERR30 "unknown POSIX class name"
+#define ERR31 "POSIX collating elements are not supported"
 
 /* All character handling must be done as unsigned characters. Otherwise there
 are problems with top-bit-set characters and functions such as isspace().
@@ -269,6 +273,7 @@ runs on as long as necessary after the end. */
 
 typedef struct real_pcre {
   unsigned long int magic_number;
+  size_t size;
   const unsigned char *tables;
   unsigned long int options;
   uschar top_bracket;
@@ -311,11 +316,12 @@ typedef struct match_data {
   BOOL   noteol;                /* NOTEOL flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
+  const uschar *start_pattern;  /* For use when recursing */
   const uschar *start_subject;  /* Start of the subject string */
   const uschar *end_subject;    /* End of the subject string */
   const uschar *start_match;    /* Start of this match attempt */
   const uschar *end_match_ptr;  /* Subject position at end match */
-  int     end_offset_top;       /* Highwater mark at end of match */
+  int    end_offset_top;        /* Highwater mark at end of match */
 } match_data;
 
 /* Bit definitions for entries in the pcre_ctypes table. */
@@ -328,12 +334,19 @@ typedef struct match_data {
 #define ctype_meta    0x80   /* regexp meta char or zero (end pattern) */
 
 /* Offsets for the bitmap tables in pcre_cbits. Each table contains a set
-of bits for a class map. */
+of bits for a class map. Some classes are built by combining these tables. */
 
-#define cbit_digit    0      /* for \d */
-#define cbit_word    32      /* for \w */
-#define cbit_space   64      /* for \s */
-#define cbit_length  96      /* Length of the cbits table */
+#define cbit_space     0      /* [:space:] or \s */
+#define cbit_xdigit   32      /* [:xdigit:] */
+#define cbit_digit    64      /* [:digit:] or \d */
+#define cbit_upper    96      /* [:upper:] */
+#define cbit_lower   128      /* [:lower:] */
+#define cbit_word    160      /* [:word:] or \w */
+#define cbit_graph   192      /* [:graph:] */
+#define cbit_print   224      /* [:print:] */
+#define cbit_punct   256      /* [:punct:] */
+#define cbit_cntrl   288      /* [:cntrl:] */
+#define cbit_length  320      /* Length of the cbits table */
 
 /* Offsets of the various tables from the base tables pointer, and
 total length. */

@@ -6,24 +6,30 @@ entirely of code written in Standard C, and so should compile successfully
 on any machine with a Standard C compiler and library, using normal compiling
 commands to do the following:
 
-(1) Copy or rename the file config.in as config.h. You should not have to
-change any settings inside it for a Standard C environment.
+(1) Copy or rename the file config.in as config.h, and change the macros that
+define HAVE_STRERROR and HAVE_MEMMOVE to define them as 1 rather than 0.
+Unfortunately, because of the way Unix autoconf works, the default setting has
+to be 0.
 
-(2) Compile dftables.c as a stand-alone program, and then run it with
+(2) Copy or rename the file pcre.in as pcre.h, and change the macro definitions
+for PCRE_MAJOR, PCRE_MINOR, and PCRE_DATE near its start to the values set in
+configure.in.
+
+(3) Compile dftables.c as a stand-alone program, and then run it with
 the standard output sent to chartables.c. This generates a set of standard
 character tables.
 
-(3) Compile maketables.c, get.c, study.c and pcre.c and link them all
+(4) Compile maketables.c, get.c, study.c and pcre.c and link them all
 together into an object library in whichever form your system keeps such
 libraries. This is the pcre library (chartables.c gets included by means of an
 #include directive).
 
-(4) Similarly, compile pcreposix.c and link it as the pcreposix library.
+(5) Similarly, compile pcreposix.c and link it as the pcreposix library.
 
-(5) Compile the test program pcretest.c. This needs the functions in the
+(6) Compile the test program pcretest.c. This needs the functions in the
 pcre and pcreposix libraries when linking.
 
-(6) Run pcretest on the testinput files in the testdata directory, and check
+(7) Run pcretest on the testinput files in the testdata directory, and check
 that the output matches the corresponding testoutput files. You must use the
 -i option when checking testinput2.
 

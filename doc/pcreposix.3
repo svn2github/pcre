@@ -36,11 +36,11 @@ can be accessed by adding \fB-lpcreposix\fR to the command for linking an
 application which uses them. Because the POSIX functions call the native ones,
 it is also necessary to add \fR-lpcre\fR.
 
-As I am pretty ignorant about POSIX, these functions must be considered as
-experimental. I have implemented only those option bits that can be reasonably
-mapped to PCRE native options. Other POSIX options are not even defined. It may
-be that it is useful to define, but ignore, other options. Feedback from more
-knowledgeable folk may cause this kind of detail to change.
+I have implemented only those option bits that can be reasonably mapped to PCRE
+native options. In addition, the options REG_EXTENDED and REG_NOSUB are defined
+with the value zero. They have no effect, but since programs that are written
+to the POSIX interface often use them, this makes it easier to slot in PCRE as
+a replacement library. Other POSIX options are not even defined.
 
 When PCRE is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are

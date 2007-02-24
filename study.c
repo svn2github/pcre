@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-1999 University of Cambridge
+           Copyright (c) 1997-2000 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -207,12 +207,12 @@ do
 
       case OP_NOT_WORDCHAR:
       for (c = 0; c < 32; c++)
-        start_bits[c] |= ~(cd->cbits[c] | cd->cbits[c+cbit_word]);
+        start_bits[c] |= ~cd->cbits[c+cbit_word];
       break;
 
       case OP_WORDCHAR:
       for (c = 0; c < 32; c++)
-        start_bits[c] |= (cd->cbits[c] | cd->cbits[c+cbit_word]);
+        start_bits[c] |= cd->cbits[c+cbit_word];
       break;
 
       /* One or more character type fudges the pointer and restarts, knowing
@@ -264,12 +264,12 @@ do
 
         case OP_NOT_WORDCHAR:
         for (c = 0; c < 32; c++)
-          start_bits[c] |= ~(cd->cbits[c] | cd->cbits[c+cbit_word]);
+          start_bits[c] |= ~cd->cbits[c+cbit_word];
         break;
 
         case OP_WORDCHAR:
         for (c = 0; c < 32; c++)
-          start_bits[c] |= (cd->cbits[c] | cd->cbits[c+cbit_word]);
+          start_bits[c] |= cd->cbits[c+cbit_word];
         break;
         }
 

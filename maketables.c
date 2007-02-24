@@ -8,7 +8,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-1999 University of Cambridge
+           Copyright (c) 1997-2000 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -81,15 +81,34 @@ for (i = 0; i < 256; i++) *p++ = tolower(i);
 
 for (i = 0; i < 256; i++) *p++ = islower(i)? toupper(i) : tolower(i);
 
-/* Then the character class tables */
+/* Then the character class tables. Don't try to be clever and save effort
+on exclusive ones - in some locales things may be different. */
 
 memset(p, 0, cbit_length);
 for (i = 0; i < 256; i++)
   {
-  if (isdigit(i)) p[cbit_digit  + i/8] |= 1 << (i&7);
-  if (isalnum(i) || i == '_')
-                  p[cbit_word   + i/8] |= 1 << (i&7);
+  if (isdigit(i))
+    {
+    p[cbit_digit  + i/8] |= 1 << (i&7);
+    p[cbit_word   + i/8] |= 1 << (i&7);
+    }
+  if (isupper(i))
+    {
+    p[cbit_upper  + i/8] |= 1 << (i&7);
+    p[cbit_word   + i/8] |= 1 << (i&7);
+    }
+  if (islower(i))
+    {
+    p[cbit_lower  + i/8] |= 1 << (i&7);
+    p[cbit_word   + i/8] |= 1 << (i&7);
+    }
+  if (i == '_')   p[cbit_word   + i/8] |= 1 << (i&7);
   if (isspace(i)) p[cbit_space  + i/8] |= 1 << (i&7);
+  if (isxdigit(i))p[cbit_xdigit + i/8] |= 1 << (i&7);
+  if (isgraph(i)) p[cbit_graph  + i/8] |= 1 << (i&7);
+  if (isprint(i)) p[cbit_print  + i/8] |= 1 << (i&7);
+  if (ispunct(i)) p[cbit_punct  + i/8] |= 1 << (i&7);
+  if (iscntrl(i)) p[cbit_cntrl  + i/8] |= 1 << (i&7);
   }
 p += cbit_length;
 

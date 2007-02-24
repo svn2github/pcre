@@ -1,8 +1,17 @@
 News about PCRE releases
 ------------------------
 
-A "configure" script is now used to configure PCRE for Unix systems. It builds
-a Makefile and a config.h file.
+Release 3.0 01-Feb-00
+---------------------
+
+1. A "configure" script is now used to configure PCRE for Unix systems. It
+builds a Makefile, a config.h file, and the pcre-config script.
+
+2. PCRE is built as a shared library by default.
+
+3. There is support for POSIX classes such as [:alpha:].
+
+5. There is an experimental recursion feature.
 
 ----------------------------------------------------------------------------
           IMPORTANT FOR THOSE UPGRADING FROM VERSIONS BEFORE 2.00

@@ -2,8 +2,8 @@ ChangeLog for PCRE
 ------------------
 
 
-Version 2.09 14-Sep-99
-----------------------
+Version 3.0 01-Feb-00
+---------------------
 
 1. Add support for the /+ modifier to perltest (to output $` like it does in
 pcretest).
@@ -22,6 +22,30 @@ effect.
 captured string vector to pcre_exec(), but (since release 2.00) PCRE has
 required a bigger vector, with some working space on the end. This means that
 the POSIX wrapper now has to get and free some memory, and copy the results.
+
+6. Added some simple autoconf support, placing the test data and the
+documentation in separate directories, re-organizing some of the
+information files, and making it build pcre-config (a GNU standard). Also added
+libtool support for building PCRE as a shared library, which is now the
+default.
+
+7. Got rid of the leading zero in the definition of PCRE_MINOR because 08 and
+09 are not valid octal constants. Single digits will be used for minor values
+less than 10.
+
+8. Defined REG_EXTENDED and REG_NOSUB as zero in the POSIX header, so that
+existing programs that set these in the POSIX interface can use PCRE without
+modification.
+
+9. Added a new function, pcre_fullinfo() with an extensible interface. It can
+return all that pcre_info() returns, plus additional data. The pcre_info()
+function is retained for compatibility, but is considered to be obsolete.
+
+10. Added experimental recursion feature (?R) to handle one common case that
+Perl 5.6 will be able to do with (?p{...}).
+
+11. Added support for POSIX character classes like [:alpha:], which Perl is
+adopting.
 
 
 Version 2.08 31-Aug-99

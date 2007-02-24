@@ -2,7 +2,7 @@
 *       Perl-Compatible Regular Expressions      *
 *************************************************/
 
-/* Copyright (c) 1997-1999 University of Cambridge */
+/* Copyright (c) 1997-2000 University of Cambridge */
 
 #ifndef _PCREPOSIX_H
 #define _PCREPOSIX_H
@@ -27,6 +27,12 @@ extern "C" {
 #define REG_NEWLINE   0x02
 #define REG_NOTBOL    0x04
 #define REG_NOTEOL    0x08
+
+/* These are not used by PCRE, but by defining them we make it easier
+to slot PCRE into existing programs that make POSIX calls. */
+
+#define REG_EXTENDED  0
+#define REG_NOSUB     0
 
 /* Error values. Not all these are relevant or used by the wrapper. */
 

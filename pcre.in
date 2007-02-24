@@ -2,14 +2,14 @@
 *       Perl-Compatible Regular Expressions      *
 *************************************************/
 
-/* Copyright (c) 1997-1999 University of Cambridge */
+/* Copyright (c) 1997-2000 University of Cambridge */
 
 #ifndef _PCRE_H
 #define _PCRE_H
 
-#define PCRE_MAJOR 2
-#define PCRE_MINOR 08
-#define PCRE_DATE  31-Aug-1999
+#define PCRE_MAJOR @PCRE_MAJOR@
+#define PCRE_MINOR @PCRE_MINOR@
+#define PCRE_DATE  @PCRE_DATE@
 
 /* Win32 uses DLL by default */
 
@@ -59,6 +59,16 @@ extern "C" {
 #define PCRE_ERROR_NOMEMORY       (-6)
 #define PCRE_ERROR_NOSUBSTRING    (-7)
 
+/* Request types for pcre_fullinfo() */
+
+#define PCRE_INFO_OPTIONS         0
+#define PCRE_INFO_SIZE            1
+#define PCRE_INFO_CAPTURECOUNT    2
+#define PCRE_INFO_BACKREFMAX      3
+#define PCRE_INFO_FIRSTCHAR       4
+#define PCRE_INFO_FIRSTTABLE      5
+#define PCRE_INFO_LASTLITERAL     6
+
 /* Types */
 
 typedef void pcre;
@@ -83,6 +93,7 @@ extern int pcre_exec(const pcre *, const pcre_extra *, const char *,
 extern int pcre_get_substring(const char *, int *, int, int, const char **);
 extern int pcre_get_substring_list(const char *, int *, int, const char ***);
 extern int pcre_info(const pcre *, int *, int *);
+extern int pcre_fullinfo(const pcre *, const pcre_extra *, int, void *);
 extern unsigned const char *pcre_maketables(void);
 extern pcre_extra *pcre_study(const pcre *, int, const char **);
 extern const char *pcre_version(void);

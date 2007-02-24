@@ -27,10 +27,10 @@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-BINDIR = $(exec_prefix)/bin
-LIBDIR = $(exec_prefix)/lib
-INCDIR = $(prefix)/include
-MANDIR = $(prefix)/man
+BINDIR = @bindir@
+LIBDIR = @libdir@
+INCDIR = @includedir@
+MANDIR = @mandir@
 
 CC = @CC@
 CFLAGS = @CFLAGS@
@@ -44,6 +44,11 @@ RANLIB = @RANLIB@
 
 LIBTOOL = @LIBTOOL@
 LIBSUFFIX = @LIBSUFFIX@
+
+# These are the version numbers for the shared libraries
+
+PCRELIBVERSION = @PCRE_LIB_VERSION@
+PCREPOSIXLIBVERSION = @PCRE_POSIXLIB_VERSION@
 
 
 #---------------------------------------------------------------------------#
@@ -105,7 +110,7 @@ libpcre.la:     $(OBJ)
 		@echo '--- Building shared library: libpcre'
 		@echo ' '
 		-rm -f libpcre.la
-		libtool $(CC) -o libpcre.la -rpath $(LIBDIR) $(LOBJ)
+		libtool $(CC) -version-info '$(PCRELIBVERSION)' -o libpcre.la -rpath $(LIBDIR) $(LOBJ)
 
 libpcreposix.a: pcreposix.o
 		@echo ' '
@@ -120,7 +125,7 @@ libpcreposix.la: pcreposix.o
 		@echo '--- Building shared library: libpcreposix'
 		@echo ' '
 		-rm -f libpcreposix.la
-		libtool $(CC) -o libpcreposix.la -rpath $(LIBDIR) pcreposix.lo
+		libtool $(CC) -version-info '$(PCREPOSIXLIBVERSION)' -o libpcreposix.la -rpath $(LIBDIR) pcreposix.lo
 
 pcre.o:         chartables.c pcre.c pcre.h internal.h config.h Makefile
 		$(LIBTOOL) $(CC) -c $(CFLAGS) pcre.c
@@ -159,11 +164,16 @@ install:        all
 		$(INSTALL_DATA) doc/pcreposix.3 $(MANDIR)/man3/pcre.3
 		$(INSTALL_DATA) doc/pgrep.1 $(MANDIR)/man1/pgrep.1
 		@if test "$(LIBTOOL)" = "libtool"; then \
+		  echo ' '; \
 		  echo '--- Rebuilding pgrep to use installed shared library ---'; \
 		  echo $(CC) $(CFLAGS) -o pgrep pgrep.o -L$(LIBDIR) -lpcre; \
 		  $(CC) $(CFLAGS) -o pgrep pgrep.o -L$(LIBDIR) -lpcre; \
+		  echo '--- Rebuilding pcretest to use installed shared library ---'; \
+		  echo $(CC) $(CFLAGS) -o pcretest pcretest.o -L$(LIBDIR) -lpcre -lpcreposix; \
+		  $(CC) $(CFLAGS) -o pcretest pcretest.o -L$(LIBDIR) -lpcre -lpcreposix; \
 		fi
-		$(INSTALL)	pgrep $(BINDIR)/pgrep \
+		$(INSTALL)	pgrep $(BINDIR)/pgrep
+		$(INSTALL)	pcre-config $(BINDIR)/pcre-config
 
 # We deliberately omit dftables and chartables.c from 'make clean'; once made
 # chartables.c shouldn't change, and if people have edited the tables by hand,
@@ -174,7 +184,7 @@ clean:;         -rm -rf *.o *.lo *.a *.la .libs pcretest pgrep testtry
 # But "make distclean" should get back to a virgin distribution
 
 distclean:      clean
-		-rm -f chartables.c libtool \
+		-rm -f chartables.c libtool pcre-config pcre.h \
 		Makefile config.h config.status config.log config.cache
 
 check:          runtest

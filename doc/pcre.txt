@@ -30,6 +30,9 @@ SYNOPSIS
 
      const unsigned char *pcre_maketables(void);
 
+     int pcre_fullinfo(const pcre *code, const pcre_extra *extra,
+          int what, void *where);
+
      int pcre_info(const pcre *code, int *optptr, *firstcharptr);
 
      char *pcre_version(void);
@@ -46,16 +49,22 @@ DESCRIPTION
      lar  expression  pattern  matching using the same syntax and
      semantics as Perl  5,  with  just  a  few  differences  (see
      below).  The  current  implementation  corresponds  to  Perl
-     5.005.
+     5.005, with some additional features from the Perl  develop-
+     ment release.
 
      PCRE has its own native API,  which  is  described  in  this
      document.  There  is  also  a  set of wrapper functions that
-     correspond to the POSIX API.  These  are  described  in  the
-     pcreposix documentation.
+     correspond to the POSIX regular expression API.   These  are
+     described in the pcreposix documentation.
+
      The native API function prototypes are defined in the header
      file  pcre.h,  and  on  Unix  systems  the library itself is
      called libpcre.a, so can be accessed by adding -lpcre to the
-     command for linking an application which calls it.
+     command  for  linking  an  application  which  calls it. The
+     header file defines the macros PCRE_MAJOR and PCRE_MINOR  to
+     contain the major and minor release numbers for the library.
+     Applications can use these to include support for  different
+     releases.
 
      The functions pcre_compile(), pcre_study(), and  pcre_exec()
      are  used  for  compiling  and matching regular expressions,
@@ -66,10 +75,12 @@ DESCRIPTION
      to build a set of character tables in the current locale for
      passing to pcre_compile().
 
-     The function pcre_info() is used  to  find  out  information
-     about  a compiled pattern, while the function pcre_version()
-     returns a pointer to a string containing the version of PCRE
-     and its date of release.
+     The function pcre_fullinfo() is used to find out information
+     about a compiled pattern; pcre_info() is an obsolete version
+     which returns only some of the available information, but is
+     retained   for   backwards   compatibility.    The  function
+     pcre_version() returns a pointer to a string containing  the
+     version of PCRE and its date of release.
 
      The global variables  pcre_malloc  and  pcre_free  initially
      contain the entry points of the standard malloc() and free()
@@ -89,6 +100,7 @@ MULTI-THREADING
      The compiled form of a regular  expression  is  not  altered
      during  matching, so the same compiled pattern can safely be
      used by several threads at once.
+
 
 
 
@@ -187,14 +199,16 @@ COMPILING A PATTERN
 
        PCRE_EXTRA
 
-     This option turns on additional functionality of  PCRE  that
-     is  incompatible  with Perl. Any backslash in a pattern that
-     is followed by a letter that has no special  meaning  causes
-     an  error,  thus  reserving  these  combinations  for future
-     expansion. By default, as in Perl, a backslash followed by a
-     letter  with  no  special  meaning  is treated as a literal.
-     There are at present no other features  controlled  by  this
-     option.
+     This option was invented in  order  to  turn  on  additional
+     functionality of PCRE that is incompatible with Perl, but it
+     is currently of very little use. When set, any backslash  in
+     a  pattern  that is followed by a letter that has no special
+     meaning causes an error, thus reserving  these  combinations
+     for  future  expansion.  By default, as in Perl, a backslash
+     followed by a letter with no special meaning is treated as a
+     literal.  There  are at present no other features controlled
+     by this option. It can also be set by a (?X) option  setting
+     within a pattern.
 
        PCRE_MULTILINE
 
@@ -207,9 +221,9 @@ COMPILING A PATTERN
      PCRE_DOLLAR_ENDONLY is set). This is the same as Perl.
 
      When PCRE_MULTILINE it is set, the "start of line" and  "end
-     of   line"   constructs   match   immediately  following  or
-     immediately  before  any  newline  in  the  subject  string,
-     respectively,  as well as at the very start and end. This is
+     of  line"  constructs match immediately following or immedi-
+     ately before any newline  in  the  subject  string,  respec-
+     tively,  as  well  as  at  the  very  start and end. This is
      equivalent to Perl's /m option. If there are no "\n" charac-
      ters  in  a subject string, or no occurrences of ^ or $ in a
      pattern, setting PCRE_MULTILINE has no effect.
@@ -284,27 +298,63 @@ LOCALE SUPPORT
 
 
 INFORMATION ABOUT A PATTERN
-     The pcre_info() function returns information  about  a  com-
-     piled pattern.  Its yield is the number of capturing subpat-
-     terns, or one of the following negative numbers:
+     The pcre_fullinfo() function  returns  information  about  a
+     compiled pattern. It replaces the obsolete pcre_info() func-
+     tion, which is nevertheless retained for backwards compabil-
+     ity (and is documented below).
+
+     The first argument for pcre_fullinfo() is a pointer  to  the
+     compiled  pattern.  The  second  argument  is  the result of
+     pcre_study(), or NULL if the pattern was  not  studied.  The
+     third  argument  specifies  which  piece  of  information is
+     required, while the fourth argument is a pointer to a  vari-
+     able  to receive the data. The yield of the function is zero
+     for success, or one of the following negative numbers:
 
        PCRE_ERROR_NULL       the argument code was NULL
+                             the argument where was NULL
        PCRE_ERROR_BADMAGIC   the "magic number" was not found
+       PCRE_ERROR_BADOPTION  the value of what was invalid
 
-     If the optptr argument is not NULL, a copy  of  the  options
-     with which the pattern was compiled is placed in the integer
-     it points to. These option bits are those specified  in  the
+     The possible values for the third argument  are  defined  in
+     pcre.h, and are as follows:
+
+       PCRE_INFO_OPTIONS
+
+     Return a copy of the options with which the pattern was com-
+     piled.  The fourth argument should point to au unsigned long
+     int variable. These option bits are those specified  in  the
      call  to  pcre_compile(),  modified  by any top-level option
      settings  within  the   pattern   itself,   and   with   the
-     PCRE_ANCHORED  bit  set  if  the form of the pattern implies
-     that it can match only at the start of a subject string.
+     PCRE_ANCHORED  bit  forcibly  set if the form of the pattern
+     implies that it can match only at the  start  of  a  subject
+     string.
 
-     If the pattern is not anchored and the firstcharptr argument
-     is  not  NULL, it is used to pass back information about the
-     first character of any matched string. If there is  a  fixed
-     first    character,    e.g.   from   a   pattern   such   as
+       PCRE_INFO_SIZE
+
+     Return the size of the compiled pattern, that is, the  value
+     that  was  passed as the argument to pcre_malloc() when PCRE
+     was getting memory in which to place the compiled data.  The
+     fourth argument should point to a size_t variable.
+
+       PCRE_INFO_CAPTURECOUNT
+
+     Return the number of capturing subpatterns in  the  pattern.
+     The fourth argument should point to an int variable.
+
+       PCRE_INFO_BACKREFMAX
+
+     Return the number of the highest back reference in the  pat-
+     tern.  The  fourth argument should point to an int variable.
+     Zero is returned if there are no back references.
+
+       PCRE_INFO_FIRSTCHAR
+
+     Return information about the first character of any  matched
+     string,  for  a  non-anchored  pattern.  If there is a fixed
+     first   character,   e.g.   from   a   pattern    such    as
      (cat|cow|coyote), then it is returned in the integer pointed
-     to by firstcharptr. Otherwise, if either
+     to by where. Otherwise, if either
 
      (a) the pattern was compiled with the PCRE_MULTILINE option,
      and every branch starts with "^", or
@@ -312,9 +362,48 @@ INFORMATION ABOUT A PATTERN
      (b) every  branch  of  the  pattern  starts  with  ".*"  and
      PCRE_DOTALL is not set (if it were set, the pattern would be
      anchored),
+
      then -1 is returned, indicating  that  the  pattern  matches
      only  at  the  start  of  a subject string or after any "\n"
-     within the string. Otherwise -2 is returned.
+     within the string. Otherwise -2 is  returned.  For  anchored
+     patterns, -2 is returned.
+
+       PCRE_INFO_FIRSTTABLE
+
+     If the pattern was studied, and this resulted  in  the  con-
+     struction of a 256-bit table indicating a fixed set of char-
+     acters for the first character in  any  matching  string,  a
+     pointer   to  the  table  is  returned.  Otherwise  NULL  is
+     returned. The fourth argument should point  to  an  unsigned
+     char * variable.
+
+       PCRE_INFO_LASTLITERAL
+
+     For a non-anchored pattern, return the value of  the  right-
+     most  literal  character  which  must  exist  in any matched
+     string, other than at its start. The fourth argument  should
+     point  to an int variable. If there is no such character, or
+     if the pattern is anchored, -1 is returned. For example, for
+     the pattern /a\d+z\d+/ the returned value is 'z'.
+
+     The pcre_info() function is now obsolete because its  inter-
+     face  is  too  restrictive  to return all the available data
+     about  a  compiled  pattern.   New   programs   should   use
+     pcre_fullinfo()  instead.  The  yield  of pcre_info() is the
+     number of capturing subpatterns, or  one  of  the  following
+     negative numbers:
+
+       PCRE_ERROR_NULL       the argument code was NULL
+       PCRE_ERROR_BADMAGIC   the "magic number" was not found
+
+     If the optptr argument is not NULL, a copy  of  the  options
+     with which the pattern was compiled is placed in the integer
+     it points to (see PCRE_INFO_OPTIONS above).
+
+     If the pattern is not anchored and the firstcharptr argument
+     is  not  NULL, it is used to pass back information about the
+     first    character    of    any    matched    string    (see
+     PCRE_INFO_FIRSTCHAR above).
 
 
 
@@ -640,9 +729,10 @@ DIFFERENCES FROM PERL
      6. The Perl \G assertion is  not  supported  as  it  is  not
      relevant to single pattern matches.
 
-     7. Fairly obviously, PCRE does  not  support  the  (?{code})
-     construction.
-
+     7. Fairly obviously, PCRE does not support the (?{code}) and
+     (?p{code})  constructions. However, there is some experimen-
+     tal support for recursive patterns using the  non-Perl  item
+     (?R).
      8. There are at the time of writing some  oddities  in  Perl
      5.005_02  concerned  with  the  settings of captured strings
      when part of a pattern is repeated.  For  example,  matching
@@ -675,9 +765,9 @@ DIFFERENCES FROM PERL
      (c) If PCRE_EXTRA is set, a backslash followed by  a  letter
      with no special meaning is faulted.
 
-     (d)  If  PCRE_UNGREEDY  is  set,  the  greediness   of   the
-     repetition quantifiers is inverted, that is, by default they
-     are not greedy, but if followed by a question mark they are.
+     (d) If PCRE_UNGREEDY is set, the greediness of  the  repeti-
+     tion  quantifiers  is inverted, that is, by default they are
+     not greedy, but if followed by a question mark they are.
 
      (e) PCRE_ANCHORED can be used to force a pattern to be tried
      only at the start of the subject.
@@ -685,15 +775,20 @@ DIFFERENCES FROM PERL
      (f) The PCRE_NOTBOL, PCRE_NOTEOL, and PCRE_NOTEMPTY  options
      for pcre_exec() have no Perl equivalents.
 
+     (g) The (?R) construct allows for recursive pattern matching
+     (Perl  5.6 can do this using the (?p{code}) construct, which
+     PCRE cannot of course support.)
+
 
 
 REGULAR EXPRESSION DETAILS
      The syntax and semantics of  the  regular  expressions  sup-
      ported  by PCRE are described below. Regular expressions are
      also described in the Perl documentation and in a number  of
+
      other  books,  some  of which have copious examples. Jeffrey
      Friedl's  "Mastering  Regular  Expressions",  published   by
-     O'Reilly  (ISBN 1-56592-257-3), covers them in great detail.
+     O'Reilly  (ISBN  1-56592-257),  covers them in great detail.
      The description here is intended as reference documentation.
 
      A regular expression is a pattern that is matched against  a
@@ -780,8 +875,7 @@ BACKSLASH
        \f     formfeed (hex 0C)
        \n     newline (hex 0A)
        \r     carriage return (hex 0D)
-
-            tab (hex 09)
+       \t     tab (hex 09)
        \xhh   character with hex code hh
        \ddd   character with octal code ddd, or backreference
 
@@ -833,6 +927,7 @@ BACKSLASH
      Note that octal values of 100 or greater must not be  intro-
      duced  by  a  leading zero, because no more than three octal
      digits are ever read.
+
      All the sequences that define a single  byte  value  can  be
      used both inside and outside character classes. In addition,
      inside a character class, the sequence "\b"  is  interpreted
@@ -885,6 +980,7 @@ BACKSLASH
      These assertions may not appear in  character  classes  (but
      note that "\b" has a different meaning, namely the backspace
      character, inside a character class).
+
      A word boundary is a position in the  subject  string  where
      the current character and the previous character do not both
      match \w or \W (i.e. one matches \w and  the  other  matches
@@ -1046,6 +1142,44 @@ SQUARE BRACKETS
 
 
 
+POSIX CHARACTER CLASSES
+     Perl 5.6 (not yet released at the time of writing) is  going
+     to  support  the POSIX notation for character classes, which
+     uses names enclosed by  [:  and  :]   within  the  enclosing
+     square brackets. PCRE supports this notation. For example,
+
+       [01[:alpha:]%]
+
+     matches "0", "1", any alphabetic character, or "%". The sup-
+     ported class names are
+
+       alnum    letters and digits
+       alpha    letters
+       ascii    character codes 0 - 127
+       cntrl    control characters
+       digit    decimal digits (same as \d)
+       graph    printing characters, excluding space
+       lower    lower case letters
+       print    printing characters, including space
+       punct    printing characters, excluding letters and digits
+       space    white space (same as \s)
+       upper    upper case letters
+       word     "word" characters (same as \w)
+       xdigit   hexadecimal digits
+
+     The names "ascii" and "word" are  Perl  extensions.  Another
+     Perl  extension is negation, which is indicated by a ^ char-
+     acter after the colon. For example,
+
+       [12[:^digit:]]
+
+     matches "1", "2", or any non-digit.  PCRE  (and  Perl)  also
+     recogize  the POSIX syntax [.ch.] and [=ch=] where "ch" is a
+     "collating element", but these are  not  supported,  and  an
+     error is given if they are encountered.
+
+
+
 VERTICAL BAR
      Vertical bar characters are  used  to  separate  alternative
      patterns. For example, the pattern
@@ -1196,7 +1330,6 @@ SUBPATTERNS
 REPETITION
      Repetition is specified by quantifiers, which can follow any
      of the following items:
-
 
        a single character, possibly escaped
        the . metacharacter
@@ -1384,8 +1517,8 @@ BACK REFERENCES
      A back reference that occurs inside the parentheses to which
      it  refers  fails when the subpattern is first used, so, for
      example, (a\1) never matches.  However, such references  can
-     be useful inside repeated subpatterns. For example, the pat-
-     tern
+     be  useful  inside  repeated  subpatterns.  For example, the
+     pattern
 
        (a|b\1)+
 
@@ -1407,6 +1540,7 @@ ASSERTIONS
      cated assertions are coded as  subpatterns.  There  are  two
      kinds:  those that look ahead of the current position in the
      subject string, and those that look behind it.
+
      An assertion subpattern is matched in the normal way, except
      that  it  does not cause the current matching position to be
      changed. Lookahead assertions start with  (?=  for  positive
@@ -1572,20 +1706,19 @@ ONCE-ONLY SUBPATTERNS
 
        abcd$
 
-     when applied to a long  string  which  does  not  match  it.
-     Because matching proceeds from left to right, PCRE will look
-     for each "a" in the subject and then  see  if  what  follows
-     matches the rest of the pattern. If the pattern is specified
-     as
+     when applied to a long string which does not match.  Because
+     matching  proceeds  from  left  to right, PCRE will look for
+     each "a" in the subject and then see if what follows matches
+     the rest of the pattern. If the pattern is specified as
 
        ^.*abcd$
 
      then the initial .* matches the entire string at first,  but
-     when  this  fails,  it  backtracks to match all but the last
-     character, then all but the last two characters, and so  on.
-     Once again the search for "a" covers the entire string, from
-     right to left, so we are no better off. However, if the pat-
-     tern is written as
+     when  this  fails  (because  there  is no following "a"), it
+     backtracks to match all but the last character, then all but
+     the  last  two  characters, and so on. Once again the search
+     for "a" covers the entire string, from right to left, so  we
+     are no better off. However, if the pattern is written as
 
        ^(?>.*)(?<=abcd)
 
@@ -1595,6 +1728,36 @@ ONCE-ONLY SUBPATTERNS
      it  fails,  the  match  fails immediately. For long strings,
      this approach makes a significant difference to the process-
      ing time.
+
+     When a pattern contains an unlimited repeat inside a subpat-
+     tern  that  can  itself  be  repeated an unlimited number of
+     times, the use of a once-only subpattern is the only way  to
+     avoid  some  failing matches taking a very long time indeed.
+     The pattern
+
+       (\D+|<\d+>)*[!?]
+
+     matches an unlimited number of substrings that  either  con-
+     sist  of  non-digits,  or digits enclosed in <>, followed by
+     either ! or ?. When it matches, it runs quickly. However, if
+     it is applied to
+
+       aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+     it takes a long  time  before  reporting  failure.  This  is
+     because the string can be divided between the two repeats in
+     a large number of ways, and all have to be tried. (The exam-
+     ple  used  [!?]  rather  than a single character at the end,
+     because both PCRE and Perl have an optimization that  allows
+     for  fast  failure  when  a  single  character is used. They
+     remember the last single character that is  required  for  a
+     match,  and  fail early if it is not present in the string.)
+     If the pattern is changed to
+
+       ((?>\D+)|<\d+>)*[!?]
+
+     sequences of non-digits cannot be broken, and  failure  hap-
+     pens quickly.
 
 
 
@@ -1665,6 +1828,75 @@ COMMENTS
      If the PCRE_EXTENDED option is set, an unescaped # character
      outside  a character class introduces a comment that contin-
      ues up to the next newline character in the pattern.
+
+
+
+RECURSIVE PATTERNS
+     Consider the problem of matching a  string  in  parentheses,
+     allowing  for  unlimited nested parentheses. Without the use
+     of recursion, the best that can be done is to use a  pattern
+     that  matches  up  to some fixed depth of nesting. It is not
+     possible to handle an arbitrary nesting depth. Perl 5.6  has
+     provided   an  experimental  facility  that  allows  regular
+     expressions to recurse (amongst other things). It does  this
+     by  interpolating  Perl  code in the expression at run time,
+     and the code can refer to the expression itself. A Perl pat-
+     tern  to  solve  the parentheses problem can be created like
+     this:
+
+       $re = qr{\( (?: (?>[^()]+) | (?p{$re}) )* \)}x;
+
+     The (?p{...}) item interpolates Perl code at run  time,  and
+     in  this  case refers recursively to the pattern in which it
+     appears. Obviously, PCRE cannot support the interpolation of
+     Perl  code.  Instead,  the special item (?R) is provided for
+     the specific case of recursion. This PCRE pattern solves the
+     parentheses  problem (assume the PCRE_EXTENDED option is set
+     so that white space is ignored):
+
+       \( ( (?>[^()]+) | (?R) )* \)
+
+     First it matches an opening parenthesis. Then it matches any
+     number  of substrings which can either be a sequence of non-
+     parentheses, or a recursive  match  of  the  pattern  itself
+     (i.e. a correctly parenthesized substring). Finally there is
+     a closing parenthesis.
+
+     This particular example pattern  contains  nested  unlimited
+     repeats, and so the use of a once-only subpattern for match-
+     ing strings of non-parentheses is  important  when  applying
+     the  pattern to strings that do not match. For example, when
+     it is applied to
+
+       (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()
+
+     it yields "no match" quickly. However, if a  once-only  sub-
+     pattern  is  not  used,  the match runs for a very long time
+     indeed because there are so many different ways the + and  *
+     repeats  can carve up the subject, and all have to be tested
+     before failure can be reported.
+
+     The values set for any capturing subpatterns are those  from
+     the outermost level of the recursion at which the subpattern
+     value is set. If the pattern above is matched against
+
+       (ab(cd)ef)
+
+     the value for the capturing parentheses is  "ef",  which  is
+     the  last  value  taken  on  at the top level. If additional
+     parentheses are added, giving
+
+       \( ( ( (?>[^()]+) | (?R) )* ) \)
+          ^                        ^
+          ^                        ^ then the string they capture
+     is "ab(cd)ef", the contents of the top level parentheses. If
+     there are more than 15 capturing parentheses in  a  pattern,
+     PCRE  has  to  obtain  extra  memory  to store data during a
+     recursion, which it does by using  pcre_malloc,  freeing  it
+     via  pcre_free  afterwards. If no memory can be obtained, it
+     saves data for the first 15 capturing parentheses  only,  as
+     there is no way to give an out-of-memory error from within a
+     recursion.
 
 
 
@@ -1742,5 +1974,5 @@ AUTHOR
      Cambridge CB2 3QG, England.
      Phone: +44 1223 334714
 
-     Last updated: 29 July 1999
-     Copyright (c) 1997-1999 University of Cambridge.
+     Last updated: 27 January 2000
+     Copyright (c) 1997-2000 University of Cambridge.

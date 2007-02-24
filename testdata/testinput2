@@ -591,5 +591,120 @@
     aaaabbbbzzzz\O3
     aaaabbbbzzzz\O4
     aaaabbbbzzzz\O5
+    
+/^.?abcd/S 
+
+/\(             # ( at start
+  (?:           # Non-capturing bracket
+  (?>[^()]+)    # Either a sequence of non-brackets (no backtracking)
+  |             # Or
+  (?R)          # Recurse - i.e. nested bracketed string
+  )*            # Zero or more contents
+  \)            # Closing )
+  /x
+    (abcd)
+    (abcd)xyz
+    xyz(abcd)
+    (ab(xy)cd)pqr 
+    (ab(xycd)pqr 
+    () abc () 
+    12(abcde(fsh)xyz(foo(bar))lmno)89
+    *** Failers
+    abcd 
+    abcd)
+    (abcd  
+
+/\(  ( (?>[^()]+) | (?R) )* \) /xg
+    (ab(xy)cd)pqr 
+    1(abcd)(x(y)z)pqr
+
+/\(  (?: (?>[^()]+) | (?R) ) \) /x
+    (abcd)
+    (ab(xy)cd)
+    (a(b(c)d)e) 
+    ((ab)) 
+    *** Failers
+    ()   
+
+/\(  (?: (?>[^()]+) | (?R) )? \) /x
+    ()
+    12(abcde(fsh)xyz(foo(bar))lmno)89
+
+/\(  ( (?>[^()]+) | (?R) )* \) /x
+    (ab(xy)cd)
+
+/\( ( ( (?>[^()]+) | (?R) )* ) \) /x
+    (ab(xy)cd)
+
+/\( (123)? ( ( (?>[^()]+) | (?R) )* ) \) /x
+    (ab(xy)cd)
+    (123ab(xy)cd)
+
+/\( ( (123)? ( (?>[^()]+) | (?R) )* ) \) /x
+    (ab(xy)cd)
+    (123ab(xy)cd)
+
+/\( (((((((((( ( (?>[^()]+) | (?R) )* )))))))))) \) /x
+    (ab(xy)cd)
+
+/\( ( ( (?>[^()<>]+) | ((?>[^()]+)) | (?R) )* ) \) /x
+    (abcd(xyz<p>qrs)123)
+
+/\( ( ( (?>[^()]+) | ((?R)) )* ) \) /x
+    (ab(cd)ef)
+    (ab(cd(ef)gh)ij)
+
+/^[[:alnum:]]/D
+
+/^[[:alpha:]]/D
+             
+/^[[:ascii:]]/D
+
+/^[[:cntrl:]]/D
+
+/^[[:digit:]]/D
+
+/^[[:graph:]]/D
+
+/^[[:lower:]]/D
+
+/^[[:print:]]/D
+
+/^[[:punct:]]/D
+
+/^[[:space:]]/D
+
+/^[[:upper:]]/D
+
+/^[[:xdigit:]]/D
+
+/^[[:word:]]/D
+
+/^[[:^cntrl:]]/D
+
+/^[12[:^digit:]]/D
+
+/[01[:alpha:]%]/D
+
+/[[.ch.]]/
+
+/[[=ch=]]/
+
+/[[:rhubarb:]]/
+
+/[[:upper:]]/i
+    A
+    a 
+    
+/[[:lower:]]/i
+    A
+    a 
+
+/((?-i)[[:lower:]])[[:lower:]]/i
+    ab
+    aB
+    *** Failers
+    Ab
+    AB        
 
 / End of test input /
