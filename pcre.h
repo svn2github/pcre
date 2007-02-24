@@ -31,6 +31,7 @@ extern "C" {
 #define PCRE_NOTBOL          0x0080
 #define PCRE_NOTEOL          0x0100
 #define PCRE_UNGREEDY        0x0200
+#define PCRE_NOTEMPTY        0x0400
 
 /* Exec-time and get-time error codes */
 

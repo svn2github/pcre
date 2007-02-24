@@ -12,7 +12,14 @@
 /* Use the internal info for displaying the results of pcre_study(). */
 
 #include "internal.h"
+
+/* It is possible to compile this test program without including support for
+testing the POSIX interface, though this is not available via the standard
+Makefile. */
+
+#if !defined NOPOSIX
 #include "pcreposix.h"
+#endif
 
 #ifndef CLOCKS_PER_SEC
 #ifdef CLK_TCK
@@ -48,7 +55,7 @@ static const char *OP_names[] = {
 };
 
 
-static void print_internals(pcre *re, FILE *outfile)
+static void print_internals(pcre *re)
 {
 unsigned char *code = ((real_pcre *)re)->code;
 
@@ -366,7 +373,11 @@ while (!done)
   {
   pcre *re = NULL;
   pcre_extra *extra = NULL;
+
+#if !defined NOPOSIX  /* There are still compilers that require no indent */
   regex_t preg;
+#endif
+
   const char *error;
   unsigned char *p, *pp, *ppp;
   unsigned const char *tables = NULL;
@@ -460,7 +471,11 @@ while (!done)
       case 'G': do_G = 1; break;
       case 'I': do_showinfo = 1; break;
       case 'M': log_store = 1; break;
+
+#if !defined NOPOSIX
       case 'P': do_posix = 1; break;
+#endif
+
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
@@ -489,6 +504,7 @@ while (!done)
   timing, showing, or debugging options, nor the ability to pass over
   local character tables. */
 
+#if !defined NOPOSIX
   if (posix || do_posix)
     {
     int rc;
@@ -511,6 +527,8 @@ while (!done)
   /* Handle compiling via the native interface */
 
   else
+#endif  /* !defined NOPOSIX */
+
     {
     if (timeit)
       {
@@ -561,7 +579,7 @@ while (!done)
       {
       int first_char, count;
 
-      if (do_debug) print_internals(re, outfile);
+      if (do_debug) print_internals(re);
 
       count = pcre_info(re, &options, &first_char);
       if (count < 0) fprintf(outfile,
@@ -579,6 +597,10 @@ while (!done)
             ((options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
             ((options & PCRE_EXTRA) != 0)? " extra" : "",
             ((options & PCRE_UNGREEDY) != 0)? " ungreedy" : "");
+
+        if (((((real_pcre *)re)->options) & PCRE_ICHANGED) != 0)
+          fprintf(outfile, "Case state changes\n");
+
         if (first_char == -1)
           {
           fprintf(outfile, "First char at start or follows \\n\n");
@@ -594,6 +616,16 @@ while (!done)
           else
             fprintf(outfile, "First char = %d\n", first_char);
           }
+
+        if (((((real_pcre *)re)->options) & PCRE_REQCHSET) != 0)
+          {
+          int req_char = ((real_pcre *)re)->req_char;
+          if (isprint(req_char))
+            fprintf(outfile, "Req char = \'%c\'\n", req_char);
+          else
+            fprintf(outfile, "Req char = %d\n", req_char);
+          }
+        else fprintf(outfile, "No req char\n");
         }
       }
 
@@ -752,6 +784,10 @@ while (!done)
         getlist = 1;
         continue;
 
+        case 'N':
+        options |= PCRE_NOTEMPTY;
+        continue;
+
         case 'O':
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
         if (n <= (int)(sizeof(offsets)/sizeof(int))) size_offsets = n;
@@ -769,6 +805,7 @@ while (!done)
     /* Handle matching via the POSIX interface, which does not
     support timing. */
 
+#if !defined NOPOSIX
     if (posix || do_posix)
       {
       int rc;
@@ -777,7 +814,7 @@ while (!done)
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
 
-      rc = regexec(&preg, (unsigned char *)bptr,
+      rc = regexec(&preg, (const char *)bptr,
         sizeof(pmatch)/sizeof(regmatch_t), pmatch, eflags);
 
       if (rc != 0)
@@ -809,7 +846,10 @@ while (!done)
 
     /* Handle matching via the native interface - repeats for /g and /G */
 
-    else for (;;)
+    else
+#endif  /* !defined NOPOSIX */
+
+    for (;;)
       {
       if (timeit)
         {
@@ -863,13 +903,13 @@ while (!done)
           {
           if ((copystrings & (1 << i)) != 0)
             {
-            char buffer[16];
+            char copybuffer[16];
             int rc = pcre_copy_substring((char *)bptr, offsets, count,
-              i, buffer, sizeof(buffer));
+              i, copybuffer, sizeof(copybuffer));
             if (rc < 0)
               fprintf(outfile, "copy substring %d failed %d\n", i, rc);
             else
-              fprintf(outfile, "%2dC %s (%d)\n", i, buffer, rc);
+              fprintf(outfile, "%2dC %s (%d)\n", i, copybuffer, rc);
             }
           }
 
@@ -928,7 +968,11 @@ while (!done)
     }
 
   CONTINUE:
+
+#if !defined NOPOSIX
   if (posix || do_posix) regfree(&preg);
+#endif
+
   if (re != NULL) free(re);
   if (extra != NULL) free(extra);
   if (tables != NULL)

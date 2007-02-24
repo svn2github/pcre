@@ -486,4 +486,101 @@
 /^ab\n/mg+
     ab\nab\ncd
 
+/abc/
+
+/abc|bac/
+
+/(abc|bac)/
+
+/(abc|(c|dc))/
+
+/(abc|(d|de)c)/
+
+/a*/
+
+/a+/
+
+/(baa|a+)/
+
+/a{0,3}/
+
+/baa{3,}/
+
+/"([^\\"]+|\\.)*"/
+
+/(abc|ab[cd])/
+
+/(a|.)/
+
+/a|ba|\w/
+
+/abc(?=pqr)/
+
+/...(?<=abc)/
+
+/abc(?!pqr)/
+
+/ab./
+
+/ab[xyz]/
+
+/abc*/
+
+/ab.c*/
+
+/a.c*/
+
+/.c*/
+
+/ac*/
+
+/(a.c*|b.c*)/
+
+/a.c*|aba/
+
+/.+a/
+
+/(?=abcda)a.*/
+
+/(?=a)a.*/
+
+/a(b)*/
+
+/a\d*/
+
+/ab\d*/
+
+/a(\d)*/
+
+/abcde{0,0}/
+
+/ab\d+/
+
+/a(?(1)b)/
+
+/a(?(1)bag|big)/
+
+/a(?(1)bag|big)*/
+
+/a(?(1)bag|big)+/
+
+/a(?(1)b..|b..)/
+
+/ab\d{0}e/
+
+/a?b?/
+    a
+    b
+    ab
+    \
+    *** Failers
+    \N     
+    
+/|-/
+    abcd
+    -abc
+    \Nab-c
+    *** Failers
+    \Nabc     
+
 / End of test input /

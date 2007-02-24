@@ -37,12 +37,16 @@ The distribution should contain the following files:
 
   ChangeLog         log of changes to the code
   LICENCE           conditions for the use of PCRE
-  Makefile          for building PCRE
+  Makefile          for building PCRE in Unix systems
   README            this file
-  RunTest           a shell script for running tests
+  RunTest           a Unix shell script for running tests
   Tech.Notes        notes on the encoding
-  pcre.3            man page for the functions
-  pcreposix.3       man page for the POSIX wrapper API
+  pcre.3            man page source for the functions
+  pcre.3.txt        plain text version
+  pcre.3.html       HTML version
+  pcreposix.3       man page source for the POSIX wrapper API
+  pcreposix.3.txt   plain text version
+  pcreposix.3.HTML  HTML version
   dftables.c        auxiliary program for building chartables.c
   get.c             )
   maketables.c      )
@@ -53,7 +57,9 @@ The distribution should contain the following files:
   pcreposix.h       header for the external POSIX wrapper API
   internal.h        header for internal use
   pcretest.c        test program
-  pgrep.1           man page for pgrep
+  pgrep.1           man page source for pgrep
+  pgrep.1.txt       plain text version
+  pgrep.1.HTML      HTML version
   pgrep.c           source of a grep utility that uses PCRE
   perltest          Perl test program
   testinput1        test data, compatible with Perl 5.004 and 5.005
@@ -65,23 +71,32 @@ The distribution should contain the following files:
   testoutput3       test results corresponding to testinput3
   testoutput4       test results corresponding to testinput4
 
-To build PCRE, edit Makefile for your system (it is a fairly simple make file,
-and there are some comments at the top) and then run it. It builds two
-libraries called libpcre.a and libpcreposix.a, a test program called pcretest,
-and the pgrep command.
+To build PCRE on a Unix system, first edit Makefile for your system. It is a
+fairly simple make file, and there are some comments near the top, after the
+text "On a Unix system". Then run "make". It builds two libraries called
+libpcre.a and libpcreposix.a, a test program called pcretest, and the pgrep
+command. You can use "make install" to copy these, and the public header file
+pcre.h, to appropriate live directories on your system. These installation
+directories are defined at the top of the Makefile, and you should edit them if
+necessary.
 
-To test PCRE, run the RunTest script in the pcre directory. This runs pcretest
-on each of the testinput files in turn, and compares the output with the
+For a non-Unix system, read the comments at the top of Makefile, which give
+some hints on what needs to be done. PCRE has been compiled on Windows systems
+and on Macintoshes, but I don't know the details as I don't use those systems.
+It should be straightforward to build PCRE on any system that has a Standard C
+compiler.
+
+To test PCRE, run the RunTest script in the pcre directory. This can also be
+run by "make runtest". It runs the pcretest test program (which is documented
+below) on each of the testinput files in turn, and compares the output with the
 contents of the corresponding testoutput file. A file called testtry is used to
-hold the output from pcretest (which is documented below).
-
-To run pcretest on just one of the test files, give its number as an argument
-to RunTest, for example:
+hold the output from pcretest. To run pcretest on just one of the test files,
+give its number as an argument to RunTest, for example:
 
   RunTest 3
 
 The first and third test files can also be fed directly into the perltest
-program to check that Perl gives the same results. The third file requires the
+script to check that Perl gives the same results. The third file requires the
 additional features of release 5.005, which is why it is kept separate from the
 main test input, which needs only Perl 5.004. In the long run, when 5.005 is
 widespread, these two test files may get amalgamated.
@@ -102,15 +117,6 @@ output to say why. If running this test produces instances of the error
 
 in the comparison output, it means that locale is not available on your system,
 despite being listed by "locale". This does not mean that PCRE is broken.
-
-To install PCRE, copy libpcre.a to any suitable library directory (e.g.
-/usr/local/lib), pcre.h to any suitable include directory (e.g.
-/usr/local/include), and pcre.3 to any suitable man directory (e.g.
-/usr/local/man/man3).
-
-To install the pgrep command, copy it to any suitable binary directory, (e.g.
-/usr/local/bin) and pgrep.1 to any suitable man directory (e.g.
-/usr/local/man/man1).
 
 PCRE has its own native API, but a set of "wrapper" functions that are based on
 the POSIX API are also supplied in the library libpcreposix.a. Note that this
@@ -253,8 +259,8 @@ compilation.
 The /S modifier causes pcre_study() to be called after the expression has been
 compiled, and the results used when the expression is matched.
 
-The /M modifier causes information about the size of memory block used to hold
-the compile pattern to be output.
+The /M modifier causes the size of memory block used to hold the compiled
+pattern to be output.
 
 Finally, the /P modifier causes pcretest to call PCRE via the POSIX wrapper API
 rather than its native API. When this is done, all other modifiers except /i,
@@ -283,6 +289,7 @@ is removed, and it is then scanned for \ escapes. The following are recognized:
   \Gdd   call pcre_get_substring() for substring dd after a successful match
            (any decimal number less than 32)
   \L     call pcre_get_substringlist() after a successful match
+  \N     pass the PCRE_NOTEMPTY option to pcre_exec()
   \Odd   set the size of the output vector passed to pcre_exec() to dd
            (any number of decimal digits)
   \Z     pass the PCRE_NOTEOL option to pcre_exec()
@@ -375,12 +382,12 @@ specification as pcretest, and so can be given identical input, except that
 input patterns can be followed only by Perl's lower case modifiers. The
 contents of testinput1 and testinput3 meet this condition.
 
-The data lines are processed as Perl strings, so if they contain $ or @
-characters, these have to be escaped. For this reason, all such characters in
-testinput1 and testinput3 are escaped so that they can be used for perltest as
-well as for pcretest, and the special upper case modifiers such as /A that
-pcretest recognizes are not used in these files. The output should be
-identical, apart from the initial identifying banner.
+The data lines are processed as Perl double-quoted strings, so if they contain
+" \ $ or @ characters, these have to be escaped. For this reason, all such
+characters in testinput1 and testinput3 are escaped so that they can be used
+for perltest as well as for pcretest, and the special upper case modifiers such
+as /A that pcretest recognizes are not used in these files. The output should
+be identical, apart from the initial identifying banner.
 
 The testinput2 and testinput4 files are not suitable for feeding to perltest,
 since they do make use of the special upper case modifiers and escapes that
@@ -389,4 +396,4 @@ contains malformed regular expressions, in order to check that PCRE diagnoses
 them correctly.
 
 Philip Hazel <ph10@cam.ac.uk>
-June 1999
+July 1999

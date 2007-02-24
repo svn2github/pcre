@@ -1855,4 +1855,35 @@
     *** Failers 
     z 
 
+/abcde{0,0}/
+    abcd
+    *** Failers
+    abce  
+
+/ab[cd]{0,0}e/
+    abe
+    *** Failers
+    abcde 
+    
+/ab(c){0,0}d/
+    abd
+    *** Failers
+    abcd   
+
+/a(b*)/
+    a
+    ab
+    abbbb
+    *** Failers
+    bbbbb    
+    
+/ab\d{0}e/
+    abe
+    *** Failers
+    ab1e   
+    
+/"([^\\"]+|\\.)*"/
+    the \"quick\" brown fox
+    \"the \\\"quick\\\" brown fox\" 
+
 / End of test input /

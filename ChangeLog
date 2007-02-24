@@ -2,6 +2,45 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.07 29-Jul-99
+----------------------
+
+1. The documentation is now supplied in plain text form and HTML as well as in
+the form of man page sources.
+
+2. C++ compilers don't like assigning (void *) values to other pointer types.
+In particular this affects malloc(). Although there is no problem in Standard
+C, I've put in casts to keep C++ compilers happy.
+
+3. Typo on pcretest.c; a cast of (unsigned char *) in the POSIX regexec() call
+should be (const char *).
+
+4. If NOPOSIX is defined, pcretest.c compiles without POSIX support. This may
+be useful for non-Unix systems who don't want to bother with the POSIX stuff.
+However, I haven't made this a standard facility. The documentation doesn't
+mention it, and the Makefile doesn't support it.
+
+5. The Makefile now contains an "install" target, with editable destinations at
+the top of the file. The pcretest program is not installed.
+
+6. pgrep -V now gives the PCRE version number and date.
+
+7. Fixed bug: a zero repetition after a literal string (e.g. /abcde{0}/) was
+causing the entire string to be ignored, instead of just the last character.
+
+8. If a pattern like /"([^\\"]+|\\.)*"/ is applied in the normal way to a
+non-matching string, it can take a very, very long time, even for strings of
+quite modest length, because of the nested recursion. PCRE now does better in
+some of these cases. It does this by remembering the last required literal
+character in the pattern, and pre-searching the subject to ensure it is present
+before running the real match. In other words, it applies a heuristic to detect
+some types of certain failure quickly, and in the above example, if presented
+with a string that has no trailing " it gives "no match" very quickly.
+
+9. A new runtime option PCRE_NOTEMPTY causes null string matches to be ignored;
+other alternatives are tried instead.
+
+
 Version 2.06 09-Jun-99
 ----------------------
 

@@ -1,13 +1,41 @@
 # Make file for PCRE (Perl-Compatible Regular Expression) library.
 
-# Edit CC, CFLAGS, and RANLIB for your system.
+# If you are using a Unix system, see below.
 
+##############################################################################
+# If you want to compile PCRE for a non-Unix system, note that it consists
+# entirely of code written in Standard C, and so should compile successfully
+# using normal compiling commands to do the following:
+#
+# (1) Compile dftables.c as a stand-alone program, and then run it with
+# output sent to chartables.c. This generates a set of standard character
+# tables.
+#
+# (2) Compile maketables.c, get.c, study.c and pcre.c and link them all
+# together. This is the pcre library (chartables.c gets included by means of
+# an #include directive).
+#
+# (3) Compile pcreposix.c and link it as the pcreposix library.
+#
+# (4) Compile the test program pcretest.c. This needs the functions in the
+# pcre and pcreposix libraries when linking.
+#
+# (5) Run pcretest on the testinput files, and check that the output matches
+# the corresponding testoutput files. You must use the -i option with
+# testinput2.
+
+
+##############################################################################
+# On a Unix system:
+#
+# Edit CC, CFLAGS, and RANLIB for your system.
+#
 # It is believed that RANLIB=ranlib is required for AIX, BSDI, FreeBSD, Linux,
 # MIPS RISCOS, NetBSD, OpenBSD, Digital Unix, and Ultrix.
-
+#
 # Use CFLAGS = -DUSE_BCOPY on SunOS4 and any other system that lacks the
 # memmove() function, but has bcopy().
-
+#
 # Use CFLAGS = -DSTRERROR_FROM_ERRLIST on SunOS4 and any other system that
 # lacks the strerror() function, but can provide the equivalent by indexing
 # into errlist.
@@ -17,7 +45,20 @@ CC = gcc -O2 -Wall
 CFLAGS =
 RANLIB = @true
 
-##########################################################################
+# If you are going to obey "make install", edit these settings for your
+# system. BINDIR is the directory in which the pgrep command is installed.
+# INCDIR is the directory in which the public header file pcre.h is installed.
+# LIBDIR is the directory in which the libraries are installed. MANDIR is the
+# directory in which the man pages are installed. The pcretest program, as it
+# is a test program, does not get installed anywhere.
+
+BINDIR = /usr/local/bin
+INCDIR = /usr/local/include
+LIBDIR = /usr/local/lib
+MANDIR = /usr/local/man
+
+
+##############################################################################
 
 OBJ = maketables.o get.o study.o pcre.o
 
@@ -67,6 +108,13 @@ chartables.c:   dftables
 
 dftables:       dftables.c maketables.c pcre.h internal.h Makefile
 		$(CC) -o dftables $(CFLAGS) dftables.c
+
+install:        all
+		cp libpcre.a libpcreposix.a $(LIBDIR)
+		cp pcre.h $(INCDIR)
+		cp pgrep $(BINDIR)
+		cp pcre.3 pcreposix.3 $(MANDIR)/man3
+		cp pgrep.1 $(MANDIR)/man1
 
 # We deliberately omit dftables and chartables.c from 'make clean'; once made
 # chartables.c shouldn't change, and if people have edited the tables by hand,
