@@ -7,6 +7,8 @@ separate text files for the pcregrep and pcretest commands.
 -----------------------------------------------------------------------------
 
 
+PCRE(3)                                                                PCRE(3)
+
 
 NAME
        PCRE - Perl-compatible regular expressions
@@ -203,8 +205,10 @@ AUTHOR
 
 Last updated: 07 March 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREBUILD(3)                                                      PCREBUILD(3)
 
 
 NAME
@@ -379,8 +383,10 @@ USING EBCDIC CODE
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
 NAME
@@ -545,8 +551,10 @@ DISADVANTAGES OF THE DFA ALGORITHM
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREAPI(3)                                                          PCREAPI(3)
 
 
 NAME
@@ -1833,7 +1841,7 @@ EXTRACTING CAPTURED SUBSTRINGS BY NAME
        To extract a substring by name, you first have to find associated  num-
        ber.  For example, for this pattern
 
-         (a+)b(?<xxx>\d+)...
+         (a+)b(?P<xxx>\d+)...
 
        the number of the subpattern called "xxx" is 2. You can find the number
        from the name by calling pcre_get_stringnumber(). The first argument is
@@ -2033,8 +2041,10 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
 Last updated: 16 May 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
 NAME
@@ -2190,8 +2200,10 @@ RETURN VALUES
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
 NAME
@@ -2307,8 +2319,10 @@ DIFFERENCES BETWEEN PCRE AND PERL
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
 NAME
@@ -3735,8 +3749,10 @@ CALLOUTS
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
 NAME
@@ -3923,8 +3939,10 @@ MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
 NAME
@@ -4032,12 +4050,14 @@ COMPATIBILITY WITH DIFFERENT PCRE RELEASES
        any saved patterns that were compiled with  previous  releases  (not  a
        facility  that  was  previously advertised), you will have to recompile
        them for release 5.0. However, from now on, it should  be  possible  to
-       make changes in a compabible manner.
+       make changes in a compatible manner.
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
 NAME
@@ -4118,8 +4138,10 @@ PCRE PERFORMANCE
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
 NAME
@@ -4313,8 +4335,10 @@ AUTHOR
 
 Last updated: 28 February 2005
 Copyright (c) 1997-2005 University of Cambridge.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCRECPP(3)                                                          PCRECPP(3)
 
 
 NAME
@@ -4528,8 +4552,10 @@ AUTHOR
 
        The C++ wrapper was contributed by Google Inc.
        Copyright (c) 2005 Google Inc.
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 
+
+PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
 NAME
@@ -4594,5 +4620,4 @@ PCRE SAMPLE PROGRAM
 
 Last updated: 09 September 2004
 Copyright (c) 1997-2004 University of Cambridge.
------------------------------------------------------------------------------
-
+------------------------------------------------------------------------------

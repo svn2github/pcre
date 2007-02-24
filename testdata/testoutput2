@@ -1,4 +1,4 @@
-PCRE version 6.0 07-Jun-2005
+PCRE version 6.1 21-Jun-2005
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -5703,6 +5703,18 @@ No match: POSIX code 17: match failed
  0: ab=cd
     ab\ncd
  0: ab\x0acd
+
+/(?i)(?-i)AbCd/
+Capturing subpattern count = 0
+No options
+First char = 'A'
+Need char = 'd'
+    AbCd
+ 0: AbCd
+    ** Failers
+No match
+    abcd  
+No match
 
 / End of testinput2 /
 Capturing subpattern count = 0

@@ -171,7 +171,7 @@ CPP_TARGETS = libpcrecpp.la \
   pcre_scanner_unittest@EXEEXT@ \
   pcre_stringpiece_unittest@EXEEXT@
 
-all:            libpcre.la @POSIX_LIB@ @MAYBE_CPP_TARGETS@ pcretest@EXEEXT@ pcregrep@EXEEXT@ @ON_WINDOWS@ winshared
+all:            libpcre.la @POSIX_LIB@ pcretest@EXEEXT@ pcregrep@EXEEXT@ @MAYBE_CPP_TARGETS@ @ON_WINDOWS@ winshared
 
 pcregrep@EXEEXT@: libpcre.la pcregrep.@OBJEXT@ @ON_WINDOWS@ winshared
 		$(LINK) -o pcregrep@EXEEXT@ pcregrep.@OBJEXT@ libpcre.la
@@ -211,120 +211,120 @@ libpcrecpp.la: libpcre.la $(CPPOBJ)
 # directory, not the source directory.
 
 pcre_chartables.@OBJEXT@: pcre_chartables.c
-		$(LTCOMPILE) $(top_srcdir)/pcre_chartables.c
+		@$(LTCOMPILE) $(top_srcdir)/pcre_chartables.c
 
 pcre_compile.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_compile.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_compile.c
 
 pcre_config.@OBJEXT@:  Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_config.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_config.c
 
 pcre_dfa_exec.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_dfa_exec.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_dfa_exec.c
 
 pcre_exec.@OBJEXT@:    Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_exec.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_exec.c
 
 pcre_fullinfo.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_fullinfo.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_fullinfo.c
 
 pcre_get.@OBJEXT@:     Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_get.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_get.c
 
 pcre_globals.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_globals.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_globals.c
 
 pcre_info.@OBJEXT@:    Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_info.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_info.c
 
 pcre_maketables.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_maketables.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_maketables.c
 
 pcre_ord2utf8.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_ord2utf8.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_ord2utf8.c
 
 pcre_printint.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_printint.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_printint.c
 
 pcre_refcount.@OBJEXT@:   Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_refcount.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_refcount.c
 
 pcre_study.@OBJEXT@:   Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_study.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_study.c
 
 pcre_tables.@OBJEXT@:  Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_tables.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_tables.c
 
 pcre_try_flipped.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_try_flipped.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_try_flipped.c
 
 pcre_ucp_findchar.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_ucp_findchar.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_ucp_findchar.c
 
 pcre_valid_utf8.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_valid_utf8.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_valid_utf8.c
 
 pcre_version.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_version.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_version.c
 
 pcre_xclass.@OBJEXT@:  Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_xclass.c
-		$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_xclass.c
 
 pcreposix.@OBJEXT@:    $(top_srcdir)/pcreposix.c $(top_srcdir)/pcreposix.h \
 		  $(top_srcdir)/pcre_internal.h pcre.h config.h Makefile
-		$(LTCOMPILE) $(POSIX_MALLOC_THRESHOLD) $(top_srcdir)/pcreposix.c
+		@$(LTCOMPILE) $(POSIX_MALLOC_THRESHOLD) $(top_srcdir)/pcreposix.c
 
 pcrecpp.@OBJEXT@:      $(top_srcdir)/pcrecpp.cc pcrecpp.h \
 		pcre_stringpiece.h pcre.h config.h Makefile
-		$(LTCXXCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCXXCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcrecpp.cc
 
 pcre_scanner.@OBJEXT@: $(top_srcdir)/pcre_scanner.cc $(top_srcdir)/pcre_scanner.h \
 		pcrecpp.h pcre_stringpiece.h pcre.h config.h Makefile
-		$(LTCXXCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCXXCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_scanner.cc
 
 pcre_stringpiece.@OBJEXT@:  $(top_srcdir)/pcre_stringpiece.cc pcre_stringpiece.h \
 		config.h Makefile
-		$(LTCXXCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
+		@$(LTCXXCOMPILE) $(UTF8) $(UCP) $(POSIX_MALLOC_THRESHOLD) \
 		$(top_srcdir)/pcre_stringpiece.cc
 
 pcretest.@OBJEXT@:     $(top_srcdir)/pcretest.c $(top_srcdir)/pcre_internal.h \

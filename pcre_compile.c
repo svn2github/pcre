@@ -4625,6 +4625,14 @@ while ((c = *(++ptr)) != 0)
             nothing is done here and it is handled during the compiling
             process.
 
+            We allow for more than one options setting at the start. If such
+            settings do not change the existing options, nothing is compiled.
+            However, we must leave space just in case something is compiled.
+            This can happen for pathological sequences such as (?i)(?-i)
+            because the global options will end up with -i set. The space is
+            small and not significant. (Before I did this there was a reported
+            bug with (?i)(?-i) in a machine-generated pattern.)
+
             [Historical note: Up to Perl 5.8, options settings at top level
             were always global settings, wherever they appeared in the pattern.
             That is, they were equivalent to an external setting. From 5.8
@@ -4637,6 +4645,7 @@ while ((c = *(++ptr)) != 0)
               options = (options | set) & (~unset);
               set = unset = 0;     /* To save length */
               item_count--;        /* To allow for several */
+              length += 2;
               }
 
             /* Fall through */

@@ -21,8 +21,8 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=6
-PCRE_MINOR=0
-PCRE_DATE=07-Jun-2005
+PCRE_MINOR=1
+PCRE_DATE=21-Jun-2005
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
@@ -43,12 +43,6 @@ AC_PROG_CC
 dnl For the C++ wrapper libpcrecpp.
 
 AC_PROG_CXX
-
-if test -n "$ac_cv_prog_ac_ct_CXX"; then
-  MAYBE_CPP_TARGETS='$(CPP_TARGETS)'
-fi
-echo "Maybe-cpp-targets: '$ac_cv_prog_CXX' '$MAYBE_CPP_TARGETS'" #!!
-AC_SUBST(MAYBE_CPP_TARGETS)
 
 dnl The icc compiler has the same options as gcc, so let the rest of the
 dnl configure script think it has gcc when setting up dnl options etc.
@@ -90,6 +84,8 @@ AC_LANG_CPLUSPLUS
 dnl I could be more clever here, given I'm doing AC_SUBST with this
 dnl (eg set a var to be the name of the include file I want).  But I'm not
 dnl so it's easy to change back to 'regular' autoconf vars if we needed to.
+AC_CHECK_HEADERS(string, [pcre_has_cpp_headers="1"],
+                         [pcre_has_cpp_headers="0"])
 AC_CHECK_HEADERS(bits/type_traits.h, [pcre_has_bits_type_traits="1"],
                                      [pcre_has_bits_type_traits="0"])
 AC_CHECK_HEADERS(type_traits.h, [pcre_has_type_traits="1"],
@@ -98,6 +94,13 @@ dnl Using AC_SUBST eliminates the need to include config.h in a public .h file
 AC_SUBST(pcre_has_bits_type_traits)
 AC_SUBST(pcre_has_type_traits)
 AC_LANG_RESTORE
+
+dnl From the above, we now have enough info to know if C++ is fully installed
+if test -n "$ac_cv_prog_ac_ct_CXX" -a "$pcre_has_cpp_headers" = 1; then
+  MAYBE_CPP_TARGETS='$(CPP_TARGETS)'
+fi
+AC_SUBST(MAYBE_CPP_TARGETS)
+
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 

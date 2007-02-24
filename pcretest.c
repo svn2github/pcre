@@ -62,6 +62,12 @@ Makefile. */
 #include "pcreposix.h"
 #endif
 
+/* It is also possible, for the benefit of the version imported into Exim, to
+build pcretest without support for UTF8 (define NOUTF8), without the interface
+to the DFA matcher (NODFA), and without the doublecheck of the old "info"
+function (define NOINFOCHECK). */
+
+
 #ifndef CLOCKS_PER_SEC
 #ifdef CLK_TCK
 #define CLOCKS_PER_SEC CLK_TCK
@@ -135,6 +141,8 @@ Returns:   >  0 => the number of bytes consumed
            -6 to 0 => malformed UTF-8 character at offset = (-return)
 */
 
+#if !defined NOUTF8
+
 static int
 utf82ord(unsigned char *buffer, int *vptr)
 {
@@ -176,6 +184,8 @@ if (j != i) return -(i+1);
 return i+1;
 }
 
+#endif
+
 
 
 /*************************************************
@@ -193,6 +203,7 @@ int yield = 0;
 
 while (length-- > 0)
   {
+#if !defined NOUTF8
   if (use_utf8)
     {
     int rc = utf82ord(p, &c);
@@ -215,6 +226,7 @@ while (length-- > 0)
       continue;
       }
     }
+#endif
 
    /* Not UTF-8, or malformed UTF-8  */
 
@@ -464,7 +476,9 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-t") == 0) timeit = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
+#if !defined NODFA
   else if (strcmp(argv[op], "-dfa") == 0) all_use_dfa = 1;
+#endif
   else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
       ((size_offsets = get_value((unsigned char *)argv[op+1], &endptr)),
         *endptr == 0))
@@ -502,7 +516,9 @@ while (argc > 1 && argv[op][0] == '-')
     printf("Usage:   pcretest [-d] [-i] [-o <n>] [-p] [-s] [-t] [<input> [<output>]]\n");
     printf("  -C     show PCRE compile-time options and exit\n");
     printf("  -d     debug: show compiled code; implies -i\n");
+#if !defined NODFA
     printf("  -dfa   force DFA matching for all subjects\n");
+#endif
     printf("  -i     show information about compiled pattern\n"
            "  -m     output memory used information\n"
            "  -o <n> set size of offsets vector to <n>\n");
@@ -962,7 +978,9 @@ while (!done)
     if (do_showinfo)
       {
       unsigned long int get_options, all_options;
+#if !defined NOINFOCHECK
       int old_first_char, old_options, old_count;
+#endif
       int count, backrefmax, first_char, need_char;
       int nameentrysize, namecount;
       const uschar *nametable;
@@ -983,6 +1001,7 @@ while (!done)
       new_info(re, NULL, PCRE_INFO_NAMECOUNT, &namecount);
       new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable);
 
+#if !defined NOINFOCHECK
       old_count = pcre_info(re, &old_options, &old_first_char);
       if (count < 0) fprintf(outfile,
         "Error %d from pcre_info()\n", count);
@@ -1000,6 +1019,7 @@ while (!done)
           "Options disagreement: pcre_fullinfo=%ld pcre_info=%d\n",
             get_options, old_options);
         }
+#endif
 
       if (size != regex_gotten_store) fprintf(outfile,
         "Size disagreement: pcre_fullinfo=%d call to malloc for %d\n",
@@ -1259,6 +1279,7 @@ while (!done)
 
         /* Handle \x{..} specially - new Perl thing for utf8 */
 
+#if !defined NOUTF8
         if (*p == '{')
           {
           unsigned char *pt = p;
@@ -1277,6 +1298,7 @@ while (!done)
             }
           /* Not correct form; fall through */
           }
+#endif
 
         /* Ordinary \x */
 
@@ -1357,16 +1379,20 @@ while (!done)
           }
         continue;
 
+#if !defined NODFA
         case 'D':
+#if !defined NOPOSIX
         if (posix || do_posix)
           printf("** Can't use dfa matching in POSIX mode: \\D ignored\n");
         else
+#endif
           use_dfa = 1;
         continue;
 
         case 'F':
         options |= PCRE_DFA_SHORTEST;
         continue;
+#endif
 
         case 'G':
         if (isdigit(*p))
@@ -1422,9 +1448,11 @@ while (!done)
         options |= PCRE_PARTIAL;
         continue;
 
+#if !defined NODFA
         case 'R':
         options |= PCRE_DFA_RESTART;
         continue;
+#endif
 
         case 'S':
         show_malloc = 1;
@@ -1507,6 +1535,7 @@ while (!done)
         clock_t time_taken;
         clock_t start_time = clock();
 
+#if !defined NODFA
         if (all_use_dfa || use_dfa)
           {
           int workspace[1000];
@@ -1516,6 +1545,7 @@ while (!done)
               sizeof(workspace)/sizeof(int));
           }
         else
+#endif
 
         for (i = 0; i < LOOPREPEAT; i++)
           count = pcre_exec(re, extra, (char *)bptr, len,
@@ -1591,6 +1621,7 @@ while (!done)
       /* The normal case is just to do the match once, with the default
       value of match_limit. */
 
+#if !defined NODFA
       else if (all_use_dfa || use_dfa)
         {
         int workspace[1000];
@@ -1603,6 +1634,7 @@ while (!done)
           count = use_size_offsets/2;
           }
         }
+#endif
 
       else
         {
@@ -1699,9 +1731,11 @@ while (!done)
       else if (count == PCRE_ERROR_PARTIAL)
         {
         fprintf(outfile, "Partial match");
+#if !defined NODFA
         if ((all_use_dfa || use_dfa) && use_size_offsets > 2)
           fprintf(outfile, ": %.*s", use_offsets[1] - use_offsets[0],
             bptr + use_offsets[0]);
+#endif
         fprintf(outfile, "\n");
         break;  /* Out of the /g loop */
         }

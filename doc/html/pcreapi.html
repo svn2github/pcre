@@ -1398,7 +1398,7 @@ provided.
 To extract a substring by name, you first have to find associated number.
 For example, for this pattern
 <pre>
-  (a+)b(?&#60;xxx&#62;\d+)...
+  (a+)b(?P&#60;xxx&#62;\d+)...
 </pre>
 the number of the subpattern called "xxx" is 2. You can find the number from
 the name by calling <b>pcre_get_stringnumber()</b>. The first argument is the

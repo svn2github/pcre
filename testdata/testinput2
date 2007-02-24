@@ -1424,4 +1424,9 @@
     ab=cd 
     ab\ncd
 
+/(?i)(?-i)AbCd/
+    AbCd
+    ** Failers
+    abcd  
+
 / End of testinput2 /
