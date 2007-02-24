@@ -38,7 +38,7 @@ RANLIB = @RANLIB@
 
 # LIBTOOL defaults to "", which cuts out the building of shared libraries.
 # If "configure" is called with --enable-shared-libraries, then LIBTOOL is
-# set to "libtool", which causes shared libraries to be built, and LIBSUFFIX
+# set to "./libtool", which causes shared libraries to be built, and LIBSUFFIX
 # is set to "la" instead of "a", which causes the shared libraries to be
 # installed.
 
@@ -79,7 +79,7 @@ LOBJ = maketables.lo get.lo study.lo pcre.lo
 all:            libtool libpcre.$(LIBSUFFIX) libpcreposix.$(LIBSUFFIX) pcretest pgrep
 
 libtool:        config.guess config.sub ltconfig ltmain.sh
-		@if test "$(LIBTOOL)" = "libtool"; then \
+		@if test "$(LIBTOOL)" = "./libtool"; then \
 		  echo '--- Building libtool ---'; \
 		  ./ltconfig ./ltmain.sh; \
 		  echo '--- Built libtool ---'; fi
@@ -110,7 +110,7 @@ libpcre.la:     $(OBJ)
 		@echo '--- Building shared library: libpcre'
 		@echo ' '
 		-rm -f libpcre.la
-		libtool $(CC) -version-info '$(PCRELIBVERSION)' -o libpcre.la -rpath $(LIBDIR) $(LOBJ)
+		./libtool $(CC) -version-info '$(PCRELIBVERSION)' -o libpcre.la -rpath $(LIBDIR) $(LOBJ)
 
 libpcreposix.a: pcreposix.o
 		@echo ' '
@@ -125,7 +125,7 @@ libpcreposix.la: pcreposix.o
 		@echo '--- Building shared library: libpcreposix'
 		@echo ' '
 		-rm -f libpcreposix.la
-		libtool $(CC) -version-info '$(PCREPOSIXLIBVERSION)' -o libpcreposix.la -rpath $(LIBDIR) pcreposix.lo
+		./libtool $(CC) -version-info '$(PCREPOSIXLIBVERSION)' -o libpcreposix.la -rpath $(LIBDIR) pcreposix.lo
 
 pcre.o:         chartables.c pcre.c pcre.h internal.h config.h Makefile
 		$(LIBTOOL) $(CC) -c $(CFLAGS) pcre.c
@@ -164,7 +164,7 @@ install:        all
 		$(INSTALL_DATA) doc/pcre.3 $(MANDIR)/man3/pcre.3
 		$(INSTALL_DATA) doc/pcreposix.3 $(MANDIR)/man3/pcreposix.3
 		$(INSTALL_DATA) doc/pgrep.1 $(MANDIR)/man1/pgrep.1
-		@if test "$(LIBTOOL)" = "libtool"; then \
+		@if test "$(LIBTOOL)" = "./libtool"; then \
 		  echo ' '; \
 		  echo '--- Rebuilding pgrep to use installed shared library ---'; \
 		  echo $(CC) $(CFLAGS) -o pgrep pgrep.o -L$(LIBDIR) -lpcre; \

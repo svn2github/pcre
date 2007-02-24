@@ -505,12 +505,12 @@ fi
 
 
 PCRE_MAJOR=3
-PCRE_MINOR=1
-PCRE_DATE=09-Feb-2000
+PCRE_MINOR=2
+PCRE_DATE=12-May-2000
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 
-PCRE_LIB_VERSION=0:0:0
+PCRE_LIB_VERSION=0:1:0
 PCRE_POSIXLIB_VERSION=0:0:0
 
 
@@ -1104,7 +1104,7 @@ fi
 
 
 
-for ac_func in memmove strerror
+for ac_func in bcopy memmove strerror
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1134: checking for $ac_func" >&5
@@ -1161,7 +1161,7 @@ done
 
 
 
-LIBTOOL=libtool
+LIBTOOL=./libtool
 LIBSUFFIX=la
 # Check whether --enable-shared or --disable-shared was given.
 if test "${enable_shared+set}" = set; then
