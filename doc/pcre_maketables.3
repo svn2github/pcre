@@ -9,18 +9,22 @@ PCRE - Perl-compatible regular expressions
 .SM
 .br
 .B const unsigned char *pcre_maketables(void);
-
+.
 .SH DESCRIPTION
 .rs
 .sp
-This function builds a set of character tables which can be passed to
-\fBpcre_compile()\fR to override PCRE's internal, built-in tables (which were
-made by \fBpcre_maketables()\fR when PCRE was compiled). You might want to do
-this if you are using a non-standard locale. The function yields a pointer to
-the tables.
-
-There is a complete description of the PCRE API in the
+This function builds a set of character tables for character values less than
+256. These can be passed to \fBpcre_compile()\fP to override PCRE's internal,
+built-in tables (which were made by \fBpcre_maketables()\fP when PCRE was
+compiled). You might want to do this if you are using a non-standard locale.
+The function yields a pointer to the tables.
+.P
+There is a complete description of the PCRE native API in the
 .\" HREF
-\fBpcreapi\fR
+\fBpcreapi\fP
+.\"
+page and a description of the POSIX API in the
+.\" HREF
+\fBpcreposix\fP
 .\"
 page.

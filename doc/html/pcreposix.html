@@ -3,9 +3,15 @@
 <title>pcreposix specification</title>
 </head>
 <body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-This HTML document has been generated automatically from the original man page.
-If there is any nonsense in it, please consult the man page, in case the
-conversion went wrong.<br>
+<h1>pcreposix man page</h1>
+<p>
+Return to the <a href="index.html">PCRE index page</a>.
+</p>
+<p>
+This page is part of the PCRE HTML documentation. It was generated automatically
+from the original man page. If there is any nonsense in it, please consult the
+man page, in case the conversion went wrong.
+<br>
 <ul>
 <li><a name="TOC1" href="#SEC1">SYNOPSIS OF POSIX API</a>
 <li><a name="TOC2" href="#SEC2">DESCRIPTION</a>
@@ -13,7 +19,7 @@ conversion went wrong.<br>
 <li><a name="TOC4" href="#SEC4">MATCHING NEWLINE CHARACTERS</a>
 <li><a name="TOC5" href="#SEC5">MATCHING A PATTERN</a>
 <li><a name="TOC6" href="#SEC6">ERROR MESSAGES</a>
-<li><a name="TOC7" href="#SEC7">STORAGE</a>
+<li><a name="TOC7" href="#SEC7">MEMORY USAGE</a>
 <li><a name="TOC8" href="#SEC8">AUTHOR</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS OF POSIX API</a><br>
@@ -40,7 +46,7 @@ conversion went wrong.<br>
 This set of functions provides a POSIX-style API to the PCRE regular expression
 package. See the
 <a href="pcreapi.html"><b>pcreapi</b></a>
-documentation for a description of the native API, which contains additional
+documentation for a description of PCRE's native API, which contains additional
 functionality.
 </P>
 <P>
@@ -48,8 +54,8 @@ The functions described here are just wrapper functions that ultimately call
 the PCRE native API. Their prototypes are defined in the <b>pcreposix.h</b>
 header file, and on Unix systems the library itself is called
 <b>pcreposix.a</b>, so can be accessed by adding <b>-lpcreposix</b> to the
-command for linking an application which uses them. Because the POSIX functions
-call the native ones, it is also necessary to add \fR-lpcre\fR.
+command for linking an application that uses them. Because the POSIX functions
+call the native ones, it is also necessary to add <b>-lpcre</b>.
 </P>
 <P>
 I have implemented only those option bits that can be reasonably mapped to PCRE
@@ -75,33 +81,27 @@ structure types, <i>regex_t</i> for compiled internal forms, and
 constants whose names start with "REG_"; these are used for setting options and
 identifying error codes.
 </P>
+<P>
+</P>
 <br><a name="SEC3" href="#TOC1">COMPILING A PATTERN</a><br>
 <P>
 The function <b>regcomp()</b> is called to compile a pattern into an
 internal form. The pattern is a C string terminated by a binary zero, and
 is passed in the argument <i>pattern</i>. The <i>preg</i> argument is a pointer
-to a regex_t structure which is used as a base for storing information about
-the compiled expression.
+to a <b>regex_t</b> structure that is used as a base for storing information
+about the compiled expression.
 </P>
 <P>
 The argument <i>cflags</i> is either zero, or contains one or more of the bits
 defined by the following macros:
-</P>
-<P>
 <pre>
   REG_ICASE
-</PRE>
-</P>
-<P>
+</pre>
 The PCRE_CASELESS option is set when the expression is passed for compilation
 to the native function.
-</P>
-<P>
 <pre>
   REG_NEWLINE
-</PRE>
-</P>
-<P>
+</pre>
 The PCRE_MULTILINE option is set when the expression is passed for compilation
 to the native function. Note that this does <i>not</i> mimic the defined POSIX
 behaviour for REG_NEWLINE (see the following section).
@@ -127,69 +127,47 @@ This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE to obey POSIX semantics, but then PCRE was never
 intended to be a POSIX engine. The following table lists the different
 possibilities for matching newline characters in PCRE:
-</P>
-<P>
 <pre>
                           Default   Change with
-</PRE>
-</P>
-<P>
-<pre>
+
   . matches newline          no     PCRE_DOTALL
   newline matches [^a]       yes    not changeable
   $ matches \n at end        yes    PCRE_DOLLARENDONLY
   $ matches \n in middle     no     PCRE_MULTILINE
   ^ matches \n in middle     no     PCRE_MULTILINE
-</PRE>
-</P>
-<P>
+</pre>
 This is the equivalent table for POSIX:
-</P>
-<P>
 <pre>
                           Default   Change with
-</PRE>
-</P>
-<P>
-<pre>
-  . matches newline          yes      REG_NEWLINE
-  newline matches [^a]       yes      REG_NEWLINE
-  $ matches \n at end        no       REG_NEWLINE
-  $ matches \n in middle     no       REG_NEWLINE
-  ^ matches \n in middle     no       REG_NEWLINE
-</PRE>
-</P>
-<P>
+
+  . matches newline          yes    REG_NEWLINE
+  newline matches [^a]       yes    REG_NEWLINE
+  $ matches \n at end        no     REG_NEWLINE
+  $ matches \n in middle     no     REG_NEWLINE
+  ^ matches \n in middle     no     REG_NEWLINE
+</pre>
 PCRE's behaviour is the same as Perl's, except that there is no equivalent for
-PCRE_DOLLARENDONLY in Perl. In both PCRE and Perl, there is no way to stop
+PCRE_DOLLAR_ENDONLY in Perl. In both PCRE and Perl, there is no way to stop
 newline from matching [^a].
 </P>
 <P>
 The default POSIX newline handling can be obtained by setting PCRE_DOTALL and
-PCRE_DOLLARENDONLY, but there is no way to make PCRE behave exactly as for the
+PCRE_DOLLAR_ENDONLY, but there is no way to make PCRE behave exactly as for the
 REG_NEWLINE action.
 </P>
 <br><a name="SEC5" href="#TOC1">MATCHING A PATTERN</a><br>
 <P>
-The function <b>regexec()</b> is called to match a pre-compiled pattern
-<i>preg</i> against a given <i>string</i>, which is terminated by a zero byte,
-subject to the options in <i>eflags</i>. These can be:
-</P>
-<P>
+The function <b>regexec()</b> is called to match a compiled pattern <i>preg</i>
+against a given <i>string</i>, which is terminated by a zero byte, subject to
+the options in <i>eflags</i>. These can be:
 <pre>
   REG_NOTBOL
-</PRE>
-</P>
-<P>
+</pre>
 The PCRE_NOTBOL option is set when calling the underlying PCRE matching
 function.
-</P>
-<P>
 <pre>
   REG_NOTEOL
-</PRE>
-</P>
-<P>
+</pre>
 The PCRE_NOTEOL option is set when calling the underlying PCRE matching
 function.
 </P>
@@ -217,7 +195,7 @@ terminated by a binary zero is placed in <i>errbuf</i>. The length of the
 message, including the zero, is limited to <i>errbuf_size</i>. The yield of the
 function is the size of buffer needed to hold the whole message.
 </P>
-<br><a name="SEC7" href="#TOC1">STORAGE</a><br>
+<br><a name="SEC7" href="#TOC1">MEMORY USAGE</a><br>
 <P>
 Compiling a regular expression causes memory to be allocated and associated
 with the <i>preg</i> structure. The function <b>regfree()</b> frees all such
@@ -232,6 +210,9 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 03 February 2003
+Last updated: 07 September 2004
 <br>
-Copyright &copy; 1997-2003 University of Cambridge.
+Copyright &copy; 1997-2004 University of Cambridge.
+<p>
+Return to the <a href="index.html">PCRE index page</a>.
+</p>

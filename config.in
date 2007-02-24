@@ -100,7 +100,7 @@ Define NO_RECURSE to get a version that doesn't use recursion in the match()
 function; instead it creates its own stack by steam using pcre_recurse_malloc
 to get memory. For more detail, see comments and other stuff just above the
 match() function. On Unix systems, "configure" can be used to set this in the
-Makefile (use --disable-recursion). */
+Makefile (use --disable-stack-for-recursion). */
 
 /* #define NO_RECURSE */
 

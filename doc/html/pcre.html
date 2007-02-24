@@ -3,31 +3,38 @@
 <title>pcre specification</title>
 </head>
 <body bgcolor="#FFFFFF" text="#00005A" link="#0066FF" alink="#3399FF" vlink="#2222BB">
-This HTML document has been generated automatically from the original man page.
-If there is any nonsense in it, please consult the man page, in case the
-conversion went wrong.<br>
+<h1>pcre man page</h1>
+<p>
+Return to the <a href="index.html">PCRE index page</a>.
+</p>
+<p>
+This page is part of the PCRE HTML documentation. It was generated automatically
+from the original man page. If there is any nonsense in it, please consult the
+man page, in case the conversion went wrong.
+<br>
 <ul>
-<li><a name="TOC1" href="#SEC1">DESCRIPTION</a>
+<li><a name="TOC1" href="#SEC1">INTRODUCTION</a>
 <li><a name="TOC2" href="#SEC2">USER DOCUMENTATION</a>
 <li><a name="TOC3" href="#SEC3">LIMITATIONS</a>
-<li><a name="TOC4" href="#SEC4">UTF-8 SUPPORT</a>
+<li><a name="TOC4" href="#SEC4">UTF-8 AND UNICODE PROPERTY SUPPORT</a>
 <li><a name="TOC5" href="#SEC5">AUTHOR</a>
 </ul>
-<br><a name="SEC1" href="#TOC1">DESCRIPTION</a><br>
+<br><a name="SEC1" href="#TOC1">INTRODUCTION</a><br>
 <P>
 The PCRE library is a set of functions that implement regular expression
 pattern matching using the same syntax and semantics as Perl, with just a few
-differences. The current implementation of PCRE (release 4.x) corresponds
-approximately with Perl 5.8, including support for UTF-8 encoded strings.
-However, this support has to be explicitly enabled; it is not the default.
+differences. The current implementation of PCRE (release 5.x) corresponds
+approximately with Perl 5.8, including support for UTF-8 encoded strings and
+Unicode general category properties. However, this support has to be explicitly
+enabled; it is not the default.
 </P>
 <P>
-PCRE is written in C and released as a C library. However, a number of people
-have written wrappers and interfaces of various kinds. A C++ class is included
-in these contributions, which can be found in the <i>Contrib</i> directory at
-the primary FTP site, which is:
-</P>
+PCRE is written in C and released as a C library. A number of people have
+written wrappers and interfaces of various kinds. A C++ class is included in
+these contributions, which can be found in the <i>Contrib</i> directory at the
+primary FTP site, which is:
 <a href="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre">ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre</a>
+</P>
 <P>
 Details of exactly which Perl regular expression features are and are not
 supported by PCRE are given in separate documents. See the
@@ -41,18 +48,18 @@ Some features of PCRE can be included, excluded, or changed when the library is
 built. The
 <a href="pcre_config.html"><b>pcre_config()</b></a>
 function makes it possible for a client to discover which features are
-available. Documentation about building PCRE for various operating systems can
-be found in the <b>README</b> file in the source distribution.
+available. The features themselves are described in the
+<a href="pcrebuild.html"><b>pcrebuild</b></a>
+page. Documentation about building PCRE for various operating systems can be
+found in the <b>README</b> file in the source distribution.
 </P>
 <br><a name="SEC2" href="#TOC1">USER DOCUMENTATION</a><br>
 <P>
-The user documentation for PCRE has been split up into a number of different
-sections. In the "man" format, each of these is a separate "man page". In the
-HTML format, each is a separate page, linked from the index page. In the plain
-text format, all the sections are concatenated, for ease of searching. The
-sections are as follows:
-</P>
-<P>
+The user documentation for PCRE comprises a number of different sections. In
+the "man" format, each of these is a separate "man page". In the HTML format,
+each is a separate page, linked from the index page. In the plain text format,
+all the sections are concatenated, for ease of searching. The sections are as
+follows:
 <pre>
   pcre              this document
   pcreapi           details of PCRE's native API
@@ -60,15 +67,14 @@ sections are as follows:
   pcrecallout       details of the callout feature
   pcrecompat        discussion of Perl compatibility
   pcregrep          description of the <b>pcregrep</b> command
-  pcrepattern       syntax and semantics of supported
-                      regular expressions
+  pcrepartial       details of the partial matching facility
+  pcrepattern       syntax and semantics of supported regular expressions
   pcreperform       discussion of performance issues
   pcreposix         the POSIX-compatible API
+  pcreprecompile    details of saving and re-using precompiled patterns
   pcresample        discussion of the sample program
-  pcretest          the <b>pcretest</b> testing command
-</PRE>
-</P>
-<P>
+  pcretest          description of the <b>pcretest</b> testing command
+</pre>
 In addition, in the "man" and HTML formats, there is a short page for each
 library function, listing its arguments and results.
 </P>
@@ -84,7 +90,7 @@ regular expressions that are truly enormous, you can compile PCRE with an
 internal linkage size of 3 or 4 (see the <b>README</b> file in the source
 distribution and the
 <a href="pcrebuild.html"><b>pcrebuild</b></a>
-documentation for details). If these cases the limit is substantially larger.
+documentation for details). In these cases the limit is substantially larger.
 However, the speed of execution will be slower.
 </P>
 <P>
@@ -101,12 +107,13 @@ The maximum length of a subject string is the largest positive number that an
 integer variable can hold. However, PCRE uses recursion to handle subpatterns
 and indefinite repetition. This means that the available stack space may limit
 the size of a subject string that can be processed by certain patterns.
-</P>
-<a name="utf8support"></a><br><a name="SEC4" href="#TOC1">UTF-8 SUPPORT</a><br>
+<a name="utf8support"></a></P>
+<br><a name="SEC4" href="#TOC1">UTF-8 AND UNICODE PROPERTY SUPPORT</a><br>
 <P>
-Starting at release 3.3, PCRE has had some support for character strings
-encoded in the UTF-8 format. For release 4.0 this has been greatly extended to
-cover most common requirements.
+From release 3.3, PCRE has had some support for character strings encoded in
+the UTF-8 format. For release 4.0 this was greatly extended to cover most
+common requirements, and in release 5.0 additional support for Unicode general
+category properties was added.
 </P>
 <P>
 In order process UTF-8 strings, you must build PCRE to include UTF-8 support in
@@ -120,6 +127,16 @@ instead of just strings of bytes.
 If you compile PCRE with UTF-8 support, but do not use it at run time, the
 library will be a bit bigger, but the additional run time overhead is limited
 to testing the PCRE_UTF8 flag in several places, so should not be very large.
+</P>
+<P>
+If PCRE is built with Unicode character property support (which implies UTF-8
+support), the escape sequences \p{..}, \P{..}, and \X are supported.
+The available properties that can be tested are limited to the general
+category properties such as Lu for an upper case letter or Nd for a decimal
+number. A full list is given in the
+<a href="pcrepattern.html"><b>pcrepattern</b></a>
+documentation. The PCRE library is increased in size by about 90K when Unicode
+property support is included.
 </P>
 <P>
 The following comments apply when PCRE is running in UTF-8 mode:
@@ -163,16 +180,22 @@ but its use can lead to some strange effects.
 7. The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly
 test characters of any code value, but the characters that PCRE recognizes as
 digits, spaces, or word characters remain the same set as before, all with
-values less than 256.
+values less than 256. This remains true even when PCRE includes Unicode
+property support, because to do otherwise would slow down PCRE in many common
+cases. If you really want to test for a wider sense of, say, "digit", you
+must use Unicode property tests such as \p{Nd}.
 </P>
 <P>
-8. Case-insensitive matching applies only to characters whose values are less
-than 256. PCRE does not support the notion of "case" for higher-valued
-characters.
+8. Similarly, characters that match the POSIX named character classes are all
+low-valued characters.
 </P>
 <P>
-9. PCRE does not support the use of Unicode tables and properties or the Perl
-escapes \p, \P, and \X.
+9. Case-insensitive matching applies only to characters whose values are less
+than 128, unless PCRE is built with Unicode property support. Even when Unicode
+property support is available, PCRE still uses its own character tables when
+checking the case of low-valued characters, so as not to degrade performance.
+The Unicode property information is used only for characters with higher
+values.
 </P>
 <br><a name="SEC5" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -183,8 +206,9 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 <br>
 Phone: +44 1223 334714
-</P>
-<P>
-Last updated: 20 August 2003
+Last updated: 09 September 2004
 <br>
-Copyright &copy; 1997-2003 University of Cambridge.
+Copyright &copy; 1997-2004 University of Cambridge.
+<p>
+Return to the <a href="index.html">PCRE index page</a>.
+</p>

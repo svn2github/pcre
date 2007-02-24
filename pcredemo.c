@@ -7,10 +7,10 @@ of calling the PCRE regular expression library from a C program. See the
 pcresample documentation for a short discussion.
 
 Compile thuswise:
-  gcc -Wall pcredemo.c -I/opt/local/include -L/opt/local/lib \
-    -R/opt/local/lib -lpcre
+  gcc -Wall pcredemo.c -I/usr/local/include -L/usr/local/lib \
+    -R/usr/local/lib -lpcre
 
-Replace "/opt/local/include" and "/opt/local/lib" with wherever the include and
+Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
 library files for PCRE are installed on your system. Only some operating
 systems (e.g. Solaris) use the -R option.
 */
@@ -39,12 +39,13 @@ int subject_length;
 int rc, i;
 
 
-/*************************************************************************
-* First, sort out the command line. There is only one possible option at *
-* the moment, "-g" to request repeated matching to find all occurrences, *
-* like Perl's /g option. We set the variable find_all non-zero if it is  *
-* present. Apart from that, there must be exactly two arguments.         *
-*************************************************************************/
+/**************************************************************************
+* First, sort out the command line. There is only one possible option at  *
+* the moment, "-g" to request repeated matching to find all occurrences,  *
+* like Perl's /g option. We set the variable find_all to a non-zero value *
+* if the -g option is present. Apart from that, there must be exactly two *
+* arguments.                                                              *
+**************************************************************************/
 
 find_all = 0;
 for (i = 1; i < argc; i++)
@@ -90,7 +91,7 @@ if (re == NULL)
 
 /*************************************************************************
 * If the compilation succeeded, we call PCRE again, in order to do a     *
-* pattern match against the subject string. This just does ONE match. If *
+* pattern match against the subject string. This does just ONE match. If *
 * further matching is needed, it will be done below.                     *
 *************************************************************************/
 
@@ -116,6 +117,7 @@ if (rc < 0)
     */
     default: printf("Matching error %d\n", rc); break;
     }
+  free(re);     /* Release memory used for the compiled pattern */
   return 1;
   }
 
@@ -149,12 +151,12 @@ for (i = 0; i < rc; i++)
   }
 
 
-/*************************************************************************
-* That concludes the basic part of this demonstration program. We have   *
-* compiled a pattern, and performed a single match. The code that follows*
-* first shows how to access named substrings, and then how to code for   *
-* repeated matches on the same subject.                                  *
-*************************************************************************/
+/**************************************************************************
+* That concludes the basic part of this demonstration program. We have    *
+* compiled a pattern, and performed a single match. The code that follows *
+* first shows how to access named substrings, and then how to code for    *
+* repeated matches on the same subject.                                   *
+**************************************************************************/
 
 /* See if there are any named substrings, and if so, show them by name. First
 we have to extract the count of named parentheses from the pattern. */
@@ -219,7 +221,11 @@ if (namecount <= 0) printf("No named substrings\n"); else
 * proceed round the loop.                                                *
 *************************************************************************/
 
-if (!find_all) return 0;   /* Finish unless -g was given */
+if (!find_all)
+  {
+  free(re);   /* Release the memory used for the compiled pattern */
+  return 0;   /* Finish unless -g was given */
+  }
 
 /* Loop for second and subsequent matches */
 
@@ -270,6 +276,7 @@ for (;;)
   if (rc < 0)
     {
     printf("Matching error %d\n", rc);
+    free(re);    /* Release memory used for the compiled pattern */
     return 1;
     }
 
@@ -310,6 +317,7 @@ for (;;)
   }      /* End of loop to find second and subsequent matches */
 
 printf("\n");
+free(re);       /* Release memory used for the compiled pattern */
 return 0;
 }
 

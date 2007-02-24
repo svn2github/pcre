@@ -206,6 +206,6 @@ for (;;)
     }
   }
 
-printf $outfile "\n";
+# printf $outfile "\n";
 
 # End

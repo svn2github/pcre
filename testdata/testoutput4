@@ -1,4 +1,4 @@
-PCRE version 4.5 01-December-2003
+PCRE version 5.0 13-Sep-2004
 
 /-- Do not use the \x{} construct except with patterns that have the --/
 /-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
@@ -409,12 +409,6 @@ No match
     > >\x{100} Y
  0: >\x{100}
   
-/\W/8
-    A.B
- 0: .
-    A\x{100}B 
- 0: \x{100}
-  
 /\d/8
     \x{100}3
  0: 3
@@ -423,10 +417,6 @@ No match
     \x{100} X
  0:  
     
-/\w/8
-    \x{100}X   
- 0: X
-
 /\D+/8
     12abcd34
  0: abcd
@@ -831,7 +821,7 @@ No match
  0: \x{100}
     *** Failers
 No match
-    \x{101}
+    \x{102}
 No match
     y    
 No match
@@ -905,5 +895,9 @@ No match
  1: a
  0: 
  1: 
+
+/^\x{85}$/8i
+    \x{85}
+ 0: \x{85}
 
 / End of testinput4 /

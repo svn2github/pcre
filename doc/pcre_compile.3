@@ -8,18 +8,18 @@ PCRE - Perl-compatible regular expressions
 .PP
 .SM
 .br
-.B pcre *pcre_compile(const char *\fIpattern\fR, int \fIoptions\fR,
+.B pcre *pcre_compile(const char *\fIpattern\fP, int \fIoptions\fP,
 .ti +5n
-.B const char **\fIerrptr\fR, int *\fIerroffset\fR,
+.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
 .ti +5n
-.B const unsigned char *\fItableptr\fR);
-
+.B const unsigned char *\fItableptr\fP);
+.
 .SH DESCRIPTION
 .rs
 .sp
 This function compiles a regular expression into an internal form. Its
 arguments are:
-
+.sp
   \fIpattern\fR       A zero-terminated string containing the
                   regular expression to be compiled
   \fIoptions\fR       Zero or more option bits
@@ -27,10 +27,11 @@ arguments are:
   \fIerroffset\fR     Offset in pattern where error was found
   \fItableptr\fR      Pointer to character tables, or NULL to
                   use the built-in default
-
+.sp
 The option bits are:
-
+.sp
   PCRE_ANCHORED         Force pattern anchoring
+  PCRE_AUTO_CALLOUT     Compile automatic callouts
   PCRE_CASELESS         Do caseless matching
   PCRE_DOLLAR_ENDONLY   $ not to match newline at end
   PCRE_DOTALL           . matches anything including NL
@@ -45,15 +46,19 @@ The option bits are:
   PCRE_NO_UTF8_CHECK    Do not check the pattern for UTF-8
                           validity (only relevant if
                           PCRE_UTF8 is set)
-
-PCRE must be compiled with UTF-8 support in order to use PCRE_UTF8
-(or PCRE_NO_UTF8_CHECK).
-
+.sp
+PCRE must be built with UTF-8 support in order to use PCRE_UTF8 and
+PCRE_NO_UTF8_CHECK.
+.P
 The yield of the function is a pointer to a private data structure that
 contains the compiled pattern, or NULL if an error was detected.
-
-There is a complete description of the PCRE API in the
+.P
+There is a complete description of the PCRE native API in the
 .\" HREF
 \fBpcreapi\fR
+.\"
+page and a description of the POSIX API in the
+.\" HREF
+\fBpcreposix\fR
 .\"
 page.

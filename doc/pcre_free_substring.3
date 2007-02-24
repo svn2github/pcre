@@ -8,17 +8,21 @@ PCRE - Perl-compatible regular expressions
 .PP
 .SM
 .br
-.B void pcre_free_substring(const char *\fIstringptr\fR);
-
+.B void pcre_free_substring(const char *\fIstringptr\fP);
+.
 .SH DESCRIPTION
 .rs
 .sp
 This is a convenience function for freeing the store obtained by a previous
-call to \fBpcre_get_substring()\fR or \fBpcre_get_named_substring()\fR. Its
+call to \fBpcre_get_substring()\fP or \fBpcre_get_named_substring()\fP. Its
 only argument is a pointer to the string.
-
-There is a complete description of the PCRE API in the
+.P
+There is a complete description of the PCRE native API in the
 .\" HREF
-\fBpcreapi\fR
+\fBpcreapi\fP
+.\"
+page and a description of the POSIX API in the
+.\" HREF
+\fBpcreposix\fP
 .\"
 page.

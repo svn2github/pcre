@@ -71,8 +71,7 @@ OPTIONS
 
        -u        Operate  in UTF-8 mode. This option is available only if PCRE
                  has been compiled with UTF-8 support. Both  the  pattern  and
-                 each  subject  line  are assumed to be valid strings of UTF-8
-                 characters.
+                 each  subject line must be valid strings of UTF-8 characters.
 
        -v        Invert the sense of the match, so that  lines  which  do  not
                  match the pattern are now the ones that are found.
@@ -113,12 +112,11 @@ DIAGNOSTICS
        found).
 
 
-
 AUTHOR
 
        Philip Hazel <ph10@cam.ac.uk>
        University Computing Service
        Cambridge CB2 3QG, England.
 
-Last updated: 03 February 2003
-Copyright (c) 1997-2003 University of Cambridge.
+Last updated: 09 September 2004
+Copyright (c) 1997-2004 University of Cambridge.

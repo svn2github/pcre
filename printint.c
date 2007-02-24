@@ -9,26 +9,34 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2003 University of Cambridge
+           Copyright (c) 1997-2004 University of Cambridge
 
 -----------------------------------------------------------------------------
-Permission is granted to anyone to use this software for any purpose on any
-computer system, and to redistribute it freely, subject to the following
-restrictions:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-1. This software is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
 
-2. The origin of this software must not be misrepresented, either by
-   explicit claim or by omission.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
 
-3. Altered versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
+    * Neither the name of the University of Cambridge nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
 
-4. If PCRE is embedded in any software that is released under the GNU
-   General Purpose Licence (GPL), then the terms of that licence shall
-   supersede any condition above with which it is incompatible.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
@@ -76,6 +84,18 @@ else
   c = (c & utf8_t3[a]) << s;
   for (i = 1; i <= a; i++)
     {
+    /* This is a check for malformed UTF-8; it should only occur if the sanity
+    check has been turned off. Rather than swallow random bytes, just stop if
+    we hit a bad one. Print it with \X instead of \x as an indication. */
+
+    if ((ptr[i] & 0xc0) != 0x80)
+      {
+      fprintf(f, "\\X{%x}", c);
+      return i - 1;
+      }
+
+    /* The byte is OK */
+
     s -= 6;
     c |= (ptr[i] & 0x3f) << s;
     }
@@ -88,17 +108,54 @@ else
 
 
 /*************************************************
+*          Find Unicode property name            *
+*************************************************/
+
+static const char *
+get_ucpname(int property)
+{
+int i;
+for (i = sizeof(utt)/sizeof(ucp_type_table); i >= 0; i--)
+  {
+  if (property == utt[i].value) break;
+  }
+return (i >= 0)? utt[i].name : "??";
+}
+
+
+
+/*************************************************
 *         Print compiled regex                   *
 *************************************************/
+
+/* Make this function work for a regex with integers either byte order.
+However, we assume that what we are passed is a compiled regex. */
 
 static void
 print_internals(pcre *external_re, FILE *f)
 {
 real_pcre *re = (real_pcre *)external_re;
-uschar *codestart =
-  (uschar *)re + sizeof(real_pcre) + re->name_count * re->name_entry_size;
-uschar *code = codestart;
-BOOL utf8 = (re->options & PCRE_UTF8) != 0;
+uschar *codestart, *code;
+BOOL utf8;
+
+unsigned int options = re->options;
+int offset = re->name_table_offset;
+int count = re->name_count;
+int size = re->name_entry_size;
+
+if (re->magic_number != MAGIC_NUMBER)
+  {
+  offset = ((offset << 8) & 0xff00) | ((offset >> 8) & 0xff);
+  count = ((count << 8) & 0xff00) | ((count >> 8) & 0xff);
+  size = ((size << 8) & 0xff00) | ((size >> 8) & 0xff);
+  options = ((options << 24) & 0xff000000) |
+            ((options <<  8) & 0x00ff0000) |
+            ((options >>  8) & 0x0000ff00) |
+            ((options >> 24) & 0x000000ff);
+  }
+
+code = codestart = (uschar *)re + offset + count * size;
+utf8 = (options & PCRE_UTF8) != 0;
 
 for(;;)
   {
@@ -129,18 +186,31 @@ for(;;)
     fprintf(f, " %.2x %s", code[1], OP_names[*code]);
     break;
 
-    case OP_CHARS:
+    case OP_CHAR:
       {
-      int charlength = code[1];
-      ccode = code + 2;
-      extra = charlength;
-      fprintf(f, "%3d ", charlength);
-      while (charlength > 0)
+      fprintf(f, "    ");
+      do
         {
-        int extrabytes = print_char(f, ccode, utf8);
-        ccode += 1 + extrabytes;
-        charlength -= 1 + extrabytes;
+        code++;
+        code += 1 + print_char(f, code, utf8);
         }
+      while (*code == OP_CHAR);
+      fprintf(f, "\n");
+      continue;
+      }
+    break;
+
+    case OP_CHARNC:
+      {
+      fprintf(f, " NC ");
+      do
+        {
+        code++;
+        code += 1 + print_char(f, code, utf8);
+        }
+      while (*code == OP_CHARNC);
+      fprintf(f, "\n");
+      continue;
       }
     break;
 
@@ -182,8 +252,16 @@ for(;;)
     case OP_TYPEQUERY:
     case OP_TYPEMINQUERY:
     fprintf(f, "    ");
-    if (*code >= OP_TYPESTAR) fprintf(f, "%s", OP_names[code[1]]);
-      else extra = print_char(f, code+1, utf8);
+    if (*code >= OP_TYPESTAR)
+      {
+      fprintf(f, "%s", OP_names[code[1]]);
+      if (code[1] == OP_PROP || code[1] == OP_NOTPROP)
+        {
+        fprintf(f, " %s ", get_ucpname(code[2]));
+        extra = 1;
+        }
+      }
+    else extra = print_char(f, code+1, utf8);
     fprintf(f, "%s", OP_names[*code]);
     break;
 
@@ -201,7 +279,13 @@ for(;;)
     case OP_TYPEEXACT:
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
-    fprintf(f, "    %s{", OP_names[code[3]]);
+    fprintf(f, "    %s", OP_names[code[3]]);
+    if (code[3] == OP_PROP || code[3] == OP_NOTPROP)
+      {
+      fprintf(f, " %s ", get_ucpname(code[4]));
+      extra = 1;
+      }
+    fprintf(f, "{");
     if (*code != OP_TYPEEXACT) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
     if (*code == OP_TYPEMINUPTO) fprintf(f, "?");
@@ -243,7 +327,13 @@ for(;;)
     goto CLASS_REF_REPEAT;
 
     case OP_CALLOUT:
-    fprintf(f, "    %s %d", OP_names[*code], code[1]);
+    fprintf(f, "    %s %d %d %d", OP_names[*code], code[1], GET(code,2),
+      GET(code, 2 + LINK_SIZE));
+    break;
+
+    case OP_PROP:
+    case OP_NOTPROP:
+    fprintf(f, "    %s %s", OP_names[*code], get_ucpname(code[1]));
     break;
 
     /* OP_XCLASS can only occur in UTF-8 mode. However, there's no harm in
@@ -287,7 +377,7 @@ for(;;)
             if (isprint(i)) fprintf(f, "%c", i); else fprintf(f, "\\x%02x", i);
             if (--j > i)
               {
-              fprintf(f, "-");
+              if (j != i + 1) fprintf(f, "-");
               if (j == '-' || j == ']') fprintf(f, "\\");
               if (isprint(j)) fprintf(f, "%c", j); else fprintf(f, "\\x%02x", j);
               }
@@ -304,11 +394,22 @@ for(;;)
         int ch;
         while ((ch = *ccode++) != XCL_END)
           {
-          ccode += 1 + print_char(f, ccode, TRUE);
-          if (ch == XCL_RANGE)
+          if (ch == XCL_PROP)
             {
-            fprintf(f, "-");
+            fprintf(f, "\\p{%s}", get_ucpname(*ccode++));
+            }
+          else if (ch == XCL_NOTPROP)
+            {
+            fprintf(f, "\\P{%s}", get_ucpname(*ccode++));
+            }
+          else
+            {
             ccode += 1 + print_char(f, ccode, TRUE);
+            if (ch == XCL_RANGE)
+              {
+              fprintf(f, "-");
+              ccode += 1 + print_char(f, ccode, TRUE);
+              }
             }
           }
         }
@@ -329,7 +430,7 @@ for(;;)
         case OP_CRQUERY:
         case OP_CRMINQUERY:
         fprintf(f, "%s", OP_names[*ccode]);
-        extra = OP_lengths[*ccode];
+        extra += OP_lengths[*ccode];
         break;
 
         case OP_CRRANGE:
@@ -339,7 +440,7 @@ for(;;)
         if (max == 0) fprintf(f, "{%d,}", min);
         else fprintf(f, "{%d,%d}", min, max);
         if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
-        extra = OP_lengths[*ccode];
+        extra += OP_lengths[*ccode];
         break;
         }
       }
