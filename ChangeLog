@@ -2,12 +2,30 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.04 18-Feb-99
+----------------------
+
+1. For parenthesized subpatterns with repeats whose minimum was zero, the
+computation of the store needed to hold the pattern was incorrect (too large).
+If such patterns were nested a few deep, this could multiply and become a real
+problem.
+
+2. Added /M option to pcretest to show the memory requirement of a specific
+pattern. Made -m a synonym of -s (which does this globally) for compatibility.
+
+3. Subpatterns of the form (regex){n,m} (i.e. limited maximum) were being
+compiled in such a way that the backtracking after subsequent failure was
+pessimal. Something like (a){0,3} was compiled as (a)?(a)?(a)? instead of
+((a)((a)(a)?)?)? with disastrous performance if the maximum was of any size.
+
+
 Version 2.03 02-Feb-99
 ----------------------
 
 1. Fixed typo and small mistake in man page.
 
-2. Added 4th condition (GPL supersedes) and created separate LICENCE file.
+2. Added 4th condition (GPL supersedes if conflict) and created separate
+LICENCE file containing the conditions.
 
 3. Updated pcretest so that patterns such as /abc\/def/ work like they do in
 Perl, that is the internal \ allows the delimiter to be included in the

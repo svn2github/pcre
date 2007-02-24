@@ -1,4 +1,4 @@
-PCRE version 2.03 12-Feb-1999
+PCRE version 2.04 19-Feb-1999
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -977,6 +977,14 @@ No first char
  0: abc\x00def
  0C abc (7)
  0L abc
+    
+/word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
+)((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
+)?)?)?)?)?)?)?)?)?otherword/M
+Memory allocation request: 441 (code space 428)
+Identifying subpattern count = 8
+No options
+First char = 'w'
 
 / End of test input /
 Identifying subpattern count = 0

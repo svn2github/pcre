@@ -216,6 +216,9 @@ internal form of compiled regular expressions to be output after compilation.
 The /S option causes pcre_study() to be called after the expression has been
 compiled, and the results used when the expression is matched.
 
+The /M option causes information about the size of memory block used to hold
+the compile pattern to be output.
+
 Finally, the /P option causes pcretest to call PCRE via the POSIX wrapper API
 rather than its native API. When this is done, all other options except /i and
 /m are ignored. REG_ICASE is set if /i is present, and REG_NEWLINE is set if /m
@@ -291,8 +294,10 @@ If the option -i is given to pcretest, it is equivalent to adding /I to each
 regular expression: information about the compiled pattern is given after
 compilation.
 
-If the option -s is given to pcretest, it outputs the size of each compiled
-pattern after it has been compiled.
+If the option -m is given to pcretest, it outputs the size of each compiled
+pattern after it has been compiled. It is equivalent to adding /M to each
+regular expression. For compatibility with earlier versions of pcretest, -s is
+a synonym for -m.
 
 If the -t option is given, each compile, study, and match is run 20000 times
 while being timed, and the resulting time per compile or match is output in

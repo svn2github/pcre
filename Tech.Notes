@@ -185,9 +185,11 @@ compiled data its minimum number of times (or once with a BRAZERO if the
 minimum is zero), with the final copy terminating with a KETRMIN or KETRMAX as
 appropriate.
 
-A subpattern with a bounded maximum repetition is replicated up to the maximum
-number of times, with BRAZERO or BRAMINZERO before each replication after the
-minimum. In effect, (abc){2,5} becomes (abc)(abc)(abc)?(abc)?(abc)?.
+A subpattern with a bounded maximum repetition is replicated in a nested
+fashion up to the maximum number of times, with BRAZERO or BRAMINZERO before
+each replication after the minimum, so that, for example, (abc){2,5} is
+compiled as (abc)(abc)((abc)((abc)(abc)?)?)?. The 200-bracket limit does not
+apply to these internally generated brackets.
 
 
 Assertions

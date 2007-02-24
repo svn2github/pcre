@@ -1091,8 +1091,10 @@ for (;; ptr++)
     else if ((int)*previous >= OP_BRA || (int)*previous == OP_ONCE ||
              (int)*previous == OP_COND)
       {
-      int i, ketoffset = 0;
+      register int i;
+      int ketoffset = 0;
       int len = code - previous;
+      uschar *bralink = NULL;
 
       /* If the maximum repeat count is unlimited, find the end of the bracket
       by scanning through from the start, and compute the offset back to it
@@ -1107,6 +1109,130 @@ for (;; ptr++)
         ketoffset = code - ket;
         }
 
+      /* The case of a zero minimum is special because of the need to stick
+      OP_BRAZERO in front of it, and because the group appears once in the
+      data, whereas in other cases it appears the minimum number of times. For
+      this reason, it is simplest to treat this case separately, as otherwise
+      the code gets far too mess. There are several special subcases when the
+      minimum is zero. */
+
+      if (repeat_min == 0)
+        {
+        /* If the maximum is also zero, we just omit the group from the output
+        altogether. */
+
+        if (repeat_max == 0)
+          {
+          code = previous;
+          previous = NULL;
+          break;
+          }
+
+        /* If the maximum is 1 or unlimited, we just have to stick in the
+        BRAZERO and do no more at this point. */
+
+        if (repeat_max <= 1)
+          {
+          memmove(previous+1, previous, len);
+          code++;
+          *previous++ = OP_BRAZERO + repeat_type;
+          }
+
+        /* If the maximum is greater than 1 and limited, we have to replicate
+        in a nested fashion, sticking OP_BRAZERO before each set of brackets.
+        The first one has to be handled carefully because it's the original
+        copy, which has to be moved up. The remainder can be handled by code
+        that is common with the non-zero minimum case below. We just have to
+        adjust the value or repeat_max, since one less copy is required. */
+
+        else
+          {
+          int offset;
+          memmove(previous+4, previous, len);
+          code += 4;
+          *previous++ = OP_BRAZERO + repeat_type;
+          *previous++ = OP_BRA;
+
+          /* We chain together the bracket offset fields that have to be
+          filled in later when the ends of the brackets are reached. */
+
+          offset = (bralink == NULL)? 0 : previous - bralink;
+          bralink = previous;
+          *previous++ = offset >> 8;
+          *previous++ = offset & 255;
+          }
+
+        repeat_max--;
+        }
+
+      /* If the minimum is greater than zero, replicate the group as many
+      times as necessary, and adjust the maximum to the number of subsequent
+      copies that we need. */
+
+      else
+        {
+        for (i = 1; i < repeat_min; i++)
+          {
+          memcpy(code, previous, len);
+          code += len;
+          }
+        if (repeat_max > 0) repeat_max -= repeat_min;
+        }
+
+      /* This code is common to both the zero and non-zero minimum cases. If
+      the maximum is limited, it replicates the group in a nested fashion,
+      remembering the bracket starts on a stack. In the case of a zero minimum,
+      the first one was set up above. In all cases the repeat_max now specifies
+      the number of additional copies needed. */
+
+      if (repeat_max >= 0)
+        {
+        for (i = repeat_max - 1; i >= 0; i--)
+          {
+          *code++ = OP_BRAZERO + repeat_type;
+
+          /* All but the final copy start a new nesting, maintaining the
+          chain of brackets outstanding. */
+
+          if (i != 0)
+            {
+            int offset;
+            *code++ = OP_BRA;
+            offset = (bralink == NULL)? 0 : code - bralink;
+            bralink = code;
+            *code++ = offset >> 8;
+            *code++ = offset & 255;
+            }
+
+          memcpy(code, previous, len);
+          code += len;
+          }
+
+        /* Now chain through the pending brackets, and fill in their length
+        fields (which are holding the chain links pro tem). */
+
+        while (bralink != NULL)
+          {
+          int oldlinkoffset;
+          int offset = code - bralink + 1;
+          uschar *bra = code - offset;
+          oldlinkoffset = (bra[1] << 8) + bra[2];
+          bralink = (oldlinkoffset == 0)? NULL : bralink - oldlinkoffset;
+          *code++ = OP_KET;
+          *code++ = bra[1] = offset >> 8;
+          *code++ = bra[2] = (offset & 255);
+          }
+        }
+
+      /* If the maximum is unlimited, set a repeater in the final copy. We
+      can't just offset backwards from the current code point, because we
+      don't know if there's been an options resetting after the ket. The
+      correct offset was computed above. */
+
+      else code[-ketoffset] = OP_KETRMAX + repeat_type;
+
+
+#ifdef NEVER
       /* If the minimum is greater than zero, and the maximum is unlimited or
       equal to the minimum, the first copy remains where it is, and is
       replicated up to the minimum number of times. This case includes the +
@@ -1154,6 +1280,9 @@ for (;; ptr++)
       correct offset was computed above. */
 
       if (repeat_max == -1) code[-ketoffset] = OP_KETRMAX + repeat_type;
+#endif
+
+
       }
 
     /* Else there's some kind of shambles */
@@ -2272,14 +2401,29 @@ while ((c = *(++ptr)) != 0)
       else if (c == '+') { maxval = -1; ptr++; }
       else if (c == '?') { minval = 0; ptr++; }
 
-      /* If there is a minimum > 1 we have to replicate up to minval-1 times;
-      if there is a limited maximum we have to replicate up to maxval-1 times
-      and allow for a BRAZERO item before each optional copy, as we also have
-      to do before the first copy if the minimum is zero. */
+      /* If the minimum is zero, we have to allow for an OP_BRAZERO before the
+      group, and if the maximum is greater than zero, we have to replicate
+      maxval-1 times; each replication acquires an OP_BRAZERO plus a nesting
+      bracket set - hence the 7. */
 
-      if (minval == 0) length++;
-        else if (minval > 1) length += (minval - 1) * duplength;
-      if (maxval > minval) length += (maxval - minval) * (duplength + 1);
+      if (minval == 0)
+        {
+        length++;
+        if (maxval > 0) length += (maxval - 1) * (duplength + 7);
+        }
+
+      /* When the minimum is greater than zero, 1 we have to replicate up to
+      minval-1 times, with no additions required in the copies. Then, if
+      there is a limited maximum we have to replicate up to maxval-1 times
+      allowing for a BRAZERO item before each optional copy and nesting
+      brackets for all but one of the optional copies. */
+
+      else
+        {
+        length += (minval - 1) * duplength;
+        if (maxval > minval)   /* Need this test as maxval=-1 means no limit */
+          length += (maxval - minval) * (duplength + 7) - 6;
+        }
       }
     continue;
 
@@ -2775,7 +2919,11 @@ for (;;)
     int number = op - OP_BRA;
     int offset = number << 1;
 
-    DPRINTF(("start bracket %d\n", number));
+#ifdef DEBUG
+    printf("start bracket %d subject=", number);
+    pchars(eptr, 16, TRUE, md);
+    printf("\n");
+#endif
 
     if (offset < md->offset_max)
       {

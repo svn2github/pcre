@@ -425,5 +425,9 @@
     
 /^abc\00def/
     abc\00def\L\C0 
+    
+/word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
+)((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
+)?)?)?)?)?)?)?)?)?otherword/M
 
 / End of test input /

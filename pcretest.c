@@ -274,7 +274,9 @@ compiled re. */
 
 static void *new_malloc(size_t size)
 {
-if (log_store) fprintf(outfile, "Store size request: %d\n", (int)size);
+if (log_store)
+  fprintf(outfile, "Memory allocation request: %d (code space %d)\n",
+    (int)size, (int)size - offsetof(real_pcre, code[0]));
 return malloc(size);
 }
 
@@ -292,6 +294,7 @@ int study_options = 0;
 int op = 1;
 int timeit = 0;
 int showinfo = 0;
+int showstore = 0;
 int posix = 0;
 int debug = 0;
 int done = 0;
@@ -306,7 +309,8 @@ outfile = stdout;
 
 while (argc > 1 && argv[op][0] == '-')
   {
-  if (strcmp(argv[op], "-s") == 0) log_store = 1;
+  if (strcmp(argv[op], "-s") == 0 || strcmp(argv[op], "-m") == 0)
+    showstore = 1;
   else if (strcmp(argv[op], "-t") == 0) timeit = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
@@ -434,6 +438,8 @@ while (!done)
 
   options = 0;
   study_options = 0;
+  log_store = showstore;  /* default from command line */
+
   while (*pp != 0)
     {
     switch (*pp++)
@@ -447,6 +453,7 @@ while (!done)
       case 'D': do_debug = do_showinfo = 1; break;
       case 'E': options |= PCRE_DOLLAR_ENDONLY; break;
       case 'I': do_showinfo = 1; break;
+      case 'M': log_store = 1; break;
       case 'P': do_posix = 1; break;
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;

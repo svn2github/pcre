@@ -1,4 +1,4 @@
-PCRE version 2.03 12-Feb-1999
+PCRE version 2.04 19-Feb-1999
 
 /the quick brown fox/
     the quick brown fox
@@ -2530,6 +2530,122 @@ No match
 /\d\d\/\d\d\/\d\d\d\d/
     01/01/2000
  0: 01/01/2000
+
+/word (?:[a-zA-Z0-9]+ ){0,10}otherword/
+  word cat dog elephant mussel cow horse canary baboon snake shark otherword
+ 0: word cat dog elephant mussel cow horse canary baboon snake shark otherword
+  word cat dog elephant mussel cow horse canary baboon snake shark
+No match
+
+/word (?:[a-zA-Z0-9]+ ){0,300}otherword/
+  word cat dog elephant mussel cow horse canary baboon snake shark the quick brown fox and the lazy dog and several other words getting close to thirty by now I hope
+No match
+
+/^(a){0,0}/
+    bcd
+ 0: 
+    abc
+ 0: 
+    aab     
+ 0: 
+
+/^(a){0,1}/
+    bcd
+ 0: 
+    abc
+ 0: a
+ 1: a
+    aab  
+ 0: a
+ 1: a
+
+/^(a){0,2}/
+    bcd
+ 0: 
+    abc
+ 0: a
+ 1: a
+    aab  
+ 0: aa
+ 1: a
+
+/^(a){0,3}/
+    bcd
+ 0: 
+    abc
+ 0: a
+ 1: a
+    aab
+ 0: aa
+ 1: a
+    aaa   
+ 0: aaa
+ 1: a
+
+/^(a){0,}/
+    bcd
+ 0: 
+    abc
+ 0: a
+ 1: a
+    aab
+ 0: aa
+ 1: a
+    aaa
+ 0: aaa
+ 1: a
+    aaaaaaaa    
+ 0: aaaaaaaa
+ 1: a
+
+/^(a){1,1}/
+    bcd
+No match
+    abc
+ 0: a
+ 1: a
+    aab  
+ 0: a
+ 1: a
+
+/^(a){1,2}/
+    bcd
+No match
+    abc
+ 0: a
+ 1: a
+    aab  
+ 0: aa
+ 1: a
+
+/^(a){1,3}/
+    bcd
+No match
+    abc
+ 0: a
+ 1: a
+    aab
+ 0: aa
+ 1: a
+    aaa   
+ 0: aaa
+ 1: a
+
+/^(a){1,}/
+    bcd
+No match
+    abc
+ 0: a
+ 1: a
+    aab
+ 0: aa
+ 1: a
+    aaa
+ 0: aaa
+ 1: a
+    aaaaaaaa    
+ 0: aaaaaaaa
+ 1: a
 
 / End of test input /
 
