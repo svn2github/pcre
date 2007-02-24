@@ -1,6 +1,35 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.2 01-Aug-05
+---------------------
+
+ 1. There was no test for integer overflow of quantifier values. A construction
+    such as {1111111111111111} would give undefined results. What is worse, if
+    a minimum quantifier for a parenthesized subpattern overflowed and became
+    negative, the calculation of the memory size went wrong. This could have
+    led to memory overwriting.
+
+ 2. Building PCRE using VPATH was broken. Hopefully it is now fixed.
+
+ 3. Added "b" to the 2nd argument of fopen() in dftables.c, for non-Unix-like
+    operating environments where this matters.
+
+ 4. Applied Giuseppe Maxia's patch to add additional features for controlling
+    PCRE options from within the C++ wrapper.
+
+ 5. Named capturing subpatterns were not being correctly counted when a pattern
+    was compiled. This caused two problems: (a) If there were more than 100
+    such subpatterns, the calculation of the memory needed for the whole
+    compiled pattern went wrong, leading to an overflow error. (b) Numerical
+    back references of the form \12, where the number was greater than 9, were
+    not recognized as back references, even though there were sufficient
+    previous subpatterns.
+
+ 6. Two minor patches to pcrecpp.cc in order to allow it to compile on older
+    versions of gcc, e.g. 2.95.4.
+
+
 Version 6.1 21-Jun-05
 ---------------------
 

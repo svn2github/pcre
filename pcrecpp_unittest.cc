@@ -43,6 +43,8 @@ using pcrecpp::Hex;
 using pcrecpp::Octal;
 using pcrecpp::CRadix;
 
+static bool VERBOSE_TEST  = false;
+
 // CHECK dies with a fatal error if condition is not true.  It is *not*
 // controlled by NDEBUG, so the check will be executed regardless of
 // compilation mode.  Therefore, it is safe to do things like:
@@ -363,6 +365,227 @@ static void TestRecursion(int size, const char *pattern, int match_limit) {
   re.FullMatch(domain);
 }
 
+//
+// Options tests contributed by
+// Giuseppe Maxia, CTO, Stardata s.r.l.
+// July 2005
+//
+static void GetOneOptionResult(
+                const char *option_name,
+                const char *regex,
+                const char *str,
+                RE_Options options,
+                bool full,
+                string expected) {
+
+  printf("Testing Option <%s>\n", option_name);
+  if(VERBOSE_TEST)
+    printf("/%s/ finds \"%s\" within \"%s\" \n",
+                    regex,
+                    expected.c_str(),
+                    str);
+  string captured("");
+  if (full)
+    RE(regex,options).FullMatch(str, &captured);
+  else
+    RE(regex,options).PartialMatch(str, &captured);
+  CHECK_EQ(captured, expected);
+}
+
+static void TestOneOption(
+                const char *option_name,
+                const char *regex,
+                const char *str,
+                RE_Options options,
+                bool full,
+                bool assertive = true) {
+
+  printf("Testing Option <%s>\n", option_name);
+  if (VERBOSE_TEST)
+    printf("'%s' %s /%s/ \n",
+                  str,
+                  (assertive? "matches" : "doesn't match"),
+                  regex);
+  if (assertive) {
+    if (full)
+      CHECK(RE(regex,options).FullMatch(str));
+    else
+      CHECK(RE(regex,options).PartialMatch(str));
+  } else {
+    if (full)
+      CHECK(!RE(regex,options).FullMatch(str));
+    else
+      CHECK(!RE(regex,options).PartialMatch(str));
+  }
+}
+
+static void Test_CASELESS() {
+  RE_Options options;
+  RE_Options options2;
+
+  options.set_caseless(true);
+  TestOneOption("CASELESS (class)",  "HELLO",    "hello", options, false);
+  TestOneOption("CASELESS (class2)", "HELLO",    "hello", options2.set_caseless(true), false);
+  TestOneOption("CASELESS (class)",  "^[A-Z]+$", "Hello", options, false);
+
+  TestOneOption("CASELESS (function)", "HELLO",    "hello", pcrecpp::CASELESS(), false);
+  TestOneOption("CASELESS (function)", "^[A-Z]+$", "Hello", pcrecpp::CASELESS(), false);
+  options.set_caseless(false);
+  TestOneOption("no CASELESS", "HELLO",    "hello", options, false, false);
+}
+
+static void Test_MULTILINE() {
+  RE_Options options;
+  RE_Options options2;
+  const char *str = "HELLO\n" "cruel\n" "world\n";
+
+  options.set_multiline(true);
+  TestOneOption("MULTILINE (class)",    "^cruel$", str, options, false);
+  TestOneOption("MULTILINE (class2)",   "^cruel$", str, options2.set_multiline(true), false);
+  TestOneOption("MULTILINE (function)", "^cruel$", str, pcrecpp::MULTILINE(), false);
+  options.set_multiline(false);
+  TestOneOption("no MULTILINE", "^cruel$", str, options, false, false);
+}
+
+static void Test_DOTALL() {
+  RE_Options options;
+  RE_Options options2;
+  const char *str = "HELLO\n" "cruel\n" "world";
+
+  options.set_dotall(true);
+  TestOneOption("DOTALL (class)",    "HELLO.*world", str, options, true);
+  TestOneOption("DOTALL (class2)",   "HELLO.*world", str, options2.set_dotall(true), true);
+  TestOneOption("DOTALL (function)",    "HELLO.*world", str, pcrecpp::DOTALL(), true);
+  options.set_dotall(false);
+  TestOneOption("no DOTALL", "HELLO.*world", str, options, true, false);
+}
+
+static void Test_DOLLAR_ENDONLY() {
+  RE_Options options;
+  RE_Options options2;
+  const char *str = "HELLO world\n";
+
+  TestOneOption("no DOLLAR_ENDONLY", "world$", str, options, false);
+  options.set_dollar_endonly(true);
+  TestOneOption("DOLLAR_ENDONLY 1",    "world$", str, options, false, false);
+  TestOneOption("DOLLAR_ENDONLY 2",    "world$", str, options2.set_dollar_endonly(true), false, false);
+}
+
+static void Test_EXTRA() {
+  RE_Options options;
+  const char *str = "HELLO";
+
+  options.set_extra(true);
+  TestOneOption("EXTRA 1", "\\HELL\\O", str, options, true, false );
+  TestOneOption("EXTRA 2", "\\HELL\\O", str, RE_Options().set_extra(true), true, false );
+  options.set_extra(false);
+  TestOneOption("no EXTRA", "\\HELL\\O", str, options, true );
+}
+
+static void Test_EXTENDED() {
+  RE_Options options;
+  RE_Options options2;
+  const char *str = "HELLO world";
+
+  options.set_extended(true);
+  TestOneOption("EXTENDED (class)",    "HELLO world", str, options, false, false);
+  TestOneOption("EXTENDED (class2)",   "HELLO world", str, options2.set_extended(true), false, false);
+  TestOneOption("EXTENDED (class)",
+                    "^ HE L{2} O "
+                    "\\s+        "
+                    "\\w+ $      ",
+                    str,
+                    options,
+                    false);
+
+  TestOneOption("EXTENDED (function)",    "HELLO world", str, pcrecpp::EXTENDED(), false, false);
+  TestOneOption("EXTENDED (function)",
+                    "^ HE L{2} O "
+                    "\\s+        "
+                    "\\w+ $      ",
+                    str,
+                    pcrecpp::EXTENDED(),
+                    false);
+
+  options.set_extended(false);
+  TestOneOption("no EXTENDED", "HELLO world", str, options, false);
+}
+
+static void Test_NO_AUTO_CAPTURE() {
+  RE_Options options;
+  const char *str = "HELLO world";
+  string captured;
+
+  printf("Testing Option <no NO_AUTO_CAPTURE>\n");
+  if (VERBOSE_TEST)
+    printf("parentheses capture text\n");
+  RE re("(world|universe)$", options);
+  CHECK(re.Extract("\\1", str , &captured));
+  CHECK_EQ(captured, "world");
+  options.set_no_auto_capture(true);
+  printf("testing Option <NO_AUTO_CAPTURE>\n");
+  if (VERBOSE_TEST)
+    printf("parentheses do not capture text\n");
+  re.Extract("\\1",str, &captured );
+  CHECK_EQ(captured, "world");
+}
+
+static void Test_UNGREEDY() {
+  RE_Options options;
+  const char *str = "HELLO, 'this' is the 'world'";
+
+  options.set_ungreedy(true);
+  GetOneOptionResult("UNGREEDY 1", "('.*')", str, options, false, "'this'" );
+  GetOneOptionResult("UNGREEDY 2", "('.*')", str, RE_Options().set_ungreedy(true), false, "'this'" );
+  GetOneOptionResult("UNGREEDY", "('.*?')", str, options, false, "'this' is the 'world'" );
+
+  options.set_ungreedy(false);
+  GetOneOptionResult("no UNGREEDY", "('.*')", str, options, false, "'this' is the 'world'" );
+  GetOneOptionResult("no UNGREEDY", "('.*?')", str, options, false, "'this'" );
+}
+
+static void Test_all_options() {
+  const char *str = "HELLO\n" "cruel\n" "world";
+  RE_Options options;
+  options.set_all_options(PCRE_CASELESS | PCRE_DOTALL);
+
+  TestOneOption("all_options (CASELESS|DOTALL)", "^hello.*WORLD", str , options, false);
+  options.set_all_options(0);
+  TestOneOption("all_options (0)", "^hello.*WORLD", str , options, false, false);
+  options.set_all_options(PCRE_MULTILINE | PCRE_EXTENDED);
+
+  TestOneOption("all_options (MULTILINE|EXTENDED)", " ^ c r u e l $ ", str, options, false);
+  TestOneOption("all_options (MULTILINE|EXTENDED) with constructor",
+                  " ^ c r u e l $ ",
+                  str,
+                  RE_Options(PCRE_MULTILINE | PCRE_EXTENDED),
+                  false);
+
+  TestOneOption("all_options (MULTILINE|EXTENDED) with concatenation",
+                  " ^ c r u e l $ ",
+                  str,
+                  RE_Options()
+                       .set_multiline(true)
+                       .set_extended(true),
+                  false);
+
+  options.set_all_options(0);
+  TestOneOption("all_options (0)", "^ c r u e l $", str, options, false, false);
+
+}
+
+static void TestOptions() {
+  printf("Testing Options\n");
+  Test_CASELESS();
+  Test_MULTILINE();
+  Test_DOTALL();
+  Test_DOLLAR_ENDONLY();
+  Test_EXTENDED();
+  Test_NO_AUTO_CAPTURE();
+  Test_UNGREEDY();
+  Test_EXTRA();
+  Test_all_options();
+}
 
 int main(int argc, char** argv) {
   // Treat any flag as --help
@@ -806,6 +1029,11 @@ int main(int argc, char** argv) {
   TestRecursion(bytes, "a.", matchlimit);
   TestRecursion(bytes, "ab.", matchlimit);
   TestRecursion(bytes, "abc.", matchlimit);
+
+  // Test Options
+  if (getenv("VERBOSE_TEST") != NULL)
+    VERBOSE_TEST  = true;
+  TestOptions();
 
   // Done
   printf("OK\n");

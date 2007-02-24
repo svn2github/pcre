@@ -28,6 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: Sanjay Ghemawat
+// Support for PCRE_XXX modifiers added by Giuseppe Maxia, July 2005
 
 #ifndef _PCRE_REGEXP_H
 #define _PCRE_REGEXP_H
@@ -159,6 +160,90 @@
 //       --enable-utf8 flag.
 //
 // -----------------------------------------------------------------------
+// PASSING MODIFIERS TO THE REGULAR EXPRESSION ENGINE
+//
+// PCRE defines some modifiers to change the behavior of the regular
+// expression engine.
+// The C++ wrapper defines an auxiliary class, RE_Options, as a vehicle
+// to pass such modifiers to a RE class.
+//
+// Currently, the following modifiers are supported
+//
+//    modifier              description               Perl corresponding
+//
+//    PCRE_CASELESS         case insensitive match    /i
+//    PCRE_MULTILINE        multiple lines match      /m
+//    PCRE_DOTALL           dot matches newlines      /s
+//    PCRE_DOLLAR_ENDONLY   $ matches only at end     N/A
+//    PCRE_EXTRA            strict escape parsing     N/A
+//    PCRE_EXTENDED         ignore whitespaces        /x
+//    PCRE_UTF8             handles UTF8 chars        built-in
+//    PCRE_UNGREEDY         reverses * and *?         N/A
+//    PCRE_NO_AUTO_CAPTURE  disables matching parens  N/A (*)
+//
+// (For a full account on how each modifier works, please check the
+// PCRE API reference manual).
+//
+// (*) Both Perl and PCRE allow non matching parentheses by means of the
+// "?:" modifier within the pattern itself. e.g. (?:ab|cd) does not
+// capture, while (ab|cd) does.
+//
+// For each modifier, there are two member functions whose name is made
+// out of the modifier in lowercase, without the "PCRE_" prefix. For
+// instance, PCRE_CASELESS is handled by
+//    bool caseless(),
+// which returns true if the modifier is set, and
+//    RE_Options & set_caseless(bool),
+// which sets or unsets the modifier.
+//
+// Moreover, PCRE_CONFIG_MATCH_LIMIT can be accessed through the
+// set_match_limit() and match_limit() member functions.
+// Setting match_limit to a non-zero value will limit the executation of
+// pcre to keep it from doing bad things like blowing the stack or taking
+// an eternity to return a result.  A value of 5000 is good enough to stop
+// stack blowup in a 2MB thread stack.  Setting match_limit to zero will
+// disable match limiting.
+//
+// Normally, to pass one or more modifiers to a RE class, you declare
+// a RE_Options object, set the appropriate options, and pass this
+// object to a RE constructor. Example:
+//
+//    RE_options opt;
+//    opt.set_caseless(true);
+//
+//    if (RE("HELLO", opt).PartialMatch("hello world")) ...
+//
+// RE_options has two constructors. The default constructor takes no
+// arguments and creates a set of flags that are off by default.
+//
+// The optional parameter 'option_flags' is to facilitate transfer
+// of legacy code from C programs.  This lets you do
+//    RE(pattern, RE_Options(PCRE_CASELESS|PCRE_MULTILINE)).PartialMatch(str);
+//
+// But new code is better off doing
+//    RE(pattern,
+//      RE_Options().set_caseless(true).set_multiline(true)).PartialMatch(str);
+// (See below)
+//
+// If you are going to pass one of the most used modifiers, there are some
+// convenience functions that return a RE_Options class with the
+// appropriate modifier already set:
+// CASELESS(), UTF8(), MULTILINE(), DOTALL(), EXTENDED()
+//
+// If you need to set several options at once, and you don't want to go
+// through the pains of declaring a RE_Options object and setting several
+// options, there is a parallel method that give you such ability on the
+// fly. You can concatenate several set_xxxxx member functions, since each
+// of them returns a reference to its class object.  e.g.: to pass
+// PCRE_CASELESS, PCRE_EXTENDED, and PCRE_MULTILINE to a RE with one
+// statement, you may write
+//
+//    RE(" ^ xyz \\s+ .* blah$", RE_Options()
+//                            .set_caseless(true)
+//                            .set_extended(true)
+//                            .set_multiline(true)).PartialMatch(sometext);
+//
+// -----------------------------------------------------------------------
 // SCANNING TEXT INCREMENTALLY
 //
 // The "Consume" operation may be useful if you want to repeatedly
@@ -245,6 +330,13 @@
 
 namespace pcrecpp {
 
+#define PCRE_SET_OR_CLEAR(b, o) \
+    if (b) all_options_ |= (o); else all_options_ &= ~(o); \
+    return *this
+
+#define PCRE_IS_SET(o)  \
+        (all_options_ & o) == o
+
 // We convert user-passed pointers into special Arg objects
 class Arg;
 extern Arg no_arg;
@@ -252,44 +344,128 @@ extern Arg no_arg;
 /***** Compiling regular expressions: the RE class *****/
 
 // RE_Options allow you to set options to be passed along to pcre,
-// along with other options we put on top of pcre.  Only UTF and
-// match_limit are supported now.  Setting match_limit
-// to a non-zero value will limit the executation of pcre to
-// keep it from doing bad things like blowing the stack or taking
-// an eternity to return a result.  A value of 5000 is good enough
-// to stop stack blowup in a 2MB thread stack.
-// Setting match_limit to zero will disable match limiting.
+// along with other options we put on top of pcre.
+// Only 9 modifiers, plus match_limit are supported now.
 class RE_Options {
  public:
   // constructor
-  RE_Options() : match_limit_(0), utf8_(false) {}
+  RE_Options() : match_limit_(0), all_options_(0) {}
+
+  // alternative constructor.
+  // To facilitate transfer of legacy code from C programs
+  //
+  // This lets you do
+  //    RE(pattern, RE_Options(PCRE_CASELESS|PCRE_MULTILINE)).PartialMatch(str);
+  // But new code is better off doing
+  //    RE(pattern,
+  //      RE_Options().set_caseless(true).set_multiline(true)).PartialMatch(str);
+  RE_Options(int option_flags) : match_limit_(0), all_options_ (option_flags) {}
   // we're fine with the default destructor, copy constructor, etc.
 
   // accessors and mutators
   int match_limit() const { return match_limit_; };
-  void set_match_limit(int limit) {
+  RE_Options &set_match_limit(int limit) {
     match_limit_ = limit;
+    return *this;
   }
 
-  bool utf8() const { return utf8_; }
-  void set_utf8(bool u) {
-    utf8_ = u;
+  bool caseless() const {
+    return PCRE_IS_SET(PCRE_CASELESS);
+  }
+  RE_Options &set_caseless(bool x) {
+    PCRE_SET_OR_CLEAR(x, PCRE_CASELESS);
+  }
+
+  bool multiline() const {
+    return PCRE_IS_SET(PCRE_MULTILINE);
+  }
+  RE_Options &set_multiline(bool x) {
+    PCRE_SET_OR_CLEAR(x, PCRE_MULTILINE);
+  }
+
+  bool dotall() const {
+    return PCRE_IS_SET(PCRE_DOTALL);
+  }
+  RE_Options &set_dotall(bool x) {
+    PCRE_SET_OR_CLEAR(x,PCRE_DOTALL);
+  }
+
+  bool extended() const {
+    return PCRE_IS_SET(PCRE_EXTENDED);
+  }
+  RE_Options &set_extended(bool x) {
+    PCRE_SET_OR_CLEAR(x,PCRE_EXTENDED);
+  }
+
+  bool dollar_endonly() const {
+    return PCRE_IS_SET(PCRE_DOLLAR_ENDONLY);
+  }
+  RE_Options &set_dollar_endonly(bool x) {
+    PCRE_SET_OR_CLEAR(x,PCRE_DOLLAR_ENDONLY);
+  }
+
+  bool extra() const {
+    return PCRE_IS_SET( PCRE_EXTRA);
+  }
+  RE_Options &set_extra(bool x) {
+    PCRE_SET_OR_CLEAR(x, PCRE_EXTRA);
+  }
+
+  bool ungreedy() const {
+    return PCRE_IS_SET(PCRE_UNGREEDY);
+  }
+  RE_Options &set_ungreedy(bool x) {
+    PCRE_SET_OR_CLEAR(x, PCRE_UNGREEDY);
+  }
+
+  bool utf8() const {
+    return PCRE_IS_SET(PCRE_UTF8);
+  }
+  RE_Options &set_utf8(bool x) {
+    PCRE_SET_OR_CLEAR(x, PCRE_UTF8);
+  }
+
+  bool no_auto_capture() const {
+    return PCRE_IS_SET(PCRE_NO_AUTO_CAPTURE);
+  }
+  RE_Options &set_no_auto_capture(bool x) {
+    PCRE_SET_OR_CLEAR(x, PCRE_NO_AUTO_CAPTURE);
+  }
+
+  RE_Options &set_all_options(int opt) {
+    all_options_ = opt;
+    return *this;
+  }
+  int all_options() const {
+    return all_options_ ;
   }
 
   // TODO: add other pcre flags
 
  private:
   int match_limit_;
-  bool utf8_;
+  int all_options_;
 };
 
 // These functions return some common RE_Options
 static inline RE_Options UTF8() {
-  RE_Options options;
-  options.set_utf8(true);
-  return options;
+  return RE_Options().set_utf8(true);
 }
 
+static inline RE_Options CASELESS() {
+  return RE_Options().set_caseless(true);
+}
+static inline RE_Options MULTILINE() {
+  return RE_Options().set_multiline(true);
+}
+
+static inline RE_Options DOTALL() {
+  return RE_Options().set_dotall(true);
+}
+
+static inline RE_Options EXTENDED() {
+  return RE_Options().set_extended(true);
+}
 
 // Interface for regular expression matching.  Also corresponds to a
 // pre-compiled regular expression.  An "RE" object is safe for
@@ -600,8 +776,11 @@ MAKE_INTEGER_PARSER(long long,          longlong);
 MAKE_INTEGER_PARSER(unsigned long long, ulonglong);
 #endif
 
+#undef PCRE_IS_SET
+#undef PCRE_SET_OR_CLEAR
 #undef MAKE_INTEGER_PARSER
 
 }   // namespace pcrecpp
+
 
 #endif /* _PCRE_REGEXP_H */

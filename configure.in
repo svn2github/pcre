@@ -21,8 +21,8 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=6
-PCRE_MINOR=1
-PCRE_DATE=21-Jun-2005
+PCRE_MINOR=2
+PCRE_DATE=01-Aug-2005
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros

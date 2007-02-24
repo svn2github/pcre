@@ -1428,5 +1428,26 @@
     AbCd
     ** Failers
     abcd  
+    
+/a{11111111111111111111}/
+
+/(){64294967295}/
+
+/(){2,4294967295}/
+
+"(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"
+    abcdefghijklAkB
+
+"(?P<n0>a)(?P<n1>b)(?P<n2>c)(?P<n3>d)(?P<n4>e)(?P<n5>f)(?P<n6>g)(?P<n7>h)(?P<n8>i)(?P<n9>j)(?P<n10>k)(?P<n11>l)A\11B"
+    abcdefghijklAkB
+
+"(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)A\11B"
+    abcdefghijklAkB
+
+"(?P<name0>a)(?P<name1>a)(?P<name2>a)(?P<name3>a)(?P<name4>a)(?P<name5>a)(?P<name6>a)(?P<name7>a)(?P<name8>a)(?P<name9>a)(?P<name10>a)(?P<name11>a)(?P<name12>a)(?P<name13>a)(?P<name14>a)(?P<name15>a)(?P<name16>a)(?P<name17>a)(?P<name18>a)(?P<name19>a)(?P<name20>a)(?P<name21>a)(?P<name22>a)(?P<name23>a)(?P<name24>a)(?P<name25>a)(?P<name26>a)(?P<name27>a)(?P<name28>a)(?P<name29>a)(?P<name30>a)(?P<name31>a)(?P<name32>a)(?P<name33>a)(?P<name34>a)(?P<name35>a)(?P<name36>a)(?P<name37>a)(?P<name38>a)(?P<name39>a)(?P<name40>a)(?P<name41>a)(?P<name42>a)(?P<name43>a)(?P<name44>a)(?P<name45>a)(?P<name46>a)(?P<name47>a)(?P<name48>a)(?P<name49>a)(?P<name50>a)(?P<name51>a)(?P<name52>a)(?P<name53>a)(?P<name54>a)(?P<name55>a)(?P<name56>a)(?P<name57>a)(?P<name58>a)(?P<name59>a)(?P<name60>a)(?P<name61>a)(?P<name62>a)(?P<name63>a)(?P<name64>a)(?P<name65>a)(?P<name66>a)(?P<name67>a)(?P<name68>a)(?P<name69>a)(?P<name70>a)(?P<name71>a)(?P<name72>a)(?P<name73>a)(?P<name74>a)(?P<name75>a)(?P<name76>a)(?P<name77>a)(?P<name78>a)(?P<name79>a)(?P<name80>a)(?P<name81>a)(?P<name82>a)(?P<name83>a)(?P<name84>a)(?P<name85>a)(?P<name86>a)(?P<name87>a)(?P<name88>a)(?P<name89>a)(?P<name90>a)(?P<name91>a)(?P<name92>a)(?P<name93>a)(?P<name94>a)(?P<name95>a)(?P<name96>a)(?P<name97>a)(?P<name98>a)(?P<name99>a)(?P<name100>a)"
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+"(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)"
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 / End of testinput2 /

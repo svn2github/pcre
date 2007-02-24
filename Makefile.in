@@ -211,7 +211,7 @@ libpcrecpp.la: libpcre.la $(CPPOBJ)
 # directory, not the source directory.
 
 pcre_chartables.@OBJEXT@: pcre_chartables.c
-		@$(LTCOMPILE) $(top_srcdir)/pcre_chartables.c
+		@$(LTCOMPILE) pcre_chartables.c
 
 pcre_compile.@OBJEXT@: Makefile config.h pcre.h \
 		$(top_srcdir)/pcre_internal.h $(top_srcdir)/pcre_compile.c
@@ -329,23 +329,23 @@ pcre_stringpiece.@OBJEXT@:  $(top_srcdir)/pcre_stringpiece.cc pcre_stringpiece.h
 
 pcretest.@OBJEXT@:     $(top_srcdir)/pcretest.c $(top_srcdir)/pcre_internal.h \
 		pcre.h config.h Makefile
-		$(CC) -c $(CFLAGS) -I. $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcretest.c
+		$(CC) -c $(CFLAGS) -I. -I$(top_srcdir) $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcretest.c
 
 pcrecpp_unittest.@OBJEXT@:  $(top_srcdir)/pcrecpp_unittest.cc pcrecpp.h \
 		pcre_stringpiece.h pcre.h config.h Makefile
-		$(CXX) -c $(CXXFLAGS) -I. $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcrecpp_unittest.cc
+		$(CXX) -c $(CXXFLAGS) -I. -I$(top_srcdir) $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcrecpp_unittest.cc
 
 pcre_stringpiece_unittest.@OBJEXT@:  $(top_srcdir)/pcre_stringpiece_unittest.cc \
 		pcre_stringpiece.h config.h Makefile
-		$(CXX) -c $(CXXFLAGS) -I. $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcre_stringpiece_unittest.cc
+		$(CXX) -c $(CXXFLAGS) -I. -I$(top_srcdir) $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcre_stringpiece_unittest.cc
 
 pcre_scanner_unittest.@OBJEXT@:  $(top_srcdir)/pcre_scanner_unittest.cc \
 		$(top_srcdir)/pcre_scanner.h pcrecpp.h pcre_stringpiece.h \
 		pcre.h config.h Makefile
-		$(CXX) -c $(CXXFLAGS) -I. $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcre_scanner_unittest.cc
+		$(CXX) -c $(CXXFLAGS) -I. -I$(top_srcdir) $(UTF8) $(UCP) $(LINK_SIZE) $(top_srcdir)/pcre_scanner_unittest.cc
 
 pcregrep.@OBJEXT@:     $(top_srcdir)/pcregrep.c pcre.h Makefile config.h
-		$(CC) -c $(CFLAGS) -I. $(UTF8) $(UCP) $(PCREGREP_OSTYPE) $(top_srcdir)/pcregrep.c
+		$(CC) -c $(CFLAGS) -I. -I$(top_srcdir) $(UTF8) $(UCP) $(PCREGREP_OSTYPE) $(top_srcdir)/pcregrep.c
 
 # Some Windows-specific targets for MinGW. Do not use for Cygwin.
 

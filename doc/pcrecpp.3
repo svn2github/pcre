@@ -11,9 +11,10 @@ PCRE - Perl-compatible regular expressions.
 .SH DESCRIPTION
 .rs
 .sp
-The C++ wrapper for PCRE was provided by Google Inc. This brief man page was
-constructed from the notes in the \fIpcrecpp.h\fP file, which should be
-consulted for further details.
+The C++ wrapper for PCRE was provided by Google Inc. Some additional
+functionality was added by Giuseppe Maxia. This brief man page was constructed
+from the notes in the \fIpcrecpp.h\fP file, which should be consulted for
+further details.
 .
 .
 .SH "MATCHING INTERFACE"
@@ -128,6 +129,93 @@ match up to three bytes of a multi-byte character.
 .sp
 NOTE: The UTF8 flag is ignored if pcre was not configured with the
       --enable-utf8 flag.
+.
+.
+.SH "PASSING MODIFIERS TO THE REGULAR EXPRESSION ENGINE"
+.rs
+.sp
+PCRE defines some modifiers to change the behavior of the regular expression
+engine. The C++ wrapper defines an auxiliary class, RE_Options, as a vehicle to
+pass such modifiers to a RE class. Currently, the following modifiers are
+supported:
+.sp
+   modifier              description               Perl corresponding
+.sp
+   PCRE_CASELESS         case insensitive match      /i
+   PCRE_MULTILINE        multiple lines match        /m
+   PCRE_DOTALL           dot matches newlines        /s
+   PCRE_DOLLAR_ENDONLY   $ matches only at end       N/A
+   PCRE_EXTRA            strict escape parsing       N/A
+   PCRE_EXTENDED         ignore whitespaces          /x
+   PCRE_UTF8             handles UTF8 chars          built-in
+   PCRE_UNGREEDY         reverses * and *?           N/A
+   PCRE_NO_AUTO_CAPTURE  disables capturing parens   N/A (*)
+.sp
+(*) Both Perl and PCRE allow non capturing parentheses by means of the
+"?:" modifier within the pattern itself. e.g. (?:ab|cd) does not
+capture, while (ab|cd) does.
+.P
+For a full account on how each modifier works, please check the
+PCRE API reference page.
+.P
+For each modifier, there are two member functions whose name is made
+out of the modifier in lowercase, without the "PCRE_" prefix. For
+instance, PCRE_CASELESS is handled by
+.sp
+  bool caseless()
+.sp
+which returns true if the modifier is set, and
+.sp
+  RE_Options & set_caseless(bool)
+.sp
+which sets or unsets the modifier. Moreover, PCRE_CONFIG_MATCH_LIMIT can be
+accessed through the \fBset_match_limit()\fR and \fBmatch_limit()\fR member
+functions. Setting \fImatch_limit\fR to a non-zero value will limit the
+execution of pcre to keep it from doing bad things like blowing the stack or
+taking an eternity to return a result. A value of 5000 is good enough to stop
+stack blowup in a 2MB thread stack. Setting \fImatch_limit\fR to zero disables
+match limiting.
+.P
+Normally, to pass one or more modifiers to a RE class, you declare
+a \fIRE_Options\fR object, set the appropriate options, and pass this
+object to a RE constructor. Example:
+.sp
+   RE_options opt;
+   opt.set_caseless(true);
+   if (RE("HELLO", opt).PartialMatch("hello world")) ...
+.sp
+RE_options has two constructors. The default constructor takes no arguments and
+creates a set of flags that are off by default. The optional parameter
+\fIoption_flags\fR is to facilitate transfer of legacy code from C programs.
+This lets you do
+.sp
+   RE(pattern,
+     RE_Options(PCRE_CASELESS|PCRE_MULTILINE)).PartialMatch(str);
+.sp
+However, new code is better off doing
+.sp
+   RE(pattern,
+     RE_Options().set_caseless(true).set_multiline(true))
+       .PartialMatch(str);
+.sp
+If you are going to pass one of the most used modifiers, there are some
+convenience functions that return a RE_Options class with the
+appropriate modifier already set: \fBCASELESS()\fR, \fBUTF8()\fR,
+\fBMULTILINE()\fR, \fBDOTALL\fR(), and \fBEXTENDED()\fR.
+.P
+If you need to set several options at once, and you don't want to go through
+the pains of declaring a RE_Options object and setting several options, there
+is a parallel method that give you such ability on the fly. You can concatenate
+several \fBset_xxxxx()\fR member functions, since each of them returns a
+reference to its class object. For example, to pass PCRE_CASELESS,
+PCRE_EXTENDED, and PCRE_MULTILINE to a RE with one statement, you may write:
+.sp
+   RE(" ^ xyz \e\es+ .* blah$",
+     RE_Options()
+       .set_caseless(true)
+       .set_extended(true)
+       .set_multiline(true)).PartialMatch(sometext);
+.sp
 .
 .
 .SH "SCANNING TEXT INCREMENTALLY"

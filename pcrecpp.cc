@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <string>
+#include <algorithm>
 #include "config.h"
 // We need this to compile the proper dll on windows/msys.  This is copied
 // from pcre_internal.h.  It would probably be better just to include that.
@@ -97,8 +98,7 @@ RE::~RE() {
 pcre* RE::Compile(Anchor anchor) {
   // First, convert RE_Options into pcre options
   int pcre_options = 0;
-  if (options_.utf8())
-    pcre_options |= PCRE_UTF8;
+  pcre_options = options_.all_options();
 
   // Special treatment for anchoring.  This is needed because at
   // runtime pcre only provides an option for anchoring at the
@@ -378,7 +378,7 @@ bool RE::Extract(const StringPiece& rewrite,
   int matches = TryMatch(text, 0, UNANCHORED, vec, kVecSize);
   if (matches == 0)
     return false;
-  out->clear();
+  out->erase();
   return Rewrite(out, rewrite, text, vec, matches);
 }
 

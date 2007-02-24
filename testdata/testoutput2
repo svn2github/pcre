@@ -1,4 +1,4 @@
-PCRE version 6.1 21-Jun-2005
+PCRE version 6.2 01-Aug-2005
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -5715,6 +5715,229 @@ Need char = 'd'
 No match
     abcd  
 No match
+    
+/a{11111111111111111111}/
+Failed: number too big in {} quantifier at offset 22
+
+/(){64294967295}/
+Failed: number too big in {} quantifier at offset 14
+
+/(){2,4294967295}/
+Failed: number too big in {} quantifier at offset 15
+
+"(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+Case state changes
+First char = 'a' (caseless)
+Need char = 'B'
+    abcdefghijklAkB
+ 0: abcdefghijklAkB
+ 1: k
+
+"(?P<n0>a)(?P<n1>b)(?P<n2>c)(?P<n3>d)(?P<n4>e)(?P<n5>f)(?P<n6>g)(?P<n7>h)(?P<n8>i)(?P<n9>j)(?P<n10>k)(?P<n11>l)A\11B"
+Capturing subpattern count = 12
+Max back reference = 11
+Named capturing subpatterns:
+  n0    1
+  n1    2
+  n10  11
+  n11  12
+  n2    3
+  n3    4
+  n4    5
+  n5    6
+  n6    7
+  n7    8
+  n8    9
+  n9   10
+No options
+First char = 'a'
+Need char = 'B'
+    abcdefghijklAkB
+ 0: abcdefghijklAkB
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+ 5: e
+ 6: f
+ 7: g
+ 8: h
+ 9: i
+10: j
+11: k
+12: l
+
+"(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)A\11B"
+Capturing subpattern count = 12
+Max back reference = 11
+No options
+First char = 'a'
+Need char = 'B'
+    abcdefghijklAkB
+ 0: abcdefghijklAkB
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+ 5: e
+ 6: f
+ 7: g
+ 8: h
+ 9: i
+10: j
+11: k
+12: l
+
+"(?P<name0>a)(?P<name1>a)(?P<name2>a)(?P<name3>a)(?P<name4>a)(?P<name5>a)(?P<name6>a)(?P<name7>a)(?P<name8>a)(?P<name9>a)(?P<name10>a)(?P<name11>a)(?P<name12>a)(?P<name13>a)(?P<name14>a)(?P<name15>a)(?P<name16>a)(?P<name17>a)(?P<name18>a)(?P<name19>a)(?P<name20>a)(?P<name21>a)(?P<name22>a)(?P<name23>a)(?P<name24>a)(?P<name25>a)(?P<name26>a)(?P<name27>a)(?P<name28>a)(?P<name29>a)(?P<name30>a)(?P<name31>a)(?P<name32>a)(?P<name33>a)(?P<name34>a)(?P<name35>a)(?P<name36>a)(?P<name37>a)(?P<name38>a)(?P<name39>a)(?P<name40>a)(?P<name41>a)(?P<name42>a)(?P<name43>a)(?P<name44>a)(?P<name45>a)(?P<name46>a)(?P<name47>a)(?P<name48>a)(?P<name49>a)(?P<name50>a)(?P<name51>a)(?P<name52>a)(?P<name53>a)(?P<name54>a)(?P<name55>a)(?P<name56>a)(?P<name57>a)(?P<name58>a)(?P<name59>a)(?P<name60>a)(?P<name61>a)(?P<name62>a)(?P<name63>a)(?P<name64>a)(?P<name65>a)(?P<name66>a)(?P<name67>a)(?P<name68>a)(?P<name69>a)(?P<name70>a)(?P<name71>a)(?P<name72>a)(?P<name73>a)(?P<name74>a)(?P<name75>a)(?P<name76>a)(?P<name77>a)(?P<name78>a)(?P<name79>a)(?P<name80>a)(?P<name81>a)(?P<name82>a)(?P<name83>a)(?P<name84>a)(?P<name85>a)(?P<name86>a)(?P<name87>a)(?P<name88>a)(?P<name89>a)(?P<name90>a)(?P<name91>a)(?P<name92>a)(?P<name93>a)(?P<name94>a)(?P<name95>a)(?P<name96>a)(?P<name97>a)(?P<name98>a)(?P<name99>a)(?P<name100>a)"
+Capturing subpattern count = 101
+Named capturing subpatterns:
+  name0     1
+  name1     2
+  name10   11
+  name100 101
+  name11   12
+  name12   13
+  name13   14
+  name14   15
+  name15   16
+  name16   17
+  name17   18
+  name18   19
+  name19   20
+  name2     3
+  name20   21
+  name21   22
+  name22   23
+  name23   24
+  name24   25
+  name25   26
+  name26   27
+  name27   28
+  name28   29
+  name29   30
+  name3     4
+  name30   31
+  name31   32
+  name32   33
+  name33   34
+  name34   35
+  name35   36
+  name36   37
+  name37   38
+  name38   39
+  name39   40
+  name4     5
+  name40   41
+  name41   42
+  name42   43
+  name43   44
+  name44   45
+  name45   46
+  name46   47
+  name47   48
+  name48   49
+  name49   50
+  name5     6
+  name50   51
+  name51   52
+  name52   53
+  name53   54
+  name54   55
+  name55   56
+  name56   57
+  name57   58
+  name58   59
+  name59   60
+  name6     7
+  name60   61
+  name61   62
+  name62   63
+  name63   64
+  name64   65
+  name65   66
+  name66   67
+  name67   68
+  name68   69
+  name69   70
+  name7     8
+  name70   71
+  name71   72
+  name72   73
+  name73   74
+  name74   75
+  name75   76
+  name76   77
+  name77   78
+  name78   79
+  name79   80
+  name8     9
+  name80   81
+  name81   82
+  name82   83
+  name83   84
+  name84   85
+  name85   86
+  name86   87
+  name87   88
+  name88   89
+  name89   90
+  name9    10
+  name90   91
+  name91   92
+  name92   93
+  name93   94
+  name94   95
+  name95   96
+  name96   97
+  name97   98
+  name98   99
+  name99  100
+No options
+First char = 'a'
+Need char = 'a'
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Matched, but too many substrings
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 1: a
+ 2: a
+ 3: a
+ 4: a
+ 5: a
+ 6: a
+ 7: a
+ 8: a
+ 9: a
+10: a
+11: a
+12: a
+13: a
+14: a
+
+"(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)"
+Capturing subpattern count = 101
+No options
+First char = 'a'
+Need char = 'a'
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Matched, but too many substrings
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 1: a
+ 2: a
+ 3: a
+ 4: a
+ 5: a
+ 6: a
+ 7: a
+ 8: a
+ 9: a
+10: a
+11: a
+12: a
+13: a
+14: a
 
 / End of testinput2 /
 Capturing subpattern count = 0

@@ -10,7 +10,10 @@ echo "Testing pcregrep"
 # supported by pcregrep.
 
 cf=diff
-testdata=@top_srcdir@/testdata
+if [ ! -d testdata ] ; then
+  ln -s @top_srcdir@/testdata testdata
+fi
+testdata=./testdata
 
 ./pcregrep -V 2>testtry
 
