@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "2.00 24-Sep-1998"
+#define PCRE_VERSION       "2.01 21-Oct-1998"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -259,6 +259,7 @@ runs on as long as necessary after the end. */
 
 typedef struct real_pcre {
   unsigned int  magic_number;
+  const unsigned char *tables;
   unsigned short int options;
   unsigned char top_bracket;
   unsigned char top_backref;
@@ -273,14 +274,38 @@ typedef struct real_pcre_extra {
   unsigned char start_bits[32];
 } real_pcre_extra;
 
-/* Global tables from chartables.c */
 
-extern uschar pcre_lcc[];
-extern uschar pcre_fcc[];
-extern uschar pcre_cbits[];
-extern uschar pcre_ctypes[];
+/* Structure for passing "static" information around between the functions
+doing the compiling, so that they are thread-safe. */
 
-/* Bit definitions for entries in pcre_ctypes[]. */
+typedef struct compile_data {
+  const uschar *lcc;            /* Points to lower casing table */
+  const uschar *fcc;            /* Points to case-flippint table */
+  const uschar *cbits;          /* Points to character type table */
+  const uschar *ctypes;         /* Points to table of type maps */
+} compile_data;
+
+/* Structure for passing "static" information around between the functions
+doing the matching, so that they are thread-safe. */
+
+typedef struct match_data {
+  int    errorcode;             /* As it says */
+  int   *offset_vector;         /* Offset vector */
+  int    offset_end;            /* One past the end */
+  int    offset_max;            /* The maximum usable for return data */
+  const uschar *lcc;            /* Points to lower casing table */
+  const uschar *ctypes;         /* Points to table of type maps */
+  BOOL   offset_overflow;       /* Set if too many extractions */
+  BOOL   notbol;                /* NOTBOL flag */
+  BOOL   noteol;                /* NOTEOL flag */
+  BOOL   endonly;               /* Dollar not before final \n */
+  const uschar *start_subject;  /* Start of the subject string */
+  const uschar *end_subject;    /* End of the subject string */
+  const uschar *end_match_ptr;  /* Subject position at end match */
+  int     end_offset_top;       /* Highwater mark at end of match */
+} match_data;
+
+/* Bit definitions for entries in the pcre_ctypes table. */
 
 #define ctype_space   0x01
 #define ctype_letter  0x02
@@ -289,12 +314,21 @@ extern uschar pcre_ctypes[];
 #define ctype_word    0x10   /* alphameric or '_' */
 #define ctype_meta    0x80   /* regexp meta char or zero (end pattern) */
 
-/* Offsets for the bitmap tables */
+/* Offsets for the bitmap tables in pcre_cbits. Each table contains a set
+of bits for a class map. */
 
-#define cbit_digit    0
-#define cbit_letter  32
-#define cbit_word    64
-#define cbit_space   96
-#define cbit_length 128      /* Length of the cbits table */
+#define cbit_digit    0      /* for \d */
+#define cbit_word    32      /* for \w */
+#define cbit_space   64      /* for \s */
+#define cbit_length  96      /* Length of the cbits table */
+
+/* Offsets of the various tables from the base tables pointer, and
+total length. */
+
+#define lcc_offset      0
+#define fcc_offset    256
+#define cbits_offset  512
+#define ctypes_offset (cbits_offset + cbit_length)
+#define tables_length (ctypes_offset + 256)
 
 /* End of internal.h */

@@ -191,7 +191,7 @@ int options = 0;
 if ((cflags & REG_ICASE) != 0) options |= PCRE_CASELESS;
 if ((cflags & REG_NEWLINE) != 0) options |= PCRE_MULTILINE;
 
-preg->re_pcre = pcre_compile(pattern, options, &errorptr, &erroffset);
+preg->re_pcre = pcre_compile(pattern, options, &errorptr, &erroffset, NULL);
 preg->re_erroffset = erroffset;
 
 if (preg->re_pcre == NULL) return pcre_posix_error_code(errorptr);

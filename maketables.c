@@ -30,97 +30,67 @@ See the file Tech.Notes for some information on the internals.
 */
 
 
-/* This is a support program to generate the file chartables.c, containing
-character tables of various kinds. They are built according to the local C
-locale. */
+/* This file is compiled on its own as part of the PCRE library. However,
+it is also included in the compilation of deftables.c, in which case the macro
+DEFTABLES is defined. */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-
+#ifndef DEFTABLES
 #include "internal.h"
+#endif
 
-int main(void)
+
+
+/*************************************************
+*           Create PCRE character tables         *
+*************************************************/
+
+/* This function builds a set of character tables for use by PCRE and returns
+a pointer to them. They are build using the ctype functions, and consequently
+their contents will depend upon the current locale setting. When compiled as
+part of the library, the store is obtained via pcre_malloc(), but when compiled
+inside deftables, use malloc().
+
+Arguments:   none
+Returns:     pointer to the contiguous block of data
+*/
+
+unsigned const char *
+pcre_maketables(void)
 {
+unsigned char *yield, *p;
 int i;
-unsigned char cbits[cbit_length];
 
-printf(
-  "/*************************************************\n"
-  "*      Perl-Compatible Regular Expressions       *\n"
-  "*************************************************/\n\n"
-  "/* This file is automatically written by the makechartables auxiliary \n"
-  "program. If you edit it by hand, you might like to edit the Makefile to \n"
-  "prevent its ever being regenerated. */\n\n"
-  "/* This table is a lower casing table. */\n\n"
-  "unsigned char pcre_lcc[] = {\n");
+#ifndef DEFTABLES
+yield = (pcre_malloc)(tables_length);
+#else
+yield = malloc(tables_length);
+#endif
 
-printf("  ");
+if (yield == NULL) return NULL;
+p = yield;
+
+/* First comes the lower casing table */
+
+for (i = 0; i < 256; i++) *p++ = tolower(i);
+
+/* Next the case-flipping table */
+
+for (i = 0; i < 256; i++) *p++ = islower(i)? toupper(i) : tolower(i);
+
+/* Then the character class tables */
+
+memset(p, 0, cbit_length);
 for (i = 0; i < 256; i++)
   {
-  if ((i & 7) == 0 && i != 0) printf("\n  ");
-  printf("%3d", tolower(i));
-  if (i != 255) printf(",");
-  }
-printf(" };\n\n");
-
-printf(
-  "/* This table is a case flipping table. */\n\n"
-  "unsigned char pcre_fcc[] = {\n");
-
-printf("  ");
-for (i = 0; i < 256; i++)
-  {
-  if ((i & 7) == 0 && i != 0) printf("\n  ");
-  printf("%3d", islower(i)? toupper(i) : tolower(i));
-  if (i != 255) printf(",");
-  }
-printf(" };\n\n");
-
-printf(
-  "/* This table contains bit maps for digits, letters, 'word' chars, and\n"
-  "white space. Each map is 32 bytes long and the bits run from the least\n"
-  "significant end of each byte. */\n\n"
-  "unsigned char pcre_cbits[] = {\n");
-
-memset(cbits, 0, sizeof(cbits));
-
-for (i = 0; i < 256; i++)
-  {
-  if (isdigit(i)) cbits[cbit_digit  + i/8] |= 1 << (i&7);
-  if (isalpha(i)) cbits[cbit_letter + i/8] |= 1 << (i&7);
+  if (isdigit(i)) p[cbit_digit  + i/8] |= 1 << (i&7);
   if (isalnum(i) || i == '_')
-                  cbits[cbit_word   + i/8] |= 1 << (i&7);
-  if (isspace(i)) cbits[cbit_space  + i/8] |= 1 << (i&7);
+                  p[cbit_word   + i/8] |= 1 << (i&7);
+  if (isspace(i)) p[cbit_space  + i/8] |= 1 << (i&7);
   }
+p += cbit_length;
 
-printf("  ");
-for (i = 0; i < cbit_length; i++)
-  {
-  if ((i & 7) == 0 && i != 0)
-    {
-    if ((i & 31) == 0) printf("\n");
-    printf("\n  ");
-    }
-  printf("0x%02x", cbits[i]);
-  if (i != cbit_length - 1) printf(",");
-  }
-printf(" };\n\n");
+/* Finally, the character type table */
 
-printf(
-  "/* This table identifies various classes of character by individual bits:\n"
-  "  0x%02x   white space character\n"
-  "  0x%02x   letter\n"
-  "  0x%02x   decimal digit\n"
-  "  0x%02x   hexadecimal digit\n"
-  "  0x%02x   alphanumeric or '_'\n"
-  "  0x%02x   regular expression metacharacter or binary zero\n*/\n\n",
-  ctype_space, ctype_letter, ctype_digit, ctype_xdigit, ctype_word,
-  ctype_meta);
-
-printf("unsigned char pcre_ctypes[] = {\n");
-
-printf("  ");
 for (i = 0; i < 256; i++)
   {
   int x = 0;
@@ -130,28 +100,10 @@ for (i = 0; i < 256; i++)
   if (isxdigit(i)) x += ctype_xdigit;
   if (isalnum(i) || i == '_') x += ctype_word;
   if (strchr("*+?{^.$|()[", i) != 0) x += ctype_meta;
-
-  if ((i & 7) == 0 && i != 0)
-    {
-    printf(" /* ");
-    if (isprint(i-8)) printf(" %c -", i-8);
-      else printf("%3d-", i-8);
-    if (isprint(i-1)) printf(" %c ", i-1);
-      else printf("%3d", i-1);
-    printf(" */\n  ");
-    }
-  printf("0x%02x", x);
-  if (i != 255) printf(",");
+  *p++ = x;
   }
 
-printf("};/* ");
-if (isprint(i-8)) printf(" %c -", i-8);
-  else printf("%3d-", i-8);
-if (isprint(i-1)) printf(" %c ", i-1);
-  else printf("%3d", i-1);
-printf(" */\n\n/* End of chartables.c */\n");
-
-return 0;
+return yield;
 }
 
 /* End of maketables.c */

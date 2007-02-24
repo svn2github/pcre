@@ -8,6 +8,14 @@ README file for PCRE (Perl-compatible regular expressions)
 * ovector is required at matching time, to provide some additional workspace. *
 * The new man page has details. This change was necessary in order to support *
 * some of the new functionality in Perl 5.005.                                *
+*                                                                             *
+*           IMPORTANT FOR THOSE UPGRADING FROM VERSION 2.00                   *
+*                                                                             *
+* Another (I hope this is the last!) change has been made to the API for the  *
+* pcre_compile() function. An additional argument has been added to make it   *
+* possible to pass over a pointer to character tables built in the current    *
+* locale by pcre_maketables(). To use the default tables, this new arguement  *
+* should be passed as NULL.                                                   *
 *******************************************************************************
 
 The distribution should contain the following files:
@@ -19,7 +27,8 @@ The distribution should contain the following files:
   Tech.Notes        notes on the encoding
   pcre.3            man page for the functions
   pcreposix.3       man page for the POSIX wrapper API
-  maketables.c      auxiliary program for building chartables.c
+  deftables.c       auxiliary program for building chartables.c
+  maketables.c      )
   study.c           ) source of
   pcre.c            )   the functions
   pcreposix.c       )
@@ -33,9 +42,11 @@ The distribution should contain the following files:
   testinput         test data, compatible with Perl 5.004 and 5.005
   testinput2        test data for error messages and non-Perl things
   testinput3        test data, compatible with Perl 5.005
+  testinput4        test data for locale-specific tests
   testoutput        test results corresponding to testinput
   testoutput2       test results corresponding to testinput2
-  testoutput3       test results corresponding to testinpug3
+  testoutput3       test results corresponding to testinput3
+  testoutput4       test results corresponding to testinput4
 
 To build PCRE, edit Makefile for your system (it is a fairly simple make file,
 and there are some comments at the top) and then run it. It builds two
@@ -61,6 +72,19 @@ widespread, these two test files may get amalgamated.
 The second set of tests check pcre_info(), pcre_study(), error detection and
 run-time flags that are specific to PCRE, as well as the POSIX wrapper API.
 
+The fourth set of tests checks pcre_maketables(), the facility for building a
+set of character tables for a specific locale and using them instead of the
+default tables. The tests make use of the "fr" (French) locale. Before running
+the test, the script checks for the presence of this locale by running the
+"locale" command. If that command fails, or if it doesn't include "fr" in the
+list of available locales, the fourth test cannot be run, and a comment is
+output to say why. If running this test produces instances of the error
+
+  ** Failed to set locale "fr"
+
+in the comparison output, it means that locale is not available on your system,
+despite being listed by "locale". This does not mean that PCRE is broken.
+
 To install PCRE, copy libpcre.a to any suitable library directory (e.g.
 /usr/local/lib), pcre.h to any suitable include directory (e.g.
 /usr/local/include), and pcre.3 to any suitable man directory (e.g.
@@ -83,23 +107,28 @@ uses the POSIX API, it will have to be renamed or pointed at by a link.
 Character tables
 ----------------
 
-PCRE uses four tables for manipulating and identifying characters. These are
-compiled from a source file called chartables.c. This is not supplied in
-the distribution, but is built by the program maketables (compiled from
-maketables.c), which uses the ANSI C character handling functions such as
-isalnum(), isalpha(), isupper(), islower(), etc. to build the table sources.
-This means that the default C locale set in your system may affect the contents
-of the tables. You can change the tables by editing chartables.c and then
-re-building PCRE. If you do this, you should probably also edit Makefile to
-ensure that the file doesn't ever get re-generated.
+PCRE uses four tables for manipulating and identifying characters. The final
+argument of the pcre_compile() function is a pointer to a block of memory
+containing the concatenated tables. A call to pcre_maketables() is used to
+generate a set of tables in the current locale. However, if the final argument
+is passed as NULL, a set of default tables that is built into the binary is
+used.
 
-The first two tables pcre_lcc[] and pcre_fcc[] provide lower casing and a
-case flipping functions, respectively. The pcre_cbits[] table consists of four
-32-byte bit maps which identify digits, letters, "word" characters, and white
-space, respectively. These are used when building 32-byte bit maps that
-represent character classes.
+The source file called chartables.c contains the default set of tables. This is
+not supplied in the distribution, but is built by the program deftables
+(compiled from deftables.c), which uses the ANSI C character handling functions
+such as isalnum(), isalpha(), isupper(), islower(), etc. to build the table
+sources. This means that the default C locale set your system will control the
+contents of the tables. You can change the default tables by editing
+chartables.c and then re-building PCRE. If you do this, you should probably
+also edit Makefile to ensure that the file doesn't ever get re-generated.
 
-The pcre_ctypes[] table has bits indicating various character types, as
+The first two 256-byte tables provide lower casing and case flipping functions,
+respectively. The next table consists of three 32-byte bit maps which identify
+digits, "word" characters, and white space, respectively. These are used when
+building 32-byte bit maps that represent character classes.
+
+The final 256-byte table has bits indicating various character types, as
 follows:
 
     1   white space character
@@ -138,10 +167,28 @@ same effect as they do in Perl.
 
 There are also some upper case options that do not match Perl options: /A, /E,
 and /X set PCRE_ANCHORED, PCRE_DOLLAR_ENDONLY, and PCRE_EXTRA respectively.
-The /D option is a PCRE debugging feature. It causes the internal form of
-compiled regular expressions to be output after compilation. The /S option
-causes pcre_study() to be called after the expression has been compiled, and
-the results used when the expression is matched.
+
+The /L option must be followed directly by the name of a locale, for example,
+
+  /pattern/Lfr
+
+For this reason, it must be the last option letter. The given locale is set,
+pcre_maketables() is called to build a set of character tables for the locale,
+and this is then passed to pcre_compile() when compiling the regular
+expression. Without an /L option, NULL is passed as the tables pointer; that
+is, /L applies only to the expression on which it appears.
+
+The /I option requests that pcretest output information about the compiled
+expression (whether it is anchored, has a fixed first character, and so on). It
+does this by calling pcre_info() after compiling an expression, and outputting
+the information it gets back. If the pattern is studied, the results of that
+are also output.
+
+The /D option is a PCRE debugging feature, which also assumes /I. It causes the
+internal form of compiled regular expressions to be output after compilation.
+
+The /S option causes pcre_study() to be called after the expression has been
+compiled, and the results used when the expression is matched.
 
 Finally, the /P option causes pcretest to call PCRE via the POSIX wrapper API
 rather than its native API. When this is done, all other options except /i and
@@ -206,9 +253,9 @@ following flags has any effect in this case.
 If the option -d is given to pcretest, it is equivalent to adding /D to each
 regular expression: the internal form is output after compilation.
 
-If the option -i (for "information") is given to pcretest, it calls pcre_info()
-after compiling an expression, and outputs the information it gets back. If the
-pattern is studied, the results of that are also output.
+If the option -i is given to pcretest, it is equivalent to adding /I to each
+regular expression: information about the compiled pattern is given after
+compilation.
 
 If the option -s is given to pcretest, it outputs the size of each compiled
 pattern after it has been compiled.
@@ -237,10 +284,11 @@ for pcretest, and the special upper case options such as /A that pcretest
 recognizes are not used in this file. The output should be identical, apart
 from the initial identifying banner.
 
-The testinput2 file is not suitable for feeding to Perltest, since it does
-make use of the special upper case options and escapes that pcretest uses to
-test some features of PCRE. It also contains malformed regular expressions, in
-order to check that PCRE diagnoses them correctly.
+The testinput2 and testinput4 files are not suitable for feeding to Perltest,
+since they do make use of the special upper case options and escapes that
+pcretest uses to test some features of PCRE. The first of these files also
+contains malformed regular expressions, in order to check that PCRE diagnoses
+them correctly.
 
 Philip Hazel <ph10@cam.ac.uk>
-September 1998
+October 1998

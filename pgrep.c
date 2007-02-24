@@ -172,7 +172,7 @@ if (i >= argc) return usage(0);
 
 /* Compile the regular expression. */
 
-pattern = pcre_compile(argv[i++], options, &error, &errptr);
+pattern = pcre_compile(argv[i++], options, &error, &errptr, NULL);
 if (pattern == NULL)
   {
   fprintf(stderr, "pgrep: error in regex at offset %d: %s\n", errptr, error);

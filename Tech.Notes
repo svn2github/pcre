@@ -23,18 +23,18 @@ optionally, minimizing in Perl) the amount of the subject that matches
 individual wild portions of the pattern. This is an "NFA algorithm" in Friedl's
 terminology.
 
-For this set of functions, I tried at first to invent an algorithm that used an
-amount of store bounded by a multiple of the number of characters in the
-pattern, to save on compiling time. However, because of the greater complexity
-in Perl regular expressions, I couldn't do this. In any case, a first pass
-through the pattern is needed, in order to find internal flag settings like
-(?i) at top level. So it works by running a very degenerate first pass to
-calculate a maximum store size, and then a second pass to do the real compile -
-which may use a bit less than the predicted amount of store. The idea is that
-this is going to turn out faster because the first pass is degenerate and the
-second can just store stuff straight into the vector. It does make the
-compiling functions bigger, of course, but they have got quite big anyway to
-handle all the Perl stuff.
+For this set of functions that forms PCRE, I tried at first to invent an
+algorithm that used an amount of store bounded by a multiple of the number of
+characters in the pattern, to save on compiling time. However, because of the
+greater complexity in Perl regular expressions, I couldn't do this. In any
+case, a first pass through the pattern is needed, in order to find internal
+flag settings like (?i) at top level. So it works by running a very degenerate
+first pass to calculate a maximum store size, and then a second pass to do the
+real compile - which may use a bit less than the predicted amount of store. The
+idea is that this is going to turn out faster because the first pass is
+degenerate and the second can just store stuff straight into the vector. It
+does make the compiling functions bigger, of course, but they have got quite
+big anyway to handle all the Perl stuff.
 
 The compiled form of a pattern is a vector of bytes, containing items of
 variable length. The first byte in an item is an opcode, and the length of the
@@ -118,21 +118,16 @@ instances of OP_CHARS are used.
 Character classes
 -----------------
 
-OP_CLASS is used for a character class, and OP_NEGCLASS for a negated character
-class, provided there are at least two characters in the class. If there is
-only one character, OP_CHARS is used for a positive class, and OP_NOT for a
-negative one. A set of repeating opcodes (OP_NOTSTAR etc.) are used for a
-repeated, negated, single-character class.
+OP_CLASS is used for a character class, provided there are at least two
+characters in the class. If there is only one character, OP_CHARS is used for a
+positive class, and OP_NOT for a negative one (that is, for something like
+[^a]). Another set of repeating opcodes (OP_NOTSTAR etc.) are used for a
+repeated, negated, single-character class. The normal ones (OP_STAR etc.) are
+used for a repeated positive single-character class.
 
-Both OP_CLASS and OP_NEGCLASS are followed by a 32-byte bit map containing a 1
+OP_CLASS is followed by a 32-byte bit map containing a 1
 bit for every character that is acceptable. The bits are counted from the least
-significant end of each byte. The reason for having two opcodes is to cope with
-negated character classes when caseless matching is specified at run time but
-not at compile time. If it is specified at compile time, the bit map is built
-appropriately. This is the only time that a distinction is made between
-OP_CLASS and OP_NEGCLASS, when the bit map was built in a caseful manner but
-matching must be caseless. For OP_CLASS, a character matches if either of its
-cases is in the bit map, but for OP_NEGCLASS, both of them must be present.
+significant end of each byte.
 
 
 Back references
@@ -144,8 +139,9 @@ OP_REF is followed by a single byte containing the reference number.
 Repeating character classes and back references
 -----------------------------------------------
 
-In both cases, the repeat information follows the base item. The matching code
-looks at the following opcode to see if it is one of
+Single-character classes are handled specially (see above). This applies to
+OP_CLASS and OP_REF. In both cases, the repeat information follows the base
+item. The matching code looks at the following opcode to see if it is one of
 
   OP_CRSTAR
   OP_CRMINSTAR
@@ -201,8 +197,9 @@ Forward assertions are just like other subpatterns, but starting with one of
 the opcodes OP_ASSERT or OP_ASSERT_NOT. Backward assertions use the opcodes
 OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
 is OP_REVERSE, followed by a two byte count of the number of characters to move
-back. A separate count is present in each alternative of a lookbehind
-assertion, allowing them to have different fixed lengths.
+back the pointer in the subject string. A separate count is present in each
+alternative of a lookbehind assertion, allowing them to have different fixed
+lengths.
 
 
 Once-only subpatterns
@@ -237,4 +234,4 @@ the compiled data.
 
 
 Philip Hazel
-September 1998
+October 1998

@@ -47,16 +47,17 @@ Arguments:
   start_bits    points to the bit map
   c             is the character
   caseless      the caseless flag
+  cd            the block with char table pointers
 
 Returns:        nothing
 */
 
 static void
-set_bit(uschar *start_bits, int c, BOOL caseless)
+set_bit(uschar *start_bits, int c, BOOL caseless, compile_data *cd)
 {
 start_bits[c/8] |= (1 << (c&7));
-if (caseless && (pcre_ctypes[c] & ctype_letter) != 0)
-  start_bits[pcre_fcc[c]/8] |= (1 << (pcre_fcc[c]&7));
+if (caseless && (cd->ctypes[c] & ctype_letter) != 0)
+  start_bits[cd->fcc[c]/8] |= (1 << (cd->fcc[c]&7));
 }
 
 
@@ -73,12 +74,14 @@ Arguments:
   code         points to an expression
   start_bits   points to a 32-byte table, initialized to 0
   caseless     the current state of the caseless flag
+  cd           the block with char table pointers
 
 Returns:       TRUE if table built, FALSE otherwise
 */
 
 static BOOL
-set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless)
+set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless,
+  compile_data *cd)
 {
 register int c;
 
@@ -96,7 +99,8 @@ do
 
     if ((int)*tcode >= OP_BRA || *tcode == OP_ASSERT)
       {
-      if (!set_start_bits(tcode, start_bits, caseless)) return FALSE;
+      if (!set_start_bits(tcode, start_bits, caseless, cd))
+        return FALSE;
       }
 
     else switch(*tcode)
@@ -126,7 +130,8 @@ do
 
       case OP_BRAZERO:
       case OP_BRAMINZERO:
-      if (!set_start_bits(++tcode, start_bits, caseless)) return FALSE;
+      if (!set_start_bits(++tcode, start_bits, caseless, cd))
+        return FALSE;
       do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
       tcode += 3;
       try_next = TRUE;
@@ -138,7 +143,7 @@ do
       case OP_MINSTAR:
       case OP_QUERY:
       case OP_MINQUERY:
-      set_bit(start_bits, tcode[1], caseless);
+      set_bit(start_bits, tcode[1], caseless, cd);
       tcode += 2;
       try_next = TRUE;
       break;
@@ -147,7 +152,7 @@ do
 
       case OP_UPTO:
       case OP_MINUPTO:
-      set_bit(start_bits, tcode[3], caseless);
+      set_bit(start_bits, tcode[3], caseless, cd);
       tcode += 4;
       try_next = TRUE;
       break;
@@ -162,35 +167,39 @@ do
 
       case OP_PLUS:
       case OP_MINPLUS:
-      set_bit(start_bits, tcode[1], caseless);
+      set_bit(start_bits, tcode[1], caseless, cd);
       break;
 
       /* Single character type sets the bits and stops */
 
       case OP_NOT_DIGIT:
-      for (c = 0; c < 32; c++) start_bits[c] |= ~pcre_cbits[c+cbit_digit];
+      for (c = 0; c < 32; c++)
+        start_bits[c] |= ~cd->cbits[c+cbit_digit];
       break;
 
       case OP_DIGIT:
-      for (c = 0; c < 32; c++) start_bits[c] |= pcre_cbits[c+cbit_digit];
+      for (c = 0; c < 32; c++)
+        start_bits[c] |= cd->cbits[c+cbit_digit];
       break;
 
       case OP_NOT_WHITESPACE:
-      for (c = 0; c < 32; c++) start_bits[c] |= ~pcre_cbits[c+cbit_space];
+      for (c = 0; c < 32; c++)
+        start_bits[c] |= ~cd->cbits[c+cbit_space];
       break;
 
       case OP_WHITESPACE:
-      for (c = 0; c < 32; c++) start_bits[c] |= pcre_cbits[c+cbit_space];
+      for (c = 0; c < 32; c++)
+        start_bits[c] |= cd->cbits[c+cbit_space];
       break;
 
       case OP_NOT_WORDCHAR:
       for (c = 0; c < 32; c++)
-        start_bits[c] |= ~(pcre_cbits[c] | pcre_cbits[c+cbit_word]);
+        start_bits[c] |= ~(cd->cbits[c] | cd->cbits[c+cbit_word]);
       break;
 
       case OP_WORDCHAR:
       for (c = 0; c < 32; c++)
-        start_bits[c] |= (pcre_cbits[c] | pcre_cbits[c+cbit_word]);
+        start_bits[c] |= (cd->cbits[c] | cd->cbits[c+cbit_word]);
       break;
 
       /* One or more character type fudges the pointer and restarts, knowing
@@ -221,29 +230,33 @@ do
       switch(tcode[1])
         {
         case OP_NOT_DIGIT:
-        for (c = 0; c < 32; c++) start_bits[c] |= ~pcre_cbits[c+cbit_digit];
+        for (c = 0; c < 32; c++)
+          start_bits[c] |= ~cd->cbits[c+cbit_digit];
         break;
 
         case OP_DIGIT:
-        for (c = 0; c < 32; c++) start_bits[c] |= pcre_cbits[c+cbit_digit];
+        for (c = 0; c < 32; c++)
+          start_bits[c] |= cd->cbits[c+cbit_digit];
         break;
 
         case OP_NOT_WHITESPACE:
-        for (c = 0; c < 32; c++) start_bits[c] |= ~pcre_cbits[c+cbit_space];
+        for (c = 0; c < 32; c++)
+          start_bits[c] |= ~cd->cbits[c+cbit_space];
         break;
 
         case OP_WHITESPACE:
-        for (c = 0; c < 32; c++) start_bits[c] |= pcre_cbits[c+cbit_space];
+        for (c = 0; c < 32; c++)
+          start_bits[c] |= cd->cbits[c+cbit_space];
         break;
 
         case OP_NOT_WORDCHAR:
         for (c = 0; c < 32; c++)
-          start_bits[c] |= ~(pcre_cbits[c] | pcre_cbits[c+cbit_word]);
+          start_bits[c] |= ~(cd->cbits[c] | cd->cbits[c+cbit_word]);
         break;
 
         case OP_WORDCHAR:
         for (c = 0; c < 32; c++)
-          start_bits[c] |= (pcre_cbits[c] | pcre_cbits[c+cbit_word]);
+          start_bits[c] |= (cd->cbits[c] | cd->cbits[c+cbit_word]);
         break;
         }
 
@@ -316,6 +329,7 @@ pcre_study(const pcre *external_re, int options, const char **errorptr)
 uschar start_bits[32];
 real_pcre_extra *extra;
 const real_pcre *re = (const real_pcre *)external_re;
+compile_data compile_block;
 
 *errorptr = NULL;
 
@@ -338,11 +352,18 @@ present. */
 if ((re->options & (PCRE_ANCHORED|PCRE_FIRSTSET|PCRE_STARTLINE)) != 0)
   return NULL;
 
+/* Set the character tables in the block which is passed around */
+
+compile_block.lcc = re->tables + lcc_offset;
+compile_block.fcc = re->tables + fcc_offset;
+compile_block.cbits = re->tables + cbits_offset;
+compile_block.ctypes = re->tables + ctypes_offset;
+
 /* See if we can find a fixed set of initial characters for the pattern. */
 
 memset(start_bits, 0, 32 * sizeof(uschar));
-if (!set_start_bits(re->code, start_bits, (re->options & PCRE_CASELESS) != 0))
-  return NULL;
+if (!set_start_bits(re->code, start_bits, (re->options & PCRE_CASELESS) != 0,
+  &compile_block)) return NULL;
 
 /* Get an "extra" block and put the information therein. */
 

@@ -2,6 +2,14 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.01 21-Oct-98
+----------------------
+
+1. Changed the API for pcre_compile() to allow for the provision of a pointer
+to character tables built by pcre_maketables() in the current locale. If NULL
+is passed, the default tables are used.
+
+
 Version 2.00 24-Sep-98
 ----------------------
 

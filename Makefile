@@ -19,7 +19,7 @@ RANLIB = @true
 
 ##########################################################################
 
-OBJ = chartables.o study.o pcre.o
+OBJ = maketables.o study.o pcre.o
 
 all:            libpcre.a libpcreposix.a pcretest pgrep
 
@@ -39,14 +39,14 @@ libpcreposix.a: pcreposix.o
 		$(AR) libpcreposix.a pcreposix.o
 		$(RANLIB) libpcreposix.a
 
-pcre.o:         pcre.c pcre.h internal.h Makefile
+pcre.o:         chartables.c pcre.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) pcre.c
 
 pcreposix.o:    pcreposix.c pcreposix.h internal.h pcre.h Makefile
 		$(CC) -c $(CFLAGS) pcreposix.c
 
-chartables.o:   chartables.c
-		$(CC) -c $(CFLAGS) chartables.c
+maketables.o:   maketables.c pcre.h internal.h Makefile
+		$(CC) -c $(CFLAGS) maketables.c
 
 study.o:        study.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) study.c
@@ -57,15 +57,15 @@ pcretest.o:     pcretest.c pcre.h Makefile
 pgrep.o:        pgrep.c pcre.h Makefile
 		$(CC) -c $(CFLAGS) pgrep.c
 
-# An auxiliary program makes the character tables
+# An auxiliary program makes the default character table source
 
-chartables.c:    maketables
-		./maketables >chartables.c
+chartables.c:   deftables
+		./deftables >chartables.c
 
-maketables:     maketables.c Makefile
-		$(CC) -o maketables $(CFLAGS) maketables.c
+deftables:      deftables.c maketables.c pcre.h internal.h Makefile
+		$(CC) -o deftables $(CFLAGS) deftables.c
 
-# We deliberately omit maketables and chartables.c from 'make clean'; once made
+# We deliberately omit deftables and chartables.c from 'make clean'; once made
 # chartables.c shouldn't change, and if people have edited the tables by hand,
 # you don't want to throw them away.
 

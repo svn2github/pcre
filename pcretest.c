@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <locale.h>
 
 /* Use the internal info for displaying the results of pcre_study(). */
 
@@ -313,6 +314,12 @@ while (argc > 1 && argv[op][0] == '-')
   else
     {
     printf("*** Unknown option %s\n", argv[op]);
+    printf("Usage: pcretest [-d] [-i] [-p] [-s] [-t] [<input> [<output>]]\n");
+    printf("  -d   debug: show compiled code; implies -i\n"
+           "  -i   show information about compiled pattern\n"
+           "  -p   use POSIX interface\n"
+           "  -s   output store information\n"
+           "  -t   time compilation and execution\n");
     return 1;
     }
   op++;
@@ -357,9 +364,11 @@ while (!done)
   pcre_extra *extra = NULL;
   regex_t preg;
   const char *error;
-  unsigned char *p, *pp;
+  unsigned char *p, *pp, *ppp;
+  unsigned const char *tables = NULL;
   int do_study = 0;
-  int do_debug = 0;
+  int do_debug = debug;
+  int do_showinfo = showinfo;
   int do_posix = 0;
   int erroroffset, len, delimiter;
 
@@ -422,13 +431,29 @@ while (!done)
       case 'm': options |= PCRE_MULTILINE; break;
       case 's': options |= PCRE_DOTALL; break;
       case 'x': options |= PCRE_EXTENDED; break;
+
       case 'A': options |= PCRE_ANCHORED; break;
-      case 'D': do_debug = 1; break;
+      case 'D': do_debug = do_showinfo = 1; break;
       case 'E': options |= PCRE_DOLLAR_ENDONLY; break;
+      case 'I': do_showinfo = 1; break;
       case 'P': do_posix = 1; break;
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
+
+      case 'L':
+      ppp = pp;
+      while (*ppp != '\n' && *ppp != ' ') ppp++;
+      *ppp = 0;
+      if (setlocale(LC_CTYPE, (const char *)pp) == NULL)
+        {
+        fprintf(outfile, "** Failed to set locale \"%s\"\n", pp);
+        goto SKIP_DATA;
+        }
+      tables = pcre_maketables();
+      pp = ppp;
+      break;
+
       case '\n': case ' ': break;
       default:
       fprintf(outfile, "** Unknown option '%c'\n", pp[-1]);
@@ -437,7 +462,8 @@ while (!done)
     }
 
   /* Handle compiling via the POSIX interface, which doesn't support the
-  timing, showing, or debugging options. */
+  timing, showing, or debugging options, nor the ability to pass over
+  local character tables. */
 
   if (posix || do_posix)
     {
@@ -469,7 +495,7 @@ while (!done)
       clock_t start_time = clock();
       for (i = 0; i < LOOPREPEAT; i++)
         {
-        re = pcre_compile((char *)p, options, &error, &erroroffset);
+        re = pcre_compile((char *)p, options, &error, &erroroffset, tables);
         if (re != NULL) free(re);
         }
       time_taken = clock() - start_time;
@@ -477,7 +503,7 @@ while (!done)
         ((double)time_taken)/(4 * CLOCKS_PER_SEC));
       }
 
-    re = pcre_compile((char *)p, options, &error, &erroroffset);
+    re = pcre_compile((char *)p, options, &error, &erroroffset, tables);
 
     /* Compilation failed; go back for another re, skipping to blank line
     if non-interactive. */
@@ -501,16 +527,16 @@ while (!done)
           }
         fprintf(outfile, "\n");
         }
-      continue;
+      goto CONTINUE;
       }
 
     /* Compilation succeeded; print data if required */
 
-    if (showinfo || do_debug)
+    if (do_showinfo)
       {
       int first_char, count;
 
-      if (debug || do_debug) print_internals(re, outfile);
+      if (do_debug) print_internals(re, outfile);
 
       count = pcre_info(re, &options, &first_char);
       if (count < 0) fprintf(outfile,
@@ -573,7 +599,7 @@ while (!done)
       /* This looks at internal information. A bit kludgy to do it this
       way, but it is useful for testing. */
 
-      else if (showinfo || do_debug)
+      else if (do_showinfo)
         {
         real_pcre_extra *xx = (real_pcre_extra *)extra;
         if ((xx->options & PCRE_STUDY_MAPPED) == 0)
@@ -784,6 +810,11 @@ while (!done)
   if (posix || do_posix) regfree(&preg);
   if (re != NULL) free(re);
   if (extra != NULL) free(extra);
+  if (tables != NULL)
+    {
+    free((void *)tables);
+    setlocale(LC_CTYPE, "C");
+    }
   }
 
 fprintf(outfile, "\n");

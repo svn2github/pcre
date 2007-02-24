@@ -54,9 +54,11 @@ extern void  (*pcre_free)(void *);
 
 /* Functions */
 
-extern pcre *pcre_compile(const char *, int, const char **, int *);
+extern pcre *pcre_compile(const char *, int, const char **, int *,
+  const unsigned char *);
 extern int pcre_exec(const pcre *, const pcre_extra *, const char *,
   int, int, int *, int);
+extern unsigned const char *pcre_maketables(void);
 extern int pcre_info(const pcre *, int *, int *);
 extern pcre_extra *pcre_study(const pcre *, int, const char **);
 extern const char *pcre_version(void);
