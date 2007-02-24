@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2006 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -114,6 +114,23 @@ Unix, where it is defined in sys/types, so use "uschar" instead. */
 
 typedef unsigned char uschar;
 
+/* When PCRE is compiled as a C++ library, the subject pointer can be replaced
+with a custom type. This makes it possible, for example, to allow pcre_exec()
+to process subject strings that are discontinuous by using a smart pointer
+class. It must always be possible to inspect all of the subject string in
+pcre_exec() because of the way it backtracks. Two macros are required in the
+normal case, for sign-unspecified and unsigned char pointers. The former is
+used for the external interface and appears in pcre.h, which is why its name
+must begin with PCRE_. */
+
+#ifdef CUSTOM_SUBJECT_PTR
+#define PCRE_SPTR CUSTOM_SUBJECT_PTR
+#define USPTR CUSTOM_SUBJECT_PTR
+#else
+#define PCRE_SPTR const char *
+#define USPTR const unsigned char *
+#endif
+
 /* Include the public PCRE header and the definitions of UCP character property
 values. */
 
@@ -146,10 +163,11 @@ case in PCRE. */
 void *
 pcre_memmove(unsigned char *dest, const unsigned char *src, size_t n)
 {
-int i;
+size_t i;
 dest += n;
 src += n;
 for (i = 0; i < n; ++i) *(--dest) =  *(--src);
+return dest;
 }
 #define memmove(a, b, c) pcre_memmove(a, b, c)
 #endif   /* not HAVE_BCOPY */
@@ -443,6 +461,26 @@ ESC_n is defined as yet another macro, which is set in config.h to either \n
 #define ESC_tee '\t'
 #endif
 
+/* Codes for different types of Unicode property */
+
+#define PT_ANY        0    /* Any property - matches all chars */
+#define PT_LAMP       1    /* L& - the union of Lu, Ll, Lt */
+#define PT_GC         2    /* General characteristic (e.g. L) */
+#define PT_PC         3    /* Particular characteristic (e.g. Lu) */
+#define PT_SC         4    /* Script (e.g. Han) */
+
+/* Flag bits and data types for the extended class (OP_XCLASS) for classes that
+contain UTF-8 characters with values greater than 255. */
+
+#define XCL_NOT    0x01    /* Flag: this is a negative class */
+#define XCL_MAP    0x02    /* Flag: a 32-byte map is present */
+
+#define XCL_END       0    /* Marks end of individual items */
+#define XCL_SINGLE    1    /* Single item (one multibyte char) follows */
+#define XCL_RANGE     2    /* A range (two multibyte chars) follows */
+#define XCL_PROP      3    /* Unicode property (2-byte property code follows) */
+#define XCL_NOTPROP   4    /* Unicode inverted property (ditto) */
+
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
@@ -457,19 +495,6 @@ character, that code will have to change. */
 enum { ESC_A = 1, ESC_G, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s, ESC_W,
        ESC_w, ESC_dum1, ESC_C, ESC_P, ESC_p, ESC_X, ESC_Z, ESC_z, ESC_E,
        ESC_Q, ESC_REF };
-
-/* Flag bits and data types for the extended class (OP_XCLASS) for classes that
-contain UTF-8 characters with values greater than 255. */
-
-#define XCL_NOT    0x01    /* Flag: this is a negative class */
-#define XCL_MAP    0x02    /* Flag: a 32-byte map is present */
-
-#define XCL_END       0    /* Marks end of individual items */
-#define XCL_SINGLE    1    /* Single item (one multibyte char) follows */
-#define XCL_RANGE     2    /* A range (two multibyte chars) follows */
-#define XCL_PROP      3    /* Unicode property (one property code) follows */
-#define XCL_NOTPROP   4    /* Unicode inverted property (ditto) */
-
 
 /* Opcode table: OP_BRA must be last, as all values >= it are used for brackets
 that extract substrings. Starting from 1 (i.e. after OP_END), the values up to
@@ -634,7 +659,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1,                             /* End                                    */ \
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* \A, \G, \B, \B, \D, \d, \S, \s, \W, \w */ \
   1, 1,                          /* Any, Anybyte                           */ \
-  2, 2, 1,                       /* NOTPROP, PROP, EXTUNI                  */ \
+  3, 3, 1,                       /* NOTPROP, PROP, EXTUNI                  */ \
   1, 1, 2, 1, 1,                 /* \Z, \z, Opt, ^, $                      */ \
   2,                             /* Char  - the minimum length             */ \
   2,                             /* Charnc  - the minimum length           */ \
@@ -766,7 +791,7 @@ typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
   int group_num;                /* Number of group that was called */
   const uschar *after_call;     /* "Return value": points after the call in the expr */
-  const uschar *save_start;     /* Old value of md->start_match */
+  USPTR save_start;             /* Old value of md->start_match */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
 } recursion_info;
@@ -785,8 +810,9 @@ struct heapframe;
 doing traditional NFA matching, so that they are thread-safe. */
 
 typedef struct match_data {
-  unsigned long int match_call_count; /* As it says */
-  unsigned long int match_limit;/* As it says */
+  unsigned long int match_call_count;      /* As it says */
+  unsigned long int match_limit;           /* As it says */
+  unsigned long int match_limit_recursion; /* As it says */
   int   *offset_vector;         /* Offset vector */
   int    offset_end;            /* One past the end */
   int    offset_max;            /* The maximum usable for return data */
@@ -801,10 +827,10 @@ typedef struct match_data {
   BOOL   partial;               /* PARTIAL flag */
   BOOL   hitend;                /* Hit the end of the subject at some point */
   const uschar *start_code;     /* For use when recursing */
-  const uschar *start_subject;  /* Start of the subject string */
-  const uschar *end_subject;    /* End of the subject string */
-  const uschar *start_match;    /* Start of this match attempt */
-  const uschar *end_match_ptr;  /* Subject position at end match */
+  USPTR  start_subject;         /* Start of the subject string */
+  USPTR  end_subject;           /* End of the subject string */
+  USPTR  start_match;           /* Start of this match attempt */
+  USPTR  end_match_ptr;         /* Subject position at end match */
   int    end_offset_top;        /* Highwater mark at end of match */
   int    capture_last;          /* Most recent capture number */
   int    start_offset;          /* The start offset value */
@@ -859,12 +885,13 @@ total length. */
 #define ctypes_offset (cbits_offset + cbit_length)
 #define tables_length (ctypes_offset + 256)
 
-/* Layout of the UCP type table that translates property names into codes for
-pcre_ucp_findchar(). */
+/* Layout of the UCP type table that translates property names into types and
+codes. */
 
 typedef struct {
   const char *name;
-  int value;
+  pcre_uint16 type;
+  pcre_uint16 value;
 } ucp_type_table;
 
 
@@ -895,7 +922,8 @@ sense, but are not part of the PCRE public API. */
 extern int         _pcre_ord2utf8(int, uschar *);
 extern real_pcre * _pcre_try_flipped(const real_pcre *, real_pcre *,
                      const pcre_study_data *, pcre_study_data *);
-extern int         _pcre_ucp_findchar(const int, int *, int *);
+extern int         _pcre_ucp_findprop(const int, int *, int *);
+extern int         _pcre_ucp_othercase(const int);
 extern int         _pcre_valid_utf8(const uschar *, int);
 extern BOOL        _pcre_xclass(int, const uschar *);
 

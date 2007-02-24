@@ -61,12 +61,14 @@ A <b>pcre_extra</b> structure contains the following fields:
 <pre>
   <i>flags</i>        Bits indicating which fields are set
   <i>study_data</i>   Opaque data from <b>pcre_study()</b>
-  <i>match_limit</i>  Limit on internal recursion
+  <i>match_limit</i>  Limit on internal resource use
+  <i>match_limit_recursion</i>  Limit on internal recursion depth
   <i>callout_data</i> Opaque data passed back to callouts
   <i>tables</i>       Points to character tables or is NULL
 </pre>
 The flag bits are PCRE_EXTRA_STUDY_DATA, PCRE_EXTRA_MATCH_LIMIT,
-PCRE_EXTRA_CALLOUT_DATA, and PCRE_EXTRA_TABLES.
+PCRE_EXTRA_MATCH_LIMIT_RECURSION, PCRE_EXTRA_CALLOUT_DATA, and
+PCRE_EXTRA_TABLES.
 </P>
 <P>
 There is a complete description of the PCRE native API in the

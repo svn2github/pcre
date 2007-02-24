@@ -59,6 +59,9 @@ Behave as if each regex has the \fB/P\fP modifier; the POSIX wrapper API is
 used to call PCRE. None of the other options has any effect when \fB-p\fP is
 set.
 .TP 10
+\fP-q\fP
+Do not output the version number of \fBpcretest\fP at the start of execution.
+.TP 10
 \fB-t\fP
 Run each compile, study, and match many times with a timer, and output
 resulting time per compile or match (in milliseconds). Do not set \fB-m\fP with
@@ -276,7 +279,8 @@ recognized:
 .\" JOIN
   \eL         call pcre_get_substringlist() after a
                successful match
-  \eM         discover the minimum MATCH_LIMIT setting
+  \eM         discover the minimum MATCH_LIMIT and
+               MATCH_LIMIT_RECURSION settings
   \eN         pass the PCRE_NOTEMPTY option to \fBpcre_exec()\fP
 .\" JOIN
   \eOdd       set the size of the output vector passed to
@@ -298,21 +302,25 @@ very last character is a backslash, it is ignored. This gives a way of passing
 an empty line as data, since a real empty line terminates the data input.
 .P
 If \eM is present, \fBpcretest\fP calls \fBpcre_exec()\fP several times, with
-different values in the \fImatch_limit\fP field of the \fBpcre_extra\fP data
-structure, until it finds the minimum number that is needed for
-\fBpcre_exec()\fP to complete. This number is a measure of the amount of
-recursion and backtracking that takes place, and checking it out can be
-instructive. For most simple matches, the number is quite small, but for
-patterns with very large numbers of matching possibilities, it can become large
-very quickly with increasing length of subject string.
+different values in the \fImatch_limit\fP and \fImatch_limit_recursion\fP
+fields of the \fBpcre_extra\fP data structure, until it finds the minimum
+numbers for each parameter that allow \fBpcre_exec()\fP to complete. The
+\fImatch_limit\fP number is a measure of the amount of backtracking that takes
+place, and checking it out can be instructive. For most simple matches, the
+number is quite small, but for patterns with very large numbers of matching
+possibilities, it can become large very quickly with increasing length of
+subject string. The \fImatch_limit_recursion\fP number is a measure of how much
+stack (or, if PCRE is compiled with NO_RECURSE, how much heap) memory is needed
+to complete the match attempt.
 .P
 When \eO is used, the value specified may be higher or lower than the size set
 by the \fB-O\fP command line option (or defaulted to 45); \eO applies only to
 the call of \fBpcre_exec()\fP for the line in which it appears.
 .P
 If the \fB/P\fP modifier was present on the pattern, causing the POSIX wrapper
-API to be used, only \eB and \eZ have any effect, causing REG_NOTBOL and
-REG_NOTEOL to be passed to \fBregexec()\fP respectively.
+API to be used, the only option-setting sequences that have any effect are \eB
+and \eZ, causing REG_NOTBOL and REG_NOTEOL, respectively, to be passed to
+\fBregexec()\fP.
 .P
 The use of \ex{hh...} to represent UTF-8 characters is not dependent on the use
 of the \fB/8\fP modifier on the pattern. It is recognized always. There may be
@@ -568,6 +576,6 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 .P
 .in 0
-Last updated: 28 February 2005
+Last updated: 18 January 2006
 .br
-Copyright (c) 1997-2005 University of Cambridge.
+Copyright (c) 1997-2006 University of Cambridge.

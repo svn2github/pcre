@@ -175,7 +175,7 @@ represents:
   \t        tab (hex 09)
   \ddd      character with octal code ddd, or backreference
   \xhh      character with hex code hh
-  \x{hhh..} character with hex code hhh... (UTF-8 mode only)
+  \x{hhh..} character with hex code hhh..
 </pre>
 The precise effect of \cx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
@@ -184,18 +184,18 @@ Thus \cz becomes hex 1A, but \c{ becomes hex 3B, while \c; becomes hex
 </P>
 <P>
 After \x, from zero to two hexadecimal digits are read (letters can be in
-upper or lower case). In UTF-8 mode, any number of hexadecimal digits may
-appear between \x{ and }, but the value of the character code must be less
-than 2**31 (that is, the maximum hexadecimal value is 7FFFFFFF). If characters
-other than hexadecimal digits appear between \x{ and }, or if there is no
-terminating }, this form of escape is not recognized. Instead, the initial
-\x will be interpreted as a basic hexadecimal escape, with no following
-digits, giving a character whose value is zero.
+upper or lower case). Any number of hexadecimal digits may appear between \x{
+and }, but the value of the character code must be less than 256 in non-UTF-8
+mode, and less than 2**31 in UTF-8 mode (that is, the maximum hexadecimal value
+is 7FFFFFFF). If characters other than hexadecimal digits appear between \x{
+and }, or if there is no terminating }, this form of escape is not recognized.
+Instead, the initial \x will be interpreted as a basic hexadecimal escape,
+with no following digits, giving a character whose value is zero.
 </P>
 <P>
 Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \x when PCRE is in UTF-8 mode. There is no difference in the
-way they are handled. For example, \xdc is exactly the same as \x{dc}.
+syntaxes for \x. There is no difference in the way they are handled. For
+example, \xdc is exactly the same as \x{dc}.
 </P>
 <P>
 After \0 up to two further octal digits are read. In both cases, if there
@@ -285,36 +285,117 @@ greater than 128 are used for accented letters, and these are matched by \w.
 <P>
 In UTF-8 mode, characters with values greater than 128 never match \d, \s, or
 \w, and always match \D, \S, and \W. This is true even when Unicode
-character property support is available.
+character property support is available. The use of locales with Unicode is
+discouraged.
 <a name="uniextseq"></a></P>
 <br><b>
 Unicode character properties
 </b><br>
 <P>
 When PCRE is built with Unicode character property support, three additional
-escape sequences to match generic character types are available when UTF-8 mode
+escape sequences to match character properties are available when UTF-8 mode
 is selected. They are:
 <pre>
- \p{<i>xx</i>}   a character with the <i>xx</i> property
- \P{<i>xx</i>}   a character without the <i>xx</i> property
- \X       an extended Unicode sequence
+  \p{<i>xx</i>}   a character with the <i>xx</i> property
+  \P{<i>xx</i>}   a character without the <i>xx</i> property
+  \X       an extended Unicode sequence
 </pre>
-The property names represented by <i>xx</i> above are limited to the
-Unicode general category properties. Each character has exactly one such
-property, specified by a two-letter abbreviation. For compatibility with Perl,
-negation can be specified by including a circumflex between the opening brace
-and the property name. For example, \p{^Lu} is the same as \P{Lu}.
+The property names represented by <i>xx</i> above are limited to the Unicode
+script names, the general category properties, and "Any", which matches any
+character (including newline). Other properties such as "InMusicalSymbols" are
+not currently supported by PCRE. Note that \P{Any} does not match any
+characters, so always causes a match failure.
 </P>
 <P>
-If only one letter is specified with \p or \P, it includes all the properties
-that start with that letter. In this case, in the absence of negation, the
-curly brackets in the escape sequence are optional; these two examples have
-the same effect:
+Sets of Unicode characters are defined as belonging to certain scripts. A
+character from one of these sets can be matched using a script name. For
+example:
+<pre>
+  \p{Greek}
+  \P{Han}
+</pre>
+Those that are not part of an identified script are lumped together as
+"Common". The current list of scripts is:
+</P>
+<P>
+Arabic,
+Armenian,
+Bengali,
+Bopomofo,
+Braille,
+Buginese,
+Buhid,
+Canadian_Aboriginal,
+Cherokee,
+Common,
+Coptic,
+Cypriot,
+Cyrillic,
+Deseret,
+Devanagari,
+Ethiopic,
+Georgian,
+Glagolitic,
+Gothic,
+Greek,
+Gujarati,
+Gurmukhi,
+Han,
+Hangul,
+Hanunoo,
+Hebrew,
+Hiragana,
+Inherited,
+Kannada,
+Katakana,
+Kharoshthi,
+Khmer,
+Lao,
+Latin,
+Limbu,
+Linear_B,
+Malayalam,
+Mongolian,
+Myanmar,
+New_Tai_Lue,
+Ogham,
+Old_Italic,
+Old_Persian,
+Oriya,
+Osmanya,
+Runic,
+Shavian,
+Sinhala,
+Syloti_Nagri,
+Syriac,
+Tagalog,
+Tagbanwa,
+Tai_Le,
+Tamil,
+Telugu,
+Thaana,
+Thai,
+Tibetan,
+Tifinagh,
+Ugaritic,
+Yi.
+</P>
+<P>
+Each character has exactly one general category property, specified by a
+two-letter abbreviation. For compatibility with Perl, negation can be specified
+by including a circumflex between the opening brace and the property name. For
+example, \p{^Lu} is the same as \P{Lu}.
+</P>
+<P>
+If only one letter is specified with \p or \P, it includes all the general
+category properties that start with that letter. In this case, in the absence
+of negation, the curly brackets in the escape sequence are optional; these two
+examples have the same effect:
 <pre>
   \p{L}
   \pL
 </pre>
-The following property codes are supported:
+The following general category property codes are supported:
 <pre>
   C     Other
   Cc    Control
@@ -360,8 +441,19 @@ The following property codes are supported:
   Zp    Paragraph separator
   Zs    Space separator
 </pre>
-Extended properties such as "Greek" or "InMusicalSymbols" are not supported by
-PCRE.
+The special property L& is also supported: it matches a character that has
+the Lu, Ll, or Lt property, in other words, a letter that is not classified as
+a modifier or "other".
+</P>
+<P>
+The long synonyms for these properties that Perl supports (such as \p{Letter})
+are not supported by PCRE. Nor is is permitted to prefix any of these
+properties with "Is".
+</P>
+<P>
+No character that is in the Unicode table has the Cn (unassigned) property.
+Instead, this property is assumed for any code point that is not in the
+Unicode table.
 </P>
 <P>
 Specifying caseless matching does not affect these escape sequences. For
@@ -1360,14 +1452,19 @@ number, provided that it occurs inside that subpattern. (If not, it is a
 (?R) is a recursive call of the entire regular expression.
 </P>
 <P>
-For example, this PCRE pattern solves the nested parentheses problem (assume
-the PCRE_EXTENDED option is set so that white space is ignored):
+A recursive subpattern call is always treated as an atomic group. That is, once
+it has matched some of the subject string, it is never re-entered, even if
+it contains untried alternatives and there is a subsequent matching failure.
+</P>
+<P>
+This PCRE pattern solves the nested parentheses problem (assume the
+PCRE_EXTENDED option is set so that white space is ignored):
 <pre>
   \( ( (?&#62;[^()]+) | (?R) )* \)
 </pre>
 First it matches an opening parenthesis. Then it matches any number of
 substrings which can either be a sequence of non-parentheses, or a recursive
-match of the pattern itself (that is a correctly parenthesized substring).
+match of the pattern itself (that is, a correctly parenthesized substring).
 Finally there is a closing parenthesis.
 </P>
 <P>
@@ -1450,6 +1547,12 @@ is used, it does match "sense and responsibility" as well as the other two
 strings. Such references must, however, follow the subpattern to which they
 refer.
 </P>
+<P>
+Like recursive subpatterns, a "subroutine" call is always treated as an atomic
+group. That is, once it has matched some of the subject string, it is never
+re-entered, even if it contains untried alternatives and there is a subsequent
+matching failure.
+</P>
 <br><a name="SEC20" href="#TOC1">CALLOUTS</a><br>
 <P>
 Perl has a feature whereby using the sequence (?{...}) causes arbitrary Perl
@@ -1486,9 +1589,9 @@ description of the interface to the callout function is given in the
 documentation.
 </P>
 <P>
-Last updated: 28 February 2005
+Last updated: 24 January 2006
 <br>
-Copyright &copy; 1997-2005 University of Cambridge.
+Copyright &copy; 1997-2006 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

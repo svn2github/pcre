@@ -15,21 +15,9 @@ dnl A safety precaution
 
 AC_PREREQ(2.57)
 
-dnl Arrange to build config.h from config.h.in. Note that pcre.h is
-dnl built differently, as it is just a "substitution" file.
+dnl Arrange to build config.h from config.h.in.
 dnl Manual says this macro should come right after AC_INIT.
 AC_CONFIG_HEADER(config.h)
-
-dnl Provide the current PCRE version information. Do not use numbers
-dnl with leading zeros for the minor version, as they end up in a C
-dnl macro, and may be treated as octal constants. Stick to single
-dnl digits for minor numbers less than 10. There are unlikely to be
-dnl that many releases anyway.
-
-PCRE_MAJOR=6
-PCRE_MINOR=4
-PCRE_DATE=05-Sep-2005
-PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
 
@@ -41,6 +29,14 @@ dnl are built by default on Unix systems.
 PCRE_LIB_VERSION=0:1:0
 PCRE_POSIXLIB_VERSION=0:0:0
 PCRE_CPPLIB_VERSION=0:0:0
+
+dnl Find the PCRE version from the pcre.h file. The PCRE_VERSION variable is
+dnl substituted in pcre-config.in.
+
+PCRE_MAJOR=`grep '#define PCRE_MAJOR' ./pcre.h | cut -c 29-`
+PCRE_MINOR=`grep '#define PCRE_MINOR' ./pcre.h | cut -c 29-`
+PCRE_PRERELEASE=`grep '#define PCRE_PRERELEASE' ./pcre.h | cut -c 29-`
+PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}${PCRE_PRERELEASE}
 
 dnl Handle --disable-cpp
 
@@ -204,7 +200,7 @@ dnl I've done.
 dnl Handle --with-posix-malloc-threshold=n
 
 AC_ARG_WITH(posix-malloc-threshold,
-[  --with-posix-malloc-threshold=5  threshold for POSIX malloc usage],
+[  --with-posix-malloc-threshold=10  threshold for POSIX malloc usage],
   POSIX_MALLOC_THRESHOLD=-DPOSIX_MALLOC_THRESHOLD=$withval
 )
 
@@ -215,11 +211,18 @@ AC_ARG_WITH(link-size,
   LINK_SIZE=-DLINK_SIZE=$withval
 )
 
-dnl Handle --with-match_limit=n
+dnl Handle --with-match-limit=n
 
 AC_ARG_WITH(match-limit,
-[  --with-match-limit=10000000      default limit on internal looping)],
+[  --with-match-limit=10000000  default limit on internal looping],
   MATCH_LIMIT=-DMATCH_LIMIT=$withval
+)
+
+dnl Handle --with-match-limit_recursion=n
+
+AC_ARG_WITH(match-limit-recursion,
+[  --with-match-limit-recursion=10000000  default limit on internal recursion],
+  MATCH_LIMIT_RECURSION=-DMATCH_LIMIT_RECURSION=$withval
 )
 
 dnl Unicode character property support implies UTF-8 support
@@ -236,20 +239,19 @@ AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CXX_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(CXXFLAGS_FOR_BUILD)
+AC_SUBST(CXXLDFLAGS)
 AC_SUBST(EBCDIC)
 AC_SUBST(HAVE_MEMMOVE)
 AC_SUBST(HAVE_STRERROR)
 AC_SUBST(LINK_SIZE)
 AC_SUBST(MATCH_LIMIT)
+AC_SUBST(MATCH_LIMIT_RECURSION)
 AC_SUBST(NEWLINE)
 AC_SUBST(NO_RECURSE)
-AC_SUBST(PCRE_MAJOR)
-AC_SUBST(PCRE_MINOR)
-AC_SUBST(PCRE_DATE)
-AC_SUBST(PCRE_VERSION)
 AC_SUBST(PCRE_LIB_VERSION)
 AC_SUBST(PCRE_POSIXLIB_VERSION)
 AC_SUBST(PCRE_CPPLIB_VERSION)
+AC_SUBST(PCRE_VERSION)
 AC_SUBST(POSIX_MALLOC_THRESHOLD)
 AC_SUBST(UCP)
 AC_SUBST(UTF8)
@@ -287,4 +289,4 @@ if test "x$enable_shared" = "xno" ; then
 fi
 
 dnl This must be last; it determines what files are written as well as config.h
-AC_OUTPUT(Makefile pcre.h:pcre.h.in pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in pcrecpp.h:pcrecpp.h.in pcre_stringpiece.h:pcre_stringpiece.h.in RunGrepTest:RunGrepTest.in RunTest:RunTest.in,[chmod a+x RunTest RunGrepTest pcre-config])
+AC_OUTPUT(Makefile pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in pcrecpparg.h:pcrecpparg.h.in pcre_stringpiece.h:pcre_stringpiece.h.in RunGrepTest:RunGrepTest.in RunTest:RunTest.in,[chmod a+x RunTest RunGrepTest pcre-config])

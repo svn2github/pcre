@@ -475,6 +475,57 @@ return ((value & 0x000000ff) << 24) |
 
 
 /*************************************************
+*        Check match or recursion limit          *
+*************************************************/
+
+static int
+check_match_limit(pcre *re, pcre_extra *extra, uschar *bptr, int len,
+  int start_offset, int options, int *use_offsets, int use_size_offsets,
+  int flag, unsigned long int *limit, int errnumber, const char *msg)
+{
+int count;
+int min = 0;
+int mid = 64;
+int max = -1;
+
+extra->flags |= flag;
+
+for (;;)
+  {
+  *limit = mid;
+
+  count = pcre_exec(re, extra, (char *)bptr, len, start_offset, options,
+    use_offsets, use_size_offsets);
+
+  if (count == errnumber)
+    {
+    /* fprintf(outfile, "Testing %s limit = %d\n", msg, mid); */
+    min = mid;
+    mid = (mid == max - 1)? max : (max > 0)? (min + max)/2 : mid*2;
+    }
+
+  else if (count >= 0 || count == PCRE_ERROR_NOMATCH ||
+                         count == PCRE_ERROR_PARTIAL)
+    {
+    if (mid == min + 1)
+      {
+      fprintf(outfile, "Minimum %s limit = %d\n", msg, mid);
+      break;
+      }
+    /* fprintf(outfile, "Testing %s limit = %d\n", msg, mid); */
+    max = mid;
+    mid = (min + mid)/2;
+    }
+  else break;    /* Some other error */
+  }
+
+extra->flags &= ~flag;
+return count;
+}
+
+
+
+/*************************************************
 *                Main Program                    *
 *************************************************/
 
@@ -491,6 +542,7 @@ int op = 1;
 int timeit = 0;
 int showinfo = 0;
 int showstore = 0;
+int quiet = 0;
 int size_offsets = 45;
 int size_offsets_max;
 int *offsets = NULL;
@@ -531,6 +583,7 @@ while (argc > 1 && argv[op][0] == '-')
   if (strcmp(argv[op], "-s") == 0 || strcmp(argv[op], "-m") == 0)
     showstore = 1;
   else if (strcmp(argv[op], "-t") == 0) timeit = 1;
+  else if (strcmp(argv[op], "-q") == 0) quiet = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
 #if !defined NODFA
@@ -563,6 +616,8 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  POSIX malloc threshold = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT, &rc);
     printf("  Default match limit = %d\n", rc);
+    (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT_RECURSION, &rc);
+    printf("  Default recursion depth limit = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_STACKRECURSE, &rc);
     printf("  Match recursion uses %s\n", rc? "stack" : "heap");
     exit(0);
@@ -634,9 +689,9 @@ pcre_free = new_free;
 pcre_stack_malloc = stack_malloc;
 pcre_stack_free = stack_free;
 
-/* Heading line, then prompt for first regex if stdin */
+/* Heading line unless quiet, then prompt for first regex if stdin */
 
-fprintf(outfile, "PCRE version %s\n\n", pcre_version());
+if (!quiet) fprintf(outfile, "PCRE version %s\n\n", pcre_version());
 
 /* Main loop */
 
@@ -896,6 +951,9 @@ while (!done)
     if ((options & PCRE_CASELESS) != 0) cflags |= REG_ICASE;
     if ((options & PCRE_MULTILINE) != 0) cflags |= REG_NEWLINE;
     if ((options & PCRE_DOTALL) != 0) cflags |= REG_DOTALL;
+    if ((options & PCRE_NO_AUTO_CAPTURE) != 0) cflags |= REG_NOSUB;
+    if ((options & PCRE_UTF8) != 0) cflags |= REG_UTF8;
+
     rc = regcomp(&preg, (char *)p, cflags);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -1111,7 +1169,7 @@ while (!done)
         fprintf(outfile, "Partial matching not supported\n");
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -1121,6 +1179,7 @@ while (!done)
           ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
+          ((get_options & PCRE_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
           ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "");
 
@@ -1266,8 +1325,8 @@ while (!done)
 
   for (;;)
     {
-    unsigned char *q;
-    unsigned char *bptr = dbuffer;
+    uschar *q;
+    uschar *bptr = dbuffer;
     int *use_offsets = offsets;
     int use_size_offsets = size_offsets;
     int callout_data = 0;
@@ -1555,6 +1614,11 @@ while (!done)
         (void)regerror(rc, &preg, (char *)buffer, BUFFER_SIZE);
         fprintf(outfile, "No match: POSIX code %d: %s\n", rc, buffer);
         }
+      else if ((((const pcre *)preg.re_pcre)->options & PCRE_NO_AUTO_CAPTURE)
+              != 0)
+        {
+        fprintf(outfile, "Matched with REG_NOSUB\n");
+        }
       else
         {
         size_t i;
@@ -1615,48 +1679,26 @@ while (!done)
         }
 
       /* If find_match_limit is set, we want to do repeated matches with
-      varying limits in order to find the minimum value. */
+      varying limits in order to find the minimum value for the match limit and
+      for the recursion limit. */
 
       if (find_match_limit)
         {
-        int min = 0;
-        int mid = 64;
-        int max = -1;
-
         if (extra == NULL)
           {
           extra = (pcre_extra *)malloc(sizeof(pcre_extra));
           extra->flags = 0;
           }
-        extra->flags |= PCRE_EXTRA_MATCH_LIMIT;
 
-        for (;;)
-          {
-          extra->match_limit = mid;
-          count = pcre_exec(re, extra, (char *)bptr, len, start_offset,
-            options | g_notempty, use_offsets, use_size_offsets);
-          if (count == PCRE_ERROR_MATCHLIMIT)
-            {
-            /* fprintf(outfile, "Testing match limit = %d\n", mid); */
-            min = mid;
-            mid = (mid == max - 1)? max : (max > 0)? (min + max)/2 : mid*2;
-            }
-          else if (count >= 0 || count == PCRE_ERROR_NOMATCH ||
-                                 count == PCRE_ERROR_PARTIAL)
-            {
-            if (mid == min + 1)
-              {
-              fprintf(outfile, "Minimum match limit = %d\n", mid);
-              break;
-              }
-            /* fprintf(outfile, "Testing match limit = %d\n", mid); */
-            max = mid;
-            mid = (min + mid)/2;
-            }
-          else break;    /* Some other error */
-          }
+        count = check_match_limit(re, extra, bptr, len, start_offset,
+          options|g_notempty, use_offsets, use_size_offsets,
+          PCRE_EXTRA_MATCH_LIMIT, &(extra->match_limit),
+          PCRE_ERROR_MATCHLIMIT, "match()");
 
-        extra->flags &= ~PCRE_EXTRA_MATCH_LIMIT;
+        count = check_match_limit(re, extra, bptr, len, start_offset,
+          options|g_notempty, use_offsets, use_size_offsets,
+          PCRE_EXTRA_MATCH_LIMIT_RECURSION, &(extra->match_limit_recursion),
+          PCRE_ERROR_RECURSIONLIMIT, "match() recursion");
         }
 
       /* If callout_data is set, use the interface with additional data */

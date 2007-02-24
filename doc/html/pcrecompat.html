@@ -21,8 +21,8 @@ regular expressions. The differences described here are with respect to Perl
 5.8.
 </P>
 <P>
-1. PCRE does not have full UTF-8 support. Details of what it does have are
-given in the
+1. PCRE has only a subset of Perl's UTF-8 and Unicode support. Details of what
+it does have are given in the
 <a href="pcre.html#utf8support">section on UTF-8 support</a>
 in the main
 <a href="pcre.html"><b>pcre</b></a>
@@ -57,7 +57,8 @@ encountered by PCRE, an error is generated.
 6. The Perl escape sequences \p, \P, and \X are supported only if PCRE is
 built with Unicode character property support. The properties that can be
 tested with \p and \P are limited to the general category properties such as
-Lu and Nd.
+Lu and Nd, script names such as Greek or Han, and the derived properties Any
+and L&.
 </P>
 <P>
 7. PCRE does support the \Q...\E escape for quoting substrings. Characters in
@@ -146,9 +147,9 @@ different hosts that have the other endianness.
 different way and is not Perl-compatible.
 </P>
 <P>
-Last updated: 28 February 2005
+Last updated: 24 January 2006
 <br>
-Copyright &copy; 1997-2005 University of Cambridge.
+Copyright &copy; 1997-2006 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

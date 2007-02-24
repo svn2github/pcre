@@ -197,9 +197,29 @@ Because of this phenomenon, it does not usually make sense to end a pattern
 that is going to be matched in this way with a variable repeat.
 </P>
 <P>
-Last updated: 28 February 2005
+4. Patterns that contain alternatives at the top level which do not all
+start with the same pattern item may not work as expected. For example,
+consider this pattern:
+<pre>
+  1234|3789
+</pre>
+If the first part of the subject is "ABC123", a partial match of the first
+alternative is found at offset 3. There is no partial match for the second
+alternative, because such a match does not start at the same point in the
+subject string. Attempting to continue with the string "789" does not yield a
+match because only those alternatives that match at one point in the subject
+are remembered. The problem arises because the start of the second alternative
+matches within the first alternative. There is no problem with anchored
+patterns or patterns such as:
+<pre>
+  1234|ABCD
+</pre>
+where no string can be a partial match for both alternatives.
+</P>
+<P>
+Last updated: 16 January 2006
 <br>
-Copyright &copy; 1997-2005 University of Cambridge.
+Copyright &copy; 1997-2006 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

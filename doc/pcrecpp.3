@@ -168,13 +168,17 @@ which returns true if the modifier is set, and
 .sp
   RE_Options & set_caseless(bool)
 .sp
-which sets or unsets the modifier. Moreover, PCRE_CONFIG_MATCH_LIMIT can be
+which sets or unsets the modifier. Moreover, PCRE_EXTRA_MATCH_LIMIT can be
 accessed through the \fBset_match_limit()\fR and \fBmatch_limit()\fR member
 functions. Setting \fImatch_limit\fR to a non-zero value will limit the
 execution of pcre to keep it from doing bad things like blowing the stack or
 taking an eternity to return a result. A value of 5000 is good enough to stop
 stack blowup in a 2MB thread stack. Setting \fImatch_limit\fR to zero disables
-match limiting.
+match limiting. Alternatively, you can call \fBmatch_limit_recursion()\fP
+which uses PCRE_EXTRA_MATCH_LIMIT_RECURSION to limit how much PCRE
+recurses. \fBmatch_limit()\fP limits the number of matches PCRE does;
+\fBmatch_limit_recursion()\fP limits the depth of internal recursion, and
+therefore the amount of stack that is used.
 .P
 Normally, to pass one or more modifiers to a RE class, you declare
 a \fIRE_Options\fR object, set the appropriate options, and pass this

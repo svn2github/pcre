@@ -61,13 +61,15 @@ A \fBpcre_extra\fP structure contains the following fields:
 .sp
   \fIflags\fP        Bits indicating which fields are set
   \fIstudy_data\fP   Opaque data from \fBpcre_study()\fP
-  \fImatch_limit\fP  Limit on internal recursion
+  \fImatch_limit\fP  Limit on internal resource use
+  \fImatch_limit_recursion\fP  Limit on internal recursion depth
   \fIcallout_data\fP Opaque data passed back to callouts
   \fItables\fP       Points to character tables or is NULL
 .sp
 The flag bits are PCRE_EXTRA_STUDY_DATA, PCRE_EXTRA_MATCH_LIMIT,
-PCRE_EXTRA_CALLOUT_DATA, and PCRE_EXTRA_TABLES. For DFA matching, the
-\fImatch_limit\fP field is not used, and must not be set.
+PCRE_EXTRA_MATCH_LIMIT_RECURSION, PCRE_EXTRA_CALLOUT_DATA, and
+PCRE_EXTRA_TABLES. For DFA matching, the \fImatch_limit\fP and
+\fImatch_limit_recursion\fP fields are not used, and must not be set.
 .P
 There is a complete description of the PCRE native API in the
 .\" HREF

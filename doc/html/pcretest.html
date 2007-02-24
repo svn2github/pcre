@@ -84,6 +84,10 @@ used to call PCRE. None of the other options has any effect when <b>-p</b> is
 set.
 </P>
 <P>
+\fP-q\fP
+Do not output the version number of <b>pcretest</b> at the start of execution.
+</P>
+<P>
 <b>-t</b>
 Run each compile, study, and match many times with a timer, and output
 resulting time per compile or match (in milliseconds). Do not set <b>-m</b> with
@@ -291,7 +295,8 @@ recognized:
   \Gname     call pcre_get_named_substring() for substring "name" after a successful match (name termin-
                ated by next non-alphanumeric character)
   \L         call pcre_get_substringlist() after a successful match
-  \M         discover the minimum MATCH_LIMIT setting
+  \M         discover the minimum MATCH_LIMIT and
+               MATCH_LIMIT_RECURSION settings
   \N         pass the PCRE_NOTEMPTY option to <b>pcre_exec()</b>
   \Odd       set the size of the output vector passed to <b>pcre_exec()</b> to dd (any number of digits)
   \P         pass the PCRE_PARTIAL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
@@ -308,13 +313,16 @@ an empty line as data, since a real empty line terminates the data input.
 </P>
 <P>
 If \M is present, <b>pcretest</b> calls <b>pcre_exec()</b> several times, with
-different values in the <i>match_limit</i> field of the <b>pcre_extra</b> data
-structure, until it finds the minimum number that is needed for
-<b>pcre_exec()</b> to complete. This number is a measure of the amount of
-recursion and backtracking that takes place, and checking it out can be
-instructive. For most simple matches, the number is quite small, but for
-patterns with very large numbers of matching possibilities, it can become large
-very quickly with increasing length of subject string.
+different values in the <i>match_limit</i> and <i>match_limit_recursion</i>
+fields of the <b>pcre_extra</b> data structure, until it finds the minimum
+numbers for each parameter that allow <b>pcre_exec()</b> to complete. The
+<i>match_limit</i> number is a measure of the amount of backtracking that takes
+place, and checking it out can be instructive. For most simple matches, the
+number is quite small, but for patterns with very large numbers of matching
+possibilities, it can become large very quickly with increasing length of
+subject string. The <i>match_limit_recursion</i> number is a measure of how much
+stack (or, if PCRE is compiled with NO_RECURSE, how much heap) memory is needed
+to complete the match attempt.
 </P>
 <P>
 When \O is used, the value specified may be higher or lower than the size set
@@ -323,8 +331,9 @@ the call of <b>pcre_exec()</b> for the line in which it appears.
 </P>
 <P>
 If the <b>/P</b> modifier was present on the pattern, causing the POSIX wrapper
-API to be used, only \B and \Z have any effect, causing REG_NOTBOL and
-REG_NOTEOL to be passed to <b>regexec()</b> respectively.
+API to be used, the only option-setting sequences that have any effect are \B
+and \Z, causing REG_NOTBOL and REG_NOTEOL, respectively, to be passed to
+<b>regexec()</b>.
 </P>
 <P>
 The use of \x{hh...} to represent UTF-8 characters is not dependent on the use
@@ -572,9 +581,9 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 28 February 2005
+Last updated: 18 January 2006
 <br>
-Copyright &copy; 1997-2005 University of Cambridge.
+Copyright &copy; 1997-2006 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

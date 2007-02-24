@@ -302,6 +302,12 @@ The output is an integer that gives the default limit for the number of
 internal matching function calls in a <b>pcre_exec()</b> execution. Further
 details are given with <b>pcre_exec()</b> below.
 <pre>
+  PCRE_CONFIG_MATCH_LIMIT_RECURSION
+</pre>
+The output is an integer that gives the default limit for the depth of
+recursion when calling the internal matching function in a <b>pcre_exec()</b>
+execution. Further details are given with <b>pcre_exec()</b> below.
+<pre>
   PCRE_CONFIG_STACKRECURSE
 </pre>
 The output is an integer that is set to one if internal recursion when running
@@ -358,8 +364,9 @@ time.
 If <i>errptr</i> is NULL, <b>pcre_compile()</b> returns NULL immediately.
 Otherwise, if compilation of a pattern fails, <b>pcre_compile()</b> returns
 NULL, and sets the variable pointed to by <i>errptr</i> to point to a textual
-error message. The offset from the start of the pattern to the character where
-the error was discovered is placed in the variable pointed to by
+error message. This is a static string that is part of the library. You must
+not try to free it. The offset from the start of the pattern to the character
+where the error was discovered is placed in the variable pointed to by
 <i>erroffset</i>, which must not be NULL. If it is, an immediate error is given.
 </P>
 <P>
@@ -615,9 +622,10 @@ options are defined, and this argument should always be zero.
 <P>
 The third argument for <b>pcre_study()</b> is a pointer for an error message. If
 studying succeeds (even if no data is returned), the variable it points to is
-set to NULL. Otherwise it points to a textual error message. You should
-therefore test the error pointer for NULL after calling <b>pcre_study()</b>, to
-be sure that it has run successfully.
+set to NULL. Otherwise it is set to point to a textual error message. This is a
+static string that is part of the library. You must not try to free it. You
+should test the error pointer for NULL after calling <b>pcre_study()</b>, to be
+sure that it has run successfully.
 </P>
 <P>
 This is a typical call to <b>pcre_study</b>():
@@ -639,7 +647,7 @@ digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
 less than 128. Higher-valued codes never match escapes such as \w or \d, but
 can be tested with \p if PCRE is built with Unicode character property
-support.
+support. The use of locales with Unicode is discouraged.
 </P>
 <P>
 An internal set of tables is created in the default C locale when PCRE is
@@ -947,12 +955,13 @@ Extra data for <b>pcre_exec()</b>
 If the <i>extra</i> argument is not NULL, it must point to a <b>pcre_extra</b>
 data block. The <b>pcre_study()</b> function returns such a block (when it
 doesn't return NULL), but you can also create one for yourself, and pass
-additional information in it. The fields in a <b>pcre_extra</b> block are as
-follows:
+additional information in it. The <b>pcre_extra</b> block contains the following
+fields (not necessarily in this order):
 <pre>
   unsigned long int <i>flags</i>;
   void *<i>study_data</i>;
   unsigned long int <i>match_limit</i>;
+  unsigned long int <i>match_limit_recursion</i>;
   void *<i>callout_data</i>;
   const unsigned char *<i>tables</i>;
 </pre>
@@ -961,6 +970,7 @@ are set. The flag bits are:
 <pre>
   PCRE_EXTRA_STUDY_DATA
   PCRE_EXTRA_MATCH_LIMIT
+  PCRE_EXTRA_MATCH_LIMIT_RECURSION
   PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_TABLES
 </pre>
@@ -977,18 +987,39 @@ classic example is the use of nested unlimited repeats.
 </P>
 <P>
 Internally, PCRE uses a function called <b>match()</b> which it calls repeatedly
-(sometimes recursively). The limit is imposed on the number of times this
-function is called during a match, which has the effect of limiting the amount
-of recursion and backtracking that can take place. For patterns that are not
-anchored, the count starts from zero for each position in the subject string.
+(sometimes recursively). The limit set by <i>match_limit</i> is imposed on the
+number of times this function is called during a match, which has the effect of
+limiting the amount of backtracking that can take place. For patterns that are
+not anchored, the count restarts from zero for each position in the subject
+string.
 </P>
 <P>
-The default limit for the library can be set when PCRE is built; the default
+The default value for the limit can be set when PCRE is built; the default
 default is 10 million, which handles all but the most extreme cases. You can
-reduce the default by suppling <b>pcre_exec()</b> with a <b>pcre_extra</b> block
-in which <i>match_limit</i> is set to a smaller value, and
-PCRE_EXTRA_MATCH_LIMIT is set in the <i>flags</i> field. If the limit is
-exceeded, <b>pcre_exec()</b> returns PCRE_ERROR_MATCHLIMIT.
+override the default by suppling <b>pcre_exec()</b> with a <b>pcre_extra</b>
+block in which <i>match_limit</i> is set, and PCRE_EXTRA_MATCH_LIMIT is set in
+the <i>flags</i> field. If the limit is exceeded, <b>pcre_exec()</b> returns
+PCRE_ERROR_MATCHLIMIT.
+</P>
+<P>
+The <i>match_limit_recursion</i> field is similar to <i>match_limit</i>, but
+instead of limiting the total number of times that <b>match()</b> is called, it
+limits the depth of recursion. The recursion depth is a smaller number than the
+total number of calls, because not all calls to <b>match()</b> are recursive.
+This limit is of use only if it is set smaller than <i>match_limit</i>.
+</P>
+<P>
+Limiting the recursion depth limits the amount of stack that can be used, or,
+when PCRE has been compiled to use memory on the heap instead of the stack, the
+amount of heap memory that can be used.
+</P>
+<P>
+The default value for <i>match_limit_recursion</i> can be set when PCRE is
+built; the default default is the same value as the default for
+<i>match_limit</i>. You can override the default by suppling <b>pcre_exec()</b>
+with a <b>pcre_extra</b> block in which <i>match_limit_recursion</i> is set, and
+PCRE_EXTRA_MATCH_LIMIT_RECURSION is set in the <i>flags</i> field. If the limit
+is exceeded, <b>pcre_exec()</b> returns PCRE_ERROR_RECURSIONLIMIT.
 </P>
 <P>
 The <i>pcre_callout</i> field is used in conjunction with the "callout" feature,
@@ -1247,7 +1278,13 @@ below). It is never returned by <b>pcre_exec()</b>.
 <pre>
   PCRE_ERROR_MATCHLIMIT     (-8)
 </pre>
-The recursion and backtracking limit, as specified by the <i>match_limit</i>
+The backtracking limit, as specified by the <i>match_limit</i> field in a
+<b>pcre_extra</b> structure (or defaulted) was reached. See the description
+above.
+<pre>
+  PCRE_ERROR_RECURSIONLIMIT (-21)
+</pre>
+The internal recursion limit, as specified by the <i>match_limit_recursion</i>
 field in a <b>pcre_extra</b> structure (or defaulted) was reached. See the
 description above.
 <pre>
@@ -1478,12 +1515,12 @@ multiple paths through the pattern tree. More workspace will be needed for
 patterns and subjects where there are a lot of possible matches.
 </P>
 <P>
-Here is an example of a simple call to <b>pcre_exec()</b>:
+Here is an example of a simple call to <b>pcre_dfa_exec()</b>:
 <pre>
   int rc;
   int ovector[10];
   int wspace[20];
-  rc = pcre_exec(
+  rc = pcre_dfa_exec(
     re,             /* result of pcre_compile() */
     NULL,           /* we didn't study the pattern */
     "some string",  /* the subject string */
@@ -1610,9 +1647,9 @@ error is given if the output vector is not large enough. This should be
 extremely rare, as a vector of size 1000 is used.
 </P>
 <P>
-Last updated: 16 May 2005
+Last updated: 18 January 2006
 <br>
-Copyright &copy; 1997-2005 University of Cambridge.
+Copyright &copy; 1997-2006 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

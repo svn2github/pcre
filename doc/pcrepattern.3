@@ -148,7 +148,7 @@ represents:
   \et        tab (hex 09)
   \eddd      character with octal code ddd, or backreference
   \exhh      character with hex code hh
-  \ex{hhh..} character with hex code hhh... (UTF-8 mode only)
+  \ex{hhh..} character with hex code hhh..
 .sp
 The precise effect of \ecx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
@@ -156,17 +156,17 @@ Thus \ecz becomes hex 1A, but \ec{ becomes hex 3B, while \ec; becomes hex
 7B.
 .P
 After \ex, from zero to two hexadecimal digits are read (letters can be in
-upper or lower case). In UTF-8 mode, any number of hexadecimal digits may
-appear between \ex{ and }, but the value of the character code must be less
-than 2**31 (that is, the maximum hexadecimal value is 7FFFFFFF). If characters
-other than hexadecimal digits appear between \ex{ and }, or if there is no
-terminating }, this form of escape is not recognized. Instead, the initial
-\ex will be interpreted as a basic hexadecimal escape, with no following
-digits, giving a character whose value is zero.
+upper or lower case). Any number of hexadecimal digits may appear between \ex{
+and }, but the value of the character code must be less than 256 in non-UTF-8
+mode, and less than 2**31 in UTF-8 mode (that is, the maximum hexadecimal value
+is 7FFFFFFF). If characters other than hexadecimal digits appear between \ex{
+and }, or if there is no terminating }, this form of escape is not recognized.
+Instead, the initial \ex will be interpreted as a basic hexadecimal escape,
+with no following digits, giving a character whose value is zero.
 .P
 Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \ex when PCRE is in UTF-8 mode. There is no difference in the
-way they are handled. For example, \exdc is exactly the same as \ex{dc}.
+syntaxes for \ex. There is no difference in the way they are handled. For
+example, \exdc is exactly the same as \ex{dc}.
 .P
 After \e0 up to two further octal digits are read. In both cases, if there
 are fewer than two digits, just those that are present are used. Thus the
@@ -272,7 +272,8 @@ greater than 128 are used for accented letters, and these are matched by \ew.
 .P
 In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
 \ew, and always match \eD, \eS, and \eW. This is true even when Unicode
-character property support is available.
+character property support is available. The use of locales with Unicode is
+discouraged.
 .
 .
 .\" HTML <a name="uniextseq"></a>
@@ -280,28 +281,105 @@ character property support is available.
 .rs
 .sp
 When PCRE is built with Unicode character property support, three additional
-escape sequences to match generic character types are available when UTF-8 mode
+escape sequences to match character properties are available when UTF-8 mode
 is selected. They are:
 .sp
- \ep{\fIxx\fP}   a character with the \fIxx\fP property
- \eP{\fIxx\fP}   a character without the \fIxx\fP property
- \eX       an extended Unicode sequence
+  \ep{\fIxx\fP}   a character with the \fIxx\fP property
+  \eP{\fIxx\fP}   a character without the \fIxx\fP property
+  \eX       an extended Unicode sequence
 .sp
-The property names represented by \fIxx\fP above are limited to the
-Unicode general category properties. Each character has exactly one such
-property, specified by a two-letter abbreviation. For compatibility with Perl,
-negation can be specified by including a circumflex between the opening brace
-and the property name. For example, \ep{^Lu} is the same as \eP{Lu}.
+The property names represented by \fIxx\fP above are limited to the Unicode
+script names, the general category properties, and "Any", which matches any
+character (including newline). Other properties such as "InMusicalSymbols" are
+not currently supported by PCRE. Note that \eP{Any} does not match any
+characters, so always causes a match failure.
 .P
-If only one letter is specified with \ep or \eP, it includes all the properties
-that start with that letter. In this case, in the absence of negation, the
-curly brackets in the escape sequence are optional; these two examples have
-the same effect:
+Sets of Unicode characters are defined as belonging to certain scripts. A
+character from one of these sets can be matched using a script name. For
+example:
+.sp
+  \ep{Greek}
+  \eP{Han}
+.sp
+Those that are not part of an identified script are lumped together as
+"Common". The current list of scripts is:
+.P
+Arabic,
+Armenian,
+Bengali,
+Bopomofo,
+Braille,
+Buginese,
+Buhid,
+Canadian_Aboriginal,
+Cherokee,
+Common,
+Coptic,
+Cypriot,
+Cyrillic,
+Deseret,
+Devanagari,
+Ethiopic,
+Georgian,
+Glagolitic,
+Gothic,
+Greek,
+Gujarati,
+Gurmukhi,
+Han,
+Hangul,
+Hanunoo,
+Hebrew,
+Hiragana,
+Inherited,
+Kannada,
+Katakana,
+Kharoshthi,
+Khmer,
+Lao,
+Latin,
+Limbu,
+Linear_B,
+Malayalam,
+Mongolian,
+Myanmar,
+New_Tai_Lue,
+Ogham,
+Old_Italic,
+Old_Persian,
+Oriya,
+Osmanya,
+Runic,
+Shavian,
+Sinhala,
+Syloti_Nagri,
+Syriac,
+Tagalog,
+Tagbanwa,
+Tai_Le,
+Tamil,
+Telugu,
+Thaana,
+Thai,
+Tibetan,
+Tifinagh,
+Ugaritic,
+Yi.
+.P
+Each character has exactly one general category property, specified by a
+two-letter abbreviation. For compatibility with Perl, negation can be specified
+by including a circumflex between the opening brace and the property name. For
+example, \ep{^Lu} is the same as \eP{Lu}.
+.P
+If only one letter is specified with \ep or \eP, it includes all the general
+category properties that start with that letter. In this case, in the absence
+of negation, the curly brackets in the escape sequence are optional; these two
+examples have the same effect:
 .sp
   \ep{L}
   \epL
 .sp
-The following property codes are supported:
+The following general category property codes are supported:
 .sp
   C     Other
   Cc    Control
@@ -347,8 +425,17 @@ The following property codes are supported:
   Zp    Paragraph separator
   Zs    Space separator
 .sp
-Extended properties such as "Greek" or "InMusicalSymbols" are not supported by
-PCRE.
+The special property L& is also supported: it matches a character that has
+the Lu, Ll, or Lt property, in other words, a letter that is not classified as
+a modifier or "other".
+.P
+The long synonyms for these properties that Perl supports (such as \ep{Letter})
+are not supported by PCRE. Nor is is permitted to prefix any of these
+properties with "Is".
+.P
+No character that is in the Unicode table has the Cn (unassigned) property.
+Instead, this property is assumed for any code point that is not in the
+Unicode table.
 .P
 Specifying caseless matching does not affect these escape sequences. For
 example, \ep{Lu} always matches only upper case letters.
@@ -1346,14 +1433,18 @@ number, provided that it occurs inside that subpattern. (If not, it is a
 "subroutine" call, which is described in the next section.) The special item
 (?R) is a recursive call of the entire regular expression.
 .P
-For example, this PCRE pattern solves the nested parentheses problem (assume
-the PCRE_EXTENDED option is set so that white space is ignored):
+A recursive subpattern call is always treated as an atomic group. That is, once
+it has matched some of the subject string, it is never re-entered, even if
+it contains untried alternatives and there is a subsequent matching failure.
+.P
+This PCRE pattern solves the nested parentheses problem (assume the
+PCRE_EXTENDED option is set so that white space is ignored):
 .sp
   \e( ( (?>[^()]+) | (?R) )* \e)
 .sp
 First it matches an opening parenthesis. Then it matches any number of
 substrings which can either be a sequence of non-parentheses, or a recursive
-match of the pattern itself (that is a correctly parenthesized substring).
+match of the pattern itself (that is, a correctly parenthesized substring).
 Finally there is a closing parenthesis.
 .P
 If this were part of a larger pattern, you would not want to recurse the entire
@@ -1437,6 +1528,11 @@ matches "sense and sensibility" and "response and responsibility", but not
 is used, it does match "sense and responsibility" as well as the other two
 strings. Such references must, however, follow the subpattern to which they
 refer.
+.P
+Like recursive subpatterns, a "subroutine" call is always treated as an atomic
+group. That is, once it has matched some of the subject string, it is never
+re-entered, even if it contains untried alternatives and there is a subsequent
+matching failure.
 .
 .
 .SH CALLOUTS
@@ -1475,6 +1571,6 @@ description of the interface to the callout function is given in the
 documentation.
 .P
 .in 0
-Last updated: 28 February 2005
+Last updated: 24 January 2006
 .br
-Copyright (c) 1997-2005 University of Cambridge.
+Copyright (c) 1997-2006 University of Cambridge.

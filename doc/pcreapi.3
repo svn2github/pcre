@@ -309,6 +309,12 @@ The output is an integer that gives the default limit for the number of
 internal matching function calls in a \fBpcre_exec()\fP execution. Further
 details are given with \fBpcre_exec()\fP below.
 .sp
+  PCRE_CONFIG_MATCH_LIMIT_RECURSION
+.sp
+The output is an integer that gives the default limit for the depth of
+recursion when calling the internal matching function in a \fBpcre_exec()\fP
+execution. Further details are given with \fBpcre_exec()\fP below.
+.sp
   PCRE_CONFIG_STACKRECURSE
 .sp
 The output is an integer that is set to one if internal recursion when running
@@ -370,8 +376,9 @@ time.
 If \fIerrptr\fP is NULL, \fBpcre_compile()\fP returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fP returns
 NULL, and sets the variable pointed to by \fIerrptr\fP to point to a textual
-error message. The offset from the start of the pattern to the character where
-the error was discovered is placed in the variable pointed to by
+error message. This is a static string that is part of the library. You must
+not try to free it. The offset from the start of the pattern to the character
+where the error was discovered is placed in the variable pointed to by
 \fIerroffset\fP, which must not be NULL. If it is, an immediate error is given.
 .P
 If \fBpcre_compile2()\fP is used instead of \fBpcre_compile()\fP, and the
@@ -631,9 +638,10 @@ options are defined, and this argument should always be zero.
 .P
 The third argument for \fBpcre_study()\fP is a pointer for an error message. If
 studying succeeds (even if no data is returned), the variable it points to is
-set to NULL. Otherwise it points to a textual error message. You should
-therefore test the error pointer for NULL after calling \fBpcre_study()\fP, to
-be sure that it has run successfully.
+set to NULL. Otherwise it is set to point to a textual error message. This is a
+static string that is part of the library. You must not try to free it. You
+should test the error pointer for NULL after calling \fBpcre_study()\fP, to be
+sure that it has run successfully.
 .P
 This is a typical call to \fBpcre_study\fP():
 .sp
@@ -657,7 +665,7 @@ digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
 less than 128. Higher-valued codes never match escapes such as \ew or \ed, but
 can be tested with \ep if PCRE is built with Unicode character property
-support.
+support. The use of locales with Unicode is discouraged.
 .P
 An internal set of tables is created in the default C locale when PCRE is
 built. This is used when the final argument of \fBpcre_compile()\fP is NULL,
@@ -964,12 +972,13 @@ Here is an example of a simple call to \fBpcre_exec()\fP:
 If the \fIextra\fP argument is not NULL, it must point to a \fBpcre_extra\fP
 data block. The \fBpcre_study()\fP function returns such a block (when it
 doesn't return NULL), but you can also create one for yourself, and pass
-additional information in it. The fields in a \fBpcre_extra\fP block are as
-follows:
+additional information in it. The \fBpcre_extra\fP block contains the following
+fields (not necessarily in this order):
 .sp
   unsigned long int \fIflags\fP;
   void *\fIstudy_data\fP;
   unsigned long int \fImatch_limit\fP;
+  unsigned long int \fImatch_limit_recursion\fP;
   void *\fIcallout_data\fP;
   const unsigned char *\fItables\fP;
 .sp
@@ -978,6 +987,7 @@ are set. The flag bits are:
 .sp
   PCRE_EXTRA_STUDY_DATA
   PCRE_EXTRA_MATCH_LIMIT
+  PCRE_EXTRA_MATCH_LIMIT_RECURSION
   PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_TABLES
 .sp
@@ -992,17 +1002,35 @@ but which have a very large number of possibilities in their search trees. The
 classic example is the use of nested unlimited repeats.
 .P
 Internally, PCRE uses a function called \fBmatch()\fP which it calls repeatedly
-(sometimes recursively). The limit is imposed on the number of times this
-function is called during a match, which has the effect of limiting the amount
-of recursion and backtracking that can take place. For patterns that are not
-anchored, the count starts from zero for each position in the subject string.
+(sometimes recursively). The limit set by \fImatch_limit\fP is imposed on the
+number of times this function is called during a match, which has the effect of
+limiting the amount of backtracking that can take place. For patterns that are
+not anchored, the count restarts from zero for each position in the subject
+string.
 .P
-The default limit for the library can be set when PCRE is built; the default
+The default value for the limit can be set when PCRE is built; the default
 default is 10 million, which handles all but the most extreme cases. You can
-reduce the default by suppling \fBpcre_exec()\fP with a \fBpcre_extra\fP block
-in which \fImatch_limit\fP is set to a smaller value, and
-PCRE_EXTRA_MATCH_LIMIT is set in the \fIflags\fP field. If the limit is
-exceeded, \fBpcre_exec()\fP returns PCRE_ERROR_MATCHLIMIT.
+override the default by suppling \fBpcre_exec()\fP with a \fBpcre_extra\fP
+block in which \fImatch_limit\fP is set, and PCRE_EXTRA_MATCH_LIMIT is set in
+the \fIflags\fP field. If the limit is exceeded, \fBpcre_exec()\fP returns
+PCRE_ERROR_MATCHLIMIT.
+.P
+The \fImatch_limit_recursion\fP field is similar to \fImatch_limit\fP, but
+instead of limiting the total number of times that \fBmatch()\fP is called, it
+limits the depth of recursion. The recursion depth is a smaller number than the
+total number of calls, because not all calls to \fBmatch()\fP are recursive.
+This limit is of use only if it is set smaller than \fImatch_limit\fP.
+.P
+Limiting the recursion depth limits the amount of stack that can be used, or,
+when PCRE has been compiled to use memory on the heap instead of the stack, the
+amount of heap memory that can be used.
+.P
+The default value for \fImatch_limit_recursion\fP can be set when PCRE is
+built; the default default is the same value as the default for
+\fImatch_limit\fP. You can override the default by suppling \fBpcre_exec()\fP
+with a \fBpcre_extra\fP block in which \fImatch_limit_recursion\fP is set, and
+PCRE_EXTRA_MATCH_LIMIT_RECURSION is set in the \fIflags\fP field. If the limit
+is exceeded, \fBpcre_exec()\fP returns PCRE_ERROR_RECURSIONLIMIT.
 .P
 The \fIpcre_callout\fP field is used in conjunction with the "callout" feature,
 which is described in the
@@ -1250,7 +1278,13 @@ below). It is never returned by \fBpcre_exec()\fP.
 .sp
   PCRE_ERROR_MATCHLIMIT     (-8)
 .sp
-The recursion and backtracking limit, as specified by the \fImatch_limit\fP
+The backtracking limit, as specified by the \fImatch_limit\fP field in a
+\fBpcre_extra\fP structure (or defaulted) was reached. See the description
+above.
+.sp
+  PCRE_ERROR_RECURSIONLIMIT (-21)
+.sp
+The internal recursion limit, as specified by the \fImatch_limit_recursion\fP
 field in a \fBpcre_extra\fP structure (or defaulted) was reached. See the
 description above.
 .sp
@@ -1499,12 +1533,12 @@ vector should contain at least 20 elements. It is used for keeping track of
 multiple paths through the pattern tree. More workspace will be needed for
 patterns and subjects where there are a lot of possible matches.
 .P
-Here is an example of a simple call to \fBpcre_exec()\fP:
+Here is an example of a simple call to \fBpcre_dfa_exec()\fP:
 .sp
   int rc;
   int ovector[10];
   int wspace[20];
-  rc = pcre_exec(
+  rc = pcre_dfa_exec(
     re,             /* result of pcre_compile() */
     NULL,           /* we didn't study the pattern */
     "some string",  /* the subject string */
@@ -1631,6 +1665,6 @@ error is given if the output vector is not large enough. This should be
 extremely rare, as a vector of size 1000 is used.
 .P
 .in 0
-Last updated: 16 May 2005
+Last updated: 18 January 2006
 .br
-Copyright (c) 1997-2005 University of Cambridge.
+Copyright (c) 1997-2006 University of Cambridge.

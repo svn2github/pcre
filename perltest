@@ -7,6 +7,8 @@
 # "use utf8" lines in order to to UTF-8 stuff (and you mustn't uncomment them
 # for non-UTF-8 use).
 
+use locale;
+
 
 # Function for turning a string into a string of printing chars. There are
 # currently problems with UTF-8 strings; this fudges round them.

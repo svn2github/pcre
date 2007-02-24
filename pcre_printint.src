@@ -101,16 +101,18 @@ else
 *************************************************/
 
 static const char *
-get_ucpname(int property)
+get_ucpname(int ptype, int pvalue)
 {
 #ifdef SUPPORT_UCP
 int i;
 for (i = _pcre_utt_size; i >= 0; i--)
   {
-  if (property == _pcre_utt[i].value) break;
+  if (ptype == _pcre_utt[i].type && pvalue == _pcre_utt[i].value) break;
   }
 return (i >= 0)? _pcre_utt[i].name : "??";
 #else
+ptype = ptype;    /* Avoid compiler warning */
+pvalue = pvalue;
 return "??";
 #endif
 }
@@ -250,8 +252,8 @@ for(;;)
       fprintf(f, "%s", OP_names[code[1]]);
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP)
         {
-        fprintf(f, " %s ", get_ucpname(code[2]));
-        extra = 1;
+        fprintf(f, " %s ", get_ucpname(code[2], code[3]));
+        extra = 2;
         }
       }
     else extra = print_char(f, code+1, utf8);
@@ -275,8 +277,8 @@ for(;;)
     fprintf(f, "    %s", OP_names[code[3]]);
     if (code[3] == OP_PROP || code[3] == OP_NOTPROP)
       {
-      fprintf(f, " %s ", get_ucpname(code[4]));
-      extra = 1;
+      fprintf(f, " %s ", get_ucpname(code[4], code[5]));
+      extra = 2;
       }
     fprintf(f, "{");
     if (*code != OP_TYPEEXACT) fprintf(f, "0,");
@@ -326,7 +328,7 @@ for(;;)
 
     case OP_PROP:
     case OP_NOTPROP:
-    fprintf(f, "    %s %s", OP_names[*code], get_ucpname(code[1]));
+    fprintf(f, "    %s %s", OP_names[*code], get_ucpname(code[1], code[2]));
     break;
 
     /* OP_XCLASS can only occur in UTF-8 mode. However, there's no harm in
@@ -389,11 +391,15 @@ for(;;)
           {
           if (ch == XCL_PROP)
             {
-            fprintf(f, "\\p{%s}", get_ucpname(*ccode++));
+            int ptype = *ccode++;
+            int pvalue = *ccode++;
+            fprintf(f, "\\p{%s}", get_ucpname(ptype, pvalue));
             }
           else if (ch == XCL_NOTPROP)
             {
-            fprintf(f, "\\P{%s}", get_ucpname(*ccode++));
+            int ptype = *ccode++;
+            int pvalue = *ccode++;
+            fprintf(f, "\\P{%s}", get_ucpname(ptype, pvalue));
             }
           else
             {
@@ -434,6 +440,12 @@ for(;;)
         else fprintf(f, "{%d,%d}", min, max);
         if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
         extra += _pcre_OP_lengths[*ccode];
+        break;
+
+        /* Do nothing if it's not a repeat; this code stops picky compilers
+        warning about the lack of a default code path. */
+
+        default:
         break;
         }
       }

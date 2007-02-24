@@ -81,16 +81,16 @@ PCRE_PARTIAL flag is used for the match. Here is a run of \fBpcretest\fP that
 uses the date example quoted above:
 .sp
     re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
-  data> 25jun04\P
+  data> 25jun04\eP
    0: 25jun04
    1: jun
-  data> 25dec3\P
+  data> 25dec3\eP
   Partial match
-  data> 3ju\P
+  data> 3ju\eP
   Partial match
-  data> 3juj\P
+  data> 3juj\eP
   No match
-  data> j\P
+  data> j\eP
   No match
 .sp
 The first data string is matched completely, so \fBpcretest\fP shows the
@@ -175,10 +175,29 @@ hand, if "dogsbody" is presented as a single string, both matches are found.
 .P
 Because of this phenomenon, it does not usually make sense to end a pattern
 that is going to be matched in this way with a variable repeat.
+.P
+4. Patterns that contain alternatives at the top level which do not all
+start with the same pattern item may not work as expected. For example,
+consider this pattern:
+.sp
+  1234|3789
+.sp
+If the first part of the subject is "ABC123", a partial match of the first
+alternative is found at offset 3. There is no partial match for the second
+alternative, because such a match does not start at the same point in the
+subject string. Attempting to continue with the string "789" does not yield a
+match because only those alternatives that match at one point in the subject
+are remembered. The problem arises because the start of the second alternative
+matches within the first alternative. There is no problem with anchored
+patterns or patterns such as:
+.sp
+  1234|ABCD
+.sp
+where no string can be a partial match for both alternatives.
 .
 .
 .P
 .in 0
-Last updated: 28 February 2005
+Last updated: 16 January 2006
 .br
-Copyright (c) 1997-2005 University of Cambridge.
+Copyright (c) 1997-2006 University of Cambridge.
