@@ -12,7 +12,7 @@ functions.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997 University of Cambridge
+           Copyright (c) 1998 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -212,7 +212,7 @@ int options = 0;
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
 
-preg->re_erroffset = -1;   /* Only has meaning after compile */
+preg->re_erroffset = (size_t)(-1);   /* Only has meaning after compile */
 
 rc = pcre_exec(preg->re_pcre, NULL, string, (int)strlen(string), options,
   (int *)pmatch, nmatch * 2);

@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997 University of Cambridge
+           Copyright (c) 1998 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -49,10 +49,17 @@ the external pcre header. */
 #include "internal.h"
 
 
+/* Allow compilation as C++ source code, should anybody want to do that. */
+
+#ifdef __cplusplus
+#define class pcre_class
+#endif
+
+
 /* Min and max values for the common repeats; for the maxima, 0 => infinity */
 
-static char rep_min[] = { 0, 0, 1, 1, 0, 0 };
-static char rep_max[] = { 0, 0, 0, 0, 1, 1 };
+static const char rep_min[] = { 0, 0, 1, 1, 0, 0 };
+static const char rep_max[] = { 0, 0, 0, 0, 1, 1 };
 
 /* Text forms of OP_ values and things, for debugging (not all used) */
 
@@ -76,7 +83,7 @@ are simple data values; negative values are for special things like \d and so
 on. Zero means further processing is needed (for things like \x), or the escape
 is invalid. */
 
-static short int escapes[] = {
+static const short int escapes[] = {
     0,      0,      0,      0,      0,      0,      0,      0,   /* 0 - 7 */
     0,      0,    ':',    ';',    '<',    '=',    '>',    '?',   /* 8 - ? */
   '@', -ESC_A, -ESC_B,      0, -ESC_D,      0,      0,      0,   /* @ - G */
@@ -1296,7 +1303,7 @@ for (;; ptr++)
     the next state. */
 
     previous[1] = length;
-    ptr--;
+    if (length < 255) ptr--;
     break;
     }
   }                   /* end of big loop */
@@ -3450,7 +3457,7 @@ ocount = offsetcount & (-2);
 if (re->top_backref > 0 && re->top_backref >= ocount/2)
   {
   ocount = re->top_backref * 2 + 2;
-  match_block.offset_vector = (pcre_malloc)(ocount * sizeof(int));
+  match_block.offset_vector = (int *)(pcre_malloc)(ocount * sizeof(int));
   if (match_block.offset_vector == NULL) return PCRE_ERROR_NOMEMORY;
   using_temporary_offsets = TRUE;
   DPRINTF(("Got memory to hold back references\n"));

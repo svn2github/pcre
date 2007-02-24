@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "1.05 23-Dec-1997"
+#define PCRE_VERSION       "1.06 23-Jan-1998"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -12,7 +12,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997 University of Cambridge
+           Copyright (c) 1998 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any

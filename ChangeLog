@@ -2,6 +2,14 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.06 23-Jan-98
+----------------------
+
+1. Added Markus Oberhumer's little patches for C++.
+
+2. Literal strings longer than 255 characters were broken.
+
+
 Version 1.05 23-Dec-97
 ----------------------
 

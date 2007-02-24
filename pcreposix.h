@@ -2,7 +2,7 @@
 *       Perl-Compatible Regular Expressions      *
 *************************************************/
 
-/* Copyright (c) 1997 University of Cambridge */
+/* Copyright (c) 1998 University of Cambridge */
 
 #ifndef _PCREPOSIX_H
 #define _PCREPOSIX_H
@@ -14,6 +14,12 @@ be there. I hope. */
 /* Have to include stdlib.h in order to ensure that size_t is defined. */
 
 #include <stdlib.h>
+
+/* Allow for C++ users */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Options defined by POSIX. */
 
@@ -68,5 +74,9 @@ extern int regcomp(regex_t *, const char *, int);
 extern int regexec(regex_t *, const char *, size_t, regmatch_t *, int);
 extern size_t regerror(int, const regex_t *, char *, size_t);
 extern void regfree(regex_t *);
+
+#ifdef __cplusplus
+}   /* extern "C" */
+#endif
 
 #endif /* End of pcreposix.h */
