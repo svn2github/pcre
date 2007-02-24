@@ -2041,7 +2041,7 @@ while (code < code_end)
     case OP_MINUPTO:
     if (isprint(c = code[3])) printf("    %c{", c);
       else printf("    \\x%02x{", c);
-    if (*code != OP_EXACT) printf(",");
+    if (*code != OP_EXACT) printf("0,");
     printf("%d}", (code[1] << 8) + code[2]);
     if (*code == OP_MINUPTO) printf("?");
     code += 3;
@@ -3299,14 +3299,21 @@ hide it in a separate function. This is called only when PCRE_EXTRA is set,
 since it's needed only for the extension \X option, and with any luck, a good
 compiler will spot the tail recursion and compile it efficiently.
 
-Arguments:    The block containing the match data
-Returns:      The return from setjump()
+Arguments:
+   eptr        pointer in subject
+   ecode       position in code
+   offset_top  current top pointer
+   md          pointer to "static" info for the match
+
+Returns:       TRUE if matched
 */
 
-static int
-my_setjmp(match_data *match_block)
+static BOOL
+match_with_setjmp(const uschar *eptr, const uschar *ecode, int offset_top,
+  match_data *match_block)
 {
-return setjmp(match_block->fail_env);
+return setjmp(match_block->fail_env) == 0 &&
+      match(eptr, ecode, offset_top, match_block);
 }
 
 
@@ -3338,8 +3345,7 @@ int
 pcre_exec(const pcre *external_re, const pcre_extra *external_extra,
   const char *subject, int length, int options, int *offsets, int offsetcount)
 {
-int resetcount;
-int ocount = offsetcount;
+int resetcount, ocount;
 int first_char = -1;
 match_data match_block;
 const uschar *start_bits = NULL;
@@ -3347,6 +3353,7 @@ const uschar *start_match = (const uschar *)subject;
 const uschar *end_subject;
 const real_pcre *re = (const real_pcre *)external_re;
 const real_pcre_extra *extra = (const real_pcre_extra *)external_extra;
+BOOL using_temporary_offsets = FALSE;
 BOOL anchored = ((re->options | options) & PCRE_ANCHORED) != 0;
 BOOL startline = (re->options & PCRE_STARTLINE) != 0;
 
@@ -3375,15 +3382,16 @@ match_block.errorcode = PCRE_ERROR_NOMATCH;     /* Default error */
 
 /* If the expression has got more back references than the offsets supplied can
 hold, we get a temporary bit of working store to use during the matching.
-Otherwise, we can use the vector supplied, rounding down the size of it to a
-multiple of 2. */
+Otherwise, we can use the vector supplied, rounding down its size to a multiple
+of 2. */
 
-ocount &= (-2);
-if (re->top_backref > 0 && re->top_backref + 1 >= ocount/2)
+ocount = offsetcount & (-2);
+if (re->top_backref > 0 && re->top_backref >= ocount/2)
   {
   ocount = re->top_backref * 2 + 2;
   match_block.offset_vector = (pcre_malloc)(ocount * sizeof(int));
   if (match_block.offset_vector == NULL) return PCRE_ERROR_NOMEMORY;
+  using_temporary_offsets = TRUE;
   DPRINTF(("Got memory to hold back references\n"));
   }
 else match_block.offset_vector = offsets;
@@ -3498,19 +3506,22 @@ do
   it unless PCRE_EXTRA is set, since only in that case is the "cut" operation
   enabled. */
 
-  if (((re->options & PCRE_EXTRA) != 0 && my_setjmp(&match_block) != 0) ||
-      !match(start_match, re->code, 2, &match_block))
-    continue;
+  if ((re->options & PCRE_EXTRA) != 0)
+    {
+    if (!match_with_setjmp(start_match, re->code, 2, &match_block))
+      continue;
+    }
+  else if (!match(start_match, re->code, 2, &match_block)) continue;
 
   /* Copy the offset information from temporary store if necessary */
 
-  if (ocount != offsetcount)
+  if (using_temporary_offsets)
     {
     if (offsetcount >= 4)
       {
       memcpy(offsets + 2, match_block.offset_vector + 2,
         (offsetcount - 2) * sizeof(int));
-      DPRINTF(("Copied offsets; freeing temporary memory\n"));
+      DPRINTF(("Copied offsets from temporary memory\n"));
       }
     if (match_block.end_offset_top > offsetcount)
       match_block.offset_overflow = TRUE;
@@ -3533,6 +3544,12 @@ do
 while (!anchored &&
        match_block.errorcode == PCRE_ERROR_NOMATCH &&
        start_match++ < end_subject);
+
+if (using_temporary_offsets)
+  {
+  DPRINTF(("Freeing temporary memory\n"));
+  (pcre_free)(match_block.offset_vector);
+  }
 
 DPRINTF((">>>> returning %d\n", match_block.errorcode));
 

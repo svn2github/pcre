@@ -8,12 +8,12 @@ pcre - Perl-compatible regular expressions.
 .br
 .B pcre *pcre_compile(const char *\fIpattern\fR, int \fIoptions\fR,
 .ti +5n
-.B char **\fIerrptr\fR, int *\fIerroffset\fR);
+.B const char **\fIerrptr\fR, int *\fIerroffset\fR);
 .PP
 .br
 .B pcre_extra *pcre_study(const pcre *\fIcode\fR, int \fIoptions\fR,
 .ti +5n
-.B char **\fIerrptr\fR);
+.B const char **\fIerrptr\fR);
 .PP
 .br
 .B int pcre_exec(const pcre *\fIcode\fR, "const pcre_extra *\fIextra\fR,"

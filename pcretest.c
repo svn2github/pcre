@@ -122,7 +122,7 @@ for(;;)
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
     printf("    %s{", OP_names[code[3]]);
-    if (*code != OP_TYPEEXACT) printf(",");
+    if (*code != OP_TYPEEXACT) printf("0,");
     printf("%d}", (code[1] << 8) + code[2]);
     if (*code == OP_TYPEMINUPTO) printf("?");
     code += 3;
@@ -268,6 +268,7 @@ int timeit = 0;
 int showinfo = 0;
 int posix = 0;
 int debug = 0;
+int done = 0;
 unsigned char buffer[30000];
 unsigned char dbuffer[1024];
 
@@ -326,7 +327,7 @@ fprintf(outfile, "PCRE version %s\n\n", pcre_version());
 
 /* Main loop */
 
-for (;;)
+while (!done)
   {
   pcre *re = NULL;
   pcre_extra *extra = NULL;
@@ -375,7 +376,8 @@ for (;;)
     if (fgets((char *)pp, len, infile) == NULL)
       {
       fprintf(outfile, "** Unexpected EOF\n");
-      goto END_OFF;
+      done = 1;
+      goto CONTINUE;
       }
     if (infile != stdin) fprintf(outfile, (char *)pp);
     }
@@ -410,7 +412,7 @@ for (;;)
       }
     }
 
-  /* Handle compiing via the POSIX interface, which doesn't support the
+  /* Handle compiling via the POSIX interface, which doesn't support the
   timing, showing, or debugging options. */
 
   if (posix || do_posix)
@@ -465,7 +467,10 @@ for (;;)
         for (;;)
           {
           if (fgets((char *)buffer, sizeof(buffer), infile) == NULL)
-            goto END_OFF;
+            {
+            done = 1;
+            goto CONTINUE;
+            }
           len = (int)strlen((char *)buffer);
           while (len > 0 && isspace(buffer[len-1])) len--;
           if (len == 0) break;
@@ -592,7 +597,11 @@ for (;;)
     options = 0;
 
     if (infile == stdin) printf("  data> ");
-    if (fgets((char *)buffer, sizeof(buffer), infile) == NULL) goto END_OFF;
+    if (fgets((char *)buffer, sizeof(buffer), infile) == NULL)
+      {
+      done = 1;
+      goto CONTINUE;
+      }
     if (infile != stdin) fprintf(outfile, (char *)buffer);
 
     len = (int)strlen((char *)buffer);
@@ -762,12 +771,12 @@ for (;;)
       }
     }
 
+  CONTINUE:
   if (posix || do_posix) regfree(&preg);
   if (re != NULL) free(re);
   if (extra != NULL) free(extra);
   }
 
-END_OFF:
 fprintf(outfile, "\n");
 return 0;
 }

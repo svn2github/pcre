@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "1.03 18-Dec-1997"
+#define PCRE_VERSION       "1.04 22-Dec-1997"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -57,7 +57,7 @@ define a macro for memmove() if USE_BCOPY is defined. */
 Standard C system should have one. */
 
 #ifndef offsetof
-#define offsetof(p_type,field) ((size_t)&(((p_type)0)->field))
+#define offsetof(p_type,field) ((size_t)&(((p_type *)0)->field))
 #endif
 
 /* Private options flags start at the most significant end of the two bytes.

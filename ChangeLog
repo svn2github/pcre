@@ -2,6 +2,29 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.04 19-Dec-97
+----------------------
+
+1. Corrected the man page, where some "const" qualifiers had been omitted.
+
+2. Made debugging output print "{0,xxx}" instead of just "{,xxx}" to agree with
+input syntax.
+
+3. Fixed memory leak which occurred when a regex with back references was
+matched with an offsets vector that wasn't big enough. The temporary memory
+that is used in this case wasn't being freed if the match failed.
+
+4. Tidied pcretest to ensure it frees memory that it gets.
+
+5. Temporary memory was being obtained in the case where the passed offsets
+vector was exactly big enough.
+
+6. Corrected definition of offsetof() from change 5 below.
+
+7. I had screwed up change 6 below and broken the rules for the use of
+setjmp(). Now fixed.
+
+
 Version 1.03 18-Dec-97
 ----------------------
 
@@ -39,7 +62,7 @@ optimized code for single-character negative classes.
 from gcc -Wall, and avoided calling it at all unless PCRE_EXTRA is used.
 
 7. Constructs such as \d{8,} were compiling into the equivalent of
-\d{8}\d{65527} instead of \d{8}\d* which didn't make much difference to the
+\d{8}\d{0,65527} instead of \d{8}\d* which didn't make much difference to the
 outcome, but in this particular case used more store than had been allocated,
 which caused the bug to be discovered because it threw up an internal error.
 
