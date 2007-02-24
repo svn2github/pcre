@@ -2,6 +2,15 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.08 27-Mar-98
+----------------------
+
+1. Add PCRE_UNGREEDY to invert the greediness of quantifiers.
+
+2. Add (?U) and (?X) to set PCRE_UNGREEDY and PCRE_EXTRA respectively. The
+latter must appear before anything that relies on it in the pattern.
+
+
 Version 1.07 16-Feb-98
 ----------------------
 

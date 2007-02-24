@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.07 16-Feb-1998
+PCRE version 1.08 27-Mar-1998
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -84,6 +84,9 @@ Failed: \ at end of pattern at offset 4
 
 /ab\gdef/X
 Failed: unrecognized character follows \ at offset 3
+
+/(?X)ab\gdef/X
+Failed: unrecognized character follows \ at offset 7
 
 /x{5,4}/
 Failed: numbers out of order in {} quantifier at offset 5
@@ -353,7 +356,21 @@ No first char
     /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
 No match
 
+"(?X).*/\Xfoo"
+Identifying subpattern count = 0
+Options: anchored extra
+No first char
+    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
+No match
+
 ".*/\Xfoo"X
+Identifying subpattern count = 0
+Options: anchored extra
+No first char
+    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
+ 0: /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
+
+"(?X).*/\Xfoo"
 Identifying subpattern count = 0
 Options: anchored extra
 No first char
@@ -646,6 +663,55 @@ Failed: operand of unlimited repeat could match the empty string at offset 6
 
 /((a|b|c)*)*/
 Failed: operand of unlimited repeat could match the empty string at offset 10
+
+/<.*>/
+Identifying subpattern count = 0
+No options
+First char = '<'
+    abc<def>ghi<klm>nop
+ 0: <def>ghi<klm>
+
+/<.*?>/
+Identifying subpattern count = 0
+No options
+First char = '<'
+    abc<def>ghi<klm>nop
+ 0: <def>
+
+/<.*>/U
+Identifying subpattern count = 0
+Options: ungreedy
+First char = '<'
+    abc<def>ghi<klm>nop
+ 0: <def>
+    
+/<.*>(?U)/
+Identifying subpattern count = 0
+Options: ungreedy
+First char = '<'
+    abc<def>ghi<klm>nop
+ 0: <def>
+
+/<.*?>/U
+Identifying subpattern count = 0
+Options: ungreedy
+First char = '<'
+    abc<def>ghi<klm>nop
+ 0: <def>ghi<klm>
+    
+/={3,}/U
+Identifying subpattern count = 0
+Options: ungreedy
+First char = '='
+    abc========def
+ 0: ===
+    
+/(?U)={3,}?/
+Identifying subpattern count = 0
+Options: ungreedy
+First char = '='
+    abc========def
+ 0: ========
 
 / End of test input /
 Identifying subpattern count = 0

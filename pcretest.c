@@ -404,6 +404,7 @@ while (!done)
       case 'P': do_posix = 1; break;
       case 'S': do_study = 1; break;
       case 'I': study_options |= PCRE_CASELESS; break;
+      case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
       case '\n': case ' ': break;
       default:
@@ -495,14 +496,15 @@ while (!done)
         {
         fprintf(outfile, "Identifying subpattern count = %d\n", count);
         if (options == 0) fprintf(outfile, "No options\n");
-          else fprintf(outfile, "Options:%s%s%s%s%s%s%s\n",
+          else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s\n",
             ((options & PCRE_ANCHORED) != 0)? " anchored" : "",
             ((options & PCRE_CASELESS) != 0)? " caseless" : "",
             ((options & PCRE_EXTENDED) != 0)? " extended" : "",
             ((options & PCRE_MULTILINE) != 0)? " multiline" : "",
             ((options & PCRE_DOTALL) != 0)? " dotall" : "",
             ((options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
-            ((options & PCRE_EXTRA) != 0)? " extra" : "");
+            ((options & PCRE_EXTRA) != 0)? " extra" : "",
+            ((options & PCRE_UNGREEDY) != 0)? " ungreedy" : "");
         if (first_char == -1)
           {
           fprintf(outfile, "First char at start or follows \\n\n");

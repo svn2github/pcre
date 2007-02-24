@@ -38,6 +38,8 @@
 
 /ab\gdef/X
 
+/(?X)ab\gdef/X
+
 /x{5,4}/
 
 /z{65536}/
@@ -146,7 +148,13 @@
 ".*/\Xfoo"X
     /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
 
+"(?X).*/\Xfoo"
+    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
+
 ".*/\Xfoo"X
+    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
+
+"(?X).*/\Xfoo"
     /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
 
 /(\.\d\d[1-9]?)\d+/
@@ -286,5 +294,26 @@
 /((a)*)*/
  
 /((a|b|c)*)*/
+
+/<.*>/
+    abc<def>ghi<klm>nop
+
+/<.*?>/
+    abc<def>ghi<klm>nop
+
+/<.*>/U
+    abc<def>ghi<klm>nop
+    
+/<.*>(?U)/
+    abc<def>ghi<klm>nop
+
+/<.*?>/U
+    abc<def>ghi<klm>nop
+    
+/={3,}/U
+    abc========def
+    
+/(?U)={3,}?/
+    abc========def
 
 / End of test input /

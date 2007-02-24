@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "1.07 16-Feb-1998"
+#define PCRE_VERSION       "1.08 27-Mar-1998"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -78,7 +78,7 @@ only some permitted at run or study time. */
 
 #define PUBLIC_OPTIONS \
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
-   PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA)
+   PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY)
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_CASELESS|PCRE_ANCHORED|PCRE_MULTILINE|PCRE_NOTBOL|PCRE_NOTEOL| \

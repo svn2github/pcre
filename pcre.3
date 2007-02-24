@@ -104,7 +104,8 @@ The \fIoptions\fR argument contains independent bits that affect the
 compilation. It should be zero if no options are required. Those options that
 are compabible with Perl can also be set at compile time from within the
 pattern (see the detailed description of regular expressions below) and all
-options except PCRE_EXTENDED and PCRE_EXTRA can be set at the time of matching.
+options except PCRE_EXTENDED, PCRE_EXTRA and PCRE_UNGREEDY can be set at the
+time of matching.
 .PP
 If \fIerrptr\fR is NULL, \fBpcre_compile()\fR returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fR returns
@@ -182,7 +183,15 @@ influencing the progress of a match.
   (2) Once a subpattern enclosed in (?>subpat) brackets has matched,
       backtracking never goes back into the pattern.
 
-See below for further details of both of these.
+See below for further details of both of these. PCRE_EXTRA can be set by a (?X)
+option setting within the pattern, but this must precede anything in the
+pattern which relies on its being set.
+
+  PCRE_UNGREEDY
+
+This option inverts the "greediness" of the quantifiers so that they are not
+greedy by default, but become greedy if followed by "?". It is not compatible
+with Perl. It can also be set by a (?U) option setting within the pattern.
 
 
 
@@ -418,6 +427,10 @@ character matches only at the very end of the string.
 recognized, and a backslash followed by a letter with no special meaning is
 faulted. There is also a new kind of parenthesized subpattern starting with (?>
 which has a block on backtracking into it once it has matched.
+
+(c) If PCRE_UNGREEDY is set, the greediness of the repetition quantifiers is
+inverted, that is, by default they are not greedy, but if followed by a
+question mark they are.
 
 
 .SH REGULAR EXPRESSION DETAILS
@@ -866,6 +879,11 @@ own right. Because it has two uses, it can sometimes appear doubled, as in
 which matches one digit by preference, but can match two if that is the only
 way the rest of the pattern matches.
 
+If the PCRE_UNGREEDY option is set (an option which is not available in Perl)
+then the quantifiers are not greedy by default, but individual ones can be made
+greedy by following they by a question mark. In other words, it inverts the
+default behaviour.
+
 When a parenthesized subpattern is quantified with a minimum repeat count that
 is greater than 1 or with a limited maximum, more store is required for the
 compiled pattern, in proportion to the size of the minimum or maximum.
@@ -985,6 +1003,15 @@ If the sequence (?x) occurs anywhere in a pattern, it has the effect of setting
 the PCRE_EXTENDED option, that is, whitespace is ignored and # introduces a
 comment that lasts till the next newline. The option applies to the whole
 pattern, not just to the portion that follows it.
+
+If the sequence (?U) occurs anywhere in a pattern, it has the effect of setting
+the PCRE_UNGREEDY option which inverts the greediness of quantifiers. This is
+an extension to Perl's facilities.
+
+If the sequence (?X) occurs in a pattern, it has the effect of setting the
+PCRE_EXTRA flag, which turns on some additional features not found in Perl.
+This flag setting is special in that it must occur earlier in the pattern than
+any of the additional features. It is best put at the start.
 
 If more than one option is required, they can be specified jointly, for example
 as (?ix) or (?mi).
