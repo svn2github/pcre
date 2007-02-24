@@ -30,7 +30,8 @@ static int log_store = 0;
 /* Debugging function to print the internal form of the regex. This is the same
 code as contained in pcre.c under the DEBUG macro. */
 
-static char *OP_names[] = { "End", "\\A", "\\B", "\\b", "\\D", "\\d",
+static const char *OP_names[] = {
+  "End", "\\A", "\\B", "\\b", "\\D", "\\d",
   "\\S", "\\s", "\\W", "\\w", "Cut", "\\Z", "^", "$", "Any", "chars",
   "not",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
@@ -327,7 +328,7 @@ for (;;)
   pcre *re = NULL;
   pcre_extra *extra = NULL;
   regex_t preg;
-  char *error;
+  const char *error;
   unsigned char *p, *pp;
   int do_study = 0;
   int do_debug = 0;
@@ -661,7 +662,7 @@ for (;;)
 
         case 'O':
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
-        if (n <= sizeof(offsets)/sizeof(int)) size_offsets = n;
+        if (n <= (int)sizeof(offsets)/sizeof(int)) size_offsets = n;
         continue;
 
         case 'Z':
@@ -694,7 +695,7 @@ for (;;)
         }
       else
         {
-        int i;
+        size_t i;
         for (i = 0; i < sizeof(pmatch)/sizeof(regmatch_t); i++)
           {
           if (pmatch[i].rm_so >= 0)

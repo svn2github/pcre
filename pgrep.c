@@ -137,7 +137,7 @@ int i;
 int rc = 1;
 int options = 0;
 int errptr;
-char *error;
+const char *error;
 BOOL filenames = TRUE;
 
 /* Process the options */

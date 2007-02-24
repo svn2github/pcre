@@ -603,8 +603,8 @@ operation from backtracking past it. For example, if the expression
 
   .*/foo
 
-is matched against the string "/foo/this/is/not" then after the initial greedy
-.* has swallowed the whole string, it keeps backtracking right the way to the
+is matched against the string "/foo/this/is/not" then after the greedy .*
+has swallowed the whole string, PCRE keeps backtracking all the way to the
 beginning before failing. If, on the other hand, the expression is
 
   .*/\\Xfoo
@@ -866,7 +866,7 @@ own right. Because it has two uses, it can sometimes appear doubled, as in
 which matches one digit by preference, but can match two if that is the only
 way the rest of the pattern matches.
 
-When a parenthesized subpattern is quantified a with minimum repeat count that
+When a parenthesized subpattern is quantified with a minimum repeat count that
 is greater than 1 or with a limited maximum, more store is required for the
 compiled pattern, in proportion to the size of the minimum or maximum.
 

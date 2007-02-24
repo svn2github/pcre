@@ -39,7 +39,7 @@ restrictions:
 
 /* Corresponding tables of PCRE error messages and POSIX error codes. */
 
-static char *estring[] = {
+static const char *estring[] = {
   ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
   ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
   ERR21, ERR22, ERR23 };
@@ -72,7 +72,7 @@ static int eint[] = {
 
 /* Table of texts corresponding to POSIX error codes */
 
-static char *pstring[] = {
+static const char *pstring[] = {
   "",                                /* Dummy for value 0 */
   "internal error",                  /* REG_ASSERT */
   "invalid repeat counts in {}",     /* BADBR      */
@@ -106,7 +106,7 @@ look them up in a table to turn them into POSIX-style error codes. */
 static int
 pcre_posix_error_code(const char *s)
 {
-int i;
+size_t i;
 for (i = 0; i < sizeof(estring)/sizeof(char *); i++)
   if (strcmp(s, estring[i]) == 0) return eint[i];
 return REG_ASSERT;
@@ -121,24 +121,20 @@ return REG_ASSERT;
 size_t
 regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
-char *message, *addmessage;
-int length, adlength;
+const char *message, *addmessage;
+size_t length, addlength;
 
-message = (errcode >= sizeof(pstring)/sizeof(char *))?
+message = (errcode >= (int)(sizeof(pstring)/sizeof(char *)))?
   "unknown error code" : pstring[errcode];
+length = strlen(message) + 1;
 
-length = (int)strlen(message) + 1;
-
-if (preg != NULL && (int)preg->re_erroffset != -1)
-  {
-  addmessage = " at offset ";
-  adlength = (int)strlen(addmessage) + 6;
-  }
-else adlength = 0;
+addmessage = " at offset ";
+addlength = (preg != NULL && (int)preg->re_erroffset != -1)?
+  strlen(addmessage) + 6 : 0;
 
 if (errbuf_size > 0)
   {
-  if (adlength > 0 && errbuf_size >= length + adlength)
+  if (addlength > 0 && errbuf_size >= length + addlength)
     sprintf(errbuf, "%s%s%-6d", message, addmessage, preg->re_erroffset);
   else
     {
@@ -147,7 +143,7 @@ if (errbuf_size > 0)
     }
   }
 
-return length + adlength;
+return length + addlength;
 }
 
 
@@ -183,7 +179,7 @@ Returns:      0 on success
 int
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
-char *errorptr;
+const char *errorptr;
 int erroffset;
 int options = 0;
 
@@ -225,7 +221,7 @@ if (rc == 0) return 0;    /* All pmatch were filled in */
 
 if (rc > 0)
   {
-  int i;
+  size_t i;
   for (i = rc; i < nmatch; i++) pmatch[i].rm_so = pmatch[i].rm_eo = -1;
   return 0;
   }

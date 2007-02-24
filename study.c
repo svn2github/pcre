@@ -52,13 +52,13 @@ Returns:       TRUE if table built, FALSE otherwise
 */
 
 static BOOL
-set_start_bits(uschar *code, uschar *start_bits)
+set_start_bits(const uschar *code, uschar *start_bits)
 {
 register int c;
 
 do
   {
-  uschar *tcode = code + 3;
+  const uschar *tcode = code + 3;
   BOOL try_next = TRUE;
 
   while (try_next)
@@ -264,12 +264,12 @@ Returns:    pointer to a pcre_extra block,
 */
 
 pcre_extra *
-pcre_study(const pcre *external_re, int options, char **errorptr)
+pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 BOOL caseless;
 uschar start_bits[32];
 real_pcre_extra *extra;
-real_pcre *re = (real_pcre *)external_re;
+const real_pcre *re = (const real_pcre *)external_re;
 
 *errorptr = NULL;
 

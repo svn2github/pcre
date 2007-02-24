@@ -48,7 +48,8 @@ static char rep_max[] = { 0, 0, 0, 0, 1, 1 };
 /* Text forms of OP_ values and things, for debugging */
 
 #ifdef DEBUG
-static char *OP_names[] = { "End", "\\A", "\\B", "\\b", "\\D", "\\d",
+static const char *OP_names[] = {
+  "End", "\\A", "\\B", "\\b", "\\D", "\\d",
   "\\S", "\\s", "\\W", "\\w", "Cut", "\\Z", "^", "$", "Any", "chars",
   "not",
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
@@ -81,7 +82,7 @@ static short int escapes[] = {
 
 /* Definition to allow mutual recursion */
 
-static BOOL compile_regex(int, int *,uschar **,uschar **,char **);
+static BOOL compile_regex(int, int *, uschar **, const uschar **, const char **);
 
 /* Structure for passing "static" information around between the functions
 doing the matching, so that they are thread-safe. */
@@ -98,10 +99,10 @@ typedef struct match_data {
   BOOL   noteol;                /* NOTEOL flag */
   BOOL   dotall;                /* Dot matches any char */
   BOOL   endonly;               /* Dollar not before final \n */
-  uschar *start_subject;        /* Start of the subject string */
-  uschar *end_subject;          /* End of the subject string */
+  const uschar *start_subject;  /* Start of the subject string */
+  const uschar *end_subject;    /* End of the subject string */
   jmp_buf fail_env;             /* Environment for longjump() break out */
-  uschar *end_match_ptr;        /* Subject position at end match */
+  const uschar *end_match_ptr;  /* Subject position at end match */
   int     end_offset_top;       /* Highwater mark at end of match */
 } match_data;
 
@@ -126,7 +127,7 @@ void  (*pcre_free)(void *) = free;
 *          Return version string                 *
 *************************************************/
 
-char *
+const char *
 pcre_version(void)
 {
 return PCRE_VERSION;
@@ -156,7 +157,7 @@ Returns:        number of identifying extraction brackets
 int
 pcre_info(const pcre *external_re, int *optptr, int *first_char)
 {
-real_pcre *re = (real_pcre *)external_re;
+const real_pcre *re = (const real_pcre *)external_re;
 if (re == NULL) return PCRE_ERROR_NULL;
 if (re->magic_number != MAGIC_NUMBER) return PCRE_ERROR_BADMAGIC;
 if (optptr != NULL) *optptr = (re->options & PUBLIC_OPTIONS);
@@ -360,10 +361,10 @@ Returns:     zero or positive => a data character
 */
 
 static int
-check_escape(uschar **ptrptr, char **errorptr, int bracount, int options,
-  BOOL isclass)
+check_escape(const uschar **ptrptr, const char **errorptr, int bracount,
+  int options, BOOL isclass)
 {
-uschar *ptr = *ptrptr;
+const uschar *ptr = *ptrptr;
 int c = *(++ptr) & 255;   /* Ensure > 0 on signed-char systems */
 int i;
 
@@ -382,7 +383,7 @@ else if ((i = escapes[c - '0']) != 0) c = i;
 
 else
   {
-  uschar *oldptr;
+  const uschar *oldptr;
   switch (c)
     {
     /* The handling of escape sequences consisting of a string of digits
@@ -502,7 +503,7 @@ Returns:    TRUE or FALSE
 */
 
 static BOOL
-is_counted_repeat(uschar *p)
+is_counted_repeat(const uschar *p)
 {
 if ((pcre_ctypes[*p++] & ctype_digit) == 0) return FALSE;
 while ((pcre_ctypes[*p] & ctype_digit) != 0) p++;
@@ -537,8 +538,8 @@ Returns:     pointer to '}' on success;
              current ptr on error, with errorptr set
 */
 
-static uschar *
-read_repeat_counts(uschar *p, int *minp, int *maxp, char **errorptr)
+static const uschar *
+read_repeat_counts(const uschar *p, int *minp, int *maxp, const char **errorptr)
 {
 int min = 0;
 int max = -1;
@@ -592,17 +593,17 @@ Returns:     TRUE on success
 */
 
 static BOOL
-compile_branch(int options, int *brackets, uschar **codeptr, uschar **ptrptr,
-  char **errorptr)
+compile_branch(int options, int *brackets, uschar **codeptr,
+  const uschar **ptrptr, const char **errorptr)
 {
 int repeat_type, op_type;
 int repeat_min, repeat_max;
 int bravalue, length;
 register int c;
 register uschar *code = *codeptr;
-uschar *ptr = *ptrptr;
+const uschar *ptr = *ptrptr;
+const uschar *oldptr;
 uschar *previous = NULL;
-uschar *oldptr;
 uschar class[32];
 
 /* Switch on next character until the end of the branch */
@@ -697,7 +698,7 @@ for (;; ptr++)
       /* Backslash may introduce a single character, or it may introduce one
       of the specials, which just set a flag. Escaped items are checked for
       validity in the pre-compiling pass. The sequence \b is a special case.
-      Inside a class (and only there) it is treated as backslash. Elsewhere
+      Inside a class (and only there) it is treated as backspace. Elsewhere
       it marks a word boundary. Other escapes have preset maps ready to
       or into the one we are building. We assume they have more than one
       character in them, so set class_count bigger than one. */
@@ -1214,7 +1215,7 @@ for (;; ptr++)
       continue;
       }
 
-    /* Reset and fall through */
+    /* Data character: reset and fall through */
 
     ptr = oldptr;
     c = '\\';
@@ -1305,10 +1306,10 @@ Returns:    TRUE on success
 */
 
 static BOOL
-compile_regex(int options, int *brackets, uschar **codeptr, uschar **ptrptr,
-  char **errorptr)
+compile_regex(int options, int *brackets, uschar **codeptr,
+  const uschar **ptrptr, const char **errorptr)
 {
-uschar *ptr = *ptrptr;
+const uschar *ptr = *ptrptr;
 uschar *code = *codeptr;
 uschar *start_bracket = code;
 
@@ -1374,7 +1375,7 @@ Returns:   TRUE or FALSE
 */
 
 static BOOL
-is_anchored(register uschar *code, BOOL multiline)
+is_anchored(register const uschar *code, BOOL multiline)
 {
 do {
    int op = (int)code[3];
@@ -1403,7 +1404,7 @@ Returns:   TRUE or FALSE
 */
 
 static BOOL
-is_startline(uschar *code)
+is_startline(const uschar *code)
 {
 do {
    if ((int)code[3] >= OP_BRA || code[3] == OP_ASSERT)
@@ -1488,7 +1489,7 @@ Returns:       pointer to compiled data block, or NULL on error,
 */
 
 pcre *
-pcre_compile(const char *pattern, int options, char **errorptr,
+pcre_compile(const char *pattern, int options, const char **errorptr,
   int *erroroffset)
 {
 real_pcre *re;
@@ -1498,9 +1499,10 @@ int runlength;
 int c, size;
 int bracount = 0;
 int brastack[200];
-int brastackptr = 0;
 int top_backref = 0;
-uschar *code, *ptr;
+unsigned int brastackptr = 0;
+uschar *code;
+const uschar *ptr;
 
 #ifdef DEBUG
 uschar *code_base, *code_end;
@@ -1539,7 +1541,7 @@ internal flag settings. Make an attempt to correct for any counted white space
 if an "extended" flag setting appears late in the pattern. We can't be so
 clever for #-comments. */
 
-ptr = (uschar *)(pattern - 1);
+ptr = (const uschar *)(pattern - 1);
 while ((c = *(++ptr)) != 0)
   {
   int min, max;
@@ -1566,7 +1568,7 @@ while ((c = *(++ptr)) != 0)
 
     case '\\':
       {
-      uschar *save_ptr = ptr;
+      const uschar *save_ptr = ptr;
       c = check_escape(&ptr, errorptr, bracount, options, FALSE);
       if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
       if (c >= 0)
@@ -1831,7 +1833,7 @@ while ((c = *(++ptr)) != 0)
 
       if (c == '\\')
         {
-        uschar *saveptr = ptr;
+        const uschar *saveptr = ptr;
         c = check_escape(&ptr, errorptr, bracount, options, FALSE);
         if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
         if (c < 0) { ptr = saveptr; break; }
@@ -1879,7 +1881,7 @@ re->options = options;
 error, *errorptr will be set non-NULL, so we don't need to look at the result
 of the function here. */
 
-ptr = (uschar *)pattern;
+ptr = (const uschar *)pattern;
 code = re->code;
 *code = OP_BRA;
 bracount = 0;
@@ -1906,7 +1908,7 @@ if (*errorptr != NULL)
   {
   (pcre_free)(re);
   PCRE_ERROR_RETURN:
-  *erroroffset = ptr - (uschar *)pattern;
+  *erroroffset = ptr - (const uschar *)pattern;
   return NULL;
   }
 
@@ -2204,9 +2206,9 @@ Returns:      TRUE if matched
 */
 
 static BOOL
-match_ref(int number, register uschar *eptr, int length, match_data *md)
+match_ref(int number, register const uschar *eptr, int length, match_data *md)
 {
-uschar *p = md->start_subject + md->offset_vector[number];
+const uschar *p = md->start_subject + md->offset_vector[number];
 
 #ifdef DEBUG
 if (eptr >= md->end_subject)
@@ -2253,7 +2255,7 @@ Returns:       TRUE if matched
 */
 
 static BOOL
-match(register uschar *eptr, register uschar *ecode, int offset_top,
+match(register const uschar *eptr, register const uschar *ecode, int offset_top,
   match_data *md)
 {
 for (;;)
@@ -2261,7 +2263,7 @@ for (;;)
   int min, max, ctype;
   register int i;
   register int c;
-  BOOL minimize;
+  BOOL minimize = FALSE;
 
   /* Opening bracket. Check the alternative branches in turn, failing if none
   match. We have to set the start offset if required and there is space
@@ -2274,7 +2276,7 @@ for (;;)
   if ((int)*ecode >= OP_BRA)
     {
     int number = (*ecode - OP_BRA) << 1;
-    int save_offset1, save_offset2;
+    int save_offset1 = 0, save_offset2 = 0;
 
     #ifdef DEBUG
     printf("start bracket %d\n", number/2);
@@ -2401,7 +2403,7 @@ for (;;)
 
     case OP_BRAZERO:
       {
-      uschar *next = ecode+1;
+      const uschar *next = ecode+1;
       if (match(eptr, next, offset_top, md)) return TRUE;
       do next += (next[1] << 8) + next[2]; while (*next == OP_ALT);
       ecode = next + 3;
@@ -2410,7 +2412,7 @@ for (;;)
 
     case OP_BRAMINZERO:
       {
-      uschar *next = ecode+1;
+      const uschar *next = ecode+1;
       do next += (next[1] << 8) + next[2]; while (*next == OP_ALT);
       if (match(eptr, next+3, offset_top, md)) return TRUE;
       ecode++;
@@ -2426,7 +2428,7 @@ for (;;)
     case OP_KETRMAX:
       {
       int number;
-      uschar *prev = ecode - (ecode[1] << 8) - ecode[2];
+      const uschar *prev = ecode - (ecode[1] << 8) - ecode[2];
 
       if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT || *prev == OP_ONCE)
         {
@@ -2675,7 +2677,7 @@ for (;;)
 
       else
         {
-        uschar *pp = eptr;
+        const uschar *pp = eptr;
         for (i = min; i < max; i++)
           {
           if (!match_ref(number, eptr, length, md)) break;
@@ -2699,8 +2701,8 @@ for (;;)
 
     case OP_CLASS:
       {
-      uschar *data = ecode + 1;  /* Save for matching */
-      ecode += 33;               /* Advance past the item */
+      const uschar *data = ecode + 1;  /* Save for matching */
+      ecode += 33;                     /* Advance past the item */
 
       switch (*ecode)
         {
@@ -2783,7 +2785,7 @@ for (;;)
 
       else
         {
-        uschar *pp = eptr;
+        const uschar *pp = eptr;
         for (i = min; i < max; eptr++, i++)
           {
           if (eptr >= md->end_subject) break;
@@ -2901,7 +2903,7 @@ for (;;)
         }
       else
         {
-        uschar *pp = eptr;
+        const uschar *pp = eptr;
         for (i = min; i < max; i++)
           {
           if (eptr >= md->end_subject || c != pcre_lcc[*eptr]) break;
@@ -2931,7 +2933,7 @@ for (;;)
         }
       else
         {
-        uschar *pp = eptr;
+        const uschar *pp = eptr;
         for (i = min; i < max; i++)
           {
           if (eptr >= md->end_subject || c != *eptr) break;
@@ -3028,7 +3030,7 @@ for (;;)
         }
       else
         {
-        uschar *pp = eptr;
+        const uschar *pp = eptr;
         for (i = min; i < max; i++)
           {
           if (eptr >= md->end_subject || c == pcre_lcc[*eptr]) break;
@@ -3058,7 +3060,7 @@ for (;;)
         }
       else
         {
-        uschar *pp = eptr;
+        const uschar *pp = eptr;
         for (i = min; i < max; i++)
           {
           if (eptr >= md->end_subject || c == *eptr) break;
@@ -3175,7 +3177,7 @@ for (;;)
 
     else
       {
-      uschar *pp = eptr;
+      const uschar *pp = eptr;
       switch(ctype)
         {
         case OP_ANY:
@@ -3307,11 +3309,11 @@ int resetcount;
 int ocount = offsetcount;
 int first_char = -1;
 match_data match_block;
-uschar *start_bits = NULL;
-uschar *start_match = (uschar *)subject;
-uschar *end_subject;
-real_pcre *re = (real_pcre *)external_re;
-real_pcre_extra *extra = (real_pcre_extra *)external_extra;
+const uschar *start_bits = NULL;
+const uschar *start_match = (uschar *)subject;
+const uschar *end_subject;
+const real_pcre *re = (const real_pcre *)external_re;
+const real_pcre_extra *extra = (const real_pcre_extra *)external_extra;
 BOOL anchored = ((re->options | options) & PCRE_ANCHORED) != 0;
 BOOL startline = (re->options & PCRE_STARTLINE) != 0;
 
@@ -3321,7 +3323,7 @@ if (re == NULL || subject == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (re->magic_number != MAGIC_NUMBER) return PCRE_ERROR_BADMAGIC;
 
-match_block.start_subject = (uschar *)subject;
+match_block.start_subject = (const uschar *)subject;
 match_block.end_subject = match_block.start_subject + length;
 end_subject = match_block.end_subject;
 

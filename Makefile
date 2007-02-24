@@ -1,6 +1,6 @@
 # Make file for PCRE (Perl-Compatible Regular Expression) library.
 
-# Edit CC , CFLAGS, and RANLIB for your system.
+# Edit CC, CFLAGS, and RANLIB for your system.
 
 # It is believed that RANLIB=ranlib is required for AIX, BSDI, FreeBSD, Linux,
 # MIPS RISCOS, NetBSD, OpenBSD, Digital Unix, and Ultrix.
@@ -12,7 +12,7 @@
 # lacks the strerror() function, but can provide the equivalent by indexing
 # into errlist.
 
-CC = gcc -O
+CC = gcc -O2
 CFLAGS =
 RANLIB = @true
 
@@ -38,22 +38,22 @@ libpcreposix.a: pcreposix.o
 		ar cq libpcreposix.a pcreposix.o
 		$(RANLIB) libpcreposix.a
 
-pcre.o:         pcre.c pcre.h internal.h
+pcre.o:         pcre.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) pcre.c
 
-pcreposix.o:    pcreposix.c pcreposix.h internal.h
+pcreposix.o:    pcreposix.c pcreposix.h internal.h Makefile
 		$(CC) -c $(CFLAGS) pcreposix.c
 
 chartables.o:   chartables.c
 		$(CC) -c $(CFLAGS) chartables.c
 
-study.o:        study.c pcre.h internal.h
+study.o:        study.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) study.c
 
-pcretest.o:     pcretest.c pcre.h
+pcretest.o:     pcretest.c pcre.h Makefile
 		$(CC) -c $(CFLAGS) pcretest.c
 
-pgrep.o:        pgrep.c pcre.h
+pgrep.o:        pgrep.c pcre.h Makefile
 		$(CC) -c $(CFLAGS) pgrep.c
 
 # An auxiliary program makes the character tables
@@ -61,7 +61,7 @@ pgrep.o:        pgrep.c pcre.h
 chartables.c:    maketables
 		./maketables >chartables.c
 
-maketables:     maketables.c
+maketables:     maketables.c Makefile
 		$(CC) -o maketables $(CFLAGS) maketables.c
 
 # We deliberately omit maketables and chartables.c from 'make clean'; once made
@@ -69,5 +69,14 @@ maketables:     maketables.c
 # you don't want to throw them away.
 
 clean:;         /bin/rm -f *.o *.a pcretest pgrep
+
+# Run the tests
+
+runtest:        all
+		./pcretest testinput testtry
+		diff testtry testoutput
+		./pcretest -i testinput2 testtry
+		diff testtry testoutput2
+		rm -f testtry
 
 # End

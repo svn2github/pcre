@@ -33,14 +33,17 @@ a test program called pcretest, and the pgrep command.
 To test PCRE, run pcretest on the file testinput, and compare the output with
 the contents of testoutput. There should be no differences. For example:
 
-  pcretest testinput /tmp/anything
-  diff /tmp/anything testoutput
+  pcretest testinput some.file
+  diff some.file testoutput
 
 Do the same with testinput2, comparing the output with testoutput2, but this
 time using the -i flag for pcretest, i.e.
 
-  pcretest -i testinput2 /tmp/anything
-  diff /tmp/anything testoutput2
+  pcretest -i testinput2 some.file
+  diff some.file testoutput2
+
+The make target "runtest" runs both these tests, using the file "testtry" to
+store the intermediate output, deleting it at the end if all goes well.
 
 There are two sets of tests because the first set can also be fed directly into
 the perltest program to check that Perl gives the same results. The second set

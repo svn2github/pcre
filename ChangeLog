@@ -2,6 +2,20 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.02 12-Dec-97
+----------------------
+
+1. Typos in pcre.3 and comments in the source fixed.
+
+2. Applied a contributed patch to get rid of places where it used to remove
+'const' from variables, and fixed some signed/unsigned and uninitialized
+variable warnings.
+
+3. Added the "runtest" target to Makefile.
+
+4. Set default compiler flag to -O2 rather than just -O.
+
+
 Version 1.01 19-Nov-97
 ----------------------
 

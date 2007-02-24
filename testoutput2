@@ -1,5 +1,5 @@
 Testing Perl-Compatible Regular Expressions
-PCRE version 1.01 19-Nov-1997
+PCRE version 1.02 12-Dec-1997
 
 /(a)b|/
 Identifying subpattern count = 1
