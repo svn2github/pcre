@@ -1,4 +1,4 @@
-PCRE version 4.2 14-Apr-2003
+PCRE version 4.3 21-May-2003
 
 /-- Do not use the \x{} construct except with patterns that have the --/
 /-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
@@ -853,6 +853,26 @@ No match
  0: X
     \x{123} 
  0: \x{123}
+
+/^[ac]*b/8
+  xb
+No match
+
+/^[ac\x{100}]*b/8
+  xb
+No match
+
+/^[^x]*b/8i
+  xb
+No match
+
+/^[^x]*b/8
+  xb
+No match
+  
+/^\d*b/8
+  xb 
+No match
 
 / End of testinput4 /
 

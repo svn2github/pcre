@@ -1,6 +1,54 @@
 ChangeLog for PCRE
 ------------------
 
+Version 4.3 21-May-03
+---------------------
+
+1. Two instances of @WIN_PREFIX@ omitted from the Windows targets in the
+   Makefile.
+
+2. Some refactoring to improve the quality of the code:
+
+   (i)   The utf8_table... variables are now declared "const".
+
+   (ii)  The code for \cx, which used the "case flipping" table to upper case
+         lower case letters, now just substracts 32. This is ASCII-specific,
+         but the whole concept of \cx is ASCII-specific, so it seems
+         reasonable.
+
+   (iii) PCRE was using its character types table to recognize decimal and
+         hexadecimal digits in the pattern. This is silly, because it handles
+         only 0-9, a-f, and A-F, but the character types table is locale-
+         specific, which means strange things might happen. A private
+         table is now used for this - though it costs 256 bytes, a table is
+         much faster than multiple explicit tests. Of course, the standard
+         character types table is still used for matching digits in subject
+         strings against \d.
+
+   (iv)  Strictly, the identifier ESC_t is reserved by POSIX (all identifiers
+         ending in _t are). So I've renamed it as ESC_tee.
+
+3. The first argument for regexec() in the POSIX wrapper should have been
+   defined as "const".
+
+4. Changed pcretest to use malloc() for its buffers so that they can be
+   Electric Fenced for debugging.
+
+5. There were several places in the code where, in UTF-8 mode, PCRE would try
+   to read one or more bytes before the start of the subject string. Often this
+   had no effect on PCRE's behaviour, but in some circumstances it could
+   provoke a segmentation fault.
+
+6. A lookbehind at the start of a pattern in UTF-8 mode could also cause PCRE
+   to try to read one or more bytes before the start of the subject string.
+
+7. A lookbehind in a pattern matched in non-UTF-8 mode on a PCRE compiled with
+   UTF-8 support could misbehave in various ways if the subject string
+   contained bytes with the 0x80 bit set and the 0x40 bit unset in a lookbehind
+   area. (PCRE was not checking for the UTF-8 mode flag, and trying to move
+   back over UTF-8 characters.)
+
+
 Version 4.2 14-Apr-03
 ---------------------
 

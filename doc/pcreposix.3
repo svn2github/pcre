@@ -50,7 +50,9 @@ a replacement library. Other POSIX options are not even defined.
 When PCRE is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are
 still those of Perl, subject to the setting of various PCRE options, as
-described below.
+described below. "POSIX-like in style" means that the API approximates to the
+POSIX definition; it is not fully POSIX-compatible, and in multi-byte encoding
+domains it is probably even less compatible.
 
 The header for these functions is supplied as \fBpcreposix.h\fR to avoid any
 potential clash with other POSIX libraries. It can, of course, be renamed or

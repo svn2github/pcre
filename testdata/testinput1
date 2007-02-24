@@ -3835,4 +3835,7 @@
     ≈жедј
     ≈жедя
 
+/(?<=Z)X./
+  \x84XAZXB
+
 / End of testinput1 /

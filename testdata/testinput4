@@ -495,4 +495,19 @@
     XYZ
     \x{123} 
 
+/^[ac]*b/8
+  xb
+
+/^[ac\x{100}]*b/8
+  xb
+
+/^[^x]*b/8i
+  xb
+
+/^[^x]*b/8
+  xb
+  
+/^\d*b/8
+  xb 
+
 / End of testinput4 /

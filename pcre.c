@@ -113,7 +113,7 @@ static const short int escapes[] = {
     0,      0, -ESC_Z,    '[',   '\\',    ']',    '^',    '_',   /* X - _ */
   '`',      7, -ESC_b,      0, -ESC_d,  ESC_e,  ESC_f,      0,   /* ` - g */
     0,      0,      0,      0,      0,      0,  ESC_n,      0,   /* h - o */
-    0,      0,  ESC_r, -ESC_s,  ESC_t,      0,      0, -ESC_w,   /* p - w */
+    0,      0,  ESC_r, -ESC_s,  ESC_tee,    0,      0, -ESC_w,   /* p - w */
     0,      0, -ESC_z                                            /* x - z */
 };
 
@@ -150,6 +150,56 @@ static const int posix_class_maps[] = {
   cbit_xdigit,-1,         -1              /* xdigit */
 };
 
+/* Table to identify ASCII digits and hex digits. This is used when compiling
+patterns. Note that the tables in chartables are dependent on the locale, and
+may mark arbitrary characters as digits - but the PCRE compiling code expects
+to handle only 0-9, a-z, and A-Z as digits when compiling. That is why we have
+a private table here. It costs 256 bytes, but it is a lot faster than doing
+character value tests (at least in some simple cases I timed), and in some
+applications one wants PCRE to compile efficiently as well as match
+efficiently.
+
+For convenience, we use the same bit definitions as in chartables:
+
+  0x04   decimal digit
+  0x08   hexadecimal digit
+
+Then we can use ctype_digit and ctype_xdigit in the code. */
+
+static const unsigned char digitab[] =
+  {
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*   0-  7 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*   8- 15 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  16- 23 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  24- 31 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*    - '  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  ( - /  */
+  0x0c,0x0c,0x0c,0x0c,0x0c,0x0c,0x0c,0x0c, /*  0 - 7  */
+  0x0c,0x0c,0x00,0x00,0x00,0x00,0x00,0x00, /*  8 - ?  */
+  0x00,0x08,0x08,0x08,0x08,0x08,0x08,0x00, /*  @ - G  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  H - O  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  P - W  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  X - _  */
+  0x00,0x08,0x08,0x08,0x08,0x08,0x08,0x00, /*  ` - g  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  h - o  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  p - w  */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  x -127 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 128-135 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 136-143 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 144-151 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 152-159 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 160-167 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 168-175 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 176-183 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 184-191 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 192-199 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 200-207 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 208-215 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 216-223 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 224-231 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 232-239 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 240-247 */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};/* 248-255 */
 
 /* Definition to allow mutual recursion */
 
@@ -315,19 +365,20 @@ tables. */
 /* These are the breakpoints for different numbers of bytes in a UTF-8
 character. */
 
-static int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
+static const int utf8_table1[] =
+  { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
 
 /* These are the indicator bits and the mask for the data bits to set in the
 first byte of a character, indexed by the number of additional bytes. */
 
-static int utf8_table2[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
-static int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+static const int utf8_table2[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
+static const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
 
 /* Table of the number of extra characters, indexed by the first character
 masked with 0x3f. The highest number for a valid UTF-8 character is in fact
 0x3d. */
 
-static uschar utf8_table4[] = {
+static const uschar utf8_table4[] = {
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -686,7 +737,7 @@ else
       {
       oldptr = ptr;
       c -= '0';
-      while ((cd->ctypes[ptr[1]] & ctype_digit) != 0)
+      while ((digitab[ptr[1]] & ctype_digit) != 0)
         c = c * 10 + *(++ptr) - '0';
       if (c < 10 || c <= bracount)
         {
@@ -712,8 +763,7 @@ else
 
     case '0':
     c -= '0';
-    while(i++ < 2 && (cd->ctypes[ptr[1]] & ctype_digit) != 0 &&
-      ptr[1] != '8' && ptr[1] != '9')
+    while(i++ < 2 && ptr[1] >= '0' && ptr[1] <= '7')
         c = c * 8 + *(++ptr) - '0';
     c &= 255;     /* Take least significant 8 bits */
     break;
@@ -728,12 +778,12 @@ else
       const uschar *pt = ptr + 2;
       register int count = 0;
       c = 0;
-      while ((cd->ctypes[*pt] & ctype_xdigit) != 0)
+      while ((digitab[*pt] & ctype_xdigit) != 0)
         {
+        int cc = *pt++;
+        if (cc >= 'a') cc -= 32;            /* Convert to upper case */
         count++;
-        c = c * 16 + cd->lcc[*pt] -
-          (((cd->ctypes[*pt] & ctype_digit) != 0)? '0' : 'W');
-        pt++;
+        c = c * 16 + cc - ((cc < 'A')? '0' : ('A' - 10));
         }
       if (*pt == '}')
         {
@@ -749,11 +799,11 @@ else
     /* Read just a single hex char */
 
     c = 0;
-    while (i++ < 2 && (cd->ctypes[ptr[1]] & ctype_xdigit) != 0)
+    while (i++ < 2 && (digitab[ptr[1]] & ctype_xdigit) != 0)
       {
-      ptr++;
-      c = c * 16 + cd->lcc[*ptr] -
-        (((cd->ctypes[*ptr] & ctype_digit) != 0)? '0' : 'W');
+      int cc = *(++ptr);
+      if (cc >= 'a') cc -= 32;              /* Convert to upper case */
+      c = c * 16 + cc - ((cc < 'A')? '0' : ('A' - 10));
       }
     break;
 
@@ -767,9 +817,10 @@ else
       return 0;
       }
 
-    /* A letter is upper-cased; then the 0x40 bit is flipped */
+    /* A letter is upper-cased; then the 0x40 bit is flipped. This coding
+    is ASCII-specific, but then the whole concept of \cx is ASCII-specific. */
 
-    if (c >= 'a' && c <= 'z') c = cd->fcc[c];
+    if (c >= 'a' && c <= 'z') c -= 32;
     c ^= 0x40;
     break;
 
@@ -815,15 +866,16 @@ Returns:    TRUE or FALSE
 static BOOL
 is_counted_repeat(const uschar *p, compile_data *cd)
 {
-if ((cd->ctypes[*p++] & ctype_digit) == 0) return FALSE;
-while ((cd->ctypes[*p] & ctype_digit) != 0) p++;
+if ((digitab[*p++] && ctype_digit) == 0) return FALSE;
+while ((digitab[*p] & ctype_digit) != 0) p++;
 if (*p == '}') return TRUE;
 
 if (*p++ != ',') return FALSE;
 if (*p == '}') return TRUE;
 
-if ((cd->ctypes[*p++] & ctype_digit) == 0) return FALSE;
-while ((cd->ctypes[*p] & ctype_digit) != 0) p++;
+if ((digitab[*p++] && ctype_digit) == 0) return FALSE;
+while ((digitab[*p] & ctype_digit) != 0) p++;
+
 return (*p == '}');
 }
 
@@ -856,14 +908,14 @@ read_repeat_counts(const uschar *p, int *minp, int *maxp,
 int min = 0;
 int max = -1;
 
-while ((cd->ctypes[*p] & ctype_digit) != 0) min = min * 10 + *p++ - '0';
+while ((digitab[*p] & ctype_digit) != 0) min = min * 10 + *p++ - '0';
 
 if (*p == '}') max = min; else
   {
   if (*(++p) != '}')
     {
     max = 0;
-    while((cd->ctypes[*p] & ctype_digit) != 0) max = max * 10 + *p++ - '0';
+    while((digitab[*p] & ctype_digit) != 0) max = max * 10 + *p++ - '0';
     if (max < min)
       {
       *errorptr = ERR4;
@@ -2570,9 +2622,11 @@ for (;; ptr++)
           ptr += 3;
           }
 
-        /* Condition to test for a numbered subpattern match */
+        /* Condition to test for a numbered subpattern match. We know that
+        if a digit follows ( then there will just be digits until ) because
+        the syntax was checked in the first pass. */
 
-        else if ((cd->ctypes[ptr[1]] & ctype_digit) != 0)
+        else if ((digitab[ptr[1]] && ctype_digit) != 0)
           {
           int condref;                 /* Don't amalgamate; some compilers */
           condref = *(++ptr) - '0';    /* grumble at autoincrement in declaration */
@@ -2625,7 +2679,7 @@ for (;; ptr++)
         *code++ = OP_CALLOUT;
           {
           int n = 0;
-          while ((cd->ctypes[*(++ptr)] & ctype_digit) != 0)
+          while ((digitab[*(++ptr)] & ctype_digit) != 0)
             n = n * 10 + *ptr - '0';
           if (n > 255)
             {
@@ -2725,8 +2779,7 @@ for (;; ptr++)
           {
           const uschar *called;
           recno = 0;
-
-          while ((cd->ctypes[*ptr] & ctype_digit) != 0)
+          while((digitab[*ptr] & ctype_digit) != 0)
             recno = recno * 10 + *ptr++ - '0';
 
           /* Come here from code above that handles a named recursion */
@@ -4164,7 +4217,7 @@ while ((c = *(++ptr)) != 0)
         case '5': case '6': case '7': case '8': case '9':
         ptr += 2;
         if (c != 'R')
-          while ((compile_block.ctypes[*(++ptr)] & ctype_digit) != 0);
+          while ((digitab[*(++ptr)] & ctype_digit) != 0);
         if (*ptr != ')')
           {
           *errorptr = ERR29;
@@ -4190,7 +4243,7 @@ while ((c = *(++ptr)) != 0)
 
         case 'C':
         ptr += 2;
-        while ((compile_block.ctypes[*(++ptr)] & ctype_digit) != 0);
+        while ((digitab[*(++ptr)] & ctype_digit) != 0);
         if (*ptr != ')')
           {
           *errorptr = ERR39;
@@ -4257,11 +4310,11 @@ while ((c = *(++ptr)) != 0)
           ptr += 4;
           length += 3;
           }
-        else if ((compile_block.ctypes[ptr[3]] & ctype_digit) != 0)
+        else if ((digitab[ptr[3]] & ctype_digit) != 0)
           {
           ptr += 4;
           length += 3;
-          while ((compile_block.ctypes[*ptr] & ctype_digit) != 0) ptr++;
+          while ((digitab[*ptr] & ctype_digit) != 0) ptr++;
           if (*ptr != ')')
             {
             *errorptr = ERR26;
@@ -5171,17 +5224,28 @@ for (;;)
 
     case OP_REVERSE:
 #ifdef SUPPORT_UTF8
-    c = GET(ecode,1);
-    for (i = 0; i < c; i++)
+    if (md->utf8)
       {
-      eptr--;
-      BACKCHAR(eptr)
+      c = GET(ecode,1);
+      for (i = 0; i < c; i++)
+        {
+        eptr--;
+        if (eptr < md->start_subject) return MATCH_NOMATCH;
+        BACKCHAR(eptr)
+        }
       }
-#else
-    eptr -= GET(ecode,1);
+    else
 #endif
 
-    if (eptr < md->start_subject) return MATCH_NOMATCH;
+    /* No UTF-8 support, or not in UTF-8 mode: count is byte count */
+
+      {
+      eptr -= GET(ecode,1);
+      if (eptr < md->start_subject) return MATCH_NOMATCH;
+      }
+
+    /* Skip to next op code */
+
     ecode += 1 + LINK_SIZE;
     break;
 
@@ -5999,11 +6063,12 @@ for (;;)
               }
             eptr += len;
             }
-          while (eptr >= pp)
+          for (;;)
             {
-            if ((rrc = match(eptr--, ecode, offset_top, md, ims, eptrb, 0)) !=
+            if ((rrc = match(eptr, ecode, offset_top, md, ims, eptrb, 0)) !=
                  MATCH_NOMATCH) return rrc;
-            BACKCHAR(eptr)
+            if (eptr-- == pp) break;        /* Stop if tried at original pos */
+            BACKCHAR(eptr);
             }
           }
         else
@@ -6111,10 +6176,11 @@ for (;;)
           if (!match_xclass(c, data)) break;
           eptr += len;
           }
-        while (eptr >= pp)
+        for(;;)
           {
-          if ((rrc = match(eptr--, ecode, offset_top, md, ims, eptrb, 0)) !=
+          if ((rrc = match(eptr, ecode, offset_top, md, ims, eptrb, 0)) !=
                MATCH_NOMATCH) return rrc;
+          if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr)
           }
         return MATCH_NOMATCH;
@@ -6490,11 +6556,11 @@ for (;;)
             if (c == d) break;
             eptr += len;
             }
-          while (eptr >= pp)
+          for(;;)
             {
             if ((rrc = match(eptr, ecode, offset_top, md, ims, eptrb, 0)) !=
                  MATCH_NOMATCH) return rrc;
-            eptr--;
+            if (eptr-- == pp) break;        /* Stop if tried at original pos */
             BACKCHAR(eptr);
             }
           }
@@ -6595,11 +6661,11 @@ for (;;)
             if (c == d) break;
             eptr += len;
             }
-          while (eptr >= pp)
+          for(;;)
             {
             if ((rrc = match(eptr, ecode, offset_top, md, ims, eptrb, 0)) !=
                 MATCH_NOMATCH) return rrc;
-            eptr--;
+            if (eptr-- == pp) break;        /* Stop if tried at original pos */
             BACKCHAR(eptr);
             }
           }
@@ -7053,10 +7119,11 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        while (eptr >= pp)
+        for(;;)
           {
-          if ((rrc = match(eptr--, ecode, offset_top, md, ims, eptrb, 0)) !=
+          if ((rrc = match(eptr, ecode, offset_top, md, ims, eptrb, 0)) !=
                MATCH_NOMATCH) return rrc;
+          if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr);
           }
         }

@@ -77,7 +77,7 @@ typedef struct {
 /* The functions */
 
 extern int regcomp(regex_t *, const char *, int);
-extern int regexec(regex_t *, const char *, size_t, regmatch_t *, int);
+extern int regexec(const regex_t *, const char *, size_t, regmatch_t *, int);
 extern size_t regerror(int, const regex_t *, char *, size_t);
 extern void regfree(regex_t *);
 

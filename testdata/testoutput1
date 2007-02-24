@@ -1,4 +1,4 @@
-PCRE version 4.2 14-Apr-2003
+PCRE version 4.3 21-May-2003
 
 /the quick brown fox/
     the quick brown fox
@@ -6266,6 +6266,10 @@ No match
  0: \xc5\xe6\xe5\xe4\xc0
     ≈жедя
  0: \xc5\xe6\xe5\xe4\xdf
+
+/(?<=Z)X./
+  \x84XAZXB
+ 0: XB
 
 / End of testinput1 /
 

@@ -194,8 +194,8 @@ wininstall : winshared
 	$(mkinstalldirs) $(DESTDIR)$(BINDIR)
 	$(INSTALL) .libs/@WIN_PREFIX@pcre.dll $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcre.dll
 	$(INSTALL) .libs/@WIN_PREFIX@pcreposix.dll $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcreposix.dll
-	$(INSTALL) .libs/libpcreposix.dll.a $(DESTDIR)$(LIBDIR)/libpcreposix.dll.a
-	$(INSTALL) .libs/libpcre.dll.a $(DESTDIR)$(LIBDIR)/libpcre.dll.a
+	$(INSTALL) .libs/@WIN_PREFIX@libpcreposix.dll.a $(DESTDIR)$(LIBDIR)/@WIN_PREFIX@libpcreposix.dll.a
+	$(INSTALL) .libs/@WIN_PREFIX@libpcre.dll.a $(DESTDIR)$(LIBDIR)/@WIN_PREFIX@libpcre.dll.a
 	-strip -g $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcre.dll
 	-strip -g $(DESTDIR)$(BINDIR)/@WIN_PREFIX@pcreposix.dll
 	-strip $(DESTDIR)$(BINDIR)/pcregrep@EXEEXT@

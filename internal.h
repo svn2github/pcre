@@ -247,8 +247,11 @@ ESC_n is defined as yet another macro, which is set in config.h to either \n
 #define ESC_r '\r'
 #endif
 
-#ifndef ESC_t
-#define ESC_t '\t'
+/* We can't officially use ESC_t because it is a POSIX reserved identifier
+(presumably because of all the others like size_t). */
+
+#ifndef ESC_tee
+#define ESC_tee '\t'
 #endif
 
 /* These are escaped items that aren't just an encoding of a particular data

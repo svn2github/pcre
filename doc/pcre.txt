@@ -3090,7 +3090,10 @@ DESCRIPTION
      that is POSIX-like in style. The syntax and semantics of the
      regular expressions themselves are still those of Perl, sub-
      ject  to  the  setting of various PCRE options, as described
-     below.
+     below. "POSIX-like in style" means that the API approximates
+     to  the  POSIX definition; it is not fully POSIX-compatible,
+     and in multi-byte encoding domains it is probably even  less
+     compatible.
 
      The header for these functions is supplied as pcreposix.h to
      avoid  any  potential  clash  with other POSIX libraries. It

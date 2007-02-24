@@ -37,6 +37,9 @@ Makefile. */
 
 #define LOOPREPEAT 50000
 
+#define BUFFER_SIZE 30000
+#define DBUFFER_SIZE 1024
+
 
 static FILE *outfile;
 static int log_store = 0;
@@ -50,13 +53,13 @@ static size_t gotten_store;
 
 
 
-static int utf8_table1[] = {
+static const int utf8_table1[] = {
   0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};
 
-static int utf8_table2[] = {
+static const int utf8_table2[] = {
   0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
 
-static int utf8_table3[] = {
+static const int utf8_table3[] = {
   0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
 
 
@@ -387,8 +390,15 @@ int posix = 0;
 #endif
 int debug = 0;
 int done = 0;
-unsigned char buffer[30000];
-unsigned char dbuffer[1024];
+
+unsigned char *buffer;
+unsigned char *dbuffer;
+
+/* Get buffers from malloc() so that Electric Fence will check their misuse
+when I am debugging. */
+
+buffer = malloc(BUFFER_SIZE);
+dbuffer = malloc(DBUFFER_SIZE);
 
 /* Static so that new_malloc can use it. */
 
@@ -518,7 +528,7 @@ while (!done)
   use_utf8 = 0;
 
   if (infile == stdin) printf("  re> ");
-  if (fgets((char *)buffer, sizeof(buffer), infile) == NULL) break;
+  if (fgets((char *)buffer, BUFFER_SIZE, infile) == NULL) break;
   if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
   fflush(outfile);
 
@@ -549,7 +559,7 @@ while (!done)
       }
     if (*pp != 0) break;
 
-    len = sizeof(buffer) - (pp - buffer);
+    len = BUFFER_SIZE - (pp - buffer);
     if (len < 256)
       {
       fprintf(outfile, "** Expression too long - missing delimiter?\n");
@@ -648,7 +658,7 @@ while (!done)
 
     if (rc != 0)
       {
-      (void)regerror(rc, &preg, (char *)buffer, sizeof(buffer));
+      (void)regerror(rc, &preg, (char *)buffer, BUFFER_SIZE);
       fprintf(outfile, "Failed: POSIX code %d: %s\n", rc, buffer);
       goto SKIP_DATA;
       }
@@ -689,7 +699,7 @@ while (!done)
         {
         for (;;)
           {
-          if (fgets((char *)buffer, sizeof(buffer), infile) == NULL)
+          if (fgets((char *)buffer, BUFFER_SIZE, infile) == NULL)
             {
             done = 1;
             goto CONTINUE;
@@ -921,7 +931,7 @@ while (!done)
     callout_fail_id = -1;
 
     if (infile == stdin) printf("data> ");
-    if (fgets((char *)buffer, sizeof(buffer), infile) == NULL)
+    if (fgets((char *)buffer, BUFFER_SIZE, infile) == NULL)
       {
       done = 1;
       goto CONTINUE;
@@ -1134,7 +1144,7 @@ while (!done)
 
       if (rc != 0)
         {
-        (void)regerror(rc, &preg, (char *)buffer, sizeof(buffer));
+        (void)regerror(rc, &preg, (char *)buffer, BUFFER_SIZE);
         fprintf(outfile, "No match: POSIX code %d: %s\n", rc, buffer);
         }
       else
