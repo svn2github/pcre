@@ -57,8 +57,9 @@ function may be called several times for different starting points.
 The \fIcurrent_position\fR field contains the offset within the subject of the
 current match pointer.
 
-The \fIcapture_top\fR field contains the number of the highest captured
-substring so far.
+The \fIcapture_top\fR field contains one more than the number of the highest
+numbered captured substring so far. If no substrings have been captured,
+the value of \fIcapture_top\fR is one.
 
 The \fIcapture_last\fR field contains the number of the most recently captured
 substring.

@@ -52,7 +52,6 @@ static int use_utf8;
 static size_t gotten_store;
 
 
-
 static const int utf8_table1[] = {
   0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};
 
@@ -321,13 +320,16 @@ if (post_start > 0)
   }
 
 fprintf(outfile, "\n");
-
 first_callout = 0;
 
-if ((int)(cb->callout_data) != 0)
+if (cb->callout_data != NULL)
   {
-  fprintf(outfile, "Callout data = %d\n", (int)(cb->callout_data));
-  return (int)(cb->callout_data);
+  int callout_data = *((int *)(cb->callout_data));
+  if (callout_data != 0)
+    {
+    fprintf(outfile, "Callout data = %d\n", callout_data);
+    return callout_data;
+    }
   }
 
 return (cb->callout_number != callout_fail_id)? 0 :
@@ -397,8 +399,8 @@ unsigned char *dbuffer;
 /* Get buffers from malloc() so that Electric Fence will check their misuse
 when I am debugging. */
 
-buffer = malloc(BUFFER_SIZE);
-dbuffer = malloc(DBUFFER_SIZE);
+buffer = (unsigned char *)malloc(BUFFER_SIZE);
+dbuffer = (unsigned char *)malloc(DBUFFER_SIZE);
 
 /* Static so that new_malloc can use it. */
 
@@ -464,7 +466,7 @@ while (argc > 1 && argv[op][0] == '-')
 /* Get the store for the offsets vector, and remember what it was */
 
 size_offsets_max = size_offsets;
-offsets = malloc(size_offsets_max * sizeof(int));
+offsets = (int *)malloc(size_offsets_max * sizeof(int));
 if (offsets == NULL)
   {
   printf("** Failed to get %d bytes of memory for offsets vector\n",
@@ -619,6 +621,7 @@ while (!done)
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
       case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
+      case '?': options |= PCRE_NO_UTF8_CHECK; break;
 
       case 'L':
       ppp = pp;
@@ -787,7 +790,7 @@ while (!done)
         }
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -796,7 +799,8 @@ while (!done)
           ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
-          ((get_options & PCRE_UTF8) != 0)? " utf8" : "");
+          ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
+          ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "");
 
       if (((((real_pcre *)re)->options) & PCRE_ICHANGED) != 0)
         fprintf(outfile, "Case state changes\n");
@@ -861,13 +865,17 @@ while (!done)
       else if (extra == NULL)
         fprintf(outfile, "Study returned NULL\n");
 
+      /* Don't output study size; at present it is in any case a fixed
+      value, but it varies, depending on the computer architecture, and
+      so messes up the test suite. */
+
       else if (do_showinfo)
         {
         size_t size;
         uschar *start_bits = NULL;
         new_info(re, extra, PCRE_INFO_STUDYSIZE, &size);
         new_info(re, extra, PCRE_INFO_FIRSTTABLE, &start_bits);
-        fprintf(outfile, "Study size = %d\n", size);
+        /* fprintf(outfile, "Study size = %d\n", size); */
         if (start_bits == NULL)
           fprintf(outfile, "No starting character set\n");
         else
@@ -1105,7 +1113,7 @@ while (!done)
           {
           size_offsets_max = n;
           free(offsets);
-          use_offsets = offsets = malloc(size_offsets_max * sizeof(int));
+          use_offsets = offsets = (int *)malloc(size_offsets_max * sizeof(int));
           if (offsets == NULL)
             {
             printf("** Failed to get %d bytes of memory for offsets vector\n",
@@ -1119,6 +1127,10 @@ while (!done)
 
         case 'Z':
         options |= PCRE_NOTEOL;
+        continue;
+
+        case '?':
+        options |= PCRE_NO_UTF8_CHECK;
         continue;
         }
       *q++ = c;
@@ -1136,7 +1148,7 @@ while (!done)
       int eflags = 0;
       regmatch_t *pmatch = NULL;
       if (use_size_offsets > 0)
-        pmatch = malloc(sizeof(regmatch_t) * use_size_offsets);
+        pmatch = (regmatch_t *)malloc(sizeof(regmatch_t) * use_size_offsets);
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
 
@@ -1203,7 +1215,7 @@ while (!done)
 
         if (extra == NULL)
           {
-          extra = malloc(sizeof(pcre_extra));
+          extra = (pcre_extra *)malloc(sizeof(pcre_extra));
           extra->flags = 0;
           }
         extra->flags |= PCRE_EXTRA_MATCH_LIMIT;
@@ -1242,11 +1254,11 @@ while (!done)
         {
         if (extra == NULL)
           {
-          extra = malloc(sizeof(pcre_extra));
+          extra = (pcre_extra *)malloc(sizeof(pcre_extra));
           extra->flags = 0;
           }
         extra->flags |= PCRE_EXTRA_CALLOUT_DATA;
-        extra->callout_data = (void *)callout_data;
+        extra->callout_data = &callout_data;
         count = pcre_exec(re, extra, (char *)bptr, len, start_offset,
           options | g_notempty, use_offsets, use_size_offsets);
         extra->flags &= ~PCRE_EXTRA_CALLOUT_DATA;

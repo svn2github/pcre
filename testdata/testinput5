@@ -192,4 +192,34 @@
 
 /[^\xff]/8D
 
+/[Ã„-Ãœ]/8
+    Ã– # Matches without Study
+    \x{d6}
+    
+/[Ã„-Ãœ]/8S
+    Ã– <-- Same with Study
+    \x{d6}
+    
+/[\x{c4}-\x{dc}]/8 
+    Ã– # Matches without Study
+    \x{d6} 
+
+/[\x{c4}-\x{dc}]/8S
+    Ã– <-- Same with Study
+    \x{d6} 
+
+/[Ã]/8
+
+/Ã/8
+
+/ÃÃÃxxx/8
+
+/ÃÃÃxxx/8?D
+
+/abc/8
+   Ã]
+   Ã
+   ÃÃÃ
+   ÃÃÃ\?
+
 / End of testinput5 /

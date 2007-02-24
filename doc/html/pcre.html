@@ -125,9 +125,16 @@ to testing the PCRE_UTF8 flag in several places, so should not be very large.
 The following comments apply when PCRE is running in UTF-8 mode:
 </P>
 <P>
-1. PCRE assumes that the strings it is given contain valid UTF-8 codes. It does
-not diagnose invalid UTF-8 strings. If you pass invalid UTF-8 strings to PCRE,
-the results are undefined.
+1. When you set the PCRE_UTF8 flag, the strings passed as patterns and subjects
+are checked for validity on entry to the relevant functions. If an invalid
+UTF-8 string is passed, an error return is given. In some situations, you may
+already know that your strings are valid, and therefore want to skip these
+checks in order to improve performance. If you set the PCRE_NO_UTF8_CHECK flag
+at compile time or at run time, PCRE assumes that the pattern or subject it
+is given (respectively) contains only valid UTF-8 codes. In this case, it does
+not diagnose an invalid UTF-8 string. If you pass an invalid UTF-8 string to
+PCRE when PCRE_NO_UTF8_CHECK is set, the results are undefined. Your program
+may crash.
 </P>
 <P>
 2. In a pattern, the escape sequence \x{...}, where the contents of the braces
@@ -178,6 +185,6 @@ Cambridge CB2 3QG, England.
 Phone: +44 1223 334714
 </P>
 <P>
-Last updated: 04 February 2003
+Last updated: 20 August 2003
 <br>
 Copyright &copy; 1997-2003 University of Cambridge.

@@ -1,6 +1,21 @@
 News about PCRE releases
 ------------------------
 
+Release 4.4 21-Aug-03
+---------------------
+
+This is mainly a bug-fix and tidying release. The only new feature is that PCRE
+checks UTF-8 strings for validity by default. There is an option to suppress
+this, just in case anybody wants that teeny extra bit of performance.
+
+
+Releases 4.1 - 4.3
+------------------
+
+Sorry, I forgot about updating the NEWS file for these releases. Please take a
+look at ChangeLog.
+
+
 Release 4.0 17-Feb-03
 ---------------------
 

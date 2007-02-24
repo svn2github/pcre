@@ -1,6 +1,62 @@
 ChangeLog for PCRE
 ------------------
 
+Version 4.4 13-Aug-03
+---------------------
+
+ 1. In UTF-8 mode, a character class containing characters with values between
+    127 and 255 was not handled correctly if the compiled pattern was studied.
+    In fixing this, I have also improved the studying algorithm for such
+    classes (slightly).
+
+ 2. Three internal functions had redundant arguments passed to them. Removal
+    might give a very teeny performance improvement.
+
+ 3. Documentation bug: the value of the capture_top field in a callout is *one
+    more than* the number of the hightest numbered captured substring.
+
+ 4. The Makefile linked pcretest and pcregrep with -lpcre, which could result
+    in incorrectly linking with a previously installed version. They now link
+    explicitly with libpcre.la.
+
+ 5. configure.in no longer needs to recognize Cygwin specially.
+
+ 6. A problem in pcre.in for Windows platforms is fixed.
+
+ 7. If a pattern was successfully studied, and the -d (or /D) flag was given to
+    pcretest, it used to include the size of the study block as part of its
+    output. Unfortunately, the structure contains a field that has a different
+    size on different hardware architectures. This meant that the tests that
+    showed this size failed. As the block is currently always of a fixed size,
+    this information isn't actually particularly useful in pcretest output, so
+    I have just removed it.
+
+ 8. Three pre-processor statements accidentally did not start in column 1.
+    Sadly, there are *still* compilers around that complain, even though
+    standard C has not required this for well over a decade. Sigh.
+
+ 9. In pcretest, the code for checking callouts passed small integers in the
+    callout_data field, which is a void * field. However, some picky compilers
+    complained about the casts involved for this on 64-bit systems. Now
+    pcretest passes the address of the small integer instead, which should get
+    rid of the warnings.
+
+10. By default, when in UTF-8 mode, PCRE now checks for valid UTF-8 strings at
+    both compile and run time, and gives an error if an invalid UTF-8 sequence
+    is found. There is a option for disabling this check in cases where the
+    string is known to be correct and/or the maximum performance is wanted.
+
+11. In response to a bug report, I changed one line in Makefile.in from
+
+        -Wl,--out-implib,.libs/lib@WIN_PREFIX@pcreposix.dll.a \
+    to
+        -Wl,--out-implib,.libs/@WIN_PREFIX@libpcreposix.dll.a \
+
+    to look similar to other lines, but I have no way of telling whether this
+    is the right thing to do, as I do not use Windows. No doubt I'll get told
+    if it's wrong...
+
+
 Version 4.3 21-May-03
 ---------------------
 

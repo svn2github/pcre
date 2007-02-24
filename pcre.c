@@ -241,9 +241,15 @@ changed by the caller, but are shared between all threads. However, when
 compiling for Virtual Pascal, things are done differently (see pcre.in). */
 
 #ifndef VPCOMPAT
+#ifdef __cplusplus
+extern "C" void *(*pcre_malloc)(size_t) = malloc;
+extern "C" void  (*pcre_free)(void *) = free;
+extern "C" int   (*pcre_callout)(pcre_callout_block *) = NULL;
+#else
 void *(*pcre_malloc)(size_t) = malloc;
 void  (*pcre_free)(void *) = free;
 int   (*pcre_callout)(pcre_callout_block *) = NULL;
+#endif
 #endif
 
 
@@ -511,7 +517,7 @@ if (re == NULL || where == NULL) return PCRE_ERROR_NULL;
 if (re->magic_number != MAGIC_NUMBER) return PCRE_ERROR_BADMAGIC;
 
 if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_STUDY_DATA) != 0)
-  study = extra_data->study_data;
+  study = (const pcre_study_data *)extra_data->study_data;
 
 switch (what)
   {
@@ -592,11 +598,11 @@ pcre_config(int what, void *where)
 switch (what)
   {
   case PCRE_CONFIG_UTF8:
-  #ifdef SUPPORT_UTF8
+#ifdef SUPPORT_UTF8
   *((int *)where) = 1;
-  #else
+#else
   *((int *)where) = 0;
-  #endif
+#endif
   break;
 
   case PCRE_CONFIG_NEWLINE:
@@ -669,7 +675,6 @@ Arguments:
   bracount   number of previous extracting brackets
   options    the options bits
   isclass    TRUE if inside a character class
-  cd         pointer to char tables block
 
 Returns:     zero or positive => a data character
              negative => a special escape sequence
@@ -678,7 +683,7 @@ Returns:     zero or positive => a data character
 
 static int
 check_escape(const uschar **ptrptr, const char **errorptr, int bracount,
-  int options, BOOL isclass, compile_data *cd)
+  int options, BOOL isclass)
 {
 const uschar *ptr = *ptrptr;
 int c, i;
@@ -801,7 +806,8 @@ else
     c = 0;
     while (i++ < 2 && (digitab[ptr[1]] & ctype_xdigit) != 0)
       {
-      int cc = *(++ptr);
+      int cc;                               /* Some compilers don't like ++ */
+      cc = *(++ptr);                        /* in initializers */
       if (cc >= 'a') cc -= 32;              /* Convert to upper case */
       c = c * 16 + cc - ((cc < 'A')? '0' : ('A' - 10));
       }
@@ -858,13 +864,12 @@ where the ddds are digits.
 
 Arguments:
   p         pointer to the first char after '{'
-  cd        pointer to char tables block
 
 Returns:    TRUE or FALSE
 */
 
 static BOOL
-is_counted_repeat(const uschar *p, compile_data *cd)
+is_counted_repeat(const uschar *p)
 {
 if ((digitab[*p++] && ctype_digit) == 0) return FALSE;
 while ((digitab[*p] & ctype_digit) != 0) p++;
@@ -895,15 +900,13 @@ Arguments:
   maxp       pointer to int for max
              returned as -1 if no max
   errorptr   points to pointer to error message
-  cd         pointer to character tables clock
 
 Returns:     pointer to '}' on success;
              current ptr on error, with errorptr set
 */
 
 static const uschar *
-read_repeat_counts(const uschar *p, int *minp, int *maxp,
-  const char **errorptr, compile_data *cd)
+read_repeat_counts(const uschar *p, int *minp, int *maxp, const char **errorptr)
 {
 int min = 0;
 int max = -1;
@@ -1793,7 +1796,7 @@ for (;; ptr++)
 
       if (c == '\\')
         {
-        c = check_escape(&ptr, errorptr, *brackets, options, TRUE, cd);
+        c = check_escape(&ptr, errorptr, *brackets, options, TRUE);
         if (-c == ESC_b) c = '\b';  /* \b is backslash in a class */
 
         if (-c == ESC_Q)            /* Handle start of quoted string */
@@ -1882,7 +1885,7 @@ for (;; ptr++)
         if (d == '\\')
           {
           const uschar *oldptr = ptr;
-          d = check_escape(&ptr, errorptr, *brackets, options, TRUE, cd);
+          d = check_escape(&ptr, errorptr, *brackets, options, TRUE);
 
           /* \b is backslash; any other special means the '-' was literal */
 
@@ -2091,8 +2094,8 @@ for (;; ptr++)
     /* Various kinds of repeat */
 
     case '{':
-    if (!is_counted_repeat(ptr+1, cd)) goto NORMAL_CHAR;
-    ptr = read_repeat_counts(ptr+1, &repeat_min, &repeat_max, errorptr, cd);
+    if (!is_counted_repeat(ptr+1)) goto NORMAL_CHAR;
+    ptr = read_repeat_counts(ptr+1, &repeat_min, &repeat_max, errorptr);
     if (*errorptr != NULL) goto FAILED;
     goto REPEAT;
 
@@ -3039,7 +3042,7 @@ for (;; ptr++)
 
     case '\\':
     tempptr = ptr;
-    c = check_escape(&ptr, errorptr, *brackets, options, FALSE, cd);
+    c = check_escape(&ptr, errorptr, *brackets, options, FALSE);
 
     /* Handle metacharacters introduced by \. For ones like \d, the ESC_ values
     are arranged to be the negation of the corresponding OP_values. For the
@@ -3142,7 +3145,7 @@ for (;; ptr++)
       if (c == '\\')
         {
         tempptr = ptr;
-        c = check_escape(&ptr, errorptr, *brackets, options, FALSE, cd);
+        c = check_escape(&ptr, errorptr, *brackets, options, FALSE);
         if (c < 0) { ptr = tempptr; break; }
 
         /* If a character is > 127 in UTF-8 mode, we have to turn it into
@@ -3727,6 +3730,56 @@ return c;
 
 
 
+#ifdef SUPPORT_UTF8
+/*************************************************
+*         Validate a UTF-8 string                *
+*************************************************/
+
+/* This function is called (optionally) at the start of compile or match, to
+validate that a supposed UTF-8 string is actually valid. The early check means
+that subsequent code can assume it is dealing with a valid string. The check
+can be turned off for maximum performance, but then consequences of supplying
+an invalid string are then undefined.
+
+Arguments:
+  string       points to the string
+  length       length of string, or -1 if the string is zero-terminated
+
+Returns:       < 0    if the string is a valid UTF-8 string
+               >= 0   otherwise; the value is the offset of the bad byte
+*/
+
+static int
+valid_utf8(const uschar *string, int length)
+{
+register const uschar *p;
+
+if (length < 0)
+  {
+  for (p = string; *p != 0; p++);
+  length = p - string;
+  }
+
+for (p = string; length-- > 0; p++)
+  {
+  int ab;
+  if (*p < 128) continue;
+  if ((*p & 0xc0) != 0xc0) return p - string;
+  ab = utf8_table4[*p & 0x3f];  /* Number of additional bytes */
+  if (length < ab) return p - string;
+  while (ab-- > 0)
+    {
+    if ((*(++p) & 0xc0) != 0x80) return p - string;
+    length--;
+    }
+  }
+
+return -1;
+}
+#endif
+
+
+
 /*************************************************
 *        Compile a Regular Expression            *
 *************************************************/
@@ -3793,6 +3846,12 @@ if (erroroffset == NULL)
 
 #ifdef SUPPORT_UTF8
 utf8 = (options & PCRE_UTF8) != 0;
+if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
+     (*erroroffset = valid_utf8((uschar *)pattern, -1)) >= 0)
+  {
+  *errorptr = ERR44;
+  return NULL;
+  }
 #else
 if ((options & PCRE_UTF8) != 0)
   {
@@ -3874,7 +3933,7 @@ while ((c = *(++ptr)) != 0)
     case '\\':
       {
       const uschar *save_ptr = ptr;
-      c = check_escape(&ptr, errorptr, bracount, options, FALSE, &compile_block);
+      c = check_escape(&ptr, errorptr, bracount, options, FALSE);
       if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
       if (c >= 0)
         {
@@ -3910,9 +3969,9 @@ while ((c = *(++ptr)) != 0)
       if (refnum > compile_block.top_backref)
         compile_block.top_backref = refnum;
       length += 2;   /* For single back reference */
-      if (ptr[1] == '{' && is_counted_repeat(ptr+2, &compile_block))
+      if (ptr[1] == '{' && is_counted_repeat(ptr+2))
         {
-        ptr = read_repeat_counts(ptr+2, &min, &max, errorptr, &compile_block);
+        ptr = read_repeat_counts(ptr+2, &min, &max, errorptr);
         if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
         if ((min == 0 && (max == 1 || max == -1)) ||
           (min == 1 && max == -1))
@@ -3942,8 +4001,8 @@ while ((c = *(++ptr)) != 0)
     class, or back reference. */
 
     case '{':
-    if (!is_counted_repeat(ptr+1, &compile_block)) goto NORMAL_CHAR;
-    ptr = read_repeat_counts(ptr+1, &min, &max, errorptr, &compile_block);
+    if (!is_counted_repeat(ptr+1)) goto NORMAL_CHAR;
+    ptr = read_repeat_counts(ptr+1, &min, &max, errorptr);
     if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
 
     /* These special cases just insert one extra opcode */
@@ -4039,8 +4098,7 @@ while ((c = *(++ptr)) != 0)
 #ifdef SUPPORT_UTF8
         int prevchar = ptr[-1];
 #endif
-        int ch = check_escape(&ptr, errorptr, bracount, options, TRUE,
-          &compile_block);
+        int ch = check_escape(&ptr, errorptr, bracount, options, TRUE);
         if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
 
         /* \b is backspace inside a class */
@@ -4151,9 +4209,9 @@ while ((c = *(++ptr)) != 0)
 
       /* A repeat needs either 1 or 5 bytes. */
 
-      if (*ptr != 0 && ptr[1] == '{' && is_counted_repeat(ptr+2, &compile_block))
+      if (*ptr != 0 && ptr[1] == '{' && is_counted_repeat(ptr+2))
         {
-        ptr = read_repeat_counts(ptr+2, &min, &max, errorptr, &compile_block);
+        ptr = read_repeat_counts(ptr+2, &min, &max, errorptr);
         if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
         if ((min == 0 && (max == 1 || max == -1)) ||
           (min == 1 && max == -1))
@@ -4505,9 +4563,9 @@ while ((c = *(++ptr)) != 0)
     /* Leave ptr at the final char; for read_repeat_counts this happens
     automatically; for the others we need an increment. */
 
-    if ((c = ptr[1]) == '{' && is_counted_repeat(ptr+2, &compile_block))
+    if ((c = ptr[1]) == '{' && is_counted_repeat(ptr+2))
       {
-      ptr = read_repeat_counts(ptr+2, &min, &max, errorptr, &compile_block);
+      ptr = read_repeat_counts(ptr+2, &min, &max, errorptr);
       if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
       }
     else if (c == '*') { min = 0; max = -1; ptr++; }
@@ -4596,8 +4654,7 @@ while ((c = *(++ptr)) != 0)
       if (c == '\\')
         {
         const uschar *saveptr = ptr;
-        c = check_escape(&ptr, errorptr, bracount, options, FALSE,
-          &compile_block);
+        c = check_escape(&ptr, errorptr, bracount, options, FALSE);
         if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
         if (c < 0) { ptr = saveptr; break; }
 
@@ -7307,7 +7364,7 @@ if (extra_data != NULL)
   {
   register unsigned int flags = extra_data->flags;
   if ((flags & PCRE_EXTRA_STUDY_DATA) != 0)
-    study = extra_data->study_data;
+    study = (const pcre_study_data *)extra_data->study_data;
   if ((flags & PCRE_EXTRA_MATCH_LIMIT) != 0)
     match_block.match_limit = extra_data->match_limit;
   if ((flags & PCRE_EXTRA_CALLOUT_DATA) != 0)
@@ -7339,6 +7396,15 @@ match_block.recursive = NULL;                   /* No recursion at top level */
 
 match_block.lcc = re->tables + lcc_offset;
 match_block.ctypes = re->tables + ctypes_offset;
+
+/* Check a UTF-8 string if required. Unfortunately there's no way of passing
+back the character offset. */
+
+#ifdef SUPPORT_UTF8
+if (match_block.utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
+    valid_utf8((uschar *)subject, length) >= 0)
+  return PCRE_ERROR_BADUTF8;
+#endif
 
 /* The ims options can vary during the matching as a result of the presence
 of (?ims) items in the pattern. They are kept in a local variable so that

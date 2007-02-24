@@ -111,9 +111,10 @@ respectively. For example:
   /caseless/i
 
 These modifier letters have the same effect as they do in Perl. There are
-others which set PCRE options that do not correspond to anything in Perl:
-\fB/A\fR, \fB/E\fR, and \fB/X\fR set PCRE_ANCHORED, PCRE_DOLLAR_ENDONLY, and
-PCRE_EXTRA respectively.
+others that set PCRE options that do not correspond to anything in Perl:
+\fB/A\fR, \fB/E\fR, \fB/N\fR, \fB/U\fR, and \fB/X\fR set PCRE_ANCHORED,
+PCRE_DOLLAR_ENDONLY, PCRE_NO_AUTO_CAPTURE, PCRE_UNGREEDY, and PCRE_EXTRA
+respectively.
 
 Searching for all possible matches within each subject string can be requested
 by the \fB/g\fR or \fB/G\fR modifier. After finding a match, PCRE is called
@@ -179,6 +180,10 @@ option set. This turns on support for UTF-8 character handling in PCRE,
 provided that it was compiled with this support enabled. This modifier also
 causes any non-printing characters in output strings to be printed using the
 \\x{hh...} notation if they are valid UTF-8 sequences.
+
+If the \fB/?\fR modifier is used with \fB/8\fR, it causes \fBpcretest\fR to
+call \fBpcre_compile()\fR with the PCRE_NO_UTF8_CHECK option, to suppress the
+checking of the string for UTF-8 validity.
 
 .SH CALLOUTS
 .rs
@@ -261,6 +266,8 @@ recognized:
                \fBpcre_exec()\fR to dd (any number of decimal
                digits)
   \\Z         pass the PCRE_NOTEOL option to \fBpcre_exec()\fR
+  \\?         pass the PCRE_NO_UTF8_CHECK option to
+               \fBpcre_exec()\fR
 
 If \\M is present, \fBpcretest\fR calls \fBpcre_exec()\fR several times, with
 different values in the \fImatch_limit\fR field of the \fBpcre_extra\fR data
@@ -351,6 +358,6 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 
 .in 0
-Last updated: 03 February 2003
+Last updated: 20 August 2003
 .br
 Copyright (c) 1997-2003 University of Cambridge.

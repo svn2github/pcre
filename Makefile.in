@@ -1,21 +1,14 @@
 
 # Makefile.in for PCRE (Perl-Compatible Regular Expression) library.
 
-#---------------------------------------------------------------------------#
-# MinGW DLLs are built automatically with this configure.in and Makefile.in #
-# as long you are using autoconf 2.50 or higher. The Win32 static libraries #
-# have not been tested, but appear to be generated. This functionality is   #
-# by courtesy of Fred Cox. I (Philip Hazel) don't know anything about it,   #
-# as I live entirely in a non-Windows world.                                #
-#---------------------------------------------------------------------------#
-
 
 #############################################################################
 
 # PCRE is developed on a Unix system. I do not use Windows or Macs, and know
 # nothing about building software on them. Although the code of PCRE should
 # be very portable, the building system in this Makefile is designed for Unix
-# systems, with the exception of the mingw32 stuff just mentioned.
+# systems. However, there are features that have been supplied to me by various
+# people that should make it work on MinGW and Cygwin systems.
 
 # This setting enables Unix-style directory scanning in pcregrep, triggered
 # by the -f option. Maybe one day someone will add code for other systems.
@@ -106,11 +99,11 @@ LOBJ = maketables.lo get.lo study.lo pcre.lo @POSIX_LOBJ@
 all:            libpcre.la @POSIX_LIB@ pcretest@EXEEXT@ pcregrep@EXEEXT@ @ON_WINDOWS@ winshared
 
 pcregrep@EXEEXT@: libpcre.la pcregrep.@OBJEXT@ @ON_WINDOWS@ winshared
-		$(LINK) -o pcregrep@EXEEXT@ pcregrep.@OBJEXT@ -lpcre
+		$(LINK) -o pcregrep@EXEEXT@ pcregrep.@OBJEXT@ libpcre.la
 
 pcretest@EXEEXT@: libpcre.la @POSIX_LIB@ pcretest.@OBJEXT@ @ON_WINDOWS@ winshared
 		$(LINK) $(PURIFY) $(EFENCE) -o pcretest@EXEEXT@  pcretest.@OBJEXT@ \
-		-lpcre @POSIX_LIB@
+		libpcre.la @POSIX_LIB@
 
 libpcre.la:     $(OBJ)
 		-rm -f libpcre.la
@@ -119,7 +112,7 @@ libpcre.la:     $(OBJ)
 
 libpcreposix.la: pcreposix.@OBJEXT@
 		-rm -f libpcreposix.la
-		$(LINKLIB) -rpath $(LIBDIR) -L. -lpcre -version-info \
+		$(LINKLIB) -rpath $(LIBDIR) libpcre.la -version-info \
 		'$(PCREPOSIXLIBVERSION)' -o libpcreposix.la pcreposix.lo
 
 pcre.@OBJEXT@:  $(top_srcdir)/chartables.c $(top_srcdir)/pcre.c \
@@ -151,7 +144,7 @@ pcretest.@OBJEXT@:     $(top_srcdir)/pcretest.c $(top_srcdir)/internal.h \
 pcregrep.@OBJEXT@:     $(top_srcdir)/pcregrep.c pcre.h Makefile config.h
 		$(CC) -c $(CFLAGS) -I. $(UTF8) $(PCREGREP_OSTYPE) $(top_srcdir)/pcregrep.c
 
-# Some Windows-specific targets, for Cygwin and MinGW
+# Some Windows-specific targets for MinGW. Do not use for Cygwin.
 
 winshared : .libs/@WIN_PREFIX@pcre.dll .libs/@WIN_PREFIX@pcreposix.dll
 
@@ -175,8 +168,8 @@ winshared : .libs/@WIN_PREFIX@pcre.dll .libs/@WIN_PREFIX@pcreposix.dll
 .libs/@WIN_PREFIX@pcreposix.dll: libpcreposix.la libpcre.la
 	$(CC) $(CFLAGS) -shared -o $@ \
 	-Wl,--whole-archive .libs/libpcreposix.a \
-	-Wl,--out-implib,.libs/lib@WIN_PREFIX@pcreposix.dll.a \
-	-Wl,--output-def,.libs/@WIN_PREFIX@pcreposix.dll-def \
+	-Wl,--out-implib,.libs/@WIN_PREFIX@pcreposix.dll.a \
+	-Wl,--output-def,.libs/@WIN_PREFIX@libpcreposix.dll-def \
 	-Wl,--export-all-symbols \
 	-Wl,--no-whole-archive .libs/libpcre.a
 	sed -e "s#dlname=''#dlname='../bin/@WIN_PREFIX@pcreposix.dll'#" \

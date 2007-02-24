@@ -198,10 +198,10 @@ time, run time or study time, respectively. */
 #define PUBLIC_OPTIONS \
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8| \
-   PCRE_NO_AUTO_CAPTURE)
+   PCRE_NO_AUTO_CAPTURE|PCRE_NO_UTF8_CHECK)
 
 #define PUBLIC_EXEC_OPTIONS \
-  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY)
+  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -526,6 +526,7 @@ just to accommodate the POSIX wrapper. */
 #define ERR41 "unrecognized character after (?P"
 #define ERR42 "syntax error after (?P"
 #define ERR43 "two named groups have the same name"
+#define ERR44 "invalid UTF-8 string"
 
 /* All character handling must be done as unsigned characters. Otherwise there
 are problems with top-bit-set characters and functions such as isspace().

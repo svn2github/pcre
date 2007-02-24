@@ -1,4 +1,4 @@
-PCRE version 4.3 21-May-2003
+PCRE version 4.4 21-August-2003
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -136,7 +136,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: c d e 
     this sentence eventually mentions a cat
  0: cat
@@ -148,7 +147,6 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
-Study size = 40
 Starting character set: C D E c d e 
     this sentence eventually mentions a CAT cat
  0: CAT
@@ -160,7 +158,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: a b c d 
 
 /(a|[^\dZ])/S
@@ -168,7 +165,6 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
@@ -189,7 +185,6 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: \x09 \x0a \x0c \x0d \x20 a b 
 
 /(ab\2)/
@@ -524,7 +519,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: a b c d 
 
 /(?i)[abcd]/S
@@ -532,7 +526,6 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
-Study size = 40
 Starting character set: A B C D a b c d 
 
 /(?m)[xy]|(b|c)/S
@@ -540,7 +533,6 @@ Capturing subpattern count = 1
 Options: multiline
 No first char
 No need char
-Study size = 40
 Starting character set: b c x y 
 
 /(^a|^b)/m
@@ -612,7 +604,6 @@ No options
 Case state changes
 No first char
 No need char
-Study size = 40
 Starting character set: C a b c d 
 
 /a$/
@@ -677,7 +668,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: a b 
 
 /(?<!foo)(alpha|omega)/S
@@ -685,7 +675,6 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'a'
-Study size = 40
 Starting character set: a o 
 
 /(?!alphabet)[ab]/S
@@ -693,7 +682,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: a b 
 
 /(?<=foo\n)^bar/m
@@ -3378,7 +3366,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: a b 
 
 /[^a]/I
@@ -3398,7 +3385,6 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = '6'
-Study size = 40
 Starting character set: 0 1 2 3 4 5 6 7 8 9 
 
 /a^b/I
@@ -3432,7 +3418,6 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
-Study size = 40
 Starting character set: A B a b 
 
 /[ab](?i)cd/IS
@@ -3441,7 +3426,6 @@ No options
 Case state changes
 No first char
 Need char = 'd' (caseless)
-Study size = 40
 Starting character set: a b 
 
 /abc(?C)def/
@@ -3742,7 +3726,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Study size = 40
 Starting character set: a b 
 
 /(?R)/

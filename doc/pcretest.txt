@@ -119,10 +119,10 @@ PATTERN MODIFIERS
        /caseless/i
 
      These modifier letters have the same effect as  they  do  in
-     Perl.  There  are  others which set PCRE options that do not
-     correspond  to  anything  in  Perl:   /A,  /E,  and  /X  set
-     PCRE_ANCHORED,  PCRE_DOLLAR_ENDONLY,  and PCRE_EXTRA respec-
-     tively.
+     Perl.  There  are  others  that set PCRE options that do not
+     correspond to anything in Perl:  /A, /E, /N, /U, and /X  set
+     PCRE_ANCHORED,   PCRE_DOLLAR_ENDONLY,  PCRE_NO_AUTO_CAPTURE,
+     PCRE_UNGREEDY, and PCRE_EXTRA respectively.
 
      Searching for  all  possible  matches  within  each  subject
      string  can  be  requested  by  the /g or /G modifier. After
@@ -199,6 +199,10 @@ PATTERN MODIFIERS
      printing characters in output strings to  be  printed  using
      the \x{hh...} notation if they are valid UTF-8 sequences.
 
+     If the /? modifier is used with /8, it  causes  pcretest  to
+     call  pcre_compile()  with the PCRE_NO_UTF8_CHECK option, to
+     suppress the checking of the string for UTF-8 validity.
+
 
 CALLOUTS
 
@@ -255,12 +259,12 @@ DATA LINES
                     after a successful match (any decimal number
                     less than 32)
        \Cname     call pcre_copy_named_substring() for substring
+
                     "name" after a successful match (name termin-
                     ated by next non alphanumeric character)
        \C+        show the current captured substrings at callout
                     time
-
-       C-        do not supply a callout function
+       \C-        do not supply a callout function
        \C!n       return 1 instead of 0 when callout number n is
                     reached
        \C!n!m     return 1 instead of 0 when callout number n is
@@ -281,6 +285,8 @@ DATA LINES
                     pcre_exec() to dd (any number of decimal
                     digits)
        \Z         pass the PCRE_NOTEOL option to pcre_exec()
+       \?         pass the PCRE_NO_UTF8_CHECK option to
+                    pcre_exec()
 
      If \M is present, pcretest calls pcre_exec() several  times,
      with  different  values  in  the  match_limit  field  of the
@@ -306,7 +312,6 @@ DATA LINES
      API  to  be  used,  only  B,  and Z have any effect, causing
      REG_NOTBOL and REG_NOTEOL to be passed to regexec()  respec-
      tively.
-
      The use of \x{hh...} to represent UTF-8  characters  is  not
      dependent  on  the use of the /8 modifier on the pattern. It
      is recognized always. There may be any number of hexadecimal
@@ -378,5 +383,5 @@ AUTHOR
      University Computing Service,
      Cambridge CB2 3QG, England.
 
-Last updated: 03 February 2003
+Last updated: 20 August 2003
 Copyright (c) 1997-2003 University of Cambridge.

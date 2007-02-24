@@ -52,10 +52,14 @@ The option bits are:
                           theses (named ones available)
   PCRE_UNGREEDY         Invert greediness of quantifiers
   PCRE_UTF8             Run in UTF-8 mode
+  PCRE_NO_UTF8_CHECK    Do not check the pattern for UTF-8
+                          validity (only relevant if
+                          PCRE_UTF8 is set)
 </PRE>
 </P>
 <P>
-PCRE must have been compiled with UTF-8 support when PCRE_UTF8 is used.
+PCRE must be compiled with UTF-8 support in order to use PCRE_UTF8
+(or PCRE_NO_UTF8_CHECK).
 </P>
 <P>
 The yield of the function is a pointer to a private data structure that

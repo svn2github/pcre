@@ -81,8 +81,9 @@ The <i>current_position</i> field contains the offset within the subject of the
 current match pointer.
 </P>
 <P>
-The <i>capture_top</i> field contains the number of the highest captured
-substring so far.
+The <i>capture_top</i> field contains one more than the number of the highest
+numbered captured substring so far. If no substrings have been captured,
+the value of <i>capture_top</i> is one.
 </P>
 <P>
 The <i>capture_last</i> field contains the number of the most recently captured

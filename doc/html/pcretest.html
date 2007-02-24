@@ -149,9 +149,10 @@ respectively. For example:
 </P>
 <P>
 These modifier letters have the same effect as they do in Perl. There are
-others which set PCRE options that do not correspond to anything in Perl:
-<b>/A</b>, <b>/E</b>, and <b>/X</b> set PCRE_ANCHORED, PCRE_DOLLAR_ENDONLY, and
-PCRE_EXTRA respectively.
+others that set PCRE options that do not correspond to anything in Perl:
+<b>/A</b>, <b>/E</b>, <b>/N</b>, <b>/U</b>, and <b>/X</b> set PCRE_ANCHORED,
+PCRE_DOLLAR_ENDONLY, PCRE_NO_AUTO_CAPTURE, PCRE_UNGREEDY, and PCRE_EXTRA
+respectively.
 </P>
 <P>
 Searching for all possible matches within each subject string can be requested
@@ -232,6 +233,11 @@ option set. This turns on support for UTF-8 character handling in PCRE,
 provided that it was compiled with this support enabled. This modifier also
 causes any non-printing characters in output strings to be printed using the
 \x{hh...} notation if they are valid UTF-8 sequences.
+</P>
+<P>
+If the <b>/?</b> modifier is used with <b>/8</b>, it causes <b>pcretest</b> to
+call <b>pcre_compile()</b> with the PCRE_NO_UTF8_CHECK option, to suppress the
+checking of the string for UTF-8 validity.
 </P>
 <br><a name="SEC5" href="#TOC1">CALLOUTS</a><br>
 <P>
@@ -318,6 +324,8 @@ recognized:
                <b>pcre_exec()</b> to dd (any number of decimal
                digits)
   \Z         pass the PCRE_NOTEOL option to <b>pcre_exec()</b>
+  \?         pass the PCRE_NO_UTF8_CHECK option to
+               <b>pcre_exec()</b>
 </PRE>
 </P>
 <P>
@@ -429,6 +437,6 @@ University Computing Service,
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 03 February 2003
+Last updated: 20 August 2003
 <br>
 Copyright &copy; 1997-2003 University of Cambridge.

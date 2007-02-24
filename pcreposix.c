@@ -48,7 +48,7 @@ static const char *estring[] = {
   ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
   ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR29, ERR29, ERR30,
   ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39, ERR40,
-  ERR41, ERR42, ERR43 };
+  ERR41, ERR42, ERR43, ERR44 };
 
 static int eint[] = {
   REG_EESCAPE, /* "\\ at end of pattern" */
@@ -93,7 +93,8 @@ static int eint[] = {
   REG_BADPAT,  /* "recursive call could loop indefinitely" */
   REG_BADPAT,  /* "unrecognized character after (?P" */
   REG_BADPAT,  /* "syntax error after (?P" */
-  REG_BADPAT   /* "two named groups have the same name" */
+  REG_BADPAT,  /* "two named groups have the same name" */
+  REG_BADPAT   /* "invalid UTF-8 string" */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -217,7 +218,7 @@ preg->re_erroffset = erroffset;
 
 if (preg->re_pcre == NULL) return pcre_posix_error_code(errorptr);
 
-preg->re_nsub = pcre_info(preg->re_pcre, NULL, NULL);
+preg->re_nsub = pcre_info((const pcre *)preg->re_pcre, NULL, NULL);
 return 0;
 }
 
@@ -264,8 +265,8 @@ if (nmatch > 0)
     }
   }
 
-rc = pcre_exec(preg->re_pcre, NULL, string, (int)strlen(string), 0, options,
-  ovector, nmatch * 3);
+rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string, (int)strlen(string),
+  0, options, ovector, nmatch * 3);
 
 if (rc == 0) rc = nmatch;    /* All captured slots were filled in */
 
