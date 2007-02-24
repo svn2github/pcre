@@ -1,4 +1,4 @@
-PCRE version 2.05 21-Apr-1999
+PCRE version 2.06 21-Jun-1999
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -981,7 +981,7 @@ No first char
 /word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
 )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
 )?)?)?)?)?)?)?)?)?otherword/M
-Memory allocation request: 441 (code space 428)
+Memory allocation (code space): 428
 Identifying subpattern count = 8
 No options
 First char = 'w'
@@ -1080,6 +1080,142 @@ No first char
 Identifying subpattern count = 0
 No options
 First char at start or follows \n
+
+/\Biss\B/+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/\Biss\B/+P
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/iss/G+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+    Mississippi
+ 0: iss
+ 0+ issippi
+ 0: iss
+ 0+ ippi
+
+/\Biss\B/G+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/\Biss\B/g+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+    Mississippi
+ 0: iss
+ 0+ issippi
+ 0: iss
+ 0+ ippi
+    *** Failers
+No match
+    Mississippi\A
+No match
+
+/(?<=[Ms])iss/g+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+    Mississippi
+ 0: iss
+ 0+ issippi
+ 0: iss
+ 0+ ippi
+
+/(?<=[Ms])iss/G+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/^iss/g+
+Identifying subpattern count = 0
+Options: anchored
+No first char
+    ississippi
+ 0: iss
+ 0+ issippi
+    
+/.*iss/g+
+Identifying subpattern count = 0
+No options
+First char at start or follows \n
+    abciss\nxyzisspqr 
+ 0: abciss
+ 0+ \x0axyzisspqr
+ 0: xyziss
+ 0+ pqr
+
+/.i./+g
+Identifying subpattern count = 0
+No options
+No first char
+    Mississippi
+ 0: Mis
+ 0+ sissippi
+ 0: sis
+ 0+ sippi
+ 0: sip
+ 0+ pi
+    Mississippi\A
+ 0: Mis
+ 0+ sissippi
+ 0: sis
+ 0+ sippi
+ 0: sip
+ 0+ pi
+    Missouri river
+ 0: Mis
+ 0+ souri river
+ 0: ri 
+ 0+ river
+ 0: riv
+ 0+ er
+    Missouri river\A  
+ 0: Mis
+ 0+ souri river
+
+/^.is/+g
+Identifying subpattern count = 0
+Options: anchored
+No first char
+    Mississippi
+ 0: Mis
+ 0+ sissippi
+
+/^ab\n/g+
+Identifying subpattern count = 0
+Options: anchored
+No first char
+    ab\nab\ncd
+ 0: ab\x0a
+ 0+ ab\x0acd
+
+/^ab\n/mg+
+Identifying subpattern count = 0
+Options: multiline
+First char at start or follows \n
+    ab\nab\ncd
+ 0: ab\x0a
+ 0+ ab\x0acd
+ 0: ab\x0a
+ 0+ cd
 
 / End of test input /
 Identifying subpattern count = 0

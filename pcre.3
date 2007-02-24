@@ -20,9 +20,9 @@ pcre - Perl-compatible regular expressions.
 .br
 .B int pcre_exec(const pcre *\fIcode\fR, "const pcre_extra *\fIextra\fR,"
 .ti +5n
-.B "const char *\fIsubject\fR," int \fIlength\fR, int \fIoptions\fR,
+.B "const char *\fIsubject\fR," int \fIlength\fR, int \fIstartoffset\fR,
 .ti +5n
-.B int *\fIovector\fR, int \fIovecsize\fR);
+.B int \fIoptions\fR, int *\fIovector\fR, int \fIovecsize\fR);
 .PP
 .br
 .B int pcre_copy_substring(const char *\fIsubject\fR, int *\fIovector\fR,
@@ -249,7 +249,7 @@ treated as letters), the following code could be used:
 The tables are built in memory that is obtained via \fBpcre_malloc\fR. The
 pointer that is passed to \fBpcre_compile\fR is saved with the compiled
 pattern, and the same tables are used via this pointer by \fBpcre_study()\fR
-and \fBpcre_match()\fR. Thus for any single pattern, compilation, studying and
+and \fBpcre_exec()\fR. Thus for any single pattern, compilation, studying and
 matching all happen in the same locale, but different patterns can be compiled
 in different locales. It is the caller's responsibility to ensure that the
 memory containing the tables remains available for as long as it is needed.
@@ -293,9 +293,6 @@ pre-compiled pattern, which is passed in the \fIcode\fR argument. If the
 pattern has been studied, the result of the study should be passed in the
 \fIextra\fR argument. Otherwise this must be NULL.
 
-The subject string is passed as a pointer in \fIsubject\fR and a length in
-\fIlength\fR. Unlike the pattern string, it may contain binary zero characters.
-
 The PCRE_ANCHORED option can be passed in the \fIoptions\fR argument, whose
 unused bits must be zero. However, if a pattern was compiled with
 PCRE_ANCHORED, or turned out to be anchored by virtue of its contents, it
@@ -315,6 +312,34 @@ The end of the string is not the end of a line, so the dollar metacharacter
 should not match it nor (except in multiline mode) a newline immediately before
 it. Setting this without PCRE_MULTILINE (at compile time) causes dollar never
 to match.
+
+The subject string is passed as a pointer in \fIsubject\fR, a length in
+\fIlength\fR, and a starting offset in \fIstartoffset\fR. Unlike the pattern
+string, it may contain binary zero characters. When the starting offset is
+zero, the search for a match starts at the beginning of the subject, and this
+is by far the most common case.
+
+A non-zero starting offset is useful when searching for another match in the
+same subject by calling \fBpcre_exec()\fR again after a previous success.
+Setting \fIstartoffset\fR differs from just passing over a shortened string and
+setting PCRE_NOTBOL in the case of a pattern that begins with any kind of
+lookbehind. For example, consider the pattern
+
+  \\Biss\\B
+
+which finds occurrences of "iss" in the middle of words. (\\B matches only if
+the current position in the subject is not a word boundary.) When applied to
+the string "Mississipi" the first call to \fBpcre_exec()\fR finds the first
+occurrence. If \fBpcre_exec()\fR is called again with just the remainder of the
+subject, namely "issipi", it does not match, because \\B is always false at the
+start of the subject, which is deemed to be a word boundary. However, if
+\fBpcre_exec()\fR is passed the entire string again, but with \fIstartoffset\fR
+set to 4, it finds the second occurrence of "iss" because it is able to look
+behind the starting point to discover that it is preceded by a letter.
+
+If a non-zero starting offset is passed when the pattern is anchored, one
+attempt to match at the given offset is tried. This can only succeed if the
+pattern does not require the match to be at the start of the subject.
 
 In general, a pattern matches a certain portion of the subject, and in
 addition, further substrings from the subject may be picked out by parts of the
@@ -730,16 +755,19 @@ first or last character matches \\w, respectively.
 The \\A, \\Z, and \\z assertions differ from the traditional circumflex and
 dollar (described below) in that they only ever match at the very start and end
 of the subject string, whatever options are set. They are not affected by the
-PCRE_NOTBOL or PCRE_NOTEOL options. The difference between \\Z and \\z is that
-\\Z matches before a newline that is the last character of the string as well
-as at the end of the string, whereas \\z matches only at the end.
+PCRE_NOTBOL or PCRE_NOTEOL options. If the \fIstartoffset\fR argument of
+\fBpcre_exec()\fR is non-zero, \\A can never match. The difference between \\Z
+and \\z is that \\Z matches before a newline that is the last character of the
+string as well as at the end of the string, whereas \\z matches only at the
+end.
 
 
 .SH CIRCUMFLEX AND DOLLAR
 Outside a character class, in the default matching mode, the circumflex
 character is an assertion which is true only if the current matching point is
-at the start of the subject string. Inside a character class, circumflex has an
-entirely different meaning (see below).
+at the start of the subject string. If the \fIstartoffset\fR argument of
+\fBpcre_exec()\fR is non-zero, circumflex can never match. Inside a character
+class, circumflex has an entirely different meaning (see below).
 
 Circumflex need not be the first character of the pattern if a number of
 alternatives are involved, but it should be the first thing in each alternative
@@ -766,8 +794,10 @@ after and immediately before an internal "\\n" character, respectively, in
 addition to matching at the start and end of the subject string. For example,
 the pattern /^abc$/ matches the subject string "def\\nabc" in multiline mode,
 but not otherwise. Consequently, patterns that are anchored in single line mode
-because all branches start with "^" are not anchored in multiline mode. The
-PCRE_DOLLAR_ENDONLY option is ignored if PCRE_MULTILINE is set.
+because all branches start with "^" are not anchored in multiline mode, and a
+match for circumflex is possible when the \fIstartoffset\fR argument of
+\fBpcre_exec()\fR is non-zero. The PCRE_DOLLAR_ENDONLY option is ignored if
+PCRE_MULTILINE is set.
 
 Note that the sequences \\A, \\Z, and \\z can be used to match the start and
 end of the subject in both modes, and if all branches of a pattern start with
@@ -1219,11 +1249,11 @@ matches an occurrence of "baz" that is preceded by "bar" which in turn is not
 preceded by "foo".
 
 Assertion subpatterns are not capturing subpatterns, and may not be repeated,
-because it makes no sense to assert the same thing several times. If an
-assertion contains capturing subpatterns within it, these are always counted
-for the purposes of numbering the capturing subpatterns in the whole pattern.
-Substring capturing is carried out for positive assertions, but it does not
-make sense for negative assertions.
+because it makes no sense to assert the same thing several times. If any kind
+of assertion contains capturing subpatterns within it, these are counted for
+the purposes of numbering the capturing subpatterns in the whole pattern.
+However, substring capturing is carried out only for positive assertions,
+because it does not make sense for negative assertions.
 
 Assertions count towards the maximum of 200 parenthesized subpatterns.
 
@@ -1390,4 +1420,6 @@ Cambridge CB2 3QG, England.
 .br
 Phone: +44 1223 334714
 
+Last updated: 10 June 1999
+.br
 Copyright (c) 1997-1999 University of Cambridge.

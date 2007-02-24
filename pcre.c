@@ -1790,6 +1790,11 @@ for (;;)
     code += 2;
     break;
 
+    case OP_WORD_BOUNDARY:
+    case OP_NOT_WORD_BOUNDARY:
+    code++;
+    break;
+
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
@@ -4113,6 +4118,7 @@ Arguments:
   external_extra  points to "hints" from pcre_study() or is NULL
   subject         points to the subject string
   length          length of subject string (may contain binary zeros)
+  start_offset    where to start in the subject string
   options         option bits
   offsets         points to a vector of ints to be filled in with offsets
   offsetcount     the number of elements in the vector
@@ -4125,14 +4131,15 @@ Returns:          > 0 => success; value is the number of elements filled in
 
 int
 pcre_exec(const pcre *external_re, const pcre_extra *external_extra,
-  const char *subject, int length, int options, int *offsets, int offsetcount)
+  const char *subject, int length, int start_offset, int options, int *offsets,
+  int offsetcount)
 {
 int resetcount, ocount;
 int first_char = -1;
 int ims = 0;
 match_data match_block;
 const uschar *start_bits = NULL;
-const uschar *start_match = (const uschar *)subject;
+const uschar *start_match = (const uschar *)subject + start_offset;
 const uschar *end_subject;
 const real_pcre *re = (const real_pcre *)external_re;
 const real_pcre_extra *extra = (const real_pcre_extra *)external_extra;
@@ -4224,7 +4231,7 @@ if (!anchored)
         start_bits = extra->start_bits;
   }
 
-/* Loop for unanchored matches; for anchored regexps the loop runs just once. */
+/* Loop for unanchored matches; for anchored regexs the loop runs just once. */
 
 do
   {

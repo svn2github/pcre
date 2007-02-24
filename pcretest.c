@@ -275,8 +275,8 @@ compiled re. */
 static void *new_malloc(size_t size)
 {
 if (log_store)
-  fprintf(outfile, "Memory allocation request: %d (code space %d)\n",
-    (int)size, (int)size - offsetof(real_pcre, code[0]));
+  fprintf(outfile, "Memory allocation (code space): %d\n",
+    (int)((int)size - offsetof(real_pcre, code[0])));
 return malloc(size);
 }
 
@@ -372,7 +372,10 @@ while (!done)
   unsigned const char *tables = NULL;
   int do_study = 0;
   int do_debug = debug;
+  int do_G = 0;
+  int do_g = 0;
   int do_showinfo = showinfo;
+  int do_showrest = 0;
   int do_posix = 0;
   int erroroffset, len, delimiter;
 
@@ -444,14 +447,17 @@ while (!done)
     {
     switch (*pp++)
       {
+      case 'g': do_g = 1; break;
       case 'i': options |= PCRE_CASELESS; break;
       case 'm': options |= PCRE_MULTILINE; break;
       case 's': options |= PCRE_DOTALL; break;
       case 'x': options |= PCRE_EXTENDED; break;
 
+      case '+': do_showrest = 1; break;
       case 'A': options |= PCRE_ANCHORED; break;
       case 'D': do_debug = do_showinfo = 1; break;
       case 'E': options |= PCRE_DOLLAR_ENDONLY; break;
+      case 'G': do_G = 1; break;
       case 'I': do_showinfo = 1; break;
       case 'M': log_store = 1; break;
       case 'P': do_posix = 1; break;
@@ -661,16 +667,18 @@ while (!done)
   for (;;)
     {
     unsigned char *q;
+    unsigned char *bptr = dbuffer;
     int count, c;
     int copystrings = 0;
     int getstrings = 0;
     int getlist = 0;
+    int start_offset = 0;
     int offsets[45];
     int size_offsets = sizeof(offsets)/sizeof(int);
 
     options = 0;
 
-    if (infile == stdin) printf("  data> ");
+    if (infile == stdin) printf("data> ");
     if (fgets((char *)buffer, sizeof(buffer), infile) == NULL)
       {
       done = 1;
@@ -769,8 +777,8 @@ while (!done)
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
 
-      rc = regexec(&preg, (char *)dbuffer, sizeof(pmatch)/sizeof(regmatch_t),
-        pmatch, eflags);
+      rc = regexec(&preg, (unsigned char *)bptr,
+        sizeof(pmatch)/sizeof(regmatch_t), pmatch, eflags);
 
       if (rc != 0)
         {
@@ -788,14 +796,20 @@ while (!done)
             pchars(dbuffer + pmatch[i].rm_so,
               pmatch[i].rm_eo - pmatch[i].rm_so);
             fprintf(outfile, "\n");
+            if (i == 0 && do_showrest)
+              {
+              fprintf(outfile, " 0+ ");
+              pchars(dbuffer + pmatch[i].rm_eo, len - pmatch[i].rm_eo);
+              fprintf(outfile, "\n");
+              }
             }
           }
         }
       }
 
-    /* Handle matching via the native interface */
+    /* Handle matching via the native interface - repeats for /g and /G */
 
-    else
+    else for (;;)
       {
       if (timeit)
         {
@@ -803,16 +817,16 @@ while (!done)
         clock_t time_taken;
         clock_t start_time = clock();
         for (i = 0; i < LOOPREPEAT; i++)
-          count = pcre_exec(re, extra, (char *)dbuffer, len, options, offsets,
-            size_offsets);
+          count = pcre_exec(re, extra, (char *)bptr, len,
+            (do_g? start_offset : 0), options, offsets, size_offsets);
         time_taken = clock() - start_time;
         fprintf(outfile, "Execute time %.3f milliseconds\n",
           ((double)time_taken * 1000.0)/
           ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
         }
 
-      count = pcre_exec(re, extra, (char *)dbuffer, len, options, offsets,
-        size_offsets);
+      count = pcre_exec(re, extra, (char *)bptr, len,
+        (do_g? start_offset : 0), options, offsets, size_offsets);
 
       if (count == 0)
         {
@@ -830,8 +844,18 @@ while (!done)
           else
             {
             fprintf(outfile, "%2d: ", i/2);
-            pchars(dbuffer + offsets[i], offsets[i+1] - offsets[i]);
+            pchars(bptr + offsets[i], offsets[i+1] - offsets[i]);
             fprintf(outfile, "\n");
+            if (i == 0)
+              {
+              start_offset = offsets[1];
+              if (do_showrest)
+                {
+                fprintf(outfile, " 0+ ");
+                pchars(bptr + offsets[i+1], len - offsets[i+1]);
+                fprintf(outfile, "\n");
+                }
+              }
             }
           }
 
@@ -840,7 +864,7 @@ while (!done)
           if ((copystrings & (1 << i)) != 0)
             {
             char buffer[16];
-            int rc = pcre_copy_substring((char *)dbuffer, offsets, count,
+            int rc = pcre_copy_substring((char *)bptr, offsets, count,
               i, buffer, sizeof(buffer));
             if (rc < 0)
               fprintf(outfile, "copy substring %d failed %d\n", i, rc);
@@ -854,7 +878,7 @@ while (!done)
           if ((getstrings & (1 << i)) != 0)
             {
             const char *substring;
-            int rc = pcre_get_substring((char *)dbuffer, offsets, count,
+            int rc = pcre_get_substring((char *)bptr, offsets, count,
               i, &substring);
             if (rc < 0)
               fprintf(outfile, "get substring %d failed %d\n", i, rc);
@@ -869,7 +893,7 @@ while (!done)
         if (getlist)
           {
           const char **stringlist;
-          int rc = pcre_get_substring_list((char *)dbuffer, offsets, count,
+          int rc = pcre_get_substring_list((char *)bptr, offsets, count,
             &stringlist);
           if (rc < 0)
             fprintf(outfile, "get substring list failed %d\n", rc);
@@ -886,8 +910,19 @@ while (!done)
         }
       else
         {
-        if (count == -1) fprintf(outfile, "No match\n");
-          else fprintf(outfile, "Error %d\n", count);
+        if (start_offset == 0)
+          {
+          if (count == -1) fprintf(outfile, "No match\n");
+            else fprintf(outfile, "Error %d\n", count);
+          }
+        start_offset = -1;
+        }
+
+      if ((!do_g && !do_G) || start_offset <= 0) break;
+      if (do_G)
+        {
+        bptr += start_offset;
+        len -= start_offset;
         }
       }
     }

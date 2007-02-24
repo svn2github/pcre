@@ -1,4 +1,4 @@
-PCRE version 2.05 21-Apr-1999
+PCRE version 2.06 21-Jun-1999
 
 /the quick brown fox/
     the quick brown fox
@@ -2765,6 +2765,65 @@ No match
     *** Failers 
 No match
     abcde\nBar  
+No match
+
+/^.*B/
+    **** Failers
+No match
+    abc\nB
+No match
+     
+/(?s)^.*B/
+    abc\nB
+ 0: abc\x0aB
+
+/(?m)^.*B/
+    abc\nB
+ 0: B
+     
+/(?ms)^.*B/
+    abc\nB
+ 0: abc\x0aB
+
+/(?ms)^B/
+    abc\nB
+ 0: B
+
+/(?s)B$/
+    B\n
+ 0: B
+
+/^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+    123456654321
+ 0: 123456654321
+  
+/^\d\d\d\d\d\d\d\d\d\d\d\d/
+    123456654321 
+ 0: 123456654321
+
+/^[\d][\d][\d][\d][\d][\d][\d][\d][\d][\d][\d][\d]/
+    123456654321
+ 0: 123456654321
+  
+/^[abc]{12}/
+    abcabcabcabc
+ 0: abcabcabcabc
+    
+/^[a-c]{12}/
+    abcabcabcabc
+ 0: abcabcabcabc
+    
+/^(a|b|c){12}/
+    abcabcabcabc 
+ 0: abcabcabcabc
+ 1: c
+
+/^[abcdefghijklmnopqrstuvwxy0123456789]/
+    n
+ 0: n
+    *** Failers 
+No match
+    z 
 No match
 
 / End of test input /

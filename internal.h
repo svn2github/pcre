@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "2.05 21-Apr-1999"
+#define PCRE_VERSION       "2.06 21-Jun-1999"
 
 
 /* This is a library of functions to support regular expressions whose syntax

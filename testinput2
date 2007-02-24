@@ -442,4 +442,48 @@
 
 /(?s:.*X|^B)/D
 
+/\Biss\B/+
+    Mississippi
+
+/\Biss\B/+P
+    Mississippi
+
+/iss/G+
+    Mississippi
+
+/\Biss\B/G+
+    Mississippi
+
+/\Biss\B/g+
+    Mississippi
+    *** Failers
+    Mississippi\A
+
+/(?<=[Ms])iss/g+
+    Mississippi
+
+/(?<=[Ms])iss/G+
+    Mississippi
+
+/^iss/g+
+    ississippi
+    
+/.*iss/g+
+    abciss\nxyzisspqr 
+
+/.i./+g
+    Mississippi
+    Mississippi\A
+    Missouri river
+    Missouri river\A  
+
+/^.is/+g
+    Mississippi
+
+/^ab\n/g+
+    ab\nab\ncd
+
+/^ab\n/mg+
+    ab\nab\ncd
+
 / End of test input /
