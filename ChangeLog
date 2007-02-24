@@ -1,12 +1,24 @@
 ChangeLog for PCRE
 ------------------
 
+Version 3.8 18-Dec-01
+---------------------
+
+1. The experimental UTF-8 code was completely screwed up. It was packing the
+bytes in the wrong order. How dumb can you get?
+
+
 Version 3.7 29-Oct-01
 ---------------------
 
 1. In updating pcretest to check change 1 of version 3.6, I screwed up.
 This caused pcretest, when used on the test data, to segfault. Unfortunately,
 this didn't happen under Solaris 8, where I normally test things.
+
+2. The Makefile had to be changed to make it work on BSD systems, where 'make'
+doesn't seem to recognize that ./xxx and xxx are the same file. (This entry
+isn't in ChangeLog distributed with 3.7 because I forgot when I hastily made
+this fix an hour or so after the initial 3.7 release.)
 
 
 Version 3.6 23-Oct-01

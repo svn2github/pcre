@@ -73,13 +73,14 @@ for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
   if (cvalue <= utf8_table1[i]) break;
 if (i >= sizeof(utf8_table1)/sizeof(int)) return 0;
 if (cvalue < 0) return -1;
-*buffer++ = utf8_table2[i] | (cvalue & utf8_table3[i]);
-cvalue >>= 6 - i;
-for (j = 0; j < i; j++)
-  {
-  *buffer++ = 0x80 | (cvalue & 0x3f);
-  cvalue >>= 6;
-  }
+
+buffer += i;
+for (j = i; j > 0; j--)
+ {
+ *buffer-- = 0x80 | (cvalue & 0x3f);
+ cvalue >>= 6;
+ }
+*buffer = utf8_table2[i] | cvalue;
 return i + 1;
 }
 
@@ -117,15 +118,15 @@ if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
 
 /* i now has a value in the range 1-5 */
 
-d = c & utf8_table3[i];
-s = 6 - i;
+s = 6*i;
+d = (c & utf8_table3[i]) << s;
 
 for (j = 0; j < i; j++)
   {
   c = *buffer++;
   if ((c & 0xc0) != 0x80) return -(j+1);
+  s -= 6;
   d |= (c & 0x3f) << s;
-  s += 6;
   }
 
 /* Check that encoding was the correct unique one */
@@ -460,7 +461,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
   else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
-      ((size_offsets = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
+      ((size_offsets = (int)strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
     {
     op++;
     argc--;
