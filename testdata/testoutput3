@@ -1,4 +1,4 @@
-PCRE version 3.6 23-Oct-2001
+PCRE version 3.7 29-Oct-2001
 
 /(?<!bar)foo/
     foo

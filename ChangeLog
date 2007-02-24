@@ -1,6 +1,14 @@
 ChangeLog for PCRE
 ------------------
 
+Version 3.7 29-Oct-01
+---------------------
+
+1. In updating pcretest to check change 1 of version 3.6, I screwed up.
+This caused pcretest, when used on the test data, to segfault. Unfortunately,
+this didn't happen under Solaris 8, where I normally test things.
+
+
 Version 3.6 23-Oct-01
 ---------------------
 

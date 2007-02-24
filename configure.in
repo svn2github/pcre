@@ -17,8 +17,8 @@ dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
 PCRE_MAJOR=3
-PCRE_MINOR=6
-PCRE_DATE=23-Oct-2001
+PCRE_MINOR=7
+PCRE_DATE=29-Oct-2001
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Provide versioning information for libtool shared libraries that
