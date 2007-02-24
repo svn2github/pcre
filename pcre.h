@@ -32,7 +32,7 @@ extern "C" {
 #define PCRE_NOTEOL          0x0100
 #define PCRE_UNGREEDY        0x0200
 
-/* Exec-time error codes */
+/* Exec-time and get-time error codes */
 
 #define PCRE_ERROR_NOMATCH        (-1)
 #define PCRE_ERROR_NULL           (-2)
@@ -40,6 +40,7 @@ extern "C" {
 #define PCRE_ERROR_BADMAGIC       (-4)
 #define PCRE_ERROR_UNKNOWN_NODE   (-5)
 #define PCRE_ERROR_NOMEMORY       (-6)
+#define PCRE_ERROR_NOSUBSTRING    (-7)
 
 /* Types */
 
@@ -56,10 +57,13 @@ extern void  (*pcre_free)(void *);
 
 extern pcre *pcre_compile(const char *, int, const char **, int *,
   const unsigned char *);
+extern int pcre_copy_substring(const char *, int *, int, int, char *, int);
 extern int pcre_exec(const pcre *, const pcre_extra *, const char *,
   int, int, int *, int);
-extern unsigned const char *pcre_maketables(void);
+extern int pcre_get_substring(const char *, int *, int, int, const char **);
+extern int pcre_get_substring_list(const char *, int *, int, const char ***);
 extern int pcre_info(const pcre *, int *, int *);
+extern unsigned const char *pcre_maketables(void);
 extern pcre_extra *pcre_study(const pcre *, int, const char **);
 extern const char *pcre_version(void);
 

@@ -28,8 +28,6 @@
     *** Failers
     def\nabc
 
-/abc\/
-
 /ab\gdef/X
 
 /(?X)ab\gdef/X
@@ -155,8 +153,6 @@
 /abc$/P
     abc
     abc\n 
-
-/abc\/P
 
 /(abc)\2/P
 
@@ -285,7 +281,7 @@
 
 /(?<=ab(c|de)f)g/
 
-/The next two are in testinput2 because they have variable length branches/
+/The next three are in testinput2 because they have variable length branches/
 
 /(?<=bullock|donkey)-cart/
     the bullock-cart
@@ -295,6 +291,10 @@
     horse-and-cart    
       
 /(?<=ab(?i)x|y|z)/
+
+/(?>.*)(?<=(abcd)|(xyz))/
+    alphabetabcd
+    endingxyz
 
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/
     abxyZZ
@@ -338,8 +338,6 @@
 
 /(*)b/
 
-/a\/
-
 /abc)/
 
 /(abc/
@@ -363,8 +361,6 @@
 /*a/i
 
 /(*)b/i
-
-/a\/i
 
 /abc)/i
 
@@ -397,5 +393,37 @@
 /(?<=x+)y/
 
 /a{37,17}/
+
+/abc/\
+
+/abc/\P
+
+/abc/\i
+
+/(a)bc(d)/
+    abcd
+    abcd\C2
+    abcd\C5
+     
+/(.{20})/
+    abcdefghijklmnopqrstuvwxyz
+    abcdefghijklmnopqrstuvwxyz\C1
+    abcdefghijklmnopqrstuvwxyz\G1
+     
+/(.{15})/
+    abcdefghijklmnopqrstuvwxyz
+    abcdefghijklmnopqrstuvwxyz\C1\G1
+
+/(.{16})/
+    abcdefghijklmnopqrstuvwxyz
+    abcdefghijklmnopqrstuvwxyz\C1\G1\L
+    
+/^(a|(bc))de(f)/
+    adef\G1\G2\G3\G4\L 
+    bcdef\G1\G2\G3\G4\L 
+    adefghijk\C0 
+    
+/^abc\00def/
+    abc\00def\L\C0 
 
 / End of test input /

@@ -1655,5 +1655,31 @@
     ABC445
     *** Failers
     ABC123
+    
+/^[W-]46]/
+    W46]789 
+    -46]789
+    *** Failers
+    Wall
+    Zebra
+    42
+    [abcd] 
+    ]abcd[
        
+/^[W-\]46]/
+    W46]789 
+    Wall
+    Zebra
+    Xylophone  
+    42
+    [abcd] 
+    ]abcd[
+    \\backslash 
+    *** Failers
+    -46]789
+    well
+    
+/\d\d\/\d\d\/\d\d\d\d/
+    01/01/2000
+
 / End of test input /

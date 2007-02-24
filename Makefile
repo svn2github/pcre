@@ -19,7 +19,7 @@ RANLIB = @true
 
 ##########################################################################
 
-OBJ = maketables.o study.o pcre.o
+OBJ = maketables.o get.o study.o pcre.o
 
 all:            libpcre.a libpcreposix.a pcretest pgrep
 
@@ -47,6 +47,9 @@ pcreposix.o:    pcreposix.c pcreposix.h internal.h pcre.h Makefile
 
 maketables.o:   maketables.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) maketables.c
+
+get.o:          get.c pcre.h internal.h Makefile
+		$(CC) -c $(CFLAGS) get.c
 
 study.o:        study.c pcre.h internal.h Makefile
 		$(CC) -c $(CFLAGS) study.c

@@ -13,9 +13,6 @@ pcre - Perl-compatible regular expressions.
 .B const unsigned char *\fItableptr\fR);
 .PP
 .br
-.B const unsigned char *pcre_maketables(void);
-.PP
-.br
 .B pcre_extra *pcre_study(const pcre *\fIcode\fR, int \fIoptions\fR,
 .ti +5n
 .B const char **\fIerrptr\fR);
@@ -26,6 +23,28 @@ pcre - Perl-compatible regular expressions.
 .B "const char *\fIsubject\fR," int \fIlength\fR, int \fIoptions\fR,
 .ti +5n
 .B int *\fIovector\fR, int \fIovecsize\fR);
+.PP
+.br
+.B int pcre_copy_substring(const char *\fIsubject\fR, int *\fIovector\fR,
+.ti +5n
+.B int \fIstringcount\fR, int \fIstringnumber\fR, char *\fIbuffer\fR,
+.ti +5n
+.B int \fIbuffersize\fR);
+.PP
+.br
+.B int pcre_get_substring(const char *\fIsubject\fR, int *\fIovector\fR,
+.ti +5n
+.B int \fIstringcount\fR, int \fIstringnumber\fR,
+.ti +5n
+.B const char **\fIstringptr\fR);
+.PP
+.br
+.B int pcre_get_substring_list(const char *\fIsubject\fR,
+.ti +5n
+.B int *\fIovector\fR, int \fIstringcount\fR, "const char ***\fIlistptr\fR);"
+.PP
+.br
+.B const unsigned char *pcre_maketables(void);
 .PP
 .br
 .B int pcre_info(const pcre *\fIcode\fR, int *\fIoptptr\fR, int
@@ -51,10 +70,13 @@ PCRE has its own native API, which is described in this man page. There is also
 a set of wrapper functions that correspond to the POSIX API. See
 \fBpcreposix (3)\fR.
 
-The three functions \fBpcre_compile()\fR, \fBpcre_study()\fR, and
-\fBpcre_exec()\fR are used for compiling and matching regular expressions. The
-function \fBpcre_maketables()\fR is used (optionally) to build a set of
-character tables in the current locale for passing to \fBpcre_compile()\fR.
+The functions \fBpcre_compile()\fR, \fBpcre_study()\fR, and \fBpcre_exec()\fR
+are used for compiling and matching regular expressions, while
+\fBpcre_copy_substring()\fR, \fBpcre_get_substring()\fR, and
+\fBpcre_get_substring_list()\fR are convenience functions for extracting
+captured substrings from a matched subject string. The function
+\fBpcre_maketables()\fR is used (optionally) to build a set of character tables
+in the current locale for passing to \fBpcre_compile()\fR.
 
 The function \fBpcre_info()\fR is used to find out information about a compiled
 pattern, while the function \fBpcre_version()\fR returns a pointer to a string
@@ -233,6 +255,27 @@ in different locales. It is the caller's responsibility to ensure that the
 memory containing the tables remains available for as long as it is needed.
 
 
+.SH INFORMATION ABOUT A PATTERN
+The \fBpcre_info()\fR function returns information about a compiled pattern.
+Its yield is the number of capturing subpatterns, or one of the following
+negative numbers:
+
+  PCRE_ERROR_NULL       the argument \fIcode\fR was NULL
+  PCRE_ERROR_BADMAGIC   the "magic number" was not found
+
+If the \fIoptptr\fR argument is not NULL, a copy of the options with which the
+pattern was compiled is placed in the integer it points to.
+
+If the \fIfirstcharptr\fR argument is not NULL, is is used to pass back
+information about the first character of any matched string. If there is a
+fixed first character, e.g. from a pattern such as (cat|cow|coyote), then it is
+returned in the integer pointed to by \fIfirstcharptr\fR. Otherwise, if the
+pattern was compiled with the PCRE_MULTILINE option, and every branch started
+with "^", then -1 is returned, indicating that the pattern will match at the
+start of a subject string or after any "\\n" within the string. Otherwise -2 is
+returned.
+
+
 .SH MATCHING A PATTERN
 The function \fBpcre_exec()\fR is called to match a subject string against a
 pre-compiled pattern, which is passed in the \fIcode\fR argument. If the
@@ -289,6 +332,9 @@ first capturing subpattern, and so on. The value returned by \fBpcre_exec()\fR
 is the number of pairs that have been set. If there are no capturing
 subpatterns, the return value from a successful match is 1, indicating that
 just the first pair of offsets has been set.
+
+Some convenience functions are provided for extracting the captured substrings
+as separate strings. These are described in the following section.
 
 It is possible for an capturing subpattern number \fIn+1\fR to match some
 part of the subject when subpattern \fIn\fR has not been used at all. For
@@ -350,25 +396,62 @@ call via \fBpcre_malloc()\fR fails, this error is given. The memory is freed at
 the end of matching.
 
 
-.SH INFORMATION ABOUT A PATTERN
-The \fBpcre_info()\fR function returns information about a compiled pattern.
-Its yield is the number of capturing subpatterns, or one of the following
-negative numbers:
+.SH EXTRACTING CAPTURED SUBSTRINGS
+Captured substrings can be accessed directly by using the offsets returned by
+\fBpcre_exec()\fR in \fIovector\fR. For convenience, the functions
+\fBpcre_copy_substring()\fR, \fBpcre_get_substring()\fR, and
+\fBpcre_get_substring_list()\fR are provided for extracting captured substrings
+as new, separate, zero-terminated strings. A substring that contains a binary
+zero is correctly extracted and has a further zero added on the end, but the
+result does not, of course, function as a C string.
 
-  PCRE_ERROR_NULL       the argument \fIcode\fR was NULL
-  PCRE_ERROR_BADMAGIC   the "magic number" was not found
+The first three arguments are the same for all three functions: \fIsubject\fR
+is the subject string which has just been successfully matched, \fIovector\fR
+is a pointer to the vector of integer offsets that was passed to
+\fBpcre_exec()\fR, and \fIstringcount\fR is the number of substrings that
+were captured by the match, including the substring that matched the entire
+regular expression. This is the value returned by \fBpcre_exec\fR if it
+is greater than zero. If \fBpcre_exec()\fR returned zero, indicating that it
+ran out of space in \fIovector\fR, then the value passed as
+\fIstringcount\fR should be the size of the vector divided by three.
 
-If the \fIoptptr\fR argument is not NULL, a copy of the options with which the
-pattern was compiled is placed in the integer it points to.
+The functions \fBpcre_copy_substring()\fR and \fBpcre_get_substring()\fR
+extract a single substring, whose number is given as \fIstringnumber\fR. A
+value of zero extracts the substring that matched the entire pattern, while
+higher values extract the captured substrings. For \fBpcre_copy_substring()\fR,
+the string is placed in \fIbuffer\fR, whose length is given by
+\fIbuffersize\fR, while for \fBpcre_get_substring()\fR a new block of store is
+obtained via \fBpcre_malloc\fR, and its address is returned via
+\fIstringptr\fR. The yield of the function is the length of the string, not
+including the terminating zero, or one of
 
-If the \fIfirstcharptr\fR argument is not NULL, is is used to pass back
-information about the first character of any matched string. If there is a
-fixed first character, e.g. from a pattern such as (cat|cow|coyote), then it is
-returned in the integer pointed to by \fIfirstcharptr\fR. Otherwise, if the
-pattern was compiled with the PCRE_MULTILINE option, and every branch started
-with "^", then -1 is returned, indicating that the pattern will match at the
-start of a subject string or after any "\\n" within the string. Otherwise -2 is
-returned.
+  PCRE_ERROR_NOMEMORY       (-6)
+
+The buffer was too small for \fBpcre_copy_substring()\fR, or the attempt to get
+memory failed for \fBpcre_get_substring()\fR.
+
+  PCRE_ERROR_NOSUBSTRING    (-7)
+
+There is no substring whose number is \fIstringnumber\fR.
+
+The \fBpcre_get_substring_list()\fR function extracts all available substrings
+and builds a list of pointers to them. All this is done in a single block of
+memory which is obtained via \fBpcre_malloc\fR. The address of the memory block
+is returned via \fIlistptr\fR, which is also the start of the list of string
+pointers. The end of the list is marked by a NULL pointer. The yield of the
+function is zero if all went well, or
+
+  PCRE_ERROR_NOMEMORY       (-6)
+
+if the attempt to get the memory block failed.
+
+When any of these functions encounter a substring that is unset, which can
+happen when capturing subpattern number \fIn+1\fR matches some part of the
+subject, but subpattern \fIn\fR has not been used at all, they return an empty
+string. This can be distinguished from a genuine zero-length substring by
+inspecting the appropriate offset in \fIovector\fR, which is negative for unset
+substrings.
+
 
 
 .SH LIMITATIONS
@@ -723,11 +806,15 @@ The minus (hyphen) character can be used to specify a range of characters in a
 character class. For example, [d-m] matches any letter between d and m,
 inclusive. If a minus character is required in a class, it must be escaped with
 a backslash or appear in a position where it cannot be interpreted as
-indicating a range, typically as the first or last character in the class. It
-is not possible to have the character "]" as the end character of a range,
-since a sequence such as [w-] is interpreted as a class of two characters. The
-octal or hexadecimal representation of "]" can, however, be used to end a
-range.
+indicating a range, typically as the first or last character in the class.
+
+It is not possible to have the literal character "]" as the end character of a
+range. A pattern such as [W-]46] is interpreted as a class of two characters
+("W" and "-") followed by a literal string "46]", so it would match "W46]" or
+"-46]". However, if the "]" is escaped with a backslash it is interpreted as
+the end of range, so [W-\\]46] is interpreted as a single class containing a
+range followed by two separate characters. The octal or hexadecimal
+representation of "]" can also be used to end a range.
 
 Ranges operate in ASCII collating sequence. They can also be used for
 characters specified numerically, for example [\\000-\\037]. If a range that
@@ -1156,7 +1243,7 @@ of characters that an identical standalone pattern would match, if anchored at
 the current point in the subject string.
 
 Once-only subpatterns are not capturing subpatterns. Simple cases such as the
-above example can be though of as a maximizing repeat that must swallow
+above example can be thought of as a maximizing repeat that must swallow
 everything it can. So, while both \\d+ and \\d+? are prepared to adjust the
 number of digits they match in order to make the rest of the pattern match,
 (?>\\d+) can only match an entire sequence of digits.

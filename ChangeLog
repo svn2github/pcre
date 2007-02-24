@@ -2,6 +2,22 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.03 02-Feb-99
+----------------------
+
+1. Fixed typo and small mistake in man page.
+
+2. Added 4th condition (GPL supersedes) and created separate LICENCE file.
+
+3. Updated pcretest so that patterns such as /abc\/def/ work like they do in
+Perl, that is the internal \ allows the delimiter to be included in the
+pattern. Locked out the use of \ as a delimiter. If \ immediately follows
+the final delimiter, add \ to the end of the pattern (to test the error).
+
+4. Added the convenience functions for extracting substrings after a successful
+match. Updated pcretest to make it able to test these functions.
+
+
 Version 2.02 14-Jan-99
 ----------------------
 

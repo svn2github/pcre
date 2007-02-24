@@ -1,4 +1,4 @@
-PCRE version 2.02 14-Jan-1999
+PCRE version 2.03 12-Feb-1999
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -67,9 +67,6 @@ No first char
 No match
     def\nabc
 No match
-
-/abc\/
-Failed: \ at end of pattern at offset 4
 
 /ab\gdef/X
 Failed: unrecognized character follows \ at offset 3
@@ -361,9 +358,6 @@ No match: POSIX code 17: match failed
  0: abc
     abc\n 
  0: abc
-
-/abc\/P
-Failed: POSIX code 9: bad escape sequence at offset 4     
 
 /(abc)\2/P
 Failed: POSIX code 15: bad back reference at offset 7     
@@ -658,7 +652,7 @@ Failed: lookbehind assertion is not fixed length at offset 12
 /(?<=ab(c|de)f)g/
 Failed: lookbehind assertion is not fixed length at offset 13
 
-/The next two are in testinput2 because they have variable length branches/
+/The next three are in testinput2 because they have variable length branches/
 Identifying subpattern count = 0
 No options
 First char = 'T'
@@ -682,6 +676,18 @@ No match
 Identifying subpattern count = 0
 No options
 No first char
+
+/(?>.*)(?<=(abcd)|(xyz))/
+Identifying subpattern count = 2
+Options: anchored
+No first char
+    alphabetabcd
+ 0: alphabetabcd
+ 1: abcd
+    endingxyz
+ 0: endingxyz
+ 1: <unset>
+ 2: xyz
 
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/
 Identifying subpattern count = 0
@@ -770,9 +776,6 @@ Failed: nothing to repeat at offset 0
 /(*)b/
 Failed: nothing to repeat at offset 1
 
-/a\/
-Failed: \ at end of pattern at offset 2
-
 /abc)/
 Failed: unmatched parentheses at offset 3
 
@@ -808,9 +811,6 @@ Failed: nothing to repeat at offset 0
 
 /(*)b/i
 Failed: nothing to repeat at offset 1
-
-/a\/i
-Failed: \ at end of pattern at offset 2
 
 /abc)/i
 Failed: unmatched parentheses at offset 3
@@ -859,6 +859,124 @@ Failed: lookbehind assertion is not fixed length at offset 6
 
 /a{37,17}/
 Failed: numbers out of order in {} quantifier at offset 7
+
+/abc/\
+Failed: \ at end of pattern at offset 4
+
+/abc/\P
+Failed: POSIX code 9: bad escape sequence at offset 4     
+
+/abc/\i
+Failed: \ at end of pattern at offset 4
+
+/(a)bc(d)/
+Identifying subpattern count = 2
+No options
+First char = 'a'
+    abcd
+ 0: abcd
+ 1: a
+ 2: d
+    abcd\C2
+ 0: abcd
+ 1: a
+ 2: d
+ 2C d (1)
+    abcd\C5
+ 0: abcd
+ 1: a
+ 2: d
+copy substring 5 failed -7
+     
+/(.{20})/
+Identifying subpattern count = 1
+No options
+No first char
+    abcdefghijklmnopqrstuvwxyz
+ 0: abcdefghijklmnopqrst
+ 1: abcdefghijklmnopqrst
+    abcdefghijklmnopqrstuvwxyz\C1
+ 0: abcdefghijklmnopqrst
+ 1: abcdefghijklmnopqrst
+copy substring 1 failed -6
+    abcdefghijklmnopqrstuvwxyz\G1
+ 0: abcdefghijklmnopqrst
+ 1: abcdefghijklmnopqrst
+ 1G abcdefghijklmnopqrst (20)
+     
+/(.{15})/
+Identifying subpattern count = 1
+No options
+No first char
+    abcdefghijklmnopqrstuvwxyz
+ 0: abcdefghijklmno
+ 1: abcdefghijklmno
+    abcdefghijklmnopqrstuvwxyz\C1\G1
+ 0: abcdefghijklmno
+ 1: abcdefghijklmno
+ 1C abcdefghijklmno (15)
+ 1G abcdefghijklmno (15)
+
+/(.{16})/
+Identifying subpattern count = 1
+No options
+No first char
+    abcdefghijklmnopqrstuvwxyz
+ 0: abcdefghijklmnop
+ 1: abcdefghijklmnop
+    abcdefghijklmnopqrstuvwxyz\C1\G1\L
+ 0: abcdefghijklmnop
+ 1: abcdefghijklmnop
+copy substring 1 failed -6
+ 1G abcdefghijklmnop (16)
+ 0L abcdefghijklmnop
+ 1L abcdefghijklmnop
+    
+/^(a|(bc))de(f)/
+Identifying subpattern count = 3
+Options: anchored
+No first char
+    adef\G1\G2\G3\G4\L 
+ 0: adef
+ 1: a
+ 2: <unset>
+ 3: f
+ 1G a (1)
+ 2G  (0)
+ 3G f (1)
+get substring 4 failed -7
+ 0L adef
+ 1L a
+ 2L 
+ 3L f
+    bcdef\G1\G2\G3\G4\L 
+ 0: bcdef
+ 1: bc
+ 2: bc
+ 3: f
+ 1G bc (2)
+ 2G bc (2)
+ 3G f (1)
+get substring 4 failed -7
+ 0L bcdef
+ 1L bc
+ 2L bc
+ 3L f
+    adefghijk\C0 
+ 0: adef
+ 1: a
+ 2: <unset>
+ 3: f
+ 0C adef (4)
+    
+/^abc\00def/
+Identifying subpattern count = 0
+Options: anchored
+No first char
+    abc\00def\L\C0 
+ 0: abc\x00def
+ 0C abc (7)
+ 0L abc
 
 / End of test input /
 Identifying subpattern count = 0

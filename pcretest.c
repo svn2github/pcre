@@ -385,9 +385,9 @@ while (!done)
 
   delimiter = *p++;
 
-  if (isalnum(delimiter))
+  if (isalnum(delimiter) || delimiter == '\\')
     {
-    fprintf(outfile, "** Delimiter must not be alphameric\n");
+    fprintf(outfile, "** Delimiter must not be alphameric or \\\n");
     goto SKIP_DATA;
     }
 
@@ -395,7 +395,12 @@ while (!done)
 
   for(;;)
     {
-    while (*pp != 0 && *pp != delimiter) pp++;
+    while (*pp != 0)
+      {
+      if (*pp == '\\' && pp[1] != 0) pp++;
+        else if (*pp == delimiter) break;
+      pp++;
+      }
     if (*pp != 0) break;
 
     len = sizeof(buffer) - (pp - buffer);
@@ -414,6 +419,12 @@ while (!done)
       }
     if (infile != stdin) fprintf(outfile, "%s", (char *)pp);
     }
+
+  /* If the first character after the delimiter is backslash, make
+  the pattern end with backslash. This is purely to provide a way
+  of testing for the error message when a pattern ends with backslash. */
+
+  if (pp[1] == '\\') *pp++ = '\\';
 
   /* Terminate the pattern at the delimiter */
 
@@ -644,6 +655,9 @@ while (!done)
     {
     unsigned char *q;
     int count, c;
+    int copystrings = 0;
+    int getstrings = 0;
+    int getlist = 0;
     int offsets[45];
     int size_offsets = sizeof(offsets)/sizeof(int);
 
@@ -707,6 +721,20 @@ while (!done)
 
         case 'B':
         options |= PCRE_NOTBOL;
+        continue;
+
+        case 'C':
+        while(isdigit(*p)) n = n * 10 + *p++ - '0';
+        copystrings |= 1 << n;
+        continue;
+
+        case 'G':
+        while(isdigit(*p)) n = n * 10 + *p++ - '0';
+        getstrings |= 1 << n;
+        continue;
+
+        case 'L':
+        getlist = 1;
         continue;
 
         case 'O':
@@ -788,8 +816,7 @@ while (!done)
       if (count >= 0)
         {
         int i;
-        count *= 2;
-        for (i = 0; i < count; i += 2)
+        for (i = 0; i < count * 2; i += 2)
           {
           if (offsets[i] < 0)
             fprintf(outfile, "%2d: <unset>\n", i/2);
@@ -800,6 +827,55 @@ while (!done)
             fprintf(outfile, "\n");
             }
           }
+
+        for (i = 0; i < 32; i++)
+          {
+          if ((copystrings & (1 << i)) != 0)
+            {
+            char buffer[16];
+            int rc = pcre_copy_substring((char *)dbuffer, offsets, count,
+              i, buffer, sizeof(buffer));
+            if (rc < 0)
+              fprintf(outfile, "copy substring %d failed %d\n", i, rc);
+            else
+              fprintf(outfile, "%2dC %s (%d)\n", i, buffer, rc);
+            }
+          }
+
+        for (i = 0; i < 32; i++)
+          {
+          if ((getstrings & (1 << i)) != 0)
+            {
+            const char *substring;
+            int rc = pcre_get_substring((char *)dbuffer, offsets, count,
+              i, &substring);
+            if (rc < 0)
+              fprintf(outfile, "get substring %d failed %d\n", i, rc);
+            else
+              {
+              fprintf(outfile, "%2dG %s (%d)\n", i, substring, rc);
+              free((void *)substring);
+              }
+            }
+          }
+
+        if (getlist)
+          {
+          const char **stringlist;
+          int rc = pcre_get_substring_list((char *)dbuffer, offsets, count,
+            &stringlist);
+          if (rc < 0)
+            fprintf(outfile, "get substring list failed %d\n", rc);
+          else
+            {
+            for (i = 0; i < count; i++)
+              fprintf(outfile, "%2dL %s\n", i, stringlist[i]);
+            if (stringlist[i] != NULL)
+              fprintf(outfile, "string list not terminated by NULL\n");
+            free((void *)stringlist);
+            }
+          }
+
         }
       else
         {

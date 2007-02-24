@@ -1,4 +1,4 @@
-PCRE version 2.02 14-Jan-1999
+PCRE version 2.03 12-Feb-1999
 
 /the quick brown fox/
     the quick brown fox
@@ -2484,6 +2484,52 @@ No match
 No match
     ABC123
 No match
+    
+/^[W-]46]/
+    W46]789 
+ 0: W46]
+    -46]789
+ 0: -46]
+    *** Failers
+No match
+    Wall
+No match
+    Zebra
+No match
+    42
+No match
+    [abcd] 
+No match
+    ]abcd[
+No match
        
+/^[W-\]46]/
+    W46]789 
+ 0: W
+    Wall
+ 0: W
+    Zebra
+ 0: Z
+    Xylophone  
+ 0: X
+    42
+ 0: 4
+    [abcd] 
+ 0: [
+    ]abcd[
+ 0: ]
+    \\backslash 
+ 0: \
+    *** Failers
+No match
+    -46]789
+No match
+    well
+No match
+    
+/\d\d\/\d\d\/\d\d\d\d/
+    01/01/2000
+ 0: 01/01/2000
+
 / End of test input /
 

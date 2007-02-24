@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "2.02 14-Jan-1999"
+#define PCRE_VERSION       "2.03 12-Feb-1999"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -28,6 +28,10 @@ restrictions:
 
 3. Altered versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
+
+4. If PCRE is embedded in any software that is released under the GNU
+   General Purpose Licence (GPL), then the terms of that licence shall
+   supersede any condition above with which it is incompatible.
 -----------------------------------------------------------------------------
 */
 

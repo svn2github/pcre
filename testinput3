@@ -1625,4 +1625,10 @@
     the.quick.brown.fox_
     the.quick.brown.fox+       
 
+/(?>.*)(?<=(abcd|wxyz))/
+    alphabetabcd
+    endingwxyz
+    *** Failers
+    a rather long string that doesn't end with one of them
+        
 / End of test input /       

@@ -1,4 +1,4 @@
-PCRE version 2.02 14-Jan-1999
+PCRE version 2.03 12-Feb-1999
 
 /(?<!bar)foo/
     foo
@@ -2806,5 +2806,17 @@ No match
     the.quick.brown.fox+       
 No match
 
+/(?>.*)(?<=(abcd|wxyz))/
+    alphabetabcd
+ 0: alphabetabcd
+ 1: abcd
+    endingwxyz
+ 0: endingwxyz
+ 1: wxyz
+    *** Failers
+No match
+    a rather long string that doesn't end with one of them
+No match
+        
 / End of test input /       
 
