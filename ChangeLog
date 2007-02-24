@@ -2,6 +2,24 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.08 31-Aug-99
+----------------------
+
+1. When startoffset was not zero and the pattern began with ".*", PCRE was not
+trying to match at the startoffset position, but instead was moving forward to
+the next newline as if a previous match had failed.
+
+2. pcretest was not making use of PCRE_NOTEMPTY when repeating for /g and /G,
+and could get into a loop if a null string was matched other than at the start
+of the subject.
+
+3. Added definitions of PCRE_MAJOR and PCRE_MINOR to pcre.h so the version can
+be distinguished at compile time, and for completeness also added PCRE_DATE.
+
+5. Added Paul Sokolovsky's minor changes to make it easy to compile a Win32 DLL
+in GnuWin32 environments.
+
+
 Version 2.07 29-Jul-99
 ----------------------
 

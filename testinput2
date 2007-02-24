@@ -583,4 +583,7 @@
     *** Failers
     \Nabc     
 
+/.*?/g+
+  abc
+
 / End of test input /

@@ -330,8 +330,9 @@ is applied to a string not beginning with "a" or "b", it matches the empty
 string at the start of the subject. With PCRE_NOTEMPTY set, this match is not
 valid, so PCRE searches further into the string for occurrences of "a" or "b".
 Perl has no direct equivalent of this option, but it makes a special case of
-a pattern match of the empty string within its \fBsplit()\fR function. Using
-PCRE_NOTEMPTY it is possible to emulate this behaviour.
+a pattern match of the empty string within its \fBsplit()\fR function, or when
+using the /g modifier. Using PCRE_NOTEMPTY it is possible to emulate this
+behaviour.
 
 The subject string is passed as a pointer in \fIsubject\fR, a length in
 \fIlength\fR, and a starting offset in \fIstartoffset\fR. Unlike the pattern

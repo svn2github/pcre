@@ -3,9 +3,6 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "2.07 29-Jul-1999"
-
-
 /* This is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language. See
 the file Tech.Notes for some information on the internals.

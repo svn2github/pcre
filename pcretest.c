@@ -704,6 +704,7 @@ while (!done)
     int copystrings = 0;
     int getstrings = 0;
     int getlist = 0;
+    int gmatched = 0;
     int start_offset = 0;
     int offsets[45];
     int size_offsets = sizeof(offsets)/sizeof(int);
@@ -849,7 +850,7 @@ while (!done)
     else
 #endif  /* !defined NOPOSIX */
 
-    for (;;)
+    for (;; gmatched++)    /* Loop for /g or /G */
       {
       if (timeit)
         {
@@ -858,7 +859,7 @@ while (!done)
         clock_t start_time = clock();
         for (i = 0; i < LOOPREPEAT; i++)
           count = pcre_exec(re, extra, (char *)bptr, len,
-            (do_g? start_offset : 0), options, offsets, size_offsets);
+            start_offset, options, offsets, size_offsets);
         time_taken = clock() - start_time;
         fprintf(outfile, "Execute time %.3f milliseconds\n",
           ((double)time_taken * 1000.0)/
@@ -866,13 +867,15 @@ while (!done)
         }
 
       count = pcre_exec(re, extra, (char *)bptr, len,
-        (do_g? start_offset : 0), options, offsets, size_offsets);
+        start_offset, options, offsets, size_offsets);
 
       if (count == 0)
         {
         fprintf(outfile, "Matched, but too many substrings\n");
         count = size_offsets/3;
         }
+
+      /* Matched */
 
       if (count >= 0)
         {
@@ -888,7 +891,6 @@ while (!done)
             fprintf(outfile, "\n");
             if (i == 0)
               {
-              start_offset = offsets[1];
               if (do_showrest)
                 {
                 fprintf(outfile, " 0+ ");
@@ -946,26 +948,45 @@ while (!done)
             free((void *)stringlist);
             }
           }
-
         }
+
+      /* Failed to match */
+
       else
         {
-        if (start_offset == 0)
+        if (gmatched == 0)
           {
           if (count == -1) fprintf(outfile, "No match\n");
             else fprintf(outfile, "Error %d\n", count);
           }
-        start_offset = -1;
+        break;  /* Out of the /g loop */
         }
 
-      if ((!do_g && !do_G) || start_offset <= 0) break;
-      if (do_G)
+      /* If not /g or /G we are done */
+
+      if (!do_g && !do_G) break;
+
+      /* If we have matched an empty string, set PCRE_NOTEMPTY for the next
+      match. This mimics what Perl's /g option does. */
+
+      if (offsets[1] == offsets[0])
+        options |= PCRE_NOTEMPTY;
+      else
+        options &= ~PCRE_NOTEMPTY;
+
+      /* For /g, update the start offset, leaving the rest alone */
+
+      if (do_g) start_offset = offsets[1];
+
+      /* For /G, update the pointer and length */
+
+      else
         {
-        bptr += start_offset;
-        len -= start_offset;
+        bptr += offsets[1];
+        len -= offsets[1];
         }
-      }
-    }
+      }  /* End of loop for /g and /G */
+    }    /* End of loop for data lines */
 
   CONTINUE:
 

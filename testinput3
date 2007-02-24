@@ -1662,4 +1662,31 @@
     *** Failers
     123999foo  
 
+/<a[\s]+href[\s]*=[\s]*          # find <a href=
+ ([\"\'])?                       # find single or double quote
+ (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+    <a href=\"abcd xyz pqr\" cats
+    <a href=\'abcd xyz pqr\' cats
+
+/<a\s+href\s*=\s*                # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+    <a href=\"abcd xyz pqr\" cats
+    <a href       =       \'abcd xyz pqr\' cats
+
+/<a\s+href(?>\s*)=(?>\s*)        # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+    <a href=\"abcd xyz pqr\" cats
+    <a href       =       \'abcd xyz pqr\' cats
+
 / End of test input /       

@@ -1,8 +1,18 @@
 # Make file for PCRE (Perl-Compatible Regular Expression) library.
 
-# If you are using a Unix system, see below.
+# If you are using a Unix system, see below. I am a Unix person, so that is
+# the stuff I really know about. PCRE is developed on a Unix box.
 
-##############################################################################
+# To build mingw32 DLL uncomment the next two lines. This addition for mingw32
+# was contributed by  Paul Sokolovsky <Paul.Sokolovsky@technologist.com>. I
+# (Philip Hazel) don't know anything about it! There are some additional
+# targets at the bottom of this Makefile.
+#
+# include dll.mk
+# DLL_LDFLAGS=-s
+
+
+######## NON-UNIX ############ NON-UNIX ############## NON-UNIX ##############
 # If you want to compile PCRE for a non-Unix system, note that it consists
 # entirely of code written in Standard C, and so should compile successfully
 # using normal compiling commands to do the following:
@@ -25,7 +35,7 @@
 # testinput2.
 
 
-##############################################################################
+######## UNIX ################## UNIX ################## UNIX ################
 # On a Unix system:
 #
 # Edit CC, CFLAGS, and RANLIB for your system.
@@ -59,6 +69,7 @@ MANDIR = /usr/local/man
 
 
 ##############################################################################
+
 
 OBJ = maketables.o get.o study.o pcre.o
 
@@ -124,5 +135,24 @@ clean:;         -rm -f *.o *.a pcretest pgrep
 
 runtest:        all
 		./RunTest
+
+######## MINGW32 ############### MINGW32 ############### MINGW32 #############
+
+# This addition for mingw32 was contributed by  Paul Sokolovsky
+# <Paul.Sokolovsky@technologist.com>. I (PH) don't know anything about it!
+
+dll:            _dll libpcre.dll.a pgrep_d pcretest_d
+
+_dll:
+		$(MAKE) CFLAGS=-DSTATIC pcre.dll
+
+pcre.dll:       $(OBJ) pcreposix.o pcre.def
+libpcre.dll.a:  pcre.def
+
+pgrep_d:        libpcre.dll.a pgrep.o
+		$(CC) $(CFLAGS) -L. -o pgrep pgrep.o -lpcre.dll
+
+pcretest_d:     libpcre.dll.a pcretest.o
+		$(PURIFY) $(CC) $(CFLAGS) -L. -o pcretest pcretest.o -lpcre.dll
 
 # End

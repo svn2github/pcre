@@ -1,4 +1,4 @@
-PCRE version 2.07 29-Jul-1999
+PCRE version 2.08 31-Aug-1999
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -1594,6 +1594,27 @@ No req char
  0: 
     \Nabc     
 No match
+
+/.*?/g+
+Identifying subpattern count = 0
+No options
+First char at start or follows \n
+No req char
+  abc
+ 0: 
+ 0+ abc
+ 0: a
+ 0+ bc
+ 0: 
+ 0+ bc
+ 0: b
+ 0+ c
+ 0: 
+ 0+ c
+ 0: c
+ 0+ 
+ 0: 
+ 0+ 
 
 / End of test input /
 Identifying subpattern count = 0

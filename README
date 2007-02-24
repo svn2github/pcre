@@ -70,6 +70,8 @@ The distribution should contain the following files:
   testoutput2       test results corresponding to testinput2
   testoutput3       test results corresponding to testinput3
   testoutput4       test results corresponding to testinput4
+  dll.mk            for Win32 DLL
+  pcre.def          ditto
 
 To build PCRE on a Unix system, first edit Makefile for your system. It is a
 fairly simple make file, and there are some comments near the top, after the
@@ -85,6 +87,16 @@ some hints on what needs to be done. PCRE has been compiled on Windows systems
 and on Macintoshes, but I don't know the details as I don't use those systems.
 It should be straightforward to build PCRE on any system that has a Standard C
 compiler.
+
+Some help in building a Win32 DLL of PCRE in GnuWin32 environments was
+contributed by Paul.Sokolovsky@technologist.com. These environments are
+Mingw32 (http://www.xraylith.wisc.edu/~khan/software/gnu-win32/) and
+CygWin  (http://sourceware.cygnus.com/cygwin/). Paul comments:
+
+  For CygWin, set CFLAGS=-mno-cygwin, and do 'make dll'. You'll get
+  pcre.dll (containing pcreposix also), libpcre.dll.a, and dynamically
+  linked pgrep and pcretest. If you have /bin/sh, run RunTest (three
+  main test go ok, locale not supported).
 
 To test PCRE, run the RunTest script in the pcre directory. This can also be
 run by "make runtest". It runs the pcretest test program (which is documented
@@ -220,13 +232,18 @@ others which set PCRE options that do not correspond to anything in Perl: /A,
 /E, and /X set PCRE_ANCHORED, PCRE_DOLLAR_ENDONLY, and PCRE_EXTRA respectively.
 
 Searching for all possible matches within each subject string can be requested
-by the /g or /G modifier. The /g modifier behaves similarly to the way it does
-in Perl. After finding a match, PCRE is called again to search the remainder of
-the subject string. The difference between /g and /G is that the former uses
-the start_offset argument to pcre_exec() to start searching at a new point
-within the entire string, whereas the latter passes over a shortened substring.
-This makes a difference to the matching process if the pattern begins with a
-lookbehind assertion (including \b or \B).
+by the /g or /G modifier. After finding a match, PCRE is called again to search
+the remainder of the subject string. The difference between /g and /G is that
+the former uses the startoffset argument to pcre_exec() to start searching at
+a new point within the entire string (which is in effect what Perl does),
+whereas the latter passes over a shortened substring. This makes a difference
+to the matching process if the pattern begins with a lookbehind assertion
+(including \b or \B).
+
+If any call to pcre_exec() in a /g or /G sequence matches an empty string, the
+next call is done with the PCRE_NOTEMPTY flag set so that it cannot match an
+empty string again. This imitates the way Perl handles such cases when using
+the /g modifier or the split() function.
 
 There are a number of other modifiers for controlling the way pcretest
 operates.

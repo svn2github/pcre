@@ -365,8 +365,8 @@ MATCHING A PATTERN
      further into the string for occurrences of "a" or "b".  Perl
      has no direct equivalent of this  option,  but  it  makes  a
      special  case  of a pattern match of the empty string within
-     its split() function. Using PCRE_NOTEMPTY it is possible  to
-     emulate this behaviour.
+     its split() function, or when using the /g  modifier.  Using
+     PCRE_NOTEMPTY it is possible to emulate this behaviour.
 
      The subject string is passed as  a  pointer  in  subject,  a
      length  in  length,  and  a  starting offset in startoffset.

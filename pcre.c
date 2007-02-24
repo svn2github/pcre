@@ -148,10 +148,13 @@ tables. */
 *          Return version string                 *
 *************************************************/
 
+#define STRING(a)  # a
+#define XSTRING(s) STRING(s)
+
 const char *
 pcre_version(void)
 {
-return PCRE_VERSION;
+return XSTRING(PCRE_MAJOR) "." XSTRING(PCRE_MINOR) " " XSTRING(PCRE_DATE);
 }
 
 
@@ -3088,7 +3091,7 @@ for (;;)
     case OP_OPT:
     ims = ecode[1];
     ecode += 2;
-    DPRINTF(("ims set to %02x\n", ims));
+    DPRINTF(("ims set to %02lx\n", ims));
     break;
 
     /* Assertion brackets. Check the alternative branches in turn - the
@@ -3195,7 +3198,7 @@ for (;;)
       if (ecode[3] == OP_OPT)
         {
         ims = (ims & ~PCRE_IMS) | ecode[4];
-        DPRINTF(("ims set to %02x at group repeat\n", ims));
+        DPRINTF(("ims set to %02lx at group repeat\n", ims));
         }
 
       if (*ecode == OP_KETRMIN)
@@ -3289,7 +3292,7 @@ for (;;)
       the group. */
 
       ims = original_ims;
-      DPRINTF(("ims reset to %02x\n", ims));
+      DPRINTF(("ims reset to %02lx\n", ims));
 
       /* For a non-repeating ket, just continue at this level. This also
       happens for a repeating ket if no characters were matched in the group.
@@ -4337,7 +4340,7 @@ do
 
   else if (startline)
     {
-    if (start_match > match_block.start_subject)
+    if (start_match > match_block.start_subject + start_offset)
       {
       while (start_match < end_subject && start_match[-1] != '\n')
         start_match++;

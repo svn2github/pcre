@@ -437,8 +437,9 @@ is applied to a string not beginning with "a" or "b", it matches the empty
 string at the start of the subject. With PCRE_NOTEMPTY set, this match is not
 valid, so PCRE searches further into the string for occurrences of "a" or "b".
 Perl has no direct equivalent of this option, but it makes a special case of
-a pattern match of the empty string within its <B>split()</B> function. Using
-PCRE_NOTEMPTY it is possible to emulate this behaviour.
+a pattern match of the empty string within its <B>split()</B> function, or when
+using the /g modifier. Using PCRE_NOTEMPTY it is possible to emulate this
+behaviour.
 </P>
 <P>
 The subject string is passed as a pointer in <I>subject</I>, a length in
