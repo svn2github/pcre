@@ -2,6 +2,15 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 1.09 28 Apr-98
+----------------------
+
+1. A negated single character class followed by a quantifier with a minimum
+value of one (e.g.  [^x]{1,6}  ) was not compiled correctly. This could lead to
+program crashes, or just wrong answers. This did not apply to negated classes
+containing more than one character, or to minima other than one.
+
+
 Version 1.08 27-Mar-98
 ----------------------
 

@@ -1008,13 +1008,19 @@ for (;; ptr++)
         /* If the mininum is 1 and the previous item was a character string,
         we either have to put back the item that got cancelled if the string
         length was 1, or add the character back onto the end of a longer
-        string. For a character type nothing need be done; it will just get put
-        back naturally. */
+        string. For a character type nothing need be done; it will just get
+        put back naturally. Note that the final character is always going to
+        get added below. */
 
         else if (*previous == OP_CHARS)
           {
           if (code == previous) code += 2; else previous[1]++;
           }
+
+        /*  For a single negated character we also have to put back the
+        item that got cancelled. */
+
+        else if (*previous == OP_NOT) code++;
 
         /* If the maximum is unlimited, insert an OP_STAR. */
 
