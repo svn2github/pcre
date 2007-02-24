@@ -79,15 +79,16 @@ return a non-NULL value before trying to save the study data.
 .rs
 .sp
 Re-using a precompiled pattern is straightforward. Having reloaded it into main
-memory, you pass its pointer to \fBpcre_exec()\fP in the usual way. This should
-work even on another host, and even if that host has the opposite endianness to
-the one where the pattern was compiled.
+memory, you pass its pointer to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP in
+the usual way. This should work even on another host, and even if that host has
+the opposite endianness to the one where the pattern was compiled.
 .P
 However, if you passed a pointer to custom character tables when the pattern
 was compiled (the \fItableptr\fP argument of \fBpcre_compile()\fP), you must
-now pass a similar pointer to \fBpcre_exec()\fP, because the value saved with
-the compiled pattern will obviously be nonsense. A field in a
-\fBpcre_extra()\fP block is used to pass this data, as described in the
+now pass a similar pointer to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP,
+because the value saved with the compiled pattern will obviously be nonsense. A
+field in a \fBpcre_extra()\fP block is used to pass this data, as described in
+the
 .\" HTML <a href="pcreapi.html#extradata">
 .\" </a>
 section on matching a pattern
@@ -107,7 +108,8 @@ If you saved study data with the compiled pattern, you need to create your own
 \fBpcre_extra\fP data block and set the \fIstudy_data\fP field to point to the
 reloaded study data. You must also set the PCRE_EXTRA_STUDY_DATA bit in the
 \fIflags\fP field to indicate that study data is present. Then pass the
-\fBpcre_extra\fP block to \fBpcre_exec()\fP in the usual way.
+\fBpcre_extra\fP block to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP in the
+usual way.
 .
 .
 .SH "COMPATIBILITY WITH DIFFERENT PCRE RELEASES"
@@ -120,6 +122,6 @@ advertised), you will have to recompile them for release 5.0. However, from now
 on, it should be possible to make changes in a compabible manner.
 .P
 .in 0
-Last updated: 10 September 2004
+Last updated: 28 February 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

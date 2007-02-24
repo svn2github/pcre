@@ -35,8 +35,8 @@ this, PCRE has to retry the match starting after every newline in the subject.
 .P
 If you are using such a pattern with subject strings that do not contain
 newlines, the best performance is obtained by setting PCRE_DOTALL, or starting
-the pattern with ^.* to indicate explicit anchoring. That saves PCRE from
-having to scan along the subject looking for a newline to restart at.
+the pattern with ^.* or ^.*? to indicate explicit anchoring. That saves PCRE
+from having to scan along the subject looking for a newline to restart at.
 .P
 Beware of patterns that contain nested indefinite repeats. These can take a
 long time to run when applied to a string that does not match. Consider the
@@ -71,6 +71,6 @@ In many cases, the solution to this kind of performance issue is to use an
 atomic group or a possessive quantifier.
 .P
 .in 0
-Last updated: 09 September 2004
+Last updated: 28 February 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

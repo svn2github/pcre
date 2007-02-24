@@ -1,4 +1,4 @@
-PCRE version 5.0 13-Sep-2004
+PCRE version 6.0 07-Jun-2005
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -3841,6 +3841,58 @@ Callout 0: last capture = 1
  0: xyz
  1: abc
    
+/a(b+)(c*)(?C1)/
+Capturing subpattern count = 2
+Partial matching not supported
+No options
+First char = 'a'
+Need char = 'b'
+    abbbbbccc\C*1
+--->abbbbbccc
+  1 ^        ^    
+Callout data = 1
+  1 ^       ^     
+Callout data = 1
+  1 ^      ^      
+Callout data = 1
+  1 ^     ^       
+Callout data = 1
+  1 ^    ^        
+Callout data = 1
+  1 ^   ^         
+Callout data = 1
+  1 ^  ^          
+Callout data = 1
+  1 ^ ^           
+Callout data = 1
+No match
+
+/a(b+?)(c*?)(?C1)/
+Capturing subpattern count = 2
+Partial matching not supported
+No options
+First char = 'a'
+Need char = 'b'
+    abbbbbccc\C*1
+--->abbbbbccc
+  1 ^ ^           
+Callout data = 1
+  1 ^  ^          
+Callout data = 1
+  1 ^   ^         
+Callout data = 1
+  1 ^    ^        
+Callout data = 1
+  1 ^     ^       
+Callout data = 1
+  1 ^      ^      
+Callout data = 1
+  1 ^       ^     
+Callout data = 1
+  1 ^        ^    
+Callout data = 1
+No match
+   
 /(?C)abc/ 
 Capturing subpattern count = 0
 No options
@@ -5599,6 +5651,58 @@ Capturing subpattern count = 0
 Options: anchored
 No first char
 No need char
+
+/line\nbreak/
+Capturing subpattern count = 0
+No options
+First char = 'l'
+Need char = 'k'
+    this is a line\nbreak
+ 0: line\x0abreak
+    line one\nthis is a line\nbreak in the second line 
+ 0: line\x0abreak
+
+/line\nbreak/f
+Capturing subpattern count = 0
+Options: firstline
+First char = 'l'
+Need char = 'k'
+    this is a line\nbreak
+ 0: line\x0abreak
+    ** Failers 
+No match
+    line one\nthis is a line\nbreak in the second line 
+No match
+
+/line\nbreak/mf
+Capturing subpattern count = 0
+Options: multiline firstline
+First char = 'l'
+Need char = 'k'
+    this is a line\nbreak
+ 0: line\x0abreak
+    ** Failers 
+No match
+    line one\nthis is a line\nbreak in the second line 
+No match
+
+/ab.cd/P
+    ab-cd
+ 0: ab-cd
+    ab=cd 
+ 0: ab=cd
+    ** Failers
+No match: POSIX code 17: match failed
+    ab\ncd
+No match: POSIX code 17: match failed
+
+/ab.cd/Ps
+    ab-cd
+ 0: ab-cd
+    ab=cd 
+ 0: ab=cd
+    ab\ncd
+ 0: ab\x0acd
 
 / End of testinput2 /
 Capturing subpattern count = 0

@@ -33,8 +33,8 @@ package. See the
 .\" HREF
 \fBpcreapi\fP
 .\"
-documentation for a description of PCRE's native API, which contains additional
-functionality.
+documentation for a description of PCRE's native API, which contains much
+additional functionality.
 .P
 The functions described here are just wrapper functions that ultimately call
 the PCRE native API. Their prototypes are defined in the \fBpcreposix.h\fP
@@ -75,6 +75,11 @@ about the compiled expression.
 .P
 The argument \fIcflags\fP is either zero, or contains one or more of the bits
 defined by the following macros:
+.sp
+  REG_DOTALL
+.sp
+The PCRE_DOTALL option is set when the expression is passed for compilation to
+the native function. Note that REG_DOTALL is not part of the POSIX standard.
 .sp
   REG_ICASE
 .sp
@@ -189,13 +194,13 @@ memory, after which \fIpreg\fP may no longer be used as a compiled expression.
 .SH AUTHOR
 .rs
 .sp
-Philip Hazel <ph10@cam.ac.uk>
+Philip Hazel
 .br
 University Computing Service,
 .br
 Cambridge CB2 3QG, England.
 .P
 .in 0
-Last updated: 07 September 2004
+Last updated: 28 February 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

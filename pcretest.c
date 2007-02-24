@@ -4,7 +4,7 @@
 
 /* This program was hacked up as a tester for PCRE. I really should have
 written it more tidily in the first place. Will I ever learn? It has grown and
-been extended and consequently is now rather untidy in places.
+been extended and consequently is now rather, er, *very* untidy in places.
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -44,11 +44,15 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <locale.h>
 #include <errno.h>
 
-/* We need the internal info for displaying the results of pcre_study(). Also
-for getting the opcodes for showing compiled code. */
-
 #define PCRE_SPY        /* For Win32 build, import data, not export */
-#include "internal.h"
+
+/* We need the internal info for displaying the results of pcre_study() and
+other internal data; pcretest also uses some of the fixed tables, and generally
+has "inside information" compared to a program that strictly follows the PCRE
+API. */
+
+#include "pcre_internal.h"
+
 
 /* It is possible to compile this test program without including support for
 testing the POSIX interface, though this is not available via the standard
@@ -87,34 +91,6 @@ static size_t gotten_store;
 static uschar *pbuffer = NULL;
 
 
-static const int utf8_table1[] = {
-  0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};
-
-static const int utf8_table2[] = {
-  0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
-
-static const int utf8_table3[] = {
-  0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
-
-
-
-/*************************************************
-*         Print compiled regex                   *
-*************************************************/
-
-/* The code for doing this is held in a separate file that is also included in
-pcre.c when it is compiled with the debug switch. It defines a function called
-print_internals(), which uses a table of opcode lengths defined by the macro
-OP_LENGTHS, whose name must be OP_lengths. It also uses a table that translates
-Unicode property names to numbers; this is kept in a separate file. */
-
-static uschar OP_lengths[] = { OP_LENGTHS };
-
-#include "ucp.h"
-#include "ucptypetable.c"
-#include "printint.c"
-
-
 
 /*************************************************
 *          Read number from string               *
@@ -142,42 +118,6 @@ return(result);
 }
 
 
-
-/*************************************************
-*       Convert character value to UTF-8         *
-*************************************************/
-
-/* This function takes an integer value in the range 0 - 0x7fffffff
-and encodes it as a UTF-8 character in 0 to 6 bytes.
-
-Arguments:
-  cvalue     the character value
-  buffer     pointer to buffer for result - at least 6 bytes long
-
-Returns:     number of characters placed in the buffer
-             -1 if input character is negative
-             0 if input character is positive but too big (only when
-             int is longer than 32 bits)
-*/
-
-static int
-ord2utf8(int cvalue, unsigned char *buffer)
-{
-register int i, j;
-for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
-  if (cvalue <= utf8_table1[i]) break;
-if (i >= sizeof(utf8_table1)/sizeof(int)) return 0;
-if (cvalue < 0) return -1;
-
-buffer += i;
-for (j = i; j > 0; j--)
- {
- *buffer-- = 0x80 | (cvalue & 0x3f);
- cvalue >>= 6;
- }
-*buffer = utf8_table2[i] | cvalue;
-return i + 1;
-}
 
 
 /*************************************************
@@ -214,7 +154,7 @@ if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
 /* i now has a value in the range 1-5 */
 
 s = 6*i;
-d = (c & utf8_table3[i]) << s;
+d = (c & _pcre_utf8_table3[i]) << s;
 
 for (j = 0; j < i; j++)
   {
@@ -226,8 +166,8 @@ for (j = 0; j < i; j++)
 
 /* Check that encoding was the correct unique one */
 
-for (j = 0; j < sizeof(utf8_table1)/sizeof(int); j++)
-  if (d <= utf8_table1[j]) break;
+for (j = 0; j < _pcre_utf8_table1_size; j++)
+  if (d <= _pcre_utf8_table1[j]) break;
 if (j != i) return -(i+1);
 
 /* Valid value */
@@ -403,7 +343,7 @@ static void *new_malloc(size_t size)
 void *block = malloc(size);
 gotten_store = size;
 if (show_malloc)
-  fprintf(outfile, "malloc       %3d %p\n", size, block);
+  fprintf(outfile, "malloc       %3d %p\n", (int)size, block);
 return block;
 }
 
@@ -421,7 +361,7 @@ static void *stack_malloc(size_t size)
 {
 void *block = malloc(size);
 if (show_malloc)
-  fprintf(outfile, "stack_malloc %3d %p\n", size, block);
+  fprintf(outfile, "stack_malloc %3d %p\n", (int)size, block);
 return block;
 }
 
@@ -484,12 +424,14 @@ int showinfo = 0;
 int showstore = 0;
 int size_offsets = 45;
 int size_offsets_max;
-int *offsets;
+int *offsets = NULL;
 #if !defined NOPOSIX
 int posix = 0;
 #endif
 int debug = 0;
 int done = 0;
+int all_use_dfa = 0;
+int yield = 0;
 
 unsigned char *buffer;
 unsigned char *dbuffer;
@@ -522,6 +464,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-t") == 0) timeit = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
+  else if (strcmp(argv[op], "-dfa") == 0) all_use_dfa = 1;
   else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
       ((size_offsets = get_value((unsigned char *)argv[op+1], &endptr)),
         *endptr == 0))
@@ -558,8 +501,9 @@ while (argc > 1 && argv[op][0] == '-')
     printf("** Unknown or malformed option %s\n", argv[op]);
     printf("Usage:   pcretest [-d] [-i] [-o <n>] [-p] [-s] [-t] [<input> [<output>]]\n");
     printf("  -C     show PCRE compile-time options and exit\n");
-    printf("  -d     debug: show compiled code; implies -i\n"
-           "  -i     show information about compiled pattern\n"
+    printf("  -d     debug: show compiled code; implies -i\n");
+    printf("  -dfa   force DFA matching for all subjects\n");
+    printf("  -i     show information about compiled pattern\n"
            "  -m     output memory used information\n"
            "  -o <n> set size of offsets vector to <n>\n");
 #if !defined NOPOSIX
@@ -567,7 +511,8 @@ while (argc > 1 && argv[op][0] == '-')
 #endif
     printf("  -s     output store (memory) used information\n"
            "  -t     time compilation and execution\n");
-    return 1;
+    yield = 1;
+    goto EXIT;
     }
   op++;
   argc--;
@@ -581,7 +526,8 @@ if (offsets == NULL)
   {
   printf("** Failed to get %d bytes of memory for offsets vector\n",
     size_offsets_max * sizeof(int));
-  return 1;
+  yield = 1;
+  goto EXIT;
   }
 
 /* Sort out the input and output files */
@@ -592,7 +538,8 @@ if (argc > 1)
   if (infile == NULL)
     {
     printf("** Failed to open %s\n", argv[op]);
-    return 1;
+    yield = 1;
+    goto EXIT;
     }
   }
 
@@ -602,7 +549,8 @@ if (argc > 2)
   if (outfile == NULL)
     {
     printf("** Failed to open %s\n", argv[op+1]);
-    return 1;
+    yield = 1;
+    goto EXIT;
     }
   }
 
@@ -802,6 +750,7 @@ while (!done)
     {
     switch (*pp++)
       {
+      case 'f': options |= PCRE_FIRSTLINE; break;
       case 'g': do_g = 1; break;
       case 'i': options |= PCRE_CASELESS; break;
       case 'm': options |= PCRE_MULTILINE; break;
@@ -831,7 +780,8 @@ while (!done)
 
       case 'L':
       ppp = pp;
-      while (*ppp != '\n' && *ppp != ' ') ppp++;
+      /* The '\r' test here is so that it works on Windows */
+      while (*ppp != '\n' && *ppp != '\r' && *ppp != ' ') ppp++;
       *ppp = 0;
       if (setlocale(LC_CTYPE, (const char *)pp) == NULL)
         {
@@ -849,7 +799,10 @@ while (!done)
       *pp = 0;
       break;
 
-      case '\n': case ' ': break;
+      case '\r':                      /* So that it works in Windows */
+      case '\n':
+      case ' ':
+      break;
 
       default:
       fprintf(outfile, "** Unknown option '%c'\n", pp[-1]);
@@ -869,6 +822,7 @@ while (!done)
 
     if ((options & PCRE_CASELESS) != 0) cflags |= REG_ICASE;
     if ((options & PCRE_MULTILINE) != 0) cflags |= REG_NEWLINE;
+    if ((options & PCRE_DOTALL) != 0) cflags |= REG_DOTALL;
     rc = regcomp(&preg, (char *)p, cflags);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -1016,7 +970,7 @@ while (!done)
       if (do_debug)
         {
         fprintf(outfile, "------------------------------------------------------------------\n");
-        print_internals(re, outfile);
+        _pcre_printint(re, outfile);
         }
 
       new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
@@ -1049,7 +1003,7 @@ while (!done)
 
       if (size != regex_gotten_store) fprintf(outfile,
         "Size disagreement: pcre_fullinfo=%d call to malloc for %d\n",
-        size, regex_gotten_store);
+        (int)size, (int)regex_gotten_store);
 
       fprintf(outfile, "Capturing subpattern count = %d\n", count);
       if (backrefmax > 0)
@@ -1080,11 +1034,12 @@ while (!done)
         fprintf(outfile, "Partial matching not supported\n");
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
           ((get_options & PCRE_MULTILINE) != 0)? " multiline" : "",
+          ((get_options & PCRE_FIRSTLINE) != 0)? " firstline" : "",
           ((get_options & PCRE_DOTALL) != 0)? " dotall" : "",
           ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
@@ -1222,6 +1177,10 @@ while (!done)
           }
         fclose(f);
         }
+
+      new_free(re);
+      if (extra != NULL) new_free(extra);
+      if (tables != NULL) new_free((void *)tables);
       continue;  /* With next regex */
       }
     }        /* End of non-POSIX compile */
@@ -1244,6 +1203,7 @@ while (!done)
     int gmatched = 0;
     int start_offset = 0;
     int g_notempty = 0;
+    int use_dfa = 0;
 
     options = 0;
 
@@ -1309,7 +1269,7 @@ while (!done)
             {
             unsigned char buff8[8];
             int ii, utn;
-            utn = ord2utf8(c, buff8);
+            utn = _pcre_ord2utf8(c, buff8);
             for (ii = 0; ii < utn - 1; ii++) *q++ = buff8[ii];
             c = buff8[ii];   /* Last byte */
             p = pt + 1;
@@ -1397,6 +1357,17 @@ while (!done)
           }
         continue;
 
+        case 'D':
+        if (posix || do_posix)
+          printf("** Can't use dfa matching in POSIX mode: \\D ignored\n");
+        else
+          use_dfa = 1;
+        continue;
+
+        case 'F':
+        options |= PCRE_DFA_SHORTEST;
+        continue;
+
         case 'G':
         if (isdigit(*p))
           {
@@ -1439,7 +1410,8 @@ while (!done)
             {
             printf("** Failed to get %d bytes of memory for offsets vector\n",
               size_offsets_max * sizeof(int));
-            return 1;
+            yield = 1;
+            goto EXIT;
             }
           }
         use_size_offsets = n;
@@ -1448,6 +1420,10 @@ while (!done)
 
         case 'P':
         options |= PCRE_PARTIAL;
+        continue;
+
+        case 'R':
+        options |= PCRE_DFA_RESTART;
         continue;
 
         case 'S':
@@ -1466,6 +1442,12 @@ while (!done)
       }
     *q = 0;
     len = q - dbuffer;
+
+    if ((all_use_dfa || use_dfa) && find_match_limit)
+      {
+      printf("**Match limit not relevant for DFA matching: ignored\n");
+      find_match_limit = 0;
+      }
 
     /* Handle matching via the POSIX interface, which does not
     support timing or playing with the match limit or callout data. */
@@ -1524,9 +1506,21 @@ while (!done)
         register int i;
         clock_t time_taken;
         clock_t start_time = clock();
+
+        if (all_use_dfa || use_dfa)
+          {
+          int workspace[1000];
+          for (i = 0; i < LOOPREPEAT; i++)
+            count = pcre_dfa_exec(re, NULL, (char *)bptr, len, start_offset,
+              options | g_notempty, use_offsets, use_size_offsets, workspace,
+              sizeof(workspace)/sizeof(int));
+          }
+        else
+
         for (i = 0; i < LOOPREPEAT; i++)
           count = pcre_exec(re, extra, (char *)bptr, len,
             start_offset, options | g_notempty, use_offsets, use_size_offsets);
+
         time_taken = clock() - start_time;
         fprintf(outfile, "Execute time %.3f milliseconds\n",
           (((double)time_taken * 1000.0) / (double)LOOPREPEAT) /
@@ -1597,16 +1591,28 @@ while (!done)
       /* The normal case is just to do the match once, with the default
       value of match_limit. */
 
+      else if (all_use_dfa || use_dfa)
+        {
+        int workspace[1000];
+        count = pcre_dfa_exec(re, NULL, (char *)bptr, len, start_offset,
+          options | g_notempty, use_offsets, use_size_offsets, workspace,
+          sizeof(workspace)/sizeof(int));
+        if (count == 0)
+          {
+          fprintf(outfile, "Matched, but too many subsidiary matches\n");
+          count = use_size_offsets/2;
+          }
+        }
+
       else
         {
         count = pcre_exec(re, extra, (char *)bptr, len,
           start_offset, options | g_notempty, use_offsets, use_size_offsets);
-        }
-
-      if (count == 0)
-        {
-        fprintf(outfile, "Matched, but too many substrings\n");
-        count = use_size_offsets/3;
+        if (count == 0)
+          {
+          fprintf(outfile, "Matched, but too many substrings\n");
+          count = use_size_offsets/3;
+          }
         }
 
       /* Matched */
@@ -1692,7 +1698,11 @@ while (!done)
 
       else if (count == PCRE_ERROR_PARTIAL)
         {
-        fprintf(outfile, "Partial match\n");
+        fprintf(outfile, "Partial match");
+        if ((all_use_dfa || use_dfa) && use_size_offsets > 2)
+          fprintf(outfile, ": %.*s", use_offsets[1] - use_offsets[0],
+            bptr + use_offsets[0]);
+        fprintf(outfile, "\n");
         break;  /* Out of the /g loop */
         }
 
@@ -1770,17 +1780,28 @@ while (!done)
   if (posix || do_posix) regfree(&preg);
 #endif
 
-  if (re != NULL) free(re);
-  if (extra != NULL) free(extra);
+  if (re != NULL) new_free(re);
+  if (extra != NULL) new_free(extra);
   if (tables != NULL)
     {
-    free((void *)tables);
+    new_free((void *)tables);
     setlocale(LC_CTYPE, "C");
     }
   }
 
 if (infile == stdin) fprintf(outfile, "\n");
-return 0;
+
+EXIT:
+
+if (infile != NULL && infile != stdin) fclose(infile);
+if (outfile != NULL && outfile != stdout) fclose(outfile);
+
+free(buffer);
+free(dbuffer);
+free(pbuffer);
+free(offsets);
+
+return yield;
 }
 
-/* End */
+/* End of pcretest.c */

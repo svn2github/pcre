@@ -19,13 +19,17 @@ man page, in case the conversion went wrong.
 <li><a name="TOC4" href="#SEC4">SAVING PRECOMPILED PATTERNS FOR LATER USE</a>
 <li><a name="TOC5" href="#SEC5">CHECKING BUILD-TIME OPTIONS</a>
 <li><a name="TOC6" href="#SEC6">COMPILING A PATTERN</a>
-<li><a name="TOC7" href="#SEC7">STUDYING A PATTERN</a>
-<li><a name="TOC8" href="#SEC8">LOCALE SUPPORT</a>
-<li><a name="TOC9" href="#SEC9">INFORMATION ABOUT A PATTERN</a>
-<li><a name="TOC10" href="#SEC10">OBSOLETE INFO FUNCTION</a>
-<li><a name="TOC11" href="#SEC11">MATCHING A PATTERN</a>
-<li><a name="TOC12" href="#SEC12">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a>
-<li><a name="TOC13" href="#SEC13">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
+<li><a name="TOC7" href="#SEC7">COMPILATION ERROR CODES</a>
+<li><a name="TOC8" href="#SEC8">STUDYING A PATTERN</a>
+<li><a name="TOC9" href="#SEC9">LOCALE SUPPORT</a>
+<li><a name="TOC10" href="#SEC10">INFORMATION ABOUT A PATTERN</a>
+<li><a name="TOC11" href="#SEC11">OBSOLETE INFO FUNCTION</a>
+<li><a name="TOC12" href="#SEC12">REFERENCE COUNTS</a>
+<li><a name="TOC13" href="#SEC13">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a>
+<li><a name="TOC14" href="#SEC14">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a>
+<li><a name="TOC15" href="#SEC15">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
+<li><a name="TOC16" href="#SEC16">FINDING ALL POSSIBLE MATCHES</a>
+<li><a name="TOC17" href="#SEC17">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE NATIVE API</a><br>
 <P>
@@ -37,6 +41,12 @@ man page, in case the conversion went wrong.
 <b>const unsigned char *<i>tableptr</i>);</b>
 </P>
 <P>
+<b>pcre *pcre_compile2(const char *<i>pattern</i>, int <i>options</i>,</b>
+<b>int *<i>errorcodeptr</i>,</b>
+<b>const char **<i>errptr</i>, int *<i>erroffset</i>,</b>
+<b>const unsigned char *<i>tableptr</i>);</b>
+</P>
+<P>
 <b>pcre_extra *pcre_study(const pcre *<i>code</i>, int <i>options</i>,</b>
 <b>const char **<i>errptr</i>);</b>
 </P>
@@ -44,6 +54,12 @@ man page, in case the conversion went wrong.
 <b>int pcre_exec(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
 <b>const char *<i>subject</i>, int <i>length</i>, int <i>startoffset</i>,</b>
 <b>int <i>options</i>, int *<i>ovector</i>, int <i>ovecsize</i>);</b>
+</P>
+<P>
+<b>int pcre_dfa_exec(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
+<b>const char *<i>subject</i>, int <i>length</i>, int <i>startoffset</i>,</b>
+<b>int <i>options</i>, int *<i>ovector</i>, int <i>ovecsize</i>,</b>
+<b>int *<i>workspace</i>, int <i>wscount</i>);</b>
 </P>
 <P>
 <b>int pcre_copy_named_substring(const pcre *<i>code</i>,</b>
@@ -93,6 +109,9 @@ man page, in case the conversion went wrong.
 <b>*<i>firstcharptr</i>);</b>
 </P>
 <P>
+<b>int pcre_refcount(pcre *<i>code</i>, int <i>adjust</i>);</b>
+</P>
+<P>
 <b>int pcre_config(int <i>what</i>, void *<i>where</i>);</b>
 </P>
 <P>
@@ -115,32 +134,46 @@ man page, in case the conversion went wrong.
 </P>
 <br><a name="SEC2" href="#TOC1">PCRE API OVERVIEW</a><br>
 <P>
-PCRE has its own native API, which is described in this document. There is also
-a set of wrapper functions that correspond to the POSIX regular expression API.
-These are described in the
+PCRE has its own native API, which is described in this document. There is
+also a set of wrapper functions that correspond to the POSIX regular expression
+API. These are described in the
 <a href="pcreposix.html"><b>pcreposix</b></a>
-documentation.
+documentation. Both of these APIs define a set of C function calls. A C++
+wrapper is distributed with PCRE. It is documented in the
+<a href="pcrecpp.html"><b>pcrecpp</b></a>
+page.
 </P>
 <P>
-The native API function prototypes are defined in the header file <b>pcre.h</b>,
-and on Unix systems the library itself is called <b>libpcre</b>. It can
-normally be accessed by adding <b>-lpcre</b> to the command for linking an
-application that uses PCRE. The header file defines the macros PCRE_MAJOR and
-PCRE_MINOR to contain the major and minor release numbers for the library.
+The native API C function prototypes are defined in the header file
+<b>pcre.h</b>, and on Unix systems the library itself is called <b>libpcre</b>.
+It can normally be accessed by adding <b>-lpcre</b> to the command for linking
+an application that uses PCRE. The header file defines the macros PCRE_MAJOR
+and PCRE_MINOR to contain the major and minor release numbers for the library.
 Applications can use these to include support for different releases of PCRE.
 </P>
 <P>
-The functions <b>pcre_compile()</b>, <b>pcre_study()</b>, and <b>pcre_exec()</b>
-are used for compiling and matching regular expressions. A sample program that
-demonstrates the simplest way of using them is provided in the file called
-<i>pcredemo.c</i> in the source distribution. The
+The functions <b>pcre_compile()</b>, <b>pcre_compile2()</b>, <b>pcre_study()</b>,
+and <b>pcre_exec()</b> are used for compiling and matching regular expressions
+in a Perl-compatible manner. A sample program that demonstrates the simplest
+way of using them is provided in the file called <i>pcredemo.c</i> in the source
+distribution. The
 <a href="pcresample.html"><b>pcresample</b></a>
 documentation describes how to run it.
 </P>
 <P>
+A second matching function, <b>pcre_dfa_exec()</b>, which is not
+Perl-compatible, is also provided. This uses a different algorithm for the
+matching. This allows it to find all possible matches (at a given point in the
+subject), not just one. However, this algorithm does not return captured
+substrings. A description of the two matching algorithms and their advantages
+and disadvantages is given in the
+<a href="pcrematching.html"><b>pcrematching</b></a>
+documentation.
+</P>
+<P>
 In addition to the main compiling and matching functions, there are convenience
-functions for extracting captured substrings from a matched subject string.
-They are:
+functions for extracting captured substrings from a subject string that is
+matched by <b>pcre_exec()</b>. They are:
 <pre>
   <b>pcre_copy_substring()</b>
   <b>pcre_copy_named_substring()</b>
@@ -154,10 +187,10 @@ provided, to free the memory used for extracted strings.
 </P>
 <P>
 The function <b>pcre_maketables()</b> is used to build a set of character tables
-in the current locale for passing to <b>pcre_compile()</b> or <b>pcre_exec()</b>.
-This is an optional facility that is provided for specialist use. Most
-commonly, no special tables are passed, in which case internal tables that are
-generated when PCRE is built are used.
+in the current locale for passing to <b>pcre_compile()</b>, <b>pcre_exec()</b>,
+or <b>pcre_dfa_exec()</b>. This is an optional facility that is provided for
+specialist use. Most commonly, no special tables are passed, in which case
+internal tables that are generated when PCRE is built are used.
 </P>
 <P>
 The function <b>pcre_fullinfo()</b> is used to find out information about a
@@ -165,6 +198,11 @@ compiled pattern; <b>pcre_info()</b> is an obsolete version that returns only
 some of the available information, but is retained for backwards compatibility.
 The function <b>pcre_version()</b> returns a pointer to a string containing the
 version of PCRE and its date of release.
+</P>
+<P>
+The function <b>pcre_refcount()</b> maintains a reference count in a data block
+containing a compiled pattern. This is provided for the benefit of
+object-oriented applications.
 </P>
 <P>
 The global variables <b>pcre_malloc</b> and <b>pcre_free</b> initially contain
@@ -177,12 +215,13 @@ should be done before calling any PCRE functions.
 The global variables <b>pcre_stack_malloc</b> and <b>pcre_stack_free</b> are also
 indirections to memory management functions. These special functions are used
 only when PCRE is compiled to use the heap for remembering data, instead of
-recursive function calls. This is a non-standard way of building PCRE, for use
-in environments that have limited stacks. Because of the greater use of memory
-management, it runs more slowly. Separate functions are provided so that
-special-purpose external code can be used for this case. When used, these
-functions are always called in a stack-like manner (last obtained, first
-freed), and always for memory blocks of the same size.
+recursive function calls, when running the <b>pcre_exec()</b> function. This is
+a non-standard way of building PCRE, for use in environments that have limited
+stacks. Because of the greater use of memory management, it runs more slowly.
+Separate functions are provided so that special-purpose external code can be
+used for this case. When used, these functions are always called in a
+stack-like manner (last obtained, first freed), and always for memory blocks of
+the same size.
 </P>
 <P>
 The global variable <b>pcre_callout</b> initially contains NULL. It can be set
@@ -265,27 +304,37 @@ details are given with <b>pcre_exec()</b> below.
 <pre>
   PCRE_CONFIG_STACKRECURSE
 </pre>
-The output is an integer that is set to one if internal recursion is
-implemented by recursive function calls that use the stack to remember their
-state. This is the usual way that PCRE is compiled. The output is zero if PCRE
-was compiled to use blocks of data on the heap instead of recursive function
-calls. In this case, <b>pcre_stack_malloc</b> and <b>pcre_stack_free</b> are
-called to manage memory blocks on the heap, thus avoiding the use of the stack.
+The output is an integer that is set to one if internal recursion when running
+<b>pcre_exec()</b> is implemented by recursive function calls that use the stack
+to remember their state. This is the usual way that PCRE is compiled. The
+output is zero if PCRE was compiled to use blocks of data on the heap instead
+of recursive function calls. In this case, <b>pcre_stack_malloc</b> and
+<b>pcre_stack_free</b> are called to manage memory blocks on the heap, thus
+avoiding the use of the stack.
 </P>
 <br><a name="SEC6" href="#TOC1">COMPILING A PATTERN</a><br>
 <P>
 <b>pcre *pcre_compile(const char *<i>pattern</i>, int <i>options</i>,</b>
 <b>const char **<i>errptr</i>, int *<i>erroffset</i>,</b>
 <b>const unsigned char *<i>tableptr</i>);</b>
+<b>pcre *pcre_compile2(const char *<i>pattern</i>, int <i>options</i>,</b>
+<b>int *<i>errorcodeptr</i>,</b>
+<b>const char **<i>errptr</i>, int *<i>erroffset</i>,</b>
+<b>const unsigned char *<i>tableptr</i>);</b>
 </P>
 <P>
-The function <b>pcre_compile()</b> is called to compile a pattern into an
-internal form. The pattern is a C string terminated by a binary zero, and
-is passed in the <i>pattern</i> argument. A pointer to a single block of memory
-that is obtained via <b>pcre_malloc</b> is returned. This contains the compiled
-code and related data. The <b>pcre</b> type is defined for the returned block;
-this is a typedef for a structure whose contents are not externally defined. It
-is up to the caller to free the memory when it is no longer required.
+Either of the functions <b>pcre_compile()</b> or <b>pcre_compile2()</b> can be
+called to compile a pattern into an internal form. The only difference between
+the two interfaces is that <b>pcre_compile2()</b> has an additional argument,
+<i>errorcodeptr</i>, via which a numerical error code can be returned.
+</P>
+<P>
+The pattern is a C string terminated by a binary zero, and is passed in the
+<i>pattern</i> argument. A pointer to a single block of memory that is obtained
+via <b>pcre_malloc</b> is returned. This contains the compiled code and related
+data. The <b>pcre</b> type is defined for the returned block; this is a typedef
+for a structure whose contents are not externally defined. It is up to the
+caller to free the memory when it is no longer required.
 </P>
 <P>
 Although the compiled code of a PCRE regex is relocatable, that is, it does not
@@ -312,6 +361,12 @@ NULL, and sets the variable pointed to by <i>errptr</i> to point to a textual
 error message. The offset from the start of the pattern to the character where
 the error was discovered is placed in the variable pointed to by
 <i>erroffset</i>, which must not be NULL. If it is, an immediate error is given.
+</P>
+<P>
+If <b>pcre_compile2()</b> is used instead of <b>pcre_compile()</b>, and the
+<i>errorcodeptr</i> argument is not NULL, a non-zero error code number is
+returned via this argument in the event of an error. This is in addition to the
+textual error message. Error codes and messages are listed below.
 </P>
 <P>
 If the final argument, <i>tableptr</i>, is NULL, PCRE uses a default set of
@@ -357,9 +412,13 @@ documentation.
 </pre>
 If this bit is set, letters in the pattern match both upper and lower case
 letters. It is equivalent to Perl's /i option, and it can be changed within a
-pattern by a (?i) option setting. When running in UTF-8 mode, case support for
-high-valued characters is available only when PCRE is built with Unicode
-character property support.
+pattern by a (?i) option setting. In UTF-8 mode, PCRE always understands the
+concept of case for characters whose values are less than 128, so caseless
+matching is always possible. For characters with higher values, the concept of
+case is supported if PCRE is compiled with Unicode property support, but not
+otherwise. If you want to use caseless matching for characters 128 and above,
+you must ensure that PCRE is compiled with Unicode property support as well as
+with UTF-8 support.
 <pre>
   PCRE_DOLLAR_ENDONLY
 </pre>
@@ -403,6 +462,12 @@ expansion. By default, as in Perl, a backslash followed by a letter with no
 special meaning is treated as a literal. There are at present no other features
 controlled by this option. It can also be set by a (?X) option setting within a
 pattern.
+<pre>
+  PCRE_FIRSTLINE
+</pre>
+If this option is set, an unanchored pattern is required to match before or at
+the first newline character in the subject string, though the matched text may
+continue over the newline.
 <pre>
   PCRE_MULTILINE
 </pre>
@@ -455,12 +520,69 @@ automatically checked. If an invalid UTF-8 sequence of bytes is found,
 valid, and you want to skip this check for performance reasons, you can set the
 PCRE_NO_UTF8_CHECK option. When it is set, the effect of passing an invalid
 UTF-8 string as a pattern is undefined. It may cause your program to crash.
-Note that this option can also be passed to <b>pcre_exec()</b>, to suppress the
-UTF-8 validity checking of subject strings.
+Note that this option can also be passed to <b>pcre_exec()</b> and
+<b>pcre_dfa_exec()</b>, to suppress the UTF-8 validity checking of subject
+strings.
 </P>
-<br><a name="SEC7" href="#TOC1">STUDYING A PATTERN</a><br>
+<br><a name="SEC7" href="#TOC1">COMPILATION ERROR CODES</a><br>
 <P>
-<b>pcre_extra *pcre_study(const pcre *<i>code</i>, int <i>options</i>,</b>
+The following table lists the error codes than may be returned by
+<b>pcre_compile2()</b>, along with the error messages that may be returned by
+both compiling functions.
+<pre>
+   0  no error
+   1  \ at end of pattern
+   2  \c at end of pattern
+   3  unrecognized character follows \
+   4  numbers out of order in {} quantifier
+   5  number too big in {} quantifier
+   6  missing terminating ] for character class
+   7  invalid escape sequence in character class
+   8  range out of order in character class
+   9  nothing to repeat
+  10  operand of unlimited repeat could match the empty string
+  11  internal error: unexpected repeat
+  12  unrecognized character after (?
+  13  POSIX named classes are supported only within a class
+  14  missing )
+  15  reference to non-existent subpattern
+  16  erroffset passed as NULL
+  17  unknown option bit(s) set
+  18  missing ) after comment
+  19  parentheses nested too deeply
+  20  regular expression too large
+  21  failed to get memory
+  22  unmatched parentheses
+  23  internal error: code overflow
+  24  unrecognized character after (?&#60;
+  25  lookbehind assertion is not fixed length
+  26  malformed number after (?(
+  27  conditional group contains more than two branches
+  28  assertion expected after (?(
+  29  (?R or (?digits must be followed by )
+  30  unknown POSIX class name
+  31  POSIX collating elements are not supported
+  32  this version of PCRE is not compiled with PCRE_UTF8 support
+  33  spare error
+  34  character value in \x{...} sequence is too large
+  35  invalid condition (?(0)
+  36  \C not allowed in lookbehind assertion
+  37  PCRE does not support \L, \l, \N, \U, or \u
+  38  number after (?C is &#62; 255
+  39  closing ) for (?C expected
+  40  recursive call could loop indefinitely
+  41  unrecognized character after (?P
+  42  syntax error after (?P
+  43  two named groups have the same name
+  44  invalid UTF-8 string
+  45  support for \P, \p, and \X has not been compiled
+  46  malformed \P or \p sequence
+  47  unknown property name after \P or \p
+</PRE>
+</P>
+<br><a name="SEC8" href="#TOC1">STUDYING A PATTERN</a><br>
+<P>
+<b>pcre_extra *pcre_study(const pcre *<i>code</i>, int <i>options</i></b>
 <b>const char **<i>errptr</i>);</b>
 </P>
 <P>
@@ -481,7 +603,7 @@ described
 in the section on matching a pattern.
 </P>
 <P>
-If studying the pattern does not produce any additional information,
+If studying the pattern does not produce any additional information
 <b>pcre_study()</b> returns NULL. In that circumstance, if the calling program
 wants to pass any of the other fields to <b>pcre_exec()</b>, it must set up its
 own <b>pcre_extra</b> block.
@@ -510,14 +632,14 @@ At present, studying a pattern is useful only for non-anchored patterns that do
 not have a single fixed starting character. A bitmap of possible starting
 bytes is created.
 <a name="localesupport"></a></P>
-<br><a name="SEC8" href="#TOC1">LOCALE SUPPORT</a><br>
+<br><a name="SEC9" href="#TOC1">LOCALE SUPPORT</a><br>
 <P>
-PCRE handles caseless matching, and determines whether characters are letters,
+PCRE handles caseless matching, and determines whether characters are letters
 digits, or whatever, by reference to a set of tables, indexed by character
-value. (When running in UTF-8 mode, this applies only to characters with codes
+value. When running in UTF-8 mode, this applies only to characters with codes
 less than 128. Higher-valued codes never match escapes such as \w or \d, but
 can be tested with \p if PCRE is built with Unicode character property
-support.)
+support.
 </P>
 <P>
 An internal set of tables is created in the default C locale when PCRE is
@@ -558,7 +680,7 @@ this facility could be used to match a pattern in a different locale from the
 one in which it was compiled. Passing table pointers at run time is discussed
 below in the section on matching a pattern.
 </P>
-<br><a name="SEC9" href="#TOC1">INFORMATION ABOUT A PATTERN</a><br>
+<br><a name="SEC10" href="#TOC1">INFORMATION ABOUT A PATTERN</a><br>
 <P>
 <b>int pcre_fullinfo(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
 <b>int <i>what</i>, void *<i>where</i>);</b>
@@ -607,7 +729,7 @@ no back references.
 Return the number of capturing subpatterns in the pattern. The fourth argument
 should point to an <b>int</b> variable.
 <pre>
-  PCRE_INFO_DEFAULTTABLES
+  PCRE_INFO_DEFAULT_TABLES
 </pre>
 Return a pointer to the internal default character tables within PCRE. The
 fourth argument should point to an <b>unsigned char *</b> variable. This
@@ -729,7 +851,7 @@ a <b>pcre_extra</b> block. That is, it is the value that was passed to
 created by <b>pcre_study()</b>. The fourth argument should point to a
 <b>size_t</b> variable.
 </P>
-<br><a name="SEC10" href="#TOC1">OBSOLETE INFO FUNCTION</a><br>
+<br><a name="SEC11" href="#TOC1">OBSOLETE INFO FUNCTION</a><br>
 <P>
 <b>int pcre_info(const pcre *<i>code</i>, int *<i>optptr</i>, int</b>
 <b>*<i>firstcharptr</i>);</b>
@@ -753,7 +875,31 @@ If the pattern is not anchored and the <i>firstcharptr</i> argument is not NULL,
 it is used to pass back information about the first character of any matched
 string (see PCRE_INFO_FIRSTBYTE above).
 </P>
-<br><a name="SEC11" href="#TOC1">MATCHING A PATTERN</a><br>
+<br><a name="SEC12" href="#TOC1">REFERENCE COUNTS</a><br>
+<P>
+<b>int pcre_refcount(pcre *<i>code</i>, int <i>adjust</i>);</b>
+</P>
+<P>
+The <b>pcre_refcount()</b> function is used to maintain a reference count in the
+data block that contains a compiled pattern. It is provided for the benefit of
+applications that operate in an object-oriented manner, where different parts
+of the application may be using the same compiled pattern, but you want to free
+the block when they are all done.
+</P>
+<P>
+When a pattern is compiled, the reference count field is initialized to zero.
+It is changed only by calling this function, whose action is to add the
+<i>adjust</i> value (which may be positive or negative) to it. The yield of the
+function is the new value. However, the value of the count is constrained to
+lie between 0 and 65535, inclusive. If the new value is outside these limits,
+it is forced to the appropriate limit value.
+</P>
+<P>
+Except when it is zero, the reference count is not correctly preserved if a
+pattern is compiled on one host and then transferred to a host whose byte-order
+is different. (This seems a highly unlikely scenario.)
+</P>
+<br><a name="SEC13" href="#TOC1">MATCHING A PATTERN: THE TRADITIONAL FUNCTION</a><br>
 <P>
 <b>int pcre_exec(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
 <b>const char *<i>subject</i>, int <i>length</i>, int <i>startoffset</i>,</b>
@@ -763,7 +909,11 @@ string (see PCRE_INFO_FIRSTBYTE above).
 The function <b>pcre_exec()</b> is called to match a subject string against a
 compiled pattern, which is passed in the <i>code</i> argument. If the
 pattern has been studied, the result of the study should be passed in the
-<i>extra</i> argument.
+<i>extra</i> argument. This function is the main matching facility of the
+library, and it operates in a Perl-like manner. For specialist use there is
+also an alternative matching function, which is described
+<a href="#dfamatch">below</a>
+in the section about the <b>pcre_dfa_exec()</b> function.
 </P>
 <P>
 In most applications, the pattern will have been compiled (and optionally
@@ -787,7 +937,7 @@ Here is an example of a simple call to <b>pcre_exec()</b>:
     0,              /* start at offset 0 in the subject */
     0,              /* default options */
     ovector,        /* vector of integers for substring information */
-    30);            /* number of elements in the vector (NOT size in bytes) */
+    30);            /* number of elements (NOT size in bytes) */
 <a name="extradata"></a></PRE>
 </P>
 <br><b>
@@ -1046,7 +1196,7 @@ Note that <b>pcre_info()</b> can be used to find out how many capturing
 subpatterns there are in a compiled pattern. The smallest size for
 <i>ovector</i> that will allow for <i>n</i> captured substrings, in addition to
 the offsets of the substring matched by the whole pattern, is (<i>n</i>+1)*3.
-</P>
+<a name="errorlist"></a></P>
 <br><b>
 Return values from <b>pcre_exec()</b>
 </b><br>
@@ -1117,29 +1267,29 @@ A string that contains an invalid UTF-8 byte sequence was passed as a subject.
 The UTF-8 byte sequence that was passed as a subject was valid, but the value
 of <i>startoffset</i> did not point to the beginning of a UTF-8 character.
 <pre>
-  PCRE_ERROR_PARTIAL (-12)
+  PCRE_ERROR_PARTIAL        (-12)
 </pre>
 The subject string did not match, but it did match partially. See the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation for details of partial matching.
 <pre>
-  PCRE_ERROR_BAD_PARTIAL (-13)
+  PCRE_ERROR_BADPARTIAL     (-13)
 </pre>
 The PCRE_PARTIAL option was used with a compiled pattern containing items that
 are not supported for partial matching. See the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation for details of partial matching.
 <pre>
-  PCRE_ERROR_INTERNAL (-14)
+  PCRE_ERROR_INTERNAL       (-14)
 </pre>
 An unexpected internal error has occurred. This error could be caused by a bug
 in PCRE or by overwriting of the compiled pattern.
 <pre>
-  PCRE_ERROR_BADCOUNT (-15)
+  PCRE_ERROR_BADCOUNT       (-15)
 </pre>
 This error is given if the value of the <i>ovecsize</i> argument is negative.
 </P>
-<br><a name="SEC12" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
+<br><a name="SEC14" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
 <P>
 <b>int pcre_copy_substring(const char *<i>subject</i>, int *<i>ovector</i>,</b>
 <b>int <i>stringcount</i>, int <i>stringnumber</i>, char *<i>buffer</i>,</b>
@@ -1227,7 +1377,7 @@ linked via a special interface to another programming language which cannot use
 <b>pcre_free</b> directly; it is for these cases that the functions are
 provided.
 </P>
-<br><a name="SEC13" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a><br>
+<br><a name="SEC15" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a><br>
 <P>
 <b>int pcre_get_stringnumber(const pcre *<i>code</i>,</b>
 <b>const char *<i>name</i>);</b>
@@ -1278,10 +1428,191 @@ These functions call <b>pcre_get_stringnumber()</b>, and if it succeeds, they
 then call <i>pcre_copy_substring()</i> or <i>pcre_get_substring()</i>, as
 appropriate.
 </P>
+<br><a name="SEC16" href="#TOC1">FINDING ALL POSSIBLE MATCHES</a><br>
 <P>
-Last updated: 09 September 2004
+The traditional matching function uses a similar algorithm to Perl, which stops
+when it finds the first match, starting at a given point in the subject. If you
+want to find all possible matches, or the longest possible match, consider
+using the alternative matching function (see below) instead. If you cannot use
+the alternative function, but still need to find all possible matches, you
+can kludge it up by making use of the callout facility, which is described in
+the
+<a href="pcrecallout.html"><b>pcrecallout</b></a>
+documentation.
+</P>
+<P>
+What you have to do is to insert a callout right at the end of the pattern.
+When your callout function is called, extract and save the current matched
+substring. Then return 1, which forces <b>pcre_exec()</b> to backtrack and try
+other alternatives. Ultimately, when it runs out of matches, <b>pcre_exec()</b>
+will yield PCRE_ERROR_NOMATCH.
+<a name="dfamatch"></a></P>
+<br><a name="SEC17" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a><br>
+<P>
+<b>int pcre_dfa_exec(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
+<b>const char *<i>subject</i>, int <i>length</i>, int <i>startoffset</i>,</b>
+<b>int <i>options</i>, int *<i>ovector</i>, int <i>ovecsize</i>,</b>
+<b>int *<i>workspace</i>, int <i>wscount</i>);</b>
+</P>
+<P>
+The function <b>pcre_dfa_exec()</b> is called to match a subject string against
+a compiled pattern, using a "DFA" matching algorithm. This has different
+characteristics to the normal algorithm, and is not compatible with Perl. Some
+of the features of PCRE patterns are not supported. Nevertheless, there are
+times when this kind of matching can be useful. For a discussion of the two
+matching algorithms, see the
+<a href="pcrematching.html"><b>pcrematching</b></a>
+documentation.
+</P>
+<P>
+The arguments for the <b>pcre_dfa_exec()</b> function are the same as for
+<b>pcre_exec()</b>, plus two extras. The <i>ovector</i> argument is used in a
+different way, and this is described below. The other common arguments are used
+in the same way as for <b>pcre_exec()</b>, so their description is not repeated
+here.
+</P>
+<P>
+The two additional arguments provide workspace for the function. The workspace
+vector should contain at least 20 elements. It is used for keeping track of
+multiple paths through the pattern tree. More workspace will be needed for
+patterns and subjects where there are a lot of possible matches.
+</P>
+<P>
+Here is an example of a simple call to <b>pcre_exec()</b>:
+<pre>
+  int rc;
+  int ovector[10];
+  int wspace[20];
+  rc = pcre_exec(
+    re,             /* result of pcre_compile() */
+    NULL,           /* we didn't study the pattern */
+    "some string",  /* the subject string */
+    11,             /* the length of the subject string */
+    0,              /* start at offset 0 in the subject */
+    0,              /* default options */
+    ovector,        /* vector of integers for substring information */
+    10,             /* number of elements (NOT size in bytes) */
+    wspace,         /* working space vector */
+    20);            /* number of elements (NOT size in bytes) */
+</PRE>
+</P>
+<br><b>
+Option bits for <b>pcre_dfa_exec()</b>
+</b><br>
+<P>
+The unused bits of the <i>options</i> argument for <b>pcre_dfa_exec()</b> must be
+zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NOTBOL,
+PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL,
+PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last three of these are
+the same as for <b>pcre_exec()</b>, so their description is not repeated here.
+<pre>
+  PCRE_PARTIAL
+</pre>
+This has the same general effect as it does for <b>pcre_exec()</b>, but the
+details are slightly different. When PCRE_PARTIAL is set for
+<b>pcre_dfa_exec()</b>, the return code PCRE_ERROR_NOMATCH is converted into
+PCRE_ERROR_PARTIAL if the end of the subject is reached, there have been no
+complete matches, but there is still at least one matching possibility. The
+portion of the string that provided the partial match is set as the first
+matching string.
+<pre>
+  PCRE_DFA_SHORTEST
+</pre>
+Setting the PCRE_DFA_SHORTEST option causes the matching algorithm to stop as
+soon as it has found one match. Because of the way the DFA algorithm works,
+this is necessarily the shortest possible match at the first possible matching
+point in the subject string.
+<pre>
+  PCRE_DFA_RESTART
+</pre>
+When <b>pcre_dfa_exec()</b> is called with the PCRE_PARTIAL option, and returns
+a partial match, it is possible to call it again, with additional subject
+characters, and have it continue with the same match. The PCRE_DFA_RESTART
+option requests this action; when it is set, the <i>workspace</i> and
+<i>wscount</i> options must reference the same vector as before because data
+about the match so far is left in them after a partial match. There is more
+discussion of this facility in the
+<a href="pcrepartial.html"><b>pcrepartial</b></a>
+documentation.
+</P>
+<br><b>
+Successful returns from <b>pcre_dfa_exec()</b>
+</b><br>
+<P>
+When <b>pcre_dfa_exec()</b> succeeds, it may have matched more than one
+substring in the subject. Note, however, that all the matches from one run of
+the function start at the same point in the subject. The shorter matches are
+all initial substrings of the longer matches. For example, if the pattern
+<pre>
+  &#60;.*&#62;
+</pre>
+is matched against the string
+<pre>
+  This is &#60;something&#62; &#60;something else&#62; &#60;something further&#62; no more
+</pre>
+the three matched strings are
+<pre>
+  &#60;something&#62;
+  &#60;something&#62; &#60;something else&#62;
+  &#60;something&#62; &#60;something else&#62; &#60;something further&#62;
+</pre>
+On success, the yield of the function is a number greater than zero, which is
+the number of matched substrings. The substrings themselves are returned in
+<i>ovector</i>. Each string uses two elements; the first is the offset to the
+start, and the second is the offset to the end. All the strings have the same
+start offset. (Space could have been saved by giving this only once, but it was
+decided to retain some compatibility with the way <b>pcre_exec()</b> returns
+data, even though the meaning of the strings is different.)
+</P>
+<P>
+The strings are returned in reverse order of length; that is, the longest
+matching string is given first. If there were too many matches to fit into
+<i>ovector</i>, the yield of the function is zero, and the vector is filled with
+the longest matches.
+</P>
+<br><b>
+Error returns from <b>pcre_dfa_exec()</b>
+</b><br>
+<P>
+The <b>pcre_dfa_exec()</b> function returns a negative number when it fails.
+Many of the errors are the same as for <b>pcre_exec()</b>, and these are
+described
+<a href="#errorlist">above.</a>
+There are in addition the following errors that are specific to
+<b>pcre_dfa_exec()</b>:
+<pre>
+  PCRE_ERROR_DFA_UITEM      (-16)
+</pre>
+This return is given if <b>pcre_dfa_exec()</b> encounters an item in the pattern
+that it does not support, for instance, the use of \C or a back reference.
+<pre>
+  PCRE_ERROR_DFA_UCOND      (-17)
+</pre>
+This return is given if <b>pcre_dfa_exec()</b> encounters a condition item in a
+pattern that uses a back reference for the condition. This is not supported.
+<pre>
+  PCRE_ERROR_DFA_UMLIMIT    (-18)
+</pre>
+This return is given if <b>pcre_dfa_exec()</b> is called with an <i>extra</i>
+block that contains a setting of the <i>match_limit</i> field. This is not
+supported (it is meaningless).
+<pre>
+  PCRE_ERROR_DFA_WSSIZE     (-19)
+</pre>
+This return is given if <b>pcre_dfa_exec()</b> runs out of space in the
+<i>workspace</i> vector.
+<pre>
+  PCRE_ERROR_DFA_RECURSE    (-20)
+</pre>
+When a recursive subpattern is processed, the matching function calls itself
+recursively, using private vectors for <i>ovector</i> and <i>workspace</i>. This
+error is given if the output vector is not large enough. This should be
+extremely rare, as a vector of size 1000 is used.
+</P>
+<P>
+Last updated: 16 May 2005
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+Copyright &copy; 1997-2005 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

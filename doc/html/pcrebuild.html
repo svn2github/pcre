@@ -113,17 +113,19 @@ to the <b>configure</b> command.
 <br><a name="SEC7" href="#TOC1">LIMITING PCRE RESOURCE USAGE</a><br>
 <P>
 Internally, PCRE has a function called <b>match()</b>, which it calls repeatedly
-(possibly recursively) when matching a pattern. By controlling the maximum
-number of times this function may be called during a single matching operation,
-a limit can be placed on the resources used by a single call to
-<b>pcre_exec()</b>. The limit can be changed at run time, as described in the
+(possibly recursively) when matching a pattern with the <b>pcre_exec()</b>
+function. By controlling the maximum number of times this function may be
+called during a single matching operation, a limit can be placed on the
+resources used by a single call to <b>pcre_exec()</b>. The limit can be changed
+at run time, as described in the
 <a href="pcreapi.html"><b>pcreapi</b></a>
 documentation. The default is 10 million, but this can be changed by adding a
 setting such as
 <pre>
   --with-match-limit=500000
 </pre>
-to the <b>configure</b> command.
+to the <b>configure</b> command. This setting has no effect on the
+<b>pcre_dfa_exec()</b> matching function.
 </P>
 <br><a name="SEC8" href="#TOC1">HANDLING VERY LARGE PATTERNS</a><br>
 <P>
@@ -148,13 +150,14 @@ of the compiled pattern, and this changes with the link size.
 </P>
 <br><a name="SEC9" href="#TOC1">AVOIDING EXCESSIVE STACK USAGE</a><br>
 <P>
-PCRE implements backtracking while matching by making recursive calls to an
-internal function called <b>match()</b>. In environments where the size of the
-stack is limited, this can severely limit PCRE's operation. (The Unix
-environment does not usually suffer from this problem.) An alternative approach
-that uses memory from the heap to remember data, instead of using recursive
-function calls, has been implemented to work round this problem. If you want to
-build a version of PCRE that works this way, add
+When matching with the <b>pcre_exec()</b> function, PCRE implements backtracking
+by making recursive calls to an internal function called <b>match()</b>. In
+environments where the size of the stack is limited, this can severely limit
+PCRE's operation. (The Unix environment does not usually suffer from this
+problem.) An alternative approach that uses memory from the heap to remember
+data, instead of using recursive function calls, has been implemented to work
+round this problem. If you want to build a version of PCRE that works this way,
+add
 <pre>
   --disable-stack-for-recursion
 </pre>
@@ -165,7 +168,8 @@ predictable: the block sizes requested are always the same, and the blocks are
 always freed in reverse order. A calling program might be able to implement
 optimized functions that perform better than the standard <b>malloc()</b> and
 <b>free()</b> functions. PCRE runs noticeably more slowly when built in this
-way.
+way. This option affects only the <b>pcre_exec()</b> function; it is not
+relevant for the the <b>pcre_dfa_exec()</b> function.
 </P>
 <br><a name="SEC10" href="#TOC1">USING EBCDIC CODE</a><br>
 <P>
@@ -178,9 +182,9 @@ compiled to run in an EBCDIC environment by adding
 to the <b>configure</b> command.
 </P>
 <P>
-Last updated: 09 September 2004
+Last updated: 28 February 2005
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+Copyright &copy; 1997-2005 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

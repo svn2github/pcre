@@ -20,9 +20,9 @@ dnl macro, and may be treated as octal constants. Stick to single
 dnl digits for minor numbers less than 10. There are unlikely to be
 dnl that many releases anyway.
 
-PCRE_MAJOR=5
+PCRE_MAJOR=6
 PCRE_MINOR=0
-PCRE_DATE=13-Sep-2004
+PCRE_DATE=07-Jun-2005
 PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}
 
 dnl Default values for miscellaneous macros
@@ -34,10 +34,21 @@ dnl are built by default on Unix systems.
 
 PCRE_LIB_VERSION=0:1:0
 PCRE_POSIXLIB_VERSION=0:0:0
+PCRE_CPPLIB_VERSION=0:0:0
 
 dnl Checks for programs.
 
 AC_PROG_CC
+
+dnl For the C++ wrapper libpcrecpp.
+
+AC_PROG_CXX
+
+if test -n "$ac_cv_prog_ac_ct_CXX"; then
+  MAYBE_CPP_TARGETS='$(CPP_TARGETS)'
+fi
+echo "Maybe-cpp-targets: '$ac_cv_prog_CXX' '$MAYBE_CPP_TARGETS'" #!!
+AC_SUBST(MAYBE_CPP_TARGETS)
 
 dnl The icc compiler has the same options as gcc, so let the rest of the
 dnl configure script think it has gcc when setting up dnl options etc.
@@ -60,7 +71,10 @@ dnl just have to adjust the Makefile by hand or set these values when they
 dnl run "configure".
 
 CC_FOR_BUILD=${CC_FOR_BUILD:-'$(CC)'}
+CXX_FOR_BUILD=${CXX_FOR_BUILD:-'$(CXX)'}
 CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD:-'$(CFLAGS)'}
+CPPFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD:-'$(CPPFLAGS)'}
+CXXFLAGS_FOR_BUILD=${CXXFLAGS_FOR_BUILD:-'$(CXXFLAGS)'}
 BUILD_EXEEXT=${BUILD_EXEEXT:-'$(EXEEXT)'}
 BUILD_OBJEXT=${BUILD_OBJEXT:-'$(OBJEXT)'}
 
@@ -69,14 +83,35 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(limits.h)
 
+dnl These are C++ header files
+
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+dnl I could be more clever here, given I'm doing AC_SUBST with this
+dnl (eg set a var to be the name of the include file I want).  But I'm not
+dnl so it's easy to change back to 'regular' autoconf vars if we needed to.
+AC_CHECK_HEADERS(bits/type_traits.h, [pcre_has_bits_type_traits="1"],
+                                     [pcre_has_bits_type_traits="0"])
+AC_CHECK_HEADERS(type_traits.h, [pcre_has_type_traits="1"],
+                                [pcre_has_type_traits="0"])
+dnl Using AC_SUBST eliminates the need to include config.h in a public .h file
+AC_SUBST(pcre_has_bits_type_traits)
+AC_SUBST(pcre_has_type_traits)
+AC_LANG_RESTORE
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 
 AC_C_CONST
 AC_TYPE_SIZE_T
 
+AC_CHECK_TYPES([long long], [pcre_has_long_long="1"], [pcre_has_long_long="0"])
+AC_CHECK_TYPES([unsigned long long], [pcre_has_ulong_long="1"], [pcre_has_ulong_long="0"])
+AC_SUBST(pcre_has_long_long)
+AC_SUBST(pcre_has_ulong_long)
+
 dnl Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memmove strerror)
+AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll)
 
 dnl Handle --enable-utf8
 
@@ -157,10 +192,6 @@ AC_ARG_WITH(match-limit,
   MATCH_LIMIT=-DMATCH_LIMIT=$withval
 )
 
-dnl Now arrange to build libtool
-
-AC_PROG_LIBTOOL
-
 dnl Unicode character property support implies UTF-8 support
 
 if test "$UCP" != "" ; then
@@ -172,7 +203,9 @@ dnl "Export" these variables
 AC_SUBST(BUILD_EXEEXT)
 AC_SUBST(BUILD_OBJEXT)
 AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(CXX_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
+AC_SUBST(CXXFLAGS_FOR_BUILD)
 AC_SUBST(EBCDIC)
 AC_SUBST(HAVE_MEMMOVE)
 AC_SUBST(HAVE_STRERROR)
@@ -186,6 +219,7 @@ AC_SUBST(PCRE_DATE)
 AC_SUBST(PCRE_VERSION)
 AC_SUBST(PCRE_LIB_VERSION)
 AC_SUBST(PCRE_POSIXLIB_VERSION)
+AC_SUBST(PCRE_CPPLIB_VERSION)
 AC_SUBST(POSIX_MALLOC_THRESHOLD)
 AC_SUBST(UCP)
 AC_SUBST(UTF8)
@@ -223,4 +257,4 @@ if test "x$enable_shared" = "xno" ; then
 fi
 
 dnl This must be last; it determines what files are written as well as config.h
-AC_OUTPUT(Makefile pcre.h:pcre.in pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in RunTest:RunTest.in,[chmod a+x RunTest pcre-config])
+AC_OUTPUT(Makefile pcre.h:pcre.in pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in pcrecpp.h:pcrecpp.h.in pcre_stringpiece.h:pcre_stringpiece.h.in RunGrepTest:RunGrepTest.in RunTest:RunTest.in,[chmod a+x RunTest RunGrepTest pcre-config])

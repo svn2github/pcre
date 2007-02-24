@@ -6,15 +6,29 @@ PCRE - Perl-compatible regular expressions
 .sp
 The PCRE library is a set of functions that implement regular expression
 pattern matching using the same syntax and semantics as Perl, with just a few
-differences. The current implementation of PCRE (release 5.x) corresponds
+differences. The current implementation of PCRE (release 6.x) corresponds
 approximately with Perl 5.8, including support for UTF-8 encoded strings and
 Unicode general category properties. However, this support has to be explicitly
 enabled; it is not the default.
 .P
+In addition to the Perl-compatible matching function, PCRE also contains an
+alternative matching function that matches the same compiled patterns in a
+different way. In certain circumstances, the alternative function has some
+advantages. For a discussion of the two matching algorithms, see the
+.\" HREF
+\fBpcrematching\fP
+.\"
+page.
+.P
 PCRE is written in C and released as a C library. A number of people have
-written wrappers and interfaces of various kinds. A C++ class is included in
-these contributions, which can be found in the \fIContrib\fR directory at the
-primary FTP site, which is:
+written wrappers and interfaces of various kinds. In particular, Google Inc.
+have provided a comprehensive C++ wrapper. This is now included as part of the
+PCRE distribution. The
+.\" HREF
+\fBpcrecpp\fP
+.\"
+page has details of this interface. Other people's contributions can be found
+in the \fIContrib\fR directory at the primary FTP site, which is:
 .sp
 .\" HTML <a href="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre">
 .\" </a>
@@ -43,6 +57,11 @@ available. The features themselves are described in the
 .\"
 page. Documentation about building PCRE for various operating systems can be
 found in the \fBREADME\fP file in the source distribution.
+.P
+The library contains a number of undocumented internal functions and data
+tables that are used by more than one of the exported external functions, but
+which are not intended for use by external callers. Their names all begin with
+"_pcre_", which hopefully will not provoke any name clashes.
 .
 .
 .SH "USER DOCUMENTATION"
@@ -55,23 +74,25 @@ all the sections are concatenated, for ease of searching. The sections are as
 follows:
 .sp
   pcre              this document
-  pcreapi           details of PCRE's native API
+  pcreapi           details of PCRE's native C API
   pcrebuild         options for building PCRE
   pcrecallout       details of the callout feature
   pcrecompat        discussion of Perl compatibility
+  pcrecpp           details of the C++ wrapper
   pcregrep          description of the \fBpcregrep\fP command
+  pcrematching      discussion of the two matching algorithms
   pcrepartial       details of the partial matching facility
 .\" JOIN
   pcrepattern       syntax and semantics of supported
                       regular expressions
   pcreperform       discussion of performance issues
-  pcreposix         the POSIX-compatible API
+  pcreposix         the POSIX-compatible C API
   pcreprecompile    details of saving and re-using precompiled patterns
   pcresample        discussion of the sample program
   pcretest          description of the \fBpcretest\fP testing command
 .sp
 In addition, in the "man" and HTML formats, there is a short page for each
-library function, listing its arguments and results.
+C library function, listing its arguments and results.
 .
 .
 .SH LIMITATIONS
@@ -99,9 +120,10 @@ depth of nesting of all kinds of parenthesized subpattern, including capturing
 subpatterns, assertions, and other types of subpattern, is 200.
 .P
 The maximum length of a subject string is the largest positive number that an
-integer variable can hold. However, PCRE uses recursion to handle subpatterns
-and indefinite repetition. This means that the available stack space may limit
-the size of a subject string that can be processed by certain patterns.
+integer variable can hold. However, when using the traditional matching
+function, PCRE uses recursion to handle subpatterns and indefinite repetition.
+This means that the available stack space may limit the size of a subject
+string that can be processed by certain patterns.
 .sp
 .\" HTML <a name="utf8support"></a>
 .
@@ -167,7 +189,8 @@ bytes, for example: \ex{100}{3}.
 5. The dot metacharacter matches one UTF-8 character instead of a single byte.
 .P
 6. The escape sequence \eC can be used to match a single byte in UTF-8 mode,
-but its use can lead to some strange effects.
+but its use can lead to some strange effects. This facility is not available in
+the alternative matching function, \fBpcre_dfa_exec()\fP.
 .P
 7. The character escapes \eb, \eB, \ed, \eD, \es, \eS, \ew, and \eW correctly
 test characters of any code value, but the characters that PCRE recognizes as
@@ -190,15 +213,17 @@ values.
 .SH AUTHOR
 .rs
 .sp
-Philip Hazel <ph10@cam.ac.uk>
+Philip Hazel
 .br
 University Computing Service,
 .br
 Cambridge CB2 3QG, England.
-.br
-Phone: +44 1223 334714
+.P
+Putting an actual email address here seems to have been a spam magnet, so I've
+taken it away. If you want to email me, use my initial and surname, separated
+by a dot, at the domain ucs.cam.ac.uk.
 .sp
 .in 0
-Last updated: 09 September 2004
+Last updated: 07 March 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

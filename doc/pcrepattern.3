@@ -26,15 +26,35 @@ in the main
 .\"
 page.
 .P
+The remainder of this document discusses the patterns that are supported by
+PCRE when its main matching function, \fBpcre_exec()\fP, is used.
+From release 6.0, PCRE offers a second matching function,
+\fBpcre_dfa_exec()\fP, which matches using a different algorithm that is not
+Perl-compatible. The advantages and disadvantages of the alternative function,
+and how it differs from the normal function, are discussed in the
+.\" HREF
+\fBpcrematching\fP
+.\"
+page.
+.P
 A regular expression is a pattern that is matched against a subject string from
 left to right. Most characters stand for themselves in a pattern, and match the
 corresponding characters in the subject. As a trivial example, the pattern
 .sp
   The quick brown fox
 .sp
-matches a portion of a subject string that is identical to itself. The power of
-regular expressions comes from the ability to include alternatives and
-repetitions in the pattern. These are encoded in the pattern by the use of
+matches a portion of a subject string that is identical to itself. When
+caseless matching is specified (the PCRE_CASELESS option), letters are matched
+independently of case. In UTF-8 mode, PCRE always understands the concept of
+case for characters whose values are less than 128, so caseless matching is
+always possible. For characters with higher values, the concept of case is
+supported if PCRE is compiled with Unicode property support, but not otherwise.
+If you want to use caseless matching for characters 128 and above, you must
+ensure that PCRE is compiled with Unicode property support as well as with
+UTF-8 support.
+.P
+The power of regular expressions comes from the ability to include alternatives
+and repetitions in the pattern. These are encoded in the pattern by the use of
 \fImetacharacters\fP, which do not stand for themselves but instead are
 interpreted in some special way.
 .P
@@ -527,9 +547,13 @@ class as a literal string of bytes, or by using the \ex{ escaping mechanism.
 When caseless matching is set, any letters in a class represent both their
 upper case and lower case versions, so for example, a caseless [aeiou] matches
 "A" as well as "a", and a caseless [^aeiou] does not match "A", whereas a
-caseful version would. When running in UTF-8 mode, PCRE supports the concept of
-case for characters with values greater than 128 only when it is compiled with
-Unicode property support.
+caseful version would. In UTF-8 mode, PCRE always understands the concept of
+case for characters whose values are less than 128, so caseless matching is
+always possible. For characters with higher values, the concept of case is
+supported if PCRE is compiled with Unicode property support, but not otherwise.
+If you want to use caseless matching for characters 128 and above, you must
+ensure that PCRE is compiled with Unicode property support as well as with
+UTF-8 support.
 .P
 The newline character is never treated in any special way in character classes,
 whatever the setting of the PCRE_DOTALL or PCRE_MULTILINE options is. A class
@@ -1451,6 +1475,6 @@ description of the interface to the callout function is given in the
 documentation.
 .P
 .in 0
-Last updated: 09 September 2004
+Last updated: 28 February 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

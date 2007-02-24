@@ -4,7 +4,7 @@ pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
 .rs
 .sp
-.B pcretest "[-C] [-d] [-i] [-m] [-o osize] [-p] [-t] [source]"
+.B pcretest "[-C] [-d] [-dfa] [-i] [-m] [-o osize] [-p] [-t] [source]"
 .ti +5n
 .B "[destination]"
 .P
@@ -31,11 +31,16 @@ Output the version number of the PCRE library, and all available information
 about the optional features that are included, and then exit.
 .TP 10
 \fB-d\fP
-Behave as if each regex had the \fB/D\fP (debug) modifier; the internal
+Behave as if each regex has the \fB/D\fP (debug) modifier; the internal
 form is output after compilation.
 .TP 10
+\fB-dfa\fP
+Behave as if each data line contains the \eD escape sequence; this causes the
+alternative matching function, \fBpcre_dfa_exec()\fP, to be used instead of the
+standard \fBpcre_exec()\fP function (more detail is given below).
+.TP 10
 \fB-i\fP
-Behave as if each regex had the \fB/I\fP modifier; information about the
+Behave as if each regex has the \fB/I\fP modifier; information about the
 compiled pattern is given after compilation.
 .TP 10
 \fB-m\fP
@@ -50,8 +55,9 @@ for 14 capturing subexpressions. The vector size can be changed for individual
 matching calls by including \eO in the data line (see below).
 .TP 10
 \fB-p\fP
-Behave as if each regex has \fB/P\fP modifier; the POSIX wrapper API is used
-to call PCRE. None of the other options has any effect when \fB-p\fP is set.
+Behave as if each regex has the \fB/P\fP modifier; the POSIX wrapper API is
+used to call PCRE. None of the other options has any effect when \fB-p\fP is
+set.
 .TP 10
 \fB-t\fP
 Run each compile, study, and match many times with a timer, and output
@@ -131,6 +137,7 @@ not correspond to anything in Perl:
   \fB/A\fP    PCRE_ANCHORED
   \fB/C\fP    PCRE_AUTO_CALLOUT
   \fB/E\fP    PCRE_DOLLAR_ENDONLY
+  \fB/f\fP    PCRE_FIRSTLINE
   \fB/N\fP    PCRE_NO_AUTO_CAPTURE
   \fB/U\fP    PCRE_UNGREEDY
   \fB/X\fP    PCRE_EXTRA
@@ -257,6 +264,8 @@ recognized:
 .\" JOIN
   \eC*n       pass the number n (may be negative) as callout
                data; this is used as the callout return value
+  \eD         use the \fBpcre_dfa_exec()\fP match function
+  \eF         only shortest match for \fBpcre_dfa_exec()\fP
 .\" JOIN
   \eGdd       call pcre_get_substring() for substring dd
                after a successful match (number less than 32)
@@ -272,7 +281,10 @@ recognized:
 .\" JOIN
   \eOdd       set the size of the output vector passed to
                \fBpcre_exec()\fP to dd (any number of digits)
+.\" JOIN
   \eP         pass the PCRE_PARTIAL option to \fBpcre_exec()\fP
+               or \fBpcre_dfa_exec()\fP
+  \eR         pass the PCRE_DFA_RESTART option to \fBpcre_dfa_exec()\fP
   \eS         output details of memory get/free calls during matching
   \eZ         pass the PCRE_NOTEOL option to \fBpcre_exec()\fP
 .\" JOIN
@@ -308,15 +320,38 @@ any number of hexadecimal digits inside the braces. The result is from one to
 six bytes, encoded according to the UTF-8 rules.
 .
 .
-.SH "OUTPUT FROM PCRETEST"
+.SH "THE ALTERNATIVE MATCHING FUNCTION"
 .rs
 .sp
+By default, \fBpcretest\fP uses the standard PCRE matching function,
+\fBpcre_exec()\fP to match each data line. From release 6.0, PCRE supports an
+alternative matching function, \fBpcre_dfa_test()\fP, which operates in a
+different way, and has some restrictions. The differences between the two
+functions are described in the
+.\" HREF
+\fBpcrematching\fP
+.\"
+documentation.
+.P
+If a data line contains the \eD escape sequence, or if the command line
+contains the \fB-dfa\fP option, the alternative matching function is called.
+This function finds all possible matches at a given point. If, however, the \eF
+escape sequence is present in the data line, it stops after the first match is
+found. This is always the shortest possible match.
+.
+.
+.SH "DEFAULT OUTPUT FROM PCRETEST"
+.rs
+.sp
+This section describes the output when the normal matching function,
+\fBpcre_exec()\fP, is being used.
+.P
 When a match succeeds, pcretest outputs the list of captured substrings that
 \fBpcre_exec()\fP returns, starting with number 0 for the string that matched
 the whole pattern. Otherwise, it outputs "No match" or "Partial match"
 when \fBpcre_exec()\fP returns PCRE_ERROR_NOMATCH or PCRE_ERROR_PARTIAL,
 respectively, and otherwise the PCRE negative error number. Here is an example
-of an interactive pcretest run.
+of an interactive \fBpcretest\fP run.
 .sp
   $ pcretest
   PCRE version 5.00 07-Sep-2004
@@ -365,13 +400,68 @@ prompt is used for continuations), data lines may not. However newlines can be
 included in data by means of the \en escape.
 .
 .
+.SH "OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION"
+.rs
+.sp
+When the alternative matching function, \fBpcre_dfa_exec()\fP, is used (by
+means of the \eD escape sequence or the \fB-dfa\fP command line option), the
+output consists of a list of all the matches that start at the first point in
+the subject where there is at least one match. For example:
+.sp
+    re> /(tang|tangerine|tan)/
+  data> yellow tangerine\eD
+   0: tangerine
+   1: tang
+   2: tan
+.sp
+(Using the normal matching function on this data finds only "tang".) The
+longest matching string is always given first (and numbered zero).
+.P
+If \fB/g\P is present on the pattern, the search for further matches resumes
+at the end of the longest match. For example:
+.sp
+    re> /(tang|tangerine|tan)/g
+  data> yellow tangerine and tangy sultana\eD
+   0: tangerine
+   1: tang
+   2: tan
+   0: tang
+   1: tan
+   0: tan
+.sp
+Since the matching function does not support substring capture, the escape
+sequences that are concerned with captured substrings are not relevant.
+.
+.
+.SH "RESTARTING AFTER A PARTIAL MATCH"
+.rs
+.sp
+When the alternative matching function has given the PCRE_ERROR_PARTIAL return,
+indicating that the subject partially matched the pattern, you can restart the
+match with additional subject data by means of the \eR escape sequence. For
+example:
+.sp
+    re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+  data> 23ja\eP\eD
+  Partial match: 23ja
+  data> n05\eR\eD
+   0: n05
+.sp
+For further information about partial matching, see the
+.\" HREF
+\fBpcrepartial\fP
+.\"
+documentation.
+.
+.
 .SH CALLOUTS
 .rs
 .sp
 If the pattern contains any callout requests, \fBpcretest\fP's callout function
-is called during matching. By default, it displays the callout number, the
-start and current positions in the text at the callout time, and the next
-pattern item to be tested. For example, the output
+is called during matching. This works with both matching functions. By default,
+the called function displays the callout number, the start and current
+positions in the text at the callout time, and the next pattern item to be
+tested. For example, the output
 .sp
   --->pqrabcdef
     0    ^  ^     \ed
@@ -396,7 +486,7 @@ example:
    0: E*
 .sp
 The callout function in \fBpcretest\fP returns zero (carry on matching) by
-default, but you can use an \eC item in a data line (as described above) to
+default, but you can use a \eC item in a data line (as described above) to
 change this.
 .P
 Inserting callouts can be helpful when using \fBpcretest\fP to check
@@ -471,13 +561,13 @@ result is undefined.
 .SH AUTHOR
 .rs
 .sp
-Philip Hazel <ph10@cam.ac.uk>
+Philip Hazel
 .br
 University Computing Service,
 .br
 Cambridge CB2 3QG, England.
 .P
 .in 0
-Last updated: 10 September 2004
+Last updated: 28 February 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

@@ -88,16 +88,17 @@ return a non-NULL value before trying to save the study data.
 <br><a name="SEC3" href="#TOC1">RE-USING A PRECOMPILED PATTERN</a><br>
 <P>
 Re-using a precompiled pattern is straightforward. Having reloaded it into main
-memory, you pass its pointer to <b>pcre_exec()</b> in the usual way. This should
-work even on another host, and even if that host has the opposite endianness to
-the one where the pattern was compiled.
+memory, you pass its pointer to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b> in
+the usual way. This should work even on another host, and even if that host has
+the opposite endianness to the one where the pattern was compiled.
 </P>
 <P>
 However, if you passed a pointer to custom character tables when the pattern
 was compiled (the <i>tableptr</i> argument of <b>pcre_compile()</b>), you must
-now pass a similar pointer to <b>pcre_exec()</b>, because the value saved with
-the compiled pattern will obviously be nonsense. A field in a
-<b>pcre_extra()</b> block is used to pass this data, as described in the
+now pass a similar pointer to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>,
+because the value saved with the compiled pattern will obviously be nonsense. A
+field in a <b>pcre_extra()</b> block is used to pass this data, as described in
+the
 <a href="pcreapi.html#extradata">section on matching a pattern</a>
 in the
 <a href="pcreapi.html"><b>pcreapi</b></a>
@@ -114,7 +115,8 @@ If you saved study data with the compiled pattern, you need to create your own
 <b>pcre_extra</b> data block and set the <i>study_data</i> field to point to the
 reloaded study data. You must also set the PCRE_EXTRA_STUDY_DATA bit in the
 <i>flags</i> field to indicate that study data is present. Then pass the
-<b>pcre_extra</b> block to <b>pcre_exec()</b> in the usual way.
+<b>pcre_extra</b> block to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b> in the
+usual way.
 </P>
 <br><a name="SEC4" href="#TOC1">COMPATIBILITY WITH DIFFERENT PCRE RELEASES</a><br>
 <P>
@@ -125,9 +127,9 @@ advertised), you will have to recompile them for release 5.0. However, from now
 on, it should be possible to make changes in a compabible manner.
 </P>
 <P>
-Last updated: 10 September 2004
+Last updated: 28 February 2005
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+Copyright &copy; 1997-2005 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

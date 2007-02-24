@@ -50,8 +50,8 @@ this, PCRE has to retry the match starting after every newline in the subject.
 <P>
 If you are using such a pattern with subject strings that do not contain
 newlines, the best performance is obtained by setting PCRE_DOTALL, or starting
-the pattern with ^.* to indicate explicit anchoring. That saves PCRE from
-having to scan along the subject looking for a newline to restart at.
+the pattern with ^.* or ^.*? to indicate explicit anchoring. That saves PCRE
+from having to scan along the subject looking for a newline to restart at.
 </P>
 <P>
 Beware of patterns that contain nested indefinite repeats. These can take a
@@ -89,9 +89,9 @@ In many cases, the solution to this kind of performance issue is to use an
 atomic group or a possessive quantifier.
 </P>
 <P>
-Last updated: 09 September 2004
+Last updated: 28 February 2005
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+Copyright &copy; 1997-2005 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

@@ -100,10 +100,11 @@ to the \fBconfigure\fP command.
 .rs
 .sp
 Internally, PCRE has a function called \fBmatch()\fP, which it calls repeatedly
-(possibly recursively) when matching a pattern. By controlling the maximum
-number of times this function may be called during a single matching operation,
-a limit can be placed on the resources used by a single call to
-\fBpcre_exec()\fP. The limit can be changed at run time, as described in the
+(possibly recursively) when matching a pattern with the \fBpcre_exec()\fP
+function. By controlling the maximum number of times this function may be
+called during a single matching operation, a limit can be placed on the
+resources used by a single call to \fBpcre_exec()\fP. The limit can be changed
+at run time, as described in the
 .\" HREF
 \fBpcreapi\fP
 .\"
@@ -112,7 +113,8 @@ setting such as
 .sp
   --with-match-limit=500000
 .sp
-to the \fBconfigure\fP command.
+to the \fBconfigure\fP command. This setting has no effect on the
+\fBpcre_dfa_exec()\fP matching function.
 .
 .SH "HANDLING VERY LARGE PATTERNS"
 .rs
@@ -138,13 +140,14 @@ of the compiled pattern, and this changes with the link size.
 .SH "AVOIDING EXCESSIVE STACK USAGE"
 .rs
 .sp
-PCRE implements backtracking while matching by making recursive calls to an
-internal function called \fBmatch()\fP. In environments where the size of the
-stack is limited, this can severely limit PCRE's operation. (The Unix
-environment does not usually suffer from this problem.) An alternative approach
-that uses memory from the heap to remember data, instead of using recursive
-function calls, has been implemented to work round this problem. If you want to
-build a version of PCRE that works this way, add
+When matching with the \fBpcre_exec()\fP function, PCRE implements backtracking
+by making recursive calls to an internal function called \fBmatch()\fP. In
+environments where the size of the stack is limited, this can severely limit
+PCRE's operation. (The Unix environment does not usually suffer from this
+problem.) An alternative approach that uses memory from the heap to remember
+data, instead of using recursive function calls, has been implemented to work
+round this problem. If you want to build a version of PCRE that works this way,
+add
 .sp
   --disable-stack-for-recursion
 .sp
@@ -155,7 +158,8 @@ predictable: the block sizes requested are always the same, and the blocks are
 always freed in reverse order. A calling program might be able to implement
 optimized functions that perform better than the standard \fBmalloc()\fP and
 \fBfree()\fP functions. PCRE runs noticeably more slowly when built in this
-way.
+way. This option affects only the \fBpcre_exec()\fP function; it is not
+relevant for the the \fBpcre_dfa_exec()\fP function.
 .
 .SH "USING EBCDIC CODE"
 .rs
@@ -169,6 +173,6 @@ compiled to run in an EBCDIC environment by adding
 to the \fBconfigure\fP command.
 .P
 .in 0
-Last updated: 09 September 2004
+Last updated: 28 February 2005
 .br
-Copyright (c) 1997-2004 University of Cambridge.
+Copyright (c) 1997-2005 University of Cambridge.

@@ -18,14 +18,17 @@ man page, in case the conversion went wrong.
 <li><a name="TOC3" href="#SEC3">DESCRIPTION</a>
 <li><a name="TOC4" href="#SEC4">PATTERN MODIFIERS</a>
 <li><a name="TOC5" href="#SEC5">DATA LINES</a>
-<li><a name="TOC6" href="#SEC6">OUTPUT FROM PCRETEST</a>
-<li><a name="TOC7" href="#SEC7">CALLOUTS</a>
-<li><a name="TOC8" href="#SEC8">SAVING AND RELOADING COMPILED PATTERNS</a>
-<li><a name="TOC9" href="#SEC9">AUTHOR</a>
+<li><a name="TOC6" href="#SEC6">THE ALTERNATIVE MATCHING FUNCTION</a>
+<li><a name="TOC7" href="#SEC7">DEFAULT OUTPUT FROM PCRETEST</a>
+<li><a name="TOC8" href="#SEC8">OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION</a>
+<li><a name="TOC9" href="#SEC9">RESTARTING AFTER A PARTIAL MATCH</a>
+<li><a name="TOC10" href="#SEC10">CALLOUTS</a>
+<li><a name="TOC11" href="#SEC11">SAVING AND RELOADING COMPILED PATTERNS</a>
+<li><a name="TOC12" href="#SEC12">AUTHOR</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SYNOPSIS</a><br>
 <P>
-<b>pcretest [-C] [-d] [-i] [-m] [-o osize] [-p] [-t] [source]</b>
+<b>pcretest [-C] [-d] [-dfa] [-i] [-m] [-o osize] [-p] [-t] [source]</b>
 <b>[destination]</b>
 </P>
 <P>
@@ -47,12 +50,18 @@ about the optional features that are included, and then exit.
 </P>
 <P>
 <b>-d</b>
-Behave as if each regex had the <b>/D</b> (debug) modifier; the internal
+Behave as if each regex has the <b>/D</b> (debug) modifier; the internal
 form is output after compilation.
 </P>
 <P>
+<b>-dfa</b>
+Behave as if each data line contains the \D escape sequence; this causes the
+alternative matching function, <b>pcre_dfa_exec()</b>, to be used instead of the
+standard <b>pcre_exec()</b> function (more detail is given below).
+</P>
+<P>
 <b>-i</b>
-Behave as if each regex had the <b>/I</b> modifier; information about the
+Behave as if each regex has the <b>/I</b> modifier; information about the
 compiled pattern is given after compilation.
 </P>
 <P>
@@ -70,8 +79,9 @@ matching calls by including \O in the data line (see below).
 </P>
 <P>
 <b>-p</b>
-Behave as if each regex has <b>/P</b> modifier; the POSIX wrapper API is used
-to call PCRE. None of the other options has any effect when <b>-p</b> is set.
+Behave as if each regex has the <b>/P</b> modifier; the POSIX wrapper API is
+used to call PCRE. None of the other options has any effect when <b>-p</b> is
+set.
 </P>
 <P>
 <b>-t</b>
@@ -152,6 +162,7 @@ not correspond to anything in Perl:
   <b>/A</b>    PCRE_ANCHORED
   <b>/C</b>    PCRE_AUTO_CALLOUT
   <b>/E</b>    PCRE_DOLLAR_ENDONLY
+  <b>/f</b>    PCRE_FIRSTLINE
   <b>/N</b>    PCRE_NO_AUTO_CAPTURE
   <b>/U</b>    PCRE_UNGREEDY
   <b>/X</b>    PCRE_EXTRA
@@ -274,6 +285,8 @@ recognized:
   \C!n       return 1 instead of 0 when callout number n is reached
   \C!n!m     return 1 instead of 0 when callout number n is reached for the nth time
   \C*n       pass the number n (may be negative) as callout data; this is used as the callout return value
+  \D         use the <b>pcre_dfa_exec()</b> match function
+  \F         only shortest match for <b>pcre_dfa_exec()</b>
   \Gdd       call pcre_get_substring() for substring dd after a successful match (number less than 32)
   \Gname     call pcre_get_named_substring() for substring "name" after a successful match (name termin-
                ated by next non-alphanumeric character)
@@ -281,7 +294,8 @@ recognized:
   \M         discover the minimum MATCH_LIMIT setting
   \N         pass the PCRE_NOTEMPTY option to <b>pcre_exec()</b>
   \Odd       set the size of the output vector passed to <b>pcre_exec()</b> to dd (any number of digits)
-  \P         pass the PCRE_PARTIAL option to <b>pcre_exec()</b>
+  \P         pass the PCRE_PARTIAL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \R         pass the PCRE_DFA_RESTART option to <b>pcre_dfa_exec()</b>
   \S         output details of memory get/free calls during matching
   \Z         pass the PCRE_NOTEOL option to <b>pcre_exec()</b>
   \?         pass the PCRE_NO_UTF8_CHECK option to <b>pcre_exec()</b>
@@ -318,14 +332,35 @@ of the <b>/8</b> modifier on the pattern. It is recognized always. There may be
 any number of hexadecimal digits inside the braces. The result is from one to
 six bytes, encoded according to the UTF-8 rules.
 </P>
-<br><a name="SEC6" href="#TOC1">OUTPUT FROM PCRETEST</a><br>
+<br><a name="SEC6" href="#TOC1">THE ALTERNATIVE MATCHING FUNCTION</a><br>
+<P>
+By default, <b>pcretest</b> uses the standard PCRE matching function,
+<b>pcre_exec()</b> to match each data line. From release 6.0, PCRE supports an
+alternative matching function, <b>pcre_dfa_test()</b>, which operates in a
+different way, and has some restrictions. The differences between the two
+functions are described in the
+<a href="pcrematching.html"><b>pcrematching</b></a>
+documentation.
+</P>
+<P>
+If a data line contains the \D escape sequence, or if the command line
+contains the <b>-dfa</b> option, the alternative matching function is called.
+This function finds all possible matches at a given point. If, however, the \F
+escape sequence is present in the data line, it stops after the first match is
+found. This is always the shortest possible match.
+</P>
+<br><a name="SEC7" href="#TOC1">DEFAULT OUTPUT FROM PCRETEST</a><br>
+<P>
+This section describes the output when the normal matching function,
+<b>pcre_exec()</b>, is being used.
+</P>
 <P>
 When a match succeeds, pcretest outputs the list of captured substrings that
 <b>pcre_exec()</b> returns, starting with number 0 for the string that matched
 the whole pattern. Otherwise, it outputs "No match" or "Partial match"
 when <b>pcre_exec()</b> returns PCRE_ERROR_NOMATCH or PCRE_ERROR_PARTIAL,
 respectively, and otherwise the PCRE negative error number. Here is an example
-of an interactive pcretest run.
+of an interactive <b>pcretest</b> run.
 <pre>
   $ pcretest
   PCRE version 5.00 07-Sep-2004
@@ -375,12 +410,62 @@ Note that while patterns can be continued over several lines (a plain "&#62;"
 prompt is used for continuations), data lines may not. However newlines can be
 included in data by means of the \n escape.
 </P>
-<br><a name="SEC7" href="#TOC1">CALLOUTS</a><br>
+<br><a name="SEC8" href="#TOC1">OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION</a><br>
+<P>
+When the alternative matching function, <b>pcre_dfa_exec()</b>, is used (by
+means of the \D escape sequence or the <b>-dfa</b> command line option), the
+output consists of a list of all the matches that start at the first point in
+the subject where there is at least one match. For example:
+<pre>
+    re&#62; /(tang|tangerine|tan)/
+  data&#62; yellow tangerine\D
+   0: tangerine
+   1: tang
+   2: tan
+</pre>
+(Using the normal matching function on this data finds only "tang".) The
+longest matching string is always given first (and numbered zero).
+</P>
+<P>
+If \fB/g\P is present on the pattern, the search for further matches resumes
+at the end of the longest match. For example:
+<pre>
+    re&#62; /(tang|tangerine|tan)/g
+  data&#62; yellow tangerine and tangy sultana\D
+   0: tangerine
+   1: tang
+   2: tan
+   0: tang
+   1: tan
+   0: tan
+</pre>
+Since the matching function does not support substring capture, the escape
+sequences that are concerned with captured substrings are not relevant.
+</P>
+<br><a name="SEC9" href="#TOC1">RESTARTING AFTER A PARTIAL MATCH</a><br>
+<P>
+When the alternative matching function has given the PCRE_ERROR_PARTIAL return,
+indicating that the subject partially matched the pattern, you can restart the
+match with additional subject data by means of the \R escape sequence. For
+example:
+<pre>
+    re&#62; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+  data&#62; 23ja\P\D
+  Partial match: 23ja
+  data&#62; n05\R\D
+   0: n05
+</pre>
+For further information about partial matching, see the
+<a href="pcrepartial.html"><b>pcrepartial</b></a>
+documentation.
+</P>
+<br><a name="SEC10" href="#TOC1">CALLOUTS</a><br>
 <P>
 If the pattern contains any callout requests, <b>pcretest</b>'s callout function
-is called during matching. By default, it displays the callout number, the
-start and current positions in the text at the callout time, and the next
-pattern item to be tested. For example, the output
+is called during matching. This works with both matching functions. By default,
+the called function displays the callout number, the start and current
+positions in the text at the callout time, and the next pattern item to be
+tested. For example, the output
 <pre>
   ---&#62;pqrabcdef
     0    ^  ^     \d
@@ -406,7 +491,7 @@ example:
    0: E*
 </pre>
 The callout function in <b>pcretest</b> returns zero (carry on matching) by
-default, but you can use an \C item in a data line (as described above) to
+default, but you can use a \C item in a data line (as described above) to
 change this.
 </P>
 <P>
@@ -416,7 +501,7 @@ the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
 </P>
-<br><a name="SEC8" href="#TOC1">SAVING AND RELOADING COMPILED PATTERNS</a><br>
+<br><a name="SEC11" href="#TOC1">SAVING AND RELOADING COMPILED PATTERNS</a><br>
 <P>
 The facilities described in this section are not available when the POSIX
 inteface to PCRE is being used, that is, when the <b>/P</b> pattern modifier is
@@ -478,18 +563,18 @@ string using a reloaded pattern is likely to cause <b>pcretest</b> to crash.
 Finally, if you attempt to load a file that is not in the correct format, the
 result is undefined.
 </P>
-<br><a name="SEC9" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC12" href="#TOC1">AUTHOR</a><br>
 <P>
-Philip Hazel &#60;ph10@cam.ac.uk&#62;
+Philip Hazel
 <br>
 University Computing Service,
 <br>
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 10 September 2004
+Last updated: 28 February 2005
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+Copyright &copy; 1997-2005 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

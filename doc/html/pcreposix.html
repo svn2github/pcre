@@ -46,8 +46,8 @@ man page, in case the conversion went wrong.
 This set of functions provides a POSIX-style API to the PCRE regular expression
 package. See the
 <a href="pcreapi.html"><b>pcreapi</b></a>
-documentation for a description of PCRE's native API, which contains additional
-functionality.
+documentation for a description of PCRE's native API, which contains much
+additional functionality.
 </P>
 <P>
 The functions described here are just wrapper functions that ultimately call
@@ -94,6 +94,11 @@ about the compiled expression.
 <P>
 The argument <i>cflags</i> is either zero, or contains one or more of the bits
 defined by the following macros:
+<pre>
+  REG_DOTALL
+</pre>
+The PCRE_DOTALL option is set when the expression is passed for compilation to
+the native function. Note that REG_DOTALL is not part of the POSIX standard.
 <pre>
   REG_ICASE
 </pre>
@@ -203,16 +208,16 @@ memory, after which <i>preg</i> may no longer be used as a compiled expression.
 </P>
 <br><a name="SEC8" href="#TOC1">AUTHOR</a><br>
 <P>
-Philip Hazel &#60;ph10@cam.ac.uk&#62;
+Philip Hazel
 <br>
 University Computing Service,
 <br>
 Cambridge CB2 3QG, England.
 </P>
 <P>
-Last updated: 07 September 2004
+Last updated: 28 February 2005
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+Copyright &copy; 1997-2005 University of Cambridge.
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

@@ -18,7 +18,8 @@ PCRE - Perl-compatible regular expressions
 .rs
 .sp
 This function matches a compiled regular expression against a given subject
-string, and returns offsets to capturing subexpressions. Its arguments are:
+string, using a matching algorithm that is similar to Perl's. It returns
+offsets to captured substrings. Its arguments are:
 .sp
   \fIcode\fP         Points to the compiled pattern
   \fIextra\fP        Points to an associated \fBpcre_extra\fP structure,

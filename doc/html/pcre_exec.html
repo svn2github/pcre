@@ -28,7 +28,8 @@ DESCRIPTION
 </b><br>
 <P>
 This function matches a compiled regular expression against a given subject
-string, and returns offsets to capturing subexpressions. Its arguments are:
+string, using a matching algorithm that is similar to Perl's. It returns
+offsets to captured substrings. Its arguments are:
 <pre>
   <i>code</i>         Points to the compiled pattern
   <i>extra</i>        Points to an associated <b>pcre_extra</b> structure,

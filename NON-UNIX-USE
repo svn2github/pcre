@@ -51,8 +51,8 @@ character tables and writes them to that file.
 
   rem Mark Tetrode's commands
   rem Compile & run
-  cl -DSUPPORT_UTF8 dftables.c
-  dftables.exe > chartables.c
+  cl -DSUPPORT_UTF8 -DSUPPORT_UCP dftables.c
+  dftables.exe chartables.c
 
 (4) Compile maketables.c, get.c, study.c and pcre.c and link them all
 together into an object library in whichever form your system keeps such
@@ -62,7 +62,7 @@ have to do this once for each type.
 
   rem Mark Tetrode's commands, for a static library
   rem Compile & lib
-  cl -DSUPPORT_UTF8 -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
+  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
   lib /OUT:pcre.lib maketables.obj get.obj study.obj pcre.obj
 
 (5) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
@@ -70,7 +70,7 @@ library.
 
   rem Mark Tetrode's commands, for a static library
   rem Compile & lib
-  cl -DSUPPORT_UTF8 -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
+  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
   lib /OUT:pcreposix.lib pcreposix.obj
 
 (6) Compile the test program pcretest.c. This needs the functions in the
@@ -78,7 +78,7 @@ pcre and pcreposix libraries when linking.
 
   rem Mark Tetrode's commands
   rem compile & link
-  cl pcretest.c pcre.lib pcreposix.lib
+  cl /F0x400000 pcretest.c pcre.lib pcreposix.lib
 
 (7) Run pcretest on the testinput files in the testdata directory, and check
 that the output matches the corresponding testoutput files. You must use the
@@ -87,13 +87,6 @@ format, with just LF characters as line terminators. You may need to edit them
 to change this if your system uses a different convention.
 
   rem Mark Tetrode's commands
-  rem Make a change, i.e. space, backspace, and save again - do this for all
-  rem to change UNIX to Win, \n to \n\r
-  write testoutput1
-  write testoutput2
-  write testoutput3
-  write testoutput4
-  write testoutput5
   pcretest testdata\testinput1 testdata\myoutput1
   windiff testdata\testoutput1 testdata\myoutput1
   pcretest -i testdata\testinput2 testdata\myoutput2
@@ -104,6 +97,8 @@ to change this if your system uses a different convention.
   windiff testdata\testoutput4 testdata\myoutput4
   pcretest testdata\testinput5 testdata\myoutput5
   windiff testdata\testoutput5 testdata\myoutput5
+  pcretest testdata\testinput6 testdata\myoutput6
+  windiff testdata\testoutput6 testdata\myoutput6
 
 
 FURTHER REMARKS

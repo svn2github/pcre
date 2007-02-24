@@ -3838,4 +3838,12 @@
 /(?<=Z)X./
   \x84XAZXB
 
+/ab cd (?x) de fg/
+    ab cd defg
+
+/ab cd(?x) de fg/
+    ab cddefg
+    ** Failers 
+    abcddefg
+
 / End of testinput1 /
