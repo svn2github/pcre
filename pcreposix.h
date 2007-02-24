@@ -2,7 +2,7 @@
 *       Perl-Compatible Regular Expressions      *
 *************************************************/
 
-/* Copyright (c) 1998 University of Cambridge */
+/* Copyright (c) 1997-1999 University of Cambridge */
 
 #ifndef _PCREPOSIX_H
 #define _PCREPOSIX_H

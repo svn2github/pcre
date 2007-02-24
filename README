@@ -27,7 +27,7 @@ The distribution should contain the following files:
   Tech.Notes        notes on the encoding
   pcre.3            man page for the functions
   pcreposix.3       man page for the POSIX wrapper API
-  deftables.c       auxiliary program for building chartables.c
+  dftables.c        auxiliary program for building chartables.c
   maketables.c      )
   study.c           ) source of
   pcre.c            )   the functions
@@ -115,8 +115,8 @@ is passed as NULL, a set of default tables that is built into the binary is
 used.
 
 The source file called chartables.c contains the default set of tables. This is
-not supplied in the distribution, but is built by the program deftables
-(compiled from deftables.c), which uses the ANSI C character handling functions
+not supplied in the distribution, but is built by the program dftables
+(compiled from dftables.c), which uses the ANSI C character handling functions
 such as isalnum(), isalpha(), isupper(), islower(), etc. to build the table
 sources. This means that the default C locale set your system will control the
 contents of the tables. You can change the default tables by editing
@@ -291,4 +291,4 @@ contains malformed regular expressions, in order to check that PCRE diagnoses
 them correctly.
 
 Philip Hazel <ph10@cam.ac.uk>
-October 1998
+January 1999

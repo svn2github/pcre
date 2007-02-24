@@ -1090,17 +1090,24 @@ same length of string. An assertion such as
 
   (?<=ab(c|de))
 
-is not permitted, because its single branch can match two different lengths,
-but it is acceptable if rewritten to use two branches:
+is not permitted, because its single top-level branch can match two different
+lengths, but it is acceptable if rewritten to use two top-level branches:
 
   (?<=abc|abde)
 
 The implementation of lookbehind assertions is, for each alternative, to
 temporarily move the current position back by the fixed width and then try to
 match. If there are insufficient characters before the current position, the
-match is deemed to fail.
+match is deemed to fail. Lookbehinds in conjunction with once-only subpatterns
+can be particularly useful for matching at the ends of strings; an example is
+given at the end of the section on once-only subpatterns.
 
-Assertions can be nested in any combination. For example,
+Several assertions (of any sort) may occur in succession. For example,
+
+  (?<=\\d{3})(?<!999)foo
+
+matches "foo" preceded by three digits that are not "999". Furthermore,
+assertions can be nested in any combination. For example,
 
   (?<=(?<!foo)bar)baz
 
@@ -1156,6 +1163,32 @@ number of digits they match in order to make the rest of the pattern match,
 
 This construction can of course contain arbitrarily complicated subpatterns,
 and it can be nested.
+
+Once-only subpatterns can be used in conjunction with lookbehind assertions to
+specify efficient matching at the end of the subject string. Consider a simple
+pattern such as
+
+  abcd$
+
+when applied to a long string which does not match it. Because matching
+proceeds from left to right, PCRE will look for each "a" in the subject and
+then see if what follows matches the rest of the pattern. If the pattern is
+specified as
+
+  .*abcd$
+
+then the initial .* matches the entire string at first, but when this fails, it
+backtracks to match all but the last character, then all but the last two
+characters, and so on. Once again the search for "a" covers the entire string,
+from right to left, so we are no better off. However, if the pattern is written
+as
+
+  (?>.*)(?<=abcd)
+
+then there can be no backtracking for the .* item; it can match only the entire
+string. The subsequent lookbehind assertion does a single test on the last four
+characters. If it fails, the match fails immediately. For long strings, this
+approach makes a significant difference to the processing time.
 
 
 .SH CONDITIONAL SUBPATTERNS
@@ -1236,4 +1269,4 @@ Cambridge CB2 3QG, England.
 .br
 Phone: +44 1223 334714
 
-Copyright (c) 1998 University of Cambridge.
+Copyright (c) 1997-1999 University of Cambridge.

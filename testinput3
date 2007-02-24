@@ -1599,5 +1599,30 @@
 /b\z/
     a\nb
     *** Failers
+    
+/^(?>(?(1)\.|())[^\W_](?>[a-z0-9-]*[^\W_])?)+$/
+    a
+    abc
+    a-b
+    0-9 
+    a.b
+    5.6.7  
+    the.quick.brown.fox
+    a100.b200.300c  
+    12-ab.1245 
+    ***Failers
+    \
+    .a
+    -a
+    a-
+    a.  
+    a_b 
+    a.-
+    a..  
+    ab..bc 
+    the.quick.brown.fox-
+    the.quick.brown.fox.
+    the.quick.brown.fox_
+    the.quick.brown.fox+       
 
 / End of test input /       

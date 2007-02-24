@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1998 University of Cambridge
+           Copyright (c) 1997-1999 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -4032,6 +4032,17 @@ in the pattern. */
 
 resetcount = 2 + re->top_bracket * 2;
 if (resetcount > offsetcount) resetcount = ocount;
+
+/* Reset the working variable associated with each extraction. These should
+never be used unless previously set, but they get saved and restored, and so we
+initialize them to avoid reading uninitialized locations. */
+
+if (match_block.offset_vector != NULL)
+  {
+  register int *iptr = match_block.offset_vector + ocount;
+  register int *iend = iptr - resetcount/2 + 1;
+  while (--iptr >= iend) *iptr = -1;
+  }
 
 /* Set up the first character to match, if available. The first_char value is
 never set for an anchored regular expression, but the anchoring may be forced

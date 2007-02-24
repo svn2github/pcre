@@ -1,4 +1,4 @@
-PCRE version 2.01 21-Oct-1998
+PCRE version 2.02 14-Jan-1999
 
 /(a)b|/
 Identifying subpattern count = 1

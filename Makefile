@@ -27,15 +27,15 @@ pgrep:          libpcre.a pgrep.o
 		$(CC) $(CFLAGS) -o pgrep pgrep.o libpcre.a
 
 pcretest:       libpcre.a libpcreposix.a pcretest.o
-		$(CC) $(CFLAGS) -o pcretest pcretest.o libpcre.a libpcreposix.a
+		$(PURIFY) $(CC) $(CFLAGS) -o pcretest pcretest.o libpcre.a libpcreposix.a
 
 libpcre.a:      $(OBJ)
-		/bin/rm -f libpcre.a
+		-rm -f libpcre.a
 		$(AR) libpcre.a $(OBJ)
 		$(RANLIB) libpcre.a
 
 libpcreposix.a: pcreposix.o
-		/bin/rm -f libpcreposix.a
+		-rm -f libpcreposix.a
 		$(AR) libpcreposix.a pcreposix.o
 		$(RANLIB) libpcreposix.a
 
@@ -59,17 +59,17 @@ pgrep.o:        pgrep.c pcre.h Makefile
 
 # An auxiliary program makes the default character table source
 
-chartables.c:   deftables
-		./deftables >chartables.c
+chartables.c:   dftables
+		./dftables >chartables.c
 
-deftables:      deftables.c maketables.c pcre.h internal.h Makefile
-		$(CC) -o deftables $(CFLAGS) deftables.c
+dftables:       dftables.c maketables.c pcre.h internal.h Makefile
+		$(CC) -o dftables $(CFLAGS) dftables.c
 
-# We deliberately omit deftables and chartables.c from 'make clean'; once made
+# We deliberately omit dftables and chartables.c from 'make clean'; once made
 # chartables.c shouldn't change, and if people have edited the tables by hand,
 # you don't want to throw them away.
 
-clean:;         /bin/rm -f *.o *.a pcretest pgrep
+clean:;         -rm -f *.o *.a pcretest pgrep
 
 runtest:        all
 		./RunTest

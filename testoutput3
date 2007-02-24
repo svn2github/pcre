@@ -1,4 +1,4 @@
-PCRE version 2.01 21-Oct-1998
+PCRE version 2.02 14-Jan-1999
 
 /(?<!bar)foo/
     foo
@@ -2747,6 +2747,63 @@ No match
     a\nb
  0: b
     *** Failers
+No match
+    
+/^(?>(?(1)\.|())[^\W_](?>[a-z0-9-]*[^\W_])?)+$/
+    a
+ 0: a
+ 1: 
+    abc
+ 0: abc
+ 1: 
+    a-b
+ 0: a-b
+ 1: 
+    0-9 
+ 0: 0-9
+ 1: 
+    a.b
+ 0: a.b
+ 1: 
+    5.6.7  
+ 0: 5.6.7
+ 1: 
+    the.quick.brown.fox
+ 0: the.quick.brown.fox
+ 1: 
+    a100.b200.300c  
+ 0: a100.b200.300c
+ 1: 
+    12-ab.1245 
+ 0: 12-ab.1245
+ 1: 
+    ***Failers
+No match
+    \
+No match
+    .a
+No match
+    -a
+No match
+    a-
+No match
+    a.  
+No match
+    a_b 
+No match
+    a.-
+No match
+    a..  
+No match
+    ab..bc 
+No match
+    the.quick.brown.fox-
+No match
+    the.quick.brown.fox.
+No match
+    the.quick.brown.fox_
+No match
+    the.quick.brown.fox+       
 No match
 
 / End of test input /       

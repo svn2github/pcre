@@ -22,7 +22,7 @@
 #endif
 #endif
 
-#define LOOPREPEAT 10000
+#define LOOPREPEAT 20000
 
 
 static FILE *outfile;
@@ -499,8 +499,9 @@ while (!done)
         if (re != NULL) free(re);
         }
       time_taken = clock() - start_time;
-      fprintf(outfile, "Compile time %.2f milliseconds\n",
-        ((double)time_taken)/(4 * CLOCKS_PER_SEC));
+      fprintf(outfile, "Compile time %.3f milliseconds\n",
+        ((double)time_taken * 1000.0) /
+        ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
       }
 
     re = pcre_compile((char *)p, options, &error, &erroroffset, tables);
@@ -586,8 +587,9 @@ while (!done)
           extra = pcre_study(re, study_options, &error);
         time_taken = clock() - start_time;
         if (extra != NULL) free(extra);
-        fprintf(outfile, "  Study time %.2f milliseconds\n",
-          ((double)time_taken)/(4 * CLOCKS_PER_SEC));
+        fprintf(outfile, "  Study time %.3f milliseconds\n",
+          ((double)time_taken * 1000.0)/
+          ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
         }
 
       extra = pcre_study(re, study_options, &error);
@@ -765,12 +767,13 @@ while (!done)
         register int i;
         clock_t time_taken;
         clock_t start_time = clock();
-        for (i = 0; i < 4000; i++)
+        for (i = 0; i < LOOPREPEAT; i++)
           count = pcre_exec(re, extra, (char *)dbuffer, len, options, offsets,
             size_offsets);
         time_taken = clock() - start_time;
-        fprintf(outfile, "Execute time %.2f milliseconds\n",
-          ((double)time_taken)/(4 * CLOCKS_PER_SEC));
+        fprintf(outfile, "Execute time %.3f milliseconds\n",
+          ((double)time_taken * 1000.0)/
+          ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
         }
 
       count = pcre_exec(re, extra, (char *)dbuffer, len, options, offsets,
