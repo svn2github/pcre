@@ -2,14 +2,12 @@
 # Makefile.in for PCRE (Perl-Compatible Regular Expression) library.
 
 #---------------------------------------------------------------------------#
-# To build mingw32 DLL uncomment the next two lines. This addition for      #
-# mingw32 was contributed by <Paul.Sokolovsky@technologist.com>. I (Philip  #
-# Hazel) don't know anything about it! There are some additional targets at #
-# the bottom of this Makefile.                                              #
+# MinGW DLLs are built automatically with this configure.in and Makefile.in #
+# as long you are using autoconf 2.50 or higher. The Win32 static libraries #
+# have not been tested, but appear to be generated. This functionality is   #
+# by courtesy of Fred Cox. I (Philip Hazel) don't know anything about it,   #
+# as I live entirely in a non-Windows world.                                #
 #---------------------------------------------------------------------------#
-#
-# include dll.mk
-# DLL_LDFLAGS=-s
 
 
 #############################################################################
@@ -58,9 +56,13 @@ MANDIR = @mandir@
 
 CC = @CC@
 CFLAGS = @CFLAGS@
-RANLIB = @RANLIB@
+HOST_CC = @HOST_CC@
+HOST_CFLAGS = @HOST_CFLAGS@
 UTF8   = @UTF8@
 NEWLINE = @NEWLINE@
+POSIX_MALLOC_THRESHOLD = @POSIX_MALLOC_THRESHOLD@
+LINK_SIZE = @LINK_SIZE@
+MATCH_LIMIT= @MATCH_LIMIT@
 
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -69,8 +71,8 @@ INSTALL_DATA = @INSTALL_DATA@
 # to do one or the other or both by ./configure.
 
 LIBTOOL = @LIBTOOL@
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) -I. $(NEWLINE)
-LINK = $(LIBTOOL) --mode=link $(CC)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) -c $(CFLAGS) -I. -I$(top_srcdir) $(NEWLINE) $(LINK_SIZE) $(MATCH_LIMIT)
+LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -I. -I$(top_srcdir)
 
 # These are the version numbers for the shared libraries
 
@@ -80,17 +82,17 @@ PCREPOSIXLIBVERSION = @PCRE_POSIXLIB_VERSION@
 ##############################################################################
 
 
-OBJ = maketables.o get.o study.o pcre.o
-LOBJ = maketables.lo get.lo study.lo pcre.lo
+OBJ = maketables.o get.o study.o pcre.o @POSIX_OBJ@
+LOBJ = maketables.lo get.lo study.lo pcre.lo @POSIX_LOBJ@
 
-all:            libpcre.la libpcreposix.la pcretest pcregrep
+all:            libpcre.la @POSIX_LIB@ pcretest pcregrep
 
 pcregrep:       libpcre.la pcregrep.o
-		$(LINK) $(CFLAGS) -o pcregrep pcregrep.o libpcre.la
+		$(LINK) -o pcregrep pcregrep.o libpcre.la
 
-pcretest:       libpcre.la libpcreposix.la pcretest.o
-		$(LINK) $(PURIFY) $(CFLAGS) -o pcretest pcretest.o \
-		libpcre.la libpcreposix.la
+pcretest:       libpcre.la @POSIX_LIB@ pcretest.o
+		$(LINK) $(PURIFY) $(EFENCE) -o pcretest pcretest.o \
+		libpcre.la @POSIX_LIB@
 
 libpcre.la:     $(OBJ)
 		-rm -f libpcre.la
@@ -103,12 +105,13 @@ libpcreposix.la: pcreposix.o
 		'$(PCREPOSIXLIBVERSION)' -o libpcreposix.la pcreposix.lo
 
 pcre.o:         $(top_srcdir)/chartables.c $(top_srcdir)/pcre.c \
-		$(top_srcdir)/internal.h pcre.h config.h Makefile
-		$(LTCOMPILE) $(UTF8) $(top_srcdir)/pcre.c
+		$(top_srcdir)/internal.h $(top_srcdir)/printint.c \
+		pcre.h config.h Makefile
+		$(LTCOMPILE) $(UTF8) $(POSIX_MALLOC_THRESHOLD) $(top_srcdir)/pcre.c
 
 pcreposix.o:    $(top_srcdir)/pcreposix.c $(top_srcdir)/pcreposix.h \
 		$(top_srcdir)/internal.h pcre.h config.h Makefile
-		$(LTCOMPILE) $(top_srcdir)/pcreposix.c
+		$(LTCOMPILE) $(POSIX_MALLOC_THRESHOLD) $(top_srcdir)/pcreposix.c
 
 maketables.o:   $(top_srcdir)/maketables.c $(top_srcdir)/internal.h \
 		pcre.h config.h Makefile
@@ -122,8 +125,10 @@ study.o:        $(top_srcdir)/study.c $(top_srcdir)/internal.h \
 		pcre.h config.h Makefile
 		$(LTCOMPILE) $(UTF8) $(top_srcdir)/study.c
 
-pcretest.o:     $(top_srcdir)/pcretest.c $(top_srcdir)/internal.h pcre.h config.h Makefile
-		$(CC) -c $(CFLAGS) -I. $(UTF8) $(top_srcdir)/pcretest.c
+pcretest.o:     $(top_srcdir)/pcretest.c $(top_srcdir)/internal.h \
+		$(top_srcdir)/printint.c \
+		pcre.h config.h Makefile
+		$(CC) -c $(CFLAGS) -I. $(UTF8) $(LINK_SIZE) $(top_srcdir)/pcretest.c
 
 pcregrep.o:     $(top_srcdir)/pcregrep.c pcre.h Makefile config.h
 		$(CC) -c $(CFLAGS) -I. $(UTF8) $(PCREGREP_OSTYPE) $(top_srcdir)/pcregrep.c
@@ -133,30 +138,56 @@ pcregrep.o:     $(top_srcdir)/pcregrep.c pcre.h Makefile config.h
 $(top_srcdir)/chartables.c:   dftables
 		./dftables >$(top_srcdir)/chartables.c
 
-dftables:       $(top_srcdir)/dftables.c $(top_srcdir)/maketables.c \
+dftables.o:     $(top_srcdir)/dftables.c $(top_srcdir)/maketables.c \
 		$(top_srcdir)/internal.h pcre.h config.h Makefile
-		$(LINK) -o dftables $(CFLAGS) $(top_srcdir)/dftables.c
+		$(HOST_CC) -c $(HOST_CFLAGS) -I. $(top_srcdir)/dftables.c
+
+dftables:       dftables.o
+		$(LINK) -o dftables dftables.o
 
 install:        all
-		$(mkinstalldirs) $(DESTDIR)/$(LIBDIR)
-		echo "$(LIBTOOL) --mode=install $(INSTALL) libpcre.la $(DESTDIR)/$(LIBDIR)/libpcre.la"
-		$(LIBTOOL) --mode=install $(INSTALL) libpcre.la $(DESTDIR)/$(LIBDIR)/libpcre.la
-		echo "$(LIBTOOL) --mode=install $(INSTALL) libpcreposix.la $(DESTDIR)/$(LIBDIR)/libpcreposix.la"
-		$(LIBTOOL) --mode=install $(INSTALL) libpcreposix.la $(DESTDIR)/$(LIBDIR)/libpcreposix.la
-		$(LIBTOOL) --finish $(DESTDIR)/$(LIBDIR)
-		$(mkinstalldirs) $(DESTDIR)/$(INCDIR)
-		$(INSTALL_DATA) pcre.h $(DESTDIR)/$(INCDIR)/pcre.h
-		$(INSTALL_DATA) $(top_srcdir)/pcreposix.h $(DESTDIR)/$(INCDIR)/pcreposix.h
-		$(mkinstalldirs) $(DESTDIR)/$(MANDIR)/man3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre.3 $(DESTDIR)/$(MANDIR)/man3/pcre.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcreposix.3 $(DESTDIR)/$(MANDIR)/man3/pcreposix.3
-		$(mkinstalldirs) $(DESTDIR)/$(MANDIR)/man1
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcregrep.1 $(DESTDIR)/$(MANDIR)/man1/pcregrep.1
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcretest.1 $(DESTDIR)/$(MANDIR)/man1/pcretest.1
-		$(mkinstalldirs) $(DESTDIR)/$(BINDIR)
-		$(LIBTOOL) --mode=install $(INSTALL) pcregrep $(DESTDIR)/$(BINDIR)/pcregrep
-		$(LIBTOOL) --mode=install $(INSTALL) pcretest $(DESTDIR)/$(BINDIR)/pcretest
-		$(INSTALL) pcre-config $(DESTDIR)/$(BINDIR)/pcre-config
+		$(mkinstalldirs) $(DESTDIR)$(LIBDIR)
+		echo "$(LIBTOOL) --mode=install $(INSTALL) libpcre.la $(DESTDIR)$(LIBDIR)/libpcre.la"
+		$(LIBTOOL) --mode=install $(INSTALL) libpcre.la $(DESTDIR)$(LIBDIR)/libpcre.la
+		echo "$(LIBTOOL) --mode=install $(INSTALL) libpcreposix.la $(DESTDIR)$(LIBDIR)/libpcreposix.la"
+		$(LIBTOOL) --mode=install $(INSTALL) libpcreposix.la $(DESTDIR)$(LIBDIR)/libpcreposix.la
+		$(LIBTOOL) --finish $(DESTDIR)$(LIBDIR)
+		$(mkinstalldirs) $(DESTDIR)$(INCDIR)
+		$(INSTALL_DATA) pcre.h $(DESTDIR)$(INCDIR)/pcre.h
+		$(INSTALL_DATA) $(top_srcdir)/pcreposix.h $(DESTDIR)$(INCDIR)/pcreposix.h
+		$(mkinstalldirs) $(DESTDIR)$(MANDIR)/man3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre.3 $(DESTDIR)$(MANDIR)/man3/pcre.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcreapi.3 $(DESTDIR)$(MANDIR)/man3/pcreapi.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcrebuild.3 $(DESTDIR)$(MANDIR)/man3/pcrebuild.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecallout.3 $(DESTDIR)$(MANDIR)/man3/pcrecallout.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecompat.3 $(DESTDIR)$(MANDIR)/man3/pcrecompat.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcrepattern.3 $(DESTDIR)$(MANDIR)/man3/pcrepattern.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcreperform.3 $(DESTDIR)$(MANDIR)/man3/pcreperform.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcreposix.3 $(DESTDIR)$(MANDIR)/man3/pcreposix.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcresample.3 $(DESTDIR)$(MANDIR)/man3/pcresample.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_compile.3 $(DESTDIR)$(MANDIR)/man3/pcre_compile.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_config.3 $(DESTDIR)$(MANDIR)/man3/pcre_config.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_copy_named_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_copy_named_substring.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_copy_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_copy_substring.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_exec.3 $(DESTDIR)$(MANDIR)/man3/pcre_exec.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_free_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_free_substring.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_free_substring_list.3 $(DESTDIR)$(MANDIR)/man3/pcre_free_substring_list.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_fullinfo.3 $(DESTDIR)$(MANDIR)/man3/pcre_fullinfo.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_named_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_named_substring.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_stringnumber.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_stringnumber.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_substring.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_substring_list.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_substring_list.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_info.3 $(DESTDIR)$(MANDIR)/man3/pcre_info.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_maketables.3 $(DESTDIR)$(MANDIR)/man3/pcre_maketables.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_study.3 $(DESTDIR)$(MANDIR)/man3/pcre_study.3
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_version.3 $(DESTDIR)$(MANDIR)/man3/pcre_version.3
+		$(mkinstalldirs) $(DESTDIR)$(MANDIR)/man1
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcregrep.1 $(DESTDIR)$(MANDIR)/man1/pcregrep.1
+		$(INSTALL_DATA) $(top_srcdir)/doc/pcretest.1 $(DESTDIR)$(MANDIR)/man1/pcretest.1
+		$(mkinstalldirs) $(DESTDIR)$(BINDIR)
+		$(LIBTOOL) --mode=install $(INSTALL) pcregrep $(DESTDIR)$(BINDIR)/pcregrep
+		$(LIBTOOL) --mode=install $(INSTALL) pcretest $(DESTDIR)$(BINDIR)/pcretest
+		$(INSTALL) pcre-config $(DESTDIR)$(BINDIR)/pcre-config
 
 # We deliberately omit dftables and chartables.c from 'make clean'; once made
 # chartables.c shouldn't change, and if people have edited the tables by hand,
@@ -176,24 +207,5 @@ test:           runtest
 
 runtest:        all
 		./RunTest
-
-######## MINGW32 ############### MINGW32 ############### MINGW32 #############
-
-# This addition for mingw32 was contributed by  Paul Sokolovsky
-# <Paul.Sokolovsky@technologist.com>. I (PH) don't know anything about it!
-
-dll:            _dll libpcre.dll.a pcregrep_d pcretest_d
-
-_dll:
-		$(MAKE) CFLAGS=-DSTATIC pcre.dll
-
-pcre.dll:       $(OBJ) pcreposix.o pcre.def
-libpcre.dll.a:  pcre.def
-
-pcregrep_d:     libpcre.dll.a pcregrep.o
-		$(CC) $(CFLAGS) -L. -o pcregrep pcregrep.o -lpcre.dll
-
-pcretest_d:     libpcre.dll.a pcretest.o
-		$(PURIFY) $(CC) $(CFLAGS) -L. -o pcretest pcretest.o -lpcre.dll
 
 # End

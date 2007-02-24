@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2001 University of Cambridge
+           Copyright (c) 1997-2002 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -78,6 +78,7 @@ Arguments:
   code         points to an expression
   start_bits   points to a 32-byte table, initialized to 0
   caseless     the current state of the caseless flag
+  utf8         TRUE if in UTF-8 mode
   cd           the block with char table pointers
 
 Returns:       TRUE if table built, FALSE otherwise
@@ -85,7 +86,7 @@ Returns:       TRUE if table built, FALSE otherwise
 
 static BOOL
 set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless,
-  compile_data *cd)
+  BOOL utf8, compile_data *cd)
 {
 register int c;
 
@@ -99,7 +100,7 @@ volatile int dummy;
 
 do
   {
-  const uschar *tcode = code + 3;
+  const uschar *tcode = code + 1 + LINK_SIZE;
   BOOL try_next = TRUE;
 
   while (try_next)
@@ -109,7 +110,7 @@ do
 
     if ((int)*tcode >= OP_BRA || *tcode == OP_ASSERT)
       {
-      if (!set_start_bits(tcode, start_bits, caseless, cd))
+      if (!set_start_bits(tcode, start_bits, caseless, utf8, cd))
         return FALSE;
       try_next = FALSE;
       }
@@ -118,6 +119,12 @@ do
       {
       default:
       return FALSE;
+
+      /* Skip over callout */
+
+      case OP_CALLOUT:
+      tcode += 2;
+      break;
 
       /* Skip over extended extraction bracket number */
 
@@ -130,8 +137,8 @@ do
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
-      do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
-      tcode += 3;
+      do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
+      tcode += 1+LINK_SIZE;
       break;
 
       /* Skip over an option setting, changing the caseless flag */
@@ -145,11 +152,11 @@ do
 
       case OP_BRAZERO:
       case OP_BRAMINZERO:
-      if (!set_start_bits(++tcode, start_bits, caseless, cd))
+      if (!set_start_bits(++tcode, start_bits, caseless, utf8, cd))
         return FALSE;
       dummy = 1;
-      do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
-      tcode += 3;
+      do tcode += GET(tcode,1); while (*tcode == OP_ALT);
+      tcode += 1+LINK_SIZE;
       break;
 
       /* Single-char * or ? sets the bit and tries the next item */
@@ -160,6 +167,9 @@ do
       case OP_MINQUERY:
       set_bit(start_bits, tcode[1], caseless, cd);
       tcode += 2;
+#ifdef SUPPORT_UTF8
+      if (utf8) while ((*tcode & 0xc0) == 0x80) tcode++;
+#endif
       break;
 
       /* Single-char upto sets the bit and tries the next */
@@ -168,6 +178,9 @@ do
       case OP_MINUPTO:
       set_bit(start_bits, tcode[3], caseless, cd);
       tcode += 4;
+#ifdef SUPPORT_UTF8
+      if (utf8) while ((*tcode & 0xc0) == 0x80) tcode++;
+#endif
       break;
 
       /* At least one single char sets the bit and stops */
@@ -281,8 +294,17 @@ do
       tcode += 2;
       break;
 
-      /* Character class: set the bits and either carry on or not,
-      according to the repeat count. */
+      /* Character class where all the information is in a bit map: set the
+      bits and either carry on or not, according to the repeat count. If it was
+      a negative class, and we are operating with UTF-8 characters, any byte
+      with the top-bit set is a potentially valid starter because it may start
+      a character with a value > 255. (This is sub-optimal in that the
+      character may be in the range 128-255, and those characters might be
+      unwanted, but that's as far as we go for the moment.) */
+
+      case OP_NCLASS:
+      if (utf8) memset(start_bits+16, 0xff, 16);
+      /* Fall through */
 
       case OP_CLASS:
         {
@@ -309,12 +331,12 @@ do
           break;
           }
         }
-      break; /* End of class handling */
+      break; /* End of bitmap class handling */
 
       }      /* End of switch */
     }        /* End of try_next loop */
 
-  code += (code[1] << 8) + code[2];   /* Advance to next branch */
+  code += GET(code, 1);   /* Advance to next branch */
   }
 while (*code == OP_ALT);
 return TRUE;
@@ -336,7 +358,8 @@ Arguments:
   errorptr  points to where to place error messages;
             set NULL unless error
 
-Returns:    pointer to a pcre_extra block,
+Returns:    pointer to a pcre_extra block, with study_data filled in and the
+              appropriate flag set;
             NULL on error or if no optimization possible
 */
 
@@ -344,8 +367,11 @@ pcre_extra *
 pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 uschar start_bits[32];
-real_pcre_extra *extra;
+pcre_extra *extra;
+pcre_study_data *study;
 const real_pcre *re = (const real_pcre *)external_re;
+uschar *code = (uschar *)re + sizeof(real_pcre) +
+  (re->name_count * re->name_entry_size);
 compile_data compile_block;
 
 *errorptr = NULL;
@@ -362,9 +388,9 @@ if ((options & ~PUBLIC_STUDY_OPTIONS) != 0)
   return NULL;
   }
 
-/* For an anchored pattern, or an unchored pattern that has a first char, or a
-multiline pattern that matches only at "line starts", no further processing at
-present. */
+/* For an anchored pattern, or an unanchored pattern that has a first char, or
+a multiline pattern that matches only at "line starts", no further processing
+at present. */
 
 if ((re->options & (PCRE_ANCHORED|PCRE_FIRSTSET|PCRE_STARTLINE)) != 0)
   return NULL;
@@ -379,12 +405,18 @@ compile_block.ctypes = re->tables + ctypes_offset;
 /* See if we can find a fixed set of initial characters for the pattern. */
 
 memset(start_bits, 0, 32 * sizeof(uschar));
-if (!set_start_bits(re->code, start_bits, (re->options & PCRE_CASELESS) != 0,
-  &compile_block)) return NULL;
+if (!set_start_bits(code, start_bits, (re->options & PCRE_CASELESS) != 0,
+  (re->options & PCRE_UTF8) != 0, &compile_block)) return NULL;
 
-/* Get an "extra" block and put the information therein. */
+/* Get a pcre_extra block and a pcre_study_data block. The study data is put in
+the latter, which is pointed to by the former, which may also get additional
+data set later by the calling program. At the moment, the size of
+pcre_study_data is fixed. We nevertheless save it in a field for returning via
+the pcre_fullinfo() function so that if it becomes variable in the future, we
+don't have to change that code. */
 
-extra = (real_pcre_extra *)(pcre_malloc)(sizeof(real_pcre_extra));
+extra = (pcre_extra *)(pcre_malloc)
+  (sizeof(pcre_extra) + sizeof(pcre_study_data));
 
 if (extra == NULL)
   {
@@ -392,10 +424,15 @@ if (extra == NULL)
   return NULL;
   }
 
-extra->options = PCRE_STUDY_MAPPED;
-memcpy(extra->start_bits, start_bits, sizeof(start_bits));
+study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
+extra->flags = PCRE_EXTRA_STUDY_DATA;
+extra->study_data = study;
 
-return (pcre_extra *)extra;
+study->size = sizeof(pcre_study_data);
+study->options = PCRE_STUDY_MAPPED;
+memcpy(study->start_bits, start_bits, sizeof(start_bits));
+
+return extra;
 }
 
 /* End of study.c */

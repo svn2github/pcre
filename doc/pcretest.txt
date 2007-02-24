@@ -3,20 +3,26 @@ NAME
      expressions.
 
 
-
 SYNOPSIS
      pcretest [-d] [-i] [-m] [-o osize] [-p] [-t] [source]  [des-
      tination]
 
      pcretest was written as a test program for the PCRE  regular
      expression  library  itself,  but  it  can  also be used for
-     experimenting  with  regular  expressions.  This  man   page
+     experimenting  with  regular  expressions.   This   document
      describes  the  features of the test program; for details of
-     the regular expressions themselves, see the pcre man page.
-
+     the regular  expressions  themselves,  see  the  pcrepattern
+     documentation.  For details of PCRE and its options, see the
+     pcreapi documentation.
 
 
 OPTIONS
+
+
+     -C        Output the version number of the PCRE library, and
+               all   available  information  about  the  optional
+               features that are included, and then exit.
+
      -d        Behave as if each regex had the /D  modifier  (see
                below); the internal form is output after compila-
                tion.
@@ -42,25 +48,17 @@ OPTIONS
                wrapper  API  is  used  to  call PCRE. None of the
                other options has any effect when -p is set.
 
-     -t        Run each compile, study,  and  match  20000  times
-               with  a  timer, and output resulting time per com-
-               pile or match (in milliseconds).  Do  not  set  -t
-               with -m, because you will then get the size output
-               20000 times and the timing will be distorted.
-
+     -t        Run each compile, study, and match many times with
+               a  timer, and output resulting time per compile or
+               match (in milliseconds). Do not set  -t  with  -m,
+               because  you  will  then get the size output 20000
+               times and the timing will be distorted.
 
 
 DESCRIPTION
+
      If pcretest is given two filename arguments, it  reads  from
      the  first and writes to the second. If it is given only one
-
-
-
-
-SunOS 5.8                 Last change:                          1
-
-
-
      filename argument, it reads from that  file  and  writes  to
      stdout. Otherwise, it reads from stdin and writes to stdout,
      and prompts for each line of input, using  "re>"  to  prompt
@@ -70,10 +68,18 @@ SunOS 5.8                 Last change:                          1
      The program handles any number of sets of input on a  single
      input  file.  Each set starts with a regular expression, and
      continues with any  number  of  data  lines  to  be  matched
-     against  the  pattern.  An empty line signals the end of the
-     data lines, at which point a new regular expression is read.
-     The  regular  expressions  are  given  enclosed  in any non-
-     alphameric delimiters other than backslash, for example
+     against the pattern.
+
+     Each line is matched separately and  independently.  If  you
+     want  to  do  multiple-line  matches, you have to use the \n
+     escape sequence in a single line of input to encode the new-
+     line  characters.  The maximum length of data line is 30,000
+     characters.
+
+     An empty line signals the end of the data  lines,  at  which
+     point  a new regular expression is read. The regular expres-
+     sions are given enclosed in  any  non-alphameric  delimiters
+     other than backslash, for example
 
        /(a|bc)x+yz/
 
@@ -104,8 +110,8 @@ SunOS 5.8                 Last change:                          1
      continuation of the regular expression.
 
 
-
 PATTERN MODIFIERS
+
      The pattern may be followed by i, m, s,  or  x  to  set  the
      PCRE_CASELESS, PCRE_MULTILINE, PCRE_DOTALL, or PCRE_EXTENDED
      options, respectively. For example:
@@ -165,9 +171,11 @@ PATTERN MODIFIERS
      pcre_fullinfo()  after  compiling an expression, and output-
      ting the information it gets back. If the  pattern  is  stu-
      died, the results of that are also output.
+
      The /D modifier is a  PCRE  debugging  feature,  which  also
      assumes /I.  It causes the internal form of compiled regular
-     expressions to be output after compilation.
+     expressions to be output after compilation. If  the  pattern
+     was studied, the information returned is also output.
 
      The /S modifier causes pcre_study() to be called  after  the
      expression  has been compiled, and the results used when the
@@ -185,19 +193,49 @@ PATTERN MODIFIERS
      REG_NEWLINE is set.
 
      The /8 modifier  causes  pcretest  to  call  PCRE  with  the
-     PCRE_UTF8  option  set.  This turns on the (currently incom-
-     plete) support for UTF-8 character handling  in  PCRE,  pro-
-     vided  that  it was compiled with this support enabled. This
-     modifier also causes any non-printing characters  in  output
-     strings  to  be printed using the \x{hh...} notation if they
-     are valid UTF-8 sequences.
+     PCRE_UTF8  option set. This turns on support for UTF-8 char-
+     acter handling in PCRE, provided that it was  compiled  with
+     this  support  enabled.  This  modifier also causes any non-
+     printing characters in output strings to  be  printed  using
+     the \x{hh...} notation if they are valid UTF-8 sequences.
 
+
+CALLOUTS
+
+     If the pattern contains  any  callout  requests,  pcretest's
+     callout function will be called. By default, it displays the
+     callout number, and the start and current positions  in  the
+     text at the callout time. For example, the output
+
+       --->pqrabcdef
+         0    ^  ^
+
+     indicates that callout number 0 occurred for a match attempt
+     starting at the fourth character of the subject string, when
+     the pointer was at the seventh character. The callout  func-
+     tion returns zero (carry on matching) by default.
+
+     Inserting callouts may be helpful  when  using  pcretest  to
+     check  complicated regular expressions. For further informa-
+     tion about callouts, see the pcrecallout documentation.
+
+     For testing the PCRE library, additional control of  callout
+     behaviour  is available via escape sequences in the data, as
+     described in the following section.  In  particular,  it  is
+     possible to pass in a number as callout data (the default is
+     zero). If the callout function receives a  non-zero  number,
+     it returns that value instead of zero.
 
 
 DATA LINES
+
      Before each data line is passed to pcre_exec(), leading  and
      trailing whitespace is removed, and it is then scanned for \
-     escapes. The following are recognized:
+     escapes.  Some  of  these  are  pretty  esoteric   features,
+     intended  for  checking  out  some  of  the more complicated
+     features of PCRE. If you are just testing "ordinary" regular
+     expressions,  you probably don't need any of these. The fol-
+     lowing escapes are recognized:
 
        \a         alarm (= BEL)
        \b         backspace
@@ -209,24 +247,51 @@ DATA LINES
        \v         vertical tab
        \nnn       octal character (up to 3 octal digits)
        \xhh       hexadecimal character (up to 2 hex digits)
-       \x{hh...}  hexadecimal UTF-8 character
-
+       \x{hh...}  hexadecimal character, any number of digits
+                    in UTF-8 mode
        \A         pass the PCRE_ANCHORED option to pcre_exec()
        \B         pass the PCRE_NOTBOL option to pcre_exec()
        \Cdd       call pcre_copy_substring() for substring dd
-                     after a successful match (any decimal number
-                     less than 32)
-       \Gdd       call pcre_get_substring() for substring dd
+                    after a successful match (any decimal number
+                    less than 32)
+       \Cname     call pcre_copy_named_substring() for substring
+                    "name" after a successful match (name termin-
+                    ated by next non alphanumeric character)
+       \C+        show the current captured substrings at callout
+                    time
 
-                     after a successful match (any decimal number
-                     less than 32)
+       C-        do not supply a callout function
+       \C!n       return 1 instead of 0 when callout number n is
+                    reached
+       \C!n!m     return 1 instead of 0 when callout number n is
+                    reached for the nth time
+       \C*n       pass the number n (may be negative) as callout
+                    data
+       \Gdd       call pcre_get_substring() for substring dd
+                    after a successful match (any decimal number
+                    less than 32)
+       \Gname     call pcre_get_named_substring() for substring
+                    "name" after a successful match (name termin-
+                    ated by next non-alphanumeric character)
        \L         call pcre_get_substringlist() after a
-                     successful match
+                    successful match
+       \M         discover the minimum MATCH_LIMIT setting
        \N         pass the PCRE_NOTEMPTY option to pcre_exec()
        \Odd       set the size of the output vector passed to
-                     pcre_exec() to dd (any number of decimal
-                     digits)
+                    pcre_exec() to dd (any number of decimal
+                    digits)
        \Z         pass the PCRE_NOTEOL option to pcre_exec()
+
+     If \M is present, pcretest calls pcre_exec() several  times,
+     with  different  values  in  the  match_limit  field  of the
+     pcre_extra data structure, until it finds the minimum number
+     that is needed for pcre_exec() to complete. This number is a
+     measure of the amount of  recursion  and  backtracking  that
+     takes  place,  and  checking  it out can be instructive. For
+     most simple matches, the number is quite small, but for pat-
+     terns  with very large numbers of matching possibilities, it
+     can become large very quickly with increasing length of sub-
+     ject string.
 
      When \O is used, it may be higher or lower than the size set
      by  the  -O  option (or defaulted to 45); \O applies only to
@@ -249,15 +314,15 @@ DATA LINES
      bytes, encoded according to the UTF-8 rules.
 
 
-
 OUTPUT FROM PCRETEST
+
      When a match succeeds, pcretest outputs the list of captured
      substrings  that pcre_exec() returns, starting with number 0
      for the string that matched the whole pattern.  Here  is  an
      example of an interactive pcretest run.
 
        $ pcretest
-       PCRE version 2.06 08-Jun-1999
+       PCRE version 4.00 08-Jan-2003
 
          re> /^abc(\d+)/
        data> abc123
@@ -307,13 +372,11 @@ OUTPUT FROM PCRETEST
      of the \n escape.
 
 
-
 AUTHOR
+
      Philip Hazel <ph10@cam.ac.uk>
      University Computing Service,
-     New Museums Site,
      Cambridge CB2 3QG, England.
-     Phone: +44 1223 334714
 
-     Last updated: 15 August 2001
-     Copyright (c) 1997-2001 University of Cambridge.
+Last updated: 03 February 2003
+Copyright (c) 1997-2003 University of Cambridge.
