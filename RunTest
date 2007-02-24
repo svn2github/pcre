@@ -33,9 +33,9 @@ fi
 
 if [ $do1 = yes ] ; then
   echo "Testing main functionality (Perl compatible)"
-  ./pcretest testinput testtry
+  ./pcretest testinput1 testtry
   if [ $? = 0 ] ; then
-    $cf testtry testoutput
+    $cf testtry testoutput1
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi

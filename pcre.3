@@ -264,14 +264,25 @@ negative numbers:
   PCRE_ERROR_BADMAGIC   the "magic number" was not found
 
 If the \fIoptptr\fR argument is not NULL, a copy of the options with which the
-pattern was compiled is placed in the integer it points to.
+pattern was compiled is placed in the integer it points to. These option bits
+are those specified in the call to \fBpcre_compile()\fR, modified by any
+top-level option settings within the pattern itself, and with the PCRE_ANCHORED
+bit set if the form of the pattern implies that it can match only at the start
+of a subject string.
 
-If the \fIfirstcharptr\fR argument is not NULL, is is used to pass back
-information about the first character of any matched string. If there is a
-fixed first character, e.g. from a pattern such as (cat|cow|coyote), then it is
-returned in the integer pointed to by \fIfirstcharptr\fR. Otherwise, if the
-pattern was compiled with the PCRE_MULTILINE option, and every branch started
-with "^", then -1 is returned, indicating that the pattern will match at the
+If the pattern is not anchored and the \fIfirstcharptr\fR argument is not NULL,
+it is used to pass back information about the first character of any matched
+string. If there is a fixed first character, e.g. from a pattern such as
+(cat|cow|coyote), then it is returned in the integer pointed to by
+\fIfirstcharptr\fR. Otherwise, if either
+
+  (a) the pattern was compiled with the PCRE_MULTILINE option, and every branch
+      starts with "^", or
+
+  (b) every branch of the pattern starts with ".*" and PCRE_DOTALL is not set
+      (if it were set, the pattern would be anchored),
+
+then -1 is returned, indicating that the pattern matches only at the
 start of a subject string or after any "\\n" within the string. Otherwise -2 is
 returned.
 
@@ -1050,9 +1061,15 @@ When a parenthesized subpattern is quantified with a minimum repeat count that
 is greater than 1 or with a limited maximum, more store is required for the
 compiled pattern, in proportion to the size of the minimum or maximum.
 
-If a pattern starts with .* then it is implicitly anchored, since whatever
-follows will be tried against every character position in the subject string.
-PCRE treats this as though it were preceded by \\A.
+If a pattern starts with .* or .{0,} and the PCRE_DOTALL option (equivalent
+to Perl's /s) is set, thus allowing the . to match newlines, then the pattern
+is implicitly anchored, because whatever follows will be tried against every
+character position in the subject string, so there is no point in retrying the
+overall match at any position after the first. PCRE treats such a pattern as
+though it were preceded by \\A. In cases where it is known that the subject
+string contains no newlines, it is worth setting PCRE_DOTALL when the pattern
+begins with .* in order to obtain this optimization, or alternatively using ^
+to indicate anchoring explicitly.
 
 When a capturing subpattern is repeated, the value captured is the substring
 that matched the final iteration. For example, after
@@ -1262,7 +1279,7 @@ proceeds from left to right, PCRE will look for each "a" in the subject and
 then see if what follows matches the rest of the pattern. If the pattern is
 specified as
 
-  .*abcd$
+  ^.*abcd$
 
 then the initial .* matches the entire string at first, but when this fails, it
 backtracks to match all but the last character, then all but the last two
@@ -1270,7 +1287,7 @@ characters, and so on. Once again the search for "a" covers the entire string,
 from right to left, so we are no better off. However, if the pattern is written
 as
 
-  (?>.*)(?<=abcd)
+  ^(?>.*)(?<=abcd)
 
 then there can be no backtracking for the .* item; it can match only the entire
 string. The subsequent lookbehind assertion does a single test on the last four
@@ -1344,6 +1361,23 @@ required behaviour is usually the most efficient. Jeffrey Friedl's book
 contains a lot of discussion about optimizing regular expressions for efficient
 performance.
 
+When a pattern begins with .* and the PCRE_DOTALL option is set, the pattern is
+implicitly anchored by PCRE, since it can match only at the start of a subject
+string. However, if PCRE_DOTALL is not set, PCRE cannot make this optimization,
+because the . metacharacter does not then match a newline, and if the subject
+string contains newlines, the pattern may match from the character immediately
+following one of them instead of from the very start. For example, the pattern
+
+   (.*) second
+
+matches the subject "first\\nand second" (where \\n stands for a newline
+character) with the first captured substring being "and". In order to do this,
+PCRE has to retry the match starting after every newline in the subject.
+
+If you are using such a pattern with subject strings that do not contain
+newlines, the best performance is obtained by setting PCRE_DOTALL, or starting
+the pattern with ^.* to indicate explicit anchoring. That saves PCRE from
+having to scan along the subject looking for a newline to restart at.
 
 .SH AUTHOR
 Philip Hazel <ph10@cam.ac.uk>

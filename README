@@ -41,11 +41,11 @@ The distribution should contain the following files:
   pgrep.1           man page for pgrep
   pgrep.c           source of a grep utility that uses PCRE
   perltest          Perl test program
-  testinput         test data, compatible with Perl 5.004 and 5.005
+  testinput1        test data, compatible with Perl 5.004 and 5.005
   testinput2        test data for error messages and non-Perl things
   testinput3        test data, compatible with Perl 5.005
   testinput4        test data for locale-specific tests
-  testoutput        test results corresponding to testinput
+  testoutput1       test results corresponding to testinput
   testoutput2       test results corresponding to testinput2
   testoutput3       test results corresponding to testinput3
   testoutput4       test results corresponding to testinput4
@@ -314,7 +314,7 @@ The perltest program
 The perltest program tests Perl's regular expressions; it has the same
 specification as pcretest, and so can be given identical input, except that
 input patterns can be followed only by Perl's lower case options. The contents
-of testinput and testinput3 meet this condition.
+of testinput1 and testinput3 meet this condition.
 
 The data lines are processed as Perl strings, so if they contain $ or @
 characters, these have to be escaped. For this reason, all such characters in
@@ -330,4 +330,4 @@ contains malformed regular expressions, in order to check that PCRE diagnoses
 them correctly.
 
 Philip Hazel <ph10@cam.ac.uk>
-February 1999
+April 1999

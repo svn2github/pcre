@@ -2,6 +2,20 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.05 21-Apr-99
+----------------------
+
+1. Changed the type of magic_number from int to long int so that it works
+properly on 16-bit systems.
+
+2. Fixed a bug which caused patterns starting with .* not to work correctly
+when the subject string contained newline characters. PCRE was assuming
+anchoring for such patterns in all cases, which is not correct because .* will
+not pass a newline unless PCRE_DOTALL is set. It now assumes anchoring only if
+DOTALL is set at top level; otherwise it knows that patterns starting with .*
+must be retried after every newline in the subject.
+
+
 Version 2.04 18-Feb-99
 ----------------------
 

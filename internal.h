@@ -3,7 +3,7 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "2.04 19-Feb-1999"
+#define PCRE_VERSION       "2.05 21-Apr-1999"
 
 
 /* This is a library of functions to support regular expressions whose syntax
@@ -92,7 +92,7 @@ time, run time or study time, respectively. */
 
 /* Magic number to provide a small check against being handed junk. */
 
-#define MAGIC_NUMBER  0x50435245   /* 'PCRE' */
+#define MAGIC_NUMBER  0x50435245UL   /* 'PCRE' */
 
 /* Miscellaneous definitions */
 
@@ -262,7 +262,7 @@ typedef unsigned char uschar;
 runs on as long as necessary after the end. */
 
 typedef struct real_pcre {
-  unsigned int  magic_number;
+  unsigned long int magic_number;
   const unsigned char *tables;
   unsigned short int options;
   unsigned char top_bracket;

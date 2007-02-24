@@ -1,4 +1,4 @@
-PCRE version 2.04 19-Feb-1999
+PCRE version 2.05 21-Apr-1999
 
 /(a)b|/
 Identifying subpattern count = 1
@@ -106,13 +106,13 @@ Failed: unrecognized character after (? at offset 2
 
 /.*b/
 Identifying subpattern count = 0
-Options: anchored
-No first char
+No options
+First char at start or follows \n
 
 /.*?b/
 Identifying subpattern count = 0
-Options: anchored
-No first char
+No options
+First char at start or follows \n
 
 /cat|dog|elephant/
 Identifying subpattern count = 0
@@ -299,8 +299,8 @@ No first char
 
 /.*((abc)$|(def))/
 Identifying subpattern count = 3
-Options: anchored
-No first char
+No options
+First char at start or follows \n
     defabc
  0: defabc
  1: abc
@@ -679,8 +679,8 @@ No first char
 
 /(?>.*)(?<=(abcd)|(xyz))/
 Identifying subpattern count = 2
-Options: anchored
-No first char
+No options
+First char at start or follows \n
     alphabetabcd
  0: alphabetabcd
  1: abcd
@@ -985,6 +985,101 @@ Memory allocation request: 441 (code space 428)
 Identifying subpattern count = 8
 No options
 First char = 'w'
+
+/.*X/D
+------------------------------------------------------------------
+  0   8 Bra 0
+  3     Any*
+  5   1 X
+  8   8 Ket
+ 11     End
+------------------------------------------------------------------
+Identifying subpattern count = 0
+No options
+First char at start or follows \n
+
+/.*X/Ds
+------------------------------------------------------------------
+  0   8 Bra 0
+  3     Any*
+  5   1 X
+  8   8 Ket
+ 11     End
+------------------------------------------------------------------
+Identifying subpattern count = 0
+Options: anchored dotall
+No first char
+
+/(.*X|^B)/D
+------------------------------------------------------------------
+  0  21 Bra 0
+  3   8 Bra 1
+  6     Any*
+  8   1 X
+ 11   7 Alt
+ 14     ^
+ 15   1 B
+ 18  15 Ket
+ 21  21 Ket
+ 24     End
+------------------------------------------------------------------
+Identifying subpattern count = 1
+No options
+First char at start or follows \n
+
+/(.*X|^B)/Ds
+------------------------------------------------------------------
+  0  21 Bra 0
+  3   8 Bra 1
+  6     Any*
+  8   1 X
+ 11   7 Alt
+ 14     ^
+ 15   1 B
+ 18  15 Ket
+ 21  21 Ket
+ 24     End
+------------------------------------------------------------------
+Identifying subpattern count = 1
+Options: anchored dotall
+No first char
+    
+/(?s)(.*X|^B)/D
+------------------------------------------------------------------
+  0  21 Bra 0
+  3   8 Bra 1
+  6     Any*
+  8   1 X
+ 11   7 Alt
+ 14     ^
+ 15   1 B
+ 18  15 Ket
+ 21  21 Ket
+ 24     End
+------------------------------------------------------------------
+Identifying subpattern count = 1
+Options: anchored dotall
+No first char
+
+/(?s:.*X|^B)/D
+------------------------------------------------------------------
+  0  27 Bra 0
+  3  10 Bra 0
+  6  04 Opt
+  8     Any*
+ 10   1 X
+ 13   9 Alt
+ 16  04 Opt
+ 18     ^
+ 19   1 B
+ 22  19 Ket
+ 25  00 Opt
+ 27  27 Ket
+ 30     End
+------------------------------------------------------------------
+Identifying subpattern count = 0
+No options
+First char at start or follows \n
 
 / End of test input /
 Identifying subpattern count = 0

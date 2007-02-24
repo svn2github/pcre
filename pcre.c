@@ -1817,9 +1817,9 @@ all of whose alternatives start with OP_SOD or OP_CIRC (recurse ad lib), then
 it's anchored. However, if this is a multiline pattern, then only OP_SOD
 counts, since OP_CIRC can match in the middle.
 
-A branch is also implicitly anchored if it starts with .* because that will try
-the rest of the pattern at all possible matching points, so there is no point
-trying them again.
+A branch is also implicitly anchored if it starts with .* and DOTALL is set,
+because that will try the rest of the pattern at all possible matching points,
+so there is no point trying them again.
 
 Arguments:
   code       points to start of expression (the bracket)
@@ -1837,7 +1837,8 @@ do {
    register int op = *scode;
    if (op >= OP_BRA || op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
      { if (!is_anchored(scode, options)) return FALSE; }
-   else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR)
+   else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR) &&
+            (*options & PCRE_DOTALL) != 0)
      { if (scode[1] != OP_ANY) return FALSE; }
    else if (op != OP_SOD &&
            ((*options & PCRE_MULTILINE) != 0 || op != OP_CIRC))
@@ -1851,11 +1852,13 @@ return TRUE;
 
 
 /*************************************************
-*     Check for start with \n line expression    *
+*         Check for starting with ^ or .*        *
 *************************************************/
 
-/* This is called for multiline expressions to try to find out if every branch
-starts with ^ so that "first char" processing can be done to speed things up.
+/* This is called to find out if every branch starts with ^ or .* so that
+"first char" processing can be done to speed things up in multiline
+matching and for non-DOTALL patterns that start with .* (which must start at
+the beginning or after \n).
 
 Argument:  points to start of expression (the bracket)
 Returns:   TRUE or FALSE
@@ -1869,6 +1872,8 @@ do {
    register int op = *scode;
    if (op >= OP_BRA || op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
      { if (!is_startline(scode)) return FALSE; }
+   else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR)
+     { if (scode[1] != OP_ANY) return FALSE; }
    else if (op != OP_CIRC) return FALSE;
    code += (code[1] << 8) + code[2];
    }
@@ -2546,11 +2551,15 @@ if (*errorptr != NULL)
   return NULL;
   }
 
-/* If the anchored option was not passed, set flag if we can determine that it
-is anchored by virtue of ^ characters or \A or anything else. Otherwise, see if
-we can determine what the first character has to be, because that speeds up
-unanchored matches no end. In the case of multiline matches, an alternative is
-to set the PCRE_STARTLINE flag if all branches start with ^. */
+/* If the anchored option was not passed, set flag if we can determine that the
+pattern is anchored by virtue of ^ characters or \A or anything else (such as
+starting with .* when DOTALL is set).
+
+Otherwise, see if we can determine what the first character has to be, because
+that speeds up unanchored matches no end. If not, see if we can set the
+PCRE_STARTLINE flag. This is helpful for multiline matches when all branches
+start with ^. and also when all branches start with .* for non-DOTALL matches.
+*/
 
 if ((options & PCRE_ANCHORED) == 0)
   {
