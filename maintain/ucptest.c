@@ -5,16 +5,16 @@
 /* Copyright (c) University of Cambridge 2006 */
 
 /* Compile thus:
-   gcc -o ucptest maintain/ucptest.c pcre_ucp_searchfuncs.c
+   gcc -o ucptest ucptest.c ../pcre_ucp_searchfuncs.c
 */
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pcre_internal.h"
-#include "ucp.h"
-#include "ucpinternal.h"
+#include "../pcre_internal.h"
+#include "../ucp.h"
+#include "../ucpinternal.h"
 
 
 /* -------------------------------------------------------------------*/

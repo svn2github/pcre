@@ -10,9 +10,9 @@ libtoolize -c -f
 
 autoconf -f -W all,no-obsolete
 
-automake -a -c -f -W all
-
 autoheader -f -W all
+
+automake -a -c -f -W all
 
 rm -rf autom4te.cache
 

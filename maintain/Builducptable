@@ -1,9 +1,9 @@
 #! /usr/bin/perl -w
 
-# This is a Perl script to create the table of character properties. For 
-# information on the format, see ucpinternal.h. The Unicode files are
-# expected to be in maintain/Unicode.tables/{Scripts,UnicodeData}.txt. The
-# ucp.h file is also required. The table is written to the standard output.
+# This is a Perl script to create the table of character properties. For
+# information on the format, see ucpinternal.h. The Unicode files are expected
+# to be in Unicode.tables/{Scripts,UnicodeData}.txt. The ../ucp.h file is also
+# required. The table is written to the standard output.
 
 # The script is rather slow because it just searches linearly through the
 # Scripts data in order to find the script for each character or character
@@ -98,7 +98,7 @@ close(IN);
 # Now read the ucp.h file to get the values for the general categories
 # and for the scripts.
 
-open(IN, "ucp.h") || die "Can't open ucp.h: $!\n";
+open(IN, "../ucp.h") || die "Can't open ../ucp.h: $!\n";
 
 while (<IN>) { last if /^enum/; }
 while (<IN>) { last if /^enum/; }

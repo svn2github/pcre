@@ -2,8 +2,8 @@ dnl Process this file with autoconf to produce a configure script.
 
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [1])
-m4_define(pcre_prerelease, [-RC0])
-m4_define(pcre_date, [2006-12-18])
+m4_define(pcre_prerelease, [-RC1])
+m4_define(pcre_date, [2007-03-05])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])

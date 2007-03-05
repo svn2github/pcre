@@ -53,9 +53,9 @@ cannot run ./configure. As it now stands, this file need not be edited in that
 circumstance. */
 
 #define PCRE_MAJOR          7
-#define PCRE_MINOR          0
-#define PCRE_PRERELEASE
-#define PCRE_DATE           18-Dec-2006
+#define PCRE_MINOR          1
+#define PCRE_PRERELEASE     -RC1
+#define PCRE_DATE           2007-03-05
 
 /* Win32 uses DLL by default; it needs special stuff for exported functions
 when building PCRE. */

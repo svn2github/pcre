@@ -1,7 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 
 dist_doc_DATA = \
-  doc/Tech.Notes \
   doc/pcre.txt \
   doc/pcregrep.txt \
   doc/pcretest.txt \

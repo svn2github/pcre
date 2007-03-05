@@ -1,6 +1,13 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.1 05-Mar-07
+---------------------
+
+ 1. Applied Bob Rossi and Daniel G's patches to convert the build system to one 
+    that is more "standard", making use of automake and other autotools. 
+
+
 Version 7.0 19-Dec-06
 ---------------------
 
