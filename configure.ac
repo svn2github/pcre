@@ -1,311 +1,428 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl This configure.in file has been hacked around quite a lot as a result of
-dnl patches that various people have sent to me (PH). Sometimes the information
-dnl I get is contradictory. I've tried to put in comments that explain things,
-dnl but in some cases the information is second-hand and I have no way of
-dnl verifying it. I am not an autoconf or libtool expert!
+m4_define(pcre_major, [7])
+m4_define(pcre_minor, [1])
+m4_define(pcre_prerelease, [-RC0])
+m4_define(pcre_date, [2006-12-18])
 
-dnl This is required at the start; the name is the name of a file
-dnl it should be seeing, to verify it is in the same directory.
-
-AC_INIT(dftables.c)
-AC_CONFIG_SRCDIR([pcre.h])
-
-dnl A safety precaution
+# Libtool shared library interface versions (current:revision:age)
+m4_define(libpcre_version, [0:1:0])
+m4_define(libpcreposix_version, [0:0:0])
+m4_define(libpcrecpp_version, [0:0:0])
 
 AC_PREREQ(2.57)
-
-dnl Arrange to build config.h from config.h.in.
-dnl Manual says this macro should come right after AC_INIT.
-AC_CONFIG_HEADER(config.h)
-
-dnl Default values for miscellaneous macros
-
-POSIX_MALLOC_THRESHOLD=-DPOSIX_MALLOC_THRESHOLD=10
-
-dnl Provide versioning information for libtool shared libraries that
-dnl are built by default on Unix systems.
-
-PCRE_LIB_VERSION=0:1:0
-PCRE_POSIXLIB_VERSION=0:0:0
-PCRE_CPPLIB_VERSION=0:0:0
-
-dnl Find the PCRE version from the pcre.h file. The PCRE_VERSION variable is
-dnl substituted in pcre-config.in.
-
-PCRE_MAJOR=`grep '#define PCRE_MAJOR' ${srcdir}/pcre.h | cut -c 29-`
-PCRE_MINOR=`grep '#define PCRE_MINOR' ${srcdir}/pcre.h | cut -c 29-`
-PCRE_PRERELEASE=`grep '#define PCRE_PRERELEASE' ${srcdir}/pcre.h | cut -c 29-`
-PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}${PCRE_PRERELEASE}
-
-dnl Handle --disable-cpp
-
-AC_ARG_ENABLE(cpp,
-[  --disable-cpp           disable C++ support],
-want_cpp="$enableval", want_cpp=yes)
-
-dnl Checks for programs.
-
+AC_INIT(PCRE, pcre_major.pcre_minor[]pcre_prerelease, , pcre)
+AC_CONFIG_SRCDIR([pcre.h.in])
+AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
+AC_CONFIG_HEADERS(config.h)
 AC_PROG_CC
-
-dnl Test for C++ for the C++ wrapper libpcrecpp. It seems, however, that
-dnl AC_PROC_CXX will set $CXX to "g++" when no C++ compiler is installed, even
-dnl though that is completely bogus. (This may happen only on certain systems
-dnl with certain versions of autoconf, of course.) An attempt to include this
-dnl test inside a check for want_cpp was criticized by a libtool expert, who
-dnl tells me that it isn't allowed.
-
 AC_PROG_CXX
-
-dnl The icc compiler has the same options as gcc, so let the rest of the
-dnl configure script think it has gcc when setting up dnl options etc.
-dnl This is a nasty hack which no longer seems necessary with the update
-dnl to the latest libtool files, so I have commented it out.
-dnl
-dnl if test "$CC" = "icc" ; then GCC=yes ; fi
-
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-dnl We need to find a compiler for compiling a program to run on the local host
-dnl while building. It needs to be different from CC when cross-compiling.
-dnl There is a macro called AC_PROG_CC_FOR_BUILD in the GNU archive for
-dnl figuring this out automatically. Unfortunately, it does not work with the
-dnl latest versions of autoconf. So for the moment, we just default to the
-dnl same values as the "main" compiler. People who are cross-compiling will
-dnl just have to adjust the Makefile by hand or set these values when they
-dnl run "configure".
+PCRE_MAJOR="pcre_major"
+PCRE_MINOR="pcre_minor"
+PCRE_PRERELEASE="pcre_prerelease"
+PCRE_DATE="pcre_date"
 
-CC_FOR_BUILD=${CC_FOR_BUILD:-'$(CC)'}
-CXX_FOR_BUILD=${CXX_FOR_BUILD:-'$(CXX)'}
-CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD:-'$(CFLAGS)'}
-CPPFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD:-'$(CPPFLAGS)'}
-CXXFLAGS_FOR_BUILD=${CXXFLAGS_FOR_BUILD:-'$(CXXFLAGS)'}
-BUILD_EXEEXT=${BUILD_EXEEXT:-'$(EXEEXT)'}
-BUILD_OBJEXT=${BUILD_OBJEXT:-'$(OBJEXT)'}
+AC_SUBST(PCRE_MAJOR)
+AC_SUBST(PCRE_MINOR)
+AC_SUBST(PCRE_PRERELEASE)
+AC_SUBST(PCRE_DATE)
 
-dnl Checks for header files.
-
-AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h)
-
-dnl The files below are C++ header files. One person told me (PH) that
-dnl AC_LANG_CPLUSPLUS unsets CXX if it was explicitly set to something which
-dnl doesn't work. However, this doesn't always seem to be the case.
-
-if test "x$want_cpp" = "xyes" -a -n "$CXX"
+# Set a more sensible default value for $(htmldir).
+if test "x$htmldir" = 'x${docdir}'
 then
-AC_LANG_SAVE
-AC_LANG_CPLUSPLUS
+  htmldir='${docdir}/html'
+fi
 
-dnl We could be more clever here, given we're doing AC_SUBST with this
-dnl (eg set a var to be the name of the include file we want).  But we're not
-dnl so it's easy to change back to 'regular' autoconf vars if we needed to.
+# Handle --disable-cpp
+AC_ARG_ENABLE(cpp,
+              AS_HELP_STRING([--disable-cpp],
+                             [disable C++ support]),
+              , enable_cpp=yes)
+
+# Handle --enable-utf8 (disabled by default)
+AC_ARG_ENABLE(utf8,
+              AS_HELP_STRING([--enable-utf8],
+                             [enable UTF-8 support]),
+              , enable_utf8=unset)
+
+# Handle --enable-unicode-properties
+AC_ARG_ENABLE(unicode-properties,
+              AS_HELP_STRING([--enable-unicode-properties],
+                             [enable Unicode properties support (implies --enable-utf8)]),
+              , enable_unicode_properties=no)
+
+# Handle --enable-newline=NL
+dnl AC_ARG_ENABLE(newline,
+dnl               AS_HELP_STRING([--enable-newline=NL],
+dnl                              [use NL as newline (lf, cr, crlf, any; default=lf)]),
+dnl               , enable_newline=lf)
+
+# Separate newline options
+ac_pcre_newline=lf
+AC_ARG_ENABLE(newline-is-cr,
+              AS_HELP_STRING([--enable-newline-is-cr],
+                             [use CR as newline character]),
+              ac_pcre_newline=cr)
+AC_ARG_ENABLE(newline-is-lf,
+              AS_HELP_STRING([--enable-newline-is-lf],
+                             [use LF as newline character (default)]),
+              ac_pcre_newline=lf)
+AC_ARG_ENABLE(newline-is-crlf,
+              AS_HELP_STRING([--enable-newline-is-crlf],
+                             [use CRLF as newline sequence]),
+              ac_pcre_newline=crlf)
+AC_ARG_ENABLE(newline-is-any,
+              AS_HELP_STRING([--enable-newline-is-any],
+                             [use any valid Unicode newline sequence]),
+              ac_pcre_newline=any)
+enable_newline="$ac_pcre_newline"
+
+# Handle --enable-ebcdic
+AC_ARG_ENABLE(ebcdic,
+              AS_HELP_STRING([--enable-ebcdic],
+                             [assume EBCDIC coding rather than ASCII]),
+              , enable_ebcdic=no)
+
+# Handle --disable-stack-for-recursion
+AC_ARG_ENABLE(stack-for-recursion,
+              AS_HELP_STRING([--disable-stack-for-recursion],
+                             [don't use stack recursion when matching]),
+              , enable_stack_for_recursion=yes)
+
+# Handle --with-posix-malloc-threshold=NBYTES
+AC_ARG_WITH(posix-malloc-threshold,
+            AS_HELP_STRING([--with-posix-malloc-threshold=NBYTES],
+                           [threshold for POSIX malloc usage (default=10)]),
+            , with_posix_malloc_threshold=10)
+
+# Handle --with-link-size=N
+AC_ARG_WITH(link-size,
+            AS_HELP_STRING([--with-link-size=N],
+                           [internal link size (2, 3, or 4 allowed; default=2)]),
+            , with_link_size=2)
+
+# Handle --with-match-limit=N
+AC_ARG_WITH(match-limit,
+            AS_HELP_STRING([--with-match-limit=N],
+                           [default limit on internal looping (default=10000000)]),
+            , with_match_limit=10000000)
+
+# Handle --with-match-limit_recursion=N
+#
+# Note: In config.h, the default is to define MATCH_LIMIT_RECURSION
+# symbolically as MATCH_LIMIT, which in turn is defined to be some numeric
+# value (e.g. 10000000). MATCH_LIMIT_RECURSION can otherwise be set to some
+# different numeric value (or even the same numeric value as MATCH_LIMIT,
+# though no longer defined in terms of the latter).
+#
+AC_ARG_WITH(match-limit-recursion,
+            AS_HELP_STRING([--with-match-limit-recursion=N],
+                           [default limit on internal recursion (default=MATCH_LIMIT)]),
+            , with_match_limit_recursion=MATCH_LIMIT)
+
+# Make sure that if enable_unicode_properties was set, that UTF-8 support
+# is enabled.
+#
+if test "x$enable_unicode_properties" = "xyes"
+then
+  if test "x$enable_utf8" = "xno"
+  then
+    AC_MSG_ERROR([support for Unicode properties requires UTF-8 support])
+  fi
+  enable_utf8=yes
+fi
+
+if test "x$enable_utf8" = "xunset"
+then
+  enable_utf8=no
+fi
+
+# Convert the newline identifier into the appropriate integer value.
+case "$enable_newline" in
+  lf)   ac_pcre_newline_value=10   ;;
+  cr)   ac_pcre_newline_value=13   ;;
+  crlf) ac_pcre_newline_value=3338 ;;
+  any)  ac_pcre_newline_value=-1   ;;
+  *)
+  AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
+  ;;
+esac
+
+# Check argument to --with-link-size
+case "$with_link_size" in
+  2|3|4) ;;
+  *)
+  AC_MSG_ERROR([invalid argument \"$with_link_size\" to --with-link-size option])
+  ;;
+esac
+
+AH_TOP([
+/* On Unix-like systems config.in is converted by "configure" into
+config.h.  Some other environments also support the use of "configure".
+PCRE is written in Standard C, but there are a few non-standard things
+it can cope with, allowing it to run on SunOS4 and other "close to
+standard" systems.
+
+On a non-Unix-like system you should just copy this file into config.h,
+and set up the macros the way you need them.  You should normally change
+the definitions of HAVE_STRERROR and HAVE_MEMMOVE to 1.  Unfortunately,
+because of the way autoconf works, these cannot be made the defaults.
+If your system has bcopy() and not memmove(), change the definition of
+HAVE_BCOPY instead of HAVE_MEMMOVE.  If your system has neither bcopy()
+nor memmove(), leave them both as 0; an emulation function will be
+used. */])
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h windows.h)
+
+# The files below are C++ header files.
+pcre_have_type_traits="0"
+pcre_have_bits_type_traits="0"
+if test "x$enable_cpp" = "xyes" -a -n "$CXX"
+then
+AC_LANG_PUSH(C++)
+
+# We could be more clever here, given we're doing AC_SUBST with this
+# (eg set a var to be the name of the include file we want).  But we're not
+# so it's easy to change back to 'regular' autoconf vars if we needed to.
 AC_CHECK_HEADERS(string, [pcre_have_cpp_headers="1"],
                          [pcre_have_cpp_headers="0"])
 AC_CHECK_HEADERS(bits/type_traits.h, [pcre_have_bits_type_traits="1"],
                                      [pcre_have_bits_type_traits="0"])
 AC_CHECK_HEADERS(type_traits.h, [pcre_have_type_traits="1"],
                                 [pcre_have_type_traits="0"])
-dnl Using AC_SUBST eliminates the need to include config.h in a public .h file
-AC_SUBST(pcre_have_bits_type_traits)
+AC_LANG_POP
+fi
+# Using AC_SUBST eliminates the need to include config.h in a public .h file
 AC_SUBST(pcre_have_type_traits)
-AC_LANG_RESTORE
-fi
+AC_SUBST(pcre_have_bits_type_traits)
 
-dnl From the above, we now have enough info to know if C++ is fully installed
-if test "x$want_cpp" = "xyes" -a -n "$CXX" -a "$pcre_have_cpp_headers" = 1; then
-  MAYBE_CPP_TARGETS='$(CPP_TARGETS)'
-  HAVE_CPP=
-else
-  MAYBE_CPP_TARGETS=
-  HAVE_CPP="#"
-fi
-AC_SUBST(MAYBE_CPP_TARGETS)
-AC_SUBST(HAVE_CPP)
+# Conditional compilation
+AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
 
-dnl Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs, structures, and compiler characteristics.
 
 AC_C_CONST
 AC_TYPE_SIZE_T
 
-AC_CHECK_TYPES([long long], [pcre_have_long_long="1"], [pcre_have_long_long="0"])
-AC_CHECK_TYPES([unsigned long long], [pcre_have_ulong_long="1"], [pcre_have_ulong_long="0"])
+AC_CHECK_TYPES([long long],
+               [pcre_have_long_long="1"],
+               [pcre_have_long_long="0"])
+AC_CHECK_TYPES([unsigned long long],
+               [pcre_have_ulong_long="1"],
+               [pcre_have_ulong_long="0"])
 AC_SUBST(pcre_have_long_long)
 AC_SUBST(pcre_have_ulong_long)
 
-dnl Checks for library functions.
+# Checks for library functions.
 
 AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll)
 
-dnl Handle --enable-utf8
-
-AC_ARG_ENABLE(utf8,
-[  --enable-utf8           enable UTF8 support],
-if test "$enableval" = "yes"; then
-  UTF8=-DSUPPORT_UTF8
-fi
-)
-
-dnl Handle --enable-unicode-properties
-
-AC_ARG_ENABLE(unicode-properties,
-[  --enable-unicode-properties  enable Unicode properties support],
-if test "$enableval" = "yes"; then
-  UCP=-DSUPPORT_UCP
-fi
-)
-
-dnl Handle --enable-newline-is-cr
-
-AC_ARG_ENABLE(newline-is-cr,
-[  --enable-newline-is-cr  use CR as the newline character],
-if test "$enableval" = "yes"; then
-  NEWLINE=-DNEWLINE=13
-fi
-)
-
-dnl Handle --enable-newline-is-lf
-
-AC_ARG_ENABLE(newline-is-lf,
-[  --enable-newline-is-lf  use LF as the newline character],
-if test "$enableval" = "yes"; then
-  NEWLINE=-DNEWLINE=10
-fi
-)
-
-dnl Handle --enable-newline-is-crlf
-
-AC_ARG_ENABLE(newline-is-crlf,
-[  --enable-newline-is-crlf  use CRLF as the newline sequence],
-if test "$enableval" = "yes"; then
-  NEWLINE=-DNEWLINE=3338
-fi
-)
-
-dnl Handle --enable-newline-is-any
-
-AC_ARG_ENABLE(newline-is-any,
-[  --enable-newline-is-any  use any Unicode newline sequence],
-if test "$enableval" = "yes"; then
-  NEWLINE=-DNEWLINE=-1
-fi
-)
-
-dnl Handle --enable-ebcdic
-
-AC_ARG_ENABLE(ebcdic,
-[  --enable-ebcdic         assume EBCDIC coding rather than ASCII],
-if test "$enableval" = "yes"; then
-  EBCDIC=-DEBCDIC=1
-fi
-)
-
-dnl Handle --disable-stack-for-recursion
-
-AC_ARG_ENABLE(stack-for-recursion,
-[  --disable-stack-for-recursion  disable use of stack recursion when matching],
-if test "$enableval" = "no"; then
-  NO_RECURSE=-DNO_RECURSE
-fi
-)
-
-dnl There doesn't seem to be a straightforward way of having parameters
-dnl that set values, other than fudging the --with thing. So that's what
-dnl I've done.
-
-dnl Handle --with-posix-malloc-threshold=n
-
-AC_ARG_WITH(posix-malloc-threshold,
-[  --with-posix-malloc-threshold=10  threshold for POSIX malloc usage],
-  POSIX_MALLOC_THRESHOLD=-DPOSIX_MALLOC_THRESHOLD=$withval
-)
-
-dnl Handle --with-link-size=n
-
-AC_ARG_WITH(link-size,
-[  --with-link-size=2    internal link size (2, 3, or 4 allowed)],
-  LINK_SIZE=-DLINK_SIZE=$withval
-)
-
-dnl Handle --with-match-limit=n
-
-AC_ARG_WITH(match-limit,
-[  --with-match-limit=10000000  default limit on internal looping],
-  MATCH_LIMIT=-DMATCH_LIMIT=$withval
-)
-
-dnl Handle --with-match-limit_recursion=n
-
-AC_ARG_WITH(match-limit-recursion,
-[  --with-match-limit-recursion=10000000  default limit on internal recursion],
-  MATCH_LIMIT_RECURSION=-DMATCH_LIMIT_RECURSION=$withval
-)
-
-dnl Unicode character property support implies UTF-8 support
-
-if test "$UCP" != "" ; then
-  UTF8=-DSUPPORT_UTF8
-fi
-
-dnl "Export" these variables
-
-AC_SUBST(BUILD_EXEEXT)
-AC_SUBST(BUILD_OBJEXT)
-AC_SUBST(CC_FOR_BUILD)
-AC_SUBST(CXX_FOR_BUILD)
-AC_SUBST(CFLAGS_FOR_BUILD)
-AC_SUBST(CXXFLAGS_FOR_BUILD)
-AC_SUBST(CXXLDFLAGS)
-AC_SUBST(EBCDIC)
-AC_SUBST(HAVE_MEMMOVE)
-AC_SUBST(HAVE_STRERROR)
-AC_SUBST(LINK_SIZE)
-AC_SUBST(MATCH_LIMIT)
-AC_SUBST(MATCH_LIMIT_RECURSION)
-AC_SUBST(NEWLINE)
-AC_SUBST(NO_RECURSE)
-AC_SUBST(PCRE_LIB_VERSION)
-AC_SUBST(PCRE_POSIXLIB_VERSION)
-AC_SUBST(PCRE_CPPLIB_VERSION)
-AC_SUBST(PCRE_VERSION)
-AC_SUBST(POSIX_MALLOC_THRESHOLD)
-AC_SUBST(UCP)
-AC_SUBST(UTF8)
-
-dnl Stuff to make MinGW work better. Special treatment is no longer
-dnl needed for Cygwin.
-
-case $host_os in
-mingw* )
-    POSIX_OBJ=pcreposix.o
-    POSIX_LOBJ=pcreposix.lo
-    POSIX_LIB=
-    ON_WINDOWS=
-    NOT_ON_WINDOWS="#"
-    WIN_PREFIX=
-    ;;
-* )
-    ON_WINDOWS="#"
-    NOT_ON_WINDOWS=
-    POSIX_OBJ=
-    POSIX_LOBJ=
-    POSIX_LIB=libpcreposix.la
-    WIN_PREFIX=
-    ;;
-esac
-AC_SUBST(WIN_PREFIX)
-AC_SUBST(ON_WINDOWS)
-AC_SUBST(NOT_ON_WINDOWS)
-AC_SUBST(POSIX_OBJ)
-AC_SUBST(POSIX_LOBJ)
-AC_SUBST(POSIX_LIB)
+# This facilitates -ansi builds under Linux
+dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 
 if test "x$enable_shared" = "xno" ; then
-    AC_DEFINE([PCRE_STATIC],[1],[to link statically])
+  AC_DEFINE([PCRE_STATIC], [1], [
+    Define if linking statically (TODO: make nice with Libtool)])
 fi
 
-dnl This must be last; it determines what files are written as well as config.h
-AC_OUTPUT(Makefile pcre-config:pcre-config.in libpcre.pc:libpcre.pc.in libpcrecpp.pc:libpcrecpp.pc.in pcrecpparg.h:pcrecpparg.h.in pcre_stringpiece.h:pcre_stringpiece.h.in RunGrepTest:RunGrepTest.in RunTest:RunTest.in,[chmod a+x RunTest RunGrepTest pcre-config])
+# Here is where pcre specific defines are handled
+
+if test "$enable_utf8" = "yes"; then
+  AC_DEFINE([SUPPORT_UTF8], [], [
+    Define to enable support for the UTF-8 Unicode encoding.])
+fi
+
+if test "$enable_unicode_properties" = "yes"; then
+  AC_DEFINE([SUPPORT_UCP], [], [
+    Define to enable support for Unicode properties])
+fi
+
+if test "$enable_stack_for_recursion" = "no"; then
+  AC_DEFINE([NO_RECURSE], [], [
+    PCRE uses recursive function calls to handle backtracking while
+    matching.  This can sometimes be a problem on systems that have
+    stacks of limited size.  Define NO_RECURSE to get a version that
+    doesn't use recursion in the match() function; instead it creates
+    its own stack by steam using pcre_recurse_malloc() to obtain memory
+    from the heap. For more detail, see the comments and other stuff
+    just above the match() function. On systems that support it,
+    "configure" can be used to set this in the Makefile
+    (use --disable-stack-for-recursion).])
+fi
+
+AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
+  The value of NEWLINE determines the newline character. The default is
+  to leave it up to the compiler, but some sites want to force a
+  particular value.  On Unix-like systems, "configure" can be used to
+  override this default.])
+
+AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
+  The value of LINK_SIZE determines the number of bytes used to store
+  links as offsets within the compiled regex. The default is 2, which
+  allows for compiled patterns up to 64K long. This covers the vast
+  majority of cases. However, PCRE can also be compiled to use 3 or 4
+  bytes instead. This allows for longer patterns in extreme cases. On
+  systems that support it, "configure" can be used to override this default.])
+
+AC_DEFINE_UNQUOTED([POSIX_MALLOC_THRESHOLD], [$with_posix_malloc_threshold], [
+  When calling PCRE via the POSIX interface, additional working storage
+  is required for holding the pointers to capturing substrings because
+  PCRE requires three integers per substring, whereas the POSIX
+  interface provides only two. If the number of expected substrings is
+  small, the wrapper function uses space on the stack, because this is
+  faster than using malloc() for each call. The threshold above which
+  the stack is no longer used is defined by POSIX_MALLOC_THRESHOLD. On
+  systems that support it, "configure" can be used to override this
+  default.])
+
+AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
+  The value of MATCH_LIMIT determines the default number of times the
+  internal match() function can be called during a single execution of
+  pcre_exec().  There is a runtime interface for setting a different
+  limit. The limit exists in order to catch runaway regular
+  expressions that take for ever to determine that they do not match.
+  The default is set very large so that it does not accidentally catch
+  legitimate cases. On systems that support it, "configure" can be
+  used to override this default default.])
+
+AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
+  The above limit applies to all calls of match(), whether or not they
+  increase the recursion depth. In some environments it is desirable
+  to limit the depth of recursive calls of match() more strictly, in
+  order to restrict the maximum amount of stack (or heap, if
+  NO_RECURSE is defined) that is used. The value of
+  MATCH_LIMIT_RECURSION applies only to recursive calls of match(). To
+  have any useful effect, it must be less than the value of
+  MATCH_LIMIT. There is a runtime method for setting a different
+  limit. On systems that support it, "configure" can be used to
+  override this default default.])
+
+AC_DEFINE([MAX_NAME_SIZE], [32], [
+  This limit is parameterized just in case anybody ever wants to
+  change it. Care must be taken if it is increased, because it guards
+  against integer overflow caused by enormously large patterns.])
+
+AC_DEFINE([MAX_NAME_COUNT], [10000], [
+  This limit is parameterized just in case anybody ever wants to
+  change it. Care must be taken if it is increased, because it guards
+  against integer overflow caused by enormously large patterns.])
+
+AC_DEFINE([MAX_DUPLENGTH], [30000], [
+  This limit is parameterized just in case anybody ever wants to
+  change it. Care must be taken if it is increased, because it guards
+  against integer overflow caused by enormously large patterns.])
+
+AH_VERBATIM([PCRE_DATA_SCOPE], [
+/* If you are compiling for a system other than a Unix-like system or
+   Win32, and it needs some magic to be inserted before the definition
+   of a function that is exported by the library, define this macro to
+   contain the relevant magic. If you do not define this macro, it
+   defaults to "extern" for a C compiler and "extern C" for a C++
+   compiler on non-Win32 systems. This macro apears at the start of
+   every exported function that is part of the external API. It does
+   not appear on functions that are "external" in the C sense, but
+   which are internal to the library. */
+#undef PCRE_DATA_SCOPE])
+
+if test "$enable_ebcdic" = "yes"; then
+  AC_DEFINE_UNQUOTED([EBCDIC], [], [
+    If you are compiling for a system that uses EBCDIC instead of ASCII
+    character codes, define this macro as 1. On systems that can use
+    "configure", this can be done via --enable-ebcdic.])
+fi
+
+# Here is where pcre specific substs are handled
+# These 3 are only used by RunTest.in.
+# TODO: remove once RunTest uses pcretest -C instead.
+AC_SUBST(LINK_SIZE, $with_link_size)
+AC_SUBST(UTF8, $enable_utf8)
+AC_SUBST(UCP, $enable_unicode_properties)
+
+# Platform specific issues
+NO_UNDEFINED=
+EXPORT_ALL_SYMBOLS=
+case $host_os in
+  cygwin* | mingw* )
+    if test X"$enable_shared" = Xyes; then
+      NO_UNDEFINED="-no-undefined"
+      EXPORT_ALL_SYMBOLS="-Wl,--export-all-symbols"
+    fi
+    ;;
+esac
+
+# The extra LDFLAGS for each particular library
+# (Note: The libpcre*_version bits are m4 variables, assigned above)
+
+EXTRA_LIBPCRE_LDFLAGS="$NO_UNDEFINED -version-info libpcre_version"
+
+EXTRA_LIBPCREPOSIX_LDFLAGS="$NO_UNDEFINED -version-info libpcreposix_version"
+
+EXTRA_LIBPCRECPP_LDFLAGS="$NO_UNDEFINED $EXPORT_ALL_SYMBOLS -version-info libpcrecpp_version"
+
+AC_SUBST(EXTRA_LIBPCRE_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
+
+# When we run 'make distcheck', use these arguments.
+DISTCHECK_CONFIGURE_FLAGS="--enable-cpp --enable-unicode-properties"
+AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
+
+# Produce these files, in addition to config.h.
+AC_CONFIG_FILES(
+	Makefile
+	RunGrepTest
+	RunTest
+	libpcre.pc
+	libpcrecpp.pc
+	pcre-config
+	pcre.h
+	pcre_stringpiece.h
+	pcrecpparg.h
+)
+
+# Make the generated script files executable.
+AC_CONFIG_COMMANDS([script-chmod], [chmod a+x RunTest RunGrepTest pcre-config])
+
+AC_OUTPUT
+
+# Print out a nice little message after configure is run displaying your
+# chosen options.
+#
+cat <<EOF
+
+$PACKAGE-$VERSION configuration summary:
+
+    Install prefix ......... : ${prefix}
+    C preprocessor ......... : ${CPP}
+    C compiler ............. : ${CC}
+    C++ preprocessor ....... : ${CXXCPP}
+    C++ compiler ........... : ${CXX}
+    Linker ................. : ${LD}
+    C preprocessor flags ... : ${CPPFLAGS}
+    C compiler flags ....... : ${CFLAGS}
+    C++ compiler flags ..... : ${CXXFLAGS}
+    Linker flags ........... : ${LDFLAGS}
+    Extra libraries ........ : ${LIBS}
+
+    Build C++ library ...... : ${enable_cpp}
+    Enable UTF-8 support ... : ${enable_utf8}
+    Unicode properties ..... : ${enable_unicode_properties}
+    Newline char/sequence .. : ${enable_newline}
+    EBCDIC coding .......... : ${enable_ebcdic}
+    Use stack recursion .... : ${enable_stack_for_recursion}
+    POSIX mem threshold .... : ${with_posix_malloc_threshold}
+    Internal link size ..... : ${with_link_size}
+    Match limit ............ : ${with_match_limit}
+    Match limit recursion .. : ${with_match_limit_recursion}
+    Build shared libs ...... : ${enable_shared}
+    Build static libs ...... : ${enable_static}
+
+EOF
+
+dnl end configure.ac

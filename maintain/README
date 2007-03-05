@@ -1,0 +1,48 @@
+The files in the "maintain" directory of the PCRE source contain data, scripts, 
+and programs that are used for the maintenance of PCRE, but do not form part of
+the PCRE distribution tarballs. There are various file names in the scripts and 
+programs; they assume that the pcre directory is current.
+
+132html         A Perl script that converts a .1 or .3 man page into HTML.
+
+Builducptable   A Perl script that creates the contents of the ucptable.h file
+                from two Unicode data files, which themselves are downloaded
+                from the Unicode web site.
+                
+CleanTxt        A Perl script that cleans up the output of "nroff -man" by
+                removing backspaces and other redundant text so as to produce
+                a readable .txt file.
+                
+Detrail         A Perl script that removes trailing spaces from files.
+
+Index.html      A file that is copied as index.html into the doc/html 
+                directory. It works like this so that doc/html can be deleted
+                and re-created from scratch.
+                
+MakeRelease     My script for creating a new release. It processes the 
+                documentation man pages into .text and HTML formats before 
+                creating tarballs.
+                
+Tech.Notes      Some notes about the internals of the PCRE code.   
+               
+Unicode.tables  The files in this directory, Scripts.txt and UnicodeData.txt, 
+                were downloaded from the Unicode web site. They contain 
+                information about Unicode characters and scripts.
+
+ucptest.c       A short C program for testing the Unicode property functions in
+                pcre_ucp_searchfuncs.c, mainly useful after rebuilding the
+                Unicode property table.
+            
+ucptestdata     A directory containing two files, testinput1 and testoutput1,
+                to use in conjunction with the ucptest program.
+            
+utf8.c          A short C program for converting a Unicode code point into a 
+                sequence of bytes in the UTF-8 encoding, and vice versa.
+                
+When there is a new release of Unicode, the files in Unicode.tables must be 
+refreshed from the web site, and the Buildupctable script can then be run to 
+generate a new version of ucptable.h. The ucptest program can be used to check 
+that the resulting table works properly, using the data files in ucptestdata to 
+check a number of test characters. 
+             
+**** 

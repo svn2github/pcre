@@ -45,7 +45,7 @@ properties. */
 
 #include "ucp.h"               /* Category definitions */
 #include "ucpinternal.h"       /* Internal table details */
-#include "ucptable.c"          /* The table itself */
+#include "ucptable.h"          /* The table itself */
 
 
 /* Table to translate from particular type value to the general value. */

@@ -1,0 +1,205 @@
+#/bin/sh
+
+# Script to make a PCRE release
+
+if [ ! "$1" ]; then
+  echo "*** Version number missing ***"
+  exit 1
+fi
+
+# The name of the release directory
+
+dir=pcre-$1
+
+# But sometimes we just want to process the documentation
+
+if [ "$1" = "doconly" ] ; then
+  doconly=yes
+fi
+
+
+# First, sort out the documentation
+
+cd doc
+echo Processing documentation
+
+# Make Text form of the documentation. It needs some mangling to make it
+# tidy for online reading. Concatenate all the .3 stuff, but omit the
+# individual function pages.
+
+cat <<End >pcre.txt
+-----------------------------------------------------------------------------
+This file contains a concatenation of the PCRE man pages, converted to plain
+text format for ease of searching with a text editor, or for use on systems
+that do not have a man page processor. The small individual files that give
+synopses of each function in the library have not been included. There are
+separate text files for the pcregrep and pcretest commands.
+-----------------------------------------------------------------------------
+
+
+End
+
+echo "Making pcre.txt"
+for file in pcre pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
+            pcrepattern pcrepartial pcreprecompile \
+            pcreperform pcreposix pcrecpp pcresample pcrestack ; do
+  echo "  Processing $file.3"
+  nroff -c -man $file.3 >$file.rawtxt
+  ../maintain/CleanTxt <$file.rawtxt >>pcre.txt
+  /bin/rm $file.rawtxt
+  echo "------------------------------------------------------------------------------" >>pcre.txt
+  if [ "$file" != "pcresample" ] ; then
+    echo " " >>pcre.txt
+    echo " " >>pcre.txt
+  fi
+done
+
+# The two commands
+for file in pcretest pcregrep ; do
+  echo Making $file.txt
+  nroff -c -man $file.1 >$file.rawtxt
+  ../maintain/CleanTxt <$file.rawtxt >$file.txt
+  /bin/rm $file.rawtxt
+done
+
+
+# Make HTML form of the documentation.
+
+/bin/rm html/*
+cp ../maintain/Index.html html/index.html
+
+for file in *.1 ; do
+  base=`basename $file .1`
+  echo Making $base.html
+  ../maintain/132html -toc $base <$file >html/$base.html
+done
+
+# Exclude table of contents for function summaries. It seems that expr
+# forces an anchored regex. Also exclude them for small pages that have
+# only one section.
+for file in *.3 ; do
+  base=`basename $file .3`
+  toc=-toc
+  if [ `expr $base : '.*_'` -ne 0 ] ; then toc="" ; fi
+  if [ "$base" = "pcresample" ] || \
+     [ "$base" = "pcrestack" ]  || \
+     [ "$base" = "pcrecompat" ] || \
+     [ "$base" = "pcreperform" ] ; then
+    toc=""
+  fi
+  echo Making $base.html
+  ../maintain/132html $toc $base <$file >html/$base.html
+done
+
+# End of documentation processing
+
+cd ..
+echo Documentation done
+
+if [ "$doconly" = "yes" ] ; then
+  exit 0
+fi
+
+# These files are detrailed and copied; do not detrail the test data
+# because there may be significant trailing spaces. The configure files
+# are also omitted from the detrailing.
+
+files="Makefile.in configure.ac config.h.in \
+  README LICENCE COPYING AUTHORS NEWS NON-UNIX-USE INSTALL ChangeLog \
+  pcre-config.in \
+  libpcre.pc.in \
+  libpcrecpp.pc.in \
+  pcre_printint.src \
+  pcredemo.c \
+  pcregrep.c \
+  pcretest.c \
+  dftables.c \
+  pcreposix.c \
+  pcreposix.h \
+  pcre.h \
+  pcre_internal.h
+  pcre_compile.c \
+  pcre_config.c \
+  pcre_dfa_exec.c \
+  pcre_exec.c \
+  pcre_fullinfo.c \
+  pcre_get.c \
+  pcre_globals.c \
+  pcre_info.c \
+  pcre_maketables.c \
+  pcre_newline.c \
+  pcre_ord2utf8.c \
+  pcre_refcount.c \
+  pcre_study.c \
+  pcre_tables.c \
+  pcre_try_flipped.c \
+  pcre_ucp_searchfuncs.c \
+  pcre_valid_utf8.c \
+  pcre_version.c \
+  pcre_xclass.c \
+  pcre_scanner.cc \
+  pcre_scanner.h \
+  pcre_scanner_unittest.cc \
+  pcrecpp.cc \
+  pcrecpp.h \
+  pcrecpparg.h.in \
+  pcrecpp_unittest.cc \
+  pcre_stringpiece.cc \
+  pcre_stringpiece.h.in \
+  pcre_stringpiece_unittest.cc \
+  perltest.pl \
+  ucp.h \
+  ucpinternal.h \
+  ucptable.h \
+  makevp.bat \
+  RunTest.bat \
+  pcre.def \
+  libpcre.def \
+  libpcreposix.def"
+
+docfiles="doc/Tech.Notes doc/p*"
+
+echo Detrailing
+./maintain/Detrail $files doc/p* doc/html/*
+
+echo Building release
+echo " "
+
+mkdir Releases/$dir
+mkdir Releases/$dir/doc
+mkdir Releases/$dir/testdata
+
+cp $files RunTest.in RunGrepTest.in configure install-sh mkinstalldirs \
+   config.guess config.sub libpcre.a.dev ltmain.sh Releases/$dir
+cp -r doc/* Releases/$dir/doc
+
+cp testdata/testinput1 testdata/testoutput1 \
+   testdata/testinput2 testdata/testoutput2 \
+   testdata/testinput3 testdata/testoutput3 \
+   testdata/testinput4 testdata/testoutput4 \
+   testdata/testinput5 testdata/testoutput5 \
+   testdata/testinput6 testdata/testoutput6 \
+   testdata/testinput7 testdata/testoutput7 \
+   testdata/testinput8 testdata/testoutput8 \
+   testdata/testinput9 testdata/testoutput9 \
+   testdata/grepinput  testdata/grepinputx  \
+   testdata/greplist   testdata/grepoutput \
+   testdata/grepinput8 testdata/grepoutput8 \
+   Releases/$dir/testdata
+
+# Change the comparison command for testing to the standard one
+
+ne Releases/$dir/RunTest.in -with /dev/null -opt "ge/cf=cf//cf=diff/"
+ne Releases/$dir/RunGrepTest.in -with /dev/null -opt "ge/cf=cf//cf=diff/"
+
+cd Releases
+
+tar cf $dir.tar $dir
+gzip -v --best $dir.tar
+gpg -sb $dir.tar.gz
+
+tar cf $dir.tar $dir
+bzip2 -v -9 $dir.tar
+gpg -sb $dir.tar.bz2
+
+#End

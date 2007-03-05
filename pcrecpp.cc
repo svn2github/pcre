@@ -29,6 +29,10 @@
 //
 // Author: Sanjay Ghemawat
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -37,7 +41,6 @@
 #include <errno.h>
 #include <string>
 #include <algorithm>
-#include "config.h"
 // We need this to compile the proper dll on windows/msys.  This is copied
 // from pcre_internal.h.  It would probably be better just to include that.
 #define PCRE_DEFINITION  /* Win32 __declspec(export) trigger for .dll */

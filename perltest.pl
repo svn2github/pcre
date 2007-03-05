@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#! /usr/bin/env perl
 
 # Program for testing regular expressions with perl to check that PCRE handles
 # them the same. This is the version that supports /8 for UTF-8 testing. As it

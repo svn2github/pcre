@@ -342,8 +342,8 @@ RC=2
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 36 -----------------------------
-./testdata/grepinputx
 ./testdata/grepinput8
+./testdata/grepinputx
 RC=0
 ---------------------------- Test 37 -----------------------------
 aaaaa0

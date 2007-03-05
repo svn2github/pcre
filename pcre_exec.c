@@ -3802,8 +3802,8 @@ md->eptrchain = eptrchain;              /* Make workspace generally available */
 md->lcc = tables + lcc_offset;
 md->ctypes = tables + ctypes_offset;
 
-/* Handle different types of newline. The two bits give four cases. If nothing
-is set at run time, whatever was used at compile time applies. */
+/* Handle different types of newline. The three bits give eight cases. If
+nothing is set at run time, whatever was used at compile time applies. */
 
 switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : options) &
        PCRE_NEWLINE_BITS)

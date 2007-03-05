@@ -2057,7 +2057,7 @@ is not anchored.
 
 Arguments:
   argument_re     points to the compiled expression
-  extra_data      points to extra data or is NULL (not currently used)
+  extra_data      points to extra data or is NULL
   subject         points to the subject string
   length          length of subject string (may contain binary zeros)
   start_offset    where to start in the subject string
@@ -2163,8 +2163,8 @@ md->end_subject = end_subject;
 md->moptions = options;
 md->poptions = re->options;
 
-/* Handle different types of newline. The two bits give four cases. If nothing
-is set at run time, whatever was used at compile time applies. */
+/* Handle different types of newline. The three bits give eight cases. If
+nothing is set at run time, whatever was used at compile time applies. */
 
 switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : options) &
          PCRE_NEWLINE_BITS)

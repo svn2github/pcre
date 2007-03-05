@@ -82,7 +82,7 @@ are simple data values; negative values are for special things like \d and so
 on. Zero means further processing is needed (for things like \x), or the escape
 is invalid. */
 
-#if !EBCDIC   /* This is the "normal" table for ASCII systems */
+#ifndef EBCDIC  /* This is the "normal" table for ASCII systems */
 static const short int escapes[] = {
      0,      0,      0,      0,      0,      0,      0,      0,   /* 0 - 7 */
      0,      0,    ':',    ';',    '<',    '=',    '>',    '?',   /* 8 - ? */
@@ -96,7 +96,7 @@ static const short int escapes[] = {
      0,      0, -ESC_z                                            /* x - z */
 };
 
-#else         /* This is the "abnormal" table for EBCDIC systems */
+#else           /* This is the "abnormal" table for EBCDIC systems */
 static const short int escapes[] = {
 /*  48 */     0,     0,      0,     '.',    '<',   '(',    '+',    '|',
 /*  50 */   '&',     0,      0,       0,      0,     0,      0,      0,
@@ -262,7 +262,7 @@ For convenience, we use the same bit definitions as in chartables:
 
 Then we can use ctype_digit and ctype_xdigit in the code. */
 
-#if !EBCDIC    /* This is the "normal" case, for ASCII systems */
+#ifndef EBCDIC  /* This is the "normal" case, for ASCII systems */
 static const unsigned char digitab[] =
   {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*   0-  7 */
@@ -298,7 +298,7 @@ static const unsigned char digitab[] =
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 240-247 */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};/* 248-255 */
 
-#else          /* This is the "abnormal" case, for EBCDIC systems */
+#else           /* This is the "abnormal" case, for EBCDIC systems */
 static const unsigned char digitab[] =
   {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*   0-  7  0 */
@@ -312,7 +312,7 @@ static const unsigned char digitab[] =
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*    - 71 40 */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  72- |     */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  & - 87 50 */
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  88- ¬     */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  88- 95    */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  - -103 60 */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 104- ?     */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 112-119 70 */
@@ -346,7 +346,7 @@ static const unsigned char ebcdic_chartab[] = { /* chartable partial dup */
   0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*    - 71 */
   0x00,0x00,0x00,0x80,0x00,0x80,0x80,0x80, /*  72- |  */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  & - 87 */
-  0x00,0x00,0x00,0x80,0x80,0x80,0x00,0x00, /*  88- ¬  */
+  0x00,0x00,0x00,0x80,0x80,0x80,0x00,0x00, /*  88- 95 */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /*  - -103 */
   0x00,0x00,0x00,0x00,0x00,0x10,0x00,0x80, /* 104- ?  */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 112-119 */
@@ -421,11 +421,11 @@ if (c == 0) *errorcodeptr = ERR1;
 a table. A non-zero result is something that can be returned immediately.
 Otherwise further processing may be required. */
 
-#if !EBCDIC    /* ASCII coding */
+#ifndef EBCDIC  /* ASCII coding */
 else if (c < '0' || c > 'z') {}                           /* Not alphameric */
 else if ((i = escapes[c - '0']) != 0) c = i;
 
-#else          /* EBCDIC coding */
+#else           /* EBCDIC coding */
 else if (c < 'a' || (ebcdic_chartab[c] & 0x0E) == 0) {}   /* Not alphameric */
 else if ((i = escapes[c - 0x48]) != 0)  c = i;
 #endif
@@ -562,10 +562,10 @@ else
         if (c == 0 && cc == '0') continue;     /* Leading zeroes */
         count++;
 
-#if !EBCDIC    /* ASCII coding */
+#ifndef EBCDIC  /* ASCII coding */
         if (cc >= 'a') cc -= 32;               /* Convert to upper case */
         c = (c << 4) + cc - ((cc < 'A')? '0' : ('A' - 10));
-#else          /* EBCDIC coding */
+#else           /* EBCDIC coding */
         if (cc >= 'a' && cc <= 'z') cc += 64;  /* Convert to upper case */
         c = (c << 4) + cc - ((cc >= '0')? '0' : ('A' - 10));
 #endif
@@ -589,10 +589,10 @@ else
       {
       int cc;                               /* Some compilers don't like ++ */
       cc = *(++ptr);                        /* in initializers */
-#if !EBCDIC    /* ASCII coding */
+#ifndef EBCDIC  /* ASCII coding */
       if (cc >= 'a') cc -= 32;              /* Convert to upper case */
       c = c * 16 + cc - ((cc < 'A')? '0' : ('A' - 10));
-#else          /* EBCDIC coding */
+#else           /* EBCDIC coding */
       if (cc <= 'z') cc += 64;              /* Convert to upper case */
       c = c * 16 + cc - ((cc >= '0')? '0' : ('A' - 10));
 #endif
@@ -611,10 +611,10 @@ else
       return 0;
       }
 
-#if !EBCDIC    /* ASCII coding */
+#ifndef EBCDIC  /* ASCII coding */
     if (c >= 'a' && c <= 'z') c -= 32;
     c ^= 0x40;
-#else          /* EBCDIC coding */
+#else           /* EBCDIC coding */
     if (c >= 'a' && c <= 'z') c += 64;
     c ^= 0xC0;
 #endif

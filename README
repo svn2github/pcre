@@ -452,7 +452,7 @@ The distribution should contain the following files:
   pcre_valid_utf8.c     )
   pcre_version.c        )
   pcre_xclass.c         )
-  ucptable.c            )
+  ucptable.h            )
 
   pcre_printint.src     ) debugging function that is #included in pcretest, and
                         )   can also be #included in pcre_compile()
@@ -504,7 +504,7 @@ The distribution should contain the following files:
   mkinstalldirs         script for making install directories
   pcretest.c            comprehensive test program
   pcredemo.c            simple demonstration of coding calls to PCRE
-  perltest              Perl test program
+  perltest.pl           Perl test program
   pcregrep.c            source of a grep utility that uses PCRE
   pcre-config.in        source of script which retains PCRE information
   pcrecpp_unittest.c           )

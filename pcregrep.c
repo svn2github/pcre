@@ -37,6 +37,10 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <ctype.h>
 #include <locale.h>
 #include <stdio.h>
@@ -48,7 +52,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "pcre.h"
 
 #define FALSE 0
@@ -56,7 +59,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef int BOOL;
 
-#define VERSION "4.4 29-Nov-2006"
 #define MAX_PATTERN_COUNT 100
 
 #if BUFSIZ > 8192
@@ -244,7 +246,7 @@ although at present the only ones are for Unix, Win32, and for "no support". */
 
 /************* Directory scanning in Unix ***********/
 
-#if IS_UNIX
+#if defined HAVE_SYS_STAT_H && defined HAVE_DIRENT_H && defined HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -314,7 +316,7 @@ Lionel Fourquaux. David Burgess added a patch to define INVALID_FILE_ATTRIBUTES
 when it did not exist. */
 
 
-#elif HAVE_WIN32API
+#elif HAVE_WINDOWS_H
 
 #ifndef STRICT
 # define STRICT
@@ -436,8 +438,8 @@ FALSE;
 typedef void directory_type;
 
 int isdirectory(char *filename) { return 0; }
-directory_type * opendirectory(char *filename) {}
-char *readdirectory(directory_type *dir) {}
+directory_type * opendirectory(char *filename) { return (directory_type*)0;}
+char *readdirectory(directory_type *dir) { return (char*)0;}
 void closedirectory(directory_type *dir) {}
 
 
@@ -1328,8 +1330,7 @@ switch(letter)
   case 'x': process_options |= PO_LINE_MATCH; break;
 
   case 'V':
-  fprintf(stderr, "pcregrep version %s using ", VERSION);
-  fprintf(stderr, "PCRE version %s\n", pcre_version());
+  fprintf(stderr, "pcregrep version %s\n", pcre_version());
   exit(0);
   break;
 

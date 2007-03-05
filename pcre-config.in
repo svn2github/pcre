@@ -43,7 +43,7 @@ while test $# -gt 0; do
       echo $exec_prefix
       ;;
     --version)
-      echo @PCRE_VERSION@
+      echo @PACKAGE_VERSION@
       ;;
     --cflags | --cflags-posix)
       if test @includedir@ != /usr/include ; then
