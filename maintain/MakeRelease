@@ -89,6 +89,7 @@ for file in *.3 ; do
   fi
   echo Making $base.html
   ../maintain/132html $toc $base <$file >html/$base.html
+  if [ $? != 0 ] ; then exit 1; fi 
 done
 
 # End of documentation processing

@@ -1,5 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
+dnl NOTE FOR MAINTAINERS: Do not use major or minor version numbers with
+dnl leading zeros, because they may be treated as octal constants. The
+dnl PCRE_PRERELEASE feature is for identifying release candidates. It might
+dnl be defined as -RC2, for example. For real releases, it should be defined
+dnl empty.
+
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [1])
 m4_define(pcre_prerelease, [-RC1])

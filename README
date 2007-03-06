@@ -125,6 +125,12 @@ library. You can read more about them in the pcrebuild man page.
   (the Unix standard). You can specify the default newline indicator by adding
   --newline-is-cr or --newline-is-lf or --newline-is-crlf or --newline-is-any
   to the "configure" command, respectively.
+  
+  If you specify --newline-is-cr or --newline-is-crlf, some of the standard 
+  tests will fail, because the lines in the test files end with LF. Even if 
+  the files are edited to change the line endings, there are likely to be some
+  failures. With --newline-is-any, many tests should succeed, but there may be
+  some failures.
 
 . When called via the POSIX interface, PCRE uses malloc() to get additional
   storage for processing capturing parentheses if there are more than 10 of
@@ -452,7 +458,6 @@ The distribution should contain the following files:
   pcre_valid_utf8.c     )
   pcre_version.c        )
   pcre_xclass.c         )
-  ucptable.h            )
 
   pcre_printint.src     ) debugging function that is #included in pcretest, and
                         )   can also be #included in pcre_compile()
@@ -462,6 +467,7 @@ The distribution should contain the following files:
   pcre_internal.h       header for internal use
   ucp.h                 ) headers concerned with
   ucpinternal.h         )   Unicode property handling
+  ucptable.h            ) (this one is the data table)
   config.in             template for config.h, which is built by configure
 
   pcrecpp.h             the header file for the C++ wrapper
@@ -526,4 +532,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-November 2006
+March 2007

@@ -7,22 +7,18 @@ PCRE - Perl-compatible regular expressions.
 .B #include <pcreposix.h>
 .PP
 .SM
-.br
 .B int regcomp(regex_t *\fIpreg\fP, const char *\fIpattern\fP,
 .ti +5n
 .B int \fIcflags\fP);
 .PP
-.br
 .B int regexec(regex_t *\fIpreg\fP, const char *\fIstring\fP,
 .ti +5n
 .B size_t \fInmatch\fP, regmatch_t \fIpmatch\fP[], int \fIeflags\fP);
 .PP
-.br
 .B size_t regerror(int \fIerrcode\fP, const regex_t *\fIpreg\fP,
 .ti +5n
 .B char *\fIerrbuf\fP, size_t \fIerrbuf_size\fP);
 .PP
-.br
 .B void regfree(regex_t *\fIpreg\fP);
 .
 .SH DESCRIPTION
@@ -214,13 +210,17 @@ memory, after which \fIpreg\fP may no longer be used as a compiled expression.
 .SH AUTHOR
 .rs
 .sp
+.nf
 Philip Hazel
-.br
-University Computing Service,
-.br
+University Computing Service
 Cambridge CB2 3QH, England.
-.P
-.in 0
-Last updated: 16 January 2006
-.br
-Copyright (c) 1997-2006 University of Cambridge.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 06 March 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

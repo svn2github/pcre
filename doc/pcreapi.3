@@ -7,14 +7,12 @@ PCRE - Perl-compatible regular expressions
 .B #include <pcre.h>
 .PP
 .SM
-.br
 .B pcre *pcre_compile(const char *\fIpattern\fP, int \fIoptions\fP,
 .ti +5n
 .B const char **\fIerrptr\fP, int *\fIerroffset\fP,
 .ti +5n
 .B const unsigned char *\fItableptr\fP);
 .PP
-.br
 .B pcre *pcre_compile2(const char *\fIpattern\fP, int \fIoptions\fP,
 .ti +5n
 .B int *\fIerrorcodeptr\fP,
@@ -23,19 +21,16 @@ PCRE - Perl-compatible regular expressions
 .ti +5n
 .B const unsigned char *\fItableptr\fP);
 .PP
-.br
 .B pcre_extra *pcre_study(const pcre *\fIcode\fP, int \fIoptions\fP,
 .ti +5n
 .B const char **\fIerrptr\fP);
 .PP
-.br
 .B int pcre_exec(const pcre *\fIcode\fP, "const pcre_extra *\fIextra\fP,"
 .ti +5n
 .B "const char *\fIsubject\fP," int \fIlength\fP, int \fIstartoffset\fP,
 .ti +5n
 .B int \fIoptions\fP, int *\fIovector\fP, int \fIovecsize\fP);
 .PP
-.br
 .B int pcre_dfa_exec(const pcre *\fIcode\fP, "const pcre_extra *\fIextra\fP,"
 .ti +5n
 .B "const char *\fIsubject\fP," int \fIlength\fP, int \fIstartoffset\fP,
@@ -44,7 +39,6 @@ PCRE - Perl-compatible regular expressions
 .ti +5n
 .B int *\fIworkspace\fP, int \fIwscount\fP);
 .PP
-.br
 .B int pcre_copy_named_substring(const pcre *\fIcode\fP,
 .ti +5n
 .B const char *\fIsubject\fP, int *\fIovector\fP,
@@ -53,14 +47,12 @@ PCRE - Perl-compatible regular expressions
 .ti +5n
 .B char *\fIbuffer\fP, int \fIbuffersize\fP);
 .PP
-.br
 .B int pcre_copy_substring(const char *\fIsubject\fP, int *\fIovector\fP,
 .ti +5n
 .B int \fIstringcount\fP, int \fIstringnumber\fP, char *\fIbuffer\fP,
 .ti +5n
 .B int \fIbuffersize\fP);
 .PP
-.br
 .B int pcre_get_named_substring(const pcre *\fIcode\fP,
 .ti +5n
 .B const char *\fIsubject\fP, int *\fIovector\fP,
@@ -69,68 +61,51 @@ PCRE - Perl-compatible regular expressions
 .ti +5n
 .B const char **\fIstringptr\fP);
 .PP
-.br
 .B int pcre_get_stringnumber(const pcre *\fIcode\fP,
 .ti +5n
 .B const char *\fIname\fP);
 .PP
-.br
 .B int pcre_get_stringtable_entries(const pcre *\fIcode\fP,
 .ti +5n
 .B const char *\fIname\fP, char **\fIfirst\fP, char **\fIlast\fP);
 .PP
-.br
 .B int pcre_get_substring(const char *\fIsubject\fP, int *\fIovector\fP,
 .ti +5n
 .B int \fIstringcount\fP, int \fIstringnumber\fP,
 .ti +5n
 .B const char **\fIstringptr\fP);
 .PP
-.br
 .B int pcre_get_substring_list(const char *\fIsubject\fP,
 .ti +5n
 .B int *\fIovector\fP, int \fIstringcount\fP, "const char ***\fIlistptr\fP);"
 .PP
-.br
 .B void pcre_free_substring(const char *\fIstringptr\fP);
 .PP
-.br
 .B void pcre_free_substring_list(const char **\fIstringptr\fP);
 .PP
-.br
 .B const unsigned char *pcre_maketables(void);
 .PP
-.br
 .B int pcre_fullinfo(const pcre *\fIcode\fP, "const pcre_extra *\fIextra\fP,"
 .ti +5n
 .B int \fIwhat\fP, void *\fIwhere\fP);
 .PP
-.br
 .B int pcre_info(const pcre *\fIcode\fP, int *\fIoptptr\fP, int
 .B *\fIfirstcharptr\fP);
 .PP
-.br
 .B int pcre_refcount(pcre *\fIcode\fP, int \fIadjust\fP);
 .PP
-.br
 .B int pcre_config(int \fIwhat\fP, void *\fIwhere\fP);
 .PP
-.br
 .B char *pcre_version(void);
 .PP
-.br
 .B void *(*pcre_malloc)(size_t);
 .PP
-.br
 .B void (*pcre_free)(void *);
 .PP
-.br
 .B void *(*pcre_stack_malloc)(size_t);
 .PP
-.br
 .B void (*pcre_stack_free)(void *);
 .PP
-.br
 .B int (*pcre_callout)(pcre_callout_block *);
 .
 .
@@ -1476,14 +1451,12 @@ Error numbers -16 to -20 are not used by \fBpcre_exec()\fP.
 .ti +5n
 .B int \fIbuffersize\fP);
 .PP
-.br
 .B int pcre_get_substring(const char *\fIsubject\fP, int *\fIovector\fP,
 .ti +5n
 .B int \fIstringcount\fP, int \fIstringnumber\fP,
 .ti +5n
 .B const char **\fIstringptr\fP);
 .PP
-.br
 .B int pcre_get_substring_list(const char *\fIsubject\fP,
 .ti +5n
 .B int *\fIovector\fP, int \fIstringcount\fP, "const char ***\fIlistptr\fP);"
@@ -1569,7 +1542,6 @@ provided.
 .ti +5n
 .B const char *\fIname\fP);
 .PP
-.br
 .B int pcre_copy_named_substring(const pcre *\fIcode\fP,
 .ti +5n
 .B const char *\fIsubject\fP, int *\fIovector\fP,
@@ -1578,7 +1550,6 @@ provided.
 .ti +5n
 .B char *\fIbuffer\fP, int \fIbuffersize\fP);
 .PP
-.br
 .B int pcre_get_named_substring(const pcre *\fIcode\fP,
 .ti +5n
 .B const char *\fIsubject\fP, int *\fIovector\fP,
@@ -1846,8 +1817,22 @@ extremely rare, as a vector of size 1000 is used.
 \fBpcrebuild\fP(3), \fBpcrecallout\fP(3), \fBpcrecpp(3)\fP(3),
 \fBpcrematching\fP(3), \fBpcrepartial\fP(3), \fBpcreposix\fP(3),
 \fBpcreprecompile\fP(3), \fBpcresample\fP(3), \fBpcrestack\fP(3).
-.P
-.in 0
-Last updated: 30 November 2006
-.br
-Copyright (c) 1997-2006 University of Cambridge.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 06 March 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

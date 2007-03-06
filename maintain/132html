@@ -40,6 +40,7 @@ $inpara = 1;
 
 # Main program
 
+$innf = 0;
 $inpara = 0;
 $inpre = 0;
 $wrotetext = 0;
@@ -81,10 +82,29 @@ while (<STDIN>)
    
   if (/^\./)
     {
-    if (/^\.br/)
+    # Some of the PCRE man pages used to contain instances of .br. However, 
+    # they should have all been removed because they cause trouble in some
+    # (other) automated systems that translate man pages to HTML. Complain if
+    # we find .br or .in (another macro that is deprecated). 
+ 
+    if (/^\.br/ || /^\.in/)
       {
-      print TEMP "<br>\n" if $wrotetext; 
+      print STDERR "\n*** Deprecated macro encountered - rewrite needed\n";
+      print STDERR "*** $_\n";  
+      die "*** Processing abandoned\n";
       }
+      
+    # Instead of .br, relevent "literal" sections are enclosed in .nf/.fi.
+    
+    elsif (/^\.nf/)
+      {
+      $innf = 1; 
+      }   
+      
+    elsif (/^\.fi/)
+      {
+      $innf = 0; 
+      }   
       
     # Handling .sp is subtle. If it is inside a literal section, do nothing if
     # the next line is a non literal text line; similarly, if not inside a
@@ -244,6 +264,10 @@ while (<STDIN>)
     print TEMP "</pre>\n"; 
     $inpre = 0; 
     }       
+    
+  # Add <br> to the end of a non-literal line if we are within .nf/.fi
+  
+  $_ .= "<br>\n" if (!$inpre && $innf); 
  
   print TEMP; 
   $wrotetext = 1; 

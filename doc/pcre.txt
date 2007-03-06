@@ -211,18 +211,21 @@ UTF-8 AND UNICODE PROPERTY SUPPORT
 AUTHOR
 
        Philip Hazel
-       University Computing Service,
+       University Computing Service
        Cambridge CB2 3QH, England.
 
        Putting an actual email address here seems to have been a spam  magnet,
        so I've taken it away. If you want to email me, use my initial and sur-
        name, separated by a dot, at the domain ucs.cam.ac.uk.
 
-Last updated: 23 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREBUILD(3)                                                      PCREBUILD(3)
 
 
@@ -442,11 +445,21 @@ SEE ALSO
 
        pcreapi(3), pcre_config(3).
 
-Last updated: 30 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
@@ -622,11 +635,21 @@ DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
        3. Although atomic groups are supported, their use does not provide the
        performance advantage that it does for the standard algorithm.
 
-Last updated: 24 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREAPI(3)                                                          PCREAPI(3)
 
 
@@ -2318,11 +2341,21 @@ SEE ALSO
        pcrebuild(3), pcrecallout(3), pcrecpp(3)(3), pcrematching(3),  pcrepar-
        tial(3),  pcreposix(3), pcreprecompile(3), pcresample(3), pcrestack(3).
 
-Last updated: 30 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
@@ -2477,11 +2510,21 @@ RETURN VALUES
        reserved for use by callout functions; it will never be  used  by  PCRE
        itself.
 
-Last updated: 28 February 2005
-Copyright (c) 1997-2005 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
@@ -2595,11 +2638,21 @@ DIFFERENCES BETWEEN PCRE AND PERL
        (j)  The  alternative  matching function (pcre_dfa_exec()) matches in a
        different way and is not Perl-compatible.
 
-Last updated: 28 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
@@ -4271,11 +4324,21 @@ SEE ALSO
 
        pcreapi(3), pcrecallout(3), pcrematching(3), pcre(3).
 
-Last updated: 06 December 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
@@ -4482,11 +4545,21 @@ MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()
 
        where no string can be a partial match for both alternatives.
 
-Last updated: 30 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
@@ -4604,11 +4677,21 @@ COMPATIBILITY WITH DIFFERENT PCRE RELEASES
        7.0  or  higher,  because  there was an internal reorganization at that
        release.
 
-Last updated: 28 November 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
@@ -4744,11 +4827,21 @@ PROCESSING TIME
        In many cases, the solution to this kind of performance issue is to use
        an atomic group or a possessive quantifier.
 
-Last updated: 20 September 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
@@ -4958,14 +5051,17 @@ MEMORY USAGE
 AUTHOR
 
        Philip Hazel
-       University Computing Service,
+       University Computing Service
        Cambridge CB2 3QH, England.
 
-Last updated: 16 January 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECPP(3)                                                          PCRECPP(3)
 
 
@@ -5294,9 +5390,14 @@ AUTHOR
 
        The C++ wrapper was contributed by Google Inc.
        Copyright (c) 2006 Google Inc.
+
+
+REVISION
+
+       Last updated: 06 March 2007
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
@@ -5360,8 +5461,18 @@ PCRE SAMPLE PROGRAM
 
        (for example) to the compile command to get round this problem.
 
-Last updated: 09 September 2004
-Copyright (c) 1997-2004 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 PCRESTACK(3)                                                      PCRESTACK(3)
 
@@ -5466,8 +5577,18 @@ PCRE DISCUSSION OF STACK USAGE
        has a command line option (-S) that can be used to increase the size of
        its stack.
 
-Last updated: 14 September 2006
-Copyright (c) 1997-2006 University of Cambridge.
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 06 March 2007
+       Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
