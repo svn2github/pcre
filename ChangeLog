@@ -34,6 +34,10 @@ Version 7.1 05-Mar-07
     makevp.bat for the current PCRE, using the additional files !compile.txt, 
     !linklib.txt, and pcregexp.pas.
     
+ 6. A Windows user reported a minor discrepancy with test 2, which turned out 
+    to be caused by a trailing space on an input line that had got lost in his 
+    copy. The trailing space was an accident, so I've just removed it.
+    
 
 Version 7.0 19-Dec-06
 ---------------------
