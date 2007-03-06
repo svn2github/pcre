@@ -80,6 +80,13 @@ MAINTAINERCLEANFILES =
 # Additional files to bundle with the distribution.
 EXTRA_DIST =
 
+# These files are to do with building for Virtual Pascal
+EXTRA_DIST += \
+  makevp.bat \
+  !compile.txt \
+  !linklib.txt \
+  pcregexp.pas   
+
 # These are the header files we'll install.  Note that while pcre.h is
 # generated from pcre.h.in, we want to include it in the distribution so
 # that users building without Autotools support have an easier time of it.

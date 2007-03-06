@@ -405,11 +405,14 @@ MAINTAINERCLEANFILES = config-cmake.h.in
 
 # Additional files to bundle with the distribution.
 
+# These files are to do with building for Virtual Pascal
+
 # The pcre_printint.src file is #included by some source files, so it must be
 # distributed. In an Autotools world, config.h is generated from config.h.in,
 # but, like pcre.h, we want to include it in the distribution so that users
 # building without Autotools support have an easier time of it.
-EXTRA_DIST = pcre_printint.src config.h RunTest.bat testdata/grepinput \
+EXTRA_DIST = makevp.bat !compile.txt !linklib.txt pcregexp.pas \
+	pcre_printint.src config.h RunTest.bat testdata/grepinput \
 	testdata/grepinput8 testdata/grepinputx testdata/greplist \
 	testdata/grepoutput testdata/grepoutput8 testdata/testinput1 \
 	testdata/testinput2 testdata/testinput3 testdata/testinput4 \
