@@ -41,17 +41,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* The current PCRE version information. */
 
-/* NOTES FOR FUTURE MAINTAINERS: Do not use numbers with leading zeros, because
-they may be treated as octal constants. The PCRE_PRERELEASE feature is for
-identifying release candidates. It might be defined as -RC2, for example. In
-real releases, it should be defined empty. Do not change the alignment of these
-statments. The code in ./configure greps out the version numbers by using "cut"
-to get values from column 29 onwards. These are substituted into pcre-config
-and libpcre.pc. The values are not put into configure.ac and substituted here
-(which would simplify this issue) because that makes life harder for those who
-cannot run ./configure. As it now stands, this file need not be edited in that
-circumstance. */
-
 #define PCRE_MAJOR          7
 #define PCRE_MINOR          1
 #define PCRE_PRERELEASE     -RC1

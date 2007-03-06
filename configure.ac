@@ -167,20 +167,17 @@ case "$with_link_size" in
 esac
 
 AH_TOP([
-/* On Unix-like systems config.in is converted by "configure" into
-config.h.  Some other environments also support the use of "configure".
-PCRE is written in Standard C, but there are a few non-standard things
-it can cope with, allowing it to run on SunOS4 and other "close to
-standard" systems.
+/* On Unix-like systems config.h.in is converted by "configure" into config.h.
+Some other environments also support the use of "configure". PCRE is written in
+Standard C, but there are a few non-standard things it can cope with, allowing
+it to run on SunOS4 and other "close to standard" systems.
 
-On a non-Unix-like system you should just copy this file into config.h,
-and set up the macros the way you need them.  You should normally change
-the definitions of HAVE_STRERROR and HAVE_MEMMOVE to 1.  Unfortunately,
-because of the way autoconf works, these cannot be made the defaults.
-If your system has bcopy() and not memmove(), change the definition of
-HAVE_BCOPY instead of HAVE_MEMMOVE.  If your system has neither bcopy()
-nor memmove(), leave them both as 0; an emulation function will be
-used. */])
+On a system without "configure" you should use the distributed config.h, and
+set up the macros the way you need them.
+
+If your system has bcopy() and not memmove(), change the definitions of
+HAVE_BCOPY and HAVE_MEMMOVE. If your system has neither bcopy() nor memmove(),
+leave them both undefined; an emulation function will be used. */])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -253,7 +250,7 @@ if test "$enable_stack_for_recursion" = "no"; then
   AC_DEFINE([NO_RECURSE], [], [
     PCRE uses recursive function calls to handle backtracking while
     matching.  This can sometimes be a problem on systems that have
-    stacks of limited size.  Define NO_RECURSE to get a version that
+    stacks of limited size. Define NO_RECURSE to get a version that
     doesn't use recursion in the match() function; instead it creates
     its own stack by steam using pcre_recurse_malloc() to obtain memory
     from the heap. For more detail, see the comments and other stuff
@@ -263,10 +260,8 @@ if test "$enable_stack_for_recursion" = "no"; then
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
-  The value of NEWLINE determines the newline character. The default is
-  to leave it up to the compiler, but some sites want to force a
-  particular value.  On Unix-like systems, "configure" can be used to
-  override this default.])
+  The value of NEWLINE determines the newline character. On Unix-like 
+  systems, "configure" can be used to override the default.])
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store
@@ -290,7 +285,7 @@ AC_DEFINE_UNQUOTED([POSIX_MALLOC_THRESHOLD], [$with_posix_malloc_threshold], [
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   The value of MATCH_LIMIT determines the default number of times the
   internal match() function can be called during a single execution of
-  pcre_exec().  There is a runtime interface for setting a different
+  pcre_exec(). There is a runtime interface for setting a different
   limit. The limit exists in order to catch runaway regular
   expressions that take for ever to determine that they do not match.
   The default is set very large so that it does not accidentally catch
@@ -305,9 +300,9 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
   NO_RECURSE is defined) that is used. The value of
   MATCH_LIMIT_RECURSION applies only to recursive calls of match(). To
   have any useful effect, it must be less than the value of
-  MATCH_LIMIT. There is a runtime method for setting a different
-  limit. On systems that support it, "configure" can be used to
-  override this default default.])
+  MATCH_LIMIT. The default is to use the same value as MATCH_LIMIT. 
+  There is a runtime method for setting a different limit. On systems 
+  that support it, "configure" can be used to override the default.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to

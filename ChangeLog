@@ -9,7 +9,14 @@ Version 7.1 05-Mar-07
     is some re-arrangement of the files and adjustment of comments consequent
     on this.
     
- 2. I had an email from Eric Raymond about problems translating some of PCRE's
+ 2. Part of the patch fixed a problem with the pcregrep tests. The test of -r 
+    for recursive directory scanning broke on some systems because the files 
+    are not scanned in any specific order and on different systems the order 
+    was different. A call to "sort" has been inserted into RunGrepTest for the 
+    approprate test as a short-term fix. In the longer term there may be an 
+    alternative.
+    
+ 3. I had an email from Eric Raymond about problems translating some of PCRE's
     man pages to HTML (despite the fact that I distribute HTML pages, some 
     people do their own conversions for various reasons). The problems 
     concerned the use of low-level troff macros .br and .in. I have therefore 
@@ -17,6 +24,10 @@ Version 7.1 05-Mar-07
     be replaced by .nf/.fi pairs). The maintain/132html script that I use to 
     generate HTML has been updated to handle .nf/.fi and to complain if it 
     encounters .br or .in.
+    
+ 4. Updated comments in configure.ac that get placed in config.h.in and also
+    arranged for config.h to be included in the distribution, for the benefit 
+    of those who have to compile without Autotools (compare pcre.h).  
     
 
 Version 7.0 19-Dec-06
