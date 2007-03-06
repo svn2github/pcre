@@ -50,7 +50,7 @@ properties. */
 
 /* Table to translate from particular type value to the general value. */
 
-static int ucp_gentype[] = {
+static const int ucp_gentype[] = {
   ucp_C, ucp_C, ucp_C, ucp_C, ucp_C,  /* Cc, Cf, Cn, Co, Cs */
   ucp_L, ucp_L, ucp_L, ucp_L, ucp_L,  /* Ll, Lu, Lm, Lo, Lt */
   ucp_M, ucp_M, ucp_M,                /* Mc, Me, Mn */

@@ -41,6 +41,13 @@ Version 7.1 05-Mar-07
  7. Add -Wl,-R... flags in pcre-config.in for *BSD* systems, as I'm told
     that is needed.  
     
+ 8. Mark ucp_table (in ucptable.h) and ucp_gentype (in pcre_ucp_searchfuncs.c)
+    as "const" (a) because they are and (b) because it helps the PHP
+    maintainers who have recently made a script to detect big data structures
+    in the php code that should be moved to the .rodata section. I remembered 
+    to update Builducptable as well, so it won't revert if ucptable.h is ever 
+    re-created.
+    
 
 Version 7.0 19-Dec-06
 ---------------------

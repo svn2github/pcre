@@ -131,7 +131,7 @@ close(IN);
 print "/* This source module is automatically generated from the Unicode\n" .
   "property table. See ucpinternal.h for a description of the layout.\n" .
   "This version was made from the Unicode $Uversion tables. */\n\n" .
-  "static cnode ucp_table[] = {\n";
+  "static const cnode ucp_table[] = {\n";
 
 # Now read the input file and generate the output.
 
