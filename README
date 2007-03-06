@@ -65,6 +65,19 @@ Windows systems (I myself do not use Windows). Some are complete in themselves;
 others are pointers to URLs containing relevant files.
 
 
+Building on non-Unix systems
+----------------------------
+
+For a non-Unix system, read the comments in the file NON-UNIX-USE, though if
+the system supports the use of "configure" and "make" you may be able to build
+PCRE in the same way as for Unix systems.
+
+PCRE has been compiled on Windows systems and on Macintoshes, but I don't know
+the details because I don't use those systems. It should be straightforward to
+build PCRE on any system that has a Standard C compiler and library, because it
+uses only Standard C functions.
+
+
 Building PCRE on a Unix-like system
 -----------------------------------
 
@@ -300,19 +313,6 @@ use the workaround of specifying the following environment variable prior to
 running the "configure" script:
 
   CXXLDFLAGS="-lstd_v2 -lCsup_v2"
-
-
-Building on non-Unix systems
-----------------------------
-
-For a non-Unix system, read the comments in the file NON-UNIX-USE, though if
-the system supports the use of "configure" and "make" you may be able to build
-PCRE in the same way as for Unix systems.
-
-PCRE has been compiled on Windows systems and on Macintoshes, but I don't know
-the details because I don't use those systems. It should be straightforward to
-build PCRE on any system that has a Standard C compiler and library, because it
-uses only Standard C functions.
 
 
 Testing PCRE

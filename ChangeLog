@@ -29,6 +29,11 @@ Version 7.1 05-Mar-07
     arranged for config.h to be included in the distribution, for the benefit 
     of those who have to compile without Autotools (compare pcre.h).  
     
+ 5. Updated the support (such as it is) for Virtual Pascal, thanks to Stefan 
+    Weber: (1) pcre_internal.h was missing some function renames; (2) updated 
+    makevp.bat for the current PCRE, using the additional files !compile.txt, 
+    !linklib.txt, and pcregexp.pas.
+    
 
 Version 7.0 19-Dec-06
 ---------------------

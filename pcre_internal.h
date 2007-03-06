@@ -189,7 +189,9 @@ need to have their names changed. PCRE must be compiled with the -DVPCOMPAT
 option on the command line. */
 
 #ifdef VPCOMPAT
+#define strlen(s)        _strlen(s)
 #define strncmp(s1,s2,m) _strncmp(s1,s2,m)
+#define memcmp(s,c,n)    _memcmp(s,c,n)
 #define memcpy(d,s,n)    _memcpy(d,s,n)
 #define memmove(d,s,n)   _memmove(d,s,n)
 #define memset(s,c,n)    _memset(s,c,n)

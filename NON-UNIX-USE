@@ -1,11 +1,13 @@
 Compiling PCRE on non-Unix systems
 ----------------------------------
 
-See below for comments on Cygwin or MinGW and OpenVMS usage. I (Philip Hazel)
-have no knowledge of Windows or VMS sytems and how their libraries work. The
-items in the PCRE Makefile that relate to anything other than Unix-like systems
-have been contributed by PCRE users. There are some other comments and files in
-the Contrib directory on the ftp site that you may find useful. See
+I (Philip Hazel) have no knowledge of Windows or VMS sytems and how their
+libraries work. The items in the PCRE distribution and Makefile that relate to
+anything other than Unix-like systems have been contributed by PCRE users and 
+are untested by me. 
+
+There are some other comments and files in the Contrib directory on the ftp
+site that you may find useful. See
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
 
@@ -135,6 +137,10 @@ FURTHER REMARKS
 If you have a system without "configure" but where you can use a Makefile, edit
 Makefile.in to create Makefile, substituting suitable values for the variables
 at the head of the file.
+
+Stefan Weber contributed the following files in the distribution for building 
+PCRE for use with VP/Borland: !compile.txt, !linklib.txt, makevp.bat, 
+pcregexp.pas.
 
 Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
 
