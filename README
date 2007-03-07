@@ -6,6 +6,20 @@ The latest release of PCRE is always available from
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
 
 Please read the NEWS file if you are upgrading from a previous release.
+The contents of this README file are:
+
+  The PCRE APIs
+  Documentation for PCRE
+  Contributions by users of PCRE
+  Building PCRE on non-Unix systems
+  Building PCRE on a Unix-like system
+  Retrieving configuration information on a Unix-like system
+  Shared libraries on Unix-like systems
+  Cross-compiling on a Unix-like system
+  Using HP's ANSI C++ compiler (aCC)
+  Testing PCRE
+  Character tables
+  File manifest
 
 
 The PCRE APIs
@@ -15,19 +29,30 @@ PCRE is written in C, and it has its own API. The distribution now includes a
 set of C++ wrapper functions, courtesy of Google Inc. (see the pcrecpp man page
 for details).
 
-Also included are a set of C wrapper functions that are based on the POSIX
-API. These end up in the library called libpcreposix. Note that this just
-provides a POSIX calling interface to PCRE: the regular expressions themselves
-still follow Perl syntax and semantics. The header file for the POSIX-style
-functions is called pcreposix.h. The official POSIX name is regex.h, but I
-didn't want to risk possible problems with existing files of that name by
-distributing it that way. To use it with an existing program that uses the
-POSIX API, it will have to be renamed or pointed at by a link.
+Also included in the distribution are a set of C wrapper functions that are
+based on the POSIX API. These end up in the library called libpcreposix. Note
+that this just provides a POSIX calling interface to PCRE; the regular
+expressions themselves still follow Perl syntax and semantics. The POSIX API is
+restricted, and does not give full access to all of PCRE's facilities.
+
+The header file for the POSIX-style functions is called pcreposix.h. The
+official POSIX name is regex.h, but I did not want to risk possible problems
+with existing files of that name by distributing it that way. To use PCRE with
+an existing program that uses the POSIX API, pcreposix.h will have to be
+renamed or pointed at by a link.
 
 If you are using the POSIX interface to PCRE and there is already a POSIX regex
-library installed on your system, you must take care when linking programs to
+library installed on your system, as well as worrying about the regex.h header
+file (as mentioned above), you must also take care when linking programs to
 ensure that they link with PCRE's libpcreposix library. Otherwise they may pick
-up the "real" POSIX functions of the same name.
+up the POSIX functions of the same name from the other library.
+
+One way of avoiding this confusion is to compile PCRE with the addition of
+-Dregcomp=PCREregcomp (and similarly for the other functions) to the compiler
+flags (CFLAGS if you are using "configure" -- see below). This has the effect
+of renaming the functions so that the names no longer clash. Of course, you
+have to do the same thing for your applications, or write them using the new
+names.
 
 
 Documentation for PCRE
@@ -36,20 +61,20 @@ Documentation for PCRE
 If you install PCRE in the normal way, you will end up with an installed set of
 man pages whose names all start with "pcre". The one that is just called "pcre"
 lists all the others. In addition to these man pages, the PCRE documentation is
-supplied in two other forms; however, as there is no standard place to install
-them, they are left in the doc directory of the unpacked source distribution.
-These forms are:
+supplied in two other forms:
 
-  1. Files called doc/pcre.txt, doc/pcregrep.txt, and doc/pcretest.txt. The
-     first of these is a concatenation of the text forms of all the section 3
-     man pages except those that summarize individual functions. The other two
-     are the text forms of the section 1 man pages for the pcregrep and
-     pcretest commands. Text forms are provided for ease of scanning with text
-     editors or similar tools.
+  1. There are files called doc/pcre.txt, doc/pcregrep.txt, and
+     doc/pcretest.txt in the source distribution. The first of these is a
+     concatenation of the text forms of all the section 3 man pages except
+     those that summarize individual functions. The other two are the text
+     forms of the section 1 man pages for the pcregrep and pcretest commands.
+     These text forms are provided for ease of scanning with text editors or
+     similar tools.
 
-  2. A subdirectory called doc/html contains all the documentation in HTML
-     form, hyperlinked in various ways, and rooted in a file called
-     doc/index.html.
+  2. A set of files containing all the documentation in HTML form, hyperlinked
+     in various ways, and rooted in a file called index.html, is installed in
+     the directory <prefix>/share/doc/pcre/html, where <prefix> is the
+     installation prefix (defaulting to /usr/local).
 
 
 Contributions by users of PCRE
@@ -60,22 +85,23 @@ You can find contributions from PCRE users in the directory
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
 
 where there is also a README file giving brief descriptions of what they are.
-Several of them provide support for compiling PCRE on various flavours of
-Windows systems (I myself do not use Windows). Some are complete in themselves;
-others are pointers to URLs containing relevant files.
+Some are complete in themselves; others are pointers to URLs containing
+relevant files. Some of this material is likely to be well out-of-date. In
+particular, several of the contributions provide support for compiling PCRE on
+various flavours of Windows (I myself do not use Windows), but it is hoped that
+more Windows support will find its way into the standard distribution.
 
 
-Building on non-Unix systems
-----------------------------
+Building PCRE on non-Unix systems
+---------------------------------
 
 For a non-Unix system, read the comments in the file NON-UNIX-USE, though if
 the system supports the use of "configure" and "make" you may be able to build
-PCRE in the same way as for Unix systems.
+PCRE in the same way as for Unix-like systems.
 
-PCRE has been compiled on Windows systems and on Macintoshes, but I don't know
-the details because I don't use those systems. It should be straightforward to
-build PCRE on any system that has a Standard C compiler and library, because it
-uses only Standard C functions.
+PCRE has been compiled on many different operating systems. It should be
+straightforward to build PCRE on any system that has a Standard C compiler and
+library, because it uses only Standard C functions.
 
 
 Building PCRE on a Unix-like system
@@ -91,8 +117,8 @@ where you want the files to be created. This command is a standard GNU
 INSTALL.
 
 Most commonly, people build PCRE within its own distribution directory, and in
-this case, on many systems, just running "./configure" is sufficient, but the
-usual methods of changing standard defaults are available. For example:
+this case, on many systems, just running "./configure" is sufficient. However,
+the usual methods of changing standard defaults are available. For example:
 
 CFLAGS='-O2 -Wall' ./configure --prefix=/opt/local
 
@@ -138,9 +164,9 @@ library. You can read more about them in the pcrebuild man page.
   (the Unix standard). You can specify the default newline indicator by adding
   --newline-is-cr or --newline-is-lf or --newline-is-crlf or --newline-is-any
   to the "configure" command, respectively.
-  
-  If you specify --newline-is-cr or --newline-is-crlf, some of the standard 
-  tests will fail, because the lines in the test files end with LF. Even if 
+
+  If you specify --newline-is-cr or --newline-is-crlf, some of the standard
+  tests will fail, because the lines in the test files end with LF. Even if
   the files are edited to change the line endings, there are likely to be some
   failures. With --newline-is-any, many tests should succeed, but there may be
   some failures.
@@ -194,19 +220,25 @@ library. You can read more about them in the pcrebuild man page.
   pcre_exec() function; it does not apply to pcre_dfa_exec(), which does not
   use deeply nested recursion.
 
-The "configure" script builds eight files for the basic C library:
+The "configure" script builds the following files for the basic C library:
 
 . Makefile is the makefile that builds the library
 . config.h contains build-time configuration options for the library
+. pcre.h is the public PCRE header file
 . pcre-config is a script that shows the settings of "configure" options
 . libpcre.pc is data for the pkg-config command
 . libtool is a script that builds shared and/or static libraries
-. RunTest is a script for running tests on the library
+. RunTest is a script for running tests on the basic C library
 . RunGrepTest is a script for running tests on the pcregrep command
 
-In addition, if a C++ compiler is found, the following are also built:
+Versions of config.h and pcre.h are distributed in the PCRE tarballs. These are
+provided for the benefit of those who have to compile PCRE without the benefit
+of "configure". If you use "configure", the distributed copies are replaced.
 
-. pcrecpp.h is the header file for programs that call PCRE via the C++ wrapper
+If a C++ compiler is found, the following files are also built:
+
+. libpcrecpp.pc is data for the pkg-config command
+. pcrecpparg.h is a header file for programs that call PCRE via the C++ wrapper
 . pcre_stringpiece.h is the header for the C++ "stringpiece" functions
 
 The "configure" script also creates config.status, which is an executable
@@ -214,30 +246,78 @@ script that can be run to recreate the configuration, and config.log, which
 contains compiler output from tests that "configure" runs.
 
 Once "configure" has run, you can run "make". It builds two libraries, called
-libpcre and libpcreposix, a test program called pcretest, and the pcregrep
-command. If a C++ compiler was found on your system, it also builds the C++
-wrapper library, which is called libpcrecpp, and some test programs called
-pcrecpp_unittest, pcre_scanner_unittest, and pcre_stringpiece_unittest.
+libpcre and libpcreposix, a test program called pcretest, a demonstration
+program called pcredemo, and the pcregrep command. If a C++ compiler was found
+on your system, it also builds the C++ wrapper library, which is called
+libpcrecpp, and some test programs called pcrecpp_unittest,
+pcre_scanner_unittest, and pcre_stringpiece_unittest.
 
-The command "make test" runs all the appropriate tests. Details of the PCRE
-tests are given in a separate section of this document, below.
+The command "make check" runs all the appropriate tests. Details of the PCRE
+tests are given below in a separate section of this document.
 
-You can use "make install" to copy the libraries, the public header files
-pcre.h, pcreposix.h, pcrecpp.h, and pcre_stringpiece.h (the last two only if
-the C++ wrapper was built), and the man pages to appropriate live directories
-on your system, in the normal way.
+You can use "make install" to install PCRE into live directories on your
+system. The following are installed (file names are all relative to the
+<prefix> that is set when "configure" is run):
+
+  Commands (bin):
+    pcretest
+    pcregrep
+    pcre-config   
+
+  Libraries (lib):
+    libpcre
+    libpcreposix
+    libpcrecpp (if C++ support is enabled)
+
+  Configuration information (lib/pkgconfig):
+    libpcre.pc
+    libpcrecpp.ps (if C++ support is enabled)
+
+  Header files (include):
+    pcre.h
+    pcreposix.h
+    pcre_scanner.h      )
+    pcre_stringpiece.h  ) if C++ support is enabled
+    pcrecpp.h           )
+    pcrecpparg.h        )
+
+  Man pages (share/man/man{1,3}):
+    pcregrep.1
+    pcretest.1
+    pcre.3
+    pcre*.3 (lots more pages, all starting "pcre")
+
+  HTML documentation (share/doc/pcre/html):
+    index.html
+    *.html (lots more pages, hyperlinked from index.html)
+
+  Text file documentation (share/doc/pcre):
+    AUTHORS
+    COPYING
+    ChangeLog
+    INSTALL
+    LICENCE
+    NON-UNIX-USE
+    NEWS
+    README
+    pcre.txt       (a concatenation of the man(3) pages)
+    pcretest.txt   the pcretest man page
+    pcregrep.txt   the pcregrep man page
+    perltest.txt   some information about the perltest.pl script
+
+Note that the pcredemo program that is built by "configure" is *not* installed 
+anywhere. It is a demonstration for programmers wanting to use PCRE.
 
 If you want to remove PCRE from your system, you can run "make uninstall".
 This removes all the files that "make install" installed. However, it does not
 remove any directories, because these are often shared with other programs.
 
 
-Retrieving configuration information on Unix-like systems
----------------------------------------------------------
+Retrieving configuration information on a Unix-like system
+----------------------------------------------------------
 
-Running "make install" also installs the command pcre-config, which can be used
-to recall information about the PCRE configuration and installation. For
-example:
+Running "make install" installs the command pcre-config, which can be used to
+recall information about the PCRE configuration and installation. For example:
 
   pcre-config --version
 
@@ -256,7 +336,7 @@ single command is used. For example:
   pkg-config --cflags pcre
 
 The data is held in *.pc files that are installed in a directory called
-pkgconfig.
+<prefix>/lib/pkgconfig.
 
 
 Shared libraries on Unix-like systems
@@ -322,11 +402,10 @@ To test PCRE on a Unix system, run the RunTest script that is created by the
 configuring process. There is also a script called RunGrepTest that tests the
 options of the pcregrep command. If the C++ wrapper library is build, three
 test programs called pcrecpp_unittest, pcre_scanner_unittest, and
-pcre_stringpiece_unittest are provided.
+pcre_stringpiece_unittest are also built.
 
-Both the scripts and all the program tests are run if you obey "make runtest",
-"make check", or "make test". For other systems, see the instructions in
-NON-UNIX-USE.
+Both the scripts and all the program tests are run if you obey "make check" or
+"make test". For other systems, see the instructions in NON-UNIX-USE.
 
 The RunTest script runs the pcretest test program (which is documented in its
 own man page) on each of the testinput files (in the testdata directory) in
@@ -337,9 +416,10 @@ the test files, give its number as an argument to RunTest, for example:
 
   RunTest 2
 
-The first test file can also be fed directly into the perltest script to check
-that Perl gives the same results. The only difference you should see is in the
-first few lines, where the Perl version is given instead of the PCRE version.
+The first test file can also be fed directly into the perltest.pl script to
+check that Perl gives the same results. The only difference you should see is
+in the first few lines, where the Perl version is given instead of the PCRE
+version.
 
 The second set of tests check pcre_fullinfo(), pcre_info(), pcre_study(),
 pcre_copy_substring(), pcre_get_substring(), pcre_get_substring_list(), error
@@ -412,7 +492,8 @@ re-generated.
 The first two 256-byte tables provide lower casing and case flipping functions,
 respectively. The next table consists of three 32-byte bit maps which identify
 digits, "word" characters, and white space, respectively. These are used when
-building 32-byte bit maps that represent character classes.
+building 32-byte bit maps that represent character classes for code points less 
+than 256.
 
 The final 256-byte table has bits indicating various character types, as
 follows:
@@ -428,108 +509,129 @@ You should not alter the set of characters that contain the 128 bit, as that
 will cause PCRE to malfunction.
 
 
-Manifest
---------
+File manifest
+-------------
 
 The distribution should contain the following files:
 
-(A) The actual source files of the PCRE library functions and their
-    headers:
+(A) Source files of the PCRE library functions and their headers:
 
-  dftables.c            auxiliary program for building chartables.c
+  dftables.c             auxiliary program for building chartables.c
+                         
+  pcreposix.c            )
+  pcre_compile.c         )
+  pcre_config.c          )
+  pcre_dfa_exec.c        )
+  pcre_exec.c            )
+  pcre_fullinfo.c        )
+  pcre_get.c             ) sources for the functions in the library,
+  pcre_globals.c         )   and some internal functions that they use
+  pcre_info.c            )
+  pcre_maketables.c      )
+  pcre_newline.c         )
+  pcre_ord2utf8.c        )
+  pcre_refcount.c        )
+  pcre_study.c           )
+  pcre_tables.c          )
+  pcre_try_flipped.c     )
+  pcre_ucp_searchfuncs.c )
+  pcre_valid_utf8.c      )
+  pcre_version.c         )
+  pcre_xclass.c          )
+  pcre_printint.src      ) debugging function that is #included in pcretest,
+                         )   and can also be #included in pcre_compile()
+  pcre.h                 ) a version of the public PCRE header file
+                         )   for use in non-"configure" environments
+  pcre.h.in              template for pcre.h when built by "configure"
+  pcreposix.h            header for the external POSIX wrapper API
+  pcre_internal.h        header for internal use
+  ucp.h                  ) headers concerned with
+  ucpinternal.h          )   Unicode property handling
+  ucptable.h             ) (this one is the data table)
+  
+  config.h               ) a version of config.h for use in non-"configure"
+                         )   environments                      
+  config.h.in            template for config.h when built by "configure"
+                         
+  pcrecpp.h              public header file for the C++ wrapper
+  pcrecpparg.h.in        template for another C++ header file
+  pcre_scanner.h         public header file for C++ scanner functions 
+  pcrecpp.cc             )
+  pcre_scanner.cc        ) source for the C++ wrapper library
+                         
+  pcre_stringpiece.h.in  template for pcre_stringpiece.h, the header for the
+                           C++ stringpiece functions
+  pcre_stringpiece.cc    source for the C++ stringpiece functions
+  
+(B) Source files for programs that use PCRE:
 
-  pcreposix.c           )
-  pcre_compile.c        )
-  pcre_config.c         )
-  pcre_dfa_exec.c       )
-  pcre_exec.c           )
-  pcre_fullinfo.c       )
-  pcre_get.c            ) sources for the functions in the library,
-  pcre_globals.c        )   and some internal functions that they use
-  pcre_info.c           )
-  pcre_maketables.c     )
-  pcre_newline.c        )
-  pcre_ord2utf8.c       )
-  pcre_refcount.c       )
-  pcre_study.c          )
-  pcre_tables.c         )
-  pcre_try_flipped.c    )
-  pcre_ucp_searchfuncs.c)
-  pcre_valid_utf8.c     )
-  pcre_version.c        )
-  pcre_xclass.c         )
-
-  pcre_printint.src     ) debugging function that is #included in pcretest, and
-                        )   can also be #included in pcre_compile()
-
-  pcre.h                the public PCRE header file
-  pcreposix.h           header for the external POSIX wrapper API
-  pcre_internal.h       header for internal use
-  ucp.h                 ) headers concerned with
-  ucpinternal.h         )   Unicode property handling
-  ucptable.h            ) (this one is the data table)
-  config.in             template for config.h, which is built by configure
-
-  pcrecpp.h             the header file for the C++ wrapper
-  pcrecpparg.h.in       "source" for another C++ header file
-  pcrecpp.cc            )
-  pcre_scanner.cc       ) source for the C++ wrapper library
-
-  pcre_stringpiece.h.in "source" for pcre_stringpiece.h, the header for the
-                          C++ stringpiece functions
-  pcre_stringpiece.cc   source for the C++ stringpiece functions
-
-(B) Auxiliary files:
-
-  AUTHORS               information about the author of PCRE
-  ChangeLog             log of changes to the code
-  INSTALL               generic installation instructions
-  LICENCE               conditions for the use of PCRE
-  COPYING               the same, using GNU's standard name
-  Makefile.in           template for Unix Makefile, which is built by configure
-  NEWS                  important changes in this release
-  NON-UNIX-USE          notes on building PCRE on non-Unix systems
-  README                this file
-  RunTest.in            template for a Unix shell script for running tests
-  RunGrepTest.in        template for a Unix shell script for pcregrep tests
-  config.guess          ) files used by libtool,
-  config.sub            )   used only when building a shared library
-  config.h.in           "source" for the config.h header file
-  configure             a configuring shell script (built by autoconf)
-  configure.ac          the autoconf input used to build configure
-  doc/Tech.Notes        notes on the encoding
-  doc/*.3               man page sources for the PCRE functions
-  doc/*.1               man page sources for pcregrep and pcretest
-  doc/html/*            HTML documentation
-  doc/pcre.txt          plain text version of the man pages
-  doc/pcretest.txt      plain text documentation of test program
-  doc/perltest.txt      plain text documentation of Perl test program
-  install-sh            a shell script for installing files
-  libpcre.pc.in         "source" for libpcre.pc for pkg-config
-  ltmain.sh             file used to build a libtool script
-  mkinstalldirs         script for making install directories
-  pcretest.c            comprehensive test program
-  pcredemo.c            simple demonstration of coding calls to PCRE
-  perltest.pl           Perl test program
-  pcregrep.c            source of a grep utility that uses PCRE
-  pcre-config.in        source of script which retains PCRE information
+  pcredemo.c             simple demonstration of coding calls to PCRE
+  pcregrep.c             source of a grep utility that uses PCRE
+  pcretest.c             comprehensive test program
+                         
+(C) Auxiliary files:     
+                         
+  AUTHORS                information about the author of PCRE
+  ChangeLog              log of changes to the code
+  INSTALL                generic installation instructions
+  LICENCE                conditions for the use of PCRE
+  COPYING                the same, using GNU's standard name
+  Makefile.in            ) template for Unix Makefile, which is built by 
+                         )   "configure"
+  Makefile.am            ) the automake input that was used to create
+                         )   Makefile.in                        
+  NEWS                   important changes in this release
+  NON-UNIX-USE           notes on building PCRE on non-Unix systems
+  README                 this file
+  RunTest.in             template for a Unix shell script for running tests
+  RunGrepTest.in         template for a Unix shell script for pcregrep tests
+  aclocal.m4             m4 macros (generated by "aclocal")
+  config.guess           ) files used by libtool,
+  config.sub             )   used only when building a shared library
+  configure              a configuring shell script (built by autoconf)
+  configure.ac           ) the autoconf input that was used to build 
+                         )   "configure" and config.h
+  depcomp                ) script to find program dependencies, generated by
+                         )   automake                
+  doc/*.3                man page sources for the PCRE functions
+  doc/*.1                man page sources for pcregrep and pcretest
+  doc/html/*             HTML documentation
+  doc/pcre.txt           plain text version of the man pages
+  doc/pcretest.txt       plain text documentation of test program
+  doc/perltest.txt       plain text documentation of Perl test program
+  install-sh             a shell script for installing files
+  libpcre.pc.in          template for libpcre.pc for pkg-config
+  libpcrecpp.pc.in       template for libpcrecpp.pc for pkg-config 
+  ltmain.sh              file used to build a libtool script
+  missing                ) common stub for a few missing GNU programs while 
+                         )   installing, generated by automake
+  mkinstalldirs          script for making install directories
+  perltest.pl            Perl test program
+  pcre-config.in         source of script which retains PCRE information
   pcrecpp_unittest.c           )
   pcre_scanner_unittest.c      ) test programs for the C++ wrapper
   pcre_stringpiece_unittest.c  )
-  testdata/testinput*   test data for main library tests
-  testdata/testoutput*  expected test results
-  testdata/grep*        input and output for pcregrep tests
+  testdata/testinput*    test data for main library tests
+  testdata/testoutput*   expected test results
+  testdata/grep*         input and output for pcregrep tests
+  
+(D) Auxiliary files for cmake support
 
-(C) Auxiliary files for Win32 DLL
+  CMakeLists.txt
+  config-cmake.h.in  
 
-  libpcre.def
-  libpcreposix.def
-
-(D) Auxiliary file for VPASCAL
+(E) Auxiliary files for VPASCAL
 
   makevp.bat
+  !compile.txt
+  !linklib.txt
+  pcregexp.pas   
+  
+(F) Miscellaneous
+
+  RunTest.bat            a script for running tests under Windows
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-March 2007
+Last updated: March 2007
