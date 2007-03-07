@@ -210,13 +210,15 @@ case in PCRE. */
 #define memmove(a, b, c) bcopy(b, a, c)
 #else  /* HAVE_BCOPY */
 static void *
-pcre_memmove(unsigned char *dest, const unsigned char *src, size_t n)
+pcre_memmove(void *d, const void *s, size_t n)
 {
 size_t i;
+unsigned char *dest = (unsigned char *)d;
+const unsigned char *src = (const unsigned char *)s;
 dest += n;
 src += n;
-for (i = 0; i < n; ++i) *(--dest) =  *(--src);
-return dest;
+for (i = 0; i < n; ++i) *(--dest) = *(--src);
+return (void *)dest;
 }
 #define memmove(a, b, c) pcre_memmove(a, b, c)
 #endif   /* not HAVE_BCOPY */

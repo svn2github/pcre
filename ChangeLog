@@ -54,6 +54,10 @@ Version 7.1 05-Mar-07
     support is not required. This saves 1.5-2K of code, which is important in 
     some applications.
     
+10. The emulated memmove() function in pcre_internal.h (provided for those 
+    environments that have neither memmove() nor bcopy()) was defining its 
+    arguments as char * instead of void *.
+    
 
 Version 7.0 19-Dec-06
 ---------------------
