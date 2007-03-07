@@ -54,6 +54,11 @@ Version 7.1 05-Mar-07
     support is not required. This saves 1.5-2K of code, which is important in 
     some applications.
     
+    Later: more #ifdefs are needed in pcre_ord2utf8.c and pcre_valid_utf8.c
+    so as not to refer to the tables, even though these functions will never be 
+    called when UTF-8 support is disabled. Otherwise there are problems with a 
+    shared library.  
+    
 10. The emulated memmove() function in pcre_internal.h (provided for those 
     environments that have neither memmove() nor bcopy()) was defining its 
     arguments as char * instead of void *.
