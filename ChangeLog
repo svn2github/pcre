@@ -48,6 +48,12 @@ Version 7.1 05-Mar-07
     to update Builducptable as well, so it won't revert if ucptable.h is ever 
     re-created.
     
+ 9. Added some extra #ifdef SUPPORT_UTF8 conditionals into pcretest.c, 
+    pcre_printint.src, pcre_compile.c, pcre_study.c, and pcre_tables.c, in
+    order to be able to cut out the UTF-8 tables in the latter when UTF-8 
+    support is not required. This saves 1.5-2K of code, which is important in 
+    some applications.
+    
 
 Version 7.0 19-Dec-06
 ---------------------

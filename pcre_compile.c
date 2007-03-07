@@ -1246,6 +1246,7 @@ for (;;)
   else
     {
     code += _pcre_OP_lengths[c];
+#ifdef SUPPORT_UTF8
     if (utf8) switch(c)
       {
       case OP_CHAR:
@@ -1266,6 +1267,7 @@ for (;;)
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
+#endif       
     }
   }
 }
@@ -1309,6 +1311,7 @@ for (;;)
   else
     {
     code += _pcre_OP_lengths[c];
+#ifdef SUPPORT_UTF8
     if (utf8) switch(c)
       {
       case OP_CHAR:
@@ -1329,6 +1332,7 @@ for (;;)
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
+#endif       
     }
   }
 }

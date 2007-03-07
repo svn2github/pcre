@@ -114,10 +114,17 @@ Makefile. */
 #include "pcreposix.h"
 #endif
 
-/* It is also possible, for the benefit of the version imported into Exim, to
-build pcretest without support for UTF8 (define NOUTF8), without the interface
-to the DFA matcher (NODFA), and without the doublecheck of the old "info"
-function (define NOINFOCHECK). */
+/* It is also possible, for the benefit of the version currently imported into
+Exim, to build pcretest without support for UTF8 (define NOUTF8), without the
+interface to the DFA matcher (NODFA), and without the doublecheck of the old
+"info" function (define NOINFOCHECK). In fact, we automatically cut out the
+UTF8 support if PCRE is built without it. */
+
+#ifndef SUPPORT_UTF8
+#ifndef NOUTF8
+#define NOUTF8
+#endif
+#endif
 
 
 /* Other parameters */

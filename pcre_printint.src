@@ -71,6 +71,12 @@ print_char(FILE *f, uschar *ptr, BOOL utf8)
 {
 int c = *ptr;
 
+#ifndef SUPPORT_UTF8
+utf8 = utf8;  /* Avoid compiler warning */
+if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
+return 0;
+
+#else
 if (!utf8 || (c & 0xc0) != 0xc0)
   {
   if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
@@ -102,6 +108,7 @@ else
   if (c < 128) fprintf(f, "\\x%02x", c); else fprintf(f, "\\x{%x}", c);
   return a;
   }
+#endif   
 }
 
 
