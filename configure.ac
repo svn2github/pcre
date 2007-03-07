@@ -260,8 +260,10 @@ if test "$enable_stack_for_recursion" = "no"; then
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
-  The value of NEWLINE determines the newline character. On Unix-like 
-  systems, "configure" can be used to override the default.])
+  The value of NEWLINE determines the newline character sequence. On 
+  Unix-like systems, "configure" can be used to override the default,
+  which is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF), 
+  or -1 (ANY).])
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store

@@ -130,8 +130,10 @@ leave them both undefined; an emulation function will be used. */
    overflow caused by enormously large patterns. */
 #undef MAX_NAME_SIZE
 
-/* The value of NEWLINE determines the newline character. On Unix-like
-   systems, "configure" can be used to override the default. */
+/* The value of NEWLINE determines the newline character sequence. On
+   Unix-like systems, "configure" can be used to override the default, which
+   is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF), or -1 (ANY).
+   */
 #undef NEWLINE
 
 /* PCRE uses recursive function calls to handle backtracking while matching.
