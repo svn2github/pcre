@@ -1,21 +1,25 @@
 #/bin/sh
 
-# Script to make a PCRE release
+# Script to prepare the files for building a PCRE release. It does some
+# processing of the documentation, detrails files, and creates pcre.h.generic
+# and config.h.generic (for use by builders who can't run ./configure).
 
-if [ ! "$1" ]; then
-  echo "*** Version number missing ***"
-  exit 1
-fi
+# You must run this script before runnning "make dist". It makes use of the
+# following files:
 
-# The name of the release directory
+# 132html     A Perl script that converts a .1 or .3 man page into HTML. It
+#             is called from MakeRelease. It "knows" the relevant troff
+#             constructs that are used in the PCRE man pages.
 
-dir=pcre-$1
+# CleanTxt    A Perl script that cleans up the output of "nroff -man" by
+#             removing backspaces and other redundant text so as to produce
+#             a readable .txt file.
 
-# But sometimes we just want to process the documentation
+# Detrail     A Perl script that removes trailing spaces from files.
 
-if [ "$1" = "doconly" ] ; then
-  doconly=yes
-fi
+# Index.html  A file that is copied as index.html into the doc/html
+#             directory when the HTML documentation is built. It works like
+#             this so that doc/html can be deleted and re-created from scratch.
 
 
 # First, sort out the documentation
@@ -45,7 +49,7 @@ for file in pcre pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
             pcreperform pcreposix pcrecpp pcresample pcrestack ; do
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt
-  ../maintain/CleanTxt <$file.rawtxt >>pcre.txt
+  ../CleanTxt <$file.rawtxt >>pcre.txt
   /bin/rm $file.rawtxt
   echo "------------------------------------------------------------------------------" >>pcre.txt
   if [ "$file" != "pcresample" ] ; then
@@ -58,20 +62,21 @@ done
 for file in pcretest pcregrep ; do
   echo Making $file.txt
   nroff -c -man $file.1 >$file.rawtxt
-  ../maintain/CleanTxt <$file.rawtxt >$file.txt
+  ../CleanTxt <$file.rawtxt >$file.txt
   /bin/rm $file.rawtxt
 done
 
 
 # Make HTML form of the documentation.
 
+echo "Making HTML documentation"
 /bin/rm html/*
-cp ../maintain/Index.html html/index.html
+cp ../Index.html html/index.html
 
 for file in *.1 ; do
   base=`basename $file .1`
-  echo Making $base.html
-  ../maintain/132html -toc $base <$file >html/$base.html
+  echo "  Making $base.html"
+  ../132html -toc $base <$file >html/$base.html
 done
 
 # Exclude table of contents for function summaries. It seems that expr
@@ -87,9 +92,9 @@ for file in *.3 ; do
      [ "$base" = "pcreperform" ] ; then
     toc=""
   fi
-  echo Making $base.html
-  ../maintain/132html $toc $base <$file >html/$base.html
-  if [ $? != 0 ] ; then exit 1; fi 
+  echo "  Making $base.html"
+  ../132html $toc $base <$file >html/$base.html
+  if [ $? != 0 ] ; then exit 1; fi
 done
 
 # End of documentation processing
@@ -97,19 +102,34 @@ done
 cd ..
 echo Documentation done
 
-if [ "$doconly" = "yes" ] ; then
-  exit 0
-fi
+# These files are detrailed; do not detrail the test data because there may be
+# significant trailing spaces. The configure files are also omitted from the
+# detrailing.
 
-# These files are detrailed and copied; do not detrail the test data
-# because there may be significant trailing spaces. The configure files
-# are also omitted from the detrailing.
-
-files="Makefile.in configure.ac config.h.in \
-  README LICENCE COPYING AUTHORS NEWS NON-UNIX-USE INSTALL ChangeLog \
+files="\
+  Makefile.am \
+  Makefile.in \
+  configure.ac \
+  README \
+  LICENCE \
+  COPYING \
+  AUTHORS \
+  NEWS \
+  NON-UNIX-USE \
+  INSTALL \
+  132html \
+  CleanTxt \
+  Detrail \
+  ChangeLog \
+  CMakeLists.txt \
+  RunGrepTest.in \
+  RunTest.in \
+  RunTest.bat \
   pcre-config.in \
   libpcre.pc.in \
   libpcrecpp.pc.in \
+  config.h \
+  config.h.in \
   pcre_printint.src \
   pcredemo.c \
   pcregrep.c \
@@ -118,6 +138,7 @@ files="Makefile.in configure.ac config.h.in \
   pcreposix.c \
   pcreposix.h \
   pcre.h \
+  pcre.h.in \
   pcre_internal.h
   pcre_compile.c \
   pcre_config.c \
@@ -153,54 +174,34 @@ files="Makefile.in configure.ac config.h.in \
   ucpinternal.h \
   ucptable.h \
   makevp.bat \
-  RunTest.bat \
   pcre.def \
   libpcre.def \
   libpcreposix.def"
 
-docfiles="doc/Tech.Notes doc/p*"
-
 echo Detrailing
-./maintain/Detrail $files doc/p* doc/html/*
+./Detrail $files doc/p* doc/html/*
 
-echo Building release
-echo " "
+echo Converting pcre.h and config.h to generic forms
+cp -f pcre.h pcre.h.generic
 
-mkdir Releases/$dir
-mkdir Releases/$dir/doc
-mkdir Releases/$dir/testdata
-
-cp $files RunTest.in RunGrepTest.in configure install-sh mkinstalldirs \
-   config.guess config.sub libpcre.a.dev ltmain.sh Releases/$dir
-cp -r doc/* Releases/$dir/doc
-
-cp testdata/testinput1 testdata/testoutput1 \
-   testdata/testinput2 testdata/testoutput2 \
-   testdata/testinput3 testdata/testoutput3 \
-   testdata/testinput4 testdata/testoutput4 \
-   testdata/testinput5 testdata/testoutput5 \
-   testdata/testinput6 testdata/testoutput6 \
-   testdata/testinput7 testdata/testoutput7 \
-   testdata/testinput8 testdata/testoutput8 \
-   testdata/testinput9 testdata/testoutput9 \
-   testdata/grepinput  testdata/grepinputx  \
-   testdata/greplist   testdata/grepoutput \
-   testdata/grepinput8 testdata/grepoutput8 \
-   Releases/$dir/testdata
-
-# Change the comparison command for testing to the standard one
-
-ne Releases/$dir/RunTest.in -with /dev/null -opt "ge/cf=cf//cf=diff/"
-ne Releases/$dir/RunGrepTest.in -with /dev/null -opt "ge/cf=cf//cf=diff/"
-
-cd Releases
-
-tar cf $dir.tar $dir
-gzip -v --best $dir.tar
-gpg -sb $dir.tar.gz
-
-tar cf $dir.tar $dir
-bzip2 -v -9 $dir.tar
-gpg -sb $dir.tar.bz2
+perl <<'END'
+  open(IN, "<config.h") || die "Can't open config.h: $!\n";
+  open(OUT, ">config.h.generic") || die "Can't open config.h.generic: $!\n";
+  while (<IN>)
+    {
+    if (/^#define\s(?!PACKAGE)(\w+)/)
+      {
+      print OUT "#ifndef $1\n";
+      print OUT;
+      print OUT "#endif\n";
+      }
+    else
+      {
+      print OUT;
+      }
+    }
+  close IN;
+  close OUT;
+END
 
 #End

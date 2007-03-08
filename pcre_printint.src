@@ -108,7 +108,7 @@ else
   if (c < 128) fprintf(f, "\\x%02x", c); else fprintf(f, "\\x{%x}", c);
   return a;
   }
-#endif   
+#endif
 }
 
 

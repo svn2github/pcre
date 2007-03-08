@@ -19,7 +19,7 @@ case `uname -s` in
   ;;
   *BSD*)
   libR=" -Wl,-R@libdir@"
-  ;;   
+  ;;
 esac
 
 while test $# -gt 0; do

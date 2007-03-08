@@ -39,18 +39,26 @@ host_triplet = @host@
 TESTS = $(am__EXEEXT_1) RunTest RunGrepTest
 bin_PROGRAMS = pcretest$(EXEEXT) pcregrep$(EXEEXT)
 noinst_PROGRAMS = dftables$(EXEEXT) $(am__EXEEXT_1) pcredemo$(EXEEXT)
+
+# These additional headers will be be installed if C++ support is enabled. We
+# do not distribute pcrecpparg.h or pcre_stringpiece.h, as these are generated
+# from corresponding .h.in files (which we do distribute).
 @WITH_PCRE_CPP_TRUE@am__append_1 = \
+@WITH_PCRE_CPP_TRUE@  pcrecpparg.h \
+@WITH_PCRE_CPP_TRUE@  pcre_stringpiece.h
+
+@WITH_PCRE_CPP_TRUE@am__append_2 = \
 @WITH_PCRE_CPP_TRUE@  pcrecpp.h \
 @WITH_PCRE_CPP_TRUE@  pcre_scanner.h
 
-@WITH_PCRE_CPP_TRUE@am__append_2 = libpcrecpp.la
-@WITH_PCRE_CPP_TRUE@am__append_3 = pcrecpp_unittest \
-@WITH_PCRE_CPP_TRUE@	pcre_scanner_unittest \
-@WITH_PCRE_CPP_TRUE@	pcre_stringpiece_unittest
+@WITH_PCRE_CPP_TRUE@am__append_3 = libpcrecpp.la
 @WITH_PCRE_CPP_TRUE@am__append_4 = pcrecpp_unittest \
 @WITH_PCRE_CPP_TRUE@	pcre_scanner_unittest \
 @WITH_PCRE_CPP_TRUE@	pcre_stringpiece_unittest
-@WITH_PCRE_CPP_TRUE@am__append_5 = libpcrecpp.pc
+@WITH_PCRE_CPP_TRUE@am__append_5 = pcrecpp_unittest \
+@WITH_PCRE_CPP_TRUE@	pcre_scanner_unittest \
+@WITH_PCRE_CPP_TRUE@	pcre_stringpiece_unittest
+@WITH_PCRE_CPP_TRUE@am__append_6 = libpcrecpp.pc
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(am__include_HEADERS_DIST) \
 	$(dist_doc_DATA) $(dist_html_DATA) $(dist_man_MANS) \
@@ -198,7 +206,7 @@ htmlDATA_INSTALL = $(INSTALL_DATA)
 pkgconfigDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_doc_DATA) $(dist_html_DATA) $(dist_noinst_DATA) \
 	$(html_DATA) $(pkgconfig_DATA)
-am__include_HEADERS_DIST = pcre.h pcreposix.h pcrecpp.h pcre_scanner.h
+am__include_HEADERS_DIST = pcreposix.h pcrecpp.h pcre_scanner.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 nodist_includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS) $(nodist_include_HEADERS)
@@ -342,14 +350,11 @@ dist_doc_DATA = \
   doc/pcre.txt \
   doc/pcregrep.txt \
   doc/pcretest.txt \
-  doc/perltest.txt \
   AUTHORS \
   COPYING \
   ChangeLog \
-  INSTALL \
   LICENCE \
   NEWS \
-  NON-UNIX-USE \
   README
 
 dist_html_DATA = \
@@ -395,7 +400,7 @@ dist_noinst_DATA = $(pcrecpp_html)
 @WITH_PCRE_CPP_TRUE@html_DATA = $(pcrecpp_html)
 
 # The Libtool libraries to install.  We'll add to this later.
-lib_LTLIBRARIES = libpcre.la libpcreposix.la $(am__append_2)
+lib_LTLIBRARIES = libpcre.la libpcreposix.la $(am__append_3)
 check_SCRIPTS = 
 noinst_SCRIPTS = RunTest RunGrepTest
 
@@ -405,14 +410,22 @@ MAINTAINERCLEANFILES = config-cmake.h.in
 
 # Additional files to bundle with the distribution.
 
+# These files contain maintenance information
+
+# These files are used in the preparation of a release
+
 # These files are to do with building for Virtual Pascal
 
+# These files are usable versions of pcre.h and config.h that are distributed
+# for the benefit of people who are building PCRE manually, without the
+# Autotools support.
+
 # The pcre_printint.src file is #included by some source files, so it must be
-# distributed. In an Autotools world, config.h is generated from config.h.in,
-# but, like pcre.h, we want to include it in the distribution so that users
-# building without Autotools support have an easier time of it.
-EXTRA_DIST = makevp.bat !compile.txt !linklib.txt pcregexp.pas \
-	pcre_printint.src config.h RunTest.bat testdata/grepinput \
+# distributed.
+EXTRA_DIST = doc/perltest.txt NON-UNIX-USE INSTALL PrepareRelease \
+	CleanTxt Detrail 132html Index.html makevp.bat !compile.txt \
+	!linklib.txt pcregexp.pas pcre.h.generic config.h.generic \
+	pcre_printint.src RunTest.bat testdata/grepinput \
 	testdata/grepinput8 testdata/grepinputx testdata/greplist \
 	testdata/grepoutput testdata/grepoutput8 testdata/testinput1 \
 	testdata/testinput2 testdata/testinput3 testdata/testinput4 \
@@ -423,18 +436,10 @@ EXTRA_DIST = makevp.bat !compile.txt !linklib.txt pcregexp.pas \
 	testdata/testoutput8 testdata/testoutput9 perltest.pl \
 	$(pcrecpp_man) CMakeLists.txt config-cmake.h.in
 
-# These are the header files we'll install.  Note that while pcre.h is
-# generated from pcre.h.in, we want to include it in the distribution so
-# that users building without Autotools support have an easier time of it.
-include_HEADERS = pcre.h pcreposix.h $(am__append_1)
-
-# These will be installed too, if C++ support is enabled. We don't
-# distribute pcrecpparg.h nor pcre_stringpiece.h, as these are generated
-# from corresponding .h.in files (which we do distribute).
-@WITH_PCRE_CPP_TRUE@nodist_include_HEADERS = \
-@WITH_PCRE_CPP_TRUE@  pcrecpparg.h \
-@WITH_PCRE_CPP_TRUE@  pcre_stringpiece.h
-
+# These are the header files we'll install. We do not distribute pcre.h because
+# it is generated from pcre.h.in.
+nodist_include_HEADERS = pcre.h $(am__append_1)
+include_HEADERS = pcreposix.h $(am__append_2)
 bin_SCRIPTS = pcre-config
 dftables_SOURCES = dftables.c
 libpcre_la_SOURCES = \
@@ -493,7 +498,7 @@ pcredemo_LDADD = libpcre.la
 
 # We have .pc files for pkg-config users.
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libpcre.pc $(am__append_5)
+pkgconfig_DATA = libpcre.pc $(am__append_6)
 dist_man_MANS = \
   doc/pcre.3 \
   doc/pcre_compile.3 \

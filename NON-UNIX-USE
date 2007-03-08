@@ -3,11 +3,11 @@ Compiling PCRE on non-Unix systems
 
 I (Philip Hazel) have no knowledge of Windows or VMS sytems and how their
 libraries work. The items in the PCRE distribution and Makefile that relate to
-anything other than Unix-like systems have been contributed by PCRE users and 
-are untested by me. 
+anything other than Unix-like systems have been contributed by PCRE users and
+are untested by me.
 
 There are some other comments and files in the Contrib directory on the ftp
-site that you may find useful. See
+site that you may find useful, although a lot of them are now out-of-date. See
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
 
@@ -20,111 +20,69 @@ library. The C++ wrapper functions are a separate issue (see below).
 
 GENERIC INSTRUCTIONS FOR THE C LIBRARY
 
-The following are generic comments about building PCRE. The interspersed
-indented commands are suggestions from Mark Tetrode as to which commands you
-might use on a Windows system to build a static library.
+The following are generic comments about building the PCRE C library "by hand".
 
-(1) Copy or rename the file config.h.in as config.h, and change the macros that
-define HAVE_STRERROR and HAVE_MEMMOVE to define them as 1 rather than 0.
-Unfortunately, because of the way Unix autoconf works, the default setting has
-to be 0. You may also want to make changes to other macros in config.h. In
-particular, if you want to force a specific value for newline, you can define
-the NEWLINE macro. The default is to use '\n', thereby using whatever value
-your compiler gives to '\n'.
+(1) Copy or rename the file config.h.generic as config.h, and edit the macro
+    settings that it contains to whatever is appropriate for your environment.
+    In particular, if you want to force a specific value for newline, you can
+    define the NEWLINE macro.
 
-  rem Mark Tetrode's commands
-  copy config.h.in config.h
-  rem Use write, because notepad cannot handle UNIX files. Change values.
-  write config.h
+    An alternative approach is not to edit config.h, but to use -D on the
+    compiler command line to make any changes that you need.
 
-(2) Compile dftables.c as a stand-alone program, and then run it with
-the single argument "pcre_chartables.c". This generates a set of standard
-character tables and writes them to that file.
+(2) Copy or rename the file pcre.h.generic to pcre.h.
 
-  rem Mark Tetrode's commands
-  rem Compile & run
-  cl -DSUPPORT_UTF8 -DSUPPORT_UCP dftables.c
-  dftables.exe pcre_chartables.c
+(3) Compile dftables.c as a stand-alone program, and then run it with
+    the single argument "pcre_chartables.c". This generates a set of standard
+    character tables and writes them to that file.
 
-(3) Compile the following source files:
+(4) Compile the following source files:
 
-  pcre_chartables.c
-  pcre_compile.c
-  pcre_config.c
-  pcre_dfa_exec.c
-  pcre_exec.c
-  pcre_fullinfo.c
-  pcre_get.c
-  pcre_globals.c
-  pcre_info.c
-  pcre_maketables.c
-  pcre_newline.c
-  pcre_ord2utf8.c
-  pcre_refcount.c
-  pcre_study.c
-  pcre_tables.c
-  pcre_try_flipped.c
-  pcre_ucp_searchfuncs.c
-  pcre_valid_utf8.c
-  pcre_version.c
-  pcre_xclass.c
+      pcre_chartables.c
+      pcre_compile.c
+      pcre_config.c
+      pcre_dfa_exec.c
+      pcre_exec.c
+      pcre_fullinfo.c
+      pcre_get.c
+      pcre_globals.c
+      pcre_info.c
+      pcre_maketables.c
+      pcre_newline.c
+      pcre_ord2utf8.c
+      pcre_refcount.c
+      pcre_study.c
+      pcre_tables.c
+      pcre_try_flipped.c
+      pcre_ucp_searchfuncs.c
+      pcre_valid_utf8.c
+      pcre_version.c
+      pcre_xclass.c
 
-and link them all together into an object library in whichever form your system
-keeps such libraries. This is the pcre C library. If your system has static and
-shared libraries, you may have to do this once for each type.
+    Now link them all together into an object library in whichever form your
+    system keeps such libraries. This is the basic PCRE C library. If your
+    system has static and shared libraries, you may have to do this once for
+    each type.
 
-  rem These comments are out-of-date, referring to a previous release which
-  rem had fewer source files. Replace with the file names from above.
-  rem Mark Tetrode's commands, for a static library
-  rem Compile & lib
-  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
-  lib /OUT:pcre.lib maketables.obj get.obj study.obj pcre.obj
+(5) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
+    library.
 
-(4) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
-library.
+(6) Compile the test program pcretest.c. This needs the functions in the
+    pcre and pcreposix libraries when linking.
 
-  rem Mark Tetrode's commands, for a static library
-  rem Compile & lib
-  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
-  lib /OUT:pcreposix.lib pcreposix.obj
+(7) Run pcretest on the testinput files in the testdata directory, and check
+    that the output matches the corresponding testoutput files. Note that the
+    supplied files are in Unix format, with just LF characters as line
+    terminators. You may need to edit them to change this if your system uses a
+    different convention.
 
-(5) Compile the test program pcretest.c. This needs the functions in the
-pcre and pcreposix libraries when linking.
-
-  rem Mark Tetrode's commands
-  rem compile & link
-  cl /F0x400000 pcretest.c pcre.lib pcreposix.lib
-
-(6) Run pcretest on the testinput files in the testdata directory, and check
-that the output matches the corresponding testoutput files. Note that the
-supplied files are in Unix format, with just LF characters as line terminators.
-You may need to edit them to change this if your system uses a different
-convention.
-
-  rem Mark Tetrode's commands
-  pcretest testdata\testinput1 testdata\myoutput1
-  windiff testdata\testoutput1 testdata\myoutput1
-  pcretest -i testdata\testinput2 testdata\myoutput2
-  windiff testdata\testoutput2 testdata\myoutput2
-  pcretest testdata\testinput3 testdata\myoutput3
-  windiff testdata\testoutput3 testdata\myoutput3
-  pcretest testdata\testinput4 testdata\myoutput4
-  windiff testdata\testoutput4 testdata\myoutput4
-  pcretest testdata\testinput5 testdata\myoutput5
-  windiff testdata\testoutput5 testdata\myoutput5
-  pcretest testdata\testinput6 testdata\myoutput6
-  windiff testdata\testoutput6 testdata\myoutput6
-
-Note that there are now three more tests (7, 8, 9) that did not exist when Mark
-wrote those comments. The test the new pcre_dfa_exec() function.
-
-(7) If you want to use the pcregrep command, compile and link pcregrep.c; it
-uses only the basic PCRE library.
+(8) If you want to use the pcregrep command, compile and link pcregrep.c; it
+    uses only the basic PCRE library (it does not need the pcreposix library).
 
 
 THE C++ WRAPPER FUNCTIONS
 
-The PCRE distribution now contains some C++ wrapper functions and tests,
+The PCRE distribution also contains some C++ wrapper functions and tests,
 contributed by Google Inc. On a system that can use "configure" and "make",
 the functions are automatically built into a library called pcrecpp. It should
 be straightforward to compile the .cc files manually on other systems. The
@@ -132,15 +90,14 @@ files called xxx_unittest.cc are test programs for each of the corresponding
 xxx.cc files.
 
 
-FURTHER REMARKS
+BUILDING FOR VIRTUAL PASCAL
 
-If you have a system without "configure" but where you can use a Makefile, edit
-Makefile.in to create Makefile, substituting suitable values for the variables
-at the head of the file.
-
-Stefan Weber contributed the following files in the distribution for building 
-PCRE for use with VP/Borland: !compile.txt, !linklib.txt, makevp.bat, 
+Stefan Weber contributed the following files in the distribution for building
+PCRE for use with VP/Borland: !compile.txt, !linklib.txt, makevp.bat,
 pcregexp.pas.
+
+
+BUILDING UNDER WINDOWS WITH BCC5.5
 
 Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
 
@@ -152,6 +109,11 @@ Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
   When linking a project with BCC5.5, pcre.lib must be included before any of
   the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
   line.
+
+
+OUT-OF-DATE COMMENTS ABOUT WIN32 BUILDS
+
+[These comments need looking at by someone who knows about Windows.]
 
 Some help in building a Win32 DLL of PCRE in GnuWin32 environments was
 contributed by Paul Sokolovsky. These environments are Mingw32

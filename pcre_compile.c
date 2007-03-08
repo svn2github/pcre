@@ -1267,7 +1267,7 @@ for (;;)
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
-#endif       
+#endif
     }
   }
 }
@@ -1332,7 +1332,7 @@ for (;;)
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
-#endif       
+#endif
     }
   }
 }

@@ -4,65 +4,73 @@ ChangeLog for PCRE
 Version 7.1 05-Mar-07
 ---------------------
 
- 1. Applied Bob Rossi and Daniel G's patches to convert the build system to one 
-    that is more "standard", making use of automake and other autotools. There 
+ 1. Applied Bob Rossi and Daniel G's patches to convert the build system to one
+    that is more "standard", making use of automake and other autotools. There
     is some re-arrangement of the files and adjustment of comments consequent
     on this.
-    
- 2. Part of the patch fixed a problem with the pcregrep tests. The test of -r 
-    for recursive directory scanning broke on some systems because the files 
-    are not scanned in any specific order and on different systems the order 
-    was different. A call to "sort" has been inserted into RunGrepTest for the 
-    approprate test as a short-term fix. In the longer term there may be an 
+
+ 2. Part of the patch fixed a problem with the pcregrep tests. The test of -r
+    for recursive directory scanning broke on some systems because the files
+    are not scanned in any specific order and on different systems the order
+    was different. A call to "sort" has been inserted into RunGrepTest for the
+    approprate test as a short-term fix. In the longer term there may be an
     alternative.
-    
+
  3. I had an email from Eric Raymond about problems translating some of PCRE's
-    man pages to HTML (despite the fact that I distribute HTML pages, some 
-    people do their own conversions for various reasons). The problems 
-    concerned the use of low-level troff macros .br and .in. I have therefore 
-    removed all such uses from the man pages (some were redundant, some could 
-    be replaced by .nf/.fi pairs). The maintain/132html script that I use to 
-    generate HTML has been updated to handle .nf/.fi and to complain if it 
+    man pages to HTML (despite the fact that I distribute HTML pages, some
+    people do their own conversions for various reasons). The problems
+    concerned the use of low-level troff macros .br and .in. I have therefore
+    removed all such uses from the man pages (some were redundant, some could
+    be replaced by .nf/.fi pairs). The maintain/132html script that I use to
+    generate HTML has been updated to handle .nf/.fi and to complain if it
     encounters .br or .in.
-    
+
  4. Updated comments in configure.ac that get placed in config.h.in and also
-    arranged for config.h to be included in the distribution, for the benefit 
-    of those who have to compile without Autotools (compare pcre.h).  
-    
- 5. Updated the support (such as it is) for Virtual Pascal, thanks to Stefan 
-    Weber: (1) pcre_internal.h was missing some function renames; (2) updated 
-    makevp.bat for the current PCRE, using the additional files !compile.txt, 
+    arranged for config.h to be included in the distribution, with the name 
+    config.h.generic, for the benefit of those who have to compile without
+    Autotools (compare pcre.h, which is now distributed as pcre.h.generic).
+
+ 5. Updated the support (such as it is) for Virtual Pascal, thanks to Stefan
+    Weber: (1) pcre_internal.h was missing some function renames; (2) updated
+    makevp.bat for the current PCRE, using the additional files !compile.txt,
     !linklib.txt, and pcregexp.pas.
-    
- 6. A Windows user reported a minor discrepancy with test 2, which turned out 
-    to be caused by a trailing space on an input line that had got lost in his 
+
+ 6. A Windows user reported a minor discrepancy with test 2, which turned out
+    to be caused by a trailing space on an input line that had got lost in his
     copy. The trailing space was an accident, so I've just removed it.
-    
+
  7. Add -Wl,-R... flags in pcre-config.in for *BSD* systems, as I'm told
-    that is needed.  
-    
+    that is needed.
+
  8. Mark ucp_table (in ucptable.h) and ucp_gentype (in pcre_ucp_searchfuncs.c)
     as "const" (a) because they are and (b) because it helps the PHP
     maintainers who have recently made a script to detect big data structures
-    in the php code that should be moved to the .rodata section. I remembered 
-    to update Builducptable as well, so it won't revert if ucptable.h is ever 
+    in the php code that should be moved to the .rodata section. I remembered
+    to update Builducptable as well, so it won't revert if ucptable.h is ever
     re-created.
-    
- 9. Added some extra #ifdef SUPPORT_UTF8 conditionals into pcretest.c, 
+
+ 9. Added some extra #ifdef SUPPORT_UTF8 conditionals into pcretest.c,
     pcre_printint.src, pcre_compile.c, pcre_study.c, and pcre_tables.c, in
-    order to be able to cut out the UTF-8 tables in the latter when UTF-8 
-    support is not required. This saves 1.5-2K of code, which is important in 
+    order to be able to cut out the UTF-8 tables in the latter when UTF-8
+    support is not required. This saves 1.5-2K of code, which is important in
     some applications.
-    
+
     Later: more #ifdefs are needed in pcre_ord2utf8.c and pcre_valid_utf8.c
-    so as not to refer to the tables, even though these functions will never be 
-    called when UTF-8 support is disabled. Otherwise there are problems with a 
-    shared library.  
-    
-10. The emulated memmove() function in pcre_internal.h (provided for those 
-    environments that have neither memmove() nor bcopy()) was defining its 
+    so as not to refer to the tables, even though these functions will never be
+    called when UTF-8 support is disabled. Otherwise there are problems with a
+    shared library.
+
+10. The emulated memmove() function in pcre_internal.h (provided for those
+    environments that have neither memmove() nor bcopy()) was defining its
     arguments as char * instead of void *.
     
+11. The script PrepareRelease is now distributed: it calls 132html, CleanTxt,
+    and Detrail to create the HTML documentation, the .txt form of the man 
+    pages, and it removes trailing spaces from listed files. It also creates 
+    pcre.h.generic and config.h.generic from pcre.h and config.h. In the latter 
+    case, it wraps all the #defines with #ifndefs. This script should be run 
+    before "make dist".
+
 
 Version 7.0 19-Dec-06
 ---------------------

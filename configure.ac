@@ -172,12 +172,14 @@ Some other environments also support the use of "configure". PCRE is written in
 Standard C, but there are a few non-standard things it can cope with, allowing
 it to run on SunOS4 and other "close to standard" systems.
 
-On a system without "configure" you should use the distributed config.h, and
-set up the macros the way you need them.
+If you are going to build PCRE "by hand" on a system without "configure" you
+should copy the distributed config.h.generic to config.h, and then set up the
+macros the way you need them. Alternatively, you can avoid editing by using -D 
+on the compiler command line to set the macro values.
 
-If your system has bcopy() and not memmove(), change the definitions of
-HAVE_BCOPY and HAVE_MEMMOVE. If your system has neither bcopy() nor memmove(),
-leave them both undefined; an emulation function will be used. */])
+PCRE uses memmove() if HAVE_MEMMOVE is set to 1; otherwise it uses bcopy() if
+HAVE_BCOPY is set to 1. If your system has neither bcopy() nor memmove(), set
+them both to 0; an emulation function will be used. */])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -260,9 +262,9 @@ if test "$enable_stack_for_recursion" = "no"; then
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
-  The value of NEWLINE determines the newline character sequence. On 
+  The value of NEWLINE determines the newline character sequence. On
   Unix-like systems, "configure" can be used to override the default,
-  which is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF), 
+  which is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF),
   or -1 (ANY).])
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
@@ -302,8 +304,8 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
   NO_RECURSE is defined) that is used. The value of
   MATCH_LIMIT_RECURSION applies only to recursive calls of match(). To
   have any useful effect, it must be less than the value of
-  MATCH_LIMIT. The default is to use the same value as MATCH_LIMIT. 
-  There is a runtime method for setting a different limit. On systems 
+  MATCH_LIMIT. The default is to use the same value as MATCH_LIMIT.
+  There is a runtime method for setting a different limit. On systems
   that support it, "configure" can be used to override the default.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [

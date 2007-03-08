@@ -394,13 +394,13 @@ do
       character with a value > 255. */
 
       case OP_NCLASS:
-#ifdef SUPPORT_UTF8       
+#ifdef SUPPORT_UTF8
       if (utf8)
         {
         start_bits[24] |= 0xf0;              /* Bits for 0xc4 - 0xc8 */
         memset(start_bits+25, 0xff, 7);      /* Bits for 0xc9 - 0xff */
         }
-#endif         
+#endif
       /* Fall through */
 
       case OP_CLASS:
@@ -431,7 +431,7 @@ do
         /* In non-UTF-8 mode, the two bit maps are completely compatible. */
 
         else
-#endif         
+#endif
           {
           for (c = 0; c < 32; c++) start_bits[c] |= tcode[c];
           }

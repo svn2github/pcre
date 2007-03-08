@@ -2,30 +2,10 @@ The files in the "maintain" directory of the PCRE source contain data, scripts,
 and programs that are used for the maintenance of PCRE, but do not form part of
 the PCRE distribution tarballs.
 
-132html         A Perl script that converts a .1 or .3 man page into HTML. It
-                is called from MakeRelease. It "knows" the relevant troff 
-                constructs that are used in the PCRE man pages.
-
 Builducptable   A Perl script that creates the contents of the ucptable.h file
                 from two Unicode data files, which themselves are downloaded
                 from the Unicode web site. Run this script in the "maintain" 
                 directory.
-                
-CleanTxt        A Perl script that cleans up the output of "nroff -man" by
-                removing backspaces and other redundant text so as to produce
-                a readable .txt file. It is called from MakeRelease.
-                
-Detrail         A Perl script that removes trailing spaces from files. It is
-                called from MakeRelease.
-
-Index.html      A file that is copied as index.html into the doc/html 
-                directory when the HTML documentation is being built. It works
-                like this so that doc/html can be deleted and re-created from
-                scratch.
-                
-MakeRelease     My script for creating a new release. It processes the 
-                documentation man pages into .text and HTML formats before 
-                creating tarballs and putting them in the Releases directory.
                 
 Tech.Notes      Some notes about the internals of the PCRE code.   
                

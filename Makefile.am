@@ -4,14 +4,11 @@ dist_doc_DATA = \
   doc/pcre.txt \
   doc/pcregrep.txt \
   doc/pcretest.txt \
-  doc/perltest.txt \
   AUTHORS \
   COPYING \
   ChangeLog \
-  INSTALL \
   LICENCE \
   NEWS \
-  NON-UNIX-USE \
   README
 
 dist_html_DATA = \
@@ -80,25 +77,46 @@ MAINTAINERCLEANFILES =
 # Additional files to bundle with the distribution.
 EXTRA_DIST =
 
+# These files contain maintenance information
+EXTRA_DIST += \
+  doc/perltest.txt \
+  NON-UNIX-USE \
+  INSTALL
+
+# These files are used in the preparation of a release
+EXTRA_DIST += \
+  PrepareRelease \
+  CleanTxt \
+  Detrail \
+  132html \
+  Index.html
+
 # These files are to do with building for Virtual Pascal
 EXTRA_DIST += \
   makevp.bat \
   !compile.txt \
   !linklib.txt \
-  pcregexp.pas   
+  pcregexp.pas
 
-# These are the header files we'll install.  Note that while pcre.h is
-# generated from pcre.h.in, we want to include it in the distribution so
-# that users building without Autotools support have an easier time of it.
+# These files are usable versions of pcre.h and config.h that are distributed
+# for the benefit of people who are building PCRE manually, without the
+# Autotools support.
+EXTRA_DIST += \
+  pcre.h.generic \
+  config.h.generic
+
+# These are the header files we'll install. We do not distribute pcre.h because
+# it is generated from pcre.h.in.
+nodist_include_HEADERS = \
+  pcre.h
 include_HEADERS = \
-  pcre.h \
   pcreposix.h
 
-# These will be installed too, if C++ support is enabled. We don't
-# distribute pcrecpparg.h nor pcre_stringpiece.h, as these are generated
+# These additional headers will be be installed if C++ support is enabled. We
+# do not distribute pcrecpparg.h or pcre_stringpiece.h, as these are generated
 # from corresponding .h.in files (which we do distribute).
 if WITH_PCRE_CPP
-nodist_include_HEADERS = \
+nodist_include_HEADERS += \
   pcrecpparg.h \
   pcre_stringpiece.h
 include_HEADERS += \
@@ -142,16 +160,14 @@ libpcre_la_SOURCES = \
   ucp.h \
   ucpinternal.h \
   ucptable.h
-  
+
 ## This file is generated as part of the building process, so don't distribute.
 nodist_libpcre_la_SOURCES = \
   pcre_chartables.c
-   
+
 # The pcre_printint.src file is #included by some source files, so it must be
-# distributed. In an Autotools world, config.h is generated from config.h.in,
-# but, like pcre.h, we want to include it in the distribution so that users
-# building without Autotools support have an easier time of it.
-EXTRA_DIST += pcre_printint.src config.h
+# distributed.
+EXTRA_DIST += pcre_printint.src
 
 libpcre_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
 
