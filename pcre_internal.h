@@ -200,9 +200,7 @@ option on the command line. */
 /* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
 define a macro for memmove() if HAVE_MEMMOVE is false, provided that HAVE_BCOPY
 is set. Otherwise, include an emulating function for those systems that have
-neither (there some non-Unix environments where this is the case). This assumes
-that all calls to memmove are moving strings upwards in store, which is the
-case in PCRE. */
+neither (there some non-Unix environments where this is the case). */
 
 #if ! HAVE_MEMMOVE
 #undef  memmove        /* some systems may have a macro */
@@ -215,10 +213,18 @@ pcre_memmove(void *d, const void *s, size_t n)
 size_t i;
 unsigned char *dest = (unsigned char *)d;
 const unsigned char *src = (const unsigned char *)s;
-dest += n;
-src += n;
-for (i = 0; i < n; ++i) *(--dest) = *(--src);
-return (void *)dest;
+if (dest > src)
+  {
+  dest += n;
+  src += n;
+  for (i = 0; i < n; ++i) *(--dest) = *(--src);
+  return (void *)dest;
+  }
+else
+  {
+  for (i = 0; i < n; ++i) *dest++ = *src++;
+  return (void *)(dest - n); 
+  }    
 }
 #define memmove(a, b, c) pcre_memmove(a, b, c)
 #endif   /* not HAVE_BCOPY */

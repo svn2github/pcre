@@ -60,9 +60,16 @@ Version 7.1 05-Mar-07
     called when UTF-8 support is disabled. Otherwise there are problems with a
     shared library.
 
-10. The emulated memmove() function in pcre_internal.h (provided for those
-    environments that have neither memmove() nor bcopy()) was defining its
-    arguments as char * instead of void *.
+10. Fixed two bugs in the emulated memmove() function in pcre_internal.h:
+
+    (a) It was defining its arguments as char * instead of void *.
+     
+    (b) It was assuming that all moves were upwards in memory; this was true 
+        a long time ago when I wrote it, but is no longer the case. 
+
+    The emulated memove() is provided for those environments that have neither
+    memmove() nor bcopy(). I didn't think anyone used it these days, but that 
+    is clearly not the case, as these two bugs were recently reported.
     
 11. The script PrepareRelease is now distributed: it calls 132html, CleanTxt,
     and Detrail to create the HTML documentation, the .txt form of the man 
@@ -105,7 +112,7 @@ Version 7.1 05-Mar-07
         I have added a new /Z option to pcretest that replaces the length and 
         offset values with spaces. This is now used to make test 3 independent 
         of link size.
-
+        
 
 Version 7.0 19-Dec-06
 ---------------------
