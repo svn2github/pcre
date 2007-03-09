@@ -29,8 +29,10 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
+# Check for the availability of UTF-8 support
+
 ./pcretest -C | ./pcregrep "No UTF-8 support" >/dev/null
-no_utf8=$?
+utf8=$?
 
 echo "---------------------------- Test 1 ------------------------------" >testtry
 $valgrind ./pcregrep PATTERN $testdata/grepinput >>testtry
@@ -218,7 +220,7 @@ if [ $? != 0 ] ; then exit 1; fi
 
 # These tests require UTF-8 support
 
-if [ $no_utf8 -ne 0 ] ; then
+if [ $utf8 -ne 0 ] ; then
   echo "Testing pcregrep UTF-8 features"
 
   echo "---------------------------- Test U1 ------------------------------" >testtry

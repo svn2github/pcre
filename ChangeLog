@@ -87,6 +87,24 @@ Version 7.1 05-Mar-07
         matching a wide character, but failed, corruption could cause an
         erroneous result when trying to check for a repeat of the original
         character.
+        
+13. Some tidying changes to the testing mechanism:
+
+    (a) The RunTest script now detects the internal link size and whether there
+        is UTF-8 and UCP support by running ./pcretest -C instead of relying on
+        values substituted by "configure". (The RunGrepTest script already did 
+        this for UTF-8.) The configure.ac script no longer substitutes the 
+        relevant variables.   
+        
+    (b) The debugging options /B and /D in pcretest show the compiled bytecode
+        with length and offset values. This means that the output is different
+        for different internal link sizes. Test 2 is skipped for link sizes
+        other than 2 because of this, bypassing the problem. Unfortunately,
+        there was also a test in test 3 (the locale tests) that used /B and
+        failed for link sizes other than 2. Rather than cut the whole test out, 
+        I have added a new /Z option to pcretest that replaces the length and 
+        offset values with spaces. This is now used to make test 3 independent 
+        of link size.
 
 
 Version 7.0 19-Dec-06

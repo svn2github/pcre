@@ -342,13 +342,6 @@ if test "$enable_ebcdic" = "yes"; then
     "configure", this can be done via --enable-ebcdic.])
 fi
 
-# Here is where pcre specific substs are handled
-# These 3 are only used by RunTest.in.
-# TODO: remove once RunTest uses pcretest -C instead.
-AC_SUBST(LINK_SIZE, $with_link_size)
-AC_SUBST(UTF8, $enable_utf8)
-AC_SUBST(UCP, $enable_unicode_properties)
-
 # Platform specific issues
 NO_UNDEFINED=
 EXPORT_ALL_SYMBOLS=
