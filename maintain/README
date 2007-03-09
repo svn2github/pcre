@@ -1,10 +1,10 @@
-The files in the "maintain" directory of the PCRE source contain data, scripts, 
+The files in the "maint" directory of the PCRE source contain data, scripts, 
 and programs that are used for the maintenance of PCRE, but do not form part of
 the PCRE distribution tarballs.
 
 Builducptable   A Perl script that creates the contents of the ucptable.h file
                 from two Unicode data files, which themselves are downloaded
-                from the Unicode web site. Run this script in the "maintain" 
+                from the Unicode web site. Run this script in the "maint" 
                 directory.
                 
 Tech.Notes      Some notes about the internals of the PCRE code.   
@@ -15,7 +15,7 @@ Unicode.tables  The files in this directory, Scripts.txt and UnicodeData.txt,
 
 ucptest.c       A short C program for testing the Unicode property functions in
                 pcre_ucp_searchfuncs.c, mainly useful after rebuilding the
-                Unicode property table. Compile and run this in the "maintain" 
+                Unicode property table. Compile and run this in the "main" 
                 directory.
             
 ucptestdata     A directory containing two files, testinput1 and testoutput1,

@@ -21,9 +21,9 @@ Version 7.1 05-Mar-07
     people do their own conversions for various reasons). The problems
     concerned the use of low-level troff macros .br and .in. I have therefore
     removed all such uses from the man pages (some were redundant, some could
-    be replaced by .nf/.fi pairs). The maintain/132html script that I use to
-    generate HTML has been updated to handle .nf/.fi and to complain if it
-    encounters .br or .in.
+    be replaced by .nf/.fi pairs). The 132html script that I use to generate
+    HTML has been updated to handle .nf/.fi and to complain if it encounters
+    .br or .in.
 
  4. Updated comments in configure.ac that get placed in config.h.in and also
     arranged for config.h to be included in the distribution, with the name 
