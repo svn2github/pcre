@@ -70,6 +70,23 @@ Version 7.1 05-Mar-07
     pcre.h.generic and config.h.generic from pcre.h and config.h. In the latter 
     case, it wraps all the #defines with #ifndefs. This script should be run 
     before "make dist".
+    
+12. Fixed two fairly obscure bugs concerned with quantified caseless matching
+    with Unicode property support.
+    
+    (a) For a maximizing quantifier, if the two different cases of the 
+        character were of different lengths in their UTF-8 codings (there are 
+        some cases like this - I found 11), and the matching function had to 
+        back up over a mixture of the two cases, it incorrectly assumed they
+        were both the same length.
+        
+    (b) When PCRE was configured to use the heap rather than the stack for 
+        recursion during matching, it was not correctly preserving the data for 
+        the other case of a UTF-8 character when checking ahead for a match 
+        while processing a minimizing repeat. If the check also involved 
+        matching a wide character, but failed, corruption could cause an
+        erroneous result when trying to check for a repeat of the original
+        character.
 
 
 Version 7.0 19-Dec-06

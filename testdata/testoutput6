@@ -1432,4 +1432,18 @@ of case for anything other than the ASCII letters. /
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
  0: \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
+/The next two are special cases where the lengths of the different cases of the 
+same character differ. The first went wrong with heap fram storage; the 2nd
+was broken in all cases./
+
+/^\x{023a}+?(\x{0130}+)/8i
+  \x{023a}\x{2c65}\x{0130}
+ 0: \x{23a}\x{2c65}\x{130}
+ 1: \x{130}
+  
+/^\x{023a}+([^X])/8i
+  \x{023a}\x{2c65}X
+ 0: \x{23a}\x{2c65}
+ 1: \x{2c65}
+ 
 / End of testinput6 /

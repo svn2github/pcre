@@ -299,6 +299,8 @@ typedef struct heapframe {
   int Xprop_category;
   int Xprop_chartype;
   int Xprop_script;
+  int Xoclength; 
+  uschar Xocchars[8]; 
 #endif
 
   int Xctype;
@@ -441,6 +443,8 @@ HEAP_RECURSE:
 #define prop_category      frame->Xprop_category
 #define prop_chartype      frame->Xprop_chartype
 #define prop_script        frame->Xprop_script
+#define oclength           frame->Xoclength
+#define occhars            frame->Xocchars
 #endif
 
 #define ctype              frame->Xctype
@@ -494,6 +498,8 @@ int prop_fail_result;
 int prop_category;
 int prop_chartype;
 int prop_script;
+int oclength;
+uschar occhars[8];
 #endif
 
 int ctype;
@@ -2045,19 +2051,18 @@ for (;;)
 
       if (length > 1)
         {
-        int oclength = 0;
-        uschar occhars[8];
-
 #ifdef SUPPORT_UCP
         unsigned int othercase;
         if ((ims & PCRE_CASELESS) != 0 &&
             (othercase = _pcre_ucp_othercase(fc)) != NOTACHAR)
           oclength = _pcre_ord2utf8(othercase, occhars);
+        else oclength = 0;
 #endif  /* SUPPORT_UCP */
 
         for (i = 1; i <= min; i++)
           {
           if (memcmp(eptr, charptr, length) == 0) eptr += length;
+#ifdef SUPPORT_UCP          
           /* Need braces because of following else */
           else if (oclength == 0) { RRETURN(MATCH_NOMATCH); }
           else
@@ -2065,6 +2070,9 @@ for (;;)
             if (memcmp(eptr, occhars, oclength) != 0) RRETURN(MATCH_NOMATCH);
             eptr += oclength;
             }
+#else   /* without SUPPORT_UCP */
+          else { RRETURN(MATCH_NOMATCH); }
+#endif  /* SUPPORT_UCP */                     
           }
 
         if (min == max) continue;
@@ -2077,6 +2085,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             if (memcmp(eptr, charptr, length) == 0) eptr += length;
+#ifdef SUPPORT_UCP            
             /* Need braces because of following else */
             else if (oclength == 0) { RRETURN(MATCH_NOMATCH); }
             else
@@ -2084,6 +2093,9 @@ for (;;)
               if (memcmp(eptr, occhars, oclength) != 0) RRETURN(MATCH_NOMATCH);
               eptr += oclength;
               }
+#else   /* without SUPPORT_UCP */
+            else { RRETURN (MATCH_NOMATCH); }
+#endif  /* SUPPORT_UCP */
             }
           /* Control never gets here */
           }
@@ -2095,12 +2107,16 @@ for (;;)
             {
             if (eptr > md->end_subject - length) break;
             if (memcmp(eptr, charptr, length) == 0) eptr += length;
+#ifdef SUPPORT_UCP             
             else if (oclength == 0) break;
             else
               {
               if (memcmp(eptr, occhars, oclength) != 0) break;
               eptr += oclength;
               }
+#else   /* without SUPPORT_UCP */
+            else break;
+#endif  /* SUPPORT_UCP */                          
             }
 
           if (possessive) continue;
@@ -2108,7 +2124,12 @@ for (;;)
            {
            RMATCH(rrc, eptr, ecode, offset_top, md, ims, eptrb, 0);
            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+#ifdef SUPPORT_UCP
+           eptr--;
+           BACKCHAR(eptr);
+#else   /* without SUPPORT_UCP */            
            eptr -= length;
+#endif  /* SUPPORT_UCP */            
            }
           RRETURN(MATCH_NOMATCH);
           }
