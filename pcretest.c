@@ -858,7 +858,7 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  Default recursion depth limit = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_STACKRECURSE, &rc);
     printf("  Match recursion uses %s\n", rc? "stack" : "heap");
-    exit(0);
+    goto EXIT;
     }
   else if (strcmp(argv[op], "-help") == 0 ||
            strcmp(argv[op], "--help") == 0)

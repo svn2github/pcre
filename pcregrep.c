@@ -119,8 +119,8 @@ static char *locale = NULL;
 static const unsigned char *pcretables = NULL;
 
 static int  pattern_count = 0;
-static pcre **pattern_list;
-static pcre_extra **hints_list;
+static pcre **pattern_list = NULL;
+static pcre_extra **hints_list = NULL;
 
 static char *include_pattern = NULL;
 static char *exclude_pattern = NULL;
@@ -1866,7 +1866,7 @@ hints_list = (pcre_extra **)malloc(MAX_PATTERN_COUNT * sizeof(pcre_extra *));
 if (pattern_list == NULL || hints_list == NULL)
   {
   fprintf(stderr, "pcregrep: malloc failed\n");
-  return 2;
+  goto EXIT2;  
   }
 
 /* If no patterns were provided by -e, and there is no file provided by -f,
@@ -1885,7 +1885,7 @@ for (j = 0; j < cmd_pattern_count; j++)
   {
   if (!compile_pattern(patterns[j], pcre_options, NULL,
        (j == 0 && cmd_pattern_count == 1)? 0 : j + 1))
-    return 2;
+    goto EXIT2;      
   }
 
 /* Compile the regular expressions that are provided in a file. */
@@ -1909,7 +1909,7 @@ if (pattern_filename != NULL)
       {
       fprintf(stderr, "pcregrep: Failed to open %s: %s\n", pattern_filename,
         strerror(errno));
-      return 2;
+      goto EXIT2;   
       }
     filename = pattern_filename;
     }
@@ -1922,7 +1922,7 @@ if (pattern_filename != NULL)
     linenumber++;
     if (buffer[0] == 0) continue;   /* Skip blank lines */
     if (!compile_pattern(buffer, pcre_options, filename, linenumber))
-      return 2;
+      goto EXIT2;
     }
 
   if (f != stdin) fclose(f);
@@ -1938,7 +1938,7 @@ for (j = 0; j < pattern_count; j++)
     char s[16];
     if (pattern_count == 1) s[0] = 0; else sprintf(s, " number %d", j);
     fprintf(stderr, "pcregrep: Error while studying regex%s: %s\n", s, error);
-    return 2;
+    goto EXIT2;
     }
   }
 
@@ -1952,7 +1952,7 @@ if (exclude_pattern != NULL)
     {
     fprintf(stderr, "pcregrep: Error in 'exclude' regex at offset %d: %s\n",
       errptr, error);
-    return 2;
+    goto EXIT2;
     }
   }
 
@@ -1964,14 +1964,17 @@ if (include_pattern != NULL)
     {
     fprintf(stderr, "pcregrep: Error in 'include' regex at offset %d: %s\n",
       errptr, error);
-    return 2;
+    goto EXIT2;
     }
   }
 
 /* If there are no further arguments, do the business on stdin and exit. */
 
 if (i >= argc)
-  return pcregrep(stdin, (filenames > FN_DEFAULT)? stdin_name : NULL);
+  {
+  rc = pcregrep(stdin, (filenames > FN_DEFAULT)? stdin_name : NULL);
+  goto EXIT;
+  }  
 
 /* Otherwise, work through the remaining arguments as files or directories.
 Pass in the fact that there is only one argument at top level - this suppresses
@@ -1988,7 +1991,22 @@ for (; i < argc; i++)
     else if (frc == 0 && rc == 1) rc = 0;
   }
 
+EXIT:
+if (pattern_list != NULL)
+  {
+  for (i = 0; i < pattern_count; i++) free(pattern_list[i]); 
+  free(pattern_list);
+  } 
+if (hints_list != NULL)
+  {
+  for (i = 0; i < pattern_count; i++) free(hints_list[i]); 
+  free(hints_list);
+  } 
 return rc;
+
+EXIT2:
+rc = 2;
+goto EXIT;
 }
 
 /* End of pcregrep */
