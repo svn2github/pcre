@@ -299,8 +299,8 @@ typedef struct heapframe {
   int Xprop_category;
   int Xprop_chartype;
   int Xprop_script;
-  int Xoclength; 
-  uschar Xocchars[8]; 
+  int Xoclength;
+  uschar Xocchars[8];
 #endif
 
   int Xctype;
@@ -2062,7 +2062,7 @@ for (;;)
         for (i = 1; i <= min; i++)
           {
           if (memcmp(eptr, charptr, length) == 0) eptr += length;
-#ifdef SUPPORT_UCP          
+#ifdef SUPPORT_UCP
           /* Need braces because of following else */
           else if (oclength == 0) { RRETURN(MATCH_NOMATCH); }
           else
@@ -2072,7 +2072,7 @@ for (;;)
             }
 #else   /* without SUPPORT_UCP */
           else { RRETURN(MATCH_NOMATCH); }
-#endif  /* SUPPORT_UCP */                     
+#endif  /* SUPPORT_UCP */
           }
 
         if (min == max) continue;
@@ -2085,7 +2085,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             if (memcmp(eptr, charptr, length) == 0) eptr += length;
-#ifdef SUPPORT_UCP            
+#ifdef SUPPORT_UCP
             /* Need braces because of following else */
             else if (oclength == 0) { RRETURN(MATCH_NOMATCH); }
             else
@@ -2107,7 +2107,7 @@ for (;;)
             {
             if (eptr > md->end_subject - length) break;
             if (memcmp(eptr, charptr, length) == 0) eptr += length;
-#ifdef SUPPORT_UCP             
+#ifdef SUPPORT_UCP
             else if (oclength == 0) break;
             else
               {
@@ -2116,7 +2116,7 @@ for (;;)
               }
 #else   /* without SUPPORT_UCP */
             else break;
-#endif  /* SUPPORT_UCP */                          
+#endif  /* SUPPORT_UCP */
             }
 
           if (possessive) continue;
@@ -2128,9 +2128,9 @@ for (;;)
 #ifdef SUPPORT_UCP
            eptr--;
            BACKCHAR(eptr);
-#else   /* without SUPPORT_UCP */            
+#else   /* without SUPPORT_UCP */
            eptr -= length;
-#endif  /* SUPPORT_UCP */            
+#endif  /* SUPPORT_UCP */
            }
           }
         /* Control never gets here */

@@ -142,7 +142,7 @@ return (ptype == pvalue)? "??" : "??";
 
 /* Make this function work for a regex with integers either byte order.
 However, we assume that what we are passed is a compiled regex. The
-print_lengths flag controls whether offsets and lengths of items are printed. 
+print_lengths flag controls whether offsets and lengths of items are printed.
 They can be turned off from pcretest so that automatic tests on bytecode can be
 written that do not depend on the value of LINK_SIZE. */
 
@@ -181,7 +181,7 @@ for(;;)
   if (print_lengths)
     fprintf(f, "%3d ", (int)(code - codestart));
   else
-    fprintf(f, "    ");    
+    fprintf(f, "    ");
 
   switch(*code)
     {
@@ -219,7 +219,7 @@ for(;;)
     case OP_CBRA:
     case OP_SCBRA:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
-      else fprintf(f, "    ");     
+      else fprintf(f, "    ");
     fprintf(f, "%s %d", OP_names[*code], GET2(code, 1+LINK_SIZE));
     break;
 
@@ -238,7 +238,7 @@ for(;;)
     case OP_SCOND:
     case OP_REVERSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
-      else fprintf(f, "    ");     
+      else fprintf(f, "    ");
     fprintf(f, "%s", OP_names[*code]);
     break;
 
@@ -356,7 +356,7 @@ for(;;)
 
     case OP_RECURSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
-      else fprintf(f, "    ");     
+      else fprintf(f, "    ");
     fprintf(f, "%s", OP_names[*code]);
     break;
 

@@ -26,7 +26,7 @@ Version 7.1 12-Mar-07
     .br or .in.
 
  4. Updated comments in configure.ac that get placed in config.h.in and also
-    arranged for config.h to be included in the distribution, with the name 
+    arranged for config.h to be included in the distribution, with the name
     config.h.generic, for the benefit of those who have to compile without
     Autotools (compare pcre.h, which is now distributed as pcre.h.generic).
 
@@ -63,59 +63,59 @@ Version 7.1 12-Mar-07
 10. Fixed two bugs in the emulated memmove() function in pcre_internal.h:
 
     (a) It was defining its arguments as char * instead of void *.
-     
-    (b) It was assuming that all moves were upwards in memory; this was true 
-        a long time ago when I wrote it, but is no longer the case. 
+
+    (b) It was assuming that all moves were upwards in memory; this was true
+        a long time ago when I wrote it, but is no longer the case.
 
     The emulated memove() is provided for those environments that have neither
-    memmove() nor bcopy(). I didn't think anyone used it these days, but that 
+    memmove() nor bcopy(). I didn't think anyone used it these days, but that
     is clearly not the case, as these two bugs were recently reported.
-    
+
 11. The script PrepareRelease is now distributed: it calls 132html, CleanTxt,
-    and Detrail to create the HTML documentation, the .txt form of the man 
-    pages, and it removes trailing spaces from listed files. It also creates 
-    pcre.h.generic and config.h.generic from pcre.h and config.h. In the latter 
-    case, it wraps all the #defines with #ifndefs. This script should be run 
+    and Detrail to create the HTML documentation, the .txt form of the man
+    pages, and it removes trailing spaces from listed files. It also creates
+    pcre.h.generic and config.h.generic from pcre.h and config.h. In the latter
+    case, it wraps all the #defines with #ifndefs. This script should be run
     before "make dist".
-    
+
 12. Fixed two fairly obscure bugs concerned with quantified caseless matching
     with Unicode property support.
-    
-    (a) For a maximizing quantifier, if the two different cases of the 
-        character were of different lengths in their UTF-8 codings (there are 
-        some cases like this - I found 11), and the matching function had to 
+
+    (a) For a maximizing quantifier, if the two different cases of the
+        character were of different lengths in their UTF-8 codings (there are
+        some cases like this - I found 11), and the matching function had to
         back up over a mixture of the two cases, it incorrectly assumed they
         were both the same length.
-        
-    (b) When PCRE was configured to use the heap rather than the stack for 
-        recursion during matching, it was not correctly preserving the data for 
-        the other case of a UTF-8 character when checking ahead for a match 
-        while processing a minimizing repeat. If the check also involved 
+
+    (b) When PCRE was configured to use the heap rather than the stack for
+        recursion during matching, it was not correctly preserving the data for
+        the other case of a UTF-8 character when checking ahead for a match
+        while processing a minimizing repeat. If the check also involved
         matching a wide character, but failed, corruption could cause an
         erroneous result when trying to check for a repeat of the original
         character.
-        
+
 13. Some tidying changes to the testing mechanism:
 
     (a) The RunTest script now detects the internal link size and whether there
         is UTF-8 and UCP support by running ./pcretest -C instead of relying on
-        values substituted by "configure". (The RunGrepTest script already did 
-        this for UTF-8.) The configure.ac script no longer substitutes the 
-        relevant variables.   
-        
+        values substituted by "configure". (The RunGrepTest script already did
+        this for UTF-8.) The configure.ac script no longer substitutes the
+        relevant variables.
+
     (b) The debugging options /B and /D in pcretest show the compiled bytecode
         with length and offset values. This means that the output is different
         for different internal link sizes. Test 2 is skipped for link sizes
         other than 2 because of this, bypassing the problem. Unfortunately,
         there was also a test in test 3 (the locale tests) that used /B and
-        failed for link sizes other than 2. Rather than cut the whole test out, 
-        I have added a new /Z option to pcretest that replaces the length and 
-        offset values with spaces. This is now used to make test 3 independent 
+        failed for link sizes other than 2. Rather than cut the whole test out,
+        I have added a new /Z option to pcretest that replaces the length and
+        offset values with spaces. This is now used to make test 3 independent
         of link size. (Test 2 will be tidied up later.)
-        
-14. If erroroffset was passed as NULL to pcre_compile, it provoked a 
+
+14. If erroroffset was passed as NULL to pcre_compile, it provoked a
     segmentation fault instead of returning the appropriate error message.
-        
+
 
 Version 7.0 19-Dec-06
 ---------------------

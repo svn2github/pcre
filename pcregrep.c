@@ -1866,7 +1866,7 @@ hints_list = (pcre_extra **)malloc(MAX_PATTERN_COUNT * sizeof(pcre_extra *));
 if (pattern_list == NULL || hints_list == NULL)
   {
   fprintf(stderr, "pcregrep: malloc failed\n");
-  goto EXIT2;  
+  goto EXIT2;
   }
 
 /* If no patterns were provided by -e, and there is no file provided by -f,
@@ -1885,7 +1885,7 @@ for (j = 0; j < cmd_pattern_count; j++)
   {
   if (!compile_pattern(patterns[j], pcre_options, NULL,
        (j == 0 && cmd_pattern_count == 1)? 0 : j + 1))
-    goto EXIT2;      
+    goto EXIT2;
   }
 
 /* Compile the regular expressions that are provided in a file. */
@@ -1909,7 +1909,7 @@ if (pattern_filename != NULL)
       {
       fprintf(stderr, "pcregrep: Failed to open %s: %s\n", pattern_filename,
         strerror(errno));
-      goto EXIT2;   
+      goto EXIT2;
       }
     filename = pattern_filename;
     }
@@ -1974,7 +1974,7 @@ if (i >= argc)
   {
   rc = pcregrep(stdin, (filenames > FN_DEFAULT)? stdin_name : NULL);
   goto EXIT;
-  }  
+  }
 
 /* Otherwise, work through the remaining arguments as files or directories.
 Pass in the fact that there is only one argument at top level - this suppresses
@@ -1994,14 +1994,14 @@ for (; i < argc; i++)
 EXIT:
 if (pattern_list != NULL)
   {
-  for (i = 0; i < pattern_count; i++) free(pattern_list[i]); 
+  for (i = 0; i < pattern_count; i++) free(pattern_list[i]);
   free(pattern_list);
-  } 
+  }
 if (hints_list != NULL)
   {
-  for (i = 0; i < pattern_count; i++) free(hints_list[i]); 
+  for (i = 0; i < pattern_count; i++) free(hints_list[i]);
   free(hints_list);
-  } 
+  }
 return rc;
 
 EXIT2:

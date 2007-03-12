@@ -249,7 +249,11 @@ multiple copies of the same substring.
 </P>
 <P>
 The <b>/B</b> modifier is a debugging feature. It requests that <b>pcretest</b>
-output a representation of the compiled byte code after compilation.
+output a representation of the compiled byte code after compilation. Normally
+this information contains length and offset values; however, if <b>/Z</b> is
+also present, this data is replaced by spaces. This is a special feature for
+use in the automatic test scripts; it ensures that the same output is generated
+for different internal link sizes.
 </P>
 <P>
 The <b>/L</b> modifier must be followed directly by the name of a locale, for

@@ -4,10 +4,10 @@ README file for PCRE (Perl-compatible regular expression library)
 The latest release of PCRE is always available from
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
-  
+
 There is a mailing list for discussion about the development of PCRE at
-  
-  pcre-dev@exim.org 
+
+  pcre-dev@exim.org
 
 Please read the NEWS file if you are upgrading from a previous release.
 The contents of this README file are:
@@ -74,11 +74,11 @@ documentation is supplied in two other forms:
      those that summarize individual functions. The other two are the text
      forms of the section 1 man pages for the pcregrep and pcretest commands.
      These text forms are provided for ease of scanning with text editors or
-     similar tools. They are installed in <prefix>/share/doc/pcre, where 
+     similar tools. They are installed in <prefix>/share/doc/pcre, where
      <prefix> is the installation prefix (defaulting to /usr/local).
 
   2. A set of files containing all the documentation in HTML form, hyperlinked
-     in various ways, and rooted in a file called index.html, is distributed in 
+     in various ways, and rooted in a file called index.html, is distributed in
      doc/html and installed in <prefix>/share/doc/pcre/html.
 
 
@@ -234,7 +234,7 @@ The "configure" script builds the following files for the basic C library:
 . RunTest is a script for running tests on the basic C library
 . RunGrepTest is a script for running tests on the pcregrep command
 
-Versions of config.h and pcre.h are distributed in the PCRE tarballs under 
+Versions of config.h and pcre.h are distributed in the PCRE tarballs under
 the names config.h.generic and pcre.h.generic. These are provided for the
 benefit of those who have to built PCRE without the benefit of "configure". If
 you use "configure", the .generic versions are not used.
@@ -395,14 +395,14 @@ use the workaround of specifying the following environment variable prior to
 running the "configure" script:
 
   CXXLDFLAGS="-lstd_v2 -lCsup_v2"
-  
+
 
 Making new tarballs
 -------------------
 
-The command "make dist" creates three PCRE tarballs, in tar.gz, tar.bz2, and 
-zip formats. However, if you have modified any of the man page sources in the 
-doc directory, you should first run the PrepareRelease script. This re-creates 
+The command "make dist" creates three PCRE tarballs, in tar.gz, tar.bz2, and
+zip formats. However, if you have modified any of the man page sources in the
+doc directory, you should first run the PrepareRelease script. This re-creates
 the .txt and HTML forms of the documentation from the man pages.
 
 

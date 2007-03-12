@@ -9,7 +9,7 @@ dnl empty.
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [1])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2007-03-05])
+m4_define(pcre_date, [2007-03-12])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -174,7 +174,7 @@ it to run on SunOS4 and other "close to standard" systems.
 
 If you are going to build PCRE "by hand" on a system without "configure" you
 should copy the distributed config.h.generic to config.h, and then set up the
-macros the way you need them. Alternatively, you can avoid editing by using -D 
+macros the way you need them. Alternatively, you can avoid editing by using -D
 on the compiler command line to set the macro values.
 
 PCRE uses memmove() if HAVE_MEMMOVE is set to 1; otherwise it uses bcopy() if

@@ -5389,7 +5389,7 @@ REPLACING PARTS OF STRINGS
 AUTHOR
 
        The C++ wrapper was contributed by Google Inc.
-       Copyright (c) 2006 Google Inc.
+       Copyright (c) 2007 Google Inc.
 
 
 REVISION
@@ -5525,7 +5525,7 @@ PCRE DISCUSSION OF STACK USAGE
        ter. For a long string, a lot of stack is required. Consider  now  this
        rewritten pattern, which matches exactly the same strings:
 
-         ([^<]++|<(?!inet))
+         ([^<]++|<(?!inet))+
 
        This  uses very much less stack, because runs of characters that do not
        contain "<" are "swallowed" in one item inside the parentheses.  Recur-
@@ -5587,7 +5587,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 March 2007
+       Last updated: 12 March 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 

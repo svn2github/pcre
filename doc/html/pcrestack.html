@@ -63,7 +63,7 @@ frame for each matched character. For a long string, a lot of stack is
 required. Consider now this rewritten pattern, which matches exactly the same
 strings:
 <pre>
-  ([^&#60;]++|&#60;(?!inet))
+  ([^&#60;]++|&#60;(?!inet))+
 </pre>
 This uses very much less stack, because runs of characters that do not contain
 "&#60;" are "swallowed" in one item inside the parentheses. Recursion happens only
@@ -139,7 +139,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 12 March 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

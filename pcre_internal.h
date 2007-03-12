@@ -223,8 +223,8 @@ if (dest > src)
 else
   {
   for (i = 0; i < n; ++i) *dest++ = *src++;
-  return (void *)(dest - n); 
-  }    
+  return (void *)(dest - n);
+  }
 }
 #define memmove(a, b, c) pcre_memmove(a, b, c)
 #endif   /* not HAVE_BCOPY */
