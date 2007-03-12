@@ -2120,10 +2120,11 @@ for (;;)
             }
 
           if (possessive) continue;
-          while (eptr >= pp)
+          for(;;)
            {
            RMATCH(rrc, eptr, ecode, offset_top, md, ims, eptrb, 0);
            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+           if (eptr == pp) RRETURN(MATCH_NOMATCH);
 #ifdef SUPPORT_UCP
            eptr--;
            BACKCHAR(eptr);
@@ -2131,7 +2132,6 @@ for (;;)
            eptr -= length;
 #endif  /* SUPPORT_UCP */            
            }
-          RRETURN(MATCH_NOMATCH);
           }
         /* Control never gets here */
         }
