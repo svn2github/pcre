@@ -52,7 +52,7 @@ frame for each matched character. For a long string, a lot of stack is
 required. Consider now this rewritten pattern, which matches exactly the same
 strings:
 .sp
-  ([^<]++|<(?!inet))
+  ([^<]++|<(?!inet))+
 .sp
 This uses very much less stack, because runs of characters that do not contain
 "<" are "swallowed" in one item inside the parentheses. Recursion happens only
@@ -129,6 +129,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 12 March 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

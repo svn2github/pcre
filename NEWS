@@ -1,7 +1,17 @@
 News about PCRE releases
 ------------------------
 
-Release 7.0 23-Nov-06
+
+Release 7.1 12-Mar-07
+---------------------
+
+There are no new features in this release. A few bugs are fixed (see ChangeLog
+for details), but the major change is a complete re-implementation of the build
+system. This now has full Autotools support and so is now "standard" in some 
+sense. It should help with compiling PCRE in a wide variety of environments.
+
+
+Release 7.0 19-Dec-06
 ---------------------
 
 This release has a new major number because there have been some internal

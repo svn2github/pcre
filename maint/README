@@ -1,6 +1,20 @@
+MAINTENANCE README FOR PCRE
+---------------------------
+
 The files in the "maint" directory of the PCRE source contain data, scripts, 
-and programs that are used for the maintenance of PCRE, but do not form part of
-the PCRE distribution tarballs.
+and programs that are used for the maintenance of PCRE, but which do not form
+part of the PCRE distribution tarballs. This document describes these files and 
+also contains some notes for maintainers. Its contents are:
+
+  Files in the maint directory
+  Updating to a new Unicode release
+  Preparing for a PCRE release
+  Making a PCRE release
+  Long-term ideas (wish list)  
+
+
+Files in the maint directory
+----------------------------
 
 Builducptable   A Perl script that creates the contents of the ucptable.h file
                 from two Unicode data files, which themselves are downloaded
@@ -15,7 +29,7 @@ Unicode.tables  The files in this directory, Scripts.txt and UnicodeData.txt,
 
 ucptest.c       A short C program for testing the Unicode property functions in
                 pcre_ucp_searchfuncs.c, mainly useful after rebuilding the
-                Unicode property table. Compile and run this in the "main" 
+                Unicode property table. Compile and run this in the "maint" 
                 directory.
             
 ucptestdata     A directory containing two files, testinput1 and testoutput1,
@@ -29,10 +43,235 @@ utf8.c          A short, freestanding C program for converting a Unicode code
                 them as a UTF-8 character and outputs the equivalent code point 
                 in hex. 
                 
+
+Updating to a new Unicode release
+---------------------------------
+
 When there is a new release of Unicode, the files in Unicode.tables must be 
 refreshed from the web site, and the Buildupctable script can then be run to 
 generate a new version of ucptable.h. The ucptest program can be used to check 
 that the resulting table works properly, using the data files in ucptestdata to 
 check a number of test characters. 
-             
-**** 
+
+
+Preparing for a PCRE release
+----------------------------
+
+This section contains a checklist of things that I consult before building a
+distribution for a new release.
+
+. Ensure that the version number and version date are correct in configure.ac.
+
+. Run ./autogen.sh to ensure everything is up-to-date.
+
+. Compile and test with many different config options, and combinations of 
+  options:
+  
+   * Totally standard ./configure with no options
+   * --disable-shared
+   * --disable-static
+   * --enable-utf8
+   * --enable-unicode-properties
+   * --disable-cpp
+   * --with-link-size=3 (occasionally check with 4 as well)       
+   * --disable-stack-for-recursion 
+   * --enable-newline-is-any 
+  
+  I've never automated this, but perhaps I should. The newline testing could be 
+  enhanced; at present, some tests fail unless plain LF is a newline. 
+  
+. Run perltest.pl on the test data for tests 1 and 4. The output should match
+  the PCRE test output, apart from the version identification at the top. The 
+  other tests are not Perl-compatible (they use various special PCRE options).
+
+. Test on a number of different operating systems. In particular, at the moment 
+  I can test on Solaris, using Sun's cc compiler (as a change from gcc). Adding 
+  -xarch=v9 to the cc options does a 64-bit test, but it also needs -S 64 for 
+  pcretest to increase the stack size for test 2. I also test on FreeBSD and 
+  Linux (where I develop). 
+
+. Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
+  valgrind", though that takes quite a long time.
+  
+. It can also useful to test with Electric Fence, though the fact that it 
+  grumbles for missing free() calls can be a nuisance. (A missing free() in 
+  pcretest is hardly a big problem.) To build with EF, use:
+    
+    LIBS='/usr/lib/libefence.a -lpthread' with ./configure.
+
+  Then all normal runs use it to check for buffer overflow. Also run everything
+  with:
+  
+    EF_PROTECT_BELOW=1 <whatever>  
+    
+  because there have been problems with lookbehinds that looked too far. 
+  
+. Test with the emulated memmove() function by undefining HAVE_MEMMOVE and 
+  HAVE_BCOPY in config.h.
+
+. Documentation: check AUTHORS, COPYING, ChangeLog (check date), INSTALL, 
+  LICENCE, NEWS (check date), NON-UNIX-USE, and README. Many of these won't 
+  need changing, but over the long term things do change.
+  
+. Man pages: Check all man pages for \ not followed by e or f or " because
+  that indicates a markup error.
+
+
+Making a PCRE release
+---------------------
+
+Run PrepareRelease and commit the files that it changes (by removing trailing
+spaces). Then run "make dist" to create the tarballs and the zipball.
+
+Don't forget to update Freshmeat when the new release is out, and to tell
+webmaster@pcre.org and the mailing list.
+
+
+Future ideas (wish list)
+------------------------
+
+This section records a list of ideas so that they do not get forgotten. They
+vary enormously in their usefulness and potential for implementation. Some are 
+very sensible; some are rather wacky. Some have been on this list for years;
+others are relatively new.
+
+. Optimization
+
+  There are always ideas for new optimizations so as to speed up pattern 
+  matching. Most of them try to save work by recognizing a non-match without 
+  having to scan all the possibilities. These are some that I've recorded:
+
+  * /((A{0,5}){0,5}){0,5}(something complex)/ on a non-matching string is very
+    slow, though Perl is fast. Can we speed up somehow? Convert to {0,125}?
+    OTOH, this is pathological - the user could easily fix it. 
+    
+  * Turn ={4} into ==== ? (for speed). I once did an experiment, and it seems
+    to have little effect, and maybe makes things worse.
+  
+  * "Ends with literal string" - note that a single character doesn't gain much 
+    over the existing "required byte" (reqbyte) feature that just saves one
+    byte.
+  
+  * These probably need to go in study():
+  
+    o Remember an initial string rather than just 1 char?
+    
+    o A required byte from alternatives - not just the last char, but an
+      earlier one if common to all alternatives.
+      
+    o Minimum length of subject needed.
+    
+    o Friedl contains other ideas.
+    
+. If Perl gets to a consistent state over the settings of capturing sub-
+  patterns inside repeats, see if we can match it. One example of the
+  difference is the matching of /(main(O)?)+/ against mainOmain, where PCRE
+  leaves $2 set. In Perl, it's unset. Changing this in PCRE will be very hard
+  because I think it needs much more state to be remembered.
+  
+. Perl 6 will be a revolution. Is it a revolution too far for PCRE? 
+
+. Unicode
+
+  * Note that in Perl, \s matches \pZ and similarly for \d, \w and the POSIX 
+    character classes. For the moment, I've chosen not to support this for 
+    backward compatibility, for speed, and because it would be messy to 
+    implement.
+      
+  * A different approach to Unicode might be to use a typedef to do everything
+    in unsigned shorts instead of unsigned chars. Actually, we'd have to have a
+    new typedef to distinguish data from bits of compiled pattern that are in
+    bytes, I think. There would need to be conversion functions in and out. I
+    don't think this is particularly trivial - and anyway, Unicode now has
+    characters that need more than 16 bits, so is this at all sensible?
+  
+  * There has been a request for direct support of 16-bit characters and
+    UTF-16. However, since Unicode is moving beyond purely 16-bit characters,
+    is this worth it at all? One possible way of handling 16-bit characters
+    would be to "load" them in the same way that UTF-8 characters are loaded.
+    
+. Allow errorptr and erroroffset to be NULL. I don't like this idea.
+
+. Line endings:
+
+  * Option to use NUL as a line terminator in subject strings. This could now
+    be done relatively easily since the extension to support LF, CR, and CRLF.
+    If this is done, a suitable option for pcregrep is also required. 
+    
+. Option to provide the pattern with a length instead of with a NUL terminator.
+  This probably affects quite a few places in the code. 
+
+. Catch SIGSEGV for stack overflows?  
+  
+. "Cut" as described in Jeffrey Friedl's book, p364: \v and \V. The definitions
+  aren't yet clear enough for me. \v flushes saved states so that no
+  backtracking to anything earlier can happen; \V says "no more bumpalong", but
+  does it fail the current match? As described in the book, these aren't really
+  "cut" as in Prolog, are they? NOTE: (a) PCRE once had "cut", but it was
+  removed when atomic groups were introduced. (b) Perl 5.10 has some (*PRUNE) 
+  features -- see below.
+
+. A feature to suspend a match via a callout was once requested.
+
+. Option to convert results into character offsets and character lengths.
+
+. Option for pcregrep to scan only the start of a file. I am not keen - this is 
+  the job of "head".
+  
+. A (non-Unix) user wanted pcregrep options to (a) list a file name just once, 
+  preceded by a blank line, instead of adding it to every matched line, and (b)
+  support --outputfile=name.
+  
+. Consider making UTF-8 and UCP the default for PCRE n.0 for some n > 7.
+
+. Add a user pointer to pcre_malloc/free functions -- some option would be 
+  needed to retain backward compatibility.
+  
+. Define a union for the results from pcre_fullinfo().
+
+. Provide a "random access to the subject" facility so that the way in which it 
+  is stored is independent of PCRE. For efficiency, it probably isn't possible 
+  to switch this dynamically. It would have to be specified when PCRE was
+  compiled. PCRE would then call a function every time it wanted a character.
+  
+. There are new (*PRUNE) facilities in Perl 5.10, some of which it might be
+  relatively easy to implement.
+  
+. Also in Perl 5.10 are relative subroutine references (?&-1) and (?&+1) which
+  I didn't know about when I added some 5.10 features for PCRE 7.0. What about
+  (?(-1)... as a condition? That's an obvious extension, even if Perl 5.10 
+  doesn't have it.
+  
+. Wild thought: the ability to compile from PCRE's internal byte code to a real
+  FSM and a very fast (third) matcher to process the result. There would be
+  even more restrictions than for pcre_dfa_exec(), however. This is not easy.
+  
+. Should pcretest have some private locale data, to avoid relying on the
+  available locales for the test data, since different OS have different ideas?
+  This won't be as thorough a test, but perhaps that doesn't really matter.
+  
+. pcregrep: add -rs for a sorted recurse? Having to store file names and sort 
+  them will of course slow it down.
+
+. Re-arrange test 2: take out the link-size dependent stuff for a separate test 
+  that is run only when the link size *is* 2; leave in some non-numbered 
+  debugging tests using the new /Z feature.
+  
+. Stan Switzer's goto replacement for longjmp, which is apparently very slow on
+  OS-X. This is used when stack recursion is disabled. It would be worth doing 
+  some timing tests on other OS.
+
+. Someone suggested --disable-callout to save code space when callouts are 
+  never wanted. This seems rather marginal.  
+
+. Automate some of the testing before release into a script that compiles with
+  different options and runs the tests in each case.
+  
+. How about distributing a fixed pcre_chartables.c file and abandoning the
+  on-the-fly generation using dftables. This will make cross-compiling easier,
+  and in any case, locales are going out of fashion. 
+
+Philip Hazel
+Email local part: ph10
+Email domain: cam.ac.uk
+Last updated: 12 March 2007

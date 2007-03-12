@@ -1,11 +1,11 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.1 05-Mar-07
+Version 7.1 12-Mar-07
 ---------------------
 
  1. Applied Bob Rossi and Daniel G's patches to convert the build system to one
-    that is more "standard", making use of automake and other autotools. There
+    that is more "standard", making use of automake and other Autotools. There
     is some re-arrangement of the files and adjustment of comments consequent
     on this.
 
@@ -111,10 +111,10 @@ Version 7.1 05-Mar-07
         failed for link sizes other than 2. Rather than cut the whole test out, 
         I have added a new /Z option to pcretest that replaces the length and 
         offset values with spaces. This is now used to make test 3 independent 
-        of link size.
+        of link size. (Test 2 will be tidied up later.)
         
 14. If erroroffset was passed as NULL to pcre_compile, it provoked a 
-    segmentation fault instead of giving the appropriate error message.
+    segmentation fault instead of returning the appropriate error message.
         
 
 Version 7.0 19-Dec-06

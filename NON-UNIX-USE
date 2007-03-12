@@ -3,8 +3,7 @@ Compiling PCRE on non-Unix systems
 
 I (Philip Hazel) have no knowledge of Windows or VMS sytems and how their
 libraries work. The items in the PCRE distribution and Makefile that relate to
-anything other than Unix-like systems have been contributed by PCRE users and
-are untested by me.
+anything other than Unix-like systems are untested by me.
 
 There are some other comments and files in the Contrib directory on the ftp
 site that you may find useful, although a lot of them are now out-of-date. See
@@ -30,7 +29,7 @@ The following are generic comments about building the PCRE C library "by hand".
     An alternative approach is not to edit config.h, but to use -D on the
     compiler command line to make any changes that you need.
 
-(2) Copy or rename the file pcre.h.generic to pcre.h.
+(2) Copy or rename the file pcre.h.generic as pcre.h.
 
 (3) Compile dftables.c as a stand-alone program, and then run it with
     the single argument "pcre_chartables.c". This generates a set of standard
