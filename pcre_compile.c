@@ -5100,7 +5100,7 @@ if (errorcodeptr != NULL) *errorcodeptr = ERR0;
 if (erroroffset == NULL)
   {
   errorcode = ERR16;
-  goto PCRE_EARLY_ERROR_RETURN;
+  goto PCRE_EARLY_ERROR_RETURN2;
   }
 
 *erroroffset = 0;
@@ -5113,7 +5113,7 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
      (*erroroffset = _pcre_valid_utf8((uschar *)pattern, -1)) >= 0)
   {
   errorcode = ERR44;
-  goto PCRE_UTF8_ERROR_RETURN;
+  goto PCRE_EARLY_ERROR_RETURN2;
   }
 #else
 if ((options & PCRE_UTF8) != 0)
@@ -5325,9 +5325,7 @@ if (errorcode != 0)
   (pcre_free)(re);
   PCRE_EARLY_ERROR_RETURN:
   *erroroffset = ptr - (const uschar *)pattern;
-#ifdef SUPPORT_UTF8
-  PCRE_UTF8_ERROR_RETURN:
-#endif
+  PCRE_EARLY_ERROR_RETURN2:
   *errorptr = error_texts[errorcode];
   if (errorcodeptr != NULL) *errorcodeptr = errorcode;
   return NULL;

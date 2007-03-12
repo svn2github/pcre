@@ -113,6 +113,9 @@ Version 7.1 05-Mar-07
         offset values with spaces. This is now used to make test 3 independent 
         of link size.
         
+14. If erroroffset was passed as NULL to pcre_compile, it provoked a 
+    segmentation fault instead of giving the appropriate error message.
+        
 
 Version 7.0 19-Dec-06
 ---------------------
