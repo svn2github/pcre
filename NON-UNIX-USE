@@ -92,8 +92,8 @@ xxx.cc files.
 BUILDING FOR VIRTUAL PASCAL
 
 Stefan Weber contributed the following files in the distribution for building
-PCRE for use with VP/Borland: !compile.txt, !linklib.txt, makevp.bat,
-pcregexp.pas.
+PCRE for use with VP/Borland: makevp-compile.txt, makevp-linklib.txt,
+makevp.bat, pcregexp.pas.
 
 
 BUILDING UNDER WINDOWS WITH BCC5.5

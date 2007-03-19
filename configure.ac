@@ -193,7 +193,7 @@ then
 AC_LANG_PUSH(C++)
 
 # We could be more clever here, given we're doing AC_SUBST with this
-# (eg set a var to be the name of the include file we want).  But we're not
+# (eg set a var to be the name of the include file we want). But we're not
 # so it's easy to change back to 'regular' autoconf vars if we needed to.
 AC_CHECK_HEADERS(string, [pcre_have_cpp_headers="1"],
                          [pcre_have_cpp_headers="0"])
@@ -251,7 +251,7 @@ fi
 if test "$enable_stack_for_recursion" = "no"; then
   AC_DEFINE([NO_RECURSE], [], [
     PCRE uses recursive function calls to handle backtracking while
-    matching.  This can sometimes be a problem on systems that have
+    matching. This can sometimes be a problem on systems that have
     stacks of limited size. Define NO_RECURSE to get a version that
     doesn't use recursion in the match() function; instead it creates
     its own stack by steam using pcre_recurse_malloc() to obtain memory

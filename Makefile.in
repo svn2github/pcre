@@ -405,7 +405,8 @@ noinst_SCRIPTS = RunTest RunGrepTest
 CLEANFILES = pcre_chartables.c testsavedregex teststderr testtry
 MAINTAINERCLEANFILES = config-cmake.h.in
 
-# Additional files to bundle with the distribution.
+# Additional files to bundle with the distribution, over and above what 
+# the Autotools include by default.
 
 # These files contain maintenance information
 
@@ -419,8 +420,8 @@ MAINTAINERCLEANFILES = config-cmake.h.in
 
 # The pcre_printint.src file is #included by some source files, so it must be
 # distributed.
-EXTRA_DIST = doc/perltest.txt NON-UNIX-USE INSTALL PrepareRelease \
-	CleanTxt Detrail 132html Index.html makevp.bat !compile.txt \
+EXTRA_DIST = doc/perltest.txt NON-UNIX-USE PrepareRelease CleanTxt \
+	Detrail 132html doc/index.html.src makevp.bat !compile.txt \
 	!linklib.txt pcregexp.pas pcre.h.generic config.h.generic \
 	pcre_printint.src RunTest.bat testdata/grepinput \
 	testdata/grepinput8 testdata/grepinputx testdata/greplist \

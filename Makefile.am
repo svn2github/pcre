@@ -74,14 +74,15 @@ noinst_PROGRAMS =
 CLEANFILES =
 MAINTAINERCLEANFILES =
 
-# Additional files to bundle with the distribution.
+# Additional files to bundle with the distribution, over and above what 
+# the Autotools include by default.
 EXTRA_DIST =
 
 # These files contain maintenance information
 EXTRA_DIST += \
   doc/perltest.txt \
   NON-UNIX-USE \
-  INSTALL
+  HACKING 
 
 # These files are used in the preparation of a release
 EXTRA_DIST += \
@@ -89,13 +90,13 @@ EXTRA_DIST += \
   CleanTxt \
   Detrail \
   132html \
-  Index.html
+  doc/index.html.src
 
 # These files are to do with building for Virtual Pascal
 EXTRA_DIST += \
   makevp.bat \
-  !compile.txt \
-  !linklib.txt \
+  makevp-compile.txt \
+  makevp-linklib.txt \
   pcregexp.pas
 
 # These files are usable versions of pcre.h and config.h that are distributed

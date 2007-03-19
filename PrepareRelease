@@ -17,9 +17,10 @@
 
 # Detrail     A Perl script that removes trailing spaces from files.
 
-# Index.html  A file that is copied as index.html into the doc/html
-#             directory when the HTML documentation is built. It works like
-#             this so that doc/html can be deleted and re-created from scratch.
+# doc/index.html.src  
+#             A file that is copied as index.html into the doc/html directory
+#             when the HTML documentation is built. It works like this so that
+#             doc/html can be deleted and re-created from scratch.
 
 
 # First, sort out the documentation
@@ -71,7 +72,7 @@ done
 
 echo "Making HTML documentation"
 /bin/rm html/*
-cp ../Index.html html/index.html
+cp index.html.src html/index.html
 
 for file in *.1 ; do
   base=`basename $file .1`

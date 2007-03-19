@@ -582,7 +582,7 @@ The distribution should contain the following files:
   ChangeLog              log of changes to the code
   CleanTxt               script to clean nroff output for txt man pages
   Detrail                script to remove trailing spaces
-  Index.html             the base HTML page
+  HACKING                some notes about the internals of PCRE 
   INSTALL                generic installation instructions
   LICENCE                conditions for the use of PCRE
   COPYING                the same, using GNU's standard name
@@ -606,6 +606,7 @@ The distribution should contain the following files:
                          )   automake
   doc/*.3                man page sources for the PCRE functions
   doc/*.1                man page sources for pcregrep and pcretest
+  doc/index.html.src     the base HTML page
   doc/html/*             HTML documentation
   doc/pcre.txt           plain text version of the man pages
   doc/pcretest.txt       plain text documentation of test program
@@ -634,8 +635,8 @@ The distribution should contain the following files:
 (E) Auxiliary files for VPASCAL
 
   makevp.bat
-  !compile.txt
-  !linklib.txt
+  makevp-compile.txt
+  makevp-linklib.txt
   pcregexp.pas
 
 (F) Auxiliary files for building PCRE "by hand"

@@ -1,4 +1,10 @@
 <html>
+<!-- This is a manually maintained file that is the root of the HTML version of 
+     the PCRE documentation. When the HTML documents are built from the man 
+     page versions, the entire doc/html directory is emptied, this file is then 
+     copied into doc/html/index.html, and the remaining files therein are 
+     created by the 132html script.
+-->      
 <head>
 <title>PCRE specification</title>
 </head>

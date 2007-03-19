@@ -32,8 +32,8 @@ Version 7.1 12-Mar-07
 
  5. Updated the support (such as it is) for Virtual Pascal, thanks to Stefan
     Weber: (1) pcre_internal.h was missing some function renames; (2) updated
-    makevp.bat for the current PCRE, using the additional files !compile.txt,
-    !linklib.txt, and pcregexp.pas.
+    makevp.bat for the current PCRE, using the additional files
+    makevp-compile.txt, makevp-linklib.txt, and pcregexp.pas.
 
  6. A Windows user reported a minor discrepancy with test 2, which turned out
     to be caused by a trailing space on an input line that had got lost in his

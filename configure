@@ -20280,7 +20280,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 # We could be more clever here, given we're doing AC_SUBST with this
-# (eg set a var to be the name of the include file we want).  But we're not
+# (eg set a var to be the name of the include file we want). But we're not
 # so it's easy to change back to 'regular' autoconf vars if we needed to.
 
 
