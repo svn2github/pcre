@@ -1135,7 +1135,7 @@ while (!done)
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
-      case 'Z': debug_lengths = 0;
+      case 'Z': debug_lengths = 0; break;
       case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
       case '?': options |= PCRE_NO_UTF8_CHECK; break;
 
