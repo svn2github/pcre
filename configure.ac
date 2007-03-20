@@ -9,7 +9,7 @@ dnl empty.
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [1])
 m4_define(pcre_prerelease, [-RC2])
-m4_define(pcre_date, [2007-03-19])
+m4_define(pcre_date, [2007-03-20])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -48,6 +48,12 @@ AC_ARG_ENABLE(cpp,
               AS_HELP_STRING([--disable-cpp],
                              [disable C++ support]),
               , enable_cpp=yes)
+
+# Handle --enable-rebuild-chartables
+AC_ARG_ENABLE(rebuild-chartables,
+              AS_HELP_STRING([--enable-rebuild-chartables],
+                             [rebuild character tables in current locale]),
+              , enable_rebuild_chartables=no)
 
 # Handle --enable-utf8 (disabled by default)
 AC_ARG_ENABLE(utf8,
@@ -90,7 +96,7 @@ enable_newline="$ac_pcre_newline"
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
-                             [assume EBCDIC coding rather than ASCII]),
+                             [assume EBCDIC coding rather than ASCII (implies --enable-rebuild-chartables)]),
               , enable_ebcdic=no)
 
 # Handle --disable-stack-for-recursion
@@ -145,6 +151,13 @@ fi
 if test "x$enable_utf8" = "xunset"
 then
   enable_utf8=no
+fi
+
+# Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
+#
+if test "x$enable_ebcdie" = "xyes"
+then
+  enable_rebuild_chartables=yes
 fi
 
 # Convert the newline identifier into the appropriate integer value.
@@ -209,6 +222,7 @@ AC_SUBST(pcre_have_bits_type_traits)
 
 # Conditional compilation
 AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
+AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -389,6 +403,11 @@ AC_CONFIG_COMMANDS([script-chmod], [chmod a+x RunTest RunGrepTest pcre-config])
 
 AC_OUTPUT
 
+# Make sure that pcre_chartables.c is removed in case the method for
+# creating it was changed by reconfiguration.
+
+rm -f pcre_chartables.c
+
 # Print out a nice little message after configure is run displaying your
 # chosen options.
 #
@@ -413,6 +432,7 @@ $PACKAGE-$VERSION configuration summary:
     Unicode properties ..... : ${enable_unicode_properties}
     Newline char/sequence .. : ${enable_newline}
     EBCDIC coding .......... : ${enable_ebcdic}
+    Rebuild char tables .... : ${enable_rebuild_chartables}
     Use stack recursion .... : ${enable_stack_for_recursion}
     POSIX mem threshold .... : ${with_posix_malloc_threshold}
     Internal link size ..... : ${with_link_size}

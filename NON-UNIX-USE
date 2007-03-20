@@ -6,7 +6,7 @@ libraries work. The items in the PCRE distribution and Makefile that relate to
 anything other than Unix-like systems are untested by me.
 
 There are some other comments and files in the Contrib directory on the ftp
-site that you may find useful, although a lot of them are now out-of-date. See
+site that you may find useful. See
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
 
@@ -31,9 +31,20 @@ The following are generic comments about building the PCRE C library "by hand".
 
 (2) Copy or rename the file pcre.h.generic as pcre.h.
 
-(3) Compile dftables.c as a stand-alone program, and then run it with
-    the single argument "pcre_chartables.c". This generates a set of standard
-    character tables and writes them to that file.
+(3) EITHER:
+      Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
+
+    OR:
+      Compile dftables.c as a stand-alone program, and then run it with the
+      single argument "pcre_chartables.c". This generates a set of standard
+      character tables and writes them to that file. The tables are generated
+      using the default C locale for your system. If you want to use a locale
+      that is specified by LC_xxx environment variables, add the -L option to
+      the dftables command. You must use this method if you are building on
+      a system that uses EBCDIC code.
+
+    The tables in pcre_chartables.c are defaults. The caller of PCRE can
+    specify alternative tables at run time.
 
 (4) Compile the following source files:
 
@@ -91,9 +102,11 @@ xxx.cc files.
 
 BUILDING FOR VIRTUAL PASCAL
 
-Stefan Weber contributed the following files in the distribution for building
-PCRE for use with VP/Borland: makevp-compile.txt, makevp-linklib.txt,
-makevp.bat, pcregexp.pas.
+A script for building PCRE using Borland's C++ compiler for use with VPASCAL
+was contributed by Alexander Tokarev. Stefan Weber updated the script and added
+additional files. The following files in the distribution are for building PCRE
+for use with VP/Borland: makevp-compile.txt, makevp-linklib.txt, makevp.bat,
+pcregexp.pas.
 
 
 BUILDING UNDER WINDOWS WITH BCC5.5
@@ -141,9 +154,6 @@ Changes to do MinGW with autoconf 2.50 were supplied by Fred Cox
 [*] But note that the supplied test files are in Unix format, with just LF
 characters as line terminators. You will have to edit them to change to CR LF
 terminators.
-
-A script for building PCRE using Borland's C++ compiler for use with VPASCAL
-was contributed by Alexander Tokarev. It is called makevp.bat.
 
 These are some further comments about Win32 builds from Mark Evans. They
 were contributed before Fred Cox's changes were made, so it is possible that
@@ -245,4 +255,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
+Last Updated: 20 March 2007
 ****

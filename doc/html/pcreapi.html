@@ -1607,8 +1607,9 @@ translation table.
 </P>
 <P>
 These functions call <b>pcre_get_stringnumber()</b>, and if it succeeds, they
-then call <i>pcre_copy_substring()</i> or <i>pcre_get_substring()</i>, as
-appropriate.
+then call <b>pcre_copy_substring()</b> or <b>pcre_get_substring()</b>, as
+appropriate. <b>NOTE:</b> If PCRE_DUPNAMES is set and there are duplicate names,
+the behaviour may not be what you want (see the next section).
 </P>
 <br><a name="SEC17" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
 <P>

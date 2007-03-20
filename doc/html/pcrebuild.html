@@ -23,10 +23,11 @@ man page, in case the conversion went wrong.
 <li><a name="TOC8" href="#SEC8">HANDLING VERY LARGE PATTERNS</a>
 <li><a name="TOC9" href="#SEC9">AVOIDING EXCESSIVE STACK USAGE</a>
 <li><a name="TOC10" href="#SEC10">LIMITING PCRE RESOURCE USAGE</a>
-<li><a name="TOC11" href="#SEC11">USING EBCDIC CODE</a>
-<li><a name="TOC12" href="#SEC12">SEE ALSO</a>
-<li><a name="TOC13" href="#SEC13">AUTHOR</a>
-<li><a name="TOC14" href="#SEC14">REVISION</a>
+<li><a name="TOC11" href="#SEC11">CREATING CHARACTER TABLES AT BUILD TIME</a>
+<li><a name="TOC12" href="#SEC12">USING EBCDIC CODE</a>
+<li><a name="TOC13" href="#SEC13">SEE ALSO</a>
+<li><a name="TOC14" href="#SEC14">AUTHOR</a>
+<li><a name="TOC15" href="#SEC15">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE BUILD-TIME OPTIONS</a><br>
 <P>
@@ -39,8 +40,8 @@ obtained by running
 <pre>
   ./configure --help
 </pre>
-The following sections describe certain options whose names begin with --enable
-or --disable. These settings specify changes to the defaults for the
+The following sections include descriptions of options whose names begin with
+--enable or --disable. These settings specify changes to the defaults for the
 <b>configure</b> command. Because of the way that <b>configure</b> works,
 --enable and --disable always come in pairs, so the complementary option always
 exists as well, but as it specifies the default, it is not described.
@@ -80,9 +81,9 @@ to the <b>configure</b> command. This implies UTF-8 support, even if you have
 not explicitly requested it.
 </P>
 <P>
-Including Unicode property support adds around 90K of tables to the PCRE
-library, approximately doubling its size. Only the general category properties
-such as <i>Lu</i> and <i>Nd</i> are supported. Details are given in the
+Including Unicode property support adds around 30K of tables to the PCRE
+library. Only the general category properties such as <i>Lu</i> and <i>Nd</i> are
+supported. Details are given in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
 documentation.
 </P>
@@ -156,11 +157,6 @@ to the <b>configure</b> command. The value given must be 2, 3, or 4. Using
 longer offsets slows down the operation of PCRE because it has to load
 additional bytes when handling them.
 </P>
-<P>
-If you build PCRE with an increased link size, test 2 (and test 5 if you are
-using UTF-8) will fail. Part of the output of these tests is a representation
-of the compiled pattern, and this changes with the link size.
-</P>
 <br><a name="SEC9" href="#TOC1">AVOIDING EXCESSIVE STACK USAGE</a><br>
 <P>
 When matching with the <b>pcre_exec()</b> function, PCRE implements backtracking
@@ -216,7 +212,24 @@ constraints. However, you can set a lower limit by adding, for example,
 </pre>
 to the <b>configure</b> command. This value can also be overridden at run time.
 </P>
-<br><a name="SEC11" href="#TOC1">USING EBCDIC CODE</a><br>
+<br><a name="SEC11" href="#TOC1">CREATING CHARACTER TABLES AT BUILD TIME</a><br>
+<P>
+PCRE uses fixed tables for processing characters whose code values are less
+than 256. By default, PCRE is built with a set of tables that are distributed
+in the file <i>pcre_chartables.c.dist</i>. These tables are for ASCII codes
+only. If you add
+<pre>
+  --enable-rebuild-chartables
+</pre>
+to the <b>configure</b> command, the distributed tables are no longer used.
+Instead, a program called <b>dftables</b> is compiled and run. This outputs the
+source for new set of tables, created in the default locale of your C runtime
+system. (This method of replacing the tables does not work if you are cross
+compiling, because <b>dftables</b> is run on the local host. If you need to
+create alternative tables when cross compiling, you will have to do so "by
+hand".)
+</P>
+<br><a name="SEC12" href="#TOC1">USING EBCDIC CODE</a><br>
 <P>
 PCRE assumes by default that it will run in an environment where the character
 code is ASCII (or Unicode, which is a superset of ASCII). PCRE can, however, be
@@ -224,13 +237,14 @@ compiled to run in an EBCDIC environment by adding
 <pre>
   --enable-ebcdic
 </pre>
-to the <b>configure</b> command.
+to the <b>configure</b> command. This setting implies
+--enable-rebuild-chartables.
 </P>
-<br><a name="SEC12" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC13" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcre_config</b>(3).
 </P>
-<br><a name="SEC13" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC14" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -239,9 +253,9 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC14" href="#TOC1">REVISION</a><br>
+<br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 20 March 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

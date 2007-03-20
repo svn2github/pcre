@@ -74,7 +74,7 @@ noinst_PROGRAMS =
 CLEANFILES =
 MAINTAINERCLEANFILES =
 
-# Additional files to bundle with the distribution, over and above what 
+# Additional files to bundle with the distribution, over and above what
 # the Autotools include by default.
 EXTRA_DIST =
 
@@ -82,7 +82,7 @@ EXTRA_DIST =
 EXTRA_DIST += \
   doc/perltest.txt \
   NON-UNIX-USE \
-  HACKING 
+  HACKING
 
 # These files are used in the preparation of a release
 EXTRA_DIST += \
@@ -128,12 +128,26 @@ endif # WITH_PCRE_CPP
 bin_SCRIPTS = pcre-config
 
 ## ---------------------------------------------------------------
-## Some helper programs used to compile libpcre.  They aren't user-visible.
+## The dftables program is used to rebuild character tables before compiling
+## PCRE, if --enable-rebuild-chartables is specified. It is not a user-visible
+## program. The default (when --enable-rebuild-chartables is not specified) is
+## to copy a distributed set of tables that are defined for ASCII code. In this
+## case, dftables is not needed.
+
+if WITH_REBUILD_CHARTABLES
+
 noinst_PROGRAMS += dftables
 dftables_SOURCES = dftables.c
 
 pcre_chartables.c: dftables$(EXEEXT)
 	./dftables$(EXEEXT) $@
+else
+
+pcre_chartables.c: pcre_chartables.c.dist
+	cp pcre_chartables.c.dist pcre_chartables.c
+
+endif # WITH_REBUILD_CHARTABLES
+
 
 ## The main pcre library
 lib_LTLIBRARIES += libpcre.la
@@ -167,8 +181,9 @@ nodist_libpcre_la_SOURCES = \
   pcre_chartables.c
 
 # The pcre_printint.src file is #included by some source files, so it must be
-# distributed.
-EXTRA_DIST += pcre_printint.src
+# distributed. The pcre_chartables.c.dist file is the default version of
+# pcre_chartables.c, used unless --enable-rebuild-chartables is specified.
+EXTRA_DIST += pcre_printint.src pcre_chartables.c.dist
 
 libpcre_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
 

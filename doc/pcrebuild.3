@@ -13,8 +13,8 @@ obtained by running
 .sp
   ./configure --help
 .sp
-The following sections describe certain options whose names begin with --enable
-or --disable. These settings specify changes to the defaults for the
+The following sections include descriptions of options whose names begin with
+--enable or --disable. These settings specify changes to the defaults for the
 \fBconfigure\fP command. Because of the way that \fBconfigure\fP works,
 --enable and --disable always come in pairs, so the complementary option always
 exists as well, but as it specifies the default, it is not described.
@@ -56,9 +56,9 @@ character properties, you must add
 to the \fBconfigure\fP command. This implies UTF-8 support, even if you have
 not explicitly requested it.
 .P
-Including Unicode property support adds around 90K of tables to the PCRE
-library, approximately doubling its size. Only the general category properties
-such as \fILu\fP and \fINd\fP are supported. Details are given in the
+Including Unicode property support adds around 30K of tables to the PCRE
+library. Only the general category properties such as \fILu\fP and \fINd\fP are
+supported. Details are given in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
@@ -137,10 +137,6 @@ or four-byte offsets by adding a setting such as
 to the \fBconfigure\fP command. The value given must be 2, 3, or 4. Using
 longer offsets slows down the operation of PCRE because it has to load
 additional bytes when handling them.
-.P
-If you build PCRE with an increased link size, test 2 (and test 5 if you are
-using UTF-8) will fail. Part of the output of these tests is a representation
-of the compiled pattern, and this changes with the link size.
 .
 .SH "AVOIDING EXCESSIVE STACK USAGE"
 .rs
@@ -202,6 +198,24 @@ constraints. However, you can set a lower limit by adding, for example,
 .sp
 to the \fBconfigure\fP command. This value can also be overridden at run time.
 .
+.SH "CREATING CHARACTER TABLES AT BUILD TIME"
+.rs
+.sp
+PCRE uses fixed tables for processing characters whose code values are less
+than 256. By default, PCRE is built with a set of tables that are distributed
+in the file \fIpcre_chartables.c.dist\fP. These tables are for ASCII codes
+only. If you add
+.sp
+  --enable-rebuild-chartables
+.sp
+to the \fBconfigure\fP command, the distributed tables are no longer used.
+Instead, a program called \fBdftables\fP is compiled and run. This outputs the
+source for new set of tables, created in the default locale of your C runtime
+system. (This method of replacing the tables does not work if you are cross
+compiling, because \fBdftables\fP is run on the local host. If you need to
+create alternative tables when cross compiling, you will have to do so "by
+hand".)
+.
 .SH "USING EBCDIC CODE"
 .rs
 .sp
@@ -211,7 +225,8 @@ compiled to run in an EBCDIC environment by adding
 .sp
   --enable-ebcdic
 .sp
-to the \fBconfigure\fP command.
+to the \fBconfigure\fP command. This setting implies
+--enable-rebuild-chartables.
 .
 .
 .SH "SEE ALSO"
@@ -234,6 +249,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 20 March 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

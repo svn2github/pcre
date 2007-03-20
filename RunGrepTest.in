@@ -7,6 +7,7 @@
 LC_ALL=C
 export LC_ALL
 
+echo " "
 echo "Testing pcregrep"
 ./pcregrep -V
 

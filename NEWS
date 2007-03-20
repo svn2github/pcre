@@ -2,13 +2,23 @@ News about PCRE releases
 ------------------------
 
 
-Release 7.1 12-Mar-07
+Release 7.1 20-Mar-07
 ---------------------
 
 There are no new features in this release. A few bugs are fixed (see ChangeLog
 for details), but the major change is a complete re-implementation of the build
 system. This now has full Autotools support and so is now "standard" in some
 sense. It should help with compiling PCRE in a wide variety of environments.
+
+An important change is that the dftables auxiliary program is no longer
+compiled and run at "make" time by default. Instead, a default set of character
+tables (assuming ASCII coding) is used. If you want to use dftables to generate
+the character tables as previously, add --enable-rebuild-chartables to the
+"configure" command. You must do this if you are compiling PCRE to run on a
+system that uses EBCDIC code.
+
+There is a discussion about character tables in the README file. The default is
+not to use dftables so that that there is no problem when cross-compiling.
 
 
 Release 7.0 19-Dec-06

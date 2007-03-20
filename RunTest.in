@@ -124,6 +124,8 @@ fi
 
 # Show which release
 
+echo ""
+echo PCRE C library tests
 ./pcretest /dev/null
 
 # Primary test, Perl-compatible
@@ -137,7 +139,6 @@ if [ $do1 = yes ] ; then
   else exit 1
   fi
   echo "OK"
-  echo " "
 fi
 
 # PCRE tests that are not Perl-compatible - API & error tests, mostly
@@ -152,7 +153,6 @@ if [ $do2 = yes ] ; then
     else exit 1
     fi
     echo "OK"
-    echo " "
   else
     echo Test 2 skipped for link size other than 2 \($link_size\)
     echo " "
@@ -176,7 +176,6 @@ if [ $do3 = yes ] ; then
       else
       echo "OK"
       fi
-      echo " "
     else exit 1
     fi
   else
@@ -197,7 +196,6 @@ if [ $do4 = yes ] ; then
   else exit 1
   fi
   echo "OK"
-  echo " "
 fi
 
 if [ $do5 = yes ] ; then
@@ -210,7 +208,6 @@ if [ $do5 = yes ] ; then
     else exit 1
     fi
     echo "OK"
-    echo " "
   else
     echo Test 5 skipped for link size other than 2 \($link_size\)
     echo " "
@@ -227,7 +224,6 @@ if [ $do6 = yes ] ; then
     else exit 1
     fi
     echo "OK"
-    echo " "
   else
     echo Test 6 skipped for link size other than 2 \($link_size\)
     echo " "
@@ -245,7 +241,6 @@ if [ $do7 = yes ] ; then
   else exit 1
   fi
   echo "OK"
-  echo " "
 fi
 
 if [ $do8 = yes ] ; then
@@ -257,7 +252,6 @@ if [ $do8 = yes ] ; then
   else exit 1
   fi
   echo "OK"
-  echo " "
 fi
 
 if [ $do9 = yes ] ; then
@@ -269,7 +263,6 @@ if [ $do9 = yes ] ; then
   else exit 1
   fi
   echo "OK"
-  echo " "
 fi
 
 # End

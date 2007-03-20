@@ -17,7 +17,7 @@
 
 # Detrail     A Perl script that removes trailing spaces from files.
 
-# doc/index.html.src  
+# doc/index.html.src
 #             A file that is copied as index.html into the doc/html directory
 #             when the HTML documentation is built. It works like this so that
 #             doc/html can be deleted and re-created from scratch.
@@ -132,6 +132,7 @@ files="\
   config.h \
   config.h.in \
   pcre_printint.src \
+  pcre_chartables.c.dist \
   pcredemo.c \
   pcregrep.c \
   pcretest.c \
