@@ -1,0 +1,124 @@
+#! /bin/sh
+
+# This is a script for the use of PCRE maintainers. It configures and rebuilds
+# PCRE with a variety of configuration options, and in each case runs the tests
+# to ensure that all goes well. Every possible combination would take far too
+# long, so we use a representative sample. As well as testing that they work,
+# we use --disable-shared or --disable-static after the first test (which
+# builds both) to save a bit of time by building only one version for the
+# subsequent tests.
+
+# Some of the tests have to be skipped when PCRE is built with non-Unix newline
+# recognition. I am planning to reduce this as much as possible in due course.
+
+# This is in case the caller has set aliases (as I do - PH)
+
+unset cp ls mv rm
+
+# Use -v to make the output more verbose
+
+verbose=0
+if [ "$1" = "-v" ] ; then verbose=1; fi
+
+# The first (empty) configuration builds with all the default settings.
+
+for opts in \
+  "" \
+  "--enable-utf8 --disable-static" \
+  "--enable-unicode-properties --disable-shared" \
+  "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
+  "--enable-unicode-properties --disable-cpp --with-link-size=3 --disable-shared" \
+  "--enable-rebuild-chartables --disable-shared" \
+  "--enable-newline-is-any --disable-shared" \
+  "--enable-newline-is-cr --disable-shared" \
+  "--enable-newline-is-crlf --disable-shared"
+do
+  rm -f *_unittest
+
+  if [ "$opts" = "" ] ; then
+    echo "===> Configuring with: default settings"
+  else
+    olen=`expr length "$opts"`
+    if [ $olen -gt 56 ] ; then
+      echo "===> Configuring with:"
+      echo "     $opts"
+    else
+      echo "===> Configuring with: $opts"
+    fi
+  fi
+
+  ./configure $opts >/dev/null 2>teststderr
+  if [ $? -ne 0 ]; then
+    echo " "
+    echo "**** Error while configuring ****"
+    cat teststderr
+    exit 1
+  fi
+
+  echo "===> Making"
+  make >/dev/null 2>teststderr
+  if [ $? -ne 0 ]; then
+    echo " "
+    echo "**** Error while making ****"
+    cat teststderr
+    exit 1
+  fi
+
+  if [ $verbose -eq 1 ]; then
+    ./pcretest -C
+  fi
+
+  conf=`./pcretest -C`
+  nl=`expr match "$conf" ".*Newline sequence is \([A-Z]*\)"`
+
+  if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
+    echo "===> Running C library tests"
+    ./RunTest >teststdout
+    if [ $? -ne 0 ]; then
+      echo " "
+      echo "**** Test failed ****"
+      cat teststdout
+      exit 1
+    fi
+  else
+    echo "===> Skipping C library tests: newline is $nl"
+  fi
+
+  if [ "$nl" = "LF" ]; then
+    echo "===> Running pcregrep tests"
+    ./RunGrepTest >teststdout 2>teststderr
+    if [ $? -ne 0 ]; then
+      echo " "
+      echo "**** Test failed ****"
+      cat teststderr
+      cat teststdout
+      exit 1
+    fi
+  else
+    echo "===> Skipping pcregrep tests: newline is $nl"
+  fi
+
+  if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
+    if [ -f pcrecpp_unittest ] ; then
+      for utest in pcrecpp_unittest \
+                   pcre_scanner_unittest \
+                   pcre_stringpiece_unittest
+      do
+        echo "===> Running $utest"
+        $utest >teststdout
+        if [ $? -ne 0 ]; then
+          echo " "
+          echo "**** Test failed ****"
+          cat teststdout
+          exit 1
+        fi
+      done
+    fi
+  else
+    echo "===> Skipping C++ tests: newline is $nl"
+  fi
+
+done
+echo "===> All done"
+
+# End

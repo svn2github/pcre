@@ -16,32 +16,33 @@ also contains some notes for maintainers. Its contents are:
 Files in the maint directory
 ----------------------------
 
-Builducptable   A Perl script that creates the contents of the ucptable.h file
-                from two Unicode data files, which themselves are downloaded
-                from the Unicode web site. Run this script in the "maint" 
-                directory.
-                
-Tech.Notes      Some notes about the internals of the PCRE code.   
-               
-Unicode.tables  The files in this directory, Scripts.txt and UnicodeData.txt, 
-                were downloaded from the Unicode web site. They contain 
-                information about Unicode characters and scripts.
-
-ucptest.c       A short C program for testing the Unicode property functions in
-                pcre_ucp_searchfuncs.c, mainly useful after rebuilding the
-                Unicode property table. Compile and run this in the "maint" 
-                directory.
-            
-ucptestdata     A directory containing two files, testinput1 and testoutput1,
-                to use in conjunction with the ucptest program.
-            
-utf8.c          A short, freestanding C program for converting a Unicode code
-                point into a sequence of bytes in the UTF-8 encoding, and vice
-                versa. If its argument is a hex number such as 0x1234, it 
-                outputs a list of the equivalent UTF-8 bytes. If its argument 
-                is sequence of concatenated UTF-8 bytes (e.g. e188b4) it treats 
-                them as a UTF-8 character and outputs the equivalent code point 
-                in hex. 
+Builducptable    A Perl script that creates the contents of the ucptable.h file
+                 from two Unicode data files, which themselves are downloaded
+                 from the Unicode web site. Run this script in the "maint"
+                 directory.
+                 
+ManyConfigTests  A shell script that runs "configure, make, test" a number of
+                 times with different configuration settings.
+                 
+Unicode.tables   The files in this directory, Scripts.txt and UnicodeData.txt, 
+                 were downloaded from the Unicode web site. They contain 
+                 information about Unicode characters and scripts.
+                 
+ucptest.c        A short C program for testing the Unicode property functions
+                 in pcre_ucp_searchfuncs.c, mainly useful after rebuilding the
+                 Unicode property table. Compile and run this in the "maint" 
+                 directory.
+                 
+ucptestdata      A directory containing two files, testinput1 and testoutput1,
+                 to use in conjunction with the ucptest program.
+                 
+utf8.c           A short, freestanding C program for converting a Unicode code
+                 point into a sequence of bytes in the UTF-8 encoding, and vice
+                 versa. If its argument is a hex number such as 0x1234, it
+                 outputs a list of the equivalent UTF-8 bytes. If its argument
+                 is sequence of concatenated UTF-8 bytes (e.g. e188b4) it
+                 treats them as a UTF-8 character and outputs the equivalent
+                 code point in hex.
                 
 
 Updating to a new Unicode release
@@ -65,20 +66,7 @@ distribution for a new release.
 . Run ./autogen.sh to ensure everything is up-to-date.
 
 . Compile and test with many different config options, and combinations of 
-  options:
-  
-   * Totally standard ./configure with no options
-   * --disable-shared
-   * --disable-static
-   * --enable-utf8
-   * --enable-unicode-properties
-   * --disable-cpp
-   * --with-link-size=3 (occasionally check with 4 as well)       
-   * --disable-stack-for-recursion 
-   * --enable-newline-is-any 
-  
-  I've never automated this, but perhaps I should. The newline testing could be 
-  enhanced; at present, some tests fail unless plain LF is a newline. 
+  options. The maint/ManyConfigTests script now encapsulates this testing.
   
 . Run perltest.pl on the test data for tests 1 and 4. The output should match
   the PCRE test output, apart from the version identification at the top. The 
@@ -264,14 +252,7 @@ others are relatively new.
 . Someone suggested --disable-callout to save code space when callouts are 
   never wanted. This seems rather marginal.  
 
-. Automate some of the testing before release into a script that compiles with
-  different options and runs the tests in each case.
-  
-. How about distributing a fixed pcre_chartables.c file and abandoning the
-  on-the-fly generation using dftables. This will make cross-compiling easier,
-  and in any case, locales are going out of fashion. 
-
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 12 March 2007
+Last updated: 20 March 2007
