@@ -2308,6 +2308,15 @@ for (;;)
         {
         while (current_subject <= end_subject && !WAS_NEWLINE(current_subject))
           current_subject++;
+
+        /* If we have just passed a CR and the newline option is ANY, and we
+        are now at a LF, advance the match position by one more character. */
+        
+        if (current_subject[-1] == '\r' &&
+             md->nltype == NLTYPE_ANY &&
+             current_subject < end_subject &&
+             *current_subject == '\n')
+          current_subject++;
         }
       }
 
