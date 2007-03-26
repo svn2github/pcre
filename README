@@ -683,8 +683,8 @@ The distribution should contain the following files:
 (E) Auxiliary files for VPASCAL
 
   makevp.bat
-  makevp-compile.txt
-  makevp-linklib.txt
+  makevp-c.txt
+  makevp-l.txt
   pcregexp.pas
 
 (F) Auxiliary files for building PCRE "by hand"
@@ -701,4 +701,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 March 2007
+Last updated: 26 March 2007

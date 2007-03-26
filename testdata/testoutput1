@@ -6571,4 +6571,12 @@ No match
   abc\n  
 No match
 
+/^X/m
+    XABC
+ 0: X
+    ** Failers 
+No match
+    XABC\B
+No match
+
 / End of testinput1 /

@@ -15,7 +15,7 @@ echo "Testing pcregrep"
 # itself. What we are checking here is the file handling and options that are
 # supported by pcregrep.
 
-cf="diff -u"
+cf="diff -ub"
 valgrind=
 if [ ! -d testdata ] ; then
   ln -s @top_srcdir@/testdata testdata
@@ -197,27 +197,11 @@ elephant" $testdata/grepinput >>testtry
 echo "---------------------------- Test 49 ------------------------------" >>testtry
 $valgrind ./pcregrep "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
 
-echo "---------------------------- Test 50 ------------------------------" >>testtry
-$valgrind ./pcregrep -N CR "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
-
-echo "---------------------------- Test 51 ------------------------------" >>testtry
-$valgrind ./pcregrep --newline=crlf "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
-
-echo "---------------------------- Test 52 ------------------------------" >>testtry
-pattern=`printf 'def\rjkl'`
-$valgrind ./pcregrep --newline=cr -F "$pattern" $testdata/grepinputx >>testtry
-
-echo "---------------------------- Test 53 ------------------------------" >>testtry
-pattern=`printf 'xxx\r\njkl'`
-$valgrind ./pcregrep --newline=crlf -F "$pattern" $testdata/grepinputx >>testtry
-
-echo "---------------------------- Test 54 ------------------------------" >>testtry
-$valgrind ./pcregrep -n --newline=any "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
-
 # Now compare the results.
 
 $cf testtry $testdata/grepoutput
 if [ $? != 0 ] ; then exit 1; fi
+
 
 # These tests require UTF-8 support
 
@@ -236,6 +220,32 @@ if [ $utf8 -ne 0 ] ; then
 else
   echo "Skipping pcregrep UTF-8 tests: no UTF-8 support in PCRE library"
 fi
+
+
+# The tests for various newline values may not work in environments where
+# the newlines in the files are not \n.
+
+echo "Testing pcregrep newline settings"
+
+echo "---------------------------- Test N1 ------------------------------" >testtry
+$valgrind ./pcregrep -N CR "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test N2 ------------------------------" >>testtry
+$valgrind ./pcregrep --newline=crlf "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test N3 ------------------------------" >>testtry
+pattern=`printf 'def\rjkl'`
+$valgrind ./pcregrep --newline=cr -F "$pattern" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test n$ ------------------------------" >>testtry
+pattern=`printf 'xxx\r\njkl'`
+$valgrind ./pcregrep --newline=crlf -F "$pattern" $testdata/grepinputx >>testtry
+
+echo "---------------------------- Test N5 ------------------------------" >>testtry
+$valgrind ./pcregrep -n --newline=any "^(abc|def|ghi|jkl)" $testdata/grepinputx >>testtry
+
+$cf testtry $testdata/grepoutputN
+if [ $? != 0 ] ; then exit 1; fi
 
 exit 0
 

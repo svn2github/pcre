@@ -8125,5 +8125,15 @@ No match
  0: \x0d\x0afoo
     \nfoo
  0: \x0afoo
+    
+/^$/mg<any>
+    abc\r\rxyz
+ 0: 
+    abc\n\rxyz  
+ 0: 
+    ** Failers 
+No match
+    abc\r\nxyz
+No match
 
 / End of testinput2 /

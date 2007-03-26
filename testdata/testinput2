@@ -2129,5 +2129,11 @@ a random value. /Ix
     afoo
     \r\nfoo
     \nfoo
+    
+/^$/mg<any>
+    abc\r\rxyz
+    abc\n\rxyz  
+    ** Failers 
+    abc\r\nxyz
 
 / End of testinput2 /

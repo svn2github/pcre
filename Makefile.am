@@ -95,8 +95,8 @@ EXTRA_DIST += \
 # These files are to do with building for Virtual Pascal
 EXTRA_DIST += \
   makevp.bat \
-  makevp-compile.txt \
-  makevp-linklib.txt \
+  makevp-c.txt \
+  makevp-l.txt \
   pcregexp.pas
 
 # These files are usable versions of pcre.h and config.h that are distributed
@@ -143,8 +143,8 @@ pcre_chartables.c: dftables$(EXEEXT)
 	./dftables$(EXEEXT) $@
 else
 
-pcre_chartables.c: pcre_chartables.c.dist
-	cp pcre_chartables.c.dist pcre_chartables.c
+pcre_chartables.c: $(srcdir)/pcre_chartables.c.dist
+	cp -f $(srcdir)/pcre_chartables.c.dist pcre_chartables.c
 
 endif # WITH_REBUILD_CHARTABLES
 
@@ -249,6 +249,7 @@ EXTRA_DIST += \
   testdata/greplist \
   testdata/grepoutput \
   testdata/grepoutput8 \
+  testdata/grepoutputN \
   testdata/testinput1 \
   testdata/testinput2 \
   testdata/testinput3 \
