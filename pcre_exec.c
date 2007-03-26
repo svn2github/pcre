@@ -4013,10 +4013,10 @@ for(;;)
       {
       while (start_match <= end_subject && !WAS_NEWLINE(start_match))
         start_match++;
-        
+
       /* If we have just passed a CR and the newline option is ANY, and we are
       now at a LF, advance the match position by one more character. */
-      
+
       if (start_match[-1] == '\r' &&
            md->nltype == NLTYPE_ANY &&
            start_match < end_subject &&

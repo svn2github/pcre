@@ -4,12 +4,12 @@ Compiling PCRE on non-Unix systems
 This document contains the following sections:
 
   General
-  Generic instructions for the PCRE C library 
+  Generic instructions for the PCRE C library
   The C++ wrapper functions
   Building for virtual Pascal
-  Comments about Win32 builds    
+  Comments about Win32 builds
   Building under Windows with BCC5.5
-  Building PCRE on OpenVMS 
+  Building PCRE on OpenVMS
 
 
 GENERAL
@@ -125,7 +125,7 @@ COMMENTS ABOUT WIN32 BUILDS
 
 There are two ways of building PCRE on Windows systems: using MinGW or using
 Cygwin. These are not at all the same thing, and are completely different from
-each other. 
+each other.
 
 The MinGW home page (http://www.mingw.org/) says this:
 
@@ -136,20 +136,20 @@ The MinGW home page (http://www.mingw.org/) says this:
 
 The Cygwin home page (http://www.cygwin.com/) says this:
 
-  Cygwin is a Linux-like environment for Windows. It consists of two parts: 
-   
-  . A DLL (cygwin1.dll) which acts as a Linux API emulation layer providing 
+  Cygwin is a Linux-like environment for Windows. It consists of two parts:
+
+  . A DLL (cygwin1.dll) which acts as a Linux API emulation layer providing
     substantial Linux API functionality
-     
+
   . A collection of tools which provide Linux look and feel.
 
-  The Cygwin DLL currently works with all recent, commercially released x86 32 
+  The Cygwin DLL currently works with all recent, commercially released x86 32
   bit and 64 bit versions of Windows, with the exception of Windows CE.
 
 On both MinGW and Cygwin, PCRE should build correctly using:
 
-  ./configure && make && make install 
-  
+  ./configure && make && make install
+
 However, if you want to statically link your program against the .a file, you
 must define PCRE_STATIC before including pcre.h, otherwise the pcre_malloc()
 and pcre_free() exported functions will be declared __declspec(dllimport), with
@@ -173,15 +173,15 @@ to tell Cygwin's gcc to use the MinGW gcc. Cygwin's gcc is only acting as a
 front end to MinGW's gcc (if you install Cygwin's gcc, you get both Cygwin's
 gcc and MinGW's gcc). So, a user can:
 
-. Build native binaries by using MinGW or by getting Cygwin and using 
+. Build native binaries by using MinGW or by getting Cygwin and using
   -mno-cygwin.
 
-. Build binaries that depend on cygwin1.dll by using Cygwin with the normal 
+. Build binaries that depend on cygwin1.dll by using Cygwin with the normal
   compiler flags.
 
-The test files that are supplied with PCRE are in Unix format, with LF 
-characters as line terminators. It may be necessary to change the line 
-terminators in order to get some of the tests to work. We hope to improves 
+The test files that are supplied with PCRE are in Unix format, with LF
+characters as line terminators. It may be necessary to change the line
+terminators in order to get some of the tests to work. We hope to improves
 things in this area in future.
 
 
