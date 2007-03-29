@@ -118,7 +118,7 @@ BUILDING FOR VIRTUAL PASCAL
 A script for building PCRE using Borland's C++ compiler for use with VPASCAL
 was contributed by Alexander Tokarev. Stefan Weber updated the script and added
 additional files. The following files in the distribution are for building PCRE
-for use with VP/Borland: makevp-c.txt, makevp-l.txt, makevp.bat, pcregexp.pas.
+for use with VP/Borland: makevp_c.txt, makevp_l.txt, makevp.bat, pcregexp.pas.
 
 
 COMMENTS ABOUT WIN32 BUILDS

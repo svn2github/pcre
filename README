@@ -683,8 +683,8 @@ The distribution should contain the following files:
 (E) Auxiliary files for VPASCAL
 
   makevp.bat
-  makevp-c.txt
-  makevp-l.txt
+  makevp_c.txt
+  makevp_l.txt
   pcregexp.pas
 
 (F) Auxiliary files for building PCRE "by hand"

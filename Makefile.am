@@ -95,8 +95,8 @@ EXTRA_DIST += \
 # These files are to do with building for Virtual Pascal
 EXTRA_DIST += \
   makevp.bat \
-  makevp-c.txt \
-  makevp-l.txt \
+  makevp_c.txt \
+  makevp_l.txt \
   pcregexp.pas
 
 # These files are usable versions of pcre.h and config.h that are distributed
