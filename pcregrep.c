@@ -50,9 +50,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
-#include "pcre.h"
+#include <pcre.h>
 
 #define FALSE 0
 #define TRUE 1
@@ -463,7 +465,7 @@ return FALSE;
 
 
 
-#if ! HAVE_STRERROR
+#ifndef HAVE_STRERROR
 /*************************************************
 *     Provide strerror() for non-ANSI libraries  *
 *************************************************/

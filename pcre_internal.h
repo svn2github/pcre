@@ -181,7 +181,7 @@ must begin with PCRE_. */
 /* Include the public PCRE header and the definitions of UCP character property
 values. */
 
-#include "pcre.h"
+#include <pcre.h>
 #include "ucp.h"
 
 /* When compiling for use with the Virtual Pascal compiler, these functions
@@ -202,9 +202,9 @@ define a macro for memmove() if HAVE_MEMMOVE is false, provided that HAVE_BCOPY
 is set. Otherwise, include an emulating function for those systems that have
 neither (there some non-Unix environments where this is the case). */
 
-#if ! HAVE_MEMMOVE
+#ifndef HAVE_MEMMOVE
 #undef  memmove        /* some systems may have a macro */
-#if HAVE_BCOPY
+#ifdef HAVE_BCOPY
 #define memmove(a, b, c) bcopy(b, a, c)
 #else  /* HAVE_BCOPY */
 static void *

@@ -144,7 +144,8 @@ pcre_chartables.c: dftables$(EXEEXT)
 else
 
 pcre_chartables.c: $(srcdir)/pcre_chartables.c.dist
-	cp -f $(srcdir)/pcre_chartables.c.dist pcre_chartables.c
+	rm -f $@
+	$(LN_S) $(srcdir)/pcre_chartables.c.dist $@
 
 endif # WITH_REBUILD_CHARTABLES
 
@@ -341,10 +342,5 @@ endif
 EXTRA_DIST += \
   CMakeLists.txt \
   config-cmake.h.in
-
-config-cmake.h.in: config.h.in
-	sed 's/#undef/#cmakedefine/g' config.h.in >$@
-
-MAINTAINERCLEANFILES += config-cmake.h.in
 
 ## end Makefile.am

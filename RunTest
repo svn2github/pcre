@@ -5,12 +5,13 @@
 
 # Run PCRE tests
 
-cf=diff
+cf="diff -u"
 valgrind=
-if [ ! -d testdata ] ; then
-  ln -s @top_srcdir@/testdata testdata
+testdata=testdata
+
+if [ -n "$srcdir" -a -d "$srcdir" ] ; then
+  testdata="$srcdir/testdata"
 fi
-testdata=./testdata
 
 # Find which optional facilities are available
 

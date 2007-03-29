@@ -44,7 +44,7 @@
 // We need this to compile the proper dll on windows/msys.  This is copied
 // from pcre_internal.h.  It would probably be better just to include that.
 #define PCRE_DEFINITION  /* Win32 __declspec(export) trigger for .dll */
-#include "pcre.h"
+#include <pcre.h>
 #include "pcre_stringpiece.h"
 #include "pcrecpp.h"
 

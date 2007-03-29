@@ -48,6 +48,11 @@ possible. There are also some static supporting functions. */
 
 #include "pcre_internal.h"
 
+/* Undefine some potentially clashing cpp symbols */
+
+#undef min
+#undef max
+
 /* The chain of eptrblocks for tail recursions uses memory in stack workspace,
 obtained at top level, the size of which is defined by EPTR_WORK_SIZE. */
 

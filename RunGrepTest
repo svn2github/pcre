@@ -17,10 +17,11 @@ echo "Testing pcregrep"
 
 cf="diff -ub"
 valgrind=
-if [ ! -d testdata ] ; then
-  ln -s @top_srcdir@/testdata testdata
+testdata=testdata
+
+if [ -n "$srcdir" -a -d "$srcdir/testdata" ] ; then
+  testdata="$srcdir/testdata"
 fi
-testdata=./testdata
 
 while [ $# -gt 0 ] ; do
   case $1 in

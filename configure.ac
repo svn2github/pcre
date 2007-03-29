@@ -26,6 +26,7 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+AC_PROG_LN_S
 
 PCRE_MAJOR="pcre_major"
 PCRE_MINOR="pcre_minor"
@@ -155,7 +156,7 @@ fi
 
 # Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
 #
-if test "x$enable_ebcdie" = "xyes"
+if test "x$enable_ebcdic" = "xyes"
 then
   enable_rebuild_chartables=yes
 fi
@@ -388,8 +389,6 @@ AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
 	Makefile
-	RunGrepTest
-	RunTest
 	libpcre.pc
 	libpcrecpp.pc
 	pcre-config
@@ -399,14 +398,13 @@ AC_CONFIG_FILES(
 )
 
 # Make the generated script files executable.
-AC_CONFIG_COMMANDS([script-chmod], [chmod a+x RunTest RunGrepTest pcre-config])
-
-AC_OUTPUT
+AC_CONFIG_COMMANDS([script-chmod], [chmod a+x pcre-config])
 
 # Make sure that pcre_chartables.c is removed in case the method for
 # creating it was changed by reconfiguration.
+AC_CONFIG_COMMANDS([delete-old-chartables], [rm -f pcre_chartables.c])
 
-rm -f pcre_chartables.c
+AC_OUTPUT
 
 # Print out a nice little message after configure is run displaying your
 # chosen options.
