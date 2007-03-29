@@ -123,8 +123,8 @@ files="\
   Detrail \
   ChangeLog \
   CMakeLists.txt \
-  RunGrepTest.in \
-  RunTest.in \
+  RunGrepTest \
+  RunTest \
   RunTest.bat \
   pcre-config.in \
   libpcre.pc.in \
