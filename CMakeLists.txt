@@ -103,15 +103,21 @@ IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 
 IF(PCRE_NEWLINE STREQUAL "LF")
-	SET(NEWLINE "10")
-ELSEIF(PCRE_NEWLINE STREQUAL "CR")
-	SET(NEWLINE "13")
-ELSEIF(PCRE_NEWLINE STREQUAL "CRLF")
-	SET(NEWLINE "3338")
-ELSEIF(PCRE_NEWLINE STREQUAL "ANY")
-	SET(NEWLINE "-1")
+  SET(NEWLINE "10")
 ELSE(PCRE_NEWLINE STREQUAL "LF")
+  IF(PCRE_NEWLINE STREQUAL "CR")
+    SET(NEWLINE "13")
+  ELSE(PCRE_NEWLINE STREQUAL "CR")
+    IF(PCRE_NEWLINE STREQUAL "CRLF")
+      SET(NEWLINE "3338")
+    ELSE(PCRE_NEWLINE STREQUAL "CRLF")
+      IF(PCRE_NEWLINE STREQUAL "ANY")
+	SET(NEWLINE "-1")
+      ELSE(PCRE_NEWLINE STREQUAL "ANY")
 	MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\".")
+      ENDIF(PCRE_NEWLINE STREQUAL "ANY")
+    ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
+  ENDIF(PCRE_NEWLINE STREQUAL "CR")
 ENDIF(PCRE_NEWLINE STREQUAL "LF")
 
 IF(PCRE_EBCDIC)
@@ -136,12 +142,12 @@ CONFIGURE_FILE(pcre.h.generic
 
 IF(PCRE_BUILD_PCRECPP)
 	CONFIGURE_FILE(pcre_stringpiece.h.in
-	               ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
-	               @ONLY)
+		       ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
+		       @ONLY)
 
 	CONFIGURE_FILE(pcrecpparg.h.in
-	               ${CMAKE_BINARY_DIR}/pcrecpparg.h
-	               @ONLY)
+		       ${CMAKE_BINARY_DIR}/pcrecpparg.h
+		       @ONLY)
 ENDIF(PCRE_BUILD_PCRECPP)
 
 # Character table generation
@@ -154,8 +160,8 @@ ADD_CUSTOM_COMMAND(
 	COMMENT "Generating character tables (pcre_chartables.c) for current locale"
 	DEPENDS dftables
 	COMMAND ${DFTABLES_EXE}
-	ARGS    ${CMAKE_BINARY_DIR}/pcre_chartables.c
-	OUTPUT  ${CMAKE_BINARY_DIR}/pcre_chartables.c
+	ARGS	${CMAKE_BINARY_DIR}/pcre_chartables.c
+	OUTPUT	${CMAKE_BINARY_DIR}/pcre_chartables.c
 )
 
 # Source code
@@ -243,9 +249,12 @@ TARGET_LINK_LIBRARIES(pcregrep pcreposix)
 ENABLE_TESTING()
 
 IF(UNIX)
-	ADD_TEST(test1 ${CMAKE_SOURCE_DIR}/RunTest srcdir=${CMAKE_SOURCE_DIR})
-ELSEIF(WIN32)
+	ADD_TEST(test1 sh -c "srcdir=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/RunTest")
+	ADD_TEST(test2 sh -c "srcdir=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/RunGrepTest")
+ELSE(UNIX)
+  IF(WIN32)
 	ADD_TEST(test1 ${CMAKE_SOURCE_DIR}/RunTest.bat ${CMAKE_SOURCE_DIR})
+  ENDIF(WIN32)       
 ENDIF(UNIX)
 
 # Installation
