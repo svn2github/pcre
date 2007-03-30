@@ -3,13 +3,12 @@
 # This is a script for the use of PCRE maintainers. It configures and rebuilds
 # PCRE with a variety of configuration options, and in each case runs the tests
 # to ensure that all goes well. Every possible combination would take far too
-# long, so we use a representative sample. As well as testing that they work,
-# we use --disable-shared or --disable-static after the first test (which
-# builds both) to save a bit of time by building only one version for the
-# subsequent tests.
+# long, so we use a representative sample. This script should be run in the
+# PCRE source directory.
 
 # Some of the tests have to be skipped when PCRE is built with non-Unix newline
 # recognition. I am planning to reduce this as much as possible in due course.
+
 
 # This is in case the caller has set aliases (as I do - PH)
 
@@ -20,35 +19,31 @@ unset cp ls mv rm
 verbose=0
 if [ "$1" = "-v" ] ; then verbose=1; fi
 
-# The first (empty) configuration builds with all the default settings.
+# This is a temporary directory for testing out-of-line builds
 
-for opts in \
-  "" \
-  "--enable-utf8 --disable-static" \
-  "--enable-unicode-properties --disable-shared" \
-  "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
-  "--enable-unicode-properties --disable-cpp --with-link-size=3 --disable-shared" \
-  "--enable-rebuild-chartables --disable-shared" \
-  "--enable-newline-is-any --disable-shared" \
-  "--enable-newline-is-cr --disable-shared" \
-  "--enable-newline-is-crlf --disable-shared" \
-  "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp"
-do
+tmp=/tmp/pcretesting
+
+
+# This function runs a single test with the set of configuration options that
+# are in $opts. The source directory must be set in srcdir.
+
+function runtest()
+  {
   rm -f *_unittest
 
   if [ "$opts" = "" ] ; then
-    echo "===> Configuring with: default settings"
+    echo "Configuring with: default settings"
   else
     olen=`expr length "$opts"`
-    if [ $olen -gt 56 ] ; then
-      echo "===> Configuring with:"
-      echo "     $opts"
+    if [ $olen -gt 53 ] ; then
+      echo "Configuring with:"
+      echo "  $opts"
     else
-      echo "===> Configuring with: $opts"
+      echo "Configuring with: $opts"
     fi
   fi
 
-  ./configure $opts >/dev/null 2>teststderr
+  $srcdir/configure $opts >/dev/null 2>teststderr
   if [ $? -ne 0 ]; then
     echo " "
     echo "**** Error while configuring ****"
@@ -56,7 +51,7 @@ do
     exit 1
   fi
 
-  echo "===> Making"
+  echo "Making"
   make >/dev/null 2>teststderr
   if [ $? -ne 0 ]; then
     echo " "
@@ -73,8 +68,8 @@ do
   nl=`expr match "$conf" ".*Newline sequence is \([A-Z]*\)"`
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
-    echo "===> Running C library tests"
-    ./RunTest >teststdout
+    echo "Running C library tests"
+    $srcdir/RunTest >teststdout
     if [ $? -ne 0 ]; then
       echo " "
       echo "**** Test failed ****"
@@ -82,12 +77,12 @@ do
       exit 1
     fi
   else
-    echo "===> Skipping C library tests: newline is $nl"
+    echo "Skipping C library tests: newline is $nl"
   fi
 
   if [ "$nl" = "LF" ]; then
-    echo "===> Running pcregrep tests"
-    ./RunGrepTest >teststdout 2>teststderr
+    echo "Running pcregrep tests"
+    $srcdir/RunGrepTest >teststdout 2>teststderr
     if [ $? -ne 0 ]; then
       echo " "
       echo "**** Test failed ****"
@@ -96,7 +91,7 @@ do
       exit 1
     fi
   else
-    echo "===> Skipping pcregrep tests: newline is $nl"
+    echo "Skipping pcregrep tests: newline is $nl"
   fi
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
@@ -105,7 +100,7 @@ do
                    pcre_scanner_unittest \
                    pcre_stringpiece_unittest
       do
-        echo "===> Running $utest"
+        echo "Running $utest"
         $utest >teststdout
         if [ $? -ne 0 ]; then
           echo " "
@@ -114,12 +109,83 @@ do
           exit 1
         fi
       done
+    else
+      echo "Skipping C++ tests: pcrecpp_unittest does not exist"    
     fi
   else
-    echo "===> Skipping C++ tests: newline is $nl"
+    echo "Skipping C++ tests: newline is $nl"
   fi
+  }
 
+
+# This set of tests builds PCRE and runs the tests with a variety of configure
+# options, in the current (source) directory. The first (empty) configuration
+# builds with all the default settings. As well as testing that these options
+# work, we use --disable-shared or --disable-static after the first test (which
+# builds both) to save a bit of time by building only one version of the
+# library for the subsequent tests.
+
+echo "Tests in the current directory"
+srcdir=.
+for opts in \
+  "" \
+  "--enable-utf8 --disable-static" \
+  "--enable-unicode-properties --disable-shared" \
+  "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
+  "--enable-unicode-properties --disable-cpp --with-link-size=3 --disable-shared" \
+  "--enable-rebuild-chartables --disable-shared" \
+  "--enable-newline-is-any --disable-shared" \
+  "--enable-newline-is-cr --disable-shared" \
+  "--enable-newline-is-crlf --disable-shared" \
+  "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp"
+do
+  runtest
 done
-echo "===> All done"
+
+
+# Clean up the distribution and then do at least one build and test in a
+# directory other than the source directory. It doesn't work unless the
+# source directory is cleaned up first - and anyway, it's best to leave it
+# in a clean state after all this reconfiguring.
+
+if [ -f Makefile ]; then
+  echo "Running 'make distclean'"
+  make distclean >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "** 'make distclean' failed"
+    exit 1
+  fi    
+fi   
+
+echo "Tests in the $tmp directory"
+srcdir=`pwd`
+export srcdir
+
+if [ ! -e $tmp ]; then
+  mkdir $tmp
+fi
+
+if [ ! -d $tmp ]; then
+  echo "** Failed to create $tmp or it is not a directory"
+  exit 1
+fi
+
+cd $tmp
+if [ $? -ne 0 ]; then
+  echo "** Failed to cd to $tmp"
+  exit 1
+fi    
+
+for opts in \
+  "--enable-unicode-properties --disable-shared"
+do
+  runtest
+done
+
+echo "Removing $tmp"
+
+rm -rf $tmp
+
+echo "All done"
 
 # End

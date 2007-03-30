@@ -729,19 +729,25 @@ bytes is created.
 .SH "LOCALE SUPPORT"
 .rs
 .sp
-PCRE handles caseless matching, and determines whether characters are letters
+PCRE handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
 less than 128. Higher-valued codes never match escapes such as \ew or \ed, but
 can be tested with \ep if PCRE is built with Unicode character property
-support. The use of locales with Unicode is discouraged.
+support. The use of locales with Unicode is discouraged. If you are handling 
+characters with codes greater than 128, you should either use UTF-8 and 
+Unicode, or use locales, but not try to mix the two.
 .P
-An internal set of tables is created in the default C locale when PCRE is
-built. This is used when the final argument of \fBpcre_compile()\fP is NULL,
-and is sufficient for many applications. An alternative set of tables can,
-however, be supplied. These may be created in a different locale from the
-default. As more and more applications change to using Unicode, the need for
-this locale support is expected to die away.
+PCRE contains an internal set of tables that are used when the final argument
+of \fBpcre_compile()\fP is NULL. These are sufficient for many applications.
+Normally, the internal tables recognize only ASCII characters. However, when 
+PCRE is built, it is possible to cause the internal tables to be rebuilt in the
+default "C" locale of the local system, which may cause them to be different.
+.P
+The internal tables can always be overridden by tables supplied by the
+application that calls PCRE. These may be created in a different locale from
+the default. As more and more applications change to using Unicode, the need
+for this locale support is expected to die away.
 .P
 External tables are built by calling the \fBpcre_maketables()\fP function,
 which has no arguments, in the relevant locale. The result can then be passed
@@ -754,6 +760,9 @@ the following code could be used:
   tables = pcre_maketables();
   re = pcre_compile(..., tables);
 .sp
+The locale name "fr_FR" is used on Linux and other Unix-like systems; if you 
+are using Windows, the name for the French locale is "french".
+.P
 When \fBpcre_maketables()\fP runs, the tables are built in memory that is
 obtained via \fBpcre_malloc\fP. It is the caller's responsibility to ensure
 that the memory containing the tables remains available for as long as it is

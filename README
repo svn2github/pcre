@@ -489,6 +489,9 @@ is output to say why. If running this test produces instances of the error
 in the comparison output, it means that locale is not available on your system,
 despite being listed by "locale". This does not mean that PCRE is broken.
 
+[If you are trying to run this test on Windows, you may be able to get it to 
+work by changing "fr_FR" to "french" everywhere it occurs.]
+
 The fourth test checks the UTF-8 support. It is not run automatically unless
 PCRE is built with UTF-8 support. To do this you must set --enable-utf8 when
 running "configure". This file can be also fed directly to the perltest script,

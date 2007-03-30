@@ -157,7 +157,9 @@ if [ $do2 = yes ] ; then
   fi
 fi
 
-# Locale-specific tests, provided the "fr_FR" locale is available
+# Locale-specific tests, provided the "fr_FR" locale is available.
+# TODO: Try the locale name "french" instead - as used on Windows - but
+# this will mean modifying the input and output data.
 
 if [ $do3 = yes ] ; then
   locale -a | grep '^fr_FR$' >/dev/null
