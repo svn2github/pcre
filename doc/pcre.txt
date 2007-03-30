@@ -1323,30 +1323,40 @@ STUDYING A PATTERN
 LOCALE SUPPORT
 
        PCRE handles caseless matching, and determines whether  characters  are
-       letters  digits,  or whatever, by reference to a set of tables, indexed
+       letters,  digits, or whatever, by reference to a set of tables, indexed
        by character value. When running in UTF-8 mode, this  applies  only  to
        characters  with  codes  less than 128. Higher-valued codes never match
        escapes such as \w or \d, but can be tested with \p if  PCRE  is  built
        with  Unicode  character property support. The use of locales with Uni-
-       code is discouraged.
+       code is discouraged. If you are handling characters with codes  greater
+       than  128, you should either use UTF-8 and Unicode, or use locales, but
+       not try to mix the two.
 
-       An internal set of tables is created in the default C locale when  PCRE
-       is  built.  This  is  used when the final argument of pcre_compile() is
-       NULL, and is sufficient for many applications. An  alternative  set  of
-       tables  can,  however, be supplied. These may be created in a different
-       locale from the default. As more and more applications change to  using
-       Unicode, the need for this locale support is expected to die away.
+       PCRE contains an internal set of tables that are used  when  the  final
+       argument  of  pcre_compile()  is  NULL.  These  are sufficient for many
+       applications.  Normally, the internal tables recognize only ASCII char-
+       acters. However, when PCRE is built, it is possible to cause the inter-
+       nal tables to be rebuilt in the default "C" locale of the local system,
+       which may cause them to be different.
 
-       External  tables  are  built by calling the pcre_maketables() function,
-       which has no arguments, in the relevant locale. The result can then  be
-       passed  to  pcre_compile()  or  pcre_exec()  as often as necessary. For
-       example, to build and use tables that are appropriate  for  the  French
-       locale  (where  accented  characters  with  values greater than 128 are
+       The  internal tables can always be overridden by tables supplied by the
+       application that calls PCRE. These may be created in a different locale
+       from  the  default.  As more and more applications change to using Uni-
+       code, the need for this locale support is expected to die away.
+
+       External tables are built by calling  the  pcre_maketables()  function,
+       which  has no arguments, in the relevant locale. The result can then be
+       passed to pcre_compile() or pcre_exec()  as  often  as  necessary.  For
+       example,  to  build  and use tables that are appropriate for the French
+       locale (where accented characters with  values  greater  than  128  are
        treated as letters), the following code could be used:
 
          setlocale(LC_CTYPE, "fr_FR");
          tables = pcre_maketables();
          re = pcre_compile(..., tables);
+
+       The  locale  name "fr_FR" is used on Linux and other Unix-like systems;
+       if you are using Windows, the name for the French locale is "french".
 
        When pcre_maketables() runs, the tables are built  in  memory  that  is
        obtained  via  pcre_malloc. It is the caller's responsibility to ensure
@@ -2918,9 +2928,9 @@ BACKSLASH
        is a letter or digit. The definition of  letters  and  digits  is  con-
        trolled  by PCRE's low-valued character tables, and may vary if locale-
        specific matching is taking place (see "Locale support" in the  pcreapi
-       page).  For  example,  in  the  "fr_FR" (French) locale, some character
-       codes greater than 128 are used for accented  letters,  and  these  are
-       matched by \w.
+       page).  For  example,  in  a French locale such as "fr_FR" in Unix-like
+       systems, or "french" in Windows, some character codes greater than  128
+       are used for accented letters, and these are matched by \w.
 
        In  UTF-8 mode, characters with values greater than 128 never match \d,
        \s, or \w, and always match \D, \S, and \W. This is true even when Uni-
@@ -3289,7 +3299,7 @@ SQUARE BRACKETS AND CHARACTER CLASSES
        If a range that includes letters is used when caseless matching is set,
        it matches the letters in either case. For example, [W-c] is equivalent
        to  [][\\^_`wxyzabc],  matched  caselessly,  and  in non-UTF-8 mode, if
-       character tables for the "fr_FR" locale are in use, [\xc8-\xcb] matches
+       character tables for a French locale are in  use,  [\xc8-\xcb]  matches
        accented  E  characters in both cases. In UTF-8 mode, PCRE supports the
        concept of case for characters with values greater than 128  only  when
        it is compiled with Unicode property support.

@@ -254,7 +254,7 @@ IF(UNIX)
 ELSE(UNIX)
   IF(WIN32)
 	ADD_TEST(test1 ${CMAKE_SOURCE_DIR}/RunTest.bat ${CMAKE_SOURCE_DIR})
-  ENDIF(WIN32)       
+  ENDIF(WIN32)
 ENDIF(UNIX)
 
 # Installation

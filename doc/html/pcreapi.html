@@ -737,20 +737,27 @@ bytes is created.
 <a name="localesupport"></a></P>
 <br><a name="SEC10" href="#TOC1">LOCALE SUPPORT</a><br>
 <P>
-PCRE handles caseless matching, and determines whether characters are letters
+PCRE handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
 less than 128. Higher-valued codes never match escapes such as \w or \d, but
 can be tested with \p if PCRE is built with Unicode character property
-support. The use of locales with Unicode is discouraged.
+support. The use of locales with Unicode is discouraged. If you are handling
+characters with codes greater than 128, you should either use UTF-8 and
+Unicode, or use locales, but not try to mix the two.
 </P>
 <P>
-An internal set of tables is created in the default C locale when PCRE is
-built. This is used when the final argument of <b>pcre_compile()</b> is NULL,
-and is sufficient for many applications. An alternative set of tables can,
-however, be supplied. These may be created in a different locale from the
-default. As more and more applications change to using Unicode, the need for
-this locale support is expected to die away.
+PCRE contains an internal set of tables that are used when the final argument
+of <b>pcre_compile()</b> is NULL. These are sufficient for many applications.
+Normally, the internal tables recognize only ASCII characters. However, when
+PCRE is built, it is possible to cause the internal tables to be rebuilt in the
+default "C" locale of the local system, which may cause them to be different.
+</P>
+<P>
+The internal tables can always be overridden by tables supplied by the
+application that calls PCRE. These may be created in a different locale from
+the default. As more and more applications change to using Unicode, the need
+for this locale support is expected to die away.
 </P>
 <P>
 External tables are built by calling the <b>pcre_maketables()</b> function,
@@ -764,6 +771,10 @@ the following code could be used:
   tables = pcre_maketables();
   re = pcre_compile(..., tables);
 </pre>
+The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
+are using Windows, the name for the French locale is "french".
+</P>
+<P>
 When <b>pcre_maketables()</b> runs, the tables are built in memory that is
 obtained via <b>pcre_malloc</b>. It is the caller's responsibility to ensure
 that the memory containing the tables remains available for as long as it is

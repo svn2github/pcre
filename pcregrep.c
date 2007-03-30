@@ -1408,11 +1408,11 @@ sprintf(buffer, "%s%.*s%s", prefix[process_options], MBUFTHIRD, pattern,
   suffix[process_options]);
 pattern_list[pattern_count] =
   pcre_compile(buffer, options, &error, &errptr, pcretables);
-if (pattern_list[pattern_count] != NULL) 
+if (pattern_list[pattern_count] != NULL)
   {
-  pattern_count++; 
+  pattern_count++;
   return TRUE;
-  } 
+  }
 
 /* Handle compile errors */
 
@@ -1947,7 +1947,7 @@ for (j = 0; j < pattern_count; j++)
     fprintf(stderr, "pcregrep: Error while studying regex%s: %s\n", s, error);
     goto EXIT2;
     }
-  hint_count++;   
+  hint_count++;
   }
 
 /* If there are include or exclude patterns, compile them. */

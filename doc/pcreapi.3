@@ -734,13 +734,13 @@ digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
 less than 128. Higher-valued codes never match escapes such as \ew or \ed, but
 can be tested with \ep if PCRE is built with Unicode character property
-support. The use of locales with Unicode is discouraged. If you are handling 
-characters with codes greater than 128, you should either use UTF-8 and 
+support. The use of locales with Unicode is discouraged. If you are handling
+characters with codes greater than 128, you should either use UTF-8 and
 Unicode, or use locales, but not try to mix the two.
 .P
 PCRE contains an internal set of tables that are used when the final argument
 of \fBpcre_compile()\fP is NULL. These are sufficient for many applications.
-Normally, the internal tables recognize only ASCII characters. However, when 
+Normally, the internal tables recognize only ASCII characters. However, when
 PCRE is built, it is possible to cause the internal tables to be rebuilt in the
 default "C" locale of the local system, which may cause them to be different.
 .P
@@ -760,7 +760,7 @@ the following code could be used:
   tables = pcre_maketables();
   re = pcre_compile(..., tables);
 .sp
-The locale name "fr_FR" is used on Linux and other Unix-like systems; if you 
+The locale name "fr_FR" is used on Linux and other Unix-like systems; if you
 are using Windows, the name for the French locale is "french".
 .P
 When \fBpcre_maketables()\fP runs, the tables are built in memory that is

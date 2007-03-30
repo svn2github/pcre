@@ -297,8 +297,9 @@ place (see
 <a href="pcreapi.html#localesupport">"Locale support"</a>
 in the
 <a href="pcreapi.html"><b>pcreapi</b></a>
-page). For example, in the "fr_FR" (French) locale, some character codes
-greater than 128 are used for accented letters, and these are matched by \w.
+page). For example, in a French locale such as "fr_FR" in Unix-like systems,
+or "french" in Windows, some character codes greater than 128 are used for
+accented letters, and these are matched by \w.
 </P>
 <P>
 In UTF-8 mode, characters with values greater than 128 never match \d, \s, or
@@ -756,7 +757,7 @@ example [\x{100}-\x{2ff}].
 If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, [W-c] is equivalent to
 [][\\^_`wxyzabc], matched caselessly, and in non-UTF-8 mode, if character
-tables for the "fr_FR" locale are in use, [\xc8-\xcb] matches accented E
+tables for a French locale are in use, [\xc8-\xcb] matches accented E
 characters in both cases. In UTF-8 mode, PCRE supports the concept of case for
 characters with values greater than 128 only when it is compiled with Unicode
 property support.

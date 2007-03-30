@@ -33,7 +33,7 @@ done
 
 if [ -z "$srcdir" -o ! -d "$srcdir/testdata" ] ; then
   srcdir=.
-fi   
+fi
 
 # Check for the availability of UTF-8 support
 
