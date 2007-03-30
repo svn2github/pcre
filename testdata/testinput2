@@ -2136,4 +2136,7 @@ a random value. /Ix
     ** Failers 
     abc\r\nxyz
 
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+
 / End of testinput2 /

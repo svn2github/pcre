@@ -8136,4 +8136,9 @@ No match
     abc\r\nxyz
 No match
 
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a
+
 / End of testinput2 /

@@ -4240,4 +4240,7 @@
     ** Failers 
     XABC\B
 
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+
 / End of testinput7 /

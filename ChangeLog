@@ -126,6 +126,14 @@ Version 7.1 12-Mar-07
 16. Changed the comparison command for RunGrepTest from "diff -u" to "diff -ub"
     in an attempt to make files that differ only in their line terminators
     compare equal. This works on Linux.
+    
+17. Under certain error circumstances pcregrep might try to free random memory
+    as it exited. This is now fixed, thanks to valgrind.
+    
+19. In pcretest, if the pattern /(?m)^$/g<any> was matched against the string
+    "abc\r\n\r\n", it found an unwanted second match after the second \r. This 
+    was because its rules for how to advance for /g after matching an empty 
+    string did not allow for this case. They now check for it specially. 
 
 
 Version 7.0 19-Dec-06
