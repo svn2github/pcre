@@ -8141,4 +8141,20 @@ No match
  0: 
  0+ \x0d\x0a
 
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a
+ 0: \x0d\x0a
+ 0+ 
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+ 0: 
+ 0+ \x0d\x0a\x0d\x0a
+ 0: 
+ 0+ \x0d\x0a
+ 0: 
+ 0+ 
+
 / End of testinput2 /

@@ -1972,7 +1972,6 @@ while (!done)
 
     for (;; gmatched++)    /* Loop for /g or /G */
       {
-      int gany_fudge;
       if (timeitm > 0)
         {
         register int i;
@@ -2212,11 +2211,18 @@ while (!done)
         }
 
       /* Failed to match. If this is a /g or /G loop and we previously set
-      g_notempty after a null match, this is not necessarily the end.
-      We want to advance the start offset, and continue. In the case of UTF-8
-      matching, the advance must be one character, not one byte. Fudge the
-      offset values to achieve this. We won't be at the end of the string -
-      that was checked before setting g_notempty. */
+      g_notempty after a null match, this is not necessarily the end. We want
+      to advance the start offset, and continue. We won't be at the end of the
+      string - that was checked before setting g_notempty.
+
+      Complication arises in the case when the newline option is "any".
+      If the previous match was at the end of a line terminated by CRLF, an
+      advance of one character just passes the \r, whereas we should prefer the
+      longer newline sequence, as does the code in pcre_exec(). Fudge the
+      offset value to achieve this.
+      
+      Otherwise, in the case of UTF-8 matching, the advance must be one
+      character, not one byte. */
 
       else
         {
@@ -2224,7 +2230,13 @@ while (!done)
           {
           int onechar = 1;
           use_offsets[0] = start_offset;
-          if (use_utf8)
+          if ((((real_pcre *)re)->options & PCRE_NEWLINE_BITS) == 
+                  PCRE_NEWLINE_ANY &&
+              start_offset < len - 1 &&
+              bptr[start_offset] == '\r' &&
+              bptr[start_offset+1] == '\n')
+            onechar++;   
+          else if (use_utf8)
             {
             while (start_offset + onechar < len)
               {
@@ -2256,39 +2268,26 @@ while (!done)
       what Perl's /g options does. This turns out to be rather cunning. First
       we set PCRE_NOTEMPTY and PCRE_ANCHORED and try the match again at the
       same point. If this fails (picked up above) we advance to the next
-      character.
-
-      Yet more complication arises in the case when the newline option is
-      "any" and a pattern in multiline mode has to match at the start of a
-      line. If a previous match was at the end of a line, and advance of one
-      character just passes the \r, whereas we should prefer the longer newline
-      sequence, as does the code in pcre_exec(). So we fudge it. */
+      character. */
 
       g_notempty = 0;
-      gany_fudge = 0;
 
       if (use_offsets[0] == use_offsets[1])
         {
         if (use_offsets[0] == len) break;
         g_notempty = PCRE_NOTEMPTY | PCRE_ANCHORED;
-        if ((((real_pcre *)re)->options & PCRE_STARTLINE) != 0 &&
-            (((real_pcre *)re)->options & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANY &&
-            use_offsets[0] < len - 1 &&
-            bptr[use_offsets[0]] == '\r' &&
-            bptr[use_offsets[0]+1] == '\n')
-          gany_fudge = 1;
         }
 
       /* For /g, update the start offset, leaving the rest alone */
 
-      if (do_g) start_offset = use_offsets[1] + gany_fudge;
+      if (do_g) start_offset = use_offsets[1];
 
       /* For /G, update the pointer and length */
 
       else
         {
-        bptr += use_offsets[1] + gany_fudge;
-        len -= use_offsets[1] + gany_fudge;
+        bptr += use_offsets[1];
+        len -= use_offsets[1];
         }
       }  /* End of loop for /g and /G */
 

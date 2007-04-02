@@ -4243,4 +4243,10 @@
 /(?m)^$/<any>g+
     abc\r\n\r\n
 
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+
 / End of testinput7 /
