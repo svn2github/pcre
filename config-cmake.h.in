@@ -11,6 +11,8 @@
 #cmakedefine HAVE_MEMMOVE
 #cmakedefine HAVE_STRERROR
 
+#cmakedefine PCRE_STATIC
+
 #cmakedefine SUPPORT_UTF8
 #cmakedefine SUPPORT_UCP
 #cmakedefine EBCDIC

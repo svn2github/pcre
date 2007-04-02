@@ -23,11 +23,15 @@ site that you may find useful. See
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
 
-If you want to compile PCRE for a non-Unix system (or perhaps, more strictly,
-for a system that does not support "configure" and "make" files), note that
-the basic PCRE library consists entirely of code written in Standard C, and so
-should compile successfully on any system that has a Standard C compiler and
-library. The C++ wrapper functions are a separate issue (see below).
+If you want to compile PCRE for a non-Unix system (especially for a system that
+does not support "configure" and "make" files), note that the basic PCRE
+library consists entirely of code written in Standard C, and so should compile
+successfully on any system that has a Standard C compiler and library. The C++
+wrapper functions are a separate issue (see below).
+
+The PCRE distribution contains some experimental support for "cmake", but this 
+is incomplete and not documented. However if you are a "cmake" user you might 
+like to try building with "cmake".
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
@@ -123,9 +127,13 @@ for use with VP/Borland: makevp_c.txt, makevp_l.txt, makevp.bat, pcregexp.pas.
 
 COMMENTS ABOUT WIN32 BUILDS
 
-There are two ways of building PCRE on Windows systems: using MinGW or using
-Cygwin. These are not at all the same thing, and are completely different from
-each other.
+There are two ways of building PCRE using the "congifure, make, make install" 
+paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
+the same thing; they are completely different from each other. There is also 
+some experimental, undocumented support for building using "cmake", which you 
+might like to try if you are familiar with "cmake". However, at the present 
+time, the "cmake" process builds only a static library (not a dll), and the
+tests are not automatically run.
 
 The MinGW home page (http://www.mingw.org/) says this:
 

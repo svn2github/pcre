@@ -38,12 +38,12 @@ CHECK_TYPE_SIZE("unsigned long long"	UNSIGNED_LONG_LONG)
 # (Note: CMakeSetup displays these in alphabetical order, regardless of
 # the order we use here)
 
-SET(BUILD_SHARED_LIBS "SHARED" CACHE STRING
-    "What type of libraries to build. Set to SHARED or STATIC.")
+SET(BUILD_SHARED_LIBS OFF CACHE BOOL
+    "Build shared libraries instead of static ones.")
 
 OPTION(PCRE_BUILD_PCRECPP "Build the PCRE C++ library (pcrecpp)." ON)
 
-SET(PCRE_EBCDIC FALSE CACHE BOOL
+SET(PCRE_EBCDIC OFF CACHE BOOL
     "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems)")
 
 SET(PCRE_LINK_SIZE "2" CACHE STRING
@@ -58,16 +58,16 @@ SET(PCRE_MATCH_LIMIT_RECURSION "MATCH_LIMIT" CACHE STRING
 SET(PCRE_NEWLINE "LF" CACHE STRING
     "What to recognize as a newline (one of CR, LF, CRLF, ANY).")
 
-SET(PCRE_NO_RECURSE TRUE CACHE BOOL
+SET(PCRE_NO_RECURSE ON CACHE BOOL
     "If ON, then don't use stack recursion when matching. See NO_RECURSE in config.h.in for details.")
 
 SET(PCRE_POSIX_MALLOC_THRESHOLD "10" CACHE STRING
     "Threshold for malloc() usage. See POSIX_MALLOC_THRESHOLD in config.h.in for details.")
 
-SET(PCRE_SUPPORT_UNICODE_PROPERTIES FALSE CACHE BOOL
+SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
     "Enable support for Unicode properties. (If set, UTF-8 support will be enabled as well)")
 
-SET(PCRE_SUPPORT_UTF8 FALSE CACHE BOOL
+SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
     "Enable support for the Unicode UTF-8 encoding.")
 
 # Prepare build configuration
@@ -94,6 +94,10 @@ IF(HAVE_UNSIGNED_LONG_LONG)
 	SET(pcre_have_ulong_long 1)
 ENDIF(HAVE_UNSIGNED_LONG_LONG)
 
+IF(NOT BUILD_SHARED_LIBS)
+	SET(PCRE_STATIC 1)
+ENDIF(NOT BUILD_SHARED_LIBS)
+
 IF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
 	SET(SUPPORT_UTF8 1)
 ENDIF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
@@ -102,23 +106,24 @@ IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 	SET(SUPPORT_UCP 1)
 ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 
+SET(NEWLINE "")
+
 IF(PCRE_NEWLINE STREQUAL "LF")
-  SET(NEWLINE "10")
-ELSE(PCRE_NEWLINE STREQUAL "LF")
-  IF(PCRE_NEWLINE STREQUAL "CR")
-    SET(NEWLINE "13")
-  ELSE(PCRE_NEWLINE STREQUAL "CR")
-    IF(PCRE_NEWLINE STREQUAL "CRLF")
-      SET(NEWLINE "3338")
-    ELSE(PCRE_NEWLINE STREQUAL "CRLF")
-      IF(PCRE_NEWLINE STREQUAL "ANY")
-	SET(NEWLINE "-1")
-      ELSE(PCRE_NEWLINE STREQUAL "ANY")
-	MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\".")
-      ENDIF(PCRE_NEWLINE STREQUAL "ANY")
-    ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
-  ENDIF(PCRE_NEWLINE STREQUAL "CR")
+	SET(NEWLINE "10")
 ENDIF(PCRE_NEWLINE STREQUAL "LF")
+IF(PCRE_NEWLINE STREQUAL "CR")
+	SET(NEWLINE "13")
+ENDIF(PCRE_NEWLINE STREQUAL "CR")
+IF(PCRE_NEWLINE STREQUAL "CRLF")
+	SET(NEWLINE "3338")
+ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
+IF(PCRE_NEWLINE STREQUAL "ANY")
+	SET(NEWLINE "-1")
+ENDIF(PCRE_NEWLINE STREQUAL "ANY")
+
+IF(NEWLINE STREQUAL "")
+	MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\".")
+ENDIF(NEWLINE STREQUAL "")
 
 IF(PCRE_EBCDIC)
 	SET(EBCDIC 1)
@@ -244,18 +249,57 @@ TARGET_LINK_LIBRARIES(pcretest pcreposix)
 ADD_EXECUTABLE(pcregrep pcregrep.c)
 TARGET_LINK_LIBRARIES(pcregrep pcreposix)
 
+IF(PCRE_BUILD_PCRECPP)
+	ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
+	TARGET_LINK_LIBRARIES(pcrecpp_unittest pcrecpp)
+
+	ADD_EXECUTABLE(pcre_scanner_unittest pcre_scanner_unittest.cc)
+	TARGET_LINK_LIBRARIES(pcre_scanner_unittest pcrecpp)
+
+	ADD_EXECUTABLE(pcre_stringpiece_unittest pcre_stringpiece_unittest.cc)
+	TARGET_LINK_LIBRARIES(pcre_stringpiece_unittest pcrecpp)
+ENDIF(PCRE_BUILD_PCRECPP)
+
 # Testing
 
 ENABLE_TESTING()
 
+GET_TARGET_PROPERTY(PCREGREP_EXE pcregrep DEBUG_LOCATION)
+GET_TARGET_PROPERTY(PCRETEST_EXE pcretest DEBUG_LOCATION)
+
+# Write out a CTest configuration file that sets some needed environment
+# variables for the test scripts.
+#
+FILE(WRITE ${CMAKE_BINARY_DIR}/CTestCustom.ctest
+"# This is a generated file.
+SET(ENV{srcdir} ${CMAKE_SOURCE_DIR})
+SET(ENV{pcregrep} ${PCREGREP_EXE})
+SET(ENV{pcretest} ${PCRETEST_EXE})
+")
+
 IF(UNIX)
-	ADD_TEST(test1 sh -c "srcdir=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/RunTest")
-	ADD_TEST(test2 sh -c "srcdir=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/RunGrepTest")
-ELSE(UNIX)
-  IF(WIN32)
-	ADD_TEST(test1 ${CMAKE_SOURCE_DIR}/RunTest.bat ${CMAKE_SOURCE_DIR})
-  ENDIF(WIN32)
+	ADD_TEST(pcre_test      ${CMAKE_SOURCE_DIR}/RunTest)
+	ADD_TEST(pcre_grep_test ${CMAKE_SOURCE_DIR}/RunGrepTest)
 ENDIF(UNIX)
+IF(WIN32)
+	ADD_TEST(pcre_test cmd /C ${CMAKE_SOURCE_DIR}/RunTest.bat)
+ENDIF(WIN32)
+
+GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
+                    pcrecpp_unittest
+                    DEBUG_LOCATION)
+
+GET_TARGET_PROPERTY(PCRE_SCANNER_UNITTEST_EXE
+                    pcre_scanner_unittest
+                    DEBUG_LOCATION)
+
+GET_TARGET_PROPERTY(PCRE_STRINGPIECE_UNITTEST_EXE
+                    pcre_stringpiece_unittest
+                    DEBUG_LOCATION)
+
+ADD_TEST(pcrecpp_test          ${PCRECPP_UNITTEST_EXE})
+ADD_TEST(pcre_scanner_test     ${PCRE_SCANNER_UNITTEST_EXE})
+ADD_TEST(pcre_stringpiece_test ${PCRE_STRINGPIECE_UNITTEST_EXE})
 
 # Installation
 

@@ -3831,7 +3831,7 @@ md->ctypes = tables + ctypes_offset;
 /* Handle different types of newline. The three bits give eight cases. If
 nothing is set at run time, whatever was used at compile time applies. */
 
-switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : options) &
+switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : (pcre_uint32)options) &
        PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */

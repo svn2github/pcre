@@ -2220,7 +2220,7 @@ while (!done)
       advance of one character just passes the \r, whereas we should prefer the
       longer newline sequence, as does the code in pcre_exec(). Fudge the
       offset value to achieve this.
-      
+
       Otherwise, in the case of UTF-8 matching, the advance must be one
       character, not one byte. */
 
@@ -2230,12 +2230,12 @@ while (!done)
           {
           int onechar = 1;
           use_offsets[0] = start_offset;
-          if ((((real_pcre *)re)->options & PCRE_NEWLINE_BITS) == 
+          if ((((real_pcre *)re)->options & PCRE_NEWLINE_BITS) ==
                   PCRE_NEWLINE_ANY &&
               start_offset < len - 1 &&
               bptr[start_offset] == '\r' &&
               bptr[start_offset+1] == '\n')
-            onechar++;   
+            onechar++;
           else if (use_utf8)
             {
             while (start_offset + onechar < len)

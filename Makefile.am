@@ -63,7 +63,7 @@ lib_LTLIBRARIES =
 # TESTS is for binary unit tests, check_SCRIPTS for script-based tests
 TESTS =
 check_SCRIPTS =
-noinst_SCRIPTS =
+dist_noinst_SCRIPTS =
 
 # Some of the binaries we make are to be installed, and others are
 # (non-user-visible) helper programs needed to build libpcre.
@@ -105,6 +105,12 @@ EXTRA_DIST += \
 EXTRA_DIST += \
   pcre.h.generic \
   config.h.generic
+
+pcre.h.generic: configure.ac
+	rm -f $@
+	cp -p pcre.h $@
+
+MAINTAINERCLEANFILES += pcre.h.generic
 
 # These are the header files we'll install. We do not distribute pcre.h because
 # it is generated from pcre.h.in.
@@ -231,14 +237,14 @@ endif # WITH_PCRE_CPP
 # ways. We install these test binaries in case folks find it helpful.
 
 TESTS += RunTest
-noinst_SCRIPTS += RunTest
+dist_noinst_SCRIPTS += RunTest
 EXTRA_DIST += RunTest.bat
 bin_PROGRAMS += pcretest
 pcretest_SOURCES = pcretest.c
 pcretest_LDADD = libpcreposix.la
 
 TESTS += RunGrepTest
-noinst_SCRIPTS += RunGrepTest
+dist_noinst_SCRIPTS += RunGrepTest
 bin_PROGRAMS += pcregrep
 pcregrep_SOURCES = pcregrep.c
 pcregrep_LDADD = libpcreposix.la

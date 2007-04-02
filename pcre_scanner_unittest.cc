@@ -38,6 +38,10 @@
 #include <pcre_stringpiece.h>
 #include <pcre_scanner.h>
 
+#ifdef _WIN32
+#  define snprintf _snprintf
+#endif
+
 #define FLAGS_unittest_stack_size   49152
 
 // Dies with a fatal error if the two values are not equal.
