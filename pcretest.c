@@ -67,13 +67,16 @@ input mode under Windows. */
 #endif
 
 
-#define PCRE_SPY        /* For Win32 build, import data, not export */
+/* We have to include pcre_internal.h because we need the internal info for
+displaying the results of pcre_study() and we also need to know about the
+internal macros, structures, and other internal data values; pcretest has
+"inside information" compared to a program that strictly follows the PCRE API.
 
-/* We include pcre_internal.h because we need the internal info for displaying
-the results of pcre_study() and we also need to know about the internal
-macros, structures, and other internal data values; pcretest has "inside
-information" compared to a program that strictly follows the PCRE API. */
+Although pcre_internal.h does itself include pcre.h, we explicitly include it
+here before pcre_internal.h so that the PCRE_EXP_xxx macros get set
+appropriately for an application, not for building PCRE. */
 
+#include "pcre.h"
 #include "pcre_internal.h"
 
 /* We need access to the data tables that PCRE uses. So as not to have to keep

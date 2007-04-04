@@ -9,7 +9,7 @@ dnl empty.
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [1])
 m4_define(pcre_prerelease, [-RC4])
-m4_define(pcre_date, [2007-03-29])
+m4_define(pcre_date, [2007-04-04])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -338,7 +338,7 @@ AC_DEFINE([MAX_DUPLENGTH], [30000], [
   change it. Care must be taken if it is increased, because it guards
   against integer overflow caused by enormously large patterns.])
 
-AH_VERBATIM([PCRE_DATA_SCOPE], [
+AH_VERBATIM([PCRE_EXP_DEFN], [
 /* If you are compiling for a system other than a Unix-like system or
    Win32, and it needs some magic to be inserted before the definition
    of a function that is exported by the library, define this macro to
@@ -348,7 +348,7 @@ AH_VERBATIM([PCRE_DATA_SCOPE], [
    every exported function that is part of the external API. It does
    not appear on functions that are "external" in the C sense, but
    which are internal to the library. */
-#undef PCRE_DATA_SCOPE])
+#undef PCRE_EXP_DEFN])
 
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [

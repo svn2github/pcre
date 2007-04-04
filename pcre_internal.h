@@ -83,8 +83,57 @@ setjmp and stdarg are used is when NO_RECURSE is set. */
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef PCRE_SPY
-#define PCRE_DEFINITION       /* Win32 __declspec(export) trigger for .dll */
+/* When compiling a DLL for Windows, the exported symbols have to be declared
+using some MS magic. I found some useful information on this web page:
+http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
+information there, using __declspec(dllesport) without "extern" we have a
+definition; with "extern" we have a declaration. The settings here override the
+setting in pcre.h (which is included below); it defines only PCRE_EXP_DECL,
+which is all that is needed for applications, which import the symbols. We use:
+
+  PCRE_EXP_DECL       for declarations
+  PCRE_EXP_DEFN       for definitions of exported functions
+  PCRE_EXP_DATA_DEFN  for definitions of exported variables
+
+The reason for the two DEFN macros is that in non-Windows environments, one
+does not want to have "extern" before variable definitions because it leads to
+compiler warnings. So we distinguish between functions and variables. In
+Windows, the two should always be the same.
+
+The reason for wrapping this in #ifndef PCRE_EXP_DECL is so that pcretest,
+which is an application, but needs to import this file in order to "peek" at
+internals, can #include pcre.h first, can get an application's-eye view.
+
+In principle, people compiling for non-Windows, non-Unix-like (i.e. uncommon,
+special-purpose environments) might want to stick other stuff in front of
+exported symbols. That's why, in the non-Windows case, we set PCRE_EXP_DEFN and
+PCRE_EXP_DATA_DEFN only if they are not already set. */
+
+#ifndef PCRE_EXP_DECL
+#  ifdef _WIN32
+#    ifdef DLL_EXPORT
+#      define PCRE_EXP_DECL       extern __declspec(dllexport)
+#      define PCRE_EXP_DEFN       __declspec(dllexport)
+#      define PCRE_EXP_DATA_DEFN  __declspec(dllexport)
+#    else
+#      define PCRE_EXP_DECL       extern
+#      define PCRE_EXP_DEFN
+#      define PCRE_EXP_DATA_DEFN
+#    endif
+#
+#  else
+#    ifdef __cplusplus
+#      define PCRE_EXP_DECL       extern "C"
+#    else
+#      define PCRE_EXP_DECL       extern
+#    endif
+#    ifndef PCRE_EXP_DEFN
+#      define PCRE_EXP_DEFN       PCRE_EXP_DECL
+#    endif
+#    ifndef PCRE_EXP_DATA_DEFN
+#      define PCRE_EXP_DATA_DEFN
+#    endif
+#  endif
 #endif
 
 /* We need to have types that specify unsigned 16-bit and 32-bit integers. We
@@ -177,6 +226,8 @@ must begin with PCRE_. */
 #define PCRE_SPTR const char *
 #define USPTR const unsigned char *
 #endif
+
+
 
 /* Include the public PCRE header and the definitions of UCP character property
 values. */
