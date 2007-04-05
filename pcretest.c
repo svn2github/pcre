@@ -2232,9 +2232,18 @@ while (!done)
         if (g_notempty != 0)
           {
           int onechar = 1;
+          unsigned int obits = ((real_pcre *)re)->options;
           use_offsets[0] = start_offset;
-          if ((((real_pcre *)re)->options & PCRE_NEWLINE_BITS) ==
-                  PCRE_NEWLINE_ANY &&
+          if ((obits & PCRE_NEWLINE_BITS) == 0)
+            {
+            int d;
+            (void)pcre_config(PCRE_CONFIG_NEWLINE, &d);
+            obits = (d == '\r')? PCRE_NEWLINE_CR :
+                    (d == '\n')? PCRE_NEWLINE_LF :
+                    (d == ('\r'<<8 | '\n'))? PCRE_NEWLINE_CRLF :
+                    (d == -1)? PCRE_NEWLINE_ANY : 0;
+            }
+          if ((obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANY &&
               start_offset < len - 1 &&
               bptr[start_offset] == '\r' &&
               bptr[start_offset+1] == '\n')

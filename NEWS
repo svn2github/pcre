@@ -10,7 +10,11 @@ for details), but the major change is a complete re-implementation of the build
 system. This now has full Autotools support and so is now "standard" in some
 sense. It should help with compiling PCRE in a wide variety of environments.
 
-An important change is that the dftables auxiliary program is no longer
+NOTE: when building shared libraries for Windows, three dlls are now built,
+called libpcre, libpcreposix, and libpcrecpp. Previously, everything was
+included in a single dll.
+
+Another important change is that the dftables auxiliary program is no longer
 compiled and run at "make" time by default. Instead, a default set of character
 tables (assuming ASCII coding) is used. If you want to use dftables to generate
 the character tables as previously, add --enable-rebuild-chartables to the

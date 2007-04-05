@@ -157,10 +157,13 @@ The Cygwin home page (http://www.cygwin.com/) says this:
 On both MinGW and Cygwin, PCRE should build correctly using:
 
   ./configure && make && make install
+  
+This should create two libraries called libpcre and libpcreposix, and, if you
+have enabled building the C++ wrapper, a third one called libpcrecpp.
 
-However, if you want to statically link your program against the .a file, you
-must define PCRE_STATIC before including pcre.h, otherwise the pcre_malloc()
-and pcre_free() exported functions will be declared __declspec(dllimport), with
+If you want to statically link your program against a non-dll .a file, you must
+define PCRE_STATIC before including pcre.h, otherwise the pcre_malloc() and
+pcre_free() exported functions will be declared __declspec(dllimport), with
 unwanted results.
 
 Using Cygwin's compiler generates libraries and executables that depend on
