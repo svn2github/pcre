@@ -139,6 +139,9 @@ Version 7.1 12-Mar-07
 20. pcretest is supposed to handle patterns and data of any length, by 
     extending its buffers when necessary. It was getting this wrong when the 
     buffer for a data line had to be extended.
+    
+21. Added PCRE_NEWLINE_ANYCRLF which is like ANY, but matches only CR, LF, or
+    CRLF as a newline sequence. 
 
 
 Version 7.0 19-Dec-06

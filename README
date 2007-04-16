@@ -169,18 +169,20 @@ library. You can read more about them in the pcrebuild man page.
   supported.
 
 . You can build PCRE to recognize either CR or LF or the sequence CRLF or any
-  of the Unicode newline sequences as indicating the end of a line. Whatever
-  you specify at build time is the default; the caller of PCRE can change the
-  selection at run time. The default newline indicator is a single LF character
-  (the Unix standard). You can specify the default newline indicator by adding
-  --newline-is-cr or --newline-is-lf or --newline-is-crlf or --newline-is-any
-  to the "configure" command, respectively.
+  of the preceding, or any of the Unicode newline sequences as indicating the
+  end of a line. Whatever you specify at build time is the default; the caller
+  of PCRE can change the selection at run time. The default newline indicator
+  is a single LF character (the Unix standard). You can specify the default
+  newline indicator by adding --enable-newline-is-cr or --enable-newline-is-lf
+  or --enable-newline-is-crlf or --enable-newline-is-anycrlf or
+  --enable-newline-is-any to the "configure" command, respectively.
 
-  If you specify --newline-is-cr or --newline-is-crlf, some of the standard
-  tests will fail, because the lines in the test files end with LF. Even if
-  the files are edited to change the line endings, there are likely to be some
-  failures. With --newline-is-any, many tests should succeed, but there may be
-  some failures.
+  If you specify --enable-newline-is-cr or --enable-newline-is-crlf, some of
+  the standard tests will fail, because the lines in the test files end with
+  LF. Even if the files are edited to change the line endings, there are likely
+  to be some failures. With --enable-newline-is-anycrlf or
+  --enable-newline-is-any, many tests should succeed, but there may be some
+  failures.
 
 . When called via the POSIX interface, PCRE uses malloc() to get additional
   storage for processing capturing parentheses if there are more than 10 of
@@ -709,4 +711,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 29 March 2007
+Last updated: 16 April 2007

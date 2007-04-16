@@ -242,12 +242,15 @@ echo "---------------------------- Test N3 ------------------------------" >>tes
 pattern=`printf 'def\rjkl'`
 (cd $srcdir; $valgrind $pcregrep --newline=cr -F "$pattern" ./testdata/grepinputx) >>testtry
 
-echo "---------------------------- Test n$ ------------------------------" >>testtry
+echo "---------------------------- Test N4 ------------------------------" >>testtry
 pattern=`printf 'xxx\r\njkl'`
 (cd $srcdir; $valgrind $pcregrep --newline=crlf -F "$pattern" ./testdata/grepinputx) >>testtry
 
 echo "---------------------------- Test N5 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep -n --newline=any "^(abc|def|ghi|jkl)" ./testdata/grepinputx) >>testtry
+
+echo "---------------------------- Test N6 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -n --newline=anycrlf "^(abc|def|ghi|jkl)" ./testdata/grepinputx) >>testtry
 
 $cf testtry $srcdir/testdata/grepoutputN
 if [ $? != 0 ] ; then exit 1; fi

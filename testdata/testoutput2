@@ -7833,6 +7833,8 @@ Matched, but too many substrings
  0: a\x0db
     a\nb\<cr>
  0: a\x0ab
+    a\x85b\<anycrlf> 
+ 0: a\x85b
     ** Failers
 No match
     a\nb
@@ -7842,6 +7844,10 @@ No match
     a\rb\<cr>
 No match
     a\rb\<any>
+No match
+    a\x85b\<any> 
+No match
+    a\rb\<anycrlf>
 No match
 
 /^abc./mgx<any>
@@ -7865,7 +7871,6 @@ No match
  0: abc9
 
 /a/<cr><any>
-Failed: inconsistent NEWLINE options at offset 0
 
 /a/<any><crlf>
 Failed: inconsistent NEWLINE options at offset 0
@@ -8156,5 +8161,12 @@ No match
  0+ \x0d\x0a
  0: 
  0+ 
+
+/abc.$/mgx<anycrlf>
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+ 0: abc1
+ 0: abc4
+ 0: abc5
+ 0: abc9
 
 / End of testinput2 /

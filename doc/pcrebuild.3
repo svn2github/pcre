@@ -83,9 +83,14 @@ character sequence CRLF. If you want this, add
 .sp
 to the \fBconfigure\fP command. There is a fourth option, specified by
 .sp
+  --enable-newline-is-anycrlf
+.sp
+which causes PCRE to recognize any of the three sequences CR, LF, or CRLF as
+indicating a line ending. Finally, a fifth option, specified by
+.sp
   --enable-newline-is-any
 .sp
-which causes PCRE to recognize any Unicode newline sequence.
+causes PCRE to recognize any Unicode newline sequence.
 .P
 Whatever line ending convention is selected when PCRE is built can be
 overridden when the library functions are called. At build time it is
@@ -249,6 +254,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 20 March 2007
+Last updated: 16 April 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

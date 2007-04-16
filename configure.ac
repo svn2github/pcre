@@ -8,8 +8,8 @@ dnl empty.
 
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [1])
-m4_define(pcre_prerelease, [-RC4])
-m4_define(pcre_date, [2007-04-04])
+m4_define(pcre_prerelease, [-RC5])
+m4_define(pcre_date, [2007-04-16])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -71,7 +71,7 @@ AC_ARG_ENABLE(unicode-properties,
 # Handle --enable-newline=NL
 dnl AC_ARG_ENABLE(newline,
 dnl               AS_HELP_STRING([--enable-newline=NL],
-dnl                              [use NL as newline (lf, cr, crlf, any; default=lf)]),
+dnl                              [use NL as newline (lf, cr, crlf, anycrlf, any; default=lf)]),
 dnl               , enable_newline=lf)
 
 # Separate newline options
@@ -88,6 +88,10 @@ AC_ARG_ENABLE(newline-is-crlf,
               AS_HELP_STRING([--enable-newline-is-crlf],
                              [use CRLF as newline sequence]),
               ac_pcre_newline=crlf)
+AC_ARG_ENABLE(newline-is-anycrlf,
+              AS_HELP_STRING([--enable-newline-is-anycrlf],
+                             [use CR, LF, or CRLF as newline sequence]),
+              ac_pcre_newline=anycrlf)
 AC_ARG_ENABLE(newline-is-any,
               AS_HELP_STRING([--enable-newline-is-any],
                              [use any valid Unicode newline sequence]),
@@ -163,10 +167,11 @@ fi
 
 # Convert the newline identifier into the appropriate integer value.
 case "$enable_newline" in
-  lf)   ac_pcre_newline_value=10   ;;
-  cr)   ac_pcre_newline_value=13   ;;
-  crlf) ac_pcre_newline_value=3338 ;;
-  any)  ac_pcre_newline_value=-1   ;;
+  lf)      ac_pcre_newline_value=10   ;;
+  cr)      ac_pcre_newline_value=13   ;;
+  crlf)    ac_pcre_newline_value=3338 ;;
+  anycrlf) ac_pcre_newline_value=-2   ;; 
+  any)     ac_pcre_newline_value=-1   ;;
   *)
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
   ;;
@@ -280,7 +285,7 @@ AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
   The value of NEWLINE determines the newline character sequence. On
   Unix-like systems, "configure" can be used to override the default,
   which is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF),
-  or -1 (ANY).])
+  -1 (ANY), or -2 (ANYCRLF).])
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store

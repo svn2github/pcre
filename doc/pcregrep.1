@@ -220,22 +220,23 @@ the previous 8K characters (or all the previous characters, if fewer than 8K)
 are guaranteed to be available for lookbehind assertions.
 .TP
 \fB-N\fP \fInewline-type\fP, \fB--newline=\fP\fInewline-type\fP
-The PCRE library supports four different conventions for indicating
+The PCRE library supports five different conventions for indicating
 the ends of lines. They are the single-character sequences CR (carriage return)
-and LF (linefeed), the two-character sequence CRLF, and an "any" convention, in
+and LF (linefeed), the two-character sequence CRLF, an "anycrlf" convention, 
+which recognizes any of the preceding three types, and an "any" convention, in
 which any Unicode line ending sequence is assumed to end a line. The Unicode
 sequences are the three just mentioned, plus VT (vertical tab, U+000B), FF
 (formfeed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and
-PS (paragraph separator, U+0029).
+PS (paragraph separator, U+2029).
 .sp
 When the PCRE library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, \fBpcregrep\fP uses the library's default.
-The possible values for this option are CR, LF, CRLF, or ANY. This makes it
-possible to use \fBpcregrep\fP on files that have come from other environments
-without having to modify their line endings. If the data that is being scanned
-does not agree with the convention set by this option, \fBpcregrep\fP may
-behave in strange ways.
+The possible values for this option are CR, LF, CRLF, ANYCRLF, or ANY. This
+makes it possible to use \fBpcregrep\fP on files that have come from other
+environments without having to modify their line endings. If the data that is
+being scanned does not agree with the convention set by this option,
+\fBpcregrep\fP may behave in strange ways.
 .TP
 \fB-n\fP, \fB--line-number\fP
 Precede each output line by its line number in the file, followed by a colon
@@ -387,6 +388,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 16 April 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

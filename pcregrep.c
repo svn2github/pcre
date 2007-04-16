@@ -88,7 +88,7 @@ enum { DEE_READ, DEE_SKIP };
 
 /* Line ending types */
 
-enum { EL_LF, EL_CR, EL_CRLF, EL_ANY };
+enum { EL_LF, EL_CR, EL_CRLF, EL_ANY, EL_ANYCRLF };
 
 
 
@@ -196,7 +196,7 @@ static option_item optionlist[] = {
   { OP_STRING,    N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
   { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
-  { OP_STRING,    'N',      &newline,          "newline=type",  "specify newline type (CR, LR, CRLF)" },
+  { OP_STRING,    'N',      &newline,          "newline=type",  "specify newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
   { OP_NODATA,    'o',      NULL,              "only-matching", "show only the part of the line that matched" },
   { OP_NODATA,    'q',      NULL,              "quiet",         "suppress output, just set return code" },
@@ -226,7 +226,7 @@ static const char *prefix[] = {
 static const char *suffix[] = {
   "", "\\b", ")$",   ")$",   "\\E", "\\E\\b", "\\E)$",   "\\E)$" };
 
-/* UTF-8 tables - used only when the newline setting is "all". */
+/* UTF-8 tables - used only when the newline setting is "any". */
 
 const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
 
@@ -545,6 +545,50 @@ switch(endlinetype)
     }
   break;
 
+  case EL_ANYCRLF:
+  while (p < endptr)
+    {
+    int extra = 0;
+    register int c = *((unsigned char *)p);
+
+    if (utf8 && c >= 0xc0)
+      {
+      int gcii, gcss;
+      extra = utf8_table4[c & 0x3f];  /* Number of additional bytes */
+      gcss = 6*extra;
+      c = (c & utf8_table3[extra]) << gcss;
+      for (gcii = 1; gcii <= extra; gcii++)
+        {
+        gcss -= 6;
+        c |= (p[gcii] & 0x3f) << gcss;
+        }
+      }
+
+    p += 1 + extra;
+
+    switch (c)
+      {
+      case 0x0a:    /* LF */
+      *lenptr = 1;
+      return p;
+
+      case 0x0d:    /* CR */
+      if (p < endptr && *p == 0x0a)
+        {
+        *lenptr = 2;
+        p++;
+        }
+      else *lenptr = 1;
+      return p;
+  
+      default:
+      break;
+      }
+    }   /* End of loop for ANYCRLF case */
+     
+  *lenptr = 0;  /* Must have hit the end */
+  return endptr;
+
   case EL_ANY:
   while (p < endptr)
     {
@@ -643,6 +687,7 @@ switch(endlinetype)
   return p;   /* But control should never get here */
 
   case EL_ANY:
+  case EL_ANYCRLF: 
   if (*(--p) == '\n' && p > startptr && p[-1] == '\r') p--;
   if (utf8) while ((*p & 0xc0) == 0x80) p--;
 
@@ -671,7 +716,17 @@ switch(endlinetype)
       }
     else c = *((unsigned char *)pp);
 
-    switch (c)
+    if (endlinetype == EL_ANYCRLF) switch (c)
+      {
+      case 0x0a:    /* LF */
+      case 0x0d:    /* CR */
+      return p;
+      
+      default:
+      break;
+      }   
+
+    else switch (c)
       {
       case 0x0a:    /* LF */
       case 0x0b:    /* VT */
@@ -1512,6 +1567,7 @@ switch(i)
   case '\r':               newline = (char *)"cr"; break;
   case ('\r' << 8) | '\n': newline = (char *)"crlf"; break;
   case -1:                 newline = (char *)"any"; break;
+  case -2:                 newline = (char *)"anycrlf"; break; 
   }
 
 /* Process the options */
@@ -1818,6 +1874,11 @@ else if (strcmp(newline, "any") == 0 || strcmp(newline, "ANY") == 0)
   {
   pcre_options |= PCRE_NEWLINE_ANY;
   endlinetype = EL_ANY;
+  }
+else if (strcmp(newline, "anycrlf") == 0 || strcmp(newline, "ANYCRLF") == 0)
+  {
+  pcre_options |= PCRE_NEWLINE_ANYCRLF;
+  endlinetype = EL_ANYCRLF;
   }
 else
   {

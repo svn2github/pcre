@@ -106,6 +106,7 @@ extern "C" {
 #define PCRE_NEWLINE_LF         0x00200000
 #define PCRE_NEWLINE_CRLF       0x00300000
 #define PCRE_NEWLINE_ANY        0x00400000
+#define PCRE_NEWLINE_ANYCRLF    0x00500000
 
 /* Exec-time and get/set-time error codes */
 

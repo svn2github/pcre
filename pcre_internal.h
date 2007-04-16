@@ -174,21 +174,22 @@ characters only go up to 0x7fffffff (though Unicode doesn't go beyond
 #define NOTACHAR 0xffffffff
 
 /* PCRE is able to support several different kinds of newline (CR, LF, CRLF,
-and "all" at present). The following macros are used to package up testing for
-newlines. NLBLOCK, PSSTART, and PSEND are defined in the various modules to
-indicate in which datablock the parameters exist, and what the start/end of
-string field names are. */
+"any" and "anycrlf" at present). The following macros are used to package up
+testing for newlines. NLBLOCK, PSSTART, and PSEND are defined in the various
+modules to indicate in which datablock the parameters exist, and what the
+start/end of string field names are. */
 
-#define NLTYPE_FIXED   0     /* Newline is a fixed length string */
-#define NLTYPE_ANY     1     /* Newline is any Unicode line ending */
+#define NLTYPE_FIXED    0     /* Newline is a fixed length string */
+#define NLTYPE_ANY      1     /* Newline is any Unicode line ending */
+#define NLTYPE_ANYCRLF  2     /* Newline is CR, LF, or CRLF */
 
 /* This macro checks for a newline at the given position */
 
 #define IS_NEWLINE(p) \
   ((NLBLOCK->nltype != NLTYPE_FIXED)? \
     ((p) < NLBLOCK->PSEND && \
-     _pcre_is_newline((p), NLBLOCK->PSEND, &(NLBLOCK->nllen), utf8) \
-    ) \
+     _pcre_is_newline((p), NLBLOCK->nltype, NLBLOCK->PSEND, &(NLBLOCK->nllen),\
+       utf8)) \
     : \
     ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
      (p)[0] == NLBLOCK->nl[0] && \
@@ -201,8 +202,8 @@ string field names are. */
 #define WAS_NEWLINE(p) \
   ((NLBLOCK->nltype != NLTYPE_FIXED)? \
     ((p) > NLBLOCK->PSSTART && \
-     _pcre_was_newline((p), NLBLOCK->PSSTART, &(NLBLOCK->nllen), utf8) \
-    ) \
+     _pcre_was_newline((p), NLBLOCK->nltype, NLBLOCK->PSSTART, \
+       &(NLBLOCK->nllen), utf8)) \
     : \
     ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
      (p)[-NLBLOCK->nllen] == NLBLOCK->nl[0] && \
@@ -500,7 +501,8 @@ bits. */
 /* Masks for identifying the public options that are permitted at compile
 time, run time, or study time, respectively. */
 
-#define PCRE_NEWLINE_BITS (PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|PCRE_NEWLINE_ANY)
+#define PCRE_NEWLINE_BITS (PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|PCRE_NEWLINE_ANY| \
+                           PCRE_NEWLINE_ANYCRLF)
 
 #define PUBLIC_OPTIONS \
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
@@ -1087,16 +1089,16 @@ extern const uschar _pcre_OP_lengths[];
 one of the exported public functions. They have to be "external" in the C
 sense, but are not part of the PCRE public API. */
 
-extern BOOL         _pcre_is_newline(const uschar *, const uschar *, int *,
-                      BOOL);
+extern BOOL         _pcre_is_newline(const uschar *, int, const uschar *, 
+                      int *, BOOL);
 extern int          _pcre_ord2utf8(int, uschar *);
 extern real_pcre   *_pcre_try_flipped(const real_pcre *, real_pcre *,
                       const pcre_study_data *, pcre_study_data *);
 extern int          _pcre_ucp_findprop(const unsigned int, int *, int *);
 extern unsigned int _pcre_ucp_othercase(const unsigned int);
 extern int          _pcre_valid_utf8(const uschar *, int);
-extern BOOL         _pcre_was_newline(const uschar *, const uschar *, int *,
-                      BOOL);
+extern BOOL         _pcre_was_newline(const uschar *, int, const uschar *, 
+                      int *, BOOL);
 extern BOOL         _pcre_xclass(int, const uschar *);
 
 #endif
