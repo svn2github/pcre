@@ -157,7 +157,7 @@ bytes at the start of the buffer.
 always produce exactly the same result as matching over one single long string.
 The difference arises when there are multiple matching possibilities, because a
 partial match result is given only when there are no completed matches in a
-call to fBpcre_dfa_exec()\fP. This means that as soon as the shortest match has
+call to \fBpcre_dfa_exec()\fP. This means that as soon as the shortest match has
 been found, continuation to a new subject segment is no longer possible.
 Consider this \fBpcretest\fP example:
 .sp

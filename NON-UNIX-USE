@@ -157,7 +157,7 @@ The Cygwin home page (http://www.cygwin.com/) says this:
 On both MinGW and Cygwin, PCRE should build correctly using:
 
   ./configure && make && make install
-  
+
 This should create two libraries called libpcre and libpcreposix, and, if you
 have enabled building the C++ wrapper, a third one called libpcrecpp.
 

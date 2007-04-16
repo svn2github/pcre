@@ -521,8 +521,8 @@ REGULAR EXPRESSIONS AS TREES
 
 THE STANDARD MATCHING ALGORITHM
 
-       In the terminology of Jeffrey Friedl's book Mastering  Regular  Expres-
-       sions,  the  standard  algorithm  is  an "NFA algorithm". It conducts a
+       In the terminology of Jeffrey Friedl's book "Mastering Regular  Expres-
+       sions",  the  standard  algorithm  is an "NFA algorithm". It conducts a
        depth-first search of the pattern tree. That is, it  proceeds  along  a
        single path through the tree, checking that the subject matches what is
        required. When there is a mismatch, the algorithm  tries  any  alterna-
@@ -4527,10 +4527,9 @@ MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()
        not always produce exactly the same result as matching over one  single
        long  string.   The  difference arises when there are multiple matching
        possibilities, because a partial match result is given only when  there
-       are  no  completed  matches  in a call to fBpcre_dfa_exec(). This means
-       that as soon as the shortest match has been found,  continuation  to  a
-       new  subject  segment  is  no  longer possible.  Consider this pcretest
-       example:
+       are  no completed matches in a call to pcre_dfa_exec(). This means that
+       as soon as the shortest match has been found,  continuation  to  a  new
+       subject segment is no longer possible.  Consider this pcretest example:
 
            re> /dog(sbody)?/
          data> do\P\D
