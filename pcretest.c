@@ -1594,7 +1594,7 @@ while (!done)
   for (;;)
     {
     uschar *q;
-    uschar *bptr = dbuffer;
+    uschar *bptr;
     int *use_offsets = offsets;
     int use_size_offsets = size_offsets;
     int callout_data = 0;
@@ -1650,7 +1650,7 @@ while (!done)
     p = buffer;
     while (isspace(*p)) p++;
 
-    q = dbuffer;
+    bptr = q = dbuffer;
     while ((c = *p++) != 0)
       {
       int i = 0;

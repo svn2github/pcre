@@ -135,6 +135,10 @@ Version 7.1 12-Mar-07
     was because its rules for how to advance for /g after matching an empty
     string at the end of a line did not allow for this case. They now check for
     it specially.
+    
+20. pcretest is supposed to handle patterns and data of any length, by 
+    extending its buffers when necessary. It was getting this wrong when the 
+    buffer for a data line had to be extended.
 
 
 Version 7.0 19-Dec-06
