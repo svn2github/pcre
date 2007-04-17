@@ -1644,7 +1644,7 @@ for (i = 1; i < argc; i++)
         char buff2[24];
         int baselen = opbra - op->long_name;
         sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, 
+        sprintf(buff2, "%s%.*s", buff1,
           (int)strlen(op->long_name) - baselen - 2, opbra + 1);
         if (strcmp(arg, buff1) == 0 || strcmp(arg, buff2) == 0)
           break;

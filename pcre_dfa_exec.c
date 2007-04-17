@@ -500,9 +500,9 @@ for (;;)
     const uschar *code;
     int state_offset = current_state->offset;
     int count, codevalue;
-#ifdef SUPPORT_UCP     
+#ifdef SUPPORT_UCP
     int chartype, script;
-#endif     
+#endif
 
 #ifdef DEBUG
     printf ("%.*sProcessing state %d c=", rlevel*2-2, SP, state_offset);

@@ -157,7 +157,7 @@ PATTERN MODIFIERS
          /<cr>       PCRE_NEWLINE_CR
          /<lf>       PCRE_NEWLINE_LF
          /<crlf>     PCRE_NEWLINE_CRLF
-         /<anycrlf>  PCRE_NEWLINE_ANY
+         /<anycrlf>  PCRE_NEWLINE_ANYCRLF
          /<any>      PCRE_NEWLINE_ANY
 
        Those  specifying  line ending sequencess are literal strings as shown.
