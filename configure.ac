@@ -170,7 +170,7 @@ case "$enable_newline" in
   lf)      ac_pcre_newline_value=10   ;;
   cr)      ac_pcre_newline_value=13   ;;
   crlf)    ac_pcre_newline_value=3338 ;;
-  anycrlf) ac_pcre_newline_value=-2   ;; 
+  anycrlf) ac_pcre_newline_value=-2   ;;
   any)     ac_pcre_newline_value=-1   ;;
   *)
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])

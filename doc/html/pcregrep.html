@@ -270,23 +270,24 @@ are guaranteed to be available for lookbehind assertions.
 </P>
 <P>
 <b>-N</b> <i>newline-type</i>, <b>--newline=</b><i>newline-type</i>
-The PCRE library supports four different conventions for indicating
+The PCRE library supports five different conventions for indicating
 the ends of lines. They are the single-character sequences CR (carriage return)
-and LF (linefeed), the two-character sequence CRLF, and an "any" convention, in
+and LF (linefeed), the two-character sequence CRLF, an "anycrlf" convention,
+which recognizes any of the preceding three types, and an "any" convention, in
 which any Unicode line ending sequence is assumed to end a line. The Unicode
 sequences are the three just mentioned, plus VT (vertical tab, U+000B), FF
 (formfeed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and
-PS (paragraph separator, U+0029).
+PS (paragraph separator, U+2029).
 <br>
 <br>
 When the PCRE library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, <b>pcregrep</b> uses the library's default.
-The possible values for this option are CR, LF, CRLF, or ANY. This makes it
-possible to use <b>pcregrep</b> on files that have come from other environments
-without having to modify their line endings. If the data that is being scanned
-does not agree with the convention set by this option, <b>pcregrep</b> may
-behave in strange ways.
+The possible values for this option are CR, LF, CRLF, ANYCRLF, or ANY. This
+makes it possible to use <b>pcregrep</b> on files that have come from other
+environments without having to modify their line endings. If the data that is
+being scanned does not agree with the convention set by this option,
+<b>pcregrep</b> may behave in strange ways.
 </P>
 <P>
 <b>-n</b>, <b>--line-number</b>
@@ -431,7 +432,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC12" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 16 April 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

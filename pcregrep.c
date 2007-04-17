@@ -580,12 +580,12 @@ switch(endlinetype)
         }
       else *lenptr = 1;
       return p;
-  
+
       default:
       break;
       }
     }   /* End of loop for ANYCRLF case */
-     
+
   *lenptr = 0;  /* Must have hit the end */
   return endptr;
 
@@ -687,7 +687,7 @@ switch(endlinetype)
   return p;   /* But control should never get here */
 
   case EL_ANY:
-  case EL_ANYCRLF: 
+  case EL_ANYCRLF:
   if (*(--p) == '\n' && p > startptr && p[-1] == '\r') p--;
   if (utf8) while ((*p & 0xc0) == 0x80) p--;
 
@@ -721,10 +721,10 @@ switch(endlinetype)
       case 0x0a:    /* LF */
       case 0x0d:    /* CR */
       return p;
-      
+
       default:
       break;
-      }   
+      }
 
     else switch (c)
       {
@@ -1567,7 +1567,7 @@ switch(i)
   case '\r':               newline = (char *)"cr"; break;
   case ('\r' << 8) | '\n': newline = (char *)"crlf"; break;
   case -1:                 newline = (char *)"any"; break;
-  case -2:                 newline = (char *)"anycrlf"; break; 
+  case -2:                 newline = (char *)"anycrlf"; break;
   }
 
 /* Process the options */

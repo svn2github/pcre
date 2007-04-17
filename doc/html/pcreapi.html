@@ -246,12 +246,13 @@ documentation.
 </P>
 <br><a name="SEC3" href="#TOC1">NEWLINES</a><br>
 <P>
-PCRE supports four different conventions for indicating line breaks in
+PCRE supports five different conventions for indicating line breaks in
 strings: a single CR (carriage return) character, a single LF (linefeed)
-character, the two-character sequence CRLF, or any Unicode newline sequence.
-The Unicode newline sequences are the three just mentioned, plus the single
-characters VT (vertical tab, U+000B), FF (formfeed, U+000C), NEL (next line,
-U+0085), LS (line separator, U+2028), and PS (paragraph separator, U+2029).
+character, the two-character sequence CRLF, any of the three preceding, or any
+Unicode newline sequence. The Unicode newline sequences are the three just
+mentioned, plus the single characters VT (vertical tab, U+000B), FF (formfeed,
+U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
+(paragraph separator, U+2029).
 </P>
 <P>
 Each of the first three conventions is used by at least one operating system as
@@ -317,8 +318,8 @@ properties is available; otherwise it is set to zero.
 </pre>
 The output is an integer whose value specifies the default character sequence
 that is recognized as meaning "newline". The four values that are supported
-are: 10 for LF, 13 for CR, 3338 for CRLF, and -1 for ANY. The default should
-normally be the standard sequence for your operating system.
+are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. The
+default should normally be the standard sequence for your operating system.
 <pre>
   PCRE_CONFIG_LINK_SIZE
 </pre>
@@ -546,25 +547,28 @@ occurrences of ^ or $ in a pattern, setting PCRE_MULTILINE has no effect.
   PCRE_NEWLINE_CR
   PCRE_NEWLINE_LF
   PCRE_NEWLINE_CRLF
+  PCRE_NEWLINE_ANYCRLF
   PCRE_NEWLINE_ANY
 </pre>
 These options override the default newline definition that was chosen when PCRE
 was built. Setting the first or the second specifies that a newline is
 indicated by a single character (CR or LF, respectively). Setting
 PCRE_NEWLINE_CRLF specifies that a newline is indicated by the two-character
-CRLF sequence. Setting PCRE_NEWLINE_ANY specifies that any Unicode newline
-sequence should be recognized. The Unicode newline sequences are the three just
-mentioned, plus the single characters VT (vertical tab, U+000B), FF (formfeed,
-U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
-(paragraph separator, U+2029). The last two are recognized only in UTF-8 mode.
+CRLF sequence. Setting PCRE_NEWLINE_ANYCRLF specifies that any of the three
+preceding sequences should be recognized. Setting PCRE_NEWLINE_ANY specifies
+that any Unicode newline sequence should be recognized. The Unicode newline
+sequences are the three just mentioned, plus the single characters VT (vertical
+tab, U+000B), FF (formfeed, U+000C), NEL (next line, U+0085), LS (line
+separator, U+2028), and PS (paragraph separator, U+2029). The last two are
+recognized only in UTF-8 mode.
 </P>
 <P>
 The newline setting in the options word uses three bits that are treated
-as a number, giving eight possibilities. Currently only five are used (default
-plus the four values above). This means that if you set more than one newline
+as a number, giving eight possibilities. Currently only six are used (default
+plus the five values above). This means that if you set more than one newline
 option, the combination may or may not be sensible. For example,
 PCRE_NEWLINE_CR with PCRE_NEWLINE_LF is equivalent to PCRE_NEWLINE_CRLF, but
-other combinations yield unused numbers and cause an error.
+other combinations may yield unused numbers and cause an error.
 </P>
 <P>
 The only time that a line break is specially recognized when compiling a
@@ -1166,6 +1170,7 @@ matching time.
   PCRE_NEWLINE_CR
   PCRE_NEWLINE_LF
   PCRE_NEWLINE_CRLF
+  PCRE_NEWLINE_ANYCRLF
   PCRE_NEWLINE_ANY
 </pre>
 These options override the newline definition that was chosen or defaulted when
@@ -1173,9 +1178,10 @@ the pattern was compiled. For details, see the description of
 <b>pcre_compile()</b> above. During matching, the newline choice affects the
 behaviour of the dot, circumflex, and dollar metacharacters. It may also alter
 the way the match position is advanced after a match failure for an unanchored
-pattern. When PCRE_NEWLINE_CRLF or PCRE_NEWLINE_ANY is set, and a match attempt
-fails when the current position is at a CRLF sequence, the match position is
-advanced by two characters instead of one, in other words, to after the CRLF.
+pattern. When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is
+set, and a match attempt fails when the current position is at a CRLF sequence,
+the match position is advanced by two characters instead of one, in other
+words, to after the CRLF.
 <pre>
   PCRE_NOTBOL
 </pre>
@@ -1851,7 +1857,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 16 April 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

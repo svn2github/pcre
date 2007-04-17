@@ -5138,7 +5138,7 @@ cd->cbits = tables + cbits_offset;
 cd->ctypes = tables + ctypes_offset;
 
 /* Handle different types of newline. The three bits give seven cases. The
-current code allows for fixed one- or two-byte sequences, plus "any" and 
+current code allows for fixed one- or two-byte sequences, plus "any" and
 "anycrlf". */
 
 switch (options & (PCRE_NEWLINE_CRLF | PCRE_NEWLINE_ANY))
@@ -5149,7 +5149,7 @@ switch (options & (PCRE_NEWLINE_CRLF | PCRE_NEWLINE_ANY))
   case PCRE_NEWLINE_CR+
        PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
   case PCRE_NEWLINE_ANY: newline = -1; break;
-  case PCRE_NEWLINE_ANYCRLF: newline = -2; break; 
+  case PCRE_NEWLINE_ANYCRLF: newline = -2; break;
   default: errorcode = ERR56; goto PCRE_EARLY_ERROR_RETURN;
   }
 

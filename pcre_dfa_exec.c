@@ -2175,7 +2175,7 @@ switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : (pcre_uint32)option
   case PCRE_NEWLINE_CR+
        PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
   case PCRE_NEWLINE_ANY: newline = -1; break;
-  case PCRE_NEWLINE_ANYCRLF: newline = -2; break; 
+  case PCRE_NEWLINE_ANYCRLF: newline = -2; break;
   default: return PCRE_ERROR_BADNEWLINE;
   }
 
@@ -2431,13 +2431,13 @@ for (;;)
     }
   if (current_subject > end_subject) break;
 
-  /* If we have just passed a CR and the newline option is CRLF or ANY or 
+  /* If we have just passed a CR and the newline option is CRLF or ANY or
   ANYCRLF, and we are now at a LF, advance the match position by one more
   character. */
 
   if (current_subject[-1] == '\r' &&
-       (md->nltype == NLTYPE_ANY || 
-        md->nltype == NLTYPE_ANYCRLF || 
+       (md->nltype == NLTYPE_ANY ||
+        md->nltype == NLTYPE_ANYCRLF ||
         md->nllen == 2) &&
        current_subject < end_subject &&
        *current_subject == '\n')

@@ -852,7 +852,7 @@ while (argc > 1 && argv[op][0] == '-')
     (void)pcre_config(PCRE_CONFIG_NEWLINE, &rc);
     printf("  Newline sequence is %s\n", (rc == '\r')? "CR" :
       (rc == '\n')? "LF" : (rc == ('\r'<<8 | '\n'))? "CRLF" :
-      (rc == -2)? "ANYCRLF" : 
+      (rc == -2)? "ANYCRLF" :
       (rc == -1)? "ANY" : "???");
     (void)pcre_config(PCRE_CONFIG_LINK_SIZE, &rc);
     printf("  Internal link size = %d\n", rc);
@@ -2225,7 +2225,7 @@ while (!done)
       to advance the start offset, and continue. We won't be at the end of the
       string - that was checked before setting g_notempty.
 
-      Complication arises in the case when the newline option is "any" or 
+      Complication arises in the case when the newline option is "any" or
       "anycrlf". If the previous match was at the end of a line terminated by
       CRLF, an advance of one character just passes the \r, whereas we should
       prefer the longer newline sequence, as does the code in pcre_exec().
@@ -2248,11 +2248,11 @@ while (!done)
             obits = (d == '\r')? PCRE_NEWLINE_CR :
                     (d == '\n')? PCRE_NEWLINE_LF :
                     (d == ('\r'<<8 | '\n'))? PCRE_NEWLINE_CRLF :
-                    (d == -2)? PCRE_NEWLINE_ANYCRLF : 
+                    (d == -2)? PCRE_NEWLINE_ANYCRLF :
                     (d == -1)? PCRE_NEWLINE_ANY : 0;
             }
           if (((obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANY ||
-               (obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANYCRLF) 
+               (obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANYCRLF)
               &&
               start_offset < len - 1 &&
               bptr[start_offset] == '\r' &&

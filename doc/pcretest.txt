@@ -146,18 +146,19 @@ PATTERN MODIFIERS
        The following table shows additional modifiers for setting PCRE options
        that do not correspond to anything in Perl:
 
-         /A       PCRE_ANCHORED
-         /C       PCRE_AUTO_CALLOUT
-         /E       PCRE_DOLLAR_ENDONLY
-         /f       PCRE_FIRSTLINE
-         /J       PCRE_DUPNAMES
-         /N       PCRE_NO_AUTO_CAPTURE
-         /U       PCRE_UNGREEDY
-         /X       PCRE_EXTRA
-         /<cr>    PCRE_NEWLINE_CR
-         /<lf>    PCRE_NEWLINE_LF
-         /<crlf>  PCRE_NEWLINE_CRLF
-         /<any>   PCRE_NEWLINE_ANY
+         /A          PCRE_ANCHORED
+         /C          PCRE_AUTO_CALLOUT
+         /E          PCRE_DOLLAR_ENDONLY
+         /f          PCRE_FIRSTLINE
+         /J          PCRE_DUPNAMES
+         /N          PCRE_NO_AUTO_CAPTURE
+         /U          PCRE_UNGREEDY
+         /X          PCRE_EXTRA
+         /<cr>       PCRE_NEWLINE_CR
+         /<lf>       PCRE_NEWLINE_LF
+         /<crlf>     PCRE_NEWLINE_CRLF
+         /<anycrlf>  PCRE_NEWLINE_ANY
+         /<any>      PCRE_NEWLINE_ANY
 
        Those  specifying  line ending sequencess are literal strings as shown.
        This example sets multiline matching  with  CRLF  as  the  line  ending
@@ -329,6 +330,8 @@ DATA LINES
          \<lf>      pass the PCRE_NEWLINE_LF option to pcre_exec()
                       or pcre_dfa_exec()
          \<crlf>    pass the PCRE_NEWLINE_CRLF option to pcre_exec()
+                      or pcre_dfa_exec()
+         \<anycrlf> pass the PCRE_NEWLINE_ANYCRLF option to pcre_exec()
                       or pcre_dfa_exec()
          \<any>     pass the PCRE_NEWLINE_ANY option to pcre_exec()
                       or pcre_dfa_exec()
@@ -618,5 +621,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 March 2007
+       Last updated: 16 April 2007
        Copyright (c) 1997-2007 University of Cambridge.

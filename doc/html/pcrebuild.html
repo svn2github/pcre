@@ -106,9 +106,14 @@ character sequence CRLF. If you want this, add
 </pre>
 to the <b>configure</b> command. There is a fourth option, specified by
 <pre>
+  --enable-newline-is-anycrlf
+</pre>
+which causes PCRE to recognize any of the three sequences CR, LF, or CRLF as
+indicating a line ending. Finally, a fifth option, specified by
+<pre>
   --enable-newline-is-any
 </pre>
-which causes PCRE to recognize any Unicode newline sequence.
+causes PCRE to recognize any Unicode newline sequence.
 </P>
 <P>
 Whatever line ending convention is selected when PCRE is built can be
@@ -255,7 +260,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 20 March 2007
+Last updated: 16 April 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>
