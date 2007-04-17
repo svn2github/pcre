@@ -890,7 +890,7 @@ offsets = (int *)malloc(size_offsets_max * sizeof(int));
 if (offsets == NULL)
   {
   printf("** Failed to get %d bytes of memory for offsets vector\n",
-    size_offsets_max * sizeof(int));
+    (int)(size_offsets_max * sizeof(int)));
   yield = 1;
   goto EXIT;
   }
@@ -1852,7 +1852,7 @@ while (!done)
           if (offsets == NULL)
             {
             printf("** Failed to get %d bytes of memory for offsets vector\n",
-              size_offsets_max * sizeof(int));
+              (int)(size_offsets_max * sizeof(int)));
             yield = 1;
             goto EXIT;
             }

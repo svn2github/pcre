@@ -280,7 +280,7 @@ for (;;)
   if (strcmp(dent->d_name, ".") != 0 && strcmp(dent->d_name, "..") != 0)
     return dent->d_name;
   }
-return NULL;   /* Keep compiler happy; never executed */
+/* Control never reaches here */
 }
 
 static void
@@ -1525,7 +1525,7 @@ if ((process_options & PO_FIXED_STRINGS) != 0)
     char *p = end_of_line(pattern, eop, &ellength);
     if (ellength == 0)
       return compile_single_pattern(pattern, options, filename, count);
-    sprintf(buffer, "%.*s", p - pattern - ellength, pattern);
+    sprintf(buffer, "%.*s", (int)(p - pattern - ellength), pattern);
     pattern = p;
     if (!compile_single_pattern(buffer, options, filename, count))
       return FALSE;
@@ -1644,8 +1644,8 @@ for (i = 1; i < argc; i++)
         char buff2[24];
         int baselen = opbra - op->long_name;
         sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, strlen(op->long_name) - baselen - 2,
-          opbra + 1);
+        sprintf(buff2, "%s%.*s", buff1, 
+          (int)strlen(op->long_name) - baselen - 2, opbra + 1);
         if (strcmp(arg, buff1) == 0 || strcmp(arg, buff2) == 0)
           break;
         }

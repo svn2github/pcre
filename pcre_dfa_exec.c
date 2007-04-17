@@ -500,7 +500,9 @@ for (;;)
     const uschar *code;
     int state_offset = current_state->offset;
     int count, codevalue;
+#ifdef SUPPORT_UCP     
     int chartype, script;
+#endif     
 
 #ifdef DEBUG
     printf ("%.*sProcessing state %d c=", rlevel*2-2, SP, state_offset);
@@ -783,13 +785,12 @@ for (;;)
       break;
 
 
-#ifdef SUPPORT_UCP
-
       /*-----------------------------------------------------------------*/
       /* Check the next character by Unicode property. We will get here only
       if the support is in the binary; otherwise a compile-time error occurs.
       */
 
+#ifdef SUPPORT_UCP
       case OP_PROP:
       case OP_NOTPROP:
       if (clen > 0)
@@ -970,6 +971,7 @@ for (;;)
       argument. It keeps the code above fast for the other cases. The argument
       is in the d variable. */
 
+#ifdef SUPPORT_UCP
       case OP_PROP_EXTRA + OP_TYPEPLUS:
       case OP_PROP_EXTRA + OP_TYPEMINPLUS:
       case OP_PROP_EXTRA + OP_TYPEPOSPLUS:
@@ -1049,6 +1051,7 @@ for (;;)
         ADD_NEW_DATA(-state_offset, count, ncount);
         }
       break;
+#endif
 
       /*-----------------------------------------------------------------*/
       case OP_ANYNL_EXTRA + OP_TYPEPLUS:
@@ -1085,6 +1088,7 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+#ifdef SUPPORT_UCP
       case OP_PROP_EXTRA + OP_TYPEQUERY:
       case OP_PROP_EXTRA + OP_TYPEMINQUERY:
       case OP_PROP_EXTRA + OP_TYPEPOSQUERY:
@@ -1182,6 +1186,7 @@ for (;;)
         ADD_NEW_DATA(-(state_offset + count), 0, ncount);
         }
       break;
+#endif
 
       /*-----------------------------------------------------------------*/
       case OP_ANYNL_EXTRA + OP_TYPEQUERY:
@@ -1226,6 +1231,7 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+#ifdef SUPPORT_UCP
       case OP_PROP_EXTRA + OP_TYPEEXACT:
       case OP_PROP_EXTRA + OP_TYPEUPTO:
       case OP_PROP_EXTRA + OP_TYPEMINUPTO:
@@ -1313,6 +1319,7 @@ for (;;)
           { ADD_NEW_DATA(-state_offset, count, ncount); }
         }
       break;
+#endif
 
       /*-----------------------------------------------------------------*/
       case OP_ANYNL_EXTRA + OP_TYPEEXACT:
