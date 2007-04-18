@@ -86,10 +86,11 @@ setjmp and stdarg are used is when NO_RECURSE is set. */
 /* When compiling a DLL for Windows, the exported symbols have to be declared
 using some MS magic. I found some useful information on this web page:
 http://msdn2.microsoft.com/en-us/library/y4h7bcy6(VS.80).aspx. According to the
-information there, using __declspec(dllesport) without "extern" we have a
+information there, using __declspec(dllexport) without "extern" we have a
 definition; with "extern" we have a declaration. The settings here override the
 setting in pcre.h (which is included below); it defines only PCRE_EXP_DECL,
-which is all that is needed for applications, which import the symbols. We use:
+which is all that is needed for applications (they just import the symbols). We
+use:
 
   PCRE_EXP_DECL       for declarations
   PCRE_EXP_DEFN       for definitions of exported functions
@@ -102,7 +103,7 @@ Windows, the two should always be the same.
 
 The reason for wrapping this in #ifndef PCRE_EXP_DECL is so that pcretest,
 which is an application, but needs to import this file in order to "peek" at
-internals, can #include pcre.h first, can get an application's-eye view.
+internals, can #include pcre.h first to get an application's-eye view.
 
 In principle, people compiling for non-Windows, non-Unix-like (i.e. uncommon,
 special-purpose environments) might want to stick other stuff in front of
