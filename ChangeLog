@@ -149,6 +149,8 @@ Version 7.1 12-Mar-07
 
 23. Added some casts to kill warnings from HP-UX ia64 compiler.
 
+24. Added a man page for pcre-config.
+
 
 Version 7.0 19-Dec-06
 ---------------------

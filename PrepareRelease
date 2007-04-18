@@ -59,8 +59,8 @@ for file in pcre pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
   fi
 done
 
-# The two commands
-for file in pcretest pcregrep ; do
+# The three commands
+for file in pcretest pcregrep pcre-config ; do
   echo Making $file.txt
   nroff -c -man $file.1 >$file.rawtxt
   ../CleanTxt <$file.rawtxt >$file.txt

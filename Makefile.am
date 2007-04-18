@@ -2,6 +2,7 @@
 
 dist_doc_DATA = \
   doc/pcre.txt \
+  doc/pcre-config.txt \
   doc/pcregrep.txt \
   doc/pcretest.txt \
   AUTHORS \
@@ -14,6 +15,7 @@ dist_doc_DATA = \
 dist_html_DATA = \
   doc/html/index.html \
   doc/html/pcre.html \
+  doc/html/pcre-config.html \
   doc/html/pcre_compile.html \
   doc/html/pcre_compile2.html \
   doc/html/pcre_config.html \
@@ -301,6 +303,7 @@ endif
 
 dist_man_MANS = \
   doc/pcre.3 \
+  doc/pcre-config.1 \
   doc/pcre_compile.3 \
   doc/pcre_compile2.3 \
   doc/pcre_config.3 \
