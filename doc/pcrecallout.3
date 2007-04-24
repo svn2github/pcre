@@ -17,7 +17,7 @@ function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
 For example, this pattern has two callout points:
 .sp
-  (?C1)\deabc(?C2)def
+  (?C1)abc(?C2)def
 .sp
 If the PCRE_AUTO_CALLOUT option bit is set when \fBpcre_compile()\fP is called,
 PCRE automatically inserts callouts, all with number 255, before each item in

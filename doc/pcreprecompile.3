@@ -17,7 +17,9 @@ tables, it is a little bit more complicated.
 If you save compiled patterns to a file, you can copy them to a different host
 and run them there. This works even if the new host has the opposite endianness
 to the one on which the patterns were compiled. There may be a small
-performance penalty, but it should be insignificant.
+performance penalty, but it should be insignificant. However, compiling regular
+expressions with one version of PCRE for use with a different version is not
+guaranteed to work and may cause crashes.
 .
 .
 .SH "SAVING A COMPILED PATTERN"
@@ -143,6 +145,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 24 April 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

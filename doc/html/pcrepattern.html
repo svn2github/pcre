@@ -1805,7 +1805,7 @@ function is to be called. If you want to identify different callout points, you
 can put a number less than 256 after the letter C. The default value is zero.
 For example, this pattern has two callout points:
 <pre>
-  (?C1)\dabc(?C2)def
+  (?C1)abc(?C2)def
 </pre>
 If the PCRE_AUTO_CALLOUT flag is passed to <b>pcre_compile()</b>, callouts are
 automatically installed before each item in the pattern. They are all numbered

@@ -61,7 +61,8 @@ Preparing for a PCRE release
 This section contains a checklist of things that I consult before building a
 distribution for a new release.
 
-. Ensure that the version number and version date are correct in configure.ac.
+. Ensure that the version number and version date are correct in configure.ac,
+  ChangeLog, and NEWS.
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
@@ -72,16 +73,10 @@ distribution for a new release.
   the PCRE test output, apart from the version identification at the top. The 
   other tests are not Perl-compatible (they use various special PCRE options).
 
-. Test on a number of different operating systems. In particular, at the moment 
-  I can test on Solaris, using Sun's cc compiler (as a change from gcc). Adding 
-  -xarch=v9 to the cc options does a 64-bit test, but it also needs -S 64 for 
-  pcretest to increase the stack size for test 2. I also test on FreeBSD and 
-  Linux (where I develop). 
-
 . Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
   valgrind", though that takes quite a long time.
   
-. It can also useful to test with Electric Fence, though the fact that it 
+. It may also useful to test with Electric Fence, though the fact that it 
   grumbles for missing free() calls can be a nuisance. (A missing free() in 
   pcretest is hardly a big problem.) To build with EF, use:
     
@@ -95,7 +90,9 @@ distribution for a new release.
   because there have been problems with lookbehinds that looked too far. 
   
 . Test with the emulated memmove() function by undefining HAVE_MEMMOVE and 
-  HAVE_BCOPY in config.h.
+  HAVE_BCOPY in config.h. You may see a number of "pcre_memmove defined but not 
+  used" warnings for the modules in which there is no call to memmove(). These
+  can be ignored.
 
 . Documentation: check AUTHORS, COPYING, ChangeLog (check date), INSTALL, 
   LICENCE, NEWS (check date), NON-UNIX-USE, and README. Many of these won't 
@@ -104,12 +101,18 @@ distribution for a new release.
 . Man pages: Check all man pages for \ not followed by e or f or " because
   that indicates a markup error.
 
+. When the release is built, test it on a number of different operating 
+  systems if possible, and using different compilers as well. For example,
+  on Solaris it is helpful to test using Sun's cc compiler as a change from
+  gcc. Adding -xarch=v9 to the cc options does a 64-bit test, but it also
+  needs -S 64 for pcretest to increase the stack size for test 2.
+
 
 Making a PCRE release
 ---------------------
 
 Run PrepareRelease and commit the files that it changes (by removing trailing
-spaces). Then run "make dist" to create the tarballs and the zipball.
+spaces). Then run "make distcheck" to create the tarballs and the zipball.
 
 Don't forget to update Freshmeat when the new release is out, and to tell
 webmaster@pcre.org and the mailing list.
@@ -251,8 +254,16 @@ others are relatively new.
 
 . Someone suggested --disable-callout to save code space when callouts are 
   never wanted. This seems rather marginal.  
+  
+. Work needs doing so that the pcregrep tests work better with different 
+  linebreak settings. Currently, some tests don't work when the input files
+  do not have \n line endings.
+  
+. If the fr_FR locale isn't available for testing, try "french" instead, 
+  because this may be available on Windows. It means modifying the test data, 
+  however.  
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 March 2007
+Last updated: 24 April 2007

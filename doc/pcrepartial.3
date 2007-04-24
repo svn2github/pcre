@@ -99,7 +99,7 @@ pattern, but the first two are partial matches. The same test, using
 \fBpcre_dfa_exec()\fP matching (by means of the \eD escape sequence), produces
 the following output:
 .sp
-    re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+    re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
   data> 25jun04\eP\eD
    0: 25jun04
   data> 23dec3\eP\eD
@@ -126,7 +126,7 @@ space as before, because this is where details of the previous partial match
 are stored. Here is an example using \fBpcretest\fP, using the \eR escape
 sequence to set the PCRE_DFA_RESTART option (\eP and \eD are as above):
 .sp
-    re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+    re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
   data> 23ja\eP\eD
   Partial match: 23ja
   data> n05\eR\eD

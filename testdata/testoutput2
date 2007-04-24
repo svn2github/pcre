@@ -8169,4 +8169,12 @@ No match
  0: abc5
  0: abc9
 
+/^X/m
+    XABC
+ 0: X
+    ** Failers 
+No match
+    XABC\B
+No match
+
 / End of testinput2 /

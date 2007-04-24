@@ -287,7 +287,9 @@ The compiled form of a regular expression can be saved and re-used at a later
 time, possibly by a different program, and even on a host other than the one on
 which it was compiled. Details are given in the
 <a href="pcreprecompile.html"><b>pcreprecompile</b></a>
-documentation.
+documentation. However, compiling a regular expression with one version of PCRE
+for use with a different version is not guaranteed to work and may cause
+crashes.
 </P>
 <br><a name="SEC6" href="#TOC1">CHECKING BUILD-TIME OPTIONS</a><br>
 <P>
@@ -1857,7 +1859,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 April 2007
+Last updated: 24 April 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

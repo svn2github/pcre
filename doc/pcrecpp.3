@@ -88,7 +88,7 @@ string is assigned the empty string. Therefore, the following will
 return false (because the empty string is not a valid number):
 .sp
    int number;
-   pcrecpp::RE::FullMatch("abc", "[a-z]+(\\d+)?", &number);
+   pcrecpp::RE::FullMatch("abc", "[a-z]+(\e\ed+)?", &number);
 .sp
 The matching interface supports at most 16 arguments per call.
 If you need more, consider using the more general interface

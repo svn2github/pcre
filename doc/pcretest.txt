@@ -488,7 +488,7 @@ RESTARTING AFTER A PARTIAL MATCH
        can restart the match with additional subject data by means of  the  \R
        escape sequence. For example:
 
-           re> /^?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)$/
+           re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
          data> 23ja\P\D
          Partial match: 23ja
          data> n05\R\D
@@ -621,5 +621,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 April 2007
+       Last updated: 24 April 2007
        Copyright (c) 1997-2007 University of Cambridge.

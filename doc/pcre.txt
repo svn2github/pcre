@@ -887,7 +887,9 @@ SAVING PRECOMPILED PATTERNS FOR LATER USE
        The compiled form of a regular expression can be saved and re-used at a
        later time, possibly by a different program, and even on a  host  other
        than  the  one  on  which  it  was  compiled.  Details are given in the
-       pcreprecompile documentation.
+       pcreprecompile documentation. However, compiling a  regular  expression
+       with  one version of PCRE for use with a different version is not guar-
+       anteed to work and may cause crashes.
 
 
 CHECKING BUILD-TIME OPTIONS
@@ -2386,7 +2388,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 April 2007
+       Last updated: 24 April 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -2414,7 +2416,7 @@ PCRE CALLOUTS
        default value is zero.  For  example,  this  pattern  has  two  callout
        points:
 
-         (?C1)eabc(?C2)def
+         (?C1)abc(?C2)def
 
        If  the  PCRE_AUTO_CALLOUT  option  bit  is  set when pcre_compile() is
        called, PCRE automatically  inserts  callouts,  all  with  number  255,
@@ -4478,7 +4480,7 @@ EXAMPLE OF PARTIAL MATCHING USING PCRETEST
        using  pcre_dfa_exec()  matching  (by means of the \D escape sequence),
        produces the following output:
 
-           re> /^?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)$/
+           re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
          data> 25jun04\P\D
           0: 25jun04
          data> 23dec3\P\D
@@ -4505,7 +4507,7 @@ MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()
        using the \R escape sequence to set the PCRE_DFA_RESTART option (\P and
        \D are as above):
 
-           re> /^?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)$/
+           re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
          data> 23ja\P\D
          Partial match: 23ja
          data> n05\R\D
@@ -4614,7 +4616,9 @@ SAVING AND RE-USING PRECOMPILED PCRE PATTERNS
        ent  host  and  run them there. This works even if the new host has the
        opposite endianness to the one on which  the  patterns  were  compiled.
        There  may  be a small performance penalty, but it should be insignifi-
-       cant.
+       cant. However, compiling regular expressions with one version  of  PCRE
+       for  use  with  a  different  version is not guaranteed to work and may
+       cause crashes.
 
 
 SAVING A COMPILED PATTERN
@@ -4721,7 +4725,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 March 2007
+       Last updated: 24 April 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -5189,7 +5193,7 @@ MATCHING INTERFACE
        return false (because the empty string is not a valid number):
 
           int number;
-          pcrecpp::RE::FullMatch("abc", "[a-z]+(\d+)?", &number);
+          pcrecpp::RE::FullMatch("abc", "[a-z]+(\\d+)?", &number);
 
        The matching interface supports at most 16 arguments per call.  If  you
        need    more,    consider    using    the    more   general   interface

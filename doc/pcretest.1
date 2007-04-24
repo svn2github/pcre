@@ -537,7 +537,7 @@ indicating that the subject partially matched the pattern, you can restart the
 match with additional subject data by means of the \eR escape sequence. For
 example:
 .sp
-    re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+    re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
   data> 23ja\eP\eD
   Partial match: 23ja
   data> n05\eR\eD
@@ -690,6 +690,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 April 2007
+Last updated: 24 April 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

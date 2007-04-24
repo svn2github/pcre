@@ -192,7 +192,7 @@ gcc and MinGW's gcc). So, a user can:
 
 The test files that are supplied with PCRE are in Unix format, with LF
 characters as line terminators. It may be necessary to change the line
-terminators in order to get some of the tests to work. We hope to improves
+terminators in order to get some of the tests to work. We hope to improve
 things in this area in future.
 
 
@@ -274,5 +274,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 26 March 2007
+Last Updated: 24 April 2007
 ****

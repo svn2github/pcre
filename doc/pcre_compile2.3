@@ -62,7 +62,9 @@ PCRE must be built with UTF-8 support in order to use PCRE_UTF8 and
 PCRE_NO_UTF8_CHECK.
 .P
 The yield of the function is a pointer to a private data structure that
-contains the compiled pattern, or NULL if an error was detected.
+contains the compiled pattern, or NULL if an error was detected. Note that
+compiling regular expressions with one version of PCRE for use with a different
+version is not guaranteed to work and may cause crashes.
 .P
 There is a complete description of the PCRE native API in the
 .\" HREF

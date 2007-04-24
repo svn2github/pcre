@@ -4018,9 +4018,4 @@
   abc
   abc\n  
 
-/^X/m
-    XABC
-    ** Failers 
-    XABC\B
-
 / End of testinput1 /
