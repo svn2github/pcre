@@ -132,7 +132,7 @@ if [ $do1 = yes ] ; then
   echo "Test 1: main functionality (Perl compatible)"
   $valgrind ./pcretest -q $testdata/testinput1 testtry
   if [ $? = 0 ] ; then
-    $cf testtry $testdata/testoutput1
+    $cf $testdata/testoutput1 testtry
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -146,7 +146,7 @@ if [ $do2 = yes ] ; then
     echo "Test 2: API and error handling (not Perl compatible)"
     $valgrind ./pcretest -q $testdata/testinput2 testtry
     if [ $? = 0 ] ; then
-      $cf testtry $testdata/testoutput2
+      $cf $testdata/testoutput2 testtry
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
@@ -184,7 +184,7 @@ if [ $do3 = yes ] ; then
     echo "Test 3: locale-specific features (using '$locale' locale)"
     $valgrind ./pcretest -q $infile testtry
     if [ $? = 0 ] ; then
-      $cf testtry $outfile
+      $cf $outfile testtry
       if [ $? != 0 ] ; then
         echo " "
         echo "Locale test did not run entirely successfully."
@@ -209,7 +209,7 @@ if [ $do4 = yes ] ; then
   echo "Test 4: UTF-8 support (Perl compatible)"
   $valgrind ./pcretest -q $testdata/testinput4 testtry
   if [ $? = 0 ] ; then
-    $cf testtry $testdata/testoutput4
+    $cf $testdata/testoutput4 testtry
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -221,7 +221,7 @@ if [ $do5 = yes ] ; then
     echo "Test 5: API and internals for UTF-8 support (not Perl compatible)"
     $valgrind ./pcretest -q $testdata/testinput5 testtry
     if [ $? = 0 ] ; then
-      $cf testtry $testdata/testoutput5
+      $cf $testdata/testoutput5 testtry
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
@@ -237,7 +237,7 @@ if [ $do6 = yes ] ; then
     echo "Test 6: Unicode property support"
     $valgrind ./pcretest -q $testdata/testinput6 testtry
     if [ $? = 0 ] ; then
-      $cf testtry $testdata/testoutput6
+      $cf $testdata/testoutput6 testtry
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
@@ -254,7 +254,7 @@ if [ $do7 = yes ] ; then
   echo "Test 7: DFA matching"
   $valgrind ./pcretest -q -dfa $testdata/testinput7 testtry
   if [ $? = 0 ] ; then
-    $cf testtry $testdata/testoutput7
+    $cf $testdata/testoutput7 testtry
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -265,7 +265,7 @@ if [ $do8 = yes ] ; then
   echo "Test 8: DFA matching with UTF-8"
   $valgrind ./pcretest -q -dfa $testdata/testinput8 testtry
   if [ $? = 0 ] ; then
-    $cf testtry $testdata/testoutput8
+    $cf $testdata/testoutput8 testtry
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -276,7 +276,7 @@ if [ $do9 = yes ] ; then
   echo "Test 9: DFA matching with Unicode properties"
   $valgrind ./pcretest -q -dfa $testdata/testinput9 testtry
   if [ $? = 0 ] ; then
-    $cf testtry $testdata/testoutput9
+    $cf $testdata/testoutput9 testtry
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi

@@ -6,6 +6,9 @@ Version 7.2 01-May-07
 
  1. If the fr_FR locale cannot be found for test 3, try the "french" locale,
     which is apparently normally available under Windows.
+    
+ 2. Re-jig the pcregrep tests with different newline settings in an attempt
+    to make them independent of the local environment's newline setting.  
       
 
 Version 7.1 24-Apr-07
