@@ -5,12 +5,12 @@ News about PCRE releases
 Release 7.2 30-Apr-07
 ---------------------
 
-Correction to the notes for 7.1: the note about shared libraries for Windows is 
-wrong. Previously, three libraries were built, but each could function 
-independently. For example, the pcreposix library also included all the 
-functions from the basic pcre library. The change is that the three libraries 
-are no longer independent. They are like the Unix libraries. To use the 
-pcreposix functions, for example, you need to link with both the pcreposix and 
+Correction to the notes for 7.1: the note about shared libraries for Windows is
+wrong. Previously, three libraries were built, but each could function
+independently. For example, the pcreposix library also included all the
+functions from the basic pcre library. The change is that the three libraries
+are no longer independent. They are like the Unix libraries. To use the
+pcreposix functions, for example, you need to link with both the pcreposix and
 the basic pcre library.
 
 

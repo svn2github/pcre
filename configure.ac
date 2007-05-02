@@ -7,9 +7,9 @@ dnl be defined as -RC2, for example. For real releases, it should be defined
 dnl empty.
 
 m4_define(pcre_major, [7])
-m4_define(pcre_minor, [1])
-m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2007-04-24])
+m4_define(pcre_minor, [2])
+m4_define(pcre_prerelease, [-RC1])
+m4_define(pcre_date, [2007-05-02])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -21,8 +21,46 @@ AC_INIT(PCRE, pcre_major.pcre_minor[]pcre_prerelease, , pcre)
 AC_CONFIG_SRCDIR([pcre.h.in])
 AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
 AC_CONFIG_HEADERS(config.h)
+
+# The default CFLAGS and CXXFLAGS in Autoconf are "-g -O2" for gcc and just
+# "-g" for any other compiler. There doesn't seem to be a standard way of
+# getting rid of the -g (which I don't think is needed for a production
+# library). This fudge seems to achieve the necessary. First, we remember the
+# externally set values of CFLAGS and CXXFLAGS. Then call the AC_PROG_CC and
+# AC_PROG_CXX macros to find the compilers - if CFLAGS and CXXFLAGS are not
+# set, they will be set to Autoconf's defaults. Afterwards, if the original
+# values were not set, remove the -g from the Autoconf defaults.
+# (PH 02-May-07)
+
+remember_set_CFLAGS="$CFLAGS"
+remember_set_CXXFLAGS="$CXXFLAGS"
+
 AC_PROG_CC
 AC_PROG_CXX
+
+if test "x$remember_set_CFLAGS" = "x"
+then
+  if test "$CFLAGS" = "-g -O2"
+  then
+    CFLAGS="-O2"
+  elif test "$CFLAGS" = "-g"
+  then
+    CFLAGS=""
+  fi
+fi
+
+if test "x$remember_set_CXXFLAGS" = "x"
+then
+  if test "$CXXFLAGS" = "-g -O2"
+  then
+    CXXFLAGS="-O2"
+  elif test "$CXXFLAGS" = "-g"
+  then
+    CXXFLAGS=""
+  fi
+fi
+
+
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL

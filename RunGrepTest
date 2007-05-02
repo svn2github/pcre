@@ -228,8 +228,8 @@ fi
 
 
 # We go to some contortions to try to ensure that the tests for the various
-# newline settings will work in environments where the normal newline sequence 
-# is not \n. Note the messy fudge to get printf to write a string that starts 
+# newline settings will work in environments where the normal newline sequence
+# is not \n. Note the messy fudge to get printf to write a string that starts
 # with a hyphen.
 
 echo "Testing pcregrep newline settings"

@@ -174,11 +174,11 @@ if [ $do3 = yes ] ; then
       sed 's/fr_FR/french/' $testdata/testinput3 >test3input
       sed 's/fr_FR/french/' $testdata/testoutput3 >test3output
       infile=test3input
-      outfile=test3output    
+      outfile=test3output
     else
-      locale= 
+      locale=
     fi
-  fi         
+  fi
 
   if [ "$locale" != "" ] ; then
     echo "Test 3: locale-specific features (using '$locale' locale)"
