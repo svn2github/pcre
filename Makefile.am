@@ -282,7 +282,8 @@ EXTRA_DIST += \
 CLEANFILES += \
 	testsavedregex \
 	teststderr \
-	testtry
+	testtry \
+        testNinput
 
 # PCRE demonstration program
 noinst_PROGRAMS += pcredemo

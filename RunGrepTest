@@ -229,32 +229,33 @@ fi
 
 # We go to some contortions to try to ensure that the tests for the various
 # newline settings will work in environments where the normal newline sequence
-# is not \n. Note the messy fudge to get printf to write a string that starts
-# with a hyphen.
+# is not \n. Do not use exported files, whose line endings might be changed.
+# Instead, create an input file using printf so that its contents are exactly
+# what we want. Note the messy fudge to get printf to write a string that
+# starts with a hyphen.
 
 echo "Testing pcregrep newline settings"
-
-printf "abc\rdef\r\nghi\njkl" >$srcdir/testNinput
+printf "abc\rdef\r\nghi\njkl" >testNinput
 
 printf "%c--------------------------- Test N1 ------------------------------\r\n" - >testtry
-(cd $srcdir; $valgrind $pcregrep -n -N CR "^(abc|def|ghi|jkl)" testNinput) >>testtry
+$valgrind $pcregrep -n -N CR "^(abc|def|ghi|jkl)" testNinput >>testtry
 
 printf "%c--------------------------- Test N2 ------------------------------\r\n" - >>testtry
-(cd $srcdir; $valgrind $pcregrep -n --newline=crlf "^(abc|def|ghi|jkl)" testNinput) >>testtry
+$valgrind $pcregrep -n --newline=crlf "^(abc|def|ghi|jkl)" testNinput >>testtry
 
 printf "%c--------------------------- Test N3 ------------------------------\r\n" - >>testtry
 pattern=`printf 'def\rjkl'`
-(cd $srcdir; $valgrind $pcregrep -n --newline=cr -F "$pattern" testNinput) >>testtry
+$valgrind $pcregrep -n --newline=cr -F "$pattern" testNinput >>testtry
 
 printf "%c--------------------------- Test N4 ------------------------------\r\n" - >>testtry
 pattern=`printf 'xxx\r\njkl'`
-(cd $srcdir; $valgrind $pcregrep -n --newline=crlf -F "$pattern" testNinput) >>testtry
+$valgrind $pcregrep -n --newline=crlf -F "$pattern" testNinput >>testtry
 
 printf "%c--------------------------- Test N5 ------------------------------\r\n" - >>testtry
-(cd $srcdir; $valgrind $pcregrep -n --newline=any "^(abc|def|ghi|jkl)" testNinput) >>testtry
+$valgrind $pcregrep -n --newline=any "^(abc|def|ghi|jkl)" testNinput >>testtry
 
 printf "%c--------------------------- Test N6 ------------------------------\r\n" - >>testtry
-(cd $srcdir; $valgrind $pcregrep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinput) >>testtry
+$valgrind $pcregrep -n --newline=anycrlf "^(abc|def|ghi|jkl)" testNinput >>testtry
 
 $cf $srcdir/testdata/grepoutputN testtry
 if [ $? != 0 ] ; then exit 1; fi
