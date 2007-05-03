@@ -11,6 +11,11 @@ Version 7.2 01-May-07
     to make them independent of the local environment's newline setting.
 
  3. Add code to configure.ac to remove -g from the CFLAGS default settings.
+ 
+ 4. Some of the "internals" tests were previously cut out when the link size
+    was not 2, because the output contained actual offsets. The recent new
+    "Z" feature of pcretest means that these can be cut out, making the tests 
+    usable with all link sizes.   
 
 
 Version 7.1 24-Apr-07

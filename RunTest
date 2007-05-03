@@ -55,21 +55,6 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-if [ "$link_size" != "2" ] ; then
-  if [ $do2 = yes ] ; then
-    echo "Can't run test 2 with an internal link size other than 2"
-    exit 1
-  fi
-  if [ $do5 = yes ] ; then
-    echo "Can't run test 5 with an internal link size other than 2"
-    exit 1
-  fi
-  if [ $do6 = yes ] ; then
-    echo "Can't run test 6 with an internal link size other than 2"
-    exit 1
-  fi
-fi
-
 if [ $utf8 -eq 0 ] ; then
   if [ $do4 = yes ] ; then
     echo "Can't run test 4 because UTF-8 support is not configured"
