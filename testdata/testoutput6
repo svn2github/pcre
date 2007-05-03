@@ -608,8 +608,7 @@ Options: utf8
 No first char
 No need char
 
-/[\p{Nd}]/8DZM
-Memory allocation (code space): 15
+/[\p{Nd}]/8DZ
 ------------------------------------------------------------------
         Bra 0
         [\p{Nd}]
@@ -623,8 +622,7 @@ No need char
     1234
  0: 1
 
-/[\p{Nd}+-]+/8DZM
-Memory allocation (code space): 48
+/[\p{Nd}+-]+/8DZ
 ------------------------------------------------------------------
         Bra 0
         [+\-\p{Nd}]+

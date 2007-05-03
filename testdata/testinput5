@@ -1,20 +1,20 @@
-/\x{100}/8DZM
+/\x{100}/8DZ
 
-/\x{1000}/8DZM
+/\x{1000}/8DZ
 
-/\x{10000}/8DZM
+/\x{10000}/8DZ
 
-/\x{100000}/8DZM
+/\x{100000}/8DZ
 
-/\x{1000000}/8DZM
+/\x{1000000}/8DZ
 
-/\x{4000000}/8DZM
+/\x{4000000}/8DZ
 
-/\x{7fffFFFF}/8DZM
+/\x{7fffFFFF}/8DZ
 
-/[\x{ff}]/8DZM
+/[\x{ff}]/8DZ
 
-/[\x{100}]/8DZM
+/[\x{100}]/8DZ
 
 /\x{ffffffff}/8
 
@@ -153,13 +153,13 @@ can't tell the difference.) --/
 
 /[^\x{c4}]/8DZ
 
-/[\x{100}]/8DZM
+/[\x{100}]/8DZ
     \x{100}
     Z\x{100}
     \x{100}Z
     *** Failers 
 
-/[Z\x{100}]/8DZM
+/[Z\x{100}]/8DZ
     Z\x{100}
     \x{100}
     \x{100}Z
@@ -296,11 +296,11 @@ can't tell the difference.) --/
  A (x) (?41) B/8x
     AxxB     
 
-/^[\x{100}\E-\Q\E\x{150}]/B8
+/^[\x{100}\E-\Q\E\x{150}]/BZ8
 
-/^[\QĀ\E-\QŐ\E]/B8
+/^[\QĀ\E-\QŐ\E]/BZ8
 
-/^[\QĀ\E-\QŐ\E/B8
+/^[\QĀ\E-\QŐ\E/BZ8
 
 /^abc./mgx8<any>
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x{0085}abc7 \x{2028}abc8 \x{2029}abc9 JUNK

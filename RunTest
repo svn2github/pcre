@@ -127,19 +127,14 @@ fi
 # PCRE tests that are not Perl-compatible - API & error tests, mostly
 
 if [ $do2 = yes ] ; then
-  if [ "$link_size" = "2" ] ; then
-    echo "Test 2: API and error handling (not Perl compatible)"
-    $valgrind ./pcretest -q $testdata/testinput2 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput2 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "OK"
-  else
-    echo Test 2 skipped for link size other than 2 \($link_size\)
-    echo " "
+  echo "Test 2: API and error handling (not Perl compatible)"
+  $valgrind ./pcretest -q $testdata/testinput2 testtry
+  if [ $? = 0 ] ; then
+    $cf $testdata/testoutput2 testtry
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
   fi
+  echo "OK"
 fi
 
 # Locale-specific tests, provided that either the "fr_FR" or the "french"
@@ -202,35 +197,25 @@ if [ $do4 = yes ] ; then
 fi
 
 if [ $do5 = yes ] ; then
-  if [ "$link_size" = "2" ] ; then
-    echo "Test 5: API and internals for UTF-8 support (not Perl compatible)"
-    $valgrind ./pcretest -q $testdata/testinput5 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput5 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "OK"
-  else
-    echo Test 5 skipped for link size other than 2 \($link_size\)
-    echo " "
+  echo "Test 5: API and internals for UTF-8 support (not Perl compatible)"
+  $valgrind ./pcretest -q $testdata/testinput5 testtry
+  if [ $? = 0 ] ; then
+    $cf $testdata/testoutput5 testtry
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
   fi
+  echo "OK"
 fi
 
 if [ $do6 = yes ] ; then
-  if [ "$link_size" = "2" ] ; then
-    echo "Test 6: Unicode property support"
-    $valgrind ./pcretest -q $testdata/testinput6 testtry
-    if [ $? = 0 ] ; then
-      $cf $testdata/testoutput6 testtry
-      if [ $? != 0 ] ; then exit 1; fi
-    else exit 1
-    fi
-    echo "OK"
-  else
-    echo Test 6 skipped for link size other than 2 \($link_size\)
-    echo " "
+  echo "Test 6: Unicode property support"
+  $valgrind ./pcretest -q $testdata/testinput6 testtry
+  if [ $? = 0 ] ; then
+    $cf $testdata/testoutput6 testtry
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
   fi
+  echo "OK"
 fi
 
 # Tests for DFA matching support
