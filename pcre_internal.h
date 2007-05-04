@@ -949,16 +949,6 @@ typedef struct recursion_info {
   int saved_max;                /* Number of saved offsets */
 } recursion_info;
 
-/* When compiling in a mode that doesn't use recursive calls to match(),
-a structure is used to remember local variables on the heap. It is defined in
-pcre_exec.c, close to the match() function, so that it is easy to keep it in
-step with any changes of local variable. However, the pointer to the current
-frame must be saved in some "static" place over a longjmp(). We declare the
-structure here so that we can put a pointer in the match_data structure. NOTE:
-This isn't used for a "normal" compilation of pcre. */
-
-struct heapframe;
-
 /* Structure for building a chain of data for holding the values of the subject
 pointer at the start of each subpattern, so as to detect when an empty string
 has been matched by a subpattern - to break infinite loops. */
@@ -1004,7 +994,6 @@ typedef struct match_data {
   int    eptrn;                 /* Next free eptrblock */
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
-  struct heapframe *thisframe;  /* Used only when compiling for no recursion */
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

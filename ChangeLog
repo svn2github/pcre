@@ -16,6 +16,11 @@ Version 7.2 01-May-07
     was not 2, because the output contained actual offsets. The recent new
     "Z" feature of pcretest means that these can be cut out, making the tests 
     usable with all link sizes.   
+    
+ 5. Implemented Stan Switzer's goto replacement for longjmp() when not using
+    stack recursion. This gives a massive performance boost under BSD, but just
+    a small improvement under Linux. However, it saves one field in the frame 
+    in all cases.
 
 
 Version 7.1 24-Apr-07
