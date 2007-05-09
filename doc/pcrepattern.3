@@ -1515,7 +1515,11 @@ recursion, a pseudo-condition called DEFINE, and assertions.
 .sp
 If the text between the parentheses consists of a sequence of digits, the
 condition is true if the capturing subpattern of that number has previously
-matched.
+matched. An alternative notation is to precede the digits with a plus or minus 
+sign. In this case, the subpattern number is relative rather than absolute.
+The most recently opened parentheses can be referenced by (?(-1), the next most 
+recent by (?(-2), and so on. In looping constructs it can also make sense to
+refer to subsequent groups with constructs such as (?(+2).
 .P
 Consider the following pattern, which contains non-significant white space to
 make it more readable (assume the PCRE_EXTENDED option) and to divide it into
@@ -1532,6 +1536,13 @@ the condition is true, and so the yes-pattern is executed and a closing
 parenthesis is required. Otherwise, since no-pattern is not present, the
 subpattern matches nothing. In other words, this pattern matches a sequence of
 non-parentheses, optionally enclosed in parentheses.
+.P
+If you were embedding this pattern in a larger one, you could use a relative 
+reference:
+.sp
+  ...other stuff... ( \e( )?    [^()]+    (?(-1) \e) ) ...
+.sp
+This makes the fragment independent of the parentheses in the larger pattern.
 .
 .SS "Checking for a used subpattern by name"
 .rs
@@ -1842,6 +1853,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 09 May 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

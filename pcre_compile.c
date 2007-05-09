@@ -243,7 +243,7 @@ static const char *error_texts[] = {
   "repeating a DEFINE group is not allowed",
   "inconsistent NEWLINE options",
   "\\g is not followed by an (optionally braced) non-zero number",
-  "(?+ or (?- must be followed by a non-zero number" 
+  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number" 
 };
 
 
@@ -2096,6 +2096,7 @@ for (;; ptr++)
   int class_lastchar;
   int newoptions;
   int recno;
+  int refsign; 
   int skipbytes;
   int subreqbyte;
   int subfirstbyte;
@@ -3622,6 +3623,7 @@ for (;; ptr++)
 
         code[1+LINK_SIZE] = OP_CREF;
         skipbytes = 3;
+        refsign = -1; 
 
         /* Check for a test for recursion in a named group. */
 
@@ -3645,7 +3647,11 @@ for (;; ptr++)
           terminator = '\'';
           ptr++;
           }
-        else terminator = 0;
+        else 
+          {
+          terminator = 0;
+          if (ptr[1] == '-' || ptr[1] == '+') refsign = *(++ptr); 
+          } 
 
         /* We now expect to read a name; any thing else is an error */
 
@@ -3681,8 +3687,33 @@ for (;; ptr++)
         if (lengthptr != NULL) break;
 
         /* In the real compile we do the work of looking for the actual
-        reference. */
+        reference. If the string started with "+" or "-" we require the rest to
+        be digits, in which case recno will be set. */
+        
+        if (refsign > 0)
+          {
+          if (recno <= 0)
+            {
+            *errorcodeptr = ERR58;
+            goto FAILED;
+            }     
+          if (refsign == '-')
+            {
+            recno = cd->bracount - recno + 1; 
+            if (recno <= 0)
+              {
+              *errorcodeptr = ERR15;
+              goto FAILED;
+              }     
+            }
+          else recno += cd->bracount; 
+          PUT2(code, 2+LINK_SIZE, recno);
+          break;
+          }  
 
+        /* Otherwise (did not start with "+" or "-"), start by looking for the
+        name. */
+         
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
           {
@@ -4005,10 +4036,9 @@ for (;; ptr++)
         case '5': case '6': case '7': case '8': case '9':   /* subroutine */
           {
           const uschar *called;
-          int sign = *ptr;
 
-          if (sign == '+') ptr++;
-          else if (sign == '-') 
+          if ((refsign = *ptr) == '+') ptr++;
+          else if (refsign == '-') 
             {
             if ((digitab[ptr[1]] & ctype_digit) == 0)
               goto OTHER_CHAR_AFTER_QUERY;
@@ -4025,7 +4055,7 @@ for (;; ptr++)
             goto FAILED;
             }
             
-          if (sign == '-')
+          if (refsign == '-')
             {
             if (recno == 0)
               {
@@ -4039,7 +4069,7 @@ for (;; ptr++)
               goto FAILED;
               }     
             }
-          else if (sign == '+')
+          else if (refsign == '+')
             {
             if (recno == 0)
               {

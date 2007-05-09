@@ -16,6 +16,9 @@ the basic pcre library.
 Some more features from Perl 5.10 have been added:
 
   (?-n) and (?+n) relative references for recursion and subroutines.
+  
+  (Not sure if this one is actually in Perl 5.10)
+  (?(-n) and (?(+n) relative references as conditions. 
 
 
 Release 7.1 24-Apr-07
