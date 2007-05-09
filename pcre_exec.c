@@ -189,7 +189,7 @@ obtained from malloc() instead instead of on the stack. Macros are used to
 achieve this so that the actual code doesn't look very different to what it
 always used to.
 
-The original heap-recursive code used longjmp(). However, it seems that this 
+The original heap-recursive code used longjmp(). However, it seems that this
 can be very slow on some operating systems. Following a suggestion from Stan
 Switzer, the use of longjmp() has been abolished, at the cost of having to
 provide a unique number for each call to RMATCH. There is no way of generating
@@ -198,8 +198,8 @@ them stand out more clearly.
 
 Crude tests on x86 Linux show a small speedup of around 5-8%. However, on
 FreeBSD, avoiding longjmp() more than halves the time taken to run the standard
-tests. Furthermore, not using longjmp() means that local dynamic variables 
-don't have indeterminate values; this has meant that the frame size can be 
+tests. Furthermore, not using longjmp() means that local dynamic variables
+don't have indeterminate values; this has meant that the frame size can be
 reduced because the result can be "passed back" by straight setting of the
 variable instead of being passed in the frame.
 ****************************************************************************
@@ -213,10 +213,10 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47 };
-        
+
 
 /* These versions of the macros use the stack, as normal. There are debugging
-versions and production versions. Note that the "rw" argument of RMATCH isn't 
+versions and production versions. Note that the "rw" argument of RMATCH isn't
 actuall used in this definition. */
 
 #ifndef NO_RECURSE
@@ -344,7 +344,7 @@ typedef struct heapframe {
   /* Where to jump back to */
 
   int Xwhere;
-   
+
 } heapframe;
 
 #endif
@@ -3651,8 +3651,8 @@ for (;;)
 /* Control never reaches here */
 
 
-/* When compiling to use the heap rather than the stack for recursive calls to 
-match(), the RRETURN() macro jumps here. The number that is saved in 
+/* When compiling to use the heap rather than the stack for recursive calls to
+match(), the RRETURN() macro jumps here. The number that is saved in
 frame->Xwhere indicates which label we actually want to return to. */
 
 #ifdef NO_RECURSE
@@ -3670,7 +3670,7 @@ switch (frame->Xwhere)
   DPRINTF(("jump error in pcre match: label %d non-existent\n", frame->Xwhere));
   return PCRE_ERROR_INTERNAL;
   }
-#undef LBL   
+#undef LBL
 #endif  /* NO_RECURSE */
 }
 

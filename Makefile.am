@@ -268,6 +268,7 @@ EXTRA_DIST += \
   testdata/testinput7 \
   testdata/testinput8 \
   testdata/testinput9 \
+  testdata/testinput10 \
   testdata/testoutput1 \
   testdata/testoutput2 \
   testdata/testoutput3 \
@@ -277,6 +278,7 @@ EXTRA_DIST += \
   testdata/testoutput7 \
   testdata/testoutput8 \
   testdata/testoutput9 \
+  testdata/testoutput10 \
   perltest.pl
 
 CLEANFILES += \

@@ -50,7 +50,7 @@ while [ $# -gt 0 ] ; do
     7) do7=yes;;
     8) do8=yes;;
     9) do9=yes;;
-   10) do10=yes;;  
+   10) do10=yes;;
    valgrind) valgrind="valgrind -q";;
     *) echo "Unknown test number $1"; exit 1;;
   esac
@@ -100,7 +100,7 @@ if [ $link_size -ne 2 ] ; then
     echo "Can't run test 10 because the link size ($link_size) is not 2"
     exit 1
   fi
-fi        
+fi
 
 # If no specific tests were requested, select all that are relevant.
 
@@ -116,7 +116,7 @@ if [ $do1 = no -a $do2 = no -a $do3 = no -a $do4 = no -a \
   do7=yes
   if [ $utf8 -ne 0 ] ; then do8=yes; fi
   if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do9=yes; fi
-  if [ $link_size -eq 2 ] ; then do10=yes; fi 
+  if [ $link_size -eq 2 ] ; then do10=yes; fi
 fi
 
 # Show which release
