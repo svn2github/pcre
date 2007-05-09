@@ -13,6 +13,10 @@ are no longer independent. They are like the Unix libraries. To use the
 pcreposix functions, for example, you need to link with both the pcreposix and
 the basic pcre library.
 
+Some more features from Perl 5.10 have been added:
+
+  (?-n) and (?+n) relative references for recursion and subroutines.
+
 
 Release 7.1 24-Apr-07
 ---------------------

@@ -8169,4 +8169,55 @@ No match
     XABC\B
 No match
 
+/(ab|c)(?-1)/B
+------------------------------------------------------------------
+  0  29 Bra 0
+  3   9 Bra 1
+  8     ab
+ 12   5 Alt
+ 15     c
+ 17  14 Ket
+ 20   6 Once
+ 23   3 Recurse
+ 26   6 Ket
+ 29  29 Ket
+ 32     End
+------------------------------------------------------------------
+    abc
+ 0: abc
+ 1: ab
+
+/xy(?+1)(abc)/B
+------------------------------------------------------------------
+  0  30 Bra 0
+  3     xy
+  7   6 Once
+ 10  16 Recurse
+ 13   6 Ket
+ 16  11 Bra 1
+ 21     abc
+ 27  11 Ket
+ 30  30 Ket
+ 33     End
+------------------------------------------------------------------
+    xyabcabc
+ 0: xyabcabc
+ 1: abc
+    ** Failers
+No match
+    xyabc  
+No match
+    
+/x(?-0)y/
+Failed: (?+ or (?- must be followed by a non-zero number at offset 5
+
+/x(?-1)y/
+Failed: reference to non-existent subpattern at offset 5
+
+/x(?+0)y/ 
+Failed: (?+ or (?- must be followed by a non-zero number at offset 5
+
+/x(?+1)y/
+Failed: reference to non-existent subpattern at offset 5
+
 / End of testinput2 /

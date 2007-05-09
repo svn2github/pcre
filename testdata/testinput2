@@ -2156,4 +2156,20 @@ a random value. /Ix
     ** Failers 
     XABC\B
 
+/(ab|c)(?-1)/B
+    abc
+
+/xy(?+1)(abc)/B
+    xyabcabc
+    ** Failers
+    xyabc  
+    
+/x(?-0)y/
+
+/x(?-1)y/
+
+/x(?+0)y/ 
+
+/x(?+1)y/
+
 / End of testinput2 /

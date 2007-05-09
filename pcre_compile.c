@@ -208,7 +208,7 @@ static const char *error_texts[] = {
   "malformed number or name after (?(",
   "conditional group contains more than two branches",
   "assertion expected after (?(",
-  "(?R or (?digits must be followed by )",
+  "(?R or (?[+-]digits must be followed by )",
   /* 30 */
   "unknown POSIX class name",
   "POSIX collating elements are not supported",
@@ -242,7 +242,8 @@ static const char *error_texts[] = {
   /* 55 */
   "repeating a DEFINE group is not allowed",
   "inconsistent NEWLINE options",
-  "\\g is not followed by an (optionally braced) non-zero number"
+  "\\g is not followed by an (optionally braced) non-zero number",
+  "(?+ or (?- must be followed by a non-zero number" 
 };
 
 
@@ -3999,18 +4000,54 @@ for (;; ptr++)
 
 
         /* ------------------------------------------------------------ */
+        case '-': case '+':
         case '0': case '1': case '2': case '3': case '4':   /* Recursion or */
         case '5': case '6': case '7': case '8': case '9':   /* subroutine */
           {
           const uschar *called;
+          int sign = *ptr;
+
+          if (sign == '+') ptr++;
+          else if (sign == '-') 
+            {
+            if ((digitab[ptr[1]] & ctype_digit) == 0)
+              goto OTHER_CHAR_AFTER_QUERY;
+            ptr++;  
+            } 
+ 
           recno = 0;
           while((digitab[*ptr] & ctype_digit) != 0)
             recno = recno * 10 + *ptr++ - '0';
+
           if (*ptr != ')')
             {
             *errorcodeptr = ERR29;
             goto FAILED;
             }
+            
+          if (sign == '-')
+            {
+            if (recno == 0)
+              {
+              *errorcodeptr = ERR58;
+              goto FAILED;
+              }     
+            recno = cd->bracount - recno + 1; 
+            if (recno <= 0)
+              {
+              *errorcodeptr = ERR15;
+              goto FAILED;
+              }     
+            }
+          else if (sign == '+')
+            {
+            if (recno == 0)
+              {
+              *errorcodeptr = ERR58;
+              goto FAILED;
+              }     
+            recno += cd->bracount; 
+            }       
 
           /* Come here from code above that handles a named recursion */
 
@@ -4084,6 +4121,7 @@ for (;; ptr++)
 
         /* ------------------------------------------------------------ */
         default:              /* Other characters: check option setting */
+        OTHER_CHAR_AFTER_QUERY: 
         set = unset = 0;
         optset = &set;
 

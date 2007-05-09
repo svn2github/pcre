@@ -1674,19 +1674,33 @@ pattern, so instead you could use this:
   ( \e( ( (?>[^()]+) | (?1) )* \e) )
 .sp
 We have put the pattern into parentheses, and caused the recursion to refer to
-them instead of the whole pattern. In a larger pattern, keeping track of
-parenthesis numbers can be tricky. It may be more convenient to use named
-parentheses instead. The Perl syntax for this is (?&name); PCRE's earlier
-syntax (?P>name) is also supported. We could rewrite the above example as
-follows:
+them instead of the whole pattern. 
+.P
+In a larger pattern, keeping track of parenthesis numbers can be tricky. This
+is made easier by the use of relative references. (A Perl 5.10 feature.)
+Instead of (?1) in the pattern above you can write (?-2) to refer to the second
+most recently opened parentheses preceding the recursion. In other words, a
+negative number counts capturing parentheses leftwards from the point at which
+it is encountered.
+.P
+It is also possible to refer to subsequently opened parentheses, by writing
+references such as (?+2). However, these cannot be recursive because the
+reference is not inside the parentheses that are referenced. They are always
+"subroutine" calls, as described in the next section.
+.P
+An alternative approach is to use named parentheses instead. The Perl syntax
+for this is (?&name); PCRE's earlier syntax (?P>name) is also supported. We
+could rewrite the above example as follows:
 .sp
   (?<pn> \e( ( (?>[^()]+) | (?&pn) )* \e) )
 .sp
 If there is more than one subpattern with the same name, the earliest one is
-used. This particular example pattern contains nested unlimited repeats, and so
-the use of atomic grouping for matching strings of non-parentheses is important
-when applying the pattern to strings that do not match. For example, when this
-pattern is applied to
+used. 
+.P
+This particular example pattern that we have been looking at contains nested
+unlimited repeats, and so the use of atomic grouping for matching strings of
+non-parentheses is important when applying the pattern to strings that do not
+match. For example, when this pattern is applied to
 .sp
   (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()
 .sp
@@ -1738,7 +1752,14 @@ is the actual recursive call.
 If the syntax for a recursive subpattern reference (either by number or by
 name) is used outside the parentheses to which it refers, it operates like a
 subroutine in a programming language. The "called" subpattern may be defined
-before or after the reference. An earlier example pointed out that the pattern
+before or after the reference. A numbered reference can be absolute or
+relative, as in these examples:
+.sp
+  (...(absolute)...)...(?2)...
+  (...(relative)...)...(?-1)...
+  (...(?+1)...(relative)...  
+.sp
+An earlier example pointed out that the pattern
 .sp
   (sens|respons)e and \e1ibility
 .sp
@@ -1759,7 +1780,7 @@ When a subpattern is used as a subroutine, processing options such as
 case-independence are fixed when the subpattern is defined. They cannot be
 changed for different calls. For example, consider this pattern:
 .sp
-  (abc)(?i:(?1))
+  (abc)(?i:(?-1))
 .sp
 It matches "abcabc". It does not match "abcABC" because the change of
 processing option does not affect the called subpattern.

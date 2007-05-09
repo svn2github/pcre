@@ -21,6 +21,14 @@ Version 7.2 01-May-07
     stack recursion. This gives a massive performance boost under BSD, but just
     a small improvement under Linux. However, it saves one field in the frame
     in all cases.
+    
+ 6. Added more features from the forthcoming Perl 5.10:
+ 
+    (a) (?-n) (where n is a string of digits) is a relative subroutine or
+        recursion call. It refers to the nth most recently opened parentheses.
+        
+    (b) (?+n) is also a relative subroutine call; it refers to the nth next
+        to be opened parentheses.     
 
 
 Version 7.1 24-Apr-07
