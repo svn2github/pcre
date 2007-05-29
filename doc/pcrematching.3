@@ -119,10 +119,14 @@ not supported, and cause errors if encountered.
 4. For the same reason, conditional expressions that use a backreference as the
 condition or test for a specific group recursion are not supported.
 .P
-5. Callouts are supported, but the value of the \fIcapture_top\fP field is
+5. Because many paths through the tree may be active, the \eK escape sequence,
+which resets the start of the match when encountered (but may be on some paths
+and not on others), is not supported. It causes an error if encountered.
+.P
+6. Callouts are supported, but the value of the \fIcapture_top\fP field is
 always 1, and the value of the \fIcapture_last\fP field is always -1.
 .P
-6.
+7.
 The \eC escape sequence, which (in the standard algorithm) matches a single
 byte, even in UTF-8 mode, is not supported because the alternative algorithm
 moves through the subject string one character at a time, for all active paths
@@ -177,6 +181,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 29 May 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

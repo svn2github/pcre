@@ -32,6 +32,9 @@ Version 7.2 01-May-07
         
     (c) Conditions that refer to capturing parentheses can be specified 
         relatively, for example, (?(-2)... or (?(+3)...
+        
+    (d) \K resets the start of the current match so that everything before
+        is not part of it.  
 
 
 Version 7.1 24-Apr-07

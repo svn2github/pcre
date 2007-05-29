@@ -226,7 +226,7 @@ actuall used in this definition. */
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
   { \
   printf("match() called in line %d\n", __LINE__); \
-  rrc = match(ra,rb,rc,rd,re,rf,rg,rdepth+1); \
+  rrc = match(ra,rb,mstart,rc,rd,re,rf,rg,rdepth+1); \
   printf("to line %d\n", __LINE__); \
   }
 #define RRETURN(ra) \
@@ -236,7 +236,7 @@ actuall used in this definition. */
   }
 #else
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
-  rrc = match(ra,rb,rc,rd,re,rf,rg,rdepth+1)
+  rrc = match(ra,rb,mstart,rc,rd,re,rf,rg,rdepth+1)
 #define RRETURN(ra) return ra
 #endif
 
@@ -255,6 +255,7 @@ argument of match(), which never changes. */
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
+  newframe->Xmstart = mstart;\
   newframe->Xoffset_top = rc;\
   newframe->Xims = re;\
   newframe->Xeptrb = rf;\
@@ -291,6 +292,7 @@ typedef struct heapframe {
 
   const uschar *Xeptr;
   const uschar *Xecode;
+  const uschar *Xmstart; 
   int Xoffset_top;
   long int Xims;
   eptrblock *Xeptrb;
@@ -371,6 +373,8 @@ made performance worse.
 Arguments:
    eptr        pointer to current character in subject
    ecode       pointer to current position in compiled code
+   mstart      pointer to the current match start position (can be modified
+                 by encountering \K) 
    offset_top  current top pointer
    md          pointer to "static" info for the match
    ims         current /i, /m, and /s options
@@ -390,7 +394,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER USPTR eptr, REGISTER const uschar *ecode,
+match(REGISTER USPTR eptr, REGISTER const uschar *ecode, const uschar *mstart, 
   int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
   int flags, unsigned int rdepth)
 {
@@ -418,6 +422,7 @@ frame->Xprevframe = NULL;            /* Marks the top level */
 
 frame->Xeptr = eptr;
 frame->Xecode = ecode;
+frame->Xmstart = mstart;
 frame->Xoffset_top = offset_top;
 frame->Xims = ims;
 frame->Xeptrb = eptrb;
@@ -432,6 +437,7 @@ HEAP_RECURSE:
 
 #define eptr               frame->Xeptr
 #define ecode              frame->Xecode
+#define mstart             frame->Xmstart
 #define offset_top         frame->Xoffset_top
 #define ims                frame->Xims
 #define eptrb              frame->Xeptrb
@@ -610,7 +616,7 @@ for (;;)
 
   if (md->partial &&
       eptr >= md->end_subject &&
-      eptr > md->start_match)
+      eptr > mstart)
     md->hitend = TRUE;
 
   switch(op)
@@ -787,7 +793,7 @@ for (;;)
       md->recursive = rec->prevrec;
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
-      md->start_match = rec->save_start;
+      mstart = rec->save_start;
       ims = original_ims;
       ecode = rec->after_call;
       break;
@@ -796,9 +802,10 @@ for (;;)
     /* Otherwise, if PCRE_NOTEMPTY is set, fail if we have matched an empty
     string - backtracking will then try other alternatives, if any. */
 
-    if (md->notempty && eptr == md->start_match) RRETURN(MATCH_NOMATCH);
-    md->end_match_ptr = eptr;          /* Record where we ended */
-    md->end_offset_top = offset_top;   /* and how many extracts were taken */
+    if (md->notempty && eptr == mstart) RRETURN(MATCH_NOMATCH);
+    md->end_match_ptr = eptr;           /* Record where we ended */
+    md->end_offset_top = offset_top;    /* and how many extracts were taken */
+    md->start_match_ptr = mstart;  /* and the start (\K can modify) */
     RRETURN(MATCH_MATCH);
 
     /* Change option settings */
@@ -904,7 +911,7 @@ for (;;)
       cb.offset_vector    = md->offset_vector;
       cb.subject          = (PCRE_SPTR)md->start_subject;
       cb.subject_length   = md->end_subject - md->start_subject;
-      cb.start_match      = md->start_match - md->start_subject;
+      cb.start_match      = mstart - md->start_subject;
       cb.current_position = eptr - md->start_subject;
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
@@ -966,8 +973,8 @@ for (;;)
 
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
-      new_recursive.save_start = md->start_match;
-      md->start_match = eptr;
+      new_recursive.save_start = mstart;
+      mstart = eptr;
 
       /* OK, now we can do the recursion. For each top-level alternative we
       restore the offset and recursion data. */
@@ -1180,7 +1187,7 @@ for (;;)
         recursion_info *rec = md->recursive;
         DPRINTF(("Recursion (%d) succeeded - continuing\n", number));
         md->recursive = rec->prevrec;
-        md->start_match = rec->save_start;
+        mstart = rec->save_start;
         memcpy(md->offset_vector, rec->offset_save,
           rec->saved_max * sizeof(int));
         ecode = rec->after_call;
@@ -1259,6 +1266,13 @@ for (;;)
     if (eptr != md->start_subject + md->start_offset) RRETURN(MATCH_NOMATCH);
     ecode++;
     break;
+    
+    /* Reset the start of match point */
+    
+    case OP_SET_SOM:
+    mstart = eptr;
+    ecode++; 
+    break;   
 
     /* Assert before internal newline if multiline, or before a terminating
     newline unless endonly is set, else end of subject unless noteol is set. */
@@ -3684,6 +3698,7 @@ Undefine all the macros that were defined above to handle this. */
 #ifdef NO_RECURSE
 #undef eptr
 #undef ecode
+#undef mstart
 #undef offset_top
 #undef ims
 #undef eptrb
@@ -4163,10 +4178,11 @@ for(;;)
 
   /* OK, we can now run the match. */
 
-  md->start_match = start_match;
+  md->start_match_ptr = start_match;      /* Insurance */
   md->match_call_count = 0;
   md->eptrn = 0;                          /* Next free eptrchain slot */
-  rc = match(start_match, md->start_code, 2, md, ims, NULL, 0, 0);
+  rc = match(start_match, md->start_code, start_match, 2, md, 
+    ims, NULL, 0, 0);
 
   /* Any return other than MATCH_NOMATCH breaks the loop. */
 
@@ -4246,11 +4262,13 @@ if (rc == MATCH_MATCH)
 
   rc = md->offset_overflow? 0 : md->end_offset_top/2;
 
-  /* If there is space, set up the whole thing as substring 0. */
+  /* If there is space, set up the whole thing as substring 0. The value of
+  md->start_match_ptr might be modified if \K was encountered on the success 
+  matching path. */
 
   if (offsetcount < 2) rc = 0; else
     {
-    offsets[0] = start_match - md->start_subject;
+    offsets[0] = md->start_match_ptr - md->start_subject;
     offsets[1] = md->end_match_ptr - md->start_subject;
     }
 

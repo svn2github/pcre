@@ -87,7 +87,7 @@ static const short int escapes[] = {
      0,      0,      0,      0,      0,      0,      0,      0,   /* 0 - 7 */
      0,      0,    ':',    ';',    '<',    '=',    '>',    '?',   /* 8 - ? */
    '@', -ESC_A, -ESC_B, -ESC_C, -ESC_D, -ESC_E,      0, -ESC_G,   /* @ - G */
-     0,      0,      0,      0,      0,      0,      0,      0,   /* H - O */
+     0,      0,      0, -ESC_K,      0,      0,      0,      0,   /* H - O */
 -ESC_P, -ESC_Q, -ESC_R, -ESC_S,      0,      0,      0, -ESC_W,   /* P - W */
 -ESC_X,      0, -ESC_Z,    '[',   '\\',    ']',    '^',    '_',   /* X - _ */
    '`',      7, -ESC_b,      0, -ESC_d,  ESC_e,  ESC_f,      0,   /* ` - g */

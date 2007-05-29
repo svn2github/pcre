@@ -74,11 +74,13 @@ enough. */
 character that is to be tested in some way. This makes is possible to
 centralize the loading of these characters. In the case of Type * etc, the
 "character" is the opcode for \D, \d, \S, \s, \W, or \w, which will always be a
-small value. */
+small value. ***NOTE*** If the start of this table is modified, the two tables 
+that follow must also be modified. */
 
 static uschar coptable[] = {
   0,                             /* End                                    */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* \A, \G, \B, \b, \D, \d, \S, \s, \W, \w */
+  0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
+  0, 0, 0, 0, 0, 0,              /* \D, \d, \S, \s, \W, \w                 */
   0, 0,                          /* Any, Anybyte                           */
   0, 0, 0, 0,                    /* NOTPROP, PROP, EXTUNI, ANYNL           */
   0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
@@ -127,7 +129,7 @@ static uschar coptable[] = {
 and \w */
 
 static uschar toptable1[] = {
-  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
   ctype_digit, ctype_digit,
   ctype_space, ctype_space,
   ctype_word,  ctype_word,
@@ -135,7 +137,7 @@ static uschar toptable1[] = {
 };
 
 static uschar toptable2[] = {
-  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
   ctype_digit, 0,
   ctype_space, 0,
   ctype_word,  0,

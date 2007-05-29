@@ -30,8 +30,10 @@ The remainder of this document discusses the patterns that are supported by
 PCRE when its main matching function, \fBpcre_exec()\fP, is used.
 From release 6.0, PCRE offers a second matching function,
 \fBpcre_dfa_exec()\fP, which matches using a different algorithm that is not
-Perl-compatible. The advantages and disadvantages of the alternative function,
-and how it differs from the normal function, are discussed in the
+Perl-compatible. Some of the features discussed below are not available when 
+\fBpcre_dfa_exec()\fP is used. The advantages and disadvantages of the
+alternative function, and how it differs from the normal function, are
+discussed in the
 .\" HREF
 \fBpcrematching\fP
 .\"
@@ -517,6 +519,36 @@ Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \ed and \ew do not use Unicode
 properties in PCRE.
+.
+.
+.\" HTML <a name="resetmatchstart"></a>
+.SS "Resetting the match start"
+.rs
+.sp
+The escape sequence \eK, which is a Perl 5.10 feature, causes any previously 
+matched characters not to be included in the final matched sequence. For 
+example, the pattern:
+.sp
+  foo\eKbar
+.sp
+matches "foobar", but reports that it has matched "bar". This feature is 
+similar to a lookbehind assertion
+.\" HTML <a href="#lookbehind">
+.\" </a>
+(described below).
+.\"
+However, in this case, the part of the subject before the real match does not 
+have to be of fixed length, as lookbehind assertions do. The use of \eK does 
+not interfere with the setting of
+.\" HTML <a href="#subpattern">
+.\" </a>
+captured substrings.
+.\"   
+For example, when the pattern
+.sp
+  (foo)\eKbar
+.sp
+matches "foobar", the first substring is still set to "foo".   
 .
 .
 .\" HTML <a name="smallassertions"></a>
@@ -1421,6 +1453,14 @@ lengths, but it is acceptable if rewritten to use two top-level branches:
 .sp
   (?<=abc|abde)
 .sp
+In some cases, the Perl 5.10 escape sequence \eK 
+.\" HTML <a href="#resetmatchstart">
+.\" </a>
+(see above)
+.\"
+can be used instead of a lookbehind assertion; this is not restricted to a
+fixed-length.
+.P
 The implementation of lookbehind assertions is, for each alternative, to
 temporarily move the current position back by the fixed length and then try to
 match. If there are insufficient characters before the current position, the
@@ -1853,6 +1893,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 May 2007
+Last updated: 29 May 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

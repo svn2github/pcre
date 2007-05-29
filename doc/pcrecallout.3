@@ -95,10 +95,12 @@ not useful.
 The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
 that were passed to \fBpcre_exec()\fP.
 .P
-The \fIstart_match\fP field contains the offset within the subject at which the
-current match attempt started. If the pattern is not anchored, the callout
-function may be called several times from the same point in the pattern for
-different starting points in the subject.
+The \fIstart_match\fP field normally contains the offset within the subject at
+which the current match attempt started. However, if the escape sequence \eK
+has been encountered, this value is changed to reflect the modified starting
+point. If the pattern is not anchored, the callout function may be called
+several times from the same point in the pattern for different starting points
+in the subject.
 .P
 The \fIcurrent_position\fP field contains the offset within the subject of the
 current match pointer.
@@ -170,6 +172,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 29 May 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
