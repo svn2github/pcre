@@ -6571,4 +6571,9 @@ No match
   abc\n  
 No match
 
+/(.*(.)?)*/
+    abcd
+ 0: abcd
+ 1: 
+
 / End of testinput1 /

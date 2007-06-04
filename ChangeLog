@@ -38,6 +38,10 @@ Version 7.2 01-May-07
         
  7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and 
     PCRE_INFO_JCHANGED. 
+    
+ 8. A pattern such as  (.*(.)?)*  caused pcre_exec() to fail by either not 
+    terminating or by crashing. Diagnosed by Viktor Griph; it was in the code 
+    for detecting groups that can match an empty string.
 
 
 Version 7.1 24-Apr-07

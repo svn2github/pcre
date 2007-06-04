@@ -1370,7 +1370,18 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   const uschar *ccode;
 
   c = *code;
+  
+  /* Groups with zero repeats can of course be empty; skip them. */
 
+  if (c == OP_BRAZERO || c == OP_BRAMINZERO)
+    {
+    do code += GET(code, 1); while (*code == OP_ALT);
+    c = *code;
+    continue;
+    }
+
+  /* For other groups, scan the branches. */
+   
   if (c == OP_BRA || c == OP_CBRA || c == OP_ONCE)
     {
     BOOL empty_branch;
@@ -1387,12 +1398,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
       }
     while (*code == OP_ALT);
     if (!empty_branch) return FALSE;   /* All branches are non-empty */
-
-    /* Move past the KET and fudge things so that the increment in the "for"
-    above has no effect. */
-
-    c = OP_END;
-    code += 1 + LINK_SIZE - _pcre_OP_lengths[c];
+    c = *code;    
     continue;
     }
 
