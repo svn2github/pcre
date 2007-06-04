@@ -71,6 +71,8 @@ envisaged for this facility, this is not felt to be a major restriction.
 .P
 If PCRE_PARTIAL is set for a pattern that does not conform to the restrictions,
 \fBpcre_exec()\fP returns the error code PCRE_ERROR_BADPARTIAL (-13).
+You can use the PCRE_INFO_OKPARTIAL call to \fBpcre_fullinfo()\fP to find out 
+if a compiled pattern can be used for partial matching.
 .
 .
 .SH "EXAMPLE OF PARTIAL MATCHING USING PCRETEST"
@@ -212,6 +214,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 March 2007
+Last updated: 04 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

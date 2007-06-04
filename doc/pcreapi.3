@@ -871,6 +871,12 @@ table indicating a fixed set of bytes for the first byte in any matching
 string, a pointer to the table is returned. Otherwise NULL is returned. The
 fourth argument should point to an \fBunsigned char *\fP variable.
 .sp
+  PCRE_INFO_JCHANGED
+.sp
+Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The 
+fourth argument should point to an \fBint\fP variable. The (?J) internal option
+setting changes the local PCRE_DUPNAMES value.
+.sp
   PCRE_INFO_LASTLITERAL
 .sp
 Return the value of the rightmost literal byte that must exist in any matched
@@ -922,6 +928,16 @@ bytes shows in hexadecimal, and undefined bytes shown as ??:
 When writing code to extract data from named subpatterns using the
 name-to-number map, remember that the length of the entries is likely to be
 different for each compiled pattern.
+.sp
+  PCRE_INFO_OKPARTIAL
+.sp
+Return 1 if the pattern can be used for partial matching, otherwise 0. The 
+fourth argument should point to an \fBint\fP variable. The
+.\" HREF
+\fBpcrepartial\fP
+.\"
+documentation lists the restrictions that apply to patterns when partial
+matching is used.
 .sp
   PCRE_INFO_OPTIONS
 .sp
@@ -1851,6 +1867,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 24 April 2007
+Last updated: 04 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

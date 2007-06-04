@@ -6193,6 +6193,7 @@ Named capturing subpatterns:
   B   3
   C   4
 Options: anchored
+Duplicate name status changes
 No first char
 No need char
     a bc d\CA\CB\CC

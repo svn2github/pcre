@@ -35,6 +35,9 @@ Version 7.2 01-May-07
         
     (d) \K resets the start of the current match so that everything before
         is not part of it.  
+        
+ 7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and 
+    PCRE_INFO_JCHANGED. 
 
 
 Version 7.1 24-Apr-07

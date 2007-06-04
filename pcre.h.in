@@ -150,6 +150,8 @@ extern "C" {
 #define PCRE_INFO_NAMETABLE          9
 #define PCRE_INFO_STUDYSIZE         10
 #define PCRE_INFO_DEFAULT_TABLES    11
+#define PCRE_INFO_OKPARTIAL         12
+#define PCRE_INFO_JCHANGED          13
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */
