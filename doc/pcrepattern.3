@@ -241,8 +241,8 @@ meanings
 .rs
 .sp
 The sequence \eg followed by a positive or negative number, optionally enclosed
-in braces, is an absolute or relative back reference. Back references are
-discussed
+in braces, is an absolute or relative back reference. A named back reference 
+can be coded as \eg{name}. Back references are discussed
 .\" HTML <a href="#backreferences">
 .\" </a>
 later,
@@ -1325,12 +1325,17 @@ back reference, the case of letters is relevant. For example,
 matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
 capturing subpattern is matched caselessly.
 .P
-Back references to named subpatterns use the Perl syntax \ek<name> or \ek'name'
-or the Python syntax (?P=name). We could rewrite the above example in either of
+There are several different ways of writing back references to named
+subpatterns. The .NET syntax \ek{name} and the Perl syntax \ek<name> or
+\ek'name' are supported, as is the Python syntax (?P=name). Perl 5.10's unified
+back reference syntax, in which \eg can be used for both numeric and named
+references, is also supported. We could rewrite the above example in any of
 the following ways:
 .sp
   (?<p1>(?i)rah)\es+\ek<p1>
+  (?'p1'(?i)rah)\es+\ek{p1}
   (?P<p1>(?i)rah)\es+(?P=p1)
+  (?<p1>(?i)rah)\es+\eg{p1}
 .sp
 A subpattern that is referenced by name may appear in the pattern before or
 after the reference.

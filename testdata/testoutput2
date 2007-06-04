@@ -8067,16 +8067,16 @@ No match
 Failed: reference to non-existent subpattern at offset 4
 
 /^(a)\g/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
 
 /^(a)\g{0}/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
 
 /^(a)\g{3/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
 
 /^(a)\g{4a}/
-Failed: \g is not followed by an (optionally braced) non-zero number at offset 4
+Failed: reference to non-existent subpattern at offset 9
 
 /^a.b/<lf>
     a\rb
@@ -8333,5 +8333,28 @@ Failed: reference to non-existent subpattern at offset 7
     foobarbaz
  0: barbaz
  1: foobar
+
+/(?<A>tom|bon)-\k{A}/
+    tom-tom
+ 0: tom-tom
+ 1: tom
+    bon-bon 
+ 0: bon-bon
+ 1: bon
+    ** Failers
+No match
+    tom-bon  
+No match
+
+/(?<A>tom|bon)-\g{A}/
+    tom-tom
+ 0: tom-tom
+ 1: tom
+    bon-bon 
+ 0: bon-bon
+ 1: bon
+    
+/\g{A/ 
+Failed: syntax error in subpattern name (missing terminator) at offset 4
 
 / End of testinput2 /

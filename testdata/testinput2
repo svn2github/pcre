@@ -2203,4 +2203,16 @@ a random value. /Ix
 /(foo\Kbar)baz/
     foobarbaz
 
+/(?<A>tom|bon)-\k{A}/
+    tom-tom
+    bon-bon 
+    ** Failers
+    tom-bon  
+
+/(?<A>tom|bon)-\g{A}/
+    tom-tom
+    bon-bon 
+    
+/\g{A/ 
+
 / End of testinput2 /

@@ -36,13 +36,18 @@ Version 7.2 01-May-07
     (d) \K resets the start of the current match so that everything before
         is not part of it.  
         
+    (e) \k{name} is synonymous with \k<name> and \k'name' (.NET compatible).
+    
+    (f) \g{name} is another synonym - part of Perl 5.10's unification of
+        reference syntax.  
+        
  7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and 
     PCRE_INFO_JCHANGED. 
     
  8. A pattern such as  (.*(.)?)*  caused pcre_exec() to fail by either not 
     terminating or by crashing. Diagnosed by Viktor Griph; it was in the code 
     for detecting groups that can match an empty string.
-
+    
 
 Version 7.1 24-Apr-07
 ---------------------

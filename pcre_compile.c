@@ -242,7 +242,7 @@ static const char *error_texts[] = {
   /* 55 */
   "repeating a DEFINE group is not allowed",
   "inconsistent NEWLINE options",
-  "\\g is not followed by an (optionally braced) non-zero number",
+  "\\g is not followed by a braced name or an optionally braced non-zero number",
   "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number" 
 };
 
@@ -453,11 +453,22 @@ else
 
     /* \g must be followed by a number, either plain or braced. If positive, it
     is an absolute backreference. If negative, it is a relative backreference.
-    This is a Perl 5.10 feature. */
+    This is a Perl 5.10 feature. Perl 5.10 also supports \g{name} as a 
+    reference to a named group. This is part of Perl's movement towards a 
+    unified syntax for back references. As this is synonymous with \k{name}, we 
+    fudge it up by pretending it really was \k. */
 
     case 'g':
     if (ptr[1] == '{')
       {
+      const uschar *p;
+      for (p = ptr+2; *p != 0 && *p != '}'; p++)
+        if (*p != '-' && (digitab[*p] & ctype_digit) == 0) break;
+      if (*p != 0 && *p != '}') 
+        {
+        c = -ESC_k;
+        break;
+        }  
       braced = TRUE;
       ptr++;
       }
@@ -4470,12 +4481,13 @@ for (;; ptr++)
       zerofirstbyte = firstbyte;
       zeroreqbyte = reqbyte;
 
-      /* \k<name> or \k'name' is a back reference by name (Perl syntax) */
+      /* \k<name> or \k'name' is a back reference by name (Perl syntax).
+      We also support \k{name} (.NET syntax) */
 
-      if (-c == ESC_k && (ptr[1] == '<' || ptr[1] == '\''))
+      if (-c == ESC_k && (ptr[1] == '<' || ptr[1] == '\'' || ptr[1] == '{'))
         {
         is_recurse = FALSE;
-        terminator = (*(++ptr) == '<')? '>' : '\'';
+        terminator = (*(++ptr) == '<')? '>' : (*ptr == '\'')? '\'' : '}';
         goto NAMED_REF_OR_RECURSE;
         }
 
