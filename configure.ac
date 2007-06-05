@@ -8,7 +8,7 @@ dnl empty.
 
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [2])
-m4_define(pcre_prerelease, [-RC2])
+m4_define(pcre_prerelease, [-RC3])
 m4_define(pcre_date, [2007-06-05])
 
 # Libtool shared library interface versions (current:revision:age)

@@ -66,16 +66,8 @@ if [ $utf8 -eq 0 ] ; then
     echo "Can't run test 5 because UTF-8 support is not configured"
     exit 1
   fi
-  if [ $do6 = yes ] ; then
-    echo "Can't run test 6 because UTF-8 support is not configured"
-    exit 1
-  fi
   if [ $do8 = yes ] ; then
     echo "Can't run test 8 because UTF-8 support is not configured"
-    exit 1
-  fi
-  if [ $do9 = yes ] ; then
-    echo "Can't run test 9 because UTF-8 support is not configured"
     exit 1
   fi
 fi
@@ -116,7 +108,7 @@ if [ $do1 = no -a $do2 = no -a $do3 = no -a $do4 = no -a \
   do7=yes
   if [ $utf8 -ne 0 ] ; then do8=yes; fi
   if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do9=yes; fi
-  if [ $link_size -eq 2 ] ; then do10=yes; fi
+  if [ $link_size -eq 2 -a $ucp -ne 0 ] ; then do10=yes; fi
 fi
 
 # Show which release
