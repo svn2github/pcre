@@ -292,7 +292,7 @@ typedef struct heapframe {
 
   const uschar *Xeptr;
   const uschar *Xecode;
-  const uschar *Xmstart; 
+  const uschar *Xmstart;
   int Xoffset_top;
   long int Xims;
   eptrblock *Xeptrb;
@@ -374,7 +374,7 @@ Arguments:
    eptr        pointer to current character in subject
    ecode       pointer to current position in compiled code
    mstart      pointer to the current match start position (can be modified
-                 by encountering \K) 
+                 by encountering \K)
    offset_top  current top pointer
    md          pointer to "static" info for the match
    ims         current /i, /m, and /s options
@@ -394,7 +394,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER USPTR eptr, REGISTER const uschar *ecode, const uschar *mstart, 
+match(REGISTER USPTR eptr, REGISTER const uschar *ecode, const uschar *mstart,
   int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
   int flags, unsigned int rdepth)
 {
@@ -1266,13 +1266,13 @@ for (;;)
     if (eptr != md->start_subject + md->start_offset) RRETURN(MATCH_NOMATCH);
     ecode++;
     break;
-    
+
     /* Reset the start of match point */
-    
+
     case OP_SET_SOM:
     mstart = eptr;
-    ecode++; 
-    break;   
+    ecode++;
+    break;
 
     /* Assert before internal newline if multiline, or before a terminating
     newline unless endonly is set, else end of subject unless noteol is set. */
@@ -4181,7 +4181,7 @@ for(;;)
   md->start_match_ptr = start_match;      /* Insurance */
   md->match_call_count = 0;
   md->eptrn = 0;                          /* Next free eptrchain slot */
-  rc = match(start_match, md->start_code, start_match, 2, md, 
+  rc = match(start_match, md->start_code, start_match, 2, md,
     ims, NULL, 0, 0);
 
   /* Any return other than MATCH_NOMATCH breaks the loop. */
@@ -4263,7 +4263,7 @@ if (rc == MATCH_MATCH)
   rc = md->offset_overflow? 0 : md->end_offset_top/2;
 
   /* If there is space, set up the whole thing as substring 0. The value of
-  md->start_match_ptr might be modified if \K was encountered on the success 
+  md->start_match_ptr might be modified if \K was encountered on the success
   matching path. */
 
   if (offsetcount < 2) rc = 0; else

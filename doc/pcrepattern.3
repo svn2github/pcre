@@ -30,7 +30,7 @@ The remainder of this document discusses the patterns that are supported by
 PCRE when its main matching function, \fBpcre_exec()\fP, is used.
 From release 6.0, PCRE offers a second matching function,
 \fBpcre_dfa_exec()\fP, which matches using a different algorithm that is not
-Perl-compatible. Some of the features discussed below are not available when 
+Perl-compatible. Some of the features discussed below are not available when
 \fBpcre_dfa_exec()\fP is used. The advantages and disadvantages of the
 alternative function, and how it differs from the normal function, are
 discussed in the
@@ -241,7 +241,7 @@ meanings
 .rs
 .sp
 The sequence \eg followed by a positive or negative number, optionally enclosed
-in braces, is an absolute or relative back reference. A named back reference 
+in braces, is an absolute or relative back reference. A named back reference
 can be coded as \eg{name}. Back references are discussed
 .\" HTML <a href="#backreferences">
 .\" </a>
@@ -525,30 +525,30 @@ properties in PCRE.
 .SS "Resetting the match start"
 .rs
 .sp
-The escape sequence \eK, which is a Perl 5.10 feature, causes any previously 
-matched characters not to be included in the final matched sequence. For 
+The escape sequence \eK, which is a Perl 5.10 feature, causes any previously
+matched characters not to be included in the final matched sequence. For
 example, the pattern:
 .sp
   foo\eKbar
 .sp
-matches "foobar", but reports that it has matched "bar". This feature is 
+matches "foobar", but reports that it has matched "bar". This feature is
 similar to a lookbehind assertion
 .\" HTML <a href="#lookbehind">
 .\" </a>
 (described below).
 .\"
-However, in this case, the part of the subject before the real match does not 
-have to be of fixed length, as lookbehind assertions do. The use of \eK does 
+However, in this case, the part of the subject before the real match does not
+have to be of fixed length, as lookbehind assertions do. The use of \eK does
 not interfere with the setting of
 .\" HTML <a href="#subpattern">
 .\" </a>
 captured substrings.
-.\"   
+.\"
 For example, when the pattern
 .sp
   (foo)\eKbar
 .sp
-matches "foobar", the first substring is still set to "foo".   
+matches "foobar", the first substring is still set to "foo".
 .
 .
 .\" HTML <a name="smallassertions"></a>
@@ -1458,7 +1458,7 @@ lengths, but it is acceptable if rewritten to use two top-level branches:
 .sp
   (?<=abc|abde)
 .sp
-In some cases, the Perl 5.10 escape sequence \eK 
+In some cases, the Perl 5.10 escape sequence \eK
 .\" HTML <a href="#resetmatchstart">
 .\" </a>
 (see above)
@@ -1560,9 +1560,9 @@ recursion, a pseudo-condition called DEFINE, and assertions.
 .sp
 If the text between the parentheses consists of a sequence of digits, the
 condition is true if the capturing subpattern of that number has previously
-matched. An alternative notation is to precede the digits with a plus or minus 
+matched. An alternative notation is to precede the digits with a plus or minus
 sign. In this case, the subpattern number is relative rather than absolute.
-The most recently opened parentheses can be referenced by (?(-1), the next most 
+The most recently opened parentheses can be referenced by (?(-1), the next most
 recent by (?(-2), and so on. In looping constructs it can also make sense to
 refer to subsequent groups with constructs such as (?(+2).
 .P
@@ -1582,7 +1582,7 @@ parenthesis is required. Otherwise, since no-pattern is not present, the
 subpattern matches nothing. In other words, this pattern matches a sequence of
 non-parentheses, optionally enclosed in parentheses.
 .P
-If you were embedding this pattern in a larger one, you could use a relative 
+If you were embedding this pattern in a larger one, you could use a relative
 reference:
 .sp
   ...other stuff... ( \e( )?    [^()]+    (?(-1) \e) ) ...
@@ -1730,7 +1730,7 @@ pattern, so instead you could use this:
   ( \e( ( (?>[^()]+) | (?1) )* \e) )
 .sp
 We have put the pattern into parentheses, and caused the recursion to refer to
-them instead of the whole pattern. 
+them instead of the whole pattern.
 .P
 In a larger pattern, keeping track of parenthesis numbers can be tricky. This
 is made easier by the use of relative references. (A Perl 5.10 feature.)
@@ -1751,7 +1751,7 @@ could rewrite the above example as follows:
   (?<pn> \e( ( (?>[^()]+) | (?&pn) )* \e) )
 .sp
 If there is more than one subpattern with the same name, the earliest one is
-used. 
+used.
 .P
 This particular example pattern that we have been looking at contains nested
 unlimited repeats, and so the use of atomic grouping for matching strings of
@@ -1813,7 +1813,7 @@ relative, as in these examples:
 .sp
   (...(absolute)...)...(?2)...
   (...(relative)...)...(?-1)...
-  (...(?+1)...(relative)...  
+  (...(?+1)...(relative)...
 .sp
 An earlier example pointed out that the pattern
 .sp

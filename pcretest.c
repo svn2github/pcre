@@ -1365,8 +1365,8 @@ while (!done)
       new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &nameentrysize);
       new_info(re, NULL, PCRE_INFO_NAMECOUNT, &namecount);
       new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable);
-      new_info(re, NULL, PCRE_INFO_OKPARTIAL, &okpartial); 
-      new_info(re, NULL, PCRE_INFO_JCHANGED, &jchanged); 
+      new_info(re, NULL, PCRE_INFO_OKPARTIAL, &okpartial);
+      new_info(re, NULL, PCRE_INFO_JCHANGED, &jchanged);
 
 #if !defined NOINFOCHECK
       old_count = pcre_info(re, &old_options, &old_first_char);
@@ -1407,7 +1407,7 @@ while (!done)
           nametable += nameentrysize;
           }
         }
-        
+
       if (!okpartial) fprintf(outfile, "Partial matching not supported\n");
 
       all_options = ((real_pcre *)re)->options;
@@ -1428,7 +1428,7 @@ while (!done)
           ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "",
           ((get_options & PCRE_DUPNAMES) != 0)? " dupnames" : "");
-          
+
       if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
       switch (get_options & PCRE_NEWLINE_BITS)

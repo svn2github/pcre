@@ -92,6 +92,8 @@ envisaged for this facility, this is not felt to be a major restriction.
 <P>
 If PCRE_PARTIAL is set for a pattern that does not conform to the restrictions,
 <b>pcre_exec()</b> returns the error code PCRE_ERROR_BADPARTIAL (-13).
+You can use the PCRE_INFO_OKPARTIAL call to <b>pcre_fullinfo()</b> to find out
+if a compiled pattern can be used for partial matching.
 </P>
 <br><a name="SEC3" href="#TOC1">EXAMPLE OF PARTIAL MATCHING USING PCRETEST</a><br>
 <P>
@@ -231,7 +233,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 04 June 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

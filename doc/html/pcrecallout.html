@@ -115,10 +115,12 @@ The <i>subject</i> and <i>subject_length</i> fields contain copies of the values
 that were passed to <b>pcre_exec()</b>.
 </P>
 <P>
-The <i>start_match</i> field contains the offset within the subject at which the
-current match attempt started. If the pattern is not anchored, the callout
-function may be called several times from the same point in the pattern for
-different starting points in the subject.
+The <i>start_match</i> field normally contains the offset within the subject at
+which the current match attempt started. However, if the escape sequence \K
+has been encountered, this value is changed to reflect the modified starting
+point. If the pattern is not anchored, the callout function may be called
+several times from the same point in the pattern for different starting points
+in the subject.
 </P>
 <P>
 The <i>current_position</i> field contains the offset within the subject of the
@@ -190,7 +192,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 29 May 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

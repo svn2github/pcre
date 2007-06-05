@@ -74,7 +74,7 @@ enough. */
 character that is to be tested in some way. This makes is possible to
 centralize the loading of these characters. In the case of Type * etc, the
 "character" is the opcode for \D, \d, \S, \s, \W, or \w, which will always be a
-small value. ***NOTE*** If the start of this table is modified, the two tables 
+small value. ***NOTE*** If the start of this table is modified, the two tables
 that follow must also be modified. */
 
 static uschar coptable[] = {

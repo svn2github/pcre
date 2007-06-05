@@ -888,6 +888,12 @@ table indicating a fixed set of bytes for the first byte in any matching
 string, a pointer to the table is returned. Otherwise NULL is returned. The
 fourth argument should point to an <b>unsigned char *</b> variable.
 <pre>
+  PCRE_INFO_JCHANGED
+</pre>
+Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The
+fourth argument should point to an <b>int</b> variable. The (?J) internal option
+setting changes the local PCRE_DUPNAMES value.
+<pre>
   PCRE_INFO_LASTLITERAL
 </pre>
 Return the value of the rightmost literal byte that must exist in any matched
@@ -938,6 +944,14 @@ bytes shows in hexadecimal, and undefined bytes shown as ??:
 When writing code to extract data from named subpatterns using the
 name-to-number map, remember that the length of the entries is likely to be
 different for each compiled pattern.
+<pre>
+  PCRE_INFO_OKPARTIAL
+</pre>
+Return 1 if the pattern can be used for partial matching, otherwise 0. The
+fourth argument should point to an <b>int</b> variable. The
+<a href="pcrepartial.html"><b>pcrepartial</b></a>
+documentation lists the restrictions that apply to patterns when partial
+matching is used.
 <pre>
   PCRE_INFO_OPTIONS
 </pre>
@@ -1859,7 +1873,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 April 2007
+Last updated: 04 June 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

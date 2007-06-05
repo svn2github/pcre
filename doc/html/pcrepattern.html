@@ -63,8 +63,10 @@ The remainder of this document discusses the patterns that are supported by
 PCRE when its main matching function, <b>pcre_exec()</b>, is used.
 From release 6.0, PCRE offers a second matching function,
 <b>pcre_dfa_exec()</b>, which matches using a different algorithm that is not
-Perl-compatible. The advantages and disadvantages of the alternative function,
-and how it differs from the normal function, are discussed in the
+Perl-compatible. Some of the features discussed below are not available when
+<b>pcre_dfa_exec()</b> is used. The advantages and disadvantages of the
+alternative function, and how it differs from the normal function, are
+discussed in the
 <a href="pcrematching.html"><b>pcrematching</b></a>
 page.
 </P>
@@ -253,8 +255,8 @@ Absolute and relative back references
 </b><br>
 <P>
 The sequence \g followed by a positive or negative number, optionally enclosed
-in braces, is an absolute or relative back reference. Back references are
-discussed
+in braces, is an absolute or relative back reference. A named back reference
+can be coded as \g{name}. Back references are discussed
 <a href="#backreferences">later,</a>
 following the discussion of
 <a href="#subpattern">parenthesized subpatterns.</a>
@@ -528,6 +530,29 @@ Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \d and \w do not use Unicode
 properties in PCRE.
+<a name="resetmatchstart"></a></P>
+<br><b>
+Resetting the match start
+</b><br>
+<P>
+The escape sequence \K, which is a Perl 5.10 feature, causes any previously
+matched characters not to be included in the final matched sequence. For
+example, the pattern:
+<pre>
+  foo\Kbar
+</pre>
+matches "foobar", but reports that it has matched "bar". This feature is
+similar to a lookbehind assertion
+<a href="#lookbehind">(described below).</a>
+However, in this case, the part of the subject before the real match does not
+have to be of fixed length, as lookbehind assertions do. The use of \K does
+not interfere with the setting of
+<a href="#subpattern">captured substrings.</a>
+For example, when the pattern
+<pre>
+  (foo)\Kbar
+</pre>
+matches "foobar", the first substring is still set to "foo".
 <a name="smallassertions"></a></P>
 <br><b>
 Simple assertions
@@ -1309,12 +1334,17 @@ matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
 capturing subpattern is matched caselessly.
 </P>
 <P>
-Back references to named subpatterns use the Perl syntax \k&#60;name&#62; or \k'name'
-or the Python syntax (?P=name). We could rewrite the above example in either of
+There are several different ways of writing back references to named
+subpatterns. The .NET syntax \k{name} and the Perl syntax \k&#60;name&#62; or
+\k'name' are supported, as is the Python syntax (?P=name). Perl 5.10's unified
+back reference syntax, in which \g can be used for both numeric and named
+references, is also supported. We could rewrite the above example in any of
 the following ways:
 <pre>
   (?&#60;p1&#62;(?i)rah)\s+\k&#60;p1&#62;
+  (?'p1'(?i)rah)\s+\k{p1}
   (?P&#60;p1&#62;(?i)rah)\s+(?P=p1)
+  (?&#60;p1&#62;(?i)rah)\s+\g{p1}
 </pre>
 A subpattern that is referenced by name may appear in the pattern before or
 after the reference.
@@ -1432,6 +1462,12 @@ lengths, but it is acceptable if rewritten to use two top-level branches:
 <pre>
   (?&#60;=abc|abde)
 </pre>
+In some cases, the Perl 5.10 escape sequence \K
+<a href="#resetmatchstart">(see above)</a>
+can be used instead of a lookbehind assertion; this is not restricted to a
+fixed-length.
+</P>
+<P>
 The implementation of lookbehind assertions is, for each alternative, to
 temporarily move the current position back by the fixed length and then try to
 match. If there are insufficient characters before the current position, the
@@ -1528,7 +1564,11 @@ Checking for a used subpattern by number
 <P>
 If the text between the parentheses consists of a sequence of digits, the
 condition is true if the capturing subpattern of that number has previously
-matched.
+matched. An alternative notation is to precede the digits with a plus or minus
+sign. In this case, the subpattern number is relative rather than absolute.
+The most recently opened parentheses can be referenced by (?(-1), the next most
+recent by (?(-2), and so on. In looping constructs it can also make sense to
+refer to subsequent groups with constructs such as (?(+2).
 </P>
 <P>
 Consider the following pattern, which contains non-significant white space to
@@ -1546,6 +1586,14 @@ the condition is true, and so the yes-pattern is executed and a closing
 parenthesis is required. Otherwise, since no-pattern is not present, the
 subpattern matches nothing. In other words, this pattern matches a sequence of
 non-parentheses, optionally enclosed in parentheses.
+</P>
+<P>
+If you were embedding this pattern in a larger one, you could use a relative
+reference:
+<pre>
+  ...other stuff... ( \( )?    [^()]+    (?(-1) \) ) ...
+</pre>
+This makes the fragment independent of the parentheses in the larger pattern.
 </P>
 <br><b>
 Checking for a used subpattern by name
@@ -1697,19 +1745,37 @@ pattern, so instead you could use this:
   ( \( ( (?&#62;[^()]+) | (?1) )* \) )
 </pre>
 We have put the pattern into parentheses, and caused the recursion to refer to
-them instead of the whole pattern. In a larger pattern, keeping track of
-parenthesis numbers can be tricky. It may be more convenient to use named
-parentheses instead. The Perl syntax for this is (?&name); PCRE's earlier
-syntax (?P&#62;name) is also supported. We could rewrite the above example as
-follows:
+them instead of the whole pattern.
+</P>
+<P>
+In a larger pattern, keeping track of parenthesis numbers can be tricky. This
+is made easier by the use of relative references. (A Perl 5.10 feature.)
+Instead of (?1) in the pattern above you can write (?-2) to refer to the second
+most recently opened parentheses preceding the recursion. In other words, a
+negative number counts capturing parentheses leftwards from the point at which
+it is encountered.
+</P>
+<P>
+It is also possible to refer to subsequently opened parentheses, by writing
+references such as (?+2). However, these cannot be recursive because the
+reference is not inside the parentheses that are referenced. They are always
+"subroutine" calls, as described in the next section.
+</P>
+<P>
+An alternative approach is to use named parentheses instead. The Perl syntax
+for this is (?&name); PCRE's earlier syntax (?P&#62;name) is also supported. We
+could rewrite the above example as follows:
 <pre>
   (?&#60;pn&#62; \( ( (?&#62;[^()]+) | (?&pn) )* \) )
 </pre>
 If there is more than one subpattern with the same name, the earliest one is
-used. This particular example pattern contains nested unlimited repeats, and so
-the use of atomic grouping for matching strings of non-parentheses is important
-when applying the pattern to strings that do not match. For example, when this
-pattern is applied to
+used.
+</P>
+<P>
+This particular example pattern that we have been looking at contains nested
+unlimited repeats, and so the use of atomic grouping for matching strings of
+non-parentheses is important when applying the pattern to strings that do not
+match. For example, when this pattern is applied to
 <pre>
   (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()
 </pre>
@@ -1758,7 +1824,14 @@ is the actual recursive call.
 If the syntax for a recursive subpattern reference (either by number or by
 name) is used outside the parentheses to which it refers, it operates like a
 subroutine in a programming language. The "called" subpattern may be defined
-before or after the reference. An earlier example pointed out that the pattern
+before or after the reference. A numbered reference can be absolute or
+relative, as in these examples:
+<pre>
+  (...(absolute)...)...(?2)...
+  (...(relative)...)...(?-1)...
+  (...(?+1)...(relative)...
+</pre>
+An earlier example pointed out that the pattern
 <pre>
   (sens|respons)e and \1ibility
 </pre>
@@ -1781,7 +1854,7 @@ When a subpattern is used as a subroutine, processing options such as
 case-independence are fixed when the subpattern is defined. They cannot be
 changed for different calls. For example, consider this pattern:
 <pre>
-  (abc)(?i:(?1))
+  (abc)(?i:(?-1))
 </pre>
 It matches "abcabc". It does not match "abcABC" because the change of
 processing option does not affect the called subpattern.
@@ -1836,7 +1909,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC24" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 29 May 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

@@ -243,7 +243,7 @@ static const char *error_texts[] = {
   "repeating a DEFINE group is not allowed",
   "inconsistent NEWLINE options",
   "\\g is not followed by a braced name or an optionally braced non-zero number",
-  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number" 
+  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number"
 };
 
 
@@ -453,9 +453,9 @@ else
 
     /* \g must be followed by a number, either plain or braced. If positive, it
     is an absolute backreference. If negative, it is a relative backreference.
-    This is a Perl 5.10 feature. Perl 5.10 also supports \g{name} as a 
-    reference to a named group. This is part of Perl's movement towards a 
-    unified syntax for back references. As this is synonymous with \k{name}, we 
+    This is a Perl 5.10 feature. Perl 5.10 also supports \g{name} as a
+    reference to a named group. This is part of Perl's movement towards a
+    unified syntax for back references. As this is synonymous with \k{name}, we
     fudge it up by pretending it really was \k. */
 
     case 'g':
@@ -464,11 +464,11 @@ else
       const uschar *p;
       for (p = ptr+2; *p != 0 && *p != '}'; p++)
         if (*p != '-' && (digitab[*p] & ctype_digit) == 0) break;
-      if (*p != 0 && *p != '}') 
+      if (*p != 0 && *p != '}')
         {
         c = -ESC_k;
         break;
-        }  
+        }
       braced = TRUE;
       ptr++;
       }
@@ -1381,18 +1381,19 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   const uschar *ccode;
 
   c = *code;
-  
+
   /* Groups with zero repeats can of course be empty; skip them. */
 
   if (c == OP_BRAZERO || c == OP_BRAMINZERO)
     {
+    code += _pcre_OP_lengths[c];
     do code += GET(code, 1); while (*code == OP_ALT);
     c = *code;
     continue;
     }
 
   /* For other groups, scan the branches. */
-   
+
   if (c == OP_BRA || c == OP_CBRA || c == OP_ONCE)
     {
     BOOL empty_branch;
@@ -1409,7 +1410,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
       }
     while (*code == OP_ALT);
     if (!empty_branch) return FALSE;   /* All branches are non-empty */
-    c = *code;    
+    c = *code;
     continue;
     }
 
@@ -2113,7 +2114,7 @@ for (;; ptr++)
   int class_lastchar;
   int newoptions;
   int recno;
-  int refsign; 
+  int refsign;
   int skipbytes;
   int subreqbyte;
   int subfirstbyte;
@@ -3640,7 +3641,7 @@ for (;; ptr++)
 
         code[1+LINK_SIZE] = OP_CREF;
         skipbytes = 3;
-        refsign = -1; 
+        refsign = -1;
 
         /* Check for a test for recursion in a named group. */
 
@@ -3664,11 +3665,11 @@ for (;; ptr++)
           terminator = '\'';
           ptr++;
           }
-        else 
+        else
           {
           terminator = 0;
-          if (ptr[1] == '-' || ptr[1] == '+') refsign = *(++ptr); 
-          } 
+          if (ptr[1] == '-' || ptr[1] == '+') refsign = *(++ptr);
+          }
 
         /* We now expect to read a name; any thing else is an error */
 
@@ -3706,31 +3707,31 @@ for (;; ptr++)
         /* In the real compile we do the work of looking for the actual
         reference. If the string started with "+" or "-" we require the rest to
         be digits, in which case recno will be set. */
-        
+
         if (refsign > 0)
           {
           if (recno <= 0)
             {
             *errorcodeptr = ERR58;
             goto FAILED;
-            }     
+            }
           if (refsign == '-')
             {
-            recno = cd->bracount - recno + 1; 
+            recno = cd->bracount - recno + 1;
             if (recno <= 0)
               {
               *errorcodeptr = ERR15;
               goto FAILED;
-              }     
+              }
             }
-          else recno += cd->bracount; 
+          else recno += cd->bracount;
           PUT2(code, 2+LINK_SIZE, recno);
           break;
-          }  
+          }
 
         /* Otherwise (did not start with "+" or "-"), start by looking for the
         name. */
-         
+
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
           {
@@ -4055,13 +4056,13 @@ for (;; ptr++)
           const uschar *called;
 
           if ((refsign = *ptr) == '+') ptr++;
-          else if (refsign == '-') 
+          else if (refsign == '-')
             {
             if ((digitab[ptr[1]] & ctype_digit) == 0)
               goto OTHER_CHAR_AFTER_QUERY;
-            ptr++;  
-            } 
- 
+            ptr++;
+            }
+
           recno = 0;
           while((digitab[*ptr] & ctype_digit) != 0)
             recno = recno * 10 + *ptr++ - '0';
@@ -4071,20 +4072,20 @@ for (;; ptr++)
             *errorcodeptr = ERR29;
             goto FAILED;
             }
-            
+
           if (refsign == '-')
             {
             if (recno == 0)
               {
               *errorcodeptr = ERR58;
               goto FAILED;
-              }     
-            recno = cd->bracount - recno + 1; 
+              }
+            recno = cd->bracount - recno + 1;
             if (recno <= 0)
               {
               *errorcodeptr = ERR15;
               goto FAILED;
-              }     
+              }
             }
           else if (refsign == '+')
             {
@@ -4092,9 +4093,9 @@ for (;; ptr++)
               {
               *errorcodeptr = ERR58;
               goto FAILED;
-              }     
-            recno += cd->bracount; 
-            }       
+              }
+            recno += cd->bracount;
+            }
 
           /* Come here from code above that handles a named recursion */
 
@@ -4168,7 +4169,7 @@ for (;; ptr++)
 
         /* ------------------------------------------------------------ */
         default:              /* Other characters: check option setting */
-        OTHER_CHAR_AFTER_QUERY: 
+        OTHER_CHAR_AFTER_QUERY:
         set = unset = 0;
         optset = &set;
 
@@ -4319,9 +4320,11 @@ for (;; ptr++)
     is on the bracket. */
 
     /* If this is a conditional bracket, check that there are no more than
-    two branches in the group, or just one if it's a DEFINE group. */
+    two branches in the group, or just one if it's a DEFINE group. We do this
+    in the real compile phase, not in the pre-pass, where the whole group may
+    not be available. */
 
-    if (bravalue == OP_COND)
+    if (bravalue == OP_COND && lengthptr == NULL)
       {
       uschar *tc = code;
       int condcount = 0;
@@ -4653,7 +4656,7 @@ This function is used during the pre-compile phase when we are trying to find
 out the amount of memory needed, as well as during the real compile phase. The
 value of lengthptr distinguishes the two phases.
 
-Argument:
+Arguments:
   options        option bits, including any changes for this subpattern
   oldims         previous settings of ims option bits
   codeptr        -> the address of the current code pointer
@@ -4806,26 +4809,29 @@ for (;;)
       }
     }
 
-  /* Reached end of expression, either ')' or end of pattern. Go back through
-  the alternative branches and reverse the chain of offsets, with the field in
-  the BRA item now becoming an offset to the first alternative. If there are
-  no alternatives, it points to the end of the group. The length in the
-  terminating ket is always the length of the whole bracketed item. If any of
-  the ims options were changed inside the group, compile a resetting op-code
-  following, except at the very end of the pattern. Return leaving the pointer
-  at the terminating char. */
+  /* Reached end of expression, either ')' or end of pattern. In the real
+  compile phase, go back through the alternative branches and reverse the chain
+  of offsets, with the field in the BRA item now becoming an offset to the
+  first alternative. If there are no alternatives, it points to the end of the
+  group. The length in the terminating ket is always the length of the whole
+  bracketed item. If any of the ims options were changed inside the group,
+  compile a resetting op-code following, except at the very end of the pattern.
+  Return leaving the pointer at the terminating char. */
 
   if (*ptr != '|')
     {
-    int branch_length = code - last_branch;
-    do
+    if (lengthptr == NULL)
       {
-      int prev_length = GET(last_branch, 1);
-      PUT(last_branch, 1, branch_length);
-      branch_length = prev_length;
-      last_branch -= branch_length;
+      int branch_length = code - last_branch;
+      do
+        {
+        int prev_length = GET(last_branch, 1);
+        PUT(last_branch, 1, branch_length);
+        branch_length = prev_length;
+        last_branch -= branch_length;
+        }
+      while (branch_length > 0);
       }
-    while (branch_length > 0);
 
     /* Fill in the ket */
 
@@ -4852,17 +4858,29 @@ for (;;)
     return TRUE;
     }
 
-  /* Another branch follows; insert an "or" node. Its length field points back
+  /* Another branch follows. In the pre-compile phase, we can move the code
+  pointer back to where it was for the start of the first branch. (That is,
+  pretend that each branch is the only one.)
+
+  In the real compile phase, insert an ALT node. Its length field points back
   to the previous branch while the bracket remains open. At the end the chain
   is reversed. It's done like this so that the start of the bracket has a
   zero offset until it is closed, making it possible to detect recursion. */
 
-  *code = OP_ALT;
-  PUT(code, 1, code - last_branch);
-  bc.current = last_branch = code;
-  code += 1 + LINK_SIZE;
+  if (lengthptr != NULL)
+    {
+    code = *codeptr + 1 + LINK_SIZE + skipbytes;
+    length += 1 + LINK_SIZE;
+    }
+  else
+    {
+    *code = OP_ALT;
+    PUT(code, 1, code - last_branch);
+    bc.current = last_branch = code;
+    code += 1 + LINK_SIZE;
+    }
+
   ptr++;
-  length += 1 + LINK_SIZE;
   }
 /* Control never reaches here */
 }

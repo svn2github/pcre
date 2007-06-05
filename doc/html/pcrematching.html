@@ -148,11 +148,16 @@ not supported, and cause errors if encountered.
 condition or test for a specific group recursion are not supported.
 </P>
 <P>
-5. Callouts are supported, but the value of the <i>capture_top</i> field is
+5. Because many paths through the tree may be active, the \K escape sequence,
+which resets the start of the match when encountered (but may be on some paths
+and not on others), is not supported. It causes an error if encountered.
+</P>
+<P>
+6. Callouts are supported, but the value of the <i>capture_top</i> field is
 always 1, and the value of the <i>capture_last</i> field is always -1.
 </P>
 <P>
-6.
+7.
 The \C escape sequence, which (in the standard algorithm) matches a single
 byte, even in UTF-8 mode, is not supported because the alternative algorithm
 moves through the subject string one character at a time, for all active paths
@@ -207,7 +212,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 29 May 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

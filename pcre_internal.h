@@ -605,7 +605,7 @@ ESC_Z to detect the types that may be repeated. These are the types that
 consume characters. If any new escapes are put in between that don't consume a
 character, that code will have to change. */
 
-enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s, 
+enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_W, ESC_w, ESC_dum1, ESC_C, ESC_P, ESC_p, ESC_R, ESC_X, ESC_Z, ESC_z,
        ESC_E, ESC_Q, ESC_k, ESC_REF };
 
@@ -629,7 +629,7 @@ enum {
 
   OP_SOD,            /* 1 Start of data: \A */
   OP_SOM,            /* 2 Start of match (subject + offset): \G */
-  OP_SET_SOM,        /* 3 Set start of match (\K) */ 
+  OP_SET_SOM,        /* 3 Set start of match (\K) */
   OP_NOT_WORD_BOUNDARY,  /*  4 \B */
   OP_WORD_BOUNDARY,      /*  5 \b */
   OP_NOT_DIGIT,          /*  6 \D */
