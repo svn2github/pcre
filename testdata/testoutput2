@@ -8170,36 +8170,36 @@ No match
     XABC\B
 No match
 
-/(ab|c)(?-1)/B
+/(ab|c)(?-1)/BZ
 ------------------------------------------------------------------
-  0  29 Bra 0
-  3   9 Bra 1
-  8     ab
- 12   5 Alt
- 15     c
- 17  14 Ket
- 20   6 Once
- 23   3 Recurse
- 26   6 Ket
- 29  29 Ket
- 32     End
+        Bra 0
+        Bra 1
+        ab
+        Alt
+        c
+        Ket
+        Once
+        Recurse
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
     abc
  0: abc
  1: ab
 
-/xy(?+1)(abc)/B
+/xy(?+1)(abc)/BZ
 ------------------------------------------------------------------
-  0  30 Bra 0
-  3     xy
-  7   6 Once
- 10  16 Recurse
- 13   6 Ket
- 16  11 Bra 1
- 21     abc
- 27  11 Ket
- 30  30 Ket
- 33     End
+        Bra 0
+        xy
+        Once
+        Recurse
+        Ket
+        Bra 1
+        abc
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
     xyabcabc
  0: xyabcabc
@@ -8221,22 +8221,22 @@ Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offs
 /x(?+1)y/
 Failed: reference to non-existent subpattern at offset 5
 
-/^(abc)?(?(-1)X|Y)/B
+/^(abc)?(?(-1)X|Y)/BZ
 ------------------------------------------------------------------
-  0  35 Bra 0
-  3     ^
-  4     Brazero
-  5  11 Bra 1
- 10     abc
- 16  11 Ket
- 19   8 Cond
- 22   1 Cond ref
- 25     X
- 27   5 Alt
- 30     Y
- 32  13 Ket
- 35  35 Ket
- 38     End
+        Bra 0
+        ^
+        Brazero
+        Bra 1
+        abc
+        Ket
+        Cond
+      1 Cond ref
+        X
+        Alt
+        Y
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
     abcX
  0: abcX
@@ -8248,23 +8248,23 @@ No match
     abcY   
 No match
     
-/^((?(+1)X|Y)(abc))+/B 
+/^((?(+1)X|Y)(abc))+/BZ 
 ------------------------------------------------------------------
-  0  42 Bra 0
-  3     ^
-  4  35 Bra 1
-  9   8 Cond
- 12   2 Cond ref
- 15     X
- 17   5 Alt
- 20     Y
- 22  13 Ket
- 25  11 Bra 2
- 30     abc
- 36  11 Ket
- 39  35 KetRmax
- 42  42 Ket
- 45     End
+        Bra 0
+        ^
+        Bra 1
+        Cond
+      2 Cond ref
+        X
+        Alt
+        Y
+        Ket
+        Bra 2
+        abc
+        Ket
+        KetRmax
+        Ket
+        End
 ------------------------------------------------------------------
     YabcXabc
  0: YabcXabc
@@ -8279,37 +8279,37 @@ No match
     XabcXabc  
 No match
 
-/(?(-1)a)/B
+/(?(-1)a)/BZ
 Failed: reference to non-existent subpattern at offset 6
 
-/((?(-1)a))/B
+/((?(-1)a))/BZ
 ------------------------------------------------------------------
-  0  22 Bra 0
-  3  16 Bra 1
-  8   8 Cond
- 11   1 Cond ref
- 14     a
- 16   8 Ket
- 19  16 Ket
- 22  22 Ket
- 25     End
+        Bra 0
+        Bra 1
+        Cond
+      1 Cond ref
+        a
+        Ket
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
 
-/((?(-2)a))/B
+/((?(-2)a))/BZ
 Failed: reference to non-existent subpattern at offset 7
 
-/^(?(+1)X|Y)/B
+/^(?(+1)X|Y)/BZ
 ------------------------------------------------------------------
-  0  20 Bra 0
-  3     ^
-  4   8 Cond
-  7   1 Cond ref
- 10     X
- 12   5 Alt
- 15     Y
- 17  13 Ket
- 20  20 Ket
- 23     End
+        Bra 0
+        ^
+        Cond
+      1 Cond ref
+        X
+        Alt
+        Y
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
     Y
  0: Y

@@ -2156,10 +2156,10 @@ a random value. /Ix
     ** Failers 
     XABC\B
 
-/(ab|c)(?-1)/B
+/(ab|c)(?-1)/BZ
     abc
 
-/xy(?+1)(abc)/B
+/xy(?+1)(abc)/BZ
     xyabcabc
     ** Failers
     xyabc  
@@ -2172,25 +2172,25 @@ a random value. /Ix
 
 /x(?+1)y/
 
-/^(abc)?(?(-1)X|Y)/B
+/^(abc)?(?(-1)X|Y)/BZ
     abcX
     Y
     ** Failers
     abcY   
     
-/^((?(+1)X|Y)(abc))+/B 
+/^((?(+1)X|Y)(abc))+/BZ 
     YabcXabc
     YabcXabcXabc
     ** Failers
     XabcXabc  
 
-/(?(-1)a)/B
+/(?(-1)a)/BZ
 
-/((?(-1)a))/B
+/((?(-1)a))/BZ
 
-/((?(-2)a))/B
+/((?(-2)a))/BZ
 
-/^(?(+1)X|Y)/B
+/^(?(+1)X|Y)/BZ
     Y
 
 /(foo)\Kbar/

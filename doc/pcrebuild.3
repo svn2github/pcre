@@ -164,13 +164,17 @@ build a version of PCRE that works this way, add
 .sp
 to the \fBconfigure\fP command. With this configuration, PCRE will use the
 \fBpcre_stack_malloc\fP and \fBpcre_stack_free\fP variables to call memory
-management functions. Separate functions are provided because the usage is very
-predictable: the block sizes requested are always the same, and the blocks are
-always freed in reverse order. A calling program might be able to implement
-optimized functions that perform better than the standard \fBmalloc()\fP and
-\fBfree()\fP functions. PCRE runs noticeably more slowly when built in this
-way. This option affects only the \fBpcre_exec()\fP function; it is not
-relevant for the the \fBpcre_dfa_exec()\fP function.
+management functions. By default these point to \fBmalloc()\fP and
+\fBfree()\fP, but you can replace the pointers so that your own functions are
+used. 
+.P
+Separate functions are provided rather than using \fBpcre_malloc\fP and
+\fBpcre_free\fP because the usage is very predictable: the block sizes
+requested are always the same, and the blocks are always freed in reverse
+order. A calling program might be able to implement optimized functions that
+perform better than \fBmalloc()\fP and \fBfree()\fP. PCRE runs noticeably more
+slowly when built in this way. This option affects only the \fBpcre_exec()\fP
+function; it is not relevant for the the \fBpcre_dfa_exec()\fP function.
 .
 .SH "LIMITING PCRE RESOURCE USAGE"
 .rs
@@ -254,6 +258,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 April 2007
+Last updated: 05 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
