@@ -2680,14 +2680,18 @@ for (;; ptr++)
             unsigned int origd = d;
             while (get_othercase_range(&cc, origd, &occ, &ocd))
               {
-              if (occ >= c && ocd <= d) continue;  /* Skip embedded ranges */
+              if (occ >= (unsigned int)c && 
+                  ocd <= (unsigned int)d) 
+                continue;                          /* Skip embedded ranges */
 
-              if (occ < c  && ocd >= c - 1)        /* Extend the basic range */
+              if (occ < (unsigned int)c  && 
+                  ocd >= (unsigned int)c - 1)      /* Extend the basic range */
                 {                                  /* if there is overlap,   */
                 c = occ;                           /* noting that if occ < c */
                 continue;                          /* we can't have ocd > d  */
                 }                                  /* because a subrange is  */
-              if (ocd > d && occ <= d + 1)         /* always shorter than    */
+              if (ocd > (unsigned int)d && 
+                  occ <= (unsigned int)d + 1)      /* always shorter than    */
                 {                                  /* the basic range.       */
                 d = ocd;
                 continue;
