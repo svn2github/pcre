@@ -958,6 +958,38 @@ is reached, an option setting in one branch does affect subsequent branches, so
 the above patterns match "SUNDAY" as well as "Saturday".
 .
 .
+.SH "DUPLICATE SUBPATTERN NUMBERS"
+.rs
+.sp
+Perl 5.10 introduced a feature whereby each alternative in a subpattern uses 
+the same numbers for its capturing parentheses. Such a subpattern starts with 
+(?| and is itself a non-capturing subpattern. For example, consider this 
+pattern:
+.sp
+  (?|(Sat)ur|(Sun))day
+.sp   
+Because the two alternatives are inside a (?| group, both sets of capturing 
+parentheses are numbered one. Thus, when the pattern matches, you can look 
+at captured substring number one, whichever alternative matched. This construct 
+is useful when you want to capture part, but not all, of one of a number of 
+alternatives. Inside a (?| group, parentheses are numbered as usual, but the 
+number is reset at the start of each branch. The numbers of any capturing
+buffers that follow the subpattern start after the highest number used in any 
+branch. The following example is taken from the Perl documentation. 
+The numbers underneath show in which buffer the captured content will be
+stored.
+.sp
+  # before  ---------------branch-reset----------- after
+  / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
+  # 1            2         2  3        2     3     4
+.sp   
+A backreference or a recursive call to a numbered subpattern always refers to
+the first one in the pattern with the given number.
+.P
+An alternative approach to using this "branch reset" feature is to use
+duplicate named subpatterns, as described in the next section.
+.
+.
 .SH "NAMED SUBPATTERNS"
 .rs
 .sp
@@ -1007,6 +1039,9 @@ abbreviation. This pattern (ignoring the line breaks) does the job:
   (?<DN>Sat)(?:urday)?
 .sp
 There are five capturing substrings, but only one is ever set after a match.
+(An alternative way of solving this problem is to use a "branch reset" 
+subpattern, as described in the previous section.)
+.P
 The convenience function for extracting the data by name returns the substring
 for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was. If you
@@ -1898,6 +1933,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 May 2007
+Last updated: 11 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

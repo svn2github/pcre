@@ -6990,4 +6990,32 @@ No match
  0: 
  0+ 
 
+/(?|(abc)|(xyz))/
+   >abc<
+ 0: abc
+   >xyz< 
+ 0: xyz
+
+/(x)(?|(abc)|(xyz))(x)/
+    xabcx
+ 0: xabcx
+    xxyzx 
+ 0: xxyzx
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/
+    xabcpqrx
+ 0: xabcpqrx
+    xxyzx 
+ 0: xxyzx
+
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+ 0: abcabc
+    xyzabc 
+ 0: xyzabc
+    ** Failers 
+No match
+    xyzxyz 
+No match
+ 
 / End of testinput7 /

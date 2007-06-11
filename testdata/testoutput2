@@ -8357,4 +8357,121 @@ No match
 /\g{A/ 
 Failed: syntax error in subpattern name (missing terminator) at offset 4
 
+/(?|(abc)|(xyz))/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 0
+        Bra 1
+        abc
+        Ket
+        Alt
+        Bra 1
+        xyz
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+   >abc<
+ 0: abc
+ 1: abc
+   >xyz< 
+ 0: xyz
+ 1: xyz
+
+/(x)(?|(abc)|(xyz))(x)/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 1
+        x
+        Ket
+        Bra 0
+        Bra 2
+        abc
+        Ket
+        Alt
+        Bra 2
+        xyz
+        Ket
+        Ket
+        Bra 3
+        x
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    xabcx
+ 0: xabcx
+ 1: x
+ 2: abc
+ 3: x
+    xxyzx 
+ 0: xxyzx
+ 1: x
+ 2: xyz
+ 3: x
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/BZ
+------------------------------------------------------------------
+        Bra 0
+        Bra 1
+        x
+        Ket
+        Bra 0
+        Bra 2
+        abc
+        Ket
+        Bra 3
+        pqr
+        Ket
+        Alt
+        Bra 2
+        xyz
+        Ket
+        Ket
+        Bra 4
+        x
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    xabcpqrx
+ 0: xabcpqrx
+ 1: x
+ 2: abc
+ 3: pqr
+ 4: x
+    xxyzx 
+ 0: xxyzx
+ 1: x
+ 2: xyz
+ 3: <unset>
+ 4: x
+
+/(?|(abc)|(xyz))\1/
+    abcabc
+ 0: abcabc
+ 1: abc
+    xyzxyz 
+ 0: xyzxyz
+ 1: xyz
+    ** Failers
+No match
+    abcxyz
+No match
+    xyzabc   
+No match
+    
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+ 0: abcabc
+ 1: abc
+    xyzabc 
+ 0: xyzabc
+ 1: xyz
+    ** Failers 
+No match
+    xyzxyz 
+No match
+ 
 / End of testinput2 /

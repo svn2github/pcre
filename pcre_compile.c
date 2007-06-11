@@ -374,8 +374,8 @@ static const unsigned char ebcdic_chartab[] = { /* chartable partial dup */
 /* Definition to allow mutual recursion */
 
 static BOOL
-  compile_regex(int, int, uschar **, const uschar **, int *, BOOL, int, int *,
-    int *, branch_chain *, compile_data *, int *);
+  compile_regex(int, int, uschar **, const uschar **, int *, BOOL, BOOL, int, 
+    int *, int *, branch_chain *, compile_data *, int *);
 
 
 
@@ -2110,6 +2110,7 @@ for (;; ptr++)
   BOOL possessive_quantifier;
   BOOL is_quantifier;
   BOOL is_recurse;
+  BOOL reset_bracount; 
   int class_charcount;
   int class_lastchar;
   int newoptions;
@@ -3584,6 +3585,7 @@ for (;; ptr++)
     skipbytes = 0;
     bravalue = OP_CBRA;
     save_hwm = cd->hwm;
+    reset_bracount = FALSE; 
 
     if (*(++ptr) == '?')
       {
@@ -3604,6 +3606,11 @@ for (;; ptr++)
           }
         continue;
 
+
+        /* ------------------------------------------------------------ */
+        case '|':                 /* Reset capture count for each branch */
+        reset_bracount = TRUE;
+        /* Fall through */ 
 
         /* ------------------------------------------------------------ */
         case ':':                 /* Non-capturing bracket */
@@ -4304,6 +4311,7 @@ for (;; ptr++)
          errorcodeptr,                 /* Where to put an error message */
          (bravalue == OP_ASSERTBACK ||
           bravalue == OP_ASSERTBACK_NOT), /* TRUE if back assert */
+         reset_bracount,               /* True if (?| group */  
          skipbytes,                    /* Skip over bracket number */
          &subfirstbyte,                /* For possible first char */
          &subreqbyte,                  /* For possible last char */
@@ -4663,6 +4671,7 @@ Arguments:
   ptrptr         -> the address of the current pattern pointer
   errorcodeptr   -> pointer to error code variable
   lookbehind     TRUE if this is a lookbehind assertion
+  reset_bracount TRUE to reset the count for each branch 
   skipbytes      skip this many bytes at start (for brackets and OP_COND)
   firstbyteptr   place to put the first required character, or a negative number
   reqbyteptr     place to put the last required character, or a negative number
@@ -4676,8 +4685,9 @@ Returns:         TRUE on success
 
 static BOOL
 compile_regex(int options, int oldims, uschar **codeptr, const uschar **ptrptr,
-  int *errorcodeptr, BOOL lookbehind, int skipbytes, int *firstbyteptr,
-  int *reqbyteptr, branch_chain *bcptr, compile_data *cd, int *lengthptr)
+  int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipbytes, 
+  int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr, compile_data *cd, 
+  int *lengthptr)
 {
 const uschar *ptr = *ptrptr;
 uschar *code = *codeptr;
@@ -4687,6 +4697,8 @@ uschar *reverse_count = NULL;
 int firstbyte, reqbyte;
 int branchfirstbyte, branchreqbyte;
 int length;
+int orig_bracount;
+int max_bracount;
 branch_chain bc;
 
 bc.outer = bcptr;
@@ -4715,8 +4727,14 @@ code += 1 + LINK_SIZE + skipbytes;
 
 /* Loop for each alternative branch */
 
+orig_bracount = max_bracount = cd->bracount;
 for (;;)
   {
+  /* For a (?| group, reset the capturing bracket count so that each branch
+  uses the same numbers. */ 
+ 
+  if (reset_bracount) cd->bracount = orig_bracount;
+ 
   /* Handle a change of ims options at the start of the branch */
 
   if ((options & PCRE_IMS) != oldims)
@@ -4745,6 +4763,11 @@ for (;;)
     *ptrptr = ptr;
     return FALSE;
     }
+    
+  /* Keep the highest bracket count in case (?| was used and some branch
+  has fewer than the rest. */ 
+    
+  if (cd->bracount > max_bracount) max_bracount = cd->bracount;
 
   /* In the real compile phase, there is some post-processing to be done. */
 
@@ -4847,6 +4870,10 @@ for (;;)
       *code++ = oldims;
       length += 2;
       }
+      
+    /* Retain the highest bracket number, in case resetting was used. */
+      
+    cd->bracount = max_bracount;
 
     /* Set values to pass back */
 
@@ -5322,7 +5349,8 @@ outside can help speed up starting point checks. */
 code = cworkspace;
 *code = OP_BRA;
 (void)compile_regex(cd->external_options, cd->external_options & PCRE_IMS,
-  &code, &ptr, &errorcode, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, &length);
+  &code, &ptr, &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, 
+  &length);
 if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 
 DPRINTF(("end pre-compile: length=%d workspace=%d\n", length,
@@ -5390,7 +5418,7 @@ ptr = (const uschar *)pattern;
 code = (uschar *)codestart;
 *code = OP_BRA;
 (void)compile_regex(re->options, re->options & PCRE_IMS, &code, &ptr,
-  &errorcode, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, NULL);
+  &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, NULL);
 re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
 

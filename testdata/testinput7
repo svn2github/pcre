@@ -4249,4 +4249,22 @@
 /(?m)$/<any>g+ 
     abc\r\n\r\n
 
+/(?|(abc)|(xyz))/
+   >abc<
+   >xyz< 
+
+/(x)(?|(abc)|(xyz))(x)/
+    xabcx
+    xxyzx 
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/
+    xabcpqrx
+    xxyzx 
+
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+    xyzabc 
+    ** Failers 
+    xyzxyz 
+ 
 / End of testinput7 /

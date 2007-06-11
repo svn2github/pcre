@@ -2215,4 +2215,29 @@ a random value. /Ix
     
 /\g{A/ 
 
+/(?|(abc)|(xyz))/BZ
+   >abc<
+   >xyz< 
+
+/(x)(?|(abc)|(xyz))(x)/BZ
+    xabcx
+    xxyzx 
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/BZ
+    xabcpqrx
+    xxyzx 
+
+/(?|(abc)|(xyz))\1/
+    abcabc
+    xyzxyz 
+    ** Failers
+    abcxyz
+    xyzabc   
+    
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+    xyzabc 
+    ** Failers 
+    xyzxyz 
+ 
 / End of testinput2 /
