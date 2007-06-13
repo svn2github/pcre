@@ -40,11 +40,11 @@ Version 7.2 13-June-07
 
     (f) \g{name} is another synonym - part of Perl 5.10's unification of
         reference syntax.
-        
+
     (g) (?| introduces a group in which the numbering of parentheses in each
-        alternative starts with the same number.  
-        
-    (h) \h, \H, \v, and \V match horizontal and vertical whitespace. 
+        alternative starts with the same number.
+
+    (h) \h, \H, \v, and \V match horizontal and vertical whitespace.
 
  7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and
     PCRE_INFO_JCHANGED.
@@ -59,15 +59,15 @@ Version 7.2 13-June-07
     bit of new cunning has reduced the workspace needed for groups with
     alternatives. The 1000-alternative test pattern now uses 12 bytes of
     workspace instead of running out of the 4096 that are available.
-    
+
 10. Inserted some missing (unsigned int) casts to get rid of compiler warnings.
 
 11. Applied patch from Google to remove an optimization that didn't quite work.
     The report of the bug said:
-    
+
       pcrecpp::RE("a*").FullMatch("aaa") matches, while
       pcrecpp::RE("a*?").FullMatch("aaa") does not, and
-      pcrecpp::RE("a*?\\z").FullMatch("aaa") does again. 
+      pcrecpp::RE("a*?\\z").FullMatch("aaa") does again.
 
 
 Version 7.1 24-Apr-07

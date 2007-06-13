@@ -2941,7 +2941,7 @@ for (;;)
             }
           }
         break;
-        
+
         case OP_HSPACE:
         for (i = 1; i <= min; i++)
           {
@@ -2973,7 +2973,7 @@ for (;;)
             }
           }
         break;
-        
+
         case OP_NOT_VSPACE:
         for (i = 1; i <= min; i++)
           {
@@ -2993,7 +2993,7 @@ for (;;)
             }
           }
         break;
-        
+
         case OP_VSPACE:
         for (i = 1; i <= min; i++)
           {
@@ -3009,7 +3009,7 @@ for (;;)
             case 0x85:      /* NEL */
             case 0x2028:    /* LINE SEPARATOR */
             case 0x2029:    /* PARAGRAPH SEPARATOR */
-            break; 
+            break;
             }
           }
         break;
@@ -3150,7 +3150,7 @@ for (;;)
             case 0x09:      /* HT */
             case 0x20:      /* SPACE */
             case 0xa0:      /* NBSP */
-            break; 
+            break;
             }
           }
         break;
@@ -3184,7 +3184,7 @@ for (;;)
             case 0x0c:      /* FF */
             case 0x0d:      /* CR */
             case 0x85:      /* NEL */
-            break; 
+            break;
             }
           }
         break;
@@ -3845,16 +3845,16 @@ for (;;)
           break;
 
           case OP_NOT_HSPACE:
-          case OP_HSPACE: 
+          case OP_HSPACE:
           for (i = min; i < max; i++)
             {
-            BOOL gotspace; 
+            BOOL gotspace;
             int len = 1;
             if (eptr >= md->end_subject) break;
             GETCHARLEN(c, eptr, len);
             switch(c)
-              {  
-              default: gotspace = FALSE; break; 
+              {
+              default: gotspace = FALSE; break;
               case 0x09:      /* HT */
               case 0x20:      /* SPACE */
               case 0xa0:      /* NBSP */
@@ -3875,7 +3875,7 @@ for (;;)
               case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
               case 0x3000:    /* IDEOGRAPHIC SPACE */
               gotspace = TRUE;
-              break;  
+              break;
               }
             if (gotspace == (ctype == OP_NOT_HSPACE)) break;
             eptr += len;
@@ -3883,16 +3883,16 @@ for (;;)
           break;
 
           case OP_NOT_VSPACE:
-          case OP_VSPACE: 
+          case OP_VSPACE:
           for (i = min; i < max; i++)
             {
-            BOOL gotspace; 
+            BOOL gotspace;
             int len = 1;
             if (eptr >= md->end_subject) break;
             GETCHARLEN(c, eptr, len);
             switch(c)
               {
-              default: gotspace = FALSE; break;   
+              default: gotspace = FALSE; break;
               case 0x0a:      /* LF */
               case 0x0b:      /* VT */
               case 0x0c:      /* FF */
@@ -3903,7 +3903,7 @@ for (;;)
               gotspace = TRUE;
               break;
               }
-            if (gotspace == (ctype == OP_NOT_VSPACE)) break;     
+            if (gotspace == (ctype == OP_NOT_VSPACE)) break;
             eptr += len;
             }
           break;
@@ -4040,7 +4040,7 @@ for (;;)
             if (eptr >= md->end_subject) break;
             c = *eptr;
             if (c == 0x09 || c == 0x20 || c == 0xa0) break;
-            eptr++; 
+            eptr++;
             }
           break;
 
@@ -4050,7 +4050,7 @@ for (;;)
             if (eptr >= md->end_subject) break;
             c = *eptr;
             if (c != 0x09 && c != 0x20 && c != 0xa0) break;
-            eptr++; 
+            eptr++;
             }
           break;
 
@@ -4061,7 +4061,7 @@ for (;;)
             c = *eptr;
             if (c == 0x0a || c == 0x0b || c == 0x0c || c == 0x0d || c == 0x85)
               break;
-            eptr++; 
+            eptr++;
             }
           break;
 

@@ -76,8 +76,8 @@ documentation. When built in this way, instead of using the stack, PCRE obtains
 and frees memory by calling the functions that are pointed to by the
 \fBpcre_stack_malloc\fP and \fBpcre_stack_free\fP variables. By default, these
 point to \fBmalloc()\fP and \fBfree()\fP, but you can replace the pointers to
-cause PCRE to use your own functions. Since the block sizes are always the 
-same, and are always freed in reverse order, it may be possible to implement 
+cause PCRE to use your own functions. Since the block sizes are always the
+same, and are always freed in reverse order, it may be possible to implement
 customized memory handlers that are more efficient than the standard functions.
 .P
 In Unix-like environments, there is not often a problem with the stack unless

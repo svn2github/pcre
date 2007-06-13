@@ -658,7 +658,7 @@ out of use. To avoid confusion, they have not been re-used.
   26  malformed number or name after (?(
   27  conditional group contains more than two branches
   28  assertion expected after (?(
-  29  (?R or (?digits must be followed by )
+  29  (?R or (?[+-]digits must be followed by )
   30  unknown POSIX class name
   31  POSIX collating elements are not supported
   32  this version of PCRE is not compiled with PCRE_UTF8 support
@@ -686,6 +686,9 @@ out of use. To avoid confusion, they have not been re-used.
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
   56  inconsistent NEWLINE options"
+  57  \g is not followed by a braced name or an optionally braced
+        non-zero number
+  58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
 </PRE>
 </P>
 <br><a name="SEC9" href="#TOC1">STUDYING A PATTERN</a><br>
@@ -892,7 +895,7 @@ fourth argument should point to an <b>unsigned char *</b> variable.
 </pre>
 Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The
 fourth argument should point to an <b>int</b> variable. The (?J) internal option
-setting changes the local PCRE_DUPNAMES value.
+setting changes the local PCRE_DUPNAMES option.
 <pre>
   PCRE_INFO_LASTLITERAL
 </pre>
@@ -1873,7 +1876,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 June 2007
+Last updated: 13 June 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

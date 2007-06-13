@@ -45,7 +45,7 @@ The following are generic comments about building the PCRE C library "by hand".
 
     An alternative approach is not to edit config.h, but to use -D on the
     compiler command line to make any changes that you need.
-    
+
     NOTE: There have been occasions when the way in which certain parameters in
     config.h are used has changed between releases. (In the configure/make
     world, this is handled automatically.) When upgrading to a new release, you
@@ -165,10 +165,10 @@ On both MinGW and Cygwin, PCRE should build correctly using:
   ./configure && make && make install
 
 This should create two libraries called libpcre and libpcreposix, and, if you
-have enabled building the C++ wrapper, a third one called libpcrecpp. These are 
-independent libraries: when you like with libpcreposix or libpcrecpp you must 
-also link with libpcre, which contains the basic functions. (Some earlier 
-releases of PCRE included the basic libpcre functions in libpcreposix. This no 
+have enabled building the C++ wrapper, a third one called libpcrecpp. These are
+independent libraries: when you like with libpcreposix or libpcrecpp you must
+also link with libpcre, which contains the basic functions. (Some earlier
+releases of PCRE included the basic libpcre functions in libpcreposix. This no
 longer happens.)
 
 If you want to statically link your program against a non-dll .a file, you must

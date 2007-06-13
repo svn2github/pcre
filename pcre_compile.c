@@ -2026,7 +2026,7 @@ switch(op_code)
 
     case ESC_W:
     return item <= 127 && (cd->ctypes[item] & ctype_word) != 0;
-    
+
     case ESC_h:
     case ESC_H:
     switch(item)
@@ -2053,8 +2053,8 @@ switch(op_code)
       return -next != ESC_h;
       default:
       return -next == ESC_h;
-      }    
-      
+      }
+
     case ESC_v:
     case ESC_V:
     switch(item)
@@ -2069,7 +2069,7 @@ switch(op_code)
       return -next != ESC_v;
       default:
       return -next == ESC_v;
-      }    
+      }
 
     default:
     return FALSE;
@@ -2093,20 +2093,20 @@ switch(op_code)
 
   case OP_NOT_HSPACE:
   return next == -ESC_h;
-  
+
   /* Can't have \S in here because VT matches \S (Perl anomaly) */
-  case OP_VSPACE:  
+  case OP_VSPACE:
   return next == -ESC_V || next == -ESC_d || next == -ESC_w;
 
   case OP_NOT_VSPACE:
-  return next == -ESC_v;  
+  return next == -ESC_v;
 
   case OP_WORDCHAR:
   return next == -ESC_W || next == -ESC_s || next == -ESC_h || next == -ESC_v;
 
   case OP_NOT_WORDCHAR:
   return next == -ESC_w || next == -ESC_d;
-  
+
   default:
   return FALSE;
   }

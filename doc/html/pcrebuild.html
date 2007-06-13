@@ -180,13 +180,18 @@ build a version of PCRE that works this way, add
 </pre>
 to the <b>configure</b> command. With this configuration, PCRE will use the
 <b>pcre_stack_malloc</b> and <b>pcre_stack_free</b> variables to call memory
-management functions. Separate functions are provided because the usage is very
-predictable: the block sizes requested are always the same, and the blocks are
-always freed in reverse order. A calling program might be able to implement
-optimized functions that perform better than the standard <b>malloc()</b> and
-<b>free()</b> functions. PCRE runs noticeably more slowly when built in this
-way. This option affects only the <b>pcre_exec()</b> function; it is not
-relevant for the the <b>pcre_dfa_exec()</b> function.
+management functions. By default these point to <b>malloc()</b> and
+<b>free()</b>, but you can replace the pointers so that your own functions are
+used.
+</P>
+<P>
+Separate functions are provided rather than using <b>pcre_malloc</b> and
+<b>pcre_free</b> because the usage is very predictable: the block sizes
+requested are always the same, and the blocks are always freed in reverse
+order. A calling program might be able to implement optimized functions that
+perform better than <b>malloc()</b> and <b>free()</b>. PCRE runs noticeably more
+slowly when built in this way. This option affects only the <b>pcre_exec()</b>
+function; it is not relevant for the the <b>pcre_dfa_exec()</b> function.
 </P>
 <br><a name="SEC10" href="#TOC1">LIMITING PCRE RESOURCE USAGE</a><br>
 <P>
@@ -260,7 +265,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 April 2007
+Last updated: 05 June 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

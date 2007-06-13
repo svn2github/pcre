@@ -260,14 +260,14 @@ parenthesized subpatterns.
 Another use of backslash is for specifying generic character types. The
 following are always recognized:
 .sp
-  \ed     any decimal digit 
+  \ed     any decimal digit
   \eD     any character that is not a decimal digit
   \eh     any horizontal whitespace character
-  \eH     any character that is not a horizontal whitespace character  
+  \eH     any character that is not a horizontal whitespace character
   \es     any whitespace character
   \eS     any character that is not a whitespace character
   \ev     any vertical whitespace character
-  \eV     any character that is not a vertical whitespace character  
+  \eV     any character that is not a vertical whitespace character
   \ew     any "word" character
   \eW     any "non-word" character
 .sp
@@ -287,11 +287,11 @@ does.
 .P
 In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
 \ew, and always match \eD, \eS, and \eW. This is true even when Unicode
-character property support is available. These sequences retain their original 
-meanings from before UTF-8 support was available, mainly for efficiency 
+character property support is available. These sequences retain their original
+meanings from before UTF-8 support was available, mainly for efficiency
 reasons.
 .P
-The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the 
+The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the
 other sequences, these do match certain high-valued codepoints in UTF-8 mode.
 The horizontal space characters are:
 .sp
@@ -1001,28 +1001,28 @@ the above patterns match "SUNDAY" as well as "Saturday".
 .SH "DUPLICATE SUBPATTERN NUMBERS"
 .rs
 .sp
-Perl 5.10 introduced a feature whereby each alternative in a subpattern uses 
-the same numbers for its capturing parentheses. Such a subpattern starts with 
-(?| and is itself a non-capturing subpattern. For example, consider this 
+Perl 5.10 introduced a feature whereby each alternative in a subpattern uses
+the same numbers for its capturing parentheses. Such a subpattern starts with
+(?| and is itself a non-capturing subpattern. For example, consider this
 pattern:
 .sp
   (?|(Sat)ur|(Sun))day
-.sp   
-Because the two alternatives are inside a (?| group, both sets of capturing 
-parentheses are numbered one. Thus, when the pattern matches, you can look 
-at captured substring number one, whichever alternative matched. This construct 
-is useful when you want to capture part, but not all, of one of a number of 
-alternatives. Inside a (?| group, parentheses are numbered as usual, but the 
+.sp
+Because the two alternatives are inside a (?| group, both sets of capturing
+parentheses are numbered one. Thus, when the pattern matches, you can look
+at captured substring number one, whichever alternative matched. This construct
+is useful when you want to capture part, but not all, of one of a number of
+alternatives. Inside a (?| group, parentheses are numbered as usual, but the
 number is reset at the start of each branch. The numbers of any capturing
-buffers that follow the subpattern start after the highest number used in any 
-branch. The following example is taken from the Perl documentation. 
+buffers that follow the subpattern start after the highest number used in any
+branch. The following example is taken from the Perl documentation.
 The numbers underneath show in which buffer the captured content will be
 stored.
 .sp
   # before  ---------------branch-reset----------- after
   / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
   # 1            2         2  3        2     3     4
-.sp   
+.sp
 A backreference or a recursive call to a numbered subpattern always refers to
 the first one in the pattern with the given number.
 .P
@@ -1079,7 +1079,7 @@ abbreviation. This pattern (ignoring the line breaks) does the job:
   (?<DN>Sat)(?:urday)?
 .sp
 There are five capturing substrings, but only one is ever set after a match.
-(An alternative way of solving this problem is to use a "branch reset" 
+(An alternative way of solving this problem is to use a "branch reset"
 subpattern, as described in the previous section.)
 .P
 The convenience function for extracting the data by name returns the substring

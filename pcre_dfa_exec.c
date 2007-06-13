@@ -63,7 +63,7 @@ applications. */
 
 /* These are offsets that are used to turn the OP_TYPESTAR and friends opcodes
 into others, under special conditions. A gap of 20 between the blocks should be
-enough. The resulting opcodes don't have to be less than 256 because they are 
+enough. The resulting opcodes don't have to be less than 256 because they are
 never stored, so we push them well clear of the normal opcodes. */
 
 #define OP_PROP_EXTRA       300
@@ -585,9 +585,9 @@ for (;;)
           case OP_ANYNL: codevalue += OP_ANYNL_EXTRA; break;
           case OP_EXTUNI: codevalue += OP_EXTUNI_EXTRA; break;
           case OP_NOT_HSPACE:
-          case OP_HSPACE: codevalue += OP_HSPACE_EXTRA; break; 
+          case OP_HSPACE: codevalue += OP_HSPACE_EXTRA; break;
           case OP_NOT_VSPACE:
-          case OP_VSPACE: codevalue += OP_VSPACE_EXTRA; break; 
+          case OP_VSPACE: codevalue += OP_VSPACE_EXTRA; break;
           default: break;
           }
         }
@@ -1105,7 +1105,7 @@ for (;;)
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
       if (clen > 0)
         {
-        BOOL OK; 
+        BOOL OK;
         switch (c)
           {
           case 0x000a:
@@ -1116,15 +1116,15 @@ for (;;)
           case 0x2028:
           case 0x2029:
           OK = TRUE;
-          break; 
+          break;
 
           default:
           OK = FALSE;
-          break;  
+          break;
           }
 
         if (OK == (d == OP_VSPACE))
-          { 
+          {
           if (count > 0 && codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSPLUS)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1144,7 +1144,7 @@ for (;;)
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
       if (clen > 0)
         {
-        BOOL OK; 
+        BOOL OK;
         switch (c)
           {
           case 0x09:      /* HT */
@@ -1168,14 +1168,14 @@ for (;;)
           case 0x3000:    /* IDEOGRAPHIC SPACE */
           OK = TRUE;
           break;
-          
+
           default:
           OK = FALSE;
           break;
           }
-           
+
         if (OK == (d == OP_HSPACE))
-          {          
+          {
           if (count > 0 && codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSPLUS)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1346,7 +1346,7 @@ for (;;)
       ADD_ACTIVE(state_offset + 2, 0);
       if (clen > 0)
         {
-        BOOL OK; 
+        BOOL OK;
         switch (c)
           {
           case 0x000a:
@@ -1358,13 +1358,13 @@ for (;;)
           case 0x2029:
           OK = TRUE;
           break;
-          
+
           default:
           OK = FALSE;
           break;
           }
         if (OK == (d == OP_VSPACE))
-          {          
+          {
           if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSSTAR ||
               codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSQUERY)
             {
@@ -1392,7 +1392,7 @@ for (;;)
       ADD_ACTIVE(state_offset + 2, 0);
       if (clen > 0)
         {
-        BOOL OK; 
+        BOOL OK;
         switch (c)
           {
           case 0x09:      /* HT */
@@ -1416,14 +1416,14 @@ for (;;)
           case 0x3000:    /* IDEOGRAPHIC SPACE */
           OK = TRUE;
           break;
-           
+
           default:
           OK = FALSE;
           break;
           }
-           
+
         if (OK == (d == OP_HSPACE))
-          {          
+          {
           if (codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSSTAR ||
               codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSQUERY)
             {
@@ -1574,7 +1574,7 @@ for (;;)
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        BOOL OK; 
+        BOOL OK;
         switch (c)
           {
           case 0x000a:
@@ -1586,13 +1586,13 @@ for (;;)
           case 0x2029:
           OK = TRUE;
           break;
-          
+
           default:
           OK = FALSE;
           }
-           
+
         if (OK == (d == OP_VSPACE))
-          {         
+          {
           if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSUPTO)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1616,7 +1616,7 @@ for (;;)
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        BOOL OK; 
+        BOOL OK;
         switch (c)
           {
           case 0x09:      /* HT */
@@ -1640,14 +1640,14 @@ for (;;)
           case 0x3000:    /* IDEOGRAPHIC SPACE */
           OK = TRUE;
           break;
-           
+
           default:
           OK = FALSE;
           break;
           }
-           
+
         if (OK == (d == OP_HSPACE))
-          {          
+          {
           if (codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSUPTO)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1771,8 +1771,8 @@ for (;;)
         case 0x2028:
         case 0x2029:
         break;
-         
-        default:  
+
+        default:
         ADD_NEW(state_offset + 1, 0);
         break;
         }
@@ -1791,7 +1791,7 @@ for (;;)
         case 0x2029:
         ADD_NEW(state_offset + 1, 0);
         break;
-        
+
         default: break;
         }
       break;
@@ -1820,8 +1820,8 @@ for (;;)
         case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
         case 0x3000:    /* IDEOGRAPHIC SPACE */
         break;
-         
-        default:  
+
+        default:
         ADD_NEW(state_offset + 1, 0);
         break;
         }

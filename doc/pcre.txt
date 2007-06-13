@@ -197,7 +197,11 @@ UTF-8 AND UNICODE PROPERTY SUPPORT
        8. Similarly, characters that match the POSIX named  character  classes
        are all low-valued characters.
 
-       9.  Case-insensitive  matching  applies only to characters whose values
+       9.  However,  the Perl 5.10 horizontal and vertical whitespace matching
+       escapes (\h, \H, \v, and \V) do match all the appropriate Unicode char-
+       acters.
+
+       10.  Case-insensitive  matching applies only to characters whose values
        are less than 128, unless PCRE is built with Unicode property  support.
        Even  when  Unicode  property support is available, PCRE still uses its
        own character tables when checking the case of  low-valued  characters,
@@ -222,7 +226,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 18 April 2007
+       Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -390,13 +394,17 @@ AVOIDING EXCESSIVE STACK USAGE
 
        to  the  configure  command. With this configuration, PCRE will use the
        pcre_stack_malloc and pcre_stack_free variables to call memory  manage-
-       ment  functions.  Separate  functions are provided because the usage is
-       very predictable: the block sizes requested are always  the  same,  and
-       the  blocks  are always freed in reverse order. A calling program might
-       be able to implement optimized functions that perform better  than  the
-       standard  malloc()  and  free()  functions.  PCRE  runs noticeably more
-       slowly when built in this way. This option affects only the pcre_exec()
-       function; it is not relevant for the the pcre_dfa_exec() function.
+       ment  functions. By default these point to malloc() and free(), but you
+       can replace the pointers so that your own functions are used.
+
+       Separate functions are  provided  rather  than  using  pcre_malloc  and
+       pcre_free  because  the  usage  is  very  predictable:  the block sizes
+       requested are always the same, and  the  blocks  are  always  freed  in
+       reverse  order.  A calling program might be able to implement optimized
+       functions that perform better  than  malloc()  and  free().  PCRE  runs
+       noticeably more slowly when built in this way. This option affects only
+       the  pcre_exec()  function;  it   is   not   relevant   for   the   the
+       pcre_dfa_exec() function.
 
 
 LIMITING PCRE RESOURCE USAGE
@@ -474,7 +482,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 April 2007
+       Last updated: 05 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -1259,7 +1267,7 @@ COMPILATION ERROR CODES
          26  malformed number or name after (?(
          27  conditional group contains more than two branches
          28  assertion expected after (?(
-         29  (?R or (?digits must be followed by )
+         29  (?R or (?[+-]digits must be followed by )
          30  unknown POSIX class name
          31  POSIX collating elements are not supported
          32  this version of PCRE is not compiled with PCRE_UTF8 support
@@ -1288,6 +1296,9 @@ COMPILATION ERROR CODES
          54  DEFINE group contains more than one branch
          55  repeating a DEFINE group is not allowed
          56  inconsistent NEWLINE options"
+         57  \g is not followed by a braced name or an optionally braced
+               non-zero number
+         58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
 
 
 STUDYING A PATTERN
@@ -1480,7 +1491,7 @@ INFORMATION ABOUT A PATTERN
 
        Return  1  if the (?J) option setting is used in the pattern, otherwise
        0. The fourth argument should point to an int variable. The (?J) inter-
-       nal option setting changes the local PCRE_DUPNAMES value.
+       nal option setting changes the local PCRE_DUPNAMES option.
 
          PCRE_INFO_LASTLITERAL
 
@@ -2406,7 +2417,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 June 2007
+       Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -2593,8 +2604,8 @@ DIFFERENCES BETWEEN PCRE AND PERL
 
        This  document describes the differences in the ways that PCRE and Perl
        handle regular expressions. The differences described here  are  mainly
-       with  respect  to  Perl 5.8, though PCRE version 7.0 contains some fea-
-       tures that are expected to be in the forthcoming Perl 5.10.
+       with  respect  to  Perl 5.8, though PCRE versions 7.0 and later contain
+       some features that are expected to be in the forthcoming Perl 5.10.
 
        1. PCRE has only a subset of Perl's UTF-8 and Unicode support.  Details
        of  what  it does have are given in the section on UTF-8 support in the
@@ -2672,8 +2683,8 @@ DIFFERENCES BETWEEN PCRE AND PERL
        meta-character matches only at the very end of the string.
 
        (c) If PCRE_EXTRA is set, a backslash followed by a letter with no spe-
-       cial  meaning  is  faulted.  Otherwise,  like  Perl,  the  backslash is
-       ignored. (Perl can be made to issue a warning.)
+       cial meaning is faulted. Otherwise, like Perl, the backslash is quietly
+       ignored.  (Perl can be made to issue a warning.)
 
        (d) If PCRE_UNGREEDY is set, the greediness of the  repetition  quanti-
        fiers is inverted, that is, by default they are not greedy, but if fol-
@@ -2705,7 +2716,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 March 2007
+       Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -2938,8 +2949,12 @@ BACKSLASH
 
          \d     any decimal digit
          \D     any character that is not a decimal digit
+         \h     any horizontal whitespace character
+         \H     any character that is not a horizontal whitespace character
          \s     any whitespace character
          \S     any character that is not a whitespace character
+         \v     any vertical whitespace character
+         \V     any character that is not a vertical whitespace character
          \w     any "word" character
          \W     any "non-word" character
 
@@ -2954,9 +2969,49 @@ BACKSLASH
 
        For compatibility with Perl, \s does not match the VT  character  (code
        11).   This makes it different from the the POSIX "space" class. The \s
-       characters are HT (9), LF (10), FF (12), CR (13), and space  (32).  (If
+       characters are HT (9), LF (10), FF (12), CR (13), and  space  (32).  If
        "use locale;" is included in a Perl script, \s may match the VT charac-
-       ter. In PCRE, it never does.)
+       ter. In PCRE, it never does.
+
+       In UTF-8 mode, characters with values greater than 128 never match  \d,
+       \s, or \w, and always match \D, \S, and \W. This is true even when Uni-
+       code character property support is available.  These  sequences  retain
+       their original meanings from before UTF-8 support was available, mainly
+       for efficiency reasons.
+
+       The sequences \h, \H, \v, and \V are Perl 5.10 features. In contrast to
+       the  other  sequences, these do match certain high-valued codepoints in
+       UTF-8 mode.  The horizontal space characters are:
+
+         U+0009     Horizontal tab
+         U+0020     Space
+         U+00A0     Non-break space
+         U+1680     Ogham space mark
+         U+180E     Mongolian vowel separator
+         U+2000     En quad
+         U+2001     Em quad
+         U+2002     En space
+         U+2003     Em space
+         U+2004     Three-per-em space
+         U+2005     Four-per-em space
+         U+2006     Six-per-em space
+         U+2007     Figure space
+         U+2008     Punctuation space
+         U+2009     Thin space
+         U+200A     Hair space
+         U+202F     Narrow no-break space
+         U+205F     Medium mathematical space
+         U+3000     Ideographic space
+
+       The vertical space characters are:
+
+         U+000A     Linefeed
+         U+000B     Vertical tab
+         U+000C     Formfeed
+         U+000D     Carriage return
+         U+0085     Next line
+         U+2028     Line separator
+         U+2029     Paragraph separator
 
        A "word" character is an underscore or any character less than 256 that
        is  a  letter  or  digit.  The definition of letters and digits is con-
@@ -2964,17 +3019,13 @@ BACKSLASH
        specific  matching is taking place (see "Locale support" in the pcreapi
        page). For example, in a French locale such  as  "fr_FR"  in  Unix-like
        systems,  or "french" in Windows, some character codes greater than 128
-       are used for accented letters, and these are matched by \w.
-
-       In UTF-8 mode, characters with values greater than 128 never match  \d,
-       \s, or \w, and always match \D, \S, and \W. This is true even when Uni-
-       code character property support is available. The use of  locales  with
-       Unicode is discouraged.
+       are used for accented letters, and these are matched by \w. The use  of
+       locales with Unicode is discouraged.
 
    Newline sequences
 
        Outside  a  character class, the escape sequence \R matches any Unicode
-       newline sequence. This is an extension to Perl. In non-UTF-8 mode \R is
+       newline sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \R  is
        equivalent to the following:
 
          (?>\r\n|\n|\x0b|\f|\r|\x85)
@@ -3537,6 +3588,37 @@ SUBPATTERNS
        "Saturday".
 
 
+DUPLICATE SUBPATTERN NUMBERS
+
+       Perl 5.10 introduced a feature whereby each alternative in a subpattern
+       uses the same numbers for its capturing parentheses. Such a  subpattern
+       starts  with (?| and is itself a non-capturing subpattern. For example,
+       consider this pattern:
+
+         (?|(Sat)ur|(Sun))day
+
+       Because the two alternatives are inside a (?| group, both sets of  cap-
+       turing  parentheses  are  numbered one. Thus, when the pattern matches,
+       you can look at captured substring number  one,  whichever  alternative
+       matched.  This  construct  is useful when you want to capture part, but
+       not all, of one of a number of alternatives. Inside a (?| group, paren-
+       theses  are  numbered as usual, but the number is reset at the start of
+       each branch. The numbers of any capturing buffers that follow the  sub-
+       pattern  start after the highest number used in any branch. The follow-
+       ing example is taken from the Perl documentation.  The  numbers  under-
+       neath show in which buffer the captured content will be stored.
+
+         # before  ---------------branch-reset----------- after
+         / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
+         # 1            2         2  3        2     3     4
+
+       A  backreference  or  a  recursive call to a numbered subpattern always
+       refers to the first one in the pattern with the given number.
+
+       An alternative approach to using this "branch reset" feature is to  use
+       duplicate named subpatterns, as described in the next section.
+
+
 NAMED SUBPATTERNS
 
        Identifying  capturing  parentheses  by number is simple, but it can be
@@ -3576,14 +3658,16 @@ NAMED SUBPATTERNS
          (?<DN>Sat)(?:urday)?
 
        There  are  five capturing substrings, but only one is ever set after a
-       match.  The convenience  function  for  extracting  the  data  by  name
-       returns  the  substring  for  the first (and in this example, the only)
-       subpattern of that name that matched.  This  saves  searching  to  find
-       which  numbered  subpattern  it  was. If you make a reference to a non-
-       unique named subpattern from elsewhere in the  pattern,  the  one  that
-       corresponds  to  the  lowest number is used. For further details of the
-       interfaces for handling named subpatterns, see the  pcreapi  documenta-
-       tion.
+       match.  (An alternative way of solving this problem is to use a "branch
+       reset" subpattern, as described in the previous section.)
+
+       The  convenience  function  for extracting the data by name returns the
+       substring for the first (and in this example, the only)  subpattern  of
+       that  name  that  matched.  This saves searching to find which numbered
+       subpattern it was. If you make a reference to a non-unique  named  sub-
+       pattern  from elsewhere in the pattern, the one that corresponds to the
+       lowest number is used. For further details of the interfaces  for  han-
+       dling named subpatterns, see the pcreapi documentation.
 
 
 REPETITION
@@ -4455,7 +4539,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 May 2007
+       Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -4786,19 +4870,9 @@ RE-USING A PRECOMPILED PATTERN
 
 COMPATIBILITY WITH DIFFERENT PCRE RELEASES
 
-       The layout of the control block that is at the start of the  data  that
-       makes  up  a  compiled pattern was changed for release 5.0. If you have
-       any saved patterns that were compiled with  previous  releases  (not  a
-       facility  that  was  previously advertised), you will have to recompile
-       them for release 5.0 and above.
-
-       If you have any saved patterns in UTF-8 mode that use  \p  or  \P  that
-       were  compiled  with any release up to and including 6.4, you will have
-       to recompile them for release 6.5 and above.
-
-       All saved patterns from earlier releases must be recompiled for release
-       7.0  or  higher,  because  there was an internal reorganization at that
-       release.
+       In general, it is safest to  recompile  all  saved  patterns  when  you
+       update  to  a new PCRE release, though not all updates actually require
+       this. Recompiling is definitely needed for release 7.2.
 
 
 AUTHOR
@@ -4810,7 +4884,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 24 April 2007
+       Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -5545,28 +5619,29 @@ PCRE SAMPLE PROGRAM
        bility  of  matching an empty string. Comments in the code explain what
        is going on.
 
-       If PCRE is installed in the standard include  and  library  directories
-       for  your  system, you should be able to compile the demonstration pro-
-       gram using this command:
+       The demonstration program is automatically built if you use  "./config-
+       ure;make"  to  build PCRE. Otherwise, if PCRE is installed in the stan-
+       dard include and library directories for your  system,  you  should  be
+       able to compile the demonstration program using this command:
 
          gcc -o pcredemo pcredemo.c -lpcre
 
-       If PCRE is installed elsewhere, you may need to add additional  options
-       to  the  command line. For example, on a Unix-like system that has PCRE
-       installed in /usr/local, you  can  compile  the  demonstration  program
+       If  PCRE is installed elsewhere, you may need to add additional options
+       to the command line. For example, on a Unix-like system that  has  PCRE
+       installed  in  /usr/local,  you  can  compile the demonstration program
        using a command like this:
 
          gcc -o pcredemo -I/usr/local/include pcredemo.c \
              -L/usr/local/lib -lpcre
 
-       Once  you  have  compiled the demonstration program, you can run simple
+       Once you have compiled the demonstration program, you  can  run  simple
        tests like this:
 
          ./pcredemo 'cat|dog' 'the cat sat on the mat'
          ./pcredemo -g 'cat|dog' 'the dog sat on the cat'
 
-       Note that there is a  much  more  comprehensive  test  program,  called
-       pcretest,  which  supports  many  more  facilities  for testing regular
+       Note  that  there  is  a  much  more comprehensive test program, called
+       pcretest, which supports  many  more  facilities  for  testing  regular
        expressions and the PCRE library. The pcredemo program is provided as a
        simple coding example.
 
@@ -5574,10 +5649,10 @@ PCRE SAMPLE PROGRAM
        the standard library directory, you may get an error like this when you
        try to run pcredemo:
 
-         ld.so.1:  a.out:  fatal:  libpcre.so.0:  open failed: No such file or
+         ld.so.1: a.out: fatal: libpcre.so.0: open failed:  No  such  file  or
        directory
 
-       This is caused by the way shared library support works  on  those  sys-
+       This  is  caused  by the way shared library support works on those sys-
        tems. You need to add
 
          -R/usr/local/lib
@@ -5594,7 +5669,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 March 2007
+       Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 PCRESTACK(3)                                                      PCRESTACK(3)
@@ -5664,17 +5739,24 @@ PCRE DISCUSSION OF STACK USAGE
        In environments where stack memory is constrained, you  might  want  to
        compile  PCRE to use heap memory instead of stack for remembering back-
        up points. This makes it run a lot more slowly, however. Details of how
-       to do this are given in the pcrebuild documentation.
+       to do this are given in the pcrebuild documentation. When built in this
+       way, instead of using the stack, PCRE obtains and frees memory by call-
+       ing  the  functions  that  are  pointed to by the pcre_stack_malloc and
+       pcre_stack_free variables. By default,  these  point  to  malloc()  and
+       free(),  but you can replace the pointers to cause PCRE to use your own
+       functions. Since the block sizes are always the same,  and  are  always
+       freed in reverse order, it may be possible to implement customized mem-
+       ory handlers that are more efficient than the standard functions.
 
-       In  Unix-like environments, there is not often a problem with the stack
-       unless very long strings are involved,  though  the  default  limit  on
-       stack  size  varies  from system to system. Values from 8Mb to 64Mb are
+       In Unix-like environments, there is not often a problem with the  stack
+       unless  very  long  strings  are  involved, though the default limit on
+       stack size varies from system to system. Values from 8Mb  to  64Mb  are
        common. You can find your default limit by running the command:
 
          ulimit -s
 
-       Unfortunately, the effect of running out of  stack  is  often  SIGSEGV,
-       though  sometimes  a more explicit error message is given. You can nor-
+       Unfortunately,  the  effect  of  running out of stack is often SIGSEGV,
+       though sometimes a more explicit error message is given. You  can  nor-
        mally increase the limit on stack size by code such as this:
 
          struct rlimit rlim;
@@ -5682,21 +5764,21 @@ PCRE DISCUSSION OF STACK USAGE
          rlim.rlim_cur = 100*1024*1024;
          setrlimit(RLIMIT_STACK, &rlim);
 
-       This reads the current limits (soft and hard) using  getrlimit(),  then
-       attempts  to  increase  the  soft limit to 100Mb using setrlimit(). You
+       This  reads  the current limits (soft and hard) using getrlimit(), then
+       attempts to increase the soft limit to  100Mb  using  setrlimit().  You
        must do this before calling pcre_exec().
 
-       PCRE has an internal counter that can be used to  limit  the  depth  of
-       recursion,  and  thus cause pcre_exec() to give an error code before it
-       runs out of stack. By default, the limit is very  large,  and  unlikely
-       ever  to operate. It can be changed when PCRE is built, and it can also
+       PCRE  has  an  internal  counter that can be used to limit the depth of
+       recursion, and thus cause pcre_exec() to give an error code  before  it
+       runs  out  of  stack. By default, the limit is very large, and unlikely
+       ever to operate. It can be changed when PCRE is built, and it can  also
        be set when pcre_exec() is called. For details of these interfaces, see
        the pcrebuild and pcreapi documentation.
 
        As a very rough rule of thumb, you should reckon on about 500 bytes per
-       recursion. Thus, if you want to limit your  stack  usage  to  8Mb,  you
-       should  set  the  limit at 16000 recursions. A 64Mb stack, on the other
-       hand, can support around 128000 recursions. The pcretest  test  program
+       recursion.  Thus,  if  you  want  to limit your stack usage to 8Mb, you
+       should set the limit at 16000 recursions. A 64Mb stack,  on  the  other
+       hand,  can  support around 128000 recursions. The pcretest test program
        has a command line option (-S) that can be used to increase the size of
        its stack.
 
@@ -5710,7 +5792,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 March 2007
+       Last updated: 05 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
