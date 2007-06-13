@@ -260,10 +260,14 @@ parenthesized subpatterns.
 Another use of backslash is for specifying generic character types. The
 following are always recognized:
 .sp
-  \ed     any decimal digit
+  \ed     any decimal digit 
   \eD     any character that is not a decimal digit
+  \eh     any horizontal whitespace character
+  \eH     any character that is not a horizontal whitespace character  
   \es     any whitespace character
   \eS     any character that is not a whitespace character
+  \ev     any vertical whitespace character
+  \eV     any character that is not a vertical whitespace character  
   \ew     any "word" character
   \eW     any "non-word" character
 .sp
@@ -277,9 +281,49 @@ there is no character to match.
 .P
 For compatibility with Perl, \es does not match the VT character (code 11).
 This makes it different from the the POSIX "space" class. The \es characters
-are HT (9), LF (10), FF (12), CR (13), and space (32). (If "use locale;" is
+are HT (9), LF (10), FF (12), CR (13), and space (32). If "use locale;" is
 included in a Perl script, \es may match the VT character. In PCRE, it never
-does.)
+does.
+.P
+In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
+\ew, and always match \eD, \eS, and \eW. This is true even when Unicode
+character property support is available. These sequences retain their original 
+meanings from before UTF-8 support was available, mainly for efficiency 
+reasons.
+.P
+The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the 
+other sequences, these do match certain high-valued codepoints in UTF-8 mode.
+The horizontal space characters are:
+.sp
+  U+0009     Horizontal tab
+  U+0020     Space
+  U+00A0     Non-break space
+  U+1680     Ogham space mark
+  U+180E     Mongolian vowel separator
+  U+2000     En quad
+  U+2001     Em quad
+  U+2002     En space
+  U+2003     Em space
+  U+2004     Three-per-em space
+  U+2005     Four-per-em space
+  U+2006     Six-per-em space
+  U+2007     Figure space
+  U+2008     Punctuation space
+  U+2009     Thin space
+  U+200A     Hair space
+  U+202F     Narrow no-break space
+  U+205F     Medium mathematical space
+  U+3000     Ideographic space
+.sp
+The vertical space characters are:
+.sp
+  U+000A     Linefeed
+  U+000B     Vertical tab
+  U+000C     Formfeed
+  U+000D     Carriage return
+  U+0085     Next line
+  U+2028     Line separator
+  U+2029     Paragraph separator
 .P
 A "word" character is an underscore or any character less than 256 that is a
 letter or digit. The definition of letters and digits is controlled by PCRE's
@@ -295,19 +339,15 @@ in the
 .\"
 page). For example, in a French locale such as "fr_FR" in Unix-like systems,
 or "french" in Windows, some character codes greater than 128 are used for
-accented letters, and these are matched by \ew.
-.P
-In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
-\ew, and always match \eD, \eS, and \eW. This is true even when Unicode
-character property support is available. The use of locales with Unicode is
-discouraged.
+accented letters, and these are matched by \ew. The use of locales with Unicode
+is discouraged.
 .
 .
 .SS "Newline sequences"
 .rs
 .sp
 Outside a character class, the escape sequence \eR matches any Unicode newline
-sequence. This is an extension to Perl. In non-UTF-8 mode \eR is equivalent to
+sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \eR is equivalent to
 the following:
 .sp
   (?>\er\en|\en|\ex0b|\ef|\er|\ex85)
@@ -1933,6 +1973,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 June 2007
+Last updated: 13 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

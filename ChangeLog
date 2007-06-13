@@ -43,6 +43,8 @@ Version 7.2 05-June-07
         
     (g) (?| introduces a group in which the numbering of parentheses in each
         alternative starts with the same number.  
+        
+    (h) \h, \H, \v, and \V match horizontal and vertical whitespace. 
 
  7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and
     PCRE_INFO_JCHANGED.

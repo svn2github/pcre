@@ -58,6 +58,11 @@ used by pcretest. DEBUG is not defined when building a production library. */
 #endif
 
 
+/* Macro for setting individual bits in class bitmaps. */
+
+#define SETBIT(a,b) a[b/8] |= (1 << (b%8))
+
+
 /*************************************************
 *      Code parameters and static tables         *
 *************************************************/
@@ -87,12 +92,12 @@ static const short int escapes[] = {
      0,      0,      0,      0,      0,      0,      0,      0,   /* 0 - 7 */
      0,      0,    ':',    ';',    '<',    '=',    '>',    '?',   /* 8 - ? */
    '@', -ESC_A, -ESC_B, -ESC_C, -ESC_D, -ESC_E,      0, -ESC_G,   /* @ - G */
-     0,      0,      0, -ESC_K,      0,      0,      0,      0,   /* H - O */
--ESC_P, -ESC_Q, -ESC_R, -ESC_S,      0,      0,      0, -ESC_W,   /* P - W */
+-ESC_H,      0,      0, -ESC_K,      0,      0,      0,      0,   /* H - O */
+-ESC_P, -ESC_Q, -ESC_R, -ESC_S,      0,      0, -ESC_V, -ESC_W,   /* P - W */
 -ESC_X,      0, -ESC_Z,    '[',   '\\',    ']',    '^',    '_',   /* X - _ */
    '`',      7, -ESC_b,      0, -ESC_d,  ESC_e,  ESC_f,      0,   /* ` - g */
-     0,      0,      0, -ESC_k,      0,      0,  ESC_n,      0,   /* h - o */
--ESC_p,      0,  ESC_r, -ESC_s,  ESC_tee,    0,      0, -ESC_w,   /* p - w */
+-ESC_h,      0,      0, -ESC_k,      0,      0,  ESC_n,      0,   /* h - o */
+-ESC_p,      0,  ESC_r, -ESC_s,  ESC_tee,    0, -ESC_v, -ESC_w,   /* p - w */
      0,      0, -ESC_z                                            /* x - z */
 };
 
@@ -106,18 +111,18 @@ static const short int escapes[] = {
 /*  70 */     0,     0,      0,       0,      0,     0,      0,      0,
 /*  78 */     0,   '`',    ':',     '#',    '@',  '\'',    '=',    '"',
 /*  80 */     0,     7, -ESC_b,       0, -ESC_d, ESC_e,  ESC_f,      0,
-/*  88 */     0,     0,      0,     '{',      0,     0,      0,      0,
+/*  88 */-ESC_h,     0,      0,     '{',      0,     0,      0,      0,
 /*  90 */     0,     0, -ESC_k,     'l',      0, ESC_n,      0, -ESC_p,
 /*  98 */     0, ESC_r,      0,     '}',      0,     0,      0,      0,
-/*  A0 */     0,   '~', -ESC_s, ESC_tee,      0,     0, -ESC_w,      0,
+/*  A0 */     0,   '~', -ESC_s, ESC_tee,      0,-ESC_v, -ESC_w,      0,
 /*  A8 */     0,-ESC_z,      0,       0,      0,   '[',      0,      0,
 /*  B0 */     0,     0,      0,       0,      0,     0,      0,      0,
 /*  B8 */     0,     0,      0,       0,      0,   ']',    '=',    '-',
 /*  C0 */   '{',-ESC_A, -ESC_B,  -ESC_C, -ESC_D,-ESC_E,      0, -ESC_G,
-/*  C8 */     0,     0,      0,       0,      0,     0,      0,      0,
+/*  C8 */-ESC_H,     0,      0,       0,      0,     0,      0,      0,
 /*  D0 */   '}',     0,      0,       0,      0,     0,      0, -ESC_P,
 /*  D8 */-ESC_Q,-ESC_R,      0,       0,      0,     0,      0,      0,
-/*  E0 */  '\\',     0, -ESC_S,       0,      0,     0, -ESC_W, -ESC_X,
+/*  E0 */  '\\',     0, -ESC_S,       0,      0,-ESC_V, -ESC_W, -ESC_X,
 /*  E8 */     0,-ESC_Z,      0,       0,      0,     0,      0,      0,
 /*  F0 */     0,     0,      0,       0,      0,     0,      0,      0,
 /*  F8 */     0,     0,      0,       0,      0,     0,      0,      0
@@ -2530,7 +2535,7 @@ for (;; ptr++)
 
             case ESC_E: /* Perl ignores an orphan \E */
             continue;
-
+            
             default:    /* Not recognized; fall through */
             break;      /* Need "default" setting to stop compiler warning. */
             }
@@ -2539,6 +2544,133 @@ for (;; ptr++)
 
           else if (c == -ESC_d || c == -ESC_D || c == -ESC_w ||
                    c == -ESC_W || c == -ESC_s || c == -ESC_S) continue;
+                   
+          /* We need to deal with \H, \h, \V, and \v in both phases because
+          they use extra memory. */
+          
+          if (-c == ESC_h)
+            {
+            SETBIT(classbits, 0x09); /* VT */
+            SETBIT(classbits, 0x20); /* SPACE */
+            SETBIT(classbits, 0xa0); /* NSBP */  
+#ifdef SUPPORT_UTF8
+            if (utf8)
+              { 
+              class_utf8 = TRUE;
+              *class_utf8data++ = XCL_SINGLE;
+              class_utf8data += _pcre_ord2utf8(0x1680, class_utf8data); 
+              *class_utf8data++ = XCL_SINGLE;
+              class_utf8data += _pcre_ord2utf8(0x180e, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x2000, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x200A, class_utf8data); 
+              *class_utf8data++ = XCL_SINGLE;
+              class_utf8data += _pcre_ord2utf8(0x202f, class_utf8data); 
+              *class_utf8data++ = XCL_SINGLE;
+              class_utf8data += _pcre_ord2utf8(0x205f, class_utf8data); 
+              *class_utf8data++ = XCL_SINGLE;
+              class_utf8data += _pcre_ord2utf8(0x3000, class_utf8data); 
+              } 
+#endif            
+            continue; 
+            }    
+
+          if (-c == ESC_H)
+            {
+            for (c = 0; c < 32; c++)
+              {
+              int x = 0xff;
+              switch (c)
+                { 
+                case 0x09/8: x ^= 1 << (0x09%8); break;
+                case 0x20/8: x ^= 1 << (0x20%8); break;
+                case 0xa0/8: x ^= 1 << (0xa0%8); break;
+                default: break;
+                }
+              classbits[c] |= x;
+              }           
+ 
+#ifdef SUPPORT_UTF8
+            if (utf8)
+              { 
+              class_utf8 = TRUE;
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x0100, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x167f, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x1681, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x180d, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x180f, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x1fff, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x200B, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x202e, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x2030, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x205e, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x2060, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x2fff, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x3001, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x7fffffff, class_utf8data); 
+              } 
+#endif            
+            continue; 
+            }    
+
+          if (-c == ESC_v)
+            {
+            SETBIT(classbits, 0x0a); /* LF */
+            SETBIT(classbits, 0x0b); /* VT */
+            SETBIT(classbits, 0x0c); /* FF */  
+            SETBIT(classbits, 0x0d); /* CR */  
+            SETBIT(classbits, 0x85); /* NEL */  
+#ifdef SUPPORT_UTF8
+            if (utf8)
+              { 
+              class_utf8 = TRUE;
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x2028, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x2029, class_utf8data); 
+              } 
+#endif            
+            continue; 
+            }    
+
+          if (-c == ESC_V)
+            {
+            for (c = 0; c < 32; c++)
+              {
+              int x = 0xff;
+              switch (c)
+                { 
+                case 0x0a/8: x ^= 1 << (0x0a%8);
+                             x ^= 1 << (0x0b%8);
+                             x ^= 1 << (0x0c%8);
+                             x ^= 1 << (0x0d%8); 
+                             break;
+                case 0x85/8: x ^= 1 << (0x85%8); break;
+                default: break;
+                }
+              classbits[c] |= x;
+              }           
+ 
+#ifdef SUPPORT_UTF8
+            if (utf8)
+              { 
+              class_utf8 = TRUE;
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x0100, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x2027, class_utf8data); 
+              *class_utf8data++ = XCL_RANGE; 
+              class_utf8data += _pcre_ord2utf8(0x2029, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x7fffffff, class_utf8data); 
+              } 
+#endif            
+            continue; 
+            }    
 
           /* We need to deal with \P and \p in both phases. */
 

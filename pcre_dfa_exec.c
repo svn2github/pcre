@@ -63,11 +63,14 @@ applications. */
 
 /* These are offsets that are used to turn the OP_TYPESTAR and friends opcodes
 into others, under special conditions. A gap of 20 between the blocks should be
-enough. */
+enough. The resulting opcodes don't have to be less than 256 because they are 
+never stored, so we push them well clear of the normal opcodes. */
 
-#define OP_PROP_EXTRA 100
-#define OP_EXTUNI_EXTRA 120
-#define OP_ANYNL_EXTRA 140
+#define OP_PROP_EXTRA       300
+#define OP_EXTUNI_EXTRA     320
+#define OP_ANYNL_EXTRA      340
+#define OP_HSPACE_EXTRA     360
+#define OP_VSPACE_EXTRA     380
 
 
 /* This table identifies those opcodes that are followed immediately by a
@@ -82,7 +85,8 @@ static uschar coptable[] = {
   0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
   0, 0, 0, 0, 0, 0,              /* \D, \d, \S, \s, \W, \w                 */
   0, 0,                          /* Any, Anybyte                           */
-  0, 0, 0, 0,                    /* NOTPROP, PROP, EXTUNI, ANYNL           */
+  0, 0, 0,                       /* NOTPROP, PROP, EXTUNI                  */
+  0, 0, 0, 0, 0,                 /* \R, \H, \h, \V, \v                     */
   0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
   1,                             /* Char                                   */
   1,                             /* Charnc                                 */
@@ -559,10 +563,10 @@ for (;;)
     permitted.
 
     We also use this mechanism for opcodes such as OP_TYPEPLUS that take an
-    argument that is not a data character - but is always one byte long.
-    Unfortunately, we have to take special action to deal with  \P, \p, and
-    \X in this case. To keep the other cases fast, convert these ones to new
-    opcodes. */
+    argument that is not a data character - but is always one byte long. We
+    have to take special action to deal with  \P, \p, \H, \h, \V, \v and \X in
+    this case. To keep the other cases fast, convert these ones to new opcodes.
+    */
 
     if (coptable[codevalue] > 0)
       {
@@ -580,6 +584,10 @@ for (;;)
           case OP_PROP: codevalue += OP_PROP_EXTRA; break;
           case OP_ANYNL: codevalue += OP_ANYNL_EXTRA; break;
           case OP_EXTUNI: codevalue += OP_EXTUNI_EXTRA; break;
+          case OP_NOT_HSPACE:
+          case OP_HSPACE: codevalue += OP_HSPACE_EXTRA; break; 
+          case OP_NOT_VSPACE:
+          case OP_VSPACE: codevalue += OP_VSPACE_EXTRA; break; 
           default: break;
           }
         }
@@ -1090,6 +1098,96 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_VSPACE_EXTRA + OP_TYPEPLUS:
+      case OP_VSPACE_EXTRA + OP_TYPEMINPLUS:
+      case OP_VSPACE_EXTRA + OP_TYPEPOSPLUS:
+      count = current_state->count;  /* Already matched */
+      if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+      if (clen > 0)
+        {
+        BOOL OK; 
+        switch (c)
+          {
+          case 0x000a:
+          case 0x000b:
+          case 0x000c:
+          case 0x000d:
+          case 0x0085:
+          case 0x2028:
+          case 0x2029:
+          OK = TRUE;
+          break; 
+
+          default:
+          OK = FALSE;
+          break;  
+          }
+
+        if (OK == (d == OP_VSPACE))
+          { 
+          if (count > 0 && codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSPLUS)
+            {
+            active_count--;           /* Remove non-match possibility */
+            next_active_state--;
+            }
+          count++;
+          ADD_NEW_DATA(-state_offset, count, 0);
+          }
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_HSPACE_EXTRA + OP_TYPEPLUS:
+      case OP_HSPACE_EXTRA + OP_TYPEMINPLUS:
+      case OP_HSPACE_EXTRA + OP_TYPEPOSPLUS:
+      count = current_state->count;  /* Already matched */
+      if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
+      if (clen > 0)
+        {
+        BOOL OK; 
+        switch (c)
+          {
+          case 0x09:      /* HT */
+          case 0x20:      /* SPACE */
+          case 0xa0:      /* NBSP */
+          case 0x1680:    /* OGHAM SPACE MARK */
+          case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+          case 0x2000:    /* EN QUAD */
+          case 0x2001:    /* EM QUAD */
+          case 0x2002:    /* EN SPACE */
+          case 0x2003:    /* EM SPACE */
+          case 0x2004:    /* THREE-PER-EM SPACE */
+          case 0x2005:    /* FOUR-PER-EM SPACE */
+          case 0x2006:    /* SIX-PER-EM SPACE */
+          case 0x2007:    /* FIGURE SPACE */
+          case 0x2008:    /* PUNCTUATION SPACE */
+          case 0x2009:    /* THIN SPACE */
+          case 0x200A:    /* HAIR SPACE */
+          case 0x202f:    /* NARROW NO-BREAK SPACE */
+          case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+          case 0x3000:    /* IDEOGRAPHIC SPACE */
+          OK = TRUE;
+          break;
+          
+          default:
+          OK = FALSE;
+          break;
+          }
+           
+        if (OK == (d == OP_HSPACE))
+          {          
+          if (count > 0 && codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSPLUS)
+            {
+            active_count--;           /* Remove non-match possibility */
+            next_active_state--;
+            }
+          count++;
+          ADD_NEW_DATA(-state_offset, count, 0);
+          }
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
 #ifdef SUPPORT_UCP
       case OP_PROP_EXTRA + OP_TYPEQUERY:
       case OP_PROP_EXTRA + OP_TYPEMINQUERY:
@@ -1233,6 +1331,111 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_VSPACE_EXTRA + OP_TYPEQUERY:
+      case OP_VSPACE_EXTRA + OP_TYPEMINQUERY:
+      case OP_VSPACE_EXTRA + OP_TYPEPOSQUERY:
+      count = 2;
+      goto QS4;
+
+      case OP_VSPACE_EXTRA + OP_TYPESTAR:
+      case OP_VSPACE_EXTRA + OP_TYPEMINSTAR:
+      case OP_VSPACE_EXTRA + OP_TYPEPOSSTAR:
+      count = 0;
+
+      QS4:
+      ADD_ACTIVE(state_offset + 2, 0);
+      if (clen > 0)
+        {
+        BOOL OK; 
+        switch (c)
+          {
+          case 0x000a:
+          case 0x000b:
+          case 0x000c:
+          case 0x000d:
+          case 0x0085:
+          case 0x2028:
+          case 0x2029:
+          OK = TRUE;
+          break;
+          
+          default:
+          OK = FALSE;
+          break;
+          }
+        if (OK == (d == OP_VSPACE))
+          {          
+          if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSSTAR ||
+              codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSQUERY)
+            {
+            active_count--;           /* Remove non-match possibility */
+            next_active_state--;
+            }
+          ADD_NEW_DATA(-(state_offset + count), 0, 0);
+          }
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_HSPACE_EXTRA + OP_TYPEQUERY:
+      case OP_HSPACE_EXTRA + OP_TYPEMINQUERY:
+      case OP_HSPACE_EXTRA + OP_TYPEPOSQUERY:
+      count = 2;
+      goto QS5;
+
+      case OP_HSPACE_EXTRA + OP_TYPESTAR:
+      case OP_HSPACE_EXTRA + OP_TYPEMINSTAR:
+      case OP_HSPACE_EXTRA + OP_TYPEPOSSTAR:
+      count = 0;
+
+      QS5:
+      ADD_ACTIVE(state_offset + 2, 0);
+      if (clen > 0)
+        {
+        BOOL OK; 
+        switch (c)
+          {
+          case 0x09:      /* HT */
+          case 0x20:      /* SPACE */
+          case 0xa0:      /* NBSP */
+          case 0x1680:    /* OGHAM SPACE MARK */
+          case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+          case 0x2000:    /* EN QUAD */
+          case 0x2001:    /* EM QUAD */
+          case 0x2002:    /* EN SPACE */
+          case 0x2003:    /* EM SPACE */
+          case 0x2004:    /* THREE-PER-EM SPACE */
+          case 0x2005:    /* FOUR-PER-EM SPACE */
+          case 0x2006:    /* SIX-PER-EM SPACE */
+          case 0x2007:    /* FIGURE SPACE */
+          case 0x2008:    /* PUNCTUATION SPACE */
+          case 0x2009:    /* THIN SPACE */
+          case 0x200A:    /* HAIR SPACE */
+          case 0x202f:    /* NARROW NO-BREAK SPACE */
+          case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+          case 0x3000:    /* IDEOGRAPHIC SPACE */
+          OK = TRUE;
+          break;
+           
+          default:
+          OK = FALSE;
+          break;
+          }
+           
+        if (OK == (d == OP_HSPACE))
+          {          
+          if (codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSSTAR ||
+              codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSQUERY)
+            {
+            active_count--;           /* Remove non-match possibility */
+            next_active_state--;
+            }
+          ADD_NEW_DATA(-(state_offset + count), 0, 0);
+          }
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
 #ifdef SUPPORT_UCP
       case OP_PROP_EXTRA + OP_TYPEEXACT:
       case OP_PROP_EXTRA + OP_TYPEUPTO:
@@ -1361,6 +1564,103 @@ for (;;)
         }
       break;
 
+      /*-----------------------------------------------------------------*/
+      case OP_VSPACE_EXTRA + OP_TYPEEXACT:
+      case OP_VSPACE_EXTRA + OP_TYPEUPTO:
+      case OP_VSPACE_EXTRA + OP_TYPEMINUPTO:
+      case OP_VSPACE_EXTRA + OP_TYPEPOSUPTO:
+      if (codevalue != OP_VSPACE_EXTRA + OP_TYPEEXACT)
+        { ADD_ACTIVE(state_offset + 4, 0); }
+      count = current_state->count;  /* Number already matched */
+      if (clen > 0)
+        {
+        BOOL OK; 
+        switch (c)
+          {
+          case 0x000a:
+          case 0x000b:
+          case 0x000c:
+          case 0x000d:
+          case 0x0085:
+          case 0x2028:
+          case 0x2029:
+          OK = TRUE;
+          break;
+          
+          default:
+          OK = FALSE;
+          }
+           
+        if (OK == (d == OP_VSPACE))
+          {         
+          if (codevalue == OP_VSPACE_EXTRA + OP_TYPEPOSUPTO)
+            {
+            active_count--;           /* Remove non-match possibility */
+            next_active_state--;
+            }
+          if (++count >= GET2(code, 1))
+            { ADD_NEW_DATA(-(state_offset + 4), 0, 0); }
+          else
+            { ADD_NEW_DATA(-state_offset, count, 0); }
+          }
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_HSPACE_EXTRA + OP_TYPEEXACT:
+      case OP_HSPACE_EXTRA + OP_TYPEUPTO:
+      case OP_HSPACE_EXTRA + OP_TYPEMINUPTO:
+      case OP_HSPACE_EXTRA + OP_TYPEPOSUPTO:
+      if (codevalue != OP_HSPACE_EXTRA + OP_TYPEEXACT)
+        { ADD_ACTIVE(state_offset + 4, 0); }
+      count = current_state->count;  /* Number already matched */
+      if (clen > 0)
+        {
+        BOOL OK; 
+        switch (c)
+          {
+          case 0x09:      /* HT */
+          case 0x20:      /* SPACE */
+          case 0xa0:      /* NBSP */
+          case 0x1680:    /* OGHAM SPACE MARK */
+          case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+          case 0x2000:    /* EN QUAD */
+          case 0x2001:    /* EM QUAD */
+          case 0x2002:    /* EN SPACE */
+          case 0x2003:    /* EM SPACE */
+          case 0x2004:    /* THREE-PER-EM SPACE */
+          case 0x2005:    /* FOUR-PER-EM SPACE */
+          case 0x2006:    /* SIX-PER-EM SPACE */
+          case 0x2007:    /* FIGURE SPACE */
+          case 0x2008:    /* PUNCTUATION SPACE */
+          case 0x2009:    /* THIN SPACE */
+          case 0x200A:    /* HAIR SPACE */
+          case 0x202f:    /* NARROW NO-BREAK SPACE */
+          case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+          case 0x3000:    /* IDEOGRAPHIC SPACE */
+          OK = TRUE;
+          break;
+           
+          default:
+          OK = FALSE;
+          break;
+          }
+           
+        if (OK == (d == OP_HSPACE))
+          {          
+          if (codevalue == OP_HSPACE_EXTRA + OP_TYPEPOSUPTO)
+            {
+            active_count--;           /* Remove non-match possibility */
+            next_active_state--;
+            }
+          if (++count >= GET2(code, 1))
+            { ADD_NEW_DATA(-(state_offset + 4), 0, 0); }
+          else
+            { ADD_NEW_DATA(-state_offset, count, 0); }
+          }
+        }
+      break;
+
 /* ========================================================================== */
       /* These opcodes are followed by a character that is usually compared
       to the current subject character; it is loaded into d. We still get
@@ -1455,6 +1755,102 @@ for (;;)
           {
           ADD_NEW(state_offset + 1, 0);
           }
+        break;
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_NOT_VSPACE:
+      if (clen > 0) switch(c)
+        {
+        case 0x000a:
+        case 0x000b:
+        case 0x000c:
+        case 0x000d:
+        case 0x0085:
+        case 0x2028:
+        case 0x2029:
+        break;
+         
+        default:  
+        ADD_NEW(state_offset + 1, 0);
+        break;
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_VSPACE:
+      if (clen > 0) switch(c)
+        {
+        case 0x000a:
+        case 0x000b:
+        case 0x000c:
+        case 0x000d:
+        case 0x0085:
+        case 0x2028:
+        case 0x2029:
+        ADD_NEW(state_offset + 1, 0);
+        break;
+        
+        default: break;
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_NOT_HSPACE:
+      if (clen > 0) switch(c)
+        {
+        case 0x09:      /* HT */
+        case 0x20:      /* SPACE */
+        case 0xa0:      /* NBSP */
+        case 0x1680:    /* OGHAM SPACE MARK */
+        case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+        case 0x2000:    /* EN QUAD */
+        case 0x2001:    /* EM QUAD */
+        case 0x2002:    /* EN SPACE */
+        case 0x2003:    /* EM SPACE */
+        case 0x2004:    /* THREE-PER-EM SPACE */
+        case 0x2005:    /* FOUR-PER-EM SPACE */
+        case 0x2006:    /* SIX-PER-EM SPACE */
+        case 0x2007:    /* FIGURE SPACE */
+        case 0x2008:    /* PUNCTUATION SPACE */
+        case 0x2009:    /* THIN SPACE */
+        case 0x200A:    /* HAIR SPACE */
+        case 0x202f:    /* NARROW NO-BREAK SPACE */
+        case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+        case 0x3000:    /* IDEOGRAPHIC SPACE */
+        break;
+         
+        default:  
+        ADD_NEW(state_offset + 1, 0);
+        break;
+        }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_HSPACE:
+      if (clen > 0) switch(c)
+        {
+        case 0x09:      /* HT */
+        case 0x20:      /* SPACE */
+        case 0xa0:      /* NBSP */
+        case 0x1680:    /* OGHAM SPACE MARK */
+        case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
+        case 0x2000:    /* EN QUAD */
+        case 0x2001:    /* EM QUAD */
+        case 0x2002:    /* EN SPACE */
+        case 0x2003:    /* EM SPACE */
+        case 0x2004:    /* THREE-PER-EM SPACE */
+        case 0x2005:    /* FOUR-PER-EM SPACE */
+        case 0x2006:    /* SIX-PER-EM SPACE */
+        case 0x2007:    /* FIGURE SPACE */
+        case 0x2008:    /* PUNCTUATION SPACE */
+        case 0x2009:    /* THIN SPACE */
+        case 0x200A:    /* HAIR SPACE */
+        case 0x202f:    /* NARROW NO-BREAK SPACE */
+        case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
+        case 0x3000:    /* IDEOGRAPHIC SPACE */
+        ADD_NEW(state_offset + 1, 0);
         break;
         }
       break;
