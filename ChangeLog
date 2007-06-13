@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.2 05-June-07
+Version 7.2 13-June-07
 ---------------------
 
  1. If the fr_FR locale cannot be found for test 3, try the "french" locale,

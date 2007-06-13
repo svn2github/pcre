@@ -219,7 +219,10 @@ must use Unicode property tests such as \ep{Nd}.
 8. Similarly, characters that match the POSIX named character classes are all
 low-valued characters.
 .P
-9. Case-insensitive matching applies only to characters whose values are less
+9. However, the Perl 5.10 horizontal and vertical whitespace matching escapes 
+(\eh, \eH, \ev, and \eV) do match all the appropriate Unicode characters.
+.P
+10. Case-insensitive matching applies only to characters whose values are less
 than 128, unless PCRE is built with Unicode property support. Even when Unicode
 property support is available, PCRE still uses its own character tables when
 checking the case of low-valued characters, so as not to degrade performance.
@@ -248,6 +251,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 18 April 2007
+Last updated: 13 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

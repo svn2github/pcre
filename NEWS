@@ -2,11 +2,12 @@ News about PCRE releases
 ------------------------
 
 
-Release 7.2 30-Apr-07
+Release 7.2 13-Jun-07
 ---------------------
 
 WARNING: saved patterns that were compiled by earlier versions of PCRE must be
-recompiled for use with 7.2 (necessitated by the addition of \K).
+recompiled for use with 7.2 (necessitated by the addition of \K, \h, \H, \v,
+and \V).
 
 Correction to the notes for 7.1: the note about shared libraries for Windows is
 wrong. Previously, three libraries were built, but each could function
@@ -20,8 +21,9 @@ Some more features from Perl 5.10 have been added:
 
   (?-n) and (?+n) relative references for recursion and subroutines.
 
-  (Not sure if this one is actually in Perl 5.10)
   (?(-n) and (?(+n) relative references as conditions.
+  
+  \k{name} and \g{name} are synonyms for \k<name>.
 
   \K to reset the start of the matched string; for example, (foo)\Kbar
   matches bar preceded by foo, but only sets bar as the matched string.
