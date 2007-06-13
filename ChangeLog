@@ -62,6 +62,13 @@ Version 7.2 05-June-07
     
 10. Inserted some missing (unsigned int) casts to get rid of compiler warnings.
 
+11. Applied patch from Google to remove an optimization that didn't quite work.
+    The report of the bug said:
+    
+      pcrecpp::RE("a*").FullMatch("aaa") matches, while
+      pcrecpp::RE("a*?").FullMatch("aaa") does not, and
+      pcrecpp::RE("a*?\\z").FullMatch("aaa") does again. 
+
 
 Version 7.1 24-Apr-07
 ---------------------

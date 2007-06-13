@@ -77,25 +77,14 @@ void RE::Init(const string& pat, const RE_Options* options) {
 
   re_partial_ = Compile(UNANCHORED);
   if (re_partial_ != NULL) {
-    // Check for complicated patterns.  The following change is
-    // conservative in that it may treat some "simple" patterns
-    // as "complex" (e.g., if the vertical bar is in a character
-    // class or is escaped).  But it seems good enough.
-    if (strchr(pat.c_str(), '|') == NULL) {
-      // Simple pattern: we can use position-based checks to perform
-      // fully anchored matches
-      re_full_ = re_partial_;
-    } else {
-      // We need a special pattern for anchored matches
-      re_full_ = Compile(ANCHOR_BOTH);
-    }
+    re_full_ = Compile(ANCHOR_BOTH);
   }
 }
 
 void RE::Cleanup() {
-  if (re_full_ != NULL && re_full_ != re_partial_) (*pcre_free)(re_full_);
-  if (re_partial_ != NULL)                         (*pcre_free)(re_partial_);
-  if (error_ != &empty_string)                     delete error_;
+  if (re_full_ != NULL)         (*pcre_free)(re_full_);
+  if (re_partial_ != NULL)      (*pcre_free)(re_partial_);
+  if (error_ != &empty_string)  delete error_;
 }
 
 
@@ -505,13 +494,6 @@ int RE::TryMatch(const StringPiece& text,
     // When this happens, there is a match and the output vector
     // is filled, but we miss out on the positions of the extra subpatterns.
     rc = vecsize / 2;
-  }
-
-  if ((anchor == ANCHOR_BOTH) && (re_full_ == re_partial_)) {
-    // We need an extra check to make sure that the match extended
-    // to the end of the input string
-    assert(vec[0] == 0);                 // PCRE_ANCHORED forces starting match
-    if (vec[1] != text.size()) return 0; // Did not get ending match
   }
 
   return rc;

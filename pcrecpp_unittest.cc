@@ -806,8 +806,11 @@ int main(int argc, char** argv) {
   /***** FullMatch with no args *****/
 
   CHECK(RE("h.*o").FullMatch("hello"));
-  CHECK(!RE("h.*o").FullMatch("othello"));
-  CHECK(!RE("h.*o").FullMatch("hello!"));
+  CHECK(!RE("h.*o").FullMatch("othello"));     // Must be anchored at front
+  CHECK(!RE("h.*o").FullMatch("hello!"));      // Must be anchored at end
+  CHECK(RE("a*").FullMatch("aaaa"));           // Fullmatch with normal op
+  CHECK(RE("a*?").FullMatch("aaaa"));          // Fullmatch with nongreedy op
+  CHECK(RE("a*?\\z").FullMatch("aaaa"));       // Two unusual ops
 
   /***** FullMatch with args *****/
 
