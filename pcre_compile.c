@@ -379,7 +379,7 @@ static const unsigned char ebcdic_chartab[] = { /* chartable partial dup */
 /* Definition to allow mutual recursion */
 
 static BOOL
-  compile_regex(int, int, uschar **, const uschar **, int *, BOOL, BOOL, int, 
+  compile_regex(int, int, uschar **, const uschar **, int *, BOOL, BOOL, int,
     int *, int *, branch_chain *, compile_data *, int *);
 
 
@@ -1949,6 +1949,50 @@ if (next >= 0) switch(op_code)
   case OP_NOT_WORDCHAR:
   return next <= 127 && (cd->ctypes[next] & ctype_word) != 0;
 
+  case OP_HSPACE:
+  case OP_NOT_HSPACE:
+  switch(next)
+    {
+    case 0x09:
+    case 0x20:
+    case 0xa0:
+    case 0x1680:
+    case 0x180e:
+    case 0x2000:
+    case 0x2001:
+    case 0x2002:
+    case 0x2003:
+    case 0x2004:
+    case 0x2005:
+    case 0x2006:
+    case 0x2007:
+    case 0x2008:
+    case 0x2009:
+    case 0x200A:
+    case 0x202f:
+    case 0x205f:
+    case 0x3000:
+    return op_code != OP_HSPACE;
+    default:
+    return op_code == OP_HSPACE;
+    }
+
+  case OP_VSPACE:
+  case OP_NOT_VSPACE:
+  switch(next)
+    {
+    case 0x0a:
+    case 0x0b:
+    case 0x0c:
+    case 0x0d:
+    case 0x85:
+    case 0x2028:
+    case 0x2029:
+    return op_code != OP_VSPACE;
+    default:
+    return op_code == OP_VSPACE;
+    }
+
   default:
   return FALSE;
   }
@@ -1982,13 +2026,58 @@ switch(op_code)
 
     case ESC_W:
     return item <= 127 && (cd->ctypes[item] & ctype_word) != 0;
+    
+    case ESC_h:
+    case ESC_H:
+    switch(item)
+      {
+      case 0x09:
+      case 0x20:
+      case 0xa0:
+      case 0x1680:
+      case 0x180e:
+      case 0x2000:
+      case 0x2001:
+      case 0x2002:
+      case 0x2003:
+      case 0x2004:
+      case 0x2005:
+      case 0x2006:
+      case 0x2007:
+      case 0x2008:
+      case 0x2009:
+      case 0x200A:
+      case 0x202f:
+      case 0x205f:
+      case 0x3000:
+      return -next != ESC_h;
+      default:
+      return -next == ESC_h;
+      }    
+      
+    case ESC_v:
+    case ESC_V:
+    switch(item)
+      {
+      case 0x0a:
+      case 0x0b:
+      case 0x0c:
+      case 0x0d:
+      case 0x85:
+      case 0x2028:
+      case 0x2029:
+      return -next != ESC_v;
+      default:
+      return -next == ESC_v;
+      }    
 
     default:
     return FALSE;
     }
 
   case OP_DIGIT:
-  return next == -ESC_D || next == -ESC_s || next == -ESC_W;
+  return next == -ESC_D || next == -ESC_s || next == -ESC_W ||
+         next == -ESC_h || next == -ESC_v;
 
   case OP_NOT_DIGIT:
   return next == -ESC_d;
@@ -1997,14 +2086,27 @@ switch(op_code)
   return next == -ESC_S || next == -ESC_d || next == -ESC_w;
 
   case OP_NOT_WHITESPACE:
-  return next == -ESC_s;
+  return next == -ESC_s || next == -ESC_h || next == -ESC_v;
+
+  case OP_HSPACE:
+  return next == -ESC_S || next == -ESC_H || next == -ESC_d || next == -ESC_w;
+
+  case OP_NOT_HSPACE:
+  return next == -ESC_h;
+  
+  /* Can't have \S in here because VT matches \S (Perl anomaly) */
+  case OP_VSPACE:  
+  return next == -ESC_V || next == -ESC_d || next == -ESC_w;
+
+  case OP_NOT_VSPACE:
+  return next == -ESC_v;  
 
   case OP_WORDCHAR:
-  return next == -ESC_W || next == -ESC_s;
+  return next == -ESC_W || next == -ESC_s || next == -ESC_h || next == -ESC_v;
 
   case OP_NOT_WORDCHAR:
   return next == -ESC_w || next == -ESC_d;
-
+  
   default:
   return FALSE;
   }
@@ -2115,7 +2217,7 @@ for (;; ptr++)
   BOOL possessive_quantifier;
   BOOL is_quantifier;
   BOOL is_recurse;
-  BOOL reset_bracount; 
+  BOOL reset_bracount;
   int class_charcount;
   int class_lastchar;
   int newoptions;
@@ -2535,7 +2637,7 @@ for (;; ptr++)
 
             case ESC_E: /* Perl ignores an orphan \E */
             continue;
-            
+
             default:    /* Not recognized; fall through */
             break;      /* Need "default" setting to stop compiler warning. */
             }
@@ -2544,36 +2646,36 @@ for (;; ptr++)
 
           else if (c == -ESC_d || c == -ESC_D || c == -ESC_w ||
                    c == -ESC_W || c == -ESC_s || c == -ESC_S) continue;
-                   
+
           /* We need to deal with \H, \h, \V, and \v in both phases because
           they use extra memory. */
-          
+
           if (-c == ESC_h)
             {
             SETBIT(classbits, 0x09); /* VT */
             SETBIT(classbits, 0x20); /* SPACE */
-            SETBIT(classbits, 0xa0); /* NSBP */  
+            SETBIT(classbits, 0xa0); /* NSBP */
 #ifdef SUPPORT_UTF8
             if (utf8)
-              { 
+              {
               class_utf8 = TRUE;
               *class_utf8data++ = XCL_SINGLE;
-              class_utf8data += _pcre_ord2utf8(0x1680, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x1680, class_utf8data);
               *class_utf8data++ = XCL_SINGLE;
-              class_utf8data += _pcre_ord2utf8(0x180e, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x2000, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x200A, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x180e, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x2000, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x200A, class_utf8data);
               *class_utf8data++ = XCL_SINGLE;
-              class_utf8data += _pcre_ord2utf8(0x202f, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x202f, class_utf8data);
               *class_utf8data++ = XCL_SINGLE;
-              class_utf8data += _pcre_ord2utf8(0x205f, class_utf8data); 
+              class_utf8data += _pcre_ord2utf8(0x205f, class_utf8data);
               *class_utf8data++ = XCL_SINGLE;
-              class_utf8data += _pcre_ord2utf8(0x3000, class_utf8data); 
-              } 
-#endif            
-            continue; 
-            }    
+              class_utf8data += _pcre_ord2utf8(0x3000, class_utf8data);
+              }
+#endif
+            continue;
+            }
 
           if (-c == ESC_H)
             {
@@ -2581,63 +2683,63 @@ for (;; ptr++)
               {
               int x = 0xff;
               switch (c)
-                { 
+                {
                 case 0x09/8: x ^= 1 << (0x09%8); break;
                 case 0x20/8: x ^= 1 << (0x20%8); break;
                 case 0xa0/8: x ^= 1 << (0xa0%8); break;
                 default: break;
                 }
               classbits[c] |= x;
-              }           
- 
+              }
+
 #ifdef SUPPORT_UTF8
             if (utf8)
-              { 
+              {
               class_utf8 = TRUE;
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x0100, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x167f, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x1681, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x180d, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x180f, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x1fff, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x200B, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x202e, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x2030, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x205e, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x2060, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x2fff, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x3001, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x7fffffff, class_utf8data); 
-              } 
-#endif            
-            continue; 
-            }    
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x0100, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x167f, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x1681, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x180d, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x180f, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x1fff, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x200B, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x202e, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x2030, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x205e, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x2060, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x2fff, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x3001, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x7fffffff, class_utf8data);
+              }
+#endif
+            continue;
+            }
 
           if (-c == ESC_v)
             {
             SETBIT(classbits, 0x0a); /* LF */
             SETBIT(classbits, 0x0b); /* VT */
-            SETBIT(classbits, 0x0c); /* FF */  
-            SETBIT(classbits, 0x0d); /* CR */  
-            SETBIT(classbits, 0x85); /* NEL */  
+            SETBIT(classbits, 0x0c); /* FF */
+            SETBIT(classbits, 0x0d); /* CR */
+            SETBIT(classbits, 0x85); /* NEL */
 #ifdef SUPPORT_UTF8
             if (utf8)
-              { 
+              {
               class_utf8 = TRUE;
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x2028, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x2029, class_utf8data); 
-              } 
-#endif            
-            continue; 
-            }    
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x2028, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x2029, class_utf8data);
+              }
+#endif
+            continue;
+            }
 
           if (-c == ESC_V)
             {
@@ -2645,32 +2747,32 @@ for (;; ptr++)
               {
               int x = 0xff;
               switch (c)
-                { 
+                {
                 case 0x0a/8: x ^= 1 << (0x0a%8);
                              x ^= 1 << (0x0b%8);
                              x ^= 1 << (0x0c%8);
-                             x ^= 1 << (0x0d%8); 
+                             x ^= 1 << (0x0d%8);
                              break;
                 case 0x85/8: x ^= 1 << (0x85%8); break;
                 default: break;
                 }
               classbits[c] |= x;
-              }           
- 
+              }
+
 #ifdef SUPPORT_UTF8
             if (utf8)
-              { 
+              {
               class_utf8 = TRUE;
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x0100, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x2027, class_utf8data); 
-              *class_utf8data++ = XCL_RANGE; 
-              class_utf8data += _pcre_ord2utf8(0x2029, class_utf8data); 
-              class_utf8data += _pcre_ord2utf8(0x7fffffff, class_utf8data); 
-              } 
-#endif            
-            continue; 
-            }    
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x0100, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x2027, class_utf8data);
+              *class_utf8data++ = XCL_RANGE;
+              class_utf8data += _pcre_ord2utf8(0x2029, class_utf8data);
+              class_utf8data += _pcre_ord2utf8(0x7fffffff, class_utf8data);
+              }
+#endif
+            continue;
+            }
 
           /* We need to deal with \P and \p in both phases. */
 
@@ -2812,17 +2914,17 @@ for (;; ptr++)
             unsigned int origd = d;
             while (get_othercase_range(&cc, origd, &occ, &ocd))
               {
-              if (occ >= (unsigned int)c && 
-                  ocd <= (unsigned int)d) 
+              if (occ >= (unsigned int)c &&
+                  ocd <= (unsigned int)d)
                 continue;                          /* Skip embedded ranges */
 
-              if (occ < (unsigned int)c  && 
+              if (occ < (unsigned int)c  &&
                   ocd >= (unsigned int)c - 1)      /* Extend the basic range */
                 {                                  /* if there is overlap,   */
                 c = occ;                           /* noting that if occ < c */
                 continue;                          /* we can't have ocd > d  */
                 }                                  /* because a subrange is  */
-              if (ocd > (unsigned int)d && 
+              if (ocd > (unsigned int)d &&
                   occ <= (unsigned int)d + 1)      /* always shorter than    */
                 {                                  /* the basic range.       */
                 d = ocd;
@@ -3721,7 +3823,7 @@ for (;; ptr++)
     skipbytes = 0;
     bravalue = OP_CBRA;
     save_hwm = cd->hwm;
-    reset_bracount = FALSE; 
+    reset_bracount = FALSE;
 
     if (*(++ptr) == '?')
       {
@@ -3746,7 +3848,7 @@ for (;; ptr++)
         /* ------------------------------------------------------------ */
         case '|':                 /* Reset capture count for each branch */
         reset_bracount = TRUE;
-        /* Fall through */ 
+        /* Fall through */
 
         /* ------------------------------------------------------------ */
         case ':':                 /* Non-capturing bracket */
@@ -4447,7 +4549,7 @@ for (;; ptr++)
          errorcodeptr,                 /* Where to put an error message */
          (bravalue == OP_ASSERTBACK ||
           bravalue == OP_ASSERTBACK_NOT), /* TRUE if back assert */
-         reset_bracount,               /* True if (?| group */  
+         reset_bracount,               /* True if (?| group */
          skipbytes,                    /* Skip over bracket number */
          &subfirstbyte,                /* For possible first char */
          &subreqbyte,                  /* For possible last char */
@@ -4807,7 +4909,7 @@ Arguments:
   ptrptr         -> the address of the current pattern pointer
   errorcodeptr   -> pointer to error code variable
   lookbehind     TRUE if this is a lookbehind assertion
-  reset_bracount TRUE to reset the count for each branch 
+  reset_bracount TRUE to reset the count for each branch
   skipbytes      skip this many bytes at start (for brackets and OP_COND)
   firstbyteptr   place to put the first required character, or a negative number
   reqbyteptr     place to put the last required character, or a negative number
@@ -4821,8 +4923,8 @@ Returns:         TRUE on success
 
 static BOOL
 compile_regex(int options, int oldims, uschar **codeptr, const uschar **ptrptr,
-  int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipbytes, 
-  int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr, compile_data *cd, 
+  int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipbytes,
+  int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr, compile_data *cd,
   int *lengthptr)
 {
 const uschar *ptr = *ptrptr;
@@ -4867,10 +4969,10 @@ orig_bracount = max_bracount = cd->bracount;
 for (;;)
   {
   /* For a (?| group, reset the capturing bracket count so that each branch
-  uses the same numbers. */ 
- 
+  uses the same numbers. */
+
   if (reset_bracount) cd->bracount = orig_bracount;
- 
+
   /* Handle a change of ims options at the start of the branch */
 
   if ((options & PCRE_IMS) != oldims)
@@ -4899,10 +5001,10 @@ for (;;)
     *ptrptr = ptr;
     return FALSE;
     }
-    
+
   /* Keep the highest bracket count in case (?| was used and some branch
-  has fewer than the rest. */ 
-    
+  has fewer than the rest. */
+
   if (cd->bracount > max_bracount) max_bracount = cd->bracount;
 
   /* In the real compile phase, there is some post-processing to be done. */
@@ -5006,9 +5108,9 @@ for (;;)
       *code++ = oldims;
       length += 2;
       }
-      
+
     /* Retain the highest bracket number, in case resetting was used. */
-      
+
     cd->bracount = max_bracount;
 
     /* Set values to pass back */
@@ -5485,7 +5587,7 @@ outside can help speed up starting point checks. */
 code = cworkspace;
 *code = OP_BRA;
 (void)compile_regex(cd->external_options, cd->external_options & PCRE_IMS,
-  &code, &ptr, &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, 
+  &code, &ptr, &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd,
   &length);
 if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 

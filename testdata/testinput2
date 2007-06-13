@@ -2287,4 +2287,43 @@ a random value. /Ix
 
 /[\x0a\V]/BZ
 
+/\H++X/BZ
+    ** Failers
+    XXXX
+    
+/\H+\hY/BZ
+    XXXX Y 
+
+/\H+ Y/BZ
+
+/\h+A/BZ
+
+/\v*B/BZ
+
+/\V+\x0a/BZ
+
+/A+\h/BZ
+
+/ *\H/BZ
+
+/A*\v/BZ
+
+/\x0b*\V/BZ
+
+/\d+\h/BZ
+
+/\d*\v/BZ
+
+/S+\h\S+\v/BZ
+
+/\w{3,}\h\w+\v/BZ
+
+/\h+\d\h+\w\h+\S\h+\H/BZ
+
+/\v+\d\v+\w\v+\S\v+\V/BZ
+
+/\H+\h\H+\d/BZ
+
+/\V+\v\V+\w/BZ
+
 / End of testinput2 /
