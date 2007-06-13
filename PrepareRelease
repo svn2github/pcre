@@ -183,6 +183,11 @@ files="\
 echo Detrailing
 ./Detrail $files doc/p* doc/html/*
 
+echo Doing basic configure to get default pcre.h and config.h
+# This is in case the caller has set aliases (as I do - PH)
+unset cp ls mv rm
+./configure >/dev/null
+
 echo Converting pcre.h and config.h to generic forms
 cp -f pcre.h pcre.h.generic
 
@@ -205,5 +210,7 @@ perl <<'END'
   close IN;
   close OUT;
 END
+
+echo Done
 
 #End
