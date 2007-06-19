@@ -376,8 +376,10 @@ Inside a character class, \eR matches the letter "R".
 .rs
 .sp
 When PCRE is built with Unicode character property support, three additional
-escape sequences to match character properties are available when UTF-8 mode
-is selected. They are:
+escape sequences that match characters with specific properties are available.
+When not in UTF-8 mode, these sequences are of course limited to testing
+characters whose codepoints are less than 256, but they do work in this mode.
+The extra escape sequences are:
 .sp
   \ep{\fIxx\fP}   a character with the \fIxx\fP property
   \eP{\fIxx\fP}   a character without the \fIxx\fP property
@@ -553,7 +555,8 @@ atomic group
 (see below).
 .\"
 Characters with the "mark" property are typically accents that affect the
-preceding character.
+preceding character. None of them have codepoints less than 256, so in 
+non-UTF-8 mode \eX matches any one character.
 .P
 Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
@@ -1973,6 +1976,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 June 2007
+Last updated: 19 June 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
