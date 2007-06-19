@@ -384,8 +384,10 @@ Unicode character properties
 </b><br>
 <P>
 When PCRE is built with Unicode character property support, three additional
-escape sequences to match character properties are available when UTF-8 mode
-is selected. They are:
+escape sequences that match characters with specific properties are available.
+When not in UTF-8 mode, these sequences are of course limited to testing
+characters whose codepoints are less than 256, but they do work in this mode.
+The extra escape sequences are:
 <pre>
   \p{<i>xx</i>}   a character with the <i>xx</i> property
   \P{<i>xx</i>}   a character without the <i>xx</i> property
@@ -566,7 +568,8 @@ or more characters with the "mark" property, and treats the sequence as an
 atomic group
 <a href="#atomicgroup">(see below).</a>
 Characters with the "mark" property are typically accents that affect the
-preceding character.
+preceding character. None of them have codepoints less than 256, so in
+non-UTF-8 mode \X matches any one character.
 </P>
 <P>
 Matching characters by Unicode property is not fast, because PCRE has to search
@@ -1987,7 +1990,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC25" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 June 2007
+Last updated: 19 June 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

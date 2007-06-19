@@ -68,9 +68,9 @@ Version 7.2 19-June-07
       pcrecpp::RE("a*").FullMatch("aaa") matches, while
       pcrecpp::RE("a*?").FullMatch("aaa") does not, and
       pcrecpp::RE("a*?\\z").FullMatch("aaa") does again.
-      
+
 12. If \p or \P was used in non-UTF-8 mode on a character greater than 127
-    it matched the wrong number of bytes. 
+    it matched the wrong number of bytes.
 
 
 Version 7.1 24-Apr-07
