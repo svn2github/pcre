@@ -38,79 +38,92 @@ GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
 
 The following are generic comments about building the PCRE C library "by hand".
 
-(1) Copy or rename the file config.h.generic as config.h, and edit the macro
-    settings that it contains to whatever is appropriate for your environment.
-    In particular, if you want to force a specific value for newline, you can
-    define the NEWLINE macro.
+ (1) Copy or rename the file config.h.generic as config.h, and edit the macro
+     settings that it contains to whatever is appropriate for your environment.
+     In particular, if you want to force a specific value for newline, you can
+     define the NEWLINE macro.
+ 
+     An alternative approach is not to edit config.h, but to use -D on the
+     compiler command line to make any changes that you need.
+ 
+     NOTE: There have been occasions when the way in which certain parameters
+     in config.h are used has changed between releases. (In the configure/make
+     world, this is handled automatically.) When upgrading to a new release,
+     you are strongly advised to review config.h.generic before re-using what
+     you had previously.
+ 
+ (2) Copy or rename the file pcre.h.generic as pcre.h.
+ 
+ (3) EITHER:
+       Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
+ 
+     OR:
+       Compile dftables.c as a stand-alone program, and then run it with the
+       single argument "pcre_chartables.c". This generates a set of standard
+       character tables and writes them to that file. The tables are generated
+       using the default C locale for your system. If you want to use a locale
+       that is specified by LC_xxx environment variables, add the -L option to
+       the dftables command. You must use this method if you are building on
+       a system that uses EBCDIC code.
+ 
+     The tables in pcre_chartables.c are defaults. The caller of PCRE can
+     specify alternative tables at run time.
+     
+ (4) Ensure that you have the following header files:
+ 
+       pcre_internal.h
+       ucp.h
+       ucpinternal.h
+       ucptable.h
+ 
+ (5) Also ensure that you have the following file, which is #included as source
+     when building a debugging version of PCRE and is also used by pcretest.
+ 
+       pcre_printint.src
+ 
+ (6) Compile the following source files:
+ 
+       pcre_chartables.c
+       pcre_compile.c
+       pcre_config.c
+       pcre_dfa_exec.c
+       pcre_exec.c
+       pcre_fullinfo.c
+       pcre_get.c
+       pcre_globals.c
+       pcre_info.c
+       pcre_maketables.c
+       pcre_newline.c
+       pcre_ord2utf8.c
+       pcre_refcount.c
+       pcre_study.c
+       pcre_tables.c
+       pcre_try_flipped.c
+       pcre_ucp_searchfuncs.c
+       pcre_valid_utf8.c
+       pcre_version.c
+       pcre_xclass.c
+ 
+ (7) Now link all the compiled code into an object library in whichever form
+     your system keeps such libraries. This is the basic PCRE C library. If
+     your system has static and shared libraries, you may have to do this once
+     for each type.
+ 
+ (8) Similarly, compile pcreposix.c and link the result (on its own) as the
+     pcreposix library.
 
-    An alternative approach is not to edit config.h, but to use -D on the
-    compiler command line to make any changes that you need.
+ (9) Compile the test program pcretest.c. This needs the functions in the
+     pcre and pcreposix libraries when linking. It also needs the
+     pcre_printint.src source file, which it #includes.
 
-    NOTE: There have been occasions when the way in which certain parameters in
-    config.h are used has changed between releases. (In the configure/make
-    world, this is handled automatically.) When upgrading to a new release, you
-    are strongly advised to review config.h.generic before re-using what you
-    had previously.
+(10) Run pcretest on the testinput files in the testdata directory, and check
+     that the output matches the corresponding testoutput files. Note that the
+     supplied files are in Unix format, with just LF characters as line
+     terminators. You may need to edit them to change this if your system uses
+     a different convention.
 
-(2) Copy or rename the file pcre.h.generic as pcre.h.
-
-(3) EITHER:
-      Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
-
-    OR:
-      Compile dftables.c as a stand-alone program, and then run it with the
-      single argument "pcre_chartables.c". This generates a set of standard
-      character tables and writes them to that file. The tables are generated
-      using the default C locale for your system. If you want to use a locale
-      that is specified by LC_xxx environment variables, add the -L option to
-      the dftables command. You must use this method if you are building on
-      a system that uses EBCDIC code.
-
-    The tables in pcre_chartables.c are defaults. The caller of PCRE can
-    specify alternative tables at run time.
-
-(4) Compile the following source files:
-
-      pcre_chartables.c
-      pcre_compile.c
-      pcre_config.c
-      pcre_dfa_exec.c
-      pcre_exec.c
-      pcre_fullinfo.c
-      pcre_get.c
-      pcre_globals.c
-      pcre_info.c
-      pcre_maketables.c
-      pcre_newline.c
-      pcre_ord2utf8.c
-      pcre_refcount.c
-      pcre_study.c
-      pcre_tables.c
-      pcre_try_flipped.c
-      pcre_ucp_searchfuncs.c
-      pcre_valid_utf8.c
-      pcre_version.c
-      pcre_xclass.c
-
-    Now link them all together into an object library in whichever form your
-    system keeps such libraries. This is the basic PCRE C library. If your
-    system has static and shared libraries, you may have to do this once for
-    each type.
-
-(5) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
-    library.
-
-(6) Compile the test program pcretest.c. This needs the functions in the
-    pcre and pcreposix libraries when linking.
-
-(7) Run pcretest on the testinput files in the testdata directory, and check
-    that the output matches the corresponding testoutput files. Note that the
-    supplied files are in Unix format, with just LF characters as line
-    terminators. You may need to edit them to change this if your system uses a
-    different convention.
-
-(8) If you want to use the pcregrep command, compile and link pcregrep.c; it
-    uses only the basic PCRE library (it does not need the pcreposix library).
+(11) If you want to use the pcregrep command, compile and link pcregrep.c; it
+     uses only the basic PCRE library (it does not need the pcreposix library).
 
 
 THE C++ WRAPPER FUNCTIONS
@@ -284,5 +297,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 13 June 2007
+Last Updated: 05 July 2007
 ****
