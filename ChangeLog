@@ -1,7 +1,24 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.2 19-June-07
+Version 7.3 05-Jul-07
+---------------------
+
+ 1. In the rejigging of the build system that eventually resulted in 7.1, the
+    line "#include <pcre.h>" was included in pcre_internal.h. The use of angle
+    brackets there is not right, since it causes compilers to look for an
+    installed pcre.h, not the version that is in the source that is being
+    compiled (which of course may be different). I have changed it back to:
+    
+      #include "pcre.h"
+      
+    I have a vague recollection that the change was concerned with compiling in 
+    different directories, but in the new build system, that is taken care of 
+    by the VPATH setting the Makefile.   
+
+
+
+Version 7.2 19-Jun-07
 ---------------------
 
  1. If the fr_FR locale cannot be found for test 3, try the "french" locale,
