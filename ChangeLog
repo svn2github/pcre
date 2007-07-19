@@ -15,6 +15,16 @@ Version 7.3 05-Jul-07
     I have a vague recollection that the change was concerned with compiling in 
     different directories, but in the new build system, that is taken care of 
     by the VPATH setting the Makefile.   
+    
+ 2. The pattern .*$ when run in not-DOTALL UTF-8 mode with newline=any failed
+    when the subject happened to end in the byte 0x85 (e.g. if the last
+    character was \x{1ec5}). *Character* 0x85 is one of the "any" newline
+    characters but of course it shouldn't be taken as a newline when it is part
+    of another character. The bug was that, for an unlimited repeat of . in
+    not-DOTALL UTF-8 mode, PCRE was advancing by bytes rather than by
+    characters when looking for a newline.
+    
+ 3. A small performance improvement in the DOTALL UTF-8 mode .* case. 
 
 
 

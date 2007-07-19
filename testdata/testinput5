@@ -393,4 +393,7 @@ can't tell the difference.) --/
 
 /[\V]/8BZ
 
+/.*$/8<any>
+    \x{1ec5} 
+
 / End of testinput5 /

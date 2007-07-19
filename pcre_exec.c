@@ -3764,11 +3764,6 @@ for (;;)
         switch(ctype)
           {
           case OP_ANY:
-
-          /* Special code is required for UTF8, but when the maximum is
-          unlimited we don't need it, so we repeat the non-UTF8 code. This is
-          probably worth it, because .* is quite a common idiom. */
-
           if (max < INT_MAX)
             {
             if ((ims & PCRE_DOTALL) == 0)
@@ -3801,15 +3796,12 @@ for (;;)
                 {
                 if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
                 eptr++;
+                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
                 }
-              break;
               }
             else
               {
-              c = max - min;
-              if (c > (unsigned int)(md->end_subject - eptr))
-                c = md->end_subject - eptr;
-              eptr += c;
+              eptr = md->end_subject;
               }
             }
           break;

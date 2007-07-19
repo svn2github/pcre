@@ -744,7 +744,7 @@ enum {
   as there's a test for >= ONCE for a subpattern that isn't an assertion. */
 
   OP_ONCE,           /* 92 Atomic group */
-  OP_BRA,            /* 83 Start of non-capturing bracket */
+  OP_BRA,            /* 93 Start of non-capturing bracket */
   OP_CBRA,           /* 94 Start of capturing bracket */
   OP_COND,           /* 95 Conditional group */
 
