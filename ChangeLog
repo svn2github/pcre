@@ -31,6 +31,8 @@ Version 7.3 05-Jul-07
     
  5. Arrange to use "%I64d" instead of "%lld" for long printing in the pcrecpp
     unittest when running under MinGW.  
+    
+ 6. ESC_K was left out of the EBCDIC table. 
 
 
 

@@ -139,7 +139,7 @@ enable_newline="$ac_pcre_newline"
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
-                             [assume EBCDIC coding rather than ASCII (implies --enable-rebuild-chartables)]),
+                             [assume EBCDIC coding rather than ASCII; use this only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
               , enable_ebcdic=no)
 
 # Handle --disable-stack-for-recursion

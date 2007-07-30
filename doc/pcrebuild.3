@@ -229,13 +229,15 @@ hand".)
 .rs
 .sp
 PCRE assumes by default that it will run in an environment where the character
-code is ASCII (or Unicode, which is a superset of ASCII). PCRE can, however, be
-compiled to run in an EBCDIC environment by adding
+code is ASCII (or Unicode, which is a superset of ASCII). This is the case for
+most computer operating systems. PCRE can, however, be compiled to run in an
+EBCDIC environment by adding
 .sp
   --enable-ebcdic
 .sp
 to the \fBconfigure\fP command. This setting implies
---enable-rebuild-chartables.
+--enable-rebuild-chartables. You should only use it if you know that you are in 
+an EBCDIC environment (for example, an IBM mainframe operating system).
 .
 .
 .SH "SEE ALSO"
@@ -258,6 +260,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 June 2007
+Last updated: 30 July 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
