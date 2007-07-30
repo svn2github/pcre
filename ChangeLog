@@ -25,6 +25,9 @@ Version 7.3 05-Jul-07
     characters when looking for a newline.
     
  3. A small performance improvement in the DOTALL UTF-8 mode .* case. 
+ 
+ 4. Debugging: adjusted the names of opcodes for different kinds of parentheses 
+    in debug output.  
 
 
 

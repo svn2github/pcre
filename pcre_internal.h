@@ -783,7 +783,7 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "class", "nclass", "xclass", "Ref", "Recurse", "Callout",       \
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",     \
   "AssertB", "AssertB not", "Reverse",                            \
-  "Once", "Bra 0", "Bra", "Cond", "SBra 0", "SBra", "SCond",      \
+  "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
   "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero"
 
 
