@@ -905,6 +905,11 @@ int main(int argc, char** argv) {
     CHECK(!RE("(\\d+)").FullMatch("4294967296", &v));
   }
 #ifdef HAVE_LONG_LONG
+# if defined(__MINGW__) || defined(__MINGW32__)
+#   define LLD "%I64d"
+# else
+#   define LLD "%lld"
+# endif
   {
     long long v;
     static const long long max_value = 0x7fffffffffffffffLL;
@@ -914,18 +919,18 @@ int main(int argc, char** argv) {
     CHECK(RE("(-?\\d+)").FullMatch("100", &v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v)); CHECK_EQ(v, -100);
 
-    snprintf(buf, sizeof(buf), "%lld", max_value);
+    snprintf(buf, sizeof(buf), LLD, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
-    snprintf(buf, sizeof(buf), "%lld", min_value);
+    snprintf(buf, sizeof(buf), LLD, min_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, min_value);
 
-    snprintf(buf, sizeof(buf), "%lld", max_value);
+    snprintf(buf, sizeof(buf), LLD, max_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
 
-    snprintf(buf, sizeof(buf), "%lld", min_value);
+    snprintf(buf, sizeof(buf), LLD, min_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
