@@ -1465,11 +1465,22 @@ description above.
 .sp
   PCRE_ERROR_NULLWSLIMIT    (-22)
 .sp
-When a group that can match an empty substring is repeated with an unbounded
-upper limit, the subject position at the start of the group must be remembered,
-so that a test for an empty string can be made when the end of the group is
-reached. Some workspace is required for this; if it runs out, this error is
-given.
+When a parenthesized subpattern that can match an empty substring is repeated
+with an unbounded upper limit, the subject position at the start of the group
+must be remembered, so that a test for an empty string can be made when the end
+of the group is reached. The repetition loop is automatically terminated when
+an empty string is matched.
+.P
+Some workspace is required for remembering the starting position. For most
+capturing subpatterns, an internal recursive call of the match() function is 
+used, and in this case, the workspace is taken from the runtime stack. However,
+for non-capturing subpatterns, this is not available. Instead, some fixed
+workspace (taken from the top-level stack) is used. If it runs out, the
+PCRE_ERROR_NULLWSLIMIT error is given. The size of the fixed workspace allows
+for up to 1000 repetitions of a non-capturing subpattern that might match an
+empty string. If this limit is a problem for you, you can sometimes get round 
+it by changing a non-capturing subpattern into a capturing one, but that will 
+increase the amount of runtime stack that is used.
 .sp
   PCRE_ERROR_BADNEWLINE     (-23)
 .sp
@@ -1870,6 +1881,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 June 2007
+Last updated: 30 July 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

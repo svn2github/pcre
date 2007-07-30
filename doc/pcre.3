@@ -128,6 +128,11 @@ maximum number of capturing subpatterns is 65535.
 There is no limit to the number of parenthesized subpatterns, but there can be
 no more than 65535 capturing subpatterns.
 .P
+If a non-capturing subpattern with an unlimited repetition quantifier can match
+an empty string, there is a limit of 1000 on the number of times it can be
+repeated while not matching an empty string - if it does match an empty 
+string, the loop is immediately broken.
+.P
 The maximum length of name for a named subpattern is 32 characters, and the
 maximum number of named subpatterns is 10000.
 .P
@@ -251,6 +256,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 13 June 2007
+Last updated: 30 July 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
