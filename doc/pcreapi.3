@@ -947,7 +947,10 @@ matching is used.
 Return a copy of the options with which the pattern was compiled. The fourth
 argument should point to an \fBunsigned long int\fP variable. These option bits
 are those specified in the call to \fBpcre_compile()\fP, modified by any
-top-level option settings within the pattern itself.
+top-level option settings at the start of the pattern itself. In other words,
+they are the options that will be in force when matching starts. For example,
+if the pattern /(?im)abc(?-i)d/ is compiled with the PCRE_EXTENDED option, the
+result is PCRE_CASELESS, PCRE_MULTILINE, and PCRE_EXTENDED.
 .P
 A pattern is automatically anchored by PCRE if all of its top-level
 alternatives begin with one of the following:
