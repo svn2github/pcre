@@ -7,6 +7,7 @@ This document contains the following sections:
   Generic instructions for the PCRE C library
   The C++ wrapper functions
   Building for virtual Pascal
+  Stack size in Windows environments
   Comments about Win32 builds
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
@@ -142,6 +143,18 @@ A script for building PCRE using Borland's C++ compiler for use with VPASCAL
 was contributed by Alexander Tokarev. Stefan Weber updated the script and added
 additional files. The following files in the distribution are for building PCRE
 for use with VP/Borland: makevp_c.txt, makevp_l.txt, makevp.bat, pcregexp.pas.
+
+
+STACK SIZE IN WINDOWS ENVIRONMENTS
+
+The default processor stack size of 1Mb in some Windows environments is too
+small for matching patterns that need much recursion. In particular, test 2 may
+fail because of this. Normally, running out of stack causes a crash, but there
+have been cases where the test program has just died silently. See your linker
+documentation for how to increase stack size if you experience problems. The 
+Linux default of 8Mb is a reasonable choice for the stack, though even that can 
+be too small for some pattern/subject combinations. There is more about stack 
+usage in the "pcrestack" documentation.
 
 
 COMMENTS ABOUT WIN32 BUILDS
