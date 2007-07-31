@@ -35,6 +35,8 @@
 #include <stdlib.h>    // for NULL
 #include <string>
 
+#include <pcre.h>
+
 namespace pcrecpp {
 
 class StringPiece;
@@ -51,7 +53,7 @@ class _RE_MatchObject {
   }
 };
 
-class Arg {
+class PCRECPP_EXP_DEFN Arg {
  public:
   // Empty constructor so we can declare arrays of Arg
   Arg();

@@ -50,11 +50,13 @@
 #include <bits/type_traits.h>
 #endif
 
+#include <pcre.h>
+
 using std::string;
 
 namespace pcrecpp {
 
-class StringPiece {
+class PCRECPP_EXP_DEFN StringPiece {
  private:
   const char*   ptr_;
   int           length_;

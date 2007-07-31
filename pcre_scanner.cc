@@ -29,9 +29,14 @@
 //
 // Author: Sanjay Ghemawat
 
+#ifdef HAVE_CONFIG_H                         
+#include <config.h>
+#endif                                                               
+
 #include <vector>
 #include <assert.h>
-#include "config.h"
+
+#include "pcrecpp_internal.h"
 #include "pcre_scanner.h"
 
 using std::vector;

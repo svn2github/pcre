@@ -33,10 +33,13 @@
 //
 // TODO: Test extractions for PartialMatch/Consume
 
+#ifdef HAVE_CONFIG_H                         
+#include <config.h>
+#endif                                                               
+
 #include <stdio.h>
 #include <cassert>
 #include <vector>
-#include "config.h"
 #include "pcrecpp.h"
 
 using pcrecpp::StringPiece;

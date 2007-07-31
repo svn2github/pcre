@@ -32,9 +32,15 @@
 // Unittest for scanner, especially GetNextComments and GetComments()
 // functionality.
 
+#ifdef HAVE_CONFIG_H                         
+#include <config.h>
+#endif                                                               
+
 #include <stdio.h>
 #include <string>
 #include <vector>
+
+#include <pcrecpp.h>
 #include <pcre_stringpiece.h>
 #include <pcre_scanner.h>
 

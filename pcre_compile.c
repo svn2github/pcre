@@ -42,10 +42,13 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting internal functions that are not used by other modules. */
 
 
+#ifdef HAVE_CONFIG_H                         
+#include <config.h>
+#endif                                                               
+
 #define NLBLOCK cd             /* Block containing newline information */
 #define PSSTART start_pattern  /* Field containing processed string start */
 #define PSEND   end_pattern    /* Field containing processed string end */
-
 
 #include "pcre_internal.h"
 
@@ -701,7 +704,7 @@ if (c == '{')
     *negptr = TRUE;
     ptr++;
     }
-  for (i = 0; i < sizeof(name) - 1; i++)
+  for (i = 0; i < (int)sizeof(name) - 1; i++)
     {
     c = *(++ptr);
     if (c == 0) goto ERROR_RETURN;

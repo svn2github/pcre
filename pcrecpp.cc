@@ -30,7 +30,7 @@
 // Author: Sanjay Ghemawat
 
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include <stdlib.h>
@@ -41,12 +41,11 @@
 #include <errno.h>
 #include <string>
 #include <algorithm>
-// We need this to compile the proper dll on windows/msys.  This is copied
-// from pcre_internal.h.  It would probably be better just to include that.
-#define PCRE_DEFINITION  /* Win32 __declspec(export) trigger for .dll */
+
+#include "pcrecpp_internal.h"
 #include <pcre.h>
-#include "pcre_stringpiece.h"
 #include "pcrecpp.h"
+#include "pcre_stringpiece.h"
 
 
 namespace pcrecpp {
@@ -56,7 +55,7 @@ static const int kMaxArgs = 16;
 static const int kVecSize = (1 + kMaxArgs) * 3;  // results + PCRE workspace
 
 // Special object that stands-in for no argument
-Arg no_arg((void*)NULL);
+PCRECPP_EXP_DECL Arg no_arg((void*)NULL);
 
 // If a regular expression has no error, its error_ field points here
 static const string empty_string;
@@ -463,7 +462,7 @@ int RE::TryMatch(const StringPiece& text,
     return 0;
   }
 
-  pcre_extra extra = { 0 };
+  pcre_extra extra = { 0, 0, 0, 0, 0, 0 };
   if (options_.match_limit() > 0) {
     extra.flags |= PCRE_EXTRA_MATCH_LIMIT;
     extra.match_limit = options_.match_limit();

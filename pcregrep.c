@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include <ctype.h>
@@ -50,8 +50,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 #include <pcre.h>
@@ -855,7 +856,7 @@ while (ptr < endptr)
 
   t = end_of_line(t, endptr, &endlinelength);
   linelength = t - ptr - endlinelength;
-  length = multiline? endptr - ptr : linelength;
+  length = multiline? (size_t)(endptr - ptr) : linelength;
 
   /* Extra processing for Jeffrey Friedl's debugging. */
 
@@ -1625,7 +1626,7 @@ for (i = 1; i < argc; i++)
         else                 /* Special case xxx=data */
           {
           int oplen = equals - op->long_name;
-          int arglen = (argequals == NULL)? strlen(arg) : argequals - arg;
+          int arglen = (argequals == NULL)? (int)strlen(arg) : argequals - arg;
           if (oplen == arglen && strncmp(arg, op->long_name, oplen) == 0)
             {
             option_data = arg + arglen;

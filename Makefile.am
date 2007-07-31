@@ -210,6 +210,7 @@ if WITH_PCRE_CPP
 
 lib_LTLIBRARIES += libpcrecpp.la
 libpcrecpp_la_SOURCES = \
+  pcrecpp_internal.h \
   pcrecpp.cc \
   pcre_scanner.cc \
   pcre_stringpiece.cc

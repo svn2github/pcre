@@ -67,10 +67,6 @@ be absolutely sure we get our version. */
 #endif
 
 
-/* Get the definitions provided by running "configure" */
-
-#include "config.h"
-
 /* Standard C headers plus the external interface definition. The only time
 setjmp and stdarg are used is when NO_RECURSE is set. */
 
@@ -112,7 +108,7 @@ PCRE_EXP_DATA_DEFN only if they are not already set. */
 
 #ifndef PCRE_EXP_DECL
 #  ifdef _WIN32
-#    ifdef DLL_EXPORT
+#    ifndef PCRE_STATIC
 #      define PCRE_EXP_DECL       extern __declspec(dllexport)
 #      define PCRE_EXP_DEFN       __declspec(dllexport)
 #      define PCRE_EXP_DATA_DEFN  __declspec(dllexport)
@@ -121,7 +117,6 @@ PCRE_EXP_DATA_DEFN only if they are not already set. */
 #      define PCRE_EXP_DEFN
 #      define PCRE_EXP_DATA_DEFN
 #    endif
-#
 #  else
 #    ifdef __cplusplus
 #      define PCRE_EXP_DECL       extern "C"
