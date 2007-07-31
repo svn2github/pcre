@@ -53,16 +53,10 @@ possible. There are also some static supporting functions. */
 #undef min
 #undef max
 
-/* The chain of eptrblocks for tail recursions uses memory in stack workspace,
-obtained at top level, the size of which is defined by EPTR_WORK_SIZE. */
-
-#define EPTR_WORK_SIZE (1000)
-
 /* Flag bits for the match() function */
 
 #define match_condassert     0x01  /* Called to check a condition assertion */
 #define match_cbegroup       0x02  /* Could-be-empty unlimited repeat group */
-#define match_tail_recursed  0x04  /* Tail recursive call */
 
 /* Non-error returns from the match() function. Error returns are externally
 defined PCRE_ERROR_xxx codes, which are all negative. */
@@ -212,7 +206,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
-       RM41,  RM42, RM43, RM44, RM45, RM46, RM47 };
+       RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50 };
 
 
 /* These versions of the macros use the stack, as normal. There are debugging
@@ -384,7 +378,6 @@ Arguments:
                  match_condassert - this is an assertion condition
                  match_cbegroup - this is the start of an unlimited repeat
                    group that can match an empty string
-                 match_tail_recursed - this is a tail_recursed group
    rdepth      the recursion depth
 
 Returns:       MATCH_MATCH if matched            )  these values are >= 0
@@ -586,22 +579,16 @@ original_ims = ims;    /* Save for resetting on ')' */
 string, the match_cbegroup flag is set. When this is the case, add the current
 subject pointer to the chain of such remembered pointers, to be checked when we
 hit the closing ket, in order to break infinite loops that match no characters.
-When match() is called in other circumstances, don't add to the chain. If this
-is a tail recursion, use a block from the workspace, as the one on the stack is
-already used. */
+When match() is called in other circumstances, don't add to the chain. The
+match_cbegroup flag must NOT be used with tail recursion, because the memory
+block that is used is on the stack, so a new one may be required for each
+match(). */
 
 if ((flags & match_cbegroup) != 0)
   {
-  eptrblock *p;
-  if ((flags & match_tail_recursed) != 0)
-    {
-    if (md->eptrn >= EPTR_WORK_SIZE) RRETURN(PCRE_ERROR_NULLWSLIMIT);
-    p = md->eptrchain + md->eptrn++;
-    }
-  else p = &newptrb;
-  p->epb_saved_eptr = eptr;
-  p->epb_prev = eptrb;
-  eptrb = p;
+  newptrb.epb_saved_eptr = eptr;
+  newptrb.epb_prev = eptrb;
+  eptrb = &newptrb;
   }
 
 /* Now start processing the opcodes. */
@@ -677,15 +664,22 @@ for (;;)
       RRETURN(MATCH_NOMATCH);
       }
 
-    /* Insufficient room for saving captured contents. Treat as a non-capturing
-    bracket. */
+    /* FALL THROUGH ... Insufficient room for saving captured contents. Treat
+    as a non-capturing bracket. */
+
+    /* VVVVVVVVVVVVVVVVVVVVVVVVV */
+    /* VVVVVVVVVVVVVVVVVVVVVVVVV */
 
     DPRINTF(("insufficient capture room: treat as non-capturing\n"));
+
+    /* VVVVVVVVVVVVVVVVVVVVVVVVV */
+    /* VVVVVVVVVVVVVVVVVVVVVVVVV */
 
     /* Non-capturing bracket. Loop for all the alternatives. When we get to the
     final alternative within the brackets, we would return the result of a
     recursive call to match() whatever happened. We can reduce stack usage by
-    turning this into a tail recursion. */
+    turning this into a tail recursion, except in the case when match_cbegroup
+    is set.*/
 
     case OP_BRA:
     case OP_SBRA:
@@ -693,12 +687,20 @@ for (;;)
     flags = (op >= OP_SBRA)? match_cbegroup : 0;
     for (;;)
       {
-      if (ecode[GET(ecode, 1)] != OP_ALT)
+      if (ecode[GET(ecode, 1)] != OP_ALT)   /* Final alternative */
         {
-        ecode += _pcre_OP_lengths[*ecode];
-        flags |= match_tail_recursed;
-        DPRINTF(("bracket 0 tail recursion\n"));
-        goto TAIL_RECURSE;
+        if (flags == 0)    /* Not a possibly empty group */
+          {
+          ecode += _pcre_OP_lengths[*ecode];
+          DPRINTF(("bracket 0 tail recursion\n"));
+          goto TAIL_RECURSE;
+          }
+
+        /* Possibly empty group; can't use tail recursion. */
+
+        RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, ims,
+          eptrb, flags, RM48);
+        RRETURN(rrc);
         }
 
       /* For non-final alternatives, continue the loop for a NOMATCH result;
@@ -766,16 +768,25 @@ for (;;)
       }
 
     /* We are now at the branch that is to be obeyed. As there is only one,
-    we can use tail recursion to avoid using another stack frame. If the second
-    alternative doesn't exist, we can just plough on. */
+    we can use tail recursion to avoid using another stack frame, except when
+    match_cbegroup is required for an unlimited repeat of a possibly empty
+    group. If the second alternative doesn't exist, we can just plough on. */
 
     if (condition || *ecode == OP_ALT)
       {
       ecode += 1 + LINK_SIZE;
-      flags = match_tail_recursed | ((op == OP_SCOND)? match_cbegroup : 0);
-      goto TAIL_RECURSE;
+      if (op == OP_SCOND)        /* Possibly empty group */
+        {
+        RMATCH(eptr, ecode, offset_top, md, ims, eptrb, match_cbegroup, RM49);
+        RRETURN(rrc);
+        }
+      else                       /* Group must match something */
+        {
+        flags = 0;
+        goto TAIL_RECURSE;
+        }
       }
-    else
+    else                         /* Condition false & no 2nd alternative */
       {
       ecode += 1 + LINK_SIZE;
       }
@@ -1027,8 +1038,7 @@ for (;;)
 
     do
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims,
-        eptrb, 0, RM7);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM7);
       if (rrc == MATCH_MATCH) break;
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode,1);
@@ -1073,11 +1083,10 @@ for (;;)
 
     if (*ecode == OP_KETRMIN)
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0,
-        RM8);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM8);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode = prev;
-      flags = match_tail_recursed;
+      flags = 0;
       goto TAIL_RECURSE;
       }
     else  /* OP_KETRMAX */
@@ -1085,7 +1094,7 @@ for (;;)
       RMATCH(eptr, prev, offset_top, md, ims, eptrb, match_cbegroup, RM9);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
-      flags = match_tail_recursed;
+      flags = 0;
       goto TAIL_RECURSE;
       }
     /* Control never gets here */
@@ -1216,17 +1225,21 @@ for (;;)
 
     /* The repeating kets try the rest of the pattern or restart from the
     preceding bracket, in the appropriate order. In the second case, we can use
-    tail recursion to avoid using another stack frame. */
+    tail recursion to avoid using another stack frame, unless we have an
+    unlimited repeat of a group that can match an empty string. */
 
     flags = (*prev >= OP_SBRA)? match_cbegroup : 0;
 
     if (*ecode == OP_KETRMIN)
       {
-      RMATCH(eptr, ecode + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0,
-        RM12);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM12);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      if (flags != 0)    /* Could match an empty string */
+        {
+        RMATCH(eptr, prev, offset_top, md, ims, eptrb, flags, RM50);
+        RRETURN(rrc);
+        }
       ecode = prev;
-      flags |= match_tail_recursed;
       goto TAIL_RECURSE;
       }
     else  /* OP_KETRMAX */
@@ -1234,7 +1247,7 @@ for (;;)
       RMATCH(eptr, prev, offset_top, md, ims, eptrb, flags, RM13);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
-      flags = match_tail_recursed;
+      flags = 0;
       goto TAIL_RECURSE;
       }
     /* Control never gets here */
@@ -4290,7 +4303,6 @@ const uschar *start_bits = NULL;
 USPTR start_match = (USPTR)subject + start_offset;
 USPTR end_subject;
 USPTR req_byte_ptr = start_match - 1;
-eptrblock eptrchain[EPTR_WORK_SIZE];
 
 pcre_study_data internal_study;
 const pcre_study_data *study;
@@ -4376,7 +4388,6 @@ md->partial = (options & PCRE_PARTIAL) != 0;
 md->hitend = FALSE;
 
 md->recursive = NULL;                   /* No recursion at top level */
-md->eptrchain = eptrchain;              /* Make workspace generally available */
 
 md->lcc = tables + lcc_offset;
 md->ctypes = tables + ctypes_offset;
@@ -4674,9 +4685,7 @@ for(;;)
 
   md->start_match_ptr = start_match;      /* Insurance */
   md->match_call_count = 0;
-  md->eptrn = 0;                          /* Next free eptrchain slot */
-  rc = match(start_match, md->start_code, start_match, 2, md,
-    ims, NULL, 0, 0);
+  rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);
 
   /* Any return other than MATCH_NOMATCH breaks the loop. */
 

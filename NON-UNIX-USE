@@ -42,21 +42,21 @@ The following are generic comments about building the PCRE C library "by hand".
      settings that it contains to whatever is appropriate for your environment.
      In particular, if you want to force a specific value for newline, you can
      define the NEWLINE macro.
- 
+
      An alternative approach is not to edit config.h, but to use -D on the
      compiler command line to make any changes that you need.
- 
+
      NOTE: There have been occasions when the way in which certain parameters
      in config.h are used has changed between releases. (In the configure/make
      world, this is handled automatically.) When upgrading to a new release,
      you are strongly advised to review config.h.generic before re-using what
      you had previously.
- 
+
  (2) Copy or rename the file pcre.h.generic as pcre.h.
- 
+
  (3) EITHER:
        Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
- 
+
      OR:
        Compile dftables.c as a stand-alone program, and then run it with the
        single argument "pcre_chartables.c". This generates a set of standard
@@ -65,24 +65,24 @@ The following are generic comments about building the PCRE C library "by hand".
        that is specified by LC_xxx environment variables, add the -L option to
        the dftables command. You must use this method if you are building on
        a system that uses EBCDIC code.
- 
+
      The tables in pcre_chartables.c are defaults. The caller of PCRE can
      specify alternative tables at run time.
-     
+
  (4) Ensure that you have the following header files:
- 
+
        pcre_internal.h
        ucp.h
        ucpinternal.h
        ucptable.h
- 
+
  (5) Also ensure that you have the following file, which is #included as source
      when building a debugging version of PCRE and is also used by pcretest.
- 
+
        pcre_printint.src
- 
+
  (6) Compile the following source files:
- 
+
        pcre_chartables.c
        pcre_compile.c
        pcre_config.c
@@ -103,12 +103,12 @@ The following are generic comments about building the PCRE C library "by hand".
        pcre_valid_utf8.c
        pcre_version.c
        pcre_xclass.c
- 
+
  (7) Now link all the compiled code into an object library in whichever form
      your system keeps such libraries. This is the basic PCRE C library. If
      your system has static and shared libraries, you may have to do this once
      for each type.
- 
+
  (8) Similarly, compile pcreposix.c and link the result (on its own) as the
      pcreposix library.
 

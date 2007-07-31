@@ -961,7 +961,10 @@ matching is used.
 Return a copy of the options with which the pattern was compiled. The fourth
 argument should point to an <b>unsigned long int</b> variable. These option bits
 are those specified in the call to <b>pcre_compile()</b>, modified by any
-top-level option settings within the pattern itself.
+top-level option settings at the start of the pattern itself. In other words,
+they are the options that will be in force when matching starts. For example,
+if the pattern /(?im)abc(?-i)d/ is compiled with the PCRE_EXTENDED option, the
+result is PCRE_CASELESS, PCRE_MULTILINE, and PCRE_EXTENDED.
 </P>
 <P>
 A pattern is automatically anchored by PCRE if all of its top-level
@@ -1484,20 +1487,12 @@ The internal recursion limit, as specified by the <i>match_limit_recursion</i>
 field in a <b>pcre_extra</b> structure (or defaulted) was reached. See the
 description above.
 <pre>
-  PCRE_ERROR_NULLWSLIMIT    (-22)
-</pre>
-When a group that can match an empty substring is repeated with an unbounded
-upper limit, the subject position at the start of the group must be remembered,
-so that a test for an empty string can be made when the end of the group is
-reached. Some workspace is required for this; if it runs out, this error is
-given.
-<pre>
   PCRE_ERROR_BADNEWLINE     (-23)
 </pre>
 An invalid combination of PCRE_NEWLINE_<i>xxx</i> options was given.
 </P>
 <P>
-Error numbers -16 to -20 are not used by <b>pcre_exec()</b>.
+Error numbers -16 to -20 and -22 are not used by <b>pcre_exec()</b>.
 </P>
 <br><a name="SEC15" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
 <P>
@@ -1876,7 +1871,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 June 2007
+Last updated: 30 July 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

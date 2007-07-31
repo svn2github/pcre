@@ -132,7 +132,7 @@ extern "C" {
 #define PCRE_ERROR_DFA_WSSIZE     (-19)
 #define PCRE_ERROR_DFA_RECURSE    (-20)
 #define PCRE_ERROR_RECURSIONLIMIT (-21)
-#define PCRE_ERROR_NULLWSLIMIT    (-22)
+#define PCRE_ERROR_NOTUSED        (-22)
 #define PCRE_ERROR_BADNEWLINE     (-23)
 
 /* Request types for pcre_fullinfo() */

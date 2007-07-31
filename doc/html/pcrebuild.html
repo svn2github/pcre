@@ -242,13 +242,15 @@ hand".)
 <br><a name="SEC12" href="#TOC1">USING EBCDIC CODE</a><br>
 <P>
 PCRE assumes by default that it will run in an environment where the character
-code is ASCII (or Unicode, which is a superset of ASCII). PCRE can, however, be
-compiled to run in an EBCDIC environment by adding
+code is ASCII (or Unicode, which is a superset of ASCII). This is the case for
+most computer operating systems. PCRE can, however, be compiled to run in an
+EBCDIC environment by adding
 <pre>
   --enable-ebcdic
 </pre>
 to the <b>configure</b> command. This setting implies
---enable-rebuild-chartables.
+--enable-rebuild-chartables. You should only use it if you know that you are in
+an EBCDIC environment (for example, an IBM mainframe operating system).
 </P>
 <br><a name="SEC13" href="#TOC1">SEE ALSO</a><br>
 <P>
@@ -265,7 +267,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 05 June 2007
+Last updated: 30 July 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

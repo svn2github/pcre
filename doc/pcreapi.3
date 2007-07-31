@@ -1466,30 +1466,11 @@ The internal recursion limit, as specified by the \fImatch_limit_recursion\fP
 field in a \fBpcre_extra\fP structure (or defaulted) was reached. See the
 description above.
 .sp
-  PCRE_ERROR_NULLWSLIMIT    (-22)
-.sp
-When a parenthesized subpattern that can match an empty substring is repeated
-with an unbounded upper limit, the subject position at the start of the group
-must be remembered, so that a test for an empty string can be made when the end
-of the group is reached. The repetition loop is automatically terminated when
-an empty string is matched.
-.P
-Some workspace is required for remembering the starting position. For most
-capturing subpatterns, an internal recursive call of the match() function is 
-used, and in this case, the workspace is taken from the runtime stack. However,
-for non-capturing subpatterns, this is not available. Instead, some fixed
-workspace (taken from the top-level stack) is used. If it runs out, the
-PCRE_ERROR_NULLWSLIMIT error is given. The size of the fixed workspace allows
-for up to 1000 repetitions of a non-capturing subpattern that might match an
-empty string. If this limit is a problem for you, you can sometimes get round 
-it by changing a non-capturing subpattern into a capturing one, but that will 
-increase the amount of runtime stack that is used.
-.sp
   PCRE_ERROR_BADNEWLINE     (-23)
 .sp
 An invalid combination of PCRE_NEWLINE_\fIxxx\fP options was given.
 .P
-Error numbers -16 to -20 are not used by \fBpcre_exec()\fP.
+Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .
 .
 .SH "EXTRACTING CAPTURED SUBSTRINGS BY NUMBER"
