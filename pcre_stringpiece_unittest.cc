@@ -1,9 +1,9 @@
 // Copyright 2003 and onwards Google Inc.
 // Author: Sanjay Ghemawat
 
-#ifdef HAVE_CONFIG_H                         
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif                                                               
+#endif
 
 #include <stdio.h>
 #include <map>

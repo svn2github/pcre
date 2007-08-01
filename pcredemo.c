@@ -11,7 +11,7 @@ Compile thuswise:
     -R/usr/local/lib -lpcre
 
 Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
-library files for PCRE are installed on your system. You don't need -I and -L 
+library files for PCRE are installed on your system. You don't need -I and -L
 if PCRE is installed in the standard system libraries. Only some operating
 systems (e.g. Solaris) use the -R option.
 */

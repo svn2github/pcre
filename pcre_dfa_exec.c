@@ -44,9 +44,9 @@ FSM). This is NOT Perl- compatible, but it has advantages in certain
 applications. */
 
 
-#ifdef HAVE_CONFIG_H                         
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif                                                               
+#endif
 
 #define NLBLOCK md             /* Block containing newline information */
 #define PSSTART start_subject  /* Field containing processed string start */

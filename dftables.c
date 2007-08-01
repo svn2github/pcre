@@ -43,9 +43,9 @@ character tables for PCRE. The tables are built according to the current
 locale. Now that pcre_maketables is a function visible to the outside world, we
 make use of its code from here in order to be consistent. */
 
-#ifdef HAVE_CONFIG_H                         
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif                                                               
+#endif
 
 #include <ctype.h>
 #include <stdio.h>
@@ -109,9 +109,9 @@ fprintf(f,
   "Pulling in the header ensures that the array gets flagged as \"someone\n"
   "outside this compilation unit might reference this\" and so it will always\n"
   "be supplied to the linker. */\n\n"
-  "#ifdef HAVE_CONFIG_H"
-  "#include <config.h>"
-  "#endif"
+  "#ifdef HAVE_CONFIG_H\n"
+  "#include <config.h>\n"
+  "#endif\n\n"
   "#include \"pcre_internal.h\"\n\n");
 fprintf(f,
   "const unsigned char _pcre_default_tables[] = {\n\n"

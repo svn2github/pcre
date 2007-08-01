@@ -15,7 +15,7 @@ This document contains the following sections:
 
 GENERAL
 
-I (Philip Hazel) have no knowledge of Windows or VMS sytems and how their
+I (Philip Hazel) have no experience of Windows or VMS sytems and how their
 libraries work. The items in the PCRE distribution and Makefile that relate to
 anything other than Unix-like systems are untested by me.
 
@@ -105,6 +105,11 @@ The following are generic comments about building the PCRE C library "by hand".
        pcre_version.c
        pcre_xclass.c
 
+     Make sure that you include -I. in the compiler command (or equivalent for
+     an unusual compiler) so that all included PCRE header files are first
+     sought in the current directory. Otherwise you run the risk of picking up
+     a previously-installed file from somewhere else.
+
  (7) Now link all the compiled code into an object library in whichever form
      your system keeps such libraries. This is the basic PCRE C library. If
      your system has static and shared libraries, you may have to do this once
@@ -151,9 +156,9 @@ The default processor stack size of 1Mb in some Windows environments is too
 small for matching patterns that need much recursion. In particular, test 2 may
 fail because of this. Normally, running out of stack causes a crash, but there
 have been cases where the test program has just died silently. See your linker
-documentation for how to increase stack size if you experience problems. The 
-Linux default of 8Mb is a reasonable choice for the stack, though even that can 
-be too small for some pattern/subject combinations. There is more about stack 
+documentation for how to increase stack size if you experience problems. The
+Linux default of 8Mb is a reasonable choice for the stack, though even that can
+be too small for some pattern/subject combinations. There is more about stack
 usage in the "pcrestack" documentation.
 
 
@@ -310,5 +315,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 05 July 2007
+Last Updated: 01 August 2007
 ****

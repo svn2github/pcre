@@ -48,6 +48,11 @@ Version 7.3 05-Jul-07
     from the 1000-entry workspace that had been reserved. So now there is no
     explicit limit, but more stack is used.
 
+ 8. Applied Daniel's patches to solve problems with the import/export magic
+    syntax that is required for Windows, and which was going wrong for the
+    pcreposix and pcrecpp parts of the library. These were overlooked when this
+    problem was solved for the main library.
+
 
 Version 7.2 19-Jun-07
 ---------------------

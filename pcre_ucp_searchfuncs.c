@@ -41,9 +41,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains code for searching the table of Unicode character
 properties. */
 
-#ifdef HAVE_CONFIG_H                         
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif                                                               
+#endif
 
 #include "pcre_internal.h"
 

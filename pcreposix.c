@@ -42,12 +42,12 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
-#ifdef HAVE_CONFIG_H                         
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif                                                               
+#endif
 
 
-/* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for 
+/* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for
 compiling these functions. This must come before including pcreposix.h, where
 they are set for an application (using these functions) if they have not
 previously been set. */
@@ -57,6 +57,7 @@ previously been set. */
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
+#include <pcre.h>
 #include "pcre_internal.h"
 #include "pcreposix.h"
 
