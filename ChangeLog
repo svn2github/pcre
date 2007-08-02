@@ -29,8 +29,8 @@ Version 7.3 05-Jul-07
  4. Debugging: adjusted the names of opcodes for different kinds of parentheses
     in debug output.
 
- 5. Arrange to use "%I64d" instead of "%lld" for long printing in the pcrecpp
-    unittest when running under MinGW.
+ 5. Arrange to use "%I64d" instead of "%lld" and "%I64u" instead of "%llu" for
+    long printing in the pcrecpp unittest when running under MinGW.
 
  6. ESC_K was left out of the EBCDIC table.
 
