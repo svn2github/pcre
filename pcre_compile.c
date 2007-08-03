@@ -2453,17 +2453,24 @@ for (;; ptr++)
       goto FAILED;
       }
 
-    /* If the first character is '^', set the negation flag and skip it. */
-
-    if ((c = *(++ptr)) == '^')
+    /* If the first character is '^', set the negation flag and skip it. Also,
+    if the first few characters (either before or after ^) are \Q\E or \E we 
+    skip them too. This makes for compatibility with Perl. */
+    
+    negate_class = FALSE;
+    for (;;)
       {
-      negate_class = TRUE;
       c = *(++ptr);
-      }
-    else
-      {
-      negate_class = FALSE;
-      }
+      if (c == '\\')
+        {
+        if (ptr[1] == 'E') ptr++; 
+          else if (strncmp((const char *)ptr+1, "Q\\E", 3) == 0) ptr += 3;
+            else break; 
+        }
+      else if (!negate_class && c == '^')
+        negate_class = TRUE;
+      else break;
+      } 
 
     /* Keep a count of chars with values < 256 so that we can optimize the case
     of just a single character (as long as it's < 256). However, For higher
@@ -2603,7 +2610,7 @@ for (;; ptr++)
       of the specials, which just set a flag. The sequence \b is a special
       case. Inside a class (and only there) it is treated as backspace.
       Elsewhere it marks a word boundary. Other escapes have preset maps ready
-      to or into the one we are building. We assume they have more than one
+      to 'or' into the one we are building. We assume they have more than one
       character in them, so set class_charcount bigger than one. */
 
       if (c == '\\')
@@ -3068,7 +3075,7 @@ for (;; ptr++)
       *errorcodeptr = ERR6;
       goto FAILED;
       }
-
+      
     /* If class_charcount is 1, we saw precisely one character whose value is
     less than 256. In non-UTF-8 mode we can always optimize. In UTF-8 mode, we
     can optimize the negative case only if there were no characters >= 128

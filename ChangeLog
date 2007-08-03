@@ -69,6 +69,13 @@ Version 7.3 05-Jul-07
     duplicate names are permitted. If none of the named substrings are set, the 
     functions return PCRE_ERROR_NOSUBSTRING (7); the doc said they returned an 
     empty string. 
+    
+11. Because Perl interprets \Q...\E at a high level, and ignores orphan \E 
+    instances, patterns such as [\Q\E] or [\E] or even [^\E] cause an error, 
+    because the ] is interpreted as the first data character and the 
+    terminating ] is not found. PCRE has been made compatible with Perl in this 
+    regard. Previously, it interpreted [\Q\E] as an empty class, and [\E] could 
+    cause memory overwriting. 
 
 
 Version 7.2 19-Jun-07
