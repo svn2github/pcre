@@ -53,6 +53,18 @@ Version 7.3 05-Jul-07
     pcreposix and pcrecpp parts of the library. These were overlooked when this
     problem was solved for the main library.
 
+ 9. There were some crude static tests to avoid integer overflow when computing
+    the size of patterns that contain repeated groups with explicit upper
+    limits. As the maximum quantifier is 65535, the maximum group length was
+    set at 30,000 so that the product of these two numbers did not overflow a
+    32-bit integer. However, it turns out that people want to use groups that
+    are longer than 30,000 bytes (though not repeat them that many times).
+    Change 7.0/17 (the refactoring of the way the pattern size is computed) has
+    made it possible to implement the integer overflow checks in a much more
+    dynamic way, which I have now done. The artificial limitation on group
+    length has been removed - we now have only the limit on the total length of
+    the compiled pattern, which depends on the LINK_SIZE setting.
+
 
 Version 7.2 19-Jun-07
 ---------------------

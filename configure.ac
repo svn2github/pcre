@@ -376,11 +376,6 @@ AC_DEFINE([MAX_NAME_COUNT], [10000], [
   change it. Care must be taken if it is increased, because it guards
   against integer overflow caused by enormously large patterns.])
 
-AC_DEFINE([MAX_DUPLENGTH], [30000], [
-  This limit is parameterized just in case anybody ever wants to
-  change it. Care must be taken if it is increased, because it guards
-  against integer overflow caused by enormously large patterns.])
-
 AH_VERBATIM([PCRE_EXP_DEFN], [
 /* If you are compiling for a system other than a Unix-like system or
    Win32, and it needs some magic to be inserted before the definition

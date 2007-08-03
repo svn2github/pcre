@@ -1294,7 +1294,7 @@ COMPILATION ERROR CODES
          47  unknown property name after \P or \p
          48  subpattern name is too long (maximum 32 characters)
          49  too many named subpatterns (maximum 10,000)
-         50  repeated subpattern is too long
+         50  [this code is not in use]
          51  octal value is greater than \377 (not in UTF-8 mode)
          52  internal error: overran compiling workspace
          53   internal  error:  previously-checked  referenced  subpattern not

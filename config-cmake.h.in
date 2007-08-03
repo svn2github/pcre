@@ -26,6 +26,5 @@
 
 #define MAX_NAME_SIZE	32
 #define MAX_NAME_COUNT	10000
-#define MAX_DUPLENGTH	30000
 
 /* end config.h for CMake builds */

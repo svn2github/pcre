@@ -65,6 +65,13 @@ used by pcretest. DEBUG is not defined when building a production library. */
 
 #define SETBIT(a,b) a[b/8] |= (1 << (b%8))
 
+/* Maximum length value to check against when making sure that the integer that
+holds the compiled pattern length does not overflow. We make it a bit less than
+INT_MAX to allow for adding in group terminating bytes, so that we don't have
+to check them every time. */
+
+#define OFLOW_MAX (INT_MAX - 20)
+
 
 /*************************************************
 *      Code parameters and static tables         *
@@ -206,7 +213,7 @@ static const char *error_texts[] = {
   "missing ) after comment",
   "parentheses nested too deeply",  /** DEAD **/
   /* 20 */
-  "regular expression too large",
+  "regular expression is too large",
   "failed to get memory",
   "unmatched parentheses",
   "internal error: code overflow",
@@ -242,7 +249,7 @@ static const char *error_texts[] = {
   "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " characters)",
   "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")",
   /* 50 */
-  "repeated subpattern is too long",
+  "repeated subpattern is too long",    /** DEAD **/
   "octal value is greater than \\377 (not in UTF-8 mode)",
   "internal error: overran compiling workspace",
   "internal error: previously-checked referenced subpattern not found",
@@ -2258,6 +2265,15 @@ for (;; ptr++)
     */
 
     if (code < last_code) code = last_code;
+
+    /* Paranoid check for integer overflow */
+
+    if (OFLOW_MAX - *lengthptr < code - last_code)
+      {
+      *errorcodeptr = ERR20;
+      goto FAILED;
+      }
+
     *lengthptr += code - last_code;
     DPRINTF(("length=%d added %d c=%c\n", *lengthptr, code - last_code, c));
 
@@ -2370,6 +2386,11 @@ for (;; ptr++)
     *ptrptr = ptr;
     if (lengthptr != NULL)
       {
+      if (OFLOW_MAX - *lengthptr < code - last_code)
+        {
+        *errorcodeptr = ERR20;
+        goto FAILED;
+        }
       *lengthptr += code - last_code;   /* To include callout length */
       DPRINTF((">> end branch\n"));
       }
@@ -3524,14 +3545,6 @@ for (;; ptr++)
         goto FAILED;
         }
 
-      /* This is a paranoid check to stop integer overflow later on */
-
-      if (len > MAX_DUPLENGTH)
-        {
-        *errorcodeptr = ERR50;
-        goto FAILED;
-        }
-
       /* If the maximum repeat count is unlimited, find the end of the bracket
       by scanning through from the start, and compute the offset back to it
       from the current code pointer. There may be an OP_OPT setting following
@@ -3620,10 +3633,21 @@ for (;; ptr++)
         if (repeat_min > 1)
           {
           /* In the pre-compile phase, we don't actually do the replication. We
-          just adjust the length as if we had. */
+          just adjust the length as if we had. Do some paranoid checks for
+          potential integer overflow. */
 
           if (lengthptr != NULL)
-            *lengthptr += (repeat_min - 1)*length_prevgroup;
+            {
+            int delta = (repeat_min - 1)*length_prevgroup;
+            if ((double)(repeat_min - 1)*(double)length_prevgroup >
+                                                            (double)INT_MAX ||
+                OFLOW_MAX - *lengthptr < delta)
+              {
+              *errorcodeptr = ERR20;
+              goto FAILED;
+              }
+            *lengthptr += delta;
+            }
 
           /* This is compiling for real */
 
@@ -3661,11 +3685,23 @@ for (;; ptr++)
         /* In the pre-compile phase, we don't actually do the replication. We
         just adjust the length as if we had. For each repetition we must add 1
         to the length for BRAZERO and for all but the last repetition we must
-        add 2 + 2*LINKSIZE to allow for the nesting that occurs. */
+        add 2 + 2*LINKSIZE to allow for the nesting that occurs. Do some
+        paranoid checks to avoid integer overflow. */
 
         if (lengthptr != NULL && repeat_max > 0)
-          *lengthptr += repeat_max * (length_prevgroup + 1 + 2 + 2*LINK_SIZE) -
-            2 - 2*LINK_SIZE;  /* Last one doesn't nest */
+          {
+          int delta = repeat_max * (length_prevgroup + 1 + 2 + 2*LINK_SIZE) -
+                      2 - 2*LINK_SIZE;   /* Last one doesn't nest */
+          if ((double)repeat_max *
+                (double)(length_prevgroup + 1 + 2 + 2*LINK_SIZE)
+                  > (double)INT_MAX ||
+              OFLOW_MAX - *lengthptr < delta)
+            {
+            *errorcodeptr = ERR20;
+            goto FAILED;
+            }
+          *lengthptr += delta;
+          }
 
         /* This is compiling for real */
 
@@ -4627,6 +4663,11 @@ for (;; ptr++)
 
     if (lengthptr != NULL)
       {
+      if (OFLOW_MAX - *lengthptr < length_prevgroup - 2 - 2*LINK_SIZE)
+        {
+        *errorcodeptr = ERR20;
+        goto FAILED;
+        }
       *lengthptr += length_prevgroup - 2 - 2*LINK_SIZE;
       code++;
       PUTINC(code, 0, 1 + LINK_SIZE);
@@ -5122,7 +5163,15 @@ for (;;)
     *ptrptr = ptr;
     *firstbyteptr = firstbyte;
     *reqbyteptr = reqbyte;
-    if (lengthptr != NULL) *lengthptr += length;
+    if (lengthptr != NULL)
+      {
+      if (OFLOW_MAX - *lengthptr < length)
+        {
+        *errorcodeptr = ERR20;
+        return FALSE;
+        }
+      *lengthptr += length;
+      }
     return TRUE;
     }
 
