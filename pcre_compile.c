@@ -1409,7 +1409,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 
   /* For other groups, scan the branches. */
 
-  if (c == OP_BRA || c == OP_CBRA || c == OP_ONCE)
+  if (c == OP_BRA || c == OP_CBRA || c == OP_ONCE || c == OP_COND)
     {
     BOOL empty_branch;
     if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */

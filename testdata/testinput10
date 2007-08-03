@@ -101,4 +101,8 @@ are all themselves checked in other tests. --/
 
 /[\x{105}-\x{109}]/8iBM
 
+/( ( (?(1)0|) )*   )/xBM
+
+/(  (?(1)0|)*   )/xBM
+
 / End of testinput10 /
