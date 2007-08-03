@@ -64,6 +64,11 @@ Version 7.3 05-Jul-07
     dynamic way, which I have now done. The artificial limitation on group
     length has been removed - we now have only the limit on the total length of
     the compiled pattern, which depends on the LINK_SIZE setting.
+    
+10. Fixed a bug in the documentation for get/copy named substring when 
+    duplicate names are permitted. If none of the named substrings are set, the 
+    functions return PCRE_ERROR_NOSUBSTRING (7); the doc said they returned an 
+    empty string. 
 
 
 Version 7.2 19-Jun-07

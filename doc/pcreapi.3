@@ -1635,12 +1635,15 @@ example is shown in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
-documentation. When duplicates are present, \fBpcre_copy_named_substring()\fP
-and \fBpcre_get_named_substring()\fP return the first substring corresponding
-to the given name that is set. If none are set, an empty string is returned.
-The \fBpcre_get_stringnumber()\fP function returns one of the numbers that are
-associated with the name, but it is not defined which it is.
-.sp
+documentation. 
+.P
+When duplicates are present, \fBpcre_copy_named_substring()\fP and
+\fBpcre_get_named_substring()\fP return the first substring corresponding to
+the given name that is set. If none are set, PCRE_ERROR_NOSUBSTRING (-7) is
+returned; no data is returned. The \fBpcre_get_stringnumber()\fP function
+returns one of the numbers that are associated with the name, but it is not
+defined which it is.
+.P
 If you want to get full details of all captured substrings for a given name,
 you must use the \fBpcre_get_stringtable_entries()\fP function. The first
 argument is the compiled pattern, and the second is the name. The third and
