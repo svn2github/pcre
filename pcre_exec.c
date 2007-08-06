@@ -609,7 +609,7 @@ for (;;)
       eptr >= md->end_subject &&
       eptr > mstart)
     md->hitend = TRUE;
-
+    
   switch(op)
     {
     /* Handle a capturing bracket. If there is space in the offset vector, save
@@ -895,7 +895,7 @@ for (;;)
         {
         eptr--;
         if (eptr < md->start_subject) RRETURN(MATCH_NOMATCH);
-        BACKCHAR(eptr)
+        BACKCHAR(eptr);
         }
       }
     else
@@ -2050,7 +2050,7 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM21);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
-          BACKCHAR(eptr)
+          BACKCHAR(eptr);
           }
         RRETURN(MATCH_NOMATCH);
         }
@@ -3719,7 +3719,7 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM44);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
-          BACKCHAR(eptr);
+          if (utf8) BACKCHAR(eptr);
           }
         }
 
@@ -3758,9 +3758,9 @@ for (;;)
           for (;;)                        /* Move back over one extended */
             {
             int len = 1;
-            BACKCHAR(eptr);
             if (!utf8) c = *eptr; else
               {
+              BACKCHAR(eptr);
               GETCHARLEN(c, eptr, len);
               }
             prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
@@ -3999,7 +3999,7 @@ for (;;)
           }
         }
       else
-#endif
+#endif  /* SUPPORT_UTF8 */
 
       /* Not UTF-8 mode */
         {

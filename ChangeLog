@@ -83,6 +83,10 @@ Version 7.3 05-Jul-07
     subpattern was within another subpattern. For example, it looped when
     trying to match  (((?(1)X|))*)  but it was OK with  ((?(1)X|)*)  where the 
     condition was not nested. This bug has been fixed.
+    
+12. A pattern like \X?\d or \P{L}?\d in non-UTF-8 mode could cause a backtrack
+    past the start of the subject in the presence of bytes with the top bit
+    set, for example "\x8aBCD".
 
 
 Version 7.2 19-Jun-07

@@ -358,7 +358,9 @@ capturing parenthesis numbers in back references. */
 
 /* When UTF-8 encoding is being used, a character is no longer just a single
 byte. The macros for character handling generate simple sequences when used in
-byte-mode, and more complicated ones for UTF-8 characters. */
+byte-mode, and more complicated ones for UTF-8 characters. BACKCHAR should 
+never be called in byte mode. To make sure it can never even appear when UTF-8 
+support is omitted, we don't even define it. */
 
 #ifndef SUPPORT_UTF8
 #define GETCHAR(c, eptr) c = *eptr;
@@ -366,7 +368,7 @@ byte-mode, and more complicated ones for UTF-8 characters. */
 #define GETCHARINC(c, eptr) c = *eptr++;
 #define GETCHARINCTEST(c, eptr) c = *eptr++;
 #define GETCHARLEN(c, eptr, len) c = *eptr;
-#define BACKCHAR(eptr)
+/* #define BACKCHAR(eptr) */
 
 #else   /* SUPPORT_UTF8 */
 
@@ -459,9 +461,10 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
     }
 
 /* If the pointer is not at the start of a character, move it back until
-it is. Called only in UTF-8 mode. */
+it is. This is called only in UTF-8 mode - we don't put a test within the macro 
+because almost all calls are already within a block of UTF-8 only code. */
 
-#define BACKCHAR(eptr) while((*eptr & 0xc0) == 0x80) eptr--;
+#define BACKCHAR(eptr) while((*eptr & 0xc0) == 0x80) eptr--
 
 #endif
 

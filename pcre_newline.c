@@ -128,12 +128,16 @@ _pcre_was_newline(const uschar *ptr, int type, const uschar *startptr,
 {
 int c;
 ptr--;
+#ifdef SUPPORT_UTF8
 if (utf8)
   {
   BACKCHAR(ptr);
   GETCHAR(c, ptr);
   }
 else c = *ptr;
+#else   /* no UTF-8 support */ 
+c = *ptr;
+#endif  /* SUPPORT_UTF8 */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
