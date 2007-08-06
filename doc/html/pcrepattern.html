@@ -41,12 +41,14 @@ man page, in case the conversion went wrong.
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE REGULAR EXPRESSION DETAILS</a><br>
 <P>
-The syntax and semantics of the regular expressions supported by PCRE are
-described below. Regular expressions are also described in the Perl
-documentation and in a number of books, some of which have copious examples.
-Jeffrey Friedl's "Mastering Regular Expressions", published by O'Reilly, covers
-regular expressions in great detail. This description of PCRE's regular
-expressions is intended as reference material.
+The syntax and semantics of the regular expressions that are supported by PCRE
+are described in detail below. There is a quick-reference syntax summary in the
+<a href="pcresyntax.html"><b>pcresyntax</b></a>
+page. Perl's regular expressions are described in its own documentation, and
+regular expressions in general are covered in a number of books, some of which
+have copious examples. Jeffrey Friedl's "Mastering Regular Expressions",
+published by O'Reilly, covers regular expressions in great detail. This
+description of PCRE's regular expressions is intended as reference material.
 </P>
 <P>
 The original operation of PCRE was on strings of one-byte characters. However,
@@ -255,9 +257,9 @@ meanings
 Absolute and relative back references
 </b><br>
 <P>
-The sequence \g followed by a positive or negative number, optionally enclosed
-in braces, is an absolute or relative back reference. A named back reference
-can be coded as \g{name}. Back references are discussed
+The sequence \g followed by an unsigned or a negative number, optionally
+enclosed in braces, is an absolute or relative back reference. A named back
+reference can be coded as \g{name}. Back references are discussed
 <a href="#backreferences">later,</a>
 following the discussion of
 <a href="#subpattern">parenthesized subpatterns.</a>
@@ -1303,6 +1305,11 @@ previous example can be rewritten as
 <pre>
   \d++foo
 </pre>
+Note that a possessive quantifier can be used with an entire group, for
+example:
+<pre>
+  (abc|xyz){2,3}+
+</pre>
 Possessive quantifiers are always greedy; the setting of the PCRE_UNGREEDY
 option is ignored. They are a convenient notation for the simpler forms of
 atomic group. However, there is no difference in the meaning of a possessive
@@ -1377,16 +1384,17 @@ subpattern is possible using named parentheses (see below).
 <P>
 Another way of avoiding the ambiguity inherent in the use of digits following a
 backslash is to use the \g escape sequence, which is a feature introduced in
-Perl 5.10. This escape must be followed by a positive or a negative number,
-optionally enclosed in braces. These examples are all identical:
+Perl 5.10. This escape must be followed by an unsigned number or a negative
+number, optionally enclosed in braces. These examples are all identical:
 <pre>
   (ring), \1
   (ring), \g1
   (ring), \g{1}
 </pre>
-A positive number specifies an absolute reference without the ambiguity that is
-present in the older syntax. It is also useful when literal digits follow the
-reference. A negative number is a relative reference. Consider this example:
+An unsigned number specifies an absolute reference without the ambiguity that
+is present in the older syntax. It is also useful when literal digits follow
+the reference. A negative number is a relative reference. Consider this
+example:
 <pre>
   (abc(def)ghi)\g{-1}
 </pre>
@@ -1990,7 +1998,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC25" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 June 2007
+Last updated: 06 August 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

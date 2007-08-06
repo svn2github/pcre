@@ -64,26 +64,26 @@ Version 7.3 05-Jul-07
     dynamic way, which I have now done. The artificial limitation on group
     length has been removed - we now have only the limit on the total length of
     the compiled pattern, which depends on the LINK_SIZE setting.
-    
-10. Fixed a bug in the documentation for get/copy named substring when 
-    duplicate names are permitted. If none of the named substrings are set, the 
-    functions return PCRE_ERROR_NOSUBSTRING (7); the doc said they returned an 
-    empty string. 
-    
-11. Because Perl interprets \Q...\E at a high level, and ignores orphan \E 
-    instances, patterns such as [\Q\E] or [\E] or even [^\E] cause an error, 
-    because the ] is interpreted as the first data character and the 
-    terminating ] is not found. PCRE has been made compatible with Perl in this 
-    regard. Previously, it interpreted [\Q\E] as an empty class, and [\E] could 
-    cause memory overwriting. 
-    
+
+10. Fixed a bug in the documentation for get/copy named substring when
+    duplicate names are permitted. If none of the named substrings are set, the
+    functions return PCRE_ERROR_NOSUBSTRING (7); the doc said they returned an
+    empty string.
+
+11. Because Perl interprets \Q...\E at a high level, and ignores orphan \E
+    instances, patterns such as [\Q\E] or [\E] or even [^\E] cause an error,
+    because the ] is interpreted as the first data character and the
+    terminating ] is not found. PCRE has been made compatible with Perl in this
+    regard. Previously, it interpreted [\Q\E] as an empty class, and [\E] could
+    cause memory overwriting.
+
 10. Like Perl, PCRE automatically breaks an unlimited repeat after an empty
     string has been matched (to stop an infinite loop). It was not recognizing
-    a conditional subpattern that could match an empty string if that 
+    a conditional subpattern that could match an empty string if that
     subpattern was within another subpattern. For example, it looped when
-    trying to match  (((?(1)X|))*)  but it was OK with  ((?(1)X|)*)  where the 
+    trying to match  (((?(1)X|))*)  but it was OK with  ((?(1)X|)*)  where the
     condition was not nested. This bug has been fixed.
-    
+
 12. A pattern like \X?\d or \P{L}?\d in non-UTF-8 mode could cause a backtrack
     past the start of the subject in the presence of bytes with the top bit
     set, for example "\x8aBCD".

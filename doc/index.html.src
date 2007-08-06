@@ -63,6 +63,9 @@ The HTML documentation for PCRE comprises the following pages:
 <tr><td><a href="pcrestack.html">pcrestack</a></td>
     <td>&nbsp;&nbsp;Discussion of PCRE's stack usage</td></tr>
 
+<tr><td><a href="pcresyntax.html">pcresyntax</a></td>
+    <td>&nbsp;&nbsp;Syntax quick-reference summary</td></tr>
+
 <tr><td><a href="pcretest.html">pcretest</a></td>
     <td>&nbsp;&nbsp;The <b>pcretest</b> command for testing PCRE</td></tr>
 </table>

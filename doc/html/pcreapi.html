@@ -1653,13 +1653,17 @@ are not required to be unique. Normally, patterns with duplicate names are such
 that in any one match, only one of the named subpatterns participates. An
 example is shown in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
-documentation. When duplicates are present, <b>pcre_copy_named_substring()</b>
-and <b>pcre_get_named_substring()</b> return the first substring corresponding
-to the given name that is set. If none are set, an empty string is returned.
-The <b>pcre_get_stringnumber()</b> function returns one of the numbers that are
-associated with the name, but it is not defined which it is.
-<br>
-<br>
+documentation.
+</P>
+<P>
+When duplicates are present, <b>pcre_copy_named_substring()</b> and
+<b>pcre_get_named_substring()</b> return the first substring corresponding to
+the given name that is set. If none are set, PCRE_ERROR_NOSUBSTRING (-7) is
+returned; no data is returned. The <b>pcre_get_stringnumber()</b> function
+returns one of the numbers that are associated with the name, but it is not
+defined which it is.
+</P>
+<P>
 If you want to get full details of all captured substrings for a given name,
 you must use the <b>pcre_get_stringtable_entries()</b> function. The first
 argument is the compiled pattern, and the second is the name. The third and

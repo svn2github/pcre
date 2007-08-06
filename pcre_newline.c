@@ -135,7 +135,7 @@ if (utf8)
   GETCHAR(c, ptr);
   }
 else c = *ptr;
-#else   /* no UTF-8 support */ 
+#else   /* no UTF-8 support */
 c = *ptr;
 #endif  /* SUPPORT_UTF8 */
 

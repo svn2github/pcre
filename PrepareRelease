@@ -46,7 +46,7 @@ End
 
 echo "Making pcre.txt"
 for file in pcre pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
-            pcrepattern pcrepartial pcreprecompile \
+            pcrepattern pcresyntax pcrepartial pcreprecompile \
             pcreperform pcreposix pcrecpp pcresample pcrestack ; do
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt

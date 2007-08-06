@@ -47,7 +47,11 @@ and
 .\" HREF
 \fBpcrecompat\fR
 .\"
-pages.
+pages. There is a syntax summary in the
+.\" HREF
+\fBpcresyntax\fR
+.\"
+page.
 .P
 Some features of PCRE can be included, excluded, or changed when the library is
 built. The
@@ -93,6 +97,7 @@ follows:
 .\" JOIN
   pcrepattern       syntax and semantics of supported
                       regular expressions
+  pcresyntax        quick syntax reference
   pcreperform       discussion of performance issues
   pcreposix         the POSIX-compatible C API
   pcreprecompile    details of saving and re-using precompiled patterns
@@ -121,17 +126,10 @@ distribution and the
 documentation for details). In these cases the limit is substantially larger.
 However, the speed of execution is slower.
 .P
-All values in repeating quantifiers must be less than 65536. The maximum
-compiled length of subpattern with an explicit repeat count is 30000 bytes. The
-maximum number of capturing subpatterns is 65535.
+All values in repeating quantifiers must be less than 65536.
 .P
 There is no limit to the number of parenthesized subpatterns, but there can be
 no more than 65535 capturing subpatterns.
-.P
-If a non-capturing subpattern with an unlimited repetition quantifier can match
-an empty string, there is a limit of 1000 on the number of times it can be
-repeated while not matching an empty string - if it does match an empty
-string, the loop is immediately broken.
 .P
 The maximum length of name for a named subpattern is 32 characters, and the
 maximum number of named subpatterns is 10000.
@@ -256,6 +254,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 30 July 2007
+Last updated: 06 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

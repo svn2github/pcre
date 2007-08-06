@@ -609,7 +609,7 @@ for (;;)
       eptr >= md->end_subject &&
       eptr > mstart)
     md->hitend = TRUE;
-    
+
   switch(op)
     {
     /* Handle a capturing bracket. If there is space in the offset vector, save

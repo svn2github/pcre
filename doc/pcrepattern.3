@@ -4,12 +4,16 @@ PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
 .rs
 .sp
-The syntax and semantics of the regular expressions supported by PCRE are
-described below. Regular expressions are also described in the Perl
-documentation and in a number of books, some of which have copious examples.
-Jeffrey Friedl's "Mastering Regular Expressions", published by O'Reilly, covers
-regular expressions in great detail. This description of PCRE's regular
-expressions is intended as reference material.
+The syntax and semantics of the regular expressions that are supported by PCRE
+are described in detail below. There is a quick-reference syntax summary in the
+.\" HREF
+\fBpcresyntax\fP
+.\"
+page. Perl's regular expressions are described in its own documentation, and
+regular expressions in general are covered in a number of books, some of which
+have copious examples. Jeffrey Friedl's "Mastering Regular Expressions",
+published by O'Reilly, covers regular expressions in great detail. This
+description of PCRE's regular expressions is intended as reference material.
 .P
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 character strings. To use this, you must
@@ -240,9 +244,9 @@ meanings
 .SS "Absolute and relative back references"
 .rs
 .sp
-The sequence \eg followed by a positive or negative number, optionally enclosed
-in braces, is an absolute or relative back reference. A named back reference
-can be coded as \eg{name}. Back references are discussed
+The sequence \eg followed by an unsigned or a negative number, optionally
+enclosed in braces, is an absolute or relative back reference. A named back
+reference can be coded as \eg{name}. Back references are discussed
 .\" HTML <a href="#backreferences">
 .\" </a>
 later,
@@ -1290,6 +1294,11 @@ previous example can be rewritten as
 .sp
   \ed++foo
 .sp
+Note that a possessive quantifier can be used with an entire group, for
+example:
+.sp
+  (abc|xyz){2,3}+
+.sp
 Possessive quantifiers are always greedy; the setting of the PCRE_UNGREEDY
 option is ignored. They are a convenient notation for the simpler forms of
 atomic group. However, there is no difference in the meaning of a possessive
@@ -1364,16 +1373,17 @@ subpattern is possible using named parentheses (see below).
 .P
 Another way of avoiding the ambiguity inherent in the use of digits following a
 backslash is to use the \eg escape sequence, which is a feature introduced in
-Perl 5.10. This escape must be followed by a positive or a negative number,
-optionally enclosed in braces. These examples are all identical:
+Perl 5.10. This escape must be followed by an unsigned number or a negative
+number, optionally enclosed in braces. These examples are all identical:
 .sp
   (ring), \e1
   (ring), \eg1
   (ring), \eg{1}
 .sp
-A positive number specifies an absolute reference without the ambiguity that is
-present in the older syntax. It is also useful when literal digits follow the
-reference. A negative number is a relative reference. Consider this example:
+An unsigned number specifies an absolute reference without the ambiguity that
+is present in the older syntax. It is also useful when literal digits follow
+the reference. A negative number is a relative reference. Consider this
+example:
 .sp
   (abc(def)ghi)\eg{-1}
 .sp
@@ -1976,6 +1986,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 June 2007
+Last updated: 06 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
