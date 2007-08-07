@@ -601,14 +601,17 @@ page.
   PCRE_NO_UTF8_CHECK
 .sp
 When PCRE_UTF8 is set, the validity of the pattern as a UTF-8 string is
-automatically checked. If an invalid UTF-8 sequence of bytes is found,
-\fBpcre_compile()\fP returns an error. If you already know that your pattern is
-valid, and you want to skip this check for performance reasons, you can set the
-PCRE_NO_UTF8_CHECK option. When it is set, the effect of passing an invalid
-UTF-8 string as a pattern is undefined. It may cause your program to crash.
-Note that this option can also be passed to \fBpcre_exec()\fP and
-\fBpcre_dfa_exec()\fP, to suppress the UTF-8 validity checking of subject
-strings.
+automatically checked. Note that the check is for a syntactically valid UTF-8
+byte string, as defined by RFC 2279. It is \fInot\fP a check for a UTF-8 string
+of assigned or allowable Unicode code points.
+.P
+If an invalid UTF-8 sequence of bytes is found, \fBpcre_compile()\fP returns an
+error. If you already know that your pattern is valid, and you want to skip
+this check for performance reasons, you can set the PCRE_NO_UTF8_CHECK option.
+When it is set, the effect of passing an invalid UTF-8 string as a pattern is
+undefined. It may cause your program to crash. Note that this option can also
+be passed to \fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP, to suppress the UTF-8
+validity checking of subject strings.
 .
 .
 .SH "COMPILATION ERROR CODES"
@@ -1231,10 +1234,13 @@ code that demonstrates how to do this in the \fIpcredemo.c\fP sample program.
 .sp
 When PCRE_UTF8 is set at compile time, the validity of the subject as a UTF-8
 string is automatically checked when \fBpcre_exec()\fP is subsequently called.
-The value of \fIstartoffset\fP is also checked to ensure that it points to the
-start of a UTF-8 character. If an invalid UTF-8 sequence of bytes is found,
-\fBpcre_exec()\fP returns the error PCRE_ERROR_BADUTF8. If \fIstartoffset\fP
-contains an invalid value, PCRE_ERROR_BADUTF8_OFFSET is returned.
+Note that the check is for a syntactically valid UTF-8 byte string, as defined
+by RFC 2279. It is \fInot\fP a check for a UTF-8 string of assigned or
+allowable Unicode code points. The value of \fIstartoffset\fP is also checked
+to ensure that it points to the start of a UTF-8 character. If an invalid UTF-8
+sequence of bytes is found, \fBpcre_exec()\fP returns the error
+PCRE_ERROR_BADUTF8. If \fIstartoffset\fP contains an invalid value,
+PCRE_ERROR_BADUTF8_OFFSET is returned.
 .P
 If you already know that your subject is valid, and you want to skip these
 checks for performance reasons, you can set the PCRE_NO_UTF8_CHECK option when
@@ -1868,6 +1874,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 30 July 2007
+Last updated: 07 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
