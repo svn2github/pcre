@@ -8796,4 +8796,243 @@ Failed: missing terminating ] for character class at offset 8
 /[\Q\E^]AAA/
 Failed: missing terminating ] for character class at offset 10
 
+/A(*PRUNE)B(*SKIP)C(*THEN)D(*COMMIT)E(*F)F(*FAIL)G(?!)H(*ACCEPT)I/BZ
+------------------------------------------------------------------
+        Bra
+        A
+        *PRUNE
+        B
+        *SKIP
+        C
+        *THEN
+        D
+        *COMMIT
+        E
+        *FAIL
+        F
+        *FAIL
+        G
+        *FAIL
+        H
+        *ACCEPT
+        I
+        Ket
+        End
+------------------------------------------------------------------
+
+/^a+(*FAIL)/
+    aaaaaa
+No match
+    
+/a+b?c+(*FAIL)/
+    aaabccc
+No match
+
+/a+b?(*PRUNE)c+(*FAIL)/
+    aaabccc
+No match
+
+/a+b?(*COMMIT)c+(*FAIL)/
+    aaabccc
+No match
+    
+/a+b?(*SKIP)c+(*FAIL)/
+    aaabcccaaabccc
+No match
+
+/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+ 0: aaaxxxxxx
+    aaa++++++ 
+ 0: aaa
+    bbbxxxxx
+ 0: bbbxxxxx
+    bbb+++++ 
+ 0: bbb
+    cccxxxx
+ 0: cccxxxx
+    ccc++++ 
+ 0: ccc
+    dddddddd   
+ 0: ddd
+
+/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+ 0: aaaxxxxxx
+ 1: aaaxxxxxx
+    aaa++++++ 
+ 0: aaa
+ 1: aaa
+    bbbxxxxx
+ 0: bbbxxxxx
+ 1: bbbxxxxx
+    bbb+++++ 
+ 0: bbb
+ 1: bbb
+    cccxxxx
+ 0: cccxxxx
+ 1: cccxxxx
+    ccc++++ 
+ 0: ccc
+ 1: ccc
+    dddddddd   
+ 0: ddd
+ 1: ddd
+
+/a+b?(*THEN)c+(*FAIL)/
+    aaabccc
+No match
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    ABX
+ 0: AB
+    AADE
+ 0: AADE
+ 1: AAD
+ 2: A
+ 3: E
+    ACDE
+ 0: ACDE
+ 1: ACD
+ 2: C
+ 3: E
+    ** Failers
+No match
+    AD 
+No match
+        
+/^a+(*FAIL)/C
+    aaaaaa
+--->aaaaaa
+ +0 ^          ^
+ +1 ^          a+
+ +3 ^     ^    (*FAIL)
+ +3 ^    ^     (*FAIL)
+ +3 ^   ^      (*FAIL)
+ +3 ^  ^       (*FAIL)
+ +3 ^ ^        (*FAIL)
+ +3 ^^         (*FAIL)
+No match
+    
+/a+b?c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       c+
+ +6 ^      ^    (*FAIL)
+ +6 ^     ^     (*FAIL)
+ +6 ^    ^      (*FAIL)
+ +4 ^  ^        c+
+ +2 ^ ^         b?
+ +4 ^ ^         c+
+ +2 ^^          b?
+ +4 ^^          c+
+ +0  ^          a+
+ +2  ^ ^        b?
+ +4  ^  ^       c+
+ +6  ^     ^    (*FAIL)
+ +6  ^    ^     (*FAIL)
+ +6  ^   ^      (*FAIL)
+ +4  ^ ^        c+
+ +2  ^^         b?
+ +4  ^^         c+
+ +0   ^         a+
+ +2   ^^        b?
+ +4   ^ ^       c+
+ +6   ^    ^    (*FAIL)
+ +6   ^   ^     (*FAIL)
+ +6   ^  ^      (*FAIL)
+ +4   ^^        c+
+No match
+
+/a+b?(*PRUNE)c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       (*PRUNE)
++12 ^   ^       c+
++14 ^      ^    (*FAIL)
++14 ^     ^     (*FAIL)
++14 ^    ^      (*FAIL)
+ +0  ^          a+
+ +2  ^ ^        b?
+ +4  ^  ^       (*PRUNE)
++12  ^  ^       c+
++14  ^     ^    (*FAIL)
++14  ^    ^     (*FAIL)
++14  ^   ^      (*FAIL)
+ +0   ^         a+
+ +2   ^^        b?
+ +4   ^ ^       (*PRUNE)
++12   ^ ^       c+
++14   ^    ^    (*FAIL)
++14   ^   ^     (*FAIL)
++14   ^  ^      (*FAIL)
+No match
+
+/a+b?(*COMMIT)c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       (*COMMIT)
++13 ^   ^       c+
++15 ^      ^    (*FAIL)
++15 ^     ^     (*FAIL)
++15 ^    ^      (*FAIL)
+No match
+    
+/a+b?(*SKIP)c+(*FAIL)/C
+    aaabcccaaabccc
+--->aaabcccaaabccc
+ +0 ^                  a+
+ +2 ^  ^               b?
+ +4 ^   ^              (*SKIP)
++11 ^   ^              c+
++13 ^      ^           (*FAIL)
++13 ^     ^            (*FAIL)
++13 ^    ^             (*FAIL)
+ +0        ^           a+
+ +2        ^  ^        b?
+ +4        ^   ^       (*SKIP)
++11        ^   ^       c+
++13        ^      ^    (*FAIL)
++13        ^     ^     (*FAIL)
++13        ^    ^      (*FAIL)
+No match
+
+/a+b?(*THEN)c+(*FAIL)/C
+    aaabccc
+--->aaabccc
+ +0 ^           a+
+ +2 ^  ^        b?
+ +4 ^   ^       (*THEN)
++11 ^   ^       c+
++13 ^      ^    (*FAIL)
++13 ^     ^     (*FAIL)
++13 ^    ^      (*FAIL)
+ +0  ^          a+
+ +2  ^ ^        b?
+ +4  ^  ^       (*THEN)
++11  ^  ^       c+
++13  ^     ^    (*FAIL)
++13  ^    ^     (*FAIL)
++13  ^   ^      (*FAIL)
+ +0   ^         a+
+ +2   ^^        b?
+ +4   ^ ^       (*THEN)
++11   ^ ^       c+
++13   ^    ^    (*FAIL)
++13   ^   ^     (*FAIL)
++13   ^  ^      (*FAIL)
+No match
+    
+/a(*PRUNE:XXX)b/
+Failed: (*VERB) with an argument is not supported at offset 8
+
+/a(*MARK)b/ 
+Failed: (*VERB) not recognized at offset 7
+
 / End of testinput2 /

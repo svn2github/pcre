@@ -81,7 +81,12 @@ treated as atomic groups in PCRE. This is like Python, but unlike Perl.
 strings when part of a pattern is repeated. For example, matching "aba" against
 the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 .P
-11. PCRE provides some extensions to the Perl regular expression facilities.
+11. PCRE does support Perl 5.10's backtracking verbs (*ACCEPT), (*FAIL), (*F),
+(*COMMIT), (*PRUNE), (*SKIP), and (*THEN), but only in the forms without an
+argument. PCRE does not support (*MARK). If (*ACCEPT) is within capturing 
+parentheses, PCRE does not set that capture group; this is different to Perl.
+.P
+12. PCRE provides some extensions to the Perl regular expression facilities.
 Perl 5.10 will include new features that are not in earlier versions, some of
 which (such as named parentheses) have been in PCRE for some time. This list is
 with respect to Perl 5.10:
@@ -132,6 +137,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 June 2007
+Last updated: 08 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

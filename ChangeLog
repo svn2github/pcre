@@ -87,6 +87,11 @@ Version 7.3 05-Jul-07
 12. A pattern like \X?\d or \P{L}?\d in non-UTF-8 mode could cause a backtrack
     past the start of the subject in the presence of bytes with the top bit
     set, for example "\x8aBCD".
+    
+13. Added Perl 5.10 experimental backtracking controls (*FAIL), (*F), (*PRUNE),
+    (*SKIP), (*THEN), (*COMMIT), and (*ACCEPT).
+
+14. Optimized (?!) to (*FAIL). 
 
 
 Version 7.2 19-Jun-07

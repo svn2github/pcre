@@ -608,13 +608,8 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z, ESC_E, ESC_Q, ESC_k, ESC_REF };
 
 
-/* Opcode table: OP_BRA must be last, as all values >= it are used for brackets
-that extract substrings. Starting from 1 (i.e. after OP_END), the values up to
+/* Opcode table: Starting from 1 (i.e. after OP_END), the values up to
 OP_EOD must correspond in order to the list of escapes immediately above.
-
-To keep stored, compiled patterns compatible, new opcodes should be added
-immediately before OP_BRA, where (since release 7.0) a gap is left for this
-purpose.
 
 *** NOTE NOTE NOTE *** Whenever this list is updated, the two macro definitions
 that follow must also be updated to match. There is also a table called
@@ -758,7 +753,19 @@ enum {
   OP_DEF,            /* 101 The DEFINE condition */
 
   OP_BRAZERO,        /* 102 These two must remain together and in this */
-  OP_BRAMINZERO      /* 103 order. */
+  OP_BRAMINZERO,     /* 103 order. */
+
+  /* These are backtracking control verbs */
+
+  OP_PRUNE,          /* 104 */
+  OP_SKIP,           /* 105 */
+  OP_THEN,           /* 106 */
+  OP_COMMIT,         /* 107 */
+
+  /* These are forced failure and success verbs */
+
+  OP_FAIL,           /* 108 */
+  OP_ACCEPT          /* 109 */
 };
 
 
@@ -782,7 +789,8 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",     \
   "AssertB", "AssertB not", "Reverse",                            \
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
-  "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero"
+  "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero",    \
+  "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -846,6 +854,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3,                             /* RREF                                   */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
+  1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
+  1, 1                           /* FAIL, ACCEPT                           */
 
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
@@ -860,7 +870,8 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR20, ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR28, ERR29,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
-       ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58 };
+       ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
+       ERR60 };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit
@@ -929,6 +940,7 @@ typedef struct compile_data {
   int  external_options;        /* External (initial) options */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
   BOOL nopartial;               /* Set TRUE if partial won't work */
+  BOOL had_accept;              /* (*ACCEPT) encountered */ 
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */
   uschar nl[4];                 /* Newline string when fixed length */

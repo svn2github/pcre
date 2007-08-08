@@ -2341,4 +2341,71 @@ a random value. /Ix
 
 /[\Q\E^]AAA/
 
+/A(*PRUNE)B(*SKIP)C(*THEN)D(*COMMIT)E(*F)F(*FAIL)G(?!)H(*ACCEPT)I/BZ
+
+/^a+(*FAIL)/
+    aaaaaa
+    
+/a+b?c+(*FAIL)/
+    aaabccc
+
+/a+b?(*PRUNE)c+(*FAIL)/
+    aaabccc
+
+/a+b?(*COMMIT)c+(*FAIL)/
+    aaabccc
+    
+/a+b?(*SKIP)c+(*FAIL)/
+    aaabcccaaabccc
+
+/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+    aaa++++++ 
+    bbbxxxxx
+    bbb+++++ 
+    cccxxxx
+    ccc++++ 
+    dddddddd   
+
+/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+    aaa++++++ 
+    bbbxxxxx
+    bbb+++++ 
+    cccxxxx
+    ccc++++ 
+    dddddddd   
+
+/a+b?(*THEN)c+(*FAIL)/
+    aaabccc
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    ABX
+    AADE
+    ACDE
+    ** Failers
+    AD 
+        
+/^a+(*FAIL)/C
+    aaaaaa
+    
+/a+b?c+(*FAIL)/C
+    aaabccc
+
+/a+b?(*PRUNE)c+(*FAIL)/C
+    aaabccc
+
+/a+b?(*COMMIT)c+(*FAIL)/C
+    aaabccc
+    
+/a+b?(*SKIP)c+(*FAIL)/C
+    aaabcccaaabccc
+
+/a+b?(*THEN)c+(*FAIL)/C
+    aaabccc
+    
+/a(*PRUNE:XXX)b/
+
+/a(*MARK)b/ 
+
 / End of testinput2 /

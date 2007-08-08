@@ -140,6 +140,27 @@ static const short int escapes[] = {
 #endif
 
 
+/* Table of special "verbs" like (*PRUNE) */
+
+typedef struct verbitem {
+  const char *name;
+  int   len;
+  int   op;
+} verbitem;     
+
+static verbitem verbs[] = {
+  { "ACCEPT", 6, OP_ACCEPT },
+  { "COMMIT", 6, OP_COMMIT },
+  { "F",      1, OP_FAIL },
+  { "FAIL",   4, OP_FAIL },  
+  { "PRUNE",  5, OP_PRUNE },
+  { "SKIP",   4, OP_SKIP  },
+  { "THEN",   4, OP_THEN  }
+};
+
+static int verbcount = sizeof(verbs)/sizeof(verbitem);
+
+
 /* Tables of names of POSIX character classes and their lengths. The list is
 terminated by a zero length entry. The first three must be alpha, lower, upper,
 as this is assumed for handling case independence. */
@@ -258,7 +279,10 @@ static const char *error_texts[] = {
   "repeating a DEFINE group is not allowed",
   "inconsistent NEWLINE options",
   "\\g is not followed by a braced name or an optionally braced non-zero number",
-  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number"
+  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number",
+  "(*VERB) with an argument is not supported",
+  /* 60 */ 
+  "(*VERB) not recognized" 
 };
 
 
@@ -941,7 +965,7 @@ for (; *ptr != 0; ptr++)
   /* An opening parens must now be a real metacharacter */
 
   if (*ptr != '(') continue;
-  if (ptr[1] != '?')
+  if (ptr[1] != '?' && ptr[1] != '*')
     {
     count++;
     if (name == NULL && count == lorn) return count;
@@ -3860,9 +3884,7 @@ for (;; ptr++)
     /* ===================================================================*/
     /* Start of nested parenthesized sub-expression, or comment or lookahead or
     lookbehind or option setting or condition or all the other extended
-    parenthesis forms. First deal with the specials; all are introduced by ?,
-    and the appearance of any of them means that this is not a capturing
-    group. */
+    parenthesis forms.  */
 
     case '(':
     newoptions = options;
@@ -3870,8 +3892,45 @@ for (;; ptr++)
     bravalue = OP_CBRA;
     save_hwm = cd->hwm;
     reset_bracount = FALSE;
+    
+    /* First deal with various "verbs" that can be introduced by '*'. */
+    
+    if (*(++ptr) == '*' && (cd->ctypes[ptr[1]] & ctype_letter) != 0)
+      {
+      int i, namelen; 
+      const uschar *name = ++ptr;
+      previous = NULL;
+      while ((cd->ctypes[*++ptr] & ctype_letter) != 0);
+      if (*ptr == ':')
+        {
+        *errorcodeptr = ERR59;   /* Not supported */
+        goto FAILED;  
+        }   
+      if (*ptr != ')')
+        {
+        *errorcodeptr = ERR60;
+        goto FAILED;
+        }
+      namelen = ptr - name;          
+      for (i = 0; i < verbcount; i++)
+        { 
+        if (namelen == verbs[i].len &&
+            strncmp((char *)name, verbs[i].name, namelen) == 0)
+          {
+          *code = verbs[i].op;
+          if (*code++ == OP_ACCEPT) cd->had_accept = TRUE;
+          break;
+          }    
+        }   
+      if (i < verbcount) continue;   
+      *errorcodeptr = ERR60;
+      goto FAILED; 
+      }  
+ 
+    /* Deal with the extended parentheses; all are introduced by '?', and the
+    appearance of any of them means that this is not a capturing group. */
 
-    if (*(++ptr) == '?')
+    else if (*ptr == '?')
       {
       int i, set, unset, namelen;
       int *optset;
@@ -4113,8 +4172,14 @@ for (;; ptr++)
 
         /* ------------------------------------------------------------ */
         case '!':                 /* Negative lookahead */
-        bravalue = OP_ASSERT_NOT;
         ptr++;
+        if (*ptr == ')')          /* Optimize (?!) */
+          {
+          *code++ = OP_FAIL;
+          previous = NULL; 
+          continue;  
+          }  
+        bravalue = OP_ASSERT_NOT;
         break;
 
 
@@ -5706,6 +5771,7 @@ cd->start_code = codestart;
 cd->hwm = cworkspace;
 cd->req_varyopt = 0;
 cd->nopartial = FALSE;
+cd->had_accept = FALSE;
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
 error, errorcode will be set non-zero, so we don't need to look at the result
@@ -5720,6 +5786,7 @@ re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
 
 if (cd->nopartial) re->options |= PCRE_NOPARTIAL;
+if (cd->had_accept) reqbyte = -1;   /* Must disable after (*ACCEPT) */
 
 /* If not reached end of pattern on success, there's an excess bracket. */
 

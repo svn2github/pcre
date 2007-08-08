@@ -348,6 +348,25 @@ Each top-level branch of a look behind must be of a fixed length.
   (?(assert)...  assertion condition
 .
 .
+.SH "BACKTRACKING CONTROL"
+.rs
+.sp
+The following act immediately they are reached:  
+.sp 
+  (*ACCEPT)      force successful match
+  (*FAIL)        force backtrack; synonym (*F)
+.sp
+The following act only when a subsequent match failure causes a backtrack to 
+reach them. They all force a match failure, but they differ in what happens 
+afterwards. Those that advance the start-of-match point do so only if the 
+pattern is not anchored.
+.sp
+  (*COMMIT)      overall failure, no advance of starting point
+  (*PRUNE)       advance to next starting character
+  (*SKIP)        advance start to current matching position
+  (*THEN)        local failure, backtrack to next alternation
+.
+.
 .SH "CALLOUTS"
 .rs
 .sp
@@ -376,6 +395,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 August 2007
+Last updated: 08 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

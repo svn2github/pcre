@@ -130,7 +130,9 @@ static uschar coptable[] = {
   0,                             /* CREF                                   */
   0,                             /* RREF                                   */
   0,                             /* DEF                                    */
-  0, 0                           /* BRAZERO, BRAMINZERO                    */
+  0, 0,                          /* BRAZERO, BRAMINZERO                    */
+  0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
+  0, 0                           /* FAIL, ACCEPT                           */  
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,

@@ -156,6 +156,7 @@ static int callout_count;
 static int callout_extra;
 static int callout_fail_count;
 static int callout_fail_id;
+static int debug_lengths;
 static int first_callout;
 static int locale_set = 0;
 static int show_malloc;
@@ -954,7 +955,6 @@ while (!done)
   size_t size, regex_gotten_store;
   int do_study = 0;
   int do_debug = debug;
-  int debug_lengths = 1;
   int do_G = 0;
   int do_g = 0;
   int do_showinfo = showinfo;
@@ -963,6 +963,7 @@ while (!done)
   int erroroffset, len, delimiter, poffset;
 
   use_utf8 = 0;
+  debug_lengths = 1; 
 
   if (infile == stdin) printf("  re> ");
   if (extend_inputline(infile, buffer) == NULL) break;

@@ -126,11 +126,12 @@ and not on others), is not supported. It causes an error if encountered.
 6. Callouts are supported, but the value of the \fIcapture_top\fP field is
 always 1, and the value of the \fIcapture_last\fP field is always -1.
 .P
-7.
-The \eC escape sequence, which (in the standard algorithm) matches a single
+7. The \eC escape sequence, which (in the standard algorithm) matches a single
 byte, even in UTF-8 mode, is not supported because the alternative algorithm
 moves through the subject string one character at a time, for all active paths
 through the tree.
+.P
+8. None of the backtracking control verbs such as (*PRUNE) are supported.
 .
 .SH "ADVANTAGES OF THE ALTERNATIVE ALGORITHM"
 .rs
@@ -181,6 +182,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 May 2007
+Last updated: 08 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

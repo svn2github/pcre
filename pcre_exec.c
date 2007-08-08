@@ -68,6 +68,14 @@ defined PCRE_ERROR_xxx codes, which are all negative. */
 #define MATCH_MATCH        1
 #define MATCH_NOMATCH      0
 
+/* Special internal returns from the match() function. Make them sufficiently 
+negative to avoid the external error codes. */
+
+#define MATCH_COMMIT       (-999)
+#define MATCH_PRUNE        (-998)
+#define MATCH_SKIP         (-997)
+#define MATCH_THEN         (-996)
+
 /* Maximum number of ints of offset to save on the stack for recursive calls.
 If the offset vector is bigger, malloc is used. This should be a multiple of 3,
 because the offset vector is always a multiple of 3 long. */
@@ -210,7 +218,8 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
-       RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50 };
+       RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
+       RM51,  RM52, RM53 };
 
 
 /* These versions of the macros use the stack, as normal. There are debugging
@@ -612,6 +621,34 @@ for (;;)
 
   switch(op)
     {
+    case OP_FAIL:
+    return MATCH_NOMATCH; 
+    
+    case OP_PRUNE:
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
+      ims, eptrb, flags, RM51);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    return MATCH_PRUNE;
+    
+    case OP_COMMIT:
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
+      ims, eptrb, flags, RM52);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    return MATCH_COMMIT;
+ 
+    case OP_SKIP:
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
+      ims, eptrb, flags, RM53);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    md->start_match_ptr = eptr;   /* Pass back current position */ 
+    return MATCH_SKIP;
+ 
+    case OP_THEN:
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
+      ims, eptrb, flags, RM53);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+    return MATCH_THEN;
+ 
     /* Handle a capturing bracket. If there is space in the offset vector, save
     the current subject position in the working slot at the top of the vector.
     We mustn't change the current values of the data slot, because they may be
@@ -653,7 +690,7 @@ for (;;)
         {
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
           ims, eptrb, flags, RM1);
-        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+        if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         }
@@ -712,7 +749,7 @@ for (;;)
 
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, ims,
         eptrb, flags, RM2);
-      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
     /* Control never reaches here. */
@@ -760,7 +797,7 @@ for (;;)
         ecode += 1 + LINK_SIZE + GET(ecode, LINK_SIZE + 2);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
         }
-      else if (rrc != MATCH_NOMATCH)
+      else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
         {
         RRETURN(rrc);         /* Need braces because of following else */
         }
@@ -797,9 +834,11 @@ for (;;)
     break;
 
 
-    /* End of the pattern. If we are in a top-level recursion, we should
-    restore the offsets appropriately and continue from after the call. */
+    /* End of the pattern, either real or forced. If we are in a top-level
+    recursion, we should restore the offsets appropriately and continue from
+    after the call. */
 
+    case OP_ACCEPT:
     case OP_END:
     if (md->recursive != NULL && md->recursive->group_num == 0)
       {
@@ -820,7 +859,7 @@ for (;;)
     if (md->notempty && eptr == mstart) RRETURN(MATCH_NOMATCH);
     md->end_match_ptr = eptr;           /* Record where we ended */
     md->end_offset_top = offset_top;    /* and how many extracts were taken */
-    md->start_match_ptr = mstart;  /* and the start (\K can modify) */
+    md->start_match_ptr = mstart;       /* and the start (\K can modify) */
     RRETURN(MATCH_MATCH);
 
     /* Change option settings */
@@ -844,7 +883,7 @@ for (;;)
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM4);
       if (rrc == MATCH_MATCH) break;
-      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
@@ -871,7 +910,7 @@ for (;;)
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM5);
       if (rrc == MATCH_MATCH) RRETURN(MATCH_NOMATCH);
-      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -1008,7 +1047,7 @@ for (;;)
             (pcre_free)(new_recursive.offset_save);
           RRETURN(MATCH_MATCH);
           }
-        else if (rrc != MATCH_NOMATCH)
+        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           RRETURN(rrc);
@@ -1044,7 +1083,7 @@ for (;;)
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM7);
       if (rrc == MATCH_MATCH) break;
-      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -4547,6 +4586,7 @@ the loop runs just once. */
 for(;;)
   {
   USPTR save_end_subject = end_subject;
+  USPTR new_start_match; 
 
   /* Reset the maximum number of extractions we might see. */
 
@@ -4687,13 +4727,48 @@ for(;;)
 
   /* OK, we can now run the match. */
 
-  md->start_match_ptr = start_match;      /* Insurance */
+  md->start_match_ptr = start_match;
   md->match_call_count = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);
+  
+  switch(rc)
+    {
+    /* NOMATCH and PRUNE advance by one character. THEN at this level acts 
+    exactly like PRUNE. */
+      
+    case MATCH_NOMATCH:
+    case MATCH_PRUNE:
+    case MATCH_THEN: 
+    new_start_match = start_match + 1;
+#ifdef SUPPORT_UTF8
+    if (utf8)
+      while(new_start_match < end_subject && (*new_start_match & 0xc0) == 0x80)
+        new_start_match++;
+#endif
+    break;   
+    
+    /* SKIP passes back the next starting point explicitly. */
+    
+    case MATCH_SKIP:
+    new_start_match = md->start_match_ptr;
+    break; 
+    
+    /* COMMIT disables the bumpalong, but otherwise behaves as NOMATCH. */
 
-  /* Any return other than MATCH_NOMATCH breaks the loop. */
-
-  if (rc != MATCH_NOMATCH) break;
+    case MATCH_COMMIT:
+    rc = MATCH_NOMATCH;
+    goto ENDLOOP; 
+    
+    /* Any other return is some kind of error. */
+     
+    default:
+    goto ENDLOOP;
+    } 
+    
+  /* Control reaches here for the various types of "no match at this point" 
+  result. Reset the code to MATCH_NOMATCH for subsequent checking. */
+  
+  rc = MATCH_NOMATCH; 
 
   /* If PCRE_FIRSTLINE is set, the match must happen before or at the first
   newline in the subject (though it may continue over the newline). Therefore,
@@ -4701,14 +4776,9 @@ for(;;)
 
   if (firstline && IS_NEWLINE(start_match)) break;
 
-  /* Advance the match position by one character. */
+  /* Advance to new matching position */
 
-  start_match++;
-#ifdef SUPPORT_UTF8
-  if (utf8)
-    while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
-      start_match++;
-#endif
+  start_match = new_start_match;
 
   /* Break the loop if the pattern is anchored or if we have passed the end of
   the subject. */
@@ -4734,7 +4804,7 @@ for(;;)
 /* We reach here when rc is not MATCH_NOMATCH, or if one of the stopping
 conditions is true:
 
-(1) The pattern is anchored;
+(1) The pattern is anchored or the match was failed by (*COMMIT);
 
 (2) We are past the end of the subject;
 
@@ -4748,6 +4818,8 @@ where we had to get some local store to hold offsets for backreference
 processing, copy those that we can. In this case there need not be overflow if
 certain parts of the pattern were not used, even though there are more
 capturing parentheses than vector slots. */
+
+ENDLOOP:
 
 if (rc == MATCH_MATCH)
   {
