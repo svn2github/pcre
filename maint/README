@@ -113,6 +113,10 @@ Making a PCRE release
 
 Run PrepareRelease and commit the files that it changes (by removing trailing
 spaces). Then run "make distcheck" to create the tarballs and the zipball.
+Double-check with "svn status", then create an SVN tagged copy:
+
+  svn copy svn://vcs.exim.org/pcre/code/trunk \
+           svn://vcs.exim.org/pcre/code/tags/pcre-7.x 
 
 Don't forget to update Freshmeat when the new release is out, and to tell
 webmaster@pcre.org and the mailing list.
@@ -217,9 +221,6 @@ others are relatively new.
   to switch this dynamically. It would have to be specified when PCRE was
   compiled. PCRE would then call a function every time it wanted a character.
 
-. There are new (*PRUNE) facilities in Perl 5.10, some of which it might be
-  relatively easy to implement.
-
 . Wild thought: the ability to compile from PCRE's internal byte code to a real
   FSM and a very fast (third) matcher to process the result. There would be
   even more restrictions than for pcre_dfa_exec(), however. This is not easy.
@@ -233,32 +234,11 @@ others are relatively new.
 
 . Someone suggested --disable-callout to save code space when callouts are
   never wanted. This seems rather marginal.
-
-. "Cut" as described in Jeffrey Friedl's book, p364: \v and \V. The definitions
-  aren't yet clear enough for me. \v flushes saved states so that no
-  backtracking to anything earlier can happen; \V says "no more bumpalong", but
-  does it fail the current match? As described in the book, these aren't really
-  "cut" as in Prolog, are they? NOTE: (a) PCRE once had "cut", but it was
-  removed when atomic groups were introduced. (b) Perl 5.10 has some (*PRUNE)
-  features --
-
-. These are the Perl 5.10 backtracking control features (all of which are
-  described as "experimental" -- some of them "very experimental") that it
-  might be easy to add to PCRE. They all succeed when encountered, but act as
-  follows when backtracking:
-
-  (*PRUNE)  fail this match attempt, but still bumpalong
-  (*SKIP)   fail this match attempt, bumpalong to current match point
-  (*THEN)   fail this branch, try next branch at same level or fail if none
-  (*COMMIT) fail this match attempt, suppress bumpalong
-  (*FAIL)   fail and backtrack (same as (?!) and that can be optimized)
-  (*F)      synonym for (*FAIL)
-  (*ACCEPT) behave as if end of pattern reached ("very experimental")
-
-  Some of these can have arguments (*PRUNE:NAME) but I'm not sure whether they
-  make sense in the PCRE context.
+  
+. Check names that consist entirely of digits: PCRE allows, but do Perl and 
+  Python, etc? 
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 13 June 2007
+Last updated: 09 August 2007

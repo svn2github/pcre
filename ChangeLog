@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.3 05-Jul-07
+Version 7.3 09-Aug-07
 ---------------------
 
  1. In the rejigging of the build system that eventually resulted in 7.1, the
@@ -93,11 +93,11 @@ Version 7.3 05-Jul-07
 
 14. Optimized (?!) to (*FAIL).
 
-15. Updated the test for a valid UTF-8 string to conform to the later RFC 3629. 
-    This restricts code points to be within the range 0 to 0x10FFFF, excluding 
-    the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the 
-    full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still 
-    does: it's just the validity check that is more restrictive. 
+15. Updated the test for a valid UTF-8 string to conform to the later RFC 3629.
+    This restricts code points to be within the range 0 to 0x10FFFF, excluding
+    the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the
+    full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still
+    does: it's just the validity check that is more restrictive.
 
 
 Version 7.2 19-Jun-07

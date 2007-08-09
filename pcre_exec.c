@@ -211,16 +211,15 @@ variable instead of being passed in the frame.
 ****************************************************************************
 ***************************************************************************/
 
-
-/* Numbers for RMATCH calls */
+/* Numbers for RMATCH calls. When this list is changed, the code at HEAP_RETURN
+below must be updated in sync.  */
 
 enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM11,  RM12, RM13, RM14, RM15, RM16, RM17, RM18, RM19, RM20,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
-       RM51,  RM52, RM53 };
-
+       RM51,  RM52, RM53, RM54 };
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -622,32 +621,32 @@ for (;;)
   switch(op)
     {
     case OP_FAIL:
-    return MATCH_NOMATCH;
+    RRETURN(MATCH_NOMATCH);
 
     case OP_PRUNE:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM51);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    return MATCH_PRUNE;
+    RRETURN(MATCH_PRUNE);
 
     case OP_COMMIT:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM52);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    return MATCH_COMMIT;
+    RRETURN(MATCH_COMMIT);
 
     case OP_SKIP:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM53);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->start_match_ptr = eptr;   /* Pass back current position */
-    return MATCH_SKIP;
+    RRETURN(MATCH_SKIP);
 
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-      ims, eptrb, flags, RM53);
+      ims, eptrb, flags, RM54);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    return MATCH_THEN;
+    RRETURN(MATCH_THEN);
 
     /* Handle a capturing bracket. If there is space in the offset vector, save
     the current subject position in the working slot at the top of the vector.
@@ -4229,7 +4228,8 @@ switch (frame->Xwhere)
   LBL(17) LBL(18) LBL(19) LBL(20) LBL(21) LBL(22) LBL(23) LBL(24)
   LBL(25) LBL(26) LBL(27) LBL(28) LBL(29) LBL(30) LBL(31) LBL(32)
   LBL(33) LBL(34) LBL(35) LBL(36) LBL(37) LBL(38) LBL(39) LBL(40)
-  LBL(41) LBL(42) LBL(43) LBL(44) LBL(45) LBL(46) LBL(47)
+  LBL(41) LBL(42) LBL(43) LBL(44) LBL(45) LBL(46) LBL(47) LBL(48)
+  LBL(49) LBL(50) LBL(51) LBL(52) LBL(53) LBL(54)
   default:
   DPRINTF(("jump error in pcre match: label %d non-existent\n", frame->Xwhere));
   return PCRE_ERROR_INTERNAL;
