@@ -887,12 +887,20 @@ No match
     \xf1\x8f\x80\x80 
 No match
     \xf8\x88\x80\x80\x80  
-No match
+Error -10
     \xf9\x87\x80\x80\x80  
-No match
+Error -10
     \xfc\x84\x80\x80\x80\x80
-No match
+Error -10
     \xfd\x83\x80\x80\x80\x80
+Error -10
+    \?\xf8\x88\x80\x80\x80  
+No match
+    \?\xf9\x87\x80\x80\x80  
+No match
+    \?\xfc\x84\x80\x80\x80\x80
+No match
+    \?\xfd\x83\x80\x80\x80\x80
 No match
 
 /\x{100}abc(xyz(?1))/8DZ
@@ -1476,5 +1484,35 @@ No match
 /.*$/8<any>
     \x{1ec5} 
  0: \x{1ec5}
+    
+/-- This tests the stricter UTF-8 check according to RFC 3629. --/ 
+    
+/X/8
+    \x{0}\x{d7ff}\x{e000}\x{10ffff}
+No match
+    \x{d800}
+Error -10
+    \x{d800}\?
+No match
+    \x{da00}
+Error -10
+    \x{da00}\?
+No match
+    \x{dfff}
+Error -10
+    \x{dfff}\?
+No match
+    \x{110000}    
+Error -10
+    \x{110000}\?    
+No match
+    \x{2000000} 
+Error -10
+    \x{2000000}\? 
+No match
+    \x{7fffffff} 
+Error -10
+    \x{7fffffff}\? 
+No match
 
 / End of testinput5 /

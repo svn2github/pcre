@@ -157,11 +157,13 @@ and not on others), is not supported. It causes an error if encountered.
 always 1, and the value of the <i>capture_last</i> field is always -1.
 </P>
 <P>
-7.
-The \C escape sequence, which (in the standard algorithm) matches a single
+7. The \C escape sequence, which (in the standard algorithm) matches a single
 byte, even in UTF-8 mode, is not supported because the alternative algorithm
 moves through the subject string one character at a time, for all active paths
 through the tree.
+</P>
+<P>
+8. None of the backtracking control verbs such as (*PRUNE) are supported.
 </P>
 <br><a name="SEC5" href="#TOC1">ADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
 <P>
@@ -212,7 +214,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 May 2007
+Last updated: 08 August 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

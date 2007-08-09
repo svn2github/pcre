@@ -87,11 +87,17 @@ Version 7.3 05-Jul-07
 12. A pattern like \X?\d or \P{L}?\d in non-UTF-8 mode could cause a backtrack
     past the start of the subject in the presence of bytes with the top bit
     set, for example "\x8aBCD".
-    
+
 13. Added Perl 5.10 experimental backtracking controls (*FAIL), (*F), (*PRUNE),
     (*SKIP), (*THEN), (*COMMIT), and (*ACCEPT).
 
-14. Optimized (?!) to (*FAIL). 
+14. Optimized (?!) to (*FAIL).
+
+15. Updated the test for a valid UTF-8 string to conform to the later RFC 3629. 
+    This restricts code points to be within the range 0 to 0x10FFFF, excluding 
+    the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the 
+    full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still 
+    does: it's just the validity check that is more restrictive. 
 
 
 Version 7.2 19-Jun-07

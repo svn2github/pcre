@@ -411,7 +411,10 @@ and \eZ, causing REG_NOTBOL and REG_NOTEOL, respectively, to be passed to
 The use of \ex{hh...} to represent UTF-8 characters is not dependent on the use
 of the \fB/8\fP modifier on the pattern. It is recognized always. There may be
 any number of hexadecimal digits inside the braces. The result is from one to
-six bytes, encoded according to the UTF-8 rules.
+six bytes, encoded according to the original UTF-8 rules of RFC 2279. This
+allows for values in the range 0 to 0x7FFFFFFF. Note that not all of those are
+valid Unicode code points, or indeed valid UTF-8 characters according to the
+later rules in RFC 3629.
 .
 .
 .SH "THE ALTERNATIVE MATCHING FUNCTION"
@@ -690,6 +693,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 24 April 2007
+Last updated: 09 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

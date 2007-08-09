@@ -35,9 +35,10 @@ man page, in case the conversion went wrong.
 <li><a name="TOC20" href="#SEC20">RECURSIVE PATTERNS</a>
 <li><a name="TOC21" href="#SEC21">SUBPATTERNS AS SUBROUTINES</a>
 <li><a name="TOC22" href="#SEC22">CALLOUTS</a>
-<li><a name="TOC23" href="#SEC23">SEE ALSO</a>
-<li><a name="TOC24" href="#SEC24">AUTHOR</a>
-<li><a name="TOC25" href="#SEC25">REVISION</a>
+<li><a name="TOC23" href="#SEC23">BACTRACKING CONTROL</a>
+<li><a name="TOC24" href="#SEC24">SEE ALSO</a>
+<li><a name="TOC25" href="#SEC25">AUTHOR</a>
+<li><a name="TOC26" href="#SEC26">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE REGULAR EXPRESSION DETAILS</a><br>
 <P>
@@ -195,11 +196,15 @@ Thus \cz becomes hex 1A, but \c{ becomes hex 3B, while \c; becomes hex
 After \x, from zero to two hexadecimal digits are read (letters can be in
 upper or lower case). Any number of hexadecimal digits may appear between \x{
 and }, but the value of the character code must be less than 256 in non-UTF-8
-mode, and less than 2**31 in UTF-8 mode (that is, the maximum hexadecimal value
-is 7FFFFFFF). If characters other than hexadecimal digits appear between \x{
-and }, or if there is no terminating }, this form of escape is not recognized.
-Instead, the initial \x will be interpreted as a basic hexadecimal escape,
-with no following digits, giving a character whose value is zero.
+mode, and less than 2**31 in UTF-8 mode. That is, the maximum value in
+hexadecimal is 7FFFFFFF. Note that this is bigger than the largest Unicode code
+point, which is 10FFFF.
+</P>
+<P>
+If characters other than hexadecimal digits appear between \x{ and }, or if
+there is no terminating }, this form of escape is not recognized. Instead, the
+initial \x will be interpreted as a basic hexadecimal escape, with no
+following digits, giving a character whose value is zero.
 </P>
 <P>
 Characters whose value is less than 256 can be defined by either of the two
@@ -544,6 +549,14 @@ The following general category property codes are supported:
 The special property L& is also supported: it matches a character that has
 the Lu, Ll, or Lt property, in other words, a letter that is not classified as
 a modifier or "other".
+</P>
+<P>
+The Cs (Surrogate) property applies only to characters in the range U+D800 to
+U+DFFF. Such characters are not valid in UTF-8 strings (see RFC 3629) and so
+cannot be tested by PCRE, unless UTF-8 validity checking has been turned off
+(see the discussion of PCRE_NO_UTF8_CHECK in the
+<a href="pcreapi.html"><b>pcreapi</b></a>
+page).
 </P>
 <P>
 The long synonyms for these properties that Perl supports (such as \p{Letter})
@@ -1983,11 +1996,126 @@ description of the interface to the callout function is given in the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
 </P>
-<br><a name="SEC23" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC23" href="#TOC1">BACTRACKING CONTROL</a><br>
+<P>
+Perl 5.10 introduced a number of "Special Backtracking Control Verbs", which
+are described in the Perl documentation as "experimental and subject to change
+or removal in a future version of Perl". It goes on to say: "Their usage in
+production code should be noted to avoid problems during upgrades." The same
+remarks apply to the PCRE features described in this section.
+</P>
+<P>
+Since these verbs are specifically related to backtracking, they can be used
+only when the pattern is to be matched using <b>pcre_exec()</b>, which uses a
+backtracking algorithm. They cause an error if encountered by
+<b>pcre_dfa_exec()</b>.
+</P>
+<P>
+The new verbs make use of what was previously invalid syntax: an opening
+parenthesis followed by an asterisk. In Perl, they are generally of the form
+(*VERB:ARG) but PCRE does not support the use of arguments, so its general
+form is just (*VERB). Any number of these verbs may occur in a pattern. There
+are two kinds:
+</P>
+<br><b>
+Verbs that act immediately
+</b><br>
+<P>
+The following verbs act as soon as they are encountered:
+<pre>
+   (*ACCEPT)
+</pre>
+This verb causes the match to end successfully, skipping the remainder of the
+pattern. When inside a recursion, only the innermost pattern is ended
+immediately. PCRE differs from Perl in what happens if the (*ACCEPT) is inside
+capturing parentheses. In Perl, the data so far is captured: in PCRE no data is
+captured. For example:
+<pre>
+  A(A|B(*ACCEPT)|C)D
+</pre>
+This matches "AB", "AAD", or "ACD", but when it matches "AB", no data is
+captured.
+<pre>
+  (*FAIL) or (*F)
+</pre>
+This verb causes the match to fail, forcing backtracking to occur. It is
+equivalent to (?!) but easier to read. The Perl documentation notes that it is
+probably useful only when combined with (?{}) or (??{}). Those are, of course,
+Perl features that are not present in PCRE. The nearest equivalent is the
+callout feature, as for example in this pattern:
+<pre>
+  a+(?C)(*FAIL)
+</pre>
+A match with the string "aaaa" always fails, but the callout is taken before
+each backtrack happens (in this example, 10 times).
+</P>
+<br><b>
+Verbs that act after backtracking
+</b><br>
+<P>
+The following verbs do nothing when they are encountered. Matching continues
+with what follows, but if there is no subsequent match, a failure is forced.
+The verbs differ in exactly what kind of failure occurs.
+<pre>
+  (*COMMIT)
+</pre>
+This verb causes the whole match to fail outright if the rest of the pattern
+does not match. Even if the pattern is unanchored, no further attempts to find
+a match by advancing the start point take place. Once (*COMMIT) has been
+passed, <b>pcre_exec()</b> is committed to finding a match at the current
+starting point, or not at all. For example:
+<pre>
+  a+(*COMMIT)b
+</pre>
+This matches "xxaab" but not "aacaab". It can be thought of as a kind of
+dynamic anchor, or "I've started, so I must finish."
+<pre>
+  (*PRUNE)
+</pre>
+This verb causes the match to fail at the current position if the rest of the
+pattern does not match. If the pattern is unanchored, the normal "bumpalong"
+advance to the next starting character then happens. Backtracking can occur as
+usual to the left of (*PRUNE), or when matching to the right of (*PRUNE), but
+if there is no match to the right, backtracking cannot cross (*PRUNE).
+In simple cases, the use of (*PRUNE) is just an alternative to an atomic
+group or possessive quantifier, but there are some uses of (*PRUNE) that cannot
+be expressed in any other way.
+<pre>
+  (*SKIP)
+</pre>
+This verb is like (*PRUNE), except that if the pattern is unanchored, the
+"bumpalong" advance is not to the next character, but to the position in the
+subject where (*SKIP) was encountered. (*SKIP) signifies that whatever text
+was matched leading up to it cannot be part of a successful match. Consider:
+<pre>
+  a+(*SKIP)b
+</pre>
+If the subject is "aaaac...", after the first match attempt fails (starting at
+the first character in the string), the starting point skips on to start the
+next attempt at "c". Note that a possessive quantifer does not have the same
+effect in this example; although it would suppress backtracking during the
+first match attempt, the second attempt would start at the second character
+instead of skipping on to "c".
+<pre>
+  (*THEN)
+</pre>
+This verb causes a skip to the next alternation if the rest of the pattern does
+not match. That is, it cancels pending backtracking, but only within the
+current alternation. Its name comes from the observation that it can be used
+for a pattern-based if-then-else block:
+<pre>
+  ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
+</pre>
+If the COND1 pattern matches, FOO is tried (and possibly further items after
+the end of the group if FOO succeeds); on failure the matcher skips to the
+second alternative and tries COND2, without backtracking into COND1. If (*THEN)
+is used outside of any alternation, it acts exactly like (*PRUNE).
+</P>
+<br><a name="SEC24" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcrecallout</b>(3), <b>pcrematching</b>(3), <b>pcre</b>(3).
 </P>
-<br><a name="SEC24" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC25" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -1996,9 +2124,9 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC25" href="#TOC1">REVISION</a><br>
+<br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 August 2007
+Last updated: 09 August 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

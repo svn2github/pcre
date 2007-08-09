@@ -61,7 +61,7 @@
     \x{09f} 
   
 /^\p{Cs}/8
-    \x{dfff}
+    \?\x{dfff}
     ** Failers
     \x{09f} 
   
@@ -69,7 +69,7 @@
     a
     ** Failers 
     Z
-    \x{dfff}  
+    \x{e000}  
   
 /^\p{Lm}/8
     \x{2b0}

@@ -83,7 +83,7 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 .P
 11. PCRE does support Perl 5.10's backtracking verbs (*ACCEPT), (*FAIL), (*F),
 (*COMMIT), (*PRUNE), (*SKIP), and (*THEN), but only in the forms without an
-argument. PCRE does not support (*MARK). If (*ACCEPT) is within capturing 
+argument. PCRE does not support (*MARK). If (*ACCEPT) is within capturing
 parentheses, PCRE does not set that capture group; this is different to Perl.
 .P
 12. PCRE provides some extensions to the Perl regular expression facilities.

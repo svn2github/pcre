@@ -68,7 +68,7 @@ defined PCRE_ERROR_xxx codes, which are all negative. */
 #define MATCH_MATCH        1
 #define MATCH_NOMATCH      0
 
-/* Special internal returns from the match() function. Make them sufficiently 
+/* Special internal returns from the match() function. Make them sufficiently
 negative to avoid the external error codes. */
 
 #define MATCH_COMMIT       (-999)
@@ -622,33 +622,33 @@ for (;;)
   switch(op)
     {
     case OP_FAIL:
-    return MATCH_NOMATCH; 
-    
+    return MATCH_NOMATCH;
+
     case OP_PRUNE:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM51);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     return MATCH_PRUNE;
-    
+
     case OP_COMMIT:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM52);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     return MATCH_COMMIT;
- 
+
     case OP_SKIP:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM53);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    md->start_match_ptr = eptr;   /* Pass back current position */ 
+    md->start_match_ptr = eptr;   /* Pass back current position */
     return MATCH_SKIP;
- 
+
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM53);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     return MATCH_THEN;
- 
+
     /* Handle a capturing bracket. If there is space in the offset vector, save
     the current subject position in the working slot at the top of the vector.
     We mustn't change the current values of the data slot, because they may be
@@ -4586,7 +4586,7 @@ the loop runs just once. */
 for(;;)
   {
   USPTR save_end_subject = end_subject;
-  USPTR new_start_match; 
+  USPTR new_start_match;
 
   /* Reset the maximum number of extractions we might see. */
 
@@ -4730,45 +4730,45 @@ for(;;)
   md->start_match_ptr = start_match;
   md->match_call_count = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);
-  
+
   switch(rc)
     {
-    /* NOMATCH and PRUNE advance by one character. THEN at this level acts 
+    /* NOMATCH and PRUNE advance by one character. THEN at this level acts
     exactly like PRUNE. */
-      
+
     case MATCH_NOMATCH:
     case MATCH_PRUNE:
-    case MATCH_THEN: 
+    case MATCH_THEN:
     new_start_match = start_match + 1;
 #ifdef SUPPORT_UTF8
     if (utf8)
       while(new_start_match < end_subject && (*new_start_match & 0xc0) == 0x80)
         new_start_match++;
 #endif
-    break;   
-    
+    break;
+
     /* SKIP passes back the next starting point explicitly. */
-    
+
     case MATCH_SKIP:
     new_start_match = md->start_match_ptr;
-    break; 
-    
+    break;
+
     /* COMMIT disables the bumpalong, but otherwise behaves as NOMATCH. */
 
     case MATCH_COMMIT:
     rc = MATCH_NOMATCH;
-    goto ENDLOOP; 
-    
+    goto ENDLOOP;
+
     /* Any other return is some kind of error. */
-     
+
     default:
     goto ENDLOOP;
-    } 
-    
-  /* Control reaches here for the various types of "no match at this point" 
+    }
+
+  /* Control reaches here for the various types of "no match at this point"
   result. Reset the code to MATCH_NOMATCH for subsequent checking. */
-  
-  rc = MATCH_NOMATCH; 
+
+  rc = MATCH_NOMATCH;
 
   /* If PCRE_FIRSTLINE is set, the match must happen before or at the first
   newline in the subject (though it may continue over the newline). Therefore,

@@ -613,14 +613,17 @@ page.
   PCRE_NO_UTF8_CHECK
 </pre>
 When PCRE_UTF8 is set, the validity of the pattern as a UTF-8 string is
-automatically checked. If an invalid UTF-8 sequence of bytes is found,
-<b>pcre_compile()</b> returns an error. If you already know that your pattern is
-valid, and you want to skip this check for performance reasons, you can set the
-PCRE_NO_UTF8_CHECK option. When it is set, the effect of passing an invalid
-UTF-8 string as a pattern is undefined. It may cause your program to crash.
-Note that this option can also be passed to <b>pcre_exec()</b> and
-<b>pcre_dfa_exec()</b>, to suppress the UTF-8 validity checking of subject
-strings.
+automatically checked. There is a discussion about the
+<a href="pcre.html#utf8strings">validity of UTF-8 strings</a>
+in the main
+<a href="pcre.html"><b>pcre</b></a>
+page. If an invalid UTF-8 sequence of bytes is found, <b>pcre_compile()</b>
+returns an error. If you already know that your pattern is valid, and you want
+to skip this check for performance reasons, you can set the PCRE_NO_UTF8_CHECK
+option. When it is set, the effect of passing an invalid UTF-8 string as a
+pattern is undefined. It may cause your program to crash. Note that this option
+can also be passed to <b>pcre_exec()</b> and <b>pcre_dfa_exec()</b>, to suppress
+the UTF-8 validity checking of subject strings.
 </P>
 <br><a name="SEC8" href="#TOC1">COMPILATION ERROR CODES</a><br>
 <P>
@@ -1247,9 +1250,14 @@ code that demonstrates how to do this in the <i>pcredemo.c</i> sample program.
 When PCRE_UTF8 is set at compile time, the validity of the subject as a UTF-8
 string is automatically checked when <b>pcre_exec()</b> is subsequently called.
 The value of <i>startoffset</i> is also checked to ensure that it points to the
-start of a UTF-8 character. If an invalid UTF-8 sequence of bytes is found,
-<b>pcre_exec()</b> returns the error PCRE_ERROR_BADUTF8. If <i>startoffset</i>
-contains an invalid value, PCRE_ERROR_BADUTF8_OFFSET is returned.
+start of a UTF-8 character. There is a discussion about the validity of UTF-8
+strings in the
+<a href="pcre.html#utf8strings">section on UTF-8 support</a>
+in the main
+<a href="pcre.html"><b>pcre</b></a>
+page. If an invalid UTF-8 sequence of bytes is found, <b>pcre_exec()</b> returns
+the error PCRE_ERROR_BADUTF8. If <i>startoffset</i> contains an invalid value,
+PCRE_ERROR_BADUTF8_OFFSET is returned.
 </P>
 <P>
 If you already know that your subject is valid, and you want to skip these
@@ -1875,7 +1883,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 July 2007
+Last updated: 09 August 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

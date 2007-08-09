@@ -146,13 +146,13 @@ typedef struct verbitem {
   const char *name;
   int   len;
   int   op;
-} verbitem;     
+} verbitem;
 
 static verbitem verbs[] = {
   { "ACCEPT", 6, OP_ACCEPT },
   { "COMMIT", 6, OP_COMMIT },
   { "F",      1, OP_FAIL },
-  { "FAIL",   4, OP_FAIL },  
+  { "FAIL",   4, OP_FAIL },
   { "PRUNE",  5, OP_PRUNE },
   { "SKIP",   4, OP_SKIP  },
   { "THEN",   4, OP_THEN  }
@@ -281,8 +281,8 @@ static const char *error_texts[] = {
   "\\g is not followed by a braced name or an optionally braced non-zero number",
   "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number",
   "(*VERB) with an argument is not supported",
-  /* 60 */ 
-  "(*VERB) not recognized" 
+  /* 60 */
+  "(*VERB) not recognized"
 };
 
 
@@ -3892,41 +3892,41 @@ for (;; ptr++)
     bravalue = OP_CBRA;
     save_hwm = cd->hwm;
     reset_bracount = FALSE;
-    
+
     /* First deal with various "verbs" that can be introduced by '*'. */
-    
+
     if (*(++ptr) == '*' && (cd->ctypes[ptr[1]] & ctype_letter) != 0)
       {
-      int i, namelen; 
+      int i, namelen;
       const uschar *name = ++ptr;
       previous = NULL;
       while ((cd->ctypes[*++ptr] & ctype_letter) != 0);
       if (*ptr == ':')
         {
         *errorcodeptr = ERR59;   /* Not supported */
-        goto FAILED;  
-        }   
+        goto FAILED;
+        }
       if (*ptr != ')')
         {
         *errorcodeptr = ERR60;
         goto FAILED;
         }
-      namelen = ptr - name;          
+      namelen = ptr - name;
       for (i = 0; i < verbcount; i++)
-        { 
+        {
         if (namelen == verbs[i].len &&
             strncmp((char *)name, verbs[i].name, namelen) == 0)
           {
           *code = verbs[i].op;
           if (*code++ == OP_ACCEPT) cd->had_accept = TRUE;
           break;
-          }    
-        }   
-      if (i < verbcount) continue;   
+          }
+        }
+      if (i < verbcount) continue;
       *errorcodeptr = ERR60;
-      goto FAILED; 
-      }  
- 
+      goto FAILED;
+      }
+
     /* Deal with the extended parentheses; all are introduced by '?', and the
     appearance of any of them means that this is not a capturing group. */
 
@@ -4176,9 +4176,9 @@ for (;; ptr++)
         if (*ptr == ')')          /* Optimize (?!) */
           {
           *code++ = OP_FAIL;
-          previous = NULL; 
-          continue;  
-          }  
+          previous = NULL;
+          continue;
+          }
         bravalue = OP_ASSERT_NOT;
         break;
 

@@ -351,14 +351,14 @@ Each top-level branch of a look behind must be of a fixed length.
 .SH "BACKTRACKING CONTROL"
 .rs
 .sp
-The following act immediately they are reached:  
-.sp 
+The following act immediately they are reached:
+.sp
   (*ACCEPT)      force successful match
   (*FAIL)        force backtrack; synonym (*F)
 .sp
-The following act only when a subsequent match failure causes a backtrack to 
-reach them. They all force a match failure, but they differ in what happens 
-afterwards. Those that advance the start-of-match point do so only if the 
+The following act only when a subsequent match failure causes a backtrack to
+reach them. They all force a match failure, but they differ in what happens
+afterwards. Those that advance the start-of-match point do so only if the
 pattern is not anchored.
 .sp
   (*COMMIT)      overall failure, no advance of starting point

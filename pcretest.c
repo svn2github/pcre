@@ -963,7 +963,7 @@ while (!done)
   int erroroffset, len, delimiter, poffset;
 
   use_utf8 = 0;
-  debug_lengths = 1; 
+  debug_lengths = 1;
 
   if (infile == stdin) printf("  re> ");
   if (extend_inputline(infile, buffer) == NULL) break;

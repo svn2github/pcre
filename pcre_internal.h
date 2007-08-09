@@ -940,7 +940,7 @@ typedef struct compile_data {
   int  external_options;        /* External (initial) options */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
   BOOL nopartial;               /* Set TRUE if partial won't work */
-  BOOL had_accept;              /* (*ACCEPT) encountered */ 
+  BOOL had_accept;              /* (*ACCEPT) encountered */
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */
   uschar nl[4];                 /* Newline string when fixed length */
