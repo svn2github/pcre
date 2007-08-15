@@ -102,6 +102,9 @@ Version 7.3 09-Aug-07
 16. Inserted checks for integer overflows during escape sequence (backslash) 
     processing, and also fixed erroneous offset values for syntax errors during 
     backslash processing. 
+    
+17. Fixed another case of looking too far back in non-UTF-8 mode (cf 12 above)
+    for patterns like [\PPP\x8a]{1,}\x80 with the subject "A\x80". 
 
 
 Version 7.2 19-Jun-07

@@ -2088,7 +2088,7 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM21);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
-          BACKCHAR(eptr);
+          if (utf8) BACKCHAR(eptr);
           }
         RRETURN(MATCH_NOMATCH);
         }
