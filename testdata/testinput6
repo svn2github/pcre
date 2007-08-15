@@ -792,4 +792,6 @@ was broken in all cases./
 
 /(?:[\PPa*]*){8,}/
 
+/[\P{Any}]/BZ
+
 / End of testinput6 /

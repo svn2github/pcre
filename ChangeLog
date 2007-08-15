@@ -113,6 +113,9 @@ Version 7.3 09-Aug-07
     something other than just ASCII characters) inside a group that had an 
     unlimited repeat caused a loop at compile time (while checking to see 
     whether the group could match an empty string). 
+    
+20. Debugging a pattern containing \p or \P could cause a crash. For example,
+    [\P{Any}] did so. (Error in the code for printing property names.)
 
 
 Version 7.2 19-Jun-07
