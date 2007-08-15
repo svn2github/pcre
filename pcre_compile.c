@@ -1470,11 +1470,15 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 
   switch (c)
     {
-    /* Check for quantifiers after a class */
+    /* Check for quantifiers after a class. XCLASS is used for classes that
+    cannot be represented just by a bit map. This includes negated single
+    high-valued characters. The length in _pcre_OP_lengths[] is zero; the
+    actual length is stored in the compiled code, so we must update "code" 
+    here. */
 
 #ifdef SUPPORT_UTF8
     case OP_XCLASS:
-    ccode = code + GET(code, 1);
+    ccode = code += GET(code, 1);
     goto CHECK_CLASS_REPEAT;
 #endif
 

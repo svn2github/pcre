@@ -1464,4 +1464,10 @@ No match
   \x8aBCD 
 No match
 
+/[\PPP\x8a]{1,}\x80/
+    A\x80
+ 0: A\x80
+
+/(?:[\PPa*]*){8,}/
+
 / End of testinput6 /

@@ -108,6 +108,11 @@ Version 7.3 09-Aug-07
     
 18. An unterminated class in a pattern like (?1)\c[ with a "forward reference"
     caused an overrun.
+    
+19. A pattern like (?:[\PPa*]*){8,} which had an "extended class" (one with 
+    something other than just ASCII characters) inside a group that had an 
+    unlimited repeat caused a loop at compile time (while checking to see 
+    whether the group could match an empty string). 
 
 
 Version 7.2 19-Jun-07

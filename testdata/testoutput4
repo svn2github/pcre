@@ -918,8 +918,4 @@ No match
     a 
  0: a
 
-/[\PPP\x8a]{1,}\x80/
-    A\x80
- 0: A\x80
-
 / End of testinput4 /

@@ -523,7 +523,4 @@
 /a*\x{100}*\w/8
     a 
 
-/[\PPP\x8a]{1,}\x80/
-    A\x80
-
 / End of testinput4 /
