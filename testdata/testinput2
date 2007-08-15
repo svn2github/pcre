@@ -2408,4 +2408,10 @@ a random value. /Ix
 
 /a(*MARK)b/ 
 
+/(?i:A{1,}\6666666666)/
+
+/\g6666666666/
+
+/[\g6666666666]/
+
 / End of testinput2 /

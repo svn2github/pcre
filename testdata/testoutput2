@@ -8064,16 +8064,16 @@ No match
  2: b
 
 /^(a)\g-2/
-Failed: reference to non-existent subpattern at offset 4
+Failed: reference to non-existent subpattern at offset 7
 
 /^(a)\g/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 5
 
 /^(a)\g{0}/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 7
 
 /^(a)\g{3/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 4
+Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 8
 
 /^(a)\g{4a}/
 Failed: reference to non-existent subpattern at offset 9
@@ -9034,5 +9034,14 @@ Failed: (*VERB) with an argument is not supported at offset 8
 
 /a(*MARK)b/ 
 Failed: (*VERB) not recognized at offset 7
+
+/(?i:A{1,}\6666666666)/
+Failed: number is too big at offset 19
+
+/\g6666666666/
+Failed: number is too big at offset 11
+
+/[\g6666666666]/
+Failed: number is too big at offset 12
 
 / End of testinput2 /

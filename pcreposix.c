@@ -124,7 +124,8 @@ static const int eint[] = {
   REG_BADPAT,  /* repeating a DEFINE group is not allowed */
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
-  REG_BADPAT   /* (?+ or (?- must be followed by a non-zero number */
+  REG_BADPAT,  /* (?+ or (?- must be followed by a non-zero number */
+  REG_BADPAT   /* number is too big */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */

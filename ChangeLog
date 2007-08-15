@@ -98,6 +98,10 @@ Version 7.3 09-Aug-07
     the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the
     full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still
     does: it's just the validity check that is more restrictive.
+    
+16. Inserted checks for integer overflows during escape sequence (backslash) 
+    processing, and also fixed erroneous offset values for syntax errors during 
+    backslash processing. 
 
 
 Version 7.2 19-Jun-07

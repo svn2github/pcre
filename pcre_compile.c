@@ -282,7 +282,8 @@ static const char *error_texts[] = {
   "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number",
   "(*VERB) with an argument is not supported",
   /* 60 */
-  "(*VERB) not recognized"
+  "(*VERB) not recognized",
+  "number is too big" 
 };
 
 
@@ -439,7 +440,7 @@ Arguments:
 
 Returns:         zero or positive => a data character
                  negative => a special escape sequence
-                 on error, errorptr is set
+                 on error, errorcodeptr is set
 */
 
 static int
@@ -523,11 +524,17 @@ else
     c = 0;
     while ((digitab[ptr[1]] & ctype_digit) != 0)
       c = c * 10 + *(++ptr) - '0';
+      
+    if (c < 0)
+      {
+      *errorcodeptr = ERR61;
+      break;
+      }    
 
     if (c == 0 || (braced && *(++ptr) != '}'))
       {
       *errorcodeptr = ERR57;
-      return 0;
+      break;
       }
 
     if (negated)
@@ -535,7 +542,7 @@ else
       if (c > bracount)
         {
         *errorcodeptr = ERR15;
-        return 0;
+        break;
         }
       c = bracount - (c - 1);
       }
@@ -564,6 +571,11 @@ else
       c -= '0';
       while ((digitab[ptr[1]] & ctype_digit) != 0)
         c = c * 10 + *(++ptr) - '0';
+      if (c < 0)
+        {
+        *errorcodeptr = ERR61;
+        break; 
+        }      
       if (c < 10 || c <= bracount)
         {
         c = -(ESC_REF + c);
@@ -659,7 +671,7 @@ else
     if (c == 0)
       {
       *errorcodeptr = ERR2;
-      return 0;
+      break;
       }
 
 #ifndef EBCDIC  /* ASCII coding */
