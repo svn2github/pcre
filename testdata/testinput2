@@ -2414,4 +2414,6 @@ a random value. /Ix
 
 /[\g6666666666]/
 
+/(?1)\c[/
+
 / End of testinput2 /

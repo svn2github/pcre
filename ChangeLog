@@ -105,6 +105,9 @@ Version 7.3 09-Aug-07
     
 17. Fixed another case of looking too far back in non-UTF-8 mode (cf 12 above)
     for patterns like [\PPP\x8a]{1,}\x80 with the subject "A\x80". 
+    
+18. An unterminated class in a pattern like (?1)\c[ with a "forward reference"
+    caused an overrun.
 
 
 Version 7.2 19-Jun-07

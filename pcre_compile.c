@@ -950,6 +950,7 @@ for (; *ptr != 0; ptr++)
     {
     while (*(++ptr) != ']')
       {
+      if (*ptr == 0) return -1; 
       if (*ptr == '\\')
         {
         if (*(++ptr) == 0) return -1;

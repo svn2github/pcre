@@ -9044,4 +9044,7 @@ Failed: number is too big at offset 11
 /[\g6666666666]/
 Failed: number is too big at offset 12
 
+/(?1)\c[/
+Failed: reference to non-existent subpattern at offset 3
+
 / End of testinput2 /
