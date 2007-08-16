@@ -137,6 +137,9 @@ Version 7.3 09-Aug-07
     
     (c) A pattern such as \p{Yi}+(\P{Yi}+)(?1) could give an incorrect
         "reference to non-existent subpattern" error. 
+        
+24. A repeated \S or \W in UTF-8 mode could give wrong answers when multibyte
+    characters were involved (for example /\S{2}/8g with "A\x{a3}BC"). 
 
 
 Version 7.2 19-Jun-07
