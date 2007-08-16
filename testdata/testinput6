@@ -794,4 +794,14 @@ was broken in all cases./
 
 /[\P{Any}]/BZ
 
+/[\P{Any}\E]/BZ
+
+/(\P{Yi}+\277)/
+
+/(\P{Yi}+\277)?/
+
+/(?<=\P{Yi}{3}A)X/
+
+/\p{Yi}+(\P{Yi}+)(?1)/
+
 / End of testinput6 /

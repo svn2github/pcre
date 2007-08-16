@@ -1106,7 +1106,6 @@ for (;;)
   {
   int d;
   register int op = *cc;
-
   switch (op)
     {
     case OP_CBRA:
@@ -1195,6 +1194,7 @@ for (;;)
 
     case OP_TYPEEXACT:
     branchlength += GET2(cc,1);
+    if (cc[3] == OP_PROP || cc[3] == OP_NOTPROP) cc += 2; 
     cc += 4;
     break;
 
@@ -1303,13 +1303,39 @@ for (;;)
     code += _pcre_OP_lengths[c];
     }
 
-  /* In UTF-8 mode, opcodes that are followed by a character may be followed by
-  a multi-byte character. The length in the table is a minimum, so we have to
-  arrange to skip the extra bytes. */
+  /* Otherwise, we can get the item's length from the table, except that for 
+  repeated character types, we have to test for \p and \P, which have an extra 
+  two bytes of parameters. */
 
   else
     {
+    switch(c)
+      {
+      case OP_TYPESTAR:
+      case OP_TYPEMINSTAR:
+      case OP_TYPEPLUS:
+      case OP_TYPEMINPLUS:
+      case OP_TYPEQUERY:
+      case OP_TYPEMINQUERY:
+      case OP_TYPEUPTO:
+      case OP_TYPEMINUPTO:
+      case OP_TYPEEXACT:
+      case OP_TYPEPOSSTAR:
+      case OP_TYPEPOSPLUS:
+      case OP_TYPEPOSQUERY:
+      case OP_TYPEPOSUPTO:
+      if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+      break; 
+      }  
+    
+    /* Add in the fixed length from the table */
+ 
     code += _pcre_OP_lengths[c];
+    
+  /* In UTF-8 mode, opcodes that are followed by a character may be followed by
+  a multi-byte character. The length in the table is a minimum, so we have to
+  arrange to skip the extra bytes. */
+ 
 #ifdef SUPPORT_UTF8
     if (utf8) switch(c)
       {
@@ -1360,21 +1386,46 @@ for (;;)
   register int c = *code;
   if (c == OP_END) return NULL;
   if (c == OP_RECURSE) return code;
-
+  
   /* XCLASS is used for classes that cannot be represented just by a bit
   map. This includes negated single high-valued characters. The length in
   the table is zero; the actual length is stored in the compiled code. */
 
   if (c == OP_XCLASS) code += GET(code, 1);
 
-  /* Otherwise, we get the item's length from the table. In UTF-8 mode, opcodes
-  that are followed by a character may be followed by a multi-byte character.
-  The length in the table is a minimum, so we have to arrange to skip the extra
-  bytes. */
+  /* Otherwise, we can get the item's length from the table, except that for 
+  repeated character types, we have to test for \p and \P, which have an extra 
+  two bytes of parameters. */
 
   else
     {
+    switch(c)
+      {
+      case OP_TYPESTAR:
+      case OP_TYPEMINSTAR:
+      case OP_TYPEPLUS:
+      case OP_TYPEMINPLUS:
+      case OP_TYPEQUERY:
+      case OP_TYPEMINQUERY:
+      case OP_TYPEUPTO:
+      case OP_TYPEMINUPTO:
+      case OP_TYPEEXACT:
+      case OP_TYPEPOSSTAR:
+      case OP_TYPEPOSPLUS:
+      case OP_TYPEPOSQUERY:
+      case OP_TYPEPOSUPTO:
+      if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+      break; 
+      }  
+      
+    /* Add in the fixed length from the table */
+
     code += _pcre_OP_lengths[c];
+ 
+    /* In UTF-8 mode, opcodes that are followed by a character may be followed
+    by a multi-byte character. The length in the table is a minimum, so we have
+    to arrange to skip the extra bytes. */
+   
 #ifdef SUPPORT_UTF8
     if (utf8) switch(c)
       {
@@ -2671,6 +2722,7 @@ for (;; ptr++)
           else inescq = TRUE;
           continue;
           }
+        else if (-c == ESC_E) continue;  /* Ignore orphan \E */   
 
         if (c < 0)
           {
@@ -4745,10 +4797,10 @@ for (;; ptr++)
       goto FAILED;
       }
 
-    /* In the pre-compile phase, update the length by the length of the nested
-    group, less the brackets at either end. Then reduce the compiled code to
-    just the brackets so that it doesn't use much memory if it is duplicated by
-    a quantifier. */
+    /* In the pre-compile phase, update the length by the length of the group,
+    less the brackets at either end. Then reduce the compiled code to just a 
+    set of non-capturing brackets so that it doesn't use much memory if it is
+    duplicated by a quantifier.*/
 
     if (lengthptr != NULL)
       {
@@ -4758,15 +4810,16 @@ for (;; ptr++)
         goto FAILED;
         }
       *lengthptr += length_prevgroup - 2 - 2*LINK_SIZE;
-      code++;
+      *code++ = OP_BRA;      
       PUTINC(code, 0, 1 + LINK_SIZE);
       *code++ = OP_KET;
       PUTINC(code, 0, 1 + LINK_SIZE);
+      break;    /* No need to waste time with special character handling */
       }
 
     /* Otherwise update the main code pointer to the end of the group. */
 
-    else code = tempcode;
+    code = tempcode;
 
     /* For a DEFINE group, required and first character settings are not
     relevant. */

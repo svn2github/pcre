@@ -116,6 +116,27 @@ Version 7.3 09-Aug-07
     
 20. Debugging a pattern containing \p or \P could cause a crash. For example,
     [\P{Any}] did so. (Error in the code for printing property names.)
+    
+21. An orphan \E inside a character class could cause a crash. 
+
+22. A repeated capturing bracket such as (A)? could cause a wild memory 
+    reference during compilation.
+    
+23. There are several functions in pcre_compile() that scan along a compiled 
+    expression for various reasons (e.g. to see if it's fixed length for look 
+    behind). There were bugs in these functions when a repeated \p or \P was
+    present in the pattern. These operators have additional parameters compared 
+    with \d, etc, and these were not being taken into account when moving along 
+    the compiled data. Specifically:
+    
+    (a) A item such as \p{Yi}{3} in a lookbehind was not treated as fixed 
+        length.  
+        
+    (b) An item such as \pL+ within a repeated group could cause crashes or 
+        loops.
+    
+    (c) A pattern such as \p{Yi}+(\P{Yi}+)(?1) could give an incorrect
+        "reference to non-existent subpattern" error. 
 
 
 Version 7.2 19-Jun-07
