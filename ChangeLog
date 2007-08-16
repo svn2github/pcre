@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.3 09-Aug-07
+Version 7.3 16-Aug-07
 ---------------------
 
  1. In the rejigging of the build system that eventually resulted in 7.1, the
@@ -98,48 +98,48 @@ Version 7.3 09-Aug-07
     the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the
     full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still
     does: it's just the validity check that is more restrictive.
-    
-16. Inserted checks for integer overflows during escape sequence (backslash) 
-    processing, and also fixed erroneous offset values for syntax errors during 
-    backslash processing. 
-    
+
+16. Inserted checks for integer overflows during escape sequence (backslash)
+    processing, and also fixed erroneous offset values for syntax errors during
+    backslash processing.
+
 17. Fixed another case of looking too far back in non-UTF-8 mode (cf 12 above)
-    for patterns like [\PPP\x8a]{1,}\x80 with the subject "A\x80". 
-    
+    for patterns like [\PPP\x8a]{1,}\x80 with the subject "A\x80".
+
 18. An unterminated class in a pattern like (?1)\c[ with a "forward reference"
     caused an overrun.
-    
-19. A pattern like (?:[\PPa*]*){8,} which had an "extended class" (one with 
-    something other than just ASCII characters) inside a group that had an 
-    unlimited repeat caused a loop at compile time (while checking to see 
-    whether the group could match an empty string). 
-    
+
+19. A pattern like (?:[\PPa*]*){8,} which had an "extended class" (one with
+    something other than just ASCII characters) inside a group that had an
+    unlimited repeat caused a loop at compile time (while checking to see
+    whether the group could match an empty string).
+
 20. Debugging a pattern containing \p or \P could cause a crash. For example,
     [\P{Any}] did so. (Error in the code for printing property names.)
-    
-21. An orphan \E inside a character class could cause a crash. 
 
-22. A repeated capturing bracket such as (A)? could cause a wild memory 
+21. An orphan \E inside a character class could cause a crash.
+
+22. A repeated capturing bracket such as (A)? could cause a wild memory
     reference during compilation.
-    
-23. There are several functions in pcre_compile() that scan along a compiled 
-    expression for various reasons (e.g. to see if it's fixed length for look 
+
+23. There are several functions in pcre_compile() that scan along a compiled
+    expression for various reasons (e.g. to see if it's fixed length for look
     behind). There were bugs in these functions when a repeated \p or \P was
-    present in the pattern. These operators have additional parameters compared 
-    with \d, etc, and these were not being taken into account when moving along 
+    present in the pattern. These operators have additional parameters compared
+    with \d, etc, and these were not being taken into account when moving along
     the compiled data. Specifically:
-    
-    (a) A item such as \p{Yi}{3} in a lookbehind was not treated as fixed 
-        length.  
-        
-    (b) An item such as \pL+ within a repeated group could cause crashes or 
+
+    (a) A item such as \p{Yi}{3} in a lookbehind was not treated as fixed
+        length.
+
+    (b) An item such as \pL+ within a repeated group could cause crashes or
         loops.
-    
+
     (c) A pattern such as \p{Yi}+(\P{Yi}+)(?1) could give an incorrect
-        "reference to non-existent subpattern" error. 
-        
+        "reference to non-existent subpattern" error.
+
 24. A repeated \S or \W in UTF-8 mode could give wrong answers when multibyte
-    characters were involved (for example /\S{2}/8g with "A\x{a3}BC"). 
+    characters were involved (for example /\S{2}/8g with "A\x{a3}BC").
 
 
 Version 7.2 19-Jun-07

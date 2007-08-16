@@ -283,7 +283,7 @@ static const char *error_texts[] = {
   "(*VERB) with an argument is not supported",
   /* 60 */
   "(*VERB) not recognized",
-  "number is too big" 
+  "number is too big"
 };
 
 
@@ -524,12 +524,12 @@ else
     c = 0;
     while ((digitab[ptr[1]] & ctype_digit) != 0)
       c = c * 10 + *(++ptr) - '0';
-      
+
     if (c < 0)
       {
       *errorcodeptr = ERR61;
       break;
-      }    
+      }
 
     if (c == 0 || (braced && *(++ptr) != '}'))
       {
@@ -574,8 +574,8 @@ else
       if (c < 0)
         {
         *errorcodeptr = ERR61;
-        break; 
-        }      
+        break;
+        }
       if (c < 10 || c <= bracount)
         {
         c = -(ESC_REF + c);
@@ -950,7 +950,7 @@ for (; *ptr != 0; ptr++)
     {
     while (*(++ptr) != ']')
       {
-      if (*ptr == 0) return -1; 
+      if (*ptr == 0) return -1;
       if (*ptr == '\\')
         {
         if (*(++ptr) == 0) return -1;
@@ -1194,7 +1194,7 @@ for (;;)
 
     case OP_TYPEEXACT:
     branchlength += GET2(cc,1);
-    if (cc[3] == OP_PROP || cc[3] == OP_NOTPROP) cc += 2; 
+    if (cc[3] == OP_PROP || cc[3] == OP_NOTPROP) cc += 2;
     cc += 4;
     break;
 
@@ -1303,8 +1303,8 @@ for (;;)
     code += _pcre_OP_lengths[c];
     }
 
-  /* Otherwise, we can get the item's length from the table, except that for 
-  repeated character types, we have to test for \p and \P, which have an extra 
+  /* Otherwise, we can get the item's length from the table, except that for
+  repeated character types, we have to test for \p and \P, which have an extra
   two bytes of parameters. */
 
   else
@@ -1325,17 +1325,17 @@ for (;;)
       case OP_TYPEPOSQUERY:
       case OP_TYPEPOSUPTO:
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
-      break; 
-      }  
-    
+      break;
+      }
+
     /* Add in the fixed length from the table */
- 
+
     code += _pcre_OP_lengths[c];
-    
+
   /* In UTF-8 mode, opcodes that are followed by a character may be followed by
   a multi-byte character. The length in the table is a minimum, so we have to
   arrange to skip the extra bytes. */
- 
+
 #ifdef SUPPORT_UTF8
     if (utf8) switch(c)
       {
@@ -1386,15 +1386,15 @@ for (;;)
   register int c = *code;
   if (c == OP_END) return NULL;
   if (c == OP_RECURSE) return code;
-  
+
   /* XCLASS is used for classes that cannot be represented just by a bit
   map. This includes negated single high-valued characters. The length in
   the table is zero; the actual length is stored in the compiled code. */
 
   if (c == OP_XCLASS) code += GET(code, 1);
 
-  /* Otherwise, we can get the item's length from the table, except that for 
-  repeated character types, we have to test for \p and \P, which have an extra 
+  /* Otherwise, we can get the item's length from the table, except that for
+  repeated character types, we have to test for \p and \P, which have an extra
   two bytes of parameters. */
 
   else
@@ -1415,17 +1415,17 @@ for (;;)
       case OP_TYPEPOSQUERY:
       case OP_TYPEPOSUPTO:
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
-      break; 
-      }  
-      
+      break;
+      }
+
     /* Add in the fixed length from the table */
 
     code += _pcre_OP_lengths[c];
- 
+
     /* In UTF-8 mode, opcodes that are followed by a character may be followed
     by a multi-byte character. The length in the table is a minimum, so we have
     to arrange to skip the extra bytes. */
-   
+
 #ifdef SUPPORT_UTF8
     if (utf8) switch(c)
       {
@@ -1524,7 +1524,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     /* Check for quantifiers after a class. XCLASS is used for classes that
     cannot be represented just by a bit map. This includes negated single
     high-valued characters. The length in _pcre_OP_lengths[] is zero; the
-    actual length is stored in the compiled code, so we must update "code" 
+    actual length is stored in the compiled code, so we must update "code"
     here. */
 
 #ifdef SUPPORT_UTF8
@@ -2722,7 +2722,7 @@ for (;; ptr++)
           else inescq = TRUE;
           continue;
           }
-        else if (-c == ESC_E) continue;  /* Ignore orphan \E */   
+        else if (-c == ESC_E) continue;  /* Ignore orphan \E */
 
         if (c < 0)
           {
@@ -4798,7 +4798,7 @@ for (;; ptr++)
       }
 
     /* In the pre-compile phase, update the length by the length of the group,
-    less the brackets at either end. Then reduce the compiled code to just a 
+    less the brackets at either end. Then reduce the compiled code to just a
     set of non-capturing brackets so that it doesn't use much memory if it is
     duplicated by a quantifier.*/
 
@@ -4810,7 +4810,7 @@ for (;; ptr++)
         goto FAILED;
         }
       *lengthptr += length_prevgroup - 2 - 2*LINK_SIZE;
-      *code++ = OP_BRA;      
+      *code++ = OP_BRA;
       PUTINC(code, 0, 1 + LINK_SIZE);
       *code++ = OP_KET;
       PUTINC(code, 0, 1 + LINK_SIZE);
