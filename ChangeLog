@@ -143,6 +143,8 @@ Version 7.3 17-Aug-07
 24. A repeated \S or \W in UTF-8 mode could give wrong answers when multibyte
     characters were involved (for example /\S{2}/8g with "A\x{a3}BC").
 
+25. Using pcregrep in multiline, inverted mode (-Mv) caused it to loop.
+
 
 Version 7.2 19-Jun-07
 ---------------------

@@ -202,6 +202,9 @@ elephant" ./testdata/grepinput) >>testtry
 echo "---------------------------- Test 49 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep "^(abc|def|ghi|jkl)" ./testdata/grepinputx) >>testtry
 
+echo "---------------------------- Test 50 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -Mv "brown\sfox" ./testdata/grepinputv) >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

@@ -255,6 +255,7 @@ pcregrep_LDADD = libpcreposix.la
 EXTRA_DIST += \
   testdata/grepinput \
   testdata/grepinput8 \
+  testdata/grepinputv \
   testdata/grepinputx \
   testdata/greplist \
   testdata/grepoutput \
