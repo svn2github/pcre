@@ -1317,14 +1317,17 @@ for (;;)
       case OP_TYPEMINPLUS:
       case OP_TYPEQUERY:
       case OP_TYPEMINQUERY:
-      case OP_TYPEUPTO:
-      case OP_TYPEMINUPTO:
-      case OP_TYPEEXACT:
       case OP_TYPEPOSSTAR:
       case OP_TYPEPOSPLUS:
       case OP_TYPEPOSQUERY:
-      case OP_TYPEPOSUPTO:
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+      break;
+
+      case OP_TYPEUPTO:
+      case OP_TYPEMINUPTO:
+      case OP_TYPEEXACT:
+      case OP_TYPEPOSUPTO:
+      if (code[3] == OP_PROP || code[3] == OP_NOTPROP) code += 2;
       break;
       }
 
@@ -1407,14 +1410,17 @@ for (;;)
       case OP_TYPEMINPLUS:
       case OP_TYPEQUERY:
       case OP_TYPEMINQUERY:
-      case OP_TYPEUPTO:
-      case OP_TYPEMINUPTO:
-      case OP_TYPEEXACT:
       case OP_TYPEPOSSTAR:
       case OP_TYPEPOSPLUS:
       case OP_TYPEPOSQUERY:
-      case OP_TYPEPOSUPTO:
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+      break;
+
+      case OP_TYPEPOSUPTO:
+      case OP_TYPEUPTO:
+      case OP_TYPEMINUPTO:
+      case OP_TYPEEXACT:
+      if (code[3] == OP_PROP || code[3] == OP_NOTPROP) code += 2;
       break;
       }
 

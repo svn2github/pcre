@@ -804,4 +804,6 @@ was broken in all cases./
 
 /\p{Yi}+(\P{Yi}+)(?1)/
 
+/(\P{Yi}{2}\277)?/
+
 / End of testinput6 /

@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.3 16-Aug-07
+Version 7.3 17-Aug-07
 ---------------------
 
  1. In the rejigging of the build system that eventually resulted in 7.1, the
@@ -137,6 +137,8 @@ Version 7.3 16-Aug-07
 
     (c) A pattern such as \p{Yi}+(\P{Yi}+)(?1) could give an incorrect
         "reference to non-existent subpattern" error.
+
+    (d) A pattern like (\P{Yi}{2}\277)? could loop at compile time.
 
 24. A repeated \S or \W in UTF-8 mode could give wrong answers when multibyte
     characters were involved (for example /\S{2}/8g with "A\x{a3}BC").
