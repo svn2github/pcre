@@ -1596,6 +1596,26 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_TYPEPOSPLUS:
     case OP_TYPEEXACT:
     return FALSE;
+    
+    /* These are going to continue, as they may be empty, but we have to 
+    fudge the length for the \p and \P cases. */ 
+    
+    case OP_TYPESTAR:
+    case OP_TYPEMINSTAR:
+    case OP_TYPEPOSSTAR:
+    case OP_TYPEQUERY:
+    case OP_TYPEMINQUERY:
+    case OP_TYPEPOSQUERY:
+    if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+    break;  
+    
+    /* Same for these */
+    
+    case OP_TYPEUPTO:
+    case OP_TYPEMINUPTO:
+    case OP_TYPEPOSUPTO:
+    if (code[3] == OP_PROP || code[3] == OP_NOTPROP) code += 2;
+    break;
 
     /* End of branch */
 
@@ -1759,6 +1779,7 @@ adjust_recurse(uschar *group, int adjust, BOOL utf8, compile_data *cd,
   uschar *save_hwm)
 {
 uschar *ptr = group;
+
 while ((ptr = (uschar *)find_recurse(ptr, utf8)) != NULL)
   {
   int offset;
