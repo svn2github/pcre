@@ -806,4 +806,12 @@ was broken in all cases./
 
 /(\P{Yi}{2}\277)?/
 
+/[\P{Yi}A]/
+
+/[\P{Yi}\P{Yi}\P{Yi}A]/
+
+/[^\P{Yi}A]/
+
+/[^\P{Yi}\P{Yi}\P{Yi}A]/
+
 / End of testinput6 /

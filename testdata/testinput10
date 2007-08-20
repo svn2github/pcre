@@ -105,4 +105,20 @@ are all themselves checked in other tests. --/
 
 /(  (?(1)0|)*   )/xBM
 
+/[a]/BM
+
+/[a]/8BM
+
+/[\xaa]/BM
+
+/[\xaa]/8BM
+
+/[^a]/BM
+
+/[^a]/8BM
+
+/[^\xaa]/BM
+
+/[^\xaa]/8BM
+
 / End of testinput10 /

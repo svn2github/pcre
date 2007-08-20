@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.3 17-Aug-07
+Version 7.3 20-Aug-07
 ---------------------
 
  1. In the rejigging of the build system that eventually resulted in 7.1, the
@@ -144,6 +144,9 @@ Version 7.3 17-Aug-07
     characters were involved (for example /\S{2}/8g with "A\x{a3}BC").
 
 25. Using pcregrep in multiline, inverted mode (-Mv) caused it to loop.
+
+26. Patterns such as [\P{Yi}A] which include \p or \P and just one other 
+    character were causing crashes (broken optimization).
 
 
 Version 7.2 19-Jun-07

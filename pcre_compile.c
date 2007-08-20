@@ -3176,11 +3176,14 @@ for (;; ptr++)
       }
 
     /* If class_charcount is 1, we saw precisely one character whose value is
-    less than 256. In non-UTF-8 mode we can always optimize. In UTF-8 mode, we
-    can optimize the negative case only if there were no characters >= 128
-    because OP_NOT and the related opcodes like OP_NOTSTAR operate on
-    single-bytes only. This is an historical hangover. Maybe one day we can
-    tidy these opcodes to handle multi-byte characters.
+    less than 256. As long as there were no characters >= 128 and there was no 
+    use of \p or \P, in other words, no use of any XCLASS features, we can 
+    optimize. 
+ 
+    In UTF-8 mode, we can optimize the negative case only if there were no
+    characters >= 128 because OP_NOT and the related opcodes like OP_NOTSTAR
+    operate on single-bytes only. This is an historical hangover. Maybe one day
+    we can tidy these opcodes to handle multi-byte characters.
 
     The optimization throws away the bit map. We turn the item into a
     1-character OP_CHAR[NC] if it's positive, or OP_NOT if it's negative. Note
@@ -3190,10 +3193,8 @@ for (;; ptr++)
     reqbyte, save the previous value for reinstating. */
 
 #ifdef SUPPORT_UTF8
-    if (class_charcount == 1 &&
-          (!utf8 ||
-          (!class_utf8 && (!negate_class || class_lastchar < 128))))
-
+    if (class_charcount == 1 && !class_utf8 && 
+      (!utf8 || !negate_class || class_lastchar < 128))
 #else
     if (class_charcount == 1)
 #endif
