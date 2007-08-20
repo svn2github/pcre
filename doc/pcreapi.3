@@ -1198,6 +1198,15 @@ pattern. When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is
 set, and a match attempt fails when the current position is at a CRLF sequence,
 the match position is advanced by two characters instead of one, in other
 words, to after the CRLF.
+.P
+Anomalous effects can occur when CRLF is a valid newline sequence and explicit
+\er or \en escapes appear in the pattern. For example, the string "\er\enA"
+matches the unanchored pattern \enA but not [X\en]A. This happens because, in
+the first case, PCRE knows that the match must start with \en, and so it skips
+there before trying to match. In the second case, it has no knowledge about the 
+starting character, so it starts matching at the beginning of the string, and
+on failing, skips over the CRLF as described above. However, if the pattern is
+studied, the match succeeds, because then PCRE once again knows where to start.
 .sp
   PCRE_NOTBOL
 .sp
@@ -1886,6 +1895,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 August 2007
+Last updated: 20 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
