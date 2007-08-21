@@ -1596,10 +1596,10 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_TYPEPOSPLUS:
     case OP_TYPEEXACT:
     return FALSE;
-    
-    /* These are going to continue, as they may be empty, but we have to 
-    fudge the length for the \p and \P cases. */ 
-    
+
+    /* These are going to continue, as they may be empty, but we have to
+    fudge the length for the \p and \P cases. */
+
     case OP_TYPESTAR:
     case OP_TYPEMINSTAR:
     case OP_TYPEPOSSTAR:
@@ -1607,10 +1607,10 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_TYPEMINQUERY:
     case OP_TYPEPOSQUERY:
     if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
-    break;  
-    
+    break;
+
     /* Same for these */
-    
+
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
     case OP_TYPEPOSUPTO:
@@ -3195,9 +3195,9 @@ for (;; ptr++)
       *errorcodeptr = ERR6;
       goto FAILED;
       }
-      
+
     /* Remember whether \r or \n are in this class */
-      
+
     if (negate_class)
       {
       if ((classbits[1] & 0x24) != 0x24) cd->external_options |= PCRE_HASCRORLF;
@@ -3205,13 +3205,13 @@ for (;; ptr++)
     else
       {
       if ((classbits[1] & 0x24) != 0) cd->external_options |= PCRE_HASCRORLF;
-      }       
-      
+      }
+
     /* If class_charcount is 1, we saw precisely one character whose value is
-    less than 256. As long as there were no characters >= 128 and there was no 
-    use of \p or \P, in other words, no use of any XCLASS features, we can 
-    optimize. 
- 
+    less than 256. As long as there were no characters >= 128 and there was no
+    use of \p or \P, in other words, no use of any XCLASS features, we can
+    optimize.
+
     In UTF-8 mode, we can optimize the negative case only if there were no
     characters >= 128 because OP_NOT and the related opcodes like OP_NOTSTAR
     operate on single-bytes only. This is an historical hangover. Maybe one day
@@ -3225,7 +3225,7 @@ for (;; ptr++)
     reqbyte, save the previous value for reinstating. */
 
 #ifdef SUPPORT_UTF8
-    if (class_charcount == 1 && !class_utf8 && 
+    if (class_charcount == 1 && !class_utf8 &&
       (!utf8 || !negate_class || class_lastchar < 128))
 #else
     if (class_charcount == 1)
@@ -5061,11 +5061,11 @@ for (;; ptr++)
     previous = code;
     *code++ = ((options & PCRE_CASELESS) != 0)? OP_CHARNC : OP_CHAR;
     for (c = 0; c < mclength; c++) *code++ = mcbuffer[c];
-    
+
     /* Remember if \r or \n were seen */
-    
+
     if (mcbuffer[0] == '\r' || mcbuffer[0] == '\n')
-      cd->external_options |= PCRE_HASCRORLF;  
+      cd->external_options |= PCRE_HASCRORLF;
 
     /* Set the first and required bytes appropriately. If no previous first
     byte, set it from this character, but revert to none on a zero repeat.
@@ -5666,6 +5666,7 @@ real_pcre *re;
 int length = 1;  /* For final END opcode */
 int firstbyte, reqbyte, newline;
 int errorcode = 0;
+int skipatstart = 0;
 #ifdef SUPPORT_UTF8
 BOOL utf8;
 #endif
@@ -5744,13 +5745,33 @@ cd->fcc = tables + fcc_offset;
 cd->cbits = tables + cbits_offset;
 cd->ctypes = tables + ctypes_offset;
 
+/* Check for newline settings at the start of the pattern, and remember the
+offset for later. */
+
+if (ptr[0] == '(' && ptr[1] == '*')
+  {
+  int newnl = 0;
+  if (strncmp((char *)(ptr+2), "CR)", 3) == 0)
+    { skipatstart = 5; newnl = PCRE_NEWLINE_CR; }
+  else if (strncmp((char *)(ptr+2), "LF)", 3)  == 0)
+    { skipatstart = 5; newnl = PCRE_NEWLINE_LF; }
+  else if (strncmp((char *)(ptr+2), "CRLF)", 5)  == 0)
+    { skipatstart = 7; newnl = PCRE_NEWLINE_CR + PCRE_NEWLINE_LF; }
+  else if (strncmp((char *)(ptr+2), "ANY)", 4) == 0)
+    { skipatstart = 6; newnl = PCRE_NEWLINE_ANY; }
+  else if (strncmp((char *)(ptr+2), "ANYCRLF)", 8)  == 0)
+    { skipatstart = 10; newnl = PCRE_NEWLINE_ANYCRLF; }
+  if (skipatstart > 0)
+    options = (options & ~PCRE_NEWLINE_BITS) | newnl;
+  }
+
 /* Handle different types of newline. The three bits give seven cases. The
 current code allows for fixed one- or two-byte sequences, plus "any" and
 "anycrlf". */
 
-switch (options & (PCRE_NEWLINE_CRLF | PCRE_NEWLINE_ANY))
+switch (options & PCRE_NEWLINE_BITS)
   {
-  case 0: newline = NEWLINE; break;   /* Compile-time default */
+  case 0: newline = NEWLINE; break;   /* Build-time default */
   case PCRE_NEWLINE_CR: newline = '\r'; break;
   case PCRE_NEWLINE_LF: newline = '\n'; break;
   case PCRE_NEWLINE_CR+
@@ -5822,6 +5843,7 @@ been put into the cd block so that they can be changed if an option setting is
 found within the regex right at the beginning. Bringing initial option settings
 outside can help speed up starting point checks. */
 
+ptr += skipatstart;
 code = cworkspace;
 *code = OP_BRA;
 (void)compile_regex(cd->external_options, cd->external_options & PCRE_IMS,
@@ -5891,7 +5913,7 @@ cd->had_accept = FALSE;
 error, errorcode will be set non-zero, so we don't need to look at the result
 of the function here. */
 
-ptr = (const uschar *)pattern;
+ptr = (const uschar *)pattern + skipatstart;
 code = (uschar *)codestart;
 *code = OP_BRA;
 (void)compile_regex(re->options, re->options & PCRE_IMS, &code, &ptr,
@@ -5998,7 +6020,7 @@ case when building a production library. */
 
 printf("Length = %d top_bracket = %d top_backref = %d\n",
   length, re->top_bracket, re->top_backref);
-   
+
 printf("Options=%08x\n", re->options);
 
 if ((re->options & PCRE_FIRSTSET) != 0)

@@ -2428,4 +2428,40 @@ a random value. /Ix
 /(\r|\n)A/<crlf>
     \r\nA 
 
+/a(*CR)b/
+
+/(*CR)a.b/
+    a\nb
+    ** Failers
+    a\rb  
+
+/(*CR)a.b/<lf>
+    a\nb
+    ** Failers
+    a\rb  
+
+/(*LF)a.b/<CRLF>
+    a\rb
+    ** Failers
+    a\nb  
+
+/(*CRLF)a.b/
+    a\rb
+    a\nb  
+    ** Failers
+    a\r\nb  
+
+/(*ANYCRLF)a.b/<CR>
+    ** Failers
+    a\rb
+    a\nb  
+    a\r\nb  
+
+/(*ANY)a.b/<cr>
+    ** Failers
+    a\rb
+    a\nb  
+    a\r\nb  
+    a\x85b 
+
 / End of testinput2 /

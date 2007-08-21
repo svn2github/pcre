@@ -243,7 +243,7 @@ by the caller to a "callout" function, which PCRE will then call at specified
 points during a matching operation. Details are given in the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
-</P>
+<a name="newlines"></a></P>
 <br><a name="SEC3" href="#TOC1">NEWLINES</a><br>
 <P>
 PCRE supports five different conventions for indicating line breaks in
@@ -262,13 +262,22 @@ default can be overridden, either when a pattern is compiled, or when it is
 matched.
 </P>
 <P>
+At compile time, the newline convention can be specified by the <i>options</i>
+argument of <b>pcre_compile()</b>, or it can be specified by special text at the
+start of the pattern itself; this overrides any other settings. See the
+<a href="pcrepattern.html"><b>pcrepattern</b></a>
+page for details of the special character sequences.
+</P>
+<P>
 In the PCRE documentation the word "newline" is used to mean "the character or
 pair of characters that indicate a line break". The choice of newline
 convention affects the handling of the dot, circumflex, and dollar
 metacharacters, the handling of #-comments in /x mode, and, when CRLF is a
 recognized line ending sequence, the match position advancement for a
-non-anchored pattern. The choice of newline convention does not affect the
-interpretation of the \n or \r escape sequences.
+non-anchored pattern. There is more detail about this in the
+<a href="#execoptions">section on <b>pcre_exec()</b> options</a>
+below. The choice of newline convention does not affect the interpretation of
+the \n or \r escape sequences.
 </P>
 <br><a name="SEC4" href="#TOC1">MULTITHREADING</a><br>
 <P>
@@ -894,6 +903,11 @@ table indicating a fixed set of bytes for the first byte in any matching
 string, a pointer to the table is returned. Otherwise NULL is returned. The
 fourth argument should point to an <b>unsigned char *</b> variable.
 <pre>
+  PCRE_INFO_HASCRORLF
+</pre>
+Return 1 if the pattern contains any explicit matches for CR or LF characters,
+otherwise 0. The fourth argument should point to an <b>int</b> variable.
+<pre>
   PCRE_INFO_JCHANGED
 </pre>
 Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The
@@ -1176,7 +1190,7 @@ the external tables might be at a different address when <b>pcre_exec()</b> is
 called. See the
 <a href="pcreprecompile.html"><b>pcreprecompile</b></a>
 documentation for a discussion of saving compiled patterns for later use.
-</P>
+<a name="execoptions"></a></P>
 <br><b>
 Option bits for <b>pcre_exec()</b>
 </b><br>
@@ -1203,10 +1217,28 @@ the pattern was compiled. For details, see the description of
 <b>pcre_compile()</b> above. During matching, the newline choice affects the
 behaviour of the dot, circumflex, and dollar metacharacters. It may also alter
 the way the match position is advanced after a match failure for an unanchored
-pattern. When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is
-set, and a match attempt fails when the current position is at a CRLF sequence,
-the match position is advanced by two characters instead of one, in other
-words, to after the CRLF.
+pattern.
+</P>
+<P>
+When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is set, and a
+match attempt for an unanchored pattern fails when the current position is at a
+CRLF sequence, and the pattern contains no explicit matches for CR or NL
+characters, the match position is advanced by two characters instead of one, in
+other words, to after the CRLF.
+</P>
+<P>
+The above rule is a compromise that makes the most common cases work as
+expected. For example, if the pattern is .+A (and the PCRE_DOTALL option is not
+set), it does not match the string "\r\nA" because, after failing at the
+start, it skips both the CR and the LF before retrying. However, the pattern
+[\r\n]A does match that string, because it contains an explicit CR or LF
+reference, and so advances only by one character after the first failure.
+Note than an explicit CR or LF reference occurs for negated character classes
+such as [^X] because they can match CR or LF characters.
+</P>
+<P>
+Notwithstanding the above, anomalous effects may still occur when CRLF is a
+valid newline sequence and explicit \r or \n escapes appear in the pattern.
 <pre>
   PCRE_NOTBOL
 </pre>
@@ -1883,7 +1915,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 09 August 2007
+Last updated: 21 August 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

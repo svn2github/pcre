@@ -171,8 +171,9 @@ not correspond to anything in Perl:
   \fB/<anycrlf>\fP  PCRE_NEWLINE_ANYCRLF
   \fB/<any>\fP      PCRE_NEWLINE_ANY
 .sp
-Those specifying line ending sequencess are literal strings as shown. This
-example sets multiline matching with CRLF as the line ending sequence:
+Those specifying line ending sequences are literal strings as shown, but the
+letters can be in either case. This example sets multiline matching with CRLF
+as the line ending sequence:
 .sp
   /^abc/m<crlf>
 .sp
@@ -693,6 +694,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 August 2007
+Last updated: 21 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

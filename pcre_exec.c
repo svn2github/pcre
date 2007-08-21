@@ -4785,7 +4785,7 @@ for(;;)
 
   if (anchored || start_match > end_subject) break;
 
-  /* If we have just passed a CR and we are now at a LF, and the pattern does 
+  /* If we have just passed a CR and we are now at a LF, and the pattern does
   not contain any explicit matches for \r or \n, and the newline option is CRLF
   or ANY or ANYCRLF, advance the match position by one more character. */
 

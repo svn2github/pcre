@@ -218,6 +218,7 @@ points during a matching operation. Details are given in the
 documentation.
 .
 .
+.\" HTML <a name="newlines"></a>
 .SH NEWLINES
 .rs
 .sp
@@ -234,6 +235,14 @@ its standard newline sequence. When PCRE is built, a default can be specified.
 The default default is LF, which is the Unix standard. When PCRE is run, the
 default can be overridden, either when a pattern is compiled, or when it is
 matched.
+.P
+At compile time, the newline convention can be specified by the \fIoptions\fP
+argument of \fBpcre_compile()\fP, or it can be specified by special text at the
+start of the pattern itself; this overrides any other settings. See the
+.\" HREF
+\fBpcrepattern\fP
+.\"
+page for details of the special character sequences.
 .P
 In the PCRE documentation the word "newline" is used to mean "the character or
 pair of characters that indicate a line break". The choice of newline
@@ -889,8 +898,8 @@ fourth argument should point to an \fBunsigned char *\fP variable.
 .sp
   PCRE_INFO_HASCRORLF
 .sp
-Return 1 if the pattern contains any explicit matches for CR or LF characters, 
-otherwise 0. The fourth argument should point to an \fBint\fP variable.   
+Return 1 if the pattern contains any explicit matches for CR or LF characters,
+otherwise 0. The fourth argument should point to an \fBint\fP variable.
 .sp
   PCRE_INFO_JCHANGED
 .sp
@@ -1205,7 +1214,7 @@ the pattern was compiled. For details, see the description of
 \fBpcre_compile()\fP above. During matching, the newline choice affects the
 behaviour of the dot, circumflex, and dollar metacharacters. It may also alter
 the way the match position is advanced after a match failure for an unanchored
-pattern. 
+pattern.
 .P
 When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is set, and a
 match attempt for an unanchored pattern fails when the current position is at a
@@ -1213,11 +1222,11 @@ CRLF sequence, and the pattern contains no explicit matches for CR or NL
 characters, the match position is advanced by two characters instead of one, in
 other words, to after the CRLF.
 .P
-The above rule is a compromise that makes the most common cases work as 
-expected. For example, if the pattern is .+A (and the PCRE_DOTALL option is not 
-set), it does not match the string "\er\enA" because, after failing at the 
-start, it skips both the CR and the LF before retrying. However, the pattern 
-[\er\en]A does match that string, because it contains an explicit CR or LF 
+The above rule is a compromise that makes the most common cases work as
+expected. For example, if the pattern is .+A (and the PCRE_DOTALL option is not
+set), it does not match the string "\er\enA" because, after failing at the
+start, it skips both the CR and the LF before retrying. However, the pattern
+[\er\en]A does match that string, because it contains an explicit CR or LF
 reference, and so advances only by one character after the first failure.
 Note than an explicit CR or LF reference occurs for negated character classes
 such as [^X] because they can match CR or LF characters.

@@ -9109,4 +9109,63 @@ No match
  0: \x0aA
  1: \x0a
 
+/a(*CR)b/
+Failed: (*VERB) not recognized at offset 5
+
+/(*CR)a.b/
+    a\nb
+ 0: a\x0ab
+    ** Failers
+No match
+    a\rb  
+No match
+
+/(*CR)a.b/<lf>
+    a\nb
+ 0: a\x0ab
+    ** Failers
+No match
+    a\rb  
+No match
+
+/(*LF)a.b/<CRLF>
+    a\rb
+ 0: a\x0db
+    ** Failers
+No match
+    a\nb  
+No match
+
+/(*CRLF)a.b/
+    a\rb
+ 0: a\x0db
+    a\nb  
+ 0: a\x0ab
+    ** Failers
+No match
+    a\r\nb  
+No match
+
+/(*ANYCRLF)a.b/<CR>
+    ** Failers
+No match
+    a\rb
+No match
+    a\nb  
+No match
+    a\r\nb  
+No match
+
+/(*ANY)a.b/<cr>
+    ** Failers
+No match
+    a\rb
+No match
+    a\nb  
+No match
+    a\r\nb  
+No match
+    a\x85b 
+No match
+
 / End of testinput2 /

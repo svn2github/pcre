@@ -139,7 +139,6 @@ files="\
   dftables.c \
   pcreposix.c \
   pcreposix.h \
-  pcre.h \
   pcre.h.in \
   pcre_internal.h
   pcre_compile.c \

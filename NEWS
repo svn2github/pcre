@@ -16,11 +16,14 @@ Most changes are bug fixes. Some that are not:
 3. Checking for potential integer overflow has been made more dynamic, and as a
    consequence there is no longer a hard limit on the size of a subpattern that
    has a limited repeat count.
-   
-4. When CRLF is a valid line-ending sequence, pcre_exec() and pcre_dfa_exec() 
-   no longer advance by two characters instead of one when an unanchored match 
-   fails at CRLF if there are explicit CR or LF matches within the pattern. 
+
+4. When CRLF is a valid line-ending sequence, pcre_exec() and pcre_dfa_exec()
+   no longer advance by two characters instead of one when an unanchored match
+   fails at CRLF if there are explicit CR or LF matches within the pattern.
    This gets rid of some anomalous effects that previously occurred.
+
+5. Some PCRE-specific settings for varying the newline options at the start of
+   a pattern have been added.
 
 
 Release 7.2 19-Jun-07

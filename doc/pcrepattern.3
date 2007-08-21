@@ -44,6 +44,44 @@ discussed in the
 page.
 .
 .
+.SH "NEWLINE CONVENTIONS"
+.rs
+.sp
+PCRE supports five different conventions for indicating line breaks in
+strings: a single CR (carriage return) character, a single LF (linefeed)
+character, the two-character sequence CRLF, any of the three preceding, or any
+Unicode newline sequence. The
+.\" HREF
+\fBpcreapi\fP
+.\"
+page has
+.\" HTML <a href="pcreapi.html#newlines">
+.\" </a>
+further discussion
+.\"
+about newlines, and shows how to set the newline convention in the
+\fIoptions\fP arguments for the compiling and matching functions.
+.P
+It is also possible to specify a newline convention by starting a pattern
+string with one of the following five sequences:
+.sp
+  (*CR)        carriage return
+  (*LF)        linefeed
+  (*CRLF)      carriage return, followed by linefeed
+  (*ANYCRLF)   any of the three above
+  (*ANY)       all Unicode newline sequences
+.sp
+These override the default and the options given to \fBpcre_compile()\fP. For
+example, on a Unix system where LF is the default newline sequence, the pattern
+.sp
+  (*CR)a.b
+.sp
+changes the convention to CR. That pattern matches "a\enb" because LF is no
+longer a newline. Note that these special settings, which are not
+Perl-compatible, are recognized only at the very start of a pattern, and that
+they must be in upper case.
+.
+.
 .SH "CHARACTERS AND METACHARACTERS"
 .rs
 .sp
@@ -153,7 +191,7 @@ represents:
   \ecx       "control-x", where x is any character
   \ee        escape (hex 1B)
   \ef        formfeed (hex 0C)
-  \en        newline (hex 0A)
+  \en        linefeed (hex 0A)
   \er        carriage return (hex 0D)
   \et        tab (hex 09)
   \eddd      character with octal code ddd, or backreference
@@ -2111,6 +2149,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 August 2007
+Last updated: 21 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

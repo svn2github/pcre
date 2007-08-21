@@ -664,6 +664,32 @@ return count;
 
 
 /*************************************************
+*         Case-independent strncmp() function    *
+*************************************************/
+
+/*
+Arguments:
+  s         first string
+  t         second string
+  n         number of characters to compare
+
+Returns:    < 0, = 0, or > 0, according to the comparison
+*/
+
+static int
+strncmpic(uschar *s, uschar *t, int n)
+{
+while (n--)
+  {
+  int c = tolower(*s++) - tolower(*t++);
+  if (c) return c;
+  }
+return 0;
+}
+
+
+
+/*************************************************
 *         Check newline indicator                *
 *************************************************/
 
@@ -681,11 +707,11 @@ Returns:      appropriate PCRE_NEWLINE_xxx flags, or 0
 static int
 check_newline(uschar *p, FILE *f)
 {
-if (strncmp((char *)p, "cr>", 3) == 0) return PCRE_NEWLINE_CR;
-if (strncmp((char *)p, "lf>", 3) == 0) return PCRE_NEWLINE_LF;
-if (strncmp((char *)p, "crlf>", 5) == 0) return PCRE_NEWLINE_CRLF;
-if (strncmp((char *)p, "anycrlf>", 8) == 0) return PCRE_NEWLINE_ANYCRLF;
-if (strncmp((char *)p, "any>", 4) == 0) return PCRE_NEWLINE_ANY;
+if (strncmpic(p, (uschar *)"cr>", 3) == 0) return PCRE_NEWLINE_CR;
+if (strncmpic(p, (uschar *)"lf>", 3) == 0) return PCRE_NEWLINE_LF;
+if (strncmpic(p, (uschar *)"crlf>", 5) == 0) return PCRE_NEWLINE_CRLF;
+if (strncmpic(p, (uschar *)"anycrlf>", 8) == 0) return PCRE_NEWLINE_ANYCRLF;
+if (strncmpic(p, (uschar *)"any>", 4) == 0) return PCRE_NEWLINE_ANY;
 fprintf(f, "Unknown newline type at: <%s\n", p);
 return 0;
 }
@@ -1358,7 +1384,7 @@ while (!done)
       int old_first_char, old_options, old_count;
 #endif
       int count, backrefmax, first_char, need_char, okpartial, jchanged,
-        hascrorlf; 
+        hascrorlf;
       int nameentrysize, namecount;
       const uschar *nametable;
 
@@ -1416,7 +1442,7 @@ while (!done)
         }
 
       if (!okpartial) fprintf(outfile, "Partial matching not supported\n");
-      if (hascrorlf) fprintf(outfile, "Contains explicit CR or LF match\n"); 
+      if (hascrorlf) fprintf(outfile, "Contains explicit CR or LF match\n");
 
       all_options = ((real_pcre *)re)->options;
       if (do_flip) all_options = byteflip(all_options, sizeof(all_options));
