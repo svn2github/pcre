@@ -166,6 +166,7 @@ Starting byte set: a b c d
 
 /(a|[^\dZ])/IS
 Capturing subpattern count = 1
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -402,6 +403,7 @@ Failed: missing terminating ] for character class at offset 4
 /[^aeiou ]{3,}/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -703,6 +705,7 @@ Starting byte set: a b
 
 /(?<=foo\n)^bar/Im
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline
 No first char
 Need char = 'r'
@@ -719,6 +722,7 @@ No match
 
 /^(?<=foo\n)bar/Im
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
 Need char = 'r'
@@ -1105,6 +1109,7 @@ No need char
 )?)?)?)?)?)?)?)?)?otherword/I
 Capturing subpattern count = 8
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 First char = 'w'
 Need char = 'd'
@@ -1347,6 +1352,7 @@ No need char
 
 /^ab\n/Ig+
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1356,6 +1362,7 @@ No need char
 
 /^ab\n/Img+
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
 Need char = 10
@@ -1433,6 +1440,7 @@ Need char = 'a'
 /"([^\\"]+|\\.)*"/I
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 First char = '"'
 Need char = '"'
@@ -1708,6 +1716,7 @@ Study returned NULL
   /Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1737,6 +1746,7 @@ No match
 /\(  ( (?>[^()]+) | (?R) )* \) /Ixg
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1752,6 +1762,7 @@ Need char = ')'
 /\(  (?: (?>[^()]+) | (?R) ) \) /Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1771,6 +1782,7 @@ No match
 /\(  (?: (?>[^()]+) | (?R) )? \) /Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1782,6 +1794,7 @@ Need char = ')'
 /\(  ( (?>[^()]+) | (?R) )* \) /Ix
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1792,6 +1805,7 @@ Need char = ')'
 /\( ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 2
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1803,6 +1817,7 @@ Need char = ')'
 /\( (123)? ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1820,6 +1835,7 @@ Need char = ')'
 /\( ( (123)? ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1837,6 +1853,7 @@ Need char = ')'
 /\( (((((((((( ( (?>[^()]+) | (?R) )* )))))))))) \) /Ix
 Capturing subpattern count = 11
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1857,6 +1874,7 @@ Need char = ')'
 /\( ( ( (?>[^()<>]+) | ((?>[^()]+)) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1869,6 +1887,7 @@ Need char = ')'
 /\( ( ( (?>[^()]+) | ((?R)) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1905,6 +1924,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1931,6 +1951,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1952,6 +1973,7 @@ Starting byte set: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1991,12 +2013,14 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
 
 /[\n\x0b\x0c\x0d[:blank:]]/IS
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -2011,6 +2035,7 @@ Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2089,6 +2114,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2154,6 +2180,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2167,6 +2194,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -3055,6 +3083,7 @@ Need char = 'b'
 /([^()]++|\([^()]*\))+/I
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3065,6 +3094,7 @@ No need char
 /\(([^()]++|\([^()]+\))+\)/I
 Capturing subpattern count = 1
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 First char = '('
 Need char = ')'
@@ -3265,6 +3295,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3277,6 +3308,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3284,6 +3316,7 @@ No need char
 /< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/Ix
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '<'
 Need char = '>'
@@ -3498,6 +3531,7 @@ Starting byte set: a b
 
 /[^a]/I
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3957,6 +3991,7 @@ Failed: recursive call could loop indefinitely at offset 16
 
 /^([^()]|\((?1)*\))*$/I
 Capturing subpattern count = 1
+Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -3976,6 +4011,7 @@ No match
 
 /^>abc>([^()]|\((?1)*\))*<xyz<$/I
 Capturing subpattern count = 1
+Contains explicit CR or LF match
 Options: anchored
 No first char
 Need char = '<'
@@ -4103,6 +4139,7 @@ No match
 /((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/Ix
 Capturing subpattern count = 2
 Partial matching not supported
+Contains explicit CR or LF match
 Options: extended
 First char = '<'
 Need char = '>'
@@ -5631,6 +5668,7 @@ No need char
 
 /line\nbreak/I
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 No options
 First char = 'l'
 Need char = 'k'
@@ -5641,6 +5679,7 @@ Need char = 'k'
 
 /line\nbreak/If
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: firstline
 First char = 'l'
 Need char = 'k'
@@ -5653,6 +5692,7 @@ No match
 
 /line\nbreak/Imf
 Capturing subpattern count = 0
+Contains explicit CR or LF match
 Options: multiline firstline
 First char = 'l'
 Need char = 'k'
@@ -5918,6 +5958,7 @@ Matched, but too many substrings
 /[^()]*(?:\((?R)\)[^()]*)*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5931,6 +5972,7 @@ No need char
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5942,6 +5984,7 @@ No need char
 /[^()]*(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5953,6 +5996,7 @@ No need char
 /(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5966,6 +6010,7 @@ No need char
 /(?:\((?R)\))|[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
+Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -9046,5 +9091,22 @@ Failed: number is too big at offset 12
 
 /(?1)\c[/
 Failed: reference to non-existent subpattern at offset 3
+
+/.+A/<crlf>
+    \r\nA
+No match
+    
+/\nA/<crlf>
+    \r\nA 
+ 0: \x0aA
+
+/[\r\n]A/<crlf>
+    \r\nA 
+ 0: \x0aA
+
+/(\r|\n)A/<crlf>
+    \r\nA 
+ 0: \x0aA
+ 1: \x0a
 
 / End of testinput2 /

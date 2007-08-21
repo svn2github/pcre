@@ -492,6 +492,7 @@ bits. */
 #define PCRE_REQCHSET      0x20000000  /* req_byte is set */
 #define PCRE_STARTLINE     0x10000000  /* start after \n for multiline */
 #define PCRE_JCHANGED      0x08000000  /* j option changes within regex */
+#define PCRE_HASCRORLF     0x04000000  /* explicit \r or \n in pattern */
 
 /* Options for the "extra" block produced by pcre_study(). */
 

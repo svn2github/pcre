@@ -3195,7 +3195,18 @@ for (;; ptr++)
       *errorcodeptr = ERR6;
       goto FAILED;
       }
-
+      
+    /* Remember whether \r or \n are in this class */
+      
+    if (negate_class)
+      {
+      if ((classbits[1] & 0x24) != 0x24) cd->external_options |= PCRE_HASCRORLF;
+      }
+    else
+      {
+      if ((classbits[1] & 0x24) != 0) cd->external_options |= PCRE_HASCRORLF;
+      }       
+      
     /* If class_charcount is 1, we saw precisely one character whose value is
     less than 256. As long as there were no characters >= 128 and there was no 
     use of \p or \P, in other words, no use of any XCLASS features, we can 
@@ -5050,6 +5061,11 @@ for (;; ptr++)
     previous = code;
     *code++ = ((options & PCRE_CASELESS) != 0)? OP_CHARNC : OP_CHAR;
     for (c = 0; c < mclength; c++) *code++ = mcbuffer[c];
+    
+    /* Remember if \r or \n were seen */
+    
+    if (mcbuffer[0] == '\r' || mcbuffer[0] == '\n')
+      cd->external_options |= PCRE_HASCRORLF;  
 
     /* Set the first and required bytes appropriately. If no previous first
     byte, set it from this character, but revert to none on a zero repeat.
@@ -5982,20 +5998,8 @@ case when building a production library. */
 
 printf("Length = %d top_bracket = %d top_backref = %d\n",
   length, re->top_bracket, re->top_backref);
-
-if (re->options != 0)
-  {
-  printf("%s%s%s%s%s%s%s%s%s\n",
-    ((re->options & PCRE_NOPARTIAL) != 0)? "nopartial " : "",
-    ((re->options & PCRE_ANCHORED) != 0)? "anchored " : "",
-    ((re->options & PCRE_CASELESS) != 0)? "caseless " : "",
-    ((re->options & PCRE_EXTENDED) != 0)? "extended " : "",
-    ((re->options & PCRE_MULTILINE) != 0)? "multiline " : "",
-    ((re->options & PCRE_DOTALL) != 0)? "dotall " : "",
-    ((re->options & PCRE_DOLLAR_ENDONLY) != 0)? "endonly " : "",
-    ((re->options & PCRE_EXTRA) != 0)? "extra " : "",
-    ((re->options & PCRE_UNGREEDY) != 0)? "ungreedy " : "");
-  }
+   
+printf("Options=%08x\n", re->options);
 
 if ((re->options & PCRE_FIRSTSET) != 0)
   {

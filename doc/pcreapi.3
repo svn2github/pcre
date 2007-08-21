@@ -240,8 +240,13 @@ pair of characters that indicate a line break". The choice of newline
 convention affects the handling of the dot, circumflex, and dollar
 metacharacters, the handling of #-comments in /x mode, and, when CRLF is a
 recognized line ending sequence, the match position advancement for a
-non-anchored pattern. The choice of newline convention does not affect the
-interpretation of the \en or \er escape sequences.
+non-anchored pattern. There is more detail about this in the
+.\" HTML <a href="#execoptions">
+.\" </a>
+section on \fBpcre_exec()\fP options
+.\"
+below. The choice of newline convention does not affect the interpretation of
+the \en or \er escape sequences.
 .
 .
 .SH MULTITHREADING
@@ -882,6 +887,11 @@ table indicating a fixed set of bytes for the first byte in any matching
 string, a pointer to the table is returned. Otherwise NULL is returned. The
 fourth argument should point to an \fBunsigned char *\fP variable.
 .sp
+  PCRE_INFO_HASCRORLF
+.sp
+Return 1 if the pattern contains any explicit matches for CR or LF characters, 
+otherwise 0. The fourth argument should point to an \fBint\fP variable.   
+.sp
   PCRE_INFO_JCHANGED
 .sp
 Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The
@@ -1169,6 +1179,7 @@ called. See the
 .\"
 documentation for a discussion of saving compiled patterns for later use.
 .
+.\" HTML <a name="execoptions"></a>
 .SS "Option bits for \fBpcre_exec()\fP"
 .rs
 .sp
@@ -1194,19 +1205,25 @@ the pattern was compiled. For details, see the description of
 \fBpcre_compile()\fP above. During matching, the newline choice affects the
 behaviour of the dot, circumflex, and dollar metacharacters. It may also alter
 the way the match position is advanced after a match failure for an unanchored
-pattern. When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is
-set, and a match attempt fails when the current position is at a CRLF sequence,
-the match position is advanced by two characters instead of one, in other
-words, to after the CRLF.
+pattern. 
 .P
-Anomalous effects can occur when CRLF is a valid newline sequence and explicit
-\er or \en escapes appear in the pattern. For example, the string "\er\enA"
-matches the unanchored pattern \enA but not [X\en]A. This happens because, in
-the first case, PCRE knows that the match must start with \en, and so it skips
-there before trying to match. In the second case, it has no knowledge about the 
-starting character, so it starts matching at the beginning of the string, and
-on failing, skips over the CRLF as described above. However, if the pattern is
-studied, the match succeeds, because then PCRE once again knows where to start.
+When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is set, and a
+match attempt for an unanchored pattern fails when the current position is at a
+CRLF sequence, and the pattern contains no explicit matches for CR or NL
+characters, the match position is advanced by two characters instead of one, in
+other words, to after the CRLF.
+.P
+The above rule is a compromise that makes the most common cases work as 
+expected. For example, if the pattern is .+A (and the PCRE_DOTALL option is not 
+set), it does not match the string "\er\enA" because, after failing at the 
+start, it skips both the CR and the LF before retrying. However, the pattern 
+[\er\en]A does match that string, because it contains an explicit CR or LF 
+reference, and so advances only by one character after the first failure.
+Note than an explicit CR or LF reference occurs for negated character classes
+such as [^X] because they can match CR or LF characters.
+.P
+Notwithstanding the above, anomalous effects may still occur when CRLF is a
+valid newline sequence and explicit \er or \en escapes appear in the pattern.
 .sp
   PCRE_NOTBOL
 .sp
@@ -1895,6 +1912,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 20 August 2007
+Last updated: 21 August 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

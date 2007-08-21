@@ -152,6 +152,10 @@ switch (what)
   *((int *)where) = (re->options & PCRE_JCHANGED) != 0;
   break;
 
+  case PCRE_INFO_HASCRORLF:
+  *((int *)where) = (re->options & PCRE_HASCRORLF) != 0;
+  break;
+
   default: return PCRE_ERROR_BADOPTION;
   }
 

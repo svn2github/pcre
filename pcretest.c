@@ -1357,7 +1357,8 @@ while (!done)
 #if !defined NOINFOCHECK
       int old_first_char, old_options, old_count;
 #endif
-      int count, backrefmax, first_char, need_char, okpartial, jchanged;
+      int count, backrefmax, first_char, need_char, okpartial, jchanged,
+        hascrorlf; 
       int nameentrysize, namecount;
       const uschar *nametable;
 
@@ -1372,6 +1373,7 @@ while (!done)
       new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable);
       new_info(re, NULL, PCRE_INFO_OKPARTIAL, &okpartial);
       new_info(re, NULL, PCRE_INFO_JCHANGED, &jchanged);
+      new_info(re, NULL, PCRE_INFO_HASCRORLF, &hascrorlf);
 
 #if !defined NOINFOCHECK
       old_count = pcre_info(re, &old_options, &old_first_char);
@@ -1414,6 +1416,7 @@ while (!done)
         }
 
       if (!okpartial) fprintf(outfile, "Partial matching not supported\n");
+      if (hascrorlf) fprintf(outfile, "Contains explicit CR or LF match\n"); 
 
       all_options = ((real_pcre *)re)->options;
       if (do_flip) all_options = byteflip(all_options, sizeof(all_options));

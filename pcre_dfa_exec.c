@@ -2842,16 +2842,17 @@ for (;;)
     }
   if (current_subject > end_subject) break;
 
-  /* If we have just passed a CR and the newline option is CRLF or ANY or
-  ANYCRLF, and we are now at a LF, advance the match position by one more
-  character. */
+  /* If we have just passed a CR and we are now at a LF, and the pattern does 
+  not contain any explicit matches for \r or \n, and the newline option is CRLF
+  or ANY or ANYCRLF, advance the match position by one more character. */
 
   if (current_subject[-1] == '\r' &&
-       (md->nltype == NLTYPE_ANY ||
-        md->nltype == NLTYPE_ANYCRLF ||
-        md->nllen == 2) &&
-       current_subject < end_subject &&
-       *current_subject == '\n')
+      current_subject < end_subject &&
+      *current_subject == '\n' &&
+      (re->options & PCRE_HASCRORLF) == 0 &&
+        (md->nltype == NLTYPE_ANY ||
+         md->nltype == NLTYPE_ANYCRLF ||
+         md->nllen == 2))
     current_subject++;
 
   }   /* "Bumpalong" loop */

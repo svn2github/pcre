@@ -2,7 +2,7 @@ News about PCRE releases
 ------------------------
 
 
-Release 7.3 16-Aug-07
+Release 7.3 20-Aug-07
 ---------------------
 
 Most changes are bug fixes. Some that are not:
@@ -16,6 +16,11 @@ Most changes are bug fixes. Some that are not:
 3. Checking for potential integer overflow has been made more dynamic, and as a
    consequence there is no longer a hard limit on the size of a subpattern that
    has a limited repeat count.
+   
+4. When CRLF is a valid line-ending sequence, pcre_exec() and pcre_dfa_exec() 
+   no longer advance by two characters instead of one when an unanchored match 
+   fails at CRLF if there are explicit CR or LF matches within the pattern. 
+   This gets rid of some anomalous effects that previously occurred.
 
 
 Release 7.2 19-Jun-07

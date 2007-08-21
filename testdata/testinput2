@@ -2416,4 +2416,16 @@ a random value. /Ix
 
 /(?1)\c[/
 
+/.+A/<crlf>
+    \r\nA
+    
+/\nA/<crlf>
+    \r\nA 
+
+/[\r\n]A/<crlf>
+    \r\nA 
+
+/(\r|\n)A/<crlf>
+    \r\nA 
+
 / End of testinput2 /

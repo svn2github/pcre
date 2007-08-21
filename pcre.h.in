@@ -167,6 +167,7 @@ extern "C" {
 #define PCRE_INFO_DEFAULT_TABLES    11
 #define PCRE_INFO_OKPARTIAL         12
 #define PCRE_INFO_JCHANGED          13
+#define PCRE_INFO_HASCRORLF         14
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */

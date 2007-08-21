@@ -150,6 +150,18 @@ Version 7.3 20-Aug-07
     
 27. Patterns such as (\P{Yi}*\277)* (group with possible zero repeat containing
     \p or \P) caused a compile-time loop. 
+    
+28. More problems have arisen in unanchored patterns when CRLF is a valid line
+    break. For example, the unstudied pattern [\r\n]A does not match the string
+    "\r\nA" because change 7.0/46 below moves the current point on by two
+    characters after failing to match at the start. However, the pattern \nA
+    *does* match, because it doesn't start till \n, and if [\r\n]A is studied, 
+    the same is true. There doesn't seem any very clean way out of this, but 
+    what I have chosen to do makes the common cases work: PCRE now takes note 
+    of whether there can be an explicit match for \r or \n anywhere in the 
+    pattern, and if so, 7.0/46 no longer applies. As part of this change, 
+    there's a new PCRE_INFO_HASCRORLF option for finding out whether a compiled 
+    pattern has explicit CR or LF references. 
 
 
 Version 7.2 19-Jun-07
