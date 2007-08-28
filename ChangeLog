@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.3 20-Aug-07
+Version 7.3 28-Aug-07
 ---------------------
 
  1. In the rejigging of the build system that eventually resulted in 7.1, the
