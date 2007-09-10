@@ -1349,6 +1349,7 @@ while (!done)
       rre->magic_number = byteflip(rre->magic_number, sizeof(rre->magic_number));
       rre->size = byteflip(rre->size, sizeof(rre->size));
       rre->options = byteflip(rre->options, sizeof(rre->options));
+      rre->flags = byteflip(rre->flags, sizeof(rre->flags)); 
       rre->top_bracket = byteflip(rre->top_bracket, sizeof(rre->top_bracket));
       rre->top_backref = byteflip(rre->top_backref, sizeof(rre->top_backref));
       rre->first_byte = byteflip(rre->first_byte, sizeof(rre->first_byte));

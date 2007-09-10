@@ -1218,7 +1218,7 @@ pattern.
 .P
 When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is set, and a
 match attempt for an unanchored pattern fails when the current position is at a
-CRLF sequence, and the pattern contains no explicit matches for CR or NL
+CRLF sequence, and the pattern contains no explicit matches for CR or LF
 characters, the match position is advanced by two characters instead of one, in
 other words, to after the CRLF.
 .P
@@ -1228,8 +1228,11 @@ set), it does not match the string "\er\enA" because, after failing at the
 start, it skips both the CR and the LF before retrying. However, the pattern
 [\er\en]A does match that string, because it contains an explicit CR or LF
 reference, and so advances only by one character after the first failure.
-Note than an explicit CR or LF reference occurs for negated character classes
-such as [^X] because they can match CR or LF characters.
+.P
+An explicit match for CR of LF is either a literal appearance of one of those 
+characters, or one of the \er or \en escape sequences. Implicit matches such as 
+[^X] do not count, nor does \es (which includes CR and LF in the characters
+that it matches).
 .P
 Notwithstanding the above, anomalous effects may still occur when CRLF is a
 valid newline sequence and explicit \er or \en escapes appear in the pattern.
@@ -1921,6 +1924,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 August 2007
+Last updated: 10 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

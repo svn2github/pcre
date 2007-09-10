@@ -4408,7 +4408,7 @@ if (re->magic_number != MAGIC_NUMBER)
 /* Set up other data */
 
 anchored = ((re->options | options) & PCRE_ANCHORED) != 0;
-startline = (re->options & PCRE_STARTLINE) != 0;
+startline = (re->flags & PCRE_STARTLINE) != 0;
 firstline = (re->options & PCRE_FIRSTLINE) != 0;
 
 /* The code starts after the real_pcre block and the capture name table. */
@@ -4438,8 +4438,8 @@ md->ctypes = tables + ctypes_offset;
 /* Handle different types of newline. The three bits give eight cases. If
 nothing is set at run time, whatever was used at compile time applies. */
 
-switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : (pcre_uint32)options) &
-       PCRE_NEWLINE_BITS)
+switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : 
+        (pcre_uint32)options) & PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */
   case PCRE_NEWLINE_CR: newline = '\r'; break;
@@ -4478,7 +4478,7 @@ else
 /* Partial matching is supported only for a restricted set of regexes at the
 moment. */
 
-if (md->partial && (re->options & PCRE_NOPARTIAL) != 0)
+if (md->partial && (re->flags & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
 /* Check a UTF-8 string if required. Unfortunately there's no way of passing
@@ -4555,7 +4555,7 @@ studied, there may be a bitmap of possible first characters. */
 
 if (!anchored)
   {
-  if ((re->options & PCRE_FIRSTSET) != 0)
+  if ((re->flags & PCRE_FIRSTSET) != 0)
     {
     first_byte = re->first_byte & 255;
     if ((first_byte_caseless = ((re->first_byte & REQ_CASELESS) != 0)) == TRUE)
@@ -4570,7 +4570,7 @@ if (!anchored)
 /* For anchored or unanchored matches, there may be a "last known required
 character" set. */
 
-if ((re->options & PCRE_REQCHSET) != 0)
+if ((re->flags & PCRE_REQCHSET) != 0)
   {
   req_byte = re->req_byte & 255;
   req_byte_caseless = (re->req_byte & REQ_CASELESS) != 0;
@@ -4792,7 +4792,7 @@ for(;;)
   if (start_match[-1] == '\r' &&
       start_match < end_subject &&
       *start_match == '\n' &&
-      (re->options & PCRE_HASCRORLF) == 0 &&
+      (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||
          md->nllen == 2))

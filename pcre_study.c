@@ -527,7 +527,8 @@ code = (uschar *)re + re->name_table_offset +
 a multiline pattern that matches only at "line starts", no further processing
 at present. */
 
-if ((re->options & (PCRE_ANCHORED|PCRE_FIRSTSET|PCRE_STARTLINE)) != 0)
+if ((re->options & PCRE_ANCHORED) != 0 ||
+    (re->flags & (PCRE_FIRSTSET|PCRE_STARTLINE)) != 0)
   return NULL;
 
 /* Set the character tables in the block that is passed around */

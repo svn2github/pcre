@@ -2644,7 +2644,7 @@ if (md->tables == NULL) md->tables = _pcre_default_tables;
 used in a loop when finding where to start. */
 
 lcc = md->tables + lcc_offset;
-startline = (re->options & PCRE_STARTLINE) != 0;
+startline = (re->flags & PCRE_STARTLINE) != 0;
 firstline = (re->options & PCRE_FIRSTLINE) != 0;
 
 /* Set up the first character to match, if available. The first_byte value is
@@ -2655,7 +2655,7 @@ studied, there may be a bitmap of possible first characters. */
 
 if (!anchored)
   {
-  if ((re->options & PCRE_FIRSTSET) != 0)
+  if ((re->flags & PCRE_FIRSTSET) != 0)
     {
     first_byte = re->first_byte & 255;
     if ((first_byte_caseless = ((re->first_byte & REQ_CASELESS) != 0)) == TRUE)
@@ -2672,7 +2672,7 @@ if (!anchored)
 /* For anchored or unanchored matches, there may be a "last known required
 character" set. */
 
-if ((re->options & PCRE_REQCHSET) != 0)
+if ((re->flags & PCRE_REQCHSET) != 0)
   {
   req_byte = re->req_byte & 255;
   req_byte_caseless = (re->req_byte & REQ_CASELESS) != 0;
@@ -2849,7 +2849,7 @@ for (;;)
   if (current_subject[-1] == '\r' &&
       current_subject < end_subject &&
       *current_subject == '\n' &&
-      (re->options & PCRE_HASCRORLF) == 0 &&
+      (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||
          md->nllen == 2))

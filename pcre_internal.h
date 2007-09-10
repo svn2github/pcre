@@ -481,18 +481,16 @@ Standard C system should have one. */
 
 #define PCRE_IMS (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL)
 
-/* Private options flags start at the most significant end of the four bytes.
-The public options defined in pcre.h start at the least significant end. Make
-sure they don't overlap! The bits are getting a bit scarce now -- when we run
-out, there is a dummy word in the structure that could be used for the private
-bits. */
+/* Private flags containing information about the compiled regex. They used to 
+live at the top end of the options word, but that got almost full, so now they 
+are in a 16-bit flags word. */
 
-#define PCRE_NOPARTIAL     0x80000000  /* can't use partial with this regex */
-#define PCRE_FIRSTSET      0x40000000  /* first_byte is set */
-#define PCRE_REQCHSET      0x20000000  /* req_byte is set */
-#define PCRE_STARTLINE     0x10000000  /* start after \n for multiline */
-#define PCRE_JCHANGED      0x08000000  /* j option changes within regex */
-#define PCRE_HASCRORLF     0x04000000  /* explicit \r or \n in pattern */
+#define PCRE_NOPARTIAL     0x0001  /* can't use partial with this regex */
+#define PCRE_FIRSTSET      0x0002  /* first_byte is set */
+#define PCRE_REQCHSET      0x0004  /* req_byte is set */
+#define PCRE_STARTLINE     0x0008  /* start after \n for multiline */
+#define PCRE_JCHANGED      0x0010  /* j option used in regex */
+#define PCRE_HASCRORLF     0x0020  /* explicit \r or \n in pattern */
 
 /* Options for the "extra" block produced by pcre_study(). */
 
@@ -894,9 +892,9 @@ NOTE NOTE NOTE:
 typedef struct real_pcre {
   pcre_uint32 magic_number;
   pcre_uint32 size;               /* Total that was malloced */
-  pcre_uint32 options;
-  pcre_uint32 dummy1;             /* For future use, maybe */
-
+  pcre_uint32 options;            /* Public options */
+  pcre_uint16 flags;              /* Private flags */
+  pcre_uint16 dummy1;             /* For future use */
   pcre_uint16 top_bracket;
   pcre_uint16 top_backref;
   pcre_uint16 first_byte;
@@ -939,8 +937,8 @@ typedef struct compile_data {
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
   int  external_options;        /* External (initial) options */
+  int  external_flags;          /* External flag bits to be set */ 
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
-  BOOL nopartial;               /* Set TRUE if partial won't work */
   BOOL had_accept;              /* (*ACCEPT) encountered */
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */

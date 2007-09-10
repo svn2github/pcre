@@ -1,6 +1,29 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.4 10-Sep-07
+---------------------
+
+1.  Change 7.3/28 was implemented for classes by looking at the bitmap. This
+    means that a class such as [\s] counted as "explicit reference to CR or 
+    LF". That isn't really right - the whole point of the change was to try to 
+    help when there was an actual mention of one of the two characters. So now 
+    the change happens only if \r or \n (or a literal CR or LF) character is 
+    encountered.
+    
+2.  The 32-bit options word was also used for 6 internal flags, but the numbers 
+    of both had grown to the point where there were only 3 bits left. 
+    Fortunately, there was spare space in the data structure, and so I have 
+    moved the internal flags into a new 16-bit field to free up more option 
+    bits.
+    
+3.  The appearance of (?J) at the start of a pattern set the DUPNAMES option, 
+    but did not set the internal JCHANGED flag - either of these is enough to 
+    control the way the "get" function works - but the PCRE_INFO_JCHANGED 
+    facility is supposed to tell if (?J) was ever used, so now (?J) at the 
+    start sets both bits.
+
+
 Version 7.3 28-Aug-07
 ---------------------
 

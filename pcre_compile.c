@@ -2975,6 +2975,12 @@ for (;; ptr++)
         }
 
       oldptr = ptr;
+      
+      /* Remember \r or \n */
+      
+      if (c == '\r' || c == '\n') cd->external_flags |= PCRE_HASCRORLF; 
+      
+      /* Check for range */
 
       if (!inescq && ptr[1] == '-')
         {
@@ -3043,6 +3049,10 @@ for (;; ptr++)
 
         if (d == c) goto LONE_SINGLE_CHARACTER;  /* A few lines below */
 
+        /* Remember \r or \n */
+        
+        if (d == '\r' || d == '\n') cd->external_flags |= PCRE_HASCRORLF; 
+      
         /* In UTF-8 mode, if the upper limit is > 255, or > 127 for caseless
         matching, we have to use an XCLASS with extra data items. Caseless
         matching for characters > 127 is available only if UCP support is
@@ -3147,7 +3157,7 @@ for (;; ptr++)
       apparent range that isn't. */
 
       LONE_SINGLE_CHARACTER:
-
+      
       /* Handle a character that cannot go in the bit map */
 
 #ifdef SUPPORT_UTF8
@@ -3195,17 +3205,25 @@ for (;; ptr++)
       *errorcodeptr = ERR6;
       goto FAILED;
       }
+      
+ 
+/* This code has been disabled because it would mean that \s counts as
+an explicit \r or \n reference, and that's not really what is wanted. Now
+we set the flag only if there is a literal "\r" or "\n" in the class. */
 
+#if 0
     /* Remember whether \r or \n are in this class */
 
     if (negate_class)
       {
-      if ((classbits[1] & 0x24) != 0x24) cd->external_options |= PCRE_HASCRORLF;
+      if ((classbits[1] & 0x24) != 0x24) cd->external_flags |= PCRE_HASCRORLF;
       }
     else
       {
-      if ((classbits[1] & 0x24) != 0) cd->external_options |= PCRE_HASCRORLF;
+      if ((classbits[1] & 0x24) != 0) cd->external_flags |= PCRE_HASCRORLF;
       }
+#endif
+       
 
     /* If class_charcount is 1, we saw precisely one character whose value is
     less than 256. As long as there were no characters >= 128 and there was no
@@ -3498,7 +3516,7 @@ for (;; ptr++)
       /* All real repeats make it impossible to handle partial matching (maybe
       one day we will be able to remove this restriction). */
 
-      if (repeat_max != 1) cd->nopartial = TRUE;
+      if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL;
 
       /* Combine the op_type with the repeat_type */
 
@@ -3648,7 +3666,7 @@ for (;; ptr++)
       /* All real repeats make it impossible to handle partial matching (maybe
       one day we will be able to remove this restriction). */
 
-      if (repeat_max != 1) cd->nopartial = TRUE;
+      if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL;
 
       if (repeat_min == 0 && repeat_max == -1)
         *code++ = OP_CRSTAR + repeat_type;
@@ -4645,7 +4663,7 @@ for (;; ptr++)
 
             case 'J':    /* Record that it changed in the external options */
             *optset |= PCRE_DUPNAMES;
-            cd->external_options |= PCRE_JCHANGED;
+            cd->external_flags |= PCRE_JCHANGED;
             break;
 
             case 'i': *optset |= PCRE_CASELESS; break;
@@ -5065,7 +5083,7 @@ for (;; ptr++)
     /* Remember if \r or \n were seen */
 
     if (mcbuffer[0] == '\r' || mcbuffer[0] == '\n')
-      cd->external_options |= PCRE_HASCRORLF;
+      cd->external_flags |= PCRE_HASCRORLF;
 
     /* Set the first and required bytes appropriately. If no previous first
     byte, set it from this character, but revert to none on a zero repeat.
@@ -5834,8 +5852,8 @@ cd->hwm = cworkspace;
 cd->start_pattern = (const uschar *)pattern;
 cd->end_pattern = (const uschar *)(pattern + strlen(pattern));
 cd->req_varyopt = 0;
-cd->nopartial = FALSE;
 cd->external_options = options;
+cd->external_flags = 0;
 
 /* Now do the pre-compile. On error, errorcode will be set non-zero, so we
 don't need to look at the result of the function here. The initial options have
@@ -5874,14 +5892,16 @@ if (re == NULL)
   goto PCRE_EARLY_ERROR_RETURN;
   }
 
-/* Put in the magic number, and save the sizes, initial options, and character
-table pointer. NULL is used for the default character tables. The nullpad field
-is at the end; it's there to help in the case when a regex compiled on a system
-with 4-byte pointers is run on another with 8-byte pointers. */
+/* Put in the magic number, and save the sizes, initial options, internal 
+flags, and character table pointer. NULL is used for the default character
+tables. The nullpad field is at the end; it's there to help in the case when a
+regex compiled on a system with 4-byte pointers is run on another with 8-byte
+pointers. */
 
 re->magic_number = MAGIC_NUMBER;
 re->size = size;
 re->options = cd->external_options;
+re->flags = cd->external_flags;
 re->dummy1 = 0;
 re->first_byte = 0;
 re->req_byte = 0;
@@ -5906,7 +5926,6 @@ codestart = cd->name_table + re->name_entry_size * re->name_count;
 cd->start_code = codestart;
 cd->hwm = cworkspace;
 cd->req_varyopt = 0;
-cd->nopartial = FALSE;
 cd->had_accept = FALSE;
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
@@ -5920,8 +5939,8 @@ code = (uschar *)codestart;
   &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, NULL);
 re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
+re->flags = cd->external_flags;
 
-if (cd->nopartial) re->options |= PCRE_NOPARTIAL;
 if (cd->had_accept) reqbyte = -1;   /* Must disable after (*ACCEPT) */
 
 /* If not reached end of pattern on success, there's an excess bracket. */
@@ -5993,10 +6012,10 @@ if ((re->options & PCRE_ANCHORED) == 0)
       int ch = firstbyte & 255;
       re->first_byte = ((firstbyte & REQ_CASELESS) != 0 &&
          cd->fcc[ch] == ch)? ch : firstbyte;
-      re->options |= PCRE_FIRSTSET;
+      re->flags |= PCRE_FIRSTSET;
       }
     else if (is_startline(codestart, 0, cd->backref_map))
-      re->options |= PCRE_STARTLINE;
+      re->flags |= PCRE_STARTLINE;
     }
   }
 
@@ -6010,7 +6029,7 @@ if (reqbyte >= 0 &&
   int ch = reqbyte & 255;
   re->req_byte = ((reqbyte & REQ_CASELESS) != 0 &&
     cd->fcc[ch] == ch)? (reqbyte & ~REQ_CASELESS) : reqbyte;
-  re->options |= PCRE_REQCHSET;
+  re->flags |= PCRE_REQCHSET;
   }
 
 /* Print out the compiled data if debugging is enabled. This is never the
@@ -6023,7 +6042,7 @@ printf("Length = %d top_bracket = %d top_backref = %d\n",
 
 printf("Options=%08x\n", re->options);
 
-if ((re->options & PCRE_FIRSTSET) != 0)
+if ((re->flags & PCRE_FIRSTSET) != 0)
   {
   int ch = re->first_byte & 255;
   const char *caseless = ((re->first_byte & REQ_CASELESS) == 0)?
@@ -6032,7 +6051,7 @@ if ((re->options & PCRE_FIRSTSET) != 0)
     else printf("First char = \\x%02x%s\n", ch, caseless);
   }
 
-if ((re->options & PCRE_REQCHSET) != 0)
+if ((re->flags & PCRE_REQCHSET) != 0)
   {
   int ch = re->req_byte & 255;
   const char *caseless = ((re->req_byte & REQ_CASELESS) == 0)?
