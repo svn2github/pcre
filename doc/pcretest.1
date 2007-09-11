@@ -157,19 +157,21 @@ effect as they do in Perl. For example:
 The following table shows additional modifiers for setting PCRE options that do
 not correspond to anything in Perl:
 .sp
-  \fB/A\fP          PCRE_ANCHORED
-  \fB/C\fP          PCRE_AUTO_CALLOUT
-  \fB/E\fP          PCRE_DOLLAR_ENDONLY
-  \fB/f\fP          PCRE_FIRSTLINE
-  \fB/J\fP          PCRE_DUPNAMES
-  \fB/N\fP          PCRE_NO_AUTO_CAPTURE
-  \fB/U\fP          PCRE_UNGREEDY
-  \fB/X\fP          PCRE_EXTRA
-  \fB/<cr>\fP       PCRE_NEWLINE_CR
-  \fB/<lf>\fP       PCRE_NEWLINE_LF
-  \fB/<crlf>\fP     PCRE_NEWLINE_CRLF
-  \fB/<anycrlf>\fP  PCRE_NEWLINE_ANYCRLF
-  \fB/<any>\fP      PCRE_NEWLINE_ANY
+  \fB/A\fP              PCRE_ANCHORED
+  \fB/C\fP              PCRE_AUTO_CALLOUT
+  \fB/E\fP              PCRE_DOLLAR_ENDONLY
+  \fB/f\fP              PCRE_FIRSTLINE
+  \fB/J\fP              PCRE_DUPNAMES
+  \fB/N\fP              PCRE_NO_AUTO_CAPTURE
+  \fB/U\fP              PCRE_UNGREEDY
+  \fB/X\fP              PCRE_EXTRA
+  \fB/<cr>\fP           PCRE_NEWLINE_CR
+  \fB/<lf>\fP           PCRE_NEWLINE_LF
+  \fB/<crlf>\fP         PCRE_NEWLINE_CRLF
+  \fB/<anycrlf>\fP      PCRE_NEWLINE_ANYCRLF
+  \fB/<any>\fP          PCRE_NEWLINE_ANY
+  \fB/<bsr_anycrlf>\fP  PCRE_BSR_ANYCRLF
+  \fB/<bsr_unicode>\fP  PCRE_BSR_UNICODE
 .sp
 Those specifying line ending sequences are literal strings as shown, but the
 letters can be in either case. This example sets multiline matching with CRLF
@@ -694,6 +696,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 August 2007
+Last updated: 11 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

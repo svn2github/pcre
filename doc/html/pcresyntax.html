@@ -34,10 +34,11 @@ man page, in case the conversion went wrong.
 <li><a name="TOC19" href="#SEC19">CONDITIONAL PATTERNS</a>
 <li><a name="TOC20" href="#SEC20">BACKTRACKING CONTROL</a>
 <li><a name="TOC21" href="#SEC21">NEWLINE CONVENTIONS</a>
-<li><a name="TOC22" href="#SEC22">CALLOUTS</a>
-<li><a name="TOC23" href="#SEC23">SEE ALSO</a>
-<li><a name="TOC24" href="#SEC24">AUTHOR</a>
-<li><a name="TOC25" href="#SEC25">REVISION</a>
+<li><a name="TOC22" href="#SEC22">WHAT \R MATCHES</a>
+<li><a name="TOC23" href="#SEC23">CALLOUTS</a>
+<li><a name="TOC24" href="#SEC24">SEE ALSO</a>
+<li><a name="TOC25" href="#SEC25">AUTHOR</a>
+<li><a name="TOC26" href="#SEC26">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE REGULAR EXPRESSION SYNTAX SUMMARY</a><br>
 <P>
@@ -406,19 +407,27 @@ These are recognized only at the very start of a pattern.
   (*ANY)
 </PRE>
 </P>
-<br><a name="SEC22" href="#TOC1">CALLOUTS</a><br>
+<br><a name="SEC22" href="#TOC1">WHAT \R MATCHES</a><br>
+<P>
+These are recognized only at the very start of a pattern.
+<pre>
+  (*BSR_ANYCRLF)
+  (*BSR_UNICODE)
+</PRE>
+</P>
+<br><a name="SEC23" href="#TOC1">CALLOUTS</a><br>
 <P>
 <pre>
   (?C)      callout
   (?Cn)     callout with data n
 </PRE>
 </P>
-<br><a name="SEC23" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC24" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcrepattern</b>(3), <b>pcreapi</b>(3), <b>pcrecallout</b>(3),
 <b>pcrematching</b>(3), <b>pcre</b>(3).
 </P>
-<br><a name="SEC24" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC25" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -427,9 +436,9 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC25" href="#TOC1">REVISION</a><br>
+<br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 August 2007
+Last updated: 11 September 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

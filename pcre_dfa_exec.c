@@ -1080,15 +1080,20 @@ for (;;)
         int ncount = 0;
         switch (c)
           {
-          case 0x000d:
-          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
-          /* Fall through */
-          case 0x000a:
           case 0x000b:
           case 0x000c:
           case 0x0085:
           case 0x2028:
           case 0x2029:
+          if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
+          goto ANYNL01;
+
+          case 0x000d:
+          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
+          /* Fall through */
+
+          ANYNL01:
+          case 0x000a:
           if (count > 0 && codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSPLUS)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1097,6 +1102,7 @@ for (;;)
           count++;
           ADD_NEW_DATA(-state_offset, count, ncount);
           break;
+
           default:
           break;
           }
@@ -1313,15 +1319,20 @@ for (;;)
         int ncount = 0;
         switch (c)
           {
-          case 0x000d:
-          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
-          /* Fall through */
-          case 0x000a:
           case 0x000b:
           case 0x000c:
           case 0x0085:
           case 0x2028:
           case 0x2029:
+          if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
+          goto ANYNL02;
+
+          case 0x000d:
+          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
+          /* Fall through */
+
+          ANYNL02:
+          case 0x000a:
           if (codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSSTAR ||
               codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSQUERY)
             {
@@ -1330,6 +1341,7 @@ for (;;)
             }
           ADD_NEW_DATA(-(state_offset + count), 0, ncount);
           break;
+
           default:
           break;
           }
@@ -1545,15 +1557,20 @@ for (;;)
         int ncount = 0;
         switch (c)
           {
-          case 0x000d:
-          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
-          /* Fall through */
-          case 0x000a:
           case 0x000b:
           case 0x000c:
           case 0x0085:
           case 0x2028:
           case 0x2029:
+          if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
+          goto ANYNL03;
+
+          case 0x000d:
+          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
+          /* Fall through */
+
+          ANYNL03:
+          case 0x000a:
           if (codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSUPTO)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1564,6 +1581,7 @@ for (;;)
           else
             { ADD_NEW_DATA(-state_offset, count, ncount); }
           break;
+
           default:
           break;
           }
@@ -1744,14 +1762,17 @@ for (;;)
       case OP_ANYNL:
       if (clen > 0) switch(c)
         {
-        case 0x000a:
         case 0x000b:
         case 0x000c:
         case 0x0085:
         case 0x2028:
         case 0x2029:
+        if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
+
+        case 0x000a:
         ADD_NEW(state_offset + 1, 0);
         break;
+
         case 0x000d:
         if (ptr + 1 < end_subject && ptr[1] == 0x0a)
           {
@@ -2573,6 +2594,18 @@ md->start_subject = (const unsigned char *)subject;
 md->end_subject = end_subject;
 md->moptions = options;
 md->poptions = re->options;
+
+/* If the BSR option is not set at match time, copy what was set
+at compile time. */
+
+if ((md->moptions & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) == 0)
+  {
+  if ((re->options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) != 0)
+    md->moptions |= re->options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE);
+#ifdef BSR_ANYCRLF
+  else md->moptions |= PCRE_BSR_ANYCRLF;
+#endif   
+  }  
 
 /* Handle different types of newline. The three bits give eight cases. If
 nothing is set at run time, whatever was used at compile time applies. */

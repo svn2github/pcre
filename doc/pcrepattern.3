@@ -79,7 +79,17 @@ example, on a Unix system where LF is the default newline sequence, the pattern
 changes the convention to CR. That pattern matches "a\enb" because LF is no
 longer a newline. Note that these special settings, which are not
 Perl-compatible, are recognized only at the very start of a pattern, and that
-they must be in upper case.
+they must be in upper case. If more than one of them is present, the last one
+is used.
+.P
+The newline convention does not affect what the \eR escape sequence matches. By
+default, this is any Unicode newline sequence, for Perl compatibility. However,
+this can be changed; see the description of \eR in the section entitled
+.\" HTML <a href="#newlineseq">
+.\" </a>
+"Newline sequences"
+.\"
+below.
 .
 .
 .SH "CHARACTERS AND METACHARACTERS"
@@ -388,12 +398,13 @@ accented letters, and these are matched by \ew. The use of locales with Unicode
 is discouraged.
 .
 .
+.\" HTML <a name="newlineseq"></a>
 .SS "Newline sequences"
 .rs
 .sp
-Outside a character class, the escape sequence \eR matches any Unicode newline
-sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \eR is equivalent to
-the following:
+Outside a character class, by default, the escape sequence \eR matches any
+Unicode newline sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \eR is
+equivalent to the following:
 .sp
   (?>\er\en|\en|\ex0b|\ef|\er|\ex85)
 .sp
@@ -412,6 +423,22 @@ In UTF-8 mode, two additional characters whose codepoints are greater than 255
 are added: LS (line separator, U+2028) and PS (paragraph separator, U+2029).
 Unicode character property support is not needed for these characters to be
 recognized.
+.P
+It is possible to restrict \eR to match only CR, LF, or CRLF (instead of the
+complete set of Unicode line endings) by setting the option PCRE_BSR_ANYCRLF
+either at compile time or when the pattern is matched. This can be made the
+default when PCRE is built; if this is the case, the other behaviour can be
+requested via the PCRE_BSR_UNICODE option. It is also possible to specify these
+settings by starting a pattern string with one of the following sequences:
+.sp
+  (*BSR_ANYCRLF)   CR, LF, or CRLF only
+  (*BSR_UNICODE)   any Unicode newline sequence
+.sp
+These override the default and the options given to \fBpcre_compile()\fP, but
+they can be overridden by options given to \fBpcre_exec()\fP. Note that these
+special settings, which are not Perl-compatible, are recognized only at the
+very start of a pattern, and that they must be in upper case. If more than one
+of them is present, the last one is used.
 .P
 Inside a character class, \eR matches the letter "R".
 .
@@ -960,8 +987,9 @@ alternative in the subpattern.
 .rs
 .sp
 The settings of the PCRE_CASELESS, PCRE_MULTILINE, PCRE_DOTALL, and
-PCRE_EXTENDED options can be changed from within the pattern by a sequence of
-Perl option letters enclosed between "(?" and ")". The option letters are
+PCRE_EXTENDED options (which are Perl-compatible) can be changed from within
+the pattern by a sequence of Perl option letters enclosed between "(?" and ")".
+The option letters are
 .sp
   i  for PCRE_CASELESS
   m  for PCRE_MULTILINE
@@ -974,6 +1002,10 @@ setting and unsetting such as (?im-sx), which sets PCRE_CASELESS and
 PCRE_MULTILINE while unsetting PCRE_DOTALL and PCRE_EXTENDED, is also
 permitted. If a letter appears both before and after the hyphen, the option is
 unset.
+.P
+The PCRE-specific options PCRE_DUPNAMES, PCRE_UNGREEDY, and PCRE_EXTRA can be
+changed in the same way as the Perl-compatible options by using the characters
+J, U and X respectively.
 .P
 When an option change occurs at top level (that is, not inside subpattern
 parentheses), the change applies to the remainder of the pattern that follows.
@@ -997,10 +1029,6 @@ matches "ab", "aB", "c", and "C", even though when matching "C" the first
 branch is abandoned before the option setting. This is because the effects of
 option settings happen at compile time. There would be some very weird
 behaviour otherwise.
-.P
-The PCRE-specific options PCRE_DUPNAMES, PCRE_UNGREEDY, and PCRE_EXTRA can be
-changed in the same way as the Perl-compatible options by using the characters
-J, U and X respectively.
 .
 .
 .\" HTML <a name="subpattern"></a>
@@ -2149,6 +2177,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 August 2007
+Last updated: 11 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

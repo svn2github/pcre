@@ -96,6 +96,18 @@ Whatever line ending convention is selected when PCRE is built can be
 overridden when the library functions are called. At build time it is
 conventional to use the standard for your operating system.
 .
+.SH "WHAT \eR MATCHES"
+.rs
+.sp
+By default, the sequence \eR in a pattern matches any Unicode newline sequence,
+whatever has been selected as the line ending sequence. If you specify
+.sp
+  --enable-bsr-anycrlf
+.sp
+the default is changed so that \eR matches only CR, LF, or CRLF. Whatever is
+selected when PCRE is built can be overridden when the library functions are
+called.
+.
 .SH "BUILDING SHARED AND STATIC LIBRARIES"
 .rs
 .sp
@@ -260,6 +272,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 30 July 2007
+Last updated: 11 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

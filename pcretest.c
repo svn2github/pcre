@@ -712,6 +712,8 @@ if (strncmpic(p, (uschar *)"lf>", 3) == 0) return PCRE_NEWLINE_LF;
 if (strncmpic(p, (uschar *)"crlf>", 5) == 0) return PCRE_NEWLINE_CRLF;
 if (strncmpic(p, (uschar *)"anycrlf>", 8) == 0) return PCRE_NEWLINE_ANYCRLF;
 if (strncmpic(p, (uschar *)"any>", 4) == 0) return PCRE_NEWLINE_ANY;
+if (strncmpic(p, (uschar *)"bsr_anycrlf>", 12) == 0) return PCRE_BSR_ANYCRLF;
+if (strncmpic(p, (uschar *)"bsr_unicode>", 12) == 0) return PCRE_BSR_UNICODE;
 fprintf(f, "Unknown newline type at: <%s\n", p);
 return 0;
 }
@@ -885,6 +887,9 @@ while (argc > 1 && argv[op][0] == '-')
       (rc == '\n')? "LF" : (rc == ('\r'<<8 | '\n'))? "CRLF" :
       (rc == -2)? "ANYCRLF" :
       (rc == -1)? "ANY" : "???");
+    (void)pcre_config(PCRE_CONFIG_BSR, &rc);
+    printf("  \\R matches %s\n", rc? "CR, LF, or CRLF only" :
+                                     "all Unicode newlines");
     (void)pcre_config(PCRE_CONFIG_LINK_SIZE, &rc);
     printf("  Internal link size = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_POSIX_MALLOC_THRESHOLD, &rc);
@@ -1349,7 +1354,7 @@ while (!done)
       rre->magic_number = byteflip(rre->magic_number, sizeof(rre->magic_number));
       rre->size = byteflip(rre->size, sizeof(rre->size));
       rre->options = byteflip(rre->options, sizeof(rre->options));
-      rre->flags = byteflip(rre->flags, sizeof(rre->flags)); 
+      rre->flags = byteflip(rre->flags, sizeof(rre->flags));
       rre->top_bracket = byteflip(rre->top_bracket, sizeof(rre->top_bracket));
       rre->top_backref = byteflip(rre->top_backref, sizeof(rre->top_backref));
       rre->first_byte = byteflip(rre->first_byte, sizeof(rre->first_byte));
@@ -1449,13 +1454,15 @@ while (!done)
       if (do_flip) all_options = byteflip(all_options, sizeof(all_options));
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
           ((get_options & PCRE_MULTILINE) != 0)? " multiline" : "",
           ((get_options & PCRE_FIRSTLINE) != 0)? " firstline" : "",
           ((get_options & PCRE_DOTALL) != 0)? " dotall" : "",
+          ((get_options & PCRE_BSR_ANYCRLF) != 0)? " bsr_anycrlf" : "",
+          ((get_options & PCRE_BSR_UNICODE) != 0)? " bsr_unicode" : "",
           ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",

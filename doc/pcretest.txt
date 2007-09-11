@@ -146,19 +146,21 @@ PATTERN MODIFIERS
        The following table shows additional modifiers for setting PCRE options
        that do not correspond to anything in Perl:
 
-         /A          PCRE_ANCHORED
-         /C          PCRE_AUTO_CALLOUT
-         /E          PCRE_DOLLAR_ENDONLY
-         /f          PCRE_FIRSTLINE
-         /J          PCRE_DUPNAMES
-         /N          PCRE_NO_AUTO_CAPTURE
-         /U          PCRE_UNGREEDY
-         /X          PCRE_EXTRA
-         /<cr>       PCRE_NEWLINE_CR
-         /<lf>       PCRE_NEWLINE_LF
-         /<crlf>     PCRE_NEWLINE_CRLF
-         /<anycrlf>  PCRE_NEWLINE_ANYCRLF
-         /<any>      PCRE_NEWLINE_ANY
+         /A              PCRE_ANCHORED
+         /C              PCRE_AUTO_CALLOUT
+         /E              PCRE_DOLLAR_ENDONLY
+         /f              PCRE_FIRSTLINE
+         /J              PCRE_DUPNAMES
+         /N              PCRE_NO_AUTO_CAPTURE
+         /U              PCRE_UNGREEDY
+         /X              PCRE_EXTRA
+         /<cr>           PCRE_NEWLINE_CR
+         /<lf>           PCRE_NEWLINE_LF
+         /<crlf>         PCRE_NEWLINE_CRLF
+         /<anycrlf>      PCRE_NEWLINE_ANYCRLF
+         /<any>          PCRE_NEWLINE_ANY
+         /<bsr_anycrlf>  PCRE_BSR_ANYCRLF
+         /<bsr_unicode>  PCRE_BSR_UNICODE
 
        Those  specifying  line  ending sequences are literal strings as shown,
        but the letters can be in either  case.  This  example  sets  multiline
@@ -625,5 +627,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 August 2007
+       Last updated: 11 September 2007
        Copyright (c) 1997-2007 University of Cambridge.

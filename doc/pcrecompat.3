@@ -112,15 +112,21 @@ only at the first matching position in the subject string.
 (f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NO_AUTO_CAPTURE
 options for \fBpcre_exec()\fP have no Perl equivalents.
 .sp
-(g) The callout facility is PCRE-specific.
+(g) The \eR escape sequence can be restricted to match only CR, LF, or CRLF
+by the PCRE_BSR_ANYCRLF option.
 .sp
-(h) The partial matching facility is PCRE-specific.
+(h) The callout facility is PCRE-specific.
 .sp
-(i) Patterns compiled by PCRE can be saved and re-used at a later time, even on
+(i) The partial matching facility is PCRE-specific.
+.sp
+(j) Patterns compiled by PCRE can be saved and re-used at a later time, even on
 different hosts that have the other endianness.
 .sp
-(j) The alternative matching function (\fBpcre_dfa_exec()\fP) matches in a
+(k) The alternative matching function (\fBpcre_dfa_exec()\fP) matches in a
 different way and is not Perl-compatible.
+.sp
+(l) PCRE recognizes some special sequences such as (*CR) at the start of
+a pattern that set overall options that cannot be changed within the pattern.
 .
 .
 .SH AUTHOR
@@ -137,6 +143,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 August 2007
+Last updated: 11 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

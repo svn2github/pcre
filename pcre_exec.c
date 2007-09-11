@@ -1526,12 +1526,16 @@ for (;;)
       case 0x000d:
       if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
       break;
+
       case 0x000a:
+      break;
+
       case 0x000b:
       case 0x000c:
       case 0x0085:
       case 0x2028:
       case 0x2029:
+      if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
       break;
       }
     ecode++;
@@ -2954,12 +2958,16 @@ for (;;)
             case 0x000d:
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
+
             case 0x000a:
+            break;
+
             case 0x000b:
             case 0x000c:
             case 0x0085:
             case 0x2028:
             case 0x2029:
+            if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
             break;
             }
           }
@@ -3172,9 +3180,12 @@ for (;;)
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
             case 0x000a:
+            break;
+
             case 0x000b:
             case 0x000c:
             case 0x0085:
+            if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
             break;
             }
           }
@@ -3426,11 +3437,14 @@ for (;;)
               if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
               break;
               case 0x000a:
+              break;
+
               case 0x000b:
               case 0x000c:
               case 0x0085:
               case 0x2028:
               case 0x2029:
+              if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
               break;
               }
             break;
@@ -3582,10 +3596,14 @@ for (;;)
               case 0x000d:
               if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
               break;
+
               case 0x000a:
+              break;
+
               case 0x000b:
               case 0x000c:
               case 0x0085:
+              if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
               break;
               }
             break;
@@ -3883,8 +3901,10 @@ for (;;)
               }
             else
               {
-              if (c != 0x000a && c != 0x000b && c != 0x000c &&
-                  c != 0x0085 && c != 0x2028 && c != 0x2029)
+              if (c != 0x000a &&
+                  (md->bsr_anycrlf ||
+                   (c != 0x000b && c != 0x000c &&
+                    c != 0x0085 && c != 0x2028 && c != 0x2029)))
                 break;
               eptr += len;
               }
@@ -4074,7 +4094,9 @@ for (;;)
               }
             else
               {
-              if (c != 0x000a && c != 0x000b && c != 0x000c && c != 0x0085)
+              if (c != 0x000a &&
+                  (md->bsr_anycrlf ||
+                    (c != 0x000b && c != 0x000c && c != 0x0085)))
                 break;
               eptr++;
               }
@@ -4435,10 +4457,36 @@ md->recursive = NULL;                   /* No recursion at top level */
 md->lcc = tables + lcc_offset;
 md->ctypes = tables + ctypes_offset;
 
+/* Handle different \R options. */
+
+switch (options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE))
+  {
+  case 0:
+  if ((re->options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) != 0)
+    md->bsr_anycrlf = (re->options & PCRE_BSR_ANYCRLF) != 0;
+  else
+#ifdef BSR_ANYCRLF
+  md->bsr_anycrlf = TRUE;
+#else
+  md->bsr_anycrlf = FALSE;
+#endif           
+  break;
+
+  case PCRE_BSR_ANYCRLF:
+  md->bsr_anycrlf = TRUE;
+  break;
+
+  case PCRE_BSR_UNICODE:
+  md->bsr_anycrlf = FALSE;
+  break;
+
+  default: return PCRE_ERROR_BADNEWLINE;
+  }
+
 /* Handle different types of newline. The three bits give eight cases. If
 nothing is set at run time, whatever was used at compile time applies. */
 
-switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : 
+switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options :
         (pcre_uint32)options) & PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */

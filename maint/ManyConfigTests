@@ -137,7 +137,7 @@ for opts in \
   "--enable-newline-is-any --disable-shared" \
   "--enable-newline-is-cr --disable-shared" \
   "--enable-newline-is-crlf --disable-shared" \
-  "--enable-newline-is-anycrlf --disable-shared" \
+  "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
   "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp"
 do
   runtest

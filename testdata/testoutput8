@@ -1204,4 +1204,84 @@ No match
     \x09\x{200a}\x{a0}\x{2028}\x0b
 No match
      
+/a\Rb/I8<bsr_anycrlf>
+Capturing subpattern count = 0
+Options: bsr_anycrlf utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    ** Failers
+No match
+    a\x{85}b
+No match
+    a\x0bb     
+No match
+
+/a\Rb/I8<bsr_unicode>
+Capturing subpattern count = 0
+Options: bsr_unicode utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    a\x{85}b
+ 0: a\x{85}b
+    a\x0bb     
+ 0: a\x{0b}b
+    ** Failers 
+No match
+    a\x{85}b\<bsr_anycrlf>
+No match
+    a\x0bb\<bsr_anycrlf>
+No match
+    
+/a\R?b/I8<bsr_anycrlf>
+Capturing subpattern count = 0
+Options: bsr_anycrlf utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    ** Failers
+No match
+    a\x{85}b
+No match
+    a\x0bb     
+No match
+
+/a\R?b/I8<bsr_unicode>
+Capturing subpattern count = 0
+Options: bsr_unicode utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    a\x{85}b
+ 0: a\x{85}b
+    a\x0bb     
+ 0: a\x{0b}b
+    ** Failers 
+No match
+    a\x{85}b\<bsr_anycrlf>
+No match
+    a\x0bb\<bsr_anycrlf>
+No match
+ 
 / End of testinput 8 / 

@@ -254,8 +254,11 @@ non-anchored pattern. There is more detail about this in the
 .\" </a>
 section on \fBpcre_exec()\fP options
 .\"
-below. The choice of newline convention does not affect the interpretation of
-the \en or \er escape sequences.
+below.
+.P
+The choice of newline convention does not affect the interpretation of
+the \en or \er escape sequences, nor does it affect what \eR matches, which is
+controlled in a similar way, but by separate options.
 .
 .
 .SH MULTITHREADING
@@ -316,6 +319,13 @@ The output is an integer whose value specifies the default character sequence
 that is recognized as meaning "newline". The four values that are supported
 are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. The
 default should normally be the standard sequence for your operating system.
+.sp
+  PCRE_CONFIG_BSR
+.sp
+The output is an integer whose value indicates what character sequences the \eR
+escape sequence matches by default. A value of 0 means that \eR matches any
+Unicode line ending sequence; a value of 1 means that \eR matches only CR, LF,
+or CRLF. The default can be overridden when a pattern is compiled or matched.
 .sp
   PCRE_CONFIG_LINK_SIZE
 .sp
@@ -457,6 +467,15 @@ facility, see the
 \fBpcrecallout\fP
 .\"
 documentation.
+.sp
+  PCRE_BSR_ANYCRLF
+  PCRE_BSR_UNICODE
+.sp
+These options (which are mutually exclusive) control what the \eR escape
+sequence matches. The choice is either to match only CR, LF, or CRLF, or to
+match any Unicode newline sequence. The default is specified when PCRE is
+built. It can be overridden from within the pattern, or by setting an option
+when a compiled pattern is matched.
 .sp
   PCRE_CASELESS
 .sp
@@ -697,7 +716,7 @@ out of use. To avoid confusion, they have not been re-used.
   53  internal error: previously-checked referenced subpattern not found
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
-  56  inconsistent NEWLINE options"
+  56  inconsistent NEWLINE options
   57  \eg is not followed by a braced name or an optionally braced
         non-zero number
   58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
@@ -899,7 +918,8 @@ fourth argument should point to an \fBunsigned char *\fP variable.
   PCRE_INFO_HASCRORLF
 .sp
 Return 1 if the pattern contains any explicit matches for CR or LF characters,
-otherwise 0. The fourth argument should point to an \fBint\fP variable.
+otherwise 0. The fourth argument should point to an \fBint\fP variable. An 
+explicit match is either a literal CR or LF character, or \er or \en.
 .sp
   PCRE_INFO_JCHANGED
 .sp
@@ -1203,6 +1223,14 @@ matching position. If a pattern was compiled with PCRE_ANCHORED, or turned out
 to be anchored by virtue of its contents, it cannot be made unachored at
 matching time.
 .sp
+  PCRE_BSR_ANYCRLF
+  PCRE_BSR_UNICODE
+.sp
+These options (which are mutually exclusive) control what the \eR escape
+sequence matches. The choice is either to match only CR, LF, or CRLF, or to
+match any Unicode newline sequence. These options override the choice that was
+made or defaulted when the pattern was compiled.
+.sp
   PCRE_NEWLINE_CR
   PCRE_NEWLINE_LF
   PCRE_NEWLINE_CRLF
@@ -1229,8 +1257,8 @@ start, it skips both the CR and the LF before retrying. However, the pattern
 [\er\en]A does match that string, because it contains an explicit CR or LF
 reference, and so advances only by one character after the first failure.
 .P
-An explicit match for CR of LF is either a literal appearance of one of those 
-characters, or one of the \er or \en escape sequences. Implicit matches such as 
+An explicit match for CR of LF is either a literal appearance of one of those
+characters, or one of the \er or \en escape sequences. Implicit matches such as
 [^X] do not count, nor does \es (which includes CR and LF in the characters
 that it matches).
 .P
@@ -1924,6 +1952,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 September 2007
+Last updated: 11 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

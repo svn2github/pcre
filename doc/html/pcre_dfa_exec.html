@@ -49,6 +49,8 @@ matching function is <b>pcre_exec()</b>. The arguments for this function are:
 The options are:
 <pre>
   PCRE_ANCHORED      Match only at the first position
+  PCRE_BSR_ANYCRLF   \R matches only CR, LF, or CRLF
+  PCRE_BSR_UNICODE   \R matches all Unicode line endings
   PCRE_NEWLINE_ANY   Recognize any Unicode newline sequence
   PCRE_NEWLINE_ANYCRLF  Recognize CR, LF, and CRLF as newline sequences
   PCRE_NEWLINE_CR    Set CR as the newline sequence

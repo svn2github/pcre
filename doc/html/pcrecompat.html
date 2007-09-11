@@ -134,18 +134,26 @@ only at the first matching position in the subject string.
 options for <b>pcre_exec()</b> have no Perl equivalents.
 <br>
 <br>
-(g) The callout facility is PCRE-specific.
+(g) The \R escape sequence can be restricted to match only CR, LF, or CRLF
+by the PCRE_BSR_ANYCRLF option.
 <br>
 <br>
-(h) The partial matching facility is PCRE-specific.
+(h) The callout facility is PCRE-specific.
 <br>
 <br>
-(i) Patterns compiled by PCRE can be saved and re-used at a later time, even on
+(i) The partial matching facility is PCRE-specific.
+<br>
+<br>
+(j) Patterns compiled by PCRE can be saved and re-used at a later time, even on
 different hosts that have the other endianness.
 <br>
 <br>
-(j) The alternative matching function (<b>pcre_dfa_exec()</b>) matches in a
+(k) The alternative matching function (<b>pcre_dfa_exec()</b>) matches in a
 different way and is not Perl-compatible.
+<br>
+<br>
+(l) PCRE recognizes some special sequences such as (*CR) at the start of
+a pattern that set overall options that cannot be changed within the pattern.
 </P>
 <br><b>
 AUTHOR
@@ -162,7 +170,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 08 August 2007
+Last updated: 11 September 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

@@ -2975,11 +2975,11 @@ for (;; ptr++)
         }
 
       oldptr = ptr;
-      
+
       /* Remember \r or \n */
-      
-      if (c == '\r' || c == '\n') cd->external_flags |= PCRE_HASCRORLF; 
-      
+
+      if (c == '\r' || c == '\n') cd->external_flags |= PCRE_HASCRORLF;
+
       /* Check for range */
 
       if (!inescq && ptr[1] == '-')
@@ -3050,9 +3050,9 @@ for (;; ptr++)
         if (d == c) goto LONE_SINGLE_CHARACTER;  /* A few lines below */
 
         /* Remember \r or \n */
-        
-        if (d == '\r' || d == '\n') cd->external_flags |= PCRE_HASCRORLF; 
-      
+
+        if (d == '\r' || d == '\n') cd->external_flags |= PCRE_HASCRORLF;
+
         /* In UTF-8 mode, if the upper limit is > 255, or > 127 for caseless
         matching, we have to use an XCLASS with extra data items. Caseless
         matching for characters > 127 is available only if UCP support is
@@ -3157,7 +3157,7 @@ for (;; ptr++)
       apparent range that isn't. */
 
       LONE_SINGLE_CHARACTER:
-      
+
       /* Handle a character that cannot go in the bit map */
 
 #ifdef SUPPORT_UTF8
@@ -3205,8 +3205,8 @@ for (;; ptr++)
       *errorcodeptr = ERR6;
       goto FAILED;
       }
-      
- 
+
+
 /* This code has been disabled because it would mean that \s counts as
 an explicit \r or \n reference, and that's not really what is wanted. Now
 we set the flag only if there is a literal "\r" or "\n" in the class. */
@@ -3223,7 +3223,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       if ((classbits[1] & 0x24) != 0) cd->external_flags |= PCRE_HASCRORLF;
       }
 #endif
-       
+
 
     /* If class_charcount is 1, we saw precisely one character whose value is
     less than 256. As long as there were no characters >= 128 and there was no
@@ -5763,24 +5763,46 @@ cd->fcc = tables + fcc_offset;
 cd->cbits = tables + cbits_offset;
 cd->ctypes = tables + ctypes_offset;
 
-/* Check for newline settings at the start of the pattern, and remember the
-offset for later. */
+/* Check for global one-time settings at the start of the pattern, and remember
+the offset for later. */
 
-if (ptr[0] == '(' && ptr[1] == '*')
+while (ptr[skipatstart] == '(' && ptr[skipatstart+1] == '*')
   {
   int newnl = 0;
-  if (strncmp((char *)(ptr+2), "CR)", 3) == 0)
-    { skipatstart = 5; newnl = PCRE_NEWLINE_CR; }
-  else if (strncmp((char *)(ptr+2), "LF)", 3)  == 0)
-    { skipatstart = 5; newnl = PCRE_NEWLINE_LF; }
-  else if (strncmp((char *)(ptr+2), "CRLF)", 5)  == 0)
-    { skipatstart = 7; newnl = PCRE_NEWLINE_CR + PCRE_NEWLINE_LF; }
-  else if (strncmp((char *)(ptr+2), "ANY)", 4) == 0)
-    { skipatstart = 6; newnl = PCRE_NEWLINE_ANY; }
-  else if (strncmp((char *)(ptr+2), "ANYCRLF)", 8)  == 0)
-    { skipatstart = 10; newnl = PCRE_NEWLINE_ANYCRLF; }
-  if (skipatstart > 0)
+  int newbsr = 0;
+
+  if (strncmp((char *)(ptr+skipatstart+2), "CR)", 3) == 0)
+    { skipatstart += 5; newnl = PCRE_NEWLINE_CR; }
+  else if (strncmp((char *)(ptr+skipatstart+2), "LF)", 3)  == 0)
+    { skipatstart += 5; newnl = PCRE_NEWLINE_LF; }
+  else if (strncmp((char *)(ptr+skipatstart+2), "CRLF)", 5)  == 0)
+    { skipatstart += 7; newnl = PCRE_NEWLINE_CR + PCRE_NEWLINE_LF; }
+  else if (strncmp((char *)(ptr+skipatstart+2), "ANY)", 4) == 0)
+    { skipatstart += 6; newnl = PCRE_NEWLINE_ANY; }
+  else if (strncmp((char *)(ptr+skipatstart+2), "ANYCRLF)", 8)  == 0)
+    { skipatstart += 10; newnl = PCRE_NEWLINE_ANYCRLF; }
+
+  else if (strncmp((char *)(ptr+skipatstart+2), "BSR_ANYCRLF)", 12) == 0)
+    { skipatstart += 14; newbsr = PCRE_BSR_ANYCRLF; }
+  else if (strncmp((char *)(ptr+skipatstart+2), "BSR_UNICODE)", 12) == 0)
+    { skipatstart += 14; newbsr = PCRE_BSR_UNICODE; }
+
+  if (newnl != 0)
     options = (options & ~PCRE_NEWLINE_BITS) | newnl;
+  else if (newbsr != 0)
+    options = (options & ~(PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) | newbsr;
+  else break;
+  }
+
+/* Check validity of \R options. */
+
+switch (options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE))
+  {
+  case 0:
+  case PCRE_BSR_ANYCRLF:
+  case PCRE_BSR_UNICODE:
+  break;
+  default: errorcode = ERR56; goto PCRE_EARLY_ERROR_RETURN;
   }
 
 /* Handle different types of newline. The three bits give seven cases. The
@@ -5892,7 +5914,7 @@ if (re == NULL)
   goto PCRE_EARLY_ERROR_RETURN;
   }
 
-/* Put in the magic number, and save the sizes, initial options, internal 
+/* Put in the magic number, and save the sizes, initial options, internal
 flags, and character table pointer. NULL is used for the default character
 tables. The nullpad field is at the end; it's there to help in the case when a
 regex compiled on a system with 4-byte pointers is run on another with 8-byte

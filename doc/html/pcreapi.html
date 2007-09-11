@@ -276,8 +276,12 @@ metacharacters, the handling of #-comments in /x mode, and, when CRLF is a
 recognized line ending sequence, the match position advancement for a
 non-anchored pattern. There is more detail about this in the
 <a href="#execoptions">section on <b>pcre_exec()</b> options</a>
-below. The choice of newline convention does not affect the interpretation of
-the \n or \r escape sequences.
+below.
+</P>
+<P>
+The choice of newline convention does not affect the interpretation of
+the \n or \r escape sequences, nor does it affect what \R matches, which is
+controlled in a similar way, but by separate options.
 </P>
 <br><a name="SEC4" href="#TOC1">MULTITHREADING</a><br>
 <P>
@@ -331,6 +335,13 @@ The output is an integer whose value specifies the default character sequence
 that is recognized as meaning "newline". The four values that are supported
 are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. The
 default should normally be the standard sequence for your operating system.
+<pre>
+  PCRE_CONFIG_BSR
+</pre>
+The output is an integer whose value indicates what character sequences the \R
+escape sequence matches by default. A value of 0 means that \R matches any
+Unicode line ending sequence; a value of 1 means that \R matches only CR, LF,
+or CRLF. The default can be overridden when a pattern is compiled or matched.
 <pre>
   PCRE_CONFIG_LINK_SIZE
 </pre>
@@ -466,6 +477,15 @@ all with number 255, before each pattern item. For discussion of the callout
 facility, see the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
+<pre>
+  PCRE_BSR_ANYCRLF
+  PCRE_BSR_UNICODE
+</pre>
+These options (which are mutually exclusive) control what the \R escape
+sequence matches. The choice is either to match only CR, LF, or CRLF, or to
+match any Unicode newline sequence. The default is specified when PCRE is
+built. It can be overridden from within the pattern, or by setting an option
+when a compiled pattern is matched.
 <pre>
   PCRE_CASELESS
 </pre>
@@ -697,7 +717,7 @@ out of use. To avoid confusion, they have not been re-used.
   53  internal error: previously-checked referenced subpattern not found
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
-  56  inconsistent NEWLINE options"
+  56  inconsistent NEWLINE options
   57  \g is not followed by a braced name or an optionally braced
         non-zero number
   58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
@@ -1206,6 +1226,14 @@ matching position. If a pattern was compiled with PCRE_ANCHORED, or turned out
 to be anchored by virtue of its contents, it cannot be made unachored at
 matching time.
 <pre>
+  PCRE_BSR_ANYCRLF
+  PCRE_BSR_UNICODE
+</pre>
+These options (which are mutually exclusive) control what the \R escape
+sequence matches. The choice is either to match only CR, LF, or CRLF, or to
+match any Unicode newline sequence. These options override the choice that was
+made or defaulted when the pattern was compiled.
+<pre>
   PCRE_NEWLINE_CR
   PCRE_NEWLINE_LF
   PCRE_NEWLINE_CRLF
@@ -1222,7 +1250,7 @@ pattern.
 <P>
 When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF, or PCRE_NEWLINE_ANY is set, and a
 match attempt for an unanchored pattern fails when the current position is at a
-CRLF sequence, and the pattern contains no explicit matches for CR or NL
+CRLF sequence, and the pattern contains no explicit matches for CR or LF
 characters, the match position is advanced by two characters instead of one, in
 other words, to after the CRLF.
 </P>
@@ -1233,8 +1261,12 @@ set), it does not match the string "\r\nA" because, after failing at the
 start, it skips both the CR and the LF before retrying. However, the pattern
 [\r\n]A does match that string, because it contains an explicit CR or LF
 reference, and so advances only by one character after the first failure.
-Note than an explicit CR or LF reference occurs for negated character classes
-such as [^X] because they can match CR or LF characters.
+</P>
+<P>
+An explicit match for CR of LF is either a literal appearance of one of those
+characters, or one of the \r or \n escape sequences. Implicit matches such as
+[^X] do not count, nor does \s (which includes CR and LF in the characters
+that it matches).
 </P>
 <P>
 Notwithstanding the above, anomalous effects may still occur when CRLF is a
@@ -1915,7 +1947,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 August 2007
+Last updated: 11 September 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

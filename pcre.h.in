@@ -122,6 +122,8 @@ extern "C" {
 #define PCRE_NEWLINE_CRLF       0x00300000
 #define PCRE_NEWLINE_ANY        0x00400000
 #define PCRE_NEWLINE_ANYCRLF    0x00500000
+#define PCRE_BSR_ANYCRLF        0x00800000
+#define PCRE_BSR_UNICODE        0x01000000
 
 /* Exec-time and get/set-time error codes */
 
@@ -180,6 +182,7 @@ compatible. */
 #define PCRE_CONFIG_STACKRECURSE            5
 #define PCRE_CONFIG_UNICODE_PROPERTIES      6
 #define PCRE_CONFIG_MATCH_LIMIT_RECURSION   7
+#define PCRE_CONFIG_BSR                     8
 
 /* Bit flags for the pcre_extra structure. Do not re-arrange or redefine
 these bits, just add new ones on the end, in order to remain compatible. */

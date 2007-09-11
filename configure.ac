@@ -136,6 +136,12 @@ AC_ARG_ENABLE(newline-is-any,
               ac_pcre_newline=any)
 enable_newline="$ac_pcre_newline"
 
+# Handle --enable-bsr-anycrlf
+AC_ARG_ENABLE(bsr-anycrlf,
+              AS_HELP_STRING([--enable-bsr-anycrlf],
+                             [\R matches only CR, LF, CRLF by default]),
+              , enable_bsr_anycrlf=no)
+
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
@@ -321,9 +327,19 @@ fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
   The value of NEWLINE determines the newline character sequence. On
-  Unix-like systems, "configure" can be used to override the default,
-  which is 10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF),
-  -1 (ANY), or -2 (ANYCRLF).])
+  systems that support it, "configure" can be used to override the
+  default, which is 10. The possible values are 10 (LF), 13 (CR),
+  3338 (CRLF), -1 (ANY), or -2 (ANYCRLF).])
+
+if test "$enable_bsr_anycrlf" = "yes"; then
+  AC_DEFINE([BSR_ANYCRLF], [], [
+    By default, the \R escape sequence matches any Unicode line ending
+    character or sequence of characters. If BSR_ANYCRLF is defined, this is
+    changed so that backslash-R matches only CR, LF, or CRLF. The build-
+    time default can be overridden by the user of PCRE at runtime. On
+    systems that support it, "configure" can be used to override the
+    default.])
+fi
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   The value of LINK_SIZE determines the number of bytes used to store
@@ -451,31 +467,32 @@ cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
 
-    Install prefix ......... : ${prefix}
-    C preprocessor ......... : ${CPP}
-    C compiler ............. : ${CC}
-    C++ preprocessor ....... : ${CXXCPP}
-    C++ compiler ........... : ${CXX}
-    Linker ................. : ${LD}
-    C preprocessor flags ... : ${CPPFLAGS}
-    C compiler flags ....... : ${CFLAGS}
-    C++ compiler flags ..... : ${CXXFLAGS}
-    Linker flags ........... : ${LDFLAGS}
-    Extra libraries ........ : ${LIBS}
+    Install prefix ........... : ${prefix}
+    C preprocessor ........... : ${CPP}
+    C compiler ............... : ${CC}
+    C++ preprocessor ......... : ${CXXCPP}
+    C++ compiler ............. : ${CXX}
+    Linker ................... : ${LD}
+    C preprocessor flags ..... : ${CPPFLAGS}
+    C compiler flags ......... : ${CFLAGS}
+    C++ compiler flags ....... : ${CXXFLAGS}
+    Linker flags ............. : ${LDFLAGS}
+    Extra libraries .......... : ${LIBS}
 
-    Build C++ library ...... : ${enable_cpp}
-    Enable UTF-8 support ... : ${enable_utf8}
-    Unicode properties ..... : ${enable_unicode_properties}
-    Newline char/sequence .. : ${enable_newline}
-    EBCDIC coding .......... : ${enable_ebcdic}
-    Rebuild char tables .... : ${enable_rebuild_chartables}
-    Use stack recursion .... : ${enable_stack_for_recursion}
-    POSIX mem threshold .... : ${with_posix_malloc_threshold}
-    Internal link size ..... : ${with_link_size}
-    Match limit ............ : ${with_match_limit}
-    Match limit recursion .. : ${with_match_limit_recursion}
-    Build shared libs ...... : ${enable_shared}
-    Build static libs ...... : ${enable_static}
+    Build C++ library ........ : ${enable_cpp}
+    Enable UTF-8 support ..... : ${enable_utf8}
+    Unicode properties ....... : ${enable_unicode_properties}
+    Newline char/sequence .... : ${enable_newline}
+    \R matches only ANYCRLF .. : ${enable_bsr_anycrlf}
+    EBCDIC coding ............ : ${enable_ebcdic}
+    Rebuild char tables ...... : ${enable_rebuild_chartables}
+    Use stack recursion ...... : ${enable_stack_for_recursion}
+    POSIX mem threshold ...... : ${with_posix_malloc_threshold}
+    Internal link size ....... : ${with_link_size}
+    Match limit .............. : ${with_match_limit}
+    Match limit recursion .... : ${with_match_limit_recursion}
+    Build shared libs ........ : ${enable_shared}
+    Build static libs ........ : ${enable_static}
 
 EOF
 

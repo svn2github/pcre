@@ -39,6 +39,8 @@ matching function is \fBpcre_exec()\fP. The arguments for this function are:
 The options are:
 .sp
   PCRE_ANCHORED      Match only at the first position
+  PCRE_BSR_ANYCRLF   \eR matches only CR, LF, or CRLF
+  PCRE_BSR_UNICODE   \eR matches all Unicode line endings
   PCRE_NEWLINE_ANY   Recognize any Unicode newline sequence
   PCRE_NEWLINE_ANYCRLF  Recognize CR, LF, and CRLF as newline sequences
   PCRE_NEWLINE_CR    Set CR as the newline sequence

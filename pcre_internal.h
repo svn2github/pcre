@@ -481,8 +481,8 @@ Standard C system should have one. */
 
 #define PCRE_IMS (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL)
 
-/* Private flags containing information about the compiled regex. They used to 
-live at the top end of the options word, but that got almost full, so now they 
+/* Private flags containing information about the compiled regex. They used to
+live at the top end of the options word, but that got almost full, so now they
 are in a 16-bit flags word. */
 
 #define PCRE_NOPARTIAL     0x0001  /* can't use partial with this regex */
@@ -506,15 +506,16 @@ time, run time, or study time, respectively. */
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8| \
    PCRE_NO_AUTO_CAPTURE|PCRE_NO_UTF8_CHECK|PCRE_AUTO_CALLOUT|PCRE_FIRSTLINE| \
-   PCRE_DUPNAMES|PCRE_NEWLINE_BITS)
+   PCRE_DUPNAMES|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL|PCRE_NEWLINE_BITS)
+   PCRE_PARTIAL|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)
 
 #define PUBLIC_DFA_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART|PCRE_NEWLINE_BITS)
+   PCRE_PARTIAL|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART|PCRE_NEWLINE_BITS| \
+   PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -937,7 +938,7 @@ typedef struct compile_data {
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
   int  external_options;        /* External (initial) options */
-  int  external_flags;          /* External flag bits to be set */ 
+  int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
   BOOL had_accept;              /* (*ACCEPT) encountered */
   int  nltype;                  /* Newline type */
@@ -998,6 +999,7 @@ typedef struct match_data {
   BOOL   notempty;              /* Empty string match not wanted */
   BOOL   partial;               /* PARTIAL flag */
   BOOL   hitend;                /* Hit the end of the subject at some point */
+  BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
   const uschar *start_code;     /* For use when recursing */
   USPTR  start_subject;         /* Start of the subject string */
   USPTR  end_subject;           /* End of the subject string */

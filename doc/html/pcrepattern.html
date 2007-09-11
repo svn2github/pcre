@@ -105,7 +105,15 @@ example, on a Unix system where LF is the default newline sequence, the pattern
 changes the convention to CR. That pattern matches "a\nb" because LF is no
 longer a newline. Note that these special settings, which are not
 Perl-compatible, are recognized only at the very start of a pattern, and that
-they must be in upper case.
+they must be in upper case. If more than one of them is present, the last one
+is used.
+</P>
+<P>
+The newline convention does not affect what the \R escape sequence matches. By
+default, this is any Unicode newline sequence, for Perl compatibility. However,
+this can be changed; see the description of \R in the section entitled
+<a href="#newlineseq">"Newline sequences"</a>
+below.
 </P>
 <br><a name="SEC3" href="#TOC1">CHARACTERS AND METACHARACTERS</a><br>
 <P>
@@ -391,14 +399,14 @@ page). For example, in a French locale such as "fr_FR" in Unix-like systems,
 or "french" in Windows, some character codes greater than 128 are used for
 accented letters, and these are matched by \w. The use of locales with Unicode
 is discouraged.
-</P>
+<a name="newlineseq"></a></P>
 <br><b>
 Newline sequences
 </b><br>
 <P>
-Outside a character class, the escape sequence \R matches any Unicode newline
-sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \R is equivalent to
-the following:
+Outside a character class, by default, the escape sequence \R matches any
+Unicode newline sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \R is
+equivalent to the following:
 <pre>
   (?&#62;\r\n|\n|\x0b|\f|\r|\x85)
 </pre>
@@ -415,6 +423,23 @@ In UTF-8 mode, two additional characters whose codepoints are greater than 255
 are added: LS (line separator, U+2028) and PS (paragraph separator, U+2029).
 Unicode character property support is not needed for these characters to be
 recognized.
+</P>
+<P>
+It is possible to restrict \R to match only CR, LF, or CRLF (instead of the
+complete set of Unicode line endings) by setting the option PCRE_BSR_ANYCRLF
+either at compile time or when the pattern is matched. This can be made the
+default when PCRE is built; if this is the case, the other behaviour can be
+requested via the PCRE_BSR_UNICODE option. It is also possible to specify these
+settings by starting a pattern string with one of the following sequences:
+<pre>
+  (*BSR_ANYCRLF)   CR, LF, or CRLF only
+  (*BSR_UNICODE)   any Unicode newline sequence
+</pre>
+These override the default and the options given to <b>pcre_compile()</b>, but
+they can be overridden by options given to <b>pcre_exec()</b>. Note that these
+special settings, which are not Perl-compatible, are recognized only at the
+very start of a pattern, and that they must be in upper case. If more than one
+of them is present, the last one is used.
 </P>
 <P>
 Inside a character class, \R matches the letter "R".
@@ -2159,7 +2184,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 August 2007
+Last updated: 11 September 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>
