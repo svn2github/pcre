@@ -49,6 +49,7 @@ dist_html_DATA = \
   doc/html/pcreprecompile.html \
   doc/html/pcresample.html \
   doc/html/pcrestack.html \
+  doc/html/pcresyntax.html \
   doc/html/pcretest.html
 
 pcrecpp_html = doc/html/pcrecpp.html

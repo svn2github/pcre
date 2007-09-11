@@ -25,6 +25,8 @@ Version 7.4 10-Sep-07
 
 4.  Added options (at build time, compile time, exec time) to change \R from
     matching any Unicode line ending sequence to just matching CR, LF, or CRLF.
+    
+5.  doc/pcresyntax.html was missing from the distribution. 
 
 
 Version 7.3 28-Aug-07
