@@ -205,6 +205,9 @@ echo "---------------------------- Test 49 ------------------------------" >>tes
 echo "---------------------------- Test 50 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep -Mv "brown\sfox" ./testdata/grepinputv) >>testtry
 
+echo "---------------------------- Test 51 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --colour=always jumps ./testdata/grepinputv) >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

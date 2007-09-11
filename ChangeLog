@@ -37,6 +37,9 @@ Version 7.4 10-Sep-07
     
 8.  Changed all #include <config.h> to #include "config.h". There were also 
     some further <pcre.h> cases that I changed to "pcre.h".
+    
+9.  When pcregrep was used with the --colour option, it missed the line ending
+    sequence off the lines that it output. 
 
 
 Version 7.3 28-Aug-07
