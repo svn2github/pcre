@@ -42,10 +42,13 @@ The following are generic comments about building the PCRE C library "by hand".
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
      settings that it contains to whatever is appropriate for your environment.
      In particular, if you want to force a specific value for newline, you can
-     define the NEWLINE macro.
+     define the NEWLINE macro. When you compile any of the PCRE modules, you
+     must specify -DHAVE_CONFIG_H to your compiler so that config.h is included
+     in the sources.
 
      An alternative approach is not to edit config.h, but to use -D on the
-     compiler command line to make any changes that you need.
+     compiler command line to make any changes that you need to the 
+     configuration options. In this case -DHAVE_CONFIG_H must not be set.
 
      NOTE: There have been occasions when the way in which certain parameters
      in config.h are used has changed between releases. (In the configure/make
@@ -59,13 +62,14 @@ The following are generic comments about building the PCRE C library "by hand".
        Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
 
      OR:
-       Compile dftables.c as a stand-alone program, and then run it with the
-       single argument "pcre_chartables.c". This generates a set of standard
-       character tables and writes them to that file. The tables are generated
-       using the default C locale for your system. If you want to use a locale
-       that is specified by LC_xxx environment variables, add the -L option to
-       the dftables command. You must use this method if you are building on
-       a system that uses EBCDIC code.
+       Compile dftables.c as a stand-alone program (using -DHAVE_CONFIG_H if 
+       you have set up config.h), and then run it with the single argument
+       "pcre_chartables.c". This generates a set of standard character tables
+       and writes them to that file. The tables are generated using the default
+       C locale for your system. If you want to use a locale that is specified
+       by LC_xxx environment variables, add the -L option to the dftables
+       command. You must use this method if you are building on a system that
+       uses EBCDIC code.
 
      The tables in pcre_chartables.c are defaults. The caller of PCRE can
      specify alternative tables at run time.
@@ -82,7 +86,9 @@ The following are generic comments about building the PCRE C library "by hand".
 
        pcre_printint.src
 
- (6) Compile the following source files:
+ (6) Compile the following source files, setting -DHAVE_CONFIG_H as a compiler
+     option if you have set up config.h with your configuration, or else use 
+     other -D settings to change the configuration as required.
 
        pcre_chartables.c
        pcre_compile.c
@@ -115,12 +121,12 @@ The following are generic comments about building the PCRE C library "by hand".
      your system has static and shared libraries, you may have to do this once
      for each type.
 
- (8) Similarly, compile pcreposix.c and link the result (on its own) as the
-     pcreposix library.
+ (8) Similarly, compile pcreposix.c (remembering -DHAVE_CONFIG_H if necessary)
+     and link the result (on its own) as the pcreposix library.
 
- (9) Compile the test program pcretest.c. This needs the functions in the
-     pcre and pcreposix libraries when linking. It also needs the
-     pcre_printint.src source file, which it #includes.
+ (9) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
+     This needs the functions in the pcre and pcreposix libraries when linking.
+     It also needs the pcre_printint.src source file, which it #includes.
 
 (10) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. Note that the
@@ -315,5 +321,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 01 August 2007
+Last Updated: 11 September 2007
 ****
