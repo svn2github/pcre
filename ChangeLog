@@ -30,6 +30,10 @@ Version 7.4 10-Sep-07
 
 6.  Put back the definition of PCRE_ERROR_NULLWSLIMIT, for backward 
     compatibility, even though it is no longer used.
+    
+7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and 
+    strtoull to pcrecpp.cc to select the available functions in WIN32 (where 
+    different names are used).
 
 
 Version 7.3 28-Aug-07

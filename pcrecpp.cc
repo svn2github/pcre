@@ -33,6 +33,12 @@
 #include <config.h>
 #endif
 
+#ifdef _WIN32
+#define HAVE_STRTOQ 1
+#define strtoll     _strtoui64
+#define strtoull    _strtoi64
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>

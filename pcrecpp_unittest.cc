@@ -37,6 +37,10 @@
 #include <config.h>
 #endif
 
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
+
 #include <stdio.h>
 #include <cassert>
 #include <vector>
