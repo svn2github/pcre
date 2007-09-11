@@ -45,7 +45,7 @@ applications. */
 
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #define NLBLOCK md             /* Block containing newline information */

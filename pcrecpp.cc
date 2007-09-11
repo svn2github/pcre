@@ -30,7 +30,7 @@
 // Author: Sanjay Ghemawat
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #ifdef _WIN32
@@ -49,7 +49,7 @@
 #include <algorithm>
 
 #include "pcrecpp_internal.h"
-#include <pcre.h>
+#include "pcre.h"
 #include "pcrecpp.h"
 #include "pcre_stringpiece.h"
 

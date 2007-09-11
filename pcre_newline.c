@@ -48,7 +48,7 @@ http://unicode.org/unicode/reports/tr18/. */
 
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #include "pcre_internal.h"

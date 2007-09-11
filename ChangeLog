@@ -34,6 +34,9 @@ Version 7.4 10-Sep-07
 7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and 
     strtoull to pcrecpp.cc to select the available functions in WIN32 (where 
     different names are used).
+    
+8.  Changed all #include <config.h> to #include "config.h". There were also 
+    some further <pcre.h> cases that I changed to "pcre.h".
 
 
 Version 7.3 28-Aug-07

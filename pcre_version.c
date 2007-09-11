@@ -43,7 +43,7 @@ string that identifies the PCRE version that is in use. */
 
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #include "pcre_internal.h"

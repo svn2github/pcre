@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 character value into a UTF8 string. */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #include "pcre_internal.h"

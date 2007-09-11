@@ -43,7 +43,7 @@ functions. */
 
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 
@@ -57,10 +57,9 @@ previously been set. */
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
-#include <pcre.h>
+#include "pcre.h"
 #include "pcre_internal.h"
 #include "pcreposix.h"
-
 
 
 /* Table to translate PCRE compile time error codes into POSIX error codes. */

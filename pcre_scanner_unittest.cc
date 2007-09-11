@@ -33,16 +33,16 @@
 // functionality.
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #include <stdio.h>
 #include <string>
 #include <vector>
 
-#include <pcrecpp.h>
-#include <pcre_stringpiece.h>
-#include <pcre_scanner.h>
+#include "pcrecpp.h"
+#include "pcre_stringpiece.h"
+#include "pcre_scanner.h"
 
 #ifdef _WIN32
 #  define snprintf _snprintf
