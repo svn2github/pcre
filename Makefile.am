@@ -343,6 +343,7 @@ dist_man_MANS = \
   doc/pcreprecompile.3 \
   doc/pcresample.3 \
   doc/pcrestack.3 \
+  doc/pcresyntax.3 \
   doc/pcretest.1
 
 pcrecpp_man = doc/pcrecpp.3
