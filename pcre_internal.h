@@ -1064,10 +1064,12 @@ total length. */
 #define tables_length (ctypes_offset + 256)
 
 /* Layout of the UCP type table that translates property names into types and
-codes. */
+codes. Each entry used to point directly to a name, but to reduce the number of
+relocations in shared libraries, it now has an offset into a single string 
+instead. */
 
 typedef struct {
-  const char *name;
+  pcre_uint16 name_offset; 
   pcre_uint16 type;
   pcre_uint16 value;
 } ucp_type_table;
@@ -1085,6 +1087,7 @@ extern const uschar _pcre_utf8_table4[];
 
 extern const int    _pcre_utf8_table1_size;
 
+extern const char   _pcre_utt_names[];
 extern const ucp_type_table _pcre_utt[];
 extern const int _pcre_utt_size;
 

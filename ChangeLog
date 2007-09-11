@@ -40,6 +40,20 @@ Version 7.4 10-Sep-07
     
 9.  When pcregrep was used with the --colour option, it missed the line ending
     sequence off the lines that it output. 
+    
+10. It was pointed out to me that arrays of string pointers cause lots of 
+    relocations when a shared library is dynamically loaded. A technique of 
+    using a single long string with a table of offsets can drastically reduce 
+    these. I have refactored PCRE in four places to do this. The result is 
+    dramatic:
+    
+      Originally:                          290
+      After changing UCP table:            187
+      After changing error message table:   43 
+      After changing table of "verbs"       36
+      After changing table of Posix names   22
+      
+    Thanks to the folks working on Gregex for glib for this insight.
 
 
 Version 7.3 28-Aug-07

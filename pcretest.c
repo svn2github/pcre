@@ -94,6 +94,7 @@ symbols to prevent clashes. */
 #define _pcre_utf8_table4      utf8_table4
 #define _pcre_utt              utt
 #define _pcre_utt_size         utt_size
+#define _pcre_utt_names        utt_names
 #define _pcre_OP_lengths       OP_lengths
 
 #include "pcre_tables.c"

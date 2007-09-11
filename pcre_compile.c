@@ -140,35 +140,47 @@ static const short int escapes[] = {
 #endif
 
 
-/* Table of special "verbs" like (*PRUNE) */
+/* Table of special "verbs" like (*PRUNE). This is a short table, so it is 
+searched linearly. Put all the names into a single string, in order to reduce 
+the number of relocations when a shared library is dynamically linked. */
 
 typedef struct verbitem {
-  const char *name;
   int   len;
   int   op;
 } verbitem;
 
+static const char verbnames[] =
+  "ACCEPT\0" 
+  "COMMIT\0" 
+  "F\0"      
+  "FAIL\0"   
+  "PRUNE\0"  
+  "SKIP\0"   
+  "THEN";   
+
 static verbitem verbs[] = {
-  { "ACCEPT", 6, OP_ACCEPT },
-  { "COMMIT", 6, OP_COMMIT },
-  { "F",      1, OP_FAIL },
-  { "FAIL",   4, OP_FAIL },
-  { "PRUNE",  5, OP_PRUNE },
-  { "SKIP",   4, OP_SKIP  },
-  { "THEN",   4, OP_THEN  }
+  { 6, OP_ACCEPT },
+  { 6, OP_COMMIT },
+  { 1, OP_FAIL },
+  { 4, OP_FAIL },
+  { 5, OP_PRUNE },
+  { 4, OP_SKIP  },
+  { 4, OP_THEN  }
 };
 
 static int verbcount = sizeof(verbs)/sizeof(verbitem);
 
 
-/* Tables of names of POSIX character classes and their lengths. The list is
-terminated by a zero length entry. The first three must be alpha, lower, upper,
-as this is assumed for handling case independence. */
+/* Tables of names of POSIX character classes and their lengths. The names are 
+now all in a single string, to reduce the number of relocations when a shared 
+library is dynamically loaded. The list of lengths is terminated by a zero
+length entry. The first three must be alpha, lower, upper, as this is assumed
+for handling case independence. */
 
-static const char *const posix_names[] = {
-  "alpha", "lower", "upper",
-  "alnum", "ascii", "blank", "cntrl", "digit", "graph",
-  "print", "punct", "space", "word",  "xdigit" };
+static const char posix_names[] =
+  "alpha\0"  "lower\0"  "upper\0"  "alnum\0"  "ascii\0"  "blank\0" 
+  "cntrl\0"  "digit\0"  "graph\0"  "print\0"  "punct\0"  "space\0" 
+  "word\0"   "xdigit";
 
 static const uschar posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
@@ -207,84 +219,88 @@ static const int posix_class_maps[] = {
 /* The texts of compile-time error messages. These are "char *" because they
 are passed to the outside world. Do not ever re-use any error number, because
 they are documented. Always add a new error instead. Messages marked DEAD below
-are no longer used. */
+are no longer used. This used to be a table of strings, but in order to reduce 
+the number of relocations needed when a shared library is loaded dynamically, 
+it is now one long string. We cannot use a table of offsets, because the 
+lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead, we 
+simply count through to the one we want - this isn't a performance issue 
+because these strings are used only when there is a compilation error. */
 
-static const char *error_texts[] = {
-  "no error",
-  "\\ at end of pattern",
-  "\\c at end of pattern",
-  "unrecognized character follows \\",
-  "numbers out of order in {} quantifier",
+static const char error_texts[] =
+  "no error\0"
+  "\\ at end of pattern\0"
+  "\\c at end of pattern\0"
+  "unrecognized character follows \\\0"
+  "numbers out of order in {} quantifier\0"
   /* 5 */
-  "number too big in {} quantifier",
-  "missing terminating ] for character class",
-  "invalid escape sequence in character class",
-  "range out of order in character class",
-  "nothing to repeat",
+  "number too big in {} quantifier\0"
+  "missing terminating ] for character class\0"
+  "invalid escape sequence in character class\0"
+  "range out of order in character class\0"
+  "nothing to repeat\0"
   /* 10 */
-  "operand of unlimited repeat could match the empty string",  /** DEAD **/
-  "internal error: unexpected repeat",
-  "unrecognized character after (?",
-  "POSIX named classes are supported only within a class",
-  "missing )",
+  "operand of unlimited repeat could match the empty string\0"  /** DEAD **/
+  "internal error: unexpected repeat\0"
+  "unrecognized character after (?\0"
+  "POSIX named classes are supported only within a class\0"
+  "missing )\0"
   /* 15 */
-  "reference to non-existent subpattern",
-  "erroffset passed as NULL",
-  "unknown option bit(s) set",
-  "missing ) after comment",
-  "parentheses nested too deeply",  /** DEAD **/
+  "reference to non-existent subpattern\0"
+  "erroffset passed as NULL\0"
+  "unknown option bit(s) set\0"
+  "missing ) after comment\0"
+  "parentheses nested too deeply\0"  /** DEAD **/
   /* 20 */
-  "regular expression is too large",
-  "failed to get memory",
-  "unmatched parentheses",
-  "internal error: code overflow",
-  "unrecognized character after (?<",
+  "regular expression is too large\0"
+  "failed to get memory\0"
+  "unmatched parentheses\0"
+  "internal error: code overflow\0"
+  "unrecognized character after (?<\0"
   /* 25 */
-  "lookbehind assertion is not fixed length",
-  "malformed number or name after (?(",
-  "conditional group contains more than two branches",
-  "assertion expected after (?(",
-  "(?R or (?[+-]digits must be followed by )",
+  "lookbehind assertion is not fixed length\0"
+  "malformed number or name after (?(\0"
+  "conditional group contains more than two branches\0"
+  "assertion expected after (?(\0"
+  "(?R or (?[+-]digits must be followed by )\0"
   /* 30 */
-  "unknown POSIX class name",
-  "POSIX collating elements are not supported",
-  "this version of PCRE is not compiled with PCRE_UTF8 support",
-  "spare error",  /** DEAD **/
-  "character value in \\x{...} sequence is too large",
+  "unknown POSIX class name\0"
+  "POSIX collating elements are not supported\0"
+  "this version of PCRE is not compiled with PCRE_UTF8 support\0"
+  "spare error\0"  /** DEAD **/
+  "character value in \\x{...} sequence is too large\0"
   /* 35 */
-  "invalid condition (?(0)",
-  "\\C not allowed in lookbehind assertion",
-  "PCRE does not support \\L, \\l, \\N, \\U, or \\u",
-  "number after (?C is > 255",
-  "closing ) for (?C expected",
+  "invalid condition (?(0)\0"
+  "\\C not allowed in lookbehind assertion\0"
+  "PCRE does not support \\L, \\l, \\N, \\U, or \\u\0"
+  "number after (?C is > 255\0"
+  "closing ) for (?C expected\0"
   /* 40 */
-  "recursive call could loop indefinitely",
-  "unrecognized character after (?P",
-  "syntax error in subpattern name (missing terminator)",
-  "two named subpatterns have the same name",
-  "invalid UTF-8 string",
+  "recursive call could loop indefinitely\0"
+  "unrecognized character after (?P\0"
+  "syntax error in subpattern name (missing terminator)\0"
+  "two named subpatterns have the same name\0"
+  "invalid UTF-8 string\0"
   /* 45 */
-  "support for \\P, \\p, and \\X has not been compiled",
-  "malformed \\P or \\p sequence",
-  "unknown property name after \\P or \\p",
-  "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " characters)",
-  "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")",
+  "support for \\P, \\p, and \\X has not been compiled\0"
+  "malformed \\P or \\p sequence\0"
+  "unknown property name after \\P or \\p\0"
+  "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " characters)\0"
+  "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")\0"
   /* 50 */
-  "repeated subpattern is too long",    /** DEAD **/
-  "octal value is greater than \\377 (not in UTF-8 mode)",
-  "internal error: overran compiling workspace",
-  "internal error: previously-checked referenced subpattern not found",
-  "DEFINE group contains more than one branch",
+  "repeated subpattern is too long\0"    /** DEAD **/
+  "octal value is greater than \\377 (not in UTF-8 mode)\0"
+  "internal error: overran compiling workspace\0"
+  "internal error: previously-checked referenced subpattern not found\0"
+  "DEFINE group contains more than one branch\0"
   /* 55 */
-  "repeating a DEFINE group is not allowed",
-  "inconsistent NEWLINE options",
-  "\\g is not followed by a braced name or an optionally braced non-zero number",
-  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number",
-  "(*VERB) with an argument is not supported",
+  "repeating a DEFINE group is not allowed\0"
+  "inconsistent NEWLINE options\0"
+  "\\g is not followed by a braced name or an optionally braced non-zero number\0"
+  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number\0"
+  "(*VERB) with an argument is not supported\0"
   /* 60 */
-  "(*VERB) not recognized",
-  "number is too big"
-};
+  "(*VERB) not recognized\0"
+  "number is too big";
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -417,6 +433,28 @@ static BOOL
   compile_regex(int, int, uschar **, const uschar **, int *, BOOL, BOOL, int,
     int *, int *, branch_chain *, compile_data *, int *);
 
+
+
+/*************************************************
+*            Find an error text                  *
+*************************************************/
+
+/* The error texts are now all in one long string, to save on relocations. As 
+some of the text is of unknown length, we can't use a table of offsets. 
+Instead, just count through the strings. This is not a performance issue 
+because it happens only when there has been a compilation error.
+
+Argument:   the error number
+Returns:    pointer to the error string
+*/
+
+static const char *
+find_error_text(int n)
+{
+const char *s = error_texts;
+for (; n > 0; n--) while (*s++ != 0); 
+return s;
+}
 
 
 /*************************************************
@@ -776,7 +814,7 @@ top = _pcre_utt_size;
 while (bot < top)
   {
   i = (bot + top) >> 1;
-  c = strcmp(name, _pcre_utt[i].name);
+  c = strcmp(name, _pcre_utt_names + _pcre_utt[i].name_offset);
   if (c == 0)
     {
     *dptr = _pcre_utt[i].value;
@@ -1733,11 +1771,13 @@ Returns:     a value representing the name, or -1 if unknown
 static int
 check_posix_name(const uschar *ptr, int len)
 {
+const char *pn = posix_names;
 register int yield = 0;
 while (posix_name_lengths[yield] != 0)
   {
   if (len == posix_name_lengths[yield] &&
-    strncmp((const char *)ptr, posix_names[yield], len) == 0) return yield;
+    strncmp((const char *)ptr, pn, len) == 0) return yield;
+  pn += posix_name_lengths[yield] + 1;   
   yield++;
   }
 return -1;
@@ -4024,6 +4064,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     if (*(++ptr) == '*' && (cd->ctypes[ptr[1]] & ctype_letter) != 0)
       {
       int i, namelen;
+      const char *vn = verbnames; 
       const uschar *name = ++ptr;
       previous = NULL;
       while ((cd->ctypes[*++ptr] & ctype_letter) != 0);
@@ -4041,12 +4082,13 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       for (i = 0; i < verbcount; i++)
         {
         if (namelen == verbs[i].len &&
-            strncmp((char *)name, verbs[i].name, namelen) == 0)
+            strncmp((char *)name, vn, namelen) == 0)
           {
           *code = verbs[i].op;
           if (*code++ == OP_ACCEPT) cd->had_accept = TRUE;
           break;
           }
+        vn += verbs[i].len + 1;  
         }
       if (i < verbcount) continue;
       *errorcodeptr = ERR60;
@@ -6005,7 +6047,7 @@ if (errorcode != 0)
   PCRE_EARLY_ERROR_RETURN:
   *erroroffset = ptr - (const uschar *)pattern;
   PCRE_EARLY_ERROR_RETURN2:
-  *errorptr = error_texts[errorcode];
+  *errorptr = find_error_text(errorcode);
   if (errorcodeptr != NULL) *errorcodeptr = errorcode;
   return NULL;
   }
@@ -6090,7 +6132,7 @@ was compiled can be seen. */
 if (code - codestart > length)
   {
   (pcre_free)(re);
-  *errorptr = error_texts[ERR23];
+  *errorptr = find_error_text(ERR23);
   *erroroffset = ptr - (uschar *)pattern;
   if (errorcodeptr != NULL) *errorcodeptr = ERR23;
   return NULL;
