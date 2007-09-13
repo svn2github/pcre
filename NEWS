@@ -2,6 +2,15 @@ News about PCRE releases
 ------------------------
 
 
+Release 7.4 13-Sep-07
+---------------------
+
+The only change of specification is the addition of options to control whether 
+\R matches any Unicode line ending (the default) or just CR, LF, and CRLF.
+Otherwise, the changes are bug fixes and a refactoring to reduce the number of 
+relocations needed in a shared library.
+
+
 Release 7.3 28-Aug-07
 ---------------------
 
