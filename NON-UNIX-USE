@@ -47,7 +47,7 @@ The following are generic comments about building the PCRE C library "by hand".
      in the sources.
 
      An alternative approach is not to edit config.h, but to use -D on the
-     compiler command line to make any changes that you need to the 
+     compiler command line to make any changes that you need to the
      configuration options. In this case -DHAVE_CONFIG_H must not be set.
 
      NOTE: There have been occasions when the way in which certain parameters
@@ -62,7 +62,7 @@ The following are generic comments about building the PCRE C library "by hand".
        Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
 
      OR:
-       Compile dftables.c as a stand-alone program (using -DHAVE_CONFIG_H if 
+       Compile dftables.c as a stand-alone program (using -DHAVE_CONFIG_H if
        you have set up config.h), and then run it with the single argument
        "pcre_chartables.c". This generates a set of standard character tables
        and writes them to that file. The tables are generated using the default
@@ -87,7 +87,7 @@ The following are generic comments about building the PCRE C library "by hand".
        pcre_printint.src
 
  (6) Compile the following source files, setting -DHAVE_CONFIG_H as a compiler
-     option if you have set up config.h with your configuration, or else use 
+     option if you have set up config.h with your configuration, or else use
      other -D settings to change the configuration as required.
 
        pcre_chartables.c

@@ -1065,11 +1065,11 @@ total length. */
 
 /* Layout of the UCP type table that translates property names into types and
 codes. Each entry used to point directly to a name, but to reduce the number of
-relocations in shared libraries, it now has an offset into a single string 
+relocations in shared libraries, it now has an offset into a single string
 instead. */
 
 typedef struct {
-  pcre_uint16 name_offset; 
+  pcre_uint16 name_offset;
   pcre_uint16 type;
   pcre_uint16 value;
 } ucp_type_table;

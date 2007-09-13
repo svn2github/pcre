@@ -36,7 +36,7 @@ man page, in case the conversion went wrong.
 <li><a name="TOC21" href="#SEC21">RECURSIVE PATTERNS</a>
 <li><a name="TOC22" href="#SEC22">SUBPATTERNS AS SUBROUTINES</a>
 <li><a name="TOC23" href="#SEC23">CALLOUTS</a>
-<li><a name="TOC24" href="#SEC24">BACTRACKING CONTROL</a>
+<li><a name="TOC24" href="#SEC24">BACKTRACKING CONTROL</a>
 <li><a name="TOC25" href="#SEC25">SEE ALSO</a>
 <li><a name="TOC26" href="#SEC26">AUTHOR</a>
 <li><a name="TOC27" href="#SEC27">REVISION</a>
@@ -986,8 +986,9 @@ alternative in the subpattern.
 <br><a name="SEC11" href="#TOC1">INTERNAL OPTION SETTING</a><br>
 <P>
 The settings of the PCRE_CASELESS, PCRE_MULTILINE, PCRE_DOTALL, and
-PCRE_EXTENDED options can be changed from within the pattern by a sequence of
-Perl option letters enclosed between "(?" and ")". The option letters are
+PCRE_EXTENDED options (which are Perl-compatible) can be changed from within
+the pattern by a sequence of Perl option letters enclosed between "(?" and ")".
+The option letters are
 <pre>
   i  for PCRE_CASELESS
   m  for PCRE_MULTILINE
@@ -1000,6 +1001,11 @@ setting and unsetting such as (?im-sx), which sets PCRE_CASELESS and
 PCRE_MULTILINE while unsetting PCRE_DOTALL and PCRE_EXTENDED, is also
 permitted. If a letter appears both before and after the hyphen, the option is
 unset.
+</P>
+<P>
+The PCRE-specific options PCRE_DUPNAMES, PCRE_UNGREEDY, and PCRE_EXTRA can be
+changed in the same way as the Perl-compatible options by using the characters
+J, U and X respectively.
 </P>
 <P>
 When an option change occurs at top level (that is, not inside subpattern
@@ -1025,11 +1031,6 @@ matches "ab", "aB", "c", and "C", even though when matching "C" the first
 branch is abandoned before the option setting. This is because the effects of
 option settings happen at compile time. There would be some very weird
 behaviour otherwise.
-</P>
-<P>
-The PCRE-specific options PCRE_DUPNAMES, PCRE_UNGREEDY, and PCRE_EXTRA can be
-changed in the same way as the Perl-compatible options by using the characters
-J, U and X respectively.
 <a name="subpattern"></a></P>
 <br><a name="SEC12" href="#TOC1">SUBPATTERNS</a><br>
 <P>
@@ -2054,7 +2055,7 @@ description of the interface to the callout function is given in the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
 </P>
-<br><a name="SEC24" href="#TOC1">BACTRACKING CONTROL</a><br>
+<br><a name="SEC24" href="#TOC1">BACKTRACKING CONTROL</a><br>
 <P>
 Perl 5.10 introduced a number of "Special Backtracking Control Verbs", which
 are described in the Perl documentation as "experimental and subject to change

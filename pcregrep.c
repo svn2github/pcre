@@ -1113,7 +1113,7 @@ while (ptr < endptr)
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
         fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
         fprintf(stdout, "%c[00m", 0x1b);
-        fwrite(ptr + offsets[1], 1, (linelength + endlinelength) - offsets[1], 
+        fwrite(ptr + offsets[1], 1, (linelength + endlinelength) - offsets[1],
           stdout);
         }
       else fwrite(ptr, 1, linelength + endlinelength, stdout);

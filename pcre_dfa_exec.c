@@ -2604,8 +2604,8 @@ if ((md->moptions & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) == 0)
     md->moptions |= re->options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE);
 #ifdef BSR_ANYCRLF
   else md->moptions |= PCRE_BSR_ANYCRLF;
-#endif   
-  }  
+#endif
+  }
 
 /* Handle different types of newline. The three bits give eight cases. If
 nothing is set at run time, whatever was used at compile time applies. */

@@ -4469,7 +4469,7 @@ switch (options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE))
   md->bsr_anycrlf = TRUE;
 #else
   md->bsr_anycrlf = FALSE;
-#endif           
+#endif
   break;
 
   case PCRE_BSR_ANYCRLF:

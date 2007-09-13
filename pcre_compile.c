@@ -140,8 +140,8 @@ static const short int escapes[] = {
 #endif
 
 
-/* Table of special "verbs" like (*PRUNE). This is a short table, so it is 
-searched linearly. Put all the names into a single string, in order to reduce 
+/* Table of special "verbs" like (*PRUNE). This is a short table, so it is
+searched linearly. Put all the names into a single string, in order to reduce
 the number of relocations when a shared library is dynamically linked. */
 
 typedef struct verbitem {
@@ -150,13 +150,13 @@ typedef struct verbitem {
 } verbitem;
 
 static const char verbnames[] =
-  "ACCEPT\0" 
-  "COMMIT\0" 
-  "F\0"      
-  "FAIL\0"   
-  "PRUNE\0"  
-  "SKIP\0"   
-  "THEN";   
+  "ACCEPT\0"
+  "COMMIT\0"
+  "F\0"
+  "FAIL\0"
+  "PRUNE\0"
+  "SKIP\0"
+  "THEN";
 
 static verbitem verbs[] = {
   { 6, OP_ACCEPT },
@@ -171,15 +171,15 @@ static verbitem verbs[] = {
 static int verbcount = sizeof(verbs)/sizeof(verbitem);
 
 
-/* Tables of names of POSIX character classes and their lengths. The names are 
-now all in a single string, to reduce the number of relocations when a shared 
+/* Tables of names of POSIX character classes and their lengths. The names are
+now all in a single string, to reduce the number of relocations when a shared
 library is dynamically loaded. The list of lengths is terminated by a zero
 length entry. The first three must be alpha, lower, upper, as this is assumed
 for handling case independence. */
 
 static const char posix_names[] =
-  "alpha\0"  "lower\0"  "upper\0"  "alnum\0"  "ascii\0"  "blank\0" 
-  "cntrl\0"  "digit\0"  "graph\0"  "print\0"  "punct\0"  "space\0" 
+  "alpha\0"  "lower\0"  "upper\0"  "alnum\0"  "ascii\0"  "blank\0"
+  "cntrl\0"  "digit\0"  "graph\0"  "print\0"  "punct\0"  "space\0"
   "word\0"   "xdigit";
 
 static const uschar posix_name_lengths[] = {
@@ -219,11 +219,11 @@ static const int posix_class_maps[] = {
 /* The texts of compile-time error messages. These are "char *" because they
 are passed to the outside world. Do not ever re-use any error number, because
 they are documented. Always add a new error instead. Messages marked DEAD below
-are no longer used. This used to be a table of strings, but in order to reduce 
-the number of relocations needed when a shared library is loaded dynamically, 
-it is now one long string. We cannot use a table of offsets, because the 
-lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead, we 
-simply count through to the one we want - this isn't a performance issue 
+are no longer used. This used to be a table of strings, but in order to reduce
+the number of relocations needed when a shared library is loaded dynamically,
+it is now one long string. We cannot use a table of offsets, because the
+lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead, we
+simply count through to the one we want - this isn't a performance issue
 because these strings are used only when there is a compilation error. */
 
 static const char error_texts[] =
@@ -439,9 +439,9 @@ static BOOL
 *            Find an error text                  *
 *************************************************/
 
-/* The error texts are now all in one long string, to save on relocations. As 
-some of the text is of unknown length, we can't use a table of offsets. 
-Instead, just count through the strings. This is not a performance issue 
+/* The error texts are now all in one long string, to save on relocations. As
+some of the text is of unknown length, we can't use a table of offsets.
+Instead, just count through the strings. This is not a performance issue
 because it happens only when there has been a compilation error.
 
 Argument:   the error number
@@ -452,7 +452,7 @@ static const char *
 find_error_text(int n)
 {
 const char *s = error_texts;
-for (; n > 0; n--) while (*s++ != 0); 
+for (; n > 0; n--) while (*s++ != 0);
 return s;
 }
 
@@ -1777,7 +1777,7 @@ while (posix_name_lengths[yield] != 0)
   {
   if (len == posix_name_lengths[yield] &&
     strncmp((const char *)ptr, pn, len) == 0) return yield;
-  pn += posix_name_lengths[yield] + 1;   
+  pn += posix_name_lengths[yield] + 1;
   yield++;
   }
 return -1;
@@ -4064,7 +4064,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     if (*(++ptr) == '*' && (cd->ctypes[ptr[1]] & ctype_letter) != 0)
       {
       int i, namelen;
-      const char *vn = verbnames; 
+      const char *vn = verbnames;
       const uschar *name = ++ptr;
       previous = NULL;
       while ((cd->ctypes[*++ptr] & ctype_letter) != 0);
@@ -4088,7 +4088,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           if (*code++ == OP_ACCEPT) cd->had_accept = TRUE;
           break;
           }
-        vn += verbs[i].len + 1;  
+        vn += verbs[i].len + 1;
         }
       if (i < verbcount) continue;
       *errorcodeptr = ERR60;
