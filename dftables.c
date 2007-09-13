@@ -110,7 +110,7 @@ fprintf(f,
   "outside this compilation unit might reference this\" and so it will always\n"
   "be supplied to the linker. */\n\n"
   "#ifdef HAVE_CONFIG_H\n"
-  "#include "config.h"\n"
+  "#include \"config.h\"\n"
   "#endif\n\n"
   "#include \"pcre_internal.h\"\n\n");
 fprintf(f,
