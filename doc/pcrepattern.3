@@ -89,7 +89,8 @@ this can be changed; see the description of \eR in the section entitled
 .\" </a>
 "Newline sequences"
 .\"
-below.
+below. A change of \eR setting can be combined with a change of newline 
+convention.
 .
 .
 .SH "CHARACTERS AND METACHARACTERS"
@@ -426,10 +427,11 @@ recognized.
 .P
 It is possible to restrict \eR to match only CR, LF, or CRLF (instead of the
 complete set of Unicode line endings) by setting the option PCRE_BSR_ANYCRLF
-either at compile time or when the pattern is matched. This can be made the
-default when PCRE is built; if this is the case, the other behaviour can be
-requested via the PCRE_BSR_UNICODE option. It is also possible to specify these
-settings by starting a pattern string with one of the following sequences:
+either at compile time or when the pattern is matched. (BSR is an abbrevation 
+for "backslash R".) This can be made the default when PCRE is built; if this is
+the case, the other behaviour can be requested via the PCRE_BSR_UNICODE option.
+It is also possible to specify these settings by starting a pattern string with
+one of the following sequences:
 .sp
   (*BSR_ANYCRLF)   CR, LF, or CRLF only
   (*BSR_UNICODE)   any Unicode newline sequence
@@ -438,8 +440,11 @@ These override the default and the options given to \fBpcre_compile()\fP, but
 they can be overridden by options given to \fBpcre_exec()\fP. Note that these
 special settings, which are not Perl-compatible, are recognized only at the
 very start of a pattern, and that they must be in upper case. If more than one
-of them is present, the last one is used.
-.P
+of them is present, the last one is used. They can be combined with a change of 
+newline convention, for example, a pattern can start with:
+.sp
+  (*ANY)(*BSR_ANYCRLF)
+.sp
 Inside a character class, \eR matches the letter "R".
 .
 .
@@ -2177,6 +2182,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 September 2007
+Last updated: 14 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
