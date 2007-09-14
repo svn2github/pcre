@@ -110,7 +110,7 @@ function runtest()
         fi
       done
     else
-      echo "Skipping C++ tests: pcrecpp_unittest does not exist"    
+      echo "Skipping C++ tests: pcrecpp_unittest does not exist"
     fi
   else
     echo "Skipping C++ tests: newline is $nl"
@@ -130,6 +130,8 @@ srcdir=.
 for opts in \
   "" \
   "--enable-utf8 --disable-static" \
+  "--disable-stack-for-recursion" \
+  "--enable-utf8 --disable-stack-for-recursion" \
   "--enable-unicode-properties --disable-shared" \
   "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-unicode-properties --disable-cpp --with-link-size=3 --disable-shared" \
@@ -155,8 +157,8 @@ if [ -f Makefile ]; then
   if [ $? -ne 0 ]; then
     echo "** 'make distclean' failed"
     exit 1
-  fi    
-fi   
+  fi
+fi
 
 echo "Tests in the $tmp directory"
 srcdir=`pwd`
@@ -175,7 +177,7 @@ cd $tmp
 if [ $? -ne 0 ]; then
   echo "** Failed to cd to $tmp"
   exit 1
-fi    
+fi
 
 for opts in \
   "--enable-unicode-properties --disable-shared"

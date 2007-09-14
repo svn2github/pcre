@@ -54,6 +54,9 @@ Version 7.4 10-Sep-07
       After changing table of Posix names   22
 
     Thanks to the folks working on Gregex for glib for this insight.
+    
+11. --disable-stack-for-recursion caused compiling to fail unless -enable-
+    unicode-properties was also set. 
 
 
 Version 7.3 28-Aug-07
