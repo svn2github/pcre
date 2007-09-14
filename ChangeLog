@@ -57,6 +57,9 @@ Version 7.4 10-Sep-07
     
 11. --disable-stack-for-recursion caused compiling to fail unless -enable-
     unicode-properties was also set. 
+    
+12. Updated the RunTest script to miss out tests that don't work if \R is
+    defaulted to ANYCRLF. 
 
 
 Version 7.3 28-Aug-07
