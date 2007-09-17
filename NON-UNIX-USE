@@ -132,7 +132,10 @@ The following are generic comments about building the PCRE C library "by hand".
      that the output matches the corresponding testoutput files. Note that the
      supplied files are in Unix format, with just LF characters as line
      terminators. You may need to edit them to change this if your system uses
-     a different convention.
+     a different convention. If you are using Windows, you probably should use 
+     the wintestinput3 file instead of testinput3 (and the corresponding output 
+     file). This is a locale test; wintestinput3 sets the locale to "french" 
+     rather than "fr_FR", and there some minor output differences. 
 
 (11) If you want to use the pcregrep command, compile and link pcregrep.c; it
      uses only the basic PCRE library (it does not need the pcreposix library).
@@ -321,5 +324,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 11 September 2007
+Last Updated: 17 September 2007
 ****
