@@ -337,13 +337,17 @@ bool RE::Replace(const StringPiece& rewrite,
 
 // Returns PCRE_NEWLINE_CRLF, PCRE_NEWLINE_CR, or PCRE_NEWLINE_LF.
 // Note that PCRE_NEWLINE_CRLF is defined to be P_N_CR | P_N_LF.
+// Modified by PH to add PCRE_NEWLINE_ANY and PCRE_NEWLINE_ANYCRLF.
+
 static int NewlineMode(int pcre_options) {
   // TODO: if we can make it threadsafe, cache this var
   int newline_mode = 0;
   /* if (newline_mode) return newline_mode; */  // do this once it's cached
-  if (pcre_options & (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF)) {
+  if (pcre_options & (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|
+                      PCRE_NEWLINE_ANY|PCRE_NEWLINE_ANYCRLF)) {
     newline_mode = (pcre_options &
-                    (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF));
+                    (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|
+                     PCRE_NEWLINE_ANY|PCRE_NEWLINE_ANYCRLF));
   } else {
     int newline;
     pcre_config(PCRE_CONFIG_NEWLINE, &newline);
@@ -353,6 +357,10 @@ static int NewlineMode(int pcre_options) {
       newline_mode = PCRE_NEWLINE_CR;
     else if (newline == 3338)
       newline_mode = PCRE_NEWLINE_CRLF;
+    else if (newline == -1)
+      newline_mode = PCRE_NEWLINE_ANY;
+    else if (newline == -2)
+      newline_mode = PCRE_NEWLINE_ANYCRLF;        
     else
       assert("" == "Unexpected return value from pcre_config(NEWLINE)");
   }
@@ -382,9 +390,13 @@ int RE::GlobalReplace(const StringPiece& rewrite,
       // Note it's better to call pcre_fullinfo() than to examine
       // all_options(), since options_ could have changed bewteen
       // compile-time and now, but this is simpler and safe enough.
+      // Modified by PH to add ANY and ANYCRLF. 
       if (start+1 < static_cast<int>(str->length()) &&
           (*str)[start] == '\r' && (*str)[start+1] == '\n' &&
-          NewlineMode(options_.all_options()) == PCRE_NEWLINE_CRLF) {
+          (NewlineMode(options_.all_options()) == PCRE_NEWLINE_CRLF ||
+           NewlineMode(options_.all_options()) == PCRE_NEWLINE_ANY ||
+           NewlineMode(options_.all_options()) == PCRE_NEWLINE_ANYCRLF)
+          ) {
         matchend++;
       }
       // We also need to advance more than one char if we're in utf8 mode.

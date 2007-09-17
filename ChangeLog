@@ -60,6 +60,9 @@ Version 7.4 10-Sep-07
 
 12. Updated the tests so that they work when \R is defaulted to ANYCRLF.
 
+13. Added checks for ANY and ANYCRLF to pcrecpp.cc where it previously
+    checked only for CRLF.
+
 
 Version 7.3 28-Aug-07
 ---------------------
