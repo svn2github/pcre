@@ -183,6 +183,12 @@ library. You can read more about them in the pcrebuild man page.
   to be some failures. With --enable-newline-is-anycrlf or
   --enable-newline-is-any, many tests should succeed, but there may be some
   failures.
+  
+. By default, the sequence \R in a pattern matches any Unicode line ending 
+  sequence. This is independent of the option specifying what PCRE considers to 
+  be the end of a line (see above). However, the caller of PCRE can restrict \R
+  to match only CR, LF, or CRLF. You can make this the default by adding
+  --enable-bsr-anycrlf to the "configure" command (bsr = "backslash R").
 
 . When called via the POSIX interface, PCRE uses malloc() to get additional
   storage for processing capturing parentheses if there are more than 10 of
@@ -714,4 +720,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 24 April 2007
+Last updated: 17 September 2007

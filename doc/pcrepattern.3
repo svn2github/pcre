@@ -1034,6 +1034,16 @@ matches "ab", "aB", "c", and "C", even though when matching "C" the first
 branch is abandoned before the option setting. This is because the effects of
 option settings happen at compile time. There would be some very weird
 behaviour otherwise.
+.P
+\fBNote:\fP There are other PCRE-specific options that can be set by the
+application when the compile or match functions are called. In some cases the
+pattern can contain special leading sequences to override what the application
+has set or what has been defaulted. Details are given in the section entitled
+.\" HTML <a href="#newlineseq">
+.\" </a>
+"Newline sequences"
+.\"
+above. 
 .
 .
 .\" HTML <a name="subpattern"></a>
@@ -2182,6 +2192,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 September 2007
+Last updated: 17 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
