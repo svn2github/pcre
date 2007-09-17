@@ -25,9 +25,6 @@ utf8=$?
 ./pcretest -C | ./pcregrep 'No Unicode properties support' >/dev/null
 ucp=$?
 
-./pcretest -C | ./pcregrep '\\R matches CR, LF, or CRLF only' >/dev/null
-bsrok=$?
-
 # Select which tests to run; for those that are explicitly requested, check
 # that the necessary optional facilities are available.
 
@@ -97,38 +94,19 @@ if [ $link_size -ne 2 ] ; then
   fi
 fi
 
-if [ $bsrok = 0 ] ; then
-  if [ $do2 = yes ] ; then
-    echo "Can't run test 2 because \\R is restricted"
-    exit 1
-  fi
-  if [ $do5 = yes ] ; then
-    echo "Can't run test 5 because \\R is restricted"
-    exit 1
-  fi
-  if [ $do7 = yes ] ; then
-    echo "Can't run test 7 because \\R is restricted"
-    exit 1
-  fi
-  if [ $do8 = yes ] ; then
-    echo "Can't run test 8 because \\R is restricted"
-    exit 1
-  fi
-fi
-
 # If no specific tests were requested, select all that are relevant.
 
 if [ $do1 = no -a $do2 = no -a $do3 = no -a $do4 = no -a \
      $do5 = no -a $do6 = no -a $do7 = no -a $do8 = no -a \
      $do9 = no -a $do10 = no ] ; then
   do1=yes
-  if [ $bsrok -ne 0 ] ; then do2=yes; fi
+  do2=yes
   do3=yes
   if [ $utf8 -ne 0 ] ; then do4=yes; fi
-  if [ $utf8 -ne 0 -a $bsrok -ne 0 ] ; then do5=yes; fi
+  if [ $utf8 -ne 0 ] ; then do5=yes; fi
   if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do6=yes; fi
-  if [ $bsrok -ne 0 ] ; then do7=yes; fi
-  if [ $utf8 -ne 0 -a $bsrok -ne 0 ] ; then do8=yes; fi
+  do7=yes
+  if [ $utf8 -ne 0 ] ; then do8=yes; fi
   if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do9=yes; fi
   if [ $link_size -eq 2 -a $ucp -ne 0 ] ; then do10=yes; fi
 fi

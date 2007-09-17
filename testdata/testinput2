@@ -1999,7 +1999,7 @@ a random value. /Ix
 
 /a/<any><crlf>
 
-/^a\Rb/
+/^a\Rb/<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
@@ -2009,7 +2009,7 @@ a random value. /Ix
     ** Failers
     a\n\rb
 
-/^a\R*b/
+/^a\R*b/<bsr_unicode>
     ab
     a\nb
     a\rb
@@ -2020,7 +2020,7 @@ a random value. /Ix
     a\n\rb
     a\n\r\x85\x0cb
 
-/^a\R+b/
+/^a\R+b/<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
@@ -2032,7 +2032,7 @@ a random value. /Ix
     ** Failers
     ab
 
-/^a\R{1,3}b/
+/^a\R{1,3}b/<bsr_unicode>
     a\nb
     a\n\rb
     a\n\r\x85b
@@ -2044,7 +2044,7 @@ a random value. /Ix
     a\n\n\n\rb
     a\r
 
-/^a[\R]b/
+/^a[\R]b/<bsr_unicode>
     aRb
     ** Failers
     a\nb

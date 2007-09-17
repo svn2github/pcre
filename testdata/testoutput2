@@ -7878,7 +7878,7 @@ No match
 /a/<any><crlf>
 Failed: inconsistent NEWLINE options at offset 0
 
-/^a\Rb/
+/^a\Rb/<bsr_unicode>
     a\nb
  0: a\x0ab
     a\rb
@@ -7896,7 +7896,7 @@ No match
     a\n\rb
 No match
 
-/^a\R*b/
+/^a\R*b/<bsr_unicode>
     ab
  0: ab
     a\nb
@@ -7916,7 +7916,7 @@ No match
     a\n\r\x85\x0cb
  0: a\x0a\x0d\x85\x0cb
 
-/^a\R+b/
+/^a\R+b/<bsr_unicode>
     a\nb
  0: a\x0ab
     a\rb
@@ -7938,7 +7938,7 @@ No match
     ab
 No match
 
-/^a\R{1,3}b/
+/^a\R{1,3}b/<bsr_unicode>
     a\nb
  0: a\x0ab
     a\n\rb
@@ -7960,7 +7960,7 @@ No match
     a\r
 No match
 
-/^a[\R]b/
+/^a[\R]b/<bsr_unicode>
     aRb
  0: aRb
     ** Failers
