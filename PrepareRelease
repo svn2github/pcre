@@ -129,7 +129,6 @@ files="\
   pcre-config.in \
   libpcre.pc.in \
   libpcrecpp.pc.in \
-  config.h \
   config.h.in \
   pcre_printint.src \
   pcre_chartables.c.dist \

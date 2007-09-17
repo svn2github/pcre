@@ -32,7 +32,7 @@ Version 7.4 10-Sep-07
     compatibility, even though it is no longer used.
 
 7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and
-    strtoull to pcrecpp.cc to select the available functions in WIN32 when the 
+    strtoull to pcrecpp.cc to select the available functions in WIN32 when the
     windows.h file is present (where different names are used).
 
 8.  Changed all #include <config.h> to #include "config.h". There were also
