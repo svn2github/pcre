@@ -33,7 +33,7 @@
 #include "config.h"
 #endif
 
-#ifdef _WIN32
+#ifdef HAVE_WINDOWS_H
 #define HAVE_STRTOQ 1
 #define strtoll     _strtoui64
 #define strtoull    _strtoi64

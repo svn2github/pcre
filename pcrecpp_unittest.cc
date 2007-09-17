@@ -37,7 +37,7 @@
 #include "config.h"
 #endif
 
-#ifdef _WIN32
+#ifdef HAVE_WINDOWS_H
 #define snprintf _snprintf
 #endif
 

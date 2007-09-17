@@ -44,7 +44,7 @@
 #include "pcre_stringpiece.h"
 #include "pcre_scanner.h"
 
-#ifdef _WIN32
+#ifdef HAVE_WINDOWS_H
 #  define snprintf _snprintf
 #endif
 

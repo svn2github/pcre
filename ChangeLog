@@ -32,8 +32,8 @@ Version 7.4 10-Sep-07
     compatibility, even though it is no longer used.
 
 7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and
-    strtoull to pcrecpp.cc to select the available functions in WIN32 (where
-    different names are used).
+    strtoull to pcrecpp.cc to select the available functions in WIN32 when the 
+    windows.h file is present (where different names are used).
 
 8.  Changed all #include <config.h> to #include "config.h". There were also
     some further <pcre.h> cases that I changed to "pcre.h".
@@ -58,8 +58,7 @@ Version 7.4 10-Sep-07
 11. --disable-stack-for-recursion caused compiling to fail unless -enable-
     unicode-properties was also set.
 
-12. Updated the RunTest script to miss out tests that don't work if \R is
-    defaulted to ANYCRLF.
+12. Updated the tests so that they work when \R is defaulted to ANYCRLF.
 
 
 Version 7.3 28-Aug-07
