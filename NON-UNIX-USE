@@ -9,6 +9,7 @@ This document contains the following sections:
   Building for virtual Pascal
   Stack size in Windows environments
   Comments about Win32 builds
+  Building PCRE with Cmake 
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
 
@@ -31,8 +32,9 @@ successfully on any system that has a Standard C compiler and library. The C++
 wrapper functions are a separate issue (see below).
 
 The PCRE distribution contains some experimental support for "cmake", but this
-is incomplete and not documented. However if you are a "cmake" user you might
-like to try building with "cmake".
+is incomplete and not fully documented. However if you are a "cmake" user you
+might like to try building with "cmake". There are some instructions in the
+section entitled "Building PCRE with Cmake" below.
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
@@ -246,6 +248,56 @@ terminators in order to get some of the tests to work. We hope to improve
 things in this area in future.
 
 
+BUILDING PCRE WITH CMAKE
+
+These instructions were contributed by a PCRE user.
+
+1. Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure 
+   that cmake\bin is on your path.
+
+2. Unzip (retaining folder structure) the PCRE source tree into a source
+   directory such as C:\pcre.
+
+3. Create a new, empty build directory: C:\pcre\build\
+
+4. Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
+   for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
+
+5. Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
+   directories, respectively
+
+6. Hit the "Configure" button.
+
+7. Select the particular IDE / build tool that you are using (Visual Studio,
+   MSYS makefiles, MinGW makefiles, etc.)
+
+8. The GUI will then list several configuration options. This is where you can
+   enable UTF-8 support, etc.
+
+9. Hit "Configure" again. The adjacent "OK" button should now be active.
+
+10. Hit "OK".
+
+11. The build directory should now contain a usable build system, be it a
+    solution file for Visual Studio, makefiles for MinGW, etc.
+
+Testing with RunTest.bat
+
+1. Copy RunTest.bat into the directory where pcretest.exe has been created.
+
+2. Edit RunTest.bat and insert a line that indentifies the relative location of
+   the pcre source, e.g.:
+
+   set srcdir=..\pcre-7.4-RC3
+
+3. Run RunTest.bat from a command shell environment. Test outputs will
+   automatically be compared to expected results, and discrepancies will
+   identified in the console output.
+
+4. To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
+   pcre_scanner_unittest.exe.
+
+
 BUILDING UNDER WINDOWS WITH BCC5.5
 
 Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
@@ -258,7 +310,7 @@ Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
   When linking a project with BCC5.5, pcre.lib must be included before any of
   the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
   line.
-
+  
 
 BUILDING PCRE ON OPENVMS
 

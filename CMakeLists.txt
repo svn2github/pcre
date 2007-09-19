@@ -1,10 +1,13 @@
 # CMakeLists.txt
 #
+#
 # This file allows building PCRE with the CMake configuration and build
 # tool. Download CMake in source or binary form from http://www.cmake.org/
 #
 # Original listfile by Christian Ehrlicher <Ch.Ehrlicher@gmx.de>
 # Refined and expanded by Daniel Richard G. <skunk@iSKUNK.ORG>
+# 2007-09-14 mod by Sheri so 7.4 supported configuration options can be entered
+# 2007-09-19 Adjusted by PH to retain previous default settings
 #
 
 PROJECT(PCRE C CXX)
@@ -56,7 +59,7 @@ SET(PCRE_MATCH_LIMIT_RECURSION "MATCH_LIMIT" CACHE STRING
     "Default limit on internal recursion. See MATCH_LIMIT_RECURSION in config.h.in for details.")
 
 SET(PCRE_NEWLINE "LF" CACHE STRING
-    "What to recognize as a newline (one of CR, LF, CRLF, ANY).")
+    "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF).")
 
 SET(PCRE_NO_RECURSE OFF CACHE BOOL
     "If ON, then don't use stack recursion when matching. See NO_RECURSE in config.h.in for details.")
@@ -69,6 +72,9 @@ SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
 
 SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
     "Enable support for the Unicode UTF-8 encoding.")
+
+SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
+    "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
 
 # Prepare build configuration
 
@@ -98,6 +104,10 @@ IF(NOT BUILD_SHARED_LIBS)
 	SET(PCRE_STATIC 1)
 ENDIF(NOT BUILD_SHARED_LIBS)
 
+IF(PCRE_SUPPORT_BSR_ANYCRLF)
+	SET(BSR_ANYCRLF 1)
+ENDIF(PCRE_SUPPORT_BSR_ANYCRLF)
+
 IF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
 	SET(SUPPORT_UTF8 1)
 ENDIF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
@@ -120,9 +130,12 @@ ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
 IF(PCRE_NEWLINE STREQUAL "ANY")
 	SET(NEWLINE "-1")
 ENDIF(PCRE_NEWLINE STREQUAL "ANY")
+IF(PCRE_NEWLINE STREQUAL "ANYCRLF")
+	SET(NEWLINE "-2")
+ENDIF(PCRE_NEWLINE STREQUAL "ANYCRLF")
 
 IF(NEWLINE STREQUAL "")
-	MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\".")
+	MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\", \"ANYCRLF\".")
 ENDIF(NEWLINE STREQUAL "")
 
 IF(PCRE_EBCDIC)
@@ -232,6 +245,10 @@ ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES})
 ADD_LIBRARY(pcreposix ${PCREPOSIX_HEADERS} ${PCREPOSIX_SOURCES})
 TARGET_LINK_LIBRARIES(pcreposix pcre)
 
+SET_TARGET_PROPERTIES(pcre pcreposix
+                        PROPERTIES PREFIX ""
+)
+
 IF(PCRE_BUILD_PCRECPP)
 	ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
 	TARGET_LINK_LIBRARIES(pcrecpp pcre)
@@ -317,9 +334,9 @@ FILE(GLOB man3 ${CMAKE_SOURCE_DIR}/doc/*.3)
 
 IF(PCRE_BUILD_PCRECPP)
 	INSTALL(TARGETS pcrecpp
-	        RUNTIME DESTINATION bin
-	        LIBRARY DESTINATION lib
-	        ARCHIVE DESTINATION lib)
+		RUNTIME DESTINATION bin
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib)
 	INSTALL(FILES ${PCRECPP_HEADERS} DESTINATION include)
 ELSE(PCRE_BUILD_PCRECPP)
 	# Remove pcrecpp.3

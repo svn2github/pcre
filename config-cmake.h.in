@@ -16,6 +16,7 @@
 #cmakedefine SUPPORT_UTF8
 #cmakedefine SUPPORT_UCP
 #cmakedefine EBCDIC
+#cmakedefine BSR_ANYCRLF
 #cmakedefine NO_RECURSE
 
 #define NEWLINE			@NEWLINE@
