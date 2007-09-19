@@ -1352,19 +1352,25 @@ while (!done)
     if (do_flip)
       {
       real_pcre *rre = (real_pcre *)re;
-      rre->magic_number = byteflip(rre->magic_number, sizeof(rre->magic_number));
+      rre->magic_number = 
+        byteflip(rre->magic_number, sizeof(rre->magic_number));
       rre->size = byteflip(rre->size, sizeof(rre->size));
       rre->options = byteflip(rre->options, sizeof(rre->options));
-      rre->flags = byteflip(rre->flags, sizeof(rre->flags));
-      rre->top_bracket = byteflip(rre->top_bracket, sizeof(rre->top_bracket));
-      rre->top_backref = byteflip(rre->top_backref, sizeof(rre->top_backref));
-      rre->first_byte = byteflip(rre->first_byte, sizeof(rre->first_byte));
-      rre->req_byte = byteflip(rre->req_byte, sizeof(rre->req_byte));
-      rre->name_table_offset = byteflip(rre->name_table_offset,
+      rre->flags = (pcre_uint16)byteflip(rre->flags, sizeof(rre->flags));
+      rre->top_bracket = 
+        (pcre_uint16)byteflip(rre->top_bracket, sizeof(rre->top_bracket));
+      rre->top_backref = 
+        (pcre_uint16)byteflip(rre->top_backref, sizeof(rre->top_backref));
+      rre->first_byte = 
+        (pcre_uint16)byteflip(rre->first_byte, sizeof(rre->first_byte));
+      rre->req_byte = 
+        (pcre_uint16)byteflip(rre->req_byte, sizeof(rre->req_byte));
+      rre->name_table_offset = (pcre_uint16)byteflip(rre->name_table_offset,
         sizeof(rre->name_table_offset));
-      rre->name_entry_size = byteflip(rre->name_entry_size,
+      rre->name_entry_size = (pcre_uint16)byteflip(rre->name_entry_size,
         sizeof(rre->name_entry_size));
-      rre->name_count = byteflip(rre->name_count, sizeof(rre->name_count));
+      rre->name_count = (pcre_uint16)byteflip(rre->name_count, 
+        sizeof(rre->name_count));
 
       if (extra != NULL)
         {
@@ -1596,15 +1602,15 @@ while (!done)
       else
         {
         uschar sbuf[8];
-        sbuf[0] = (true_size >> 24)  & 255;
-        sbuf[1] = (true_size >> 16)  & 255;
-        sbuf[2] = (true_size >>  8)  & 255;
-        sbuf[3] = (true_size)  & 255;
-
-        sbuf[4] = (true_study_size >> 24)  & 255;
-        sbuf[5] = (true_study_size >> 16)  & 255;
-        sbuf[6] = (true_study_size >>  8)  & 255;
-        sbuf[7] = (true_study_size)  & 255;
+        sbuf[0] = (uschar)((true_size >> 24) & 255);
+        sbuf[1] = (uschar)((true_size >> 16) & 255);
+        sbuf[2] = (uschar)((true_size >>  8) & 255);
+        sbuf[3] = (uschar)((true_size) & 255);
+                            
+        sbuf[4] = (uschar)((true_study_size >> 24) & 255);
+        sbuf[5] = (uschar)((true_study_size >> 16) & 255);
+        sbuf[6] = (uschar)((true_study_size >>  8) & 255);
+        sbuf[7] = (uschar)((true_study_size) & 255);
 
         if (fwrite(sbuf, 1, 8, f) < 8 ||
             fwrite(re, 1, true_size, f) < true_size)

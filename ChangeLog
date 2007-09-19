@@ -62,6 +62,8 @@ Version 7.4 10-Sep-07
 
 13. Added checks for ANY and ANYCRLF to pcrecpp.cc where it previously
     checked only for CRLF.
+    
+14. Added casts to pcretest.c to avoid compiler warnings. 
 
 
 Version 7.3 28-Aug-07
