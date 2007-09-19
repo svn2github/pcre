@@ -37,10 +37,6 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_WINDOWS_H
-#define snprintf _snprintf
-#endif
-
 #include <stdio.h>
 #include <cassert>
 #include <vector>
@@ -114,8 +110,8 @@ static void LeakTest() {
       initial_size = VirtualProcessSize();
       printf("Size after 50000: %llu\n", initial_size);
     }
-    char buf[100];
-    snprintf(buf, sizeof(buf), "pat%09d", i);
+    char buf[100];  // definitely big enough
+    sprintf(buf, "pat%09d", i);
     RE newre(buf);
   }
   uint64 final_size = VirtualProcessSize();
@@ -923,23 +919,23 @@ int main(int argc, char** argv) {
     long long v;
     static const long long max_value = 0x7fffffffffffffffLL;
     static const long long min_value = -max_value - 1;
-    char buf[32];
+    char buf[32];  // definitely big enough for a long long
 
     CHECK(RE("(-?\\d+)").FullMatch("100", &v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v)); CHECK_EQ(v, -100);
 
-    snprintf(buf, sizeof(buf), LLD, max_value);
+    sprintf(buf, LLD, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
-    snprintf(buf, sizeof(buf), LLD, min_value);
+    sprintf(buf, LLD, min_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, min_value);
 
-    snprintf(buf, sizeof(buf), LLD, max_value);
+    sprintf(buf, LLD, max_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
 
-    snprintf(buf, sizeof(buf), LLD, min_value);
+    sprintf(buf, LLD, min_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
@@ -950,12 +946,12 @@ int main(int argc, char** argv) {
     unsigned long long v;
     long long v2;
     static const unsigned long long max_value = 0xffffffffffffffffULL;
-    char buf[32];
+    char buf[32];  // definitely big enough for a unsigned long long
 
     CHECK(RE("(-?\\d+)").FullMatch("100",&v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v2)); CHECK_EQ(v2, -100);
 
-    snprintf(buf, sizeof(buf), LLU, max_value);
+    sprintf(buf, LLU, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
     assert(buf[strlen(buf)-1] != '9');

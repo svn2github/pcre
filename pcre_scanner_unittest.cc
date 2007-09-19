@@ -44,10 +44,6 @@
 #include "pcre_stringpiece.h"
 #include "pcre_scanner.h"
 
-#ifdef HAVE_WINDOWS_H
-#  define snprintf _snprintf
-#endif
-
 #define FLAGS_unittest_stack_size   49152
 
 // Dies with a fatal error if the two values are not equal.
@@ -132,8 +128,8 @@ static void TestScanner() {
 static void TestBigComment() {
   string input;
   for (int i = 0; i < 1024; ++i) {
-    char buf[1024];
-    snprintf(buf, sizeof(buf), "    # Comment %d\n", i);
+    char buf[1024];  // definitely big enough
+    sprintf(buf, "    # Comment %d\n", i);
     input += buf;
   }
   input += "name = value;\n";

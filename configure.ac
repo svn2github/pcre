@@ -294,7 +294,7 @@ AC_SUBST(pcre_have_ulong_long)
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll)
+AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll _strtoi64)
 
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])

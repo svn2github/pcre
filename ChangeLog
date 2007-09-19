@@ -33,7 +33,8 @@ Version 7.4 10-Sep-07
 
 7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and
     strtoull to pcrecpp.cc to select the available functions in WIN32 when the
-    windows.h file is present (where different names are used).
+    windows.h file is present (where different names are used). [This was 
+    reversed later after testing - see 16 below.]
 
 8.  Changed all #include <config.h> to #include "config.h". There were also
     some further <pcre.h> cases that I changed to "pcre.h".
@@ -66,6 +67,10 @@ Version 7.4 10-Sep-07
 14. Added casts to pcretest.c to avoid compiler warnings. 
 
 15. Added Craig's patch to various pcrecpp modules to avoid compiler warnings.
+
+16. Added Craig's patch to remove the WINDOWS_H tests, that were not working,
+    and instead check for _strtoi64 explicitly, and avoid the use of snprintf() 
+    entirely. This removes changes made in 7 above. 
 
 
 Version 7.3 28-Aug-07

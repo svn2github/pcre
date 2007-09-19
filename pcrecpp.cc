@@ -33,12 +33,6 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_WINDOWS_H
-#define HAVE_STRTOQ 1
-#define strtoll     _strtoui64
-#define strtoull    _strtoi64
-#endif
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -770,6 +764,8 @@ bool Arg::parse_longlong_radix(const char* str,
   long long r = strtoq(str, &end, radix);
 #elif defined HAVE_STRTOLL
   long long r = strtoll(str, &end, radix);
+#elif defined HAVE__STRTOI64
+  long long r = _strtoi64(str, &end, radix);
 #else
 #error parse_longlong_radix: cannot convert input to a long-long
 #endif
@@ -797,6 +793,8 @@ bool Arg::parse_ulonglong_radix(const char* str,
   unsigned long long r = strtouq(str, &end, radix);
 #elif defined HAVE_STRTOLL
   unsigned long long r = strtoull(str, &end, radix);
+#elif defined HAVE__STRTOI64
+  unsigned long long r = _strtoui64(str, &end, radix);
 #else
 #error parse_ulonglong_radix: cannot convert input to a long-long
 #endif
