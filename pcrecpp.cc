@@ -354,7 +354,7 @@ static int NewlineMode(int pcre_options) {
     else if (newline == -1)
       newline_mode = PCRE_NEWLINE_ANY;
     else if (newline == -2)
-      newline_mode = PCRE_NEWLINE_ANYCRLF;        
+      newline_mode = PCRE_NEWLINE_ANYCRLF;
     else
       assert("" == "Unexpected return value from pcre_config(NEWLINE)");
   }
@@ -384,7 +384,7 @@ int RE::GlobalReplace(const StringPiece& rewrite,
       // Note it's better to call pcre_fullinfo() than to examine
       // all_options(), since options_ could have changed bewteen
       // compile-time and now, but this is simpler and safe enough.
-      // Modified by PH to add ANY and ANYCRLF. 
+      // Modified by PH to add ANY and ANYCRLF.
       if (start+1 < static_cast<int>(str->length()) &&
           (*str)[start] == '\r' && (*str)[start+1] == '\n' &&
           (NewlineMode(options_.all_options()) == PCRE_NEWLINE_CRLF ||

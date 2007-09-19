@@ -259,8 +259,8 @@ REVISION
        Last updated: 09 August 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREBUILD(3)                                                      PCREBUILD(3)
 
 
@@ -529,8 +529,8 @@ REVISION
        Last updated: 11 September 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
@@ -727,8 +727,8 @@ REVISION
        Last updated: 08 August 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREAPI(3)                                                          PCREAPI(3)
 
 
@@ -2528,8 +2528,8 @@ REVISION
        Last updated: 11 September 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
@@ -2699,8 +2699,8 @@ REVISION
        Last updated: 29 May 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
@@ -2840,8 +2840,8 @@ REVISION
        Last updated: 11 September 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
@@ -4865,8 +4865,8 @@ REVISION
        Last updated: 17 September 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESYNTAX(3)                                                    PCRESYNTAX(3)
 
 
@@ -5201,8 +5201,8 @@ REVISION
        Last updated: 11 September 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
@@ -5422,8 +5422,8 @@ REVISION
        Last updated: 04 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
@@ -5546,8 +5546,8 @@ REVISION
        Last updated: 13 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
@@ -5696,8 +5696,8 @@ REVISION
        Last updated: 06 March 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
@@ -5916,8 +5916,8 @@ REVISION
        Last updated: 06 March 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECPP(3)                                                          PCRECPP(3)
 
 
@@ -6252,8 +6252,8 @@ REVISION
 
        Last updated: 06 March 2007
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
@@ -6454,5 +6454,5 @@ REVISION
        Last updated: 05 June 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+

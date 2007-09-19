@@ -9,7 +9,7 @@ This document contains the following sections:
   Building for virtual Pascal
   Stack size in Windows environments
   Comments about Win32 builds
-  Building PCRE with Cmake 
+  Building PCRE with Cmake
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
 
@@ -252,7 +252,7 @@ BUILDING PCRE WITH CMAKE
 
 These instructions were contributed by a PCRE user.
 
-1. Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure 
+1. Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
    that cmake\bin is on your path.
 
 2. Unzip (retaining folder structure) the PCRE source tree into a source
@@ -310,7 +310,7 @@ Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
   When linking a project with BCC5.5, pcre.lib must be included before any of
   the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
   line.
-  
+
 
 BUILDING PCRE ON OPENVMS
 
