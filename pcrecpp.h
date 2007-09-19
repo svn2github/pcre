@@ -491,10 +491,16 @@ class PCRECPP_EXP_DEFN RE {
  public:
   // We provide implicit conversions from strings so that users can
   // pass in a string or a "const char*" wherever an "RE" is expected.
-  RE(const char* pat) { Init(pat, NULL); }
-  RE(const char *pat, const RE_Options& option) { Init(pat, &option); }
   RE(const string& pat) { Init(pat, NULL); }
   RE(const string& pat, const RE_Options& option) { Init(pat, &option); }
+  RE(const char* pat) { Init(pat, NULL); }
+  RE(const char* pat, const RE_Options& option) { Init(pat, &option); }
+  RE(const unsigned char* pat) {
+    Init(reinterpret_cast<const char*>(pat), NULL);
+  }
+  RE(const unsigned char* pat, const RE_Options& option) {
+    Init(reinterpret_cast<const char*>(pat), &option);
+  }
 
   // Copy constructor & assignment - note that these are expensive
   // because they recompile the expression.

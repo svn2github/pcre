@@ -717,7 +717,7 @@ bool Arg::parse_short_radix(const char* str,
   long r;
   if (!parse_long_radix(str, n, &r, radix)) return false; // Could not parse
   if (r < SHRT_MIN || r > SHRT_MAX) return false;       // Out of range
-  *(reinterpret_cast<short*>(dest)) = r;
+  *(reinterpret_cast<short*>(dest)) = static_cast<short>(r);
   return true;
 }
 
@@ -728,7 +728,7 @@ bool Arg::parse_ushort_radix(const char* str,
   unsigned long r;
   if (!parse_ulong_radix(str, n, &r, radix)) return false; // Could not parse
   if (r > USHRT_MAX) return false;                      // Out of range
-  *(reinterpret_cast<unsigned short*>(dest)) = r;
+  *(reinterpret_cast<unsigned short*>(dest)) = static_cast<unsigned short>(r);
   return true;
 }
 

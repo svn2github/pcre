@@ -65,6 +65,8 @@ Version 7.4 10-Sep-07
     
 14. Added casts to pcretest.c to avoid compiler warnings. 
 
+15. Added Craig's patch to various pcrecpp modules to avoid compiler warnings.
+
 
 Version 7.3 28-Aug-07
 ---------------------

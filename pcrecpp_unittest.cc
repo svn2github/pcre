@@ -1136,13 +1136,13 @@ int main(int argc, char** argv) {
     printf("Testing UTF-8 handling\n");
 
     // Three Japanese characters (nihongo)
-    const char utf8_string[] = {
+    const unsigned char utf8_string[] = {
          0xe6, 0x97, 0xa5, // 65e5
          0xe6, 0x9c, 0xac, // 627c
          0xe8, 0xaa, 0x9e, // 8a9e
          0
     };
-    const char utf8_pattern[] = {
+    const unsigned char utf8_pattern[] = {
          '.',
          0xe6, 0x9c, 0xac, // 627c
          '.',
