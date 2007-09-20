@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.4 10-Sep-07
+Version 7.4 21-Sep-07
 ---------------------
 
 1.  Change 7.3/28 was implemented for classes by looking at the bitmap. This

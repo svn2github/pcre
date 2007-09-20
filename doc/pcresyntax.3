@@ -370,7 +370,8 @@ pattern is not anchored.
 .SH "NEWLINE CONVENTIONS"
 .rs
 .sp
-These are recognized only at the very start of a pattern.
+These are recognized only at the very start of the pattern or after a 
+(*BSR_...) option.
 .sp
   (*CR)
   (*LF)
@@ -382,7 +383,8 @@ These are recognized only at the very start of a pattern.
 .SH "WHAT \eR MATCHES"
 .rs
 .sp
-These are recognized only at the very start of a pattern.
+These are recognized only at the very start of the pattern or after a 
+(*...) option that sets the newline convention.
 .sp
   (*BSR_ANYCRLF)
   (*BSR_UNICODE)
@@ -416,6 +418,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 September 2007
+Last updated: 21 September 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
