@@ -398,7 +398,8 @@ pattern is not anchored.
 </P>
 <br><a name="SEC21" href="#TOC1">NEWLINE CONVENTIONS</a><br>
 <P>
-These are recognized only at the very start of a pattern.
+These are recognized only at the very start of the pattern or after a
+(*BSR_...) option.
 <pre>
   (*CR)
   (*LF)
@@ -409,7 +410,8 @@ These are recognized only at the very start of a pattern.
 </P>
 <br><a name="SEC22" href="#TOC1">WHAT \R MATCHES</a><br>
 <P>
-These are recognized only at the very start of a pattern.
+These are recognized only at the very start of the pattern or after a
+(*...) option that sets the newline convention.
 <pre>
   (*BSR_ANYCRLF)
   (*BSR_UNICODE)
@@ -438,7 +440,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 September 2007
+Last updated: 21 September 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

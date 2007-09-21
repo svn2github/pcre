@@ -169,7 +169,7 @@ fail because of this. Normally, running out of stack causes a crash, but there
 have been cases where the test program has just died silently. See your linker
 documentation for how to increase stack size if you experience problems. The
 Linux default of 8Mb is a reasonable choice for the stack, though even that can
-be too small for some pattern/subject combinations. 
+be too small for some pattern/subject combinations.
 
 PCRE has a compile configuration option to disable the use of stack for
 recursion so that heap is used instead. However, pattern matching is

@@ -72,6 +72,9 @@ Version 7.4 21-Sep-07
     and instead check for _strtoi64 explicitly, and avoid the use of snprintf()
     entirely. This removes changes made in 7 above.
 
+17. The CMake files have been updated, and there is now more information about
+    building with CMake in the NON-UNIX-USE document.
+
 
 Version 7.3 28-Aug-07
 ---------------------

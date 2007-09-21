@@ -33,11 +33,17 @@ man page, in case the conversion went wrong.
 <br><a name="SEC1" href="#TOC1">PCRE BUILD-TIME OPTIONS</a><br>
 <P>
 This document describes the optional features of PCRE that can be selected when
-the library is compiled. They are all selected, or deselected, by providing
-options to the <b>configure</b> script that is run before the <b>make</b>
-command. The complete list of options for <b>configure</b> (which includes the
-standard ones such as the selection of the installation directory) can be
-obtained by running
+the library is compiled. It assumes use of the <b>configure</b> script, where
+the optional features are selected or deselected by providing options to
+<b>configure</b> before running the <b>make</b> command. However, the same
+options can be selected in both Unix-like and non-Unix-like environments using
+the GUI facility of <b>CMakeSetup</b> if you are using <b>CMake</b> instead of
+<b>configure</b> to build PCRE.
+</P>
+<P>
+The complete list of options for <b>configure</b> (which includes the standard
+ones such as the selection of the installation directory) can be obtained by
+running
 <pre>
   ./configure --help
 </pre>
@@ -279,7 +285,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 September 2007
+Last updated: 21 September 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>
