@@ -7,9 +7,9 @@ dnl be defined as -RC2, for example. For real releases, it should be defined
 dnl empty.
 
 m4_define(pcre_major, [7])
-m4_define(pcre_minor, [4])
-m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2007-09-21])
+m4_define(pcre_minor, [5])
+m4_define(pcre_prerelease, [-RC1])
+m4_define(pcre_date, [2007-11-12])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])

@@ -618,23 +618,27 @@ bool Arg::parse_null(const char* str, int n, void* dest) {
 }
 
 bool Arg::parse_string(const char* str, int n, void* dest) {
+  if (dest == NULL) return true;
   reinterpret_cast<string*>(dest)->assign(str, n);
   return true;
 }
 
 bool Arg::parse_stringpiece(const char* str, int n, void* dest) {
+  if (dest == NULL) return true;
   reinterpret_cast<StringPiece*>(dest)->set(str, n);
   return true;
 }
 
 bool Arg::parse_char(const char* str, int n, void* dest) {
   if (n != 1) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<char*>(dest)) = str[0];
   return true;
 }
 
 bool Arg::parse_uchar(const char* str, int n, void* dest) {
   if (n != 1) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned char*>(dest)) = str[0];
   return true;
 }
@@ -683,6 +687,7 @@ bool Arg::parse_long_radix(const char* str,
   long r = strtol(str, &end, radix);
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<long*>(dest)) = r;
   return true;
 }
@@ -700,6 +705,7 @@ bool Arg::parse_ulong_radix(const char* str,
   unsigned long r = strtoul(str, &end, radix);
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned long*>(dest)) = r;
   return true;
 }
@@ -711,6 +717,7 @@ bool Arg::parse_short_radix(const char* str,
   long r;
   if (!parse_long_radix(str, n, &r, radix)) return false; // Could not parse
   if (r < SHRT_MIN || r > SHRT_MAX) return false;       // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<short*>(dest)) = static_cast<short>(r);
   return true;
 }
@@ -722,6 +729,7 @@ bool Arg::parse_ushort_radix(const char* str,
   unsigned long r;
   if (!parse_ulong_radix(str, n, &r, radix)) return false; // Could not parse
   if (r > USHRT_MAX) return false;                      // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned short*>(dest)) = static_cast<unsigned short>(r);
   return true;
 }
@@ -733,6 +741,7 @@ bool Arg::parse_int_radix(const char* str,
   long r;
   if (!parse_long_radix(str, n, &r, radix)) return false; // Could not parse
   if (r < INT_MIN || r > INT_MAX) return false;         // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<int*>(dest)) = r;
   return true;
 }
@@ -744,6 +753,7 @@ bool Arg::parse_uint_radix(const char* str,
   unsigned long r;
   if (!parse_ulong_radix(str, n, &r, radix)) return false; // Could not parse
   if (r > UINT_MAX) return false;                       // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned int*>(dest)) = r;
   return true;
 }
@@ -771,6 +781,7 @@ bool Arg::parse_longlong_radix(const char* str,
 #endif
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<long long*>(dest)) = r;
   return true;
 #endif   /* HAVE_LONG_LONG */
@@ -800,6 +811,7 @@ bool Arg::parse_ulonglong_radix(const char* str,
 #endif
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned long long*>(dest)) = r;
   return true;
 #endif   /* HAVE_UNSIGNED_LONG_LONG */
@@ -817,6 +829,7 @@ bool Arg::parse_double(const char* str, int n, void* dest) {
   double r = strtod(buf, &end);
   if (end != buf + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<double*>(dest)) = r;
   return true;
 }
@@ -824,6 +837,7 @@ bool Arg::parse_double(const char* str, int n, void* dest) {
 bool Arg::parse_float(const char* str, int n, void* dest) {
   double r;
   if (!parse_double(str, n, &r)) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<float*>(dest)) = static_cast<float>(r);
   return true;
 }

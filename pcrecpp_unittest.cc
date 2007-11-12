@@ -857,6 +857,22 @@ int main(int argc, char** argv) {
   CHECK_EQ(s, string("ruby"));
   CHECK_EQ(i, 1234);
 
+  // Ignore non-void* NULL arg
+  CHECK(RE("he(.*)lo").FullMatch("hello", (char*)NULL));
+  CHECK(RE("h(.*)o").FullMatch("hello", (string*)NULL));
+  CHECK(RE("h(.*)o").FullMatch("hello", (StringPiece*)NULL));
+  CHECK(RE("(.*)").FullMatch("1234", (int*)NULL));
+  CHECK(RE("(.*)").FullMatch("1234567890123456", (long long*)NULL));
+  CHECK(RE("(.*)").FullMatch("123.4567890123456", (double*)NULL));
+  CHECK(RE("(.*)").FullMatch("123.4567890123456", (float*)NULL));
+
+  // Fail on non-void* NULL arg if the match doesn't parse for the given type.
+  CHECK(!RE("h(.*)lo").FullMatch("hello", &s, (char*)NULL));
+  CHECK(!RE("(.*)").FullMatch("hello", (int*)NULL));
+  CHECK(!RE("(.*)").FullMatch("1234567890123456", (int*)NULL));
+  CHECK(!RE("(.*)").FullMatch("hello", (double*)NULL));
+  CHECK(!RE("(.*)").FullMatch("hello", (float*)NULL));
+
   // Ignored arg
   CHECK(RE("(\\w+)(:)(\\d+)").FullMatch("ruby:1234", &s, (void*)NULL, &i));
   CHECK_EQ(s, string("ruby"));
