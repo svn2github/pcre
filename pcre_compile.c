@@ -2383,6 +2383,7 @@ req_caseopt = ((options & PCRE_CASELESS) != 0)? REQ_CASELESS : 0;
 for (;; ptr++)
   {
   BOOL negate_class;
+  BOOL should_flip_negation; 
   BOOL possessive_quantifier;
   BOOL is_quantifier;
   BOOL is_recurse;
@@ -2631,6 +2632,12 @@ for (;; ptr++)
       else break;
       }
 
+    /* If a class contains a negative special such as \S, we need to flip the 
+    negation flag at the end, so that support for characters > 255 works 
+    correctly (they are all included in the class). */
+
+    should_flip_negation = FALSE;
+
     /* Keep a count of chars with values < 256 so that we can optimize the case
     of just a single character (as long as it's < 256). However, For higher
     valued UTF-8 characters, we don't yet do any optimization. */
@@ -2805,6 +2812,7 @@ for (;; ptr++)
             continue;
 
             case ESC_D:
+            should_flip_negation = TRUE; 
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_digit];
             continue;
 
@@ -2813,6 +2821,7 @@ for (;; ptr++)
             continue;
 
             case ESC_W:
+            should_flip_negation = TRUE; 
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_word];
             continue;
 
@@ -2822,6 +2831,7 @@ for (;; ptr++)
             continue;
 
             case ESC_S:
+            should_flip_negation = TRUE; 
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_space];
             classbits[1] |= 0x08;    /* Perl 5.004 onwards omits VT from \s */
             continue;
@@ -3327,11 +3337,14 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     zeroreqbyte = reqbyte;
 
     /* If there are characters with values > 255, we have to compile an
-    extended class, with its own opcode. If there are no characters < 256,
-    we can omit the bitmap in the actual compiled code. */
+    extended class, with its own opcode, unless there was a negated special 
+    such as \S in the class, because in that case all characters > 255 are in 
+    the class, so any that were explicitly given as well can be ignored. If 
+    (when there are explicit characters > 255 that must be listed) there are no
+    characters < 256, we can omit the bitmap in the actual compiled code. */
 
 #ifdef SUPPORT_UTF8
-    if (class_utf8)
+    if (class_utf8 && !should_flip_negation)
       {
       *class_utf8data++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
@@ -3357,20 +3370,19 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       }
 #endif
 
-    /* If there are no characters > 255, negate the 32-byte map if necessary,
-    and copy it into the code vector. If this is the first thing in the branch,
-    there can be no first char setting, whatever the repeat count. Any reqbyte
-    setting must remain unchanged after any kind of repeat. */
-
+    /* If there are no characters > 255, set the opcode to OP_CLASS or 
+    OP_NCLASS, depending on whether the whole class was negated and whether 
+    there were negative specials such as \S in the class. Then copy the 32-byte 
+    map into the code vector, negating it if necessary. */
+    
+    *code++ = (negate_class == should_flip_negation) ? OP_CLASS : OP_NCLASS;
     if (negate_class)
       {
-      *code++ = OP_NCLASS;
       if (lengthptr == NULL)    /* Save time in the pre-compile phase */
         for (c = 0; c < 32; c++) code[c] = ~classbits[c];
       }
     else
       {
-      *code++ = OP_CLASS;
       memcpy(code, classbits, 32);
       }
     code += 32;

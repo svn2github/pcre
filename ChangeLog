@@ -6,6 +6,10 @@ Version 7.5 12-Nov-07
 
 1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
     values in parens when parsing an RE using the C++ wrapper."
+    
+2.  Negative specials like \S did not work in character classes in UTF-8 mode.
+    Characters greater than 255 were excluded from the class instead of being
+    included.
 
 
 Version 7.4 21-Sep-07
