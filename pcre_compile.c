@@ -2710,6 +2710,7 @@ for (;; ptr++)
         if (*ptr == '^')
           {
           local_negate = TRUE;
+          should_flip_negation = TRUE;  /* Note negative special */ 
           ptr++;
           }
 

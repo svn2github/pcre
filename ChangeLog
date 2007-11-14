@@ -10,6 +10,9 @@ Version 7.5 12-Nov-07
 2.  Negative specials like \S did not work in character classes in UTF-8 mode.
     Characters greater than 255 were excluded from the class instead of being
     included.
+    
+3.  The same bug as (2) above applied to negated POSIX classes such as 
+    [:^space:].
 
 
 Version 7.4 21-Sep-07
