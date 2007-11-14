@@ -13,6 +13,10 @@ Version 7.5 12-Nov-07
     
 3.  The same bug as (2) above applied to negated POSIX classes such as 
     [:^space:].
+    
+4.  PCRECPP_STATIC was referenced in pcrecpp_internal.h, but nowhere was it
+    defined or documented. It seems to have been a typo for PCRE_STATIC, so
+    I have changed it.  
 
 
 Version 7.4 21-Sep-07
