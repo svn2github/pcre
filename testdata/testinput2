@@ -2535,4 +2535,10 @@ a random value. /Ix
 
 /(*CRLF)(*BSR_ANYCRLF)(*CR)ab/I
 
+/(?<a>)(?&)/
+
+/(?<abc>)(?&a)/
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+
 / End of testinput2 /

@@ -17,6 +17,11 @@ Version 7.5 12-Nov-07
 4.  PCRECPP_STATIC was referenced in pcrecpp_internal.h, but nowhere was it
     defined or documented. It seems to have been a typo for PCRE_STATIC, so
     I have changed it.  
+    
+5.  The construct (?&) was not diagnosed as a syntax error (it referenced the
+    first named subpattern) and a construct such as (?&a) would reference the 
+    first named subpattern whose name started with "a" (in other words, the 
+    length check was missing). 
 
 
 Version 7.4 21-Sep-07

@@ -9302,4 +9302,13 @@ Forced newline sequence: CR
 First char = 'a'
 Need char = 'b'
 
+/(?<a>)(?&)/
+Failed: subpattern name expected after (?& at offset 9
+
+/(?<abc>)(?&a)/
+Failed: reference to non-existent subpattern at offset 12
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+Failed: reference to non-existent subpattern at offset 32
+
 / End of testinput2 /

@@ -300,7 +300,8 @@ static const char error_texts[] =
   "(*VERB) with an argument is not supported\0"
   /* 60 */
   "(*VERB) not recognized\0"
-  "number is too big";
+  "number is too big\0"
+  "subpattern name expected after (?&";
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4535,6 +4536,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
         if (lengthptr != NULL)
           {
+          if (namelen == 0)
+            {
+            *errorcodeptr = ERR62;
+            goto FAILED;
+            }     
           if (*ptr != terminator)
             {
             *errorcodeptr = ERR42;
@@ -4548,14 +4554,19 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           recno = 0;
           }
 
-        /* In the real compile, seek the name in the table */
+        /* In the real compile, seek the name in the table. We check the name 
+        first, and then check that we have reached the end of the name in the 
+        table. That way, if the name that is longer than any in the table,
+        the comparison will fail without reading beyond the table entry. */
 
         else
           {
           slot = cd->name_table;
           for (i = 0; i < cd->names_found; i++)
             {
-            if (strncmp((char *)name, (char *)slot+2, namelen) == 0) break;
+            if (strncmp((char *)name, (char *)slot+2, namelen) == 0 &&
+                slot[2+namelen] == 0) 
+              break;
             slot += cd->name_entry_size;
             }
 
