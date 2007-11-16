@@ -9318,4 +9318,17 @@ Failed: digit expected after (?+ at offset 3
 /(?-+a)/
 Failed: unrecognized character after (? or (?- at offset 3
 
+/(?(-1))/
+Failed: reference to non-existent subpattern at offset 6
+
+/(?(+10))/
+Failed: reference to non-existent subpattern at offset 7
+
+/(?(10))/
+Failed: reference to non-existent subpattern at offset 6
+
+/(?(+2))()()/
+
+/(?(2))()()/
+
 / End of testinput2 /
