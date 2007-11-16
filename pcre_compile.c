@@ -4248,16 +4248,13 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             *errorcodeptr = ERR58;
             goto FAILED;
             }
-          if (refsign == '-')
+          recno = (refsign == '-')? 
+            cd->bracount - recno + 1 : recno +cd->bracount;
+          if (recno <= 0 || recno > cd->final_bracount)
             {
-            recno = cd->bracount - recno + 1;
-            if (recno <= 0)
-              {
-              *errorcodeptr = ERR15;
-              goto FAILED;
-              }
+            *errorcodeptr = ERR15;
+            goto FAILED;
             }
-          else recno += cd->bracount;
           PUT2(code, 2+LINK_SIZE, recno);
           break;
           }
@@ -4329,9 +4326,10 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           skipbytes = 1;
           }
 
-        /* Check for the "name" actually being a subpattern number. */
+        /* Check for the "name" actually being a subpattern number. We are
+        in the second pass here, so final_bracount is set. */ 
 
-        else if (recno > 0)
+        else if (recno > 0 && recno <= cd->final_bracount)
           {
           PUT2(code, 2+LINK_SIZE, recno);
           }
@@ -5939,7 +5937,7 @@ to compile parts of the pattern into; the compiled code is discarded when it is
 no longer needed, so hopefully this workspace will never overflow, though there
 is a test for its doing so. */
 
-cd->bracount = 0;
+cd->bracount = cd->final_bracount = 0;
 cd->names_found = 0;
 cd->name_entry_size = 0;
 cd->name_table = NULL;
@@ -6016,6 +6014,7 @@ field. Reset the bracket count and the names_found field. Also reset the hwm
 field; this time it's used for remembering forward references to subpatterns.
 */
 
+cd->final_bracount = cd->bracount;  /* Save for checking forward references */
 cd->bracount = 0;
 cd->names_found = 0;
 cd->name_table = (uschar *)re + re->name_table_offset;

@@ -26,6 +26,12 @@ Version 7.5 12-Nov-07
 6.  The erroneous patterns (?+-a) and (?-+a) give different error messages;
     this is right because (?- can be followed by option settings as well as by 
     digits. I have, however, made the messages clearer.
+    
+7.  Patterns such as (?(1)a|b) (a pattern that contains fewer subpatterns
+    than the number used in the conditional) now cause a compile-time error.
+    This is actually not compatible with Perl, which accepts such patterns, but
+    treats the conditional as always being FALSE (as PCRE used to), but it
+    seems to me that giving a diagnostic is better.
 
 
 Version 7.4 21-Sep-07

@@ -963,9 +963,6 @@ Failed: unrecognized character after (? or (?- at offset 3
 /(?(1?)a|b)/
 Failed: malformed number or name after (?( at offset 4
 
-/(?(1)a|b|c)/
-Failed: conditional group contains more than two branches at offset 10
-
 /[a[:xyz:/
 Failed: missing terminating ] for character class at offset 8
 
@@ -1599,32 +1596,32 @@ No options
 First char = 'a'
 Need char = 'b'
 
-/a(?(1)b)/I
-Capturing subpattern count = 0
+/a(?(1)b)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 No need char
 
-/a(?(1)bag|big)/I
-Capturing subpattern count = 0
+/a(?(1)bag|big)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'g'
 
-/a(?(1)bag|big)*/I
-Capturing subpattern count = 0
+/a(?(1)bag|big)*(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 No need char
 
-/a(?(1)bag|big)+/I
-Capturing subpattern count = 0
+/a(?(1)bag|big)+(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'g'
 
-/a(?(1)b..|b..)/I
-Capturing subpattern count = 0
+/a(?(1)b..|b..)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'b'
@@ -3441,26 +3438,26 @@ No options
 No first char
 Need char = 'a'
 
-/(?(1)ab|ac)/I
-Capturing subpattern count = 0
+/(?(1)ab|ac)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 No need char
 
-/(?(1)abz|acz)/I
-Capturing subpattern count = 0
+/(?(1)abz|acz)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'z'
 
-/(?(1)abz)/I
-Capturing subpattern count = 0
+/(?(1)abz)(.)/I
+Capturing subpattern count = 1
 No options
 No first char
 No need char
 
-/(?(1)abz)123/I
-Capturing subpattern count = 0
+/(?(1)abz)(1)23/I
+Capturing subpattern count = 1
 No options
 No first char
 Need char = '3'
@@ -8308,7 +8305,7 @@ Failed: reference to non-existent subpattern at offset 6
 /((?(-2)a))/BZ
 Failed: reference to non-existent subpattern at offset 7
 
-/^(?(+1)X|Y)/BZ
+/^(?(+1)X|Y)(.)/BZ
 ------------------------------------------------------------------
         Bra
         ^
@@ -8318,11 +8315,15 @@ Failed: reference to non-existent subpattern at offset 7
         Alt
         Y
         Ket
+        CBra 1
+        Any
+        Ket
         Ket
         End
 ------------------------------------------------------------------
-    Y
- 0: Y
+    Y!
+ 0: Y!
+ 1: !
 
 /(foo)\Kbar/
     foobar

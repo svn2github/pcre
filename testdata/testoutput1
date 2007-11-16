@@ -5551,12 +5551,6 @@ No match
  0: b
  1: b
 
-/(?(1)a|b)/
-
-/(?(1)b|a)/
-    a
- 0: a
-
 /(x)?(?(1)a|b)/
     *** Failers
 No match
