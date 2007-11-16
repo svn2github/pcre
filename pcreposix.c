@@ -125,7 +125,8 @@ static const int eint[] = {
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
   REG_BADPAT,  /* (?+ or (?- must be followed by a non-zero number */
   REG_BADPAT,  /* number is too big */
-  REG_BADPAT   /* subpattern name expected after (?& */ 
+  REG_BADPAT,  /* subpattern name expected after (?& */ 
+  REG_BADPAT   /* digit expected after (?+ */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */

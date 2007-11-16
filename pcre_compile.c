@@ -241,7 +241,7 @@ static const char error_texts[] =
   /* 10 */
   "operand of unlimited repeat could match the empty string\0"  /** DEAD **/
   "internal error: unexpected repeat\0"
-  "unrecognized character after (?\0"
+  "unrecognized character after (? or (?-\0"
   "POSIX named classes are supported only within a class\0"
   "missing )\0"
   /* 15 */
@@ -301,7 +301,8 @@ static const char error_texts[] =
   /* 60 */
   "(*VERB) not recognized\0"
   "number is too big\0"
-  "subpattern name expected after (?&";
+  "subpattern name expected after (?&\0"
+  "digit expected after (?+";
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4603,7 +4604,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           {
           const uschar *called;
 
-          if ((refsign = *ptr) == '+') ptr++;
+          if ((refsign = *ptr) == '+') 
+            {
+            ptr++;
+            if ((digitab[*ptr] & ctype_digit) == 0)
+              {
+              *errorcodeptr = ERR63;
+              goto FAILED;
+              }    
+            } 
           else if (refsign == '-')
             {
             if ((digitab[ptr[1]] & ctype_digit) == 0)

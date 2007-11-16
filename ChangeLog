@@ -22,6 +22,10 @@ Version 7.5 12-Nov-07
     first named subpattern) and a construct such as (?&a) would reference the 
     first named subpattern whose name started with "a" (in other words, the 
     length check was missing). 
+    
+6.  The erroneous patterns (?+-a) and (?-+a) give different error messages;
+    this is right because (?- can be followed by option settings as well as by 
+    digits. I have, however, made the messages clearer.
 
 
 Version 7.4 21-Sep-07

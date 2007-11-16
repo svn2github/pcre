@@ -109,7 +109,7 @@ Failed: missing ) at offset 4
 Failed: missing ) after comment at offset 7
 
 /(?z)abc/
-Failed: unrecognized character after (? at offset 2
+Failed: unrecognized character after (? or (?- at offset 2
 
 /.*b/I
 Capturing subpattern count = 0
@@ -310,7 +310,7 @@ No match
 No match
 
 /ab(?z)cd/
-Failed: unrecognized character after (? at offset 4
+Failed: unrecognized character after (? or (?- at offset 4
 
 /^abc|def/I
 Capturing subpattern count = 0
@@ -946,19 +946,19 @@ Failed: missing ) at offset 4
 Failed: unrecognized character after (?< at offset 3
 
 /a(?{)b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{{})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{}})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{"{"})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{"{"}})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /(?(1?)a|b)/
 Failed: malformed number or name after (?( at offset 4
@@ -9310,5 +9310,11 @@ Failed: reference to non-existent subpattern at offset 12
 
 /(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
 Failed: reference to non-existent subpattern at offset 32
+
+/(?+-a)/
+Failed: digit expected after (?+ at offset 3
+
+/(?-+a)/
+Failed: unrecognized character after (? or (?- at offset 3
 
 / End of testinput2 /

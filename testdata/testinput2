@@ -2541,4 +2541,8 @@ a random value. /Ix
 
 /(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
 
+/(?+-a)/
+
+/(?-+a)/
+
 / End of testinput2 /
