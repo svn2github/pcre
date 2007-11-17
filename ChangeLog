@@ -21,7 +21,10 @@ Version 7.5 12-Nov-07
 5.  The construct (?&) was not diagnosed as a syntax error (it referenced the
     first named subpattern) and a construct such as (?&a) would reference the 
     first named subpattern whose name started with "a" (in other words, the 
-    length check was missing). 
+    length check was missing). Both these problems are fixed. "Subpattern name
+    expected" is now given for (?&) (a zero-length name), and this patch also
+    makes it give the same error for \k'' (previously it complained that that
+    was a reference to a non-existent subpattern).
     
 6.  The erroneous patterns (?+-a) and (?-+a) give different error messages;
     this is right because (?- can be followed by option settings as well as by 

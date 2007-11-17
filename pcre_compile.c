@@ -301,7 +301,7 @@ static const char error_texts[] =
   /* 60 */
   "(*VERB) not recognized\0"
   "number is too big\0"
-  "subpattern name expected after (?&\0"
+  "subpattern name expected\0"
   "digit expected after (?+";
 
 
@@ -4523,7 +4523,9 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
         /* We come here from the Python syntax above that handles both
         references (?P=name) and recursion (?P>name), as well as falling
-        through from the Perl recursion syntax (?&name). */
+        through from the Perl recursion syntax (?&name). We also come here from
+        the Perl \k<name> or \k'name' back reference syntax and the \k{name}
+        .NET syntax. */
 
         NAMED_REF_OR_RECURSE:
         name = ++ptr;

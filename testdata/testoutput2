@@ -9304,7 +9304,7 @@ First char = 'a'
 Need char = 'b'
 
 /(?<a>)(?&)/
-Failed: subpattern name expected after (?& at offset 9
+Failed: subpattern name expected at offset 9
 
 /(?<abc>)(?&a)/
 Failed: reference to non-existent subpattern at offset 12
@@ -9330,5 +9330,20 @@ Failed: reference to non-existent subpattern at offset 6
 /(?(+2))()()/
 
 /(?(2))()()/
+
+/\k''/
+Failed: subpattern name expected at offset 3
+
+/\k<>/
+Failed: subpattern name expected at offset 3
+
+/\k{}/
+Failed: subpattern name expected at offset 3
+
+/(?P=)/
+Failed: subpattern name expected at offset 4
+
+/(?P>)/
+Failed: subpattern name expected at offset 4
 
 / End of testinput2 /

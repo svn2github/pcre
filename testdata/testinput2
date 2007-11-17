@@ -2553,4 +2553,14 @@ a random value. /Ix
 
 /(?(2))()()/
 
+/\k''/
+
+/\k<>/
+
+/\k{}/
+
+/(?P=)/
+
+/(?P>)/
+
 / End of testinput2 /
