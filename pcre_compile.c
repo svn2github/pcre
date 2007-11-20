@@ -498,16 +498,16 @@ ptr--;                            /* Set pointer back to the last byte */
 
 if (c == 0) *errorcodeptr = ERR1;
 
-/* Non-alphamerics are literals. For digits or letters, do an initial lookup in
-a table. A non-zero result is something that can be returned immediately.
+/* Non-alphanumerics are literals. For digits or letters, do an initial lookup
+in a table. A non-zero result is something that can be returned immediately.
 Otherwise further processing may be required. */
 
 #ifndef EBCDIC  /* ASCII coding */
-else if (c < '0' || c > 'z') {}                           /* Not alphameric */
+else if (c < '0' || c > 'z') {}                           /* Not alphanumeric */
 else if ((i = escapes[c - '0']) != 0) c = i;
 
 #else           /* EBCDIC coding */
-else if (c < 'a' || (ebcdic_chartab[c] & 0x0E) == 0) {}   /* Not alphameric */
+else if (c < 'a' || (ebcdic_chartab[c] & 0x0E) == 0) {}   /* Not alphanumeric */
 else if ((i = escapes[c - 0x48]) != 0)  c = i;
 #endif
 
@@ -724,10 +724,10 @@ else
     break;
 
     /* PCRE_EXTRA enables extensions to Perl in the matter of escapes. Any
-    other alphameric following \ is an error if PCRE_EXTRA was set; otherwise,
-    for Perl compatibility, it is a literal. This code looks a bit odd, but
-    there used to be some cases other than the default, and there may be again
-    in future, so I haven't "optimized" it. */
+    other alphanumeric following \ is an error if PCRE_EXTRA was set;
+    otherwise, for Perl compatibility, it is a literal. This code looks a bit
+    odd, but there used to be some cases other than the default, and there may
+    be again in future, so I haven't "optimized" it. */
 
     default:
     if ((options & PCRE_EXTRA) != 0) switch(c)

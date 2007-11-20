@@ -1098,7 +1098,7 @@ while (!done)
 
   if (isalnum(delimiter) || delimiter == '\\')
     {
-    fprintf(outfile, "** Delimiter must not be alphameric or \\\n");
+    fprintf(outfile, "** Delimiter must not be alphanumeric or \\\n");
     goto SKIP_DATA;
     }
 

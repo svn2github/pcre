@@ -35,6 +35,9 @@ Version 7.5 12-Nov-07
     This is actually not compatible with Perl, which accepts such patterns, but
     treats the conditional as always being FALSE (as PCRE used to), but it
     seems to me that giving a diagnostic is better.
+    
+8.  Change "alphameric" to the more common word "alphanumeric" in comments
+    and messages. 
 
 
 Version 7.4 21-Sep-07

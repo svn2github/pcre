@@ -1037,7 +1037,7 @@ typedef struct dfa_match_data {
 #define ctype_letter  0x02
 #define ctype_digit   0x04
 #define ctype_xdigit  0x08
-#define ctype_word    0x10   /* alphameric or '_' */
+#define ctype_word    0x10   /* alphanumeric or '_' */
 #define ctype_meta    0x80   /* regexp meta char or zero (end pattern) */
 
 /* Offsets for the bitmap tables in pcre_cbits. Each table contains a set
