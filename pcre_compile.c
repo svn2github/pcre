@@ -2839,9 +2839,6 @@ for (;; ptr++)
             classbits[1] |= 0x08;    /* Perl 5.004 onwards omits VT from \s */
             continue;
 
-            case ESC_E: /* Perl ignores an orphan \E */
-            continue;
-
             default:    /* Not recognized; fall through */
             break;      /* Need "default" setting to stop compiler warning. */
             }

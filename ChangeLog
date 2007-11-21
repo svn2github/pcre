@@ -41,6 +41,9 @@ Version 7.5 12-Nov-07
     
 9.  Fix two occurrences of "backslash" in comments that should have been 
     "backspace". 
+    
+10. Remove two redundant lines of code that can never be obeyed (their function 
+    was moved elsewhere). 
 
 
 Version 7.4 21-Sep-07
