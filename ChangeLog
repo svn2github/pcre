@@ -37,7 +37,10 @@ Version 7.5 12-Nov-07
     seems to me that giving a diagnostic is better.
     
 8.  Change "alphameric" to the more common word "alphanumeric" in comments
-    and messages. 
+    and messages.
+    
+9.  Fix two occurrences of "backslash" in comments that should have been 
+    "backspace". 
 
 
 Version 7.4 21-Sep-07

@@ -2787,7 +2787,7 @@ for (;; ptr++)
         c = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
         if (*errorcodeptr != 0) goto FAILED;
 
-        if (-c == ESC_b) c = '\b';       /* \b is backslash in a class */
+        if (-c == ESC_b) c = '\b';       /* \b is backspace in a class */
         else if (-c == ESC_X) c = 'X';   /* \X is literal X in a class */
         else if (-c == ESC_R) c = 'R';   /* \R is literal R in a class */
         else if (-c == ESC_Q)            /* Handle start of quoted string */
@@ -3076,7 +3076,7 @@ for (;; ptr++)
           d = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
           if (*errorcodeptr != 0) goto FAILED;
 
-          /* \b is backslash; \X is literal X; \R is literal R; any other
+          /* \b is backspace; \X is literal X; \R is literal R; any other
           special means the '-' was literal */
 
           if (d < 0)
