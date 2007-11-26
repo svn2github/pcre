@@ -44,6 +44,27 @@ Version 7.5 12-Nov-07
     
 10. Remove two redundant lines of code that can never be obeyed (their function 
     was moved elsewhere). 
+    
+11. The program that makes PCRE's Unicode character property table had a bug 
+    which caused it to generate incorrect table entries for sequences of 
+    characters that have the same character type, but are in different scripts.
+    It amalgamated them into a single range, with the script of the first of 
+    them. In other words, some characters were in the wrong script. There were
+    thirteen such cases, affecting characters in the following ranges:
+    
+      U+002b0 - U+002c1
+      U+0060c - U+0060d
+      U+0061e - U+00612  
+      U+0064b - U+0065e
+      U+0074d - U+0076d
+      U+01800 - U+01805
+      U+01d00 - U+01d77
+      U+01d9b - U+01dbf
+      U+0200b - U+0200f
+      U+030fc - U+030fe
+      U+03260 - U+0327f
+      U+0fb46 - U+0fbb1
+      U+10450 - U+1049d
 
 
 Version 7.4 21-Sep-07

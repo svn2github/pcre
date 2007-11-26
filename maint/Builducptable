@@ -8,7 +8,9 @@
 # The script is rather slow because it just searches linearly through the
 # Scripts data in order to find the script for each character or character
 # range. It could be made faster by sorting that data, or something, but hey,
-# it is only ever run once in a blue moon.
+# it is only ever run once in a blue moon. (It's even slower after I mended the
+# "forgot to check for script number before amalgamation" bug, but even so,
+# the effort of improving it isn't worth it.)
 
 # Subroutine: Given a character number, return the script number. The 
 # Scripts.txt file has been read into an array, keeping just the codepoints
@@ -164,7 +166,8 @@ while (<IN>)
       }  
  
     else
-      { 
+      {
+      my($startscript) = script($cp);  
       my($ncp) = $cp + 1;
       while (<IN>)
         {
@@ -172,7 +175,8 @@ while (<IN>)
         last if (hex($fields[0]) != $ncp ||
                  $fields[2]  ne $gc  ||
                  $fields[12] ne ""  ||
-                 $fields[13] ne "");
+                 $fields[13] ne ""  ||
+                 script($ncp) != $startscript);
                 
         $ncp++;
         }  
