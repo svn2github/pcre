@@ -923,9 +923,9 @@ explicit match is either a literal CR or LF character, or \er or \en.
 .sp
   PCRE_INFO_JCHANGED
 .sp
-Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The
-fourth argument should point to an \fBint\fP variable. The (?J) internal option
-setting changes the local PCRE_DUPNAMES option.
+Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
+0. The fourth argument should point to an \fBint\fP variable. (?J) and
+(?-J) set and unset the local PCRE_DUPNAMES option, respectively.
 .sp
   PCRE_INFO_LASTLITERAL
 .sp
@@ -1952,6 +1952,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 September 2007
+Last updated: 27 November 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
