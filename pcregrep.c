@@ -844,6 +844,7 @@ while (ptr < endptr)
   int i, endlinelength;
   int mrc = 0;
   BOOL match = FALSE;
+  char *matchptr = ptr; 
   char *t = ptr;
   size_t length, linelength;
 
@@ -906,13 +907,17 @@ while (ptr < endptr)
   }
 #endif
 
+  /* We come back here after a match when the -o option (only_matching) is set, 
+  in order to find any further matches in the same line. */
+  
+  ONLY_MATCHING_RESTART:  
 
   /* Run through all the patterns until one matches. Note that we don't include
   the final newline in the subject string. */
 
   for (i = 0; i < pattern_count; i++)
     {
-    mrc = pcre_exec(pattern_list[i], hints_list[i], ptr, length, 0, 0,
+    mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0, 0,
       offsets, 99);
     if (mrc >= 0) { match = TRUE; break; }
     if (mrc != PCRE_ERROR_NOMATCH)
@@ -920,7 +925,7 @@ while (ptr < endptr)
       fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", mrc);
       if (pattern_count > 1) fprintf(stderr, "pattern number %d to ", i+1);
       fprintf(stderr, "this line:\n");
-      fwrite(ptr, 1, linelength, stderr);   /* In case binary zero included */
+      fwrite(matchptr, 1, linelength, stderr);  /* In case binary zero included */
       fprintf(stderr, "\n");
       if (error_count == 0 &&
           (mrc == PCRE_ERROR_MATCHLIMIT || mrc == PCRE_ERROR_RECURSIONLIMIT))
@@ -967,14 +972,24 @@ while (ptr < endptr)
     else if (quiet) return 0;
 
     /* The --only-matching option prints just the substring that matched, and
-    does not pring any context. */
+    does not print any context. Afterwards, adjust the start and length, and
+    then jump back to look for further matches in the same line. If we are in 
+    invert mode, however, nothing is printed - this could be useful still 
+    because the return code is set. */
 
     else if (only_matching)
       {
-      if (printname != NULL) fprintf(stdout, "%s:", printname);
-      if (number) fprintf(stdout, "%d:", linenumber);
-      fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
-      fprintf(stdout, "\n");
+      if (!invert)
+        {  
+        if (printname != NULL) fprintf(stdout, "%s:", printname);
+        if (number) fprintf(stdout, "%d:", linenumber);
+        fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+        fprintf(stdout, "\n");
+        matchptr += offsets[1];
+        length -= offsets[1];
+        match = FALSE; 
+        goto ONLY_MATCHING_RESTART;  
+        } 
       }
 
     /* This is the default case when none of the above options is set. We print

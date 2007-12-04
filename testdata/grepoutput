@@ -358,10 +358,13 @@ after the binary zero
 ./testdata/grepinput:597:after the binary zero
 ---------------------------- Test 42 ------------------------------
 595:before
+595:zero
 596:zero
 597:after
+597:zero
 ---------------------------- Test 43 ------------------------------
 595:before
+595:zero
 596:zero
 597:zero
 ---------------------------- Test 44 ------------------------------

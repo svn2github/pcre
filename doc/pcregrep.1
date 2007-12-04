@@ -23,9 +23,9 @@ without delimiters. For example:
 .sp
 If you attempt to use delimiters (for example, by surrounding a pattern with
 slashes, as is common in Perl scripts), they are interpreted as part of the
-pattern. Quotes can of course be used on the command line because they are
-interpreted by the shell, and indeed they are required if a pattern contains
-white space or shell metacharacters.
+pattern. Quotes can of course be used to delimit patterns on the command line
+because they are interpreted by the shell, and indeed they are required if a
+pattern contains white space or shell metacharacters.
 .P
 The first argument that follows any option settings is treated as the single
 pattern to be matched when neither \fB-e\fP nor \fB-f\fP is present.
@@ -41,10 +41,10 @@ For example:
 .sp
 By default, each line that matches the pattern is copied to the standard
 output, and if there is more than one file, the file name is output at the
-start of each line. However, there are options that can change how
-\fBpcregrep\fP behaves. In particular, the \fB-M\fP option makes it possible to
-search for patterns that span line boundaries. What defines a line boundary is
-controlled by the \fB-N\fP (\fB--newline\fP) option.
+start of each line, followed by a colon. However, there are options that can
+change how \fBpcregrep\fP behaves. In particular, the \fB-M\fP option makes it
+possible to search for patterns that span line boundaries. What defines a line
+boundary is controlled by the \fB-N\fP (\fB--newline\fP) option.
 .P
 Patterns are limited to 8K or BUFSIZ characters, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP.
@@ -116,22 +116,22 @@ option), or "skip" (silently skip the path). In the default case, directories
 are read as if they were ordinary files. In some operating systems the effect
 of reading a directory like this is an immediate end-of-file.
 .TP
-\fB-e\fP \fIpattern\fP, \fB--regex=\fP\fIpattern\fP,
-\fB--regexp=\fP\fIpattern\fP Specify a pattern to be matched. This option can
-be used multiple times in order to specify several patterns. It can also be
-used as a way of specifying a single pattern that starts with a hyphen. When
-\fB-e\fP is used, no argument pattern is taken from the command line; all
-arguments are treated as file names. There is an overall maximum of 100
-patterns. They are applied to each line in the order in which they are defined
-until one matches (or fails to match if \fB-v\fP is used). If \fB-f\fP is used
-with \fB-e\fP, the command line patterns are matched first, followed by the
-patterns from the file, independent of the order in which these options are
-specified. Note that multiple use of \fB-e\fP is not the same as a single
-pattern with alternatives. For example, X|Y finds the first character in a line
-that is X or Y, whereas if the two patterns are given separately,
-\fBpcregrep\fP finds X if it is present, even if it follows Y in the line. It
-finds Y only if there is no X in the line. This really matters only if you are
-using \fB-o\fP to show the portion of the line that matched.
+\fB-e\fP \fIpattern\fP, \fB--regex=\fP\fIpattern\fP, \fB--regexp=\fP\fIpattern\fP 
+Specify a pattern to be matched. This option can be used multiple times in
+order to specify several patterns. It can also be used as a way of specifying a
+single pattern that starts with a hyphen. When \fB-e\fP is used, no argument
+pattern is taken from the command line; all arguments are treated as file
+names. There is an overall maximum of 100 patterns. They are applied to each
+line in the order in which they are defined until one matches (or fails to
+match if \fB-v\fP is used). If \fB-f\fP is used with \fB-e\fP, the command line
+patterns are matched first, followed by the patterns from the file, independent
+of the order in which these options are specified. Note that multiple use of
+\fB-e\fP is not the same as a single pattern with alternatives. For example,
+X|Y finds the first character in a line that is X or Y, whereas if the two
+patterns are given separately, \fBpcregrep\fP finds X if it is present, even if
+it follows Y in the line. It finds Y only if there is no X in the line. This
+really matters only if you are using \fB-o\fP to show the part(s) of the line
+that matched.
 .TP
 \fB--exclude\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
@@ -246,7 +246,10 @@ the filename is also being output, it precedes the line number.
 \fB-o\fP, \fB--only-matching\fP
 Show only the part of the line that matched a pattern. In this mode, no
 context is shown. That is, the \fB-A\fP, \fB-B\fP, and \fB-C\fP options are
-ignored.
+ignored. If there is more than one match in a line, each of them is shown 
+separately. If \fB-o\fP is combined with \fB-v\fP (invert the sense of the 
+match to find non-matching lines), no output is generated, but the return code 
+is set appropriately.
 .TP
 \fB-q\fP, \fB--quiet\fP
 Work quietly, that is, display nothing except error messages. The exit
@@ -388,6 +391,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 April 2007
+Last updated: 04 December 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

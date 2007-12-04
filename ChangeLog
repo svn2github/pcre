@@ -65,6 +65,16 @@ Version 7.5 12-Nov-07
       U+03260 - U+0327f
       U+0fb46 - U+0fbb1
       U+10450 - U+1049d
+      
+12. The -o option (show only the matching part of a line) for pcregrep was not
+    compatible with GNU grep in that, if there was more than one match in a
+    line, it showed only the first of them. It now behaves in the same way as
+    GNU grep.
+    
+13. If the -o and -v options were combined for pcregrep, it printed a blank 
+    line for every non-matching line. GNU grep prints nothing, and pcregrep now 
+    does the same. The return code can be used to tell if there were any 
+    non-matching lines. 
 
 
 Version 7.4 21-Sep-07
