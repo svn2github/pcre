@@ -142,8 +142,10 @@ static int process_options = 0;
 
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
+static BOOL file_offsets = FALSE;
 static BOOL hyphenpending = FALSE;
 static BOOL invert = FALSE;
+static BOOL line_offsets = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
 static BOOL only_matching = FALSE;
@@ -174,6 +176,8 @@ used to identify them. */
 #define N_LABEL     (-5)
 #define N_LOCALE    (-6)
 #define N_NULL      (-7)
+#define N_LOFFSETS  (-8)
+#define N_FOFFSETS  (-9)
 
 static option_item optionlist[] = {
   { OP_NODATA,    N_NULL,   NULL,              "",              "  terminate options" },
@@ -189,15 +193,17 @@ static option_item optionlist[] = {
   { OP_PATLIST,   'e',      NULL,              "regex(p)",      "specify pattern (may be used more than once)" },
   { OP_NODATA,    'F',      NULL,              "fixed_strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,    'f',      &pattern_filename, "file=path",     "read patterns from file" },
+  { OP_NODATA,    N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,    'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,    'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
   { OP_NODATA,    'i',      NULL,              "ignore-case",   "ignore case distinctions" },
   { OP_NODATA,    'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
   { OP_NODATA,    'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,    N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
+  { OP_NODATA,    N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
-  { OP_STRING,    'N',      &newline,          "newline=type",  "specify newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
+  { OP_STRING,    'N',      &newline,          "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
   { OP_NODATA,    'o',      NULL,              "only-matching", "show only the part of the line that matched" },
   { OP_NODATA,    'q',      NULL,              "quiet",         "suppress output, just set return code" },
@@ -820,6 +826,7 @@ int rc = 1;
 int linenumber = 1;
 int lastmatchnumber = 0;
 int count = 0;
+int filepos = 0;
 int offsets[99];
 char *lastmatchrestart = NULL;
 char buffer[3*MBUFTHIRD];
@@ -972,10 +979,12 @@ while (ptr < endptr)
     else if (quiet) return 0;
 
     /* The --only-matching option prints just the substring that matched, and
-    does not print any context. Afterwards, adjust the start and length, and
-    then jump back to look for further matches in the same line. If we are in 
-    invert mode, however, nothing is printed - this could be useful still 
-    because the return code is set. */
+    the --file-offsets and --line-offsets options output offsets for the 
+    matching substring (they both force --only-matching). None of these options
+    prints any context. Afterwards, adjust the start and length, and then jump
+    back to look for further matches in the same line. If we are in invert
+    mode, however, nothing is printed - this could be still useful because the
+    return code is set. */
 
     else if (only_matching)
       {
@@ -983,7 +992,14 @@ while (ptr < endptr)
         {  
         if (printname != NULL) fprintf(stdout, "%s:", printname);
         if (number) fprintf(stdout, "%d:", linenumber);
-        fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+        if (line_offsets)
+          fprintf(stdout, "%d,%d", matchptr + offsets[0] - ptr,
+            offsets[1] - offsets[0]);  
+        else if (file_offsets)
+          fprintf(stdout, "%d,%d", filepos + matchptr + offsets[0] - ptr,
+            offsets[1] - offsets[0]);  
+        else   
+          fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
         fprintf(stdout, "\n");
         matchptr += offsets[1];
         length -= offsets[1];
@@ -1163,9 +1179,11 @@ while (ptr < endptr)
     linelength = endmatch - ptr - ellength;
     }
 
-  /* Advance to after the newline and increment the line number. */
+  /* Advance to after the newline and increment the line number. The file 
+  offset to the current line is maintained in filepos. */
 
   ptr += linelength + endlinelength;
+  filepos += linelength + endlinelength;
   linenumber++;
 
   /* If we haven't yet reached the end of the file (the buffer is full), and
@@ -1352,7 +1370,8 @@ for (op = optionlist; op->one_char != 0; op++)
   if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
   }
 fprintf(stderr, "] [long options] [pattern] [files]\n");
-fprintf(stderr, "Type `pcregrep --help' for more information.\n");
+fprintf(stderr, "Type `pcregrep --help' for more information and the long "
+  "options.\n");
 return rc;
 }
 
@@ -1407,7 +1426,9 @@ handle_option(int letter, int options)
 {
 switch(letter)
   {
+  case N_FOFFSETS: file_offsets = TRUE; break; 
   case N_HELP: help(); exit(0);
+  case N_LOFFSETS: line_offsets = number = TRUE; break; 
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
@@ -1843,6 +1864,19 @@ if (both_context > 0)
   if (after_context == 0) after_context = both_context;
   if (before_context == 0) before_context = both_context;
   }
+  
+/* Only one of --only-matching, --file-offsets, or --line-offsets is permitted. 
+However, the latter two set the only_matching flag. */
+
+if ((only_matching && (file_offsets || line_offsets)) ||
+    (file_offsets && line_offsets)) 
+  {
+  fprintf(stderr, "pcregrep: Cannot mix --only-matching, --file-offsets "
+    "and/or --line-offsets\n");
+  exit(usage(2));
+  }
+  
+if (file_offsets || line_offsets) only_matching = TRUE;          
 
 /* If a locale has not been provided as an option, see if the LC_CTYPE or
 LC_ALL environment variable is set, and if so, use it. */

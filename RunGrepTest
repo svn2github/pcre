@@ -208,6 +208,12 @@ echo "---------------------------- Test 50 ------------------------------" >>tes
 echo "---------------------------- Test 51 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep --colour=always jumps ./testdata/grepinputv) >>testtry
 
+echo "---------------------------- Test 52 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --file-offsets 'before|zero|after' ./testdata/grepinput) >>testtry
+
+echo "---------------------------- Test 53 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --line-offsets 'before|zero|after' ./testdata/grepinput) >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry
