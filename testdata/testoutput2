@@ -9346,4 +9346,16 @@ Failed: subpattern name expected at offset 4
 /(?P>)/
 Failed: subpattern name expected at offset 4
 
+/(?!\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 9
+
+/(?=\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 9
+
+/(?<!\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 10
+
+/(?<=\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 10
+
 / End of testinput2 /

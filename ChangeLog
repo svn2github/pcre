@@ -75,6 +75,11 @@ Version 7.5 12-Nov-07
     line for every non-matching line. GNU grep prints nothing, and pcregrep now 
     does the same. The return code can be used to tell if there were any 
     non-matching lines. 
+    
+14. The pattern (?=something)(?R) was not being diagnosed as a potentially
+    infinitely looping recursion. The bug was that positive lookaheads were not
+    being skipped when checking for a possible empty match (negative lookaheads 
+    and both kinds of lookbehind were skipped). 
 
 
 Version 7.4 21-Sep-07

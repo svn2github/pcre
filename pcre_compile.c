@@ -1508,8 +1508,9 @@ for (;;)
 can match the empty string or not. It is called from could_be_empty()
 below and from compile_branch() when checking for an unlimited repeat of a
 group that can match nothing. Note that first_significant_code() skips over
-assertions. If we hit an unclosed bracket, we return "empty" - this means we've
-struck an inner bracket whose current branch will already have been scanned.
+backward and negative forward assertions when its final argument is TRUE. If we
+hit an unclosed bracket, we return "empty" - this means we've struck an inner
+bracket whose current branch will already have been scanned.
 
 Arguments:
   code        points to start of search
@@ -1530,6 +1531,16 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   const uschar *ccode;
 
   c = *code;
+  
+  /* Skip over forward assertions; the other assertions are skipped by 
+  first_significant_code() with a TRUE final argument. */
+  
+  if (c == OP_ASSERT)
+    {  
+    do code += GET(code, 1); while (*code == OP_ALT);
+    c = *code;
+    continue;
+    }  
 
   /* Groups with zero repeats can of course be empty; skip them. */
 

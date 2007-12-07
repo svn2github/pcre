@@ -2563,4 +2563,12 @@ a random value. /Ix
 
 /(?P>)/
 
+/(?!\w)(?R)/
+
+/(?=\w)(?R)/
+
+/(?<!\w)(?R)/
+
+/(?<=\w)(?R)/
+
 / End of testinput2 /
