@@ -80,6 +80,10 @@ Version 7.5 12-Nov-07
     infinitely looping recursion. The bug was that positive lookaheads were not
     being skipped when checking for a possible empty match (negative lookaheads 
     and both kinds of lookbehind were skipped). 
+    
+15. Fixed two typos in the Windows-only code in pcregrep.c, and moved the 
+    inclusion of <windows.h> to before rather than after the definition of
+    INVALID_FILE_ATTRIBUTES (patch from David Byron).
 
 
 Version 7.4 21-Sep-07
