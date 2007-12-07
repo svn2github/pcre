@@ -322,8 +322,9 @@ return isatty(fileno(stdout));
 
 /* I (Philip Hazel) have no means of testing this code. It was contributed by
 Lionel Fourquaux. David Burgess added a patch to define INVALID_FILE_ATTRIBUTES
-when it did not exist. */
-
+when it did not exist. David Byron added a patch that moved the #include of 
+<windows.h> to before the INVALID_FILE_ATTRIBUTES definition rather than after. 
+*/
 
 #elif HAVE_WINDOWS_H
 
@@ -333,11 +334,12 @@ when it did not exist. */
 #ifndef WIN32_LEAN_AND_MEAN
 # define WIN32_LEAN_AND_MEAN
 #endif
+
+#include <windows.h>
+
 #ifndef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES 0xFFFFFFFF
 #endif
-
-#include <windows.h>
 
 typedef struct directory_type
 {
@@ -423,7 +425,7 @@ regular if they are not directories. */
 
 int isregfile(char *filename)
 {
-return !isdirectory(filename)
+return !isdirectory(filename);
 }
 
 
@@ -434,7 +436,7 @@ return !isdirectory(filename)
 static BOOL
 is_stdout_tty(void)
 {
-FALSE;
+return FALSE;
 }
 
 
