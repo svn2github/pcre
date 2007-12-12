@@ -4029,7 +4029,9 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       int len;
       if (*tempcode == OP_EXACT || *tempcode == OP_TYPEEXACT ||
           *tempcode == OP_NOTEXACT)
-        tempcode += _pcre_OP_lengths[*tempcode];
+        tempcode += _pcre_OP_lengths[*tempcode] +
+          ((*tempcode == OP_TYPEEXACT && 
+             (tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP))? 2:0); 
       len = code - tempcode;
       if (len > 0) switch (*tempcode)
         {

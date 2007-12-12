@@ -84,6 +84,12 @@ Version 7.5 12-Nov-07
 15. Fixed two typos in the Windows-only code in pcregrep.c, and moved the 
     inclusion of <windows.h> to before rather than after the definition of
     INVALID_FILE_ATTRIBUTES (patch from David Byron).
+    
+16. Specifying a possessive quantifier with a specific limit for a Unicode 
+    character property caused pcre_compile() to compile bad code, which led at 
+    runtime to PCRE_ERROR_INTERNAL (-14). Examples of patterns that caused this 
+    are: /\p{Zl}{2,3}+/8 and /\p{Cc}{2}+/8. It was the possessive "+" that 
+    caused the error; without that there was no problem. 
 
 
 Version 7.4 21-Sep-07
