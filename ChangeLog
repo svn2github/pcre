@@ -6,55 +6,55 @@ Version 7.5 12-Nov-07
 
 1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
     values in parens when parsing an RE using the C++ wrapper."
-    
+
 2.  Negative specials like \S did not work in character classes in UTF-8 mode.
     Characters greater than 255 were excluded from the class instead of being
     included.
-    
-3.  The same bug as (2) above applied to negated POSIX classes such as 
+
+3.  The same bug as (2) above applied to negated POSIX classes such as
     [:^space:].
-    
+
 4.  PCRECPP_STATIC was referenced in pcrecpp_internal.h, but nowhere was it
     defined or documented. It seems to have been a typo for PCRE_STATIC, so
-    I have changed it.  
-    
+    I have changed it.
+
 5.  The construct (?&) was not diagnosed as a syntax error (it referenced the
-    first named subpattern) and a construct such as (?&a) would reference the 
-    first named subpattern whose name started with "a" (in other words, the 
+    first named subpattern) and a construct such as (?&a) would reference the
+    first named subpattern whose name started with "a" (in other words, the
     length check was missing). Both these problems are fixed. "Subpattern name
     expected" is now given for (?&) (a zero-length name), and this patch also
     makes it give the same error for \k'' (previously it complained that that
     was a reference to a non-existent subpattern).
-    
+
 6.  The erroneous patterns (?+-a) and (?-+a) give different error messages;
-    this is right because (?- can be followed by option settings as well as by 
+    this is right because (?- can be followed by option settings as well as by
     digits. I have, however, made the messages clearer.
-    
+
 7.  Patterns such as (?(1)a|b) (a pattern that contains fewer subpatterns
     than the number used in the conditional) now cause a compile-time error.
     This is actually not compatible with Perl, which accepts such patterns, but
     treats the conditional as always being FALSE (as PCRE used to), but it
     seems to me that giving a diagnostic is better.
-    
+
 8.  Change "alphameric" to the more common word "alphanumeric" in comments
     and messages.
-    
-9.  Fix two occurrences of "backslash" in comments that should have been 
-    "backspace". 
-    
-10. Remove two redundant lines of code that can never be obeyed (their function 
-    was moved elsewhere). 
-    
-11. The program that makes PCRE's Unicode character property table had a bug 
-    which caused it to generate incorrect table entries for sequences of 
+
+9.  Fix two occurrences of "backslash" in comments that should have been
+    "backspace".
+
+10. Remove two redundant lines of code that can never be obeyed (their function
+    was moved elsewhere).
+
+11. The program that makes PCRE's Unicode character property table had a bug
+    which caused it to generate incorrect table entries for sequences of
     characters that have the same character type, but are in different scripts.
-    It amalgamated them into a single range, with the script of the first of 
+    It amalgamated them into a single range, with the script of the first of
     them. In other words, some characters were in the wrong script. There were
     thirteen such cases, affecting characters in the following ranges:
-    
+
       U+002b0 - U+002c1
       U+0060c - U+0060d
-      U+0061e - U+00612  
+      U+0061e - U+00612
       U+0064b - U+0065e
       U+0074d - U+0076d
       U+01800 - U+01805
@@ -65,31 +65,33 @@ Version 7.5 12-Nov-07
       U+03260 - U+0327f
       U+0fb46 - U+0fbb1
       U+10450 - U+1049d
-      
+
 12. The -o option (show only the matching part of a line) for pcregrep was not
     compatible with GNU grep in that, if there was more than one match in a
     line, it showed only the first of them. It now behaves in the same way as
     GNU grep.
-    
-13. If the -o and -v options were combined for pcregrep, it printed a blank 
-    line for every non-matching line. GNU grep prints nothing, and pcregrep now 
-    does the same. The return code can be used to tell if there were any 
-    non-matching lines. 
-    
+
+13. If the -o and -v options were combined for pcregrep, it printed a blank
+    line for every non-matching line. GNU grep prints nothing, and pcregrep now
+    does the same. The return code can be used to tell if there were any
+    non-matching lines.
+
 14. The pattern (?=something)(?R) was not being diagnosed as a potentially
     infinitely looping recursion. The bug was that positive lookaheads were not
-    being skipped when checking for a possible empty match (negative lookaheads 
-    and both kinds of lookbehind were skipped). 
-    
-15. Fixed two typos in the Windows-only code in pcregrep.c, and moved the 
+    being skipped when checking for a possible empty match (negative lookaheads
+    and both kinds of lookbehind were skipped).
+
+15. Fixed two typos in the Windows-only code in pcregrep.c, and moved the
     inclusion of <windows.h> to before rather than after the definition of
     INVALID_FILE_ATTRIBUTES (patch from David Byron).
-    
-16. Specifying a possessive quantifier with a specific limit for a Unicode 
-    character property caused pcre_compile() to compile bad code, which led at 
-    runtime to PCRE_ERROR_INTERNAL (-14). Examples of patterns that caused this 
-    are: /\p{Zl}{2,3}+/8 and /\p{Cc}{2}+/8. It was the possessive "+" that 
-    caused the error; without that there was no problem. 
+
+16. Specifying a possessive quantifier with a specific limit for a Unicode
+    character property caused pcre_compile() to compile bad code, which led at
+    runtime to PCRE_ERROR_INTERNAL (-14). Examples of patterns that caused this
+    are: /\p{Zl}{2,3}+/8 and /\p{Cc}{2}+/8. It was the possessive "+" that
+    caused the error; without that there was no problem.
+
+17. Added --enable-pcregrep-libz and --enable-pcregrep-libbz2.
 
 
 Version 7.4 21-Sep-07

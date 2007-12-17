@@ -463,10 +463,10 @@ of an interactive \fBpcretest\fP run.
   data> xyz
   No match
 .sp
-Note that unset capturing substrings that are not followed by one that is set 
+Note that unset capturing substrings that are not followed by one that is set
 are not returned by \fBpcre_exec()\fP, and are not shown by \fBpcretest\fP. In
 the following example, there are two capturing substrings, but when the first
-data line is matched, the second, unset substring is not shown. An "internal" 
+data line is matched, the second, unset substring is not shown. An "internal"
 unset substring is shown as "<unset>", as for the second data line.
 .sp
     re> /(a)|(b)/
@@ -476,7 +476,7 @@ unset substring is shown as "<unset>", as for the second data line.
   data> b
    0: b
    1: <unset>
-   2: b   
+   2: b
 .sp
 If the strings contain any non-printing characters, they are output as \e0x
 escapes, or as \ex{...} escapes if the \fB/8\fP modifier was present on the

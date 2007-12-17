@@ -154,6 +154,18 @@ AC_ARG_ENABLE(stack-for-recursion,
                              [don't use stack recursion when matching]),
               , enable_stack_for_recursion=yes)
 
+# Handle --enable-pcregrep-libz
+AC_ARG_ENABLE(pcregrep-libz,
+              AS_HELP_STRING([--enable-pcregrep-libz],
+                             [link pcregrep with libz to handle .gz files]),
+              , enable_pcregrep_libz=no)
+
+# Handle --enable-pcregrep-libbz2
+AC_ARG_ENABLE(pcregrep-libbz2,
+              AS_HELP_STRING([--enable-pcregrep-libbz2],
+                             [link pcregrep with libbz2 to handle .bz2 files]),
+              , enable_pcregrep_libbz2=no)
+
 # Handle --with-posix-malloc-threshold=NBYTES
 AC_ARG_WITH(posix-malloc-threshold,
             AS_HELP_STRING([--with-posix-malloc-threshold=NBYTES],
@@ -296,6 +308,16 @@ AC_SUBST(pcre_have_ulong_long)
 
 AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll _strtoi64)
 
+# Check for the availability of libz (aka zlib)
+
+AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H=1])
+AC_CHECK_LIB([z], [gzopen], [HAVE_LIBZ=1])
+
+# Check for the availability of libbz2
+
+AC_CHECK_HEADERS([bzlib.h], [HAVE_BZLIB_H=1])
+AC_CHECK_LIB([bz2], [BZ2_bzopen], [HAVE_LIBBZ2=1])
+
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 
@@ -327,6 +349,18 @@ if test "$enable_stack_for_recursion" = "no"; then
     just above the match() function. On systems that support it,
     "configure" can be used to set this in the Makefile
     (use --disable-stack-for-recursion).])
+fi
+
+if test "$enable_pcregrep_libz" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBZ], [], [
+    Define to allow pcregrep to be linked with libz, so that it is
+    able to handle .gz files.])
+fi
+
+if test "$enable_pcregrep_libbz2" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBBZ2], [], [
+    Define to allow pcregrep to be linked with libbz2, so that it is
+    able to handle .bz2 files.])
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
@@ -444,6 +478,33 @@ AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 DISTCHECK_CONFIGURE_FLAGS="--enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
+# Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is
+# specified, the relevant library is available. If so, add it to LIBS.
+
+if test "$enable_pcregrep_libz" = "yes"; then
+  if test "$HAVE_ZLIB_H" != "1"; then
+    echo "** Cannot --enable-pcregrep-libz because zlib.h was not found"
+    exit 1
+  fi
+  if test "$HAVE_LIBZ" != "1"; then
+    echo "** Cannot --enable-pcregrep-libz because libz was not found"
+    exit 1
+  fi
+  if test "$LIBS" = ""; then LIBS=-lz; else LIBS="$LIBS -lz"; fi
+fi
+
+if test "$enable_pcregrep_libbz2" = "yes"; then
+  if test "$HAVE_BZLIB_H" != "1"; then
+    echo "** Cannot --enable-pcregrep-libbz2 because bzlib.h was not found"
+    exit 1
+  fi
+  if test "$HAVE_LIBBZ2" != "1"; then
+    echo "** Cannot --enable-pcregrep-libbz2 because libbz2 was not found"
+    exit 1
+  fi
+  if test "$LIBS" = ""; then LIBS=-lbz2; else LIBS="$LIBS -lbz2"; fi
+fi
+
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
 	Makefile
@@ -466,37 +527,39 @@ AC_OUTPUT
 
 # Print out a nice little message after configure is run displaying your
 # chosen options.
-#
+
 cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
 
-    Install prefix ........... : ${prefix}
-    C preprocessor ........... : ${CPP}
-    C compiler ............... : ${CC}
-    C++ preprocessor ......... : ${CXXCPP}
-    C++ compiler ............. : ${CXX}
-    Linker ................... : ${LD}
-    C preprocessor flags ..... : ${CPPFLAGS}
-    C compiler flags ......... : ${CFLAGS}
-    C++ compiler flags ....... : ${CXXFLAGS}
-    Linker flags ............. : ${LDFLAGS}
-    Extra libraries .......... : ${LIBS}
+    Install prefix ............. : ${prefix}
+    C preprocessor ............. : ${CPP}
+    C compiler ................. : ${CC}
+    C++ preprocessor ........... : ${CXXCPP}
+    C++ compiler ............... : ${CXX}
+    Linker ..................... : ${LD}
+    C preprocessor flags ....... : ${CPPFLAGS}
+    C compiler flags ........... : ${CFLAGS}
+    C++ compiler flags ......... : ${CXXFLAGS}
+    Linker flags ............... : ${LDFLAGS}
+    Extra libraries ............ : ${LIBS}
 
-    Build C++ library ........ : ${enable_cpp}
-    Enable UTF-8 support ..... : ${enable_utf8}
-    Unicode properties ....... : ${enable_unicode_properties}
-    Newline char/sequence .... : ${enable_newline}
-    \R matches only ANYCRLF .. : ${enable_bsr_anycrlf}
-    EBCDIC coding ............ : ${enable_ebcdic}
-    Rebuild char tables ...... : ${enable_rebuild_chartables}
-    Use stack recursion ...... : ${enable_stack_for_recursion}
-    POSIX mem threshold ...... : ${with_posix_malloc_threshold}
-    Internal link size ....... : ${with_link_size}
-    Match limit .............. : ${with_match_limit}
-    Match limit recursion .... : ${with_match_limit_recursion}
-    Build shared libs ........ : ${enable_shared}
-    Build static libs ........ : ${enable_static}
+    Build C++ library .......... : ${enable_cpp}
+    Enable UTF-8 support ....... : ${enable_utf8}
+    Unicode properties ......... : ${enable_unicode_properties}
+    Newline char/sequence ...... : ${enable_newline}
+    \R matches only ANYCRLF .... : ${enable_bsr_anycrlf}
+    EBCDIC coding .............. : ${enable_ebcdic}
+    Rebuild char tables ........ : ${enable_rebuild_chartables}
+    Use stack recursion ........ : ${enable_stack_for_recursion}
+    POSIX mem threshold ........ : ${with_posix_malloc_threshold}
+    Internal link size ......... : ${with_link_size}
+    Match limit ................ : ${with_match_limit}
+    Match limit recursion ...... : ${with_match_limit_recursion}
+    Build shared libs .......... : ${enable_shared}
+    Build static libs .......... : ${enable_static}
+    Link pcregrep with libz .... : ${enable_pcregrep_libz}
+    Link pcregrep with libbz2 .. : ${enable_pcregrep_libbz2}
 
 EOF
 

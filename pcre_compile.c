@@ -1531,16 +1531,16 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   const uschar *ccode;
 
   c = *code;
-  
-  /* Skip over forward assertions; the other assertions are skipped by 
+
+  /* Skip over forward assertions; the other assertions are skipped by
   first_significant_code() with a TRUE final argument. */
-  
+
   if (c == OP_ASSERT)
-    {  
+    {
     do code += GET(code, 1); while (*code == OP_ALT);
     c = *code;
     continue;
-    }  
+    }
 
   /* Groups with zero repeats can of course be empty; skip them. */
 
@@ -2396,7 +2396,7 @@ req_caseopt = ((options & PCRE_CASELESS) != 0)? REQ_CASELESS : 0;
 for (;; ptr++)
   {
   BOOL negate_class;
-  BOOL should_flip_negation; 
+  BOOL should_flip_negation;
   BOOL possessive_quantifier;
   BOOL is_quantifier;
   BOOL is_recurse;
@@ -2645,8 +2645,8 @@ for (;; ptr++)
       else break;
       }
 
-    /* If a class contains a negative special such as \S, we need to flip the 
-    negation flag at the end, so that support for characters > 255 works 
+    /* If a class contains a negative special such as \S, we need to flip the
+    negation flag at the end, so that support for characters > 255 works
     correctly (they are all included in the class). */
 
     should_flip_negation = FALSE;
@@ -2723,7 +2723,7 @@ for (;; ptr++)
         if (*ptr == '^')
           {
           local_negate = TRUE;
-          should_flip_negation = TRUE;  /* Note negative special */ 
+          should_flip_negation = TRUE;  /* Note negative special */
           ptr++;
           }
 
@@ -2826,7 +2826,7 @@ for (;; ptr++)
             continue;
 
             case ESC_D:
-            should_flip_negation = TRUE; 
+            should_flip_negation = TRUE;
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_digit];
             continue;
 
@@ -2835,7 +2835,7 @@ for (;; ptr++)
             continue;
 
             case ESC_W:
-            should_flip_negation = TRUE; 
+            should_flip_negation = TRUE;
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_word];
             continue;
 
@@ -2845,7 +2845,7 @@ for (;; ptr++)
             continue;
 
             case ESC_S:
-            should_flip_negation = TRUE; 
+            should_flip_negation = TRUE;
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_space];
             classbits[1] |= 0x08;    /* Perl 5.004 onwards omits VT from \s */
             continue;
@@ -3348,9 +3348,9 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     zeroreqbyte = reqbyte;
 
     /* If there are characters with values > 255, we have to compile an
-    extended class, with its own opcode, unless there was a negated special 
-    such as \S in the class, because in that case all characters > 255 are in 
-    the class, so any that were explicitly given as well can be ignored. If 
+    extended class, with its own opcode, unless there was a negated special
+    such as \S in the class, because in that case all characters > 255 are in
+    the class, so any that were explicitly given as well can be ignored. If
     (when there are explicit characters > 255 that must be listed) there are no
     characters < 256, we can omit the bitmap in the actual compiled code. */
 
@@ -3381,11 +3381,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       }
 #endif
 
-    /* If there are no characters > 255, set the opcode to OP_CLASS or 
-    OP_NCLASS, depending on whether the whole class was negated and whether 
-    there were negative specials such as \S in the class. Then copy the 32-byte 
+    /* If there are no characters > 255, set the opcode to OP_CLASS or
+    OP_NCLASS, depending on whether the whole class was negated and whether
+    there were negative specials such as \S in the class. Then copy the 32-byte
     map into the code vector, negating it if necessary. */
-    
+
     *code++ = (negate_class == should_flip_negation) ? OP_CLASS : OP_NCLASS;
     if (negate_class)
       {
@@ -4030,8 +4030,8 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       if (*tempcode == OP_EXACT || *tempcode == OP_TYPEEXACT ||
           *tempcode == OP_NOTEXACT)
         tempcode += _pcre_OP_lengths[*tempcode] +
-          ((*tempcode == OP_TYPEEXACT && 
-             (tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP))? 2:0); 
+          ((*tempcode == OP_TYPEEXACT &&
+             (tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP))? 2:0);
       len = code - tempcode;
       if (len > 0) switch (*tempcode)
         {
@@ -4258,7 +4258,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             *errorcodeptr = ERR58;
             goto FAILED;
             }
-          recno = (refsign == '-')? 
+          recno = (refsign == '-')?
             cd->bracount - recno + 1 : recno +cd->bracount;
           if (recno <= 0 || recno > cd->final_bracount)
             {
@@ -4337,7 +4337,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           }
 
         /* Check for the "name" actually being a subpattern number. We are
-        in the second pass here, so final_bracount is set. */ 
+        in the second pass here, so final_bracount is set. */
 
         else if (recno > 0 && recno <= cd->final_bracount)
           {
@@ -4551,7 +4551,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             {
             *errorcodeptr = ERR62;
             goto FAILED;
-            }     
+            }
           if (*ptr != terminator)
             {
             *errorcodeptr = ERR42;
@@ -4565,8 +4565,8 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           recno = 0;
           }
 
-        /* In the real compile, seek the name in the table. We check the name 
-        first, and then check that we have reached the end of the name in the 
+        /* In the real compile, seek the name in the table. We check the name
+        first, and then check that we have reached the end of the name in the
         table. That way, if the name that is longer than any in the table,
         the comparison will fail without reading beyond the table entry. */
 
@@ -4576,7 +4576,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           for (i = 0; i < cd->names_found; i++)
             {
             if (strncmp((char *)name, (char *)slot+2, namelen) == 0 &&
-                slot[2+namelen] == 0) 
+                slot[2+namelen] == 0)
               break;
             slot += cd->name_entry_size;
             }
@@ -4614,15 +4614,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           {
           const uschar *called;
 
-          if ((refsign = *ptr) == '+') 
+          if ((refsign = *ptr) == '+')
             {
             ptr++;
             if ((digitab[*ptr] & ctype_digit) == 0)
               {
               *errorcodeptr = ERR63;
               goto FAILED;
-              }    
-            } 
+              }
+            }
           else if (refsign == '-')
             {
             if ((digitab[ptr[1]] & ctype_digit) == 0)

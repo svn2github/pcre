@@ -935,7 +935,7 @@ typedef struct compile_data {
   int  names_found;             /* Number of entries so far */
   int  name_entry_size;         /* Size of each entry */
   int  bracount;                /* Count of capturing parens as we compile */
-  int  final_bracount;          /* Saved value after first pass */ 
+  int  final_bracount;          /* Saved value after first pass */
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
   int  external_options;        /* External (initial) options */

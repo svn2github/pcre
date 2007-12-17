@@ -258,6 +258,12 @@ library. You can read more about them in the pcrebuild man page.
 
   This automatically implies --enable-rebuild-chartables (see above).
 
+. It is possible to compile pcregrep to use libz and/or libbz2 to read .gz
+  and .bz2 files (respectively) by specifying one or both of
+
+  --enable-pcregrep-libz
+  --enable-pcregrep-libbz2
+
 The "configure" script builds the following files for the basic C library:
 
 . Makefile is the makefile that builds the library
@@ -725,4 +731,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 21 September 2007
+Last updated: 17 December 2007

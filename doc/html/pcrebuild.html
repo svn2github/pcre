@@ -26,9 +26,10 @@ man page, in case the conversion went wrong.
 <li><a name="TOC11" href="#SEC11">LIMITING PCRE RESOURCE USAGE</a>
 <li><a name="TOC12" href="#SEC12">CREATING CHARACTER TABLES AT BUILD TIME</a>
 <li><a name="TOC13" href="#SEC13">USING EBCDIC CODE</a>
-<li><a name="TOC14" href="#SEC14">SEE ALSO</a>
-<li><a name="TOC15" href="#SEC15">AUTHOR</a>
-<li><a name="TOC16" href="#SEC16">REVISION</a>
+<li><a name="TOC14" href="#SEC14">PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT</a>
+<li><a name="TOC15" href="#SEC15">SEE ALSO</a>
+<li><a name="TOC16" href="#SEC16">AUTHOR</a>
+<li><a name="TOC17" href="#SEC17">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE BUILD-TIME OPTIONS</a><br>
 <P>
@@ -270,11 +271,24 @@ to the <b>configure</b> command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
 an EBCDIC environment (for example, an IBM mainframe operating system).
 </P>
-<br><a name="SEC14" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC14" href="#TOC1">PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT</a><br>
+<P>
+By default, <b>pcregrep</b> reads all files as plain text. You can build it so
+that it recognizes files whose names end in <b>.gz</b> or <b>.bz2</b>, and reads
+them with <b>libz</b> or <b>libbz2</b>, respectively, by adding one or both of
+<pre>
+  --enable-pcregrep-libz
+  --enable-pcregrep-libbz2
+</pre>
+to the <b>configure</b> command. These options naturally require that the
+relevant libraries are installed on your system. Configuration will fail if
+they are not.
+</P>
+<br><a name="SEC15" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcre_config</b>(3).
 </P>
-<br><a name="SEC15" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC16" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -283,9 +297,9 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC16" href="#TOC1">REVISION</a><br>
+<br><a name="SEC17" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 September 2007
+Last updated: 17 December 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>

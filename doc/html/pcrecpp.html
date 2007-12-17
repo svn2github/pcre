@@ -101,7 +101,8 @@ The function returns true iff all of the following conditions are satisfied:
 
   c. The "i"th argument has a suitable type for holding the
      string captured as the "i"th sub-pattern. If you pass in
-     NULL for the "i"th argument, or pass fewer arguments than
+     void * NULL for the "i"th argument, or a non-void * NULL
+     of the correct type, or pass fewer arguments than the
      number of sub-patterns, "i"th captured sub-pattern is
      ignored.
 </pre>
@@ -357,7 +358,7 @@ Copyright &copy; 2007 Google Inc.
 </P>
 <br><a name="SEC12" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 12 November 2007
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

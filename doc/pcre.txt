@@ -517,6 +517,20 @@ USING EBCDIC CODE
        environment (for example, an IBM mainframe operating system).
 
 
+PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT
+
+       By default, pcregrep reads all files as plain text. You can build it so
+       that it recognizes files whose names end in .gz or .bz2, and reads them
+       with libz or libbz2, respectively, by adding one or both of
+
+         --enable-pcregrep-libz
+         --enable-pcregrep-libbz2
+
+       to the configure command. These options naturally require that the rel-
+       evant libraries are installed on your system. Configuration  will  fail
+       if they are not.
+
+
 SEE ALSO
 
        pcreapi(3), pcre_config(3).
@@ -531,7 +545,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 September 2007
+       Last updated: 17 December 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -1575,9 +1589,9 @@ INFORMATION ABOUT A PATTERN
 
          PCRE_INFO_JCHANGED
 
-       Return 1 if the (?J) option setting is used in the  pattern,  otherwise
-       0. The fourth argument should point to an int variable. The (?J) inter-
-       nal option setting changes the local PCRE_DUPNAMES option.
+       Return 1 if the (?J) or (?-J) option setting is used  in  the  pattern,
+       otherwise  0. The fourth argument should point to an int variable. (?J)
+       and (?-J) set and unset the local PCRE_DUPNAMES option, respectively.
 
          PCRE_INFO_LASTLITERAL
 
@@ -2530,7 +2544,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 September 2007
+       Last updated: 27 November 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -4996,7 +5010,7 @@ CHARACTER CLASSES
          [^...]      negative character class
          [x-y]       range (can be used for hex characters)
          [[:xxx:]]   positive POSIX named set
-         [[^:xxx:]]  negative POSIX named set
+         [[:^xxx:]]  negative POSIX named set
 
          alnum       alphanumeric
          alpha       alphabetic
@@ -5205,7 +5219,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 21 September 2007
+       Last updated: 14 November 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -6009,7 +6023,8 @@ MATCHING INTERFACE
 
          c. The "i"th argument has a suitable type for holding the
             string captured as the "i"th sub-pattern. If you pass in
-            NULL for the "i"th argument, or pass fewer arguments than
+            void * NULL for the "i"th argument, or a non-void * NULL
+            of the correct type, or pass fewer arguments than the
             number of sub-patterns, "i"th captured sub-pattern is
             ignored.
 
@@ -6257,7 +6272,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 06 March 2007
+       Last updated: 12 November 2007
 ------------------------------------------------------------------------------
 
 
