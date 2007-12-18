@@ -270,6 +270,19 @@ to the \fBconfigure\fP command. These options naturally require that the
 relevant libraries are installed on your system. Configuration will fail if
 they are not.
 .
+.SH "PCRETEST OPTION FOR LIBREADLINE SUPPORT"
+.rs
+.sp
+If you add
+.sp
+  --enable-pcretest-libreadline
+.sp
+to the \fBconfigure\fP command, \fBpcretest\fP is linked with the 
+\fBlibreadline\fP library, and when its input is from a terminal, it reads it 
+using the \fBreadline()\fP function. This provides line-editing and history 
+facilities. Note that \fBlibreadline\fP is GPL-licenced, so if you distribute a 
+binary of \fBpcretest\fP linked in this way, there may be licensing issues.
+.
 .
 .SH "SEE ALSO"
 .rs
@@ -291,6 +304,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 December 2007
+Last updated: 18 December 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

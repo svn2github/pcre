@@ -93,6 +93,8 @@ Version 7.5 12-Nov-07
 
 17. Added --enable-pcregrep-libz and --enable-pcregrep-libbz2.
 
+18. Added --enable-pcretest-libreadline.
+
 
 Version 7.4 21-Sep-07
 ---------------------

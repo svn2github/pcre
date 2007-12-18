@@ -97,6 +97,12 @@ that file and writes to stdout. Otherwise, it reads from stdin and writes to
 stdout, and prompts for each line of input, using "re>" to prompt for regular
 expressions, and "data>" to prompt for data lines.
 .P
+When \fBpcretest\fP is built, a configuration option can specify that it should 
+be linked with the \fBlibreadline\fP library. When this is done, if the input
+is from a terminal, it is read using the \fBreadline()\fP function. This
+provides line-editing and history facilities. The output from the \fB-help\fP
+option states whether or not \fBreadline()\fP will be used.
+.P
 The program handles any number of sets of input on a single input file. Each
 set starts with a regular expression, and continues with any number of data
 lines to be matched against the pattern.
@@ -711,6 +717,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 November 2007
+Last updated: 18 December 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi

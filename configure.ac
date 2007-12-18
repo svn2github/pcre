@@ -166,6 +166,12 @@ AC_ARG_ENABLE(pcregrep-libbz2,
                              [link pcregrep with libbz2 to handle .bz2 files]),
               , enable_pcregrep_libbz2=no)
 
+# Handle --enable-pcretest-libreadline
+AC_ARG_ENABLE(pcretest-libreadline,
+              AS_HELP_STRING([--enable-pcretest-libreadline],
+                             [link pcretest with libreadline]),
+              , enable_pcretest_libreadline=no)
+
 # Handle --with-posix-malloc-threshold=NBYTES
 AC_ARG_WITH(posix-malloc-threshold,
             AS_HELP_STRING([--with-posix-malloc-threshold=NBYTES],
@@ -318,6 +324,12 @@ AC_CHECK_LIB([z], [gzopen], [HAVE_LIBZ=1])
 AC_CHECK_HEADERS([bzlib.h], [HAVE_BZLIB_H=1])
 AC_CHECK_LIB([bz2], [BZ2_bzopen], [HAVE_LIBBZ2=1])
 
+# Check for the availabiity of libreadline
+
+AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
+AC_CHECK_HEADERS([readline/history.h], [HAVE_HISTORY_H=1])
+AC_CHECK_LIB([readline], [readline], [HAVE_LIB_READLINE=1])
+
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 
@@ -362,6 +374,11 @@ if test "$enable_pcregrep_libbz2" = "yes"; then
     Define to allow pcregrep to be linked with libbz2, so that it is
     able to handle .bz2 files.])
 fi
+
+if test "$enable_pcretest_libreadline" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBREADLINE], [], [
+    Define to allow pcretest to be linked with libreadline.])
+fi      
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
   The value of NEWLINE determines the newline character sequence. On
@@ -505,6 +522,20 @@ if test "$enable_pcregrep_libbz2" = "yes"; then
   if test "$LIBS" = ""; then LIBS=-lbz2; else LIBS="$LIBS -lbz2"; fi
 fi
 
+# Similarly for --enable-pcretest-readline
+
+if test "$enable_pcretest_libreadline" = "yes"; then
+  if test "$HAVE_READLINE_H" != "1"; then
+    echo "** Cannot --enable-pcretest-readline because readline/readline.h was not found."
+    exit 1
+  fi
+  if test "$HAVE_HISTORY_H" != "1"; then
+    echo "** Cannot --enable-pcretest-readline because readline/history.h was not found."
+    exit 1
+  fi
+  if test "$LIBS" = ""; then LIBS=-lreadline; else LIBS="$LIBS -lreadline"; fi
+fi   
+
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
 	Makefile
@@ -532,34 +563,35 @@ cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
 
-    Install prefix ............. : ${prefix}
-    C preprocessor ............. : ${CPP}
-    C compiler ................. : ${CC}
-    C++ preprocessor ........... : ${CXXCPP}
-    C++ compiler ............... : ${CXX}
-    Linker ..................... : ${LD}
-    C preprocessor flags ....... : ${CPPFLAGS}
-    C compiler flags ........... : ${CFLAGS}
-    C++ compiler flags ......... : ${CXXFLAGS}
-    Linker flags ............... : ${LDFLAGS}
-    Extra libraries ............ : ${LIBS}
-
-    Build C++ library .......... : ${enable_cpp}
-    Enable UTF-8 support ....... : ${enable_utf8}
-    Unicode properties ......... : ${enable_unicode_properties}
-    Newline char/sequence ...... : ${enable_newline}
-    \R matches only ANYCRLF .... : ${enable_bsr_anycrlf}
-    EBCDIC coding .............. : ${enable_ebcdic}
-    Rebuild char tables ........ : ${enable_rebuild_chartables}
-    Use stack recursion ........ : ${enable_stack_for_recursion}
-    POSIX mem threshold ........ : ${with_posix_malloc_threshold}
-    Internal link size ......... : ${with_link_size}
-    Match limit ................ : ${with_match_limit}
-    Match limit recursion ...... : ${with_match_limit_recursion}
-    Build shared libs .......... : ${enable_shared}
-    Build static libs .......... : ${enable_static}
-    Link pcregrep with libz .... : ${enable_pcregrep_libz}
-    Link pcregrep with libbz2 .. : ${enable_pcregrep_libbz2}
+    Install prefix .................. : ${prefix}
+    C preprocessor .................. : ${CPP}
+    C compiler ...................... : ${CC}
+    C++ preprocessor ................ : ${CXXCPP}
+    C++ compiler .................... : ${CXX}
+    Linker .......................... : ${LD}
+    C preprocessor flags ............ : ${CPPFLAGS}
+    C compiler flags ................ : ${CFLAGS}
+    C++ compiler flags .............. : ${CXXFLAGS}
+    Linker flags .................... : ${LDFLAGS}
+    Extra libraries ................. : ${LIBS}
+                                     
+    Build C++ library ............... : ${enable_cpp}
+    Enable UTF-8 support ............ : ${enable_utf8}
+    Unicode properties .............. : ${enable_unicode_properties}
+    Newline char/sequence ........... : ${enable_newline}
+    \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
+    EBCDIC coding ................... : ${enable_ebcdic}
+    Rebuild char tables ............. : ${enable_rebuild_chartables}
+    Use stack recursion ............. : ${enable_stack_for_recursion}
+    POSIX mem threshold ............. : ${with_posix_malloc_threshold}
+    Internal link size .............. : ${with_link_size}
+    Match limit ..................... : ${with_match_limit}
+    Match limit recursion ........... : ${with_match_limit_recursion}
+    Build shared libs ............... : ${enable_shared}
+    Build static libs ............... : ${enable_static}
+    Link pcregrep with libz ......... : ${enable_pcregrep_libz}
+    Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
+    Link pcretest with libreadline .. : ${enable_pcretest_libreadline} 
 
 EOF
 
