@@ -409,7 +409,7 @@ int RE::GlobalReplace(const StringPiece& rewrite,
       Rewrite(&out, rewrite, *str, vec, matches);
       start = matchend;
       lastend = matchend;
-      count++;
+      // count++;  // Removed by PH 19-Dec-2007: duplicate count increment
     }
   }
 

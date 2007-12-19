@@ -95,6 +95,10 @@ Version 7.5 12-Nov-07
 
 18. Added --enable-pcretest-libreadline.
 
+19. In pcrecpp.cc, the variable 'count' was incremented twice in
+    RE::GlobalReplace(). As a result, the number of replacements returned was
+    double what it should be. I have removed one of the increments.
+
 
 Version 7.4 21-Sep-07
 ---------------------
