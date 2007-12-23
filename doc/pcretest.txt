@@ -85,6 +85,12 @@ DESCRIPTION
        "re>" to prompt for regular expressions, and "data>" to prompt for data
        lines.
 
+       When  pcretest  is  built,  a  configuration option can specify that it
+       should be linked with the libreadline library. When this  is  done,  if
+       the input is from a terminal, it is read using the readline() function.
+       This provides line-editing and history facilities. The output from  the
+       -help option states whether or not readline() will be used.
+
        The program handles any number of sets of input on a single input file.
        Each set starts with a regular expression, and continues with any  num-
        ber of data lines to be matched against the pattern.
@@ -643,5 +649,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 19 November 2007
+       Last updated: 18 December 2007
        Copyright (c) 1997-2007 University of Cambridge.

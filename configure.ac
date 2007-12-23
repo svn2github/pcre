@@ -9,7 +9,7 @@ dnl empty.
 m4_define(pcre_major, [7])
 m4_define(pcre_minor, [5])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2007-11-12])
+m4_define(pcre_date, [2007-12-23])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -378,7 +378,7 @@ fi
 if test "$enable_pcretest_libreadline" = "yes"; then
   AC_DEFINE([SUPPORT_LIBREADLINE], [], [
     Define to allow pcretest to be linked with libreadline.])
-fi      
+fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
   The value of NEWLINE determines the newline character sequence. On
@@ -534,7 +534,7 @@ if test "$enable_pcretest_libreadline" = "yes"; then
     exit 1
   fi
   if test "$LIBS" = ""; then LIBS=-lreadline; else LIBS="$LIBS -lreadline"; fi
-fi   
+fi
 
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
@@ -574,7 +574,7 @@ $PACKAGE-$VERSION configuration summary:
     C++ compiler flags .............. : ${CXXFLAGS}
     Linker flags .................... : ${LDFLAGS}
     Extra libraries ................. : ${LIBS}
-                                     
+
     Build C++ library ............... : ${enable_cpp}
     Enable UTF-8 support ............ : ${enable_utf8}
     Unicode properties .............. : ${enable_unicode_properties}
@@ -591,7 +591,7 @@ $PACKAGE-$VERSION configuration summary:
     Build static libs ............... : ${enable_static}
     Link pcregrep with libz ......... : ${enable_pcregrep_libz}
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
-    Link pcretest with libreadline .. : ${enable_pcretest_libreadline} 
+    Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
 
 EOF
 

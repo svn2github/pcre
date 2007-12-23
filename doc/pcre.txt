@@ -531,6 +531,19 @@ PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT
        if they are not.
 
 
+PCRETEST OPTION FOR LIBREADLINE SUPPORT
+
+       If you add
+
+         --enable-pcretest-libreadline
+
+       to  the  configure  command,  pcretest  is  linked with the libreadline
+       library, and when its input is from a terminal, it reads it  using  the
+       readline() function. This provides line-editing and history facilities.
+       Note that libreadline is GPL-licenced, so if you distribute a binary of
+       pcretest linked in this way, there may be licensing issues.
+
+
 SEE ALSO
 
        pcreapi(3), pcre_config(3).
@@ -545,7 +558,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 December 2007
+       Last updated: 18 December 2007
        Copyright (c) 1997-2007 University of Cambridge.
 ------------------------------------------------------------------------------
 

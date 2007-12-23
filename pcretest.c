@@ -214,36 +214,36 @@ for (;;)
   if (rlen > 1000)
     {
     int dlen;
-    
+
     /* If libreadline support is required, use readline() to read a line if the
     input is a terminal. Note that readline() removes the trailing newline, so
     we must put it back again, to be compatible with fgets(). */
-    
+
 #ifdef SUPPORT_LIBREADLINE
     if (isatty(fileno(f)))
       {
-      size_t len; 
+      size_t len;
       char *s = readline(prompt);
       if (s == NULL) return (here == start)? NULL : start;
       len = strlen(s);
-      if (len > 0) add_history(s); 
+      if (len > 0) add_history(s);
       if (len > rlen - 1) len = rlen - 1;
       memcpy(here, s, len);
       here[len] = '\n';
-      here[len+1] = 0; 
-      free(s);  
+      here[len+1] = 0;
+      free(s);
       }
-    else  
-#endif     
- 
+    else
+#endif
+
     /* Read the next line by normal means, prompting if the file is stdin. */
-     
+
       {
-      if (f == stdin) printf(prompt); 
+      if (f == stdin) printf(prompt);
       if (fgets((char *)here, rlen,  f) == NULL)
         return (here == start)? NULL : start;
-      }   
- 
+      }
+
     dlen = (int)strlen((char *)here);
     if (dlen > 0 && here[dlen - 1] == '\n') return start;
     here += dlen;

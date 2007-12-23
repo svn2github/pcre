@@ -130,6 +130,13 @@ stdout, and prompts for each line of input, using "re&#62;" to prompt for regula
 expressions, and "data&#62;" to prompt for data lines.
 </P>
 <P>
+When <b>pcretest</b> is built, a configuration option can specify that it should
+be linked with the <b>libreadline</b> library. When this is done, if the input
+is from a terminal, it is read using the <b>readline()</b> function. This
+provides line-editing and history facilities. The output from the <b>-help</b>
+option states whether or not <b>readline()</b> will be used.
+</P>
+<P>
 The program handles any number of sets of input on a single input file. Each
 set starts with a regular expression, and continues with any number of data
 lines to be matched against the pattern.
@@ -689,7 +696,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 November 2007
+Last updated: 18 December 2007
 <br>
 Copyright &copy; 1997-2007 University of Cambridge.
 <br>
