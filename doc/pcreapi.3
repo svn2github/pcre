@@ -672,7 +672,7 @@ out of use. To avoid confusion, they have not been re-used.
    9  nothing to repeat
   10  [this code is not in use]
   11  internal error: unexpected repeat
-  12  unrecognized character after (?
+  12  unrecognized character after (? or (?-
   13  POSIX named classes are supported only within a class
   14  missing )
   15  reference to non-existent subpattern
@@ -680,7 +680,7 @@ out of use. To avoid confusion, they have not been re-used.
   17  unknown option bit(s) set
   18  missing ) after comment
   19  [this code is not in use]
-  20  regular expression too large
+  20  regular expression is too large
   21  failed to get memory
   22  unmatched parentheses
   23  internal error: code overflow
@@ -709,7 +709,7 @@ out of use. To avoid confusion, they have not been re-used.
   46  malformed \eP or \ep sequence
   47  unknown property name after \eP or \ep
   48  subpattern name is too long (maximum 32 characters)
-  49  too many named subpatterns (maximum 10,000)
+  49  too many named subpatterns (maximum 10000)
   50  [this code is not in use]
   51  octal value is greater than \e377 (not in UTF-8 mode)
   52  internal error: overran compiling workspace
@@ -720,6 +720,14 @@ out of use. To avoid confusion, they have not been re-used.
   57  \eg is not followed by a braced name or an optionally braced
         non-zero number
   58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
+  59  (*VERB) with an argument is not supported
+  60  (*VERB) not recognized
+  61  number is too big
+  62  subpattern name expected
+  63  digit expected after (?+     
+.sp
+The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may 
+be used if the limits were changed when PCRE was built.
 .
 .
 .SH "STUDYING A PATTERN"
@@ -1952,6 +1960,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 November 2007
+Last updated: 26 December 2007
 Copyright (c) 1997-2007 University of Cambridge.
 .fi
