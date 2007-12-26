@@ -8,6 +8,11 @@
 # Refined and expanded by Daniel Richard G. <skunk@iSKUNK.ORG>
 # 2007-09-14 mod by Sheri so 7.4 supported configuration options can be entered
 # 2007-09-19 Adjusted by PH to retain previous default settings
+# 2007-12-26 (a) On UNIX, use names libpcre instead of just pcre
+#            (b) Ensure pcretest and pcregrep link with the local library,
+#                not a previously-installed one.
+#            (c) Add PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, and
+#                PCRE_SUPPORT_LIBBZ2.
 #
 
 PROJECT(PCRE C CXX)
@@ -25,6 +30,11 @@ CHECK_INCLUDE_FILE(dirent.h	HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(unistd.h	HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE(sys/stat.h	HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILE(sys/types.h	HAVE_SYS_TYPES_H)
+
+CHECK_INCLUDE_FILE(bzlib.h      HAVE_BZLIB_H)
+CHECK_INCLUDE_FILE(zlib.h       HAVE_ZLIB_H)
+CHECK_INCLUDE_FILE(readline/history.h  HAVE_READLINE_HISTORY_H)
+CHECK_INCLUDE_FILE(readline/readline.h HAVE_READLINE_READLINE_H)
 
 CHECK_INCLUDE_FILE_CXX(type_traits.h		HAVE_TYPE_TRAITS_H)
 CHECK_INCLUDE_FILE_CXX(bits/type_traits.h	HAVE_BITS_TYPE_TRAITS_H)
@@ -76,6 +86,15 @@ SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
 SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
 
+SET(PCRE_SUPPORT_LIBBZ2 OFF CACHE BOOL
+    "Enable support for linking pcregrep with libbz2.")
+    
+SET (PCRE_SUPPORT_LIBZ OFF CACHE BOOL
+    "Enable support for linking pcregrep with libz.")
+    
+SET (PCRE_SUPPORT_LIBREADLINE OFF CACHE BOOL
+    "Enable support for linking pcretest with libreadline.")  
+
 # Prepare build configuration
 
 SET(pcre_have_type_traits 0)
@@ -115,6 +134,21 @@ ENDIF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
 IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 	SET(SUPPORT_UCP 1)
 ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
+
+IF(PCRE_SUPPORT_LIBREADLINE)
+        SET(SUPPORT_LIBREADLINE 1)
+        SET(PCRETEST_LIBS readline)
+ENDIF(PCRE_SUPPORT_LIBREADLINE)
+
+IF(PCRE_SUPPORT_LIBZ)
+        SET(SUPPORT_LIBZ 1)
+        SET(PCREGREP_LIBS z)
+ENDIF(PCRE_SUPPORT_LIBZ)
+
+IF(PCRE_SUPPORT_LIBBZ2)
+        SET(SUPPORT_LIBBZ2 1)
+        SET(PCREGREP_LIBS ${PCREGREP_LIBS} bz2)
+ENDIF(PCRE_SUPPORT_LIBBZ2)                  
 
 SET(NEWLINE "")
 
@@ -245,9 +279,11 @@ ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES})
 ADD_LIBRARY(pcreposix ${PCREPOSIX_HEADERS} ${PCREPOSIX_SOURCES})
 TARGET_LINK_LIBRARIES(pcreposix pcre)
 
+IF(NOT UNIX)
 SET_TARGET_PROPERTIES(pcre pcreposix
                         PROPERTIES PREFIX ""
 )
+ENDIF(NOT UNIX)
 
 IF(PCRE_BUILD_PCRECPP)
 	ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
@@ -260,10 +296,10 @@ ENDIF(PCRE_BUILD_PCRECPP)
 # Executables
 
 ADD_EXECUTABLE(pcretest pcretest.c)
-TARGET_LINK_LIBRARIES(pcretest pcreposix)
+TARGET_LINK_LIBRARIES(pcretest pcreposix ${PCRETEST_LIBS})
 
 ADD_EXECUTABLE(pcregrep pcregrep.c)
-TARGET_LINK_LIBRARIES(pcregrep pcreposix)
+TARGET_LINK_LIBRARIES(pcregrep pcreposix ${PCREGREP_LIBS})
 
 IF(PCRE_BUILD_PCRECPP)
 	ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
