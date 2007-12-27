@@ -63,6 +63,9 @@ distribution for a new release.
 
 . Ensure that the version number and version date are correct in configure.ac,
   ChangeLog, and NEWS.
+  
+. If new build options have been added, ensure that they are added to the CMake
+  files as well as to the autoconf files. 
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
@@ -241,4 +244,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 09 August 2007
+Last updated: 27 December 2007

@@ -88,12 +88,12 @@ SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
 
 SET(PCRE_SUPPORT_LIBBZ2 OFF CACHE BOOL
     "Enable support for linking pcregrep with libbz2.")
-    
+
 SET (PCRE_SUPPORT_LIBZ OFF CACHE BOOL
     "Enable support for linking pcregrep with libz.")
-    
+
 SET (PCRE_SUPPORT_LIBREADLINE OFF CACHE BOOL
-    "Enable support for linking pcretest with libreadline.")  
+    "Enable support for linking pcretest with libreadline.")
 
 # Prepare build configuration
 
@@ -148,7 +148,7 @@ ENDIF(PCRE_SUPPORT_LIBZ)
 IF(PCRE_SUPPORT_LIBBZ2)
         SET(SUPPORT_LIBBZ2 1)
         SET(PCREGREP_LIBS ${PCREGREP_LIBS} bz2)
-ENDIF(PCRE_SUPPORT_LIBBZ2)                  
+ENDIF(PCRE_SUPPORT_LIBBZ2)
 
 SET(NEWLINE "")
 

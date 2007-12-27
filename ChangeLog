@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.5 23-Dec-07
+Version 7.5 27-Dec-07
 ---------------------
 
 1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
@@ -100,16 +100,16 @@ Version 7.5 23-Dec-07
 20. In pcrecpp.cc, the variable 'count' was incremented twice in
     RE::GlobalReplace(). As a result, the number of replacements returned was
     double what it should be. I have removed one of the increments.
-    
+
 21. Several CMake things:
 
     (1) Arranged that, when cmake is used on Unix, the libraries end up with
-        the names libpcre and libpcreposix. 
-        
-    (2) Arranged for pcretest and pcregrep to link with the newly-built 
-        libraries, not previously installed ones.
-        
-    (3) Added PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, PCRE_SUPPORT_LIBBZ2. 
+        the names libpcre and libpcreposix, not just pcre and pcreposix.
+
+    (2) The above change means that pcretest and pcregrep are now correctly
+        linked with the newly-built libraries, not previously installed ones.
+
+    (3) Added PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, PCRE_SUPPORT_LIBBZ2.
 
 
 Version 7.4 21-Sep-07
