@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.5 27-Dec-07
+Version 7.5 29-Dec-07
 ---------------------
 
 1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
@@ -110,6 +110,14 @@ Version 7.5 27-Dec-07
         linked with the newly-built libraries, not previously installed ones.
 
     (3) Added PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, PCRE_SUPPORT_LIBBZ2.
+    
+22. In UTF-8 mode, with newline set to "any", a pattern such as .*a.*=.b.* 
+    crashed when matching a string such as a\x{2029}b (note that \x{2029} is a 
+    UTF-8 newline character). The key issue is that the pattern starts .*; 
+    this means that the match must be either at the beginning, or after a 
+    newline. The bug was in the code for advancing after a failed match and 
+    checking that the new position followed a newline. It was not taking 
+    account of UTF-8 characters correctly.
 
 
 Version 7.4 21-Sep-07

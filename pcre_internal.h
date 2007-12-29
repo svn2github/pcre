@@ -363,6 +363,7 @@ never be called in byte mode. To make sure it can never even appear when UTF-8
 support is omitted, we don't even define it. */
 
 #ifndef SUPPORT_UTF8
+#define NEXTCHAR(p) p++;
 #define GETCHAR(c, eptr) c = *eptr;
 #define GETCHARTEST(c, eptr) c = *eptr;
 #define GETCHARINC(c, eptr) c = *eptr++;
@@ -371,6 +372,13 @@ support is omitted, we don't even define it. */
 /* #define BACKCHAR(eptr) */
 
 #else   /* SUPPORT_UTF8 */
+
+/* Advance a character pointer one byte in non-UTF-8 mode and by one character
+in UTF-8 mode. */
+
+#define NEXTCHAR(p) \
+  p++; \
+  if (utf8) { while((*p & 0xc0) == 0x80) p++; }   
 
 /* Get the next UTF-8 character, not advancing the pointer. This is called when
 we know we are in UTF-8 mode. */
