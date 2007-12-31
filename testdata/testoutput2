@@ -9358,4 +9358,31 @@ Failed: recursive call could loop indefinitely at offset 10
 /(?<=\w)(?R)/
 Failed: recursive call could loop indefinitely at offset 10
 
+/[[:foo:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:1234:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:f\oo:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[: :]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:...:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:l\ower:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:abc\:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[abc[:x\]pqr:]]/
+Failed: unknown POSIX class name at offset 6
+
+/[[:a\dz:]]/
+Failed: unknown POSIX class name at offset 3
+
 / End of testinput2 /

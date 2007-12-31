@@ -1605,4 +1605,7 @@ No match
     \x61\xe2\x80\xa9\x62 
 No match
 
+/[[:a\x{100}b:]]/8
+Failed: unknown POSIX class name at offset 3
+
 / End of testinput5 /
