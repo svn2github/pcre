@@ -131,6 +131,9 @@ Version 7.5 31-Dec-07
     diagnose an unknown class for, for example, [[:l\ower:]] where Perl will 
     treat it as [[:lower:]]. However, PCRE does now give "unknown" errors where 
     Perl does, and where it didn't before. 
+    
+24. Rewrite so as to remove the single use of %n from pcregrep because in some
+    Windows environments %n is disabled by default.
 
 
 Version 7.4 21-Sep-07

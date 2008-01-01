@@ -1579,8 +1579,7 @@ for (op = optionlist; op->one_char != 0; op++)
   int n;
   char s[4];
   if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); else strcpy(s, "   ");
-  printf("  %s --%s%n", s, op->long_name, &n);
-  n = 30 - n;
+  n = 30 - printf("  %s --%s", s, op->long_name);
   if (n < 1) n = 1;
   printf("%.*s%s\n", n, "                    ", op->help_text);
   }
