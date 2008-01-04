@@ -369,7 +369,7 @@ int RE::GlobalReplace(const StringPiece& rewrite,
   int start = 0;
   int lastend = -1;
 
-  for (; start <= static_cast<int>(str->length()); count++) {
+  while (start <= static_cast<int>(str->length())) {
     int matches = TryMatch(*str, start, UNANCHORED, vec, kVecSize);
     if (matches <= 0)
       break;
@@ -409,7 +409,7 @@ int RE::GlobalReplace(const StringPiece& rewrite,
       Rewrite(&out, rewrite, *str, vec, matches);
       start = matchend;
       lastend = matchend;
-      // count++;  // Removed by PH 19-Dec-2007: duplicate count increment
+      count++;
     }
   }
 
