@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.5 04-Jan-08
+Version 7.5 10-Jan-08
 ---------------------
 
 1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
@@ -99,9 +99,9 @@ Version 7.5 04-Jan-08
 
 20. In pcrecpp.cc, the variable 'count' was incremented twice in
     RE::GlobalReplace(). As a result, the number of replacements returned was
-    double what it should be. I removed one of the increments, but Craig sent a 
-    later patch that removed the other one (the right fix) and added unit tests 
-    that check the return values (which was not done before).  
+    double what it should be. I removed one of the increments, but Craig sent a
+    later patch that removed the other one (the right fix) and added unit tests
+    that check the return values (which was not done before).
 
 21. Several CMake things:
 
@@ -112,28 +112,28 @@ Version 7.5 04-Jan-08
         linked with the newly-built libraries, not previously installed ones.
 
     (3) Added PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, PCRE_SUPPORT_LIBBZ2.
-    
-22. In UTF-8 mode, with newline set to "any", a pattern such as .*a.*=.b.* 
-    crashed when matching a string such as a\x{2029}b (note that \x{2029} is a 
-    UTF-8 newline character). The key issue is that the pattern starts .*; 
-    this means that the match must be either at the beginning, or after a 
-    newline. The bug was in the code for advancing after a failed match and 
-    checking that the new position followed a newline. It was not taking 
+
+22. In UTF-8 mode, with newline set to "any", a pattern such as .*a.*=.b.*
+    crashed when matching a string such as a\x{2029}b (note that \x{2029} is a
+    UTF-8 newline character). The key issue is that the pattern starts .*;
+    this means that the match must be either at the beginning, or after a
+    newline. The bug was in the code for advancing after a failed match and
+    checking that the new position followed a newline. It was not taking
     account of UTF-8 characters correctly.
-    
-23. PCRE was behaving differently from Perl in the way it recognized POSIX 
-    character classes. PCRE was not treating the sequence [:...:] as a 
-    character class unless the ... were all letters. Perl, however, seems to 
-    allow any characters between [: and :], though of course it rejects as 
-    unknown any "names" that contain non-letters, because all the known class 
-    names consist only of letters. Thus, Perl gives an error for [[:1234:]], 
-    for example, whereas PCRE did not - it did not recognize a POSIX character 
-    class. This seemed a bit dangerous, so the code has been changed to be 
-    closer to Perl. The behaviour is not identical to Perl, because PCRE will 
-    diagnose an unknown class for, for example, [[:l\ower:]] where Perl will 
-    treat it as [[:lower:]]. However, PCRE does now give "unknown" errors where 
-    Perl does, and where it didn't before. 
-    
+
+23. PCRE was behaving differently from Perl in the way it recognized POSIX
+    character classes. PCRE was not treating the sequence [:...:] as a
+    character class unless the ... were all letters. Perl, however, seems to
+    allow any characters between [: and :], though of course it rejects as
+    unknown any "names" that contain non-letters, because all the known class
+    names consist only of letters. Thus, Perl gives an error for [[:1234:]],
+    for example, whereas PCRE did not - it did not recognize a POSIX character
+    class. This seemed a bit dangerous, so the code has been changed to be
+    closer to Perl. The behaviour is not identical to Perl, because PCRE will
+    diagnose an unknown class for, for example, [[:l\ower:]] where Perl will
+    treat it as [[:lower:]]. However, PCRE does now give "unknown" errors where
+    Perl does, and where it didn't before.
+
 24. Rewrite so as to remove the single use of %n from pcregrep because in some
     Windows environments %n is disabled by default.
 

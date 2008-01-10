@@ -1738,22 +1738,22 @@ return TRUE;
 
 /* This function is called when the sequence "[:" or "[." or "[=" is
 encountered in a character class. It checks whether this is followed by a
-sequence of characters terminated by a matching ":]" or ".]" or "=]". If we 
+sequence of characters terminated by a matching ":]" or ".]" or "=]". If we
 reach an unescaped ']' without the special preceding character, return FALSE.
 
-Originally, this function only recognized a sequence of letters between the 
-terminators, but it seems that Perl recognizes any sequence of characters, 
-though of course unknown POSIX names are subsequently rejected. Perl gives an 
-"Unknown POSIX class" error for [:f\oo:] for example, where previously PCRE 
-didn't consider this to be a POSIX class. Likewise for [:1234:]. 
+Originally, this function only recognized a sequence of letters between the
+terminators, but it seems that Perl recognizes any sequence of characters,
+though of course unknown POSIX names are subsequently rejected. Perl gives an
+"Unknown POSIX class" error for [:f\oo:] for example, where previously PCRE
+didn't consider this to be a POSIX class. Likewise for [:1234:].
 
-The problem in trying to be exactly like Perl is in the handling of escapes. We 
-have to be sure that [abc[:x\]pqr] is *not* treated as containing a POSIX 
-class, but [abc[:x\]pqr:]] is (so that an error can be generated). The code 
-below handles the special case of \], but does not try to do any other escape 
-processing. This makes it different from Perl for cases such as [:l\ower:] 
+The problem in trying to be exactly like Perl is in the handling of escapes. We
+have to be sure that [abc[:x\]pqr] is *not* treated as containing a POSIX
+class, but [abc[:x\]pqr:]] is (so that an error can be generated). The code
+below handles the special case of \], but does not try to do any other escape
+processing. This makes it different from Perl for cases such as [:l\ower:]
 where Perl recognizes it as the POSIX class "lower" but PCRE does not recognize
-"l\ower". This is a lesser evil that not diagnosing bad classes when Perl does, 
+"l\ower". This is a lesser evil that not diagnosing bad classes when Perl does,
 I think.
 
 Arguments:
@@ -1771,15 +1771,15 @@ terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
 for (++ptr; *ptr != 0; ptr++)
   {
   if (*ptr == '\\' && ptr[1] == ']') ptr++; else
-    { 
-    if (*ptr == ']') return FALSE; 
+    {
+    if (*ptr == ']') return FALSE;
     if (*ptr == terminator && ptr[1] == ']')
       {
       *endptr = ptr;
       return TRUE;
-      }     
-    }   
-  } 
+      }
+    }
+  }
 return FALSE;
 }
 

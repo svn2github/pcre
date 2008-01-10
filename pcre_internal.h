@@ -378,7 +378,7 @@ in UTF-8 mode. */
 
 #define NEXTCHAR(p) \
   p++; \
-  if (utf8) { while((*p & 0xc0) == 0x80) p++; }   
+  if (utf8) { while((*p & 0xc0) == 0x80) p++; }
 
 /* Get the next UTF-8 character, not advancing the pointer. This is called when
 we know we are in UTF-8 mode. */

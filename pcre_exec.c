@@ -4704,8 +4704,8 @@ for(;;)
     while (start_match < end_subject)
       {
       register unsigned int c = *start_match;
-      if ((start_bits[c/8] & (1 << (c&7))) == 0) 
-        { NEXTCHAR(start_match); } 
+      if ((start_bits[c/8] & (1 << (c&7))) == 0)
+        { NEXTCHAR(start_match); }
       else break;
       }
     }
