@@ -2376,6 +2376,7 @@ uschar classbits[32];
 BOOL class_utf8;
 BOOL utf8 = (options & PCRE_UTF8) != 0;
 uschar *class_utf8data;
+uschar *class_utf8data_base;
 uschar utf8_char[6];
 #else
 BOOL utf8 = FALSE;
@@ -2687,6 +2688,7 @@ for (;; ptr++)
 #ifdef SUPPORT_UTF8
     class_utf8 = FALSE;                       /* No chars >= 256 */
     class_utf8data = code + LINK_SIZE + 2;    /* For UTF-8 items */
+    class_utf8data_base = class_utf8data;     /* For resetting in pass 1 */ 
 #endif
 
     /* Process characters until ] is reached. By writing this as a "do" it
@@ -2702,6 +2704,18 @@ for (;; ptr++)
         {                           /* Braces are required because the */
         GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
         }
+      
+      /* In the pre-compile phase, accumulate the length of any UTF-8 extra
+      data and reset the pointer. This is so that very large classes that 
+      contain a zillion UTF-8 characters no longer overwrite the work space
+      (which is on the stack). */  
+       
+      if (lengthptr != NULL)
+        {
+        *lengthptr += class_utf8data - class_utf8data_base;
+        class_utf8data = class_utf8data_base; 
+        }  
+ 
 #endif
 
       /* Inside \Q...\E everything is literal except \E */
@@ -5806,7 +5820,6 @@ this purpose. The same space is used in the second phase for remembering where
 to fill in forward references to subpatterns. */
 
 uschar cworkspace[COMPILE_WORK_SIZE];
-
 
 /* Set this early so that early errors get offset 0. */
 
