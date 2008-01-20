@@ -879,7 +879,9 @@ int main(int argc, char** argv) {
   CHECK(RE("h(.*)o").FullMatch("hello", (string*)NULL));
   CHECK(RE("h(.*)o").FullMatch("hello", (StringPiece*)NULL));
   CHECK(RE("(.*)").FullMatch("1234", (int*)NULL));
+#ifdef HAVE_LONG_LONG
   CHECK(RE("(.*)").FullMatch("1234567890123456", (long long*)NULL));
+#endif
   CHECK(RE("(.*)").FullMatch("123.4567890123456", (double*)NULL));
   CHECK(RE("(.*)").FullMatch("123.4567890123456", (float*)NULL));
 

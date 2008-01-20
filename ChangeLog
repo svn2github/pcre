@@ -1,11 +1,15 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.6 14-Jan-08
+Version 7.6 19-Jan-08
 ---------------------
 
-1.  A class with a very large number of characters with codepoints greater
-    than 255 (in UTF-8 mode, of course), caused a buffer overflow.
+1.  A character class containing a very large number of characters with
+    codepoints greater than 255 (in UTF-8 mode, of course) caused a buffer
+    overflow.
+    
+2.  Patch to cut out the "long long" test in pcrecpp_unittest when 
+    HAVE_LONG_LONG is not defined. 
      
 
 Version 7.5 10-Jan-08
