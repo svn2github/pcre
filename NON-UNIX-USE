@@ -10,6 +10,8 @@ This document contains the following sections:
   Stack size in Windows environments
   Comments about Win32 builds
   Building PCRE with CMake
+  Use of relative paths with CMake on Windows
+  Testing with runtest.bat
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
 
@@ -289,7 +291,36 @@ were contributed by a PCRE user.
 11. The build directory should now contain a usable build system, be it a
     solution file for Visual Studio, makefiles for MinGW, etc.
 
-Testing with RunTest.bat
+
+USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
+
+A PCRE user comments as follows:
+ 
+I thought that others may want to know the current state of
+CMAKE_USE_RELATIVE_PATHS support on Windows.
+
+Here it is:
+-- AdditionalIncludeDirectories is only partially modified (only the
+first path - see below)
+-- Only some of the contained file paths are modified - shown below for
+pcre.vcproj
+-- It properly modifies
+
+I am sure CMake people can fix that if they want to. Until then one will
+need to replace existing absolute paths in project files with relative
+paths manually (e.g. from VS) - relative to project file location. I did
+just that before being told to try CMAKE_USE_RELATIVE_PATHS. Not a big
+deal. 
+
+AdditionalIncludeDirectories="E:\builds\pcre\build;E:\builds\pcre\pcre-7.5;"
+AdditionalIncludeDirectories=".;E:\builds\pcre\pcre-7.5;"
+
+RelativePath="pcre.h">
+RelativePath="pcre_chartables.c">
+RelativePath="pcre_chartables.c.rule">
+
+
+TESTING WITH RUNTEST.BAT
 
 1. Copy RunTest.bat into the directory where pcretest.exe has been created.
 
@@ -304,7 +335,7 @@ Testing with RunTest.bat
 
 4. To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
    pcre_scanner_unittest.exe.
-
+   
 
 BUILDING UNDER WINDOWS WITH BCC5.5
 
@@ -384,5 +415,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 21 September 2007
+Last Updated: 20 January 2008
 ****
