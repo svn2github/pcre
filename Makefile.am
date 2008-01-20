@@ -302,6 +302,26 @@ pcredemo_LDADD = libpcre.la
 # A compatibility line, the old build system worked with 'make test'
 test: check ;
 
+
+# A PCRE user submitted the following addition, saying that it "will allow
+# anyone using the 'mingw32' compiler to simply type 'make pcre.dll' and get a
+# nice DLL for Windows use". (It is used by the pcre.dll target.)
+DLL_OBJS= pcre_compile.o pcre_config.o \
+	pcre_dfa_exec.o pcre_exec.o pcre_fullinfo.o pcre_get.o \
+	pcre_globals.o pcre_info.o pcre_maketables.o \
+	pcre_newline.o pcre_ord2utf8.o pcre_refcount.o \
+	pcre_study.o pcre_tables.o pcre_try_flipped.o \
+	pcre_ucp_searchfuncs.o pcre_valid_utf8.o pcre_version.o \
+	pcre_chartables.o \
+	pcre_xclass.o
+
+# A PCRE user submitted the following addition, saying that it "will allow
+# anyone using the 'mingw32' compiler to simply type 'make pcre.dll' and get a
+# nice DLL for Windows use".
+pcre.dll: $(DLL_OBJS)
+	$(CC) -shared -o pcre.dll -Wl,"--strip-all" -Wl,"--export-all-symbols" $(DLL_OBJS)
+
+
 # We have .pc files for pkg-config users.
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libpcre.pc

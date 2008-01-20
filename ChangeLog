@@ -22,6 +22,10 @@ Version 7.6 19-Jan-08
         HAVE_LONG_LONG.
     - Added readline support for pcretest.
     - Added an listing of the option settings after cmake has run.            
+    
+4.  A user submitted a patch to Makefile that makes it easy to created a dll
+    under mingw. I added stuff to Makefile.am that cause it to include this 
+    special target, without affecting anything else. 
      
 
 Version 7.5 10-Jan-08
