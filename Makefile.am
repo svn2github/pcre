@@ -358,6 +358,7 @@ endif
 ## CMake support
 
 EXTRA_DIST += \
+  cmake \
   CMakeLists.txt \
   config-cmake.h.in
 

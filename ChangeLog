@@ -10,6 +10,9 @@ Version 7.6 19-Jan-08
     
 2.  Patch to cut out the "long long" test in pcrecpp_unittest when 
     HAVE_LONG_LONG is not defined. 
+    
+3.  Applied Christian Ehrlicher's patch to update the CMake build files to
+    bring them up to date and include new features. 
      
 
 Version 7.5 10-Jan-08

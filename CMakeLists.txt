@@ -13,11 +13,20 @@
 #                not a previously-installed one.
 #            (c) Add PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, and
 #                PCRE_SUPPORT_LIBBZ2.
+# 2008-01-20 Brought up to date to include several new features by Christian
+#            Ehrlicher.
 #
 
 PROJECT(PCRE C CXX)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake) # for FindReadline.cmake
+
+# external packages
+FIND_PACKAGE( BZip2 )
+FIND_PACKAGE( ZLIB )
+FIND_PACKAGE( Readline )
 
 # Configuration checks
 
@@ -26,15 +35,11 @@ INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckTypeSize)
 
-CHECK_INCLUDE_FILE(dirent.h	HAVE_DIRENT_H)
-CHECK_INCLUDE_FILE(unistd.h	HAVE_UNISTD_H)
+CHECK_INCLUDE_FILE(dirent.h	    HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(sys/stat.h	HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILE(sys/types.h	HAVE_SYS_TYPES_H)
-
-CHECK_INCLUDE_FILE(bzlib.h      HAVE_BZLIB_H)
-CHECK_INCLUDE_FILE(zlib.h       HAVE_ZLIB_H)
-CHECK_INCLUDE_FILE(readline/history.h  HAVE_READLINE_HISTORY_H)
-CHECK_INCLUDE_FILE(readline/readline.h HAVE_READLINE_READLINE_H)
+CHECK_INCLUDE_FILE(unistd.h	    HAVE_UNISTD_H)
+CHECK_INCLUDE_FILE(windows.h	HAVE_WINDOWS_H)
 
 CHECK_INCLUDE_FILE_CXX(type_traits.h		HAVE_TYPE_TRAITS_H)
 CHECK_INCLUDE_FILE_CXX(bits/type_traits.h	HAVE_BITS_TYPE_TRAITS_H)
@@ -42,6 +47,9 @@ CHECK_INCLUDE_FILE_CXX(bits/type_traits.h	HAVE_BITS_TYPE_TRAITS_H)
 CHECK_FUNCTION_EXISTS(bcopy	HAVE_BCOPY)
 CHECK_FUNCTION_EXISTS(memmove	HAVE_MEMMOVE)
 CHECK_FUNCTION_EXISTS(strerror	HAVE_STRERROR)
+CHECK_FUNCTION_EXISTS(strtoll	HAVE_STRTOLL)
+CHECK_FUNCTION_EXISTS(strtoq	HAVE_STRTOQ)
+CHECK_FUNCTION_EXISTS(_strtoi64 HAVE__STRTOI64)
 
 CHECK_TYPE_SIZE("long long"		LONG_LONG)
 CHECK_TYPE_SIZE("unsigned long long"	UNSIGNED_LONG_LONG)
@@ -86,14 +94,29 @@ SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
 SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
 
-SET(PCRE_SUPPORT_LIBBZ2 OFF CACHE BOOL
-    "Enable support for linking pcregrep with libbz2.")
+# bzip2 lib
+IF(BZIP2_FOUND)
+  OPTION (PCRE_SUPPORT_LIBBZ2 "Enable support for linking pcregrep with libbz2." ON)
+ENDIF(BZIP2_FOUND)
+IF(PCRE_SUPPORT_LIBBZ2)
+  INCLUDE_DIRECTORIES(${BZIP2_INCLUDE_DIR})
+ENDIF(PCRE_SUPPORT_LIBBZ2)
 
-SET (PCRE_SUPPORT_LIBZ OFF CACHE BOOL
-    "Enable support for linking pcregrep with libz.")
+# zlib
+IF(ZLIB_FOUND)
+  OPTION (PCRE_SUPPORT_LIBZ "Enable support for linking pcregrep with libz." ON)
+ENDIF(ZLIB_FOUND)
+IF(PCRE_SUPPORT_LIBZ)
+  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ENDIF(PCRE_SUPPORT_LIBZ)
 
-SET (PCRE_SUPPORT_LIBREADLINE OFF CACHE BOOL
-    "Enable support for linking pcretest with libreadline.")
+# readline lib
+IF(READLINE_FOUND)
+  OPTION (PCRE_SUPPORT_LIBREADLINE  "Enable support for linking pcretest with libreadline." ON)
+ENDIF(READLINE_FOUND)
+IF(PCRE_SUPPORT_LIBREADLINE)
+  INCLUDE_DIRECTORIES(${READLINE_INCLUDE_DIR})
+ENDIF(PCRE_SUPPORT_LIBREADLINE)
 
 # Prepare build configuration
 
@@ -137,17 +160,17 @@ ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 
 IF(PCRE_SUPPORT_LIBREADLINE)
         SET(SUPPORT_LIBREADLINE 1)
-        SET(PCRETEST_LIBS readline)
+        SET(PCRETEST_LIBS ${READLINE_LIBRARY})
 ENDIF(PCRE_SUPPORT_LIBREADLINE)
 
 IF(PCRE_SUPPORT_LIBZ)
         SET(SUPPORT_LIBZ 1)
-        SET(PCREGREP_LIBS z)
+        SET(PCREGREP_LIBS ${PCREGREP_LIBS} ${ZLIB_LIBRARIES})
 ENDIF(PCRE_SUPPORT_LIBZ)
 
 IF(PCRE_SUPPORT_LIBBZ2)
         SET(SUPPORT_LIBBZ2 1)
-        SET(PCREGREP_LIBS ${PCREGREP_LIBS} bz2)
+        SET(PCREGREP_LIBS ${PCREGREP_LIBS} ${BZIP2_LIBRARIES})
 ENDIF(PCRE_SUPPORT_LIBBZ2)
 
 SET(NEWLINE "")
@@ -204,43 +227,50 @@ ENDIF(PCRE_BUILD_PCRECPP)
 
 # Character table generation
 
-ADD_EXECUTABLE(dftables dftables.c)
+OPTION(PCRE_REBUILD_CHARTABLES "Rebuild char tables" OFF)
+IF(PCRE_REBUILD_CHARTABLES)
+  ADD_EXECUTABLE(dftables dftables.c)
 
-GET_TARGET_PROPERTY(DFTABLES_EXE dftables LOCATION)
+  GET_TARGET_PROPERTY(DFTABLES_EXE dftables LOCATION)
 
-ADD_CUSTOM_COMMAND(
-	COMMENT "Generating character tables (pcre_chartables.c) for current locale"
-	DEPENDS dftables
-	COMMAND ${DFTABLES_EXE}
-	ARGS	${CMAKE_BINARY_DIR}/pcre_chartables.c
-	OUTPUT	${CMAKE_BINARY_DIR}/pcre_chartables.c
-)
+  ADD_CUSTOM_COMMAND(
+    COMMENT "Generating character tables (pcre_chartables.c) for current locale"
+    DEPENDS dftables
+    COMMAND ${DFTABLES_EXE}
+    ARGS	${CMAKE_BINARY_DIR}/pcre_chartables.c
+    OUTPUT	${CMAKE_BINARY_DIR}/pcre_chartables.c
+  )
+ELSE(PCRE_REBUILD_CHARTABLES)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/pcre_chartables.c.dist
+                    ${CMAKE_BINARY_DIR}/pcre_chartables.c
+                    COPYONLY)
+ENDIF(PCRE_REBUILD_CHARTABLES)
 
 # Source code
 
 SET(PCRE_HEADERS ${CMAKE_BINARY_DIR}/pcre.h)
 
 SET(PCRE_SOURCES
-	${CMAKE_BINARY_DIR}/pcre_chartables.c
-	pcre_compile.c
-	pcre_config.c
-	pcre_dfa_exec.c
-	pcre_exec.c
-	pcre_fullinfo.c
-	pcre_get.c
-	pcre_globals.c
-	pcre_info.c
-	pcre_newline.c
-	pcre_maketables.c
-	pcre_ord2utf8.c
-	pcre_refcount.c
-	pcre_study.c
-	pcre_tables.c
-	pcre_try_flipped.c
-	pcre_ucp_searchfuncs.c
-	pcre_valid_utf8.c
-	pcre_version.c
-	pcre_xclass.c
+  ${CMAKE_BINARY_DIR}/pcre_chartables.c
+  pcre_compile.c
+  pcre_config.c
+  pcre_dfa_exec.c
+  pcre_exec.c
+  pcre_fullinfo.c
+  pcre_get.c
+  pcre_globals.c
+  pcre_info.c
+  pcre_newline.c
+  pcre_maketables.c
+  pcre_ord2utf8.c
+  pcre_refcount.c
+  pcre_study.c
+  pcre_tables.c
+  pcre_try_flipped.c
+  pcre_ucp_searchfuncs.c
+  pcre_valid_utf8.c
+  pcre_version.c
+  pcre_xclass.c
 )
 
 SET(PCREPOSIX_HEADERS pcreposix.h)
@@ -248,10 +278,10 @@ SET(PCREPOSIX_HEADERS pcreposix.h)
 SET(PCREPOSIX_SOURCES pcreposix.c)
 
 SET(PCRECPP_HEADERS
-	pcrecpp.h
-	pcre_scanner.h
-	${CMAKE_BINARY_DIR}/pcrecpparg.h
-	${CMAKE_BINARY_DIR}/pcre_stringpiece.h
+  pcrecpp.h
+  pcre_scanner.h
+  ${CMAKE_BINARY_DIR}/pcrecpparg.h
+  ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
 )
 
 SET(PCRECPP_SOURCES
@@ -264,33 +294,26 @@ SET(PCRECPP_SOURCES
 
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 
-IF(WIN32)
+IF(MSVC)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-ENDIF(WIN32)
+ENDIF(MSVC)
 
 SET(CMAKE_INCLUDE_CURRENT_DIR 1)
-
-#SET(CMAKE_DEBUG_POSTFIX "d")
+# needed to make sure to not link debug libs
+# against release libs and vice versa
+IF(WIN32)
+  SET(CMAKE_DEBUG_POSTFIX "d")
+ENDIF(WIN32)
 
 # Libraries
 
-ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES})
-
+ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES} ${CMAKE_BINARY_DIR}/config.h)
 ADD_LIBRARY(pcreposix ${PCREPOSIX_HEADERS} ${PCREPOSIX_SOURCES})
 TARGET_LINK_LIBRARIES(pcreposix pcre)
 
-IF(NOT UNIX)
-SET_TARGET_PROPERTIES(pcre pcreposix
-                        PROPERTIES PREFIX ""
-)
-ENDIF(NOT UNIX)
-
 IF(PCRE_BUILD_PCRECPP)
-	ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
-	TARGET_LINK_LIBRARIES(pcrecpp pcre)
-	IF(MINGW)
-		SET_TARGET_PROPERTIES(pcrecpp PROPERTIES PREFIX "mingw-")
-	ENDIF(MINGW)
+  ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
+  TARGET_LINK_LIBRARIES(pcrecpp pcre)
 ENDIF(PCRE_BUILD_PCRECPP)
 
 # Executables
@@ -300,6 +323,13 @@ TARGET_LINK_LIBRARIES(pcretest pcreposix ${PCRETEST_LIBS})
 
 ADD_EXECUTABLE(pcregrep pcregrep.c)
 TARGET_LINK_LIBRARIES(pcregrep pcreposix ${PCREGREP_LIBS})
+
+ADD_EXECUTABLE(pcredemo pcredemo.c)
+TARGET_LINK_LIBRARIES(pcredemo pcreposix)
+IF(NOT BUILD_SHARED_LIBS)
+    # make sure to not use declspec(dllimport) in static mode on windows
+	SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
+ENDIF(NOT BUILD_SHARED_LIBS)
 
 IF(PCRE_BUILD_PCRECPP)
 	ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
@@ -388,5 +418,49 @@ ENDIF(PCRE_BUILD_PCRECPP)
 INSTALL(FILES ${man1} DESTINATION man/man1)
 INSTALL(FILES ${man3} DESTINATION man/man3)
 INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)
+
+# help, only for nice output
+IF(BUILD_SHARED_LIBS)
+  SET(BUILD_STATIC_LIBS OFF)
+ELSE(BUILD_SHARED_LIBS)
+  SET(BUILD_STATIC_LIBS ON)
+ENDIF(BUILD_SHARED_LIBS)
+
+MESSAGE(STATUS "")
+MESSAGE(STATUS "")
+MESSAGE(STATUS "PCRE configuration summary:")
+MESSAGE(STATUS "")
+MESSAGE(STATUS "  Install prefix .................. : " ${CMAKE_INSTALL_PREFIX})
+MESSAGE(STATUS "  C compiler ...................... : " ${CMAKE_C_COMPILER})
+MESSAGE(STATUS "  C++ compiler .................... : " ${CMAKE_CXX_COMPILER})
+MESSAGE(STATUS "  C compiler flags ................ : " ${CMAKE_C_FLAGS})   #FIXME
+MESSAGE(STATUS "  C++ compiler flags .............. : " ${CMAKE_CXX_FLAGS}) #FIXME
+MESSAGE(STATUS "")
+MESSAGE(STATUS "  Build C++ library ............... : " ${PCRE_BUILD_PCRECPP})
+MESSAGE(STATUS "  Enable UTF-8 support ............ : " ${PCRE_SUPPORT_UNICODE_PROPERTIES})
+MESSAGE(STATUS "  Unicode properties .............. : " ${PCRE_SUPPORT_UNICODE_PROPERTIES})
+MESSAGE(STATUS "  Newline char/sequence ........... : " ${PCRE_NEWLINE})
+MESSAGE(STATUS "  \\R matches only ANYCRLF ......... : " ${PCRE_SUPPORT_BSR_ANYCRLF})
+MESSAGE(STATUS "  EBCDIC coding ................... : " ${PCRE_EBCDIC})
+MESSAGE(STATUS "  Rebuild char tables ............. : " ${PCRE_REBUILD_CHARTABLES})
+MESSAGE(STATUS "  Use stack recursion ............. : " ${PCRE_NO_RECURSE})
+MESSAGE(STATUS "  POSIX mem threshold ............. : " ${PCRE_POSIX_MALLOC_THRESHOLD})
+MESSAGE(STATUS "  Internal link size .............. : " ${PCRE_LINK_SIZE})
+MESSAGE(STATUS "  Match limit ..................... : " ${PCRE_MATCH_LIMIT})
+MESSAGE(STATUS "  Match limit recursion ........... : " ${PCRE_MATCH_LIMIT_RECURSION})
+MESSAGE(STATUS "  Build shared libs ............... : " ${BUILD_SHARED_LIBS})
+MESSAGE(STATUS "  Build static libs ............... : " ${BUILD_STATIC_LIBS})
+IF(ZLIB_FOUND)
+  MESSAGE(STATUS "  Link pcregrep with libz ......... : " ${PCRE_SUPPORT_LIBZ})
+ELSE(ZLIB_FOUND)
+  MESSAGE(STATUS "  Link pcregrep with libz ......... :   zlib libraries not found!" )
+ENDIF(ZLIB_FOUND)
+IF(BZIP2_FOUND)
+  MESSAGE(STATUS "  Link pcregrep with libbz2 ....... : " ${PCRE_SUPPORT_LIBBZ2})
+ELSE(BZIP2_FOUND)
+  MESSAGE(STATUS "  Link pcregrep with libbz2 ....... :   bzip2 libraries not found!" )
+ENDIF(BZIP2_FOUND)
+MESSAGE(STATUS "  Link pcretest with libreadline .. : " ${PCRE_SUPPORT_LIBREADLINE})
+MESSAGE(STATUS "")
 
 # end CMakeLists.txt
