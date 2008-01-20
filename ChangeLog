@@ -12,7 +12,16 @@ Version 7.6 19-Jan-08
     HAVE_LONG_LONG is not defined. 
     
 3.  Applied Christian Ehrlicher's patch to update the CMake build files to
-    bring them up to date and include new features. 
+    bring them up to date and include new features. This patch includes:
+    
+    - Fixed PH's badly added libz and libbz2 support.
+    - Fixed a problem with static linking.
+    - Added pcredemo.
+    - Fixed dftables problem and added an option.
+    - Added a number of HAVE_XXX tests, including HAVE_WINDOWS_H and
+        HAVE_LONG_LONG.
+    - Added readline support for pcretest.
+    - Added an listing of the option settings after cmake has run.            
      
 
 Version 7.5 10-Jan-08
