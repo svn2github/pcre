@@ -295,7 +295,7 @@ were contributed by a PCRE user.
 USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
 
 A PCRE user comments as follows:
- 
+
 I thought that others may want to know the current state of
 CMAKE_USE_RELATIVE_PATHS support on Windows.
 
@@ -310,7 +310,7 @@ I am sure CMake people can fix that if they want to. Until then one will
 need to replace existing absolute paths in project files with relative
 paths manually (e.g. from VS) - relative to project file location. I did
 just that before being told to try CMAKE_USE_RELATIVE_PATHS. Not a big
-deal. 
+deal.
 
 AdditionalIncludeDirectories="E:\builds\pcre\build;E:\builds\pcre\pcre-7.5;"
 AdditionalIncludeDirectories=".;E:\builds\pcre\pcre-7.5;"
@@ -335,7 +335,7 @@ TESTING WITH RUNTEST.BAT
 
 4. To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
    pcre_scanner_unittest.exe.
-   
+
 
 BUILDING UNDER WINDOWS WITH BCC5.5
 
