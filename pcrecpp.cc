@@ -55,7 +55,7 @@ static const int kMaxArgs = 16;
 static const int kVecSize = (1 + kMaxArgs) * 3;  // results + PCRE workspace
 
 // Special object that stands-in for no argument
-PCRECPP_EXP_DEFN Arg no_arg((void*)NULL);
+Arg RE::no_arg((void*)NULL);
 
 // If a regular expression has no error, its error_ field points here
 static const string empty_string;

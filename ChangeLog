@@ -26,7 +26,12 @@ Version 7.6 19-Jan-08
 4.  A user submitted a patch to Makefile that makes it easy to created a dll
     under mingw. I added stuff to Makefile.am that cause it to include this 
     special target, without affecting anything else. 
-     
+    
+5.  Applied Craig's patch that moves no_arg into the RE class in the C++ code.
+    This is an attempt to solve the reported problem "pcrecpp::no_arg is not
+    exported in the Windows port". It has not yet been confirmed that the patch 
+    solves the problem, but it does no harm. 
+
 
 Version 7.5 10-Jan-08
 ---------------------
