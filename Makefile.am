@@ -378,7 +378,9 @@ endif
 ## CMake support
 
 EXTRA_DIST += \
-  cmake \
+  cmake/COPYING-CMAKE-SCRIPTS \
+  cmake/FindPackageHandleStandardArgs.cmake \
+  cmake/FindReadline.cmake \
   CMakeLists.txt \
   config-cmake.h.in
 
