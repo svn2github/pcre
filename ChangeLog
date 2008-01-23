@@ -31,14 +31,14 @@ Version 7.6 21-Jan-08
     This is an attempt to solve the reported problem "pcrecpp::no_arg is not
     exported in the Windows port". It has not yet been confirmed that the patch
     solves the problem, but it does no harm.
-    
+
 6.  Applied Sheri's patch to CMakeLists.txt to add NON_STANDARD_LIB_PREFIX and
-    NON_STANDARD_LIB_SUFFIX and correct the comment about stack recursion. 
-    
+    NON_STANDARD_LIB_SUFFIX and correct the comment about stack recursion.
+
 7.  Remove the automatic building of pcredemo from the ./configure system and
-    from CMakeLists.txt. The whole idea of pcredemo.c is that it is an example 
-    of a program that users should build themselves after PCRE is installed, so 
-    building it automatically is not really right. What is more, it gave 
+    from CMakeLists.txt. The whole idea of pcredemo.c is that it is an example
+    of a program that users should build themselves after PCRE is installed, so
+    building it automatically is not really right. What is more, it gave
     trouble in some build environments.
 
 
