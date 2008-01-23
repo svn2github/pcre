@@ -15,7 +15,15 @@
 #                PCRE_SUPPORT_LIBBZ2.
 # 2008-01-20 Brought up to date to include several new features by Christian
 #            Ehrlicher.
-#
+# 2008-01-22 Sheri aded options for backward compatibility of library names when
+#            building with minGW:
+#            if "ON", NON_STANDARD_LIB_PREFIX causes shared libraries to
+#            be built without "lib" as prefix. (The libraries will be named pcre.dll,
+#            pcreposix.dll and pcrecpp.dll).
+#            if "ON", NON_STANDARD_LIB_SUFFIX causes shared libraries to
+#            be built with suffix of "-0.dll". (The libraries will be named
+#            libpcre-0.dll, libpcreposix-0.dll and libpcrecpp-0.dll - same names
+#            built by default with Configure and Make.
 
 PROJECT(PCRE C CXX)
 
@@ -93,6 +101,12 @@ SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
 
 SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
+
+SET(NON_STANDARD_LIB_PREFIX OFF CACHE BOOL
+   "ON=Shared libraries built in mingw will be named pcre.dll, etc., instead of libpcre.dll, etc.")
+
+SET(NON_STANDARD_LIB_SUFFIX OFF CACHE BOOL
+   "ON=Shared libraries built in mingw will be named libpcre-0.dll, etc., instead of libpcre.dll, etc.")
 
 # bzip2 lib
 IF(BZIP2_FOUND)
@@ -311,9 +325,32 @@ ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES} ${CMAKE_BINARY_DIR}/config.h)
 ADD_LIBRARY(pcreposix ${PCREPOSIX_HEADERS} ${PCREPOSIX_SOURCES})
 TARGET_LINK_LIBRARIES(pcreposix pcre)
 
+IF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
+SET_TARGET_PROPERTIES(pcre pcreposix
+                        PROPERTIES PREFIX ""
+)
+ENDIF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
+
+IF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
+SET_TARGET_PROPERTIES(pcre pcreposix
+                        PROPERTIES SUFFIX "-0.dll"
+)
+ENDIF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
+
 IF(PCRE_BUILD_PCRECPP)
   ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
   TARGET_LINK_LIBRARIES(pcrecpp pcre)
+IF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
+SET_TARGET_PROPERTIES(pcrecpp
+                        PROPERTIES PREFIX ""
+)
+ENDIF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
+IF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
+SET_TARGET_PROPERTIES(pcrecpp
+                        PROPERTIES SUFFIX "-0.dll"
+)
+ENDIF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
+
 ENDIF(PCRE_BUILD_PCRECPP)
 
 # Executables
@@ -334,6 +371,12 @@ ENDIF(NOT BUILD_SHARED_LIBS)
 IF(PCRE_BUILD_PCRECPP)
 	ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
 	TARGET_LINK_LIBRARIES(pcrecpp_unittest pcrecpp)
+IF(MINGW AND NON_STANDARD_LIB_NAMES AND NOT PCRE_STATIC)
+SET_TARGET_PROPERTIES(pcrecpp
+                        PROPERTIES PREFIX ""
+)
+ENDIF(MINGW AND NON_STANDARD_LIB_NAMES AND NOT PCRE_STATIC)
+
 
 	ADD_EXECUTABLE(pcre_scanner_unittest pcre_scanner_unittest.cc)
 	TARGET_LINK_LIBRARIES(pcre_scanner_unittest pcrecpp)
@@ -415,6 +458,7 @@ ELSE(PCRE_BUILD_PCRECPP)
 	SET(man3 ${man3_new})
 ENDIF(PCRE_BUILD_PCRECPP)
 
+
 INSTALL(FILES ${man1} DESTINATION man/man1)
 INSTALL(FILES ${man3} DESTINATION man/man3)
 INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)
@@ -443,7 +487,7 @@ MESSAGE(STATUS "  Newline char/sequence ........... : " ${PCRE_NEWLINE})
 MESSAGE(STATUS "  \\R matches only ANYCRLF ......... : " ${PCRE_SUPPORT_BSR_ANYCRLF})
 MESSAGE(STATUS "  EBCDIC coding ................... : " ${PCRE_EBCDIC})
 MESSAGE(STATUS "  Rebuild char tables ............. : " ${PCRE_REBUILD_CHARTABLES})
-MESSAGE(STATUS "  Use stack recursion ............. : " ${PCRE_NO_RECURSE})
+MESSAGE(STATUS "  No stack recursion .............. : " ${PCRE_NO_RECURSE})
 MESSAGE(STATUS "  POSIX mem threshold ............. : " ${PCRE_POSIX_MALLOC_THRESHOLD})
 MESSAGE(STATUS "  Internal link size .............. : " ${PCRE_LINK_SIZE})
 MESSAGE(STATUS "  Match limit ..................... : " ${PCRE_MATCH_LIMIT})

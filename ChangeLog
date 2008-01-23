@@ -31,6 +31,9 @@ Version 7.6 21-Jan-08
     This is an attempt to solve the reported problem "pcrecpp::no_arg is not
     exported in the Windows port". It has not yet been confirmed that the patch
     solves the problem, but it does no harm.
+    
+6.  Applied Sheri's patch to CMakeLists.txt to add NON_STANDARD_LIB_PREFIX and
+    NON_STANDARD_LIB_SUFFIX and correct the comment about stack recursion. 
 
 
 Version 7.5 10-Jan-08
