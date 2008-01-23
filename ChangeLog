@@ -16,7 +16,7 @@ Version 7.6 21-Jan-08
 
     - Fixed PH's badly added libz and libbz2 support.
     - Fixed a problem with static linking.
-    - Added pcredemo.
+    - Added pcredemo. [But later removed - see 7 below.]
     - Fixed dftables problem and added an option.
     - Added a number of HAVE_XXX tests, including HAVE_WINDOWS_H and
         HAVE_LONG_LONG.
@@ -34,6 +34,12 @@ Version 7.6 21-Jan-08
     
 6.  Applied Sheri's patch to CMakeLists.txt to add NON_STANDARD_LIB_PREFIX and
     NON_STANDARD_LIB_SUFFIX and correct the comment about stack recursion. 
+    
+7.  Remove the automatic building of pcredemo from the ./configure system and
+    from CMakeLists.txt. The whole idea of pcredemo.c is that it is an example 
+    of a program that users should build themselves after PCRE is installed, so 
+    building it automatically is not really right. What is more, it gave 
+    trouble in some build environments.
 
 
 Version 7.5 10-Jan-08

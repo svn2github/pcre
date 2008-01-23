@@ -292,10 +292,15 @@ CLEANFILES += \
 	testtry \
         testNinput
 
-# PCRE demonstration program
-noinst_PROGRAMS += pcredemo
-pcredemo_SOURCES = pcredemo.c
-pcredemo_LDADD = libpcre.la
+
+# PCRE demonstration program. No longer built automatcally. The point is that
+# the users should build it themselves. So just distribute the source.
+# noinst_PROGRAMS += pcredemo
+# pcredemo_SOURCES = pcredemo.c
+# pcredemo_LDADD = libpcre.la
+
+EXTRA_DIST += pcredemo.c
+
 
 ## Utility rules, documentation, etc.
 

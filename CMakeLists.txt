@@ -24,6 +24,7 @@
 #            be built with suffix of "-0.dll". (The libraries will be named
 #            libpcre-0.dll, libpcreposix-0.dll and libpcrecpp-0.dll - same names
 #            built by default with Configure and Make.
+# 2008-01-23 PH removed the automatic build of pcredemo.
 
 PROJECT(PCRE C CXX)
 
@@ -361,12 +362,14 @@ TARGET_LINK_LIBRARIES(pcretest pcreposix ${PCRETEST_LIBS})
 ADD_EXECUTABLE(pcregrep pcregrep.c)
 TARGET_LINK_LIBRARIES(pcregrep pcreposix ${PCREGREP_LIBS})
 
-ADD_EXECUTABLE(pcredemo pcredemo.c)
-TARGET_LINK_LIBRARIES(pcredemo pcreposix)
-IF(NOT BUILD_SHARED_LIBS)
-    # make sure to not use declspec(dllimport) in static mode on windows
-	SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
-ENDIF(NOT BUILD_SHARED_LIBS)
+# Removed by PH (2008-01-23) because pcredemo shouldn't really be built
+# automatically, and it gave trouble in some environments anyway.
+# ADD_EXECUTABLE(pcredemo pcredemo.c)
+# TARGET_LINK_LIBRARIES(pcredemo pcreposix)
+# IF(NOT BUILD_SHARED_LIBS)
+#     # make sure to not use declspec(dllimport) in static mode on windows
+#	  SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
+# ENDIF(NOT BUILD_SHARED_LIBS)
 
 IF(PCRE_BUILD_PCRECPP)
 	ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
