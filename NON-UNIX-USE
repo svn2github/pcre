@@ -9,7 +9,7 @@ This document contains the following sections:
   Building for virtual Pascal
   Stack size in Windows environments
   Comments about Win32 builds
-  Building PCRE with CMake
+  Building PCRE on Windows with CMake
   Use of relative paths with CMake on Windows
   Testing with runtest.bat
   Building under Windows with BCC5.5
@@ -33,10 +33,12 @@ library consists entirely of code written in Standard C, and so should compile
 successfully on any system that has a Standard C compiler and library. The C++
 wrapper functions are a separate issue (see below).
 
-The PCRE distribution includes support for CMake. This support is relatively
-new, but has already been used successfully to build PCRE in multiple build
-environments on Windows. There are some instructions in the section entitled
-"Building PCRE with CMake" below.
+The PCRE distribution includes a "configure" file for use by the Configure/Make
+build system, as found in many Unix-like environments. There is also support
+support for CMake, which some users prefer, in particular in Windows
+environments. There are some instructions for CMake under Windows in the
+section entitled "Building PCRE with CMake" below. CMake can also be used to 
+build PCRE in Unix-like systems.
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
@@ -184,10 +186,9 @@ COMMENTS ABOUT WIN32 BUILDS (see also "BUILDING PCRE WITH CMAKE" below)
 There are two ways of building PCRE using the "configure, make, make install"
 paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
 the same thing; they are completely different from each other. There is also
-some experimental, undocumented support for building using "cmake", which you
-might like to try if you are familiar with "cmake". However, at the present
-time, the "cmake" process builds only a static library (not a dll), and the
-tests are not automatically run.
+support for building using CMake, which some users find a more straightforward 
+way of building PCRE under Windows. However, the tests are not run 
+automatically when CMake is used.
 
 The MinGW home page (http://www.mingw.org/) says this:
 
@@ -254,7 +255,7 @@ terminators in order to get some of the tests to work. We hope to improve
 things in this area in future.
 
 
-BUILDING PCRE WITH CMAKE
+BUILDING PCRE ON WINDOWS WITH CMAKE
 
 CMake is an alternative build facility that can be used instead of the
 traditional Unix "configure". CMake version 2.4.7 supports Borland makefiles,
@@ -262,29 +263,29 @@ MinGW makefiles, MSYS makefiles, NMake makefiles, UNIX makefiles, Visual Studio
 6, Visual Studio 7, Visual Studio 8, and Watcom W8. The following instructions
 were contributed by a PCRE user.
 
-1. Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
-   that cmake\bin is on your path.
-
-2. Unzip (retaining folder structure) the PCRE source tree into a source
-   directory such as C:\pcre.
-
-3. Create a new, empty build directory: C:\pcre\build\
-
-4. Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
-   for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
-
-5. Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
-   directories, respectively
-
-6. Hit the "Configure" button.
-
-7. Select the particular IDE / build tool that you are using (Visual Studio,
-   MSYS makefiles, MinGW makefiles, etc.)
-
-8. The GUI will then list several configuration options. This is where you can
-   enable UTF-8 support, etc.
-
-9. Hit "Configure" again. The adjacent "OK" button should now be active.
+1.  Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
+    that cmake\bin is on your path.
+    
+2.  Unzip (retaining folder structure) the PCRE source tree into a source
+    directory such as C:\pcre.
+    
+3.  Create a new, empty build directory: C:\pcre\build\
+    
+4.  Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
+    for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
+    
+5.  Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
+    directories, respectively
+    
+6.  Hit the "Configure" button.
+    
+7.  Select the particular IDE / build tool that you are using (Visual Studio,
+    MSYS makefiles, MinGW makefiles, etc.)
+    
+8.  The GUI will then list several configuration options. This is where you can
+    enable UTF-8 support, etc.
+    
+9.  Hit "Configure" again. The adjacent "OK" button should now be active.
 
 10. Hit "OK".
 
@@ -415,5 +416,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 20 January 2008
+Last Updated: 25 January 2008
 ****
