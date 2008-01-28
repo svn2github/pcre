@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.6 21-Jan-08
+Version 7.6 28-Jan-08
 ---------------------
 
 1.  A character class containing a very large number of characters with
@@ -37,7 +37,7 @@ Version 7.6 21-Jan-08
     solves the problem, but it does no harm.
 
 6.  Applied Sheri's patch to CMakeLists.txt to add NON_STANDARD_LIB_PREFIX and
-    NON_STANDARD_LIB_SUFFIX for dll names built with mingw when configured 
+    NON_STANDARD_LIB_SUFFIX for dll names built with mingw when configured
     with CMake, and also correct the comment about stack recursion.
 
 7.  Remove the automatic building of pcredemo from the ./configure system and
@@ -45,6 +45,8 @@ Version 7.6 21-Jan-08
     of a program that users should build themselves after PCRE is installed, so
     building it automatically is not really right. What is more, it gave
     trouble in some build environments.
+
+8.  Further tidies to CMakeLists.txt from Sheri and Christian.
 
 
 Version 7.5 10-Jan-08

@@ -4,7 +4,7 @@
 
 /* This is a demonstration program to illustrate the most straightforward ways
 of calling the PCRE regular expression library from a C program. See the
-pcresample documentation for a short discussion ("man pcresample" if you have 
+pcresample documentation for a short discussion ("man pcresample" if you have
 the PCRE man pages installed).
 
 In Unix-like environments, compile this program thuswise:
