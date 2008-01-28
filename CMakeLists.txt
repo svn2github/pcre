@@ -15,7 +15,7 @@
 #                PCRE_SUPPORT_LIBBZ2.
 # 2008-01-20 Brought up to date to include several new features by Christian
 #            Ehrlicher.
-# 2008-01-22 Sheri aded options for backward compatibility of library names when
+# 2008-01-22 Sheri added options for backward compatibility of library names when
 #            building with minGW:
 #            if "ON", NON_STANDARD_LIB_PREFIX causes shared libraries to
 #            be built without "lib" as prefix. (The libraries will be named pcre.dll,
@@ -44,24 +44,24 @@ INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckTypeSize)
 
-CHECK_INCLUDE_FILE(dirent.h	    HAVE_DIRENT_H)
-CHECK_INCLUDE_FILE(sys/stat.h	HAVE_SYS_STAT_H)
-CHECK_INCLUDE_FILE(sys/types.h	HAVE_SYS_TYPES_H)
-CHECK_INCLUDE_FILE(unistd.h	    HAVE_UNISTD_H)
-CHECK_INCLUDE_FILE(windows.h	HAVE_WINDOWS_H)
+CHECK_INCLUDE_FILE(dirent.h     HAVE_DIRENT_H)
+CHECK_INCLUDE_FILE(sys/stat.h   HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILE(sys/types.h  HAVE_SYS_TYPES_H)
+CHECK_INCLUDE_FILE(unistd.h     HAVE_UNISTD_H)
+CHECK_INCLUDE_FILE(windows.h    HAVE_WINDOWS_H)
 
-CHECK_INCLUDE_FILE_CXX(type_traits.h		HAVE_TYPE_TRAITS_H)
-CHECK_INCLUDE_FILE_CXX(bits/type_traits.h	HAVE_BITS_TYPE_TRAITS_H)
+CHECK_INCLUDE_FILE_CXX(type_traits.h            HAVE_TYPE_TRAITS_H)
+CHECK_INCLUDE_FILE_CXX(bits/type_traits.h       HAVE_BITS_TYPE_TRAITS_H)
 
-CHECK_FUNCTION_EXISTS(bcopy	HAVE_BCOPY)
-CHECK_FUNCTION_EXISTS(memmove	HAVE_MEMMOVE)
-CHECK_FUNCTION_EXISTS(strerror	HAVE_STRERROR)
-CHECK_FUNCTION_EXISTS(strtoll	HAVE_STRTOLL)
-CHECK_FUNCTION_EXISTS(strtoq	HAVE_STRTOQ)
+CHECK_FUNCTION_EXISTS(bcopy     HAVE_BCOPY)
+CHECK_FUNCTION_EXISTS(memmove   HAVE_MEMMOVE)
+CHECK_FUNCTION_EXISTS(strerror  HAVE_STRERROR)
+CHECK_FUNCTION_EXISTS(strtoll   HAVE_STRTOLL)
+CHECK_FUNCTION_EXISTS(strtoq    HAVE_STRTOQ)
 CHECK_FUNCTION_EXISTS(_strtoi64 HAVE__STRTOI64)
 
-CHECK_TYPE_SIZE("long long"		LONG_LONG)
-CHECK_TYPE_SIZE("unsigned long long"	UNSIGNED_LONG_LONG)
+CHECK_TYPE_SIZE("long long"             LONG_LONG)
+CHECK_TYPE_SIZE("unsigned long long"    UNSIGNED_LONG_LONG)
 
 # User-configurable options
 #
@@ -103,11 +103,16 @@ SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
 SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
 
-SET(NON_STANDARD_LIB_PREFIX OFF CACHE BOOL
-   "ON=Shared libraries built in mingw will be named pcre.dll, etc., instead of libpcre.dll, etc.")
 
-SET(NON_STANDARD_LIB_SUFFIX OFF CACHE BOOL
-   "ON=Shared libraries built in mingw will be named libpcre-0.dll, etc., instead of libpcre.dll, etc.")
+IF (MINGW)
+  OPTION(NON_STANDARD_LIB_PREFIX
+         "ON=Shared libraries built in mingw will be named pcre.dll, etc., instead of libpcre.dll, etc."
+         OFF)
+
+  OPTION(NON_STANDARD_LIB_SUFFIX
+         "ON=Shared libraries built in mingw will be named libpcre-0.dll, etc., instead of libpcre.dll, etc."
+         OFF)
+ENDIF(MINGW)
 
 # bzip2 lib
 IF(BZIP2_FOUND)
@@ -139,38 +144,38 @@ SET(pcre_have_type_traits 0)
 SET(pcre_have_bits_type_traits 0)
 
 IF(HAVE_TYPE_TRAITS_H)
-	SET(pcre_have_type_traits 1)
+        SET(pcre_have_type_traits 1)
 ENDIF(HAVE_TYPE_TRAITS_H)
 
 IF(HAVE_BITS_TYPE_TRAITS_H)
-	SET(pcre_have_bits_type_traits 1)
+        SET(pcre_have_bits_type_traits 1)
 ENDIF(HAVE_BITS_TYPE_TRAITS_H)
 
 SET(pcre_have_long_long 0)
 SET(pcre_have_ulong_long 0)
 
 IF(HAVE_LONG_LONG)
-	SET(pcre_have_long_long 1)
+        SET(pcre_have_long_long 1)
 ENDIF(HAVE_LONG_LONG)
 
 IF(HAVE_UNSIGNED_LONG_LONG)
-	SET(pcre_have_ulong_long 1)
+        SET(pcre_have_ulong_long 1)
 ENDIF(HAVE_UNSIGNED_LONG_LONG)
 
 IF(NOT BUILD_SHARED_LIBS)
-	SET(PCRE_STATIC 1)
+        SET(PCRE_STATIC 1)
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 IF(PCRE_SUPPORT_BSR_ANYCRLF)
-	SET(BSR_ANYCRLF 1)
+        SET(BSR_ANYCRLF 1)
 ENDIF(PCRE_SUPPORT_BSR_ANYCRLF)
 
 IF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
-	SET(SUPPORT_UTF8 1)
+        SET(SUPPORT_UTF8 1)
 ENDIF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
 
 IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
-	SET(SUPPORT_UCP 1)
+        SET(SUPPORT_UCP 1)
 ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 
 IF(PCRE_SUPPORT_LIBREADLINE)
@@ -191,31 +196,31 @@ ENDIF(PCRE_SUPPORT_LIBBZ2)
 SET(NEWLINE "")
 
 IF(PCRE_NEWLINE STREQUAL "LF")
-	SET(NEWLINE "10")
+        SET(NEWLINE "10")
 ENDIF(PCRE_NEWLINE STREQUAL "LF")
 IF(PCRE_NEWLINE STREQUAL "CR")
-	SET(NEWLINE "13")
+        SET(NEWLINE "13")
 ENDIF(PCRE_NEWLINE STREQUAL "CR")
 IF(PCRE_NEWLINE STREQUAL "CRLF")
-	SET(NEWLINE "3338")
+        SET(NEWLINE "3338")
 ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
 IF(PCRE_NEWLINE STREQUAL "ANY")
-	SET(NEWLINE "-1")
+        SET(NEWLINE "-1")
 ENDIF(PCRE_NEWLINE STREQUAL "ANY")
 IF(PCRE_NEWLINE STREQUAL "ANYCRLF")
-	SET(NEWLINE "-2")
+        SET(NEWLINE "-2")
 ENDIF(PCRE_NEWLINE STREQUAL "ANYCRLF")
 
 IF(NEWLINE STREQUAL "")
-	MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\", \"ANYCRLF\".")
+        MESSAGE(FATAL_ERROR "The PCRE_NEWLINE variable must be set to one of the following values: \"LF\", \"CR\", \"CRLF\", \"ANY\", \"ANYCRLF\".")
 ENDIF(NEWLINE STREQUAL "")
 
 IF(PCRE_EBCDIC)
-	SET(EBCDIC 1)
+        SET(EBCDIC 1)
 ENDIF(PCRE_EBCDIC)
 
 IF(PCRE_NO_RECURSE)
-	SET(NO_RECURSE 1)
+        SET(NO_RECURSE 1)
 ENDIF(PCRE_NO_RECURSE)
 
 # Output files
@@ -231,13 +236,13 @@ CONFIGURE_FILE(pcre.h.generic
 # What about pcre-config and libpcre.pc?
 
 IF(PCRE_BUILD_PCRECPP)
-	CONFIGURE_FILE(pcre_stringpiece.h.in
-		       ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
-		       @ONLY)
+        CONFIGURE_FILE(pcre_stringpiece.h.in
+                       ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
+                       @ONLY)
 
-	CONFIGURE_FILE(pcrecpparg.h.in
-		       ${CMAKE_BINARY_DIR}/pcrecpparg.h
-		       @ONLY)
+        CONFIGURE_FILE(pcrecpparg.h.in
+                       ${CMAKE_BINARY_DIR}/pcrecpparg.h
+                       @ONLY)
 ENDIF(PCRE_BUILD_PCRECPP)
 
 # Character table generation
@@ -252,8 +257,8 @@ IF(PCRE_REBUILD_CHARTABLES)
     COMMENT "Generating character tables (pcre_chartables.c) for current locale"
     DEPENDS dftables
     COMMAND ${DFTABLES_EXE}
-    ARGS	${CMAKE_BINARY_DIR}/pcre_chartables.c
-    OUTPUT	${CMAKE_BINARY_DIR}/pcre_chartables.c
+    ARGS        ${CMAKE_BINARY_DIR}/pcre_chartables.c
+    OUTPUT      ${CMAKE_BINARY_DIR}/pcre_chartables.c
   )
 ELSE(PCRE_REBUILD_CHARTABLES)
   CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/pcre_chartables.c.dist
@@ -300,9 +305,9 @@ SET(PCRECPP_HEADERS
 )
 
 SET(PCRECPP_SOURCES
-	pcrecpp.cc
-	pcre_scanner.cc
-	pcre_stringpiece.cc
+        pcrecpp.cc
+        pcre_scanner.cc
+        pcre_stringpiece.cc
 )
 
 # Build setup
@@ -310,7 +315,7 @@ SET(PCRECPP_SOURCES
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 
 IF(MSVC)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
+        ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
 ENDIF(MSVC)
 
 SET(CMAKE_INCLUDE_CURRENT_DIR 1)
@@ -321,38 +326,45 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Libraries
-
+# pcre
 ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES} ${CMAKE_BINARY_DIR}/config.h)
 ADD_LIBRARY(pcreposix ${PCREPOSIX_HEADERS} ${PCREPOSIX_SOURCES})
 TARGET_LINK_LIBRARIES(pcreposix pcre)
-
-IF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
-SET_TARGET_PROPERTIES(pcre pcreposix
+IF(MINGW AND NOT PCRE_STATIC)
+  IF(NON_STANDARD_LIB_PREFIX)
+    SET_TARGET_PROPERTIES(pcre pcreposix
                         PROPERTIES PREFIX ""
-)
-ENDIF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
+    )
+  ENDIF(NON_STANDARD_LIB_PREFIX)
 
-IF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
-SET_TARGET_PROPERTIES(pcre pcreposix
+  IF(NON_STANDARD_LIB_SUFFIX)
+    SET_TARGET_PROPERTIES(pcre pcreposix
                         PROPERTIES SUFFIX "-0.dll"
-)
-ENDIF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
+    )
+  ENDIF(NON_STANDARD_LIB_SUFFIX)
+ENDIF(MINGW AND NOT PCRE_STATIC)
 
+
+# pcrecpp
 IF(PCRE_BUILD_PCRECPP)
   ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
   TARGET_LINK_LIBRARIES(pcrecpp pcre)
-IF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
-SET_TARGET_PROPERTIES(pcrecpp
-                        PROPERTIES PREFIX ""
-)
-ENDIF(MINGW AND NON_STANDARD_LIB_PREFIX AND NOT PCRE_STATIC)
-IF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
-SET_TARGET_PROPERTIES(pcrecpp
-                        PROPERTIES SUFFIX "-0.dll"
-)
-ENDIF(MINGW AND NON_STANDARD_LIB_SUFFIX AND NOT PCRE_STATIC)
 
+  IF(MINGW AND NOT PCRE_STATIC)
+    IF(NON_STANDARD_LIB_PREFIX)
+      SET_TARGET_PROPERTIES(pcrecpp
+                            PROPERTIES PREFIX ""
+      )
+    ENDIF(NON_STANDARD_LIB_PREFIX)
+
+    IF(NON_STANDARD_LIB_SUFFIX)
+      SET_TARGET_PROPERTIES(pcrecpp
+                          PROPERTIES SUFFIX "-0.dll"
+      )
+    ENDIF(NON_STANDARD_LIB_SUFFIX)
+  ENDIF(MINGW AND NOT PCRE_STATIC)
 ENDIF(PCRE_BUILD_PCRECPP)
+
 
 # Executables
 
@@ -368,12 +380,12 @@ TARGET_LINK_LIBRARIES(pcregrep pcreposix ${PCREGREP_LIBS})
 # TARGET_LINK_LIBRARIES(pcredemo pcreposix)
 # IF(NOT BUILD_SHARED_LIBS)
 #     # make sure to not use declspec(dllimport) in static mode on windows
-#	  SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
+#         SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
 # ENDIF(NOT BUILD_SHARED_LIBS)
 
 IF(PCRE_BUILD_PCRECPP)
-	ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
-	TARGET_LINK_LIBRARIES(pcrecpp_unittest pcrecpp)
+        ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
+        TARGET_LINK_LIBRARIES(pcrecpp_unittest pcrecpp)
 IF(MINGW AND NON_STANDARD_LIB_NAMES AND NOT PCRE_STATIC)
 SET_TARGET_PROPERTIES(pcrecpp
                         PROPERTIES PREFIX ""
@@ -381,11 +393,11 @@ SET_TARGET_PROPERTIES(pcrecpp
 ENDIF(MINGW AND NON_STANDARD_LIB_NAMES AND NOT PCRE_STATIC)
 
 
-	ADD_EXECUTABLE(pcre_scanner_unittest pcre_scanner_unittest.cc)
-	TARGET_LINK_LIBRARIES(pcre_scanner_unittest pcrecpp)
+        ADD_EXECUTABLE(pcre_scanner_unittest pcre_scanner_unittest.cc)
+        TARGET_LINK_LIBRARIES(pcre_scanner_unittest pcrecpp)
 
-	ADD_EXECUTABLE(pcre_stringpiece_unittest pcre_stringpiece_unittest.cc)
-	TARGET_LINK_LIBRARIES(pcre_stringpiece_unittest pcrecpp)
+        ADD_EXECUTABLE(pcre_stringpiece_unittest pcre_stringpiece_unittest.cc)
+        TARGET_LINK_LIBRARIES(pcre_stringpiece_unittest pcrecpp)
 ENDIF(PCRE_BUILD_PCRECPP)
 
 # Testing
@@ -406,11 +418,11 @@ SET(ENV{pcretest} ${PCRETEST_EXE})
 ")
 
 IF(UNIX)
-	ADD_TEST(pcre_test	${CMAKE_SOURCE_DIR}/RunTest)
-	ADD_TEST(pcre_grep_test ${CMAKE_SOURCE_DIR}/RunGrepTest)
+        ADD_TEST(pcre_test      ${CMAKE_SOURCE_DIR}/RunTest)
+        ADD_TEST(pcre_grep_test ${CMAKE_SOURCE_DIR}/RunGrepTest)
 ENDIF(UNIX)
 IF(WIN32)
-	ADD_TEST(pcre_test cmd /C ${CMAKE_SOURCE_DIR}/RunTest.bat)
+        ADD_TEST(pcre_test cmd /C ${CMAKE_SOURCE_DIR}/RunTest.bat)
 ENDIF(WIN32)
 
 GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
@@ -445,20 +457,20 @@ FILE(GLOB man1 ${CMAKE_SOURCE_DIR}/doc/*.1)
 FILE(GLOB man3 ${CMAKE_SOURCE_DIR}/doc/*.3)
 
 IF(PCRE_BUILD_PCRECPP)
-	INSTALL(TARGETS pcrecpp
-		RUNTIME DESTINATION bin
-		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib)
-	INSTALL(FILES ${PCRECPP_HEADERS} DESTINATION include)
+        INSTALL(TARGETS pcrecpp
+                RUNTIME DESTINATION bin
+                LIBRARY DESTINATION lib
+                ARCHIVE DESTINATION lib)
+        INSTALL(FILES ${PCRECPP_HEADERS} DESTINATION include)
 ELSE(PCRE_BUILD_PCRECPP)
-	# Remove pcrecpp.3
-	FOREACH(man ${man3})
-		GET_FILENAME_COMPONENT(man_tmp ${man} NAME)
-		IF(NOT man_tmp STREQUAL "pcrecpp.3")
-			SET(man3_new ${man3} ${man})
-		ENDIF(NOT man_tmp STREQUAL "pcrecpp.3")
-	ENDFOREACH(man ${man3})
-	SET(man3 ${man3_new})
+        # Remove pcrecpp.3
+        FOREACH(man ${man3})
+                GET_FILENAME_COMPONENT(man_tmp ${man} NAME)
+                IF(NOT man_tmp STREQUAL "pcrecpp.3")
+                        SET(man3_new ${man3} ${man})
+                ENDIF(NOT man_tmp STREQUAL "pcrecpp.3")
+        ENDFOREACH(man ${man3})
+        SET(man3 ${man3_new})
 ENDIF(PCRE_BUILD_PCRECPP)
 
 
@@ -500,14 +512,22 @@ MESSAGE(STATUS "  Build static libs ............... : " ${BUILD_STATIC_LIBS})
 IF(ZLIB_FOUND)
   MESSAGE(STATUS "  Link pcregrep with libz ......... : " ${PCRE_SUPPORT_LIBZ})
 ELSE(ZLIB_FOUND)
-  MESSAGE(STATUS "  Link pcregrep with libz ......... :   zlib libraries not found!" )
+  MESSAGE(STATUS "  Link pcregrep with libz ......... : None" )
 ENDIF(ZLIB_FOUND)
 IF(BZIP2_FOUND)
   MESSAGE(STATUS "  Link pcregrep with libbz2 ....... : " ${PCRE_SUPPORT_LIBBZ2})
 ELSE(BZIP2_FOUND)
-  MESSAGE(STATUS "  Link pcregrep with libbz2 ....... :   bzip2 libraries not found!" )
+  MESSAGE(STATUS "  Link pcregrep with libbz2 ....... : None" )
 ENDIF(BZIP2_FOUND)
-MESSAGE(STATUS "  Link pcretest with libreadline .. : " ${PCRE_SUPPORT_LIBREADLINE})
+IF(NOT PCRE_SUPPORT_LIBREADLINE)
+  MESSAGE(STATUS "  Link pcretest with libreadline .. : None" )
+ELSE(NOT PCRE_SUPPORT_LIBREADLINE)
+  MESSAGE(STATUS "  Link pcretest with libreadline .. : " ${PCRE_SUPPORT_LIBREADLINE})
+ENDIF(NOT PCRE_SUPPORT_LIBREADLINE)
+IF(MINGW AND NOT PCRE_STATIC)
+  MESSAGE(STATUS "  Non-standard dll names (prefix) . : " ${NON_STANDARD_LIB_PREFIX})
+  MESSAGE(STATUS "  Non-standard dll names (suffix) . : " ${NON_STANDARD_LIB_SUFFIX})
+ENDIF(MINGW AND NOT PCRE_STATIC)
 MESSAGE(STATUS "")
 
 # end CMakeLists.txt
