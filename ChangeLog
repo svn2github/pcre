@@ -11,6 +11,9 @@ Version 7.7 05-Mar-08
 2.  Applied Craig's patch to pcrecpp.cc to restore ABI compatibility with
     pre-7.6 versions, which defined a global no_arg variable instead of putting
     it in the RE class.
+    
+3.  Remove a line of dead code, identified by coverity and reported by Nuno 
+    Lopes. 
 
 
 Version 7.6 28-Jan-08

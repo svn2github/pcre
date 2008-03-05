@@ -2113,7 +2113,6 @@ if (next >= 0) switch(op_code)
   /* For OP_NOT, "item" must be a single-byte character. */
 
   case OP_NOT:
-  if (next < 0) return FALSE;  /* Not a character */
   if (item == next) return TRUE;
   if ((options & PCRE_CASELESS) == 0) return FALSE;
 #ifdef SUPPORT_UTF8
