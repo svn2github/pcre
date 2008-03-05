@@ -57,6 +57,14 @@ static const int kVecSize = (1 + kMaxArgs) * 3;  // results + PCRE workspace
 // Special object that stands-in for no argument
 Arg RE::no_arg((void*)NULL);
 
+// This is for ABI compatibility with old versions of pcre (pre-7.6),
+// which defined a global no_arg variable instead of putting it in the
+// RE class.  This works on GCC >= 3, at least.  We could probably have
+// a more inclusive test if we ever needed it.
+#if defined(__GNUC__) && __GNUC__ >= 3
+extern Arg no_arg __attribute__((alias("_ZN7pcrecpp2RE6no_argE")));
+#endif
+
 // If a regular expression has no error, its error_ field points here
 static const string empty_string;
 
