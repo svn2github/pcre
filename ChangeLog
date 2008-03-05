@@ -1,6 +1,14 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.7 05-Mar-08
+---------------------
+
+1.  Applied Craig's patch to sort out a long long problem: "If we can't convert
+    a string to a long long, pretend we don't even have a long long." This is 
+    done by checking for the strtoq, strtoll, and _strtoi64 functions.
+
+
 Version 7.6 28-Jan-08
 ---------------------
 

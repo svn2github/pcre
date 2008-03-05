@@ -7,9 +7,9 @@ dnl be defined as -RC2, for example. For real releases, it should be defined
 dnl empty.
 
 m4_define(pcre_major, [7])
-m4_define(pcre_minor, [6])
-m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2008-01-28])
+m4_define(pcre_minor, [7])
+m4_define(pcre_prerelease, [-RC1])
+m4_define(pcre_date, [2008-03-05])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -301,18 +301,27 @@ AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xy
 AC_C_CONST
 AC_TYPE_SIZE_T
 
-AC_CHECK_TYPES([long long],
-               [pcre_have_long_long="1"],
-               [pcre_have_long_long="0"])
-AC_CHECK_TYPES([unsigned long long],
-               [pcre_have_ulong_long="1"],
-               [pcre_have_ulong_long="0"])
+pcre_have_strotolonglong=0
+AC_CHECK_FUNCS(strtoq strtoll _strtoi64, [pcre_have_strotolonglong="1"; break])
+# If we can't convert a string to a long long, pretend we don't even
+# have a long long.
+if test $pcre_have_strotolonglong = "0"; then
+   pcre_have_long_long="0"
+   pcre_have_ulong_long="0"
+else
+  AC_CHECK_TYPES([long long],
+                 [pcre_have_long_long="1"],
+                 [pcre_have_long_long="0"])
+  AC_CHECK_TYPES([unsigned long long],
+                 [pcre_have_ulong_long="1"],
+                 [pcre_have_ulong_long="0"])
+fi
 AC_SUBST(pcre_have_long_long)
 AC_SUBST(pcre_have_ulong_long)
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll _strtoi64)
+AC_CHECK_FUNCS(bcopy memmove strerror)
 
 # Check for the availability of libz (aka zlib)
 
