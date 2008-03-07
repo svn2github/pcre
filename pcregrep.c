@@ -1383,17 +1383,20 @@ if ((sep = isdirectory(pathname)) != 0)
 
     while ((nextfile = readdirectory(dir)) != NULL)
       {
-      int frc, blen;
+      int frc, nflen;
       sprintf(buffer, "%.512s%c%.128s", pathname, sep, nextfile);
-      blen = strlen(buffer);
-
-      if (exclude_compiled != NULL &&
-          pcre_exec(exclude_compiled, NULL, buffer, blen, 0, 0, NULL, 0) >= 0)
-        continue;
-
-      if (include_compiled != NULL &&
-          pcre_exec(include_compiled, NULL, buffer, blen, 0, 0, NULL, 0) < 0)
-        continue;
+      nflen = strlen(nextfile);
+      
+      if (!isdirectory(buffer))
+        { 
+        if (exclude_compiled != NULL &&
+            pcre_exec(exclude_compiled, NULL, nextfile, nflen, 0, 0, NULL, 0) >= 0)
+          continue;
+        
+        if (include_compiled != NULL &&
+            pcre_exec(include_compiled, NULL, nextfile, nflen, 0, 0, NULL, 0) < 0)
+          continue;
+        }   
 
       frc = grep_or_recurse(buffer, dir_recurse, FALSE);
       if (frc > 1) rc = frc;

@@ -14,6 +14,18 @@ Version 7.7 05-Mar-08
     
 3.  Remove a line of dead code, identified by coverity and reported by Nuno 
     Lopes. 
+    
+4.  Fixed two related pcregrep bugs involving -r with --include or --exclude:
+
+    (1) The include/exclude patterns were being applied to the whole pathnames
+        of files, instead of just to the final components. 
+    
+    (2) If there was more than one level of directory, the subdirectories were
+        skipped unless they satisfied the include/exclude conditions. This is
+        inconsistent with GNU grep (and could even be seen as contrary to the
+        pcregrep specification - which I improved to make it absolutely clear).
+        The action now is always to scan all levels of directory, and just
+        apply the include/exclude patterns to regular files.
 
 
 Version 7.6 28-Jan-08

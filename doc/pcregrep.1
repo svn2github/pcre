@@ -157,10 +157,12 @@ that matched.
 .TP
 \fB--exclude\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
-the \fB-r\fP (recursive search) option, any files whose names match the pattern
-are excluded. The pattern is a PCRE regular expression. If a file name matches
-both \fB--include\fP and \fB--exclude\fP, it is excluded. There is no short
-form for this option.
+the \fB-r\fP (recursive search) option, any regular files whose names match the
+pattern are excluded (subdirectories are not excluded; they are searched
+recursively). The pattern is a PCRE regular expression, and is matched against
+the final component of the file name (not the entire path). If a file name
+matches both \fB--include\fP and \fB--exclude\fP, it is excluded. There is no
+short form for this option.
 .TP
 \fB-F\fP, \fB--fixed-strings\fP
 Interpret each pattern as a list of fixed strings, separated by newlines,
@@ -212,10 +214,12 @@ Ignore upper/lower case distinctions during comparisons.
 .TP
 \fB--include\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
-the \fB-r\fP (recursive search) option, only those files whose names match the
-pattern are included. The pattern is a PCRE regular expression. If a file name
-matches both \fB--include\fP and \fB--exclude\fP, it is excluded. There is no
-short form for this option.
+the \fB-r\fP (recursive search) option, only those regular files whose names
+match the pattern are included (but subdirectories are always included and 
+searched recursively). The pattern is a PCRE regular expression, and is matched 
+against the final component of the file name (not the entire path). If a file
+name matches both \fB--include\fP and \fB--exclude\fP, it is excluded. There is
+no short form for this option.
 .TP
 \fB-L\fP, \fB--files-without-match\fP
 Instead of outputting lines from the files, just output the names of the files
@@ -434,6 +438,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 December 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 07 March 2008
+Copyright (c) 1997-2008 University of Cambridge.
 .fi
