@@ -158,7 +158,7 @@ static const char verbnames[] =
   "SKIP\0"
   "THEN";
 
-static verbitem verbs[] = {
+static const verbitem verbs[] = {
   { 6, OP_ACCEPT },
   { 6, OP_COMMIT },
   { 1, OP_FAIL },
@@ -168,7 +168,7 @@ static verbitem verbs[] = {
   { 4, OP_THEN  }
 };
 
-static int verbcount = sizeof(verbs)/sizeof(verbitem);
+static const int verbcount = sizeof(verbs)/sizeof(verbitem);
 
 
 /* Tables of names of POSIX character classes and their lengths. The names are

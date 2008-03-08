@@ -33,6 +33,9 @@ Version 7.7 05-Mar-08
 6.  Applied Craig's patch to the QuoteMeta function so that it escapes the
     NUL character as backslash + 0 rather than backslash + NUL, because PCRE 
     doesn't support NULs in patterns.
+    
+7.  Added some missing "const"s to declarations of static tables in 
+    pcre_compile.c and pcre_dfa_exec.c. 
 
 
 Version 7.6 28-Jan-08

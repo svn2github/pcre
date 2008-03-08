@@ -84,7 +84,7 @@ centralize the loading of these characters. In the case of Type * etc, the
 small value. ***NOTE*** If the start of this table is modified, the two tables
 that follow must also be modified. */
 
-static uschar coptable[] = {
+static const uschar coptable[] = {
   0,                             /* End                                    */
   0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
   0, 0, 0, 0, 0, 0,              /* \D, \d, \S, \s, \W, \w                 */
@@ -138,7 +138,7 @@ static uschar coptable[] = {
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
 and \w */
 
-static uschar toptable1[] = {
+static const uschar toptable1[] = {
   0, 0, 0, 0, 0, 0,
   ctype_digit, ctype_digit,
   ctype_space, ctype_space,
@@ -146,7 +146,7 @@ static uschar toptable1[] = {
   0                               /* OP_ANY */
 };
 
-static uschar toptable2[] = {
+static const uschar toptable2[] = {
   0, 0, 0, 0, 0, 0,
   ctype_digit, 0,
   ctype_space, 0,
