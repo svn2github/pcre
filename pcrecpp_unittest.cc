@@ -497,6 +497,7 @@ static void TestQuotaMetaSimple() {
   TestQuoteMeta("((a|b)c?d*e+[f-h]i)");
   TestQuoteMeta("((?!)xxx).*yyy");
   TestQuoteMeta("([");
+  TestQuoteMeta(string("foo\0bar", 7));
 }
 
 static void TestQuoteMetaSimpleNegative() {

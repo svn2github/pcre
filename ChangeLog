@@ -29,6 +29,10 @@ Version 7.7 05-Mar-08
         
 5.  Added the --include_dir and --exclude_dir patterns to pcregrep, and used
     --exclude_dir in the tests to avoid scanning .svn directories. 
+    
+6.  Applied Craig's patch to the QuoteMeta function so that it escapes the
+    NUL character as backslash + 0 rather than backslash + NUL, because PCRE 
+    doesn't support NULs in patterns.
 
 
 Version 7.6 28-Jan-08

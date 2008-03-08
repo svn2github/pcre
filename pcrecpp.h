@@ -620,6 +620,9 @@ class PCRECPP_EXP_DEFN RE {
   //           1.5-2.0?
   // may become:
   //           1\.5\-2\.0\?
+  // Note QuoteMeta behaves the same as perl's QuoteMeta function,
+  // *except* that it escapes the NUL character (\0) as backslash + 0,
+  // rather than backslash + NUL.
   static string QuoteMeta(const StringPiece& unquoted);
 
 

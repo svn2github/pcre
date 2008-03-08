@@ -449,21 +449,27 @@ bool RE::Extract(const StringPiece& rewrite,
   // Note that it's legal to escape a character even if it has no
   // special meaning in a regular expression -- so this function does
   // that.  (This also makes it identical to the perl function of the
-  // same name; see `perldoc -f quotemeta`.)
+  // same name; see `perldoc -f quotemeta`.)  The one exception is
+  // escaping NUL: rather than doing backslash + NUL, like perl does,
+  // we do '\0', because pcre itself doesn't take embedded NUL chars.
   for (int ii = 0; ii < unquoted.size(); ++ii) {
     // Note that using 'isalnum' here raises the benchmark time from
     // 32ns to 58ns:
-    if ((unquoted[ii] < 'a' || unquoted[ii] > 'z') &&
-        (unquoted[ii] < 'A' || unquoted[ii] > 'Z') &&
-        (unquoted[ii] < '0' || unquoted[ii] > '9') &&
-        unquoted[ii] != '_' &&
-        // If this is the part of a UTF8 or Latin1 character, we need
-        // to copy this byte without escaping.  Experimentally this is
-        // what works correctly with the regexp library.
-        !(unquoted[ii] & 128)) {
+    if (unquoted[ii] == '\0') {
+      result += "\\0";
+    } else if ((unquoted[ii] < 'a' || unquoted[ii] > 'z') &&
+               (unquoted[ii] < 'A' || unquoted[ii] > 'Z') &&
+               (unquoted[ii] < '0' || unquoted[ii] > '9') &&
+               unquoted[ii] != '_' &&
+               // If this is the part of a UTF8 or Latin1 character, we need
+               // to copy this byte without escaping.  Experimentally this is
+               // what works correctly with the regexp library.
+               !(unquoted[ii] & 128)) {
       result += '\\';
+      result += unquoted[ii];
+    } else {
+      result += unquoted[ii];
     }
-    result += unquoted[ii];
   }
 
   return result;
