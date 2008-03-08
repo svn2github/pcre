@@ -158,11 +158,21 @@ that matched.
 \fB--exclude\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
 the \fB-r\fP (recursive search) option, any regular files whose names match the
-pattern are excluded (subdirectories are not excluded; they are searched
-recursively). The pattern is a PCRE regular expression, and is matched against
-the final component of the file name (not the entire path). If a file name
-matches both \fB--include\fP and \fB--exclude\fP, it is excluded. There is no
-short form for this option.
+pattern are excluded. Subdirectories are not excluded by this option; they are
+searched recursively, subject to the \fB--exclude_dir\fP and
+\fB--include_dir\fP options. The pattern is a PCRE regular expression, and is
+matched against the final component of the file name (not the entire path). If
+a file name matches both \fB--include\fP and \fB--exclude\fP, it is excluded.
+There is no short form for this option.
+.TP
+\fB--exclude_dir\fP=\fIpattern\fP
+When \fBpcregrep\fP is searching the contents of a directory as a consequence
+of the \fB-r\fP (recursive search) option, any subdirectories whose names match
+the pattern are excluded. (Note that the \fP--exclude\fP option does not affect
+subdirectories.) The pattern is a PCRE regular expression, and is matched
+against the final component of the name (not the entire path). If a
+subdirectory name matches both \fB--include_dir\fP and \fB--exclude_dir\fP, it
+is excluded. There is no short form for this option.
 .TP
 \fB-F\fP, \fB--fixed-strings\fP
 Interpret each pattern as a list of fixed strings, separated by newlines,
@@ -215,11 +225,21 @@ Ignore upper/lower case distinctions during comparisons.
 \fB--include\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
 the \fB-r\fP (recursive search) option, only those regular files whose names
-match the pattern are included (but subdirectories are always included and 
-searched recursively). The pattern is a PCRE regular expression, and is matched 
-against the final component of the file name (not the entire path). If a file
-name matches both \fB--include\fP and \fB--exclude\fP, it is excluded. There is
-no short form for this option.
+match the pattern are included. Subdirectories are always included and searched
+recursively, subject to the \fP--include_dir\fP and \fB--exclude_dir\fP
+options. The pattern is a PCRE regular expression, and is matched against the
+final component of the file name (not the entire path). If a file name matches
+both \fB--include\fP and \fB--exclude\fP, it is excluded. There is no short
+form for this option.
+.TP
+\fB--include_dir\fP=\fIpattern\fP
+When \fBpcregrep\fP is searching the contents of a directory as a consequence
+of the \fB-r\fP (recursive search) option, only those subdirectories whose
+names match the pattern are included. (Note that the \fB--include\fP option
+does not affect subdirectories.) The pattern is a PCRE regular expression, and
+is matched against the final component of the name (not the entire path). If a
+subdirectory name matches both \fB--include_dir\fP and \fB--exclude_dir\fP, it
+is excluded. There is no short form for this option.
 .TP
 \fB-L\fP, \fB--files-without-match\fP
 Instead of outputting lines from the files, just output the names of the files
@@ -438,6 +458,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 March 2008
+Last updated: 08 March 2008
 Copyright (c) 1997-2008 University of Cambridge.
 .fi

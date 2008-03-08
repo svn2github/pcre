@@ -139,9 +139,13 @@ static pcre_extra **hints_list = NULL;
 
 static char *include_pattern = NULL;
 static char *exclude_pattern = NULL;
+static char *include_dir_pattern = NULL;
+static char *exclude_dir_pattern = NULL;
 
 static pcre *include_compiled = NULL;
 static pcre *exclude_compiled = NULL;
+static pcre *include_dir_compiled = NULL;
+static pcre *exclude_dir_compiled = NULL;
 
 static int after_context = 0;
 static int before_context = 0;
@@ -181,15 +185,17 @@ typedef struct option_item {
 /* Options without a single-letter equivalent get a negative value. This can be
 used to identify them. */
 
-#define N_COLOUR    (-1)
-#define N_EXCLUDE   (-2)
-#define N_HELP      (-3)
-#define N_INCLUDE   (-4)
-#define N_LABEL     (-5)
-#define N_LOCALE    (-6)
-#define N_NULL      (-7)
-#define N_LOFFSETS  (-8)
-#define N_FOFFSETS  (-9)
+#define N_COLOUR       (-1)
+#define N_EXCLUDE      (-2)
+#define N_EXCLUDE_DIR  (-3)
+#define N_HELP         (-4)
+#define N_INCLUDE      (-5)
+#define N_INCLUDE_DIR  (-6)
+#define N_LABEL        (-7)
+#define N_LOCALE       (-8)
+#define N_NULL         (-9)
+#define N_LOFFSETS     (-10)
+#define N_FOFFSETS     (-11)
 
 static option_item optionlist[] = {
   { OP_NODATA,    N_NULL,   NULL,              "",              "  terminate options" },
@@ -222,6 +228,8 @@ static option_item optionlist[] = {
   { OP_NODATA,    'r',      NULL,              "recursive",     "recursively scan sub-directories" },
   { OP_STRING,    N_EXCLUDE,&exclude_pattern,  "exclude=pattern","exclude matching files when recursing" },
   { OP_STRING,    N_INCLUDE,&include_pattern,  "include=pattern","include matching files when recursing" },
+  { OP_STRING,    N_EXCLUDE_DIR,&exclude_dir_pattern, "exclude_dir=pattern","exclude matching directories when recursing" },
+  { OP_STRING,    N_INCLUDE_DIR,&include_dir_pattern, "include_dir=pattern","include matching directories when recursing" },
 #ifdef JFRIEDL_DEBUG
   { OP_OP_NUMBER, 'S',      &S_arg,            "jeffS",         "replace matched (sub)string with X" },
 #endif
@@ -1361,8 +1369,9 @@ if (strcmp(pathname, "-") == 0)
   }
 
 /* If the file is a directory, skip if skipping or if we are recursing, scan
-each file within it, subject to any include or exclude patterns that were set.
-The scanning code is localized so it can be made system-specific. */
+each file and directory within it, subject to any include or exclude patterns
+that were set. The scanning code is localized so it can be made
+system-specific. */
 
 if ((sep = isdirectory(pathname)) != 0)
   {
@@ -1387,7 +1396,17 @@ if ((sep = isdirectory(pathname)) != 0)
       sprintf(buffer, "%.512s%c%.128s", pathname, sep, nextfile);
       nflen = strlen(nextfile);
       
-      if (!isdirectory(buffer))
+      if (isdirectory(buffer))
+        {
+        if (exclude_dir_compiled != NULL &&
+            pcre_exec(exclude_dir_compiled, NULL, nextfile, nflen, 0, 0, NULL, 0) >= 0)
+          continue;
+        
+        if (include_dir_compiled != NULL &&
+            pcre_exec(include_dir_compiled, NULL, nextfile, nflen, 0, 0, NULL, 0) < 0)
+          continue;
+        }
+      else     
         { 
         if (exclude_compiled != NULL &&
             pcre_exec(exclude_compiled, NULL, nextfile, nflen, 0, 0, NULL, 0) >= 0)
@@ -2287,6 +2306,30 @@ if (include_pattern != NULL)
   if (include_compiled == NULL)
     {
     fprintf(stderr, "pcregrep: Error in 'include' regex at offset %d: %s\n",
+      errptr, error);
+    goto EXIT2;
+    }
+  }
+
+if (exclude_dir_pattern != NULL)
+  {
+  exclude_dir_compiled = pcre_compile(exclude_dir_pattern, 0, &error, &errptr,
+    pcretables);
+  if (exclude_dir_compiled == NULL)
+    {
+    fprintf(stderr, "pcregrep: Error in 'exclude_dir' regex at offset %d: %s\n",
+      errptr, error);
+    goto EXIT2;
+    }
+  }
+
+if (include_dir_pattern != NULL)
+  {
+  include_dir_compiled = pcre_compile(include_dir_pattern, 0, &error, &errptr,
+    pcretables);
+  if (include_dir_compiled == NULL)
+    {
+    fprintf(stderr, "pcregrep: Error in 'include_dir' regex at offset %d: %s\n",
       errptr, error);
     goto EXIT2;
     }
