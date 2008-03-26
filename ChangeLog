@@ -36,6 +36,9 @@ Version 7.7 05-Mar-08
     
 7.  Added some missing "const"s to declarations of static tables in 
     pcre_compile.c and pcre_dfa_exec.c. 
+    
+8.  Applied Craig's patch to pcrecpp.cc to fix a problem in OS X that was
+    caused by fix #2  above. 
 
 
 Version 7.6 28-Jan-08
