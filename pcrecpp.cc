@@ -64,17 +64,20 @@ Arg RE::no_arg((void*)NULL);
 // only the __attribute__ syntax, but also __USER_LABEL_PREFIX__, are
 // gnu-specific.)
 #if defined(__GNUC__) && __GNUC__ >= 3
-#if defined(__ELF__)
+# define AS_STRING(x)   AS_STRING_INTERNAL(x)
+# define AS_STRING_INTERNAL(x)   #x
+# define USER_LABEL_PREFIX  AS_STRING(__USER_LABEL_PREFIX__)
+# if defined(__ELF__)
 extern Arg no_arg
-  __attribute__((alias(__USER_LABEL_PREFIX__ "_ZN7pcrecpp2RE6no_argE")));
-#else
+  __attribute__((alias(USER_LABEL_PREFIX "_ZN7pcrecpp2RE6no_argE")));
+# else
 // While we know elf supports strong aliases, not all formats do (Mach
 // doesn't, for instance).  So make aliases weak by default.  This is
 // a smidge less safe in theory (conceivably, someone could override
 // this symbol in their own binary), but perfectly ok in practice.
 extern Arg no_arg
-  __attribute__((weak, alias(__USER_LABEL_PREFIX__ "_ZN7pcrecpp2RE6no_argE")));
-#endif
+  __attribute__((weak, alias(USER_LABEL_PREFIX "_ZN7pcrecpp2RE6no_argE")));
+# endif
 #endif
 
 // If a regular expression has no error, its error_ field points here
