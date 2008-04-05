@@ -60,6 +60,11 @@ then
   fi
 fi
 
+# AC_PROG_CXX will return "g++" even if no c++ compiler is installed.
+# Check for that case, and just disable c++ code if g++ doesn't run.
+AC_LANG_PUSH(C++)
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([],[]),, CXX=""; CXXCP=""; CXXFLAGS="")
+AC_LANG_POP
 
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
@@ -277,6 +282,30 @@ if test "x$enable_cpp" = "xyes" -a -n "$CXX"
 then
 AC_LANG_PUSH(C++)
 
+# Older versions of pcre defined pcrecpp::no_arg, but in new versions
+# it's called pcrecpp::RE::no_arg.  For backwards ABI compatibility,
+# we want to make one an alias for the other.  Different systems do
+# this in different ways.  Some systems, for instance, can do it via
+# a linker flag: -alias (for os x 10.5) or -i (for os x <=10.4).
+OLD_LDFLAGS="$LDFLAGS"
+for flag in "-alias,__ZN7pcrecpp2RE6no_argE,__ZN7pcrecpp6no_argE" \
+            "-i__ZN7pcrecpp6no_argE:__ZN7pcrecpp2RE6no_argE"; do
+  AC_MSG_CHECKING([for alias support in the linker])
+  LDFLAGS="$OLD_LDFLAGS -Wl,$flag"
+  # We try to run the linker with this new ld flag.  If the link fails,
+  # we give up and remove the new flag from LDFLAGS.
+  AC_LINK_IFELSE(AC_LANG_PROGRAM([namespace pcrecpp {
+                                    class RE { static int no_arg; };
+                                    int RE::no_arg;
+                                  }],
+                                 []),
+                 [AC_MSG_RESULT([yes]);
+                  EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS -Wl,$flag";
+                  break;],
+                 AC_MSG_RESULT([no]))
+done
+LDFLAGS="$OLD_LDFLAGS"
+
 # We could be more clever here, given we're doing AC_SUBST with this
 # (eg set a var to be the name of the include file we want). But we're not
 # so it's easy to change back to 'regular' autoconf vars if we needed to.
@@ -286,6 +315,7 @@ AC_CHECK_HEADERS(bits/type_traits.h, [pcre_have_bits_type_traits="1"],
                                      [pcre_have_bits_type_traits="0"])
 AC_CHECK_HEADERS(type_traits.h, [pcre_have_type_traits="1"],
                                 [pcre_have_type_traits="0"])
+
 AC_LANG_POP
 fi
 # Using AC_SUBST eliminates the need to include config.h in a public .h file
@@ -490,11 +520,15 @@ esac
 # The extra LDFLAGS for each particular library
 # (Note: The libpcre*_version bits are m4 variables, assigned above)
 
-EXTRA_LIBPCRE_LDFLAGS="$NO_UNDEFINED -version-info libpcre_version"
+EXTRA_LIBPCRE_LDFLAGS="$EXTRA_LIBPCRE_LDFLAGS \
+                       $NO_UNDEFINED -version-info libpcre_version"
 
-EXTRA_LIBPCREPOSIX_LDFLAGS="$NO_UNDEFINED -version-info libpcreposix_version"
+EXTRA_LIBPCREPOSIX_LDFLAGS="$EXTRA_LIBPCREPOSIX_LDFLAGS \
+                            $NO_UNDEFINED -version-info libpcreposix_version"
 
-EXTRA_LIBPCRECPP_LDFLAGS="$NO_UNDEFINED $EXPORT_ALL_SYMBOLS -version-info libpcrecpp_version"
+EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS \
+                          $NO_UNDEFINED -version-info libpcrecpp_version \
+                          $EXPORT_ALL_SYMBOLS"
 
 AC_SUBST(EXTRA_LIBPCRE_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)

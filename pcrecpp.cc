@@ -59,25 +59,18 @@ Arg RE::no_arg((void*)NULL);
 
 // This is for ABI compatibility with old versions of pcre (pre-7.6),
 // which defined a global no_arg variable instead of putting it in the
-// RE class.  This works on GCC >= 3, at least.  We could probably
-// have a more inclusive test if we ever needed it.  (Note that not
-// only the __attribute__ syntax, but also __USER_LABEL_PREFIX__, are
+// RE class.  This works on GCC >= 3, at least.  It definitely works
+// for ELF, but may not for other object formats (Mach-O, for
+// instance, does not support aliases.)  We could probably have a more
+// inclusive test if we ever needed it.  (Note that not only the
+// __attribute__ syntax, but also __USER_LABEL_PREFIX__, are
 // gnu-specific.)
-#if defined(__GNUC__) && __GNUC__ >= 3
-# define AS_STRING(x)   AS_STRING_INTERNAL(x)
-# define AS_STRING_INTERNAL(x)   #x
-# define USER_LABEL_PREFIX  AS_STRING(__USER_LABEL_PREFIX__)
-# if defined(__ELF__)
+#if defined(__GNUC__) && __GNUC__ >= 3 && defined(__ELF__)
+# define ULP_AS_STRING(x)            ULP_AS_STRING_INTERNAL(x)
+# define ULP_AS_STRING_INTERNAL(x)   #x
+# define USER_LABEL_PREFIX_STR       ULP_AS_STRING(__USER_LABEL_PREFIX__)
 extern Arg no_arg
-  __attribute__((alias(USER_LABEL_PREFIX "_ZN7pcrecpp2RE6no_argE")));
-# else
-// While we know elf supports strong aliases, not all formats do (Mach
-// doesn't, for instance).  So make aliases weak by default.  This is
-// a smidge less safe in theory (conceivably, someone could override
-// this symbol in their own binary), but perfectly ok in practice.
-extern Arg no_arg
-  __attribute__((weak, alias(USER_LABEL_PREFIX "_ZN7pcrecpp2RE6no_argE")));
-# endif
+  __attribute__((alias(USER_LABEL_PREFIX_STR "_ZN7pcrecpp2RE6no_argE")));
 #endif
 
 // If a regular expression has no error, its error_ field points here
