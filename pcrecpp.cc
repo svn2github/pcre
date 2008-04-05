@@ -605,14 +605,14 @@ bool RE::Rewrite(string *out, const StringPiece &rewrite,
         if (start >= 0)
           out->append(text.data() + start, vec[2 * n + 1] - start);
       } else if (c == '\\') {
-        out->push_back('\\');
+        *out += '\\';
       } else {
         //fprintf(stderr, "invalid rewrite pattern: %.*s\n",
         //        rewrite.size(), rewrite.data());
         return false;
       }
     } else {
-      out->push_back(c);
+      *out += c;
     }
   }
   return true;

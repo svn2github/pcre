@@ -40,6 +40,8 @@ Version 7.7 05-Mar-08
 8.  Applied Craig's patch to pcrecpp.cc to fix a problem in OS X that was
     caused by fix #2  above. (Subsequently also a second patch to fix the
     first patch. And a third patch - this was a messy problem.) 
+    
+9.  Applied Craig's patch to remove the use of push_back(). 
 
 
 Version 7.6 28-Jan-08
