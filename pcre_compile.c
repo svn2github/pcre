@@ -295,8 +295,8 @@ static const char error_texts[] =
   /* 55 */
   "repeating a DEFINE group is not allowed\0"
   "inconsistent NEWLINE options\0"
-  "\\g is not followed by a braced name or an optionally braced non-zero number\0"
-  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number\0"
+  "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
+  "a numbered reference must not be zero\0"
   "(*VERB) with an argument is not supported\0"
   /* 60 */
   "(*VERB) not recognized\0"
@@ -531,14 +531,31 @@ else
     *errorcodeptr = ERR37;
     break;
 
-    /* \g must be followed by a number, either plain or braced. If positive, it
-    is an absolute backreference. If negative, it is a relative backreference.
-    This is a Perl 5.10 feature. Perl 5.10 also supports \g{name} as a
-    reference to a named group. This is part of Perl's movement towards a
-    unified syntax for back references. As this is synonymous with \k{name}, we
-    fudge it up by pretending it really was \k. */
+    /* \g must be followed by one of a number of specific things:
+    
+    (1) A number, either plain or braced. If positive, it is an absolute
+    backreference. If negative, it is a relative backreference. This is a Perl
+    5.10 feature.
+    
+    (2) Perl 5.10 also supports \g{name} as a reference to a named group. This
+    is part of Perl's movement towards a unified syntax for back references. As
+    this is synonymous with \k{name}, we fudge it up by pretending it really
+    was \k.
+    
+    (3) For Oniguruma compatibility we also support \g followed by a name or a 
+    number either in angle brackets or in single quotes. However, these are 
+    (possibly recursive) subroutine calls, _not_ backreferences. Just return 
+    the -ESC_g code (cf \k). */
 
     case 'g':
+    if (ptr[1] == '<' || ptr[1] == '\'')
+      {
+      c = -ESC_g;
+      break;  
+      }  
+
+    /* Handle the Perl-compatible cases */
+ 
     if (ptr[1] == '{')
       {
       const uschar *p;
@@ -565,17 +582,23 @@ else
     while ((digitab[ptr[1]] & ctype_digit) != 0)
       c = c * 10 + *(++ptr) - '0';
 
-    if (c < 0)
+    if (c < 0)   /* Integer overflow */
       {
       *errorcodeptr = ERR61;
       break;
       }
-
-    if (c == 0 || (braced && *(++ptr) != '}'))
+      
+    if (braced && *(++ptr) != '}')
       {
       *errorcodeptr = ERR57;
       break;
       }
+      
+    if (c == 0)
+      {
+      *errorcodeptr = ERR58;
+      break;
+      }     
 
     if (negated)
       {
@@ -611,7 +634,7 @@ else
       c -= '0';
       while ((digitab[ptr[1]] & ctype_digit) != 0)
         c = c * 10 + *(++ptr) - '0';
-      if (c < 0)
+      if (c < 0)    /* Integer overflow */
         {
         *errorcodeptr = ERR61;
         break;
@@ -4567,7 +4590,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         references (?P=name) and recursion (?P>name), as well as falling
         through from the Perl recursion syntax (?&name). We also come here from
         the Perl \k<name> or \k'name' back reference syntax and the \k{name}
-        .NET syntax. */
+        .NET syntax, and the Oniguruma \g<...> and \g'...' subroutine syntax. */
 
         NAMED_REF_OR_RECURSE:
         name = ++ptr;
@@ -4645,6 +4668,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         case '5': case '6': case '7': case '8': case '9':   /* subroutine */
           {
           const uschar *called;
+          terminator = ')';
+          
+          /* Come here from the \g<...> and \g'...' code (Oniguruma 
+          compatibility). However, the syntax has been checked to ensure that 
+          the ... are a (signed) number, so that neither ERR63 nor ERR29 will 
+          be called on this path, nor with the jump to OTHER_CHAR_AFTER_QUERY
+          ever be taken. */
+          
+          HANDLE_NUMERICAL_RECURSION: 
 
           if ((refsign = *ptr) == '+')
             {
@@ -4666,7 +4698,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           while((digitab[*ptr] & ctype_digit) != 0)
             recno = recno * 10 + *ptr++ - '0';
 
-          if (*ptr != ')')
+          if (*ptr != terminator)
             {
             *errorcodeptr = ERR29;
             goto FAILED;
@@ -5062,7 +5094,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     back references and those types that consume a character may be repeated.
     We can test for values between ESC_b and ESC_Z for the latter; this may
     have to change if any new ones are ever created. */
-
+    
     case '\\':
     tempptr = ptr;
     c = check_escape(&ptr, errorcodeptr, cd->bracount, options, FALSE);
@@ -5089,6 +5121,63 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       zerofirstbyte = firstbyte;
       zeroreqbyte = reqbyte;
+      
+      /* \g<name> or \g'name' is a subroutine call by name and \g<n> or \g'n' 
+      is a subroutine call by number (Oniguruma syntax). In fact, the value 
+      -ESC_g is returned only for these cases. So we don't need to check for <
+      or ' if the value is -ESC_g. For the Perl syntax \g{n} the value is
+      -ESC_REF+n, and for the Perl syntax \g{name} the result is -ESC_k (as
+      that is a synonym). */
+      
+      if (-c == ESC_g)
+        {
+        const uschar *p;
+        terminator = (*(++ptr) == '<')? '>' : '\'';
+        
+        /* These two statements stop the compiler for warning about possibly
+        unset variables caused by the jump to HANDLE_NUMERICAL_RECURSION. In 
+        fact, because we actually check for a number below, the paths that 
+        would actually be in error are never taken. */
+          
+        skipbytes = 0;
+        reset_bracount = FALSE; 
+        
+        /* Test for a name */
+        
+        if (ptr[1] != '+' && ptr[1] != '-')
+          { 
+          BOOL isnumber = TRUE; 
+          for (p = ptr + 1; *p != 0 && *p != terminator; p++)
+            {  
+            if ((cd->ctypes[*p] & ctype_digit) == 0) isnumber = FALSE;
+            if ((cd->ctypes[*p] & ctype_word) == 0) break;
+            }
+          if (*p != terminator)
+            {
+            *errorcodeptr = ERR57;
+            break; 
+            }    
+          if (isnumber) 
+            {
+            ptr++; 
+            goto HANDLE_NUMERICAL_RECURSION;
+            } 
+          is_recurse = TRUE;
+          goto NAMED_REF_OR_RECURSE;
+          }
+        
+        /* Test a signed number in angle brackets or quotes. */
+        
+        p = ptr + 2;
+        while ((digitab[*p] & ctype_digit) != 0) p++;
+        if (*p != terminator)
+          {
+          *errorcodeptr = ERR57;
+          break;
+          }
+        ptr++;   
+        goto HANDLE_NUMERICAL_RECURSION;
+        }    
 
       /* \k<name> or \k'name' is a back reference by name (Perl syntax).
       We also support \k{name} (.NET syntax) */

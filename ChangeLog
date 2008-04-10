@@ -45,6 +45,11 @@ Version 7.7 05-Mar-08
 
 10. Applied Alan Lehotsky's patch to add REG_STARTEND support to the POSIX
     matching function regexec().
+    
+11. Added support for the Oniguruma syntax \g<name>, \g<n>, \g'name', \g'n', 
+    which, however, unlike Perl's \g{...}, are subroutine calls, not back 
+    references. PCRE supports relative numbers with this syntax (I don't think
+    Oniguruma does).
 
 
 Version 7.6 28-Jan-08

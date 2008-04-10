@@ -2589,4 +2589,58 @@ a random value. /Ix
 
 /[[:a\dz:]]/
 
+/^(?<name>a|b\g<name>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g<1>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'-1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1>c))/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1'c))/
+
+/(^(a|b\g{-1}))/
+    bacxxx
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+    XAAX 
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+    ** Failers 
+    XAAX 
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+    XAAX 
+
 / End of testinput2 /

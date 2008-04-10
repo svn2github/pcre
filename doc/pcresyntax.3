@@ -304,6 +304,8 @@ In PCRE, POSIX character set names recognize only ASCII characters. You can use
   (?<!...)       negative look behind
 .sp
 Each top-level branch of a look behind must be of a fixed length.
+.
+.
 .SH "BACKREFERENCES"
 .rs
 .sp
@@ -327,6 +329,14 @@ Each top-level branch of a look behind must be of a fixed length.
   (?-n)          call subpattern by relative number
   (?&name)       call subpattern by name (Perl)
   (?P>name)      call subpattern by name (Python)
+  \eg<name>       call subpattern by name (Oniguruma) 
+  \eg'name'       call subpattern by name (Oniguruma) 
+  \eg<n>          call subpattern by absolute number (Oniguruma) 
+  \eg'n'          call subpattern by absolute number (Oniguruma) 
+  \eg<+n>         call subpattern by relative number (PCRE extension)
+  \eg'+n'         call subpattern by relative number (PCRE extension)
+  \eg<-n>         call subpattern by relative number (PCRE extension)
+  \eg'-n'         call subpattern by relative number (PCRE extension)
 .
 .
 .SH "CONDITIONAL PATTERNS"
@@ -418,6 +428,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 November 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 09 April 2008
+Copyright (c) 1997-2008 University of Cambridge.
 .fi

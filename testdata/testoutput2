@@ -8074,13 +8074,13 @@ No match
 Failed: reference to non-existent subpattern at offset 7
 
 /^(a)\g/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 5
+Failed: a numbered reference must not be zero at offset 5
 
 /^(a)\g{0}/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 7
+Failed: a numbered reference must not be zero at offset 8
 
 /^(a)\g{3/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 8
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 8
 
 /^(a)\g{4a}/
 Failed: reference to non-existent subpattern at offset 9
@@ -8217,13 +8217,13 @@ No match
 No match
     
 /x(?-0)y/
-Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offset 5
+Failed: a numbered reference must not be zero at offset 5
 
 /x(?-1)y/
 Failed: reference to non-existent subpattern at offset 5
 
 /x(?+0)y/ 
-Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offset 5
+Failed: a numbered reference must not be zero at offset 5
 
 /x(?+1)y/
 Failed: reference to non-existent subpattern at offset 5
@@ -9384,5 +9384,125 @@ Failed: unknown POSIX class name at offset 6
 
 /[[:a\dz:]]/
 Failed: unknown POSIX class name at offset 3
+
+/^(?<name>a|b\g<name>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g<1>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'-1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/(^(a|b\g<-1>c))/
+    aaaa
+ 0: a
+ 1: a
+ 2: a
+    bacxxx
+ 0: bac
+ 1: bac
+ 2: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+ 2: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+ 2: bbbaccc
+
+/(^(a|b\g<-1'c))/
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 15
+
+/(^(a|b\g{-1}))/
+    bacxxx
+No match
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    ** Failers 
+No match
+    XAAX 
+No match
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
 
 / End of testinput2 /
