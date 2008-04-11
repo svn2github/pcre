@@ -9505,4 +9505,14 @@ No match
  0: AA
  1: A
 
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+ 0: abc
+ 1: a
+   accccbbb 
+ 0: accccbbb
+ 1: a
+
 / End of testinput2 /

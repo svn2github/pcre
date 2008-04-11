@@ -1882,7 +1882,7 @@ while ((ptr = (uschar *)find_recurse(ptr, utf8)) != NULL)
 
   /* See if this recursion is on the forward reference list. If so, adjust the
   reference. */
-
+  
   for (hc = save_hwm; hc < cd->hwm; hc += LINK_SIZE)
     {
     offset = GET(hc, 0);
@@ -2458,7 +2458,7 @@ for (;; ptr++)
   /* Get next byte in the pattern */
 
   c = *ptr;
-
+  
   /* If we are in the pre-compile phase, accumulate the length used for the
   previous cycle of this loop. */
 
@@ -4138,7 +4138,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     bravalue = OP_CBRA;
     save_hwm = cd->hwm;
     reset_bracount = FALSE;
-
+    
     /* First deal with various "verbs" that can be introduced by '*'. */
 
     if (*(++ptr) == '*' && (cd->ctypes[ptr[1]] & ctype_letter) != 0)
@@ -5127,11 +5127,12 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       -ESC_g is returned only for these cases. So we don't need to check for <
       or ' if the value is -ESC_g. For the Perl syntax \g{n} the value is
       -ESC_REF+n, and for the Perl syntax \g{name} the result is -ESC_k (as
-      that is a synonym). */
+      that is a synonym for a named back reference). */
       
       if (-c == ESC_g)
         {
         const uschar *p;
+        save_hwm = cd->hwm;   /* Normally this is set when '(' is read */ 
         terminator = (*(++ptr) == '<')? '>' : '\'';
         
         /* These two statements stop the compiler for warning about possibly
