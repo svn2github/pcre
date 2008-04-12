@@ -1731,16 +1731,25 @@ for (;;)
     case OP_REF:
       {
       offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
-      ecode += 3;                                 /* Advance past item */
-
-      /* If the reference is unset, set the length to be longer than the amount
-      of subject left; this ensures that every attempt at a match fails. We
-      can't just fail here, because of the possibility of quantifiers with zero
-      minima. */
-
-      length = (offset >= offset_top || md->offset_vector[offset] < 0)?
-        md->end_subject - eptr + 1 :
-        md->offset_vector[offset+1] - md->offset_vector[offset];
+      ecode += 3;   
+      
+      /* If the reference is unset, there are two possibilities:
+      
+      (a) In the default, Perl-compatible state, set the length to be longer
+      than the amount of subject left; this ensures that every attempt at a
+      match fails. We can't just fail here, because of the possibility of
+      quantifiers with zero minima.
+      
+      (b) If the JavaScript compatibility flag is set, set the length to zero 
+      so that the back reference matches an empty string. 
+      
+      Otherwise, set the length to the length of what was matched by the 
+      referenced subpattern. */
+      
+      if (offset >= offset_top || md->offset_vector[offset] < 0)
+        length = (md->jscript_compat)? 0 : md->end_subject - eptr + 1;  
+      else
+        length = md->offset_vector[offset+1] - md->offset_vector[offset];
 
       /* Set up for repetition, or handle the non-repeated case */
 
@@ -4458,6 +4467,7 @@ end_subject = md->end_subject;
 
 md->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 utf8 = md->utf8 = (re->options & PCRE_UTF8) != 0;
+md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 
 md->notbol = (options & PCRE_NOTBOL) != 0;
 md->noteol = (options & PCRE_NOTEOL) != 0;

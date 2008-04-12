@@ -302,7 +302,8 @@ static const char error_texts[] =
   "(*VERB) not recognized\0"
   "number is too big\0"
   "subpattern name expected\0"
-  "digit expected after (?+";
+  "digit expected after (?+\0"
+  "] is an invalid data character in JavaScript compatibility mode"; 
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -2654,7 +2655,17 @@ for (;; ptr++)
     opcode is compiled. It may optionally have a bit map for characters < 256,
     but those above are are explicitly listed afterwards. A flag byte tells
     whether the bitmap is present, and whether this is a negated class or not.
-    */
+    
+    In JavaScript compatibility mode, an isolated ']' causes an error. In
+    default (Perl) mode, it is treated as a data character. */
+    
+    case ']':
+    if ((cd->external_options & PCRE_JAVASCRIPT_COMPAT) != 0)
+      {
+      *errorcodeptr = ERR64;
+      goto FAILED;  
+      }
+    goto NORMAL_CHAR;      
 
     case '[':
     previous = code;

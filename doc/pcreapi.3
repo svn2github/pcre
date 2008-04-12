@@ -549,6 +549,20 @@ If this option is set, an unanchored pattern is required to match before or at
 the first newline in the subject string, though the matched text may continue
 over the newline.
 .sp
+  PCRE_JAVASCRIPT_COMPAT
+.sp
+If this option is set, PCRE's behaviour is changed in some ways so that it is 
+compatible with JavaScript rather than Perl. The changes are as follows:
+.P
+(1) A lone closing square bracket in a pattern causes a compile-time error,
+because this is illegal in JavaScript (by default it is treated as a data
+character). Thus, the pattern AB]CD becomes illegal when this option is set.
+.P
+(2) At run time, a back reference to an unset subpattern group matches an empty
+string (by default this causes the current matching path to fail). A pattern 
+such as (\1)(a) succeeds when this option is set (assuming it can find an "a" 
+in the subject), whereas it fails by default, for Perl compatibility.
+.sp
   PCRE_MULTILINE
 .sp
 By default, PCRE treats the subject string as consisting of a single line of
@@ -717,14 +731,15 @@ out of use. To avoid confusion, they have not been re-used.
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
   56  inconsistent NEWLINE options
-  57  \eg is not followed by a braced name or an optionally braced
-        non-zero number
-  58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
+  57  \eg is not followed by a braced, angle-bracketed, or quoted 
+        name/number or by a plain number 
+  58  a numbered reference must not be zero
   59  (*VERB) with an argument is not supported
   60  (*VERB) not recognized
   61  number is too big
   62  subpattern name expected
   63  digit expected after (?+
+  64  ] is an invalid data character in JavaScript compatibility mode
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -1960,6 +1975,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 23 January 2008
+Last updated: 12 April 2008
 Copyright (c) 1997-2008 University of Cambridge.
 .fi

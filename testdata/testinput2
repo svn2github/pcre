@@ -2655,4 +2655,16 @@ a random value. /Ix
     ** Failers
     xxz  
 
+/(\3)(\1)(a)/
+    cat
+
+/(\3)(\1)(a)/<JS>
+    cat
+    
+/TA]/
+    The ACTA] comes 
+
+/TA]/<JS>
+    The ACTA] comes 
+
 / End of testinput2 /

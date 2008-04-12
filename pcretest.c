@@ -1247,10 +1247,18 @@ while (!done)
 
       case '<':
         {
-        int x = check_newline(pp, outfile);
-        if (x == 0) goto SKIP_DATA;
-        options |= x;
-        while (*pp++ != '>');
+        if (strncmp((char *)pp, "JS>", 3) == 0)
+          {
+          options |= PCRE_JAVASCRIPT_COMPAT;
+          pp += 3;  
+          }
+        else
+          {      
+          int x = check_newline(pp, outfile);
+          if (x == 0) goto SKIP_DATA;
+          options |= x;
+          while (*pp++ != '>');
+          } 
         }
       break;
 

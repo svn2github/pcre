@@ -9527,4 +9527,22 @@ No match
     xxz  
 No match
 
+/(\3)(\1)(a)/
+    cat
+No match
+
+/(\3)(\1)(a)/<JS>
+    cat
+ 0: a
+ 1: 
+ 2: 
+ 3: a
+    
+/TA]/
+    The ACTA] comes 
+ 0: TA]
+
+/TA]/<JS>
+Failed: ] is an invalid data character in JavaScript compatibility mode at offset 2
+
 / End of testinput2 /

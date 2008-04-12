@@ -57,6 +57,11 @@ Version 7.7 05-Mar-08
     (an internal error was given). Such groups are now left in the compiled 
     pattern, with a new opcode that causes them to be skipped at execution 
     time.
+    
+13. Added the PCRE_JAVASCRIPT_COMPAT option. This currently does two things:
+    (a) A lone ] character is dis-allowed (Perl treats it as data).
+    (b) A back reference to an unmatched subpattern matches an empty string 
+        (Perl fails the current match path).
 
 
 Version 7.6 28-Jan-08
