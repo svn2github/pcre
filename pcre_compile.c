@@ -1567,7 +1567,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 
   /* Groups with zero repeats can of course be empty; skip them. */
 
-  if (c == OP_BRAZERO || c == OP_BRAMINZERO)
+  if (c == OP_BRAZERO || c == OP_BRAMINZERO || c == OP_SKIPZERO)
     {
     code += _pcre_OP_lengths[c];
     do code += GET(code, 1); while (*code == OP_ALT);
@@ -1847,11 +1847,12 @@ return -1;
 that is referenced. This means that groups can be replicated for fixed
 repetition simply by copying (because the recursion is allowed to refer to
 earlier groups that are outside the current group). However, when a group is
-optional (i.e. the minimum quantifier is zero), OP_BRAZERO is inserted before
-it, after it has been compiled. This means that any OP_RECURSE items within it
-that refer to the group itself or any contained groups have to have their
-offsets adjusted. That one of the jobs of this function. Before it is called,
-the partially compiled regex must be temporarily terminated with OP_END.
+optional (i.e. the minimum quantifier is zero), OP_BRAZERO or OP_SKIPZERO is
+inserted before it, after it has been compiled. This means that any OP_RECURSE
+items within it that refer to the group itself or any contained groups have to
+have their offsets adjusted. That one of the jobs of this function. Before it
+is called, the partially compiled regex must be temporarily terminated with
+OP_END.
 
 This function has been extended with the possibility of forward references for
 recursions and subroutine calls. It must also check the list of such references
@@ -3842,28 +3843,38 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       if (repeat_min == 0)
         {
-        /* If the maximum is also zero, we just omit the group from the output
-        altogether. */
+        /* If the maximum is also zero, we used to just omit the group from the
+        output altogether, like this:
 
-        if (repeat_max == 0)
-          {
-          code = previous;
-          goto END_REPEAT;
-          }
+        ** if (repeat_max == 0)
+        **   {
+        **   code = previous;
+        **   goto END_REPEAT;
+        **   }
+        
+        However, that fails when a group is referenced as a subroutine from 
+        elsewhere in the pattern, so now we stick in OP_SKIPZERO in front of it 
+        so that it is skipped on execution. As we don't have a list of which 
+        groups are referenced, we cannot do this selectively. 
 
-        /* If the maximum is 1 or unlimited, we just have to stick in the
-        BRAZERO and do no more at this point. However, we do need to adjust
-        any OP_RECURSE calls inside the group that refer to the group itself or
-        any internal or forward referenced group, because the offset is from
-        the start of the whole regex. Temporarily terminate the pattern while
-        doing this. */
+        If the maximum is 1 or unlimited, we just have to stick in the BRAZERO
+        and do no more at this point. However, we do need to adjust any
+        OP_RECURSE calls inside the group that refer to the group itself or any
+        internal or forward referenced group, because the offset is from the
+        start of the whole regex. Temporarily terminate the pattern while doing
+        this. */
 
-        if (repeat_max <= 1)
+        if (repeat_max <= 1)    /* Covers 0, 1, and unlimited */
           {
           *code = OP_END;
           adjust_recurse(previous, 1, utf8, cd, save_hwm);
           memmove(previous+1, previous, len);
           code++;
+          if (repeat_max == 0)
+            {
+            *previous++ = OP_SKIPZERO;
+            goto END_REPEAT;
+            }    
           *previous++ = OP_BRAZERO + repeat_type;
           }
 
@@ -6198,7 +6209,7 @@ while (errorcode == 0 && cd->hwm > cworkspace)
   if (groupptr == NULL) errorcode = ERR53;
     else PUT(((uschar *)codestart), offset, groupptr - codestart);
   }
-
+  
 /* Give an error if there's back reference to a non-existent capturing
 subpattern. */
 

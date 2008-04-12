@@ -1148,11 +1148,11 @@ for (;;)
     do ecode += GET(ecode,1); while (*ecode == OP_ALT);
     break;
 
-    /* BRAZERO and BRAMINZERO occur just before a bracket group, indicating
-    that it may occur zero times. It may repeat infinitely, or not at all -
-    i.e. it could be ()* or ()? in the pattern. Brackets with fixed upper
-    repeat limits are compiled as a number of copies, with the optional ones
-    preceded by BRAZERO or BRAMINZERO. */
+    /* BRAZERO, BRAMINZERO and SKIPZERO occur just before a bracket group,
+    indicating that it may occur zero times. It may repeat infinitely, or not
+    at all - i.e. it could be ()* or ()? or even (){0} in the pattern. Brackets
+    with fixed upper repeat limits are compiled as a number of copies, with the
+    optional ones preceded by BRAZERO or BRAMINZERO. */
 
     case OP_BRAZERO:
       {
@@ -1171,6 +1171,14 @@ for (;;)
       RMATCH(eptr, next + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0, RM11);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode++;
+      }
+    break;
+
+    case OP_SKIPZERO:
+      {
+      next = ecode+1;
+      do next += GET(next,1); while (*next == OP_ALT);
+      ecode = next + 1 + LINK_SIZE;
       }
     break;
 

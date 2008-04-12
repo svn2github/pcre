@@ -9515,4 +9515,16 @@ No match
  0: accccbbb
  1: a
 
+/^(?+1)(?<a>x|y){0}z/
+    xzxx
+ 0: xz
+ 1: <unset>
+    yzyy 
+ 0: yz
+ 1: <unset>
+    ** Failers
+No match
+    xxz  
+No match
+
 / End of testinput2 /

@@ -50,6 +50,13 @@ Version 7.7 05-Mar-08
     which, however, unlike Perl's \g{...}, are subroutine calls, not back 
     references. PCRE supports relative numbers with this syntax (I don't think
     Oniguruma does).
+    
+12. Previously, a group with a zero repeat such as (...){0} was completely 
+    omitted from the compiled regex. However, this means that if the group
+    was called as a subroutine from elsewhere in the pattern, things went wrong
+    (an internal error was given). Such groups are now left in the compiled 
+    pattern, with a new opcode that causes them to be skipped at execution 
+    time.
 
 
 Version 7.6 28-Jan-08

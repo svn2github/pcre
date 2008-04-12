@@ -1259,7 +1259,14 @@ support is available, \eX{3} matches three Unicode extended sequences, each of
 which may be several bytes long (and they may be of different lengths).
 .P
 The quantifier {0} is permitted, causing the expression to behave as if the
-previous item and the quantifier were not present.
+previous item and the quantifier were not present. This may be useful for 
+subpatterns that are referenced as 
+.\" HTML <a href="#subpatternsassubroutines">
+.\" </a>
+subroutines
+.\"
+from elsewhere in the pattern. Items other than subpatterns that have a {0} 
+quantifier are omitted from the compiled pattern.
 .P
 For convenience, the three most common quantifiers have single-character
 abbreviations:
@@ -2232,6 +2239,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 April 2008
+Last updated: 12 April 2008
 Copyright (c) 1997-2008 University of Cambridge.
 .fi

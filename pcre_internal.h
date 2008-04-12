@@ -773,7 +773,11 @@ enum {
   /* These are forced failure and success verbs */
 
   OP_FAIL,           /* 108 */
-  OP_ACCEPT          /* 109 */
+  OP_ACCEPT,         /* 109 */
+  
+  /* This is used to skip a subpattern with a {0} quantifier */
+ 
+  OP_SKIPZERO        /* 110 */
 };
 
 
@@ -798,7 +802,8 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "AssertB", "AssertB not", "Reverse",                            \
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
   "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero",    \
-  "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT"
+  "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
+  "Skip zero" 
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -863,7 +868,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
   1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
-  1, 1                           /* FAIL, ACCEPT                           */
+  1, 1, 1                        /* FAIL, ACCEPT, SKIPZERO                 */
 
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */

@@ -2649,4 +2649,10 @@ a random value. /Ix
    abc
    accccbbb 
 
+/^(?+1)(?<a>x|y){0}z/
+    xzxx
+    yzyy 
+    ** Failers
+    xxz  
+
 / End of testinput2 /

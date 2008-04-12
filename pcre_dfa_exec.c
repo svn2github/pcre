@@ -694,6 +694,13 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_SKIPZERO:
+      code += 1 + GET(code, 2);
+      while (*code == OP_ALT) code += GET(code, 1);
+      ADD_ACTIVE(code - start_code + 1 + LINK_SIZE, 0);
+      break;
+
+      /*-----------------------------------------------------------------*/
       case OP_CIRC:
       if ((ptr == start_subject && (md->moptions & PCRE_NOTBOL) == 0) ||
           ((ims & PCRE_MULTILINE) != 0 &&
