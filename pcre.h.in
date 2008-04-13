@@ -124,6 +124,7 @@ extern "C" {
 #define PCRE_NEWLINE_ANYCRLF    0x00500000
 #define PCRE_BSR_ANYCRLF        0x00800000
 #define PCRE_BSR_UNICODE        0x01000000
+#define PCRE_JAVASCRIPT_COMPAT  0x02000000
 
 /* Exec-time and get/set-time error codes */
 
