@@ -9545,4 +9545,40 @@ No match
 /TA]/<JS>
 Failed: ] is an invalid data character in JavaScript compatibility mode at offset 2
 
+/(?2)[]a()b](abc)/
+Failed: reference to non-existent subpattern at offset 3
+
+/(?2)[^]a()b](abc)/
+Failed: reference to non-existent subpattern at offset 3
+
+/(?1)[]a()b](abc)/
+    abcbabc
+ 0: abcbabc
+ 1: abc
+    ** Failers 
+No match
+    abcXabc
+No match
+
+/(?1)[^]a()b](abc)/
+    abcXabc
+ 0: abcXabc
+ 1: abc
+    ** Failers 
+No match
+    abcbabc
+No match
+
+/(?2)[]a()b](abc)(xyz)/
+    xyzbabcxyz
+ 0: xyzbabcxyz
+ 1: abc
+ 2: xyz
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+Failed: reference to non-existent subpattern at offset 4
+
+/(?&N)[]a(?<N>)](abc)/
+Failed: reference to non-existent subpattern at offset 4
+
 / End of testinput2 /

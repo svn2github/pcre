@@ -2667,4 +2667,29 @@ a random value. /Ix
 /TA]/<JS>
     The ACTA] comes 
 
+/(?2)[]a()b](abc)/
+    abcbabc
+
+/(?2)[^]a()b](abc)/
+    abcbabc
+
+/(?1)[]a()b](abc)/
+    abcbabc
+    ** Failers 
+    abcXabc
+
+/(?1)[^]a()b](abc)/
+    abcXabc
+    ** Failers 
+    abcbabc
+
+/(?2)[]a()b](abc)(xyz)/
+    xyzbabcxyz
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+   abc<abc
+
+/(?&N)[]a(?<N>)](abc)/
+   abc<abc
+
 / End of testinput2 /

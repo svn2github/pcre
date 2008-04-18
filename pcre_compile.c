@@ -1008,10 +1008,33 @@ for (; *ptr != 0; ptr++)
     continue;
     }
 
-  /* Skip over character classes */
+  /* Skip over character classes; this logic must be similar to the way they
+  are handled for real. If the first character is '^', skip it. Also, if the
+  first few characters (either before or after ^) are \Q\E or \E we skip them
+  too. This makes for compatibility with Perl. */
 
   if (*ptr == '[')
     {
+    BOOL negate_class = FALSE;
+    for (;;)
+      {
+      int c = *(++ptr);
+      if (c == '\\')
+        {
+        if (ptr[1] == 'E') ptr++;
+          else if (strncmp((const char *)ptr+1, "Q\\E", 3) == 0) ptr += 3;
+            else break;
+        }
+      else if (!negate_class && c == '^')
+        negate_class = TRUE;
+      else break;
+      }
+
+    /* If the next character is ']', it is a data character that must be
+    skipped. */
+    
+    if (ptr[1] == ']') ptr++;  
+ 
     while (*(++ptr) != ']')
       {
       if (*ptr == 0) return -1;
