@@ -2115,9 +2115,10 @@ or removal in a future version of Perl". It goes on to say: "Their usage in
 production code should be noted to avoid problems during upgrades." The same
 remarks apply to the PCRE features described in this section.
 .P
-Since these verbs are specifically related to backtracking, they can be used
-only when the pattern is to be matched using \fBpcre_exec()\fP, which uses a
-backtracking algorithm. They cause an error if encountered by
+Since these verbs are specifically related to backtracking, most of them can be
+used only when the pattern is to be matched using \fBpcre_exec()\fP, which uses
+a backtracking algorithm. With the exception of (*FAIL), which behaves like a 
+failing negative assertion, they cause an error if encountered by
 \fBpcre_dfa_exec()\fP.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
@@ -2239,6 +2240,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 April 2008
+Last updated: 19 April 2008
 Copyright (c) 1997-2008 University of Cambridge.
 .fi

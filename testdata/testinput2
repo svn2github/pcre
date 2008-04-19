@@ -2692,4 +2692,36 @@ a random value. /Ix
 /(?&N)[]a(?<N>)](abc)/
    abc<abc
 
+/a[]b/
+
+/a[^]b/
+
+/a[]b/<JS>
+    ** Failers
+    ab
+
+/a[]+b/<JS>
+    ** Failers
+    ab 
+
+/a[]*+b/<JS>
+    ** Failers
+    ab 
+
+/a[^]b/<JS>
+    aXb
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS> 
+    aXb
+    a\nX\nXb 
+    ** Failers
+    ab  
+
+/a(?!)+b/
+
+/a(*FAIL)+b/
+
 / End of testinput2 /

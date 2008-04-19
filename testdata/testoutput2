@@ -9581,4 +9581,54 @@ Failed: reference to non-existent subpattern at offset 4
 /(?&N)[]a(?<N>)](abc)/
 Failed: reference to non-existent subpattern at offset 4
 
+/a[]b/
+Failed: missing terminating ] for character class at offset 4
+
+/a[^]b/
+Failed: missing terminating ] for character class at offset 5
+
+/a[]b/<JS>
+    ** Failers
+No match
+    ab
+No match
+
+/a[]+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[]*+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[^]b/<JS>
+    aXb
+ 0: aXb
+    a\nb 
+ 0: a\x0ab
+    ** Failers
+No match
+    ab  
+No match
+    
+/a[^]+b/<JS> 
+    aXb
+ 0: aXb
+    a\nX\nXb 
+ 0: a\x0aX\x0aXb
+    ** Failers
+No match
+    ab  
+No match
+
+/a(?!)+b/
+Failed: nothing to repeat at offset 5
+
+/a(*FAIL)+b/
+Failed: nothing to repeat at offset 8
+
 / End of testinput2 /

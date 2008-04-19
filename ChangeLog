@@ -58,10 +58,20 @@ Version 7.7 05-Mar-08
     pattern, with a new opcode that causes them to be skipped at execution 
     time.
     
-13. Added the PCRE_JAVASCRIPT_COMPAT option. This currently does two things:
+13. Added the PCRE_JAVASCRIPT_COMPAT option. This makes the following changes
+    to the way PCRE behaves:
+     
     (a) A lone ] character is dis-allowed (Perl treats it as data).
+     
     (b) A back reference to an unmatched subpattern matches an empty string 
         (Perl fails the current match path).
+        
+    (c) A data ] in a character class must be notated as \] because if the
+        first data character in a class is ], it defines an empty class. (In 
+        Perl it is not possible to have an empty class.) The empty class []
+        never matches; it forces failure and is equivalent to (*FAIL) or (?!).
+        The negative empty class [^] matches any one character, independently
+        of the DOTALL setting.
         
 14. A pattern such as /(?2)[]a()b](abc)/ which had a forward reference to a 
     non-existent subpattern following a character class starting with ']' and
@@ -71,6 +81,11 @@ Version 7.7 05-Mar-08
     existencd of the subpattern, it was treating the data ']' as terminating
     the class, so got the count wrong. When actually compiling, the reference 
     was subsequently set up correctly.)
+    
+15. The "always fail" assertion (?!) is optimzed to (*FAIL) by pcre_compile;
+    it was being rejected as not supported by pcre_dfa_exec(), even though 
+    other assertions are supported. I have made pcre_dfa_exec() support 
+    (*FAIL). 
 
 
 Version 7.6 28-Jan-08

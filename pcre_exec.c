@@ -1433,6 +1433,9 @@ for (;;)
       {
       if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
       }
+    /* Fall through */   
+     
+    case OP_ALLANY:
     if (eptr++ >= md->end_subject) RRETURN(MATCH_NOMATCH);
     if (utf8)
       while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
@@ -2960,6 +2963,15 @@ for (;;)
           }
         break;
 
+        case OP_ALLANY:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+          eptr++;
+          while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+          }
+        break;
+
         case OP_ANYBYTE:
         eptr += min;
         break;
@@ -3177,6 +3189,10 @@ for (;;)
             }
           }
         else eptr += min;
+        break;
+
+        case OP_ALLANY:
+        eptr += min;
         break;
 
         case OP_ANYBYTE:
@@ -3441,8 +3457,7 @@ for (;;)
           switch(ctype)
             {
             case OP_ANY:        /* This is the DOTALL case */
-            break;
-
+            case OP_ALLANY: 
             case OP_ANYBYTE:
             break;
 
@@ -3600,9 +3615,8 @@ for (;;)
           c = *eptr++;
           switch(ctype)
             {
-            case OP_ANY:   /* This is the DOTALL case */
-            break;
-
+            case OP_ANY:     /* This is the DOTALL case */
+            case OP_ALLANY: 
             case OP_ANYBYTE:
             break;
 
@@ -3896,6 +3910,19 @@ for (;;)
             }
           break;
 
+          case OP_ALLANY:
+          if (max < INT_MAX)
+            {
+            for (i = min; i < max; i++)
+              {
+              if (eptr >= md->end_subject) break;
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+              }
+            }
+          else eptr = md->end_subject;   /* Unlimited UTF-8 repeat */
+          break;
+
           /* The byte case is the same as non-UTF8 */
 
           case OP_ANYBYTE:
@@ -4090,8 +4117,9 @@ for (;;)
               }
             break;
             }
-          /* For DOTALL case, fall through and treat as \C */
+          /* For DOTALL case, fall through */
 
+          case OP_ALLANY:
           case OP_ANYBYTE:
           c = max - min;
           if (c > (unsigned int)(md->end_subject - eptr))

@@ -88,7 +88,7 @@ static const uschar coptable[] = {
   0,                             /* End                                    */
   0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
   0, 0, 0, 0, 0, 0,              /* \D, \d, \S, \s, \W, \w                 */
-  0, 0,                          /* Any, Anybyte                           */
+  0, 0, 0,                       /* Any, AllAny, Anybyte                   */
   0, 0, 0,                       /* NOTPROP, PROP, EXTUNI                  */
   0, 0, 0, 0, 0,                 /* \R, \H, \h, \V, \v                     */
   0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
@@ -132,7 +132,7 @@ static const uschar coptable[] = {
   0,                             /* DEF                                    */
   0, 0,                          /* BRAZERO, BRAMINZERO                    */
   0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
-  0, 0                           /* FAIL, ACCEPT                           */
+  0, 0, 0                        /* FAIL, ACCEPT, SKIPZERO                 */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
@@ -143,7 +143,7 @@ static const uschar toptable1[] = {
   ctype_digit, ctype_digit,
   ctype_space, ctype_space,
   ctype_word,  ctype_word,
-  0                               /* OP_ANY */
+  0, 0                            /* OP_ANY, OP_ALLANY */
 };
 
 static const uschar toptable2[] = {
@@ -151,7 +151,7 @@ static const uschar toptable2[] = {
   ctype_digit, 0,
   ctype_space, 0,
   ctype_word,  0,
-  1                               /* OP_ANY */
+  1, 1                            /* OP_ANY, OP_ALLANY */
 };
 
 
@@ -223,8 +223,8 @@ Arguments:
   rlevel            function call recursion level
   recursing         regex recursive call level
 
-Returns:            > 0 =>
-                    = 0 =>
+Returns:            > 0 => number of match offset pairs placed in offsets 
+                    = 0 => offsets overflowed; longest matches are present
                      -1 => failed to match
                    < -1 => some kind of unexpected problem
 
@@ -744,6 +744,12 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_ALLANY:
+      if (clen > 0)
+        { ADD_NEW(state_offset + 1, 0); }
+      break;
+
+      /*-----------------------------------------------------------------*/
       case OP_EODN:
       if (clen == 0 || (IS_NEWLINE(ptr) && ptr == end_subject - md->nllen))
         { ADD_ACTIVE(state_offset + 1, 0); }
@@ -859,8 +865,8 @@ for (;;)
 /* ========================================================================== */
       /* These opcodes likewise inspect the subject character, but have an
       argument that is not a data character. It is one of these opcodes:
-      OP_ANY, OP_DIGIT, OP_NOT_DIGIT, OP_WHITESPACE, OP_NOT_SPACE, OP_WORDCHAR,
-      OP_NOT_WORDCHAR. The value is loaded into d. */
+      OP_ANY, OP_ALLANY, OP_DIGIT, OP_NOT_DIGIT, OP_WHITESPACE, OP_NOT_SPACE,
+      OP_WORDCHAR, OP_NOT_WORDCHAR. The value is loaded into d. */
 
       case OP_TYPEPLUS:
       case OP_TYPEMINPLUS:
@@ -2169,7 +2175,12 @@ for (;;)
 
 /* ========================================================================== */
       /* These are the opcodes for fancy brackets of various kinds. We have
-      to use recursion in order to handle them. */
+      to use recursion in order to handle them. The "always failing" assersion 
+      (?!) is optimised when compiling to OP_FAIL, so we have to support that,
+      though the other "backtracking verbs" are not supported. */
+      
+      case OP_FAIL:
+      break;  
 
       case OP_ASSERT:
       case OP_ASSERT_NOT:
