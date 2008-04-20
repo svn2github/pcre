@@ -125,7 +125,8 @@ Opcodes with no following data
 These items are all just one byte long
 
   OP_END                 end of pattern
-  OP_ANY                 match any character
+  OP_ANY                 match any one character other than newline
+  OP_ALLANY              match any one character, including newline
   OP_ANYBYTE             match any single byte, even in UTF-8 mode
   OP_SOD                 match start of data: \A
   OP_SOM,                start of match (subject + offset): \G

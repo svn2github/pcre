@@ -1301,6 +1301,7 @@ for (;;)
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
     case OP_ANY:
+    case OP_ALLANY:
     branchlength++;
     cc++;
     break;
@@ -1679,6 +1680,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
     case OP_ANY:
+    case OP_ALLANY: 
     case OP_ANYBYTE:
     case OP_CHAR:
     case OP_CHARNC:
@@ -2665,7 +2667,7 @@ for (;; ptr++)
     zerofirstbyte = firstbyte;
     zeroreqbyte = reqbyte;
     previous = code;
-    *code++ = OP_ANY;
+    *code++ = ((options & PCRE_DOTALL) != 0)? OP_ALLANY: OP_ANY;
     break;
 
 
@@ -5753,14 +5755,14 @@ do {
      if (!is_anchored(scode, options, bracket_map, backref_map)) return FALSE;
      }
 
-   /* .* is not anchored unless DOTALL is set and it isn't in brackets that
-   are or may be referenced. */
+   /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
+   it isn't in brackets that are or may be referenced. */
 
    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
-             op == OP_TYPEPOSSTAR) &&
-            (*options & PCRE_DOTALL) != 0)
+             op == OP_TYPEPOSSTAR))
      {
-     if (scode[1] != OP_ANY || (bracket_map & backref_map) != 0) return FALSE;
+     if (scode[1] != OP_ALLANY || (bracket_map & backref_map) != 0) 
+       return FALSE;
      }
 
    /* Check for explicit anchoring */

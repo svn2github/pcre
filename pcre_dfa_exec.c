@@ -739,7 +739,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_ANY:
-      if (clen > 0 && ((ims & PCRE_DOTALL) != 0 || !IS_NEWLINE(ptr)))
+      if (clen > 0 && !IS_NEWLINE(ptr))
         { ADD_NEW(state_offset + 1, 0); }
       break;
 
@@ -877,10 +877,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (count > 0 && codevalue == OP_TYPEPOSPLUS)
@@ -903,10 +900,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (codevalue == OP_TYPEPOSQUERY)
@@ -928,10 +922,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (codevalue == OP_TYPEPOSSTAR)
@@ -951,10 +942,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (++count >= GET2(code, 1))
@@ -975,10 +963,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (codevalue == OP_TYPEPOSUPTO)

@@ -1126,7 +1126,7 @@ Need char = 'X'
 /.*X/IDZs
 ------------------------------------------------------------------
         Bra
-        Any*
+        AllAny*
         X
         Ket
         End
@@ -1160,7 +1160,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         CBra 1
-        Any*
+        AllAny*
         X
         Alt
         ^
@@ -1179,7 +1179,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         CBra 1
-        Any*
+        AllAny*
         X
         Alt
         ^
@@ -1199,7 +1199,7 @@ No need char
         Bra
         Bra
      04 Opt
-        Any*
+        AllAny*
         X
         Alt
      04 Opt
@@ -1212,8 +1212,8 @@ No need char
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Partial matching not supported
-No options
-First char at start or follows newline
+Options: anchored
+No first char
 No need char
 
 /\Biss\B/I+

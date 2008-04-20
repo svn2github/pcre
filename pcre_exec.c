@@ -1429,16 +1429,12 @@ for (;;)
     /* Match a single character type; inline for speed */
 
     case OP_ANY:
-    if ((ims & PCRE_DOTALL) == 0)
-      {
-      if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
-      }
+    if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
     /* Fall through */   
      
     case OP_ALLANY:
     if (eptr++ >= md->end_subject) RRETURN(MATCH_NOMATCH);
-    if (utf8)
-      while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+    if (utf8) while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
     ecode++;
     break;
 
@@ -2955,8 +2951,7 @@ for (;;)
         case OP_ANY:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject ||
-               ((ims & PCRE_DOTALL) == 0 && IS_NEWLINE(eptr)))
+          if (eptr >= md->end_subject || IS_NEWLINE(eptr))
             RRETURN(MATCH_NOMATCH);
           eptr++;
           while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
@@ -3180,15 +3175,11 @@ for (;;)
       switch(ctype)
         {
         case OP_ANY:
-        if ((ims & PCRE_DOTALL) == 0)
+        for (i = 1; i <= min; i++)
           {
-          for (i = 1; i <= min; i++)
-            {
-            if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
-            eptr++;
-            }
+          if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
+          eptr++;
           }
-        else eptr += min;
         break;
 
         case OP_ALLANY:
@@ -3449,14 +3440,13 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM42);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject ||
-               (ctype == OP_ANY && (ims & PCRE_DOTALL) == 0 &&
-                IS_NEWLINE(eptr)))
+               (ctype == OP_ANY && IS_NEWLINE(eptr)))
             RRETURN(MATCH_NOMATCH);
 
           GETCHARINC(c, eptr);
           switch(ctype)
             {
-            case OP_ANY:        /* This is the DOTALL case */
+            case OP_ANY:        /* This is the non-NL case */
             case OP_ALLANY: 
             case OP_ANYBYTE:
             break;
@@ -3609,13 +3599,13 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM43);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject ||
-               ((ims & PCRE_DOTALL) == 0 && IS_NEWLINE(eptr)))
+               (ctype == OP_ANY && IS_NEWLINE(eptr)))
             RRETURN(MATCH_NOMATCH);
 
           c = *eptr++;
           switch(ctype)
             {
-            case OP_ANY:     /* This is the DOTALL case */
+            case OP_ANY:     /* This is the non-NL case */
             case OP_ALLANY: 
             case OP_ANYBYTE:
             break;
@@ -3870,23 +3860,11 @@ for (;;)
           case OP_ANY:
           if (max < INT_MAX)
             {
-            if ((ims & PCRE_DOTALL) == 0)
+            for (i = min; i < max; i++)
               {
-              for (i = min; i < max; i++)
-                {
-                if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
-                eptr++;
-                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-                }
-              }
-            else
-              {
-              for (i = min; i < max; i++)
-                {
-                if (eptr >= md->end_subject) break;
-                eptr++;
-                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-                }
+              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
 
@@ -3894,18 +3872,11 @@ for (;;)
 
           else
             {
-            if ((ims & PCRE_DOTALL) == 0)
+            for (i = min; i < max; i++)
               {
-              for (i = min; i < max; i++)
-                {
-                if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
-                eptr++;
-                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-                }
-              }
-            else
-              {
-              eptr = md->end_subject;
+              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
           break;
@@ -4108,16 +4079,12 @@ for (;;)
         switch(ctype)
           {
           case OP_ANY:
-          if ((ims & PCRE_DOTALL) == 0)
+          for (i = min; i < max; i++)
             {
-            for (i = min; i < max; i++)
-              {
-              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
-              eptr++;
-              }
-            break;
+            if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+            eptr++;
             }
-          /* For DOTALL case, fall through */
+          break;
 
           case OP_ALLANY:
           case OP_ANYBYTE:

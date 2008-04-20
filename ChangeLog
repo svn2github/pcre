@@ -86,6 +86,13 @@ Version 7.7 05-Mar-08
     it was being rejected as not supported by pcre_dfa_exec(), even though 
     other assertions are supported. I have made pcre_dfa_exec() support 
     (*FAIL). 
+    
+16. The implementation of 13c above involved the invention of a new opcode,
+    OP_ALLANY, which is like OP_ANY but doesn't check the /s flag. Since /s 
+    cannot be changed at match time, I realized I could make a small 
+    improvement to matching performance by compiling OP_ALLANY instead of 
+    OP_ANY for "." when DOTALL was set, and then removing the runtime tests 
+    on the OP_ANY path. 
 
 
 Version 7.6 28-Jan-08
