@@ -49,7 +49,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <errno.h>
 
 #ifdef SUPPORT_LIBREADLINE
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <readline/readline.h>
 #include <readline/history.h>
 #endif
@@ -68,6 +70,9 @@ input mode under Windows. */
 #include <fcntl.h>             /* For _O_BINARY */
 #define INPUT_MODE   "r"
 #define OUTPUT_MODE  "wb"
+
+#define isatty _isatty         /* This is what Windows calls them, I'm told */
+#define fileno _fileno
 
 #else
 #include <sys/time.h>          /* These two includes are needed */
