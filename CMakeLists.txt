@@ -25,6 +25,7 @@
 #            libpcre-0.dll, libpcreposix-0.dll and libpcrecpp-0.dll - same names
 #            built by default with Configure and Make.
 # 2008-01-23 PH removed the automatic build of pcredemo.
+# 2008-04-22 PH modified READLINE support so it finds NCURSES when needed.
 
 PROJECT(PCRE C CXX)
 
@@ -178,9 +179,15 @@ IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
         SET(SUPPORT_UCP 1)
 ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 
+# This next one used to contain
+#       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
+# but I was advised to add the NCURSES test as well, along with
+# some modifications to cmake/FindReadline.cmake which should
+# make it possible to override the default if necessary. PH
+
 IF(PCRE_SUPPORT_LIBREADLINE)
         SET(SUPPORT_LIBREADLINE 1)
-        SET(PCRETEST_LIBS ${READLINE_LIBRARY})
+        SET(PCRETEST_LIBS ${READLINE_LIBRARY} ${NCURSES_LIBRARY})
 ENDIF(PCRE_SUPPORT_LIBREADLINE)
 
 IF(PCRE_SUPPORT_LIBZ)

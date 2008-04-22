@@ -97,6 +97,11 @@ Version 7.7 05-Mar-08
 17. Compiling pcretest on Windows with readline support failed without the 
     following two fixes: (1) Make the unistd.h include conditional on
     HAVE_UNISTD_H; (2) #define isatty and fileno as _isatty and _fileno. 
+    
+18. Changed CMakeLists.txt and cmake/FindReadline.cmake to arrange for the
+    ncurses library to be included for pcretest when ReadLine support is 
+    requested, but also to allow for it to be overridden. This patch came from 
+    Daniel Bergström.  
 
 
 Version 7.6 28-Jan-08
