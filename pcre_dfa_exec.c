@@ -223,7 +223,7 @@ Arguments:
   rlevel            function call recursion level
   recursing         regex recursive call level
 
-Returns:            > 0 => number of match offset pairs placed in offsets 
+Returns:            > 0 => number of match offset pairs placed in offsets
                     = 0 => offsets overflowed; longest matches are present
                      -1 => failed to match
                    < -1 => some kind of unexpected problem
@@ -2160,12 +2160,12 @@ for (;;)
 
 /* ========================================================================== */
       /* These are the opcodes for fancy brackets of various kinds. We have
-      to use recursion in order to handle them. The "always failing" assersion 
+      to use recursion in order to handle them. The "always failing" assersion
       (?!) is optimised when compiling to OP_FAIL, so we have to support that,
       though the other "backtracking verbs" are not supported. */
-      
+
       case OP_FAIL:
-      break;  
+      break;
 
       case OP_ASSERT:
       case OP_ASSERT_NOT:

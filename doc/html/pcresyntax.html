@@ -357,6 +357,14 @@ Each top-level branch of a look behind must be of a fixed length.
   (?-n)          call subpattern by relative number
   (?&name)       call subpattern by name (Perl)
   (?P&#62;name)      call subpattern by name (Python)
+  \g&#60;name&#62;       call subpattern by name (Oniguruma)
+  \g'name'       call subpattern by name (Oniguruma)
+  \g&#60;n&#62;          call subpattern by absolute number (Oniguruma)
+  \g'n'          call subpattern by absolute number (Oniguruma)
+  \g&#60;+n&#62;         call subpattern by relative number (PCRE extension)
+  \g'+n'         call subpattern by relative number (PCRE extension)
+  \g&#60;-n&#62;         call subpattern by relative number (PCRE extension)
+  \g'-n'         call subpattern by relative number (PCRE extension)
 </PRE>
 </P>
 <br><a name="SEC19" href="#TOC1">CONDITIONAL PATTERNS</a><br>
@@ -440,9 +448,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 November 2007
+Last updated: 09 April 2008
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2008 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

@@ -299,15 +299,15 @@ else if (nmatch > 0)
 
 /* REG_STARTEND is a BSD extension, to allow for non-NUL-terminated strings.
 The man page from OS X says "REG_STARTEND affects only the location of the
-string, not how it is matched". That is why the "so" value is used to bump the 
+string, not how it is matched". That is why the "so" value is used to bump the
 start location rather than being passed as a PCRE "starting offset". */
 
-if ((eflags & REG_STARTEND) != 0) 
+if ((eflags & REG_STARTEND) != 0)
   {
   so = pmatch[0].rm_so;
   eo = pmatch[0].rm_eo;
-  } 
-else 
+  }
+else
   {
   so = 0;
   eo = strlen(string);

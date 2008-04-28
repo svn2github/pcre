@@ -297,6 +297,25 @@ using the <b>readline()</b> function. This provides line-editing and history
 facilities. Note that <b>libreadline</b> is GPL-licenced, so if you distribute a
 binary of <b>pcretest</b> linked in this way, there may be licensing issues.
 </P>
+<P>
+Setting this option causes the <b>-lreadline</b> option to be added to the
+<b>pcretest</b> build. In many operating environments with a sytem-installed
+<b>libreadline</b> this is sufficient. However, in some environments (e.g.
+if an unmodified distribution version of readline is in use), some extra
+configuration may be necessary. The INSTALL file for <b>libreadline</b> says
+this:
+<pre>
+  "Readline uses the termcap functions, but does not link with the
+  termcap or curses library itself, allowing applications which link
+  with readline the to choose an appropriate library."
+</pre>
+If your environment has not been set up so that an appropriate library is
+automatically included, you may need to add something like
+<pre>
+  LIBS="-ncurses"
+</pre>
+immediately before the <b>configure</b> command.
+</P>
 <br><a name="SEC16" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcre_config</b>(3).
@@ -312,9 +331,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC18" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 December 2007
+Last updated: 13 April 2008
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2008 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

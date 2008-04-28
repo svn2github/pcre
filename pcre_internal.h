@@ -605,7 +605,7 @@ contain UTF-8 characters with values greater than 255. */
 value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
 definitions below, up to ESC_z. There's a dummy for OP_ANY because it
-corresponds to "." rather than an escape sequence, and another for OP_ALLANY 
+corresponds to "." rather than an escape sequence, and another for OP_ALLANY
 (which is used for [^] in JavaScript compatibility mode).
 
 The final escape must be ESC_REF as subsequent values are used for
@@ -616,8 +616,8 @@ put in between that don't consume a character, that code will have to change.
 */
 
 enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
-       ESC_W, ESC_w, ESC_dum1, ESC_dum2, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H, 
-       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z, ESC_E, ESC_Q, ESC_g, ESC_k, 
+       ESC_W, ESC_w, ESC_dum1, ESC_dum2, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
+       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z, ESC_E, ESC_Q, ESC_g, ESC_k,
        ESC_REF };
 
 
@@ -780,9 +780,9 @@ enum {
 
   OP_FAIL,           /* 109 */
   OP_ACCEPT,         /* 110 */
-  
+
   /* This is used to skip a subpattern with a {0} quantifier */
- 
+
   OP_SKIPZERO        /* 111 */
 };
 
@@ -809,7 +809,7 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
   "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero",    \
   "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
-  "Skip zero" 
+  "Skip zero"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1015,7 +1015,7 @@ typedef struct match_data {
   BOOL   notbol;                /* NOTBOL flag */
   BOOL   noteol;                /* NOTEOL flag */
   BOOL   utf8;                  /* UTF8 flag */
-  BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */ 
+  BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
   BOOL   partial;               /* PARTIAL flag */

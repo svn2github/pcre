@@ -160,6 +160,7 @@ PATTERN MODIFIERS
          /N              PCRE_NO_AUTO_CAPTURE
          /U              PCRE_UNGREEDY
          /X              PCRE_EXTRA
+         /<JS>           PCRE_JAVASCRIPT_COMPAT
          /<cr>           PCRE_NEWLINE_CR
          /<lf>           PCRE_NEWLINE_LF
          /<crlf>         PCRE_NEWLINE_CRLF
@@ -649,5 +650,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 18 December 2007
-       Copyright (c) 1997-2007 University of Cambridge.
+       Last updated: 12 April 2008
+       Copyright (c) 1997-2008 University of Cambridge.

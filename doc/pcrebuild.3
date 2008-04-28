@@ -287,19 +287,19 @@ Setting this option causes the \fB-lreadline\fP option to be added to the
 \fBpcretest\fP build. In many operating environments with a sytem-installed
 \fBlibreadline\fP this is sufficient. However, in some environments (e.g.
 if an unmodified distribution version of readline is in use), some extra
-configuration may be necessary. The INSTALL file for \fBlibreadline\fP says 
+configuration may be necessary. The INSTALL file for \fBlibreadline\fP says
 this:
 .sp
-  "Readline uses the termcap functions, but does not link with the 
-  termcap or curses library itself, allowing applications which link 
+  "Readline uses the termcap functions, but does not link with the
+  termcap or curses library itself, allowing applications which link
   with readline the to choose an appropriate library."
-.sp  
-If your environment has not been set up so that an appropriate library is 
+.sp
+If your environment has not been set up so that an appropriate library is
 automatically included, you may need to add something like
 .sp
   LIBS="-ncurses"
 .sp
-immediately before the \fBconfigure\fP command.   
+immediately before the \fBconfigure\fP command.
 .
 .
 .SH "SEE ALSO"

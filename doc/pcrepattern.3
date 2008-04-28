@@ -318,14 +318,14 @@ parenthesized subpatterns.
 .SS "Absolute and relative subroutine calls"
 .rs
 .sp
-For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or 
-a number enclosed either in angle brackets or single quotes, is an alternative 
-syntax for referencing a subpattern as a "subroutine". Details are discussed 
+For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or
+a number enclosed either in angle brackets or single quotes, is an alternative
+syntax for referencing a subpattern as a "subroutine". Details are discussed
 .\" HTML <a href="#onigurumasubroutines">
 .\" </a>
 later.
 .\"
-Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP 
+Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP
 synonymous. The former is a back reference; the latter is a subroutine call.
 .
 .
@@ -1259,13 +1259,13 @@ support is available, \eX{3} matches three Unicode extended sequences, each of
 which may be several bytes long (and they may be of different lengths).
 .P
 The quantifier {0} is permitted, causing the expression to behave as if the
-previous item and the quantifier were not present. This may be useful for 
-subpatterns that are referenced as 
+previous item and the quantifier were not present. This may be useful for
+subpatterns that are referenced as
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
 subroutines
 .\"
-from elsewhere in the pattern. Items other than subpatterns that have a {0} 
+from elsewhere in the pattern. Items other than subpatterns that have a {0}
 quantifier are omitted from the compiled pattern.
 .P
 For convenience, the three most common quantifiers have single-character
@@ -2053,20 +2053,20 @@ processing option does not affect the called subpattern.
 .SH "ONIGURUMA SUBROUTINE SYNTAX"
 .rs
 .sp
-For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or 
-a number enclosed either in angle brackets or single quotes, is an alternative 
-syntax for referencing a subpattern as a subroutine, possibly recursively. Here 
+For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or
+a number enclosed either in angle brackets or single quotes, is an alternative
+syntax for referencing a subpattern as a subroutine, possibly recursively. Here
 are two of the examples used above, rewritten using this syntax:
 .sp
   (?<pn> \e( ( (?>[^()]+) | \eg<pn> )* \e) )
   (sens|respons)e and \eg'1'ibility
 .sp
-PCRE supports an extension to Oniguruma: if a number is preceded by a 
+PCRE supports an extension to Oniguruma: if a number is preceded by a
 plus or a minus sign it is taken as a relative reference. For example:
 .sp
   (abc)(?i:\eg<-1>)
 .sp
-Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP 
+Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP
 synonymous. The former is a back reference; the latter is a subroutine call.
 .
 .
@@ -2117,7 +2117,7 @@ remarks apply to the PCRE features described in this section.
 .P
 Since these verbs are specifically related to backtracking, most of them can be
 used only when the pattern is to be matched using \fBpcre_exec()\fP, which uses
-a backtracking algorithm. With the exception of (*FAIL), which behaves like a 
+a backtracking algorithm. With the exception of (*FAIL), which behaves like a
 failing negative assertion, they cause an error if encountered by
 \fBpcre_dfa_exec()\fP.
 .P

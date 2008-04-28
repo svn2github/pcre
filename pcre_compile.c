@@ -303,7 +303,7 @@ static const char error_texts[] =
   "number is too big\0"
   "subpattern name expected\0"
   "digit expected after (?+\0"
-  "] is an invalid data character in JavaScript compatibility mode"; 
+  "] is an invalid data character in JavaScript compatibility mode";
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -533,30 +533,30 @@ else
     break;
 
     /* \g must be followed by one of a number of specific things:
-    
+
     (1) A number, either plain or braced. If positive, it is an absolute
     backreference. If negative, it is a relative backreference. This is a Perl
     5.10 feature.
-    
+
     (2) Perl 5.10 also supports \g{name} as a reference to a named group. This
     is part of Perl's movement towards a unified syntax for back references. As
     this is synonymous with \k{name}, we fudge it up by pretending it really
     was \k.
-    
-    (3) For Oniguruma compatibility we also support \g followed by a name or a 
-    number either in angle brackets or in single quotes. However, these are 
-    (possibly recursive) subroutine calls, _not_ backreferences. Just return 
+
+    (3) For Oniguruma compatibility we also support \g followed by a name or a
+    number either in angle brackets or in single quotes. However, these are
+    (possibly recursive) subroutine calls, _not_ backreferences. Just return
     the -ESC_g code (cf \k). */
 
     case 'g':
     if (ptr[1] == '<' || ptr[1] == '\'')
       {
       c = -ESC_g;
-      break;  
-      }  
+      break;
+      }
 
     /* Handle the Perl-compatible cases */
- 
+
     if (ptr[1] == '{')
       {
       const uschar *p;
@@ -588,18 +588,18 @@ else
       *errorcodeptr = ERR61;
       break;
       }
-      
+
     if (braced && *(++ptr) != '}')
       {
       *errorcodeptr = ERR57;
       break;
       }
-      
+
     if (c == 0)
       {
       *errorcodeptr = ERR58;
       break;
-      }     
+      }
 
     if (negated)
       {
@@ -976,7 +976,7 @@ be terminated by '>' because that is checked in the first pass.
 
 Arguments:
   ptr          current position in the pattern
-  cd           compile background data 
+  cd           compile background data
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
@@ -1033,10 +1033,10 @@ for (; *ptr != 0; ptr++)
 
     /* If the next character is ']', it is a data character that must be
     skipped, except in JavaScript compatibility mode. */
-    
-    if (ptr[1] == ']' && (cd->external_options & PCRE_JAVASCRIPT_COMPAT) == 0) 
-      ptr++;  
- 
+
+    if (ptr[1] == ']' && (cd->external_options & PCRE_JAVASCRIPT_COMPAT) == 0)
+      ptr++;
+
     while (*(++ptr) != ']')
       {
       if (*ptr == 0) return -1;
@@ -1680,7 +1680,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
     case OP_ANY:
-    case OP_ALLANY: 
+    case OP_ALLANY:
     case OP_ANYBYTE:
     case OP_CHAR:
     case OP_CHARNC:
@@ -1911,7 +1911,7 @@ while ((ptr = (uschar *)find_recurse(ptr, utf8)) != NULL)
 
   /* See if this recursion is on the forward reference list. If so, adjust the
   reference. */
-  
+
   for (hc = save_hwm; hc < cd->hwm; hc += LINK_SIZE)
     {
     offset = GET(hc, 0);
@@ -2487,7 +2487,7 @@ for (;; ptr++)
   /* Get next byte in the pattern */
 
   c = *ptr;
-  
+
   /* If we are in the pre-compile phase, accumulate the length used for the
   previous cycle of this loop. */
 
@@ -2682,17 +2682,17 @@ for (;; ptr++)
     opcode is compiled. It may optionally have a bit map for characters < 256,
     but those above are are explicitly listed afterwards. A flag byte tells
     whether the bitmap is present, and whether this is a negated class or not.
-    
+
     In JavaScript compatibility mode, an isolated ']' causes an error. In
     default (Perl) mode, it is treated as a data character. */
-    
+
     case ']':
     if ((cd->external_options & PCRE_JAVASCRIPT_COMPAT) != 0)
       {
       *errorcodeptr = ERR64;
-      goto FAILED;  
+      goto FAILED;
       }
-    goto NORMAL_CHAR;      
+    goto NORMAL_CHAR;
 
     case '[':
     previous = code;
@@ -2725,19 +2725,19 @@ for (;; ptr++)
         negate_class = TRUE;
       else break;
       }
-      
-    /* Empty classes are allowed in JavaScript compatibility mode. Otherwise, 
-    an initial ']' is taken as a data character -- the code below handles 
+
+    /* Empty classes are allowed in JavaScript compatibility mode. Otherwise,
+    an initial ']' is taken as a data character -- the code below handles
     that. In JS mode, [] must always fail, so generate OP_FAIL, whereas
     [^] must match any character, so generate OP_ALLANY. */
-    
+
     if (c ==']' && (cd->external_options & PCRE_JAVASCRIPT_COMPAT) != 0)
       {
       *code++ = negate_class? OP_ALLANY : OP_FAIL;
       if (firstbyte == REQ_UNSET) firstbyte = REQ_NONE;
       zerofirstbyte = firstbyte;
       break;
-      }    
+      }
 
     /* If a class contains a negative special such as \S, we need to flip the
     negation flag at the end, so that support for characters > 255 works
@@ -3902,11 +3902,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         **   code = previous;
         **   goto END_REPEAT;
         **   }
-        
-        However, that fails when a group is referenced as a subroutine from 
-        elsewhere in the pattern, so now we stick in OP_SKIPZERO in front of it 
-        so that it is skipped on execution. As we don't have a list of which 
-        groups are referenced, we cannot do this selectively. 
+
+        However, that fails when a group is referenced as a subroutine from
+        elsewhere in the pattern, so now we stick in OP_SKIPZERO in front of it
+        so that it is skipped on execution. As we don't have a list of which
+        groups are referenced, we cannot do this selectively.
 
         If the maximum is 1 or unlimited, we just have to stick in the BRAZERO
         and do no more at this point. However, we do need to adjust any
@@ -3925,7 +3925,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             {
             *previous++ = OP_SKIPZERO;
             goto END_REPEAT;
-            }    
+            }
           *previous++ = OP_BRAZERO + repeat_type;
           }
 
@@ -4119,13 +4119,13 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           }
         }
       }
-      
+
     /* If previous is OP_FAIL, it was generated by an empty class [] in
-    JavaScript mode. The other ways in which OP_FAIL can be generated, that is 
-    by (*FAIL) or (?!) set previous to NULL, which gives a "nothing to repeat" 
+    JavaScript mode. The other ways in which OP_FAIL can be generated, that is
+    by (*FAIL) or (?!) set previous to NULL, which gives a "nothing to repeat"
     error above. We can just ignore the repeat in JS case. */
-    
-    else if (*previous == OP_FAIL) goto END_REPEAT;  
+
+    else if (*previous == OP_FAIL) goto END_REPEAT;
 
     /* Else there's some kind of shambles */
 
@@ -4207,7 +4207,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     bravalue = OP_CBRA;
     save_hwm = cd->hwm;
     reset_bracount = FALSE;
-    
+
     /* First deal with various "verbs" that can be introduced by '*'. */
 
     if (*(++ptr) == '*' && (cd->ctypes[ptr[1]] & ctype_letter) != 0)
@@ -4738,14 +4738,14 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           {
           const uschar *called;
           terminator = ')';
-          
-          /* Come here from the \g<...> and \g'...' code (Oniguruma 
-          compatibility). However, the syntax has been checked to ensure that 
-          the ... are a (signed) number, so that neither ERR63 nor ERR29 will 
+
+          /* Come here from the \g<...> and \g'...' code (Oniguruma
+          compatibility). However, the syntax has been checked to ensure that
+          the ... are a (signed) number, so that neither ERR63 nor ERR29 will
           be called on this path, nor with the jump to OTHER_CHAR_AFTER_QUERY
           ever be taken. */
-          
-          HANDLE_NUMERICAL_RECURSION: 
+
+          HANDLE_NUMERICAL_RECURSION:
 
           if ((refsign = *ptr) == '+')
             {
@@ -5163,7 +5163,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     back references and those types that consume a character may be repeated.
     We can test for values between ESC_b and ESC_Z for the latter; this may
     have to change if any new ones are ever created. */
-    
+
     case '\\':
     tempptr = ptr;
     c = check_escape(&ptr, errorcodeptr, cd->bracount, options, FALSE);
@@ -5190,54 +5190,54 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       zerofirstbyte = firstbyte;
       zeroreqbyte = reqbyte;
-      
-      /* \g<name> or \g'name' is a subroutine call by name and \g<n> or \g'n' 
-      is a subroutine call by number (Oniguruma syntax). In fact, the value 
+
+      /* \g<name> or \g'name' is a subroutine call by name and \g<n> or \g'n'
+      is a subroutine call by number (Oniguruma syntax). In fact, the value
       -ESC_g is returned only for these cases. So we don't need to check for <
       or ' if the value is -ESC_g. For the Perl syntax \g{n} the value is
       -ESC_REF+n, and for the Perl syntax \g{name} the result is -ESC_k (as
       that is a synonym for a named back reference). */
-      
+
       if (-c == ESC_g)
         {
         const uschar *p;
-        save_hwm = cd->hwm;   /* Normally this is set when '(' is read */ 
+        save_hwm = cd->hwm;   /* Normally this is set when '(' is read */
         terminator = (*(++ptr) == '<')? '>' : '\'';
-        
+
         /* These two statements stop the compiler for warning about possibly
-        unset variables caused by the jump to HANDLE_NUMERICAL_RECURSION. In 
-        fact, because we actually check for a number below, the paths that 
+        unset variables caused by the jump to HANDLE_NUMERICAL_RECURSION. In
+        fact, because we actually check for a number below, the paths that
         would actually be in error are never taken. */
-          
+
         skipbytes = 0;
-        reset_bracount = FALSE; 
-        
+        reset_bracount = FALSE;
+
         /* Test for a name */
-        
+
         if (ptr[1] != '+' && ptr[1] != '-')
-          { 
-          BOOL isnumber = TRUE; 
+          {
+          BOOL isnumber = TRUE;
           for (p = ptr + 1; *p != 0 && *p != terminator; p++)
-            {  
+            {
             if ((cd->ctypes[*p] & ctype_digit) == 0) isnumber = FALSE;
             if ((cd->ctypes[*p] & ctype_word) == 0) break;
             }
           if (*p != terminator)
             {
             *errorcodeptr = ERR57;
-            break; 
-            }    
-          if (isnumber) 
+            break;
+            }
+          if (isnumber)
             {
-            ptr++; 
+            ptr++;
             goto HANDLE_NUMERICAL_RECURSION;
-            } 
+            }
           is_recurse = TRUE;
           goto NAMED_REF_OR_RECURSE;
           }
-        
+
         /* Test a signed number in angle brackets or quotes. */
-        
+
         p = ptr + 2;
         while ((digitab[*p] & ctype_digit) != 0) p++;
         if (*p != terminator)
@@ -5245,9 +5245,9 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           *errorcodeptr = ERR57;
           break;
           }
-        ptr++;   
+        ptr++;
         goto HANDLE_NUMERICAL_RECURSION;
-        }    
+        }
 
       /* \k<name> or \k'name' is a back reference by name (Perl syntax).
       We also support \k{name} (.NET syntax) */
@@ -5761,7 +5761,7 @@ do {
    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
              op == OP_TYPEPOSSTAR))
      {
-     if (scode[1] != OP_ALLANY || (bracket_map & backref_map) != 0) 
+     if (scode[1] != OP_ALLANY || (bracket_map & backref_map) != 0)
        return FALSE;
      }
 
@@ -6267,7 +6267,7 @@ while (errorcode == 0 && cd->hwm > cworkspace)
   if (groupptr == NULL) errorcode = ERR53;
     else PUT(((uschar *)codestart), offset, groupptr - codestart);
   }
-  
+
 /* Give an error if there's back reference to a non-existent capturing
 subpattern. */
 

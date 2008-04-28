@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Run PCRE tests. 
+# Run PCRE tests.
 
 valgrind=
 

@@ -551,7 +551,7 @@ over the newline.
 .sp
   PCRE_JAVASCRIPT_COMPAT
 .sp
-If this option is set, PCRE's behaviour is changed in some ways so that it is 
+If this option is set, PCRE's behaviour is changed in some ways so that it is
 compatible with JavaScript rather than Perl. The changes are as follows:
 .P
 (1) A lone closing square bracket in a pattern causes a compile-time error,
@@ -559,9 +559,9 @@ because this is illegal in JavaScript (by default it is treated as a data
 character). Thus, the pattern AB]CD becomes illegal when this option is set.
 .P
 (2) At run time, a back reference to an unset subpattern group matches an empty
-string (by default this causes the current matching path to fail). A pattern 
-such as (\1)(a) succeeds when this option is set (assuming it can find an "a" 
-in the subject), whereas it fails by default, for Perl compatibility.
+string (by default this causes the current matching alternative to fail). A
+pattern such as (\e1)(a) succeeds when this option is set (assuming it can find
+an "a" in the subject), whereas it fails by default, for Perl compatibility.
 .sp
   PCRE_MULTILINE
 .sp
@@ -731,8 +731,8 @@ out of use. To avoid confusion, they have not been re-used.
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
   56  inconsistent NEWLINE options
-  57  \eg is not followed by a braced, angle-bracketed, or quoted 
-        name/number or by a plain number 
+  57  \eg is not followed by a braced, angle-bracketed, or quoted
+        name/number or by a plain number
   58  a numbered reference must not be zero
   59  (*VERB) with an argument is not supported
   60  (*VERB) not recognized

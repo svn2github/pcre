@@ -348,7 +348,7 @@ do
       switch(tcode[1])
         {
         case OP_ANY:
-        case OP_ALLANY: 
+        case OP_ALLANY:
         return SSB_FAIL;
 
         case OP_NOT_DIGIT:

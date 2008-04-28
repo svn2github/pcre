@@ -195,10 +195,23 @@ that matched.
 <P>
 <b>--exclude</b>=<i>pattern</i>
 When <b>pcregrep</b> is searching the files in a directory as a consequence of
-the <b>-r</b> (recursive search) option, any files whose names match the pattern
-are excluded. The pattern is a PCRE regular expression. If a file name matches
-both <b>--include</b> and <b>--exclude</b>, it is excluded. There is no short
-form for this option.
+the <b>-r</b> (recursive search) option, any regular files whose names match the
+pattern are excluded. Subdirectories are not excluded by this option; they are
+searched recursively, subject to the <b>--exclude_dir</b> and
+<b>--include_dir</b> options. The pattern is a PCRE regular expression, and is
+matched against the final component of the file name (not the entire path). If
+a file name matches both <b>--include</b> and <b>--exclude</b>, it is excluded.
+There is no short form for this option.
+</P>
+<P>
+<b>--exclude_dir</b>=<i>pattern</i>
+When <b>pcregrep</b> is searching the contents of a directory as a consequence
+of the <b>-r</b> (recursive search) option, any subdirectories whose names match
+the pattern are excluded. (Note that the \fP--exclude\fP option does not affect
+subdirectories.) The pattern is a PCRE regular expression, and is matched
+against the final component of the name (not the entire path). If a
+subdirectory name matches both <b>--include_dir</b> and <b>--exclude_dir</b>, it
+is excluded. There is no short form for this option.
 </P>
 <P>
 <b>-F</b>, <b>--fixed-strings</b>
@@ -258,10 +271,23 @@ Ignore upper/lower case distinctions during comparisons.
 <P>
 <b>--include</b>=<i>pattern</i>
 When <b>pcregrep</b> is searching the files in a directory as a consequence of
-the <b>-r</b> (recursive search) option, only those files whose names match the
-pattern are included. The pattern is a PCRE regular expression. If a file name
-matches both <b>--include</b> and <b>--exclude</b>, it is excluded. There is no
-short form for this option.
+the <b>-r</b> (recursive search) option, only those regular files whose names
+match the pattern are included. Subdirectories are always included and searched
+recursively, subject to the \fP--include_dir\fP and <b>--exclude_dir</b>
+options. The pattern is a PCRE regular expression, and is matched against the
+final component of the file name (not the entire path). If a file name matches
+both <b>--include</b> and <b>--exclude</b>, it is excluded. There is no short
+form for this option.
+</P>
+<P>
+<b>--include_dir</b>=<i>pattern</i>
+When <b>pcregrep</b> is searching the contents of a directory as a consequence
+of the <b>-r</b> (recursive search) option, only those subdirectories whose
+names match the pattern are included. (Note that the <b>--include</b> option
+does not affect subdirectories.) The pattern is a PCRE regular expression, and
+is matched against the final component of the name (not the entire path). If a
+subdirectory name matches both <b>--include_dir</b> and <b>--exclude_dir</b>, it
+is excluded. There is no short form for this option.
 </P>
 <P>
 <b>-L</b>, <b>--files-without-match</b>
@@ -481,9 +507,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 December 2007
+Last updated: 08 March 2008
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2008 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
