@@ -102,6 +102,11 @@ Version 7.7 28-Apr-08
     ncurses library to be included for pcretest when ReadLine support is
     requested, but also to allow for it to be overridden. This patch came from
     Daniel Bergström.
+    
+19. There was a typo in the file ucpinternal.h where f0_rangeflag was defined
+    as 0x00f00000 instead of 0x00800000. Luckily, this would not have caused 
+    any errors with the current Unicode tables. Thanks to Peter Kankowski for 
+    spotting this. 
 
 
 Version 7.6 28-Jan-08
