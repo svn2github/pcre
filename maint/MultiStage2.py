@@ -3,6 +3,29 @@
 # Multistage table builder
 # (c) Peter Kankowski, 2008
 
+# This script was submitted to the PCRE project by Peter Kankowski as part of
+# the upgrading of Unicode property support. The new code speeds up property
+# matching many times. The script is for the use of PCRE maintainers, to
+# generate the pcre_ucd.c file that contains a digested form of the Unicode
+# data tables.
+
+# The script should be run in the maint subdirectory, using the command
+#
+# ./MultiStage2.py >../pcre_ucd.c
+#
+# It requires three Unicode data tables, DerivedGeneralCategory.txt,
+# Scripts.txt, and UnicodeData.txt, to be in the Unicode.tables subdirectory.
+
+# Added with minor modifications:
+#  Added #! line at start
+#  Removed tabs
+#  Made it work with Python 2.4 by rewriting two statements that needed 2.5
+#  Consequent code tidy
+#  Adjusted file names to Unicode.tables directory
+#
+#  Philip Hazel, 02 July 2008
+
+
 import re
 import string
 import sys
@@ -39,7 +62,7 @@ def read_table(file_name, get_value, default_value):
                 
                 m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
                 char = int(m.group(1), 16)
-#PH             last = char if m.group(3) is None else int(m.group(3), 16)
+# PH            last = char if m.group(3) is None else int(m.group(3), 16)
                 if m.group(3) is None:
                         last = char
                 else:
@@ -104,13 +127,14 @@ def print_table(table, table_name, block_size = None):
                 for i in range(0, len(table), ELEMS_PER_LINE):
                         print fmt % (table[i:i+ELEMS_PER_LINE] + (i * mult,))
         else:
-#PH             fmt = "%3d," * (ELEMS_PER_LINE if block_size > ELEMS_PER_LINE else block_size) + "\n"
+# PH            fmt = "%3d," * (ELEMS_PER_LINE if block_size > ELEMS_PER_LINE else block_size) + "\n"
                 if block_size > ELEMS_PER_LINE:
                         fmt = "%3d," * ELEMS_PER_LINE + "\n"
+                        fmt = fmt * (block_size / ELEMS_PER_LINE)
                 else:
                         fmt = "%3d," * block_size + "\n"          
-                if block_size > ELEMS_PER_LINE:
-                        fmt = fmt * (block_size / ELEMS_PER_LINE)
+# PH            if block_size > ELEMS_PER_LINE:
+# PH                    fmt = fmt * (block_size / ELEMS_PER_LINE)
                 for i in range(0, len(table), block_size):
                         print ("/* block %d */\n" + fmt) % ((i / block_size,) + table[i:i+block_size])
         print "};\n"

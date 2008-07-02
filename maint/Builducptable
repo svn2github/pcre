@@ -1,3 +1,12 @@
+############################################################
+############################################################
+## As of PCRE 8.0 this file is OBSOLETE. A different way  ##
+## of handling Unicode property data is now used. See the ##
+## maint/README document.                                 ##
+## PH 02 July 2008                                        ##
+############################################################
+############################################################
+
 #! /usr/bin/perl -w
 
 # This is a Perl script to create the table of character properties. For
