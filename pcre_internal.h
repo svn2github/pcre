@@ -140,16 +140,20 @@ preprocessor time in standard C environments. */
 
 #if USHRT_MAX == 65535
   typedef unsigned short pcre_uint16;
+  typedef short pcre_int16;
 #elif UINT_MAX == 65535
   typedef unsigned int pcre_uint16;
+  typedef int pcre_int16;
 #else
   #error Cannot determine a type for 16-bit unsigned integers
 #endif
 
 #if UINT_MAX == 4294967295
   typedef unsigned int pcre_uint32;
+  typedef int pcre_int32;
 #elif ULONG_MAX == 4294967295
   typedef unsigned long int pcre_uint32;
+  typedef long int pcre_int32;
 #else
   #error Cannot determine a type for 32-bit unsigned integers
 #endif
@@ -1126,12 +1130,35 @@ extern BOOL         _pcre_is_newline(const uschar *, int, const uschar *,
 extern int          _pcre_ord2utf8(int, uschar *);
 extern real_pcre   *_pcre_try_flipped(const real_pcre *, real_pcre *,
                       const pcre_study_data *, pcre_study_data *);
-extern int          _pcre_ucp_findprop(const unsigned int, int *, int *);
-extern unsigned int _pcre_ucp_othercase(const unsigned int);
 extern int          _pcre_valid_utf8(const uschar *, int);
 extern BOOL         _pcre_was_newline(const uschar *, int, const uschar *,
                       int *, BOOL);
 extern BOOL         _pcre_xclass(int, const uschar *);
+
+
+/* Unicode character database (UCD) */
+
+typedef struct {
+  uschar script;
+  uschar chartype;
+  pcre_int16 other_case;
+} ucd_record;
+
+extern const ucd_record  ucd_records[];
+extern const uschar      ucd_stage1[];
+extern const pcre_uint16 ucd_stage2[];
+extern const int ucp_gentype[];
+
+/* UCD access macros */
+
+#define UCD_BLOCK_SIZE 128
+#define GET_UCD(ch) (ucd_records + ucd_stage2[ucd_stage1[(ch) / UCD_BLOCK_SIZE] * \
+        UCD_BLOCK_SIZE + ch % UCD_BLOCK_SIZE])
+
+#define UCD_CHARTYPE(ch)  GET_UCD(ch)->chartype
+#define UCD_SCRIPT(ch)    GET_UCD(ch)->script
+#define UCD_CATEGORY(ch)  ucp_gentype[UCD_CHARTYPE(ch)]
+#define UCD_OTHERCASE(ch) (ch + GET_UCD(ch)->other_case) 
 
 #endif
 

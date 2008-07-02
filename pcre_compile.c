@@ -2015,7 +2015,7 @@ get_othercase_range(unsigned int *cptr, unsigned int d, unsigned int *ocptr,
 unsigned int c, othercase, next;
 
 for (c = *cptr; c <= d; c++)
-  { if ((othercase = _pcre_ucp_othercase(c)) != NOTACHAR) break; }
+  { if ((othercase = UCD_OTHERCASE(c)) != c) break; }
 
 if (c > d) return FALSE;
 
@@ -2024,7 +2024,7 @@ next = othercase + 1;
 
 for (++c; c <= d; c++)
   {
-  if (_pcre_ucp_othercase(c) != next) break;
+  if (UCD_OTHERCASE(c) != next) break;
   next++;
   }
 
@@ -2152,7 +2152,7 @@ if (next >= 0) switch(op_code)
     unsigned int othercase;
     if (next < 128) othercase = cd->fcc[next]; else
 #ifdef SUPPORT_UCP
-    othercase = _pcre_ucp_othercase((unsigned int)next);
+    othercase = UCD_OTHERCASE((unsigned int)next);
 #else
     othercase = NOTACHAR;
 #endif
@@ -2173,7 +2173,7 @@ if (next >= 0) switch(op_code)
     unsigned int othercase;
     if (next < 128) othercase = cd->fcc[next]; else
 #ifdef SUPPORT_UCP
-    othercase = _pcre_ucp_othercase(next);
+    othercase = UCD_OTHERCASE(next);
 #else
     othercase = NOTACHAR;
 #endif
@@ -3339,7 +3339,7 @@ for (;; ptr++)
         if ((options & PCRE_CASELESS) != 0)
           {
           unsigned int othercase;
-          if ((othercase = _pcre_ucp_othercase(c)) != NOTACHAR)
+          if ((othercase = UCD_OTHERCASE(c)) != c)
             {
             *class_utf8data++ = XCL_SINGLE;
             class_utf8data += _pcre_ord2utf8(othercase, class_utf8data);

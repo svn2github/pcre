@@ -819,6 +819,12 @@
 /^\x{023a}+([^X])/8i
   \x{023a}\x{2c65}X
  
+/\x{c0}+\x{116}+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
+/[\x{c0}\x{116}]+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
 /Check property support in non-UTF-8 mode/
  
 /\p{L}{4}/
