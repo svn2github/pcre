@@ -834,7 +834,7 @@ for (;;)
           break;
 
           case PT_GC:
-          OK = ucp_gentype[prop->chartype] == code[2];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[2];
           break;
 
           case PT_PC:
@@ -1003,7 +1003,7 @@ for (;;)
           break;
 
           case PT_GC:
-          OK = ucp_gentype[prop->chartype] == code[3];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[3];
           break;
 
           case PT_PC:
@@ -1225,7 +1225,7 @@ for (;;)
           break;
 
           case PT_GC:
-          OK = ucp_gentype[prop->chartype] == code[3];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[3];
           break;
 
           case PT_PC:
@@ -1472,7 +1472,7 @@ for (;;)
           break;
 
           case PT_GC:
-          OK = ucp_gentype[prop->chartype] == code[5];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[5];
           break;
 
           case PT_PC:

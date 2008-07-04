@@ -1669,7 +1669,7 @@ for (;;)
          break;
 
         case PT_GC:
-        if ((ecode[2] != ucp_gentype[prop->chartype]) == (op == OP_PROP))
+        if ((ecode[2] != _pcre_ucp_gentype[prop->chartype]) == (op == OP_PROP))
           RRETURN(MATCH_NOMATCH);
         break;
 

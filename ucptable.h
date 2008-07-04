@@ -1,3 +1,12 @@
+############################################################
+############################################################
+## As of PCRE 8.0 this file is OBSOLETE. A different way  ##
+## of handling Unicode property data is now used. See the ##
+## maint/README document.                                 ##
+## PH 02 July 2008                                        ##
+############################################################
+############################################################
+
 /* This source module is automatically generated from the Unicode
 property table. See ucpinternal.h for a description of the layout.
 This version was made from the Unicode 5.0.0 tables. */

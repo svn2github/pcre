@@ -321,3 +321,6 @@ findprop 1b00 12000 7c0 a840 10900
 07c0 Number: Decimal number Nko
 a840 Letter: Other letter Phags_Pa
 10900 Letter: Other letter Phoenician
+findprop 1d79 a77d
+1d79 Letter: Lower case letter Latin a77d
+a77d Letter: Upper case letter Latin 1d79

@@ -82,17 +82,4 @@ return 0;   /* Keep compiler happy; this function won't ever be */
 #endif      /* called when SUPPORT_UTF8 is not defined. */
 }
 
-/* Table to translate from particular type value to the general value. */
-
-const int ucp_gentype[] = {
-  ucp_C, ucp_C, ucp_C, ucp_C, ucp_C,  /* Cc, Cf, Cn, Co, Cs */
-  ucp_L, ucp_L, ucp_L, ucp_L, ucp_L,  /* Ll, Lu, Lm, Lo, Lt */
-  ucp_M, ucp_M, ucp_M,                /* Mc, Me, Mn */
-  ucp_N, ucp_N, ucp_N,                /* Nd, Nl, No */
-  ucp_P, ucp_P, ucp_P, ucp_P, ucp_P,  /* Pc, Pd, Pe, Pf, Pi */
-  ucp_P, ucp_P,                       /* Ps, Po */
-  ucp_S, ucp_S, ucp_S, ucp_S,         /* Sc, Sk, Sm, So */
-  ucp_Z, ucp_Z, ucp_Z                 /* Zl, Zp, Zs */
-};
-
 /* End of pcre_ord2utf8.c */

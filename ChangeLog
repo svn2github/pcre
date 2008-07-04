@@ -6,10 +6,13 @@ Version 8.0 02 Jul-08
 
 1.  Replaced UCP searching code with optimized version as implemented for Ad
     Muncher (http://www.admuncher.com/) by Peter Kankowski. This uses a two-
-    stage table and inline lookup instead of a function, giving speed ups of 2 
-    to 5 times on some simple patterns that I tested. Permission was given to 
-    distribute the MultiStage2.py script that generates the tables (it's not in 
-    the tarball, but is in the Subversion repository). 
+    stage table and inline lookup instead of a function, giving speed ups of 2
+    to 5 times on some simple patterns that I tested. Permission was given to
+    distribute the MultiStage2.py script that generates the tables (it's not in
+    the tarball, but is in the Subversion repository).
+
+2.  Updated the Unicode datatables to Unicode 5.1.0. This adds yet more
+    scripts.
 
 
 Version 7.7 07-May-08

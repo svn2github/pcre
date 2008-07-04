@@ -24,3 +24,4 @@ findprop fff8 fff9 fffa fffb fffc fffd fffe ffff
 findprop 10000 10001 e01ef f0000 100000
 
 findprop 1b00 12000 7c0 a840 10900
+findprop 1d79 a77d

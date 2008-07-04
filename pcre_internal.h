@@ -1141,24 +1141,26 @@ extern BOOL         _pcre_xclass(int, const uschar *);
 typedef struct {
   uschar script;
   uschar chartype;
-  pcre_int16 other_case;
+  pcre_int32 other_case;
 } ucd_record;
 
-extern const ucd_record  ucd_records[];
-extern const uschar      ucd_stage1[];
-extern const pcre_uint16 ucd_stage2[];
-extern const int ucp_gentype[];
+extern const ucd_record  _pcre_ucd_records[];
+extern const uschar      _pcre_ucd_stage1[];
+extern const pcre_uint16 _pcre_ucd_stage2[];
+extern const int         _pcre_ucp_gentype[];
+
 
 /* UCD access macros */
 
 #define UCD_BLOCK_SIZE 128
-#define GET_UCD(ch) (ucd_records + ucd_stage2[ucd_stage1[(ch) / UCD_BLOCK_SIZE] * \
+#define GET_UCD(ch) (_pcre_ucd_records + \
+        _pcre_ucd_stage2[_pcre_ucd_stage1[(ch) / UCD_BLOCK_SIZE] * \
         UCD_BLOCK_SIZE + ch % UCD_BLOCK_SIZE])
 
 #define UCD_CHARTYPE(ch)  GET_UCD(ch)->chartype
 #define UCD_SCRIPT(ch)    GET_UCD(ch)->script
-#define UCD_CATEGORY(ch)  ucp_gentype[UCD_CHARTYPE(ch)]
-#define UCD_OTHERCASE(ch) (ch + GET_UCD(ch)->other_case) 
+#define UCD_CATEGORY(ch)  _pcre_ucp_gentype[UCD_CHARTYPE(ch)]
+#define UCD_OTHERCASE(ch) (ch + GET_UCD(ch)->other_case)
 
 #endif
 

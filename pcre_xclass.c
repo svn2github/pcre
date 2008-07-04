@@ -118,7 +118,7 @@ while ((t = *data++) != XCL_END)
       break;
 
       case PT_GC:
-      if ((data[1] == ucp_gentype[prop->chartype]) == (t == XCL_PROP)) return !negated;
+      if ((data[1] == _pcre_ucp_gentype[prop->chartype]) == (t == XCL_PROP)) return !negated;
       break;
 
       case PT_PC:

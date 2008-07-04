@@ -94,10 +94,11 @@ appropriately for an application, not for building PCRE. */
 #include "pcre.h"
 #include "pcre_internal.h"
 
-/* We need access to the data tables that PCRE uses. So as not to have to keep
-two copies, we include the source file here, changing the names of the external
-symbols to prevent clashes. */
+/* We need access to some of the data tables that PCRE uses. So as not to have
+to keep two copies, we include the source file here, changing the names of the
+external symbols to prevent clashes. */
 
+#define _pcre_ucp_gentype      ucp_gentype
 #define _pcre_utf8_table1      utf8_table1
 #define _pcre_utf8_table1_size utf8_table1_size
 #define _pcre_utf8_table2      utf8_table2

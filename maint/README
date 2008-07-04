@@ -23,6 +23,10 @@ Builducptable    A Perl script that creates the contents of the ucptable.h file
                  directory.
 ----------------- This file is now OBSOLETE and no longer used ----------------
 
+GenerateUtt.py   A Python script to generate part of the pcre_tables.c file
+                 that contains Unicode script names in a long string with
+                 offsets, which is tedious to maintain by hand. 
+
 ManyConfigTests  A shell script that runs "configure, make, test" a number of
                  times with different configuration settings.
                  
@@ -40,7 +44,7 @@ Unicode.tables   The files in this directory, DerivedGeneralCategory.txt,
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre_ucd.c data, mainly useful after
                  rebuilding the Unicode property table. Compile and run this in
-                 the "maint" directory.
+                 the "maint" directory (see comments at its head).
 
 ucptestdata      A directory containing two files, testinput1 and testoutput1,
                  to use in conjunction with the ucptest program.
@@ -58,10 +62,15 @@ Updating to a new Unicode release
 ---------------------------------
 
 When there is a new release of Unicode, the files in Unicode.tables must be
-refreshed from the web site, and the MultiStage2.py script can then be run to
-generate a new version of pcre_ucd.c. The ucptest program can be used to check
-that the resulting table works properly, using the data files in ucptestdata to
-check a number of test characters.
+refreshed from the web site. If the new version of Unicode adds new character 
+scripts, both the MultiStage2.py and the GenerateUtt.py scripts must be edited 
+to add the new names. Then the MultiStage2.py script can then be run to
+generate a new version of pcre_ucd.c and the GenerateUtt.py can be run to 
+generate the tricky tables in pcre_tables.c.
+
+The ucptest program can then be compiled and used to check that the new tables
+in pcre_ucd.c work properly, using the data files in ucptestdata to check a
+number of test characters.
 
 
 Preparing for a PCRE release
@@ -253,4 +262,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 02 July 2008
+Last updated: 04 July 2008
