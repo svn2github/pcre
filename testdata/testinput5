@@ -473,4 +473,8 @@ can't tell the difference.) --/
     ** Failers
     ab  
 
+/(\x{de})\1/
+    \x{de}\x{de}
+    \x{123} 
+
 / End of testinput5 /

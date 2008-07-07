@@ -21,6 +21,11 @@ Version 8.0 02 Jul-08
 4.  Caseless matching was not working for non-ASCII characters in back 
     references. For example, /(\x{de})\1/8i was not matching \x{de}\x{fe}.
     It now works when Unicode Property Support is available. 
+    
+5.  In pcretest, an escape such as \x{de} in the data was always generating
+    a UTF-8 string, even in non-UTF-8 mode. Now it generates a single byte in
+    non-UTF-8 mode. If the value is greater than 255, it gives a warning about
+    truncation.   
 
 
 Version 7.7 07-May-08

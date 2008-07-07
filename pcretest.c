@@ -1806,9 +1806,19 @@ while (!done)
             {
             unsigned char buff8[8];
             int ii, utn;
-            utn = ord2utf8(c, buff8);
-            for (ii = 0; ii < utn - 1; ii++) *q++ = buff8[ii];
-            c = buff8[ii];   /* Last byte */
+            if (use_utf8)
+              { 
+              utn = ord2utf8(c, buff8);
+              for (ii = 0; ii < utn - 1; ii++) *q++ = buff8[ii];
+              c = buff8[ii];   /* Last byte */
+              }
+            else
+             {
+             if (c > 255) 
+               fprintf(outfile, "** Character \\x{%x} is greater than 255 and "
+                 "UTF-8 mode is not enabled.\n"
+                 "** Truncation will probably give the wrong result.\n", c);
+             }      
             p = pt + 1;
             break;
             }
