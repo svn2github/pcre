@@ -158,13 +158,39 @@ printf("\n");
 
 if (length > md->end_subject - eptr) return FALSE;
 
-/* Separate the caselesss case for speed */
+/* Separate the caseless case for speed. In UTF-8 mode we can only do this
+properly if Unicode properties are supported. Otherwise, we can check only
+ASCII characters. */
 
 if ((ims & PCRE_CASELESS) != 0)
   {
+#ifdef SUPPORT_UTF8
+#ifdef SUPPORT_UCP
+  if (md->utf8)
+    {
+    USPTR endptr = eptr + length; 
+    while (eptr < endptr)
+      {
+      int c, d; 
+      GETCHARINC(c, eptr);
+      GETCHARINC(d, p);
+      if (c != d && c != UCD_OTHERCASE(d)) return FALSE;
+      }  
+    }  
+  else
+#endif
+#endif
+
+  /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
+  is no UCP support. */
+   
   while (length-- > 0)
-    if (md->lcc[*p++] != md->lcc[*eptr++]) return FALSE;
+    { if (md->lcc[*p++] != md->lcc[*eptr++]) return FALSE; }
   }
+  
+/* In the caseful case, we can just compare the bytes, whether or not we
+are in UTF-8 mode. */
+ 
 else
   { while (length-- > 0) if (*p++ != *eptr++) return FALSE; }
 

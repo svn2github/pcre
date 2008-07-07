@@ -17,6 +17,10 @@ Version 8.0 02 Jul-08
 3.  Change 12 for 7.7 introduced a bug in pcre_study() when a pattern contained
     a group with a zero qualifier. The result of the study could be incorrect,
     or the function might crash, depending on the pattern. 
+    
+4.  Caseless matching was not working for non-ASCII characters in back 
+    references. For example, /(\x{de})\1/8i was not matching \x{de}\x{fe}.
+    It now works when Unicode Property Support is available. 
 
 
 Version 7.7 07-May-08

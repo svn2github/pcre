@@ -1705,4 +1705,46 @@ No match
     \x{1d79}\x{a77d} 
 No match
 
+/(A)\1/8i
+    AA
+ 0: AA
+ 1: A
+    Aa
+ 0: Aa
+ 1: A
+    aa
+ 0: aa
+ 1: a
+    aA
+ 0: aA
+ 1: a
+
+/(\x{de})\1/8i
+    \x{de}\x{de}
+ 0: \x{de}\x{de}
+ 1: \x{de}
+    \x{de}\x{fe}
+ 0: \x{de}\x{fe}
+ 1: \x{de}
+    \x{fe}\x{fe}
+ 0: \x{fe}\x{fe}
+ 1: \x{fe}
+    \x{fe}\x{de}
+ 0: \x{fe}\x{de}
+ 1: \x{fe}
+
+/(\x{10a})\1/8i
+    \x{10a}\x{10a}
+ 0: \x{10a}\x{10a}
+ 1: \x{10a}
+    \x{10a}\x{10b}
+ 0: \x{10a}\x{10b}
+ 1: \x{10a}
+    \x{10b}\x{10b}
+ 0: \x{10b}\x{10b}
+ 1: \x{10b}
+    \x{10b}\x{10a}
+ 0: \x{10b}\x{10a}
+ 1: \x{10b}
+
 / End of testinput6 /

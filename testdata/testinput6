@@ -925,4 +925,22 @@ was broken in all cases./
     ** Failers 
     \x{1d79}\x{a77d} 
 
+/(A)\1/8i
+    AA
+    Aa
+    aa
+    aA
+
+/(\x{de})\1/8i
+    \x{de}\x{de}
+    \x{de}\x{fe}
+    \x{fe}\x{fe}
+    \x{fe}\x{de}
+
+/(\x{10a})\1/8i
+    \x{10a}\x{10a}
+    \x{10a}\x{10b}
+    \x{10b}\x{10b}
+    \x{10b}\x{10a}
+
 / End of testinput6 /
