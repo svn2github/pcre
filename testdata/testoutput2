@@ -9631,4 +9631,11 @@ Failed: nothing to repeat at offset 5
 /a(*FAIL)+b/
 Failed: nothing to repeat at offset 8
 
+/(abc|pqr|123){0}[xyz]/SI
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Starting byte set: x y z 
+
 / End of testinput2 /

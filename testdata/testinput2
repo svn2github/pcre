@@ -2724,4 +2724,6 @@ a random value. /Ix
 
 /a(*FAIL)+b/
 
+/(abc|pqr|123){0}[xyz]/SI
+
 / End of testinput2 /

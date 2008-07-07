@@ -13,6 +13,10 @@ Version 8.0 02 Jul-08
 
 2.  Updated the Unicode datatables to Unicode 5.1.0. This adds yet more
     scripts.
+    
+3.  Change 12 for 7.7 introduced a bug in pcre_study() when a pattern contained
+    a group with a zero qualifier. The result of the study could be incorrect,
+    or the function might crash, depending on the pattern. 
 
 
 Version 7.7 07-May-08
