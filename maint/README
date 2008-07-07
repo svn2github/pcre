@@ -63,10 +63,11 @@ Updating to a new Unicode release
 
 When there is a new release of Unicode, the files in Unicode.tables must be
 refreshed from the web site. If the new version of Unicode adds new character 
-scripts, both the MultiStage2.py and the GenerateUtt.py scripts must be edited 
-to add the new names. Then the MultiStage2.py script can then be run to
-generate a new version of pcre_ucd.c and the GenerateUtt.py can be run to 
-generate the tricky tables in pcre_tables.c.
+scripts, the source file ucp.h and both the MultiStage2.py and the
+GenerateUtt.py scripts must be edited to add the new names. Then the
+MultiStage2.py script can then be run to generate a new version of pcre_ucd.c
+and the GenerateUtt.py can be run to generate the tricky tables for inclusion
+in pcre_tables.c.
 
 The ucptest program can then be compiled and used to check that the new tables
 in pcre_ucd.c work properly, using the data files in ucptestdata to check a
