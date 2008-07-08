@@ -26,6 +26,8 @@ Version 8.0 02 Jul-08
     a UTF-8 string, even in non-UTF-8 mode. Now it generates a single byte in
     non-UTF-8 mode. If the value is greater than 255, it gives a warning about
     truncation.   
+    
+6.  Minor bugfix in pcrecpp.cc (change "" == ... to NULL == ...). 
 
 
 Version 7.7 07-May-08
