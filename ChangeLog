@@ -29,6 +29,9 @@ Version 8.0 02 Jul-08
     
 6.  Minor bugfix in pcrecpp.cc (change "" == ... to NULL == ...). 
 
+7.  Added two (int) casts to pcregrep when printing the difference of two
+    pointers, in case they are 64-bit values.
+
 
 Version 7.7 07-May-08
 ---------------------
