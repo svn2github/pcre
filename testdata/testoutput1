@@ -6605,4 +6605,6 @@ No match
     p    
  0: p
 
+/(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8
+
 / End of testinput1 /

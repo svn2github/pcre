@@ -41,6 +41,14 @@ Version 8.0 02 Jul-08
     
 10. The PCRE_EXP_DEFN macro which precedes exported functions was missing from 
     the convenience functions in the pcre_get.c source file.
+    
+11. An option change at the start of a pattern that had top-level alternatives
+    could cause overwriting and/or a crash. This command provoked a crash in
+    some environments: 
+     
+      printf "/(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8\n" | pcretest  
+      
+    This potential security problem was recorded as CVE-2008-2371.
 
 
 Version 7.7 07-May-08
