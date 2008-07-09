@@ -220,7 +220,7 @@ do
       /* SKIPZERO skips the bracket. */
 
       case OP_SKIPZERO:
-      tcode++; 
+      tcode++;
       do tcode += GET(tcode,1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;

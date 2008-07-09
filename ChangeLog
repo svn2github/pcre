@@ -13,24 +13,27 @@ Version 8.0 02 Jul-08
 
 2.  Updated the Unicode datatables to Unicode 5.1.0. This adds yet more
     scripts.
-    
+
 3.  Change 12 for 7.7 introduced a bug in pcre_study() when a pattern contained
     a group with a zero qualifier. The result of the study could be incorrect,
-    or the function might crash, depending on the pattern. 
-    
-4.  Caseless matching was not working for non-ASCII characters in back 
+    or the function might crash, depending on the pattern.
+
+4.  Caseless matching was not working for non-ASCII characters in back
     references. For example, /(\x{de})\1/8i was not matching \x{de}\x{fe}.
-    It now works when Unicode Property Support is available. 
-    
+    It now works when Unicode Property Support is available.
+
 5.  In pcretest, an escape such as \x{de} in the data was always generating
     a UTF-8 string, even in non-UTF-8 mode. Now it generates a single byte in
     non-UTF-8 mode. If the value is greater than 255, it gives a warning about
-    truncation.   
-    
-6.  Minor bugfix in pcrecpp.cc (change "" == ... to NULL == ...). 
+    truncation.
+
+6.  Minor bugfix in pcrecpp.cc (change "" == ... to NULL == ...).
 
 7.  Added two (int) casts to pcregrep when printing the difference of two
     pointers, in case they are 64-bit values.
+    
+8.  Added comments about Mac OS X stack usage to the pcrestack man page and to 
+    test 2 if it fails. 
 
 
 Version 7.7 07-May-08
