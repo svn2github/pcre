@@ -34,6 +34,13 @@ Version 8.0 02 Jul-08
     
 8.  Added comments about Mac OS X stack usage to the pcrestack man page and to 
     test 2 if it fails. 
+    
+9.  Added PCRE_CALL_CONVENTION just before the names of all exported functions,
+    and a #define of that name to empty if it is not externally set. This is to 
+    allow users of MSVC to set it if necessary.  
+    
+10. The PCRE_EXP_DEFN macro which precedes exported functions was missing from 
+    the convenience functions in the pcre_get.c source file.
 
 
 Version 7.7 07-May-08
