@@ -6607,4 +6607,8 @@ No match
 
 /(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8
 
+/.*[op][xyz]/
+    fooabcfoo
+No match
+
 / End of testinput1 /

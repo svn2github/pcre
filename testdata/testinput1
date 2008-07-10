@@ -4038,4 +4038,7 @@
 
 /(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8
 
+/.*[op][xyz]/
+    fooabcfoo
+
 / End of testinput1 /
