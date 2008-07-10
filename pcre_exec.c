@@ -4719,9 +4719,9 @@ for(;;)
     {
     if (start_match > md->start_subject + start_offset)
       {
-      while (start_match <= end_subject && !WAS_NEWLINE(start_match))
+      while (start_match < end_subject && !WAS_NEWLINE(start_match))
         { NEXTCHAR(start_match); }
-
+        
       /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
       and we are now at a LF, advance the match position by one more character.
       */
@@ -4818,7 +4818,7 @@ for(;;)
     }
 
   /* OK, we can now run the match. */
-
+  
   md->start_match_ptr = start_match;
   md->match_call_count = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);

@@ -49,6 +49,12 @@ Version 8.0 02 Jul-08
       printf "/(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8\n" | pcretest  
       
     This potential security problem was recorded as CVE-2008-2371.
+    
+12. For a pattern where the match had to start at the beginning or immediately
+    after a newline (e.g /.*anything/ without the DOTALL flag), pcre_exec() and
+    pcre_dfa_exec() could read past the end of the passed subject if there was 
+    no match. To help with detecting such bugs (e.g. with valgrind), I modified
+    pcretest so that it places the subject at the end of its malloc-ed buffer.
 
 
 Version 7.7 07-May-08

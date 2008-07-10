@@ -2755,7 +2755,7 @@ for (;;)
       {
       if (current_subject > md->start_subject + start_offset)
         {
-        while (current_subject <= end_subject && !WAS_NEWLINE(current_subject))
+        while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
           current_subject++;
 
         /* If we have just passed a CR and the newline option is ANY or
