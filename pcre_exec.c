@@ -4695,32 +4695,82 @@ for(;;)
 
   if (firstline)
     {
-    USPTR t = start_match;
+    USPTR *t = start_match;
+#ifdef SUPPORT_UTF8
+    if (utf8)
+      {     
+      while (t < md->end_subject && !IS_NEWLINE(t)) 
+        {
+        t++;
+        while (t < end_subject && (*t & 0xc0) == 0x80) t++;
+        } 
+      }
+    else
+#endif        
     while (t < md->end_subject && !IS_NEWLINE(t)) t++;
     end_subject = t;
     }
 
-  /* Now test for a unique first byte */
+  /* Now advance to a unique first byte if there is one. */
 
   if (first_byte >= 0)
     {
     if (first_byte_caseless)
-      while (start_match < end_subject &&
-             md->lcc[*start_match] != first_byte)
-        { NEXTCHAR(start_match); }
-    else
+      {
+#ifdef SUPPORT_UTF8
+      if (utf8)
+        {
+        while (start_match < end_subject && md->lcc[*start_match] != first_byte)
+          {
+          start_match++;       
+          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
+            start_match++;
+          } 
+        }
+      else
+#endif                  
+      while (start_match < end_subject && md->lcc[*start_match] != first_byte)
+        start_match++;
+      }   
+    else    /* Caseful case */
+      { 
+#ifdef SUPPORT_UTF8
+      if (utf8)
+        {
+        while (start_match < end_subject && *start_match != first_byte)
+          {
+          start_match++;       
+          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
+            start_match++;
+          } 
+        }
+      else
+#endif                  
       while (start_match < end_subject && *start_match != first_byte)
-        { NEXTCHAR(start_match); }
+        start_match++;
+      }   
     }
 
-  /* Or to just after a linebreak for a multiline match if possible */
+  /* Or to just after a linebreak for a multiline match */
 
   else if (startline)
     {
     if (start_match > md->start_subject + start_offset)
       {
+#ifdef SUPPORT_UTF8
+      if (utf8)
+        {
+        while (start_match < end_subject && !WAS_NEWLINE(start_match))
+          {
+          start_match++;       
+          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
+            start_match++;
+          } 
+        }
+      else
+#endif                  
       while (start_match < end_subject && !WAS_NEWLINE(start_match))
-        { NEXTCHAR(start_match); }
+        start_match++;
         
       /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
       and we are now at a LF, advance the match position by one more character.
@@ -4734,16 +4784,32 @@ for(;;)
       }
     }
 
-  /* Or to a non-unique first char after study */
+  /* Or to a non-unique first byte after study */
 
   else if (start_bits != NULL)
     {
+#ifdef SUPPORT_UTF8    
+    if (utf8)
+      { 
+      while (start_match < end_subject)
+        {
+        register unsigned int c = *start_match;
+        if ((start_bits[c/8] & (1 << (c&7))) == 0)
+          { 
+          start_match++;       
+          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
+            start_match++;
+          } 
+        else break;
+        }
+      }
+    else
+#endif           
     while (start_match < end_subject)
       {
       register unsigned int c = *start_match;
-      if ((start_bits[c/8] & (1 << (c&7))) == 0)
-        { NEXTCHAR(start_match); }
-      else break;
+      if ((start_bits[c/8] & (1 << (c&7))) == 0) start_match++;
+        else break;
       }
     }
 

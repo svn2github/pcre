@@ -477,4 +477,7 @@ can't tell the difference.) --/
     \x{de}\x{de}
     \x{123} 
 
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+
 / End of testinput5 /

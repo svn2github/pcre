@@ -1637,4 +1637,8 @@ No match
 ** Truncation will probably give the wrong result.
 No match
 
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+ 0: X
+
 / End of testinput5 /

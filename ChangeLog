@@ -55,6 +55,13 @@ Version 8.0 02 Jul-08
     pcre_dfa_exec() could read past the end of the passed subject if there was 
     no match. To help with detecting such bugs (e.g. with valgrind), I modified
     pcretest so that it places the subject at the end of its malloc-ed buffer.
+    
+13. The change to pcretest in 12 above threw up a couple more cases when pcre_
+    exec() might read past the end of the data buffer in UTF-8 mode. 
+    
+14. A similar bug to 7.3/2 existed when the PCRE_FIRSTLINE option was set and
+    the data contained the byte 0x85 as part of a UTF-8 character within its 
+    first line.  
 
 
 Version 7.7 07-May-08
