@@ -61,7 +61,7 @@ Version 8.0 02 Jul-08
     
 14. A similar bug to 7.3/2 existed when the PCRE_FIRSTLINE option was set and
     the data contained the byte 0x85 as part of a UTF-8 character within its 
-    first line.  
+    first line. This applied both to normal and DFA matching. 
 
 
 Version 7.7 07-May-08

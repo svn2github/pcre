@@ -4695,7 +4695,7 @@ for(;;)
 
   if (firstline)
     {
-    USPTR *t = start_match;
+    USPTR t = start_match;
 #ifdef SUPPORT_UTF8
     if (utf8)
       {     
@@ -4716,39 +4716,11 @@ for(;;)
   if (first_byte >= 0)
     {
     if (first_byte_caseless)
-      {
-#ifdef SUPPORT_UTF8
-      if (utf8)
-        {
-        while (start_match < end_subject && md->lcc[*start_match] != first_byte)
-          {
-          start_match++;       
-          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
-            start_match++;
-          } 
-        }
-      else
-#endif                  
       while (start_match < end_subject && md->lcc[*start_match] != first_byte)
         start_match++;
-      }   
-    else    /* Caseful case */
-      { 
-#ifdef SUPPORT_UTF8
-      if (utf8)
-        {
-        while (start_match < end_subject && *start_match != first_byte)
-          {
-          start_match++;       
-          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
-            start_match++;
-          } 
-        }
-      else
-#endif                  
+    else
       while (start_match < end_subject && *start_match != first_byte)
         start_match++;
-      }   
     }
 
   /* Or to just after a linebreak for a multiline match */
@@ -4788,23 +4760,6 @@ for(;;)
 
   else if (start_bits != NULL)
     {
-#ifdef SUPPORT_UTF8    
-    if (utf8)
-      { 
-      while (start_match < end_subject)
-        {
-        register unsigned int c = *start_match;
-        if ((start_bits[c/8] & (1 << (c&7))) == 0)
-          { 
-          start_match++;       
-          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
-            start_match++;
-          } 
-        else break;
-        }
-      }
-    else
-#endif           
     while (start_match < end_subject)
       {
       register unsigned int c = *start_match;
