@@ -2609,10 +2609,11 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM28);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(d, eptr);
             if (d < 256) d = md->lcc[d];
-            if (fi >= max || eptr >= md->end_subject || fc == d)
-              RRETURN(MATCH_NOMATCH);
+            if (fc == d) RRETURN(MATCH_NOMATCH);
+ 
             }
           }
         else
@@ -2718,9 +2719,9 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM32);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(d, eptr);
-            if (fi >= max || eptr >= md->end_subject || fc == d)
-              RRETURN(MATCH_NOMATCH);
+            if (fc == d) RRETURN(MATCH_NOMATCH); 
             }
           }
         else
