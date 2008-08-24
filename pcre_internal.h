@@ -559,12 +559,15 @@ variable-length repeat, or a anything other than literal characters. */
 #define REQ_CASELESS 0x0100    /* indicates caselessness */
 #define REQ_VARY     0x0200    /* reqbyte followed non-literal item */
 
-/* Miscellaneous definitions */
+/* Miscellaneous definitions. The #ifndef is to pacify compiler warnings in
+environments where these macros are defined elsewhere. */
 
+#ifndef FALSE
 typedef int BOOL;
 
 #define FALSE   0
 #define TRUE    1
+#endif
 
 /* Escape items that are just an encoding of a particular data value. */
 

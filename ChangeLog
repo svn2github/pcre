@@ -70,6 +70,8 @@ Version 7.8 25-Aug-08
 
 17. Make it more clear in the documentation that values returned from 
     pcre_exec() in ovector are byte offsets, not character counts.
+    
+18. Tidied a few places to stop certain compilers from issuing warnings. 
 
 
 Version 7.7 07-May-08

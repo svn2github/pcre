@@ -455,7 +455,7 @@ static const char *
 find_error_text(int n)
 {
 const char *s = error_texts;
-for (; n > 0; n--) while (*s++ != 0);
+for (; n > 0; n--) while (*s++ != 0) {};
 return s;
 }
 
@@ -1002,7 +1002,7 @@ for (; *ptr != 0; ptr++)
     if (*(++ptr) == 0) return -1;
     if (*ptr == 'Q') for (;;)
       {
-      while (*(++ptr) != 0 && *ptr != '\\');
+      while (*(++ptr) != 0 && *ptr != '\\') {};
       if (*ptr == 0) return -1;
       if (*(++ptr) == 'E') break;
       }
@@ -1045,7 +1045,7 @@ for (; *ptr != 0; ptr++)
         if (*(++ptr) == 0) return -1;
         if (*ptr == 'Q') for (;;)
           {
-          while (*(++ptr) != 0 && *ptr != '\\');
+          while (*(++ptr) != 0 && *ptr != '\\') {};
           if (*ptr == 0) return -1;
           if (*(++ptr) == 'E') break;
           }
@@ -1059,7 +1059,7 @@ for (; *ptr != 0; ptr++)
 
   if (xmode && *ptr == '#')
     {
-    while (*(++ptr) != 0 && *ptr != '\n');
+    while (*(++ptr) != 0 && *ptr != '\n') {};
     if (*ptr == 0) return -1;
     continue;
     }
@@ -1450,6 +1450,8 @@ for (;;)
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
+#else
+    (void)(utf8);  /* Keep compiler happy by referencing function argument */
 #endif
     }
   }
@@ -1543,6 +1545,8 @@ for (;;)
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
+#else
+    (void)(utf8);  /* Keep compiler happy by referencing function argument */
 #endif
     }
   }
@@ -2134,6 +2138,8 @@ if (next >= 0) switch(op_code)
   case OP_CHAR:
 #ifdef SUPPORT_UTF8
   if (utf8 && item > 127) { GETCHAR(item, utf8_char); }
+#else
+  (void)(utf8_char);  /* Keep compiler happy by referencing function argument */
 #endif
   return item != next;
 
@@ -4216,7 +4222,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       const char *vn = verbnames;
       const uschar *name = ++ptr;
       previous = NULL;
-      while ((cd->ctypes[*++ptr] & ctype_letter) != 0);
+      while ((cd->ctypes[*++ptr] & ctype_letter) != 0) {};
       if (*ptr == ':')
         {
         *errorcodeptr = ERR59;   /* Not supported */
