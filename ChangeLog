@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.0 02 Jul-08
+Version 7.8 25-Aug-08
 ---------------------
 
 1.  Replaced UCP searching code with optimized version as implemented for Ad
@@ -65,6 +65,11 @@ Version 8.0 02 Jul-08
     
 15. Lazy qualifiers were not working in some cases in UTF-8 mode. For example,
     /^[^d]*?$/8 failed to match "abc". 
+    
+16. Added a missing copyright notice to pcrecpp_internal.h. 
+
+17. Make it more clear in the documentation that values returned from 
+    pcre_exec() in ovector are byte offsets, not character counts.
 
 
 Version 7.7 07-May-08
