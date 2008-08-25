@@ -2736,15 +2736,15 @@ for (;;)
       USPTR t = current_subject;
 #ifdef SUPPORT_UTF8
       if (utf8)
-        {     
-        while (t < md->end_subject && !IS_NEWLINE(t)) 
+        {
+        while (t < md->end_subject && !IS_NEWLINE(t))
           {
           t++;
           while (t < end_subject && (*t & 0xc0) == 0x80) t++;
-          } 
+          }
         }
       else
-#endif        
+#endif
       while (t < md->end_subject && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
@@ -2771,17 +2771,17 @@ for (;;)
           {
           while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
             {
-            current_subject++;       
-            while(current_subject < end_subject && 
-                  (*current_subject & 0xc0) == 0x80) 
+            current_subject++;
+            while(current_subject < end_subject &&
+                  (*current_subject & 0xc0) == 0x80)
               current_subject++;
-            } 
+            }
           }
         else
-#endif                  
+#endif
         while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
           current_subject++;
-          
+
         /* If we have just passed a CR and the newline option is ANY or
         ANYCRLF, and we are now at a LF, advance the match position by one more
         character. */

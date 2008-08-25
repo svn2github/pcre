@@ -79,9 +79,9 @@ for (j = i; j > 0; j--)
 return i + 1;
 #else
 (void)(cvalue);  /* Keep compiler happy; this function won't ever be */
-(void)(buffer);  /* called when SUPPORT_UTF8 is not defined. */        
-return 0;       
-#endif          
+(void)(buffer);  /* called when SUPPORT_UTF8 is not defined. */
+return 0;
+#endif
 }
 
 /* End of pcre_ord2utf8.c */

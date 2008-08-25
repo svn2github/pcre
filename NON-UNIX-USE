@@ -192,12 +192,12 @@ __declspec(dllimport), with unwanted results.
 
 CALLING CONVENTIONS IN WINDOWS ENVIRONMENTS
 
-It is possible to compile programs to use different calling conventions using 
-MSVC. Search the web for "calling conventions" for more information. To make it 
-easier to change the calling convention for the exported functions in the 
-PCRE library, the macro PCRE_CALL_CONVENTION is present in all the external 
-definitions. It can be set externally when compiling (e.g. in CFLAGS). If it is 
-not set, it defaults to empty; the default calling convention is then used 
+It is possible to compile programs to use different calling conventions using
+MSVC. Search the web for "calling conventions" for more information. To make it
+easier to change the calling convention for the exported functions in the
+PCRE library, the macro PCRE_CALL_CONVENTION is present in all the external
+definitions. It can be set externally when compiling (e.g. in CFLAGS). If it is
+not set, it defaults to empty; the default calling convention is then used
 (which is what is wanted most of the time).
 
 

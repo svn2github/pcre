@@ -4926,7 +4926,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         both phases.
 
         If we are not at the pattern start, compile code to change the ims
-        options if this setting actually changes any of them, and reset the 
+        options if this setting actually changes any of them, and reset the
         greedy defaults and the case value for firstbyte and reqbyte. */
 
         if (*ptr == ')')
@@ -4950,7 +4950,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
           /* Change options at this level, and pass them back for use
           in subsequent branches. When not at the start of the pattern, this
-          information is also necessary so that a resetting item can be 
+          information is also necessary so that a resetting item can be
           compiled at the end of a group (if we are in a group). */
 
           *optionsptr = options = newoptions;

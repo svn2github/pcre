@@ -156,7 +156,7 @@ for (p = string; length-- > 0; p++)
   }
 #else
 (void)(string);  /* Keep picky compilers happy */
-(void)(length);  
+(void)(length);
 #endif
 
 return -1;

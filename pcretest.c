@@ -2027,23 +2027,23 @@ while (!done)
       }
     *q = 0;
     len = q - dbuffer;
-    
+
     /* Move the data to the end of the buffer so that a read over the end of
-    the buffer will be seen by valgrind, even if it doesn't cause a crash. If 
+    the buffer will be seen by valgrind, even if it doesn't cause a crash. If
     we are using the POSIX interface, we must include the terminating zero. */
-    
+
 #if !defined NOPOSIX
     if (posix || do_posix)
       {
       memmove(bptr + buffer_size - len - 1, bptr, len + 1);
-      bptr += buffer_size - len - 1;  
+      bptr += buffer_size - len - 1;
       }
-    else     
-#endif 
+    else
+#endif
       {
       memmove(bptr + buffer_size - len, bptr, len);
-      bptr += buffer_size - len;  
-      } 
+      bptr += buffer_size - len;
+      }
 
     if ((all_use_dfa || use_dfa) && find_match_limit)
       {

@@ -2613,7 +2613,7 @@ for (;;)
             GETCHARINC(d, eptr);
             if (d < 256) d = md->lcc[d];
             if (fc == d) RRETURN(MATCH_NOMATCH);
- 
+
             }
           }
         else
@@ -2721,7 +2721,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(d, eptr);
-            if (fc == d) RRETURN(MATCH_NOMATCH); 
+            if (fc == d) RRETURN(MATCH_NOMATCH);
             }
           }
         else
@@ -4699,15 +4699,15 @@ for(;;)
     USPTR t = start_match;
 #ifdef SUPPORT_UTF8
     if (utf8)
-      {     
-      while (t < md->end_subject && !IS_NEWLINE(t)) 
+      {
+      while (t < md->end_subject && !IS_NEWLINE(t))
         {
         t++;
         while (t < end_subject && (*t & 0xc0) == 0x80) t++;
-        } 
+        }
       }
     else
-#endif        
+#endif
     while (t < md->end_subject && !IS_NEWLINE(t)) t++;
     end_subject = t;
     }
@@ -4735,16 +4735,16 @@ for(;;)
         {
         while (start_match < end_subject && !WAS_NEWLINE(start_match))
           {
-          start_match++;       
-          while(start_match < end_subject && (*start_match & 0xc0) == 0x80) 
+          start_match++;
+          while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
             start_match++;
-          } 
+          }
         }
       else
-#endif                  
+#endif
       while (start_match < end_subject && !WAS_NEWLINE(start_match))
         start_match++;
-        
+
       /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
       and we are now at a LF, advance the match position by one more character.
       */
@@ -4840,7 +4840,7 @@ for(;;)
     }
 
   /* OK, we can now run the match. */
-  
+
   md->start_match_ptr = start_match;
   md->match_call_count = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);

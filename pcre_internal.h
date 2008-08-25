@@ -133,14 +133,14 @@ PCRE_EXP_DATA_DEFN only if they are not already set. */
 #endif
 
 /* When compiling with the MSVC compiler, it is sometimes necessary to include
-a "calling convention" before exported function names. (This is secondhand 
+a "calling convention" before exported function names. (This is secondhand
 information; I know nothing about MSVC myself). For example, something like
 
   void __cdecl function(....)
-  
+
 might be needed. In order so make this easy, all the exported functions have
 PCRE_CALL_CONVENTION just before their names. It is rarely needed; if not
-set, we ensure here that it has no effect. */ 
+set, we ensure here that it has no effect. */
 
 #ifndef PCRE_CALL_CONVENTION
 #define PCRE_CALL_CONVENTION
