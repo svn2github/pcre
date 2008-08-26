@@ -259,8 +259,18 @@ others are relatively new.
   
 . Check names that consist entirely of digits: PCRE allows, but do Perl and 
   Python, etc? 
+  
+. A user suggested a parameter to limit the length of string matched, for 
+  example if the parameter is N, the current match should fail if the matched 
+  substring exceeds N. This could apply to both match functions. The value 
+  could be a new field in the extra block.
+  
+. Callouts with arguments: (?Cn:ARG) for instance.
+
+. A user is going to supply a patch to generalize the API for user-specific 
+  memory allocation so that it is more flexible in threaded environments.
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 04 July 2008
+Last updated: 26 August 2008
