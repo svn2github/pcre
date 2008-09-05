@@ -73,6 +73,11 @@ Version 7.8 25-Aug-08
 
 18. Tidied a few places to stop certain compilers from issuing warnings.
 
+19. Updated the Virtual Pascal + BCC files to compile the latest v7.7, as
+    supplied by Stefan Weber. I made a further small update for 7.8 because
+    there is a change of source arrangements: the pcre_searchfuncs.c module is 
+    replaced by pcre_ucd.c. 
+
 
 Version 7.7 07-May-08
 ---------------------
