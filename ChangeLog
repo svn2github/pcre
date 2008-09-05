@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.8 25-Aug-08
+Version 7.8 05-Sep-08
 ---------------------
 
 1.  Replaced UCP searching code with optimized version as implemented for Ad
@@ -75,8 +75,8 @@ Version 7.8 25-Aug-08
 
 19. Updated the Virtual Pascal + BCC files to compile the latest v7.7, as
     supplied by Stefan Weber. I made a further small update for 7.8 because
-    there is a change of source arrangements: the pcre_searchfuncs.c module is 
-    replaced by pcre_ucd.c. 
+    there is a change of source arrangements: the pcre_searchfuncs.c module is
+    replaced by pcre_ucd.c.
 
 
 Version 7.7 07-May-08

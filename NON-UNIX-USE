@@ -85,8 +85,6 @@ The following are generic comments about building the PCRE C library "by hand".
 
        pcre_internal.h
        ucp.h
-       ucpinternal.h
-       ucptable.h
 
  (5) Also ensure that you have the following file, which is #included as source
      when building a debugging version of PCRE, and is also used by pcretest.
@@ -113,7 +111,7 @@ The following are generic comments about building the PCRE C library "by hand".
        pcre_study.c
        pcre_tables.c
        pcre_try_flipped.c
-       pcre_ucp_searchfuncs.c
+       pcre_ucd.c
        pcre_valid_utf8.c
        pcre_version.c
        pcre_xclass.c
@@ -439,5 +437,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 09 July 2008
+Last Updated: 05 September 2008
 ****
