@@ -119,12 +119,16 @@ This option specifies under what circumstances the parts of a line that matched
 a pattern should be coloured in the output. By default, the output is not
 coloured. The value (which is optional, see above) may be "never", "always", or
 "auto". In the latter case, colouring happens only if the standard output is
-connected to a terminal. The colour that is used can be specified by setting
-the environment variable PCREGREP_COLOUR or PCREGREP_COLOR. The value of this
-variable should be a string of two numbers, separated by a semicolon. They are
-copied directly into the control string for setting colour on a terminal, so it
-is your responsibility to ensure that they make sense. If neither of the
-environment variables is set, the default is "1;31", which gives red.
+connected to a terminal. More resources are used when colouring is enabled, 
+because \fBpcregrep\fP has to search for all possible matches in a line, not 
+just one, in order to colour them all.
+
+The colour that is used can be specified by setting the environment variable
+PCREGREP_COLOUR or PCREGREP_COLOR. The value of this variable should be a
+string of two numbers, separated by a semicolon. They are copied directly into
+the control string for setting colour on a terminal, so it is your
+responsibility to ensure that they make sense. If neither of the environment
+variables is set, the default is "1;31", which gives red.
 .TP
 \fB-D\fP \fIaction\fP, \fB--devices=\fP\fIaction\fP
 If an input path is not a regular file or a directory, "action" specifies how

@@ -24,9 +24,13 @@ Version 7.9 xx-xxx-09
     lines. This is not true; no spaces are inserted. I have also clarified the 
     wording for the --colour (or --color) option.
     
-5.  When --colour was used with -o, the list of matching strings was not 
-    coloured; this is different to GNU grep, so I have changed it to be the 
-    same.
+5.  In pcregrep, when --colour was used with -o, the list of matching strings
+    was not coloured; this is different to GNU grep, so I have changed it to be
+    the same.
+    
+6.  When --colo(u)r was used in pcregrep, only the first matching substring in
+    each matching line was coloured. Now it goes on to look for further matches 
+    of any of the test patterns, which is the same behaviour as GNU grep.  
       
 
 Version 7.8 05-Sep-08
