@@ -286,7 +286,9 @@ library. You can read more about them in the pcrebuild man page.
   to specify something like LIBS="-lncurses" as well. This is because, to quote
   the readline INSTALL, "Readline uses the termcap functions, but does not link
   with the termcap or curses library itself, allowing applications which link
-  with readline the to choose an appropriate library."
+  with readline the to choose an appropriate library." If you get error 
+  messages about missing functions tgetstr, tgetent, tputs, tgetflag, or tgoto, 
+  this is the problem, and linking with the ncurses library should fix it. 
 
 The "configure" script builds the following files for the basic C library:
 
@@ -753,4 +755,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 05 September 2008
+Last updated: 27 February 2009

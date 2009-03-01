@@ -7,9 +7,9 @@ dnl be defined as -RC2, for example. For real releases, it should be defined
 dnl empty.
 
 m4_define(pcre_major, [7])
-m4_define(pcre_minor, [8])
-m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2008-09-05])
+m4_define(pcre_minor, [9])
+m4_define(pcre_prerelease, [-RC1])
+m4_define(pcre_date, [2009-02-27])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -539,7 +539,7 @@ DISTCHECK_CONFIGURE_FLAGS="--enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 # Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is
-# specified, the relevant library is available. If so, add it to LIBS.
+# specified, the relevant library is available.
 
 if test "$enable_pcregrep_libz" = "yes"; then
   if test "$HAVE_ZLIB_H" != "1"; then
@@ -550,8 +550,9 @@ if test "$enable_pcregrep_libz" = "yes"; then
     echo "** Cannot --enable-pcregrep-libz because libz was not found"
     exit 1
   fi
-  if test "$LIBS" = ""; then LIBS=-lz; else LIBS="$LIBS -lz"; fi
+  LIBZ="-lz"
 fi
+AC_SUBST(LIBZ)
 
 if test "$enable_pcregrep_libbz2" = "yes"; then
   if test "$HAVE_BZLIB_H" != "1"; then
@@ -562,8 +563,9 @@ if test "$enable_pcregrep_libbz2" = "yes"; then
     echo "** Cannot --enable-pcregrep-libbz2 because libbz2 was not found"
     exit 1
   fi
-  if test "$LIBS" = ""; then LIBS=-lbz2; else LIBS="$LIBS -lbz2"; fi
+  LIBBZ2="-lbz2"
 fi
+AC_SUBST(LIBBZ2)
 
 # Similarly for --enable-pcretest-readline
 
@@ -576,8 +578,9 @@ if test "$enable_pcretest_libreadline" = "yes"; then
     echo "** Cannot --enable-pcretest-readline because readline/history.h was not found."
     exit 1
   fi
-  if test "$LIBS" = ""; then LIBS=-lreadline; else LIBS="$LIBS -lreadline"; fi
+  LIBREADLINE="-lreadline"
 fi
+AC_SUBST(LIBREADLINE)
 
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(

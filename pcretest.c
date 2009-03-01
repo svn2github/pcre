@@ -925,6 +925,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-C") == 0)
     {
     int rc;
+    unsigned long int lrc; 
     printf("PCRE version %s\n", pcre_version());
     printf("Compiled with\n");
     (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
@@ -943,10 +944,10 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  Internal link size = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_POSIX_MALLOC_THRESHOLD, &rc);
     printf("  POSIX malloc threshold = %d\n", rc);
-    (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT, &rc);
-    printf("  Default match limit = %d\n", rc);
-    (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT_RECURSION, &rc);
-    printf("  Default recursion depth limit = %d\n", rc);
+    (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT, &lrc);
+    printf("  Default match limit = %ld\n", lrc);
+    (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT_RECURSION, &lrc);
+    printf("  Default recursion depth limit = %ld\n", lrc);
     (void)pcre_config(PCRE_CONFIG_STACKRECURSE, &rc);
     printf("  Match recursion uses %s\n", rc? "stack" : "heap");
     goto EXIT;

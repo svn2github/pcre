@@ -115,16 +115,16 @@ If data is required, it must be given in the same shell item, separated by an
 equals sign.
 .TP
 \fB--colour=\fP\fIvalue\fP, \fB--color=\fP\fIvalue\fP
-This option specifies under what circumstances the part of a line that matched
-a pattern should be coloured in the output. The value may be "never" (the
-default), "always", or "auto". In the latter case, colouring happens only if
-the standard output is connected to a terminal. The colour can be specified by
-setting the environment variable PCREGREP_COLOUR or PCREGREP_COLOR. The value
-of this variable should be a string of two numbers, separated by a semicolon.
-They are copied directly into the control string for setting colour on a
-terminal, so it is your responsibility to ensure that they make sense. If
-neither of the environment variables is set, the default is "1;31", which gives
-red.
+This option specifies under what circumstances the parts of a line that matched
+a pattern should be coloured in the output. By default, the output is not
+coloured. The value (which is optional, see above) may be "never", "always", or
+"auto". In the latter case, colouring happens only if the standard output is
+connected to a terminal. The colour that is used can be specified by setting
+the environment variable PCREGREP_COLOUR or PCREGREP_COLOR. The value of this
+variable should be a string of two numbers, separated by a semicolon. They are
+copied directly into the control string for setting colour on a terminal, so it
+is your responsibility to ensure that they make sense. If neither of the
+environment variables is set, the default is "1;31", which gives red.
 .TP
 \fB-D\fP \fIaction\fP, \fB--devices=\fP\fIaction\fP
 If an input path is not a regular file or a directory, "action" specifies how
@@ -204,16 +204,15 @@ and \fB--only-matching\fP.
 \fB-H\fP, \fB--with-filename\fP
 Force the inclusion of the filename at the start of output lines when searching
 a single file. By default, the filename is not shown in this case. For matching
-lines, the filename is followed by a colon and a space; for context lines, a
-hyphen separator is used. If a line number is also being output, it follows the
-file name without a space.
+lines, the filename is followed by a colon; for context lines, a hyphen
+separator is used. If a line number is also being output, it follows the file
+name.
 .TP
 \fB-h\fP, \fB--no-filename\fP
 Suppress the output filenames when searching multiple files. By default,
 filenames are shown when multiple files are searched. For matching lines, the
-filename is followed by a colon and a space; for context lines, a hyphen
-separator is used. If a line number is also being output, it follows the file
-name without a space.
+filename is followed by a colon; for context lines, a hyphen separator is used.
+If a line number is also being output, it follows the file name.
 .TP
 \fB--help\fP
 Output a help message, giving brief details of the command options and file
@@ -305,9 +304,9 @@ being scanned does not agree with the convention set by this option,
 .TP
 \fB-n\fP, \fB--line-number\fP
 Precede each output line by its line number in the file, followed by a colon
-and a space for matching lines or a hyphen and a space for context lines. If
-the filename is also being output, it precedes the line number. This option is
-forced if \fB--line-offsets\fP is used.
+for matching lines or a hyphen for context lines. If the filename is also being
+output, it precedes the line number. This option is forced if
+\fB--line-offsets\fP is used.
 .TP
 \fB-o\fP, \fB--only-matching\fP
 Show only the part of the line that matched a pattern. In this mode, no
@@ -458,6 +457,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 March 2008
-Copyright (c) 1997-2008 University of Cambridge.
+Last updated: 01 March 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi

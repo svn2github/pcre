@@ -1,6 +1,30 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.9 xx-xxx-09
+---------------------
+
+1.  When building with support for bzlib/zlib (pcregrep) and/or readline 
+    (pcretest), all targets were linked against these libraries. This included
+    libpcre, libpcreposix, and libpcrecpp, even though they do not use these
+    libraries. This caused unwanted dependencies to be created. This problem
+    has been fixed, and now only pcregrep is linked with bzlib/zlib and only 
+    pcretest is linked with readline.
+    
+2.  The "typedef int BOOL" in pcre_internal.h that was included inside the
+    "#ifndef FALSE" condition by an earlier change (probably 7.8/18) has been
+    moved outside it again, because FALSE and TRUE are already defined in AIX,
+    but BOOL is not.
+    
+3.  The pcre_config() function was treating the PCRE_MATCH_LIMIT and 
+    PCRE_MATCH_LIMIT_RETURSION values as ints, when they should be long ints.
+    
+4.  The pcregrep documentation said spaces were inserted as well as colons (or
+    hyphens) following file names and line numbers when outputting matching
+    lines. This is not true; no spaces are inserted. I have also clarified the 
+    wording for the --colour (or --color) option.
+      
+
 Version 7.8 05-Sep-08
 ---------------------
 

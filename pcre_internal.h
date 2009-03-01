@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -560,11 +560,12 @@ variable-length repeat, or a anything other than literal characters. */
 #define REQ_VARY     0x0200    /* reqbyte followed non-literal item */
 
 /* Miscellaneous definitions. The #ifndef is to pacify compiler warnings in
-environments where these macros are defined elsewhere. */
+environments where these macros are defined elsewhere. Unfortunately, there
+is no way to do the same for the typedef. */
 
-#ifndef FALSE
 typedef int BOOL;
 
+#ifndef FALSE
 #define FALSE   0
 #define TRUE    1
 #endif
