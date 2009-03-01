@@ -6,7 +6,7 @@
 its pattern matching. On a Unix or Win32 system it can recurse into
 directories.
 
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1060,7 +1060,11 @@ while (ptr < endptr)
           fprintf(stdout, "%d,%d", (int)(filepos + matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
         else
+          {
+          if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
           fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+          if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+          } 
         fprintf(stdout, "\n");
         matchptr += offsets[1];
         length -= offsets[1];

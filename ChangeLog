@@ -23,6 +23,10 @@ Version 7.9 xx-xxx-09
     hyphens) following file names and line numbers when outputting matching
     lines. This is not true; no spaces are inserted. I have also clarified the 
     wording for the --colour (or --color) option.
+    
+5.  When --colour was used with -o, the list of matching strings was not 
+    coloured; this is different to GNU grep, so I have changed it to be the 
+    same.
       
 
 Version 7.8 05-Sep-08
