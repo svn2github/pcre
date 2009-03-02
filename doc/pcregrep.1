@@ -25,7 +25,7 @@ If you attempt to use delimiters (for example, by surrounding a pattern with
 slashes, as is common in Perl scripts), they are interpreted as part of the
 pattern. Quotes can of course be used to delimit patterns on the command line
 because they are interpreted by the shell, and indeed they are required if a
-pattern contains white space or shell metacharacters.
+pattern contains white space or shell metacharacters. 
 .P
 The first argument that follows any option settings is treated as the single
 pattern to be matched when neither \fB-e\fP nor \fB-f\fP is present.
@@ -50,16 +50,27 @@ Patterns are limited to 8K or BUFSIZ characters, whichever is the greater.
 BUFSIZ is defined in \fB<stdio.h>\fP. When there is more than one pattern
 (specified by the use of \fB-e\fP and/or \fB-f\fP), each pattern is applied to
 each line in the order in which they are defined, except that all the \fB-e\fP
-patterns are tried before the \fB-f\fP patterns. As soon as one pattern matches
-(or fails to match when \fB-v\fP is used), no further patterns are considered.
+patterns are tried before the \fB-f\fP patterns. 
 .P
-When \fB--only-matching\fP, \fB--file-offsets\fP, or \fB--line-offsets\fP
-is used, the output is the part of the line that matched (either shown
-literally, or as an offset). In this case, scanning resumes immediately
-following the match, so that further matches on the same line can be found.
-If there are multiple patterns, they are all tried on the remainder of the
-line. However, patterns that follow the one that matched are not tried on the
-earlier part of the line.
+By default, as soon as one pattern matches (or fails to match when \fB-v\fP is
+used), no further patterns are considered. However, if \fB--colour\fP (or
+\fB--color\fP) is used to colour the matching substrings, or if
+\fB--only-matching\fP, \fB--file-offsets\fP, or \fB--line-offsets\fP is used to
+output only the part of the line that matched (either shown literally, or as an
+offset), scanning resumes immediately following the match, so that further
+matches on the same line can be found. If there are multiple patterns, they are
+all tried on the remainder of the line, but patterns that follow the one that
+matched are not tried on the earlier part of the line.
+.P
+This is the same behaviour as GNU grep, but it does mean that the order in 
+which multiple patterns are specified can affect the output when one of the 
+above options is used.
+.P
+Patterns that can match an empty string are accepted, but empty string
+matches are not recognized. An example is the pattern "(super)?(man)?", in 
+which all components are optional. This pattern finds all occurrences of both
+"super" and "man"; the output differs from matching with "super|man" when only
+the matching substrings are being shown.
 .P
 If the \fBLC_ALL\fP or \fBLC_CTYPE\fP environment variable is set,
 \fBpcregrep\fP uses the value to set a locale when calling the PCRE library.

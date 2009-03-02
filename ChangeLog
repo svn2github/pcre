@@ -31,6 +31,11 @@ Version 7.9 xx-xxx-09
 6.  When --colo(u)r was used in pcregrep, only the first matching substring in
     each matching line was coloured. Now it goes on to look for further matches 
     of any of the test patterns, which is the same behaviour as GNU grep.  
+    
+7.  A pattern that could match an empty string could cause pcregrep to loop; it 
+    doesn't make sense to accept an empty string match in pcregrep, so I have 
+    locked it out (using PCRE's PCRE_NOTEMPTY option). By experiment, this
+    seems to be how GNU grep behaves.
       
 
 Version 7.8 05-Sep-08

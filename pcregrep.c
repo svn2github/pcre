@@ -846,8 +846,8 @@ match_patterns(char *matchptr, size_t length, int *offsets, int *mrc)
 int i;
 for (i = 0; i < pattern_count; i++)
   {
-  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0, 0,
-    offsets, OFFSET_SIZE);
+  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0,
+    PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
   if (*mrc >= 0) return TRUE;
   if (*mrc == PCRE_ERROR_NOMATCH) continue;
   fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", *mrc);
@@ -1018,7 +1018,8 @@ while (ptr < endptr)
 
 
       for (i = 0; i < jfriedl_XR; i++)
-          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0, 0, offsets, OFFSET_SIZE) >= 0);
+          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0, 
+              PCRE_NOTEMPTY, offsets, OFFSET_SIZE) >= 0);
 
       if (gettimeofday(&end_time, &dummy) != 0)
               perror("bad gettimeofday");
