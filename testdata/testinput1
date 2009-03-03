@@ -4039,4 +4039,20 @@
 /.*[op][xyz]/
     fooabcfoo
 
+/(?(?=.*b)b|^)/
+   adc
+   abc 
+
+/(?(?=^.*b)b|^)/
+   adc
+   abc 
+
+/(?(?=.*b)b|^)*/
+   adc
+   abc 
+
+/(?(?=.*b)b|^)+/
+   adc
+   abc 
+
 / End of testinput1 /

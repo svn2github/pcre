@@ -5810,6 +5810,32 @@ do {
    const uschar *scode = first_significant_code(code + _pcre_OP_lengths[*code],
      NULL, 0, FALSE);
    register int op = *scode;
+   
+   /* If we are at the start of a conditional group, skip over the condition. 
+   before inspecting the first opcode after the condition. */
+
+   if (op == OP_COND)
+     {
+     scode += 1 + LINK_SIZE; 
+     switch (*scode)
+       {
+       case OP_CREF:
+       case OP_RREF:
+       scode += 3;
+       break;
+       
+       case OP_DEF:
+       scode += 1; 
+       break;
+       
+       default:     /* Assertion */
+       do scode += GET(scode, 1); while (*scode == OP_ALT);
+       break; 
+       }  
+
+     scode = first_significant_code(scode, NULL, 0, FALSE);
+     op = *scode; 
+     }  
 
    /* Non-capturing brackets */
 
@@ -5829,8 +5855,10 @@ do {
 
    /* Other brackets */
 
-   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
-     { if (!is_startline(scode, bracket_map, backref_map)) return FALSE; }
+   else if (op == OP_ASSERT || op == OP_ONCE)
+     { 
+     if (!is_startline(scode, bracket_map, backref_map)) return FALSE; 
+     }
 
    /* .* means "start at start or after \n" if it isn't in brackets that
    may be referenced. */

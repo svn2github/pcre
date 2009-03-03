@@ -36,6 +36,10 @@ Version 7.9 xx-xxx-09
     doesn't make sense to accept an empty string match in pcregrep, so I have 
     locked it out (using PCRE's PCRE_NOTEMPTY option). By experiment, this
     seems to be how GNU grep behaves.
+    
+8.  The pattern (?(?=.*b)b|^) was incorrectly compiled as "match must be at
+    start or after a newline", because the conditional assertion was not being 
+    skipped when checking for this condition. 
       
 
 Version 7.8 05-Sep-08
