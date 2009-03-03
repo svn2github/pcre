@@ -4055,4 +4055,10 @@
    adc
    abc 
 
+/(?(?=b).*b|^d)/
+    abc
+
+/(?(?=.*b).*b|^d)/
+    abc
+
 / End of testinput1 /

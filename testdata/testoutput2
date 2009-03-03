@@ -9638,4 +9638,56 @@ No first char
 No need char
 Starting byte set: x y z 
 
+/(?(?=.*b)b|^)/CI
+Capturing subpattern count = 0
+Partial matching not supported
+Options:
+No first char
+No need char
+   adc
+--->adc
+ +0 ^       (?(?=.*b)b|^)
+ +2 ^       (?=.*b)
+ +5 ^       .*
+ +7 ^  ^    b
+ +7 ^ ^     b
+ +7 ^^      b
+ +7 ^       b
+ 0: 
+   abc 
+--->abc
+ +0 ^       (?(?=.*b)b|^)
+ +2 ^       (?=.*b)
+ +5 ^       .*
+ +7 ^  ^    b
+ +7 ^ ^     b
+ +7 ^^      b
+ +8 ^ ^     )
+ +9 ^       b
+ +0  ^      (?(?=.*b)b|^)
+ +2  ^      (?=.*b)
+ +5  ^      .*
+ +7  ^ ^    b
+ +7  ^^     b
+ +7  ^      b
+ +8  ^^     )
+ +9  ^      b
++10  ^^     |
++13  ^^     
+ 0: b
+   
+/(?(?=b).*b|^d)/I
+Capturing subpattern count = 0
+Partial matching not supported
+No options
+No first char
+No need char
+
+/(?(?=.*b).*b|^d)/I
+Capturing subpattern count = 0
+Partial matching not supported
+No options
+First char at start or follows newline
+No need char
+
 / End of testinput2 /

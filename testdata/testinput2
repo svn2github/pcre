@@ -2726,4 +2726,12 @@ a random value. /Ix
 
 /(abc|pqr|123){0}[xyz]/SI
 
+/(?(?=.*b)b|^)/CI
+   adc
+   abc 
+   
+/(?(?=b).*b|^d)/I
+
+/(?(?=.*b).*b|^d)/I
+
 / End of testinput2 /

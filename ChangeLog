@@ -39,7 +39,11 @@ Version 7.9 xx-xxx-09
     
 8.  The pattern (?(?=.*b)b|^) was incorrectly compiled as "match must be at
     start or after a newline", because the conditional assertion was not being 
-    skipped when checking for this condition. 
+    correctly handled. The rule now is that both the assertion and what follows 
+    in the first alternative must satisfy the test. 
+    
+9.  If auto-callout was enabled in a pattern with a conditional group, PCRE 
+    could crash during matching.
       
 
 Version 7.8 05-Sep-08

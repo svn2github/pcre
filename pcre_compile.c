@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -5811,28 +5811,28 @@ do {
      NULL, 0, FALSE);
    register int op = *scode;
    
-   /* If we are at the start of a conditional group, skip over the condition. 
-   before inspecting the first opcode after the condition. */
+   /* If we are at the start of a conditional assertion group, *both* the
+   conditional assertion *and* what follows the condition must satisfy the test
+   for start of line. Other kinds of condition fail. Note that there may be an
+   auto-callout at the start of a condition. */
 
    if (op == OP_COND)
      {
      scode += 1 + LINK_SIZE; 
+     if (*scode == OP_CALLOUT) scode += _pcre_OP_lengths[OP_CALLOUT];
      switch (*scode)
        {
        case OP_CREF:
        case OP_RREF:
-       scode += 3;
-       break;
-       
        case OP_DEF:
-       scode += 1; 
-       break;
+       return FALSE; 
        
        default:     /* Assertion */
+       if (!is_startline(scode, bracket_map, backref_map)) return FALSE; 
        do scode += GET(scode, 1); while (*scode == OP_ALT);
+       scode += 1 + LINK_SIZE; 
        break; 
        }  
-
      scode = first_significant_code(scode, NULL, 0, FALSE);
      op = *scode; 
      }  

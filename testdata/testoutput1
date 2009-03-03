@@ -6633,4 +6633,12 @@ No match
    abc 
  0: b
 
+/(?(?=b).*b|^d)/
+    abc
+ 0: b
+
+/(?(?=.*b).*b|^d)/
+    abc
+ 0: ab
+
 / End of testinput1 /
