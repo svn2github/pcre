@@ -371,6 +371,13 @@ Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
   When linking a project with BCC5.5, pcre.lib must be included before any of
   the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
   line.
+  
+
+BUILDING UNDER WINDOWS CE WITH VISUAL STUDIO 200x
+
+Vincent Richomme sent a zip archive of files to help with this process. They 
+can be found in the file "pcre-vsbuild.zip" in the Contrib directory of the FTP 
+site.
 
 
 BUILDING PCRE ON OPENVMS
@@ -437,5 +444,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 05 September 2008
+Last Updated: 08 March 2009
 ****
