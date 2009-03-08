@@ -1729,7 +1729,11 @@ These functions call \fBpcre_get_stringnumber()\fP, and if it succeeds, they
 then call \fBpcre_copy_substring()\fP or \fBpcre_get_substring()\fP, as
 appropriate. \fBNOTE:\fP If PCRE_DUPNAMES is set and there are duplicate names,
 the behaviour may not be what you want (see the next section).
-.
+.P
+\fBWarning:\fP If the pattern uses the "(?|" feature to set up multiple
+subpatterns with the same number, you cannot use names to distinguish them, 
+because names are not included in the compiled code. The matching process uses 
+only numbers.
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
 .rs
@@ -1978,6 +1982,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 28 February 2009
+Last updated: 08 March 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
