@@ -478,6 +478,26 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
     len += gcaa; \
     }
 
+/* Get the next UTF-8 character, testing for UTF-8 mode, not advancing the
+pointer, incrementing length if there are extra bytes. This is called when we
+know we are in UTF-8 mode. */
+
+#define GETCHARLENTEST(c, eptr, len) \
+  c = *eptr; \
+  if (utf8 && c >= 0xc0) \
+    { \
+    int gcii; \
+    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int gcss = 6*gcaa; \
+    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
+    for (gcii = 1; gcii <= gcaa; gcii++) \
+      { \
+      gcss -= 6; \
+      c |= (eptr[gcii] & 0x3f) << gcss; \
+      } \
+    len += gcaa; \
+    }
+
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
 because almost all calls are already within a block of UTF-8 only code. */

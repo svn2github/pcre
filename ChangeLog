@@ -47,6 +47,9 @@ Version 7.9 xx-xxx-09
     
 10. The PCRE_DOLLAR_ENDONLY option was not working when pcre_dfa_exec() was 
     used for matching. 
+    
+11. Unicode property support in character classes was not working for 
+    characters (bytes) greater than 128 when not in UTF-8 mode.
       
 
 Version 7.8 05-Sep-08

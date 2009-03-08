@@ -1707,7 +1707,7 @@ for (;;)
     if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
     GETCHARINCTEST(c, eptr);
       {
-      const ucd_record * prop = GET_UCD(c);
+      const ucd_record *prop = GET_UCD(c);
 
       switch(ecode[1])
         {
@@ -2075,7 +2075,8 @@ for (;;)
 
 
     /* Match an extended character class. This opcode is encountered only
-    in UTF-8 mode, because that's the only time it is compiled. */
+    when UTF-8 mode mode is supported. Nevertheless, we may not be in UTF-8
+    mode, because Unicode properties are supported in non-UTF-8 mode. */
 
 #ifdef SUPPORT_UTF8
     case OP_XCLASS:
@@ -2117,7 +2118,7 @@ for (;;)
       for (i = 1; i <= min; i++)
         {
         if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-        GETCHARINC(c, eptr);
+        GETCHARINCTEST(c, eptr);
         if (!_pcre_xclass(c, data)) RRETURN(MATCH_NOMATCH);
         }
 
@@ -2136,7 +2137,7 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM20);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-          GETCHARINC(c, eptr);
+          GETCHARINCTEST(c, eptr);
           if (!_pcre_xclass(c, data)) RRETURN(MATCH_NOMATCH);
           }
         /* Control never gets here */
@@ -2151,7 +2152,7 @@ for (;;)
           {
           int len = 1;
           if (eptr >= md->end_subject) break;
-          GETCHARLEN(c, eptr, len);
+          GETCHARLENTEST(c, eptr, len);
           if (!_pcre_xclass(c, data)) break;
           eptr += len;
           }
