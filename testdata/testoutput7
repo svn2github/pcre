@@ -7254,4 +7254,18 @@ No match
     ab  
 No match
 
+/X$/E
+    X
+ 0: X
+    ** Failers 
+No match
+    X\n 
+No match
+
+/X$/
+    X
+ 0: X
+    X\n 
+ 0: X
+
 / End of testinput7 /
