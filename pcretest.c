@@ -785,6 +785,7 @@ printf("  -dfa     force DFA matching for all subjects\n");
 #endif
 printf("  -help    show usage information\n");
 printf("  -i       show information about compiled patterns\n"
+       "  -M       find MATCH_LIMIT minimum for each subject\n"
        "  -m       output memory used information\n"
        "  -o <n>   set size of offsets vector to <n>\n");
 #if !defined NOPOSIX
@@ -814,6 +815,7 @@ int main(int argc, char **argv)
 FILE *infile = stdin;
 int options = 0;
 int study_options = 0;
+int default_find_match_limit = FALSE;
 int op = 1;
 int timeit = 0;
 int timeitm = 0;
@@ -873,6 +875,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-b") == 0) debug = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
+  else if (strcmp(argv[op], "-M") == 0) default_find_match_limit = TRUE; 
 #if !defined NODFA
   else if (strcmp(argv[op], "-dfa") == 0) all_use_dfa = 1;
 #endif
@@ -1709,7 +1712,7 @@ while (!done)
     int callout_data_set = 0;
     int count, c;
     int copystrings = 0;
-    int find_match_limit = 0;
+    int find_match_limit = default_find_match_limit;
     int getstrings = 0;
     int getlist = 0;
     int gmatched = 0;
