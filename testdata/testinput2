@@ -2734,4 +2734,9 @@ a random value. /Ix
 
 /(?(?=.*b).*b|^d)/I
 
+/a?|b?/P
+    abc
+    ** Failers
+    ddd\N   
+
 / End of testinput2 /

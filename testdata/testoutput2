@@ -9690,4 +9690,12 @@ No options
 First char at start or follows newline
 No need char
 
+/a?|b?/P
+    abc
+ 0: a
+    ** Failers
+ 0: 
+    ddd\N   
+No match: POSIX code 17: match failed
+
 / End of testinput2 /

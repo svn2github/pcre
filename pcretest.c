@@ -2068,6 +2068,7 @@ while (!done)
         pmatch = (regmatch_t *)malloc(sizeof(regmatch_t) * use_size_offsets);
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
+      if ((options & PCRE_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY; 
 
       rc = regexec(&preg, (const char *)bptr, use_size_offsets, pmatch, eflags);
 

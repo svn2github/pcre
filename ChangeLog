@@ -52,6 +52,8 @@ Version 7.9 xx-xxx-09
     characters (bytes) greater than 127 when not in UTF-8 mode.
     
 12. Added the -M command line option to pcretest. 
+
+14. Added the non-standard REG_NOTEMPTY option to the POSIX interface.
       
 
 Version 7.8 05-Sep-08
