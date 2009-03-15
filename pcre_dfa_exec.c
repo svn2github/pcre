@@ -2714,9 +2714,8 @@ if ((re->flags & PCRE_REQCHSET) != 0)
   }
 
 /* Call the main matching function, looping for a non-anchored regex after a
-failed match. Unless restarting, optimize by moving to the first match
-character if possible, when not anchored. Then unless wanting a partial match,
-check for a required later character. */
+failed match. If not restarting, perform certain optimizations at the start of
+a match. */
 
 for (;;)
   {
@@ -2726,11 +2725,10 @@ for (;;)
     {
     const uschar *save_end_subject = end_subject;
 
-    /* Advance to a unique first char if possible. If firstline is TRUE, the
-    start of the match is constrained to the first line of a multiline string.
-    Implement this by temporarily adjusting end_subject so that we stop
-    scanning at a newline. If the match fails at the newline, later code breaks
-    this loop. */
+    /* If firstline is TRUE, the start of the match is constrained to the first
+    line of a multiline string. Implement this by temporarily adjusting
+    end_subject so that we stop scanning at a newline. If the match fails at
+    the newline, later code breaks this loop. */
 
     if (firstline)
       {
@@ -2749,63 +2747,76 @@ for (;;)
       while (t < md->end_subject && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
+      
+    /* There are some optimizations that avoid running the match if a known
+    starting point is not found, or if a known later character is not present.
+    However, there is an option that disables these, for testing and for
+    ensuring that all callouts do actually occur. */
 
-    if (first_byte >= 0)
-      {
-      if (first_byte_caseless)
-        while (current_subject < end_subject &&
-               lcc[*current_subject] != first_byte)
-          current_subject++;
-      else
-        while (current_subject < end_subject && *current_subject != first_byte)
-          current_subject++;
-      }
-
-    /* Or to just after a linebreak for a multiline match if possible */
-
-    else if (startline)
-      {
-      if (current_subject > md->start_subject + start_offset)
+    if ((options & PCRE_NO_START_OPTIMIZE) == 0)
+      { 
+ 
+      /* Advance to a known first byte. */
+      
+      if (first_byte >= 0)
         {
-#ifdef SUPPORT_UTF8
-        if (utf8)
-          {
-          while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
-            {
+        if (first_byte_caseless)
+          while (current_subject < end_subject &&
+                 lcc[*current_subject] != first_byte)
             current_subject++;
-            while(current_subject < end_subject &&
-                  (*current_subject & 0xc0) == 0x80)
-              current_subject++;
-            }
-          }
         else
-#endif
-        while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
-          current_subject++;
-
-        /* If we have just passed a CR and the newline option is ANY or
-        ANYCRLF, and we are now at a LF, advance the match position by one more
-        character. */
-
-        if (current_subject[-1] == '\r' &&
-             (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
-             current_subject < end_subject &&
-             *current_subject == '\n')
-          current_subject++;
+          while (current_subject < end_subject && 
+                 *current_subject != first_byte)
+            current_subject++;
         }
-      }
-
-    /* Or to a non-unique first char after study */
-
-    else if (start_bits != NULL)
-      {
-      while (current_subject < end_subject)
+      
+      /* Or to just after a linebreak for a multiline match if possible */
+      
+      else if (startline)
         {
-        register unsigned int c = *current_subject;
-        if ((start_bits[c/8] & (1 << (c&7))) == 0) current_subject++;
-          else break;
+        if (current_subject > md->start_subject + start_offset)
+          {
+#ifdef SUPPORT_UTF8
+          if (utf8)
+            {
+            while (current_subject < end_subject && 
+                   !WAS_NEWLINE(current_subject))
+              {
+              current_subject++;
+              while(current_subject < end_subject &&
+                    (*current_subject & 0xc0) == 0x80)
+                current_subject++;
+              }
+            }
+          else
+#endif
+          while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
+            current_subject++;
+      
+          /* If we have just passed a CR and the newline option is ANY or
+          ANYCRLF, and we are now at a LF, advance the match position by one
+          more character. */
+      
+          if (current_subject[-1] == '\r' &&
+               (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
+               current_subject < end_subject &&
+               *current_subject == '\n')
+            current_subject++;
+          }
         }
-      }
+      
+      /* Or to a non-unique first char after study */
+      
+      else if (start_bits != NULL)
+        {
+        while (current_subject < end_subject)
+          {
+          register unsigned int c = *current_subject;
+          if ((start_bits[c/8] & (1 << (c&7))) == 0) current_subject++;
+            else break;
+          }
+        }
+      }   
 
     /* Restore fudged end_subject */
 
@@ -2825,10 +2836,11 @@ for (;;)
   showed up when somebody was matching /^C/ on a 32-megabyte string... so we
   don't do this when the string is sufficiently long.
 
-  ALSO: this processing is disabled when partial matching is requested.
-  */
+  ALSO: this processing is disabled when partial matching is requested, and can 
+  also be explicitly deactivated. */
 
-  if (req_byte >= 0 &&
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
+      req_byte >= 0 &&
       end_subject - current_subject < REQ_BYTE_MAX &&
       (options & PCRE_PARTIAL) == 0)
     {

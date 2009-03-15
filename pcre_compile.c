@@ -6055,7 +6055,7 @@ if ((options & PCRE_UTF8) != 0)
   }
 #endif
 
-if ((options & ~PUBLIC_OPTIONS) != 0)
+if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
   {
   errorcode = ERR17;
   goto PCRE_EARLY_ERROR_RETURN;

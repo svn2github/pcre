@@ -9698,4 +9698,57 @@ No need char
     ddd\N   
 No match: POSIX code 17: match failed
 
+/xyz/C
+  xyz 
+--->xyz
+ +0 ^       x
+ +1 ^^      y
+ +2 ^ ^     z
+ +3 ^  ^    
+ 0: xyz
+  abcxyz 
+--->abcxyz
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  abcxyz\Y
+--->abcxyz
+ +0 ^          x
+ +0  ^         x
+ +0   ^        x
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  ** Failers 
+No match
+  abc
+No match
+  abc\Y
+--->abc
+ +0 ^       x
+ +0  ^      x
+ +0   ^     x
+ +0    ^    x
+No match
+  abcxypqr  
+No match
+  abcxypqr\Y  
+--->abcxypqr
+ +0 ^            x
+ +0  ^           x
+ +0   ^          x
+ +0    ^         x
+ +1    ^^        y
+ +2    ^ ^       z
+ +0     ^        x
+ +0      ^       x
+ +0       ^      x
+ +0        ^     x
+ +0         ^    x
+No match
+
 / End of testinput2 /

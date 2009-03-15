@@ -2739,4 +2739,14 @@ a random value. /Ix
     ** Failers
     ddd\N   
 
+/xyz/C
+  xyz 
+  abcxyz 
+  abcxyz\Y
+  ** Failers 
+  abc
+  abc\Y
+  abcxypqr  
+  abcxypqr\Y  
+
 / End of testinput2 /

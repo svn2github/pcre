@@ -1237,7 +1237,8 @@ documentation for a discussion of saving compiled patterns for later use.
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_START_OPTIMIZE,
+PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
 .sp
   PCRE_ANCHORED
 .sp
@@ -1323,6 +1324,16 @@ matching a null string by first trying the match again at the same offset with
 PCRE_NOTEMPTY and PCRE_ANCHORED, and then if that fails by advancing the
 starting offset (see below) and trying an ordinary match again. There is some
 code that demonstrates how to do this in the \fIpcredemo.c\fP sample program.
+.sp
+  PCRE_NO_START_OPTIMIZE
+.sp
+There are a number of optimizations that \fBpcre_exec()\fP uses at the start of 
+a match, in order to speed up the process. For example, if it is known that a
+match must start with a specific character, it searches the subject for that
+character, and fails immediately if it cannot find it, without actually running
+the main matching function. When callouts are in use, these optimizations can
+cause them to be skipped. This option disables the "start-up" optimizations,
+causing performance to suffer, but ensuring that the callouts do occur.
 .sp
   PCRE_NO_UTF8_CHECK
 .sp
@@ -1982,6 +1993,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 March 2009
+Last updated: 15 March 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

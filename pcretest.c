@@ -2009,6 +2009,10 @@ while (!done)
         case 'S':
         show_malloc = 1;
         continue;
+        
+        case 'Y':
+        options |= PCRE_NO_START_OPTIMIZE;
+        continue;   
 
         case 'Z':
         options |= PCRE_NOTEOL;

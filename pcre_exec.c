@@ -4716,12 +4716,12 @@ for(;;)
     register int *iend = iptr + resetcount;
     while (iptr < iend) *iptr++ = -1;
     }
-
-  /* Advance to a unique first char if possible. If firstline is TRUE, the
-  start of the match is constrained to the first line of a multiline string.
-  That is, the match must be before or at the first newline. Implement this by
-  temporarily adjusting end_subject so that we stop scanning at a newline. If
-  the match fails at the newline, later code breaks this loop. */
+    
+  /* If firstline is TRUE, the start of the match is constrained to the first
+  line of a multiline string. That is, the match must be before or at the first
+  newline. Implement this by temporarily adjusting end_subject so that we stop
+  scanning at a newline. If the match fails at the newline, later code breaks
+  this loop. */
 
   if (firstline)
     {
@@ -4740,66 +4740,74 @@ for(;;)
     while (t < md->end_subject && !IS_NEWLINE(t)) t++;
     end_subject = t;
     }
+    
+  /* There are some optimizations that avoid running the match if a known
+  starting point is not found, or if a known later character is not present.
+  However, there is an option that disables these, for testing and for ensuring
+  that all callouts do actually occur. */
+  
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0)
+    {   
+    /* Advance to a unique first byte if there is one. */
 
-  /* Now advance to a unique first byte if there is one. */
-
-  if (first_byte >= 0)
-    {
-    if (first_byte_caseless)
-      while (start_match < end_subject && md->lcc[*start_match] != first_byte)
-        start_match++;
-    else
-      while (start_match < end_subject && *start_match != first_byte)
-        start_match++;
-    }
-
-  /* Or to just after a linebreak for a multiline match */
-
-  else if (startline)
-    {
-    if (start_match > md->start_subject + start_offset)
+    if (first_byte >= 0)
       {
-#ifdef SUPPORT_UTF8
-      if (utf8)
-        {
-        while (start_match < end_subject && !WAS_NEWLINE(start_match))
-          {
+      if (first_byte_caseless)
+        while (start_match < end_subject && md->lcc[*start_match] != first_byte)
           start_match++;
-          while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
-            start_match++;
-          }
-        }
       else
-#endif
-      while (start_match < end_subject && !WAS_NEWLINE(start_match))
-        start_match++;
-
-      /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
-      and we are now at a LF, advance the match position by one more character.
-      */
-
-      if (start_match[-1] == '\r' &&
-           (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
-           start_match < end_subject &&
-           *start_match == '\n')
-        start_match++;
+        while (start_match < end_subject && *start_match != first_byte)
+          start_match++;
       }
-    }
-
-  /* Or to a non-unique first byte after study */
-
-  else if (start_bits != NULL)
-    {
-    while (start_match < end_subject)
+    
+    /* Or to just after a linebreak for a multiline match */
+    
+    else if (startline)
       {
-      register unsigned int c = *start_match;
-      if ((start_bits[c/8] & (1 << (c&7))) == 0) start_match++;
-        else break;
+      if (start_match > md->start_subject + start_offset)
+        {
+#ifdef SUPPORT_UTF8
+        if (utf8)
+          {
+          while (start_match < end_subject && !WAS_NEWLINE(start_match))
+            {
+            start_match++;
+            while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
+              start_match++;
+            }
+          }
+        else
+#endif
+        while (start_match < end_subject && !WAS_NEWLINE(start_match))
+          start_match++;
+  
+        /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
+        and we are now at a LF, advance the match position by one more character.
+        */
+  
+        if (start_match[-1] == '\r' &&
+             (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
+             start_match < end_subject &&
+             *start_match == '\n')
+          start_match++;
+        }
       }
-    }
-
+  
+    /* Or to a non-unique first byte after study */
+  
+    else if (start_bits != NULL)
+      {
+      while (start_match < end_subject)
+        {
+        register unsigned int c = *start_match;
+        if ((start_bits[c/8] & (1 << (c&7))) == 0) start_match++;
+          else break;
+        }
+      }
+    }   /* Starting optimizations */
+  
   /* Restore fudged end_subject */
-
+  
   end_subject = save_end_subject;
 
 #ifdef DEBUG  /* Sigh. Some compilers never learn. */
@@ -4808,23 +4816,25 @@ for(;;)
   printf("\n");
 #endif
 
-  /* If req_byte is set, we know that that character must appear in the subject
-  for the match to succeed. If the first character is set, req_byte must be
-  later in the subject; otherwise the test starts at the match point. This
-  optimization can save a huge amount of backtracking in patterns with nested
-  unlimited repeats that aren't going to match. Writing separate code for
-  cased/caseless versions makes it go faster, as does using an autoincrement
-  and backing off on a match.
+  /* If req_byte is set, we know that that character must appear in the
+  subject for the match to succeed. If the first character is set, req_byte
+  must be later in the subject; otherwise the test starts at the match point.
+  This optimization can save a huge amount of backtracking in patterns with
+  nested unlimited repeats that aren't going to match. Writing separate code
+  for cased/caseless versions makes it go faster, as does using an
+  autoincrement and backing off on a match.
 
-  HOWEVER: when the subject string is very, very long, searching to its end can
-  take a long time, and give bad performance on quite ordinary patterns. This
-  showed up when somebody was matching something like /^\d+C/ on a 32-megabyte
-  string... so we don't do this when the string is sufficiently long.
+  HOWEVER: when the subject string is very, very long, searching to its end
+  can take a long time, and give bad performance on quite ordinary patterns.
+  This showed up when somebody was matching something like /^\d+C/ on a
+  32-megabyte string... so we don't do this when the string is sufficiently
+  long.
 
-  ALSO: this processing is disabled when partial matching is requested.
-  */
+  ALSO: this processing is disabled when partial matching is requested, or if 
+  disabling is explicitly requested. */
 
-  if (req_byte >= 0 &&
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
+      req_byte >= 0 &&
       end_subject - start_match < REQ_BYTE_MAX &&
       !md->partial)
     {
