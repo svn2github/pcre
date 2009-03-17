@@ -56,6 +56,9 @@ Version 7.9 xx-xxx-09
 14. Added the non-standard REG_NOTEMPTY option to the POSIX interface.
 
 15. Added the PCRE_NO_START_OPTIMIZE match-time option.
+
+16. Added comments and documentation about mis-use of no_arg in the C++ 
+    wrapper.
       
 
 Version 7.8 05-Sep-08
