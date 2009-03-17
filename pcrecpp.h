@@ -646,7 +646,7 @@ class PCRECPP_EXP_DEFN RE {
   // regexp wasn't valid on construction.
   int NumberOfCapturingGroups() const;
 
-  // The default value for an argument, to indicate the end of the argument 
+  // The default value for an argument, to indicate the end of the argument
   // list. This must be used only in optional argument defaults. It should NOT
   // be passed explicitly. Some people have tried to use it like this:
   //
@@ -654,7 +654,7 @@ class PCRECPP_EXP_DEFN RE {
   //
   // This is a mistake, and will not work.
   static Arg no_arg;
-  
+
  private:
 
   void Init(const string& pattern, const RE_Options* options);

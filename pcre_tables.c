@@ -110,7 +110,7 @@ table itself. Maintenance is more error-prone, but frequent changes to this
 data are unlikely.
 
 July 2008: There is now a script called maint/GenerateUtt.py that can be used
-to generate this data instead of maintaining it entirely by hand. 
+to generate this data instead of maintaining it entirely by hand.
 
 The script was updated in March 2009 to generate a new EBCDIC-compliant
 version. Like all other character and string literals that are compared against
@@ -234,7 +234,7 @@ strings to make sure that UTF-8 support works on EBCDIC platforms. */
 #define STRING_Zp0 STR_Z STR_p "\0"
 #define STRING_Zs0 STR_Z STR_s "\0"
 
-const char _pcre_utt_names[] = 
+const char _pcre_utt_names[] =
   STRING_Any0
   STRING_Arabic0
   STRING_Armenian0

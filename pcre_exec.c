@@ -789,7 +789,7 @@ for (;;)
     case OP_SCOND:
     /* Because of the way auto-callout works during compile, a callout item is
     inserted between OP_COND and an assertion condition. */
- 
+
     if (ecode[LINK_SIZE+1] == OP_CALLOUT)
       {
       if (pcre_callout != NULL)
@@ -812,9 +812,9 @@ for (;;)
         }
       ecode += _pcre_OP_lengths[OP_CALLOUT];
       }
-      
+
     /* Now see what the actual condition is */
- 
+
     if (ecode[LINK_SIZE+1] == OP_RREF)         /* Recursion test */
       {
       offset = GET2(ecode, LINK_SIZE + 2);     /* Recursion group number*/
@@ -4716,7 +4716,7 @@ for(;;)
     register int *iend = iptr + resetcount;
     while (iptr < iend) *iptr++ = -1;
     }
-    
+
   /* If firstline is TRUE, the start of the match is constrained to the first
   line of a multiline string. That is, the match must be before or at the first
   newline. Implement this by temporarily adjusting end_subject so that we stop
@@ -4740,14 +4740,14 @@ for(;;)
     while (t < md->end_subject && !IS_NEWLINE(t)) t++;
     end_subject = t;
     }
-    
+
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later character is not present.
   However, there is an option that disables these, for testing and for ensuring
   that all callouts do actually occur. */
-  
+
   if ((options & PCRE_NO_START_OPTIMIZE) == 0)
-    {   
+    {
     /* Advance to a unique first byte if there is one. */
 
     if (first_byte >= 0)
@@ -4759,9 +4759,9 @@ for(;;)
         while (start_match < end_subject && *start_match != first_byte)
           start_match++;
       }
-    
+
     /* Or to just after a linebreak for a multiline match */
-    
+
     else if (startline)
       {
       if (start_match > md->start_subject + start_offset)
@@ -4780,11 +4780,11 @@ for(;;)
 #endif
         while (start_match < end_subject && !WAS_NEWLINE(start_match))
           start_match++;
-  
+
         /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
         and we are now at a LF, advance the match position by one more character.
         */
-  
+
         if (start_match[-1] == CHAR_CR &&
              (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
              start_match < end_subject &&
@@ -4792,9 +4792,9 @@ for(;;)
           start_match++;
         }
       }
-  
+
     /* Or to a non-unique first byte after study */
-  
+
     else if (start_bits != NULL)
       {
       while (start_match < end_subject)
@@ -4805,9 +4805,9 @@ for(;;)
         }
       }
     }   /* Starting optimizations */
-  
+
   /* Restore fudged end_subject */
-  
+
   end_subject = save_end_subject;
 
 #ifdef DEBUG  /* Sigh. Some compilers never learn. */
@@ -4830,7 +4830,7 @@ for(;;)
   32-megabyte string... so we don't do this when the string is sufficiently
   long.
 
-  ALSO: this processing is disabled when partial matching is requested, or if 
+  ALSO: this processing is disabled when partial matching is requested, or if
   disabling is explicitly requested. */
 
   if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&

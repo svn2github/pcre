@@ -825,8 +825,8 @@ if (after_context > 0 && lastmatchnumber > 0)
 *   Apply patterns to subject till one matches   *
 *************************************************/
 
-/* This function is called to run through all patterns, looking for a match. It 
-is used multiple times for the same subject when colouring is enabled, in order 
+/* This function is called to run through all patterns, looking for a match. It
+is used multiple times for the same subject when colouring is enabled, in order
 to find all possible matches.
 
 Arguments:
@@ -834,11 +834,11 @@ Arguments:
   length      the length of the subject to match
   offsets     the offets vector to fill in
   mrc         address of where to put the result of pcre_exec()
-  
-Returns:      TRUE if there was a match     
+
+Returns:      TRUE if there was a match
               FALSE if there was no match
               invert if there was a non-fatal error
-*/                
+*/
 
 static BOOL
 match_patterns(char *matchptr, size_t length, int *offsets, int *mrc)
@@ -992,7 +992,7 @@ while (ptr < endptr)
       #include <time.h>
       struct timeval start_time, end_time;
       struct timezone dummy;
-      int i; 
+      int i;
 
       if (jfriedl_XT)
       {
@@ -1018,7 +1018,7 @@ while (ptr < endptr)
 
 
       for (i = 0; i < jfriedl_XR; i++)
-          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0, 
+          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0,
               PCRE_NOTEMPTY, offsets, OFFSET_SIZE) >= 0);
 
       if (gettimeofday(&end_time, &dummy) != 0)
@@ -1038,10 +1038,10 @@ while (ptr < endptr)
 
   ONLY_MATCHING_RESTART:
 
-  /* Run through all the patterns until one matches or there is an error other 
+  /* Run through all the patterns until one matches or there is an error other
   than NOMATCH. This code is in a subroutine so that it can be re-used for
   finding subsequent matches when colouring matched lines. */
-  
+
   match = match_patterns(matchptr, length, offsets, &mrc);
 
   /* If it's a match or a not-match (as required), do what's wanted. */
@@ -1096,7 +1096,7 @@ while (ptr < endptr)
           if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
           fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
           if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
-          } 
+          }
         fprintf(stdout, "\n");
         matchptr += offsets[1];
         length -= offsets[1];
@@ -1233,19 +1233,19 @@ while (ptr < endptr)
       else
 #endif
 
-      /* We have to split the line(s) up if colouring, and search for further 
+      /* We have to split the line(s) up if colouring, and search for further
       matches. */
 
       if (do_colour)
         {
-        int last_offset = 0; 
+        int last_offset = 0;
         fwrite(ptr, 1, offsets[0], stdout);
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
         fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
         fprintf(stdout, "%c[00m", 0x1b);
         for (;;)
           {
-          last_offset += offsets[1];  
+          last_offset += offsets[1];
           matchptr += offsets[1];
           length -= offsets[1];
           if (!match_patterns(matchptr, length, offsets, &mrc)) break;
@@ -1257,9 +1257,9 @@ while (ptr < endptr)
         fwrite(ptr + last_offset, 1, (linelength + endlinelength) - last_offset,
           stdout);
         }
-        
+
       /* Not colouring; no need to search for further matches */
-       
+
       else fwrite(ptr, 1, linelength + endlinelength, stdout);
       }
 
@@ -1872,7 +1872,7 @@ const char *error;
 /* Set the default line ending value from the default in the PCRE library;
 "lf", "cr", "crlf", and "any" are supported. Anything else is treated as "lf".
 Note that the return values from pcre_config(), though derived from the ASCII
-codes, are the same in EBCDIC environments, so we must use the actual values 
+codes, are the same in EBCDIC environments, so we must use the actual values
 rather than escapes such as as '\r'. */
 
 (void)pcre_config(PCRE_CONFIG_NEWLINE, &i);

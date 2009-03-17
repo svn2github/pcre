@@ -262,8 +262,8 @@ library. You can read more about them in the pcrebuild man page.
 
   --enable-ebcdic
 
-  This automatically implies --enable-rebuild-chartables (see above). However, 
-  when PCRE is built this way, it always operates in EBCDIC. It cannot support 
+  This automatically implies --enable-rebuild-chartables (see above). However,
+  when PCRE is built this way, it always operates in EBCDIC. It cannot support
   both EBCDIC and UTF-8.
 
 . It is possible to compile pcregrep to use libz and/or libbz2, in order to
@@ -291,9 +291,9 @@ library. You can read more about them in the pcrebuild man page.
   to specify something like LIBS="-lncurses" as well. This is because, to quote
   the readline INSTALL, "Readline uses the termcap functions, but does not link
   with the termcap or curses library itself, allowing applications which link
-  with readline the to choose an appropriate library." If you get error 
-  messages about missing functions tgetstr, tgetent, tputs, tgetflag, or tgoto, 
-  this is the problem, and linking with the ncurses library should fix it. 
+  with readline the to choose an appropriate library." If you get error
+  messages about missing functions tgetstr, tgetent, tputs, tgetflag, or tgoto,
+  this is the problem, and linking with the ncurses library should fix it.
 
 The "configure" script builds the following files for the basic C library:
 

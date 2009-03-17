@@ -1202,6 +1202,11 @@ details of the interfaces for handling named subpatterns, see the
 <a href="pcreapi.html"><b>pcreapi</b></a>
 documentation.
 </P>
+<P>
+<b>Warning:</b> You cannot use different names to distinguish between two
+subpatterns with the same number (see the previous section) because PCRE uses
+only the numbers when matching.
+</P>
 <br><a name="SEC15" href="#TOC1">REPETITION</a><br>
 <P>
 Repetition is specified by quantifiers, which can follow any of the following
@@ -2238,9 +2243,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 April 2008
+Last updated: 08 March 2009
 <br>
-Copyright &copy; 1997-2008 University of Cambridge.
+Copyright &copy; 1997-2009 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

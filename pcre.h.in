@@ -95,7 +95,7 @@ it is needed here for malloc. */
 extern "C" {
 #endif
 
-/* Options. Some are compile-time only, some are run-time only, and some are 
+/* Options. Some are compile-time only, some are run-time only, and some are
 both, so we keep them all distinct. */
 
 #define PCRE_CASELESS           0x00000001

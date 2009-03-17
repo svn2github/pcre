@@ -513,8 +513,8 @@ if test "$enable_ebcdic" = "yes"; then
     If you are compiling for a system that uses EBCDIC instead of ASCII
     character codes, define this macro as 1. On systems that can use
     "configure", this can be done via --enable-ebcdic. PCRE will then
-    assume that all input strings are in EBCDIC. If you do not define 
-    this macro, PCRE will assume input strings are ASCII or UTF-8 Unicode. 
+    assume that all input strings are in EBCDIC. If you do not define
+    this macro, PCRE will assume input strings are ASCII or UTF-8 Unicode.
     It is not possible to build a version of PCRE that supports both
     EBCDIC and UTF-8.])
 fi

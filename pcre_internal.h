@@ -51,7 +51,7 @@ functions whose names all begin with "_pcre_". */
 #define DEBUG
 #endif
 
-/* We do not support both EBCDIC and UTF-8 at the same time. The "configure" 
+/* We do not support both EBCDIC and UTF-8 at the same time. The "configure"
 script prevents both being selected, but not everybody uses "configure". */
 
 #if defined EBCDIC && defined SUPPORT_UTF8
@@ -600,19 +600,19 @@ typedef int BOOL;
 
 /* If PCRE is to support UTF-8 on EBCDIC platforms, we cannot use normal
 character constants like '*' because the compiler would emit their EBCDIC code,
-which is different from their ASCII/UTF-8 code. Instead we define macros for 
-the characters so that they always use the ASCII/UTF-8 code when UTF-8 support 
-is enabled. When UTF-8 support is not enabled, the definitions use character 
-literals. Both character and string versions of each character are needed, and 
+which is different from their ASCII/UTF-8 code. Instead we define macros for
+the characters so that they always use the ASCII/UTF-8 code when UTF-8 support
+is enabled. When UTF-8 support is not enabled, the definitions use character
+literals. Both character and string versions of each character are needed, and
 there are some longer strings as well.
 
-This means that, on EBCDIC platforms, the PCRE library can handle either 
+This means that, on EBCDIC platforms, the PCRE library can handle either
 EBCDIC, or UTF-8, but not both. To support both in the same compiled library
 would need different lookups depending on whether PCRE_UTF8 was set or not.
 This would make it impossible to use characters in switch/case statements,
-which would reduce performance. For a theoretical use (which nobody has asked 
-for) in a minority area (EBCDIC platforms), this is not sensible. Any 
-application that did need both could compile two versions of the library, using 
+which would reduce performance. For a theoretical use (which nobody has asked
+for) in a minority area (EBCDIC platforms), this is not sensible. Any
+application that did need both could compile two versions of the library, using
 macros to give the functions distinct names. */
 
 #ifndef SUPPORT_UTF8

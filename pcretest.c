@@ -875,7 +875,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-b") == 0) debug = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
-  else if (strcmp(argv[op], "-M") == 0) default_find_match_limit = TRUE; 
+  else if (strcmp(argv[op], "-M") == 0) default_find_match_limit = TRUE;
 #if !defined NODFA
   else if (strcmp(argv[op], "-dfa") == 0) all_use_dfa = 1;
 #endif
@@ -928,7 +928,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-C") == 0)
     {
     int rc;
-    unsigned long int lrc; 
+    unsigned long int lrc;
     printf("PCRE version %s\n", pcre_version());
     printf("Compiled with\n");
     (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
@@ -937,7 +937,7 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  %sUnicode properties support\n", rc? "" : "No ");
     (void)pcre_config(PCRE_CONFIG_NEWLINE, &rc);
     /* Note that these values are always the ASCII values, even
-    in EBCDIC environments. CR is 13 and NL is 10. */  
+    in EBCDIC environments. CR is 13 and NL is 10. */
     printf("  Newline sequence is %s\n", (rc == 13)? "CR" :
       (rc == 10)? "LF" : (rc == (13<<8 | 10))? "CRLF" :
       (rc == -2)? "ANYCRLF" :
@@ -2011,10 +2011,10 @@ while (!done)
         case 'S':
         show_malloc = 1;
         continue;
-        
+
         case 'Y':
         options |= PCRE_NO_START_OPTIMIZE;
-        continue;   
+        continue;
 
         case 'Z':
         options |= PCRE_NOTEOL;
@@ -2074,7 +2074,7 @@ while (!done)
         pmatch = (regmatch_t *)malloc(sizeof(regmatch_t) * use_size_offsets);
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
-      if ((options & PCRE_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY; 
+      if ((options & PCRE_NOTEMPTY) != 0) eflags |= REG_NOTEMPTY;
 
       rc = regexec(&preg, (const char *)bptr, use_size_offsets, pmatch, eflags);
 

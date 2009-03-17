@@ -3,7 +3,7 @@
 *************************************************/
 
 /* PCRE is a library of functions to support regular expressions whose syntax
-and semantics are as close as possible to those of the Perl 5 language (but see 
+and semantics are as close as possible to those of the Perl 5 language (but see
 below for why this module is different).
 
                        Written by Philip Hazel
@@ -2747,17 +2747,17 @@ for (;;)
       while (t < md->end_subject && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
-      
+
     /* There are some optimizations that avoid running the match if a known
     starting point is not found, or if a known later character is not present.
     However, there is an option that disables these, for testing and for
     ensuring that all callouts do actually occur. */
 
     if ((options & PCRE_NO_START_OPTIMIZE) == 0)
-      { 
- 
+      {
+
       /* Advance to a known first byte. */
-      
+
       if (first_byte >= 0)
         {
         if (first_byte_caseless)
@@ -2765,13 +2765,13 @@ for (;;)
                  lcc[*current_subject] != first_byte)
             current_subject++;
         else
-          while (current_subject < end_subject && 
+          while (current_subject < end_subject &&
                  *current_subject != first_byte)
             current_subject++;
         }
-      
+
       /* Or to just after a linebreak for a multiline match if possible */
-      
+
       else if (startline)
         {
         if (current_subject > md->start_subject + start_offset)
@@ -2779,7 +2779,7 @@ for (;;)
 #ifdef SUPPORT_UTF8
           if (utf8)
             {
-            while (current_subject < end_subject && 
+            while (current_subject < end_subject &&
                    !WAS_NEWLINE(current_subject))
               {
               current_subject++;
@@ -2792,11 +2792,11 @@ for (;;)
 #endif
           while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
             current_subject++;
-      
+
           /* If we have just passed a CR and the newline option is ANY or
           ANYCRLF, and we are now at a LF, advance the match position by one
           more character. */
-      
+
           if (current_subject[-1] == CHAR_CR &&
                (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
                current_subject < end_subject &&
@@ -2804,9 +2804,9 @@ for (;;)
             current_subject++;
           }
         }
-      
+
       /* Or to a non-unique first char after study */
-      
+
       else if (start_bits != NULL)
         {
         while (current_subject < end_subject)
@@ -2816,7 +2816,7 @@ for (;;)
             else break;
           }
         }
-      }   
+      }
 
     /* Restore fudged end_subject */
 
@@ -2836,7 +2836,7 @@ for (;;)
   showed up when somebody was matching /^C/ on a 32-megabyte string... so we
   don't do this when the string is sufficiently long.
 
-  ALSO: this processing is disabled when partial matching is requested, and can 
+  ALSO: this processing is disabled when partial matching is requested, and can
   also be explicitly deactivated. */
 
   if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&

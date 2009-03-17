@@ -47,10 +47,10 @@ strings as UTF-8. As well as compiling PCRE with this option, you also have
 have to set the PCRE_UTF8 option when you call the \fBpcre_compile()\fP
 function.
 .P
-If you set --enable-utf8 when compiling in an EBCDIC environment, PCRE expects 
-its input to be either ASCII or UTF-8 (depending on the runtime option). It is 
-not possible to support both EBCDIC and UTF-8 codes in the same version of the 
-library. Consequently, --enable-utf8 and --enable-ebcdic are mutually 
+If you set --enable-utf8 when compiling in an EBCDIC environment, PCRE expects
+its input to be either ASCII or UTF-8 (depending on the runtime option). It is
+not possible to support both EBCDIC and UTF-8 codes in the same version of the
+library. Consequently, --enable-utf8 and --enable-ebcdic are mutually
 exclusive.
 .
 .SH "UNICODE CHARACTER PROPERTY SUPPORT"
@@ -260,7 +260,7 @@ EBCDIC environment by adding
 .sp
 to the \fBconfigure\fP command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
-an EBCDIC environment (for example, an IBM mainframe operating system). The 
+an EBCDIC environment (for example, an IBM mainframe operating system). The
 --enable-ebcdic option is incompatible with --enable-utf8.
 .
 .SH "PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT"

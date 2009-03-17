@@ -317,7 +317,7 @@ properties is available; otherwise it is set to zero.
 .sp
 The output is an integer whose value specifies the default character sequence
 that is recognized as meaning "newline". The four values that are supported
-are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. 
+are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY.
 Though they are derived from ASCII, the same values are returned in EBCDIC
 environments. The default should normally correspond to the standard sequence
 for your operating system.
@@ -1329,7 +1329,7 @@ code that demonstrates how to do this in the \fIpcredemo.c\fP sample program.
 .sp
   PCRE_NO_START_OPTIMIZE
 .sp
-There are a number of optimizations that \fBpcre_exec()\fP uses at the start of 
+There are a number of optimizations that \fBpcre_exec()\fP uses at the start of
 a match, in order to speed up the process. For example, if it is known that a
 match must start with a specific character, it searches the subject for that
 character, and fails immediately if it cannot find it, without actually running
@@ -1744,8 +1744,8 @@ appropriate. \fBNOTE:\fP If PCRE_DUPNAMES is set and there are duplicate names,
 the behaviour may not be what you want (see the next section).
 .P
 \fBWarning:\fP If the pattern uses the "(?|" feature to set up multiple
-subpatterns with the same number, you cannot use names to distinguish them, 
-because names are not included in the compiled code. The matching process uses 
+subpatterns with the same number, you cannot use names to distinguish them,
+because names are not included in the compiled code. The matching process uses
 only numbers.
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
