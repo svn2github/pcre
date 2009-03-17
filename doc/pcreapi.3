@@ -317,8 +317,10 @@ properties is available; otherwise it is set to zero.
 .sp
 The output is an integer whose value specifies the default character sequence
 that is recognized as meaning "newline". The four values that are supported
-are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. The
-default should normally be the standard sequence for your operating system.
+are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. 
+Though they are derived from ASCII, the same values are returned in EBCDIC
+environments. The default should normally correspond to the standard sequence
+for your operating system.
 .sp
   PCRE_CONFIG_BSR
 .sp
@@ -1993,6 +1995,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 15 March 2009
+Last updated: 17 March 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

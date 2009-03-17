@@ -8,6 +8,9 @@
 # offsets in the table. This is tedious to maintain by hand. Therefore, this
 # script is used to generate the table. The output is sent to stdout.
 
+# Modified by PH 17-March-2009 to generate the more verbose form that works
+# for UTF-support in EBCDIC as well as ASCII environments. 
+
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
  'Glagolitic', 'Gothic', 'Greek', 'Gujarati', 'Gurmukhi', 'Han', 'Hangul', 'Hanunoo', 'Hebrew', 'Hiragana', \
@@ -35,12 +38,31 @@ utt_table.append(('Any', 'PT_ANY'))
 
 utt_table.sort()
 
+# We have to use STR_ macros to define the strings so that it all works in
+# UTF-8 mode on EBCDIC platforms.
+
+for utt in utt_table:
+        print '#define STRING_%s0' % (utt[0].replace('&', '_AMPERSAND')),
+        for c in utt[0]:
+                if c == '_':
+                        print 'STR_UNDERSCORE',
+                elif c == '&':         
+                        print 'STR_AMPERSAND', 
+                else:           
+                        print 'STR_%s' % c,;
+        print '"\\0"'           
+
+# Print the actual table, using the string names
+
+print ''
 print 'const char _pcre_utt_names[] = ';
 last = ''
 for utt in utt_table:
 	if utt == utt_table[-1]:
 		last = ';'
-	print '  "%s\\0"%s' % (utt[0], last)
+        print '  STRING_%s0%s' % (utt[0].replace('&', '_AMPERSAND'), last)
+# This was how it was done before the EBCDIC-compatible modification.         
+#        print '  "%s\\0"%s' % (utt[0], last)
 
 print '\nconst ucp_type_table _pcre_utt[] = { '
 offset = 0

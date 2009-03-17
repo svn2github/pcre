@@ -936,8 +936,10 @@ while (argc > 1 && argv[op][0] == '-')
     (void)pcre_config(PCRE_CONFIG_UNICODE_PROPERTIES, &rc);
     printf("  %sUnicode properties support\n", rc? "" : "No ");
     (void)pcre_config(PCRE_CONFIG_NEWLINE, &rc);
-    printf("  Newline sequence is %s\n", (rc == '\r')? "CR" :
-      (rc == '\n')? "LF" : (rc == ('\r'<<8 | '\n'))? "CRLF" :
+    /* Note that these values are always the ASCII values, even
+    in EBCDIC environments. CR is 13 and NL is 10. */  
+    printf("  Newline sequence is %s\n", (rc == 13)? "CR" :
+      (rc == 10)? "LF" : (rc == (13<<8 | 10))? "CRLF" :
       (rc == -2)? "ANYCRLF" :
       (rc == -1)? "ANY" : "???");
     (void)pcre_config(PCRE_CONFIG_BSR, &rc);
@@ -2380,9 +2382,11 @@ while (!done)
             {
             int d;
             (void)pcre_config(PCRE_CONFIG_NEWLINE, &d);
-            obits = (d == '\r')? PCRE_NEWLINE_CR :
-                    (d == '\n')? PCRE_NEWLINE_LF :
-                    (d == ('\r'<<8 | '\n'))? PCRE_NEWLINE_CRLF :
+            /* Note that these values are always the ASCII ones, even in
+            EBCDIC environments. CR = 13, NL = 10. */
+            obits = (d == 13)? PCRE_NEWLINE_CR :
+                    (d == 10)? PCRE_NEWLINE_LF :
+                    (d == (13<<8 | 10))? PCRE_NEWLINE_CRLF :
                     (d == -2)? PCRE_NEWLINE_ANYCRLF :
                     (d == -1)? PCRE_NEWLINE_ANY : 0;
             }

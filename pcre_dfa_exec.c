@@ -2615,10 +2615,10 @@ switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : (pcre_uint32)option
          PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */
-  case PCRE_NEWLINE_CR: newline = '\r'; break;
-  case PCRE_NEWLINE_LF: newline = '\n'; break;
+  case PCRE_NEWLINE_CR: newline = CHAR_CR; break;
+  case PCRE_NEWLINE_LF: newline = CHAR_NL; break;
   case PCRE_NEWLINE_CR+
-       PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
+       PCRE_NEWLINE_LF: newline = (CHAR_CR << 8) | CHAR_NL; break;
   case PCRE_NEWLINE_ANY: newline = -1; break;
   case PCRE_NEWLINE_ANYCRLF: newline = -2; break;
   default: return PCRE_ERROR_BADNEWLINE;
@@ -2797,10 +2797,10 @@ for (;;)
           ANYCRLF, and we are now at a LF, advance the match position by one
           more character. */
       
-          if (current_subject[-1] == '\r' &&
+          if (current_subject[-1] == CHAR_CR &&
                (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
                current_subject < end_subject &&
-               *current_subject == '\n')
+               *current_subject == CHAR_NL)
             current_subject++;
           }
         }
@@ -2916,9 +2916,9 @@ for (;;)
   not contain any explicit matches for \r or \n, and the newline option is CRLF
   or ANY or ANYCRLF, advance the match position by one more character. */
 
-  if (current_subject[-1] == '\r' &&
+  if (current_subject[-1] == CHAR_CR &&
       current_subject < end_subject &&
-      *current_subject == '\n' &&
+      *current_subject == CHAR_NL &&
       (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||

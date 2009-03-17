@@ -1871,16 +1871,18 @@ const char *error;
 
 /* Set the default line ending value from the default in the PCRE library;
 "lf", "cr", "crlf", and "any" are supported. Anything else is treated as "lf".
-*/
+Note that the return values from pcre_config(), though derived from the ASCII
+codes, are the same in EBCDIC environments, so we must use the actual values 
+rather than escapes such as as '\r'. */
 
 (void)pcre_config(PCRE_CONFIG_NEWLINE, &i);
 switch(i)
   {
-  default:                 newline = (char *)"lf"; break;
-  case '\r':               newline = (char *)"cr"; break;
-  case ('\r' << 8) | '\n': newline = (char *)"crlf"; break;
-  case -1:                 newline = (char *)"any"; break;
-  case -2:                 newline = (char *)"anycrlf"; break;
+  default:               newline = (char *)"lf"; break;
+  case 13:               newline = (char *)"cr"; break;
+  case (13 << 8) | 10:   newline = (char *)"crlf"; break;
+  case -1:               newline = (char *)"any"; break;
+  case -2:               newline = (char *)"anycrlf"; break;
   }
 
 /* Process the options */
