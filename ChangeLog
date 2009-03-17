@@ -63,6 +63,11 @@ Version 7.9 xx-xxx-09
 17. Implemented support for UTF-8 encoding in EBCDIC environments, a patch
     from Martin Jerabek that uses macro names for all relevant character and
     string constants.
+    
+18. Added to pcre_internal.h two configuration checks: (a) If both EBCDIC and
+    SUPPORT_UTF8 are set, give an error; (b) If SUPPORT_UCP is set without
+    SUPPORT_UTF8, define SUPPORT_UTF8. The "configure" script handles both of 
+    these, but not everybody uses configure. 
 
 
 Version 7.8 05-Sep-08

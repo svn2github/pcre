@@ -58,6 +58,13 @@ script prevents both being selected, but not everybody uses "configure". */
 #error The use of both EBCDIC and SUPPORT_UTF8 is not supported.
 #endif
 
+/* If SUPPORT_UCP is defined, SUPPORT_UTF8 must also be defined. The 
+"configure" script ensures this, but not everybody uses "configure". */
+
+#if defined SUPPORT_UCP && !defined SUPPORT_UTF8
+#define SUPPORT_UTF8 1
+#endif
+
 /* Use a macro for debugging printing, 'cause that eliminates the use of #ifdef
 inline, and there are *still* stupid compilers about that don't like indented
 pre-processor statements, or at least there were when I first wrote this. After
