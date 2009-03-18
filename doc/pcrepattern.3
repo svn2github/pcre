@@ -364,7 +364,8 @@ In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
 \ew, and always match \eD, \eS, and \eW. This is true even when Unicode
 character property support is available. These sequences retain their original
 meanings from before UTF-8 support was available, mainly for efficiency
-reasons.
+reasons. Note that this also affects \eb, because it is defined in terms of \ew 
+and \eW.
 .P
 The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the
 other sequences, these do match certain high-valued codepoints in UTF-8 mode.
@@ -2244,6 +2245,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 March 2009
+Last updated: 18 March 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -252,7 +252,8 @@ digits, spaces, or word characters remain the same set as before, all with
 values less than 256. This remains true even when PCRE includes Unicode
 property support, because to do otherwise would slow down PCRE in many common
 cases. If you really want to test for a wider sense of, say, "digit", you
-must use Unicode property tests such as \ep{Nd}.
+must use Unicode property tests such as \ep{Nd}. Note that this also applies to 
+\eb, because it is defined in terms of \ew and \eW.
 .P
 7. Similarly, characters that match the POSIX named character classes are all
 low-valued characters.
@@ -289,6 +290,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 12 April 2008
-Copyright (c) 1997-2008 University of Cambridge.
+Last updated: 18 March 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi
