@@ -1663,18 +1663,26 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     {
     BOOL empty_branch;
     if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */
-
-    /* Scan a closed bracket */
-
-    empty_branch = FALSE;
-    do
-      {
-      if (!empty_branch && could_be_empty_branch(code, endcode, utf8))
-        empty_branch = TRUE;
+    
+    /* If a conditional group has only one branch, there is a second, implied, 
+    empty branch, so just skip over the conditional, because it could be empty.
+    Otherwise, scan the individual branches of the group. */
+    
+    if (c == OP_COND && code[GET(code, 1)] != OP_ALT)
       code += GET(code, 1);
+    else
+      {       
+      empty_branch = FALSE;
+      do
+        {
+        if (!empty_branch && could_be_empty_branch(code, endcode, utf8))
+          empty_branch = TRUE;
+        code += GET(code, 1);
+        }
+      while (*code == OP_ALT);
+      if (!empty_branch) return FALSE;   /* All branches are non-empty */
       }
-    while (*code == OP_ALT);
-    if (!empty_branch) return FALSE;   /* All branches are non-empty */
+        
     c = *code;
     continue;
     }

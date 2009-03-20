@@ -635,7 +635,7 @@ for (;;)
   {
   minimize = possessive = FALSE;
   op = *ecode;
-
+  
   /* For partial matching, remember if we ever hit the end of the subject after
   matching at least one subject character. */
 
@@ -880,7 +880,7 @@ for (;;)
         goto TAIL_RECURSE;
         }
       }
-    else                         /* Condition false & no 2nd alternative */
+    else                         /* Condition false & no alternative */
       {
       ecode += 1 + LINK_SIZE;
       }

@@ -6641,4 +6641,9 @@ No match
     abc
  0: ab
 
+/^%((?(?=[a])[^%])|b)*%$/
+    %ab%
+ 0: %ab%
+ 1: 
+
 / End of testinput1 /
