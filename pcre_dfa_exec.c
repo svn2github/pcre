@@ -512,7 +512,7 @@ for (;;)
     stateblock *current_state = active_states + i;
     const uschar *code;
     int state_offset = current_state->offset;
-    int count, codevalue;
+    int count, codevalue, rrc;
 
 #ifdef DEBUG
     printf ("%.*sProcessing state %d c=", rlevel*2-2, SP, state_offset);
@@ -2201,8 +2201,38 @@ for (;;)
         {
         int local_offsets[1000];
         int local_workspace[1000];
-        int condcode = code[LINK_SIZE+1];
+        int codelink = GET(code, 1); 
+        int condcode;
+        
+        /* Because of the way auto-callout works during compile, a callout item
+        is inserted between OP_COND and an assertion condition. */
 
+        if (code[LINK_SIZE+1] == OP_CALLOUT)
+          { 
+          if (pcre_callout != NULL)
+            {
+            int rrc;
+            pcre_callout_block cb;
+            cb.version          = 1;   /* Version 1 of the callout block */
+            cb.callout_number   = code[LINK_SIZE+2];
+            cb.offset_vector    = offsets;
+            cb.subject          = (PCRE_SPTR)start_subject;
+            cb.subject_length   = end_subject - start_subject;
+            cb.start_match      = current_subject - start_subject;
+            cb.current_position = ptr - start_subject;
+            cb.pattern_position = GET(code, LINK_SIZE + 3);
+            cb.next_item_length = GET(code, 3 + 2*LINK_SIZE);
+            cb.capture_top      = 1;
+            cb.capture_last     = -1;
+            cb.callout_data     = md->callout_data;
+            if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
+            if (rrc == 0) { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); }
+            }
+          code += _pcre_OP_lengths[OP_CALLOUT];
+          } 
+ 
+        condcode = code[LINK_SIZE+1];
+        
         /* Back reference conditions are not supported */
 
         if (condcode == OP_CREF) return PCRE_ERROR_DFA_UCOND;
@@ -2211,7 +2241,7 @@ for (;;)
 
         if (condcode == OP_DEF)
           {
-          ADD_ACTIVE(state_offset + GET(code, 1) + LINK_SIZE + 1, 0);
+          ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0);
           }
 
         /* The only supported version of OP_RREF is for the value RREF_ANY,
@@ -2223,7 +2253,7 @@ for (;;)
           int value = GET2(code, LINK_SIZE+2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;
           if (recursing > 0) { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
-            else { ADD_ACTIVE(state_offset + GET(code, 1) + LINK_SIZE + 1, 0); }
+            else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
 
         /* Otherwise, the condition is an assertion */
@@ -2251,9 +2281,11 @@ for (;;)
 
           if ((rc >= 0) ==
                 (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
-            { ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); }
+            { 
+            ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); 
+            }
           else
-            { ADD_ACTIVE(state_offset + GET(code, 1) + LINK_SIZE + 1, 0); }
+            { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
         }
       break;
@@ -2405,9 +2437,9 @@ for (;;)
       /* Handle callouts */
 
       case OP_CALLOUT:
+      rrc = 0; 
       if (pcre_callout != NULL)
         {
-        int rrc;
         pcre_callout_block cb;
         cb.version          = 1;   /* Version 1 of the callout block */
         cb.callout_number   = code[1];
@@ -2422,8 +2454,9 @@ for (;;)
         cb.capture_last     = -1;
         cb.callout_data     = md->callout_data;
         if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
-        if (rrc == 0) { ADD_ACTIVE(state_offset + 2 + 2*LINK_SIZE, 0); }
-        }
+        } 
+      if (rrc == 0) 
+        { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); }
       break;
 
 

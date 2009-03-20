@@ -7320,5 +7320,23 @@ No match
  +0        ^     x
  +0         ^    x
 No match
+  
+/(?C)ab/
+  ab
+--->ab
+  0 ^      a
+ 0: ab
+  \C-ab
+ 0: ab
+  
+/ab/C
+  ab
+--->ab
+ +0 ^      a
+ +1 ^^     b
+ +2 ^ ^    
+ 0: ab
+  \C-ab    
+ 0: ab
 
 / End of testinput7 /

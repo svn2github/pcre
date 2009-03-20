@@ -75,6 +75,9 @@ Version 7.9 xx-xxx-09
     (and probably a segfault) for patterns such as ^"((?(?=[a])[^"])|b)*"$ 
     with the subject "ab", where knowledge that the repeated group can match 
     nothing is needed in order to break the loop.
+    
+20. If a pattern that was compiled with callouts was matched using pcre_dfa_
+    exec(), but without supplying a callout function, matching went wrong. 
 
 
 Version 7.8 05-Sep-08

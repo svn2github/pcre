@@ -4410,5 +4410,13 @@
   abc\Y
   abcxypqr  
   abcxypqr\Y  
+  
+/(?C)ab/
+  ab
+  \C-ab
+  
+/ab/C
+  ab
+  \C-ab    
 
 / End of testinput7 /
