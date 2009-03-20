@@ -68,6 +68,13 @@ Version 7.9 xx-xxx-09
     SUPPORT_UTF8 are set, give an error; (b) If SUPPORT_UCP is set without
     SUPPORT_UTF8, define SUPPORT_UTF8. The "configure" script handles both of 
     these, but not everybody uses configure. 
+    
+19. A conditional group that had only one branch was not being correctly 
+    recognized as an item that could match an empty string. This meant that an 
+    enclosing group might also not be so recognized, causing infinite looping 
+    (and probably a segfault) for patterns such as ^"((?(?=[a])[^"])|b)*"$ 
+    with the subject "ab", where knowledge that the repeated group can match 
+    nothing is needed in order to break the loop.
 
 
 Version 7.8 05-Sep-08
