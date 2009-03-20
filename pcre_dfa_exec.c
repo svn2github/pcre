@@ -61,7 +61,6 @@ applications. */
 #define SP "                   "
 
 
-
 /*************************************************
 *      Code parameters and static tables         *
 *************************************************/
@@ -2205,13 +2204,14 @@ for (;;)
         int condcode;
         
         /* Because of the way auto-callout works during compile, a callout item
-        is inserted between OP_COND and an assertion condition. */
+        is inserted between OP_COND and an assertion condition. This does not 
+        happen for the other conditions. */
 
         if (code[LINK_SIZE+1] == OP_CALLOUT)
           { 
+          rrc = 0; 
           if (pcre_callout != NULL)
             {
-            int rrc;
             pcre_callout_block cb;
             cb.version          = 1;   /* Version 1 of the callout block */
             cb.callout_number   = code[LINK_SIZE+2];
@@ -2226,11 +2226,11 @@ for (;;)
             cb.capture_last     = -1;
             cb.callout_data     = md->callout_data;
             if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
-            if (rrc == 0) { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); }
             }
-          code += _pcre_OP_lengths[OP_CALLOUT];
+          if (rrc > 0) break;                      /* Fail this thread */
+          code += _pcre_OP_lengths[OP_CALLOUT];    /* Skip callout data */
           } 
- 
+
         condcode = code[LINK_SIZE+1];
         
         /* Back reference conditions are not supported */
@@ -2240,9 +2240,7 @@ for (;;)
         /* The DEFINE condition is always false */
 
         if (condcode == OP_DEF)
-          {
-          ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0);
-          }
+          { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
 
         /* The only supported version of OP_RREF is for the value RREF_ANY,
         which means "test if in any recursion". We can't test for specifically
@@ -2252,8 +2250,9 @@ for (;;)
           {
           int value = GET2(code, LINK_SIZE+2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;
-          if (recursing > 0) { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
-            else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
+          if (recursing > 0) 
+            { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
+          else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
 
         /* Otherwise, the condition is an assertion */
@@ -2281,9 +2280,7 @@ for (;;)
 
           if ((rc >= 0) ==
                 (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
-            { 
-            ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); 
-            }
+            { ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); }
           else
             { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
@@ -2456,7 +2453,7 @@ for (;;)
         if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
         } 
       if (rrc == 0) 
-        { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); }
+        { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); } 
       break;
 
 

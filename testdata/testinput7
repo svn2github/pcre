@@ -4419,4 +4419,8 @@
   ab
   \C-ab    
 
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+    \C-"ab"
+
 / End of testinput7 /

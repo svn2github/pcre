@@ -43,7 +43,7 @@ Version 7.9 xx-xxx-09
     in the first alternative must satisfy the test.
 
 9.  If auto-callout was enabled in a pattern with a conditional group, PCRE
-    could crash during matching.
+    could crash during matching, both with pcre_exec() and pcre_dfa_exec().
 
 10. The PCRE_DOLLAR_ENDONLY option was not working when pcre_dfa_exec() was
     used for matching.
