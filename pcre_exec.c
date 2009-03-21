@@ -362,6 +362,7 @@ typedef struct heapframe {
   uschar Xocchars[8];
 #endif
 
+  int Xcodelink;
   int Xctype;
   unsigned int Xfc;
   int Xfi;
@@ -441,6 +442,7 @@ register unsigned int c;   /* Character values not kept over RMATCH() calls */
 register BOOL utf8;        /* Local copy of UTF-8 flag for speed */
 
 BOOL minimize, possessive; /* Quantifier options */
+int condcode;
 
 /* When recursion is not being used, all "local" variables that have to be
 preserved over calls to RMATCH() are part of a "frame" which is obtained from
@@ -483,6 +485,7 @@ HEAP_RECURSE:
 #define charptr            frame->Xcharptr
 #endif
 #define callpat            frame->Xcallpat
+#define codelink           frame->Xcodelink
 #define data               frame->Xdata
 #define next               frame->Xnext
 #define pp                 frame->Xpp
@@ -564,7 +567,6 @@ uschar occhars[8];
 #endif
 
 int codelink;
-int condcode;
 int ctype;
 int length;
 int max;
