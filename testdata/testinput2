@@ -2749,4 +2749,10 @@ a random value. /Ix
   abcxypqr  
   abcxypqr\Y  
 
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+
+/^"((?(?=[a])[^"])|b)*"$/
+    "ab"
+
 / End of testinput2 /

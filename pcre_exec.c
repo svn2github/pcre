@@ -561,6 +561,8 @@ int oclength;
 uschar occhars[8];
 #endif
 
+int codelink;
+int condcode;
 int ctype;
 int length;
 int max;
@@ -787,6 +789,8 @@ for (;;)
 
     case OP_COND:
     case OP_SCOND:
+    codelink= GET(ecode, 1);
+      
     /* Because of the way auto-callout works during compile, a callout item is
     inserted between OP_COND and an assertion condition. */
 
@@ -813,9 +817,11 @@ for (;;)
       ecode += _pcre_OP_lengths[OP_CALLOUT];
       }
 
+    condcode = ecode[LINK_SIZE+1];
+     
     /* Now see what the actual condition is */
 
-    if (ecode[LINK_SIZE+1] == OP_RREF)         /* Recursion test */
+    if (condcode == OP_RREF)         /* Recursion test */
       {
       offset = GET2(ecode, LINK_SIZE + 2);     /* Recursion group number*/
       condition = md->recursive != NULL &&
@@ -823,14 +829,14 @@ for (;;)
       ecode += condition? 3 : GET(ecode, 1);
       }
 
-    else if (ecode[LINK_SIZE+1] == OP_CREF)    /* Group used test */
+    else if (condcode == OP_CREF)    /* Group used test */
       {
       offset = GET2(ecode, LINK_SIZE+2) << 1;  /* Doubled ref number */
       condition = offset < offset_top && md->offset_vector[offset] >= 0;
       ecode += condition? 3 : GET(ecode, 1);
       }
 
-    else if (ecode[LINK_SIZE+1] == OP_DEF)     /* DEFINE - always false */
+    else if (condcode == OP_DEF)     /* DEFINE - always false */
       {
       condition = FALSE;
       ecode += GET(ecode, 1);
@@ -857,7 +863,7 @@ for (;;)
       else
         {
         condition = FALSE;
-        ecode += GET(ecode, 1);
+        ecode += codelink;
         }
       }
 
