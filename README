@@ -84,6 +84,10 @@ documentation is supplied in two other forms:
   2. A set of files containing all the documentation in HTML form, hyperlinked
      in various ways, and rooted in a file called index.html, is distributed in
      doc/html and installed in <prefix>/share/doc/pcre/html.
+     
+Users of PCRE have contributed files containing the documentation for various
+releases in CHM format. These can be found in the Contrib directory of the FTP
+site (see next section).
 
 
 Contributions by users of PCRE
@@ -760,4 +764,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 17 March 2009
+Last updated: 21 March 2009
