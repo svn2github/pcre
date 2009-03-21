@@ -334,7 +334,9 @@ typedef struct heapframe {
   /* Function local variables */
 
   const uschar *Xcallpat;
+#ifdef SUPPORT_UTF8   
   const uschar *Xcharptr;
+#endif   
   const uschar *Xdata;
   const uschar *Xnext;
   const uschar *Xpp;
