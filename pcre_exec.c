@@ -1109,6 +1109,8 @@ for (;;)
         else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
+          if (new_recursive.offset_save != stacksave)
+            (pcre_free)(new_recursive.offset_save);
           RRETURN(rrc);
           }
 

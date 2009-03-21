@@ -79,6 +79,13 @@ Version 7.9 xx-xxx-09
     
 20. If a pattern that was compiled with callouts was matched using pcre_dfa_
     exec(), but without supplying a callout function, matching went wrong. 
+    
+21. If PCRE_ERROR_MATCHLIMIT occurred during a recursion, there was a memory 
+    leak if the size of the offset vector was greater than 30. When the vector 
+    is smaller, the saved offsets during recursion go onto a local stack 
+    vector, but for larger vectors malloc() is used. It was failing to free 
+    when the recursion yielded PCRE_ERROR_MATCH_LIMIT (or any other "abnormal" 
+    error, in fact).
 
 
 Version 7.8 05-Sep-08
