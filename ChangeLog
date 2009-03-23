@@ -42,7 +42,7 @@ Version 7.9 xx-xxx-09
     correctly handled. The rule now is that both the assertion and what follows
     in the first alternative must satisfy the test.
 
-9.  If auto-callout was enabled in a pattern with a conditional group whose 
+9.  If auto-callout was enabled in a pattern with a conditional group whose
     condition was an assertion, PCRE could crash during matching, both with
     pcre_exec() and pcre_dfa_exec().
 
@@ -64,32 +64,37 @@ Version 7.9 xx-xxx-09
 17. Implemented support for UTF-8 encoding in EBCDIC environments, a patch
     from Martin Jerabek that uses macro names for all relevant character and
     string constants.
-    
+
 18. Added to pcre_internal.h two configuration checks: (a) If both EBCDIC and
     SUPPORT_UTF8 are set, give an error; (b) If SUPPORT_UCP is set without
-    SUPPORT_UTF8, define SUPPORT_UTF8. The "configure" script handles both of 
-    these, but not everybody uses configure. 
-    
-19. A conditional group that had only one branch was not being correctly 
-    recognized as an item that could match an empty string. This meant that an 
-    enclosing group might also not be so recognized, causing infinite looping 
-    (and probably a segfault) for patterns such as ^"((?(?=[a])[^"])|b)*"$ 
-    with the subject "ab", where knowledge that the repeated group can match 
+    SUPPORT_UTF8, define SUPPORT_UTF8. The "configure" script handles both of
+    these, but not everybody uses configure.
+
+19. A conditional group that had only one branch was not being correctly
+    recognized as an item that could match an empty string. This meant that an
+    enclosing group might also not be so recognized, causing infinite looping
+    (and probably a segfault) for patterns such as ^"((?(?=[a])[^"])|b)*"$
+    with the subject "ab", where knowledge that the repeated group can match
     nothing is needed in order to break the loop.
-    
+
 20. If a pattern that was compiled with callouts was matched using pcre_dfa_
-    exec(), but without supplying a callout function, matching went wrong. 
-    
-21. If PCRE_ERROR_MATCHLIMIT occurred during a recursion, there was a memory 
-    leak if the size of the offset vector was greater than 30. When the vector 
-    is smaller, the saved offsets during recursion go onto a local stack 
-    vector, but for larger vectors malloc() is used. It was failing to free 
-    when the recursion yielded PCRE_ERROR_MATCH_LIMIT (or any other "abnormal" 
+    exec(), but without supplying a callout function, matching went wrong.
+
+21. If PCRE_ERROR_MATCHLIMIT occurred during a recursion, there was a memory
+    leak if the size of the offset vector was greater than 30. When the vector
+    is smaller, the saved offsets during recursion go onto a local stack
+    vector, but for larger vectors malloc() is used. It was failing to free
+    when the recursion yielded PCRE_ERROR_MATCH_LIMIT (or any other "abnormal"
     error, in fact).
-    
+
 22. There was a missing #ifdef SUPPORT_UTF8 round one of the variables in the
-    heapframe that is used only when UTF-8 support is enabled. This caused no 
-    problem, but was untidy. 
+    heapframe that is used only when UTF-8 support is enabled. This caused no
+    problem, but was untidy.
+
+23. Steven Van Ingelgem's patch to CMakeLists.txt to change the name
+    CMAKE_BINARY_DIR to PROJECT_BINARY_DIR so that it works when PCRE is
+    included within another project.
+
 
 
 Version 7.8 05-Sep-08

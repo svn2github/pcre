@@ -15,11 +15,11 @@
 #                PCRE_SUPPORT_LIBBZ2.
 # 2008-01-20 Brought up to date to include several new features by Christian
 #            Ehrlicher.
-# 2008-01-22 Sheri added options for backward compatibility of library names when
-#            building with minGW:
+# 2008-01-22 Sheri added options for backward compatibility of library names
+#            when building with minGW:
 #            if "ON", NON_STANDARD_LIB_PREFIX causes shared libraries to
-#            be built without "lib" as prefix. (The libraries will be named pcre.dll,
-#            pcreposix.dll and pcrecpp.dll).
+#            be built without "lib" as prefix. (The libraries will be named
+#            pcre.dll, pcreposix.dll and pcrecpp.dll).
 #            if "ON", NON_STANDARD_LIB_SUFFIX causes shared libraries to
 #            be built with suffix of "-0.dll". (The libraries will be named
 #            libpcre-0.dll, libpcreposix-0.dll and libpcrecpp-0.dll - same names
@@ -27,12 +27,15 @@
 # 2008-01-23 PH removed the automatic build of pcredemo.
 # 2008-04-22 PH modified READLINE support so it finds NCURSES when needed.
 # 2008-07-03 PH updated for revised UCP property support (change of files)
+# 2009-03-23 PH applied  Steven Van Ingelgem's patch to change the name
+#            CMAKE_BINARY_DIR to PROJECT_BINARY_DIR so that it works when PCRE
+#            is included within another project.
 
 PROJECT(PCRE C CXX)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake) # for FindReadline.cmake
+SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake) # for FindReadline.cmake
 
 # external packages
 FIND_PACKAGE( BZip2 )
@@ -232,24 +235,23 @@ IF(PCRE_NO_RECURSE)
 ENDIF(PCRE_NO_RECURSE)
 
 # Output files
-
 CONFIGURE_FILE(config-cmake.h.in
-               ${CMAKE_BINARY_DIR}/config.h
+               ${PROJECT_BINARY_DIR}/config.h
                @ONLY)
 
 CONFIGURE_FILE(pcre.h.generic
-               ${CMAKE_BINARY_DIR}/pcre.h
+               ${PROJECT_BINARY_DIR}/pcre.h
                COPYONLY)
 
 # What about pcre-config and libpcre.pc?
 
 IF(PCRE_BUILD_PCRECPP)
         CONFIGURE_FILE(pcre_stringpiece.h.in
-                       ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
+                       ${PROJECT_BINARY_DIR}/pcre_stringpiece.h
                        @ONLY)
 
         CONFIGURE_FILE(pcrecpparg.h.in
-                       ${CMAKE_BINARY_DIR}/pcrecpparg.h
+                       ${PROJECT_BINARY_DIR}/pcrecpparg.h
                        @ONLY)
 ENDIF(PCRE_BUILD_PCRECPP)
 
@@ -265,21 +267,21 @@ IF(PCRE_REBUILD_CHARTABLES)
     COMMENT "Generating character tables (pcre_chartables.c) for current locale"
     DEPENDS dftables
     COMMAND ${DFTABLES_EXE}
-    ARGS        ${CMAKE_BINARY_DIR}/pcre_chartables.c
-    OUTPUT      ${CMAKE_BINARY_DIR}/pcre_chartables.c
+    ARGS        ${PROJECT_BINARY_DIR}/pcre_chartables.c
+    OUTPUT      ${PROJECT_BINARY_DIR}/pcre_chartables.c
   )
 ELSE(PCRE_REBUILD_CHARTABLES)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/pcre_chartables.c.dist
-                    ${CMAKE_BINARY_DIR}/pcre_chartables.c
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/pcre_chartables.c.dist
+                    ${PROJECT_BINARY_DIR}/pcre_chartables.c
                     COPYONLY)
 ENDIF(PCRE_REBUILD_CHARTABLES)
 
 # Source code
 
-SET(PCRE_HEADERS ${CMAKE_BINARY_DIR}/pcre.h)
+SET(PCRE_HEADERS ${PROJECT_BINARY_DIR}/pcre.h)
 
 SET(PCRE_SOURCES
-  ${CMAKE_BINARY_DIR}/pcre_chartables.c
+  ${PROJECT_BINARY_DIR}/pcre_chartables.c
   pcre_compile.c
   pcre_config.c
   pcre_dfa_exec.c
@@ -308,8 +310,8 @@ SET(PCREPOSIX_SOURCES pcreposix.c)
 SET(PCRECPP_HEADERS
   pcrecpp.h
   pcre_scanner.h
-  ${CMAKE_BINARY_DIR}/pcrecpparg.h
-  ${CMAKE_BINARY_DIR}/pcre_stringpiece.h
+  ${PROJECT_BINARY_DIR}/pcrecpparg.h
+  ${PROJECT_BINARY_DIR}/pcre_stringpiece.h
 )
 
 SET(PCRECPP_SOURCES
@@ -335,7 +337,7 @@ ENDIF(WIN32)
 
 # Libraries
 # pcre
-ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES} ${CMAKE_BINARY_DIR}/config.h)
+ADD_LIBRARY(pcre ${PCRE_HEADERS} ${PCRE_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
 ADD_LIBRARY(pcreposix ${PCREPOSIX_HEADERS} ${PCREPOSIX_SOURCES})
 TARGET_LINK_LIBRARIES(pcreposix pcre)
 IF(MINGW AND NOT PCRE_STATIC)
@@ -418,19 +420,19 @@ GET_TARGET_PROPERTY(PCRETEST_EXE pcretest DEBUG_LOCATION)
 # Write out a CTest configuration file that sets some needed environment
 # variables for the test scripts.
 #
-FILE(WRITE ${CMAKE_BINARY_DIR}/CTestCustom.ctest
+FILE(WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
 "# This is a generated file.
-SET(ENV{srcdir} ${CMAKE_SOURCE_DIR})
+SET(ENV{srcdir} ${PROJECT_SOURCE_DIR})
 SET(ENV{pcregrep} ${PCREGREP_EXE})
 SET(ENV{pcretest} ${PCRETEST_EXE})
 ")
 
 IF(UNIX)
-        ADD_TEST(pcre_test      ${CMAKE_SOURCE_DIR}/RunTest)
-        ADD_TEST(pcre_grep_test ${CMAKE_SOURCE_DIR}/RunGrepTest)
+        ADD_TEST(pcre_test      ${PROJECT_SOURCE_DIR}/RunTest)
+        ADD_TEST(pcre_grep_test ${PROJECT_SOURCE_DIR}/RunGrepTest)
 ENDIF(UNIX)
 IF(WIN32)
-        ADD_TEST(pcre_test cmd /C ${CMAKE_SOURCE_DIR}/RunTest.bat)
+        ADD_TEST(pcre_test cmd /C ${PROJECT_SOURCE_DIR}/RunTest.bat)
 ENDIF(WIN32)
 
 GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
@@ -460,9 +462,9 @@ INSTALL(TARGETS pcre pcreposix pcregrep pcretest
 
 INSTALL(FILES ${PCRE_HEADERS} ${PCREPOSIX_HEADERS} DESTINATION include)
 
-FILE(GLOB html ${CMAKE_SOURCE_DIR}/doc/html/*.html)
-FILE(GLOB man1 ${CMAKE_SOURCE_DIR}/doc/*.1)
-FILE(GLOB man3 ${CMAKE_SOURCE_DIR}/doc/*.3)
+FILE(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html)
+FILE(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
+FILE(GLOB man3 ${PROJECT_SOURCE_DIR}/doc/*.3)
 
 IF(PCRE_BUILD_PCRECPP)
         INSTALL(TARGETS pcrecpp
