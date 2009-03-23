@@ -2733,8 +2733,6 @@
     abc
     abq
 
-/ab{1,}bc/
-
 /ab+bc/
     abbbbc
 

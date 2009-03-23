@@ -4573,8 +4573,6 @@ No match
     abq
 No match
 
-/ab{1,}bc/
-
 /ab+bc/
     abbbbc
  0: abbbbc
