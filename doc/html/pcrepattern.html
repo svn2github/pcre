@@ -368,7 +368,8 @@ In UTF-8 mode, characters with values greater than 128 never match \d, \s, or
 \w, and always match \D, \S, and \W. This is true even when Unicode
 character property support is available. These sequences retain their original
 meanings from before UTF-8 support was available, mainly for efficiency
-reasons.
+reasons. Note that this also affects \b, because it is defined in terms of \w
+and \W.
 </P>
 <P>
 The sequences \h, \H, \v, and \V are Perl 5.10 features. In contrast to the
@@ -2243,7 +2244,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 March 2009
+Last updated: 18 March 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

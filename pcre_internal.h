@@ -58,7 +58,7 @@ script prevents both being selected, but not everybody uses "configure". */
 #error The use of both EBCDIC and SUPPORT_UTF8 is not supported.
 #endif
 
-/* If SUPPORT_UCP is defined, SUPPORT_UTF8 must also be defined. The 
+/* If SUPPORT_UCP is defined, SUPPORT_UTF8 must also be defined. The
 "configure" script ensures this, but not everybody uses "configure". */
 
 #if defined SUPPORT_UCP && !defined SUPPORT_UTF8

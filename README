@@ -84,7 +84,7 @@ documentation is supplied in two other forms:
   2. A set of files containing all the documentation in HTML form, hyperlinked
      in various ways, and rooted in a file called index.html, is distributed in
      doc/html and installed in <prefix>/share/doc/pcre/html.
-     
+
 Users of PCRE have contributed files containing the documentation for various
 releases in CHM format. These can be found in the Contrib directory of the FTP
 site (see next section).

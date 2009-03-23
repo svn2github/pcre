@@ -334,9 +334,9 @@ typedef struct heapframe {
   /* Function local variables */
 
   const uschar *Xcallpat;
-#ifdef SUPPORT_UTF8   
+#ifdef SUPPORT_UTF8
   const uschar *Xcharptr;
-#endif   
+#endif
   const uschar *Xdata;
   const uschar *Xnext;
   const uschar *Xpp;
@@ -641,7 +641,7 @@ for (;;)
   {
   minimize = possessive = FALSE;
   op = *ecode;
-  
+
   /* For partial matching, remember if we ever hit the end of the subject after
   matching at least one subject character. */
 
@@ -794,7 +794,7 @@ for (;;)
     case OP_COND:
     case OP_SCOND:
     codelink= GET(ecode, 1);
-      
+
     /* Because of the way auto-callout works during compile, a callout item is
     inserted between OP_COND and an assertion condition. */
 
@@ -822,7 +822,7 @@ for (;;)
       }
 
     condcode = ecode[LINK_SIZE+1];
-     
+
     /* Now see what the actual condition is */
 
     if (condcode == OP_RREF)         /* Recursion test */

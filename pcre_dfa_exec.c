@@ -2200,16 +2200,16 @@ for (;;)
         {
         int local_offsets[1000];
         int local_workspace[1000];
-        int codelink = GET(code, 1); 
+        int codelink = GET(code, 1);
         int condcode;
-        
+
         /* Because of the way auto-callout works during compile, a callout item
-        is inserted between OP_COND and an assertion condition. This does not 
+        is inserted between OP_COND and an assertion condition. This does not
         happen for the other conditions. */
 
         if (code[LINK_SIZE+1] == OP_CALLOUT)
-          { 
-          rrc = 0; 
+          {
+          rrc = 0;
           if (pcre_callout != NULL)
             {
             pcre_callout_block cb;
@@ -2229,10 +2229,10 @@ for (;;)
             }
           if (rrc > 0) break;                      /* Fail this thread */
           code += _pcre_OP_lengths[OP_CALLOUT];    /* Skip callout data */
-          } 
+          }
 
         condcode = code[LINK_SIZE+1];
-        
+
         /* Back reference conditions are not supported */
 
         if (condcode == OP_CREF) return PCRE_ERROR_DFA_UCOND;
@@ -2250,7 +2250,7 @@ for (;;)
           {
           int value = GET2(code, LINK_SIZE+2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;
-          if (recursing > 0) 
+          if (recursing > 0)
             { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
           else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
@@ -2434,7 +2434,7 @@ for (;;)
       /* Handle callouts */
 
       case OP_CALLOUT:
-      rrc = 0; 
+      rrc = 0;
       if (pcre_callout != NULL)
         {
         pcre_callout_block cb;
@@ -2451,9 +2451,9 @@ for (;;)
         cb.capture_last     = -1;
         cb.callout_data     = md->callout_data;
         if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
-        } 
-      if (rrc == 0) 
-        { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); } 
+        }
+      if (rrc == 0)
+        { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); }
       break;
 
 

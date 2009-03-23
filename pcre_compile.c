@@ -1663,15 +1663,15 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     {
     BOOL empty_branch;
     if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */
-    
-    /* If a conditional group has only one branch, there is a second, implied, 
+
+    /* If a conditional group has only one branch, there is a second, implied,
     empty branch, so just skip over the conditional, because it could be empty.
     Otherwise, scan the individual branches of the group. */
-    
+
     if (c == OP_COND && code[GET(code, 1)] != OP_ALT)
       code += GET(code, 1);
     else
-      {       
+      {
       empty_branch = FALSE;
       do
         {
@@ -1682,7 +1682,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
       while (*code == OP_ALT);
       if (!empty_branch) return FALSE;   /* All branches are non-empty */
       }
-        
+
     c = *code;
     continue;
     }

@@ -23,7 +23,7 @@ I (Philip Hazel) have no experience of Windows or VMS sytems and how their
 libraries work. The items in the PCRE distribution and Makefile that relate to
 anything other than Unix-like systems are untested by me.
 
-There are some other comments and files (including some documentation in CHM 
+There are some other comments and files (including some documentation in CHM
 format) in the Contrib directory on the FTP site:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
