@@ -9786,4 +9786,58 @@ No match
  0: "ab"
  1: 
 
+/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+ 5: Y
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)Y/
+Failed: reference to non-existent subpattern at offset 5
+
+/^X(?&N)(a)(?|(b)|(q))(c)(d)(?<N>Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+ 5: Y
+ 
+/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
+/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
+/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
 / End of testinput2 /

@@ -2755,4 +2755,22 @@ a random value. /Ix
 /^"((?(?=[a])[^"])|b)*"$/
     "ab"
 
+/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)Y/
+    XYabcdY
+
+/^X(?&N)(a)(?|(b)|(q))(c)(d)(?<N>Y)/
+    XYabcdY
+ 
+/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
+    XYabcdY
+
 / End of testinput2 /

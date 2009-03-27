@@ -1009,46 +1009,115 @@ return p;
 
 
 /*************************************************
-*       Find forward referenced subpattern       *
+*  Subroutine for finding forward reference      *
 *************************************************/
 
-/* This function scans along a pattern's text looking for capturing
+/* This recursive function is called only from find_parens() below. The
+top-level call starts at the beginning of the pattern. All other calls must
+start at a parenthesis. It scans along a pattern's text looking for capturing
 subpatterns, and counting them. If it finds a named pattern that matches the
 name it is given, it returns its number. Alternatively, if the name is NULL, it
-returns when it reaches a given numbered subpattern. This is used for forward
-references to subpatterns. We know that if (?P< is encountered, the name will
-be terminated by '>' because that is checked in the first pass.
+returns when it reaches a given numbered subpattern. We know that if (?P< is
+encountered, the name will be terminated by '>' because that is checked in the
+first pass. Recursion is used to keep track of subpatterns that reset the 
+capturing group numbers - the (?| feature.
 
 Arguments:
-  ptr          current position in the pattern
+  ptrptr       address of the current character pointer (updated)
   cd           compile background data
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
+  count        pointer to the current capturing subpattern number (updated) 
 
 Returns:       the number of the named subpattern, or -1 if not found
 */
 
 static int
-find_parens(const uschar *ptr, compile_data *cd, const uschar *name, int lorn,
-  BOOL xmode)
+find_parens_sub(uschar **ptrptr, compile_data *cd, const uschar *name, int lorn,
+  BOOL xmode, int *count)
 {
-const uschar *thisname;
-int count = cd->bracount;
+uschar *ptr = *ptrptr;
+int start_count = *count;
+int hwm_count = start_count;
+BOOL dup_parens = FALSE;
+
+/* If the first character is a parenthesis, check on the type of group we are 
+dealing with. The very first call may not start with a parenthesis. */
+
+if (ptr[0] == CHAR_LEFT_PARENTHESIS)
+  {
+  if (ptr[1] == CHAR_QUESTION_MARK &&
+      ptr[2] == CHAR_VERTICAL_LINE) 
+    {
+    ptr += 3;
+    dup_parens = TRUE; 
+    } 
+
+  /* Handle a normal, unnamed capturing parenthesis */
+ 
+  else if (ptr[1] != CHAR_QUESTION_MARK && ptr[1] != CHAR_ASTERISK)
+    {
+    *count += 1;
+    if (name == NULL && *count == lorn) return *count;
+    ptr++; 
+    }
+
+  /* Handle a condition. If it is an assertion, just carry on so that it
+  is processed as normal. If not, skip to the closing parenthesis of the
+  condition (there can't be any nested parens. */ 
+   
+  else if (ptr[2] == CHAR_LEFT_PARENTHESIS)
+    {
+    ptr += 2; 
+    if (ptr[1] != CHAR_QUESTION_MARK)
+      {
+      while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+      if (*ptr != 0) ptr++; 
+      }
+    }  
+   
+  /* We have either (? or (* and not a condition */
+
+  else
+    { 
+    ptr += 2;
+    if (*ptr == CHAR_P) ptr++;                      /* Allow optional P */
+
+    /* We have to disambiguate (?<! and (?<= from (?<name> for named groups */
+    
+    if ((*ptr == CHAR_LESS_THAN_SIGN && ptr[1] != CHAR_EXCLAMATION_MARK &&
+        ptr[1] != CHAR_EQUALS_SIGN) || *ptr == CHAR_APOSTROPHE)
+      {
+      int term;
+      const uschar *thisname;
+      *count += 1;
+      if (name == NULL && *count == lorn) return *count;
+      term = *ptr++;
+      if (term == CHAR_LESS_THAN_SIGN) term = CHAR_GREATER_THAN_SIGN;
+      thisname = ptr;
+      while (*ptr != term) ptr++;
+      if (name != NULL && lorn == ptr - thisname &&
+          strncmp((const char *)name, (const char *)thisname, lorn) == 0)
+        return *count;
+      }   
+    }
+  }      
+
+/* Past any initial parenthesis handling, scan for parentheses or vertical 
+bars. */
 
 for (; *ptr != 0; ptr++)
   {
-  int term;
-
   /* Skip over backslashed characters and also entire \Q...\E */
 
   if (*ptr == CHAR_BACKSLASH)
     {
-    if (*(++ptr) == 0) return -1;
+    if (*(++ptr) == 0) goto FAIL_EXIT;
     if (*ptr == CHAR_Q) for (;;)
       {
       while (*(++ptr) != 0 && *ptr != CHAR_BACKSLASH) {};
-      if (*ptr == 0) return -1;
+      if (*ptr == 0) goto FAIL_EXIT;
       if (*(++ptr) == CHAR_E) break;
       }
     continue;
@@ -1093,11 +1162,11 @@ for (; *ptr != 0; ptr++)
       if (*ptr == 0) return -1;
       if (*ptr == CHAR_BACKSLASH)
         {
-        if (*(++ptr) == 0) return -1;
+        if (*(++ptr) == 0) goto FAIL_EXIT;
         if (*ptr == CHAR_Q) for (;;)
           {
           while (*(++ptr) != 0 && *ptr != CHAR_BACKSLASH) {};
-          if (*ptr == 0) return -1;
+          if (*ptr == 0) goto FAIL_EXIT;
           if (*(++ptr) == CHAR_E) break;
           }
         continue;
@@ -1111,43 +1180,86 @@ for (; *ptr != 0; ptr++)
   if (xmode && *ptr == CHAR_NUMBER_SIGN)
     {
     while (*(++ptr) != 0 && *ptr != CHAR_NL) {};
-    if (*ptr == 0) return -1;
+    if (*ptr == 0) goto FAIL_EXIT;
     continue;
     }
 
-  /* An opening parens must now be a real metacharacter */
-
-  if (*ptr != CHAR_LEFT_PARENTHESIS) continue;
-  if (ptr[1] != CHAR_QUESTION_MARK && ptr[1] != CHAR_ASTERISK)
+  /* Check for the special metacharacters */
+  
+  if (*ptr == CHAR_LEFT_PARENTHESIS)
     {
-    count++;
-    if (name == NULL && count == lorn) return count;
-    continue;
+    int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, count);
+    if (rc > 0) return rc;
+    if (*ptr == 0) goto FAIL_EXIT;
     }
-
-  ptr += 2;
-  if (*ptr == CHAR_P) ptr++;                      /* Allow optional P */
-
-  /* We have to disambiguate (?<! and (?<= from (?<name> */
-
-  if ((*ptr != CHAR_LESS_THAN_SIGN || ptr[1] == CHAR_EXCLAMATION_MARK ||
-      ptr[1] == CHAR_EQUALS_SIGN) && *ptr != CHAR_APOSTROPHE)
-    continue;
-
-  count++;
-
-  if (name == NULL && count == lorn) return count;
-  term = *ptr++;
-  if (term == CHAR_LESS_THAN_SIGN) term = CHAR_GREATER_THAN_SIGN;
-  thisname = ptr;
-  while (*ptr != term) ptr++;
-  if (name != NULL && lorn == ptr - thisname &&
-      strncmp((const char *)name, (const char *)thisname, lorn) == 0)
-    return count;
+    
+  else if (*ptr == CHAR_RIGHT_PARENTHESIS)
+    {
+    if (dup_parens && *count < hwm_count) *count = hwm_count;
+    *ptrptr = ptr;
+    return -1;
+    }
+    
+  else if (*ptr == CHAR_VERTICAL_LINE && dup_parens) 
+    {
+    if (*count > hwm_count) hwm_count = *count;
+    *count = start_count;
+    } 
   }
 
+FAIL_EXIT:
+*ptrptr = ptr;
 return -1;
 }
+
+
+
+
+/*************************************************
+*       Find forward referenced subpattern       *
+*************************************************/
+
+/* This function scans along a pattern's text looking for capturing
+subpatterns, and counting them. If it finds a named pattern that matches the
+name it is given, it returns its number. Alternatively, if the name is NULL, it
+returns when it reaches a given numbered subpattern. This is used for forward
+references to subpatterns. We used to be able to start this scan from the
+current compiling point, using the current count value from cd->bracount, and
+do it all in a single loop, but the addition of the possibility of duplicate
+subpattern numbers means that we have to scan from the very start, in order to
+take account of such duplicates, and to use a recursive function to keep track
+of the different types of group.
+
+Arguments:
+  cd           compile background data
+  name         name to seek, or NULL if seeking a numbered subpattern
+  lorn         name length, or subpattern number if name is NULL
+  xmode        TRUE if we are in /x mode
+
+Returns:       the number of the found subpattern, or -1 if not found
+*/
+
+static int
+find_parens(compile_data *cd, const uschar *name, int lorn, BOOL xmode)
+{
+uschar *ptr = (uschar *)cd->start_pattern;
+int count = 0;
+int rc;
+
+/* If the pattern does not start with an opening parenthesis, the first call
+to find_parens_sub() will scan right to the end (if necessary). However, if it
+does start with a parenthesis, find_parens_sub() will return when it hits the
+matching closing parens. That is why we have to have a loop. */
+
+for (;;)  
+  {  
+  rc = find_parens_sub(&ptr, cd, name, lorn, xmode, &count);
+  if (rc > 0 || *ptr++ == 0) break;   
+  } 
+   
+return rc;
+}
+
 
 
 
@@ -4489,7 +4601,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
         /* Search the pattern for a forward reference */
 
-        else if ((i = find_parens(ptr, cd, name, namelen,
+        else if ((i = find_parens(cd, name, namelen,
                         (options & PCRE_EXTENDED) != 0)) > 0)
           {
           PUT2(code, 2+LINK_SIZE, i);
@@ -4788,7 +4900,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             recno = GET2(slot, 0);
             }
           else if ((recno =                /* Forward back reference */
-                    find_parens(ptr, cd, name, namelen,
+                    find_parens(cd, name, namelen,
                       (options & PCRE_EXTENDED) != 0)) <= 0)
             {
             *errorcodeptr = ERR15;
@@ -4898,7 +5010,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
             if (called == NULL)
               {
-              if (find_parens(ptr, cd, NULL, recno,
+              if (find_parens(cd, NULL, recno,
                     (options & PCRE_EXTENDED) != 0) < 0)
                 {
                 *errorcodeptr = ERR15;

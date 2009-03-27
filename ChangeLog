@@ -103,6 +103,13 @@ Version 7.9 xx-xxx-09
      
       (b) PCRE_BUILD_PCREGREP can be see OFF not to build pcregrep, but only
           if PCRE_BUILD_TESTS is also set OFF, because the tests use pcregrep. 
+          
+25. Forward references, both numeric and by name, in patterns that made use of
+    duplicate group numbers, could behave incorrectly or give incorrect errors,
+    because when scanning forward to find the reference group, PCRE was not
+    taking into account the duplicate group numbers. A pattern such as
+    ^X(?3)(a)(?|(b)|(q))(Y) is an example.
+ 
 
 
 Version 7.8 05-Sep-08
