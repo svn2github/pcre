@@ -17,7 +17,7 @@ Version 7.9 xx-xxx-09
     but BOOL is not.
 
 3.  The pcre_config() function was treating the PCRE_MATCH_LIMIT and
-    PCRE_MATCH_LIMIT_RETURSION values as ints, when they should be long ints.
+    PCRE_MATCH_LIMIT_RECURSION values as ints, when they should be long ints.
 
 4.  The pcregrep documentation said spaces were inserted as well as colons (or
     hyphens) following file names and line numbers when outputting matching
@@ -109,6 +109,9 @@ Version 7.9 xx-xxx-09
     because when scanning forward to find the reference group, PCRE was not
     taking into account the duplicate group numbers. A pattern such as
     ^X(?3)(a)(?|(b)|(q))(Y) is an example.
+    
+26. Changed a few more instances of "const unsigned char *" to USPTR, making
+    the feature of a custom pointer more persuasive (as requested by a user). 
  
 
 

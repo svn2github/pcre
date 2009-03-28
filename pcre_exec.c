@@ -322,9 +322,9 @@ typedef struct heapframe {
 
   /* Function arguments that may change */
 
-  const uschar *Xeptr;
+  USPTR Xeptr;
   const uschar *Xecode;
-  const uschar *Xmstart;
+  USPTR Xmstart;
   int Xoffset_top;
   long int Xims;
   eptrblock *Xeptrb;
@@ -333,15 +333,15 @@ typedef struct heapframe {
 
   /* Function local variables */
 
-  const uschar *Xcallpat;
+  USPTR Xcallpat;
 #ifdef SUPPORT_UTF8
-  const uschar *Xcharptr;
+  USPTR Xcharptr;
 #endif
-  const uschar *Xdata;
-  const uschar *Xnext;
-  const uschar *Xpp;
-  const uschar *Xprev;
-  const uschar *Xsaved_eptr;
+  USPTR Xdata;
+  USPTR Xnext;
+  USPTR Xpp;
+  USPTR Xprev;
+  USPTR Xsaved_eptr;
 
   recursion_info Xnew_recursive;
 
@@ -428,7 +428,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER USPTR eptr, REGISTER const uschar *ecode, const uschar *mstart,
+match(REGISTER USPTR eptr, REGISTER const uschar *ecode, USPTR mstart,
   int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
   int flags, unsigned int rdepth)
 {
@@ -1461,7 +1461,7 @@ for (;;)
         {
         if (eptr == md->start_subject) prev_is_word = FALSE; else
           {
-          const uschar *lastptr = eptr - 1;
+          USPTR lastptr = eptr - 1;
           while((*lastptr & 0xc0) == 0x80) lastptr--;
           GETCHAR(c, lastptr);
           prev_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
@@ -4619,11 +4619,11 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  if (_pcre_valid_utf8((uschar *)subject, length) >= 0)
+  if (_pcre_valid_utf8((USPTR)subject, length) >= 0)
     return PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
-    int tb = ((uschar *)subject)[start_offset];
+    int tb = ((USPTR)subject)[start_offset];
     if (tb > 127)
       {
       tb &= 0xc0;
