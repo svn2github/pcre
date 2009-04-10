@@ -71,8 +71,13 @@ input mode under Windows. */
 #define INPUT_MODE   "r"
 #define OUTPUT_MODE  "wb"
 
-#define isatty _isatty         /* This is what Windows calls them, I'm told */
+#ifndef isatty
+#define isatty _isatty         /* This is what Windows calls them, I'm told, */
+#endif                         /* though in some environments they seem to   */
+                               /* be already defined, hence the #ifndefs.    */
+#ifndef fileno
 #define fileno _fileno
+#endif
 
 #else
 #include <sys/time.h>          /* These two includes are needed */

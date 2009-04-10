@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.9 xx-xxx-09
+Version 7.9 10-Apr-09
 ---------------------
 
 1.  When building with support for bzlib/zlib (pcregrep) and/or readline
@@ -94,25 +94,29 @@ Version 7.9 xx-xxx-09
 23. Steven Van Ingelgem's patch to CMakeLists.txt to change the name
     CMAKE_BINARY_DIR to PROJECT_BINARY_DIR so that it works when PCRE is
     included within another project.
-    
+
 24. Steven Van Ingelgem's patches to add more options to the CMake support,
     slightly modified by me:
-    
-      (a) PCRE_BUILD_TESTS can be set OFF not to build the tests, including 
-          not building pcregrep. 
-     
+
+      (a) PCRE_BUILD_TESTS can be set OFF not to build the tests, including
+          not building pcregrep.
+
       (b) PCRE_BUILD_PCREGREP can be see OFF not to build pcregrep, but only
-          if PCRE_BUILD_TESTS is also set OFF, because the tests use pcregrep. 
-          
+          if PCRE_BUILD_TESTS is also set OFF, because the tests use pcregrep.
+
 25. Forward references, both numeric and by name, in patterns that made use of
     duplicate group numbers, could behave incorrectly or give incorrect errors,
     because when scanning forward to find the reference group, PCRE was not
     taking into account the duplicate group numbers. A pattern such as
     ^X(?3)(a)(?|(b)|(q))(Y) is an example.
-    
+
 26. Changed a few more instances of "const unsigned char *" to USPTR, making
-    the feature of a custom pointer more persuasive (as requested by a user). 
- 
+    the feature of a custom pointer more persuasive (as requested by a user).
+    
+27. Wrapped the definitions of fileno and isatty for Windows, which appear in
+    pcretest.c, inside #ifndefs, because it seems they are sometimes already 
+    pre-defined. 
+
 
 
 Version 7.8 05-Sep-08

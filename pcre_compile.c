@@ -1019,7 +1019,7 @@ subpatterns, and counting them. If it finds a named pattern that matches the
 name it is given, it returns its number. Alternatively, if the name is NULL, it
 returns when it reaches a given numbered subpattern. We know that if (?P< is
 encountered, the name will be terminated by '>' because that is checked in the
-first pass. Recursion is used to keep track of subpatterns that reset the 
+first pass. Recursion is used to keep track of subpatterns that reset the
 capturing group numbers - the (?| feature.
 
 Arguments:
@@ -1028,7 +1028,7 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
-  count        pointer to the current capturing subpattern number (updated) 
+  count        pointer to the current capturing subpattern number (updated)
 
 Returns:       the number of the named subpattern, or -1 if not found
 */
@@ -1042,50 +1042,50 @@ int start_count = *count;
 int hwm_count = start_count;
 BOOL dup_parens = FALSE;
 
-/* If the first character is a parenthesis, check on the type of group we are 
+/* If the first character is a parenthesis, check on the type of group we are
 dealing with. The very first call may not start with a parenthesis. */
 
 if (ptr[0] == CHAR_LEFT_PARENTHESIS)
   {
   if (ptr[1] == CHAR_QUESTION_MARK &&
-      ptr[2] == CHAR_VERTICAL_LINE) 
+      ptr[2] == CHAR_VERTICAL_LINE)
     {
     ptr += 3;
-    dup_parens = TRUE; 
-    } 
+    dup_parens = TRUE;
+    }
 
   /* Handle a normal, unnamed capturing parenthesis */
- 
+
   else if (ptr[1] != CHAR_QUESTION_MARK && ptr[1] != CHAR_ASTERISK)
     {
     *count += 1;
     if (name == NULL && *count == lorn) return *count;
-    ptr++; 
+    ptr++;
     }
 
   /* Handle a condition. If it is an assertion, just carry on so that it
   is processed as normal. If not, skip to the closing parenthesis of the
-  condition (there can't be any nested parens. */ 
-   
+  condition (there can't be any nested parens. */
+
   else if (ptr[2] == CHAR_LEFT_PARENTHESIS)
     {
-    ptr += 2; 
+    ptr += 2;
     if (ptr[1] != CHAR_QUESTION_MARK)
       {
       while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr != 0) ptr++; 
+      if (*ptr != 0) ptr++;
       }
-    }  
-   
+    }
+
   /* We have either (? or (* and not a condition */
 
   else
-    { 
+    {
     ptr += 2;
     if (*ptr == CHAR_P) ptr++;                      /* Allow optional P */
 
     /* We have to disambiguate (?<! and (?<= from (?<name> for named groups */
-    
+
     if ((*ptr == CHAR_LESS_THAN_SIGN && ptr[1] != CHAR_EXCLAMATION_MARK &&
         ptr[1] != CHAR_EQUALS_SIGN) || *ptr == CHAR_APOSTROPHE)
       {
@@ -1100,11 +1100,11 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
       if (name != NULL && lorn == ptr - thisname &&
           strncmp((const char *)name, (const char *)thisname, lorn) == 0)
         return *count;
-      }   
+      }
     }
-  }      
+  }
 
-/* Past any initial parenthesis handling, scan for parentheses or vertical 
+/* Past any initial parenthesis handling, scan for parentheses or vertical
 bars. */
 
 for (; *ptr != 0; ptr++)
@@ -1185,26 +1185,26 @@ for (; *ptr != 0; ptr++)
     }
 
   /* Check for the special metacharacters */
-  
+
   if (*ptr == CHAR_LEFT_PARENTHESIS)
     {
     int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, count);
     if (rc > 0) return rc;
     if (*ptr == 0) goto FAIL_EXIT;
     }
-    
+
   else if (*ptr == CHAR_RIGHT_PARENTHESIS)
     {
     if (dup_parens && *count < hwm_count) *count = hwm_count;
     *ptrptr = ptr;
     return -1;
     }
-    
-  else if (*ptr == CHAR_VERTICAL_LINE && dup_parens) 
+
+  else if (*ptr == CHAR_VERTICAL_LINE && dup_parens)
     {
     if (*count > hwm_count) hwm_count = *count;
     *count = start_count;
-    } 
+    }
   }
 
 FAIL_EXIT:
@@ -1251,12 +1251,12 @@ to find_parens_sub() will scan right to the end (if necessary). However, if it
 does start with a parenthesis, find_parens_sub() will return when it hits the
 matching closing parens. That is why we have to have a loop. */
 
-for (;;)  
-  {  
+for (;;)
+  {
   rc = find_parens_sub(&ptr, cd, name, lorn, xmode, &count);
-  if (rc > 0 || *ptr++ == 0) break;   
-  } 
-   
+  if (rc > 0 || *ptr++ == 0) break;
+  }
+
 return rc;
 }
 
