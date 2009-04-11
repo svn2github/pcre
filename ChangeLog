@@ -119,6 +119,8 @@ Version 7.9 11-Apr-09
     
 28. Added support for (*UTF8) at the start of a pattern. 
 
+29. Arrange for flags added by the "release type" setting in CMake to be shown
+    in the configuration summary.
 
 
 Version 7.8 05-Sep-08
