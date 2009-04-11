@@ -406,16 +406,17 @@ argument, which is an address (see below).
 .P
 The \fIoptions\fP argument contains various bit settings that affect the
 compilation. It should be zero if no options are required. The available
-options are described below. Some of them, in particular, those that are
-compatible with Perl, can also be set and unset from within the pattern (see
-the detailed description in the
+options are described below. Some of them (in particular, those that are
+compatible with Perl, but also some others) can also be set and unset from
+within the pattern (see the detailed description in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
-documentation). For these options, the contents of the \fIoptions\fP argument
-specifies their initial settings at the start of compilation and execution. The
-PCRE_ANCHORED and PCRE_NEWLINE_\fIxxx\fP options can be set at the time of
-matching as well as at compile time.
+documentation). For those options that can be different in different parts of
+the pattern, the contents of the \fIoptions\fP argument specifies their initial
+settings at the start of compilation and execution. The PCRE_ANCHORED and
+PCRE_NEWLINE_\fIxxx\fP options can be set at the time of matching as well as at
+compile time.
 .P
 If \fIerrptr\fP is NULL, \fBpcre_compile()\fP returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fP returns
@@ -1995,6 +1996,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 March 2009
+Last updated: 11 April 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 7.9 10-Apr-09
+Version 7.9 11-Apr-09
 ---------------------
 
 1.  When building with support for bzlib/zlib (pcregrep) and/or readline
@@ -116,6 +116,8 @@ Version 7.9 10-Apr-09
 27. Wrapped the definitions of fileno and isatty for Windows, which appear in
     pcretest.c, inside #ifndefs, because it seems they are sometimes already 
     pre-defined. 
+    
+28. Added support for (*UTF8) at the start of a pattern. 
 
 
 

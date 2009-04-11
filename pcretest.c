@@ -1325,6 +1325,8 @@ while (!done)
 #endif  /* !defined NOPOSIX */
 
     {
+    unsigned long int get_options;
+      
     if (timeit > 0)
       {
       register int i;
@@ -1367,10 +1369,17 @@ while (!done)
         }
       goto CONTINUE;
       }
+      
+    /* Compilation succeeded. It is now possible to set the UTF-8 option from 
+    within the regex; check for this so that we know how to process the data 
+    lines. */
+    
+    new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
+    if ((get_options & PCRE_UTF8) != 0) use_utf8 = 1;
 
-    /* Compilation succeeded; print data if required. There are now two
-    info-returning functions. The old one has a limited interface and
-    returns only limited data. Check that it agrees with the newer one. */
+    /* Print information if required. There are now two info-returning
+    functions. The old one has a limited interface and returns only limited
+    data. Check that it agrees with the newer one. */
 
     if (log_store)
       fprintf(outfile, "Memory allocation (code space): %d\n",
@@ -1454,10 +1463,12 @@ while (!done)
       fprintf(outfile, "------------------------------------------------------------------\n");
       pcre_printint(re, outfile, debug_lengths);
       }
+      
+    /* We already have the options in get_options (see above) */
 
     if (do_showinfo)
       {
-      unsigned long int get_options, all_options;
+      unsigned long int all_options;
 #if !defined NOINFOCHECK
       int old_first_char, old_options, old_count;
 #endif
@@ -1466,7 +1477,6 @@ while (!done)
       int nameentrysize, namecount;
       const uschar *nametable;
 
-      new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
       new_info(re, NULL, PCRE_INFO_SIZE, &size);
       new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
       new_info(re, NULL, PCRE_INFO_BACKREFMAX, &backrefmax);

@@ -6226,30 +6226,6 @@ if (erroroffset == NULL)
 
 *erroroffset = 0;
 
-/* Can't support UTF8 unless PCRE has been compiled to include the code. */
-
-#ifdef SUPPORT_UTF8
-utf8 = (options & PCRE_UTF8) != 0;
-if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
-     (*erroroffset = _pcre_valid_utf8((uschar *)pattern, -1)) >= 0)
-  {
-  errorcode = ERR44;
-  goto PCRE_EARLY_ERROR_RETURN2;
-  }
-#else
-if ((options & PCRE_UTF8) != 0)
-  {
-  errorcode = ERR32;
-  goto PCRE_EARLY_ERROR_RETURN;
-  }
-#endif
-
-if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
-  {
-  errorcode = ERR17;
-  goto PCRE_EARLY_ERROR_RETURN;
-  }
-
 /* Set up pointers to the individual character tables */
 
 if (tables == NULL) tables = _pcre_default_tables;
@@ -6257,6 +6233,14 @@ cd->lcc = tables + lcc_offset;
 cd->fcc = tables + fcc_offset;
 cd->cbits = tables + cbits_offset;
 cd->ctypes = tables + ctypes_offset;
+
+/* Check that all undefined public option bits are zero */
+
+if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
+  {
+  errorcode = ERR17;
+  goto PCRE_EARLY_ERROR_RETURN;
+  }
 
 /* Check for global one-time settings at the start of the pattern, and remember
 the offset for later. */
@@ -6266,6 +6250,9 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
   {
   int newnl = 0;
   int newbsr = 0;
+
+  if (strncmp((char *)(ptr+skipatstart+2), STRING_UTF8_RIGHTPAR, 5) == 0)
+    { skipatstart += 7; options |= PCRE_UTF8; continue; }
 
   if (strncmp((char *)(ptr+skipatstart+2), STRING_CR_RIGHTPAR, 3) == 0)
     { skipatstart += 5; newnl = PCRE_NEWLINE_CR; }
@@ -6289,6 +6276,24 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
     options = (options & ~(PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) | newbsr;
   else break;
   }
+
+/* Can't support UTF8 unless PCRE has been compiled to include the code. */
+
+#ifdef SUPPORT_UTF8
+utf8 = (options & PCRE_UTF8) != 0;
+if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
+     (*erroroffset = _pcre_valid_utf8((uschar *)pattern, -1)) >= 0)
+  {
+  errorcode = ERR44;
+  goto PCRE_EARLY_ERROR_RETURN2;
+  }
+#else
+if ((options & PCRE_UTF8) != 0)
+  {
+  errorcode = ERR32;
+  goto PCRE_EARLY_ERROR_RETURN;
+  }
+#endif
 
 /* Check validity of \R options. */
 
