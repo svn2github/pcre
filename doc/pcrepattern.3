@@ -23,11 +23,11 @@ description of PCRE's regular expressions is intended as reference material.
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 character strings. To use this, you must
 build PCRE to include UTF-8 support, and then call \fBpcre_compile()\fP with
-the PCRE_UTF8 option. There is also a special sequence that can be given at the 
+the PCRE_UTF8 option. There is also a special sequence that can be given at the
 start of a pattern:
 .sp
   (*UTF8)
-.sp   
+.sp
 Starting a pattern with this sequence is equivalent to setting the PCRE_UTF8
 option. This feature is not Perl-compatible. How setting UTF-8 mode affects
 pattern matching is mentioned in several places below. There is also a summary
@@ -1071,7 +1071,7 @@ section entitled
 .\" </a>
 "Newline sequences"
 .\"
-above. There is also the (*UTF8) leading sequence that can be used to set UTF-8 
+above. There is also the (*UTF8) leading sequence that can be used to set UTF-8
 mode; this is equivalent to setting the PCRE_UTF8 option.
 .
 .

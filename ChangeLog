@@ -112,12 +112,12 @@ Version 7.9 11-Apr-09
 
 26. Changed a few more instances of "const unsigned char *" to USPTR, making
     the feature of a custom pointer more persuasive (as requested by a user).
-    
+
 27. Wrapped the definitions of fileno and isatty for Windows, which appear in
-    pcretest.c, inside #ifndefs, because it seems they are sometimes already 
-    pre-defined. 
-    
-28. Added support for (*UTF8) at the start of a pattern. 
+    pcretest.c, inside #ifndefs, because it seems they are sometimes already
+    pre-defined.
+
+28. Added support for (*UTF8) at the start of a pattern.
 
 29. Arrange for flags added by the "release type" setting in CMake to be shown
     in the configuration summary.

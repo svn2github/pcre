@@ -1326,7 +1326,7 @@ while (!done)
 
     {
     unsigned long int get_options;
-      
+
     if (timeit > 0)
       {
       register int i;
@@ -1369,11 +1369,11 @@ while (!done)
         }
       goto CONTINUE;
       }
-      
-    /* Compilation succeeded. It is now possible to set the UTF-8 option from 
-    within the regex; check for this so that we know how to process the data 
+
+    /* Compilation succeeded. It is now possible to set the UTF-8 option from
+    within the regex; check for this so that we know how to process the data
     lines. */
-    
+
     new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
     if ((get_options & PCRE_UTF8) != 0) use_utf8 = 1;
 
@@ -1463,7 +1463,7 @@ while (!done)
       fprintf(outfile, "------------------------------------------------------------------\n");
       pcre_printint(re, outfile, debug_lengths);
       }
-      
+
     /* We already have the options in get_options (see above) */
 
     if (do_showinfo)
