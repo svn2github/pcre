@@ -1,6 +1,15 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.00 ??-???-??
+----------------------
+
+1.  The table for translating pcre_compile() error codes into POSIX error codes
+    was out-of-date, and there was no check on the pcre_compile() error code 
+    being within the table. This could lead to an OK return being given in 
+    error.
+
+
 Version 7.9 11-Apr-09
 ---------------------
 
