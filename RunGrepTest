@@ -217,6 +217,12 @@ echo "---------------------------- Test 53 ------------------------------" >>tes
 echo "---------------------------- Test 54 -----------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep -f./testdata/greplist --color=always ./testdata/grepinputx) >>testtry
 
+echo "---------------------------- Test 55 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -c lazy ./testdata/grepinput*) >>testtry
+
+echo "---------------------------- Test 56 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -c -l lazy ./testdata/grepinput*) >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

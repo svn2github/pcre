@@ -12,7 +12,15 @@ Version 8.00 ??-???-??
 2.  Changed the call to open a subject file in pcregrep from fopen(pathname, 
     "r") to fopen(pathname, "rb"), which fixed a problem with some of the tests 
     in a Windows environment. 
-
+    
+3.  The pcregrep --count option prints the count for each file even when it is
+    zero, as does GNU grep. However, pcregrep was also printing all files when
+    --files-with-matches was added. Now, when both options are given, it prints
+    counts only for those files that have at least one match. (GNU grep just
+    prints the file name in this circumstance, but including the count seems 
+    more useful - otherwise, why use --count?) Also ensured that the 
+    combination -clh just lists non-zero counts, with no names.
+    
 
 Version 7.9 11-Apr-09
 ---------------------

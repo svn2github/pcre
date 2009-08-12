@@ -83,7 +83,7 @@ typedef int BOOL;
 output. The order is important; it is assumed that a file name is wanted for
 all values greater than FN_DEFAULT. */
 
-enum { FN_NONE, FN_DEFAULT, FN_ONLY, FN_NOMATCH_ONLY, FN_FORCE };
+enum { FN_NONE, FN_DEFAULT, FN_MATCH_ONLY, FN_NOMATCH_ONLY, FN_FORCE };
 
 /* File reading styles */
 
@@ -165,6 +165,7 @@ static BOOL invert = FALSE;
 static BOOL line_offsets = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
+static BOOL omit_zero_count = FALSE;
 static BOOL only_matching = FALSE;
 static BOOL quiet = FALSE;
 static BOOL silent = FALSE;
@@ -1061,7 +1062,7 @@ while (ptr < endptr)
     /* If all we want is a file name, there is no need to scan any more lines
     in the file. */
 
-    else if (filenames == FN_ONLY)
+    else if (filenames == FN_MATCH_ONLY)
       {
       fprintf(stdout, "%s\n", printname);
       return 0;
@@ -1365,8 +1366,12 @@ if (filenames == FN_NOMATCH_ONLY)
 
 if (count_only)
   {
-  if (printname != NULL) fprintf(stdout, "%s:", printname);
-  fprintf(stdout, "%d\n", count);
+  if (count > 0 || !omit_zero_count)
+    { 
+    if (printname != NULL && filenames != FN_NONE) 
+      fprintf(stdout, "%s:", printname);
+    fprintf(stdout, "%d\n", count);
+    } 
   }
 
 return rc;
@@ -1686,7 +1691,7 @@ switch(letter)
   case 'H': filenames = FN_FORCE; break;
   case 'h': filenames = FN_NONE; break;
   case 'i': options |= PCRE_CASELESS; break;
-  case 'l': filenames = FN_ONLY; break;
+  case 'l': omit_zero_count = TRUE; filenames = FN_MATCH_ONLY; break;
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
   case 'n': number = TRUE; break;
