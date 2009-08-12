@@ -8,6 +8,10 @@ Version 8.00 ??-???-??
     was out-of-date, and there was no check on the pcre_compile() error code 
     being within the table. This could lead to an OK return being given in 
     error.
+    
+2.  Changed the call to open a subject file in pcregrep from fopen(pathname, 
+    "r") to fopen(pathname, "rb"), which fixed a problem with some of the tests 
+    in a Windows environment. 
 
 
 Version 7.9 11-Apr-09

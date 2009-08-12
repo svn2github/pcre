@@ -14,7 +14,6 @@ uschar property_1;
 pcre_int32 property_2;
 } ucd_record; */
 
-
 const ucd_record _pcre_ucd_records[] = { /* 3656 bytes, record size 8 */
   {     9,      0,      0, }, /*   0 */
   {     9,     29,      0, }, /*   1 */

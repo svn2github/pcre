@@ -1530,7 +1530,7 @@ an attempt to read a .bz2 file indicates that it really is a plain file. */
 PLAIN_FILE:
 #endif
   {
-  in = fopen(pathname, "r");
+  in = fopen(pathname, "rb");
   handle = (void *)in;
   frtype = FR_PLAIN;
   }
