@@ -211,7 +211,7 @@ static option_item optionlist[] = {
   { OP_STRING,    'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
   { OP_STRING,    'd',      &dee_option,       "directories=action", "how to handle directories" },
   { OP_PATLIST,   'e',      NULL,              "regex(p)",      "specify pattern (may be used more than once)" },
-  { OP_NODATA,    'F',      NULL,              "fixed_strings", "patterns are sets of newline-separated strings" },
+  { OP_NODATA,    'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,    'f',      &pattern_filename, "file=path",     "read patterns from file" },
   { OP_NODATA,    N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,    'H',      NULL,              "with-filename", "force the prefixing filename on output" },

@@ -21,6 +21,11 @@ Version 8.00 ??-???-??
     more useful - otherwise, why use --count?) Also ensured that the 
     combination -clh just lists non-zero counts, with no names.
     
+4.  The long form of the pcregrep -F option was incorrectly implemented as 
+    --fixed_strings instead of --fixed-strings. This is an incompatible change, 
+    but it seems right to fix it, and I didn't think it was worth preserving 
+    the old behaviour. 
+    
 
 Version 7.9 11-Apr-09
 ---------------------
