@@ -431,3 +431,19 @@ This line contains [1;31mpattern[00m not on a [1;31mline by itself[00m.
 ---------------------------- Test 56 -----------------------------
 ./testdata/grepinput:456
 ./testdata/grepinputv:1
+---------------------------- Test 57 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
+---------------------------- Test 58 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
+---------------------------- Test 59 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
+---------------------------- Test 60 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.

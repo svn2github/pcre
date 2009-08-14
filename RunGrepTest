@@ -179,13 +179,13 @@ echo "---------------------------- Test 42 ------------------------------" >>tes
 (cd $srcdir; $valgrind $pcregrep -on 'before|zero|after' ./testdata/grepinput) >>testtry
 
 echo "---------------------------- Test 43 ------------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -on -e before -e zero -e after ./testdata/grepinput) >>testtry
+(cd $srcdir; $valgrind $pcregrep -on -e before -ezero -e after ./testdata/grepinput) >>testtry
 
 echo "---------------------------- Test 44 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep -on -f ./testdata/greplist -e binary ./testdata/grepinput) >>testtry
 
 echo "---------------------------- Test 45 ------------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -e abc -e '(unclosed' ./testdata/grepinput) 2>>testtry >>testtry
+(cd $srcdir; $valgrind $pcregrep -eabc -e '(unclosed' ./testdata/grepinput) 2>>testtry >>testtry
 
 echo "---------------------------- Test 46 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep -Fx "AB.VE
@@ -222,6 +222,18 @@ echo "---------------------------- Test 55 -----------------------------" >>test
 
 echo "---------------------------- Test 56 -----------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep -c -l lazy ./testdata/grepinput*) >>testtry
+
+echo "---------------------------- Test 57 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --regex=PATTERN ./testdata/grepinput) >>testtry
+
+echo "---------------------------- Test 58 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --regexp=PATTERN ./testdata/grepinput) >>testtry
+
+echo "---------------------------- Test 59 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --regex PATTERN ./testdata/grepinput) >>testtry
+
+echo "---------------------------- Test 60 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --regexp PATTERN ./testdata/grepinput) >>testtry
 
 # Now compare the results.
 

@@ -210,7 +210,7 @@ static option_item optionlist[] = {
   { OP_OP_STRING, N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
   { OP_STRING,    'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
   { OP_STRING,    'd',      &dee_option,       "directories=action", "how to handle directories" },
-  { OP_PATLIST,   'e',      NULL,              "regex(p)",      "specify pattern (may be used more than once)" },
+  { OP_PATLIST,   'e',      NULL,              "regex(p)=pattern", "specify pattern (may be used more than once)" },
   { OP_NODATA,    'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,    'f',      &pattern_filename, "file=path",     "read patterns from file" },
   { OP_NODATA,    N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
@@ -1929,14 +1929,17 @@ for (i = 1; i < argc; i++)
     Some options have variations in the long name spelling: specifically, we
     allow "regexp" because GNU grep allows it, though I personally go along
     with Jeffrey Friedl and Larry Wall in preferring "regex" without the "p".
-    These options are entered in the table as "regex(p)". No option is in both
-    these categories, fortunately. */
+    These options are entered in the table as "regex(p)". Options can be in
+    both these categories. */
 
     for (op = optionlist; op->one_char != 0; op++)
       {
       char *opbra = strchr(op->long_name, '(');
       char *equals = strchr(op->long_name, '=');
-      if (opbra == NULL)     /* Not a (p) case */
+ 
+      /* Handle options with only one spelling of the name */
+ 
+      if (opbra == NULL)     /* Does not contain '(' */
         {
         if (equals == NULL)  /* Not thing=data case */
           {
@@ -1958,16 +1961,36 @@ for (i = 1; i < argc; i++)
             }
           }
         }
-      else                   /* Special case xxxx(p) */
+        
+      /* Handle options with an alternate spelling of the name */
+ 
+      else 
         {
         char buff1[24];
         char buff2[24];
+         
         int baselen = opbra - op->long_name;
+        int fulllen = strchr(op->long_name, ')') - op->long_name + 1;
+        int arglen = (argequals == NULL || equals == NULL)? 
+          (int)strlen(arg) : argequals - arg;
+ 
         sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1,
-          (int)strlen(op->long_name) - baselen - 2, opbra + 1);
-        if (strcmp(arg, buff1) == 0 || strcmp(arg, buff2) == 0)
+        sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
+         
+        if (strncmp(arg, buff1, arglen) == 0 || 
+           strncmp(arg, buff2, arglen) == 0)
+          {
+          if (equals != NULL && argequals != NULL)
+            {
+            option_data = argequals; 
+            if (*option_data == '=')
+              {
+              option_data++;  
+              longopwasequals = TRUE;
+              } 
+            }  
           break;
+          } 
         }
       }
 
@@ -1977,7 +2000,6 @@ for (i = 1; i < argc; i++)
       exit(usage(2));
       }
     }
-
 
   /* Jeffrey Friedl's debugging harness uses these additional options which
   are not in the right form for putting in the option table because they use

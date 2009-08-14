@@ -26,6 +26,11 @@ Version 8.00 ??-???-??
     but it seems right to fix it, and I didn't think it was worth preserving 
     the old behaviour. 
     
+5.  The command line items --regex=pattern and --regexp=pattern were not 
+    recognized by pcregrep, which required --regex pattern or --regexp pattern
+    (with a space rather than an '='). The man page documented the '=' forms, 
+    which are compatible with GNU grep; these now work.
+    
 
 Version 7.9 11-Apr-09
 ---------------------
