@@ -116,6 +116,10 @@ The yield of \fBregcomp()\fP is zero on success, and non-zero otherwise. The
 \fIpreg\fP structure is filled in on success, and one member of the structure
 is public: \fIre_nsub\fP contains the number of capturing subpatterns in
 the regular expression. Various error codes are defined in the header file.
+.P
+NOTE: If the yield of \fBregcomp()\fP is non-zero, you must not attempt to
+use the contents of the \fIpreg\fP structure. If, for example, you pass it to
+\fBregexec()\fP, the result is undefined and your program is likely to crash.
 .
 .
 .SH "MATCHING NEWLINE CHARACTERS"
@@ -239,6 +243,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 March 2009
+Last updated: 15 August 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
