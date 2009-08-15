@@ -31,6 +31,9 @@ Version 8.00 ??-???-??
     (with a space rather than an '='). The man page documented the '=' forms, 
     which are compatible with GNU grep; these now work.
     
+6.  No libpcreposix.pc file was created for pkg-config; there was just 
+    libpcre.pc and libpcrecpp.pc. The omission has been rectified.
+    
 
 Version 7.9 11-Apr-09
 ---------------------

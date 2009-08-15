@@ -327,7 +327,7 @@ pcre.dll: $(DLL_OBJS)
 
 # We have .pc files for pkg-config users.
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libpcre.pc
+pkgconfig_DATA = libpcre.pc libpcreposix.pc
 if WITH_PCRE_CPP
 pkgconfig_DATA += libpcrecpp.pc
 endif

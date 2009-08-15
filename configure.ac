@@ -600,6 +600,7 @@ AC_SUBST(LIBREADLINE)
 AC_CONFIG_FILES(
 	Makefile
 	libpcre.pc
+        libpcreposix.pc
 	libpcrecpp.pc
 	pcre-config
 	pcre.h
