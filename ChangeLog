@@ -34,6 +34,13 @@ Version 8.00 ??-???-??
 6.  No libpcreposix.pc file was created for pkg-config; there was just 
     libpcre.pc and libpcrecpp.pc. The omission has been rectified.
     
+7.  Added #ifndef SUPPORT_UCP into the pcre_ucd.c module, to reduce its size
+    when UCP support is not needed, by modifying the Python script that 
+    generates it from Unicode data files. This should not matter if the module
+    is correctly used as a library, but I received one complaint about 50K of
+    unwanted data. My guess is that the person linked everything into his
+    program rather than using a library. Anyway, it does no harm.
+    
 
 Version 7.9 11-Apr-09
 ---------------------
