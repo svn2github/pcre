@@ -2157,8 +2157,8 @@ for (;;)
 
 /* ========================================================================== */
       /* These are the opcodes for fancy brackets of various kinds. We have
-      to use recursion in order to handle them. The "always failing" assersion
-      (?!) is optimised when compiling to OP_FAIL, so we have to support that,
+      to use recursion in order to handle them. The "always failing" assertion
+      (?!) is optimised to OP_FAIL when compiling, so we have to support that,
       though the other "backtracking verbs" are not supported. */
 
       case OP_FAIL:

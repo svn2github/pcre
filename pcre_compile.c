@@ -1423,10 +1423,8 @@ for (;;)
     branchlength++;
     cc += 2;
 #ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0)
-      {
-      while ((*cc & 0xc0) == 0x80) cc++;
-      }
+    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0) 
+      cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
 
@@ -1437,10 +1435,8 @@ for (;;)
     branchlength += GET2(cc,1);
     cc += 4;
 #ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0)
-      {
-      while((*cc & 0x80) == 0x80) cc++;
-      }
+    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0) 
+      cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
 
@@ -1912,10 +1908,13 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_QUERY:
     case OP_MINQUERY:
     case OP_POSQUERY:
+    if (utf8 && code[1] >= 0xc0) code += _pcre_utf8_table4[code[1] & 0x3f];
+    break;
+ 
     case OP_UPTO:
     case OP_MINUPTO:
     case OP_POSUPTO:
-    if (utf8) while ((code[2] & 0xc0) == 0x80) code++;
+    if (utf8 && code[3] >= 0xc0) code += _pcre_utf8_table4[code[3] & 0x3f];
     break;
 #endif
     }
@@ -3869,10 +3868,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       if (repeat_max == 0) goto END_REPEAT;
 
+      /*--------------------------------------------------------------------*/ 
+      /* This code is obsolete from release 8.00; the restriction was finally
+      removed: */
+       
       /* All real repeats make it impossible to handle partial matching (maybe
       one day we will be able to remove this restriction). */
-
-      if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL;
+       
+      /* if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL; */
+      /*--------------------------------------------------------------------*/ 
 
       /* Combine the op_type with the repeat_type */
 
@@ -4019,10 +4023,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         goto END_REPEAT;
         }
 
+      /*--------------------------------------------------------------------*/ 
+      /* This code is obsolete from release 8.00; the restriction was finally
+      removed: */
+
       /* All real repeats make it impossible to handle partial matching (maybe
       one day we will be able to remove this restriction). */
 
-      if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL;
+      /* if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL; */
+      /*--------------------------------------------------------------------*/ 
 
       if (repeat_min == 0 && repeat_max == -1)
         *code++ = OP_CRSTAR + repeat_type;
@@ -4337,11 +4346,20 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     if (possessive_quantifier)
       {
       int len;
-      if (*tempcode == OP_EXACT || *tempcode == OP_TYPEEXACT ||
-          *tempcode == OP_NOTEXACT)
+       
+      if (*tempcode == OP_TYPEEXACT)
         tempcode += _pcre_OP_lengths[*tempcode] +
-          ((*tempcode == OP_TYPEEXACT &&
-             (tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP))? 2:0);
+          ((tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP)? 2 : 0);   
+           
+      else if (*tempcode == OP_EXACT || *tempcode == OP_NOTEXACT)
+        {
+        tempcode += _pcre_OP_lengths[*tempcode];
+#ifdef SUPPORT_UTF8
+        if (utf8 && tempcode[-1] >= 0xc0)
+          tempcode += _pcre_utf8_table4[tempcode[-1] & 0x3f];
+#endif
+        }         
+ 
       len = code - tempcode;
       if (len > 0) switch (*tempcode)
         {

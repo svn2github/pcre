@@ -535,7 +535,9 @@ Standard C system should have one. */
 
 /* Private flags containing information about the compiled regex. They used to
 live at the top end of the options word, but that got almost full, so now they
-are in a 16-bit flags word. */
+are in a 16-bit flags word. From release 8.00, PCRE_NOPARTIAL is unused, as
+the restrictions on partial matching have been lifted. It remains for backwards 
+compatibility. */
 
 #define PCRE_NOPARTIAL     0x0001  /* can't use partial with this regex */
 #define PCRE_FIRSTSET      0x0002  /* first_byte is set */

@@ -144,12 +144,7 @@ found, and in particular, the longest match is found. To find more than one
 match using the standard algorithm, you have to do kludgy things with
 callouts.
 .P
-2. There is much better support for partial matching. The restrictions on the
-content of the pattern that apply when using the standard algorithm for partial
-matching do not apply to the alternative algorithm. For non-anchored patterns,
-the starting position of a partial match is available.
-.P
-3. Because the alternative algorithm scans the subject string just once, and
+2. Because the alternative algorithm scans the subject string just once, and
 never needs to backtrack, it is possible to pass very long subject strings to
 the matching function in several pieces, checking for partial matching each
 time.
@@ -183,6 +178,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 April 2008
-Copyright (c) 1997-2008 University of Cambridge.
+Last updated: 25 August 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi

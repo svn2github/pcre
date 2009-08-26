@@ -25,18 +25,32 @@ entered.
 .P
 PCRE supports the concept of partial matching by means of the PCRE_PARTIAL
 option, which can be set when calling \fBpcre_exec()\fP or
-\fBpcre_dfa_exec()\fP. When this flag is set for \fBpcre_exec()\fP, the return
-code PCRE_ERROR_NOMATCH is converted into PCRE_ERROR_PARTIAL if at any time
-during the matching process the last part of the subject string matched part of
-the pattern. Unfortunately, for non-anchored matching, it is not possible to
-obtain the position of the start of the partial match. No captured data is set
-when PCRE_ERROR_PARTIAL is returned.
+\fBpcre_dfa_exec()\fP. 
+.P
+When PCRE_PARTIAL is set for \fBpcre_exec()\fP, the return code
+PCRE_ERROR_NOMATCH is converted into PCRE_ERROR_PARTIAL if at any time during
+the matching process the last part of the subject string matched part of the
+pattern. If there are at least two slots in the offsets vector, they are filled
+in with the offsets of the longest found string that partially matched. No
+other captured data is set when PCRE_ERROR_PARTIAL is returned. The second
+offset is always that for the end of the subject. Consider this pattern:
+.sp
+  /123\ew+X|dogY/
+.sp
+If this is matched against the subject string "abc123dog", both
+alternatives fail to match, but the end of the subject is reached, so
+PCRE_ERROR_PARTIAL is returned instead of PCRE_ERROR_NOMATCH if the
+PCRE_PARTIAL option is set. The offsets are set to 3 and 9, identifying
+"123dog" as the longest partial match that was found. (In this example, there 
+are two partial matches, because "dog" on its own partially matches the second
+alternative.)
 .P
 When PCRE_PARTIAL is set for \fBpcre_dfa_exec()\fP, the return code
 PCRE_ERROR_NOMATCH is converted into PCRE_ERROR_PARTIAL if the end of the
 subject is reached, there have been no complete matches, but there is still at
 least one matching possibility. The portion of the string that provided the
-partial match is set as the first matching string.
+longest partial match is set as the first matching string, provided there are 
+at least two slots in the offsets vector.
 .P
 Using PCRE_PARTIAL disables one of PCRE's optimizations. PCRE remembers the
 last literal byte in a pattern, and abandons matching immediately if such a
@@ -44,35 +58,21 @@ byte is not present in the subject string. This optimization cannot be used
 for a subject string that might match only partially.
 .
 .
-.SH "RESTRICTED PATTERNS FOR PCRE_PARTIAL"
+.SH "FORMERLY RESTRICTED PATTERNS FOR PCRE_PARTIAL"
 .rs
 .sp
-Because of the way certain internal optimizations are implemented in the
-\fBpcre_exec()\fP function, the PCRE_PARTIAL option cannot be used with all
-patterns. These restrictions do not apply when \fBpcre_dfa_exec()\fP is used.
-For \fBpcre_exec()\fP, repeated single characters such as
-.sp
-  a{2,4}
-.sp
-and repeated single metasequences such as
-.sp
-  \ed+
-.sp
-are not permitted if the maximum number of occurrences is greater than one.
-Optional items such as \ed? (where the maximum is one) are permitted.
-Quantifiers with any values are permitted after parentheses, so the invalid
-examples above can be coded thus:
-.sp
-  (a){2,4}
-  (\ed)+
-.sp
-These constructions run more slowly, but for the kinds of application that are
-envisaged for this facility, this is not felt to be a major restriction.
+For releases of PCRE prior to 8.00, because of the way certain internal
+optimizations were implemented in the \fBpcre_exec()\fP function, the
+PCRE_PARTIAL option could not be used with all patterns. From release 8.00
+onwards, the restrictions no longer apply, and partial matching can be
+requested for any pattern.
 .P
-If PCRE_PARTIAL is set for a pattern that does not conform to the restrictions,
-\fBpcre_exec()\fP returns the error code PCRE_ERROR_BADPARTIAL (-13).
-You can use the PCRE_INFO_OKPARTIAL call to \fBpcre_fullinfo()\fP to find out
-if a compiled pattern can be used for partial matching.
+Items that were formerly restricted were repeated single characters and
+repeated metasequences. If PCRE_PARTIAL was set for a pattern that did not
+conform to the restrictions, \fBpcre_exec()\fP returned the error code
+PCRE_ERROR_BADPARTIAL (-13). This error code is no longer in use. The
+PCRE_INFO_OKPARTIAL call to \fBpcre_fullinfo()\fP to find out if a compiled
+pattern can be used for partial matching now always returns 1.
 .
 .
 .SH "EXAMPLE OF PARTIAL MATCHING USING PCRETEST"
@@ -87,9 +87,9 @@ uses the date example quoted above:
    0: 25jun04
    1: jun
   data> 25dec3\eP
-  Partial match
+  Partial match: 23dec3
   data> 3ju\eP
-  Partial match
+  Partial match: 3ju
   data> 3juj\eP
   No match
   data> j\eP
@@ -97,24 +97,29 @@ uses the date example quoted above:
 .sp
 The first data string is matched completely, so \fBpcretest\fP shows the
 matched substrings. The remaining four strings do not match the complete
-pattern, but the first two are partial matches. The same test, using
-\fBpcre_dfa_exec()\fP matching (by means of the \eD escape sequence), produces
-the following output:
+pattern, but the first two are partial matches. Similar output is obtained
+when \fBpcre_dfa_exec()\fP is used.
+.
+.                                                          
+.SH "ISSUES WITH PARTIAL MATCHING"
+.rs
 .sp
-    re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
-  data> 25jun04\eP\eD
-   0: 25jun04
-  data> 23dec3\eP\eD
-  Partial match: 23dec3
-  data> 3ju\eP\eD
-  Partial match: 3ju
-  data> 3juj\eP\eD
-  No match
-  data> j\eP\eD
-  No match
+Certain types of pattern may behave in unintuitive ways when partial matching
+is requested, whichever matching function is used. For example, matching a
+pattern that ends with (*FAIL), or any other assertion that causes a match to
+fail without inspecting any data, yields PCRE_ERROR_PARTIAL rather than
+PCRE_ERROR_NOMATCH:
 .sp
-Notice that in this case the portion of the string that was matched is made
-available.
+    re> /a+(*FAIL)/
+  data> aaa\eP
+  Partial match: aaa
+.sp
+Although (*FAIL) itself could possibly be made a special case, there are other
+assertions, for example (?!), which behave in the same way, and it is not
+possible to catch all cases. For consistency, therefore, there are no 
+exceptions to the rule that PCRE_ERROR_PARTIAL is returned instead of 
+PCRE_ERROR_NOMATCH if at any time during the match the end of the subject
+string was reached.
 .
 .
 .SH "MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()"
@@ -126,7 +131,8 @@ to continue the match by providing additional subject data and calling
 time setting the PCRE_DFA_RESTART option. You must also pass the same working
 space as before, because this is where details of the previous partial match
 are stored. Here is an example using \fBpcretest\fP, using the \eR escape
-sequence to set the PCRE_DFA_RESTART option (\eP and \eD are as above):
+sequence to set the PCRE_DFA_RESTART option (\eP sets the PCRE_PARTIAL option, 
+and \eD specifies the use of \fBpcre_dfa_exec()\fP):
 .sp
     re> /^\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed$/
   data> 23ja\eP\eD
@@ -142,8 +148,35 @@ program to do that if it needs to.
 .P
 You can set PCRE_PARTIAL with PCRE_DFA_RESTART to continue partial matching
 over multiple segments. This facility can be used to pass very long subject
-strings to \fBpcre_dfa_exec()\fP. However, some care is needed for certain
-types of pattern.
+strings to \fBpcre_dfa_exec()\fP.
+.
+.
+.SH "MULTI-SEGMENT MATCHING WITH pcre_exec()"
+.rs
+.sp
+From release 8.00, \fBpcre_exec()\fP can also be used to do multi-segment 
+matching. Unlike \fBpcre_dfa_exec()\fP, it is not possible to restart the 
+previous match with a new segment of data. Instead, new data must be added to 
+the previous subject string, and the entire match re-run, starting from the 
+point where the partial match occurred. Earlier data can be discarded.
+Consider an unanchored pattern that matches dates:
+.sp
+    re> /\ed?\ed(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\ed\ed/
+  data> The date is 23ja\eP
+  Partial match: 23ja
+.sp
+The this stage, an application could discard the text preceding "23ja", add on 
+text from the next segment, and call \fBpcre_exec()\fP again. Unlike 
+\fBpcre_dfa_exec()\fP, the entire matching string must always be available, and 
+the complete matching process occurs for each call, so more memory and more 
+processing time is needed.
+.
+.                                                          
+.SH "ISSUES WITH MULTI-SEGMENT MATCHING"
+.rs
+.sp
+Certain types of pattern may give problems with multi-segment matching, 
+whichever matching function is used.
 .P
 1. If the pattern contains tests for the beginning or end of a line, you need
 to pass the PCRE_NOTBOL or PCRE_NOTEOL options, as appropriate, when the
@@ -151,19 +184,20 @@ subject string for any call does not contain the beginning or end of a line.
 .P
 2. If the pattern contains backward assertions (including \eb or \eB), you need
 to arrange for some overlap in the subject strings to allow for this. For
-example, you could pass the subject in chunks that are 500 bytes long, but in
-a buffer of 700 bytes, with the starting offset set to 200 and the previous 200
-bytes at the start of the buffer.
+example, using \fBpcre_dfa_exec()\fP, you could pass the subject in chunks that
+are 500 bytes long, but in a buffer of 700 bytes, with the starting offset set
+to 200 and the previous 200 bytes at the start of the buffer.
 .P
 3. Matching a subject string that is split into multiple segments does not
 always produce exactly the same result as matching over one single long string.
 The difference arises when there are multiple matching possibilities, because a
-partial match result is given only when there are no completed matches in a
-call to \fBpcre_dfa_exec()\fP. This means that as soon as the shortest match has
-been found, continuation to a new subject segment is no longer possible.
-Consider this \fBpcretest\fP example:
+partial match result is given only when there are no completed matches. This
+means that as soon as the shortest match has been found, continuation to a new
+subject segment is no longer possible. Consider this \fBpcretest\fP example:
 .sp
     re> /dog(sbody)?/
+  data> dogsb\eP
+   0: dog    
   data> do\eP\eD
   Partial match: do
   data> gsb\eR\eP\eD
@@ -172,24 +206,28 @@ Consider this \fBpcretest\fP example:
    0: dogsbody
    1: dog
 .sp
-The pattern matches the words "dog" or "dogsbody". When the subject is
-presented in several parts ("do" and "gsb" being the first two) the match stops
-when "dog" has been found, and it is not possible to continue. On the other
-hand, if "dogsbody" is presented as a single string, both matches are found.
+The pattern matches "dog" or "dogsbody". The first data line passes the string
+"dogsb" to \fBpcre_exec()\fP, setting the PCRE_PARTIAL option. Although the
+string is a partial match for "dogsbody", the result is not PCRE_ERROR_PARTIAL,
+because the shorter string "dog" is a complete match. Similarly, when the
+subject is presented to \fBpcre_dfa_exec()\fP in several parts ("do" and "gsb"
+being the first two) the match stops when "dog" has been found, and it is not
+possible to continue. On the other hand, if "dogsbody" is presented as a single
+string, \fBpcre_dfa_exec()\fP finds both matches.
 .P
 Because of this phenomenon, it does not usually make sense to end a pattern
 that is going to be matched in this way with a variable repeat.
 .P
 4. Patterns that contain alternatives at the top level which do not all
-start with the same pattern item may not work as expected. For example,
-consider this pattern:
+start with the same pattern item may not work as expected when 
+\fBpcre_dfa_exec()\fP is used. For example, consider this pattern:
 .sp
   1234|3789
 .sp
 If the first part of the subject is "ABC123", a partial match of the first
 alternative is found at offset 3. There is no partial match for the second
 alternative, because such a match does not start at the same point in the
-subject string. Attempting to continue with the string "789" does not yield a
+subject string. Attempting to continue with the string "7890" does not yield a
 match because only those alternatives that match at one point in the subject
 are remembered. The problem arises because the start of the second alternative
 matches within the first alternative. There is no problem with anchored
@@ -197,7 +235,16 @@ patterns or patterns such as:
 .sp
   1234|ABCD
 .sp
-where no string can be a partial match for both alternatives.
+where no string can be a partial match for both alternatives. This is not a
+problem if \fPpcre_exec()\fP is used, because the entire match has to be rerun 
+each time:
+.sp
+    re> /1234|3789/
+  data> ABC123\eP
+  Partial match: 123
+  data> 1237890
+   0: 3789
+.sp        
 .
 .
 .SH AUTHOR
@@ -214,6 +261,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 04 June 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 26 August 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi

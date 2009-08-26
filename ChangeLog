@@ -41,6 +41,16 @@ Version 8.00 ??-???-??
     unwanted data. My guess is that the person linked everything into his
     program rather than using a library. Anyway, it does no harm.
     
+8.  A pattern such as /\x{123}{2,2}+/8 was incorrectly compiled; the trigger
+    was a minimum greater than 1 for a wide character in a possessive 
+    repetition. Chaos could result. 
+    
+9.  The restrictions on what a pattern can contain when partial matching is
+    requested for pcre_exec() have been removed. All patterns can now be 
+    partially matched by this function. In addition, if there are at least two
+    slots in the offset vector, the offsets of the first-encountered partial
+    match are set in them when PCRE_ERROR_PARTIAL is returned.
+    
 
 Version 7.9 11-Apr-09
 ---------------------

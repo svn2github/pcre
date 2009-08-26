@@ -7168,7 +7168,6 @@ No match
     
 /a\R{2,4}b/I<bsr_anycrlf>
 Capturing subpattern count = 0
-Partial matching not supported
 Options: bsr_anycrlf
 First char = 'a'
 Need char = 'b'
@@ -7187,7 +7186,6 @@ No match
 
 /a\R{2,4}b/I<bsr_unicode>
 Capturing subpattern count = 0
-Partial matching not supported
 Options: bsr_unicode
 First char = 'a'
 Need char = 'b'
@@ -7369,5 +7367,23 @@ No match
  0: "ab"
     \C-"ab"
  0: "ab"
+
+/\d+X|9+Y/
+    ++++123999\P
+Partial match: 123999
+    ++++123999Y\P
+ 0: 999Y
+
+/Z(*F)/
+    Z\P
+Partial match: Z
+    ZA\P 
+No match
+    
+/Z(?!)/
+    Z\P 
+Partial match: Z
+    ZA\P 
+No match
 
 / End of testinput7 /

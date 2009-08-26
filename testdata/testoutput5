@@ -252,7 +252,6 @@ Need char = 171
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 Need char = 'X'
@@ -269,7 +268,6 @@ Need char = 'X'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -423,7 +421,6 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 196
 Need char = 128
@@ -443,7 +440,6 @@ Study returned NULL
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -462,7 +458,6 @@ Starting byte set: x \xc4
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -481,7 +476,6 @@ Starting byte set: a x \xc4
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -501,7 +495,6 @@ Starting byte set: a x \xc4
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -551,7 +544,6 @@ Need char = 128
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -565,7 +557,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 'a'
 No need char
@@ -579,7 +570,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 'a'
 Need char = 'b'
@@ -593,7 +583,6 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 'a'
 Need char = 128
@@ -607,7 +596,6 @@ Need char = 128
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 'a'
 Need char = 129
@@ -621,7 +609,6 @@ Need char = 129
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 Need char = 'A'
@@ -640,7 +627,6 @@ Need char = 'A'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1122,7 +1108,6 @@ Need char = 191
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1136,7 +1121,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1150,7 +1134,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1164,7 +1147,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1178,7 +1160,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1192,7 +1173,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 No first char
 No need char
@@ -1206,7 +1186,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 196
 Need char = 128
@@ -1220,7 +1199,6 @@ Need char = 128
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 196
 Need char = 'X'
@@ -1234,7 +1212,6 @@ Need char = 'X'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Partial matching not supported
 Options: utf8
 First char = 'X'
 Need char = 128
@@ -1651,5 +1628,437 @@ Options: bsr_unicode utf8
 Forced newline sequence: CRLF
 First char = 'a'
 Need char = 'b'
+
+/Xa{2,4}b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/Xa{2,4}?b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/Xa{2,4}+b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X\x{123}{2,4}b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X\x{123}{2,4}?b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X\x{123}{2,4}+b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X\x{123}{2,4}b/8
+    Xx\P
+No match
+    X\x{123}x\P
+No match
+    X\x{123}\x{123}x\P 
+No match
+    X\x{123}\x{123}\x{123}x\P
+No match
+    X\x{123}\x{123}\x{123}\x{123}x\P 
+No match
+    
+/X\x{123}{2,4}?b/8
+    Xx\P
+No match
+    X\x{123}x\P
+No match
+    X\x{123}\x{123}x\P 
+No match
+    X\x{123}\x{123}\x{123}x\P
+No match
+    X\x{123}\x{123}\x{123}\x{123}x\P 
+No match
+    
+/X\x{123}{2,4}+b/8
+    Xx\P
+No match
+    X\x{123}x\P
+No match
+    X\x{123}\x{123}x\P 
+No match
+    X\x{123}\x{123}\x{123}x\P
+No match
+    X\x{123}\x{123}\x{123}\x{123}x\P 
+No match
+    
+/X\d{2,4}b/8
+    X\P
+Partial match: X
+    X3\P
+Partial match: X3
+    X33\P 
+Partial match: X33
+    X333\P
+Partial match: X333
+    X3333\P 
+Partial match: X3333
+    
+/X\d{2,4}?b/8
+    X\P
+Partial match: X
+    X3\P
+Partial match: X3
+    X33\P 
+Partial match: X33
+    X333\P
+Partial match: X333
+    X3333\P 
+Partial match: X3333
+    
+/X\d{2,4}+b/8
+    X\P
+Partial match: X
+    X3\P
+Partial match: X3
+    X33\P 
+Partial match: X33
+    X333\P
+Partial match: X333
+    X3333\P 
+Partial match: X3333
+
+/X\D{2,4}b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X\D{2,4}?b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X\D{2,4}+b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+
+/X\D{2,4}b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X\D{2,4}?b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X\D{2,4}+b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+
+/X[abc]{2,4}b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X[abc]{2,4}?b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+    
+/X[abc]{2,4}+b/8
+    X\P
+Partial match: X
+    Xa\P
+Partial match: Xa
+    Xaa\P 
+Partial match: Xaa
+    Xaaa\P
+Partial match: Xaaa
+    Xaaaa\P 
+Partial match: Xaaaa
+
+/X[abc\x{123}]{2,4}b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X[abc\x{123}]{2,4}?b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X[abc\x{123}]{2,4}+b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+
+/X[^a]{2,4}b/8
+    X\P
+Partial match: X
+    Xz\P
+Partial match: Xz
+    Xzz\P 
+Partial match: Xzz
+    Xzzz\P
+Partial match: Xzzz
+    Xzzzz\P 
+Partial match: Xzzzz
+    
+/X[^a]{2,4}?b/8
+    X\P
+Partial match: X
+    Xz\P
+Partial match: Xz
+    Xzz\P 
+Partial match: Xzz
+    Xzzz\P
+Partial match: Xzzz
+    Xzzzz\P 
+Partial match: Xzzzz
+    
+/X[^a]{2,4}+b/8
+    X\P
+Partial match: X
+    Xz\P
+Partial match: Xz
+    Xzz\P 
+Partial match: Xzz
+    Xzzz\P
+Partial match: Xzzz
+    Xzzzz\P 
+Partial match: Xzzzz
+
+/X[^a]{2,4}b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X[^a]{2,4}?b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+    
+/X[^a]{2,4}+b/8
+    X\P
+Partial match: X
+    X\x{123}\P
+Partial match: X\x{123}
+    X\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\P
+Partial match: X\x{123}\x{123}\x{123}
+    X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: X\x{123}\x{123}\x{123}\x{123}
+
+/(Y)X\1{2,4}b/8
+    YX\P
+Partial match: YX
+    YXY\P
+Partial match: YXY
+    YXYY\P 
+Partial match: YXYY
+    YXYYY\P
+Partial match: YXYYY
+    YXYYYY\P 
+Partial match: YXYYYY
+    
+/(Y)X\1{2,4}?b/8
+    YX\P
+Partial match: YX
+    YXY\P
+Partial match: YXY
+    YXYY\P 
+Partial match: YXYY
+    YXYYY\P
+Partial match: YXYYY
+    YXYYYY\P 
+Partial match: YXYYYY
+    
+/(Y)X\1{2,4}+b/8
+    YX\P
+Partial match: YX
+    YXY\P
+Partial match: YXY
+    YXYY\P 
+Partial match: YXYY
+    YXYYY\P
+Partial match: YXYYY
+    YXYYYY\P 
+Partial match: YXYYYY
+
+/(\x{123})X\1{2,4}b/8
+    \x{123}X\P
+Partial match: \x{123}X
+    \x{123}X\x{123}\P
+Partial match: \x{123}X\x{123}
+    \x{123}X\x{123}\x{123}\P 
+Partial match: \x{123}X\x{123}\x{123}
+    \x{123}X\x{123}\x{123}\x{123}\P
+Partial match: \x{123}X\x{123}\x{123}\x{123}
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: \x{123}X\x{123}\x{123}\x{123}\x{123}
+    
+/(\x{123})X\1{2,4}?b/8
+    \x{123}X\P
+Partial match: \x{123}X
+    \x{123}X\x{123}\P
+Partial match: \x{123}X\x{123}
+    \x{123}X\x{123}\x{123}\P 
+Partial match: \x{123}X\x{123}\x{123}
+    \x{123}X\x{123}\x{123}\x{123}\P
+Partial match: \x{123}X\x{123}\x{123}\x{123}
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: \x{123}X\x{123}\x{123}\x{123}\x{123}
+    
+/(\x{123})X\1{2,4}+b/8
+    \x{123}X\P
+Partial match: \x{123}X
+    \x{123}X\x{123}\P
+Partial match: \x{123}X\x{123}
+    \x{123}X\x{123}\x{123}\P 
+Partial match: \x{123}X\x{123}\x{123}
+    \x{123}X\x{123}\x{123}\x{123}\P
+Partial match: \x{123}X\x{123}\x{123}\x{123}
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
+Partial match: \x{123}X\x{123}\x{123}\x{123}\x{123}
 
 / End of testinput5 /

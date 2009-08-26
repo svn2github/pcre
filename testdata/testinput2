@@ -2773,4 +2773,143 @@ a random value. /Ix
 /^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
     XYabcdY
 
+/Xa{2,4}b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/Xa{2,4}?b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/Xa{2,4}+b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X\d{2,4}b/
+    X\P
+    X3\P
+    X33\P 
+    X333\P
+    X3333\P 
+    
+/X\d{2,4}?b/
+    X\P
+    X3\P
+    X33\P 
+    X333\P
+    X3333\P 
+    
+/X\d{2,4}+b/
+    X\P
+    X3\P
+    X33\P 
+    X333\P
+    X3333\P 
+    
+/X\D{2,4}b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X\D{2,4}?b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X\D{2,4}+b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X[abc]{2,4}b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X[abc]{2,4}?b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X[abc]{2,4}+b/
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X[^a]{2,4}b/
+    X\P
+    Xz\P
+    Xzz\P 
+    Xzzz\P
+    Xzzzz\P 
+    
+/X[^a]{2,4}?b/
+    X\P
+    Xz\P
+    Xzz\P 
+    Xzzz\P
+    Xzzzz\P 
+    
+/X[^a]{2,4}+b/
+    X\P
+    Xz\P
+    Xzz\P 
+    Xzzz\P
+    Xzzzz\P 
+    
+/(Y)X\1{2,4}b/
+    YX\P
+    YXY\P
+    YXYY\P 
+    YXYYY\P
+    YXYYYY\P 
+    
+/(Y)X\1{2,4}?b/
+    YX\P
+    YXY\P
+    YXYY\P 
+    YXYYY\P
+    YXYYYY\P 
+    
+/(Y)X\1{2,4}+b/
+    YX\P
+    YXY\P
+    YXYY\P 
+    YXYYY\P
+    YXYYYY\P 
+    
+/\++\KZ|\d+X|9+Y/
+    ++++123999\P
+    ++++123999Y\P
+    ++++Z1234\P 
+
+/Z(*F)/
+    Z\P
+    ZA\P 
+    
+/Z(?!)/
+    Z\P 
+    ZA\P 
+
 / End of testinput2 /

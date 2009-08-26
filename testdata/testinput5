@@ -485,4 +485,256 @@ can't tell the difference.) --/
 
 /(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
 
+/Xa{2,4}b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/Xa{2,4}?b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/Xa{2,4}+b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X\x{123}{2,4}b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X\x{123}{2,4}?b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X\x{123}{2,4}+b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X\x{123}{2,4}b/8
+    Xx\P
+    X\x{123}x\P
+    X\x{123}\x{123}x\P 
+    X\x{123}\x{123}\x{123}x\P
+    X\x{123}\x{123}\x{123}\x{123}x\P 
+    
+/X\x{123}{2,4}?b/8
+    Xx\P
+    X\x{123}x\P
+    X\x{123}\x{123}x\P 
+    X\x{123}\x{123}\x{123}x\P
+    X\x{123}\x{123}\x{123}\x{123}x\P 
+    
+/X\x{123}{2,4}+b/8
+    Xx\P
+    X\x{123}x\P
+    X\x{123}\x{123}x\P 
+    X\x{123}\x{123}\x{123}x\P
+    X\x{123}\x{123}\x{123}\x{123}x\P 
+    
+/X\d{2,4}b/8
+    X\P
+    X3\P
+    X33\P 
+    X333\P
+    X3333\P 
+    
+/X\d{2,4}?b/8
+    X\P
+    X3\P
+    X33\P 
+    X333\P
+    X3333\P 
+    
+/X\d{2,4}+b/8
+    X\P
+    X3\P
+    X33\P 
+    X333\P
+    X3333\P 
+
+/X\D{2,4}b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X\D{2,4}?b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X\D{2,4}+b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+
+/X\D{2,4}b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X\D{2,4}?b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X\D{2,4}+b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+
+/X[abc]{2,4}b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X[abc]{2,4}?b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+    
+/X[abc]{2,4}+b/8
+    X\P
+    Xa\P
+    Xaa\P 
+    Xaaa\P
+    Xaaaa\P 
+
+/X[abc\x{123}]{2,4}b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X[abc\x{123}]{2,4}?b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X[abc\x{123}]{2,4}+b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+
+/X[^a]{2,4}b/8
+    X\P
+    Xz\P
+    Xzz\P 
+    Xzzz\P
+    Xzzzz\P 
+    
+/X[^a]{2,4}?b/8
+    X\P
+    Xz\P
+    Xzz\P 
+    Xzzz\P
+    Xzzzz\P 
+    
+/X[^a]{2,4}+b/8
+    X\P
+    Xz\P
+    Xzz\P 
+    Xzzz\P
+    Xzzzz\P 
+
+/X[^a]{2,4}b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X[^a]{2,4}?b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/X[^a]{2,4}+b/8
+    X\P
+    X\x{123}\P
+    X\x{123}\x{123}\P 
+    X\x{123}\x{123}\x{123}\P
+    X\x{123}\x{123}\x{123}\x{123}\P 
+
+/(Y)X\1{2,4}b/8
+    YX\P
+    YXY\P
+    YXYY\P 
+    YXYYY\P
+    YXYYYY\P 
+    
+/(Y)X\1{2,4}?b/8
+    YX\P
+    YXY\P
+    YXYY\P 
+    YXYYY\P
+    YXYYYY\P 
+    
+/(Y)X\1{2,4}+b/8
+    YX\P
+    YXY\P
+    YXYY\P 
+    YXYYY\P
+    YXYYYY\P 
+
+/(\x{123})X\1{2,4}b/8
+    \x{123}X\P
+    \x{123}X\x{123}\P
+    \x{123}X\x{123}\x{123}\P 
+    \x{123}X\x{123}\x{123}\x{123}\P
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/(\x{123})X\1{2,4}?b/8
+    \x{123}X\P
+    \x{123}X\x{123}\P
+    \x{123}X\x{123}\x{123}\P 
+    \x{123}X\x{123}\x{123}\x{123}\P
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
+    
+/(\x{123})X\1{2,4}+b/8
+    \x{123}X\P
+    \x{123}X\x{123}\P
+    \x{123}X\x{123}\x{123}\P 
+    \x{123}X\x{123}\x{123}\x{123}\P
+    \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
+
 / End of testinput5 /

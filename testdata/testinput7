@@ -4421,4 +4421,16 @@
     "ab"
     \C-"ab"
 
+/\d+X|9+Y/
+    ++++123999\P
+    ++++123999Y\P
+
+/Z(*F)/
+    Z\P
+    ZA\P 
+    
+/Z(?!)/
+    Z\P 
+    ZA\P 
+
 / End of testinput7 /

@@ -2363,11 +2363,12 @@ while (!done)
       else if (count == PCRE_ERROR_PARTIAL)
         {
         fprintf(outfile, "Partial match");
-#if !defined NODFA
-        if ((all_use_dfa || use_dfa) && use_size_offsets > 2)
-          fprintf(outfile, ": %.*s", use_offsets[1] - use_offsets[0],
-            bptr + use_offsets[0]);
-#endif
+        if (use_size_offsets > 1)
+          {
+          fprintf(outfile, ": ");
+          pchars(bptr + use_offsets[0], use_offsets[1] - use_offsets[0],
+            outfile);   
+          }   
         fprintf(outfile, "\n");
         break;  /* Out of the /g loop */
         }
