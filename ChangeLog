@@ -51,6 +51,12 @@ Version 8.00 ??-???-??
     slots in the offset vector, the offsets of the first-encountered partial
     match are set in them when PCRE_ERROR_PARTIAL is returned.
     
+10. Partial matching has been split into two forms: PCRE_PARTIAL_SOFT, which is 
+    synonymous with PCRE_PARTIAL, for backwards compatibility, and 
+    PCRE_PARTIAL_HARD, which causes a longer partial match to supersede a 
+    shorter full match, and may be more useful for multi-segment matching, 
+    especially with pcre_exec().
+    
 
 Version 7.9 11-Apr-09
 ---------------------

@@ -536,7 +536,7 @@ Standard C system should have one. */
 /* Private flags containing information about the compiled regex. They used to
 live at the top end of the options word, but that got almost full, so now they
 are in a 16-bit flags word. From release 8.00, PCRE_NOPARTIAL is unused, as
-the restrictions on partial matching have been lifted. It remains for backwards 
+the restrictions on partial matching have been lifted. It remains for backwards
 compatibility. */
 
 #define PCRE_NOPARTIAL     0x0001  /* can't use partial with this regex */
@@ -565,13 +565,13 @@ time, run time, or study time, respectively. */
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
-   PCRE_NO_START_OPTIMIZE)
+   PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF| \
+   PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_DFA_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART|PCRE_NEWLINE_BITS| \
-   PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
+   PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART| \
+   PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -1601,7 +1601,7 @@ typedef struct match_data {
   BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
-  BOOL   partial;               /* PARTIAL flag */
+  int    partial;               /* PARTIAL options */
   BOOL   hitend;                /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
   const uschar *start_code;     /* For use when recursing */

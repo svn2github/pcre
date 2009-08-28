@@ -4433,4 +4433,12 @@
     Z\P 
     ZA\P 
 
+/dog(sbody)?/
+    dogs\P
+    dogs\P\P 
+    
+/dog|dogsbody/
+    dogs\P
+    dogs\P\P 
+ 
 / End of testinput7 /

@@ -403,15 +403,25 @@ same response. */
 /* These macros pack up tests that are used for partial matching, and which
 appears several times in the code. We set the "hit end" flag if the pointer is
 at the end of the subject and also past the start of the subject (i.e.
-something has been matched). The second one is used when we already know we are
-past the end of the subject. */
+something has been matched). For hard partial matching, we then return
+immediately. The second one is used when we already know we are past the end of
+the subject. */
 
 #define CHECK_PARTIAL()\
   if (md->partial && eptr >= md->end_subject && eptr > mstart)\
-    md->hitend = TRUE
+    {\
+    md->hitend = TRUE;\
+    if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);\
+    }
 
 #define SCHECK_PARTIAL()\
-  if (md->partial && eptr > mstart) md->hitend = TRUE
+  if (md->partial && eptr > mstart)\
+    {\
+    md->hitend = TRUE;\
+    md->hitend = TRUE;\
+    if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);\
+    }
+
 
 /* Performance note: It might be tempting to extract commonly used fields from
 the md structure (e.g. utf8, end_subject) into individual variables to improve
@@ -1868,11 +1878,11 @@ for (;;)
 
       for (i = 1; i <= min; i++)
         {
-        if (!match_ref(offset, eptr, length, md, ims)) 
+        if (!match_ref(offset, eptr, length, md, ims))
           {
-          CHECK_PARTIAL(); 
+          CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
-          } 
+          }
         eptr += length;
         }
 
@@ -1891,9 +1901,9 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || !match_ref(offset, eptr, length, md, ims))
             {
-            CHECK_PARTIAL();  
+            CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           eptr += length;
           }
         /* Control never gets here */
@@ -1909,7 +1919,7 @@ for (;;)
           if (!match_ref(offset, eptr, length, md, ims)) break;
           eptr += length;
           }
-        CHECK_PARTIAL();   
+        CHECK_PARTIAL();
         while (eptr >= pp)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM15);
@@ -1977,11 +1987,11 @@ for (;;)
         {
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
             CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           if (c > 255)
             {
@@ -1999,11 +2009,11 @@ for (;;)
         {
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
             CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           c = *eptr++;
           if ((data[c/8] & (1 << (c&7))) == 0) RRETURN(MATCH_NOMATCH);
           }
@@ -2027,16 +2037,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM16);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(c, eptr);
             if (c > 255)
               {
@@ -2056,16 +2066,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM17);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             c = *eptr++;
             if ((data[c/8] & (1 << (c&7))) == 0) RRETURN(MATCH_NOMATCH);
             }
@@ -2098,7 +2108,7 @@ for (;;)
               }
             eptr += len;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM18);
@@ -2118,7 +2128,7 @@ for (;;)
             if ((data[c/8] & (1 << (c&7))) == 0) break;
             eptr++;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           while (eptr >= pp)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM19);
@@ -2176,11 +2186,11 @@ for (;;)
 
       for (i = 1; i <= min; i++)
         {
-        if (eptr >= md->end_subject) 
+        if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
-          } 
+          }
         GETCHARINCTEST(c, eptr);
         if (!_pcre_xclass(c, data)) RRETURN(MATCH_NOMATCH);
         }
@@ -2199,16 +2209,16 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM20);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max) 
+          if (fi >= max)
             {
-            CHECK_PARTIAL(); 
+            CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
-          if (eptr >= md->end_subject) 
+            }
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINCTEST(c, eptr);
           if (!_pcre_xclass(c, data)) RRETURN(MATCH_NOMATCH);
           }
@@ -2228,7 +2238,7 @@ for (;;)
           if (!_pcre_xclass(c, data)) break;
           eptr += len;
           }
-        CHECK_PARTIAL();   
+        CHECK_PARTIAL();
         for(;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM21);
@@ -2455,7 +2465,7 @@ for (;;)
 
           CHECK_PARTIAL();
           if (possessive) continue;
-           
+
           for(;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM23);
@@ -2516,12 +2526,12 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max)
             {
-            CHECK_PARTIAL(); 
+            CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
           if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
           if (fc != md->lcc[*eptr++]) RRETURN(MATCH_NOMATCH);
@@ -2536,10 +2546,10 @@ for (;;)
           if (eptr >= md->end_subject || fc != md->lcc[*eptr]) break;
           eptr++;
           }
-           
-        CHECK_PARTIAL();   
+
+        CHECK_PARTIAL();
         if (possessive) continue;
-         
+
         while (eptr >= pp)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM25);
@@ -2555,7 +2565,7 @@ for (;;)
 
     else
       {
-      for (i = 1; i <= min; i++) 
+      for (i = 1; i <= min; i++)
         {
         if (eptr >= md->end_subject)
           {
@@ -2563,7 +2573,7 @@ for (;;)
           RRETURN(MATCH_NOMATCH);
           }
         if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
-        } 
+        }
       if (min == max) continue;
       if (minimize)
         {
@@ -2577,10 +2587,10 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           if (eptr >= md->end_subject)
-            {        
+            {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            }  
+            }
           if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
           }
         /* Control never gets here */
@@ -2593,7 +2603,7 @@ for (;;)
           if (eptr >= md->end_subject || fc != *eptr) break;
           eptr++;
           }
-        CHECK_PARTIAL();   
+        CHECK_PARTIAL();
         if (possessive) continue;
         while (eptr >= pp)
           {
@@ -2717,8 +2727,8 @@ for (;;)
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);  
-            }    
+            RRETURN(MATCH_NOMATCH);
+            }
           GETCHARINC(d, eptr);
           if (d < 256) d = md->lcc[d];
           if (fc == d) RRETURN(MATCH_NOMATCH);
@@ -2734,10 +2744,10 @@ for (;;)
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);  
-            }    
+            RRETURN(MATCH_NOMATCH);
+            }
           if (fc == md->lcc[*eptr++]) RRETURN(MATCH_NOMATCH);
-          } 
+          }
         }
 
       if (min == max) continue;
@@ -2757,12 +2767,12 @@ for (;;)
               {
               CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              }     
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(d, eptr);
             if (d < 256) d = md->lcc[d];
             if (fc == d) RRETURN(MATCH_NOMATCH);
@@ -2812,7 +2822,7 @@ for (;;)
             if (fc == d) break;
             eptr += len;
             }
-        CHECK_PARTIAL();     
+        CHECK_PARTIAL();
         if (possessive) continue;
         for(;;)
             {
@@ -2831,7 +2841,7 @@ for (;;)
             if (eptr >= md->end_subject || fc == md->lcc[*eptr]) break;
             eptr++;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           if (possessive) continue;
           while (eptr >= pp)
             {
@@ -2860,8 +2870,8 @@ for (;;)
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);  
-            }    
+            RRETURN(MATCH_NOMATCH);
+            }
           GETCHARINC(d, eptr);
           if (fc == d) RRETURN(MATCH_NOMATCH);
           }
@@ -2875,10 +2885,10 @@ for (;;)
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);  
-            }    
+            RRETURN(MATCH_NOMATCH);
+            }
           if (fc == *eptr++) RRETURN(MATCH_NOMATCH);
-          } 
+          }
         }
 
       if (min == max) continue;
@@ -2894,16 +2904,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM32);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(d, eptr);
             if (fc == d) RRETURN(MATCH_NOMATCH);
             }
@@ -2925,7 +2935,7 @@ for (;;)
               {
               SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              }   
+              }
             if (fc == *eptr++) RRETURN(MATCH_NOMATCH);
             }
           }
@@ -2951,7 +2961,7 @@ for (;;)
             if (fc == d) break;
             eptr += len;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           if (possessive) continue;
           for(;;)
             {
@@ -2970,7 +2980,7 @@ for (;;)
             if (eptr >= md->end_subject || fc == *eptr) break;
             eptr++;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           if (possessive) continue;
           while (eptr >= pp)
             {
@@ -3077,11 +3087,11 @@ for (;;)
           if (prop_fail_result) RRETURN(MATCH_NOMATCH);
           for (i = 1; i <= min; i++)
             {
-            if (eptr >= md->end_subject) 
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINCTEST(c, eptr);
             }
           break;
@@ -3089,11 +3099,11 @@ for (;;)
           case PT_LAMP:
           for (i = 1; i <= min; i++)
             {
-            if (eptr >= md->end_subject) 
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINCTEST(c, eptr);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
@@ -3106,11 +3116,11 @@ for (;;)
           case PT_GC:
           for (i = 1; i <= min; i++)
             {
-            if (eptr >= md->end_subject) 
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINCTEST(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
@@ -3121,11 +3131,11 @@ for (;;)
           case PT_PC:
           for (i = 1; i <= min; i++)
             {
-            if (eptr >= md->end_subject) 
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINCTEST(c, eptr);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
@@ -3136,11 +3146,11 @@ for (;;)
           case PT_SC:
           for (i = 1; i <= min; i++)
             {
-            if (eptr >= md->end_subject) 
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINCTEST(c, eptr);
             prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
@@ -3160,11 +3170,11 @@ for (;;)
         {
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINCTEST(c, eptr);
           prop_category = UCD_CATEGORY(c);
           if (prop_category == ucp_M) RRETURN(MATCH_NOMATCH);
@@ -3193,9 +3203,9 @@ for (;;)
           {
           if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL();  
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
           eptr++;
           while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
@@ -3205,29 +3215,29 @@ for (;;)
         case OP_ALLANY:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           eptr++;
           while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
           }
         break;
 
         case OP_ANYBYTE:
-        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH); 
+        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH);
         eptr += min;
         break;
 
         case OP_ANYNL:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           switch(c)
             {
@@ -3253,11 +3263,11 @@ for (;;)
         case OP_NOT_HSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           switch(c)
             {
@@ -3289,11 +3299,11 @@ for (;;)
         case OP_HSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           switch(c)
             {
@@ -3325,11 +3335,11 @@ for (;;)
         case OP_NOT_VSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           switch(c)
             {
@@ -3349,11 +3359,11 @@ for (;;)
         case OP_VSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           switch(c)
             {
@@ -3373,11 +3383,11 @@ for (;;)
         case OP_NOT_DIGIT:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINC(c, eptr);
           if (c < 128 && (md->ctypes[c] & ctype_digit) != 0)
             RRETURN(MATCH_NOMATCH);
@@ -3387,11 +3397,11 @@ for (;;)
         case OP_DIGIT:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (*eptr >= 128 || (md->ctypes[*eptr++] & ctype_digit) == 0)
             RRETURN(MATCH_NOMATCH);
           /* No need to skip more bytes - we know it's a 1-byte character */
@@ -3401,11 +3411,11 @@ for (;;)
         case OP_NOT_WHITESPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (*eptr < 128 && (md->ctypes[*eptr] & ctype_space) != 0)
             RRETURN(MATCH_NOMATCH);
           while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80);
@@ -3415,11 +3425,11 @@ for (;;)
         case OP_WHITESPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (*eptr >= 128 || (md->ctypes[*eptr++] & ctype_space) == 0)
             RRETURN(MATCH_NOMATCH);
           /* No need to skip more bytes - we know it's a 1-byte character */
@@ -3439,11 +3449,11 @@ for (;;)
         case OP_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (*eptr >= 128 || (md->ctypes[*eptr++] & ctype_word) == 0)
             RRETURN(MATCH_NOMATCH);
           /* No need to skip more bytes - we know it's a 1-byte character */
@@ -3465,34 +3475,34 @@ for (;;)
         case OP_ANY:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
           eptr++;
           }
         break;
 
         case OP_ALLANY:
-        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH); 
+        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH);
         eptr += min;
         break;
 
         case OP_ANYBYTE:
-        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH); 
+        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH);
         eptr += min;
         break;
 
         case OP_ANYNL:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
@@ -3514,11 +3524,11 @@ for (;;)
         case OP_NOT_HSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           switch(*eptr++)
             {
             default: break;
@@ -3533,11 +3543,11 @@ for (;;)
         case OP_HSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
@@ -3552,11 +3562,11 @@ for (;;)
         case OP_NOT_VSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           switch(*eptr++)
             {
             default: break;
@@ -3573,11 +3583,11 @@ for (;;)
         case OP_VSPACE:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject) 
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
@@ -3593,76 +3603,76 @@ for (;;)
 
         case OP_NOT_DIGIT:
         for (i = 1; i <= min; i++)
-          { 
-          if (eptr >= md->end_subject) 
+          {
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if ((md->ctypes[*eptr++] & ctype_digit) != 0) RRETURN(MATCH_NOMATCH);
-          } 
+          }
         break;
 
         case OP_DIGIT:
         for (i = 1; i <= min; i++)
-          { 
-          if (eptr >= md->end_subject) 
+          {
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if ((md->ctypes[*eptr++] & ctype_digit) == 0) RRETURN(MATCH_NOMATCH);
-          } 
+          }
         break;
 
         case OP_NOT_WHITESPACE:
         for (i = 1; i <= min; i++)
-          { 
-          if (eptr >= md->end_subject) 
+          {
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if ((md->ctypes[*eptr++] & ctype_space) != 0) RRETURN(MATCH_NOMATCH);
-          } 
+          }
         break;
 
         case OP_WHITESPACE:
         for (i = 1; i <= min; i++)
-          { 
-          if (eptr >= md->end_subject) 
+          {
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if ((md->ctypes[*eptr++] & ctype_space) == 0) RRETURN(MATCH_NOMATCH);
-          } 
+          }
         break;
 
         case OP_NOT_WORDCHAR:
         for (i = 1; i <= min; i++)
-          { 
-          if (eptr >= md->end_subject) 
+          {
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if ((md->ctypes[*eptr++] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
-          }   
+          }
         break;
 
         case OP_WORDCHAR:
         for (i = 1; i <= min; i++)
-          { 
-          if (eptr >= md->end_subject) 
+          {
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if ((md->ctypes[*eptr++] & ctype_word) == 0)
             RRETURN(MATCH_NOMATCH);
-          }   
+          }
         break;
 
         default:
@@ -3690,16 +3700,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM36);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(c, eptr);
             if (prop_fail_result) RRETURN(MATCH_NOMATCH);
             }
@@ -3710,16 +3720,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM37);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(c, eptr);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
@@ -3734,16 +3744,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM38);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
@@ -3756,16 +3766,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(c, eptr);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
@@ -3778,16 +3788,16 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM40);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) 
+            if (fi >= max)
               {
-              CHECK_PARTIAL(); 
+              CHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
-            if (eptr >= md->end_subject) 
+              }
+            if (eptr >= md->end_subject)
               {
-              SCHECK_PARTIAL(); 
+              SCHECK_PARTIAL();
               RRETURN(MATCH_NOMATCH);
-              } 
+              }
             GETCHARINC(c, eptr);
             prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
@@ -3809,16 +3819,16 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM41);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max) 
+          if (fi >= max)
             {
-            CHECK_PARTIAL(); 
+            CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
-          if (eptr >= md->end_subject) 
+            }
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           GETCHARINCTEST(c, eptr);
           prop_category = UCD_CATEGORY(c);
           if (prop_category == ucp_M) RRETURN(MATCH_NOMATCH);
@@ -3845,16 +3855,16 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM42);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max) 
+          if (fi >= max)
             {
-            CHECK_PARTIAL(); 
+            CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
-          if (eptr >= md->end_subject) 
+            }
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (ctype == OP_ANY && IS_NEWLINE(eptr))
             RRETURN(MATCH_NOMATCH);
           GETCHARINC(c, eptr);
@@ -4012,16 +4022,16 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM43);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max) 
+          if (fi >= max)
             {
-            CHECK_PARTIAL(); 
+            CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
-          if (eptr >= md->end_subject) 
+            }
+          if (eptr >= md->end_subject)
             {
-            SCHECK_PARTIAL(); 
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
-            } 
+            }
           if (ctype == OP_ANY && IS_NEWLINE(eptr))
             RRETURN(MATCH_NOMATCH);
           c = *eptr++;
@@ -4894,7 +4904,8 @@ md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 md->notbol = (options & PCRE_NOTBOL) != 0;
 md->noteol = (options & PCRE_NOTEOL) != 0;
 md->notempty = (options & PCRE_NOTEMPTY) != 0;
-md->partial = (options & PCRE_PARTIAL) != 0;
+md->partial = ((options & PCRE_PARTIAL_HARD) != 0)? 2 :
+              ((options & PCRE_PARTIAL_SOFT) != 0)? 1 : 0;
 md->hitend = FALSE;
 
 md->recursive = NULL;                   /* No recursion at top level */
@@ -5252,7 +5263,7 @@ for(;;)
       }
     }
 
-  /* OK, we can now run the match. If "hitend" is set afterwards, remember the 
+  /* OK, we can now run the match. If "hitend" is set afterwards, remember the
   first starting point for which a partial match was found. */
 
   md->start_match_ptr = start_match;
@@ -5394,19 +5405,19 @@ if (using_temporary_offsets)
   (pcre_free)(md->offset_vector);
   }
 
-if (rc != MATCH_NOMATCH)
+if (rc != MATCH_NOMATCH && rc != PCRE_ERROR_PARTIAL)
   {
   DPRINTF((">>>> error: returning %d\n", rc));
   return rc;
   }
-else if (md->partial && start_partial != NULL)
+else if (start_partial != NULL)
   {
   DPRINTF((">>>> returning PCRE_ERROR_PARTIAL\n"));
-  if (offsetcount > 1) 
+  if (offsetcount > 1)
     {
     offsets[0] = start_partial - (USPTR)subject;
     offsets[1] = end_subject - (USPTR)subject;
-    }  
+    }
   return PCRE_ERROR_PARTIAL;
   }
 else

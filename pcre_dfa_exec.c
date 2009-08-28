@@ -2473,11 +2473,15 @@ for (;;)
 
   if (new_count <= 0)
     {
-    if (match_count < 0 &&                     /* No matches found */
-        rlevel == 1 &&                         /* Top level match function */
-        (md->moptions & PCRE_PARTIAL) != 0 &&  /* Want partial matching */
-        ptr >= end_subject &&                  /* Reached end of subject */
-        ptr > current_subject)                 /* Matched non-empty string */
+    if (rlevel == 1 &&                               /* Top level, and */
+        (                                            /* either... */
+        (md->moptions & PCRE_PARTIAL_HARD) != 0      /* Hard partial */
+        ||                                           /* or... */
+        ((md->moptions & PCRE_PARTIAL_SOFT) != 0 &&  /* Soft partial and */
+         match_count < 0)                            /* no matches */
+        ) &&                                         /* And... */
+        ptr >= end_subject &&                     /* Reached end of subject */
+        ptr > current_subject)                    /* Matched non-empty string */
       {
       if (offsetcount >= 2)
         {

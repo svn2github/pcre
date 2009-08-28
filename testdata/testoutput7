@@ -7386,4 +7386,16 @@ Partial match: Z
     ZA\P 
 No match
 
+/dog(sbody)?/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+    
+/dog|dogsbody/
+    dogs\P
+ 0: dog
+    dogs\P\P 
+Partial match: dogs
+ 
 / End of testinput7 /

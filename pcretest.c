@@ -1992,7 +1992,8 @@ while (!done)
         continue;
 
         case 'P':
-        options |= PCRE_PARTIAL;
+        options |= ((options & PCRE_PARTIAL_SOFT) == 0)? 
+          PCRE_PARTIAL_SOFT : PCRE_PARTIAL_HARD;
         continue;
 
         case 'Q':
