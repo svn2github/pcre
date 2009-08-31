@@ -53,7 +53,10 @@ The options are:
   PCRE_NO_UTF8_CHECK Do not check the subject for UTF-8
                        validity (only relevant if PCRE_UTF8
                        was set at compile time)
-  PCRE_PARTIAL       Return PCRE_ERROR_PARTIAL for a partial match
+  PCRE_PARTIAL       ) Return PCRE_ERROR_PARTIAL for a partial match 
+  PCRE_PARTIAL_SOFT  )   if no full matches are found
+  PCRE_PARTIAL_HARD  Return PCRE_ERROR_PARTIAL for a partial match 
+                       even if there is a full match as well 
   PCRE_DFA_SHORTEST  Return only the shortest match
   PCRE_DFA_RESTART   This is a restart after a partial match
 .sp
@@ -62,7 +65,11 @@ function. Details are given in the
 .\" HREF
 \fBpcrematching\fP
 .\"
-documentation.
+documentation. For details of partial matching, see the
+.\" HREF
+\fBpcrepartial\fP
+.\"
+page.
 .P
 A \fBpcre_extra\fP structure contains the following fields:
 .sp

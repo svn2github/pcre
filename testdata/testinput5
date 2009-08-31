@@ -737,4 +737,8 @@ can't tell the difference.) --/
     \x{123}X\x{123}\x{123}\x{123}\P
     \x{123}X\x{123}\x{123}\x{123}\x{123}\P 
 
+/\bthe cat\b/8
+    the cat\P
+    the cat\P\P
+
 / End of testinput5 /

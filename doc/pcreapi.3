@@ -1242,7 +1242,7 @@ documentation for a discussion of saving compiled patterns for later use.
 The unused bits of the \fIoptions\fP argument for \fBpcre_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_START_OPTIMIZE,
-PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
+PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and PCRE_PARTIAL_HARD.
 .sp
   PCRE_ANCHORED
 .sp
@@ -1368,15 +1368,19 @@ PCRE_NO_UTF8_CHECK is set, the effect of passing an invalid UTF-8 string as a
 subject, or a value of \fIstartoffset\fP that does not point to the start of a
 UTF-8 character, is undefined. Your program may crash.
 .sp
-  PCRE_PARTIAL
+  PCRE_PARTIAL_HARD 
+  PCRE_PARTIAL_SOFT
 .sp
-This option turns on the partial matching feature. If the subject string fails
-to match the pattern, but at some point during the matching process the end of
-the subject was reached (that is, the subject partially matches the pattern and
-the failure to match occurred only because there were not enough subject
-characters), \fBpcre_exec()\fP returns PCRE_ERROR_PARTIAL instead of
-PCRE_ERROR_NOMATCH. The portion of the string that provided the longest partial
-match is set as the first matching string. There is further discussion in the
+These options turn on the partial matching feature. For backwards
+compatibility, PCRE_PARTIAL is a synonym for PCRE_PARTIAL_SOFT. A partial match
+occurs if the end of the subject string is reached successfully, but there are
+not enough subject characters to complete the match. If this happens when
+PCRE_PARTIAL_HARD is set, \fBpcre_exec()\fP immediately returns
+PCRE_ERROR_PARTIAL. Otherwise, if PCRE_PARTIAL_SOFT is set, matching continues
+by testing any other alternatives. Only if they all fail is PCRE_ERROR_PARTIAL
+returned (instead of PCRE_ERROR_NOMATCH). The portion of the string that
+provided the partial match is set as the first matching string. There is a more
+detailed discussion in the
 .\" HREF
 \fBpcrepartial\fP
 .\"
@@ -1862,20 +1866,24 @@ Here is an example of a simple call to \fBpcre_dfa_exec()\fP:
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre_dfa_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL,
-PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last three of these are
-exactly the same as for \fBpcre_exec()\fP, so their description is not repeated
-here.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD,
+PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last
+four of these are exactly the same as for \fBpcre_exec()\fP, so their
+description is not repeated here.
 .sp
-  PCRE_PARTIAL
+  PCRE_PARTIAL_HARD
+  PCRE_PARTIAL_SOFT 
 .sp
-This has the same general effect as it does for \fBpcre_exec()\fP, but the
-details are slightly different. When PCRE_PARTIAL is set for
-\fBpcre_dfa_exec()\fP, the return code PCRE_ERROR_NOMATCH is converted into
-PCRE_ERROR_PARTIAL if the end of the subject is reached, there have been no
-complete matches, but there is still at least one matching possibility. The
-portion of the string that provided the longest partial match is set as the
-first matching string.
+These have the same general effect as they do for \fBpcre_exec()\fP, but the
+details are slightly different. When PCRE_PARTIAL_HARD is set for
+\fBpcre_dfa_exec()\fP, it returns PCRE_ERROR_PARTIAL if the end of the subject
+is reached and there is still at least one matching possibility that requires
+additional characters. This happens even if some complete matches have also
+been found. When PCRE_PARTIAL_SOFT is set, the return code PCRE_ERROR_NOMATCH
+is converted into PCRE_ERROR_PARTIAL if the end of the subject is reached,
+there have been no complete matches, but there is still at least one matching
+possibility. The portion of the string that provided the longest partial match
+is set as the first matching string in both cases.
 .sp
   PCRE_DFA_SHORTEST
 .sp
@@ -1886,13 +1894,12 @@ matching point in the subject string.
 .sp
   PCRE_DFA_RESTART
 .sp
-When \fBpcre_dfa_exec()\fP is called with the PCRE_PARTIAL option, and returns
-a partial match, it is possible to call it again, with additional subject
-characters, and have it continue with the same match. The PCRE_DFA_RESTART
-option requests this action; when it is set, the \fIworkspace\fP and
-\fIwscount\fP options must reference the same vector as before because data
-about the match so far is left in them after a partial match. There is more
-discussion of this facility in the
+When \fBpcre_dfa_exec()\fP returns a partial match, it is possible to call it
+again, with additional subject characters, and have it continue with the same
+match. The PCRE_DFA_RESTART option requests this action; when it is set, the
+\fIworkspace\fP and \fIwscount\fP options must reference the same vector as
+before because data about the match so far is left in them after a partial
+match. There is more discussion of this facility in the
 .\" HREF
 \fBpcrepartial\fP
 .\"
@@ -1996,6 +2003,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 August 2009
+Last updated: 29 August 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

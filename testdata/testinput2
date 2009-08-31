@@ -2916,8 +2916,24 @@ a random value. /Ix
     dogs\P
     dogs\P\P 
     
+/dog(sbody)??/
+    dogs\P
+    dogs\P\P 
+
 /dog|dogsbody/
     dogs\P
     dogs\P\P 
  
+/dogsbody|dog/
+    dogs\P
+    dogs\P\P 
+
+/\bthe cat\b/
+    the cat\P
+    the cat\P\P
+
+/abc/
+   abc\P
+   abc\P\P
+
 / End of testinput2 /

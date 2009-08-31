@@ -361,8 +361,9 @@ recognized:
   \eOdd       set the size of the output vector passed to
                \fBpcre_exec()\fP to dd (any number of digits)
 .\" JOIN
-  \eP         pass the PCRE_PARTIAL option to \fBpcre_exec()\fP
-               or \fBpcre_dfa_exec()\fP
+  \eP         pass the PCRE_PARTIAL_SOFT option to \fBpcre_exec()\fP
+               or \fBpcre_dfa_exec()\fP; if used twice, pass the
+               PCRE_PARTIAL_HARD option 
 .\" JOIN
   \eQdd       set the PCRE_MATCH_LIMIT_RECURSION limit to dd
                (any number of digits)
@@ -460,8 +461,8 @@ This section describes the output when the normal matching function,
 .P
 When a match succeeds, pcretest outputs the list of captured substrings that
 \fBpcre_exec()\fP returns, starting with number 0 for the string that matched
-the whole pattern. Otherwise, it outputs "No match" or "Partial match" followed 
-by the partially matching substring when \fBpcre_exec()\fP returns
+the whole pattern. Otherwise, it outputs "No match" or "Partial match:"
+followed by the partially matching substring when \fBpcre_exec()\fP returns
 PCRE_ERROR_NOMATCH or PCRE_ERROR_PARTIAL, respectively, and otherwise the PCRE
 negative error number. Here is an example of an interactive \fBpcretest\fP run.
 .sp
@@ -544,7 +545,9 @@ the subject where there is at least one match. For example:
    2: tan
 .sp
 (Using the normal matching function on this data finds only "tang".) The
-longest matching string is always given first (and numbered zero).
+longest matching string is always given first (and numbered zero). After a
+PCRE_ERROR_PARTIAL return, the output is "Partial match:", followed by the 
+partially matching substring.
 .P
 If \fB/g\fP is present on the pattern, the search for further matches resumes
 at the end of the longest match. For example:
@@ -723,6 +726,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 25 August 2009
+Last updated: 29 August 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

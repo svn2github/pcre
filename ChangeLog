@@ -51,11 +51,26 @@ Version 8.00 ??-???-??
     slots in the offset vector, the offsets of the first-encountered partial
     match are set in them when PCRE_ERROR_PARTIAL is returned.
     
-10. Partial matching has been split into two forms: PCRE_PARTIAL_SOFT, which is 
-    synonymous with PCRE_PARTIAL, for backwards compatibility, and 
-    PCRE_PARTIAL_HARD, which causes a longer partial match to supersede a 
-    shorter full match, and may be more useful for multi-segment matching, 
-    especially with pcre_exec().
+10. Partial matching has been split into two forms: PCRE_PARTIAL_SOFT, which is
+    synonymous with PCRE_PARTIAL, for backwards compatibility, and
+    PCRE_PARTIAL_HARD, which causes a partial match to supersede a full match,
+    and may be more useful for multi-segment matching, especially with
+    pcre_exec().
+    
+11. Partial matching with pcre_exec() is now more intuitive. A partial match 
+    used to be given if ever the end of the subject was reached; now it is 
+    given only if matching could not proceed because another character was 
+    needed. This makes a difference in some odd cases such as Z(*FAIL) with the 
+    string "Z", which now yields "no match" instead of "partial match". In the 
+    case of pcre_dfa_exec(), "no match" is given if every matching path for the 
+    final character ended with (*FAIL). 
+    
+12. Restarting a match using pcre_dfa_exec() after a partial match did not work
+    if the pattern had a "must contain" character that was already found in the 
+    earlier partial match, unless partial matching was again requested. For
+    example, with the pattern /dog.(body)?/, the "must contain" character is
+    "g". If the first part-match was for the string "dog", restarting with
+    "sbody" failed.
     
 
 Version 7.9 11-Apr-09

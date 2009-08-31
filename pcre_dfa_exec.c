@@ -454,6 +454,8 @@ for (;;)
   int i, j;
   int clen, dlen;
   unsigned int c, d;
+  int forced_fail = 0;
+  int reached_end = 0; 
 
   /* Make the new state list into the active state list and empty the
   new state list. */
@@ -624,27 +626,31 @@ for (;;)
           ADD_ACTIVE(state_offset - GET(code, 1), 0);
           }
         }
-      else if (ptr > current_subject || (md->moptions & PCRE_NOTEMPTY) == 0)
+      else 
         {
-        if (match_count < 0) match_count = (offsetcount >= 2)? 1 : 0;
-          else if (match_count > 0 && ++match_count * 2 >= offsetcount)
-            match_count = 0;
-        count = ((match_count == 0)? offsetcount : match_count * 2) - 2;
-        if (count > 0) memmove(offsets + 2, offsets, count * sizeof(int));
-        if (offsetcount >= 2)
+        reached_end++;    /* Count branches that reach the end */ 
+        if (ptr > current_subject || (md->moptions & PCRE_NOTEMPTY) == 0)
           {
-          offsets[0] = current_subject - start_subject;
-          offsets[1] = ptr - start_subject;
-          DPRINTF(("%.*sSet matched string = \"%.*s\"\n", rlevel*2-2, SP,
-            offsets[1] - offsets[0], current_subject));
-          }
-        if ((md->moptions & PCRE_DFA_SHORTEST) != 0)
-          {
-          DPRINTF(("%.*sEnd of internal_dfa_exec %d: returning %d\n"
-            "%.*s---------------------\n\n", rlevel*2-2, SP, rlevel,
-            match_count, rlevel*2-2, SP));
-          return match_count;
-          }
+          if (match_count < 0) match_count = (offsetcount >= 2)? 1 : 0;
+            else if (match_count > 0 && ++match_count * 2 >= offsetcount)
+              match_count = 0;
+          count = ((match_count == 0)? offsetcount : match_count * 2) - 2;
+          if (count > 0) memmove(offsets + 2, offsets, count * sizeof(int));
+          if (offsetcount >= 2)
+            {
+            offsets[0] = current_subject - start_subject;
+            offsets[1] = ptr - start_subject;
+            DPRINTF(("%.*sSet matched string = \"%.*s\"\n", rlevel*2-2, SP,
+              offsets[1] - offsets[0], current_subject));
+            }
+          if ((md->moptions & PCRE_DFA_SHORTEST) != 0)
+            {
+            DPRINTF(("%.*sEnd of internal_dfa_exec %d: returning %d\n"
+              "%.*s---------------------\n\n", rlevel*2-2, SP, rlevel,
+              match_count, rlevel*2-2, SP));
+            return match_count;
+            }
+          }   
         }
       break;
 
@@ -802,8 +808,13 @@ for (;;)
           }
         else left_word = 0;
 
-        if (clen > 0) right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
-          else right_word = 0;
+        if (clen > 0) 
+          right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
+        else              /* This is a fudge to ensure that if this is the */
+          {               /* last item in the pattern, we don't count it as */
+          reached_end--;  /* reached, thus disabling a partial match. */
+          right_word = 0;
+          } 
 
         if ((left_word == right_word) == (codevalue == OP_NOT_WORD_BOUNDARY))
           { ADD_ACTIVE(state_offset + 1, 0); }
@@ -2162,6 +2173,7 @@ for (;;)
       though the other "backtracking verbs" are not supported. */
 
       case OP_FAIL:
+      forced_fail++;    /* Count FAILs for multiple states */
       break;
 
       case OP_ASSERT:
@@ -2469,11 +2481,17 @@ for (;;)
   /* We have finished the processing at the current subject character. If no
   new states have been set for the next character, we have found all the
   matches that we are going to find. If we are at the top level and partial
-  matching has been requested, check for appropriate conditions. */
+  matching has been requested, check for appropriate conditions. The "forced_
+  fail" variable counts the number of (*F) encountered for the character. If it
+  is equal to the original active_count (saved in workspace[1]) it means that
+  (*F) was found on every active state. In this case we don't want to give a
+  partial match. */
 
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
+        reached_end != workspace[1] &&               /* Not all reached end */ 
+        forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (md->moptions & PCRE_PARTIAL_HARD) != 0      /* Hard partial */
         ||                                           /* or... */
@@ -2871,12 +2889,14 @@ for (;;)
   don't do this when the string is sufficiently long.
 
   ALSO: this processing is disabled when partial matching is requested, and can
-  also be explicitly deactivated. */
+  also be explicitly deactivated. Furthermore, we have to disable when
+  restarting after a partial match, because the required character may have
+  already been matched. */
 
   if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
       req_byte >= 0 &&
       end_subject - current_subject < REQ_BYTE_MAX &&
-      (options & PCRE_PARTIAL) == 0)
+      (options & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_DFA_RESTART)) == 0)
     {
     register const uschar *p = current_subject + ((first_byte >= 0)? 1 : 0);
 

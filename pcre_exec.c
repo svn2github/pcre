@@ -418,7 +418,6 @@ the subject. */
   if (md->partial && eptr > mstart)\
     {\
     md->hitend = TRUE;\
-    md->hitend = TRUE;\
     if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);\
     }
 
@@ -664,13 +663,7 @@ for (;;)
   {
   minimize = possessive = FALSE;
   op = *ecode;
-
-  /* For partial matching, remember if we ever hit the end of the subject after
-  matching at least one subject character. This code is now wrapped in a macro
-  because it appears several times below. */
-
-  CHECK_PARTIAL();
-
+  
   switch(op)
     {
     case OP_FAIL:
@@ -1487,7 +1480,12 @@ for (;;)
           GETCHAR(c, lastptr);
           prev_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
           }
-        if (eptr >= md->end_subject) cur_is_word = FALSE; else
+        if (eptr >= md->end_subject) 
+          {
+          SCHECK_PARTIAL(); 
+          cur_is_word = FALSE; 
+          }
+        else
           {
           GETCHAR(c, eptr);
           cur_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
@@ -1496,13 +1494,17 @@ for (;;)
       else
 #endif
 
-      /* More streamlined when not in UTF-8 mode */
+      /* Not in UTF-8 mode */
 
         {
         prev_is_word = (eptr != md->start_subject) &&
           ((md->ctypes[eptr[-1]] & ctype_word) != 0);
-        cur_is_word = (eptr < md->end_subject) &&
-          ((md->ctypes[*eptr] & ctype_word) != 0);
+        if (eptr >= md->end_subject) 
+          {
+          SCHECK_PARTIAL(); 
+          cur_is_word = FALSE; 
+          }
+        else cur_is_word = ((md->ctypes[*eptr] & ctype_word) != 0);
         }
 
       /* Now see if the situation is what we want */
@@ -1520,7 +1522,11 @@ for (;;)
     /* Fall through */
 
     case OP_ALLANY:
-    if (eptr++ >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr++ >= md->end_subject) 
+      {
+      SCHECK_PARTIAL(); 
+      RRETURN(MATCH_NOMATCH);
+      } 
     if (utf8) while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
     ecode++;
     break;
@@ -1529,12 +1535,20 @@ for (;;)
     any byte, even newline, independent of the setting of PCRE_DOTALL. */
 
     case OP_ANYBYTE:
-    if (eptr++ >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr++ >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     ecode++;
     break;
 
     case OP_NOT_DIGIT:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     if (
 #ifdef SUPPORT_UTF8
@@ -1547,7 +1561,11 @@ for (;;)
     break;
 
     case OP_DIGIT:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     if (
 #ifdef SUPPORT_UTF8
@@ -1560,7 +1578,11 @@ for (;;)
     break;
 
     case OP_NOT_WHITESPACE:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     if (
 #ifdef SUPPORT_UTF8
@@ -1573,7 +1595,11 @@ for (;;)
     break;
 
     case OP_WHITESPACE:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     if (
 #ifdef SUPPORT_UTF8
@@ -1586,7 +1612,11 @@ for (;;)
     break;
 
     case OP_NOT_WORDCHAR:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     if (
 #ifdef SUPPORT_UTF8
@@ -1599,7 +1629,11 @@ for (;;)
     break;
 
     case OP_WORDCHAR:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     if (
 #ifdef SUPPORT_UTF8
@@ -1612,7 +1646,11 @@ for (;;)
     break;
 
     case OP_ANYNL:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
@@ -1636,7 +1674,11 @@ for (;;)
     break;
 
     case OP_NOT_HSPACE:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
@@ -1666,7 +1708,11 @@ for (;;)
     break;
 
     case OP_HSPACE:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
@@ -1696,7 +1742,11 @@ for (;;)
     break;
 
     case OP_NOT_VSPACE:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
@@ -1714,7 +1764,11 @@ for (;;)
     break;
 
     case OP_VSPACE:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
@@ -1737,7 +1791,11 @@ for (;;)
 
     case OP_PROP:
     case OP_NOTPROP:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
       {
       const ucd_record *prop = GET_UCD(c);
@@ -1782,7 +1840,11 @@ for (;;)
     is in the binary; otherwise a compile-time error occurs. */
 
     case OP_EXTUNI:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL();  
+      RRETURN(MATCH_NOMATCH);
+      } 
     GETCHARINCTEST(c, eptr);
       {
       int category = UCD_CATEGORY(c);
@@ -1862,14 +1924,18 @@ for (;;)
         break;
 
         default:               /* No repeat follows */
-        if (!match_ref(offset, eptr, length, md, ims)) RRETURN(MATCH_NOMATCH);
+        if (!match_ref(offset, eptr, length, md, ims)) 
+          {
+          CHECK_PARTIAL(); 
+          RRETURN(MATCH_NOMATCH);
+          } 
         eptr += length;
         continue;              /* With the main loop */
         }
 
       /* If the length of the reference is zero, just continue with the
       main loop. */
-
+      
       if (length == 0) continue;
 
       /* First, ensure the minimum number of matches are present. We get back
@@ -1899,7 +1965,8 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM14);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max || !match_ref(offset, eptr, length, md, ims))
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
+          if (!match_ref(offset, eptr, length, md, ims))
             {
             CHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
@@ -1919,7 +1986,6 @@ for (;;)
           if (!match_ref(offset, eptr, length, md, ims)) break;
           eptr += length;
           }
-        CHECK_PARTIAL();
         while (eptr >= pp)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM15);
@@ -1930,8 +1996,6 @@ for (;;)
         }
       }
     /* Control never gets here */
-
-
 
     /* Match a bit-mapped character class, possibly repeatedly. This op code is
     used when all the characters in the class have values in the range 0-255,
@@ -1989,7 +2053,7 @@ for (;;)
           {
           if (eptr >= md->end_subject)
             {
-            CHECK_PARTIAL();
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(c, eptr);
@@ -2011,7 +2075,7 @@ for (;;)
           {
           if (eptr >= md->end_subject)
             {
-            CHECK_PARTIAL();
+            SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
           c = *eptr++;
@@ -2037,11 +2101,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM16);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -2066,11 +2126,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM17);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -2108,7 +2164,6 @@ for (;;)
               }
             eptr += len;
             }
-          CHECK_PARTIAL();
           for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM18);
@@ -2128,7 +2183,6 @@ for (;;)
             if ((data[c/8] & (1 << (c&7))) == 0) break;
             eptr++;
             }
-          CHECK_PARTIAL();
           while (eptr >= pp)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM19);
@@ -2209,11 +2263,7 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM20);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max)
-            {
-            CHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -2238,7 +2288,6 @@ for (;;)
           if (!_pcre_xclass(c, data)) break;
           eptr += len;
           }
-        CHECK_PARTIAL();
         for(;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM21);
@@ -2262,7 +2311,11 @@ for (;;)
       length = 1;
       ecode++;
       GETCHARLEN(fc, ecode, length);
-      if (length > md->end_subject - eptr) RRETURN(MATCH_NOMATCH);
+      if (length > md->end_subject - eptr) 
+        {
+        CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
+        RRETURN(MATCH_NOMATCH);
+        } 
       while (length-- > 0) if (*ecode++ != *eptr++) RRETURN(MATCH_NOMATCH);
       }
     else
@@ -2270,7 +2323,11 @@ for (;;)
 
     /* Non-UTF-8 mode */
       {
-      if (md->end_subject - eptr < 1) RRETURN(MATCH_NOMATCH);
+      if (md->end_subject - eptr < 1) 
+        {
+        SCHECK_PARTIAL();            /* This one can use SCHECK_PARTIAL() */
+        RRETURN(MATCH_NOMATCH);
+        } 
       if (ecode[1] != *eptr++) RRETURN(MATCH_NOMATCH);
       ecode += 2;
       }
@@ -2286,7 +2343,11 @@ for (;;)
       ecode++;
       GETCHARLEN(fc, ecode, length);
 
-      if (length > md->end_subject - eptr) RRETURN(MATCH_NOMATCH);
+      if (length > md->end_subject - eptr) 
+        {
+        CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
+        RRETURN(MATCH_NOMATCH);
+        } 
 
       /* If the pattern character's value is < 128, we have only one byte, and
       can use the fast lookup table. */
@@ -2321,7 +2382,11 @@ for (;;)
 
     /* Non-UTF-8 mode */
       {
-      if (md->end_subject - eptr < 1) RRETURN(MATCH_NOMATCH);
+      if (md->end_subject - eptr < 1) 
+        {
+        SCHECK_PARTIAL();            /* This one can use SCHECK_PARTIAL() */  
+        RRETURN(MATCH_NOMATCH);
+        } 
       if (md->lcc[ecode[1]] != md->lcc[*eptr++]) RRETURN(MATCH_NOMATCH);
       ecode += 2;
       }
@@ -2375,6 +2440,7 @@ for (;;)
     case OP_MINQUERY:
     c = *ecode++ - OP_STAR;
     minimize = (c & 1) != 0;
+    
     min = rep_min[c];                 /* Pick up values from tables; */
     max = rep_max[c];                 /* zero for max => infinity */
     if (max == 0) max = INT_MAX;
@@ -2427,11 +2493,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM22);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr <= md->end_subject - length &&
               memcmp(eptr, charptr, length) == 0) eptr += length;
 #ifdef SUPPORT_UCP
@@ -2463,7 +2525,6 @@ for (;;)
             else break;
             }
 
-          CHECK_PARTIAL();
           if (possessive) continue;
 
           for(;;)
@@ -2492,7 +2553,7 @@ for (;;)
     /* When not in UTF-8 mode, load a single-byte character. */
 
     fc = *ecode++;
-
+    
     /* The value of fc at this point is always less than 256, though we may or
     may not be in UTF-8 mode. The code is duplicated for the caseless and
     caseful cases, for speed, since matching characters is likely to be quite
@@ -2524,11 +2585,7 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM24);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max)
-            {
-            CHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -2547,7 +2604,6 @@ for (;;)
           eptr++;
           }
 
-        CHECK_PARTIAL();
         if (possessive) continue;
 
         while (eptr >= pp)
@@ -2574,18 +2630,16 @@ for (;;)
           }
         if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
         }
+         
       if (min == max) continue;
+       
       if (minimize)
         {
         for (fi = min;; fi++)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM26);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max)
-            {
-            CHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -2603,8 +2657,8 @@ for (;;)
           if (eptr >= md->end_subject || fc != *eptr) break;
           eptr++;
           }
-        CHECK_PARTIAL();
         if (possessive) continue;
+        
         while (eptr >= pp)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM27);
@@ -2620,7 +2674,11 @@ for (;;)
     checking can be multibyte. */
 
     case OP_NOT:
-    if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
+    if (eptr >= md->end_subject) 
+      {
+      SCHECK_PARTIAL(); 
+      RRETURN(MATCH_NOMATCH);
+      } 
     ecode++;
     GETCHARINCTEST(c, eptr);
     if ((ims & PCRE_CASELESS) != 0)
@@ -2763,11 +2821,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM28);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -2786,11 +2840,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM29);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -2822,7 +2872,6 @@ for (;;)
             if (fc == d) break;
             eptr += len;
             }
-        CHECK_PARTIAL();
         if (possessive) continue;
         for(;;)
             {
@@ -2841,7 +2890,6 @@ for (;;)
             if (eptr >= md->end_subject || fc == md->lcc[*eptr]) break;
             eptr++;
             }
-          CHECK_PARTIAL();
           if (possessive) continue;
           while (eptr >= pp)
             {
@@ -2904,11 +2952,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM32);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -2926,11 +2970,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM33);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -2961,7 +3001,6 @@ for (;;)
             if (fc == d) break;
             eptr += len;
             }
-          CHECK_PARTIAL();
           if (possessive) continue;
           for(;;)
             {
@@ -2980,7 +3019,6 @@ for (;;)
             if (eptr >= md->end_subject || fc == *eptr) break;
             eptr++;
             }
-          CHECK_PARTIAL();
           if (possessive) continue;
           while (eptr >= pp)
             {
@@ -3486,12 +3524,20 @@ for (;;)
         break;
 
         case OP_ALLANY:
-        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH);
+        if (eptr > md->end_subject - min) 
+          {
+          SCHECK_PARTIAL(); 
+          RRETURN(MATCH_NOMATCH);
+          } 
         eptr += min;
         break;
 
         case OP_ANYBYTE:
-        if (eptr > md->end_subject - min) RRETURN(MATCH_NOMATCH);
+        if (eptr > md->end_subject - min) 
+          {
+          SCHECK_PARTIAL(); 
+          RRETURN(MATCH_NOMATCH);
+          } 
         eptr += min;
         break;
 
@@ -3700,11 +3746,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM36);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3720,11 +3762,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM37);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3744,11 +3782,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM38);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3766,11 +3800,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3788,11 +3818,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM40);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max)
-              {
-              CHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3819,11 +3845,7 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM41);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max)
-            {
-            CHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -3855,11 +3877,7 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM42);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max)
-            {
-            CHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -4022,11 +4040,7 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM43);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max)
-            {
-            CHECK_PARTIAL();
-            RRETURN(MATCH_NOMATCH);
-            }
+          if (fi >= max) RRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -4222,7 +4236,6 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        CHECK_PARTIAL();
         if (possessive) continue;
         for(;;)
           {
@@ -4259,7 +4272,6 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        CHECK_PARTIAL();
         if (possessive) continue;
         for(;;)
           {
@@ -4496,7 +4508,6 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        CHECK_PARTIAL();
         if (possessive) continue;
         for(;;)
           {
@@ -4652,7 +4663,6 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        CHECK_PARTIAL();
         if (possessive) continue;
         while (eptr >= pp)
           {
