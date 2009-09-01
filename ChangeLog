@@ -72,6 +72,10 @@ Version 8.00 ??-???-??
     "g". If the first part-match was for the string "dog", restarting with
     "sbody" failed.
     
+13. Added a pcredemo man page, created automatically from the pcredemo.c file,
+    so that the demonstration program is easily available in environments where 
+    PCRE has not been installed from source.  
+    
 
 Version 7.9 11-Apr-09
 ---------------------

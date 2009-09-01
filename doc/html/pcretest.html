@@ -372,7 +372,8 @@ recognized:
   \M         discover the minimum MATCH_LIMIT and MATCH_LIMIT_RECURSION settings
   \N         pass the PCRE_NOTEMPTY option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \Odd       set the size of the output vector passed to <b>pcre_exec()</b> to dd (any number of digits)
-  \P         pass the PCRE_PARTIAL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \P         pass the PCRE_PARTIAL_SOFT option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>; if used twice, pass the
+               PCRE_PARTIAL_HARD option 
   \Qdd       set the PCRE_MATCH_LIMIT_RECURSION limit to dd (any number of digits)
   \R         pass the PCRE_DFA_RESTART option to <b>pcre_dfa_exec()</b>
   \S         output details of memory get/free calls during matching
@@ -453,10 +454,10 @@ This section describes the output when the normal matching function,
 <P>
 When a match succeeds, pcretest outputs the list of captured substrings that
 <b>pcre_exec()</b> returns, starting with number 0 for the string that matched
-the whole pattern. Otherwise, it outputs "No match" or "Partial match"
-when <b>pcre_exec()</b> returns PCRE_ERROR_NOMATCH or PCRE_ERROR_PARTIAL,
-respectively, and otherwise the PCRE negative error number. Here is an example
-of an interactive <b>pcretest</b> run.
+the whole pattern. Otherwise, it outputs "No match" or "Partial match:"
+followed by the partially matching substring when <b>pcre_exec()</b> returns
+PCRE_ERROR_NOMATCH or PCRE_ERROR_PARTIAL, respectively, and otherwise the PCRE
+negative error number. Here is an example of an interactive <b>pcretest</b> run.
 <pre>
   $ pcretest
   PCRE version 7.0 30-Nov-2006
@@ -536,7 +537,9 @@ the subject where there is at least one match. For example:
    2: tan
 </pre>
 (Using the normal matching function on this data finds only "tang".) The
-longest matching string is always given first (and numbered zero).
+longest matching string is always given first (and numbered zero). After a
+PCRE_ERROR_PARTIAL return, the output is "Partial match:", followed by the 
+partially matching substring.
 </P>
 <P>
 If <b>/g</b> is present on the pattern, the search for further matches resumes
@@ -703,7 +706,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 March 2009
+Last updated: 29 August 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

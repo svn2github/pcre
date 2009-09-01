@@ -11,8 +11,8 @@ appeared in Perl are also available using the Python syntax. There is also some
 support for certain .NET and Oniguruma syntax items, and there is an option for
 requesting some minor changes that give better JavaScript compatibility.
 .P
-The current implementation of PCRE (release 7.x) corresponds approximately with
-Perl 5.10, including support for UTF-8 encoded strings and Unicode general
+The current implementation of PCRE (release 8.xx) corresponds approximately
+with Perl 5.10, including support for UTF-8 encoded strings and Unicode general
 category properties. However, UTF-8 and Unicode support has to be explicitly
 enabled; it is not the default. The Unicode tables correspond to Unicode
 release 5.1.
@@ -83,8 +83,8 @@ not exported.
 The user documentation for PCRE comprises a number of different sections. In
 the "man" format, each of these is a separate "man page". In the HTML format,
 each is a separate page, linked from the index page. In the plain text format,
-all the sections are concatenated, for ease of searching. The sections are as
-follows:
+all the sections, except the \fBpcredemo\fP section, are concatenated, for ease
+of searching. The sections are as follows:
 .sp
   pcre              this document
   pcre-config       show PCRE installation configuration information
@@ -93,6 +93,7 @@ follows:
   pcrecallout       details of the callout feature
   pcrecompat        discussion of Perl compatibility
   pcrecpp           details of the C++ wrapper
+  pcredemo          a demonstration C program that uses PCRE
   pcregrep          description of the \fBpcregrep\fP command
   pcrematching      discussion of the two matching algorithms
   pcrepartial       details of the partial matching facility
@@ -103,7 +104,7 @@ follows:
   pcreperform       discussion of performance issues
   pcreposix         the POSIX-compatible C API
   pcreprecompile    details of saving and re-using precompiled patterns
-  pcresample        discussion of the sample program
+  pcresample        discussion of the pcredemo program
   pcrestack         discussion of stack usage
   pcretest          description of the \fBpcretest\fP testing command
 .sp
@@ -291,6 +292,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 11 April 2009
+Last updated: 01 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -177,13 +177,7 @@ match using the standard algorithm, you have to do kludgy things with
 callouts.
 </P>
 <P>
-2. There is much better support for partial matching. The restrictions on the
-content of the pattern that apply when using the standard algorithm for partial
-matching do not apply to the alternative algorithm. For non-anchored patterns,
-the starting position of a partial match is available.
-</P>
-<P>
-3. Because the alternative algorithm scans the subject string just once, and
+2. Because the alternative algorithm scans the subject string just once, and
 never needs to backtrack, it is possible to pass very long subject strings to
 the matching function in several pieces, checking for partial matching each
 time.
@@ -215,9 +209,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 April 2008
+Last updated: 25 August 2009
 <br>
-Copyright &copy; 1997-2008 University of Cambridge.
+Copyright &copy; 1997-2009 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

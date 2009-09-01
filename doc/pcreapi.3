@@ -135,8 +135,12 @@ Applications can use these to include support for different releases of PCRE.
 The functions \fBpcre_compile()\fP, \fBpcre_compile2()\fP, \fBpcre_study()\fP,
 and \fBpcre_exec()\fP are used for compiling and matching regular expressions
 in a Perl-compatible manner. A sample program that demonstrates the simplest
-way of using them is provided in the file called \fIpcredemo.c\fP in the source
-distribution. The
+way of using them is provided in the file called \fIpcredemo.c\fP in the PCRE
+source distribution. A listing of this program is given in the
+.\" HREF
+\fBpcredemo\fP
+.\"
+documentation, and the
 .\" HREF
 \fBpcresample\fP
 .\"
@@ -1327,7 +1331,11 @@ when using the /g modifier. It is possible to emulate Perl's behaviour after
 matching a null string by first trying the match again at the same offset with
 PCRE_NOTEMPTY and PCRE_ANCHORED, and then if that fails by advancing the
 starting offset (see below) and trying an ordinary match again. There is some
-code that demonstrates how to do this in the \fIpcredemo.c\fP sample program.
+code that demonstrates how to do this in the 
+.\" HREF
+\fBpcredemo\fP
+.\"
+sample program.
 .sp
   PCRE_NO_START_OPTIMIZE
 .sp
@@ -2003,6 +2011,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 August 2009
+Last updated: 01 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

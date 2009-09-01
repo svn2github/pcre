@@ -143,6 +143,11 @@ The yield of <b>regcomp()</b> is zero on success, and non-zero otherwise. The
 is public: <i>re_nsub</i> contains the number of capturing subpatterns in
 the regular expression. Various error codes are defined in the header file.
 </P>
+<P>
+NOTE: If the yield of <b>regcomp()</b> is non-zero, you must not attempt to
+use the contents of the <i>preg</i> structure. If, for example, you pass it to
+<b>regexec()</b>, the result is undefined and your program is likely to crash.
+</P>
 <br><a name="SEC4" href="#TOC1">MATCHING NEWLINE CHARACTERS</a><br>
 <P>
 This area is not simple, because POSIX and Perl take different views of things.
@@ -257,7 +262,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC9" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 March 2009
+Last updated: 15 August 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

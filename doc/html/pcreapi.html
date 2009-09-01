@@ -164,8 +164,10 @@ Applications can use these to include support for different releases of PCRE.
 The functions <b>pcre_compile()</b>, <b>pcre_compile2()</b>, <b>pcre_study()</b>,
 and <b>pcre_exec()</b> are used for compiling and matching regular expressions
 in a Perl-compatible manner. A sample program that demonstrates the simplest
-way of using them is provided in the file called <i>pcredemo.c</i> in the source
-distribution. The
+way of using them is provided in the file called <i>pcredemo.c</i> in the PCRE
+source distribution. A listing of this program is given in the
+<a href="pcredemo.html"><b>pcredemo</b></a>
+documentation, and the
 <a href="pcresample.html"><b>pcresample</b></a>
 documentation describes how to compile and run it.
 </P>
@@ -1016,10 +1018,11 @@ different for each compiled pattern.
   PCRE_INFO_OKPARTIAL
 </pre>
 Return 1 if the pattern can be used for partial matching, otherwise 0. The
-fourth argument should point to an <b>int</b> variable. The
+fourth argument should point to an <b>int</b> variable. From release 8.00, this
+always returns 1, because the restrictions that previously applied to partial
+matching have been lifted. The
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
-documentation lists the restrictions that apply to patterns when partial
-matching is used.
+documentation gives details of partial matching.
 <pre>
   PCRE_INFO_OPTIONS
 </pre>
@@ -1246,7 +1249,7 @@ Option bits for <b>pcre_exec()</b>
 The unused bits of the <i>options</i> argument for <b>pcre_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_START_OPTIMIZE,
-PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
+PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and PCRE_PARTIAL_HARD.
 <pre>
   PCRE_ANCHORED
 </pre>
@@ -1336,7 +1339,9 @@ when using the /g modifier. It is possible to emulate Perl's behaviour after
 matching a null string by first trying the match again at the same offset with
 PCRE_NOTEMPTY and PCRE_ANCHORED, and then if that fails by advancing the
 starting offset (see below) and trying an ordinary match again. There is some
-code that demonstrates how to do this in the <i>pcredemo.c</i> sample program.
+code that demonstrates how to do this in the 
+<a href="pcredemo.html"><b>pcredemo</b></a>
+sample program.
 <pre>
   PCRE_NO_START_OPTIMIZE
 </pre>
@@ -1373,15 +1378,19 @@ PCRE_NO_UTF8_CHECK is set, the effect of passing an invalid UTF-8 string as a
 subject, or a value of <i>startoffset</i> that does not point to the start of a
 UTF-8 character, is undefined. Your program may crash.
 <pre>
-  PCRE_PARTIAL
+  PCRE_PARTIAL_HARD 
+  PCRE_PARTIAL_SOFT
 </pre>
-This option turns on the partial matching feature. If the subject string fails
-to match the pattern, but at some point during the matching process the end of
-the subject was reached (that is, the subject partially matches the pattern and
-the failure to match occurred only because there were not enough subject
-characters), <b>pcre_exec()</b> returns PCRE_ERROR_PARTIAL instead of
-PCRE_ERROR_NOMATCH. When PCRE_PARTIAL is used, there are restrictions on what
-may appear in the pattern. These are discussed in the
+These options turn on the partial matching feature. For backwards
+compatibility, PCRE_PARTIAL is a synonym for PCRE_PARTIAL_SOFT. A partial match
+occurs if the end of the subject string is reached successfully, but there are
+not enough subject characters to complete the match. If this happens when
+PCRE_PARTIAL_HARD is set, <b>pcre_exec()</b> immediately returns
+PCRE_ERROR_PARTIAL. Otherwise, if PCRE_PARTIAL_SOFT is set, matching continues
+by testing any other alternatives. Only if they all fail is PCRE_ERROR_PARTIAL
+returned (instead of PCRE_ERROR_NOMATCH). The portion of the string that
+provided the partial match is set as the first matching string. There is a more
+detailed discussion in the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation.
 </P>
@@ -1582,10 +1591,10 @@ documentation for details of partial matching.
 <pre>
   PCRE_ERROR_BADPARTIAL     (-13)
 </pre>
-The PCRE_PARTIAL option was used with a compiled pattern containing items that
-are not supported for partial matching. See the
-<a href="pcrepartial.html"><b>pcrepartial</b></a>
-documentation for details of partial matching.
+This code is no longer in use. It was formerly returned when the PCRE_PARTIAL
+option was used with a compiled pattern containing items that were not
+supported for partial matching. From release 8.00 onwards, there are no 
+restrictions on partial matching.
 <pre>
   PCRE_ERROR_INTERNAL       (-14)
 </pre>
@@ -1871,19 +1880,24 @@ Option bits for <b>pcre_dfa_exec()</b>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre_dfa_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL,
-PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last three of these are
-the same as for <b>pcre_exec()</b>, so their description is not repeated here.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD,
+PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last
+four of these are exactly the same as for <b>pcre_exec()</b>, so their
+description is not repeated here.
 <pre>
-  PCRE_PARTIAL
+  PCRE_PARTIAL_HARD
+  PCRE_PARTIAL_SOFT 
 </pre>
-This has the same general effect as it does for <b>pcre_exec()</b>, but the
-details are slightly different. When PCRE_PARTIAL is set for
-<b>pcre_dfa_exec()</b>, the return code PCRE_ERROR_NOMATCH is converted into
-PCRE_ERROR_PARTIAL if the end of the subject is reached, there have been no
-complete matches, but there is still at least one matching possibility. The
-portion of the string that provided the partial match is set as the first
-matching string.
+These have the same general effect as they do for <b>pcre_exec()</b>, but the
+details are slightly different. When PCRE_PARTIAL_HARD is set for
+<b>pcre_dfa_exec()</b>, it returns PCRE_ERROR_PARTIAL if the end of the subject
+is reached and there is still at least one matching possibility that requires
+additional characters. This happens even if some complete matches have also
+been found. When PCRE_PARTIAL_SOFT is set, the return code PCRE_ERROR_NOMATCH
+is converted into PCRE_ERROR_PARTIAL if the end of the subject is reached,
+there have been no complete matches, but there is still at least one matching
+possibility. The portion of the string that provided the longest partial match
+is set as the first matching string in both cases.
 <pre>
   PCRE_DFA_SHORTEST
 </pre>
@@ -1894,13 +1908,12 @@ matching point in the subject string.
 <pre>
   PCRE_DFA_RESTART
 </pre>
-When <b>pcre_dfa_exec()</b> is called with the PCRE_PARTIAL option, and returns
-a partial match, it is possible to call it again, with additional subject
-characters, and have it continue with the same match. The PCRE_DFA_RESTART
-option requests this action; when it is set, the <i>workspace</i> and
-<i>wscount</i> options must reference the same vector as before because data
-about the match so far is left in them after a partial match. There is more
-discussion of this facility in the
+When <b>pcre_dfa_exec()</b> returns a partial match, it is possible to call it
+again, with additional subject characters, and have it continue with the same
+match. The PCRE_DFA_RESTART option requests this action; when it is set, the
+<i>workspace</i> and <i>wscount</i> options must reference the same vector as
+before because data about the match so far is left in them after a partial
+match. There is more discussion of this facility in the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation.
 </P>
@@ -1996,7 +2009,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 April 2009
+Last updated: 01 September 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>
