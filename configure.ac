@@ -379,10 +379,13 @@ AC_CHECK_LIB([readline], [readline], [HAVE_LIB_READLINE=1])
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 
+PCRE_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
   AC_DEFINE([PCRE_STATIC], [1], [
     Define if linking statically (TODO: make nice with Libtool)])
+  PCRE_STATIC_CFLAG="-DPCRE_STATIC"
 fi
+AC_SUBST(PCRE_STATIC_CFLAG)
 
 # Here is where pcre specific defines are handled
 

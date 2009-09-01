@@ -76,6 +76,10 @@ Version 8.00 ??-???-??
     so that the demonstration program is easily available in environments where 
     PCRE has not been installed from source.  
     
+14. Arranged to add -DPCRE_STATIC to cflags in libpcre.pc, libpcreposix.cp,
+    libpcrecpp.pc and pcre-config when PCRE is not compiled as a shared
+    library.
+    
 
 Version 7.9 11-Apr-09
 ---------------------
