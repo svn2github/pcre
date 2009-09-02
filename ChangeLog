@@ -86,7 +86,11 @@ Version 8.00 ??-???-??
 15. Added REG_UNGREEDY to the pcreposix interface, at the request of a user.
     It maps to PCRE_UNGREEDY. It is not, of course, POSIX-compatible, but it
     is not the first non-POSIX option to be added. Clearly some people find 
-    these options useful.  
+    these options useful.
+    
+16. If a caller to the POSIX matching function regexec() passes a non-zero 
+    value for \fInmatch\fP with a NULL value for \fIpmatch\fP, the value of
+    \fInmatch\fP is forced to zero. 
     
 
 Version 7.9 11-Apr-09

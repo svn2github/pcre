@@ -206,6 +206,9 @@ If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
 \fBregexec()\fP are ignored.
 .P
+If the value of \fInmatch\fP is zero, or if the value \fIpmatch\fP is NULL,
+no data about any matched strings is returned.
+.P
 Otherwise,the portion of the string that was matched, and also any captured
 substrings, are returned via the \fIpmatch\fP argument, which points to an
 array of \fInmatch\fP structures of type \fIregmatch_t\fP, containing the
