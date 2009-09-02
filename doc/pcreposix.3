@@ -45,6 +45,10 @@ the value zero. This has no effect, but since programs that are written to the
 POSIX interface often use it, this makes it easier to slot in PCRE as a
 replacement library. Other POSIX options are not even defined.
 .P
+There are also some other options that are not defined by POSIX. These have
+been added at the request of users who want to make use of certain
+PCRE-specific features via the POSIX calling interface.
+.P
 When PCRE is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are
 still those of Perl, subject to the setting of various PCRE options, as
@@ -97,6 +101,12 @@ compiled with this flag is passed to \fBregexec()\fP for matching, the
 \fInmatch\fP and \fIpmatch\fP arguments are ignored, and no captured strings
 are returned.
 .sp
+  REG_UNGREEDY
+.sp
+The PCRE_UNGREEDY option is set when the regular expression is passed for 
+compilation to the native function. Note that REG_UNGREEDY is not part of the
+POSIX standard.   
+.sp
   REG_UTF8
 .sp
 The PCRE_UTF8 option is set when the regular expression is passed for
@@ -109,7 +119,7 @@ This means the the regex is compiled with PCRE default semantics. In
 particular, the way it handles newline characters in the subject string is the
 Perl way, not the POSIX way. Note that setting PCRE_MULTILINE has only
 \fIsome\fP of the effects specified for REG_NEWLINE. It does not affect the way
-newlines are matched by . (they aren't) or by a negative class such as [^a]
+newlines are matched by . (they are not) or by a negative class such as [^a]
 (they are).
 .P
 The yield of \fBregcomp()\fP is zero on success, and non-zero otherwise. The
@@ -243,6 +253,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 15 August 2009
+Last updated: 02 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

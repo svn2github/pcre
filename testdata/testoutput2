@@ -331,19 +331,19 @@ No need char
  2: <unset>
  3: def
 
-/abc/IP
+/abc/P
     abc
  0: abc
     *** Failers
 No match: POSIX code 17: match failed
 
-/^abc|def/IP
+/^abc|def/P
     abcdef
  0: abc
     abcdef\B
  0: def
 
-/.*((abc)$|(def))/IP
+/.*((abc)$|(def))/P
     defabc
  0: defabc
  1: abc
@@ -353,7 +353,7 @@ No match: POSIX code 17: match failed
  1: def
  3: def
 
-/the quick brown fox/IP
+/the quick brown fox/P
     the quick brown fox
  0: the quick brown fox
     *** Failers
@@ -361,28 +361,28 @@ No match: POSIX code 17: match failed
     The Quick Brown Fox
 No match: POSIX code 17: match failed
 
-/the quick brown fox/IPi
+/the quick brown fox/Pi
     the quick brown fox
  0: the quick brown fox
     The Quick Brown Fox
  0: The Quick Brown Fox
 
-/abc.def/IP
+/abc.def/P
     *** Failers
 No match: POSIX code 17: match failed
     abc\ndef
 No match: POSIX code 17: match failed
 
-/abc$/IP
+/abc$/P
     abc
  0: abc
     abc\n
  0: abc
 
-/(abc)\2/IP
+/(abc)\2/P
 Failed: POSIX code 15: bad back reference at offset 7     
 
-/(abc\1)/IP
+/(abc\1)/P
     abc
 No match: POSIX code 17: match failed
 
@@ -1615,7 +1615,7 @@ No need char
     \Nabc
 No match
 
-/a*(b+)(z)(z)/IP
+/a*(b+)(z)(z)/P
     aaaabbbbzzzz
  0: aaaabbbbzz
  1: bbbb
@@ -5548,7 +5548,7 @@ No match
     line one\nthis is a line\nbreak in the second line
 No match
 
-/ab.cd/IP
+/ab.cd/P
     ab-cd
  0: ab-cd
     ab=cd
@@ -5558,7 +5558,7 @@ No match: POSIX code 17: match failed
     ab\ncd
 No match: POSIX code 17: match failed
 
-/ab.cd/IPs
+/ab.cd/Ps
     ab-cd
  0: ab-cd
     ab=cd
@@ -5858,11 +5858,11 @@ No need char
     ((this))
  0: ((this))
 
-/a(b)c/IPN
+/a(b)c/PN
     abc
 Matched with REG_NOSUB
 
-/a(?P<name>b)c/IPN
+/a(?P<name>b)c/PN
     abc
 Matched with REG_NOSUB
 
@@ -9963,5 +9963,13 @@ Partial match: the cat
  0: abc
    abc\P\P
  0: abc
+   
+/\w+A/P
+   CDAAAAB 
+ 0: CDAAAA
+
+/\w+A/PU
+   CDAAAAB 
+ 0: CDA
 
 / End of testinput2 /

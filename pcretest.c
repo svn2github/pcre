@@ -1305,6 +1305,7 @@ while (!done)
     if ((options & PCRE_DOTALL) != 0) cflags |= REG_DOTALL;
     if ((options & PCRE_NO_AUTO_CAPTURE) != 0) cflags |= REG_NOSUB;
     if ((options & PCRE_UTF8) != 0) cflags |= REG_UTF8;
+    if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY; 
 
     rc = regcomp(&preg, (char *)p, cflags);
 

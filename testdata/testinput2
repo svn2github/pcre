@@ -123,38 +123,38 @@
     defabc
     \Zdefabc
 
-/abc/IP
+/abc/P
     abc
     *** Failers
 
-/^abc|def/IP
+/^abc|def/P
     abcdef
     abcdef\B
 
-/.*((abc)$|(def))/IP
+/.*((abc)$|(def))/P
     defabc
     \Zdefabc
 
-/the quick brown fox/IP
+/the quick brown fox/P
     the quick brown fox
     *** Failers
     The Quick Brown Fox
 
-/the quick brown fox/IPi
+/the quick brown fox/Pi
     the quick brown fox
     The Quick Brown Fox
 
-/abc.def/IP
+/abc.def/P
     *** Failers
     abc\ndef
 
-/abc$/IP
+/abc$/P
     abc
     abc\n
 
-/(abc)\2/IP
+/(abc)\2/P
 
-/(abc\1)/IP
+/(abc\1)/P
     abc
 
 /)/
@@ -593,7 +593,7 @@
     *** Failers
     \Nabc
 
-/a*(b+)(z)(z)/IP
+/a*(b+)(z)(z)/P
     aaaabbbbzzzz
     aaaabbbbzzzz\O0
     aaaabbbbzzzz\O1
@@ -1419,13 +1419,13 @@
     ** Failers
     line one\nthis is a line\nbreak in the second line
 
-/ab.cd/IP
+/ab.cd/P
     ab-cd
     ab=cd
     ** Failers
     ab\ncd
 
-/ab.cd/IPs
+/ab.cd/Ps
     ab-cd
     ab=cd
     ab\ncd
@@ -1480,10 +1480,10 @@
     (this)
     ((this))
 
-/a(b)c/IPN
+/a(b)c/PN
     abc
 
-/a(?P<name>b)c/IPN
+/a(?P<name>b)c/PN
     abc
 
 /\x{100}/I
@@ -2935,5 +2935,11 @@ a random value. /Ix
 /abc/
    abc\P
    abc\P\P
+   
+/\w+A/P
+   CDAAAAB 
+
+/\w+A/PU
+   CDAAAAB 
 
 / End of testinput2 /

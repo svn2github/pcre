@@ -240,11 +240,12 @@ int erroffset;
 int errorcode;
 int options = 0;
 
-if ((cflags & REG_ICASE) != 0)   options |= PCRE_CASELESS;
-if ((cflags & REG_NEWLINE) != 0) options |= PCRE_MULTILINE;
-if ((cflags & REG_DOTALL) != 0)  options |= PCRE_DOTALL;
-if ((cflags & REG_NOSUB) != 0)   options |= PCRE_NO_AUTO_CAPTURE;
-if ((cflags & REG_UTF8) != 0)    options |= PCRE_UTF8;
+if ((cflags & REG_ICASE) != 0)    options |= PCRE_CASELESS;
+if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
+if ((cflags & REG_DOTALL) != 0)   options |= PCRE_DOTALL;
+if ((cflags & REG_NOSUB) != 0)    options |= PCRE_NO_AUTO_CAPTURE;
+if ((cflags & REG_UTF8) != 0)     options |= PCRE_UTF8;
+if ((cflags & REG_UNGREEDY) != 0) options |= PCRE_UNGREEDY;
 
 preg->re_pcre = pcre_compile2(pattern, options, &errorcode, &errorptr,
   &erroffset, NULL);
@@ -299,10 +300,11 @@ if ((eflags & REG_NOTEMPTY) != 0) options |= PCRE_NOTEMPTY;
 
 ((regex_t *)preg)->re_erroffset = (size_t)(-1);  /* Only has meaning after compile */
 
-/* When no string data is being returned, ensure that nmatch is zero.
-Otherwise, ensure the vector for holding the return data is large enough. */
+/* When no string data is being returned, or no vector has been passed in which 
+to put it, ensure that nmatch is zero. Otherwise, ensure the vector for holding
+the return data is large enough. */
 
-if (nosub) nmatch = 0;
+if (nosub || pmatch == NULL) nmatch = 0;
 
 else if (nmatch > 0)
   {
