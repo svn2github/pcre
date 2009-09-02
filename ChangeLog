@@ -43,7 +43,10 @@ Version 8.00 ??-???-??
     
 8.  A pattern such as /\x{123}{2,2}+/8 was incorrectly compiled; the trigger
     was a minimum greater than 1 for a wide character in a possessive 
-    repetition. Chaos could result. 
+    repetition. The same bug could also affect patterns like /(\x{ff}{0,2})*/8
+    which had an unlimited repeat of a nested, fixed maximum repeat of a wide
+    character. Chaos in the form of incorrect output or a compiling loop could
+    result.
     
 9.  The restrictions on what a pattern can contain when partial matching is
     requested for pcre_exec() have been removed. All patterns can now be 
