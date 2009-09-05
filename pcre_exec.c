@@ -408,7 +408,7 @@ immediately. The second one is used when we already know we are past the end of
 the subject. */
 
 #define CHECK_PARTIAL()\
-  if (md->partial && eptr >= md->end_subject && eptr > mstart)\
+  if (md->partial != 0 && eptr >= md->end_subject && eptr > mstart)\
     {\
     md->hitend = TRUE;\
     if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);\
@@ -1024,8 +1024,9 @@ for (;;)
       if (eptr < md->start_subject) RRETURN(MATCH_NOMATCH);
       }
 
-    /* Skip to next op code */
+    /* Save the earliest consulted character, then skip to next op code */
 
+    if (eptr < md->start_used_ptr) md->start_used_ptr = eptr;
     ecode += 1 + LINK_SIZE;
     break;
 
@@ -1468,7 +1469,8 @@ for (;;)
 
       /* Find out if the previous and current characters are "word" characters.
       It takes a bit more work in UTF-8 mode. Characters > 255 are assumed to
-      be "non-word" characters. */
+      be "non-word" characters. Remember the earliest consulted character for 
+      partial matching. */
 
 #ifdef SUPPORT_UTF8
       if (utf8)
@@ -1477,6 +1479,7 @@ for (;;)
           {
           USPTR lastptr = eptr - 1;
           while((*lastptr & 0xc0) == 0x80) lastptr--;
+          if (lastptr < md->start_used_ptr) md->start_used_ptr = lastptr; 
           GETCHAR(c, lastptr);
           prev_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
           }
@@ -1497,8 +1500,11 @@ for (;;)
       /* Not in UTF-8 mode */
 
         {
-        prev_is_word = (eptr != md->start_subject) &&
-          ((md->ctypes[eptr[-1]] & ctype_word) != 0);
+        if (eptr == md->start_subject) prev_is_word = FALSE; else
+          {
+          if (eptr <= md->start_used_ptr) md->start_used_ptr = eptr - 1;  
+          prev_is_word = ((md->ctypes[eptr[-1]] & ctype_word) != 0);
+          }
         if (eptr >= md->end_subject) 
           {
           SCHECK_PARTIAL(); 
@@ -5277,9 +5283,10 @@ for(;;)
   first starting point for which a partial match was found. */
 
   md->start_match_ptr = start_match;
+  md->start_used_ptr = start_match; 
   md->match_call_count = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, ims, NULL, 0, 0);
-  if (md->hitend && start_partial == NULL) start_partial = start_match;
+  if (md->hitend && start_partial == NULL) start_partial = md->start_used_ptr;
 
   switch(rc)
     {

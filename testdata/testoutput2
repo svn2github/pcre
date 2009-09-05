@@ -9972,4 +9972,28 @@ Partial match: the cat
    CDAAAAB 
  0: CDA
 
+/abc\K123/
+    xyzabc123pqr
+ 0: 123
+    xyzabc12\P
+Partial match: abc12
+    xyzabc12\P\P
+Partial match: abc12
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+ 0: 123
+    xyzabc12\P
+Partial match: abc12
+    xyzabc12\P\P
+Partial match: abc12
+
+/\babc\b/
+    +++abc+++
+ 0: abc
+    +++ab\P
+Partial match: +ab
+    +++ab\P\P  
+Partial match: +ab
+
 / End of testinput2 /

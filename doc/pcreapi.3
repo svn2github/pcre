@@ -149,9 +149,10 @@ documentation describes how to compile and run it.
 A second matching function, \fBpcre_dfa_exec()\fP, which is not
 Perl-compatible, is also provided. This uses a different algorithm for the
 matching. The alternative algorithm finds all possible matches (at a given
-point in the subject), and scans the subject just once. However, this algorithm
-does not return captured substrings. A description of the two matching
-algorithms and their advantages and disadvantages is given in the
+point in the subject), and scans the subject just once (unless there are
+lookbehind assertions). However, this algorithm does not return captured
+substrings. A description of the two matching algorithms and their advantages
+and disadvantages is given in the
 .\" HREF
 \fBpcrematching\fP
 .\"
@@ -1011,10 +1012,10 @@ different for each compiled pattern.
 .sp
   PCRE_INFO_OKPARTIAL
 .sp
-Return 1 if the pattern can be used for partial matching, otherwise 0. The
-fourth argument should point to an \fBint\fP variable. From release 8.00, this
-always returns 1, because the restrictions that previously applied to partial
-matching have been lifted. The
+Return 1 if the pattern can be used for partial matching with
+\fBpcre_exec()\fP, otherwise 0. The fourth argument should point to an
+\fBint\fP variable. From release 8.00, this always returns 1, because the
+restrictions that previously applied to partial matching have been lifted. The
 .\" HREF
 \fBpcrepartial\fP
 .\"
@@ -1387,8 +1388,8 @@ PCRE_PARTIAL_HARD is set, \fBpcre_exec()\fP immediately returns
 PCRE_ERROR_PARTIAL. Otherwise, if PCRE_PARTIAL_SOFT is set, matching continues
 by testing any other alternatives. Only if they all fail is PCRE_ERROR_PARTIAL
 returned (instead of PCRE_ERROR_NOMATCH). The portion of the string that
-provided the partial match is set as the first matching string. There is a more
-detailed discussion in the
+was inspected when the partial match was found is set as the first matching
+string. There is a more detailed discussion in the
 .\" HREF
 \fBpcrepartial\fP
 .\"
@@ -1834,8 +1835,8 @@ a compiled pattern, using a matching algorithm that scans the subject string
 just once, and does not backtrack. This has different characteristics to the
 normal algorithm, and is not compatible with Perl. Some of the features of PCRE
 patterns are not supported. Nevertheless, there are times when this kind of
-matching can be useful. For a discussion of the two matching algorithms, see
-the
+matching can be useful. For a discussion of the two matching algorithms, and a 
+list of features that \fBpcre_dfa_exec()\fP does not support, see the
 .\" HREF
 \fBpcrematching\fP
 .\"
@@ -1890,8 +1891,8 @@ additional characters. This happens even if some complete matches have also
 been found. When PCRE_PARTIAL_SOFT is set, the return code PCRE_ERROR_NOMATCH
 is converted into PCRE_ERROR_PARTIAL if the end of the subject is reached,
 there have been no complete matches, but there is still at least one matching
-possibility. The portion of the string that provided the longest partial match
-is set as the first matching string in both cases.
+possibility. The portion of the string that was inspected when the longest
+partial match was found is set as the first matching string in both cases.
 .sp
   PCRE_DFA_SHORTEST
 .sp
@@ -2011,6 +2012,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 September 2009
+Last updated: 05 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

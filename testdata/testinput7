@@ -4470,4 +4470,17 @@
    abc\P
    abc\P\P
 
+/abc\K123/
+    xyzabc123pqr
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+    xyzabc12\P
+    xyzabc12\P\P
+
+/\babc\b/
+    +++abc+++
+    +++ab\P
+    +++ab\P\P  
+
 / End of testinput7 /

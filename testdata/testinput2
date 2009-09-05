@@ -2942,4 +2942,19 @@ a random value. /Ix
 /\w+A/PU
    CDAAAAB 
 
+/abc\K123/
+    xyzabc123pqr
+    xyzabc12\P
+    xyzabc12\P\P
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+    xyzabc12\P
+    xyzabc12\P\P
+
+/\babc\b/
+    +++abc+++
+    +++ab\P
+    +++ab\P\P  
+
 / End of testinput2 /

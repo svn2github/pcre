@@ -26,10 +26,10 @@ is very long and is not all available at once.
 .P
 PCRE supports partial matching by means of the PCRE_PARTIAL_SOFT and
 PCRE_PARTIAL_HARD options, which can be set when calling \fBpcre_exec()\fP or
-\fBpcre_dfa_exec()\fP. For backwards compatibility, PCRE_PARTIAL is a synonym 
-for PCRE_PARTIAL_SOFT. The essential difference between the two options is 
-whether or not a partial match is preferred to an alternative complete match, 
-though the details differ between the two matching functions. If both options 
+\fBpcre_dfa_exec()\fP. For backwards compatibility, PCRE_PARTIAL is a synonym
+for PCRE_PARTIAL_SOFT. The essential difference between the two options is
+whether or not a partial match is preferred to an alternative complete match,
+though the details differ between the two matching functions. If both options
 are set, PCRE_PARTIAL_HARD takes precedence.
 .P
 Setting a partial matching option disables one of PCRE's optimizations. PCRE
@@ -49,69 +49,86 @@ been matched. (In other words, a partial match can never be an empty string.)
 If PCRE_PARTIAL_SOFT is set, the partial match is remembered, but matching
 continues as normal, and other alternatives in the pattern are tried. If no
 complete match can be found, \fBpcre_exec()\fP returns PCRE_ERROR_PARTIAL
-instead of PCRE_ERROR_NOMATCH, and if there are at least two slots in the
-offsets vector, they are filled in with the offsets of the longest string that
-partially matched. Consider this pattern:
+instead of PCRE_ERROR_NOMATCH. If there are at least two slots in the offsets
+vector, the first of them is set to the offset of the earliest character that
+was inspected when the partial match was found. For convenience, the second
+offset points to the end of the string so that a substring can easily be
+extracted.
+.P
+For the majority of patterns, the first offset identifies the start of the
+partially matched string. However, for patterns that contain lookbehind
+assertions, or \eK, or begin with \eb or \eB, earlier characters have been
+inspected while carrying out the match. For example:
+.sp
+  /(?<=abc)123/
+.sp
+This pattern matches "123", but only if it is preceded by "abc". If the subject
+string is "xyzabc12", the offsets after a partial match are for the substring
+"abc12", because all these characters are needed if another match is tried
+with extra characters added.
+.P
+If there is more than one partial match, the first one that was found provides
+the data that is returned. Consider this pattern:
 .sp
   /123\ew+X|dogY/
 .sp
 If this is matched against the subject string "abc123dog", both
-alternatives fail to match, but the end of the subject is reached during 
+alternatives fail to match, but the end of the subject is reached during
 matching, so PCRE_ERROR_PARTIAL is returned instead of PCRE_ERROR_NOMATCH. The
-offsets are set to 3 and 9, identifying "123dog" as the longest partial match
+offsets are set to 3 and 9, identifying "123dog" as the first partial match
 that was found. (In this example, there are two partial matches, because "dog"
 on its own partially matches the second alternative.)
 .P
-If PCRE_PARTIAL_HARD is set for \fBpcre_exec()\fP, it returns 
+If PCRE_PARTIAL_HARD is set for \fBpcre_exec()\fP, it returns
 PCRE_ERROR_PARTIAL as soon as a partial match is found, without continuing to
 search for possible complete matches. The difference between the two options
 can be illustrated by a pattern such as:
 .sp
   /dog(sbody)?/
 .sp
-This matches either "dog" or "dogsbody", greedily (that is, it prefers the 
+This matches either "dog" or "dogsbody", greedily (that is, it prefers the
 longer string if possible). If it is matched against the string "dog" with
-PCRE_PARTIAL_SOFT, it yields a complete match for "dog". However, if 
-PCRE_PARTIAL_HARD is set, the result is PCRE_ERROR_PARTIAL. On the other hand, 
+PCRE_PARTIAL_SOFT, it yields a complete match for "dog". However, if
+PCRE_PARTIAL_HARD is set, the result is PCRE_ERROR_PARTIAL. On the other hand,
 if the pattern is made ungreedy the result is different:
 .sp
   /dog(sbody)??/
 .sp
-In this case the result is always a complete match because \fBpcre_exec()\fP 
-finds that first, and it never continues after finding a match. It might be 
+In this case the result is always a complete match because \fBpcre_exec()\fP
+finds that first, and it never continues after finding a match. It might be
 easier to follow this explanation by thinking of the two patterns like this:
 .sp
   /dog(sbody)?/    is the same as  /dogsbody|dog/
   /dog(sbody)??/   is the same as  /dog|dogsbody/
 .sp
-The second pattern will never match "dogsbody" when \fBpcre_exec()\fP is 
+The second pattern will never match "dogsbody" when \fBpcre_exec()\fP is
 used, because it will always find the shorter match first.
 .
 .
 .SH "PARTIAL MATCHING USING pcre_dfa_exec()"
 .rs
 .sp
-The \fBpcre_dfa_exec()\fP function moves along the subject string character by 
-character, without backtracking, searching for all possible matches 
-simultaneously. If the end of the subject is reached before the end of the 
+The \fBpcre_dfa_exec()\fP function moves along the subject string character by
+character, without backtracking, searching for all possible matches
+simultaneously. If the end of the subject is reached before the end of the
 pattern, there is the possibility of a partial match, again provided that at
 least one character has matched.
 .P
 When PCRE_PARTIAL_SOFT is set, PCRE_ERROR_PARTIAL is returned only if there
 have been no complete matches. Otherwise, the complete matches are returned.
 However, if PCRE_PARTIAL_HARD is set, a partial match takes precedence over any
-complete matches. The portion of the string that provided the longest partial
-match is set as the first matching string, provided there are at least two
-slots in the offsets vector.
+complete matches. The portion of the string that was inspected when the longest
+partial match was found is set as the first matching string, provided there are
+at least two slots in the offsets vector.
 .P
-Because \fBpcre_dfa_exec()\fP always searches for all possible matches, and 
+Because \fBpcre_dfa_exec()\fP always searches for all possible matches, and
 there is no difference between greedy and ungreedy repetition, its behaviour is
-different from \fBpcre_exec\fP when PCRE_PARTIAL_HARD is set. Consider the 
+different from \fBpcre_exec\fP when PCRE_PARTIAL_HARD is set. Consider the
 string "dog" matched against the ungreedy pattern shown above:
 .sp
   /dog(sbody)??/
 .sp
-Whereas \fBpcre_exec()\fP stops as soon as it finds the complete match for 
+Whereas \fBpcre_exec()\fP stops as soon as it finds the complete match for
 "dog", \fBpcre_dfa_exec()\fP also finds the partial match for "dogsbody", and
 so returns that when PCRE_PARTIAL_HARD is set.
 .
@@ -119,21 +136,21 @@ so returns that when PCRE_PARTIAL_HARD is set.
 .SH "PARTIAL MATCHING AND WORD BOUNDARIES"
 .rs
 .sp
-If a pattern ends with one of sequences \ew or \eW, which test for word 
-boundaries, partial matching with PCRE_PARTIAL_SOFT can give counter-intuitive 
+If a pattern ends with one of sequences \ew or \eW, which test for word
+boundaries, partial matching with PCRE_PARTIAL_SOFT can give counter-intuitive
 results. Consider this pattern:
 .sp
   /\ebcat\eb/
 .sp
 This matches "cat", provided there is a word boundary at either end. If the
 subject string is "the cat", the comparison of the final "t" with a following
-character cannot take place, so a partial match is found. However, 
-\fBpcre_exec()\fP carries on with normal matching, which matches \eb at the end 
-of the subject when the last character is a letter, thus finding a complete 
-match. The result, therefore, is \fInot\fP PCRE_ERROR_PARTIAL. The same thing 
+character cannot take place, so a partial match is found. However,
+\fBpcre_exec()\fP carries on with normal matching, which matches \eb at the end
+of the subject when the last character is a letter, thus finding a complete
+match. The result, therefore, is \fInot\fP PCRE_ERROR_PARTIAL. The same thing
 happens with \fBpcre_dfa_exec()\fP, because it also finds the complete match.
 .P
-Using PCRE_PARTIAL_HARD in this case does yield PCRE_ERROR_PARTIAL, because 
+Using PCRE_PARTIAL_HARD in this case does yield PCRE_ERROR_PARTIAL, because
 then the partial match takes precedence.
 .
 .
@@ -182,7 +199,7 @@ when \fBpcre_dfa_exec()\fP is used.
 If the escape sequence \eP is present more than once in a \fBpcretest\fP data
 line, the PCRE_PARTIAL_HARD option is set for the match.
 .
-.                                                          
+.
 .SH "MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()"
 .rs
 .sp
@@ -216,10 +233,10 @@ facility can be used to pass very long subject strings to
 .SH "MULTI-SEGMENT MATCHING WITH pcre_exec()"
 .rs
 .sp
-From release 8.00, \fBpcre_exec()\fP can also be used to do multi-segment 
-matching. Unlike \fBpcre_dfa_exec()\fP, it is not possible to restart the 
-previous match with a new segment of data. Instead, new data must be added to 
-the previous subject string, and the entire match re-run, starting from the 
+From release 8.00, \fBpcre_exec()\fP can also be used to do multi-segment
+matching. Unlike \fBpcre_dfa_exec()\fP, it is not possible to restart the
+previous match with a new segment of data. Instead, new data must be added to
+the previous subject string, and the entire match re-run, starting from the
 point where the partial match occurred. Earlier data can be discarded.
 Consider an unanchored pattern that matches dates:
 .sp
@@ -227,34 +244,39 @@ Consider an unanchored pattern that matches dates:
   data> The date is 23ja\eP
   Partial match: 23ja
 .sp
-The this stage, an application could discard the text preceding "23ja", add on 
-text from the next segment, and call \fBpcre_exec()\fP again. Unlike 
-\fBpcre_dfa_exec()\fP, the entire matching string must always be available, and 
-the complete matching process occurs for each call, so more memory and more 
+The this stage, an application could discard the text preceding "23ja", add on
+text from the next segment, and call \fBpcre_exec()\fP again. Unlike
+\fBpcre_dfa_exec()\fP, the entire matching string must always be available, and
+the complete matching process occurs for each call, so more memory and more
 processing time is needed.
+.P
+\fBNote:\fP If the pattern contains lookbehind assertions, or \eK, or starts
+with \eb or \eB, the string that is returned for a partial match will include
+characters that precede the partially matched string itself, because these must
+be retained when adding on more characters for a subsequent matching attempt.
 .
-.                                                          
+.
 .SH "ISSUES WITH MULTI-SEGMENT MATCHING"
 .rs
 .sp
-Certain types of pattern may give problems with multi-segment matching, 
+Certain types of pattern may give problems with multi-segment matching,
 whichever matching function is used.
 .P
 1. If the pattern contains tests for the beginning or end of a line, you need
 to pass the PCRE_NOTBOL or PCRE_NOTEOL options, as appropriate, when the
 subject string for any call does not contain the beginning or end of a line.
 .P
-2. If the pattern contains backward assertions (including \eb or \eB), you need
-to arrange for some overlap in the subject strings to allow for them to be
-correctly tested at the start of each substring. For example, using
-\fBpcre_dfa_exec()\fP, you could pass the subject in chunks that are 500 bytes
-long, but in a buffer of 700 bytes, with the starting offset set to 200 and the
-previous 200 bytes at the start of the buffer.
+2. Lookbehind assertions at the start of a pattern are catered for in the
+offsets that are returned for a partial match. However, in theory, a lookbehind
+assertion later in the pattern could require even earlier characters to be
+inspected, and it might not have been reached when a partial match occurs. This
+is probably an extremely unlikely case; you could guard against it to a certain
+extent by always including extra characters at the start.
 .P
 3. Matching a subject string that is split into multiple segments may not
 always produce exactly the same result as matching over one single long string,
-especially when PCRE_PARTIAL_SOFT is used. The section "Partial Matching and 
-Word Boundaries" above describes an issue that arises if the pattern ends with 
+especially when PCRE_PARTIAL_SOFT is used. The section "Partial Matching and
+Word Boundaries" above describes an issue that arises if the pattern ends with
 \eb or \eB. Another kind of difference may occur when there are multiple
 matching possibilities, because a partial match result is given only when there
 are no completed matches. This means that as soon as the shortest match has
@@ -263,7 +285,7 @@ Consider again this \fBpcretest\fP example:
 .sp
     re> /dog(sbody)?/
   data> dogsb\eP
-   0: dog    
+   0: dog
   data> do\eP\eD
   Partial match: do
   data> gsb\eR\eP\eD
@@ -286,15 +308,15 @@ matching multi-segment data. The example above then behaves differently:
 .sp
     re> /dog(sbody)?/
   data> dogsb\eP\eP
-  Partial match: dogsb 
+  Partial match: dogsb
   data> do\eP\eD
   Partial match: do
   data> gsb\eR\eP\eP\eD
-  Partial match: gsb    
+  Partial match: gsb
 .sp
 .P
 4. Patterns that contain alternatives at the top level which do not all
-start with the same pattern item may not work as expected when 
+start with the same pattern item may not work as expected when
 \fBpcre_dfa_exec()\fP is used. For example, consider this pattern:
 .sp
   1234|3789
@@ -311,7 +333,7 @@ patterns or patterns such as:
   1234|ABCD
 .sp
 where no string can be a partial match for both alternatives. This is not a
-problem if \fPpcre_exec()\fP is used, because the entire match has to be rerun 
+problem if \fPpcre_exec()\fP is used, because the entire match has to be rerun
 each time:
 .sp
     re> /1234|3789/
@@ -319,7 +341,7 @@ each time:
   Partial match: 123
   data> 1237890
    0: 3789
-.sp        
+.sp
 .
 .
 .SH AUTHOR
@@ -336,6 +358,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 31 August 2009
+Last updated: 05 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -461,10 +461,11 @@ This section describes the output when the normal matching function,
 .P
 When a match succeeds, pcretest outputs the list of captured substrings that
 \fBpcre_exec()\fP returns, starting with number 0 for the string that matched
-the whole pattern. Otherwise, it outputs "No match" or "Partial match:"
-followed by the partially matching substring when \fBpcre_exec()\fP returns
-PCRE_ERROR_NOMATCH or PCRE_ERROR_PARTIAL, respectively, and otherwise the PCRE
-negative error number. Here is an example of an interactive \fBpcretest\fP run.
+the whole pattern. Otherwise, it outputs "No match" when the return is
+PCRE_ERROR_NOMATCH, and "Partial match:" followed by the partially matching
+substring when \fBpcre_exec()\fP returns PCRE_ERROR_PARTIAL. For any other
+returns, it outputs the PCRE negative error number. Here is an example of an
+interactive \fBpcretest\fP run.
 .sp
   $ pcretest
   PCRE version 7.0 30-Nov-2006
@@ -726,6 +727,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 August 2009
+Last updated: 05 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

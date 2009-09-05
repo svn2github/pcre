@@ -389,6 +389,11 @@ if (*first_op == OP_REVERSE)
       current_subject - start_subject : max_back;
     current_subject -= gone_back;
     }
+    
+  /* Save the earliest consulted character */
+  
+  if (current_subject < md->start_used_ptr) 
+    md->start_used_ptr = current_subject; 
 
   /* Now we can process the individual branches. */
 
@@ -800,6 +805,7 @@ for (;;)
         if (ptr > start_subject)
           {
           const uschar *temp = ptr - 1;
+          if (temp < md->start_used_ptr) md->start_used_ptr = temp; 
 #ifdef SUPPORT_UTF8
           if (utf8) BACKCHAR(temp);
 #endif
@@ -2503,7 +2509,7 @@ for (;;)
       {
       if (offsetcount >= 2)
         {
-        offsets[0] = current_subject - start_subject;
+        offsets[0] = md->start_used_ptr - start_subject;
         offsets[1] = end_subject - start_subject;
         }
       match_count = PCRE_ERROR_PARTIAL;
@@ -2936,6 +2942,8 @@ for (;;)
 
   /* OK, now we can do the business */
 
+  md->start_used_ptr = current_subject;
+   
   rc = internal_dfa_exec(
     md,                                /* fixed match data */
     md->start_code,                    /* this subexpression's code */

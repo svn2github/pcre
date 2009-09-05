@@ -981,7 +981,7 @@ Partial match: abc
    xyzfo\P 
 No match
    foob\P\>2 
-Partial match: b
+Partial match: foob
    foobar...\R\P\>4 
  0: ar
    xyzfo\P
@@ -7441,5 +7441,25 @@ Partial match: dogs
  0: abc
    abc\P\P
  0: abc
+
+/abc\K123/
+    xyzabc123pqr
+Error -16
+    
+/(?<=abc)123/
+    xyzabc123pqr 
+ 0: 123
+    xyzabc12\P
+Partial match: abc12
+    xyzabc12\P\P
+Partial match: abc12
+
+/\babc\b/
+    +++abc+++
+ 0: abc
+    +++ab\P
+Partial match: +ab
+    +++ab\P\P  
+Partial match: +ab
 
 / End of testinput7 /
