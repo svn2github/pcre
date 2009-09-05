@@ -278,40 +278,42 @@ things in this area in future.
 
 BUILDING PCRE ON WINDOWS WITH CMAKE
 
-CMake is an alternative build facility that can be used instead of the
-traditional Unix "configure". CMake version 2.4.7 supports Borland makefiles,
-MinGW makefiles, MSYS makefiles, NMake makefiles, UNIX makefiles, Visual Studio
-6, Visual Studio 7, Visual Studio 8, and Watcom W8. The following instructions
+CMake is an alternative configuration facility that can be used instead of the
+traditional Unix "configure". CMake creates project files (make files, solution
+files, etc.) tailored to numerous development environments, including Visual
+Studio, Borland, Msys, MinGW, NMake, and Unix. The following instructions
 were contributed by a PCRE user.
 
-1.  Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
-    that cmake\bin is on your path.
+1.  Install the latest CMake version available from http://www.cmake.org/, and
+    ensure that cmake\bin is on your path.
 
 2.  Unzip (retaining folder structure) the PCRE source tree into a source
     directory such as C:\pcre.
 
-3.  Create a new, empty build directory: C:\pcre\build\
+3.  Create a new, empty build directory, for example C:\pcre\build\
 
-4.  Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
-    for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
+4.  Run cmake-gui from the Shell envirornment of your build tool, for example,
+    Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++.
 
 5.  Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
-    directories, respectively
+    directories, respectively.
 
 6.  Hit the "Configure" button.
 
-7.  Select the particular IDE / build tool that you are using (Visual Studio,
-    MSYS makefiles, MinGW makefiles, etc.)
+7.  Select the particular IDE / build tool that you are using (Visual
+    Studio, MSYS makefiles, MinGW makefiles, etc.)
 
-8.  The GUI will then list several configuration options. This is where you can
-    enable UTF-8 support, etc.
+8.  The GUI will then list several configuration options. This is where 
+    you can enable UTF-8 support or other PCRE optional features.
 
-9.  Hit "Configure" again. The adjacent "OK" button should now be active.
+9.  Hit "Configure" again. The adjacent "Generate" button should now be 
+    active.
 
-10. Hit "OK".
+10. Hit "Generate".
 
 11. The build directory should now contain a usable build system, be it a
-    solution file for Visual Studio, makefiles for MinGW, etc.
+    solution file for Visual Studio, makefiles for MinGW, etc. Exit from
+    cmake-gui and use the generated build system with your compiler or IDE.
 
 
 USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
