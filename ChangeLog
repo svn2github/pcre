@@ -100,6 +100,10 @@ Version 8.00 ??-???-??
     value for \fInmatch\fP with a NULL value for \fIpmatch\fP, the value of
     \fInmatch\fP is forced to zero. 
     
+18. RunGrepTest did not have a test for the availability of the -u option of
+    the diff command, as RunTest does. It now checks in the same way as 
+    RunTest, and also checks for the -b option.
+    
 
 Version 7.9 11-Apr-09
 ---------------------
