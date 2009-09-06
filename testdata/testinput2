@@ -2957,4 +2957,8 @@ a random value. /Ix
     +++ab\P
     +++ab\P\P  
 
+/(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/BZ
+
+/(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
+
 / End of testinput2 /

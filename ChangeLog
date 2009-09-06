@@ -97,12 +97,21 @@ Version 8.00 ??-???-??
     these options useful.
     
 17. If a caller to the POSIX matching function regexec() passes a non-zero 
-    value for \fInmatch\fP with a NULL value for \fIpmatch\fP, the value of
-    \fInmatch\fP is forced to zero. 
+    value for nmatch with a NULL value for pmatch, the value of
+    nmatch is forced to zero. 
     
 18. RunGrepTest did not have a test for the availability of the -u option of
     the diff command, as RunTest does. It now checks in the same way as 
     RunTest, and also checks for the -b option.
+    
+19. If an odd number of negated classes containing just a single character
+    interposed, within parentheses, between a forward reference to a named
+    subpattern and the definition of the subpattern, compilation crashed with 
+    an internal error, complaining that it could not find the referenced 
+    subpattern. An example of a crashing pattern is /(?&A)(([^m])(?<A>))/.
+    [The bug was that it was starting one character too far in when skipping 
+    over the character class, thus treating the ] as data rather than 
+    terminating the class. This meant it could skip too much.] 
     
 
 Version 7.9 11-Apr-09

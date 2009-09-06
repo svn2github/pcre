@@ -1100,6 +1100,7 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
       if (name != NULL && lorn == ptr - thisname &&
           strncmp((const char *)name, (const char *)thisname, lorn) == 0)
         return *count;
+      term++;   
       }
     }
   }
@@ -1134,19 +1135,21 @@ for (; *ptr != 0; ptr++)
     BOOL negate_class = FALSE;
     for (;;)
       {
-      int c = *(++ptr);
-      if (c == CHAR_BACKSLASH)
+      if (ptr[1] == CHAR_BACKSLASH)
         {
-        if (ptr[1] == CHAR_E)
-          ptr++;
-        else if (strncmp((const char *)ptr+1,
+        if (ptr[2] == CHAR_E)
+          ptr+= 2;
+        else if (strncmp((const char *)ptr+2,
                  STR_Q STR_BACKSLASH STR_E, 3) == 0)
-          ptr += 3;
+          ptr += 4;
         else
           break;
         }
-      else if (!negate_class && c == CHAR_CIRCUMFLEX_ACCENT)
+      else if (!negate_class && ptr[1] == CHAR_CIRCUMFLEX_ACCENT)
+        { 
         negate_class = TRUE;
+        ptr++;
+        }  
       else break;
       }
 

@@ -9996,4 +9996,56 @@ Partial match: +ab
     +++ab\P\P  
 Partial match: +ab
 
+/(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        Recurse
+        Ket
+        Once
+        Recurse
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        <
+        [^m]
+        [^>]
+        >
+        [^<]
+        Ket
+        CBra 2
+        \w*+
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        Recurse
+        Ket
+        Once
+        Recurse
+        Ket
+        Cond
+        Cond def
+        CBra 1
+        <
+        [\x00-/:-\xff] (neg)
+        [^>]
+        >
+        [^<]
+        Ket
+        CBra 2
+        \w*+
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 / End of testinput2 /
