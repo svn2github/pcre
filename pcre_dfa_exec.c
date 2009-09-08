@@ -45,6 +45,34 @@ FSM). This is NOT Perl- compatible, but it has advantages in certain
 applications. */
 
 
+/* NOTE ABOUT PERFORMANCE: A user of this function sent some code that improved 
+the performance of his patterns greatly. I could not use it as it stood, as it 
+was not thread safe, and made assumptions about pattern sizes. Also, it caused 
+test 7 to loop, and test 9 to crash with a segfault.
+
+The issue is the check for duplicate states, which is done by a simple linear
+search up the state list. (Grep for "duplicate" below to find the code.) For
+many patterns, there will never be many states active at one time, so a simple
+linear search is fine. In patterns that have many active states, it might be a
+bottleneck. The suggested code used an indexing scheme to remember which states
+had previously been used for each character, and avoided the linear search when
+it knew there was no chance of a duplicate. This was implemented when adding
+states to the state lists.
+
+I wrote some thread-safe, not-limited code to try something similar at the time
+of checking for duplicates (instead of when adding states), using index vectors
+on the stack. It did give a 13% improvement with one specially constructed
+pattern for certain subject strings, but on other strings and on many of the
+simpler patterns in the test suite it did worse. The major problem, I think,
+was the extra time to initialize the index. This had to be done for each call
+of internal_dfa_exec(). (The supplied patch used a static vector, initialized
+only once - I suspect this was the cause of the problems with the tests.)
+
+Overall, I concluded that the gains in some cases did not outweigh the losses 
+in others, so I abandoned this code. */
+
+
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -550,7 +578,9 @@ for (;;)
         }
       }
 
-    /* Check for a duplicate state with the same count, and skip if found. */
+    /* Check for a duplicate state with the same count, and skip if found. 
+    See the note at the head of this module about the possibility of improving
+    performance here. */
 
     for (j = 0; j < i; j++)
       {
