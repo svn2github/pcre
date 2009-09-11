@@ -647,7 +647,8 @@ for (;;)
 /* ========================================================================== */
       /* Reached a closing bracket. If not at the end of the pattern, carry
       on with the next opcode. Otherwise, unless we have an empty string and
-      PCRE_NOTEMPTY is set, save the match data, shifting up all previous
+      PCRE_NOTEMPTY is set, or PCRE_NOTEMPTY_ATSTART is set and we are at the 
+      start of the subject, save the match data, shifting up all previous
       matches so we always have the longest first. */
 
       case OP_KET:
@@ -664,7 +665,10 @@ for (;;)
       else 
         {
         reached_end++;    /* Count branches that reach the end */ 
-        if (ptr > current_subject || (md->moptions & PCRE_NOTEMPTY) == 0)
+        if (ptr > current_subject || 
+            ((md->moptions & PCRE_NOTEMPTY) == 0 &&
+              ((md->moptions & PCRE_NOTEMPTY_ATSTART) == 0 ||
+                current_subject > start_subject + md->start_offset)))
           {
           if (match_count < 0) match_count = (offsetcount >= 2)? 1 : 0;
             else if (match_count > 0 && ++match_count * 2 >= offsetcount)
@@ -2681,6 +2685,7 @@ md->start_code = (const uschar *)argument_re +
     re->name_table_offset + re->name_count * re->name_entry_size;
 md->start_subject = (const unsigned char *)subject;
 md->end_subject = end_subject;
+md->start_offset = start_offset;
 md->moptions = options;
 md->poptions = re->options;
 

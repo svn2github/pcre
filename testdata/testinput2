@@ -2961,4 +2961,50 @@ a random value. /Ix
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
 
+/abc\K|def\K/g+
+    Xabcdefghi
+
+/ab\Kc|de\Kf/g+
+    Xabcdefghi
+    
+/(?=C)/g+
+    ABCDECBA
+    
+/^abc\K/+
+    abcdef
+    ** Failers
+    defabcxyz   
+
+/abc\K/+
+    abcdef
+    abcdef\N\N
+    xyzabcdef\N\N
+    ** Failers
+    abcdef\N 
+    xyzabcdef\N
+    
+/^(?:(?=abc)|abc\K)/+
+    abcdef
+    abcdef\N\N 
+    ** Failers 
+    abcdef\N 
+
+/a?b?/+
+    xyz
+    xyzabc
+    xyzabc\N
+    xyzabc\N\N
+    xyz\N\N    
+    ** Failers 
+    xyz\N 
+
+/^a?b?/+
+    xyz
+    xyzabc
+    ** Failers 
+    xyzabc\N
+    xyzabc\N\N
+    xyz\N\N    
+    xyz\N 
+    
 / End of testinput2 /

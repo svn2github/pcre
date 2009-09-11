@@ -4483,4 +4483,7 @@
     +++ab\P
     +++ab\P\P  
 
+/(?=C)/g+
+    ABCDECBA
+
 / End of testinput7 /

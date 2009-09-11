@@ -10048,4 +10048,104 @@ Partial match: +ab
         End
 ------------------------------------------------------------------
 
+/abc\K|def\K/g+
+    Xabcdefghi
+ 0: 
+ 0+ defghi
+ 0: 
+ 0+ ghi
+
+/ab\Kc|de\Kf/g+
+    Xabcdefghi
+ 0: c
+ 0+ defghi
+ 0: f
+ 0+ ghi
+    
+/(?=C)/g+
+    ABCDECBA
+ 0: 
+ 0+ CDECBA
+ 0: 
+ 0+ CBA
+    
+/^abc\K/+
+    abcdef
+ 0: 
+ 0+ def
+    ** Failers
+No match
+    defabcxyz   
+No match
+
+/abc\K/+
+    abcdef
+ 0: 
+ 0+ def
+    abcdef\N\N
+ 0: 
+ 0+ def
+    xyzabcdef\N\N
+ 0: 
+ 0+ def
+    ** Failers
+No match
+    abcdef\N 
+No match
+    xyzabcdef\N
+No match
+    
+/^(?:(?=abc)|abc\K)/+
+    abcdef
+ 0: 
+ 0+ abcdef
+    abcdef\N\N 
+ 0: 
+ 0+ def
+    ** Failers 
+No match
+    abcdef\N 
+No match
+
+/a?b?/+
+    xyz
+ 0: 
+ 0+ xyz
+    xyzabc
+ 0: 
+ 0+ xyzabc
+    xyzabc\N
+ 0: ab
+ 0+ c
+    xyzabc\N\N
+ 0: 
+ 0+ yzabc
+    xyz\N\N    
+ 0: 
+ 0+ yz
+    ** Failers 
+ 0: 
+ 0+ ** Failers
+    xyz\N 
+No match
+
+/^a?b?/+
+    xyz
+ 0: 
+ 0+ xyz
+    xyzabc
+ 0: 
+ 0+ xyzabc
+    ** Failers 
+ 0: 
+ 0+ ** Failers
+    xyzabc\N
+No match
+    xyzabc\N\N
+No match
+    xyz\N\N    
+No match
+    xyz\N 
+No match
+    
 / End of testinput2 /

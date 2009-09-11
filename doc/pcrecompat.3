@@ -109,8 +109,8 @@ question mark they are.
 (e) PCRE_ANCHORED can be used at matching time to force a pattern to be tried
 only at the first matching position in the subject string.
 .sp
-(f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NO_AUTO_CAPTURE
-options for \fBpcre_exec()\fP have no Perl equivalents.
+(f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART, and
+PCRE_NO_AUTO_CAPTURE options for \fBpcre_exec()\fP have no Perl equivalents.
 .sp
 (g) The \eR escape sequence can be restricted to match only CR, LF, or CRLF
 by the PCRE_BSR_ANYCRLF option.
@@ -143,6 +143,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 25 August 2009
+Last updated: 11 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -1970,7 +1970,10 @@ while (!done)
         continue;
 
         case 'N':
-        options |= PCRE_NOTEMPTY;
+        if ((options & PCRE_NOTEMPTY) != 0)
+          options = (options & ~PCRE_NOTEMPTY) | PCRE_NOTEMPTY_ATSTART;
+        else    
+          options |= PCRE_NOTEMPTY;
         continue;
 
         case 'O':
@@ -2443,9 +2446,9 @@ while (!done)
       if (!do_g && !do_G) break;
 
       /* If we have matched an empty string, first check to see if we are at
-      the end of the subject. If so, the /g loop is over. Otherwise, mimic
-      what Perl's /g options does. This turns out to be rather cunning. First
-      we set PCRE_NOTEMPTY and PCRE_ANCHORED and try the match again at the
+      the end of the subject. If so, the /g loop is over. Otherwise, mimic what
+      Perl's /g options does. This turns out to be rather cunning. First we set
+      PCRE_NOTEMPTY_ATSTART and PCRE_ANCHORED and try the match again at the
       same point. If this fails (picked up above) we advance to the next
       character. */
 
@@ -2454,7 +2457,7 @@ while (!done)
       if (use_offsets[0] == use_offsets[1])
         {
         if (use_offsets[0] == len) break;
-        g_notempty = PCRE_NOTEMPTY | PCRE_ANCHORED;
+        g_notempty = PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED;
         }
 
       /* For /g, update the start offset, leaving the rest alone */

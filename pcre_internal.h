@@ -564,14 +564,15 @@ time, run time, or study time, respectively. */
    PCRE_JAVASCRIPT_COMPAT)
 
 #define PUBLIC_EXEC_OPTIONS \
-  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF| \
-   PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
+  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NOTEMPTY_ATSTART| \
+   PCRE_NO_UTF8_CHECK|PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_NEWLINE_BITS| \
+   PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_DFA_EXEC_OPTIONS \
-  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
-   PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART| \
-   PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
+  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NOTEMPTY_ATSTART| \
+   PCRE_NO_UTF8_CHECK|PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_DFA_SHORTEST| \
+   PCRE_DFA_RESTART|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
+   PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -1601,6 +1602,7 @@ typedef struct match_data {
   BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
+  BOOL   notempty_atstart;      /* Empty string match at start not wanted */
   BOOL   hitend;                /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
   const uschar *start_code;     /* For use when recursing */
@@ -1608,7 +1610,7 @@ typedef struct match_data {
   USPTR  end_subject;           /* End of the subject string */
   USPTR  start_match_ptr;       /* Start of matched string */
   USPTR  end_match_ptr;         /* Subject position at end match */
-  USPTR  start_used_ptr;        /* Earliest consulted character */ 
+  USPTR  start_used_ptr;        /* Earliest consulted character */
   int    partial;               /* PARTIAL options */
   int    end_offset_top;        /* Highwater mark at end of match */
   int    capture_last;          /* Most recent capture number */
@@ -1626,8 +1628,9 @@ typedef struct dfa_match_data {
   const uschar *start_code;     /* Start of the compiled pattern */
   const uschar *start_subject;  /* Start of the subject string */
   const uschar *end_subject;    /* End of subject string */
-  const uschar *start_used_ptr; /* Earliest consulted character */ 
+  const uschar *start_used_ptr; /* Earliest consulted character */
   const uschar *tables;         /* Character tables */
+  int   start_offset;           /* The start offset value */
   int   moptions;               /* Match options */
   int   poptions;               /* Pattern options */
   int    nltype;                /* Newline type */

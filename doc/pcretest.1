@@ -211,11 +211,11 @@ substring. This makes a difference to the matching process if the pattern
 begins with a lookbehind assertion (including \eb or \eB).
 .P
 If any call to \fBpcre_exec()\fP in a \fB/g\fP or \fB/G\fP sequence matches an
-empty string, the next call is done with the PCRE_NOTEMPTY and PCRE_ANCHORED
-flags set in order to search for another, non-empty, match at the same point.
-If this second match fails, the start offset is advanced by one, and the normal
-match is retried. This imitates the way Perl handles such cases when using the
-\fB/g\fP modifier or the \fBsplit()\fP function.
+empty string, the next call is done with the PCRE_NOTEMPTY_ATSTART and
+PCRE_ANCHORED flags set in order to search for another, non-empty, match at the
+same point. If this second match fails, the start offset is advanced by one 
+character, and the normal match is retried. This imitates the way Perl handles
+such cases when using the \fB/g\fP modifier or the \fBsplit()\fP function.
 .
 .
 .SS "Other modifiers"
@@ -356,7 +356,8 @@ recognized:
                MATCH_LIMIT_RECURSION settings
 .\" JOIN
   \eN         pass the PCRE_NOTEMPTY option to \fBpcre_exec()\fP
-               or \fBpcre_dfa_exec()\fP
+               or \fBpcre_dfa_exec()\fP; if used twice, pass the
+               PCRE_NOTEMPTY_ATSTART option 
 .\" JOIN
   \eOdd       set the size of the output vector passed to
                \fBpcre_exec()\fP to dd (any number of digits)
@@ -727,6 +728,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 September 2009
+Last updated: 11 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

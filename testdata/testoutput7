@@ -7462,4 +7462,11 @@ Partial match: +ab
     +++ab\P\P  
 Partial match: +ab
 
+/(?=C)/g+
+    ABCDECBA
+ 0: 
+ 0+ CDECBA
+ 0: 
+ 0+ CBA
+
 / End of testinput7 /

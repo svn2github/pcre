@@ -930,10 +930,19 @@ for (;;)
       break;
       }
 
-    /* Otherwise, if PCRE_NOTEMPTY is set, fail if we have matched an empty
-    string - backtracking will then try other alternatives, if any. */
+    /* Otherwise, if we have matched an empty string, fail if PCRE_NOTEMPTY is
+    set, or if PCRE_NOTEMPTY_ATSTART is set and we have matched at the start of
+    the subject. In both cases, backtracking will then try other alternatives,
+    if any. */
+    
+    if (eptr == mstart &&
+        (md->notempty ||
+          (md->notempty_atstart && 
+            mstart == md->start_subject + md->start_offset)))
+      RRETURN(MATCH_NOMATCH);  
+ 
+    /* Otherwise, we have a match. */
 
-    if (md->notempty && eptr == mstart) RRETURN(MATCH_NOMATCH);
     md->end_match_ptr = eptr;           /* Record where we ended */
     md->end_offset_top = offset_top;    /* and how many extracts were taken */
     md->start_match_ptr = mstart;       /* and the start (\K can modify) */
@@ -4920,6 +4929,7 @@ md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 md->notbol = (options & PCRE_NOTBOL) != 0;
 md->noteol = (options & PCRE_NOTEOL) != 0;
 md->notempty = (options & PCRE_NOTEMPTY) != 0;
+md->notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
 md->partial = ((options & PCRE_PARTIAL_HARD) != 0)? 2 :
               ((options & PCRE_PARTIAL_SOFT) != 0)? 1 : 0;
 md->hitend = FALSE;

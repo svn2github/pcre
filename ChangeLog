@@ -113,6 +113,11 @@ Version 8.00 ??-???-??
     over the character class, thus treating the ] as data rather than 
     terminating the class. This meant it could skip too much.] 
     
+20. Added PCRE_NOTEMPTY_ATSTART in order to be able to correctly implement the
+    /g option in pcretest when the pattern contains \K, which makes it possible 
+    to have an empty string match not at the start, even when the pattern is
+    anchored. Updated pcretest and pcredemo to use this option.  
+    
 
 Version 7.9 11-Apr-09
 ---------------------

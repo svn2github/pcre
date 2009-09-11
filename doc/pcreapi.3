@@ -1246,8 +1246,9 @@ documentation for a discussion of saving compiled patterns for later use.
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_START_OPTIMIZE,
-PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and PCRE_PARTIAL_HARD.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
+PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and
+PCRE_PARTIAL_HARD.
 .sp
   PCRE_ANCHORED
 .sp
@@ -1322,17 +1323,24 @@ match the empty string, the entire match fails. For example, if the pattern
 .sp
   a?b?
 .sp
-is applied to a string not beginning with "a" or "b", it matches the empty
+is applied to a string not beginning with "a" or "b", it matches an empty
 string at the start of the subject. With PCRE_NOTEMPTY set, this match is not
 valid, so PCRE searches further into the string for occurrences of "a" or "b".
+.sp
+  PCRE_NOTEMPTY_ATSTART
+.sp
+This is like PCRE_NOTEMPTY, except that an empty string match that is not at 
+the start of the subject is permitted. If the pattern is anchored, such a match
+can occur only if the pattern contains \eK.
 .P
-Perl has no direct equivalent of PCRE_NOTEMPTY, but it does make a special case
-of a pattern match of the empty string within its \fBsplit()\fP function, and
-when using the /g modifier. It is possible to emulate Perl's behaviour after
-matching a null string by first trying the match again at the same offset with
-PCRE_NOTEMPTY and PCRE_ANCHORED, and then if that fails by advancing the
-starting offset (see below) and trying an ordinary match again. There is some
-code that demonstrates how to do this in the 
+Perl has no direct equivalent of PCRE_NOTEMPTY or PCRE_NOTEMPTY_ATSTART, but it
+does make a special case of a pattern match of the empty string within its
+\fBsplit()\fP function, and when using the /g modifier. It is possible to
+emulate Perl's behaviour after matching a null string by first trying the match
+again at the same offset with PCRE_NOTEMPTY_ATSTART and PCRE_ANCHORED, and then
+if that fails, by advancing the starting offset (see below) and trying an
+ordinary match again. There is some code that demonstrates how to do this in
+the
 .\" HREF
 \fBpcredemo\fP
 .\"
@@ -1875,10 +1883,10 @@ Here is an example of a simple call to \fBpcre_dfa_exec()\fP:
 .sp
 The unused bits of the \fIoptions\fP argument for \fBpcre_dfa_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD,
-PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last
-four of these are exactly the same as for \fBpcre_exec()\fP, so their
-description is not repeated here.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
+PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST,
+and PCRE_DFA_RESTART. All but the last four of these are exactly the same as
+for \fBpcre_exec()\fP, so their description is not repeated here.
 .sp
   PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT 
@@ -2012,6 +2020,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 September 2009
+Last updated: 11 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

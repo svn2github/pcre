@@ -130,6 +130,7 @@ both, so we keep them all distinct. */
 #define PCRE_NO_START_OPTIMIZE  0x04000000
 #define PCRE_NO_START_OPTIMISE  0x04000000
 #define PCRE_PARTIAL_HARD       0x08000000
+#define PCRE_NOTEMPTY_ATSTART   0x10000000
 
 /* Exec-time and get/set-time error codes */
 
