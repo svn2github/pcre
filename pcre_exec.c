@@ -5326,7 +5326,7 @@ for(;;)
     rc = MATCH_NOMATCH;
     goto ENDLOOP;
 
-    /* Any other return is some kind of error. */
+    /* Any other return is either a match, or some kind of error. */
 
     default:
     goto ENDLOOP;
