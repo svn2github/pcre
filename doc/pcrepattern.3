@@ -2135,6 +2135,11 @@ a backtracking algorithm. With the exception of (*FAIL), which behaves like a
 failing negative assertion, they cause an error if encountered by
 \fBpcre_dfa_exec()\fP.
 .P
+If any of these verbs are used in an assertion subpattern, their effect is 
+confined to that subpattern; it does not extend to the surrounding pattern.
+Note that assertion subpatterns are processed as anchored at the point where 
+they are tested.
+.P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. In Perl, they are generally of the form
 (*VERB:ARG) but PCRE does not support the use of arguments, so its general
@@ -2254,6 +2259,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 April 2009
+Last updated: 13 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
