@@ -909,6 +909,30 @@ for (;;)
       ecode += 1 + LINK_SIZE;
       }
     break;
+    
+
+    /* Before OP_ACCEPT there may be any number of OP_CLOSE opcodes,
+    to close any currently open capturing brackets. */
+    
+    case OP_CLOSE:
+    number = GET2(ecode, 1); 
+    offset = number << 1;
+      
+#ifdef DEBUG
+      printf("end bracket %d at *ACCEPT", number);
+      printf("\n");
+#endif
+
+    md->capture_last = number;
+    if (offset >= md->offset_max) md->offset_overflow = TRUE; else
+      {
+      md->offset_vector[offset] =
+        md->offset_vector[md->offset_end - number];
+      md->offset_vector[offset+1] = eptr - md->start_subject;
+      if (offset_top <= offset) offset_top = offset + 2;
+      }
+    ecode += 3;
+    break;   
 
 
     /* End of the pattern, either real or forced. If we are in a top-level

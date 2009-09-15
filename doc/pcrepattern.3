@@ -2155,14 +2155,13 @@ The following verbs act as soon as they are encountered:
 .sp
 This verb causes the match to end successfully, skipping the remainder of the
 pattern. When inside a recursion, only the innermost pattern is ended
-immediately. PCRE differs from Perl in what happens if the (*ACCEPT) is inside
-capturing parentheses. In Perl, the data so far is captured: in PCRE no data is
-captured. For example:
+immediately. If the (*ACCEPT) is inside capturing parentheses, the data so far
+is captured. (This feature was added to PCRE at release 8.00.) For example:
 .sp
-  A(A|B(*ACCEPT)|C)D
+  A((?:A|B(*ACCEPT)|C)D)
 .sp
-This matches "AB", "AAD", or "ACD", but when it matches "AB", no data is
-captured.
+This matches "AB", "AAD", or "ACD"; when it matches "AB", "B" is captured by 
+the outer parentheses.
 .sp
   (*FAIL) or (*F)
 .sp
@@ -2259,6 +2258,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 September 2009
+Last updated: 15 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

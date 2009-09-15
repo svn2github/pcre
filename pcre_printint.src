@@ -245,6 +245,10 @@ for(;;)
       else fprintf(f, "    ");
     fprintf(f, "%s", OP_names[*code]);
     break;
+    
+    case OP_CLOSE:
+    fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
+    break;   
 
     case OP_CREF:
     fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);

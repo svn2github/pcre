@@ -1364,10 +1364,11 @@ enum {
 
   OP_FAIL,           /* 109 */
   OP_ACCEPT,         /* 110 */
+  OP_CLOSE,          /* 111 Used before OP_ACCEPT to close open captures */ 
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO        /* 111 */
+  OP_SKIPZERO        /* 112 */
 };
 
 
@@ -1393,7 +1394,7 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
   "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero",    \
   "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
-  "Skip zero"
+  "Close", "Skip zero"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1458,7 +1459,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
   1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
-  1, 1, 1                        /* FAIL, ACCEPT, SKIPZERO                 */
+  1, 1, 3, 1                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
 
 
 /* A magic value for OP_RREF to indicate the "any recursion" condition. */
@@ -1521,6 +1522,15 @@ typedef struct pcre_study_data {
   uschar start_bits[32];
 } pcre_study_data;
 
+/* Structure for building a chain of open capturing subpatterns during 
+compiling, so that instructions to close them can be compiled when (*ACCEPT) is 
+encountered. */
+
+typedef struct open_capitem {
+  struct open_capitem *next;    /* Chain link */
+  pcre_uint16 number;           /* Capture number */
+} open_capitem;    
+
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
 
@@ -1533,6 +1543,7 @@ typedef struct compile_data {
   const uschar *start_code;     /* The start of the compiled code */
   const uschar *start_pattern;  /* The start of the pattern */
   const uschar *end_pattern;    /* The end of the pattern */
+  open_capitem *open_caps;      /* Chain of open capture items */ 
   uschar *hwm;                  /* High watermark of workspace */
   uschar *name_table;           /* The name/number table */
   int  names_found;             /* Number of entries so far */

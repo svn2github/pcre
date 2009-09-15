@@ -4440,8 +4440,19 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         if (namelen == verbs[i].len &&
             strncmp((char *)name, vn, namelen) == 0)
           {
-          *code = verbs[i].op;
-          if (*code++ == OP_ACCEPT) cd->had_accept = TRUE;
+          /* Check for open captures before ACCEPT */
+            
+          if (verbs[i].op == OP_ACCEPT)
+            {
+            open_capitem *oc; 
+            cd->had_accept = TRUE; 
+            for (oc = cd->open_caps; oc != NULL; oc = oc->next)
+              {
+              *code++ = OP_CLOSE;
+              PUT2INC(code, 0, oc->number); 
+              }  
+            }  
+          *code++ = verbs[i].op;
           break;
           }
         vn += verbs[i].len + 1;
@@ -5669,6 +5680,8 @@ uschar *code = *codeptr;
 uschar *last_branch = code;
 uschar *start_bracket = code;
 uschar *reverse_count = NULL;
+open_capitem capitem;
+int capnumber = 0;
 int firstbyte, reqbyte;
 int branchfirstbyte, branchreqbyte;
 int length;
@@ -5694,6 +5707,17 @@ length = 2 + 2*LINK_SIZE + skipbytes;
 the code that abstracts option settings at the start of the pattern and makes
 them global. It tests the value of length for (2 + 2*LINK_SIZE) in the
 pre-compile phase to find out whether anything has yet been compiled or not. */
+
+/* If this is a capturing subpattern, add to the chain of open capturing items
+so that we can detect them if (*ACCEPT) is encountered. */
+
+if (*code == OP_CBRA)
+  {
+  capnumber = GET2(code, 1 + LINK_SIZE);
+  capitem.number = capnumber;
+  capitem.next = cd->open_caps;
+  cd->open_caps = &capitem;  
+  } 
 
 /* Offset is set zero to mark that this bracket is still open */
 
@@ -5830,6 +5854,10 @@ for (;;)
         }
       while (branch_length > 0);
       }
+      
+    /* If it was a capturing subpattern, remove it from the chain. */
+    
+    if (capnumber > 0) cd->open_caps = cd->open_caps->next;
 
     /* Fill in the ket */
 
@@ -6398,6 +6426,7 @@ cd->end_pattern = (const uschar *)(pattern + strlen(pattern));
 cd->req_varyopt = 0;
 cd->external_options = options;
 cd->external_flags = 0;
+cd->open_caps = NULL;
 
 /* Now do the pre-compile. On error, errorcode will be set non-zero, so we
 don't need to look at the result of the function here. The initial options have
@@ -6472,6 +6501,7 @@ cd->start_code = codestart;
 cd->hwm = cworkspace;
 cd->req_varyopt = 0;
 cd->had_accept = FALSE;
+cd->open_caps = NULL;
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
 error, errorcode will be set non-zero, so we don't need to look at the result

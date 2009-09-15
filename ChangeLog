@@ -123,6 +123,11 @@ Version 8.00 ??-???-??
     with unset values at the outer level. The correct (outer level) value is 
     now given.
     
+22. If (*ACCEPT) appeared inside capturing parentheses, previous releases of
+    PCRE did not set those parentheses (unlike Perl). I have now found a way to
+    make it do so. The string so far is captured, making this feature
+    compatible with Perl.
+    
 
 Version 7.9 11-Apr-09
 ---------------------
