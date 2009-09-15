@@ -1805,7 +1805,6 @@ Need char = ')'
  0: (abcd(xyz<p>qrs)123)
  1: abcd(xyz<p>qrs)123
  2: 123
- 3: <unset>
 
 /\( ( ( (?>[^()]+) | ((?R)) )* ) \) /Ix
 Capturing subpattern count = 3
@@ -7572,20 +7571,6 @@ Need char = ':'
  0: abcd:
  1: abcd
 
-/(?'abc'\w+):\k<abc>{2}/
-    a:aaxyz
- 0: a:aa
- 1: a
-    ab:ababxyz
- 0: ab:abab
- 1: ab
-    ** Failers
-No match
-    a:axyz
-No match
-    ab:abxyz
-No match
-
 /(?'abc'a|b)(?<abc>d|e)\k<abc>{2}/J
     adaa
  0: adaa
@@ -7611,13 +7596,6 @@ No match
 No match
     bddd
 No match
-
-/^(?<ab>a)? (?(<ab>)b|c) (?('ab')d|e)/x
-    abd
- 0: abd
- 1: a
-    ce
- 0: ce
 
 /(?(<bc))/
 Failed: malformed number or name after (?( at offset 6
@@ -7648,24 +7626,6 @@ Failed: reference to non-existent subpattern at offset 29
  0: abcabc1Xabc2XabcX
  1: abcabc1Xabc2XabcX
  2: abcabc1Xabc2XabcX
-
-/^(?(DEFINE) (?<A> a) (?<B> b) )  (?&A) (?&B) /x
-    abcd
- 0: ab
- 1: <unset>
- 2: <unset>
-
-/(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
-  (?(DEFINE)
-  (?<NAME_PAT>[a-z]+)
-  (?<ADDRESS_PAT>\d+)
-  )/x
-    metcalfe 33
- 0: metcalfe 33
- 1: metcalfe
- 2: 33
- 3: <unset>
- 4: <unset>
 
 /^(?(DEFINE) abc | xyz ) /x
 Failed: DEFINE group contains more than one branch at offset 22
@@ -7844,46 +7804,6 @@ Need char = 'P'
  0: PXP
  1: P
 
-/(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))\b(?&byte)(\.(?&byte)){3}/
-    1.2.3.4
- 0: 1.2.3.4
- 1: <unset>
- 2: .4
-    131.111.10.206
- 0: 131.111.10.206
- 1: <unset>
- 2: .206
-    10.0.0.0
- 0: 10.0.0.0
- 1: <unset>
- 2: .0
-    ** Failers
-No match
-    10.6
-No match
-    455.3.4.5
-No match
-
-/\b(?&byte)(\.(?&byte)){3}(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))/
-    1.2.3.4
- 0: 1.2.3.4
- 1: .4
- 2: <unset>
-    131.111.10.206
- 0: 131.111.10.206
- 1: .206
- 2: <unset>
-    10.0.0.0
- 0: 10.0.0.0
- 1: .0
- 2: <unset>
-    ** Failers
-No match
-    10.6
-No match
-    455.3.4.5
-No match
-
 /(?:a(?&abc)b)*(?<abc>x)/
     123axbaxbaxbx456
  0: axbaxbaxbx
@@ -7920,12 +7840,6 @@ No match
  1: abc
    DEFabcABCXYZ
 No match
-
-/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
-    ababababbbabZXXXX
- 0: ababababbbabZ
- 1: ab
- 2: b
 
 /^(a)\g-2/
 Failed: reference to non-existent subpattern at offset 7
@@ -8182,26 +8096,6 @@ Failed: reference to non-existent subpattern at offset 7
  0: Y!
  1: !
 
-/(foo)\Kbar/
-    foobar
- 0: bar
- 1: foo
-   
-/(foo)(\Kbar|baz)/
-    foobar
- 0: bar
- 1: foo
- 2: bar
-    foobaz 
- 0: foobaz
- 1: foo
- 2: baz
-
-/(foo\Kbar)baz/
-    foobarbaz
- 0: barbaz
- 1: foobar
-
 /(?<A>tom|bon)-\k{A}/
     tom-tom
  0: tom-tom
@@ -8214,14 +8108,6 @@ No match
     tom-bon  
 No match
 
-/(?<A>tom|bon)-\g{A}/
-    tom-tom
- 0: tom-tom
- 1: tom
-    bon-bon 
- 0: bon-bon
- 1: bon
-    
 /\g{A/ 
 Failed: syntax error in subpattern name (missing terminator) at offset 4
 
@@ -8315,82 +8201,6 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
  2: xyz
  3: <unset>
  4: x
-
-/(?|(abc)|(xyz))\1/
-    abcabc
- 0: abcabc
- 1: abc
-    xyzxyz 
- 0: xyzxyz
- 1: xyz
-    ** Failers
-No match
-    abcxyz
-No match
-    xyzabc   
-No match
-    
-/(?|(abc)|(xyz))(?1)/
-    abcabc
- 0: abcabc
- 1: abc
-    xyzabc 
- 0: xyzabc
- 1: xyz
-    ** Failers 
-No match
-    xyzxyz 
-No match
- 
-/\H\h\V\v/
-    X X\x0a
- 0: X X\x0a
-    X\x09X\x0b
- 0: X\x09X\x0b
-    ** Failers
-No match
-    \xa0 X\x0a   
-No match
-    
-/\H*\h+\V?\v{3,4}/ 
-    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
- 0: \x09 \xa0X\x0a\x0b\x0c\x0d
-    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
- 0: \x09 \xa0\x0a\x0b\x0c\x0d
-    \x09\x20\xa0\x0a\x0b\x0c
- 0: \x09 \xa0\x0a\x0b\x0c
-    ** Failers 
-No match
-    \x09\x20\xa0\x0a\x0b
-No match
-     
-/\H{3,4}/
-    XY  ABCDE
- 0: ABCD
-    XY  PQR ST 
- 0: PQR
-    
-/.\h{3,4}./
-    XY  AB    PQRS
- 0: B    P
-
-/\h*X\h?\H+Y\H?Z/
-    >XNNNYZ
- 0: XNNNYZ
-    >  X NYQZ
- 0:   X NYQZ
-    ** Failers
-No match
-    >XYZ   
-No match
-    >  X NY Z
-No match
-
-/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
-    >XY\x0aZ\x0aA\x0bNN\x0c
- 0: XY\x0aZ\x0aA\x0bNN\x0c
-    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
- 0: \x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
 
 /[\h]/BZ
 ------------------------------------------------------------------
@@ -8688,87 +8498,6 @@ Failed: missing terminating ] for character class at offset 10
         End
 ------------------------------------------------------------------
 
-/^a+(*FAIL)/
-    aaaaaa
-No match
-    
-/a+b?c+(*FAIL)/
-    aaabccc
-No match
-
-/a+b?(*PRUNE)c+(*FAIL)/
-    aaabccc
-No match
-
-/a+b?(*COMMIT)c+(*FAIL)/
-    aaabccc
-No match
-    
-/a+b?(*SKIP)c+(*FAIL)/
-    aaabcccaaabccc
-No match
-
-/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
-    aaaxxxxxx
- 0: aaaxxxxxx
-    aaa++++++ 
- 0: aaa
-    bbbxxxxx
- 0: bbbxxxxx
-    bbb+++++ 
- 0: bbb
-    cccxxxx
- 0: cccxxxx
-    ccc++++ 
- 0: ccc
-    dddddddd   
- 0: ddd
-
-/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
-    aaaxxxxxx
- 0: aaaxxxxxx
- 1: aaaxxxxxx
-    aaa++++++ 
- 0: aaa
- 1: aaa
-    bbbxxxxx
- 0: bbbxxxxx
- 1: bbbxxxxx
-    bbb+++++ 
- 0: bbb
- 1: bbb
-    cccxxxx
- 0: cccxxxx
- 1: cccxxxx
-    ccc++++ 
- 0: ccc
- 1: ccc
-    dddddddd   
- 0: ddd
- 1: ddd
-
-/a+b?(*THEN)c+(*FAIL)/
-    aaabccc
-No match
-
-/(A (A|B(*ACCEPT)|C) D)(E)/x
-    ABX
- 0: AB
-    AADE
- 0: AADE
- 1: AAD
- 2: A
- 3: E
-    ACDE
- 0: ACDE
- 1: ACD
- 2: C
- 3: E
-    ** Failers
-No match
-    AD 
-No match
-        
 /^a+(*FAIL)/C
     aaaaaa
 --->aaaaaa
@@ -9240,143 +8969,14 @@ Failed: unknown POSIX class name at offset 6
 /[[:a\dz:]]/
 Failed: unknown POSIX class name at offset 3
 
-/^(?<name>a|b\g<name>c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(?<name>a|b\g'name'c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(a|b\g<1>c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(a|b\g'1'c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/^(a|b\g'-1'c)/
-    aaaa
- 0: a
- 1: a
-    bacxxx
- 0: bac
- 1: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
-
-/(^(a|b\g<-1>c))/
-    aaaa
- 0: a
- 1: a
- 2: a
-    bacxxx
- 0: bac
- 1: bac
- 2: bac
-    bbaccxxx 
- 0: bbacc
- 1: bbacc
- 2: bbacc
-    bbbacccxx
- 0: bbbaccc
- 1: bbbaccc
- 2: bbbaccc
-
 /(^(a|b\g<-1'c))/
 Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 15
-
-/(^(a|b\g{-1}))/
-    bacxxx
-No match
-
-/(?-i:\g<name>)(?i:(?<name>a))/
-    XaaX
- 0: aa
- 1: a
-    XAAX 
- 0: AA
- 1: A
-
-/(?i:\g<name>)(?-i:(?<name>a))/
-    XaaX
- 0: aa
- 1: a
-    ** Failers 
-No match
-    XAAX 
-No match
-
-/(?-i:\g<+1>)(?i:(a))/
-    XaaX
- 0: aa
- 1: a
-    XAAX 
- 0: AA
- 1: A
-
-/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
-
-/(?<n>a|b|c)\g<n>*/
-   abc
- 0: abc
- 1: a
-   accccbbb 
- 0: accccbbb
- 1: a
 
 /^(?+1)(?<a>x|y){0}z/
     xzxx
  0: xz
- 1: <unset>
     yzyy 
  0: yz
- 1: <unset>
     ** Failers
 No match
     xxz  
@@ -9638,15 +9238,6 @@ No match
  0: "ab"
  1: 
 
-/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
- 1: a
- 2: b
- 3: c
- 4: d
- 5: Y
-
 /^X(?5)(a)(?|(b)|(q))(c)(d)Y/
 Failed: reference to non-existent subpattern at offset 5
 
@@ -9659,39 +9250,6 @@ Failed: reference to non-existent subpattern at offset 5
  4: d
  5: Y
  
-/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
- 1: a
- 2: b
- 3: <unset>
- 4: <unset>
- 5: c
- 6: d
- 7: Y
-
-/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
- 1: a
- 2: b
- 3: <unset>
- 4: <unset>
- 5: c
- 6: d
- 7: Y
-
-/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
-    XYabcdY
- 0: XYabcdY
- 1: a
- 2: b
- 3: <unset>
- 4: <unset>
- 5: c
- 6: d
- 7: Y
-
 /Xa{2,4}b/
     X\P
 Partial match: X
@@ -10048,36 +9606,6 @@ Partial match: +ab
         End
 ------------------------------------------------------------------
 
-/abc\K|def\K/g+
-    Xabcdefghi
- 0: 
- 0+ defghi
- 0: 
- 0+ ghi
-
-/ab\Kc|de\Kf/g+
-    Xabcdefghi
- 0: c
- 0+ defghi
- 0: f
- 0+ ghi
-    
-/(?=C)/g+
-    ABCDECBA
- 0: 
- 0+ CDECBA
- 0: 
- 0+ CBA
-    
-/^abc\K/+
-    abcdef
- 0: 
- 0+ def
-    ** Failers
-No match
-    defabcxyz   
-No match
-
 /abc\K/+
     abcdef
  0: 
@@ -10148,4 +9676,138 @@ No match
     xyz\N 
 No match
     
+/^(?<name>a|b\g<name>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g<1>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'-1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/(^(a|b\g<-1>c))/
+    aaaa
+ 0: a
+ 1: a
+ 2: a
+    bacxxx
+ 0: bac
+ 1: bac
+ 2: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+ 2: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+ 2: bbbaccc
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    ** Failers 
+No match
+    XAAX 
+No match
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+ 0: abc
+ 1: a
+   accccbbb 
+ 0: accccbbb
+ 1: a
+
+/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
 / End of testinput2 /

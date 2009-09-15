@@ -1915,13 +1915,6 @@ a random value. /Ix
 /(?=(?'abc'\w+))\k<abc>:/I
     abcd:
 
-/(?'abc'\w+):\k<abc>{2}/
-    a:aaxyz
-    ab:ababxyz
-    ** Failers
-    a:axyz
-    ab:abxyz
-
 /(?'abc'a|b)(?<abc>d|e)\k<abc>{2}/J
     adaa
     ** Failers
@@ -1933,10 +1926,6 @@ a random value. /Ix
     bdab
     ** Failers
     bddd
-
-/^(?<ab>a)? (?(<ab>)b|c) (?('ab')d|e)/x
-    abd
-    ce
 
 /(?(<bc))/
 
@@ -1954,16 +1943,6 @@ a random value. /Ix
 
 /(?<1> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
     abcabc1Xabc2XabcXabcabc
-
-/^(?(DEFINE) (?<A> a) (?<B> b) )  (?&A) (?&B) /x
-    abcd
-
-/(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
-  (?(DEFINE)
-  (?<NAME_PAT>[a-z]+)
-  (?<ADDRESS_PAT>\d+)
-  )/x
-    metcalfe 33
 
 /^(?(DEFINE) abc | xyz ) /x
 
@@ -2053,22 +2032,6 @@ a random value. /Ix
 /(?1)X(?<abc>P)/I
     abcPXP123
 
-/(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))\b(?&byte)(\.(?&byte)){3}/
-    1.2.3.4
-    131.111.10.206
-    10.0.0.0
-    ** Failers
-    10.6
-    455.3.4.5
-
-/\b(?&byte)(\.(?&byte)){3}(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))/
-    1.2.3.4
-    131.111.10.206
-    10.0.0.0
-    ** Failers
-    10.6
-    455.3.4.5
-
 /(?:a(?&abc)b)*(?<abc>x)/
     123axbaxbaxbx456
     123axbaxbaxb456
@@ -2089,9 +2052,6 @@ a random value. /Ix
 /(abc)(?:(?i)(?1))/
    defabcabcxyz
    DEFabcABCXYZ
-
-/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
-    ababababbbabZXXXX
 
 /^(a)\g-2/
 
@@ -2191,26 +2151,12 @@ a random value. /Ix
 /^(?(+1)X|Y)(.)/BZ
     Y!
 
-/(foo)\Kbar/
-    foobar
-   
-/(foo)(\Kbar|baz)/
-    foobar
-    foobaz 
-
-/(foo\Kbar)baz/
-    foobarbaz
-
 /(?<A>tom|bon)-\k{A}/
     tom-tom
     bon-bon 
     ** Failers
     tom-bon  
 
-/(?<A>tom|bon)-\g{A}/
-    tom-tom
-    bon-bon 
-    
 /\g{A/ 
 
 /(?|(abc)|(xyz))/BZ
@@ -2224,50 +2170,6 @@ a random value. /Ix
 /(x)(?|(abc)(pqr)|(xyz))(x)/BZ
     xabcpqrx
     xxyzx 
-
-/(?|(abc)|(xyz))\1/
-    abcabc
-    xyzxyz 
-    ** Failers
-    abcxyz
-    xyzabc   
-    
-/(?|(abc)|(xyz))(?1)/
-    abcabc
-    xyzabc 
-    ** Failers 
-    xyzxyz 
- 
-/\H\h\V\v/
-    X X\x0a
-    X\x09X\x0b
-    ** Failers
-    \xa0 X\x0a   
-    
-/\H*\h+\V?\v{3,4}/ 
-    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
-    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
-    \x09\x20\xa0\x0a\x0b\x0c
-    ** Failers 
-    \x09\x20\xa0\x0a\x0b
-     
-/\H{3,4}/
-    XY  ABCDE
-    XY  PQR ST 
-    
-/.\h{3,4}./
-    XY  AB    PQRS
-
-/\h*X\h?\H+Y\H?Z/
-    >XNNNYZ
-    >  X NYQZ
-    ** Failers
-    >XYZ   
-    >  X NY Z
-
-/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
-    >XY\x0aZ\x0aA\x0bNN\x0c
-    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
 
 /[\h]/BZ
     >\x09<
@@ -2341,49 +2243,6 @@ a random value. /Ix
 
 /A(*PRUNE)B(*SKIP)C(*THEN)D(*COMMIT)E(*F)F(*FAIL)G(?!)H(*ACCEPT)I/BZ
 
-/^a+(*FAIL)/
-    aaaaaa
-    
-/a+b?c+(*FAIL)/
-    aaabccc
-
-/a+b?(*PRUNE)c+(*FAIL)/
-    aaabccc
-
-/a+b?(*COMMIT)c+(*FAIL)/
-    aaabccc
-    
-/a+b?(*SKIP)c+(*FAIL)/
-    aaabcccaaabccc
-
-/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
-    aaaxxxxxx
-    aaa++++++ 
-    bbbxxxxx
-    bbb+++++ 
-    cccxxxx
-    ccc++++ 
-    dddddddd   
-
-/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
-    aaaxxxxxx
-    aaa++++++ 
-    bbbxxxxx
-    bbb+++++ 
-    cccxxxx
-    ccc++++ 
-    dddddddd   
-
-/a+b?(*THEN)c+(*FAIL)/
-    aaabccc
-
-/(A (A|B(*ACCEPT)|C) D)(E)/x
-    ABX
-    AADE
-    ACDE
-    ** Failers
-    AD 
-        
 /^a+(*FAIL)/C
     aaaaaa
     
@@ -2589,65 +2448,7 @@ a random value. /Ix
 
 /[[:a\dz:]]/
 
-/^(?<name>a|b\g<name>c)/
-    aaaa
-    bacxxx
-    bbaccxxx 
-    bbbacccxx
-
-/^(?<name>a|b\g'name'c)/
-    aaaa
-    bacxxx
-    bbaccxxx 
-    bbbacccxx
-
-/^(a|b\g<1>c)/
-    aaaa
-    bacxxx
-    bbaccxxx 
-    bbbacccxx
-
-/^(a|b\g'1'c)/
-    aaaa
-    bacxxx
-    bbaccxxx 
-    bbbacccxx
-
-/^(a|b\g'-1'c)/
-    aaaa
-    bacxxx
-    bbaccxxx 
-    bbbacccxx
-
-/(^(a|b\g<-1>c))/
-    aaaa
-    bacxxx
-    bbaccxxx 
-    bbbacccxx
-
 /(^(a|b\g<-1'c))/
-
-/(^(a|b\g{-1}))/
-    bacxxx
-
-/(?-i:\g<name>)(?i:(?<name>a))/
-    XaaX
-    XAAX 
-
-/(?i:\g<name>)(?-i:(?<name>a))/
-    XaaX
-    ** Failers 
-    XAAX 
-
-/(?-i:\g<+1>)(?i:(a))/
-    XaaX
-    XAAX 
-
-/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
-
-/(?<n>a|b|c)\g<n>*/
-   abc
-   accccbbb 
 
 /^(?+1)(?<a>x|y){0}z/
     xzxx
@@ -2755,24 +2556,12 @@ a random value. /Ix
 /^"((?(?=[a])[^"])|b)*"$/
     "ab"
 
-/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
-    XYabcdY
-
 /^X(?5)(a)(?|(b)|(q))(c)(d)Y/
     XYabcdY
 
 /^X(?&N)(a)(?|(b)|(q))(c)(d)(?<N>Y)/
     XYabcdY
  
-/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
-    XYabcdY
-
-/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
-    XYabcdY
-
-/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
-    XYabcdY
-
 /Xa{2,4}b/
     X\P
     Xa\P
@@ -2961,20 +2750,6 @@ a random value. /Ix
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
 
-/abc\K|def\K/g+
-    Xabcdefghi
-
-/ab\Kc|de\Kf/g+
-    Xabcdefghi
-    
-/(?=C)/g+
-    ABCDECBA
-    
-/^abc\K/+
-    abcdef
-    ** Failers
-    defabcxyz   
-
 /abc\K/+
     abcdef
     abcdef\N\N
@@ -3007,4 +2782,62 @@ a random value. /Ix
     xyz\N\N    
     xyz\N 
     
+/^(?<name>a|b\g<name>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g<1>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'-1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1>c))/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+    XAAX 
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+    ** Failers 
+    XAAX 
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+    XAAX 
+
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+   accccbbb 
+
+/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
+    XYabcdY
+
 / End of testinput2 /

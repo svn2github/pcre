@@ -1,5 +1,5 @@
 @rem  This file was contributed by Ralf Junker, and touched up by
-@rem  Daniel Richard G. Test 10 added by Philip H.
+@rem  Daniel Richard G. Tests 10-12 added by Philip H.
 @rem  Philip H also changed test 3 to use "wintest" files.
 @rem
 @rem  MS Windows batch file to run pcretest on testfiles with the correct
@@ -37,3 +37,5 @@ fc /n %srcdir%\testdata\testoutput7 testout\testoutput7
 fc /n %srcdir%\testdata\testoutput8 testout\testoutput8
 fc /n %srcdir%\testdata\testoutput9 testout\testoutput9
 fc /n %srcdir%\testdata\testoutput10 testout\testoutput10
+fc /n %srcdir%\testdata\testoutput11 testout\testoutput11
+fc /n %srcdir%\testdata\testoutput12 testout\testoutput12
