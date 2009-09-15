@@ -118,6 +118,11 @@ Version 8.00 ??-???-??
     to have an empty string match not at the start, even when the pattern is
     anchored. Updated pcretest and pcredemo to use this option.  
     
+21. If the maximum number of capturing subpatterns in a recursion was greater
+    than the maximum at the outer level, the higher number was returned, but 
+    with unset values at the outer level. The correct (outer level) value is 
+    now given.
+    
 
 Version 7.9 11-Apr-09
 ---------------------

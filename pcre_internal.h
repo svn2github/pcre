@@ -1568,6 +1568,7 @@ typedef struct recursion_info {
   USPTR save_start;             /* Old value of mstart */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
+  int offset_top;               /* Current value of offset_top */ 
 } recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject

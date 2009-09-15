@@ -924,6 +924,7 @@ for (;;)
       md->recursive = rec->prevrec;
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
+      offset_top = rec->offset_top;   
       mstart = rec->save_start;
       ims = original_ims;
       ecode = rec->after_call;
@@ -1115,6 +1116,7 @@ for (;;)
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
       new_recursive.save_start = mstart;
+      new_recursive.offset_top = offset_top; 
       mstart = eptr;
 
       /* OK, now we can do the recursion. For each top-level alternative we
@@ -1313,7 +1315,7 @@ for (;;)
       {
       number = GET2(prev, 1+LINK_SIZE);
       offset = number << 1;
-
+      
 #ifdef DEBUG
       printf("end bracket %d", number);
       printf("\n");
@@ -1339,6 +1341,7 @@ for (;;)
         mstart = rec->save_start;
         memcpy(md->offset_vector, rec->offset_save,
           rec->saved_max * sizeof(int));
+        offset_top = rec->offset_top;   
         ecode = rec->after_call;
         ims = original_ims;
         break;
@@ -5408,7 +5411,7 @@ if (rc == MATCH_MATCH)
   too many to fit into the vector. */
 
   rc = md->offset_overflow? 0 : md->end_offset_top/2;
-
+  
   /* If there is space, set up the whole thing as substring 0. The value of
   md->start_match_ptr might be modified if \K was encountered on the success
   matching path. */
