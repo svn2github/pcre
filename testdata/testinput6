@@ -1,3 +1,7 @@
+/-- This set of tests is for Unicode property support. It is compatible with
+    Perl 5.10, but not 5.8 because it tests some extra properties that are
+    not in the earlier release. --/ 
+
 /^\pC\pL\pM\pN\pP\pS\pZ</8
     \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
     \np\x{300}9!\$ < 
@@ -752,4 +756,4 @@
 /[\p{Lu}\x20]+/
     \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
 
-/ End of testinput6 /
+/-- End of testinput6 --/

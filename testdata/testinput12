@@ -1,3 +1,6 @@
+/-- These tests for Unicode property support test PCRE's API and show some of
+    the compiled code. They are not Perl-compatible. --/
+
 /[\p{L}]/DZ
 
 /[\p{^L}]/DZ
@@ -155,9 +158,9 @@
     \x{c0}
     \x{e0} 
 
-/The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap frame storage; the 2nd
-was broken in all cases./
+/-- The next two are special cases where the lengths of the different cases of
+the same character differ. The first went wrong with heap frame storage; the
+second was broken in all cases. --/
 
 /^\x{023a}+?(\x{0130}+)/8i
   \x{023a}\x{2c65}\x{0130}
@@ -185,9 +188,9 @@ was broken in all cases./
     \x{c0}
     \x{e0} 
 
-/The next two should be Perl-compatible, but it fails to match \x{e0}. PCRE
+/-- The next two should be Perl-compatible, but it fails to match \x{e0}. PCRE
 will match it only with UCP support, because without that it has no notion
-of case for anything other than the ASCII letters. / 
+of case for anything other than the ASCII letters. --/ 
 
 /((?i)[\x{c0}])/8
     \x{c0}
@@ -197,3 +200,4 @@ of case for anything other than the ASCII letters. /
     \x{c0}
     \x{e0} 
     
+/-- End of testinput12 --/

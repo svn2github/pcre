@@ -46,7 +46,10 @@ encountered by PCRE, an error is generated.
 built with Unicode character property support. The properties that can be
 tested with \ep and \eP are limited to the general category properties such as
 Lu and Nd, script names such as Greek or Han, and the derived properties Any
-and L&.
+and L&. PCRE does support the Cs (surrogate) property, which Perl does not; the
+Perl documentation says "Because Perl hides the need for the user to understand
+the internal representation of Unicode characters, there is no need to
+implement the somewhat messy concept of surrogates."
 .P
 7. PCRE does support the \eQ...\eE escape for quoting substrings. Characters in
 between are treated as literals. This is slightly different from Perl in that $
@@ -142,6 +145,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 15 September 2009
+Last updated: 16 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

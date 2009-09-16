@@ -1,3 +1,14 @@
+/-- This set of tests is not Perl-compatible. It checks on special features
+    of PCRE's API, error diagnostics, and the compiled code of some patterns.
+    It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
+    Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
+    either because PCRE can't be compatible, or there is potential Perl 
+    bug. --/  
+  
+/-- Originally, the Perl 5.10 things were in here too, but now I have separated
+    many (most?) of them out into test 11. However, there may still be some
+    that were overlooked. --/   
+
 /(a)b|/I
 Capturing subpattern count = 1
 No options
@@ -9834,4 +9845,4 @@ No match
  6: d
  7: Y
 
-/ End of testinput2 /
+/-- End of testinput2 --/

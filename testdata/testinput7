@@ -1,3 +1,6 @@
+/-- This set of tests check the DFA matching functionality of pcre_dfa_exec().
+    The -dfa flag must be used with pcretest when running it. --/
+     
 /abc/
     abc
     
@@ -4486,4 +4489,4 @@
 /(?=C)/g+
     ABCDECBA
 
-/ End of testinput7 /
+/-- End of testinput7 --/

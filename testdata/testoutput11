@@ -1,3 +1,5 @@
+/-- These tests are for the Perl 5.10 features that PCRE supports. --/
+
 /\H\h\V\v/
     X X\x0a
  0: X X\x0a
@@ -518,4 +520,4 @@ No match
     AD 
 No match
         
-/ End of testinput11 /
+/-- End of testinput11 --/

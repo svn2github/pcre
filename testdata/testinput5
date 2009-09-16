@@ -1,3 +1,6 @@
+/-- This set of tests checks the API, internals, and non-Perl stuff for UTF-8
+    support, excluding Unicode properties. --/
+
 /\x{100}/8DZ
 
 /\x{1000}/8DZ
@@ -53,30 +56,6 @@
 /.{3,5}?/DZ8
     \x{212ab}\x{212ab}\x{212ab}\x{861}
 
-/-- These tests are here rather than in testinput4 because Perl 5.6 has some
-problems with UTF-8 support, in the area of \x{..} where the value is < 255. 
-It grumbles about invalid UTF-8 strings. --/
-
-/^[a\x{c0}]b/8
-    \x{c0}b
-    
-/^([a\x{c0}]*?)aa/8
-    a\x{c0}aaaa/ 
-
-/^([a\x{c0}]*?)aa/8
-    a\x{c0}aaaa/ 
-    a\x{c0}a\x{c0}aaa/ 
-
-/^([a\x{c0}]*)aa/8
-    a\x{c0}aaaa/ 
-    a\x{c0}a\x{c0}aaa/ 
-
-/^([a\x{c0}]*)a\x{c0}/8
-    a\x{c0}aaaa/ 
-    a\x{c0}a\x{c0}aaa/ 
-    
-/-- --/ 
-    
 /(?<=\C)X/8
     Should produce an error diagnostic
     
@@ -741,4 +720,4 @@ can't tell the difference.) --/
     the cat\P
     the cat\P\P
 
-/ End of testinput5 /
+/-- End of testinput5 --/
