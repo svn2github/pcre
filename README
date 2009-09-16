@@ -24,6 +24,7 @@ The contents of this README file are:
   Shared libraries on Unix-like systems
   Cross-compiling on Unix-like systems
   Using HP's ANSI C++ compiler (aCC)
+  Using PCRE from MySQL 
   Making new tarballs
   Testing PCRE
   Character tables
@@ -476,6 +477,16 @@ use the workaround of specifying the following environment variable prior to
 running the "configure" script:
 
   CXXLDFLAGS="-lstd_v2 -lCsup_v2"
+  
+
+Using PCRE from MySQL
+---------------------
+
+On systems where both PCRE and MySQL are installed, it is possible to make use 
+of PCRE from within MySQL, as an alternative to the built-in pattern matching. 
+There is a web page that tells you how to do this:
+
+  http://www.mysqludf.org/lib_mysqludf_preg/index.php 
 
 
 Making new tarballs
@@ -765,4 +776,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 06 September 2009
+Last updated: 16 September 2009
