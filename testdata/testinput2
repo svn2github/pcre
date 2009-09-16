@@ -2750,6 +2750,8 @@ a random value. /Ix
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
 
+/(ab)(x(y)z(cd(*ACCEPT)))pq/BZ
+
 /abc\K/+
     abcdef
     abcdef\N\N
