@@ -131,6 +131,9 @@
     \x{2028}
     \x{200d} 
   
+/-- These four are here rather than in test 6 because Perl has problems with
+    the negative versions of the properties. --/
+      
 /\p{^Lu}/8i
     1234
     ** Failers
