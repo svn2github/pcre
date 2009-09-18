@@ -69,7 +69,7 @@ The \eQ...\eE sequence is recognized both inside and outside character classes.
 .P
 8. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
 constructions. However, there is support for recursive patterns. This is not
-available in Perl 5.8, but will be in Perl 5.10. Also, the PCRE "callout"
+available in Perl 5.8, but it is in Perl 5.10. Also, the PCRE "callout"
 feature allows an external function to be called during pattern matching. See
 the
 .\" HREF
@@ -78,7 +78,17 @@ the
 documentation for details.
 .P
 9. Subpatterns that are called recursively or as "subroutines" are always
-treated as atomic groups in PCRE. This is like Python, but unlike Perl.
+treated as atomic groups in PCRE. This is like Python, but unlike Perl. There 
+is a discussion of an example that explains this in more detail in the
+.\" HTML <a href="pcrepattern.html#recursiondifference">
+.\" </a>
+section on recursion differences from Perl
+.\"
+in the
+.\" HREF
+\fBpcrecompat\fP
+.\"
+page.
 .P
 10. There are some differences that are concerned with the settings of captured
 strings when part of a pattern is repeated. For example, matching "aba" against
@@ -145,6 +155,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 September 2009
+Last updated: 18 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

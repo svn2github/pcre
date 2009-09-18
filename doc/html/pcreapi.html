@@ -175,9 +175,10 @@ documentation describes how to compile and run it.
 A second matching function, <b>pcre_dfa_exec()</b>, which is not
 Perl-compatible, is also provided. This uses a different algorithm for the
 matching. The alternative algorithm finds all possible matches (at a given
-point in the subject), and scans the subject just once. However, this algorithm
-does not return captured substrings. A description of the two matching
-algorithms and their advantages and disadvantages is given in the
+point in the subject), and scans the subject just once (unless there are
+lookbehind assertions). However, this algorithm does not return captured
+substrings. A description of the two matching algorithms and their advantages
+and disadvantages is given in the
 <a href="pcrematching.html"><b>pcrematching</b></a>
 documentation.
 </P>
@@ -1017,10 +1018,10 @@ different for each compiled pattern.
 <pre>
   PCRE_INFO_OKPARTIAL
 </pre>
-Return 1 if the pattern can be used for partial matching, otherwise 0. The
-fourth argument should point to an <b>int</b> variable. From release 8.00, this
-always returns 1, because the restrictions that previously applied to partial
-matching have been lifted. The
+Return 1 if the pattern can be used for partial matching with
+<b>pcre_exec()</b>, otherwise 0. The fourth argument should point to an
+<b>int</b> variable. From release 8.00, this always returns 1, because the
+restrictions that previously applied to partial matching have been lifted. The
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation gives details of partial matching.
 <pre>
@@ -1224,8 +1225,8 @@ PCRE_EXTRA_MATCH_LIMIT_RECURSION is set in the <i>flags</i> field. If the limit
 is exceeded, <b>pcre_exec()</b> returns PCRE_ERROR_RECURSIONLIMIT.
 </P>
 <P>
-The <i>pcre_callout</i> field is used in conjunction with the "callout" feature,
-which is described in the
+The <i>callout_data</i> field is used in conjunction with the "callout" feature,
+and is described in the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
 </P>
@@ -1248,8 +1249,9 @@ Option bits for <b>pcre_exec()</b>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_START_OPTIMIZE,
-PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and PCRE_PARTIAL_HARD.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
+PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and
+PCRE_PARTIAL_HARD.
 <pre>
   PCRE_ANCHORED
 </pre>
@@ -1328,18 +1330,25 @@ match the empty string, the entire match fails. For example, if the pattern
 <pre>
   a?b?
 </pre>
-is applied to a string not beginning with "a" or "b", it matches the empty
+is applied to a string not beginning with "a" or "b", it matches an empty
 string at the start of the subject. With PCRE_NOTEMPTY set, this match is not
 valid, so PCRE searches further into the string for occurrences of "a" or "b".
+<pre>
+  PCRE_NOTEMPTY_ATSTART
+</pre>
+This is like PCRE_NOTEMPTY, except that an empty string match that is not at 
+the start of the subject is permitted. If the pattern is anchored, such a match
+can occur only if the pattern contains \K.
 </P>
 <P>
-Perl has no direct equivalent of PCRE_NOTEMPTY, but it does make a special case
-of a pattern match of the empty string within its <b>split()</b> function, and
-when using the /g modifier. It is possible to emulate Perl's behaviour after
-matching a null string by first trying the match again at the same offset with
-PCRE_NOTEMPTY and PCRE_ANCHORED, and then if that fails by advancing the
-starting offset (see below) and trying an ordinary match again. There is some
-code that demonstrates how to do this in the 
+Perl has no direct equivalent of PCRE_NOTEMPTY or PCRE_NOTEMPTY_ATSTART, but it
+does make a special case of a pattern match of the empty string within its
+<b>split()</b> function, and when using the /g modifier. It is possible to
+emulate Perl's behaviour after matching a null string by first trying the match
+again at the same offset with PCRE_NOTEMPTY_ATSTART and PCRE_ANCHORED, and then
+if that fails, by advancing the starting offset (see below) and trying an
+ordinary match again. There is some code that demonstrates how to do this in
+the
 <a href="pcredemo.html"><b>pcredemo</b></a>
 sample program.
 <pre>
@@ -1389,8 +1398,8 @@ PCRE_PARTIAL_HARD is set, <b>pcre_exec()</b> immediately returns
 PCRE_ERROR_PARTIAL. Otherwise, if PCRE_PARTIAL_SOFT is set, matching continues
 by testing any other alternatives. Only if they all fail is PCRE_ERROR_PARTIAL
 returned (instead of PCRE_ERROR_NOMATCH). The portion of the string that
-provided the partial match is set as the first matching string. There is a more
-detailed discussion in the
+was inspected when the partial match was found is set as the first matching
+string. There is a more detailed discussion in the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation.
 </P>
@@ -1837,8 +1846,8 @@ a compiled pattern, using a matching algorithm that scans the subject string
 just once, and does not backtrack. This has different characteristics to the
 normal algorithm, and is not compatible with Perl. Some of the features of PCRE
 patterns are not supported. Nevertheless, there are times when this kind of
-matching can be useful. For a discussion of the two matching algorithms, see
-the
+matching can be useful. For a discussion of the two matching algorithms, and a 
+list of features that <b>pcre_dfa_exec()</b> does not support, see the
 <a href="pcrematching.html"><b>pcrematching</b></a>
 documentation.
 </P>
@@ -1880,10 +1889,10 @@ Option bits for <b>pcre_dfa_exec()</b>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre_dfa_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD,
-PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All but the last
-four of these are exactly the same as for <b>pcre_exec()</b>, so their
-description is not repeated here.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
+PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST,
+and PCRE_DFA_RESTART. All but the last four of these are exactly the same as
+for <b>pcre_exec()</b>, so their description is not repeated here.
 <pre>
   PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT 
@@ -1896,8 +1905,8 @@ additional characters. This happens even if some complete matches have also
 been found. When PCRE_PARTIAL_SOFT is set, the return code PCRE_ERROR_NOMATCH
 is converted into PCRE_ERROR_PARTIAL if the end of the subject is reached,
 there have been no complete matches, but there is still at least one matching
-possibility. The portion of the string that provided the longest partial match
-is set as the first matching string in both cases.
+possibility. The portion of the string that was inspected when the longest
+partial match was found is set as the first matching string in both cases.
 <pre>
   PCRE_DFA_SHORTEST
 </pre>
@@ -2009,7 +2018,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 September 2009
+Last updated: 11 September 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

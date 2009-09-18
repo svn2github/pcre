@@ -520,4 +520,61 @@ No match
     AD 
 No match
         
+/^\W*+(?:((.)\W*+(?1)\W*+\2|)|((.)\W*+(?3)\W*+\4|\W*+.\W*+))\W*+$/i
+    1221
+ 0: 1221
+ 1: 1221
+ 2: 1
+    Satan, oscillate my metallic sonatas!
+ 0: Satan, oscillate my metallic sonatas!
+ 1: <unset>
+ 2: <unset>
+ 3: Satan, oscillate my metallic sonatas
+ 4: S
+    A man, a plan, a canal: Panama!
+ 0: A man, a plan, a canal: Panama!
+ 1: <unset>
+ 2: <unset>
+ 3: A man, a plan, a canal: Panama
+ 4: A
+    Able was I ere I saw Elba.
+ 0: Able was I ere I saw Elba.
+ 1: <unset>
+ 2: <unset>
+ 3: Able was I ere I saw Elba
+ 4: A
+    *** Failers
+No match
+    The quick brown fox
+No match
+
+/^((.)(?1)\2|.)$/
+    a
+ 0: a
+ 1: a
+    aba
+ 0: aba
+ 1: aba
+ 2: a
+    aabaa  
+ 0: aabaa
+ 1: aabaa
+ 2: a
+    abcdcba 
+ 0: abcdcba
+ 1: abcdcba
+ 2: a
+    pqaabaaqp  
+ 0: pqaabaaqp
+ 1: pqaabaaqp
+ 2: p
+    ablewasiereisawelba
+ 0: ablewasiereisawelba
+ 1: ablewasiereisawelba
+ 2: a
+    rhubarb
+No match
+    the quick brown fox  
+No match
+
 /-- End of testinput11 --/

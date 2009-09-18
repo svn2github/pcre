@@ -3949,39 +3949,6 @@ No options
 First char = 'a'
 Need char = 'b'
 
-/^\W*(?:((.)\W*(?1)\W*\2|)|((.)\W*(?3)\W*\4|\W*.\W*))\W*$/Ii
-Capturing subpattern count = 4
-Max back reference = 4
-Options: anchored caseless
-No first char
-No need char
-    1221
- 0: 1221
- 1: 1221
- 2: 1
-    Satan, oscillate my metallic sonatas!
- 0: Satan, oscillate my metallic sonatas!
- 1: <unset>
- 2: <unset>
- 3: Satan, oscillate my metallic sonatas
- 4: S
-    A man, a plan, a canal: Panama!
- 0: A man, a plan, a canal: Panama!
- 1: <unset>
- 2: <unset>
- 3: A man, a plan, a canal: Panama
- 4: A
-    Able was I ere I saw Elba.
- 0: Able was I ere I saw Elba.
- 1: <unset>
- 2: <unset>
- 3: Able was I ere I saw Elba
- 4: A
-    *** Failers
-No match
-    The quick brown fox
-No match
-
 /^(\d+|\((?1)([+*-])(?1)\)|-(?1))$/I
 Capturing subpattern count = 2
 Options: anchored

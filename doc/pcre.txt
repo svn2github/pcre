@@ -282,20 +282,25 @@ PCRE BUILD-TIME OPTIONS
        script,  where the optional features are selected or deselected by pro-
        viding options to configure before running the make  command.  However,
        the  same  options  can be selected in both Unix-like and non-Unix-like
-       environments using the GUI facility of  CMakeSetup  if  you  are  using
-       CMake instead of configure to build PCRE.
+       environments using the GUI facility of cmake-gui if you are using CMake
+       instead of configure to build PCRE.
+
+       There  is  a  lot more information about building PCRE in non-Unix-like
+       environments in the file called NON_UNIX_USE, which is part of the PCRE
+       distribution.  You  should consult this file as well as the README file
+       if you are building in a non-Unix-like environment.
 
        The complete list of options for configure (which includes the standard
-       ones such as the  selection  of  the  installation  directory)  can  be
+       ones  such  as  the  selection  of  the  installation directory) can be
        obtained by running
 
          ./configure --help
 
-       The  following  sections  include  descriptions  of options whose names
+       The following sections include  descriptions  of  options  whose  names
        begin with --enable or --disable. These settings specify changes to the
-       defaults  for  the configure command. Because of the way that configure
-       works, --enable and --disable always come in pairs, so  the  complemen-
-       tary  option always exists as well, but as it specifies the default, it
+       defaults for the configure command. Because of the way  that  configure
+       works,  --enable  and --disable always come in pairs, so the complemen-
+       tary option always exists as well, but as it specifies the default,  it
        is not described.
 
 
@@ -316,46 +321,46 @@ UTF-8 SUPPORT
 
          --enable-utf8
 
-       to the configure command. Of itself, this  does  not  make  PCRE  treat
-       strings  as UTF-8. As well as compiling PCRE with this option, you also
-       have have to set the PCRE_UTF8 option when you call the  pcre_compile()
+       to  the  configure  command.  Of  itself, this does not make PCRE treat
+       strings as UTF-8. As well as compiling PCRE with this option, you  also
+       have  have to set the PCRE_UTF8 option when you call the pcre_compile()
        function.
 
-       If  you set --enable-utf8 when compiling in an EBCDIC environment, PCRE
+       If you set --enable-utf8 when compiling in an EBCDIC environment,  PCRE
        expects its input to be either ASCII or UTF-8 (depending on the runtime
-       option).  It  is not possible to support both EBCDIC and UTF-8 codes in
-       the same  version  of  the  library.  Consequently,  --enable-utf8  and
+       option). It is not possible to support both EBCDIC and UTF-8  codes  in
+       the  same  version  of  the  library.  Consequently,  --enable-utf8 and
        --enable-ebcdic are mutually exclusive.
 
 
 UNICODE CHARACTER PROPERTY SUPPORT
 
-       UTF-8  support allows PCRE to process character values greater than 255
-       in the strings that it handles. On its own, however, it does  not  pro-
+       UTF-8 support allows PCRE to process character values greater than  255
+       in  the  strings that it handles. On its own, however, it does not pro-
        vide any facilities for accessing the properties of such characters. If
-       you want to be able to use the pattern escapes \P, \p,  and  \X,  which
+       you  want  to  be able to use the pattern escapes \P, \p, and \X, which
        refer to Unicode character properties, you must add
 
          --enable-unicode-properties
 
-       to  the configure command. This implies UTF-8 support, even if you have
+       to the configure command. This implies UTF-8 support, even if you  have
        not explicitly requested it.
 
-       Including Unicode property support adds around 30K  of  tables  to  the
-       PCRE  library.  Only  the general category properties such as Lu and Nd
+       Including  Unicode  property  support  adds around 30K of tables to the
+       PCRE library. Only the general category properties such as  Lu  and  Nd
        are supported. Details are given in the pcrepattern documentation.
 
 
 CODE VALUE OF NEWLINE
 
-       By default, PCRE interprets the linefeed (LF) character  as  indicating
-       the  end  of  a line. This is the normal newline character on Unix-like
-       systems. You can compile PCRE to use carriage return (CR)  instead,  by
+       By  default,  PCRE interprets the linefeed (LF) character as indicating
+       the end of a line. This is the normal newline  character  on  Unix-like
+       systems.  You  can compile PCRE to use carriage return (CR) instead, by
        adding
 
          --enable-newline-is-cr
 
-       to  the  configure  command.  There  is  also  a --enable-newline-is-lf
+       to the  configure  command.  There  is  also  a  --enable-newline-is-lf
        option, which explicitly specifies linefeed as the newline character.
 
        Alternatively, you can specify that line endings are to be indicated by
@@ -367,35 +372,35 @@ CODE VALUE OF NEWLINE
 
          --enable-newline-is-anycrlf
 
-       which  causes  PCRE  to recognize any of the three sequences CR, LF, or
+       which causes PCRE to recognize any of the three sequences  CR,  LF,  or
        CRLF as indicating a line ending. Finally, a fifth option, specified by
 
          --enable-newline-is-any
 
        causes PCRE to recognize any Unicode newline sequence.
 
-       Whatever line ending convention is selected when PCRE is built  can  be
-       overridden  when  the library functions are called. At build time it is
+       Whatever  line  ending convention is selected when PCRE is built can be
+       overridden when the library functions are called. At build time  it  is
        conventional to use the standard for your operating system.
 
 
 WHAT \R MATCHES
 
-       By default, the sequence \R in a pattern matches  any  Unicode  newline
-       sequence,  whatever  has  been selected as the line ending sequence. If
+       By  default,  the  sequence \R in a pattern matches any Unicode newline
+       sequence, whatever has been selected as the line  ending  sequence.  If
        you specify
 
          --enable-bsr-anycrlf
 
-       the default is changed so that \R matches only CR, LF, or  CRLF.  What-
-       ever  is selected when PCRE is built can be overridden when the library
+       the  default  is changed so that \R matches only CR, LF, or CRLF. What-
+       ever is selected when PCRE is built can be overridden when the  library
        functions are called.
 
 
 BUILDING SHARED AND STATIC LIBRARIES
 
-       The PCRE building process uses libtool to build both shared and  static
-       Unix  libraries by default. You can suppress one of these by adding one
+       The  PCRE building process uses libtool to build both shared and static
+       Unix libraries by default. You can suppress one of these by adding  one
        of
 
          --disable-shared
@@ -407,9 +412,9 @@ BUILDING SHARED AND STATIC LIBRARIES
 POSIX MALLOC USAGE
 
        When PCRE is called through the POSIX interface (see the pcreposix doc-
-       umentation),  additional  working  storage  is required for holding the
-       pointers to capturing substrings, because PCRE requires three  integers
-       per  substring,  whereas  the POSIX interface provides only two. If the
+       umentation), additional working storage is  required  for  holding  the
+       pointers  to capturing substrings, because PCRE requires three integers
+       per substring, whereas the POSIX interface provides only  two.  If  the
        number of expected substrings is small, the wrapper function uses space
        on the stack, because this is faster than using malloc() for each call.
        The default threshold above which the stack is no longer used is 10; it
@@ -422,112 +427,112 @@ POSIX MALLOC USAGE
 
 HANDLING VERY LARGE PATTERNS
 
-       Within  a  compiled  pattern,  offset values are used to point from one
-       part to another (for example, from an opening parenthesis to an  alter-
-       nation  metacharacter).  By default, two-byte values are used for these
-       offsets, leading to a maximum size for a  compiled  pattern  of  around
-       64K.  This  is sufficient to handle all but the most gigantic patterns.
-       Nevertheless, some people do want to process enormous patterns,  so  it
-       is  possible  to compile PCRE to use three-byte or four-byte offsets by
+       Within a compiled pattern, offset values are used  to  point  from  one
+       part  to another (for example, from an opening parenthesis to an alter-
+       nation metacharacter). By default, two-byte values are used  for  these
+       offsets,  leading  to  a  maximum size for a compiled pattern of around
+       64K. This is sufficient to handle all but the most  gigantic  patterns.
+       Nevertheless,  some  people do want to process enormous patterns, so it
+       is possible to compile PCRE to use three-byte or four-byte  offsets  by
        adding a setting such as
 
          --with-link-size=3
 
-       to the configure command. The value given must be 2,  3,  or  4.  Using
-       longer  offsets slows down the operation of PCRE because it has to load
+       to  the  configure  command.  The value given must be 2, 3, or 4. Using
+       longer offsets slows down the operation of PCRE because it has to  load
        additional bytes when handling them.
 
 
 AVOIDING EXCESSIVE STACK USAGE
 
        When matching with the pcre_exec() function, PCRE implements backtrack-
-       ing  by  making recursive calls to an internal function called match().
-       In environments where the size of the stack is limited,  this  can  se-
-       verely  limit  PCRE's operation. (The Unix environment does not usually
+       ing by making recursive calls to an internal function  called  match().
+       In  environments  where  the size of the stack is limited, this can se-
+       verely limit PCRE's operation. (The Unix environment does  not  usually
        suffer from this problem, but it may sometimes be necessary to increase
-       the  maximum  stack size.  There is a discussion in the pcrestack docu-
-       mentation.) An alternative approach to recursion that uses memory  from
-       the  heap  to remember data, instead of using recursive function calls,
-       has been implemented to work round the problem of limited  stack  size.
+       the maximum stack size.  There is a discussion in the  pcrestack  docu-
+       mentation.)  An alternative approach to recursion that uses memory from
+       the heap to remember data, instead of using recursive  function  calls,
+       has  been  implemented to work round the problem of limited stack size.
        If you want to build a version of PCRE that works this way, add
 
          --disable-stack-for-recursion
 
-       to  the  configure  command. With this configuration, PCRE will use the
-       pcre_stack_malloc and pcre_stack_free variables to call memory  manage-
-       ment  functions. By default these point to malloc() and free(), but you
+       to the configure command. With this configuration, PCRE  will  use  the
+       pcre_stack_malloc  and pcre_stack_free variables to call memory manage-
+       ment functions. By default these point to malloc() and free(), but  you
        can replace the pointers so that your own functions are used.
 
-       Separate functions are  provided  rather  than  using  pcre_malloc  and
-       pcre_free  because  the  usage  is  very  predictable:  the block sizes
-       requested are always the same, and  the  blocks  are  always  freed  in
-       reverse  order.  A calling program might be able to implement optimized
-       functions that perform better  than  malloc()  and  free().  PCRE  runs
+       Separate  functions  are  provided  rather  than  using pcre_malloc and
+       pcre_free because the  usage  is  very  predictable:  the  block  sizes
+       requested  are  always  the  same,  and  the blocks are always freed in
+       reverse order. A calling program might be able to  implement  optimized
+       functions  that  perform  better  than  malloc()  and free(). PCRE runs
        noticeably more slowly when built in this way. This option affects only
-       the  pcre_exec()  function;  it   is   not   relevant   for   the   the
+       the   pcre_exec()   function;   it   is   not   relevant  for  the  the
        pcre_dfa_exec() function.
 
 
 LIMITING PCRE RESOURCE USAGE
 
-       Internally,  PCRE has a function called match(), which it calls repeat-
-       edly  (sometimes  recursively)  when  matching  a  pattern   with   the
-       pcre_exec()  function.  By controlling the maximum number of times this
-       function may be called during a single matching operation, a limit  can
-       be  placed  on  the resources used by a single call to pcre_exec(). The
-       limit can be changed at run time, as described in the pcreapi  documen-
-       tation.  The default is 10 million, but this can be changed by adding a
+       Internally, PCRE has a function called match(), which it calls  repeat-
+       edly   (sometimes   recursively)  when  matching  a  pattern  with  the
+       pcre_exec() function. By controlling the maximum number of  times  this
+       function  may be called during a single matching operation, a limit can
+       be placed on the resources used by a single call  to  pcre_exec().  The
+       limit  can be changed at run time, as described in the pcreapi documen-
+       tation. The default is 10 million, but this can be changed by adding  a
        setting such as
 
          --with-match-limit=500000
 
-       to  the  configure  command.  This  setting  has  no  effect   on   the
+       to   the   configure  command.  This  setting  has  no  effect  on  the
        pcre_dfa_exec() matching function.
 
-       In  some  environments  it is desirable to limit the depth of recursive
+       In some environments it is desirable to limit the  depth  of  recursive
        calls of match() more strictly than the total number of calls, in order
-       to  restrict  the maximum amount of stack (or heap, if --disable-stack-
+       to restrict the maximum amount of stack (or heap,  if  --disable-stack-
        for-recursion is specified) that is used. A second limit controls this;
-       it  defaults  to  the  value  that is set for --with-match-limit, which
-       imposes no additional constraints. However, you can set a  lower  limit
+       it defaults to the value that  is  set  for  --with-match-limit,  which
+       imposes  no  additional constraints. However, you can set a lower limit
        by adding, for example,
 
          --with-match-limit-recursion=10000
 
-       to  the  configure  command.  This  value can also be overridden at run
+       to the configure command. This value can  also  be  overridden  at  run
        time.
 
 
 CREATING CHARACTER TABLES AT BUILD TIME
 
-       PCRE uses fixed tables for processing characters whose code values  are
-       less  than 256. By default, PCRE is built with a set of tables that are
-       distributed in the file pcre_chartables.c.dist. These  tables  are  for
+       PCRE  uses fixed tables for processing characters whose code values are
+       less than 256. By default, PCRE is built with a set of tables that  are
+       distributed  in  the  file pcre_chartables.c.dist. These tables are for
        ASCII codes only. If you add
 
          --enable-rebuild-chartables
 
-       to  the  configure  command, the distributed tables are no longer used.
-       Instead, a program called dftables is compiled and  run.  This  outputs
+       to the configure command, the distributed tables are  no  longer  used.
+       Instead,  a  program  called dftables is compiled and run. This outputs
        the source for new set of tables, created in the default locale of your
        C runtime system. (This method of replacing the tables does not work if
-       you  are cross compiling, because dftables is run on the local host. If
-       you need to create alternative tables when cross  compiling,  you  will
+       you are cross compiling, because dftables is run on the local host.  If
+       you  need  to  create alternative tables when cross compiling, you will
        have to do so "by hand".)
 
 
 USING EBCDIC CODE
 
-       PCRE  assumes  by  default that it will run in an environment where the
-       character code is ASCII (or Unicode, which is  a  superset  of  ASCII).
-       This  is  the  case for most computer operating systems. PCRE can, how-
+       PCRE assumes by default that it will run in an  environment  where  the
+       character  code  is  ASCII  (or Unicode, which is a superset of ASCII).
+       This is the case for most computer operating systems.  PCRE  can,  how-
        ever, be compiled to run in an EBCDIC environment by adding
 
          --enable-ebcdic
 
        to the configure command. This setting implies --enable-rebuild-charta-
-       bles.  You  should  only  use  it if you know that you are in an EBCDIC
-       environment (for example,  an  IBM  mainframe  operating  system).  The
+       bles. You should only use it if you know that  you  are  in  an  EBCDIC
+       environment  (for  example,  an  IBM  mainframe  operating system). The
        --enable-ebcdic option is incompatible with --enable-utf8.
 
 
@@ -541,7 +546,7 @@ PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT
          --enable-pcregrep-libbz2
 
        to the configure command. These options naturally require that the rel-
-       evant libraries are installed on your system. Configuration  will  fail
+       evant  libraries  are installed on your system. Configuration will fail
        if they are not.
 
 
@@ -551,24 +556,24 @@ PCRETEST OPTION FOR LIBREADLINE SUPPORT
 
          --enable-pcretest-libreadline
 
-       to  the  configure  command,  pcretest  is  linked with the libreadline
-       library, and when its input is from a terminal, it reads it  using  the
+       to the configure command,  pcretest  is  linked  with  the  libreadline
+       library,  and  when its input is from a terminal, it reads it using the
        readline() function. This provides line-editing and history facilities.
        Note that libreadline is GPL-licenced, so if you distribute a binary of
        pcretest linked in this way, there may be licensing issues.
 
-       Setting  this  option  causes  the -lreadline option to be added to the
-       pcretest build. In many operating environments with  a  sytem-installed
+       Setting this option causes the -lreadline option to  be  added  to  the
+       pcretest  build.  In many operating environments with a sytem-installed
        libreadline this is sufficient. However, in some environments (e.g.  if
-       an unmodified distribution version of readline is in use),  some  extra
-       configuration  may  be necessary. The INSTALL file for libreadline says
+       an  unmodified  distribution version of readline is in use), some extra
+       configuration may be necessary. The INSTALL file for  libreadline  says
        this:
 
          "Readline uses the termcap functions, but does not link with the
          termcap or curses library itself, allowing applications which link
          with readline the to choose an appropriate library."
 
-       If your environment has not been set up so that an appropriate  library
+       If  your environment has not been set up so that an appropriate library
        is automatically included, you may need to add something like
 
          LIBS="-ncurses"
@@ -590,7 +595,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 March 2009
+       Last updated: 06 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -696,67 +701,72 @@ THE ALTERNATIVE MATCHING ALGORITHM
        at the fourth character of the subject. The algorithm does not automat-
        ically move on to find matches that start at later positions.
 
+       Although the general principle of this matching algorithm  is  that  it
+       scans  the subject string only once, without backtracking, there is one
+       exception: when a lookbehind assertion is  encountered,  the  preceding
+       characters have to be re-inspected.
+
        There are a number of features of PCRE regular expressions that are not
        supported by the alternative matching algorithm. They are as follows:
 
-       1.  Because  the  algorithm  finds  all possible matches, the greedy or
-       ungreedy nature of repetition quantifiers is not relevant.  Greedy  and
+       1. Because the algorithm finds all  possible  matches,  the  greedy  or
+       ungreedy  nature  of repetition quantifiers is not relevant. Greedy and
        ungreedy quantifiers are treated in exactly the same way. However, pos-
-       sessive quantifiers can make a difference when what follows could  also
+       sessive  quantifiers can make a difference when what follows could also
        match what is quantified, for example in a pattern like this:
 
          ^a++\w!
 
-       This  pattern matches "aaab!" but not "aaa!", which would be matched by
-       a non-possessive quantifier. Similarly, if an atomic group is  present,
-       it  is matched as if it were a standalone pattern at the current point,
-       and the longest match is then "locked in" for the rest of  the  overall
+       This pattern matches "aaab!" but not "aaa!", which would be matched  by
+       a  non-possessive quantifier. Similarly, if an atomic group is present,
+       it is matched as if it were a standalone pattern at the current  point,
+       and  the  longest match is then "locked in" for the rest of the overall
        pattern.
 
        2. When dealing with multiple paths through the tree simultaneously, it
-       is not straightforward to keep track of  captured  substrings  for  the
-       different  matching  possibilities,  and  PCRE's implementation of this
+       is  not  straightforward  to  keep track of captured substrings for the
+       different matching possibilities, and  PCRE's  implementation  of  this
        algorithm does not attempt to do this. This means that no captured sub-
        strings are available.
 
-       3.  Because no substrings are captured, back references within the pat-
+       3. Because no substrings are captured, back references within the  pat-
        tern are not supported, and cause errors if encountered.
 
-       4. For the same reason, conditional expressions that use  a  backrefer-
-       ence  as  the  condition or test for a specific group recursion are not
+       4.  For  the same reason, conditional expressions that use a backrefer-
+       ence as the condition or test for a specific group  recursion  are  not
        supported.
 
-       5. Because many paths through the tree may be  active,  the  \K  escape
+       5.  Because  many  paths  through the tree may be active, the \K escape
        sequence, which resets the start of the match when encountered (but may
-       be on some paths and not on others), is not  supported.  It  causes  an
+       be  on  some  paths  and not on others), is not supported. It causes an
        error if encountered.
 
-       6.  Callouts  are  supported, but the value of the capture_top field is
+       6. Callouts are supported, but the value of the  capture_top  field  is
        always 1, and the value of the capture_last field is always -1.
 
-       7. The \C escape sequence, which (in the standard algorithm) matches  a
-       single  byte, even in UTF-8 mode, is not supported because the alterna-
-       tive algorithm moves through the subject  string  one  character  at  a
+       7.  The \C escape sequence, which (in the standard algorithm) matches a
+       single byte, even in UTF-8 mode, is not supported because the  alterna-
+       tive  algorithm  moves  through  the  subject string one character at a
        time, for all active paths through the tree.
 
-       8.  Except for (*FAIL), the backtracking control verbs such as (*PRUNE)
-       are not supported. (*FAIL) is supported, and  behaves  like  a  failing
+       8. Except for (*FAIL), the backtracking control verbs such as  (*PRUNE)
+       are  not  supported.  (*FAIL)  is supported, and behaves like a failing
        negative assertion.
 
 
 ADVANTAGES OF THE ALTERNATIVE ALGORITHM
 
-       Using  the alternative matching algorithm provides the following advan-
+       Using the alternative matching algorithm provides the following  advan-
        tages:
 
        1. All possible matches (at a single point in the subject) are automat-
-       ically  found,  and  in particular, the longest match is found. To find
+       ically found, and in particular, the longest match is  found.  To  find
        more than one match using the standard algorithm, you have to do kludgy
        things with callouts.
 
-       2.  Because  the  alternative  algorithm  scans the subject string just
-       once, and never needs to backtrack, it is possible to  pass  very  long
-       subject  strings  to  the matching function in several pieces, checking
+       2. Because the alternative algorithm  scans  the  subject  string  just
+       once,  and  never  needs to backtrack, it is possible to pass very long
+       subject strings to the matching function in  several  pieces,  checking
        for partial matching each time.
 
 
@@ -764,8 +774,8 @@ DISADVANTAGES OF THE ALTERNATIVE ALGORITHM
 
        The alternative algorithm suffers from a number of disadvantages:
 
-       1. It is substantially slower than  the  standard  algorithm.  This  is
-       partly  because  it has to search for all possible matches, but is also
+       1.  It  is  substantially  slower  than the standard algorithm. This is
+       partly because it has to search for all possible matches, but  is  also
        because it is less susceptible to optimization.
 
        2. Capturing parentheses and back references are not supported.
@@ -783,7 +793,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 25 August 2009
+       Last updated: 05 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -902,12 +912,13 @@ PCRE API OVERVIEW
        A second matching function, pcre_dfa_exec(), which is not Perl-compati-
        ble, is also provided. This uses a different algorithm for  the  match-
        ing.  The  alternative algorithm finds all possible matches (at a given
-       point in the subject), and scans the subject just once.  However,  this
-       algorithm does not return captured substrings. A description of the two
-       matching algorithms and their advantages and disadvantages is given  in
-       the pcrematching documentation.
+       point in the subject), and scans the subject just  once  (unless  there
+       are  lookbehind  assertions).  However,  this algorithm does not return
+       captured substrings. A description of the two matching  algorithms  and
+       their  advantages  and disadvantages is given in the pcrematching docu-
+       mentation.
 
-       In  addition  to  the  main compiling and matching functions, there are
+       In addition to the main compiling and  matching  functions,  there  are
        convenience functions for extracting captured substrings from a subject
        string that is matched by pcre_exec(). They are:
 
@@ -922,91 +933,91 @@ PCRE API OVERVIEW
        pcre_free_substring() and pcre_free_substring_list() are also provided,
        to free the memory used for extracted strings.
 
-       The function pcre_maketables() is used to  build  a  set  of  character
-       tables   in   the   current   locale  for  passing  to  pcre_compile(),
-       pcre_exec(), or pcre_dfa_exec(). This is an optional facility  that  is
-       provided  for  specialist  use.  Most  commonly,  no special tables are
-       passed, in which case internal tables that are generated when  PCRE  is
+       The  function  pcre_maketables()  is  used  to build a set of character
+       tables  in  the  current  locale   for   passing   to   pcre_compile(),
+       pcre_exec(),  or  pcre_dfa_exec(). This is an optional facility that is
+       provided for specialist use.  Most  commonly,  no  special  tables  are
+       passed,  in  which case internal tables that are generated when PCRE is
        built are used.
 
-       The  function  pcre_fullinfo()  is used to find out information about a
-       compiled pattern; pcre_info() is an obsolete version that returns  only
-       some  of  the available information, but is retained for backwards com-
-       patibility.  The function pcre_version() returns a pointer to a  string
+       The function pcre_fullinfo() is used to find out  information  about  a
+       compiled  pattern; pcre_info() is an obsolete version that returns only
+       some of the available information, but is retained for  backwards  com-
+       patibility.   The function pcre_version() returns a pointer to a string
        containing the version of PCRE and its date of release.
 
-       The  function  pcre_refcount()  maintains  a  reference count in a data
-       block containing a compiled pattern. This is provided for  the  benefit
+       The function pcre_refcount() maintains a  reference  count  in  a  data
+       block  containing  a compiled pattern. This is provided for the benefit
        of object-oriented applications.
 
-       The  global  variables  pcre_malloc and pcre_free initially contain the
-       entry points of the standard malloc()  and  free()  functions,  respec-
+       The global variables pcre_malloc and pcre_free  initially  contain  the
+       entry  points  of  the  standard malloc() and free() functions, respec-
        tively. PCRE calls the memory management functions via these variables,
-       so a calling program can replace them if it  wishes  to  intercept  the
+       so  a  calling  program  can replace them if it wishes to intercept the
        calls. This should be done before calling any PCRE functions.
 
-       The  global  variables  pcre_stack_malloc  and pcre_stack_free are also
-       indirections to memory management functions.  These  special  functions
-       are  used  only  when  PCRE is compiled to use the heap for remembering
+       The global variables pcre_stack_malloc  and  pcre_stack_free  are  also
+       indirections  to  memory  management functions. These special functions
+       are used only when PCRE is compiled to use  the  heap  for  remembering
        data, instead of recursive function calls, when running the pcre_exec()
-       function.  See  the  pcrebuild  documentation  for details of how to do
-       this. It is a non-standard way of building PCRE, for  use  in  environ-
-       ments  that  have  limited stacks. Because of the greater use of memory
-       management, it runs more slowly. Separate  functions  are  provided  so
-       that  special-purpose  external  code  can  be used for this case. When
-       used, these functions are always called in a  stack-like  manner  (last
-       obtained,  first freed), and always for memory blocks of the same size.
-       There is a discussion about PCRE's stack usage in the  pcrestack  docu-
+       function. See the pcrebuild documentation for  details  of  how  to  do
+       this.  It  is  a non-standard way of building PCRE, for use in environ-
+       ments that have limited stacks. Because of the greater  use  of  memory
+       management,  it  runs  more  slowly. Separate functions are provided so
+       that special-purpose external code can be  used  for  this  case.  When
+       used,  these  functions  are always called in a stack-like manner (last
+       obtained, first freed), and always for memory blocks of the same  size.
+       There  is  a discussion about PCRE's stack usage in the pcrestack docu-
        mentation.
 
        The global variable pcre_callout initially contains NULL. It can be set
-       by the caller to a "callout" function, which PCRE  will  then  call  at
-       specified  points during a matching operation. Details are given in the
+       by  the  caller  to  a "callout" function, which PCRE will then call at
+       specified points during a matching operation. Details are given in  the
        pcrecallout documentation.
 
 
 NEWLINES
 
-       PCRE supports five different conventions for indicating line breaks  in
-       strings:  a  single  CR (carriage return) character, a single LF (line-
+       PCRE  supports five different conventions for indicating line breaks in
+       strings: a single CR (carriage return) character, a  single  LF  (line-
        feed) character, the two-character sequence CRLF, any of the three pre-
-       ceding,  or any Unicode newline sequence. The Unicode newline sequences
-       are the three just mentioned, plus the single characters  VT  (vertical
-       tab,  U+000B), FF (formfeed, U+000C), NEL (next line, U+0085), LS (line
+       ceding, or any Unicode newline sequence. The Unicode newline  sequences
+       are  the  three just mentioned, plus the single characters VT (vertical
+       tab, U+000B), FF (formfeed, U+000C), NEL (next line, U+0085), LS  (line
        separator, U+2028), and PS (paragraph separator, U+2029).
 
-       Each of the first three conventions is used by at least  one  operating
-       system  as its standard newline sequence. When PCRE is built, a default
-       can be specified.  The default default is LF, which is the  Unix  stan-
-       dard.  When  PCRE  is run, the default can be overridden, either when a
+       Each  of  the first three conventions is used by at least one operating
+       system as its standard newline sequence. When PCRE is built, a  default
+       can  be  specified.  The default default is LF, which is the Unix stan-
+       dard. When PCRE is run, the default can be overridden,  either  when  a
        pattern is compiled, or when it is matched.
 
        At compile time, the newline convention can be specified by the options
-       argument  of  pcre_compile(), or it can be specified by special text at
+       argument of pcre_compile(), or it can be specified by special  text  at
        the start of the pattern itself; this overrides any other settings. See
        the pcrepattern page for details of the special character sequences.
 
        In the PCRE documentation the word "newline" is used to mean "the char-
-       acter or pair of characters that indicate a line break". The choice  of
-       newline  convention  affects  the  handling of the dot, circumflex, and
+       acter  or pair of characters that indicate a line break". The choice of
+       newline convention affects the handling of  the  dot,  circumflex,  and
        dollar metacharacters, the handling of #-comments in /x mode, and, when
-       CRLF  is a recognized line ending sequence, the match position advance-
+       CRLF is a recognized line ending sequence, the match position  advance-
        ment for a non-anchored pattern. There is more detail about this in the
        section on pcre_exec() options below.
 
-       The  choice of newline convention does not affect the interpretation of
-       the \n or \r escape sequences, nor does  it  affect  what  \R  matches,
+       The choice of newline convention does not affect the interpretation  of
+       the  \n  or  \r  escape  sequences, nor does it affect what \R matches,
        which is controlled in a similar way, but by separate options.
 
 
 MULTITHREADING
 
-       The  PCRE  functions  can be used in multi-threading applications, with
+       The PCRE functions can be used in  multi-threading  applications,  with
        the  proviso  that  the  memory  management  functions  pointed  to  by
        pcre_malloc, pcre_free, pcre_stack_malloc, and pcre_stack_free, and the
        callout function pointed to by pcre_callout, are shared by all threads.
 
-       The compiled form of a regular expression is not altered during  match-
+       The  compiled form of a regular expression is not altered during match-
        ing, so the same compiled pattern can safely be used by several threads
        at once.
 
@@ -1014,10 +1025,10 @@ MULTITHREADING
 SAVING PRECOMPILED PATTERNS FOR LATER USE
 
        The compiled form of a regular expression can be saved and re-used at a
-       later  time,  possibly by a different program, and even on a host other
-       than the one on which  it  was  compiled.  Details  are  given  in  the
-       pcreprecompile  documentation.  However, compiling a regular expression
-       with one version of PCRE for use with a different version is not  guar-
+       later time, possibly by a different program, and even on a  host  other
+       than  the  one  on  which  it  was  compiled.  Details are given in the
+       pcreprecompile documentation. However, compiling a  regular  expression
+       with  one version of PCRE for use with a different version is not guar-
        anteed to work and may cause crashes.
 
 
@@ -1025,79 +1036,79 @@ CHECKING BUILD-TIME OPTIONS
 
        int pcre_config(int what, void *where);
 
-       The  function pcre_config() makes it possible for a PCRE client to dis-
+       The function pcre_config() makes it possible for a PCRE client to  dis-
        cover which optional features have been compiled into the PCRE library.
-       The  pcrebuild documentation has more details about these optional fea-
+       The pcrebuild documentation has more details about these optional  fea-
        tures.
 
-       The first argument for pcre_config() is an  integer,  specifying  which
+       The  first  argument  for pcre_config() is an integer, specifying which
        information is required; the second argument is a pointer to a variable
-       into which the information is  placed.  The  following  information  is
+       into  which  the  information  is  placed. The following information is
        available:
 
          PCRE_CONFIG_UTF8
 
-       The  output is an integer that is set to one if UTF-8 support is avail-
+       The output is an integer that is set to one if UTF-8 support is  avail-
        able; otherwise it is set to zero.
 
          PCRE_CONFIG_UNICODE_PROPERTIES
 
-       The output is an integer that is set to  one  if  support  for  Unicode
+       The  output  is  an  integer  that is set to one if support for Unicode
        character properties is available; otherwise it is set to zero.
 
          PCRE_CONFIG_NEWLINE
 
-       The  output  is  an integer whose value specifies the default character
-       sequence that is recognized as meaning "newline". The four values  that
+       The output is an integer whose value specifies  the  default  character
+       sequence  that is recognized as meaning "newline". The four values that
        are supported are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF,
-       and -1 for ANY.  Though they are derived from ASCII,  the  same  values
+       and  -1  for  ANY.  Though they are derived from ASCII, the same values
        are returned in EBCDIC environments. The default should normally corre-
        spond to the standard sequence for your operating system.
 
          PCRE_CONFIG_BSR
 
        The output is an integer whose value indicates what character sequences
-       the  \R  escape sequence matches by default. A value of 0 means that \R
-       matches any Unicode line ending sequence; a value of 1  means  that  \R
+       the \R escape sequence matches by default. A value of 0 means  that  \R
+       matches  any  Unicode  line ending sequence; a value of 1 means that \R
        matches only CR, LF, or CRLF. The default can be overridden when a pat-
        tern is compiled or matched.
 
          PCRE_CONFIG_LINK_SIZE
 
-       The output is an integer that contains the number  of  bytes  used  for
+       The  output  is  an  integer that contains the number of bytes used for
        internal linkage in compiled regular expressions. The value is 2, 3, or
-       4. Larger values allow larger regular expressions to  be  compiled,  at
-       the  expense  of  slower matching. The default value of 2 is sufficient
-       for all but the most massive patterns, since  it  allows  the  compiled
+       4.  Larger  values  allow larger regular expressions to be compiled, at
+       the expense of slower matching. The default value of  2  is  sufficient
+       for  all  but  the  most massive patterns, since it allows the compiled
        pattern to be up to 64K in size.
 
          PCRE_CONFIG_POSIX_MALLOC_THRESHOLD
 
-       The  output  is  an integer that contains the threshold above which the
-       POSIX interface uses malloc() for output vectors. Further  details  are
+       The output is an integer that contains the threshold  above  which  the
+       POSIX  interface  uses malloc() for output vectors. Further details are
        given in the pcreposix documentation.
 
          PCRE_CONFIG_MATCH_LIMIT
 
-       The  output is a long integer that gives the default limit for the num-
-       ber of internal matching function calls  in  a  pcre_exec()  execution.
+       The output is a long integer that gives the default limit for the  num-
+       ber  of  internal  matching  function calls in a pcre_exec() execution.
        Further details are given with pcre_exec() below.
 
          PCRE_CONFIG_MATCH_LIMIT_RECURSION
 
        The output is a long integer that gives the default limit for the depth
-       of  recursion  when  calling  the  internal  matching  function  in   a
-       pcre_exec()  execution.  Further  details  are  given  with pcre_exec()
+       of   recursion  when  calling  the  internal  matching  function  in  a
+       pcre_exec() execution.  Further  details  are  given  with  pcre_exec()
        below.
 
          PCRE_CONFIG_STACKRECURSE
 
-       The output is an integer that is set to one if internal recursion  when
+       The  output is an integer that is set to one if internal recursion when
        running pcre_exec() is implemented by recursive function calls that use
-       the stack to remember their state. This is the usual way that  PCRE  is
+       the  stack  to remember their state. This is the usual way that PCRE is
        compiled. The output is zero if PCRE was compiled to use blocks of data
-       on the  heap  instead  of  recursive  function  calls.  In  this  case,
-       pcre_stack_malloc  and  pcre_stack_free  are  called  to  manage memory
+       on  the  heap  instead  of  recursive  function  calls.  In  this case,
+       pcre_stack_malloc and  pcre_stack_free  are  called  to  manage  memory
        blocks on the heap, thus avoiding the use of the stack.
 
 
@@ -1114,56 +1125,56 @@ COMPILING A PATTERN
 
        Either of the functions pcre_compile() or pcre_compile2() can be called
        to compile a pattern into an internal form. The only difference between
-       the two interfaces is that pcre_compile2() has an additional  argument,
+       the  two interfaces is that pcre_compile2() has an additional argument,
        errorcodeptr, via which a numerical error code can be returned.
 
        The pattern is a C string terminated by a binary zero, and is passed in
-       the pattern argument. A pointer to a single block  of  memory  that  is
-       obtained  via  pcre_malloc is returned. This contains the compiled code
+       the  pattern  argument.  A  pointer to a single block of memory that is
+       obtained via pcre_malloc is returned. This contains the  compiled  code
        and related data. The pcre type is defined for the returned block; this
        is a typedef for a structure whose contents are not externally defined.
        It is up to the caller to free the memory (via pcre_free) when it is no
        longer required.
 
-       Although  the compiled code of a PCRE regex is relocatable, that is, it
+       Although the compiled code of a PCRE regex is relocatable, that is,  it
        does not depend on memory location, the complete pcre data block is not
-       fully  relocatable, because it may contain a copy of the tableptr argu-
+       fully relocatable, because it may contain a copy of the tableptr  argu-
        ment, which is an address (see below).
 
        The options argument contains various bit settings that affect the com-
-       pilation.  It  should be zero if no options are required. The available
-       options are described below. Some of them (in  particular,  those  that
-       are  compatible  with  Perl,  but also some others) can also be set and
-       unset from within the pattern (see  the  detailed  description  in  the
-       pcrepattern  documentation). For those options that can be different in
-       different parts of the pattern, the contents of  the  options  argument
+       pilation. It should be zero if no options are required.  The  available
+       options  are  described  below. Some of them (in particular, those that
+       are compatible with Perl, but also some others) can  also  be  set  and
+       unset  from  within  the  pattern  (see the detailed description in the
+       pcrepattern documentation). For those options that can be different  in
+       different  parts  of  the pattern, the contents of the options argument
        specifies their initial settings at the start of compilation and execu-
-       tion. The PCRE_ANCHORED and PCRE_NEWLINE_xxx options can be set at  the
+       tion.  The PCRE_ANCHORED and PCRE_NEWLINE_xxx options can be set at the
        time of matching as well as at compile time.
 
        If errptr is NULL, pcre_compile() returns NULL immediately.  Otherwise,
-       if compilation of a pattern fails,  pcre_compile()  returns  NULL,  and
+       if  compilation  of  a  pattern fails, pcre_compile() returns NULL, and
        sets the variable pointed to by errptr to point to a textual error mes-
        sage. This is a static string that is part of the library. You must not
        try to free it. The offset from the start of the pattern to the charac-
        ter where the error was discovered is placed in the variable pointed to
-       by  erroffset,  which must not be NULL. If it is, an immediate error is
+       by erroffset, which must not be NULL. If it is, an immediate  error  is
        given.
 
-       If pcre_compile2() is used instead of pcre_compile(),  and  the  error-
-       codeptr  argument is not NULL, a non-zero error code number is returned
-       via this argument in the event of an error. This is in addition to  the
+       If  pcre_compile2()  is  used instead of pcre_compile(), and the error-
+       codeptr argument is not NULL, a non-zero error code number is  returned
+       via  this argument in the event of an error. This is in addition to the
        textual error message. Error codes and messages are listed below.
 
-       If  the  final  argument, tableptr, is NULL, PCRE uses a default set of
-       character tables that are  built  when  PCRE  is  compiled,  using  the
-       default  C  locale.  Otherwise, tableptr must be an address that is the
-       result of a call to pcre_maketables(). This value is  stored  with  the
-       compiled  pattern,  and used again by pcre_exec(), unless another table
+       If the final argument, tableptr, is NULL, PCRE uses a  default  set  of
+       character  tables  that  are  built  when  PCRE  is compiled, using the
+       default C locale. Otherwise, tableptr must be an address  that  is  the
+       result  of  a  call to pcre_maketables(). This value is stored with the
+       compiled pattern, and used again by pcre_exec(), unless  another  table
        pointer is passed to it. For more discussion, see the section on locale
        support below.
 
-       This  code  fragment  shows a typical straightforward call to pcre_com-
+       This code fragment shows a typical straightforward  call  to  pcre_com-
        pile():
 
          pcre *re;
@@ -1176,137 +1187,137 @@ COMPILING A PATTERN
            &erroffset,       /* for error offset */
            NULL);            /* use default character tables */
 
-       The following names for option bits are defined in  the  pcre.h  header
+       The  following  names  for option bits are defined in the pcre.h header
        file:
 
          PCRE_ANCHORED
 
        If this bit is set, the pattern is forced to be "anchored", that is, it
-       is constrained to match only at the first matching point in the  string
-       that  is being searched (the "subject string"). This effect can also be
-       achieved by appropriate constructs in the pattern itself, which is  the
+       is  constrained to match only at the first matching point in the string
+       that is being searched (the "subject string"). This effect can also  be
+       achieved  by appropriate constructs in the pattern itself, which is the
        only way to do it in Perl.
 
          PCRE_AUTO_CALLOUT
 
        If this bit is set, pcre_compile() automatically inserts callout items,
-       all with number 255, before each pattern item. For  discussion  of  the
+       all  with  number  255, before each pattern item. For discussion of the
        callout facility, see the pcrecallout documentation.
 
          PCRE_BSR_ANYCRLF
          PCRE_BSR_UNICODE
 
        These options (which are mutually exclusive) control what the \R escape
-       sequence matches. The choice is either to match only CR, LF,  or  CRLF,
+       sequence  matches.  The choice is either to match only CR, LF, or CRLF,
        or to match any Unicode newline sequence. The default is specified when
        PCRE is built. It can be overridden from within the pattern, or by set-
        ting an option when a compiled pattern is matched.
 
          PCRE_CASELESS
 
-       If  this  bit is set, letters in the pattern match both upper and lower
-       case letters. It is equivalent to Perl's  /i  option,  and  it  can  be
-       changed  within a pattern by a (?i) option setting. In UTF-8 mode, PCRE
-       always understands the concept of case for characters whose values  are
-       less  than 128, so caseless matching is always possible. For characters
-       with higher values, the concept of case is supported if  PCRE  is  com-
-       piled  with Unicode property support, but not otherwise. If you want to
-       use caseless matching for characters 128 and  above,  you  must  ensure
-       that  PCRE  is  compiled  with Unicode property support as well as with
+       If this bit is set, letters in the pattern match both upper  and  lower
+       case  letters.  It  is  equivalent  to  Perl's /i option, and it can be
+       changed within a pattern by a (?i) option setting. In UTF-8 mode,  PCRE
+       always  understands the concept of case for characters whose values are
+       less than 128, so caseless matching is always possible. For  characters
+       with  higher  values,  the concept of case is supported if PCRE is com-
+       piled with Unicode property support, but not otherwise. If you want  to
+       use  caseless  matching  for  characters 128 and above, you must ensure
+       that PCRE is compiled with Unicode property support  as  well  as  with
        UTF-8 support.
 
          PCRE_DOLLAR_ENDONLY
 
-       If this bit is set, a dollar metacharacter in the pattern matches  only
-       at  the  end  of the subject string. Without this option, a dollar also
-       matches immediately before a newline at the end of the string (but  not
-       before  any  other newlines). The PCRE_DOLLAR_ENDONLY option is ignored
-       if PCRE_MULTILINE is set.  There is no equivalent  to  this  option  in
+       If  this bit is set, a dollar metacharacter in the pattern matches only
+       at the end of the subject string. Without this option,  a  dollar  also
+       matches  immediately before a newline at the end of the string (but not
+       before any other newlines). The PCRE_DOLLAR_ENDONLY option  is  ignored
+       if  PCRE_MULTILINE  is  set.   There is no equivalent to this option in
        Perl, and no way to set it within a pattern.
 
          PCRE_DOTALL
 
        If this bit is set, a dot metacharater in the pattern matches all char-
-       acters, including those that indicate newline. Without it, a  dot  does
-       not  match  when  the  current position is at a newline. This option is
-       equivalent to Perl's /s option, and it can be changed within a  pattern
-       by  a (?s) option setting. A negative class such as [^a] always matches
+       acters,  including  those that indicate newline. Without it, a dot does
+       not match when the current position is at a  newline.  This  option  is
+       equivalent  to Perl's /s option, and it can be changed within a pattern
+       by a (?s) option setting. A negative class such as [^a] always  matches
        newline characters, independent of the setting of this option.
 
          PCRE_DUPNAMES
 
-       If this bit is set, names used to identify capturing  subpatterns  need
+       If  this  bit is set, names used to identify capturing subpatterns need
        not be unique. This can be helpful for certain types of pattern when it
-       is known that only one instance of the named  subpattern  can  ever  be
-       matched.  There  are  more details of named subpatterns below; see also
+       is  known  that  only  one instance of the named subpattern can ever be
+       matched. There are more details of named subpatterns  below;  see  also
        the pcrepattern documentation.
 
          PCRE_EXTENDED
 
-       If this bit is set, whitespace  data  characters  in  the  pattern  are
+       If  this  bit  is  set,  whitespace  data characters in the pattern are
        totally ignored except when escaped or inside a character class. White-
        space does not include the VT character (code 11). In addition, charac-
        ters between an unescaped # outside a character class and the next new-
-       line, inclusive, are also ignored. This  is  equivalent  to  Perl's  /x
-       option,  and  it  can be changed within a pattern by a (?x) option set-
+       line,  inclusive,  are  also  ignored.  This is equivalent to Perl's /x
+       option, and it can be changed within a pattern by a  (?x)  option  set-
        ting.
 
-       This option makes it possible to include  comments  inside  complicated
-       patterns.   Note,  however,  that this applies only to data characters.
-       Whitespace  characters  may  never  appear  within  special   character
-       sequences  in  a  pattern,  for  example  within the sequence (?( which
+       This  option  makes  it possible to include comments inside complicated
+       patterns.  Note, however, that this applies only  to  data  characters.
+       Whitespace   characters  may  never  appear  within  special  character
+       sequences in a pattern, for  example  within  the  sequence  (?(  which
        introduces a conditional subpattern.
 
          PCRE_EXTRA
 
-       This option was invented in order to turn on  additional  functionality
-       of  PCRE  that  is  incompatible with Perl, but it is currently of very
-       little use. When set, any backslash in a pattern that is followed by  a
-       letter  that  has  no  special  meaning causes an error, thus reserving
-       these combinations for future expansion. By  default,  as  in  Perl,  a
-       backslash  followed by a letter with no special meaning is treated as a
-       literal. (Perl can, however, be persuaded to give a warning for  this.)
-       There  are  at  present no other features controlled by this option. It
+       This  option  was invented in order to turn on additional functionality
+       of PCRE that is incompatible with Perl, but it  is  currently  of  very
+       little  use. When set, any backslash in a pattern that is followed by a
+       letter that has no special meaning  causes  an  error,  thus  reserving
+       these  combinations  for  future  expansion.  By default, as in Perl, a
+       backslash followed by a letter with no special meaning is treated as  a
+       literal.  (Perl can, however, be persuaded to give a warning for this.)
+       There are at present no other features controlled by  this  option.  It
        can also be set by a (?X) option setting within a pattern.
 
          PCRE_FIRSTLINE
 
-       If this option is set, an  unanchored  pattern  is  required  to  match
-       before  or  at  the  first  newline  in  the subject string, though the
+       If  this  option  is  set,  an  unanchored pattern is required to match
+       before or at the first  newline  in  the  subject  string,  though  the
        matched text may continue over the newline.
 
          PCRE_JAVASCRIPT_COMPAT
 
        If this option is set, PCRE's behaviour is changed in some ways so that
-       it  is  compatible with JavaScript rather than Perl. The changes are as
+       it is compatible with JavaScript rather than Perl. The changes  are  as
        follows:
 
-       (1) A lone closing square bracket in a pattern  causes  a  compile-time
-       error,  because this is illegal in JavaScript (by default it is treated
+       (1)  A  lone  closing square bracket in a pattern causes a compile-time
+       error, because this is illegal in JavaScript (by default it is  treated
        as a data character). Thus, the pattern AB]CD becomes illegal when this
        option is set.
 
-       (2)  At run time, a back reference to an unset subpattern group matches
-       an empty string (by default this causes the current  matching  alterna-
-       tive  to  fail). A pattern such as (\1)(a) succeeds when this option is
-       set (assuming it can find an "a" in the subject), whereas it  fails  by
+       (2) At run time, a back reference to an unset subpattern group  matches
+       an  empty  string (by default this causes the current matching alterna-
+       tive to fail). A pattern such as (\1)(a) succeeds when this  option  is
+       set  (assuming  it can find an "a" in the subject), whereas it fails by
        default, for Perl compatibility.
 
          PCRE_MULTILINE
 
-       By  default,  PCRE  treats the subject string as consisting of a single
-       line of characters (even if it actually contains newlines). The  "start
-       of  line"  metacharacter  (^)  matches only at the start of the string,
-       while the "end of line" metacharacter ($) matches only at  the  end  of
+       By default, PCRE treats the subject string as consisting  of  a  single
+       line  of characters (even if it actually contains newlines). The "start
+       of line" metacharacter (^) matches only at the  start  of  the  string,
+       while  the  "end  of line" metacharacter ($) matches only at the end of
        the string, or before a terminating newline (unless PCRE_DOLLAR_ENDONLY
        is set). This is the same as Perl.
 
-       When PCRE_MULTILINE it is set, the "start of line" and  "end  of  line"
-       constructs  match  immediately following or immediately before internal
-       newlines in the subject string, respectively, as well as  at  the  very
-       start  and  end.  This is equivalent to Perl's /m option, and it can be
+       When  PCRE_MULTILINE  it  is set, the "start of line" and "end of line"
+       constructs match immediately following or immediately  before  internal
+       newlines  in  the  subject string, respectively, as well as at the very
+       start and end. This is equivalent to Perl's /m option, and  it  can  be
        changed within a pattern by a (?m) option setting. If there are no new-
-       lines  in  a  subject string, or no occurrences of ^ or $ in a pattern,
+       lines in a subject string, or no occurrences of ^ or $  in  a  pattern,
        setting PCRE_MULTILINE has no effect.
 
          PCRE_NEWLINE_CR
@@ -1315,32 +1326,32 @@ COMPILING A PATTERN
          PCRE_NEWLINE_ANYCRLF
          PCRE_NEWLINE_ANY
 
-       These options override the default newline definition that  was  chosen
-       when  PCRE  was built. Setting the first or the second specifies that a
-       newline is indicated by a single character (CR  or  LF,  respectively).
-       Setting  PCRE_NEWLINE_CRLF specifies that a newline is indicated by the
-       two-character CRLF  sequence.  Setting  PCRE_NEWLINE_ANYCRLF  specifies
+       These  options  override the default newline definition that was chosen
+       when PCRE was built. Setting the first or the second specifies  that  a
+       newline  is  indicated  by a single character (CR or LF, respectively).
+       Setting PCRE_NEWLINE_CRLF specifies that a newline is indicated by  the
+       two-character  CRLF  sequence.  Setting  PCRE_NEWLINE_ANYCRLF specifies
        that any of the three preceding sequences should be recognized. Setting
-       PCRE_NEWLINE_ANY specifies that any Unicode newline sequence should  be
+       PCRE_NEWLINE_ANY  specifies that any Unicode newline sequence should be
        recognized. The Unicode newline sequences are the three just mentioned,
-       plus the single characters VT (vertical  tab,  U+000B),  FF  (formfeed,
-       U+000C),  NEL  (next line, U+0085), LS (line separator, U+2028), and PS
-       (paragraph separator, U+2029). The last  two  are  recognized  only  in
+       plus  the  single  characters  VT (vertical tab, U+000B), FF (formfeed,
+       U+000C), NEL (next line, U+0085), LS (line separator, U+2028),  and  PS
+       (paragraph  separator,  U+2029).  The  last  two are recognized only in
        UTF-8 mode.
 
-       The  newline  setting  in  the  options  word  uses three bits that are
+       The newline setting in the  options  word  uses  three  bits  that  are
        treated as a number, giving eight possibilities. Currently only six are
-       used  (default  plus the five values above). This means that if you set
-       more than one newline option, the combination may or may not be  sensi-
+       used (default plus the five values above). This means that if  you  set
+       more  than one newline option, the combination may or may not be sensi-
        ble. For example, PCRE_NEWLINE_CR with PCRE_NEWLINE_LF is equivalent to
-       PCRE_NEWLINE_CRLF, but other combinations may yield unused numbers  and
+       PCRE_NEWLINE_CRLF,  but other combinations may yield unused numbers and
        cause an error.
 
-       The  only time that a line break is specially recognized when compiling
-       a pattern is if PCRE_EXTENDED is set, and  an  unescaped  #  outside  a
-       character  class  is  encountered.  This indicates a comment that lasts
-       until after the next line break sequence. In other circumstances,  line
-       break   sequences   are   treated  as  literal  data,  except  that  in
+       The only time that a line break is specially recognized when  compiling
+       a  pattern  is  if  PCRE_EXTENDED  is set, and an unescaped # outside a
+       character class is encountered. This indicates  a  comment  that  lasts
+       until  after the next line break sequence. In other circumstances, line
+       break  sequences  are  treated  as  literal  data,   except   that   in
        PCRE_EXTENDED mode, both CR and LF are treated as whitespace characters
        and are therefore ignored.
 
@@ -1350,46 +1361,46 @@ COMPILING A PATTERN
          PCRE_NO_AUTO_CAPTURE
 
        If this option is set, it disables the use of numbered capturing paren-
-       theses  in the pattern. Any opening parenthesis that is not followed by
-       ? behaves as if it were followed by ?: but named parentheses can  still
-       be  used  for  capturing  (and  they acquire numbers in the usual way).
+       theses in the pattern. Any opening parenthesis that is not followed  by
+       ?  behaves as if it were followed by ?: but named parentheses can still
+       be used for capturing (and they acquire  numbers  in  the  usual  way).
        There is no equivalent of this option in Perl.
 
          PCRE_UNGREEDY
 
-       This option inverts the "greediness" of the quantifiers  so  that  they
-       are  not greedy by default, but become greedy if followed by "?". It is
-       not compatible with Perl. It can also be set by a (?U)  option  setting
+       This  option  inverts  the "greediness" of the quantifiers so that they
+       are not greedy by default, but become greedy if followed by "?". It  is
+       not  compatible  with Perl. It can also be set by a (?U) option setting
        within the pattern.
 
          PCRE_UTF8
 
-       This  option  causes PCRE to regard both the pattern and the subject as
-       strings of UTF-8 characters instead of single-byte  character  strings.
-       However,  it is available only when PCRE is built to include UTF-8 sup-
-       port. If not, the use of this option provokes an error. Details of  how
-       this  option  changes the behaviour of PCRE are given in the section on
+       This option causes PCRE to regard both the pattern and the  subject  as
+       strings  of  UTF-8 characters instead of single-byte character strings.
+       However, it is available only when PCRE is built to include UTF-8  sup-
+       port.  If not, the use of this option provokes an error. Details of how
+       this option changes the behaviour of PCRE are given in the  section  on
        UTF-8 support in the main pcre page.
 
          PCRE_NO_UTF8_CHECK
 
        When PCRE_UTF8 is set, the validity of the pattern as a UTF-8 string is
-       automatically  checked.  There  is  a  discussion about the validity of
-       UTF-8 strings in the main pcre page. If an invalid  UTF-8  sequence  of
-       bytes  is  found,  pcre_compile() returns an error. If you already know
+       automatically checked. There is a  discussion  about  the  validity  of
+       UTF-8  strings  in  the main pcre page. If an invalid UTF-8 sequence of
+       bytes is found, pcre_compile() returns an error. If  you  already  know
        that your pattern is valid, and you want to skip this check for perfor-
-       mance  reasons,  you  can set the PCRE_NO_UTF8_CHECK option. When it is
-       set, the effect of passing an invalid UTF-8  string  as  a  pattern  is
-       undefined.  It  may  cause your program to crash. Note that this option
-       can also be passed to pcre_exec() and pcre_dfa_exec(), to suppress  the
+       mance reasons, you can set the PCRE_NO_UTF8_CHECK option.  When  it  is
+       set,  the  effect  of  passing  an invalid UTF-8 string as a pattern is
+       undefined. It may cause your program to crash. Note  that  this  option
+       can  also be passed to pcre_exec() and pcre_dfa_exec(), to suppress the
        UTF-8 validity checking of subject strings.
 
 
 COMPILATION ERROR CODES
 
-       The  following  table  lists  the  error  codes than may be returned by
-       pcre_compile2(), along with the error messages that may be returned  by
-       both  compiling functions. As PCRE has developed, some error codes have
+       The following table lists the error  codes  than  may  be  returned  by
+       pcre_compile2(),  along with the error messages that may be returned by
+       both compiling functions. As PCRE has developed, some error codes  have
        fallen out of use. To avoid confusion, they have not been re-used.
 
           0  no error
@@ -1445,7 +1456,7 @@ COMPILATION ERROR CODES
          50  [this code is not in use]
          51  octal value is greater than \377 (not in UTF-8 mode)
          52  internal error: overran compiling workspace
-         53  internal  error:  previously-checked  referenced  subpattern  not
+         53   internal  error:  previously-checked  referenced  subpattern not
        found
          54  DEFINE group contains more than one branch
          55  repeating a DEFINE group is not allowed
@@ -1460,7 +1471,7 @@ COMPILATION ERROR CODES
          63  digit expected after (?+
          64  ] is an invalid data character in JavaScript compatibility mode
 
-       The  numbers  32  and 10000 in errors 48 and 49 are defaults; different
+       The numbers 32 and 10000 in errors 48 and 49  are  defaults;  different
        values may be used if the limits were changed when PCRE was built.
 
 
@@ -1469,32 +1480,32 @@ STUDYING A PATTERN
        pcre_extra *pcre_study(const pcre *code, int options
             const char **errptr);
 
-       If a compiled pattern is going to be used several times,  it  is  worth
+       If  a  compiled  pattern is going to be used several times, it is worth
        spending more time analyzing it in order to speed up the time taken for
-       matching. The function pcre_study() takes a pointer to a compiled  pat-
+       matching.  The function pcre_study() takes a pointer to a compiled pat-
        tern as its first argument. If studying the pattern produces additional
-       information that will help speed up matching,  pcre_study()  returns  a
-       pointer  to a pcre_extra block, in which the study_data field points to
+       information  that  will  help speed up matching, pcre_study() returns a
+       pointer to a pcre_extra block, in which the study_data field points  to
        the results of the study.
 
        The  returned  value  from  pcre_study()  can  be  passed  directly  to
-       pcre_exec().  However,  a  pcre_extra  block also contains other fields
-       that can be set by the caller before the block  is  passed;  these  are
+       pcre_exec(). However, a pcre_extra block  also  contains  other  fields
+       that  can  be  set  by the caller before the block is passed; these are
        described below in the section on matching a pattern.
 
-       If  studying  the  pattern  does not produce any additional information
+       If studying the pattern does not  produce  any  additional  information
        pcre_study() returns NULL. In that circumstance, if the calling program
-       wants  to  pass  any of the other fields to pcre_exec(), it must set up
+       wants to pass any of the other fields to pcre_exec(), it  must  set  up
        its own pcre_extra block.
 
-       The second argument of pcre_study() contains option bits.  At  present,
+       The  second  argument of pcre_study() contains option bits. At present,
        no options are defined, and this argument should always be zero.
 
-       The  third argument for pcre_study() is a pointer for an error message.
-       If studying succeeds (even if no data is  returned),  the  variable  it
-       points  to  is  set  to NULL. Otherwise it is set to point to a textual
+       The third argument for pcre_study() is a pointer for an error  message.
+       If  studying  succeeds  (even  if no data is returned), the variable it
+       points to is set to NULL. Otherwise it is set to  point  to  a  textual
        error message. This is a static string that is part of the library. You
-       must  not  try  to  free it. You should test the error pointer for NULL
+       must not try to free it. You should test the  error  pointer  for  NULL
        after calling pcre_study(), to be sure that it has run successfully.
 
        This is a typical call to pcre_study():
@@ -1506,62 +1517,62 @@ STUDYING A PATTERN
            &error);        /* set to NULL or points to a message */
 
        At present, studying a pattern is useful only for non-anchored patterns
-       that  do not have a single fixed starting character. A bitmap of possi-
+       that do not have a single fixed starting character. A bitmap of  possi-
        ble starting bytes is created.
 
 
 LOCALE SUPPORT
 
-       PCRE handles caseless matching, and determines whether  characters  are
-       letters,  digits, or whatever, by reference to a set of tables, indexed
-       by character value. When running in UTF-8 mode, this  applies  only  to
-       characters  with  codes  less than 128. Higher-valued codes never match
-       escapes such as \w or \d, but can be tested with \p if  PCRE  is  built
-       with  Unicode  character property support. The use of locales with Uni-
-       code is discouraged. If you are handling characters with codes  greater
-       than  128, you should either use UTF-8 and Unicode, or use locales, but
+       PCRE  handles  caseless matching, and determines whether characters are
+       letters, digits, or whatever, by reference to a set of tables,  indexed
+       by  character  value.  When running in UTF-8 mode, this applies only to
+       characters with codes less than 128. Higher-valued  codes  never  match
+       escapes  such  as  \w or \d, but can be tested with \p if PCRE is built
+       with Unicode character property support. The use of locales  with  Uni-
+       code  is discouraged. If you are handling characters with codes greater
+       than 128, you should either use UTF-8 and Unicode, or use locales,  but
        not try to mix the two.
 
-       PCRE contains an internal set of tables that are used  when  the  final
-       argument  of  pcre_compile()  is  NULL.  These  are sufficient for many
+       PCRE  contains  an  internal set of tables that are used when the final
+       argument of pcre_compile() is  NULL.  These  are  sufficient  for  many
        applications.  Normally, the internal tables recognize only ASCII char-
        acters. However, when PCRE is built, it is possible to cause the inter-
        nal tables to be rebuilt in the default "C" locale of the local system,
        which may cause them to be different.
 
-       The  internal tables can always be overridden by tables supplied by the
+       The internal tables can always be overridden by tables supplied by  the
        application that calls PCRE. These may be created in a different locale
-       from  the  default.  As more and more applications change to using Uni-
+       from the default. As more and more applications change  to  using  Uni-
        code, the need for this locale support is expected to die away.
 
-       External tables are built by calling  the  pcre_maketables()  function,
-       which  has no arguments, in the relevant locale. The result can then be
-       passed to pcre_compile() or pcre_exec()  as  often  as  necessary.  For
-       example,  to  build  and use tables that are appropriate for the French
-       locale (where accented characters with  values  greater  than  128  are
+       External  tables  are  built by calling the pcre_maketables() function,
+       which has no arguments, in the relevant locale. The result can then  be
+       passed  to  pcre_compile()  or  pcre_exec()  as often as necessary. For
+       example, to build and use tables that are appropriate  for  the  French
+       locale  (where  accented  characters  with  values greater than 128 are
        treated as letters), the following code could be used:
 
          setlocale(LC_CTYPE, "fr_FR");
          tables = pcre_maketables();
          re = pcre_compile(..., tables);
 
-       The  locale  name "fr_FR" is used on Linux and other Unix-like systems;
+       The locale name "fr_FR" is used on Linux and other  Unix-like  systems;
        if you are using Windows, the name for the French locale is "french".
 
-       When pcre_maketables() runs, the tables are built  in  memory  that  is
-       obtained  via  pcre_malloc. It is the caller's responsibility to ensure
-       that the memory containing the tables remains available for as long  as
+       When  pcre_maketables()  runs,  the  tables are built in memory that is
+       obtained via pcre_malloc. It is the caller's responsibility  to  ensure
+       that  the memory containing the tables remains available for as long as
        it is needed.
 
        The pointer that is passed to pcre_compile() is saved with the compiled
-       pattern, and the same tables are used via this pointer by  pcre_study()
+       pattern,  and the same tables are used via this pointer by pcre_study()
        and normally also by pcre_exec(). Thus, by default, for any single pat-
        tern, compilation, studying and matching all happen in the same locale,
        but different patterns can be compiled in different locales.
 
-       It  is  possible to pass a table pointer or NULL (indicating the use of
-       the internal tables) to pcre_exec(). Although  not  intended  for  this
-       purpose,  this facility could be used to match a pattern in a different
+       It is possible to pass a table pointer or NULL (indicating the  use  of
+       the  internal  tables)  to  pcre_exec(). Although not intended for this
+       purpose, this facility could be used to match a pattern in a  different
        locale from the one in which it was compiled. Passing table pointers at
        run time is discussed below in the section on matching a pattern.
 
@@ -1571,15 +1582,15 @@ INFORMATION ABOUT A PATTERN
        int pcre_fullinfo(const pcre *code, const pcre_extra *extra,
             int what, void *where);
 
-       The  pcre_fullinfo() function returns information about a compiled pat-
+       The pcre_fullinfo() function returns information about a compiled  pat-
        tern. It replaces the obsolete pcre_info() function, which is neverthe-
        less retained for backwards compability (and is documented below).
 
-       The  first  argument  for  pcre_fullinfo() is a pointer to the compiled
-       pattern. The second argument is the result of pcre_study(), or NULL  if
-       the  pattern  was not studied. The third argument specifies which piece
-       of information is required, and the fourth argument is a pointer  to  a
-       variable  to  receive  the  data. The yield of the function is zero for
+       The first argument for pcre_fullinfo() is a  pointer  to  the  compiled
+       pattern.  The second argument is the result of pcre_study(), or NULL if
+       the pattern was not studied. The third argument specifies  which  piece
+       of  information  is required, and the fourth argument is a pointer to a
+       variable to receive the data. The yield of the  function  is  zero  for
        success, or one of the following negative numbers:
 
          PCRE_ERROR_NULL       the argument code was NULL
@@ -1587,9 +1598,9 @@ INFORMATION ABOUT A PATTERN
          PCRE_ERROR_BADMAGIC   the "magic number" was not found
          PCRE_ERROR_BADOPTION  the value of what was invalid
 
-       The "magic number" is placed at the start of each compiled  pattern  as
-       an  simple check against passing an arbitrary memory pointer. Here is a
-       typical call of pcre_fullinfo(), to obtain the length of  the  compiled
+       The  "magic  number" is placed at the start of each compiled pattern as
+       an simple check against passing an arbitrary memory pointer. Here is  a
+       typical  call  of pcre_fullinfo(), to obtain the length of the compiled
        pattern:
 
          int rc;
@@ -1600,76 +1611,76 @@ INFORMATION ABOUT A PATTERN
            PCRE_INFO_SIZE,   /* what is required */
            &length);         /* where to put the data */
 
-       The  possible  values for the third argument are defined in pcre.h, and
+       The possible values for the third argument are defined in  pcre.h,  and
        are as follows:
 
          PCRE_INFO_BACKREFMAX
 
-       Return the number of the highest back reference  in  the  pattern.  The
-       fourth  argument  should  point to an int variable. Zero is returned if
+       Return  the  number  of  the highest back reference in the pattern. The
+       fourth argument should point to an int variable. Zero  is  returned  if
        there are no back references.
 
          PCRE_INFO_CAPTURECOUNT
 
-       Return the number of capturing subpatterns in the pattern.  The  fourth
+       Return  the  number of capturing subpatterns in the pattern. The fourth
        argument should point to an int variable.
 
          PCRE_INFO_DEFAULT_TABLES
 
-       Return  a pointer to the internal default character tables within PCRE.
-       The fourth argument should point to an unsigned char *  variable.  This
+       Return a pointer to the internal default character tables within  PCRE.
+       The  fourth  argument should point to an unsigned char * variable. This
        information call is provided for internal use by the pcre_study() func-
-       tion. External callers can cause PCRE to use  its  internal  tables  by
+       tion.  External  callers  can  cause PCRE to use its internal tables by
        passing a NULL table pointer.
 
          PCRE_INFO_FIRSTBYTE
 
-       Return  information  about  the first byte of any matched string, for a
-       non-anchored pattern. The fourth argument should point to an int  vari-
-       able.  (This option used to be called PCRE_INFO_FIRSTCHAR; the old name
+       Return information about the first byte of any matched  string,  for  a
+       non-anchored  pattern. The fourth argument should point to an int vari-
+       able. (This option used to be called PCRE_INFO_FIRSTCHAR; the old  name
        is still recognized for backwards compatibility.)
 
-       If there is a fixed first byte, for example, from  a  pattern  such  as
+       If  there  is  a  fixed first byte, for example, from a pattern such as
        (cat|cow|coyote), its value is returned. Otherwise, if either
 
-       (a)  the pattern was compiled with the PCRE_MULTILINE option, and every
+       (a) the pattern was compiled with the PCRE_MULTILINE option, and  every
        branch starts with "^", or
 
        (b) every branch of the pattern starts with ".*" and PCRE_DOTALL is not
        set (if it were set, the pattern would be anchored),
 
-       -1  is  returned, indicating that the pattern matches only at the start
-       of a subject string or after any newline within the  string.  Otherwise
+       -1 is returned, indicating that the pattern matches only at  the  start
+       of  a  subject string or after any newline within the string. Otherwise
        -2 is returned. For anchored patterns, -2 is returned.
 
          PCRE_INFO_FIRSTTABLE
 
-       If  the pattern was studied, and this resulted in the construction of a
+       If the pattern was studied, and this resulted in the construction of  a
        256-bit table indicating a fixed set of bytes for the first byte in any
-       matching  string, a pointer to the table is returned. Otherwise NULL is
-       returned. The fourth argument should point to an unsigned char *  vari-
+       matching string, a pointer to the table is returned. Otherwise NULL  is
+       returned.  The fourth argument should point to an unsigned char * vari-
        able.
 
          PCRE_INFO_HASCRORLF
 
-       Return  1  if  the  pattern  contains any explicit matches for CR or LF
-       characters, otherwise 0. The fourth argument should  point  to  an  int
-       variable.  An explicit match is either a literal CR or LF character, or
+       Return 1 if the pattern contains any explicit  matches  for  CR  or  LF
+       characters,  otherwise  0.  The  fourth argument should point to an int
+       variable. An explicit match is either a literal CR or LF character,  or
        \r or \n.
 
          PCRE_INFO_JCHANGED
 
-       Return 1 if the (?J) or (?-J) option setting is used  in  the  pattern,
-       otherwise  0. The fourth argument should point to an int variable. (?J)
+       Return  1  if  the (?J) or (?-J) option setting is used in the pattern,
+       otherwise 0. The fourth argument should point to an int variable.  (?J)
        and (?-J) set and unset the local PCRE_DUPNAMES option, respectively.
 
          PCRE_INFO_LASTLITERAL
 
-       Return the value of the rightmost literal byte that must exist  in  any
-       matched  string,  other  than  at  its  start,  if such a byte has been
+       Return  the  value of the rightmost literal byte that must exist in any
+       matched string, other than at its  start,  if  such  a  byte  has  been
        recorded. The fourth argument should point to an int variable. If there
-       is  no such byte, -1 is returned. For anchored patterns, a last literal
-       byte is recorded only if it follows something of variable  length.  For
+       is no such byte, -1 is returned. For anchored patterns, a last  literal
+       byte  is  recorded only if it follows something of variable length. For
        example, for the pattern /^a\d+z\d+/ the returned value is "z", but for
        /^a\dz\d/ the returned value is -1.
 
@@ -1677,34 +1688,34 @@ INFORMATION ABOUT A PATTERN
          PCRE_INFO_NAMEENTRYSIZE
          PCRE_INFO_NAMETABLE
 
-       PCRE supports the use of named as well as numbered capturing  parenthe-
-       ses.  The names are just an additional way of identifying the parenthe-
+       PCRE  supports the use of named as well as numbered capturing parenthe-
+       ses. The names are just an additional way of identifying the  parenthe-
        ses, which still acquire numbers. Several convenience functions such as
-       pcre_get_named_substring()  are  provided  for extracting captured sub-
-       strings by name. It is also possible to extract the data  directly,  by
-       first  converting  the  name to a number in order to access the correct
+       pcre_get_named_substring() are provided for  extracting  captured  sub-
+       strings  by  name. It is also possible to extract the data directly, by
+       first converting the name to a number in order to  access  the  correct
        pointers in the output vector (described with pcre_exec() below). To do
-       the  conversion,  you  need  to  use  the  name-to-number map, which is
+       the conversion, you need  to  use  the  name-to-number  map,  which  is
        described by these three values.
 
        The map consists of a number of fixed-size entries. PCRE_INFO_NAMECOUNT
        gives the number of entries, and PCRE_INFO_NAMEENTRYSIZE gives the size
-       of each entry; both of these  return  an  int  value.  The  entry  size
-       depends  on the length of the longest name. PCRE_INFO_NAMETABLE returns
-       a pointer to the first entry of the table  (a  pointer  to  char).  The
+       of  each  entry;  both  of  these  return  an int value. The entry size
+       depends on the length of the longest name. PCRE_INFO_NAMETABLE  returns
+       a  pointer  to  the  first  entry of the table (a pointer to char). The
        first two bytes of each entry are the number of the capturing parenthe-
-       sis, most significant byte first. The rest of the entry is  the  corre-
-       sponding  name,  zero  terminated. The names are in alphabetical order.
+       sis,  most  significant byte first. The rest of the entry is the corre-
+       sponding name, zero terminated. The names are  in  alphabetical  order.
        When PCRE_DUPNAMES is set, duplicate names are in order of their paren-
-       theses  numbers.  For  example,  consider the following pattern (assume
-       PCRE_EXTENDED is  set,  so  white  space  -  including  newlines  -  is
+       theses numbers. For example, consider  the  following  pattern  (assume
+       PCRE_EXTENDED  is  set,  so  white  space  -  including  newlines  - is
        ignored):
 
          (?<date> (?<year>(\d\d)?\d\d) -
          (?<month>\d\d) - (?<day>\d\d) )
 
-       There  are  four  named subpatterns, so the table has four entries, and
-       each entry in the table is eight bytes long. The table is  as  follows,
+       There are four named subpatterns, so the table has  four  entries,  and
+       each  entry  in the table is eight bytes long. The table is as follows,
        with non-printing bytes shows in hexadecimal, and undefined bytes shown
        as ??:
 
@@ -1713,17 +1724,18 @@ INFORMATION ABOUT A PATTERN
          00 04 m  o  n  t  h  00
          00 02 y  e  a  r  00 ??
 
-       When writing code to extract data  from  named  subpatterns  using  the
-       name-to-number  map,  remember that the length of the entries is likely
+       When  writing  code  to  extract  data from named subpatterns using the
+       name-to-number map, remember that the length of the entries  is  likely
        to be different for each compiled pattern.
 
          PCRE_INFO_OKPARTIAL
 
-       Return 1 if the pattern can be used for partial matching, otherwise  0.
-       The fourth argument should point to an int variable. From release 8.00,
-       this always returns 1, because the restrictions that previously applied
-       to  partial  matching  have  been lifted. The pcrepartial documentation
-       gives details of partial matching.
+       Return  1  if  the  pattern  can  be  used  for  partial  matching with
+       pcre_exec(), otherwise 0. The fourth argument should point  to  an  int
+       variable.  From  release  8.00,  this  always  returns  1,  because the
+       restrictions that previously applied  to  partial  matching  have  been
+       lifted.  The  pcrepartial documentation gives details of partial match-
+       ing.
 
          PCRE_INFO_OPTIONS
 
@@ -1909,8 +1921,8 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
        PCRE_EXTRA_MATCH_LIMIT_RECURSION is set in  the  flags  field.  If  the
        limit is exceeded, pcre_exec() returns PCRE_ERROR_RECURSIONLIMIT.
 
-       The  pcre_callout  field is used in conjunction with the "callout" fea-
-       ture, which is described in the pcrecallout documentation.
+       The  callout_data  field is used in conjunction with the "callout" fea-
+       ture, and is described in the pcrecallout documentation.
 
        The tables field  is  used  to  pass  a  character  tables  pointer  to
        pcre_exec();  this overrides the value that is stored with the compiled
@@ -1927,22 +1939,23 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
 
        The  unused  bits of the options argument for pcre_exec() must be zero.
        The only bits that may  be  set  are  PCRE_ANCHORED,  PCRE_NEWLINE_xxx,
-       PCRE_NOTBOL,    PCRE_NOTEOL,   PCRE_NOTEMPTY,   PCRE_NO_START_OPTIMIZE,
-       PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and PCRE_PARTIAL_HARD.
+       PCRE_NOTBOL,    PCRE_NOTEOL,    PCRE_NOTEMPTY,   PCRE_NOTEMPTY_ATSTART,
+       PCRE_NO_START_OPTIMIZE,  PCRE_NO_UTF8_CHECK,   PCRE_PARTIAL_SOFT,   and
+       PCRE_PARTIAL_HARD.
 
          PCRE_ANCHORED
 
-       The PCRE_ANCHORED option limits pcre_exec() to matching  at  the  first
-       matching  position.  If  a  pattern was compiled with PCRE_ANCHORED, or
-       turned out to be anchored by virtue of its contents, it cannot be  made
+       The  PCRE_ANCHORED  option  limits pcre_exec() to matching at the first
+       matching position. If a pattern was  compiled  with  PCRE_ANCHORED,  or
+       turned  out to be anchored by virtue of its contents, it cannot be made
        unachored at matching time.
 
          PCRE_BSR_ANYCRLF
          PCRE_BSR_UNICODE
 
        These options (which are mutually exclusive) control what the \R escape
-       sequence matches. The choice is either to match only CR, LF,  or  CRLF,
-       or  to  match  any Unicode newline sequence. These options override the
+       sequence  matches.  The choice is either to match only CR, LF, or CRLF,
+       or to match any Unicode newline sequence. These  options  override  the
        choice that was made or defaulted when the pattern was compiled.
 
          PCRE_NEWLINE_CR
@@ -1951,76 +1964,83 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
          PCRE_NEWLINE_ANYCRLF
          PCRE_NEWLINE_ANY
 
-       These options override  the  newline  definition  that  was  chosen  or
-       defaulted  when the pattern was compiled. For details, see the descrip-
-       tion of pcre_compile()  above.  During  matching,  the  newline  choice
-       affects  the  behaviour  of the dot, circumflex, and dollar metacharac-
-       ters. It may also alter the way the match position is advanced after  a
+       These  options  override  the  newline  definition  that  was chosen or
+       defaulted when the pattern was compiled. For details, see the  descrip-
+       tion  of  pcre_compile()  above.  During  matching,  the newline choice
+       affects the behaviour of the dot, circumflex,  and  dollar  metacharac-
+       ters.  It may also alter the way the match position is advanced after a
        match failure for an unanchored pattern.
 
-       When  PCRE_NEWLINE_CRLF,  PCRE_NEWLINE_ANYCRLF,  or PCRE_NEWLINE_ANY is
-       set, and a match attempt for an unanchored pattern fails when the  cur-
-       rent  position  is  at  a  CRLF  sequence,  and the pattern contains no
-       explicit matches for  CR  or  LF  characters,  the  match  position  is
+       When PCRE_NEWLINE_CRLF, PCRE_NEWLINE_ANYCRLF,  or  PCRE_NEWLINE_ANY  is
+       set,  and a match attempt for an unanchored pattern fails when the cur-
+       rent position is at a  CRLF  sequence,  and  the  pattern  contains  no
+       explicit  matches  for  CR  or  LF  characters,  the  match position is
        advanced by two characters instead of one, in other words, to after the
        CRLF.
 
        The above rule is a compromise that makes the most common cases work as
-       expected.  For  example,  if  the  pattern  is .+A (and the PCRE_DOTALL
+       expected. For example, if the  pattern  is  .+A  (and  the  PCRE_DOTALL
        option is not set), it does not match the string "\r\nA" because, after
-       failing  at the start, it skips both the CR and the LF before retrying.
-       However, the pattern [\r\n]A does match that string,  because  it  con-
+       failing at the start, it skips both the CR and the LF before  retrying.
+       However,  the  pattern  [\r\n]A does match that string, because it con-
        tains an explicit CR or LF reference, and so advances only by one char-
        acter after the first failure.
 
        An explicit match for CR of LF is either a literal appearance of one of
-       those  characters,  or  one  of the \r or \n escape sequences. Implicit
-       matches such as [^X] do not count, nor does \s (which includes  CR  and
+       those characters, or one of the \r or  \n  escape  sequences.  Implicit
+       matches  such  as [^X] do not count, nor does \s (which includes CR and
        LF in the characters that it matches).
 
-       Notwithstanding  the above, anomalous effects may still occur when CRLF
+       Notwithstanding the above, anomalous effects may still occur when  CRLF
        is a valid newline sequence and explicit \r or \n escapes appear in the
        pattern.
 
          PCRE_NOTBOL
 
        This option specifies that first character of the subject string is not
-       the beginning of a line, so the  circumflex  metacharacter  should  not
-       match  before it. Setting this without PCRE_MULTILINE (at compile time)
-       causes circumflex never to match. This option affects only  the  behav-
+       the  beginning  of  a  line, so the circumflex metacharacter should not
+       match before it. Setting this without PCRE_MULTILINE (at compile  time)
+       causes  circumflex  never to match. This option affects only the behav-
        iour of the circumflex metacharacter. It does not affect \A.
 
          PCRE_NOTEOL
 
        This option specifies that the end of the subject string is not the end
-       of a line, so the dollar metacharacter should not match it nor  (except
-       in  multiline mode) a newline immediately before it. Setting this with-
+       of  a line, so the dollar metacharacter should not match it nor (except
+       in multiline mode) a newline immediately before it. Setting this  with-
        out PCRE_MULTILINE (at compile time) causes dollar never to match. This
-       option  affects only the behaviour of the dollar metacharacter. It does
+       option affects only the behaviour of the dollar metacharacter. It  does
        not affect \Z or \z.
 
          PCRE_NOTEMPTY
 
        An empty string is not considered to be a valid match if this option is
-       set.  If  there are alternatives in the pattern, they are tried. If all
-       the alternatives match the empty string, the entire  match  fails.  For
+       set. If there are alternatives in the pattern, they are tried.  If  all
+       the  alternatives  match  the empty string, the entire match fails. For
        example, if the pattern
 
          a?b?
 
-       is  applied  to  a string not beginning with "a" or "b", it matches the
-       empty string at the start of the subject. With PCRE_NOTEMPTY set,  this
+       is applied to a string not beginning with "a" or  "b",  it  matches  an
+       empty  string at the start of the subject. With PCRE_NOTEMPTY set, this
        match is not valid, so PCRE searches further into the string for occur-
        rences of "a" or "b".
 
-       Perl has no direct equivalent of PCRE_NOTEMPTY, but it does make a spe-
-       cial  case  of  a  pattern match of the empty string within its split()
-       function, and when using the /g modifier. It  is  possible  to  emulate
-       Perl's behaviour after matching a null string by first trying the match
-       again at the same offset with PCRE_NOTEMPTY and PCRE_ANCHORED, and then
-       if  that  fails by advancing the starting offset (see below) and trying
-       an ordinary match again. There is some code that demonstrates how to do
-       this in the pcredemo sample program.
+         PCRE_NOTEMPTY_ATSTART
+
+       This  is  like PCRE_NOTEMPTY, except that an empty string match that is
+       not at the start of  the  subject  is  permitted.  If  the  pattern  is
+       anchored, such a match can occur only if the pattern contains \K.
+
+       Perl     has    no    direct    equivalent    of    PCRE_NOTEMPTY    or
+       PCRE_NOTEMPTY_ATSTART, but it does make a special  case  of  a  pattern
+       match  of  the empty string within its split() function, and when using
+       the /g modifier. It is  possible  to  emulate  Perl's  behaviour  after
+       matching a null string by first trying the match again at the same off-
+       set with PCRE_NOTEMPTY_ATSTART and  PCRE_ANCHORED,  and  then  if  that
+       fails, by advancing the starting offset (see below) and trying an ordi-
+       nary match again. There is some code that demonstrates how to  do  this
+       in the pcredemo sample program.
 
          PCRE_NO_START_OPTIMIZE
 
@@ -2066,9 +2086,9 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
        returns  PCRE_ERROR_PARTIAL.  Otherwise,  if  PCRE_PARTIAL_SOFT is set,
        matching continues by testing any other alternatives. Only if they  all
        fail  is  PCRE_ERROR_PARTIAL  returned (instead of PCRE_ERROR_NOMATCH).
-       The portion of the string that provided the partial match is set as the
-       first  matching  string.  There  is  a  more detailed discussion in the
-       pcrepartial documentation.
+       The portion of the string that was inspected when the partial match was
+       found  is  set  as  the first matching string. There is a more detailed
+       discussion in the pcrepartial documentation.
 
    The string to be matched by pcre_exec()
 
@@ -2484,19 +2504,20 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
        characteristics to the normal algorithm, and  is  not  compatible  with
        Perl.  Some  of the features of PCRE patterns are not supported. Never-
        theless, there are times when this kind of matching can be useful.  For
-       a discussion of the two matching algorithms, see the pcrematching docu-
-       mentation.
+       a  discussion  of  the  two matching algorithms, and a list of features
+       that pcre_dfa_exec() does not support, see the pcrematching  documenta-
+       tion.
 
-       The arguments for the pcre_dfa_exec() function  are  the  same  as  for
+       The  arguments  for  the  pcre_dfa_exec()  function are the same as for
        pcre_exec(), plus two extras. The ovector argument is used in a differ-
-       ent way, and this is described below. The other  common  arguments  are
-       used  in  the  same way as for pcre_exec(), so their description is not
+       ent  way,  and  this is described below. The other common arguments are
+       used in the same way as for pcre_exec(), so their  description  is  not
        repeated here.
 
-       The two additional arguments provide workspace for  the  function.  The
-       workspace  vector  should  contain at least 20 elements. It is used for
+       The  two  additional  arguments provide workspace for the function. The
+       workspace vector should contain at least 20 elements. It  is  used  for
        keeping  track  of  multiple  paths  through  the  pattern  tree.  More
-       workspace  will  be  needed for patterns and subjects where there are a
+       workspace will be needed for patterns and subjects where  there  are  a
        lot of potential matches.
 
        Here is an example of a simple call to pcre_dfa_exec():
@@ -2518,12 +2539,13 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
    Option bits for pcre_dfa_exec()
 
-       The unused bits of the options argument  for  pcre_dfa_exec()  must  be
-       zero.  The  only  bits  that  may  be  set are PCRE_ANCHORED, PCRE_NEW-
-       LINE_xxx, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY,  PCRE_NO_UTF8_CHECK,
-       PCRE_PARTIAL_HARD,     PCRE_PARTIAL_SOFT,     PCRE_DFA_SHORTEST,    and
-       PCRE_DFA_RESTART. All but the last four of these are exactly  the  same
-       as for pcre_exec(), so their description is not repeated here.
+       The  unused  bits  of  the options argument for pcre_dfa_exec() must be
+       zero. The only bits  that  may  be  set  are  PCRE_ANCHORED,  PCRE_NEW-
+       LINE_xxx,        PCRE_NOTBOL,        PCRE_NOTEOL,        PCRE_NOTEMPTY,
+       PCRE_NOTEMPTY_ATSTART, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, PCRE_PAR-
+       TIAL_SOFT,  PCRE_DFA_SHORTEST,  and  PCRE_DFA_RESTART. All but the last
+       four of these are  exactly  the  same  as  for  pcre_exec(),  so  their
+       description is not repeated here.
 
          PCRE_PARTIAL_HARD
          PCRE_PARTIAL_SOFT
@@ -2537,8 +2559,8 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
        code PCRE_ERROR_NOMATCH is converted into PCRE_ERROR_PARTIAL if the end
        of the subject is reached, there have been  no  complete  matches,  but
        there  is  still  at least one matching possibility. The portion of the
-       string that provided the longest partial match  is  set  as  the  first
-       matching string in both cases.
+       string that was inspected when the longest partial match was  found  is
+       set as the first matching string in both cases.
 
          PCRE_DFA_SHORTEST
 
@@ -2644,7 +2666,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 September 2009
+       Last updated: 11 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -2869,7 +2891,11 @@ DIFFERENCES BETWEEN PCRE AND PERL
        is  built  with Unicode character property support. The properties that
        can be tested with \p and \P are limited to the general category  prop-
        erties  such  as  Lu and Nd, script names such as Greek or Han, and the
-       derived properties Any and L&.
+       derived properties Any and L&. PCRE does  support  the  Cs  (surrogate)
+       property,  which  Perl  does  not; the Perl documentation says "Because
+       Perl hides the need for the user to understand the internal representa-
+       tion  of Unicode characters, there is no need to implement the somewhat
+       messy concept of surrogates."
 
        7. PCRE does support the \Q...\E escape for quoting substrings. Charac-
        ters  in  between  are  treated as literals. This is slightly different
@@ -2889,13 +2915,15 @@ DIFFERENCES BETWEEN PCRE AND PERL
 
        8. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
        constructions. However, there is support for recursive  patterns.  This
-       is  not available in Perl 5.8, but will be in Perl 5.10. Also, the PCRE
+       is  not  available  in Perl 5.8, but it is in Perl 5.10. Also, the PCRE
        "callout" feature allows an external function to be called during  pat-
        tern matching. See the pcrecallout documentation for details.
 
        9.  Subpatterns  that  are  called  recursively or as "subroutines" are
        always treated as atomic groups in  PCRE.  This  is  like  Python,  but
-       unlike Perl.
+       unlike  Perl. There is a discussion of an example that explains this in
+       more detail in the section on recursion differences from  Perl  in  the
+       pcrecompat page.
 
        10.  There are some differences that are concerned with the settings of
        captured strings when part of  a  pattern  is  repeated.  For  example,
@@ -2904,9 +2932,7 @@ DIFFERENCES BETWEEN PCRE AND PERL
 
        11.  PCRE  does  support  Perl  5.10's  backtracking  verbs  (*ACCEPT),
        (*FAIL),  (*F),  (*COMMIT), (*PRUNE), (*SKIP), and (*THEN), but only in
-       the forms without an  argument.  PCRE  does  not  support  (*MARK).  If
-       (*ACCEPT)  is within capturing parentheses, PCRE does not set that cap-
-       ture group; this is different to Perl.
+       the forms without an argument. PCRE does not support (*MARK).
 
        12. PCRE provides some extensions to the Perl regular expression facil-
        ities.   Perl  5.10  will  include new features that are not in earlier
@@ -2931,10 +2957,11 @@ DIFFERENCES BETWEEN PCRE AND PERL
        (e) PCRE_ANCHORED can be used at matching time to force a pattern to be
        tried only at the first matching position in the subject string.
 
-       (f)  The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NO_AUTO_CAP-
-       TURE options for pcre_exec() have no Perl equivalents.
+       (f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
+       and PCRE_NO_AUTO_CAPTURE options for pcre_exec() have no  Perl  equiva-
+       lents.
 
-       (g) The \R escape sequence can be restricted to match only CR,  LF,  or
+       (g)  The  \R escape sequence can be restricted to match only CR, LF, or
        CRLF by the PCRE_BSR_ANYCRLF option.
 
        (h) The callout facility is PCRE-specific.
@@ -2944,10 +2971,10 @@ DIFFERENCES BETWEEN PCRE AND PERL
        (j) Patterns compiled by PCRE can be saved and re-used at a later time,
        even on different hosts that have the other endianness.
 
-       (k) The alternative matching function (pcre_dfa_exec())  matches  in  a
+       (k)  The  alternative  matching function (pcre_dfa_exec()) matches in a
        different way and is not Perl-compatible.
 
-       (l)  PCRE  recognizes some special sequences such as (*CR) at the start
+       (l) PCRE recognizes some special sequences such as (*CR) at  the  start
        of a pattern that set overall options that cannot be changed within the
        pattern.
 
@@ -2961,7 +2988,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 25 August 2009
+       Last updated: 18 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -3480,9 +3507,9 @@ BACKSLASH
        U+D800 to U+DFFF. Such characters are not valid in UTF-8  strings  (see
        RFC 3629) and so cannot be tested by PCRE, unless UTF-8 validity check-
        ing has been turned off (see the discussion  of  PCRE_NO_UTF8_CHECK  in
-       the pcreapi page).
+       the pcreapi page). Perl does not support the Cs property.
 
-       The  long  synonyms  for  these  properties that Perl supports (such as
+       The  long  synonyms  for  property  names  that  Perl supports (such as
        \p{Letter}) are not supported by PCRE, nor is it  permitted  to  prefix
        any of these properties with "Is".
 
@@ -4707,8 +4734,8 @@ RECURSIVE PATTERNS
        Obviously, PCRE cannot support the interpolation of Perl code. Instead,
        it  supports  special  syntax  for recursion of the entire pattern, and
        also for individual subpattern recursion.  After  its  introduction  in
-       PCRE  and  Python,  this  kind of recursion was introduced into Perl at
-       release 5.10.
+       PCRE  and  Python,  this  kind of recursion was subsequently introduced
+       into Perl at release 5.10.
 
        A special item that consists of (? followed by a  number  greater  than
        zero and a closing parenthesis is a recursive call of the subpattern of
@@ -4717,105 +4744,166 @@ RECURSIVE PATTERNS
        tion.) The special item (?R) or (?0) is a recursive call of the  entire
        regular expression.
 
-       In  PCRE (like Python, but unlike Perl), a recursive subpattern call is
-       always treated as an atomic group. That is, once it has matched some of
-       the subject string, it is never re-entered, even if it contains untried
-       alternatives and there is a subsequent matching failure.
-
-       This PCRE pattern solves the nested  parentheses  problem  (assume  the
+       This  PCRE  pattern  solves  the nested parentheses problem (assume the
        PCRE_EXTENDED option is set so that white space is ignored):
 
          \( ( (?>[^()]+) | (?R) )* \)
 
-       First  it matches an opening parenthesis. Then it matches any number of
-       substrings which can either be a  sequence  of  non-parentheses,  or  a
-       recursive  match  of the pattern itself (that is, a correctly parenthe-
+       First it matches an opening parenthesis. Then it matches any number  of
+       substrings  which  can  either  be  a sequence of non-parentheses, or a
+       recursive match of the pattern itself (that is, a  correctly  parenthe-
        sized substring).  Finally there is a closing parenthesis.
 
-       If this were part of a larger pattern, you would not  want  to  recurse
+       If  this  were  part of a larger pattern, you would not want to recurse
        the entire pattern, so instead you could use this:
 
          ( \( ( (?>[^()]+) | (?1) )* \) )
 
-       We  have  put the pattern into parentheses, and caused the recursion to
+       We have put the pattern into parentheses, and caused the  recursion  to
        refer to them instead of the whole pattern.
 
-       In a larger pattern,  keeping  track  of  parenthesis  numbers  can  be
-       tricky.  This is made easier by the use of relative references. (A Perl
-       5.10 feature.)  Instead of (?1) in the  pattern  above  you  can  write
+       In  a  larger  pattern,  keeping  track  of  parenthesis numbers can be
+       tricky. This is made easier by the use of relative references. (A  Perl
+       5.10  feature.)   Instead  of  (?1)  in the pattern above you can write
        (?-2) to refer to the second most recently opened parentheses preceding
-       the recursion. In other  words,  a  negative  number  counts  capturing
+       the  recursion.  In  other  words,  a  negative number counts capturing
        parentheses leftwards from the point at which it is encountered.
 
-       It  is  also  possible  to refer to subsequently opened parentheses, by
-       writing references such as (?+2). However, these  cannot  be  recursive
-       because  the  reference  is  not inside the parentheses that are refer-
-       enced. They are always "subroutine" calls, as  described  in  the  next
+       It is also possible to refer to  subsequently  opened  parentheses,  by
+       writing  references  such  as (?+2). However, these cannot be recursive
+       because the reference is not inside the  parentheses  that  are  refer-
+       enced.  They  are  always  "subroutine" calls, as described in the next
        section.
 
-       An  alternative  approach is to use named parentheses instead. The Perl
-       syntax for this is (?&name); PCRE's earlier syntax  (?P>name)  is  also
+       An alternative approach is to use named parentheses instead.  The  Perl
+       syntax  for  this  is (?&name); PCRE's earlier syntax (?P>name) is also
        supported. We could rewrite the above example as follows:
 
          (?<pn> \( ( (?>[^()]+) | (?&pn) )* \) )
 
-       If  there  is more than one subpattern with the same name, the earliest
+       If there is more than one subpattern with the same name,  the  earliest
        one is used.
 
-       This particular example pattern that we have been looking  at  contains
-       nested  unlimited repeats, and so the use of atomic grouping for match-
-       ing strings of non-parentheses is important when applying  the  pattern
+       This  particular  example pattern that we have been looking at contains
+       nested unlimited repeats, and so the use of atomic grouping for  match-
+       ing  strings  of non-parentheses is important when applying the pattern
        to strings that do not match. For example, when this pattern is applied
        to
 
          (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()
 
-       it yields "no match" quickly. However, if atomic grouping is not  used,
-       the  match  runs  for a very long time indeed because there are so many
-       different ways the + and * repeats can carve up the  subject,  and  all
+       it  yields "no match" quickly. However, if atomic grouping is not used,
+       the match runs for a very long time indeed because there  are  so  many
+       different  ways  the  + and * repeats can carve up the subject, and all
        have to be tested before failure can be reported.
 
        At the end of a match, the values set for any capturing subpatterns are
        those from the outermost level of the recursion at which the subpattern
-       value  is  set.   If  you want to obtain intermediate values, a callout
-       function can be used (see below and the pcrecallout documentation).  If
+       value is set.  If you want to obtain  intermediate  values,  a  callout
+       function  can be used (see below and the pcrecallout documentation). If
        the pattern above is matched against
 
          (ab(cd)ef)
 
-       the  value  for  the  capturing  parentheses is "ef", which is the last
-       value taken on at the top level. If additional parentheses  are  added,
+       the value for the capturing parentheses is  "ef",  which  is  the  last
+       value  taken  on at the top level. If additional parentheses are added,
        giving
 
          \( ( ( (?>[^()]+) | (?R) )* ) \)
             ^                        ^
             ^                        ^
 
-       the  string  they  capture is "ab(cd)ef", the contents of the top level
-       parentheses. If there are more than 15 capturing parentheses in a  pat-
+       the string they capture is "ab(cd)ef", the contents of  the  top  level
+       parentheses.  If there are more than 15 capturing parentheses in a pat-
        tern, PCRE has to obtain extra memory to store data during a recursion,
-       which it does by using pcre_malloc, freeing  it  via  pcre_free  after-
-       wards.  If  no  memory  can  be  obtained,  the  match  fails  with the
+       which  it  does  by  using pcre_malloc, freeing it via pcre_free after-
+       wards. If  no  memory  can  be  obtained,  the  match  fails  with  the
        PCRE_ERROR_NOMEMORY error.
 
-       Do not confuse the (?R) item with the condition (R),  which  tests  for
-       recursion.   Consider  this pattern, which matches text in angle brack-
-       ets, allowing for arbitrary nesting. Only digits are allowed in  nested
-       brackets  (that is, when recursing), whereas any characters are permit-
+       Do  not  confuse  the (?R) item with the condition (R), which tests for
+       recursion.  Consider this pattern, which matches text in  angle  brack-
+       ets,  allowing for arbitrary nesting. Only digits are allowed in nested
+       brackets (that is, when recursing), whereas any characters are  permit-
        ted at the outer level.
 
          < (?: (?(R) \d++  | [^<>]*+) | (?R)) * >
 
-       In this pattern, (?(R) is the start of a conditional  subpattern,  with
-       two  different  alternatives for the recursive and non-recursive cases.
+       In  this  pattern, (?(R) is the start of a conditional subpattern, with
+       two different alternatives for the recursive and  non-recursive  cases.
        The (?R) item is the actual recursive call.
+
+   Recursion difference from Perl
+
+       In  PCRE (like Python, but unlike Perl), a recursive subpattern call is
+       always treated as an atomic group. That is, once it has matched some of
+       the subject string, it is never re-entered, even if it contains untried
+       alternatives and there is a subsequent matching failure.  This  can  be
+       illustrated  by the following pattern, which purports to match a palin-
+       dromic string that contains an odd number of characters  (for  example,
+       "a", "aba", "abcba", "abcdcba"):
+
+         ^(.|(.)(?1)\2)$
+
+       The idea is that it either matches a single character, or two identical
+       characters surrounding a sub-palindrome. In Perl, this  pattern  works;
+       in  PCRE  it  does  not if the pattern is longer than three characters.
+       Consider the subject string "abcba":
+
+       At the top level, the first character is matched, but as it is  not  at
+       the end of the string, the first alternative fails; the second alterna-
+       tive is taken and the recursion kicks in. The recursive call to subpat-
+       tern  1  successfully  matches the next character ("b"). (Note that the
+       beginning and end of line tests are not part of the recursion).
+
+       Back at the top level, the next character ("c") is compared  with  what
+       subpattern  2 matched, which was "a". This fails. Because the recursion
+       is treated as an atomic group, there are now  no  backtracking  points,
+       and  so  the  entire  match fails. (Perl is able, at this point, to re-
+       enter the recursion and try the second alternative.)  However,  if  the
+       pattern is written with the alternatives in the other order, things are
+       different:
+
+         ^((.)(?1)\2|.)$
+
+       This time, the recursing alternative is tried first, and  continues  to
+       recurse  until  it runs out of characters, at which point the recursion
+       fails. But this time we do have  another  alternative  to  try  at  the
+       higher  level.  That  is  the  big difference: in the previous case the
+       remaining alternative is at a deeper recursion level, which PCRE cannot
+       use.
+
+       To change the pattern so that matches all palindromic strings, not just
+       those with an odd number of characters, it is tempting  to  change  the
+       pattern to this:
+
+         ^((.)(?1)\2|.?)$
+
+       Again,  this  works  in Perl, but not in PCRE, and for the same reason.
+       When a deeper recursion has matched a single character,  it  cannot  be
+       entered  again  in  order  to match an empty string. The solution is to
+       separate the two cases, and write out the odd and even cases as  alter-
+       natives at the higher level:
+
+         ^(?:((.)(?1)\2|)|((.)(?3)\4|.))
+
+       If  you  want  to match typical palindromic phrases, the pattern has to
+       ignore all non-word characters, which can be done like this:
+
+         ^\W*+(?:((.)\W*+(?1)\W*+\2|)|((.)\W*+(?3)\W*+4|\W*+.\W*+))\W*+$
+
+       If run with the PCRE_CASELESS option, this pattern matches phrases such
+       as "A man, a plan, a canal: Panama!" and it works well in both PCRE and
+       Perl. Note the use of the possessive quantifier *+ to avoid  backtrack-
+       ing  into  sequences of non-word characters. Without this, PCRE takes a
+       great deal longer (ten times or more) to  match  typical  phrases,  and
+       Perl takes so long that you think it has gone into a loop.
 
 
 SUBPATTERNS AS SUBROUTINES
 
        If the syntax for a recursive subpattern reference (either by number or
-       by  name)  is used outside the parentheses to which it refers, it oper-
-       ates like a subroutine in a programming language. The "called"  subpat-
+       by name) is used outside the parentheses to which it refers,  it  oper-
+       ates  like a subroutine in a programming language. The "called" subpat-
        tern may be defined before or after the reference. A numbered reference
        can be absolute or relative, as in these examples:
 
@@ -4827,100 +4915,105 @@ SUBPATTERNS AS SUBROUTINES
 
          (sens|respons)e and \1ibility
 
-       matches "sense and sensibility" and "response and responsibility",  but
+       matches  "sense and sensibility" and "response and responsibility", but
        not "sense and responsibility". If instead the pattern
 
          (sens|respons)e and (?1)ibility
 
-       is  used, it does match "sense and responsibility" as well as the other
-       two strings. Another example is  given  in  the  discussion  of  DEFINE
+       is used, it does match "sense and responsibility" as well as the  other
+       two  strings.  Another  example  is  given  in the discussion of DEFINE
        above.
 
        Like recursive subpatterns, a "subroutine" call is always treated as an
-       atomic group. That is, once it has matched some of the subject  string,
-       it  is  never  re-entered, even if it contains untried alternatives and
+       atomic  group. That is, once it has matched some of the subject string,
+       it is never re-entered, even if it contains  untried  alternatives  and
        there is a subsequent matching failure.
 
-       When a subpattern is used as a subroutine, processing options  such  as
+       When  a  subpattern is used as a subroutine, processing options such as
        case-independence are fixed when the subpattern is defined. They cannot
        be changed for different calls. For example, consider this pattern:
 
          (abc)(?i:(?-1))
 
-       It matches "abcabc". It does not match "abcABC" because the  change  of
+       It  matches  "abcabc". It does not match "abcABC" because the change of
        processing option does not affect the called subpattern.
 
 
 ONIGURUMA SUBROUTINE SYNTAX
 
-       For  compatibility with Oniguruma, the non-Perl syntax \g followed by a
+       For compatibility with Oniguruma, the non-Perl syntax \g followed by  a
        name or a number enclosed either in angle brackets or single quotes, is
-       an  alternative  syntax  for  referencing a subpattern as a subroutine,
-       possibly recursively. Here are two of the examples used above,  rewrit-
+       an alternative syntax for referencing a  subpattern  as  a  subroutine,
+       possibly  recursively. Here are two of the examples used above, rewrit-
        ten using this syntax:
 
          (?<pn> \( ( (?>[^()]+) | \g<pn> )* \) )
          (sens|respons)e and \g'1'ibility
 
-       PCRE  supports  an extension to Oniguruma: if a number is preceded by a
+       PCRE supports an extension to Oniguruma: if a number is preceded  by  a
        plus or a minus sign it is taken as a relative reference. For example:
 
          (abc)(?i:\g<-1>)
 
-       Note that \g{...} (Perl syntax) and \g<...> (Oniguruma syntax) are  not
-       synonymous.  The former is a back reference; the latter is a subroutine
+       Note  that \g{...} (Perl syntax) and \g<...> (Oniguruma syntax) are not
+       synonymous. The former is a back reference; the latter is a  subroutine
        call.
 
 
 CALLOUTS
 
        Perl has a feature whereby using the sequence (?{...}) causes arbitrary
-       Perl  code to be obeyed in the middle of matching a regular expression.
+       Perl code to be obeyed in the middle of matching a regular  expression.
        This makes it possible, amongst other things, to extract different sub-
        strings that match the same pair of parentheses when there is a repeti-
        tion.
 
        PCRE provides a similar feature, but of course it cannot obey arbitrary
        Perl code. The feature is called "callout". The caller of PCRE provides
-       an external function by putting its entry point in the global  variable
-       pcre_callout.   By default, this variable contains NULL, which disables
+       an  external function by putting its entry point in the global variable
+       pcre_callout.  By default, this variable contains NULL, which  disables
        all calling out.
 
-       Within a regular expression, (?C) indicates the  points  at  which  the
-       external  function  is  to be called. If you want to identify different
-       callout points, you can put a number less than 256 after the letter  C.
-       The  default  value is zero.  For example, this pattern has two callout
+       Within  a  regular  expression,  (?C) indicates the points at which the
+       external function is to be called. If you want  to  identify  different
+       callout  points, you can put a number less than 256 after the letter C.
+       The default value is zero.  For example, this pattern has  two  callout
        points:
 
          (?C1)abc(?C2)def
 
        If the PCRE_AUTO_CALLOUT flag is passed to pcre_compile(), callouts are
-       automatically  installed  before each item in the pattern. They are all
+       automatically installed before each item in the pattern. They  are  all
        numbered 255.
 
        During matching, when PCRE reaches a callout point (and pcre_callout is
-       set),  the  external function is called. It is provided with the number
-       of the callout, the position in the pattern, and, optionally, one  item
-       of  data  originally supplied by the caller of pcre_exec(). The callout
-       function may cause matching to proceed, to backtrack, or to fail  alto-
+       set), the external function is called. It is provided with  the  number
+       of  the callout, the position in the pattern, and, optionally, one item
+       of data originally supplied by the caller of pcre_exec().  The  callout
+       function  may cause matching to proceed, to backtrack, or to fail alto-
        gether. A complete description of the interface to the callout function
        is given in the pcrecallout documentation.
 
 
 BACKTRACKING CONTROL
 
-       Perl 5.10 introduced a number of "Special Backtracking Control  Verbs",
+       Perl  5.10 introduced a number of "Special Backtracking Control Verbs",
        which are described in the Perl documentation as "experimental and sub-
-       ject to change or removal in a future version of Perl". It goes  on  to
-       say:  "Their usage in production code should be noted to avoid problems
+       ject  to  change or removal in a future version of Perl". It goes on to
+       say: "Their usage in production code should be noted to avoid  problems
        during upgrades." The same remarks apply to the PCRE features described
        in this section.
 
-       Since  these  verbs  are  specifically related to backtracking, most of
-       them can be  used  only  when  the  pattern  is  to  be  matched  using
+       Since these verbs are specifically related  to  backtracking,  most  of
+       them  can  be  used  only  when  the  pattern  is  to  be matched using
        pcre_exec(), which uses a backtracking algorithm. With the exception of
        (*FAIL), which behaves like a failing negative assertion, they cause an
        error if encountered by pcre_dfa_exec().
+
+       If any of these verbs are used in an assertion subpattern, their effect
+       is  confined  to that subpattern; it does not extend to the surrounding
+       pattern.  Note that assertion subpatterns are processed as anchored  at
+       the point where they are tested.
 
        The  new verbs make use of what was previously invalid syntax: an open-
        ing parenthesis followed by an asterisk. In Perl, they are generally of
@@ -4936,14 +5029,14 @@ BACKTRACKING CONTROL
 
        This  verb causes the match to end successfully, skipping the remainder
        of the pattern. When inside a recursion, only the innermost pattern  is
-       ended  immediately.  PCRE  differs  from  Perl  in  what happens if the
-       (*ACCEPT) is inside capturing parentheses. In Perl, the data so far  is
-       captured: in PCRE no data is captured. For example:
+       ended  immediately.  If  the (*ACCEPT) is inside capturing parentheses,
+       the data so far is captured. (This feature was added to PCRE at release
+       8.00.) For example:
 
-         A(A|B(*ACCEPT)|C)D
+         A((?:A|B(*ACCEPT)|C)D)
 
-       This  matches  "AB", "AAD", or "ACD", but when it matches "AB", no data
-       is captured.
+       This  matches  "AB", "AAD", or "ACD"; when it matches "AB", "B" is cap-
+       tured by the outer parentheses.
 
          (*FAIL) or (*F)
 
@@ -5039,7 +5132,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 April 2009
+       Last updated: 18 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -5453,10 +5546,26 @@ PARTIAL MATCHING USING pcre_exec()
        If PCRE_PARTIAL_SOFT is set,  the  partial  match  is  remembered,  but
        matching continues as normal, and other alternatives in the pattern are
        tried.  If  no  complete  match  can  be  found,  pcre_exec()   returns
-       PCRE_ERROR_PARTIAL  instead  of PCRE_ERROR_NOMATCH, and if there are at
-       least two slots in the offsets vector, they are filled in with the off-
-       sets  of  the longest string that partially matched. Consider this pat-
-       tern:
+       PCRE_ERROR_PARTIAL instead of PCRE_ERROR_NOMATCH. If there are at least
+       two slots in the offsets vector, the first of them is set to the offset
+       of the earliest character that was inspected when the partial match was
+       found. For convenience, the second offset points  to  the  end  of  the
+       string so that a substring can easily be extracted.
+
+       For  the majority of patterns, the first offset identifies the start of
+       the partially matched string. However, for patterns that contain  look-
+       behind  assertions,  or  \K, or begin with \b or \B, earlier characters
+       have been inspected while carrying out the match. For example:
+
+         /(?<=abc)123/
+
+       This pattern matches "123", but only if it is preceded by "abc". If the
+       subject string is "xyzabc12", the offsets after a partial match are for
+       the substring "abc12", because  all  these  characters  are  needed  if
+       another match is tried with extra characters added.
+
+       If  there  is more than one partial match, the first one that was found
+       provides the data that is returned. Consider this pattern:
 
          /123\w+X|dogY/
 
@@ -5464,7 +5573,7 @@ PARTIAL MATCHING USING pcre_exec()
        natives  fail  to  match,  but the end of the subject is reached during
        matching,   so    PCRE_ERROR_PARTIAL    is    returned    instead    of
        PCRE_ERROR_NOMATCH.  The  offsets  are  set  to  3  and  9, identifying
-       "123dog" as the longest partial match that was found. (In this example,
+       "123dog" as the first partial match that was found. (In  this  example,
        there  are  two  partial  matches,  because  "dog" on its own partially
        matches the second alternative.)
 
@@ -5508,64 +5617,65 @@ PARTIAL MATCHING USING pcre_dfa_exec()
        there  have  been  no complete matches. Otherwise, the complete matches
        are returned.  However, if PCRE_PARTIAL_HARD is set,  a  partial  match
        takes  precedence  over any complete matches. The portion of the string
-       that provided the longest partial match is set as  the  first  matching
-       string, provided there are at least two slots in the offsets vector.
+       that was inspected when the longest partial match was found is  set  as
+       the first matching string, provided there are at least two slots in the
+       offsets vector.
 
-       Because  pcre_dfa_exec()  always searches for all possible matches, and
-       there is no difference between greedy and ungreedy repetition, its  be-
+       Because pcre_dfa_exec() always searches for all possible  matches,  and
+       there  is no difference between greedy and ungreedy repetition, its be-
        haviour is different from pcre_exec when PCRE_PARTIAL_HARD is set. Con-
-       sider the string "dog"  matched  against  the  ungreedy  pattern  shown
+       sider  the  string  "dog"  matched  against  the ungreedy pattern shown
        above:
 
          /dog(sbody)??/
 
-       Whereas  pcre_exec()  stops  as soon as it finds the complete match for
+       Whereas pcre_exec() stops as soon as it finds the  complete  match  for
        "dog", pcre_dfa_exec() also finds the partial match for "dogsbody", and
        so returns that when PCRE_PARTIAL_HARD is set.
 
 
 PARTIAL MATCHING AND WORD BOUNDARIES
 
-       If  a  pattern ends with one of sequences \w or \W, which test for word
-       boundaries, partial matching with PCRE_PARTIAL_SOFT can  give  counter-
+       If a pattern ends with one of sequences \w or \W, which test  for  word
+       boundaries,  partial  matching with PCRE_PARTIAL_SOFT can give counter-
        intuitive results. Consider this pattern:
 
          /\bcat\b/
 
        This matches "cat", provided there is a word boundary at either end. If
        the subject string is "the cat", the comparison of the final "t" with a
-       following  character  cannot  take  place, so a partial match is found.
-       However, pcre_exec() carries on with normal matching, which matches  \b
-       at  the  end  of  the subject when the last character is a letter, thus
+       following character cannot take place, so a  partial  match  is  found.
+       However,  pcre_exec() carries on with normal matching, which matches \b
+       at the end of the subject when the last character  is  a  letter,  thus
        finding a complete match. The result, therefore, is not PCRE_ERROR_PAR-
-       TIAL.  The  same  thing  happens  with pcre_dfa_exec(), because it also
+       TIAL. The same thing happens  with  pcre_dfa_exec(),  because  it  also
        finds the complete match.
 
-       Using PCRE_PARTIAL_HARD in this  case  does  yield  PCRE_ERROR_PARTIAL,
+       Using  PCRE_PARTIAL_HARD  in  this  case does yield PCRE_ERROR_PARTIAL,
        because then the partial match takes precedence.
 
 
 FORMERLY RESTRICTED PATTERNS
 
        For releases of PCRE prior to 8.00, because of the way certain internal
-       optimizations  were  implemented  in  the  pcre_exec()  function,   the
-       PCRE_PARTIAL  option  (predecessor  of  PCRE_PARTIAL_SOFT) could not be
-       used with all patterns. From release 8.00 onwards, the restrictions  no
-       longer  apply,  and  partial matching with pcre_exec() can be requested
+       optimizations   were  implemented  in  the  pcre_exec()  function,  the
+       PCRE_PARTIAL option (predecessor of  PCRE_PARTIAL_SOFT)  could  not  be
+       used  with all patterns. From release 8.00 onwards, the restrictions no
+       longer apply, and partial matching with pcre_exec()  can  be  requested
        for any pattern.
 
        Items that were formerly restricted were repeated single characters and
-       repeated  metasequences. If PCRE_PARTIAL was set for a pattern that did
-       not conform to the restrictions, pcre_exec() returned  the  error  code
-       PCRE_ERROR_BADPARTIAL  (-13).  This error code is no longer in use. The
-       PCRE_INFO_OKPARTIAL call to pcre_fullinfo() to find out if  a  compiled
+       repeated metasequences. If PCRE_PARTIAL was set for a pattern that  did
+       not  conform  to  the restrictions, pcre_exec() returned the error code
+       PCRE_ERROR_BADPARTIAL (-13). This error code is no longer in  use.  The
+       PCRE_INFO_OKPARTIAL  call  to pcre_fullinfo() to find out if a compiled
        pattern can be used for partial matching now always returns 1.
 
 
 EXAMPLE OF PARTIAL MATCHING USING PCRETEST
 
-       If  the  escape  sequence  \P  is  present in a pcretest data line, the
-       PCRE_PARTIAL_SOFT option is used for  the  match.  Here  is  a  run  of
+       If the escape sequence \P is present  in  a  pcretest  data  line,  the
+       PCRE_PARTIAL_SOFT  option  is  used  for  the  match.  Here is a run of
        pcretest that uses the date example quoted above:
 
            re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
@@ -5581,24 +5691,24 @@ EXAMPLE OF PARTIAL MATCHING USING PCRETEST
          data> j\P
          No match
 
-       The  first  data  string  is  matched completely, so pcretest shows the
-       matched substrings. The remaining four strings do not  match  the  com-
+       The first data string is matched  completely,  so  pcretest  shows  the
+       matched  substrings.  The  remaining four strings do not match the com-
        plete pattern, but the first two are partial matches. Similar output is
        obtained when pcre_dfa_exec() is used.
 
-       If the escape sequence \P is present more than once in a pcretest  data
+       If  the escape sequence \P is present more than once in a pcretest data
        line, the PCRE_PARTIAL_HARD option is set for the match.
 
 
 MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()
 
        When a partial match has been found using pcre_dfa_exec(), it is possi-
-       ble to continue the match by  providing  additional  subject  data  and
-       calling  pcre_dfa_exec()  again  with the same compiled regular expres-
-       sion, this time setting the PCRE_DFA_RESTART option. You must pass  the
+       ble  to  continue  the  match  by providing additional subject data and
+       calling pcre_dfa_exec() again with the same  compiled  regular  expres-
+       sion,  this time setting the PCRE_DFA_RESTART option. You must pass the
        same working space as before, because this is where details of the pre-
-       vious partial match are stored. Here  is  an  example  using  pcretest,
-       using  the  \R  escape  sequence to set the PCRE_DFA_RESTART option (\D
+       vious  partial  match  are  stored.  Here is an example using pcretest,
+       using the \R escape sequence to set  the  PCRE_DFA_RESTART  option  (\D
        specifies the use of pcre_dfa_exec()):
 
            re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
@@ -5607,26 +5717,26 @@ MULTI-SEGMENT MATCHING WITH pcre_dfa_exec()
          data> n05\R\D
           0: n05
 
-       The first call has "23ja" as the subject, and requests  partial  match-
-       ing;  the  second  call  has  "n05"  as  the  subject for the continued
-       (restarted) match.  Notice that when the match is  complete,  only  the
-       last  part  is  shown;  PCRE  does not retain the previously partially-
-       matched string. It is up to the calling program to do that if it  needs
+       The  first  call has "23ja" as the subject, and requests partial match-
+       ing; the second call  has  "n05"  as  the  subject  for  the  continued
+       (restarted)  match.   Notice  that when the match is complete, only the
+       last part is shown; PCRE does  not  retain  the  previously  partially-
+       matched  string. It is up to the calling program to do that if it needs
        to.
 
-       You  can  set  the  PCRE_PARTIAL_SOFT or PCRE_PARTIAL_HARD options with
-       PCRE_DFA_RESTART to continue partial matching over  multiple  segments.
-       This  facility  can  be  used  to  pass  very  long  subject strings to
+       You can set the PCRE_PARTIAL_SOFT  or  PCRE_PARTIAL_HARD  options  with
+       PCRE_DFA_RESTART  to  continue partial matching over multiple segments.
+       This facility can  be  used  to  pass  very  long  subject  strings  to
        pcre_dfa_exec().
 
 
 MULTI-SEGMENT MATCHING WITH pcre_exec()
 
-       From release 8.00, pcre_exec() can also be  used  to  do  multi-segment
-       matching.  Unlike  pcre_dfa_exec(),  it  is not possible to restart the
-       previous match with a new segment of data. Instead, new  data  must  be
-       added  to  the  previous  subject  string, and the entire match re-run,
-       starting from the point where the partial match occurred. Earlier  data
+       From  release  8.00,  pcre_exec()  can also be used to do multi-segment
+       matching. Unlike pcre_dfa_exec(), it is not  possible  to  restart  the
+       previous  match  with  a new segment of data. Instead, new data must be
+       added to the previous subject string,  and  the  entire  match  re-run,
+       starting  from the point where the partial match occurred. Earlier data
        can be discarded.  Consider an unanchored pattern that matches dates:
 
            re> /\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d/
@@ -5634,10 +5744,16 @@ MULTI-SEGMENT MATCHING WITH pcre_exec()
          Partial match: 23ja
 
        The this stage, an application could discard the text preceding "23ja",
-       add on text from the next segment, and call pcre_exec()  again.  Unlike
-       pcre_dfa_exec(),  the  entire matching string must always be available,
-       and the complete matching process occurs for each call, so more  memory
+       add  on  text from the next segment, and call pcre_exec() again. Unlike
+       pcre_dfa_exec(), the entire matching string must always  be  available,
+       and  the complete matching process occurs for each call, so more memory
        and more processing time is needed.
+
+       Note: If the pattern contains lookbehind assertions, or \K,  or  starts
+       with  \b  or  \B,  the string that is returned for a partial match will
+       include characters that precede the partially  matched  string  itself,
+       because  these  must  be  retained when adding on more characters for a
+       subsequent matching attempt.
 
 
 ISSUES WITH MULTI-SEGMENT MATCHING
@@ -5645,28 +5761,28 @@ ISSUES WITH MULTI-SEGMENT MATCHING
        Certain types of pattern may give problems with multi-segment matching,
        whichever matching function is used.
 
-       1. If the pattern contains tests for the beginning or end  of  a  line,
-       you  need  to pass the PCRE_NOTBOL or PCRE_NOTEOL options, as appropri-
-       ate, when the subject string for any call does not contain  the  begin-
+       1.  If  the  pattern contains tests for the beginning or end of a line,
+       you need to pass the PCRE_NOTBOL or PCRE_NOTEOL options,  as  appropri-
+       ate,  when  the subject string for any call does not contain the begin-
        ning or end of a line.
 
-       2.  If  the  pattern contains backward assertions (including \b or \B),
-       you need to arrange for some overlap in the subject  strings  to  allow
-       for  them  to  be  correctly tested at the start of each substring. For
-       example, using pcre_dfa_exec(), you could pass the  subject  in  chunks
-       that  are 500 bytes long, but in a buffer of 700 bytes, with the start-
-       ing offset set to 200 and the previous 200 bytes at the  start  of  the
-       buffer.
+       2. Lookbehind assertions at the start of a pattern are catered  for  in
+       the  offsets that are returned for a partial match. However, in theory,
+       a lookbehind assertion later in the pattern could require even  earlier
+       characters  to  be inspected, and it might not have been reached when a
+       partial match occurs. This is probably an extremely unlikely case;  you
+       could  guard  against  it to a certain extent by always including extra
+       characters at the start.
 
-       3.  Matching  a subject string that is split into multiple segments may
-       not always produce exactly the same result as matching over one  single
-       long  string,  especially  when  PCRE_PARTIAL_SOFT is used. The section
-       "Partial Matching and Word Boundaries" above describes  an  issue  that
-       arises  if  the  pattern ends with \b or \B. Another kind of difference
-       may occur when there are multiple  matching  possibilities,  because  a
+       3. Matching a subject string that is split into multiple  segments  may
+       not  always produce exactly the same result as matching over one single
+       long string, especially when PCRE_PARTIAL_SOFT  is  used.  The  section
+       "Partial  Matching  and  Word Boundaries" above describes an issue that
+       arises if the pattern ends with \b or \B. Another  kind  of  difference
+       may  occur  when  there  are multiple matching possibilities, because a
        partial match result is given only when there are no completed matches.
        This means that as soon as the shortest match has been found, continua-
-       tion  to  a  new subject segment is no longer possible.  Consider again
+       tion to a new subject segment is no longer  possible.   Consider  again
        this pcretest example:
 
            re> /dog(sbody)?/
@@ -5680,17 +5796,17 @@ ISSUES WITH MULTI-SEGMENT MATCHING
           0: dogsbody
           1: dog
 
-       The first data line passes the string "dogsb" to  pcre_exec(),  setting
-       the  PCRE_PARTIAL_SOFT  option.  Although the string is a partial match
-       for "dogsbody", the  result  is  not  PCRE_ERROR_PARTIAL,  because  the
-       shorter  string  "dog" is a complete match. Similarly, when the subject
-       is presented to pcre_dfa_exec() in several parts ("do" and "gsb"  being
+       The  first  data line passes the string "dogsb" to pcre_exec(), setting
+       the PCRE_PARTIAL_SOFT option. Although the string is  a  partial  match
+       for  "dogsbody",  the  result  is  not  PCRE_ERROR_PARTIAL, because the
+       shorter string "dog" is a complete match. Similarly, when  the  subject
+       is  presented to pcre_dfa_exec() in several parts ("do" and "gsb" being
        the first two) the match stops when "dog" has been found, and it is not
-       possible to continue. On the other hand, if "dogsbody" is presented  as
+       possible  to continue. On the other hand, if "dogsbody" is presented as
        a single string, pcre_dfa_exec() finds both matches.
 
        Because of these problems, it is probably best to use PCRE_PARTIAL_HARD
-       when matching multi-segment data. The example above then  behaves  dif-
+       when  matching  multi-segment data. The example above then behaves dif-
        ferently:
 
            re> /dog(sbody)?/
@@ -5703,25 +5819,25 @@ ISSUES WITH MULTI-SEGMENT MATCHING
 
 
        4. Patterns that contain alternatives at the top level which do not all
-       start with the  same  pattern  item  may  not  work  as  expected  when
+       start  with  the  same  pattern  item  may  not  work  as expected when
        pcre_dfa_exec() is used. For example, consider this pattern:
 
          1234|3789
 
-       If  the  first  part of the subject is "ABC123", a partial match of the
-       first alternative is found at offset 3. There is no partial  match  for
+       If the first part of the subject is "ABC123", a partial  match  of  the
+       first  alternative  is found at offset 3. There is no partial match for
        the second alternative, because such a match does not start at the same
-       point in the subject string. Attempting to  continue  with  the  string
-       "7890"  does  not  yield  a  match because only those alternatives that
-       match at one point in the subject are remembered.  The  problem  arises
-       because  the  start  of the second alternative matches within the first
-       alternative. There is no problem with  anchored  patterns  or  patterns
+       point  in  the  subject  string. Attempting to continue with the string
+       "7890" does not yield a match  because  only  those  alternatives  that
+       match  at  one  point in the subject are remembered. The problem arises
+       because the start of the second alternative matches  within  the  first
+       alternative.  There  is  no  problem with anchored patterns or patterns
        such as:
 
          1234|ABCD
 
-       where  no  string can be a partial match for both alternatives. This is
-       not a problem if pcre_exec() is used, because the entire match  has  to
+       where no string can be a partial match for both alternatives.  This  is
+       not  a  problem if pcre_exec() is used, because the entire match has to
        be rerun each time:
 
            re> /1234|3789/
@@ -5740,7 +5856,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 31 August 2009
+       Last updated: 05 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -6062,6 +6178,10 @@ DESCRIPTION
        easier to slot in PCRE as a replacement library.  Other  POSIX  options
        are not even defined.
 
+       There  are also some other options that are not defined by POSIX. These
+       have been added at the request of users who want to make use of certain
+       PCRE-specific features via the POSIX calling interface.
+
        When  PCRE  is  called  via these functions, it is only the API that is
        POSIX-like in style. The syntax and semantics of  the  regular  expres-
        sions  themselves  are  still  those of Perl, subject to the setting of
@@ -6116,6 +6236,12 @@ COMPILING A PATTERN
        ing,  the  nmatch  and  pmatch  arguments  are ignored, and no captured
        strings are returned.
 
+         REG_UNGREEDY
+
+       The PCRE_UNGREEDY option is set when the regular expression  is  passed
+       for  compilation  to the native function. Note that REG_UNGREEDY is not
+       part of the POSIX standard.
+
          REG_UTF8
 
        The PCRE_UTF8 option is set when the regular expression is  passed  for
@@ -6128,7 +6254,7 @@ COMPILING A PATTERN
        semantics.  In particular, the way it handles newline characters in the
        subject string is the Perl way, not the POSIX way.  Note  that  setting
        PCRE_MULTILINE  has only some of the effects specified for REG_NEWLINE.
-       It does not affect the way newlines are matched by . (they  aren't)  or
+       It does not affect the way newlines are matched by . (they are not)  or
        by a negative class such as [^a] (they are).
 
        The  yield of regcomp() is zero on success, and non-zero otherwise. The
@@ -6215,36 +6341,39 @@ MATCHING A PATTERN
        matched strings  is  returned.  The  nmatch  and  pmatch  arguments  of
        regexec() are ignored.
 
+       If the value of nmatch is zero, or if the value pmatch is NULL, no data
+       about any matched strings is returned.
+
        Otherwise,the portion of the string that was matched, and also any cap-
        tured substrings, are returned via the pmatch argument, which points to
-       an  array  of nmatch structures of type regmatch_t, containing the mem-
-       bers rm_so and rm_eo. These contain the offset to the  first  character
-       of  each  substring and the offset to the first character after the end
-       of each substring, respectively. The 0th element of the vector  relates
-       to  the  entire portion of string that was matched; subsequent elements
-       relate to the capturing subpatterns of the regular  expression.  Unused
+       an array of nmatch structures of type regmatch_t, containing  the  mem-
+       bers  rm_so  and rm_eo. These contain the offset to the first character
+       of each substring and the offset to the first character after  the  end
+       of  each substring, respectively. The 0th element of the vector relates
+       to the entire portion of string that was matched;  subsequent  elements
+       relate  to  the capturing subpatterns of the regular expression. Unused
        entries in the array have both structure members set to -1.
 
-       A  successful  match  yields  a  zero  return;  various error codes are
-       defined in the header file, of  which  REG_NOMATCH  is  the  "expected"
+       A successful match yields  a  zero  return;  various  error  codes  are
+       defined  in  the  header  file,  of which REG_NOMATCH is the "expected"
        failure code.
 
 
 ERROR MESSAGES
 
        The regerror() function maps a non-zero errorcode from either regcomp()
-       or regexec() to a printable message. If preg is  not  NULL,  the  error
+       or  regexec()  to  a  printable message. If preg is not NULL, the error
        should have arisen from the use of that structure. A message terminated
-       by a binary zero is placed  in  errbuf.  The  length  of  the  message,
-       including  the  zero, is limited to errbuf_size. The yield of the func-
+       by  a  binary  zero  is  placed  in  errbuf. The length of the message,
+       including the zero, is limited to errbuf_size. The yield of  the  func-
        tion is the size of buffer needed to hold the whole message.
 
 
 MEMORY USAGE
 
-       Compiling a regular expression causes memory to be allocated and  asso-
-       ciated  with  the preg structure. The function regfree() frees all such
-       memory, after which preg may no longer be used as  a  compiled  expres-
+       Compiling  a regular expression causes memory to be allocated and asso-
+       ciated with the preg structure. The function regfree() frees  all  such
+       memory,  after  which  preg may no longer be used as a compiled expres-
        sion.
 
 
@@ -6257,7 +6386,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 15 August 2009
+       Last updated: 02 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  

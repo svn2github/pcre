@@ -116,6 +116,12 @@ character of the subject. The algorithm does not automatically move on to find
 matches that start at later positions.
 </P>
 <P>
+Although the general principle of this matching algorithm is that it scans the 
+subject string only once, without backtracking, there is one exception: when a 
+lookbehind assertion is encountered, the preceding characters have to be
+re-inspected.
+</P>
+<P>
 There are a number of features of PCRE regular expressions that are not
 supported by the alternative matching algorithm. They are as follows:
 </P>
@@ -209,7 +215,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 25 August 2009
+Last updated: 05 September 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

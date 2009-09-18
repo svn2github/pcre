@@ -59,7 +59,10 @@ encountered by PCRE, an error is generated.
 built with Unicode character property support. The properties that can be
 tested with \p and \P are limited to the general category properties such as
 Lu and Nd, script names such as Greek or Han, and the derived properties Any
-and L&.
+and L&. PCRE does support the Cs (surrogate) property, which Perl does not; the
+Perl documentation says "Because Perl hides the need for the user to understand
+the internal representation of Unicode characters, there is no need to
+implement the somewhat messy concept of surrogates."
 </P>
 <P>
 7. PCRE does support the \Q...\E escape for quoting substrings. Characters in
@@ -79,7 +82,7 @@ The \Q...\E sequence is recognized both inside and outside character classes.
 <P>
 8. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
 constructions. However, there is support for recursive patterns. This is not
-available in Perl 5.8, but will be in Perl 5.10. Also, the PCRE "callout"
+available in Perl 5.8, but it is in Perl 5.10. Also, the PCRE "callout"
 feature allows an external function to be called during pattern matching. See
 the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
@@ -87,7 +90,12 @@ documentation for details.
 </P>
 <P>
 9. Subpatterns that are called recursively or as "subroutines" are always
-treated as atomic groups in PCRE. This is like Python, but unlike Perl.
+treated as atomic groups in PCRE. This is like Python, but unlike Perl. There 
+is a discussion of an example that explains this in more detail in the
+<a href="pcrepattern.html#recursiondifference">section on recursion differences from Perl</a>
+in the
+<a href="pcrecompat.html"><b>pcrecompat</b></a>
+page.
 </P>
 <P>
 10. There are some differences that are concerned with the settings of captured
@@ -97,8 +105,7 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 <P>
 11. PCRE does support Perl 5.10's backtracking verbs (*ACCEPT), (*FAIL), (*F),
 (*COMMIT), (*PRUNE), (*SKIP), and (*THEN), but only in the forms without an
-argument. PCRE does not support (*MARK). If (*ACCEPT) is within capturing
-parentheses, PCRE does not set that capture group; this is different to Perl.
+argument. PCRE does not support (*MARK).
 </P>
 <P>
 12. PCRE provides some extensions to the Perl regular expression facilities.
@@ -130,8 +137,8 @@ question mark they are.
 only at the first matching position in the subject string.
 <br>
 <br>
-(f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NO_AUTO_CAPTURE
-options for <b>pcre_exec()</b> have no Perl equivalents.
+(f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART, and
+PCRE_NO_AUTO_CAPTURE options for <b>pcre_exec()</b> have no Perl equivalents.
 <br>
 <br>
 (g) The \R escape sequence can be restricted to match only CR, LF, or CRLF
@@ -170,7 +177,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 25 August 2009
+Last updated: 18 September 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

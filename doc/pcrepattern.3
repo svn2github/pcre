@@ -1922,18 +1922,13 @@ recursively to the pattern in which it appears.
 Obviously, PCRE cannot support the interpolation of Perl code. Instead, it
 supports special syntax for recursion of the entire pattern, and also for
 individual subpattern recursion. After its introduction in PCRE and Python,
-this kind of recursion was introduced into Perl at release 5.10.
+this kind of recursion was subsequently introduced into Perl at release 5.10.
 .P
 A special item that consists of (? followed by a number greater than zero and a
 closing parenthesis is a recursive call of the subpattern of the given number,
 provided that it occurs inside that subpattern. (If not, it is a "subroutine"
 call, which is described in the next section.) The special item (?R) or (?0) is
 a recursive call of the entire regular expression.
-.P
-In PCRE (like Python, but unlike Perl), a recursive subpattern call is always
-treated as an atomic group. That is, once it has matched some of the subject
-string, it is never re-entered, even if it contains untried alternatives and
-there is a subsequent matching failure.
 .P
 This PCRE pattern solves the nested parentheses problem (assume the
 PCRE_EXTENDED option is set so that white space is ignored):
@@ -2020,6 +2015,70 @@ recursing), whereas any characters are permitted at the outer level.
 In this pattern, (?(R) is the start of a conditional subpattern, with two
 different alternatives for the recursive and non-recursive cases. The (?R) item
 is the actual recursive call.
+.
+.
+.\" HTML <a name="recursiondifference"></a>
+.SS "Recursion difference from Perl"
+.rs
+.sp
+In PCRE (like Python, but unlike Perl), a recursive subpattern call is always
+treated as an atomic group. That is, once it has matched some of the subject
+string, it is never re-entered, even if it contains untried alternatives and
+there is a subsequent matching failure. This can be illustrated by the 
+following pattern, which purports to match a palindromic string that contains 
+an odd number of characters (for example, "a", "aba", "abcba", "abcdcba"):
+.sp
+  ^(.|(.)(?1)\e2)$
+.sp
+The idea is that it either matches a single character, or two identical 
+characters surrounding a sub-palindrome. In Perl, this pattern works; in PCRE 
+it does not if the pattern is longer than three characters. Consider the
+subject string "abcba":
+.P
+At the top level, the first character is matched, but as it is not at the end 
+of the string, the first alternative fails; the second alternative is taken
+and the recursion kicks in. The recursive call to subpattern 1 successfully
+matches the next character ("b"). (Note that the beginning and end of line
+tests are not part of the recursion).
+.P
+Back at the top level, the next character ("c") is compared with what
+subpattern 2 matched, which was "a". This fails. Because the recursion is 
+treated as an atomic group, there are now no backtracking points, and so the
+entire match fails. (Perl is able, at this point, to re-enter the recursion and
+try the second alternative.) However, if the pattern is written with the
+alternatives in the other order, things are different:
+.sp
+  ^((.)(?1)\e2|.)$
+.sp
+This time, the recursing alternative is tried first, and continues to recurse 
+until it runs out of characters, at which point the recursion fails. But this 
+time we do have another alternative to try at the higher level. That is the big 
+difference: in the previous case the remaining alternative is at a deeper
+recursion level, which PCRE cannot use.
+.P
+To change the pattern so that matches all palindromic strings, not just those 
+with an odd number of characters, it is tempting to change the pattern to this:
+.sp
+  ^((.)(?1)\e2|.?)$
+.sp
+Again, this works in Perl, but not in PCRE, and for the same reason. When a 
+deeper recursion has matched a single character, it cannot be entered again in 
+order to match an empty string. The solution is to separate the two cases, and 
+write out the odd and even cases as alternatives at the higher level:
+.sp
+  ^(?:((.)(?1)\e2|)|((.)(?3)\e4|.))
+.sp   
+If you want to match typical palindromic phrases, the pattern has to ignore all 
+non-word characters, which can be done like this:
+.sp
+  ^\eW*+(?:((.)\eW*+(?1)\eW*+\e2|)|((.)\eW*+(?3)\eW*+\4|\eW*+.\eW*+))\eW*+$
+.sp
+If run with the PCRE_CASELESS option, this pattern matches phrases such as "A 
+man, a plan, a canal: Panama!" and it works well in both PCRE and Perl. Note 
+the use of the possessive quantifier *+ to avoid backtracking into sequences of 
+non-word characters. Without this, PCRE takes a great deal longer (ten times or
+more) to match typical phrases, and Perl takes so long that you think it has
+gone into a loop.
 .
 .
 .\" HTML <a name="subpatternsassubroutines"></a>
@@ -2258,6 +2317,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 September 2009
+Last updated: 18 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
