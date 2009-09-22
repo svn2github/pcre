@@ -36,6 +36,8 @@ MultiStage2.py   A Python script that generates the file pcre_ucd.c from three
                  The generated file contains the tables for a 2-stage lookup
                  of Unicode properties.  
 
+README           This file.
+
 Unicode.tables   The files in this directory, DerivedGeneralCategory.txt, 
                  Scripts.txt and UnicodeData.txt, were downloaded from the
                  Unicode web site. They contain information about Unicode
@@ -62,16 +64,15 @@ Updating to a new Unicode release
 ---------------------------------
 
 When there is a new release of Unicode, the files in Unicode.tables must be
-refreshed from the web site. If the new version of Unicode adds new character 
+refreshed from the web site. If the new version of Unicode adds new character
 scripts, the source file ucp.h and both the MultiStage2.py and the
-GenerateUtt.py scripts must be edited to add the new names. Then the
-MultiStage2.py script can then be run to generate a new version of pcre_ucd.c
-and the GenerateUtt.py can be run to generate the tricky tables for inclusion
-in pcre_tables.c.
+GenerateUtt.py scripts must be edited to add the new names. Then MultiStage2.py
+can be run to generate a new version of pcre_ucd.c, and GenerateUtt.py can be
+run to generate the tricky tables for inclusion in pcre_tables.c.
 
-The ucptest program can then be compiled and used to check that the new tables
-in pcre_ucd.c work properly, using the data files in ucptestdata to check a
-number of test characters.
+The ucptest program can be compiled and used to check that the new tables in
+pcre_ucd.c work properly, using the data files in ucptestdata to check a number
+of test characters.
 
 
 Preparing for a PCRE release
@@ -80,8 +81,7 @@ Preparing for a PCRE release
 This section contains a checklist of things that I consult before building a
 distribution for a new release.
 
-. Ensure that the version number and version date are correct in configure.ac,
-  ChangeLog, and NEWS.
+. Ensure that the version number and version date are correct in configure.ac.
   
 . If new build options have been added, ensure that they are added to the CMake
   files as well as to the autoconf files. 
@@ -91,9 +91,11 @@ distribution for a new release.
 . Compile and test with many different config options, and combinations of
   options. The maint/ManyConfigTests script now encapsulates this testing.
 
-. Run perltest.pl on the test data for tests 1 and 4. The output should match
-  the PCRE test output, apart from the version identification at the top. The
-  other tests are not Perl-compatible (they use various special PCRE options).
+. Run perltest.pl on the test data for tests 1, 4, 6, and 11. The first two can 
+  be run with Perl 5.8 or 5.10; the last two require Perl 5.10. The output
+  should match the PCRE test output, apart from the version identification at
+  the start of each test. The other tests are not Perl-compatible (they use
+  various PCRE-specific features or options).
 
 . Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
   valgrind", though that takes quite a long time.
@@ -116,9 +118,9 @@ distribution for a new release.
   used" warnings for the modules in which there is no call to memmove(). These
   can be ignored.
 
-. Documentation: check AUTHORS, COPYING, ChangeLog (check date), INSTALL,
-  LICENCE, NEWS (check date), NON-UNIX-USE, and README. Many of these won't
-  need changing, but over the long term things do change.
+. Documentation: check AUTHORS, COPYING, ChangeLog (check version and date), 
+  INSTALL, LICENCE, NEWS (check version and date), NON-UNIX-USE, and README.
+  Many of these won't need changing, but over the long term things do change.
 
 . Man pages: Check all man pages for \ not followed by e or f or " because
   that indicates a markup error.
@@ -138,7 +140,7 @@ spaces). Then run "make distcheck" to create the tarballs and the zipball.
 Double-check with "svn status", then create an SVN tagged copy:
 
   svn copy svn://vcs.exim.org/pcre/code/trunk \
-           svn://vcs.exim.org/pcre/code/tags/pcre-7.x 
+           svn://vcs.exim.org/pcre/code/tags/pcre-8.xx 
 
 Don't forget to update Freshmeat when the new release is out, and to tell
 webmaster@pcre.org and the mailing list.
@@ -166,7 +168,7 @@ others are relatively new.
     to have little effect, and maybe makes things worse.
 
   * "Ends with literal string" - note that a single character doesn't gain much
-    over the existing "required byte" (reqbyte) feature that just saves one
+    over the existing "required byte" (reqbyte) feature that just remembers one
     byte.
 
   * These probably need to go in study():
@@ -176,9 +178,14 @@ others are relatively new.
     o A required byte from alternatives - not just the last char, but an
       earlier one if common to all alternatives.
 
-    o Minimum length of subject needed.
+    o Minimum length of subject needed (see also next . bullet).
 
     o Friedl contains other ideas.
+    
+. There was a request for a way of finding the minimum subject length that can
+  match a given pattern. (If this were available, it could be usefully added
+  to study() - see above.) This is easy for simple cases, but I haven't figured 
+  out how to handle recursion.   
 
 . If Perl gets to a consistent state over the settings of capturing sub-
   patterns inside repeats, see if we can match it. One example of the
@@ -213,10 +220,10 @@ others are relatively new.
 
   * Option to use NUL as a line terminator in subject strings. This could now
     be done relatively easily since the extension to support LF, CR, and CRLF.
-    If this is done, a suitable option for pcregrep is also required.
+    If it is done, a suitable option for pcregrep is also required.
 
 . Option to provide the pattern with a length instead of with a NUL terminator.
-  This probably affects quite a few places in the code.
+  This affects quite a few places in the code and is not trivial.
 
 . Catch SIGSEGV for stack overflows?
 
@@ -231,7 +238,7 @@ others are relatively new.
   preceded by a blank line, instead of adding it to every matched line, and (b)
   support --outputfile=name.
 
-. Consider making UTF-8 and UCP the default for PCRE n.0 for some n > 7.
+. Consider making UTF-8 and UCP the default for PCRE n.0 for some n > 8.
 
 . Add a user pointer to pcre_malloc/free functions -- some option would be
   needed to retain backward compatibility.
@@ -268,9 +275,37 @@ others are relatively new.
 . Callouts with arguments: (?Cn:ARG) for instance.
 
 . A user is going to supply a patch to generalize the API for user-specific 
-  memory allocation so that it is more flexible in threaded environments.
+  memory allocation so that it is more flexible in threaded environments. Thiw 
+  was promised a long time ago, and never appeared...
+  
+. Write a function that generates random matching strings for a compiled regex.
+
+. Write a wrapper to maintain a structure with specified runtime parameters, 
+  such as recurse limit, and pass these to PCRE each time it is called. Also 
+  maybe malloc and free. A user sent a prototype.
+  
+. Pcregrep: an option to specify the output line separator, either as a string 
+  or select from a fixed list. This is not dead easy, because at the moment it 
+  outputs whatever is in the input file.
+  
+. Improve the code for duplicate checking in pcre_dfa_exec(). An incomplete, 
+  non-thread-safe patch showed that this can help performance for patterns 
+  where there are many alternatives. However, a simple thread-safe 
+  implementation that I tried made things worse in many simple cases, so this 
+  is not an obviously good thing.
+  
+. Make the longest lookbehind available via pcre_fullinfo(). This is not 
+  straightforward because lookbehinds can be nested inside lookbehinds. This 
+  case will have to be identified, and the amounts added. This should then give 
+  the maximum possible lookbehind length. The reason for wanting this is to 
+  help when implementing multi-segment matching using pcre_exec() with partial
+  matching and overlapping segments.
+  
+. PCRE cannot at present distinguish between subpatterns with different names,
+  but the same number (created by the use of ?|). In order to do so, a way of 
+  remembering *which* subpattern numbered n matched is needed. Bugzilla #760.
 
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 26 August 2008
+Last updated: 20 September 2009

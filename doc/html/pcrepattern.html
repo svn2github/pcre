@@ -334,7 +334,9 @@ a number enclosed either in angle brackets or single quotes, is an alternative
 syntax for referencing a subpattern as a "subroutine". Details are discussed
 <a href="#onigurumasubroutines">later.</a>
 Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>not</i>
-synonymous. The former is a back reference; the latter is a subroutine call.
+synonymous. The former is a back reference; the latter is a 
+<a href="#subpatternsassubroutines">subroutine</a>
+call.
 </P>
 <br><b>
 Generic character types
@@ -1662,20 +1664,21 @@ is permitted, but
 </pre>
 causes an error at compile time. Branches that match different length strings
 are permitted only at the top level of a lookbehind assertion. This is an
-extension compared with Perl (at least for 5.8), which requires all branches to
+extension compared with Perl (5.8 and 5.10), which requires all branches to
 match the same length of string. An assertion such as
 <pre>
   (?&#60;=ab(c|de))
 </pre>
 is not permitted, because its single top-level branch can match two different
-lengths, but it is acceptable if rewritten to use two top-level branches:
+lengths, but it is acceptable to PCRE if rewritten to use two top-level
+branches:
 <pre>
   (?&#60;=abc|abde)
 </pre>
 In some cases, the Perl 5.10 escape sequence \K
 <a href="#resetmatchstart">(see above)</a>
-can be used instead of a lookbehind assertion; this is not restricted to a
-fixed-length.
+can be used instead of a lookbehind assertion to get round the fixed-length 
+restriction.
 </P>
 <P>
 The implementation of lookbehind assertions is, for each alternative, to
@@ -1688,6 +1691,13 @@ PCRE does not allow the \C escape (which matches a single byte in UTF-8 mode)
 to appear in lookbehind assertions, because it makes it impossible to calculate
 the length of the lookbehind. The \X and \R escapes, which can match
 different numbers of bytes, are also not permitted.
+</P>
+<P>
+<a href="#subpatternsassubroutines">"Subroutine"</a>
+calls (see below) such as (?2) or (?&X) are permitted in lookbehinds, as long
+as the subpattern matches a fixed-length string. 
+<a href="#recursion">Recursion,</a>
+however, is not supported.
 </P>
 <P>
 Possessive quantifiers can be used in conjunction with lookbehind assertions to
@@ -1841,8 +1851,9 @@ number or name is given. This condition does not check the entire recursion
 stack.
 </P>
 <P>
-At "top level", all these recursion test conditions are false. Recursive
-patterns are described below.
+At "top level", all these recursion test conditions are false. 
+<a href="#recursion">Recursive patterns</a>
+are described below.
 </P>
 <br><b>
 Defining subpatterns for use by reference only
@@ -1852,7 +1863,8 @@ If the condition is the string (DEFINE), and there is no subpattern with the
 name DEFINE, the condition is always false. In this case, there may be only one
 alternative in the subpattern. It is always skipped if control reaches this
 point in the pattern; the idea of DEFINE is that it can be used to define
-"subroutines" that can be referenced from elsewhere. (The use of "subroutines"
+"subroutines" that can be referenced from elsewhere. (The use of 
+<a href="#subpatternsassubroutines">"subroutines"</a>
 is described below.) For example, a pattern to match an IPv4 address could be
 written like this (ignore whitespace and line breaks):
 <pre>
@@ -1927,7 +1939,8 @@ this kind of recursion was subsequently introduced into Perl at release 5.10.
 <P>
 A special item that consists of (? followed by a number greater than zero and a
 closing parenthesis is a recursive call of the subpattern of the given number,
-provided that it occurs inside that subpattern. (If not, it is a "subroutine"
+provided that it occurs inside that subpattern. (If not, it is a 
+<a href="#subpatternsassubroutines">"subroutine"</a>
 call, which is described in the next section.) The special item (?R) or (?0) is
 a recursive call of the entire regular expression.
 </P>
@@ -1963,7 +1976,8 @@ it is encountered.
 It is also possible to refer to subsequently opened parentheses, by writing
 references such as (?+2). However, these cannot be recursive because the
 reference is not inside the parentheses that are referenced. They are always
-"subroutine" calls, as described in the next section.
+<a href="#subpatternsassubroutines">"subroutine"</a>
+calls, as described in the next section.
 </P>
 <P>
 An alternative approach is to use named parentheses instead. The Perl syntax
@@ -2318,7 +2332,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 September 2009
+Last updated: 22 September 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

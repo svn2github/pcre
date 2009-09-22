@@ -270,4 +270,17 @@
     rhubarb
     the quick brown fox  
 
+/(a)(?<=b(?1))/
+    baz
+    ** Failers
+    caz  
+    
+/(?<=b(?1))(a)/
+    zbaaz
+    ** Failers
+    aaa  
+    
+/(?<X>a)(?<=b(?&X))/
+    baz
+
 /-- End of testinput11 --/

@@ -1556,6 +1556,7 @@ typedef struct compile_data {
   int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
   BOOL had_accept;              /* (*ACCEPT) encountered */
+  BOOL check_lookbehind;        /* Lookbehinds need later checking */ 
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */
   uschar nl[4];                 /* Newline string when fixed length */

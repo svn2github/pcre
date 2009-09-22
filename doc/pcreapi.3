@@ -427,9 +427,12 @@ If \fIerrptr\fP is NULL, \fBpcre_compile()\fP returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fP returns
 NULL, and sets the variable pointed to by \fIerrptr\fP to point to a textual
 error message. This is a static string that is part of the library. You must
-not try to free it. The offset from the start of the pattern to the character
-where the error was discovered is placed in the variable pointed to by
-\fIerroffset\fP, which must not be NULL. If it is, an immediate error is given.
+not try to free it. The byte offset from the start of the pattern to the
+character that was being processes when the error was discovered is placed in
+the variable pointed to by \fIerroffset\fP, which must not be NULL. If it is,
+an immediate error is given. Some errors are not detected until checks are
+carried out when the whole pattern has been scanned; in this case the offset is
+set to the end of the pattern.
 .P
 If \fBpcre_compile2()\fP is used instead of \fBpcre_compile()\fP, and the
 \fIerrorcodeptr\fP argument is not NULL, a non-zero error code number is
@@ -2020,6 +2023,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 September 2009
+Last updated: 22 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

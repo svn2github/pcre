@@ -577,4 +577,27 @@ No match
     the quick brown fox  
 No match
 
+/(a)(?<=b(?1))/
+    baz
+ 0: a
+ 1: a
+    ** Failers
+No match
+    caz  
+No match
+    
+/(?<=b(?1))(a)/
+    zbaaz
+ 0: a
+ 1: a
+    ** Failers
+No match
+    aaa  
+No match
+    
+/(?<X>a)(?<=b(?&X))/
+    baz
+ 0: a
+ 1: a
+
 /-- End of testinput11 --/

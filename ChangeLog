@@ -131,6 +131,10 @@ Version 8.00 ??-???-??
 23. The tests have been re-organized, adding tests 11 and 12, to make it 
     possible to check the Perl 5.10 features against Perl 5.10.
     
+24. Perl 5.10 allows subroutine calls in lookbehinds, as long as the subroutine
+    pattern matches a fixed length string. PCRE did not allow this; now it 
+    does. Neither allows recursion. 
+    
 
 Version 7.9 11-Apr-09
 ---------------------

@@ -9812,4 +9812,30 @@ No match
  6: d
  7: Y
 
+/(?<=b(?1)|zzz)(a)/
+    xbaax
+ 0: a
+ 1: a
+    xzzzax 
+ 0: a
+ 1: a
+
+/(a)(?<=b\1)/
+Failed: lookbehind assertion is not fixed length at offset 10
+
+/(a)(?<=b+(?1))/
+Failed: lookbehind assertion is not fixed length at offset 13
+
+/(a+)(?<=b(?1))/
+Failed: lookbehind assertion is not fixed length at offset 14
+
+/(a(?<=b(?1)))/
+Failed: lookbehind assertion is not fixed length at offset 13
+
+/(?<=b(?1))xyz/
+Failed: reference to non-existent subpattern at offset 8
+
+/(?<=b(?1))xyz(b+)pqrstuvew/
+Failed: lookbehind assertion is not fixed length at offset 26
+
 /-- End of testinput2 --/

@@ -1331,23 +1331,34 @@ for (;;)
 
 
 /*************************************************
-*        Find the fixed length of a pattern      *
+*        Find the fixed length of a branch       *
 *************************************************/
 
-/* Scan a pattern and compute the fixed length of subject that will match it,
+/* Scan a branch and compute the fixed length of subject that will match it,
 if the length is fixed. This is needed for dealing with backward assertions.
-In UTF8 mode, the result is in characters rather than bytes.
+In UTF8 mode, the result is in characters rather than bytes. The branch is 
+temporarily terminated with OP_END when this function is called.
+
+This function is called when a backward assertion is encountered, so that if it 
+fails, the error message can point to the correct place in the pattern. 
+However, we cannot do this when the assertion contains subroutine calls,
+because they can be forward references. We solve this by remembering this case 
+and doing the check at the end; a flag specifies which mode we are running in.
 
 Arguments:
   code     points to the start of the pattern (the bracket)
   options  the compiling options
+  atend    TRUE if called when the pattern is complete 
+  cd       the "compile data" structure 
 
-Returns:   the fixed length, or -1 if there is no fixed length,
+Returns:   the fixed length, 
+             or -1 if there is no fixed length,
              or -2 if \C was encountered
+             or -3 if an OP_RECURSE item was encountered and atend is FALSE
 */
 
 static int
-find_fixedlength(uschar *code, int options)
+find_fixedlength(uschar *code, int options, BOOL atend, compile_data *cd)
 {
 int length = -1;
 
@@ -1360,6 +1371,7 @@ branch, check the length against that of the other branches. */
 for (;;)
   {
   int d;
+  uschar *ce, *cs;
   register int op = *cc;
   switch (op)
     {
@@ -1367,7 +1379,7 @@ for (;;)
     case OP_BRA:
     case OP_ONCE:
     case OP_COND:
-    d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), options);
+    d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), options, atend, cd);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -1389,6 +1401,21 @@ for (;;)
     cc += 1 + LINK_SIZE;
     branchlength = 0;
     break;
+    
+    /* A true recursion implies not fixed length, but a subroutine call may
+    be OK. If the subroutine is a forward reference, we can't deal with
+    it until the end of the pattern, so return -3. */
+    
+    case OP_RECURSE:
+    if (!atend) return -3;
+    cs = ce = (uschar *)cd->start_code + GET(cc, 1);  /* Start subpattern */
+    do ce += GET(ce, 1); while (*ce == OP_ALT);       /* End subpattern */
+    if (cc > cs && cc < ce) return -1;                /* Recursion */
+    d = find_fixedlength(cs + 2, options, atend, cd);
+    if (d < 0) return d; 
+    branchlength += d;
+    cc += 1 + LINK_SIZE;
+    break;   
 
     /* Skip over assertive subpatterns */
 
@@ -1518,16 +1545,17 @@ for (;;)
 
 
 /*************************************************
-*    Scan compiled regex for numbered bracket    *
+*    Scan compiled regex for specific bracket    *
 *************************************************/
 
 /* This little function scans through a compiled pattern until it finds a
-capturing bracket with the given number.
+capturing bracket with the given number, or, if the number is negative, an
+instance of OP_REVERSE for a lookbehind.
 
 Arguments:
   code        points to start of expression
   utf8        TRUE in UTF-8 mode
-  number      the required bracket number
+  number      the required bracket number or negative to find a lookbehind
 
 Returns:      pointer to the opcode for the bracket, or NULL if not found
 */
@@ -1545,6 +1573,14 @@ for (;;)
   the table is zero; the actual length is stored in the compiled code. */
 
   if (c == OP_XCLASS) code += GET(code, 1);
+  
+  /* Handle recursion */
+  
+  else if (c == OP_REVERSE)
+    {
+    if (number < 0) return (uschar *)code; 
+    code += _pcre_OP_lengths[c];
+    }
 
   /* Handle capturing bracket */
 
@@ -5813,21 +5849,29 @@ for (;;)
 
     /* If lookbehind, check that this branch matches a fixed-length string, and
     put the length into the OP_REVERSE item. Temporarily mark the end of the
-    branch with OP_END. */
+    branch with OP_END. If the branch contains OP_RECURSE, the result is -3 
+    because there may be forward references that we can't check here. Set a
+    flag to cause another lookbehind check at the end. Why not do it all at the 
+    end? Because common, erroneous checks are picked up here and the offset of 
+    the problem can be shown. */
 
     if (lookbehind)
       {
       int fixed_length;
       *code = OP_END;
-      fixed_length = find_fixedlength(last_branch, options);
+      fixed_length = find_fixedlength(last_branch, options, FALSE, cd);
       DPRINTF(("fixed length = %d\n", fixed_length));
-      if (fixed_length < 0)
+      if (fixed_length == -3)
+        {
+        cd->check_lookbehind = TRUE; 
+        }   
+      else if (fixed_length < 0)
         {
         *errorcodeptr = (fixed_length == -2)? ERR36 : ERR25;
         *ptrptr = ptr;
         return FALSE;
         }
-      PUT(reverse_count, 0, fixed_length);
+      else { PUT(reverse_count, 0, fixed_length); }
       }
     }
 
@@ -6230,9 +6274,7 @@ int length = 1;  /* For final END opcode */
 int firstbyte, reqbyte, newline;
 int errorcode = 0;
 int skipatstart = 0;
-#ifdef SUPPORT_UTF8
-BOOL utf8;
-#endif
+BOOL utf8 = (options & PCRE_UTF8) != 0;
 size_t size;
 uschar *code;
 const uschar *codestart;
@@ -6329,7 +6371,6 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
 /* Can't support UTF8 unless PCRE has been compiled to include the code. */
 
 #ifdef SUPPORT_UTF8
-utf8 = (options & PCRE_UTF8) != 0;
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
      (*erroroffset = _pcre_valid_utf8((uschar *)pattern, -1)) >= 0)
   {
@@ -6337,7 +6378,7 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
   goto PCRE_EARLY_ERROR_RETURN2;
   }
 #else
-if ((options & PCRE_UTF8) != 0)
+if (utf8)
   {
   errorcode = ERR32;
   goto PCRE_EARLY_ERROR_RETURN;
@@ -6501,6 +6542,7 @@ cd->start_code = codestart;
 cd->hwm = cworkspace;
 cd->req_varyopt = 0;
 cd->had_accept = FALSE;
+cd->check_lookbehind = FALSE;
 cd->open_caps = NULL;
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
@@ -6540,7 +6582,7 @@ while (errorcode == 0 && cd->hwm > cworkspace)
   cd->hwm -= LINK_SIZE;
   offset = GET(cd->hwm, 0);
   recno = GET(codestart, offset);
-  groupptr = find_bracket(codestart, (re->options & PCRE_UTF8) != 0, recno);
+  groupptr = find_bracket(codestart, utf8, recno);
   if (groupptr == NULL) errorcode = ERR53;
     else PUT(((uschar *)codestart), offset, groupptr - codestart);
   }
@@ -6549,6 +6591,47 @@ while (errorcode == 0 && cd->hwm > cworkspace)
 subpattern. */
 
 if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
+
+/* If there were any lookbehind assertions that contained OP_RECURSE 
+(recursions or subroutine calls), a flag is set for them to be checked here,
+because they may contain forward references. Actual recursions can't be fixed
+length, but subroutine calls can. It is done like this so that those without
+OP_RECURSE that are not fixed length get a diagnosic with a useful offset. The
+exceptional ones forgo this. We scan the pattern to check that they are fixed
+length, and set their lengths. */
+
+if (cd->check_lookbehind)
+  {
+  uschar *cc = (uschar *)codestart;
+   
+  /* Loop, searching for OP_REVERSE items, and process those that do not have 
+  their length set. (Actually, it will also re-process any that have a length 
+  of zero, but that is a pathological case, and it does no harm.) When we find 
+  one, we temporarily terminate the branch it is in while we scan it. */
+   
+  for (cc = (uschar *)find_bracket(codestart, utf8, -1);
+       cc != NULL;
+       cc = (uschar *)find_bracket(cc, utf8, -1))
+    { 
+    if (GET(cc, 1) == 0)
+      { 
+      int fixed_length; 
+      uschar *be = cc - 1 - LINK_SIZE + GET(cc, -LINK_SIZE);
+      int end_op = *be; 
+      *be = OP_END;
+      fixed_length = find_fixedlength(cc, re->options, TRUE, cd);
+      *be = end_op;
+      DPRINTF(("fixed length = %d\n", fixed_length));
+      if (fixed_length < 0)
+        {
+        errorcode = (fixed_length == -2)? ERR36 : ERR25;
+        break;   
+        }
+      PUT(cc, 1, fixed_length);
+      }
+    cc += 1 + LINK_SIZE;
+    }  
+  } 
 
 /* Failed to compile, or error while post-processing */
 

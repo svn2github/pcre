@@ -1156,10 +1156,12 @@ COMPILING A PATTERN
        if  compilation  of  a  pattern fails, pcre_compile() returns NULL, and
        sets the variable pointed to by errptr to point to a textual error mes-
        sage. This is a static string that is part of the library. You must not
-       try to free it. The offset from the start of the pattern to the charac-
-       ter where the error was discovered is placed in the variable pointed to
-       by erroffset, which must not be NULL. If it is, an immediate  error  is
-       given.
+       try to free it. The byte offset from the start of the  pattern  to  the
+       character  that  was  being  processes when the error was discovered is
+       placed in the variable pointed to by erroffset, which must not be NULL.
+       If  it  is,  an  immediate error is given. Some errors are not detected
+       until checks are carried out when the whole pattern has  been  scanned;
+       in this case the offset is set to the end of the pattern.
 
        If  pcre_compile2()  is  used instead of pcre_compile(), and the error-
        codeptr argument is not NULL, a non-zero error code number is  returned
@@ -2666,7 +2668,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 September 2009
+       Last updated: 22 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -4483,57 +4485,60 @@ ASSERTIONS
 
        causes  an  error at compile time. Branches that match different length
        strings are permitted only at the top level of a lookbehind  assertion.
-       This  is  an  extension  compared  with  Perl (at least for 5.8), which
-       requires all branches to match the same length of string. An  assertion
-       such as
+       This  is an extension compared with Perl (5.8 and 5.10), which requires
+       all branches to match the same length of string. An assertion such as
 
          (?<=ab(c|de))
 
-       is  not  permitted,  because  its single top-level branch can match two
-       different lengths, but it is acceptable if rewritten to  use  two  top-
-       level branches:
+       is not permitted, because its single top-level  branch  can  match  two
+       different lengths, but it is acceptable to PCRE if rewritten to use two
+       top-level branches:
 
          (?<=abc|abde)
 
        In some cases, the Perl 5.10 escape sequence \K (see above) can be used
-       instead of a lookbehind assertion; this is not restricted to  a  fixed-
-       length.
+       instead  of  a  lookbehind  assertion  to  get  round  the fixed-length
+       restriction.
 
-       The  implementation  of lookbehind assertions is, for each alternative,
-       to temporarily move the current position back by the fixed  length  and
+       The implementation of lookbehind assertions is, for  each  alternative,
+       to  temporarily  move the current position back by the fixed length and
        then try to match. If there are insufficient characters before the cur-
        rent position, the assertion fails.
 
        PCRE does not allow the \C escape (which matches a single byte in UTF-8
-       mode)  to appear in lookbehind assertions, because it makes it impossi-
-       ble to calculate the length of the lookbehind. The \X and  \R  escapes,
+       mode) to appear in lookbehind assertions, because it makes it  impossi-
+       ble  to  calculate the length of the lookbehind. The \X and \R escapes,
        which can match different numbers of bytes, are also not permitted.
 
-       Possessive  quantifiers  can  be  used  in  conjunction with lookbehind
-       assertions to specify efficient matching at  the  end  of  the  subject
+       "Subroutine" calls (see below) such as (?2) or (?&X) are  permitted  in
+       lookbehinds,  as  long as the subpattern matches a fixed-length string.
+       Recursion, however, is not supported.
+
+       Possessive quantifiers can  be  used  in  conjunction  with  lookbehind
+       assertions  to  specify  efficient  matching  at the end of the subject
        string. Consider a simple pattern such as
 
          abcd$
 
-       when  applied  to  a  long string that does not match. Because matching
+       when applied to a long string that does  not  match.  Because  matching
        proceeds from left to right, PCRE will look for each "a" in the subject
-       and  then  see  if what follows matches the rest of the pattern. If the
+       and then see if what follows matches the rest of the  pattern.  If  the
        pattern is specified as
 
          ^.*abcd$
 
-       the initial .* matches the entire string at first, but when this  fails
+       the  initial .* matches the entire string at first, but when this fails
        (because there is no following "a"), it backtracks to match all but the
-       last character, then all but the last two characters, and so  on.  Once
-       again  the search for "a" covers the entire string, from right to left,
+       last  character,  then all but the last two characters, and so on. Once
+       again the search for "a" covers the entire string, from right to  left,
        so we are no better off. However, if the pattern is written as
 
          ^.*+(?<=abcd)
 
-       there can be no backtracking for the .*+ item; it can  match  only  the
-       entire  string.  The subsequent lookbehind assertion does a single test
-       on the last four characters. If it fails, the match fails  immediately.
-       For  long  strings, this approach makes a significant difference to the
+       there  can  be  no backtracking for the .*+ item; it can match only the
+       entire string. The subsequent lookbehind assertion does a  single  test
+       on  the last four characters. If it fails, the match fails immediately.
+       For long strings, this approach makes a significant difference  to  the
        processing time.
 
    Using multiple assertions
@@ -4542,18 +4547,18 @@ ASSERTIONS
 
          (?<=\d{3})(?<!999)foo
 
-       matches "foo" preceded by three digits that are not "999". Notice  that
-       each  of  the  assertions is applied independently at the same point in
-       the subject string. First there is a  check  that  the  previous  three
-       characters  are  all  digits,  and  then there is a check that the same
+       matches  "foo" preceded by three digits that are not "999". Notice that
+       each of the assertions is applied independently at the  same  point  in
+       the  subject  string.  First  there  is a check that the previous three
+       characters are all digits, and then there is  a  check  that  the  same
        three characters are not "999".  This pattern does not match "foo" pre-
-       ceded  by  six  characters,  the first of which are digits and the last
-       three of which are not "999". For example, it  doesn't  match  "123abc-
+       ceded by six characters, the first of which are  digits  and  the  last
+       three  of  which  are not "999". For example, it doesn't match "123abc-
        foo". A pattern to do that is
 
          (?<=\d{3}...)(?<!999)foo
 
-       This  time  the  first assertion looks at the preceding six characters,
+       This time the first assertion looks at the  preceding  six  characters,
        checking that the first three are digits, and then the second assertion
        checks that the preceding three characters are not "999".
 
@@ -4561,79 +4566,79 @@ ASSERTIONS
 
          (?<=(?<!foo)bar)baz
 
-       matches  an occurrence of "baz" that is preceded by "bar" which in turn
+       matches an occurrence of "baz" that is preceded by "bar" which in  turn
        is not preceded by "foo", while
 
          (?<=\d{3}(?!999)...)foo
 
-       is another pattern that matches "foo" preceded by three digits and  any
+       is  another pattern that matches "foo" preceded by three digits and any
        three characters that are not "999".
 
 
 CONDITIONAL SUBPATTERNS
 
-       It  is possible to cause the matching process to obey a subpattern con-
-       ditionally or to choose between two alternative subpatterns,  depending
-       on  the result of an assertion, or whether a previous capturing subpat-
-       tern matched or not. The two possible forms of  conditional  subpattern
+       It is possible to cause the matching process to obey a subpattern  con-
+       ditionally  or to choose between two alternative subpatterns, depending
+       on the result of an assertion, or whether a previous capturing  subpat-
+       tern  matched  or not. The two possible forms of conditional subpattern
        are
 
          (?(condition)yes-pattern)
          (?(condition)yes-pattern|no-pattern)
 
-       If  the  condition is satisfied, the yes-pattern is used; otherwise the
-       no-pattern (if present) is used. If there are more  than  two  alterna-
+       If the condition is satisfied, the yes-pattern is used;  otherwise  the
+       no-pattern  (if  present)  is used. If there are more than two alterna-
        tives in the subpattern, a compile-time error occurs.
 
-       There  are  four  kinds of condition: references to subpatterns, refer-
+       There are four kinds of condition: references  to  subpatterns,  refer-
        ences to recursion, a pseudo-condition called DEFINE, and assertions.
 
    Checking for a used subpattern by number
 
-       If the text between the parentheses consists of a sequence  of  digits,
-       the  condition  is  true if the capturing subpattern of that number has
-       previously matched. An alternative notation is to  precede  the  digits
+       If  the  text between the parentheses consists of a sequence of digits,
+       the condition is true if the capturing subpattern of  that  number  has
+       previously  matched.  An  alternative notation is to precede the digits
        with a plus or minus sign. In this case, the subpattern number is rela-
        tive rather than absolute.  The most recently opened parentheses can be
-       referenced  by  (?(-1),  the  next most recent by (?(-2), and so on. In
+       referenced by (?(-1), the next most recent by (?(-2),  and  so  on.  In
        looping constructs it can also make sense to refer to subsequent groups
        with constructs such as (?(+2).
 
-       Consider  the  following  pattern, which contains non-significant white
+       Consider the following pattern, which  contains  non-significant  white
        space to make it more readable (assume the PCRE_EXTENDED option) and to
        divide it into three parts for ease of discussion:
 
          ( \( )?    [^()]+    (?(1) \) )
 
-       The  first  part  matches  an optional opening parenthesis, and if that
+       The first part matches an optional opening  parenthesis,  and  if  that
        character is present, sets it as the first captured substring. The sec-
-       ond  part  matches one or more characters that are not parentheses. The
+       ond part matches one or more characters that are not  parentheses.  The
        third part is a conditional subpattern that tests whether the first set
        of parentheses matched or not. If they did, that is, if subject started
        with an opening parenthesis, the condition is true, and so the yes-pat-
-       tern  is  executed  and  a  closing parenthesis is required. Otherwise,
-       since no-pattern is not present, the  subpattern  matches  nothing.  In
-       other  words,  this  pattern  matches  a  sequence  of non-parentheses,
+       tern is executed and a  closing  parenthesis  is  required.  Otherwise,
+       since  no-pattern  is  not  present, the subpattern matches nothing. In
+       other words,  this  pattern  matches  a  sequence  of  non-parentheses,
        optionally enclosed in parentheses.
 
-       If you were embedding this pattern in a larger one,  you  could  use  a
+       If  you  were  embedding  this pattern in a larger one, you could use a
        relative reference:
 
          ...other stuff... ( \( )?    [^()]+    (?(-1) \) ) ...
 
-       This  makes  the  fragment independent of the parentheses in the larger
+       This makes the fragment independent of the parentheses  in  the  larger
        pattern.
 
    Checking for a used subpattern by name
 
-       Perl uses the syntax (?(<name>)...) or (?('name')...)  to  test  for  a
-       used  subpattern  by  name.  For compatibility with earlier versions of
-       PCRE, which had this facility before Perl, the syntax  (?(name)...)  is
-       also  recognized. However, there is a possible ambiguity with this syn-
-       tax, because subpattern names may  consist  entirely  of  digits.  PCRE
-       looks  first for a named subpattern; if it cannot find one and the name
-       consists entirely of digits, PCRE looks for a subpattern of  that  num-
-       ber,  which must be greater than zero. Using subpattern names that con-
+       Perl  uses  the  syntax  (?(<name>)...) or (?('name')...) to test for a
+       used subpattern by name. For compatibility  with  earlier  versions  of
+       PCRE,  which  had this facility before Perl, the syntax (?(name)...) is
+       also recognized. However, there is a possible ambiguity with this  syn-
+       tax,  because  subpattern  names  may  consist entirely of digits. PCRE
+       looks first for a named subpattern; if it cannot find one and the  name
+       consists  entirely  of digits, PCRE looks for a subpattern of that num-
+       ber, which must be greater than zero. Using subpattern names that  con-
        sist entirely of digits is not recommended.
 
        Rewriting the above example to use a named subpattern gives this:
@@ -4644,85 +4649,85 @@ CONDITIONAL SUBPATTERNS
    Checking for pattern recursion
 
        If the condition is the string (R), and there is no subpattern with the
-       name  R, the condition is true if a recursive call to the whole pattern
+       name R, the condition is true if a recursive call to the whole  pattern
        or any subpattern has been made. If digits or a name preceded by amper-
        sand follow the letter R, for example:
 
          (?(R3)...) or (?(R&name)...)
 
-       the  condition is true if the most recent recursion is into the subpat-
-       tern whose number or name is given. This condition does not  check  the
+       the condition is true if the most recent recursion is into the  subpat-
+       tern  whose  number or name is given. This condition does not check the
        entire recursion stack.
 
-       At  "top  level", all these recursion test conditions are false. Recur-
+       At "top level", all these recursion test conditions are false.   Recur-
        sive patterns are described below.
 
    Defining subpatterns for use by reference only
 
-       If the condition is the string (DEFINE), and  there  is  no  subpattern
-       with  the  name  DEFINE,  the  condition is always false. In this case,
-       there may be only one alternative  in  the  subpattern.  It  is  always
-       skipped  if  control  reaches  this  point  in the pattern; the idea of
-       DEFINE is that it can be used to define "subroutines" that can be  ref-
-       erenced  from elsewhere. (The use of "subroutines" is described below.)
-       For example, a pattern to match an IPv4 address could be  written  like
+       If  the  condition  is  the string (DEFINE), and there is no subpattern
+       with the name DEFINE, the condition is  always  false.  In  this  case,
+       there  may  be  only  one  alternative  in the subpattern. It is always
+       skipped if control reaches this point  in  the  pattern;  the  idea  of
+       DEFINE  is that it can be used to define "subroutines" that can be ref-
+       erenced from elsewhere. (The use of "subroutines" is described  below.)
+       For  example,  a pattern to match an IPv4 address could be written like
        this (ignore whitespace and line breaks):
 
          (?(DEFINE) (?<byte> 2[0-4]\d | 25[0-5] | 1\d\d | [1-9]?\d) )
          \b (?&byte) (\.(?&byte)){3} \b
 
-       The  first part of the pattern is a DEFINE group inside which a another
-       group named "byte" is defined. This matches an individual component  of
-       an  IPv4  address  (a number less than 256). When matching takes place,
-       this part of the pattern is skipped because DEFINE acts  like  a  false
+       The first part of the pattern is a DEFINE group inside which a  another
+       group  named "byte" is defined. This matches an individual component of
+       an IPv4 address (a number less than 256). When  matching  takes  place,
+       this  part  of  the pattern is skipped because DEFINE acts like a false
        condition.
 
        The rest of the pattern uses references to the named group to match the
-       four dot-separated components of an IPv4 address, insisting on  a  word
+       four  dot-separated  components of an IPv4 address, insisting on a word
        boundary at each end.
 
    Assertion conditions
 
-       If  the  condition  is  not  in any of the above formats, it must be an
-       assertion.  This may be a positive or negative lookahead or  lookbehind
-       assertion.  Consider  this  pattern,  again  containing non-significant
+       If the condition is not in any of the above  formats,  it  must  be  an
+       assertion.   This may be a positive or negative lookahead or lookbehind
+       assertion. Consider  this  pattern,  again  containing  non-significant
        white space, and with the two alternatives on the second line:
 
          (?(?=[^a-z]*[a-z])
          \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} )
 
-       The condition  is  a  positive  lookahead  assertion  that  matches  an
-       optional  sequence of non-letters followed by a letter. In other words,
-       it tests for the presence of at least one letter in the subject.  If  a
-       letter  is found, the subject is matched against the first alternative;
-       otherwise it is  matched  against  the  second.  This  pattern  matches
-       strings  in  one  of the two forms dd-aaa-dd or dd-dd-dd, where aaa are
+       The  condition  is  a  positive  lookahead  assertion  that  matches an
+       optional sequence of non-letters followed by a letter. In other  words,
+       it  tests  for the presence of at least one letter in the subject. If a
+       letter is found, the subject is matched against the first  alternative;
+       otherwise  it  is  matched  against  the  second.  This pattern matches
+       strings in one of the two forms dd-aaa-dd or dd-dd-dd,  where  aaa  are
        letters and dd are digits.
 
 
 COMMENTS
 
-       The sequence (?# marks the start of a comment that continues up to  the
-       next  closing  parenthesis.  Nested  parentheses are not permitted. The
-       characters that make up a comment play no part in the pattern  matching
+       The  sequence (?# marks the start of a comment that continues up to the
+       next closing parenthesis. Nested parentheses  are  not  permitted.  The
+       characters  that make up a comment play no part in the pattern matching
        at all.
 
-       If  the PCRE_EXTENDED option is set, an unescaped # character outside a
-       character class introduces a  comment  that  continues  to  immediately
+       If the PCRE_EXTENDED option is set, an unescaped # character outside  a
+       character  class  introduces  a  comment  that continues to immediately
        after the next newline in the pattern.
 
 
 RECURSIVE PATTERNS
 
-       Consider  the problem of matching a string in parentheses, allowing for
-       unlimited nested parentheses. Without the use of  recursion,  the  best
-       that  can  be  done  is  to use a pattern that matches up to some fixed
-       depth of nesting. It is not possible to  handle  an  arbitrary  nesting
+       Consider the problem of matching a string in parentheses, allowing  for
+       unlimited  nested  parentheses.  Without the use of recursion, the best
+       that can be done is to use a pattern that  matches  up  to  some  fixed
+       depth  of  nesting.  It  is not possible to handle an arbitrary nesting
        depth.
 
        For some time, Perl has provided a facility that allows regular expres-
-       sions to recurse (amongst other things). It does this by  interpolating
-       Perl  code in the expression at run time, and the code can refer to the
+       sions  to recurse (amongst other things). It does this by interpolating
+       Perl code in the expression at run time, and the code can refer to  the
        expression itself. A Perl pattern using code interpolation to solve the
        parentheses problem can be created like this:
 
@@ -4732,178 +4737,178 @@ RECURSIVE PATTERNS
        refers recursively to the pattern in which it appears.
 
        Obviously, PCRE cannot support the interpolation of Perl code. Instead,
-       it  supports  special  syntax  for recursion of the entire pattern, and
-       also for individual subpattern recursion.  After  its  introduction  in
-       PCRE  and  Python,  this  kind of recursion was subsequently introduced
+       it supports special syntax for recursion of  the  entire  pattern,  and
+       also  for  individual  subpattern  recursion. After its introduction in
+       PCRE and Python, this kind of  recursion  was  subsequently  introduced
        into Perl at release 5.10.
 
-       A special item that consists of (? followed by a  number  greater  than
+       A  special  item  that consists of (? followed by a number greater than
        zero and a closing parenthesis is a recursive call of the subpattern of
-       the given number, provided that it occurs inside that  subpattern.  (If
-       not,  it  is  a  "subroutine" call, which is described in the next sec-
-       tion.) The special item (?R) or (?0) is a recursive call of the  entire
+       the  given  number, provided that it occurs inside that subpattern. (If
+       not, it is a "subroutine" call, which is described  in  the  next  sec-
+       tion.)  The special item (?R) or (?0) is a recursive call of the entire
        regular expression.
 
-       This  PCRE  pattern  solves  the nested parentheses problem (assume the
+       This PCRE pattern solves the nested  parentheses  problem  (assume  the
        PCRE_EXTENDED option is set so that white space is ignored):
 
          \( ( (?>[^()]+) | (?R) )* \)
 
-       First it matches an opening parenthesis. Then it matches any number  of
-       substrings  which  can  either  be  a sequence of non-parentheses, or a
-       recursive match of the pattern itself (that is, a  correctly  parenthe-
+       First  it matches an opening parenthesis. Then it matches any number of
+       substrings which can either be a  sequence  of  non-parentheses,  or  a
+       recursive  match  of the pattern itself (that is, a correctly parenthe-
        sized substring).  Finally there is a closing parenthesis.
 
-       If  this  were  part of a larger pattern, you would not want to recurse
+       If this were part of a larger pattern, you would not  want  to  recurse
        the entire pattern, so instead you could use this:
 
          ( \( ( (?>[^()]+) | (?1) )* \) )
 
-       We have put the pattern into parentheses, and caused the  recursion  to
+       We  have  put the pattern into parentheses, and caused the recursion to
        refer to them instead of the whole pattern.
 
-       In  a  larger  pattern,  keeping  track  of  parenthesis numbers can be
-       tricky. This is made easier by the use of relative references. (A  Perl
-       5.10  feature.)   Instead  of  (?1)  in the pattern above you can write
+       In a larger pattern,  keeping  track  of  parenthesis  numbers  can  be
+       tricky.  This is made easier by the use of relative references. (A Perl
+       5.10 feature.)  Instead of (?1) in the  pattern  above  you  can  write
        (?-2) to refer to the second most recently opened parentheses preceding
-       the  recursion.  In  other  words,  a  negative number counts capturing
+       the recursion. In other  words,  a  negative  number  counts  capturing
        parentheses leftwards from the point at which it is encountered.
 
-       It is also possible to refer to  subsequently  opened  parentheses,  by
-       writing  references  such  as (?+2). However, these cannot be recursive
-       because the reference is not inside the  parentheses  that  are  refer-
-       enced.  They  are  always  "subroutine" calls, as described in the next
+       It  is  also  possible  to refer to subsequently opened parentheses, by
+       writing references such as (?+2). However, these  cannot  be  recursive
+       because  the  reference  is  not inside the parentheses that are refer-
+       enced. They are always "subroutine" calls, as  described  in  the  next
        section.
 
-       An alternative approach is to use named parentheses instead.  The  Perl
-       syntax  for  this  is (?&name); PCRE's earlier syntax (?P>name) is also
+       An  alternative  approach is to use named parentheses instead. The Perl
+       syntax for this is (?&name); PCRE's earlier syntax  (?P>name)  is  also
        supported. We could rewrite the above example as follows:
 
          (?<pn> \( ( (?>[^()]+) | (?&pn) )* \) )
 
-       If there is more than one subpattern with the same name,  the  earliest
+       If  there  is more than one subpattern with the same name, the earliest
        one is used.
 
-       This  particular  example pattern that we have been looking at contains
-       nested unlimited repeats, and so the use of atomic grouping for  match-
-       ing  strings  of non-parentheses is important when applying the pattern
+       This particular example pattern that we have been looking  at  contains
+       nested  unlimited repeats, and so the use of atomic grouping for match-
+       ing strings of non-parentheses is important when applying  the  pattern
        to strings that do not match. For example, when this pattern is applied
        to
 
          (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()
 
-       it  yields "no match" quickly. However, if atomic grouping is not used,
-       the match runs for a very long time indeed because there  are  so  many
-       different  ways  the  + and * repeats can carve up the subject, and all
+       it yields "no match" quickly. However, if atomic grouping is not  used,
+       the  match  runs  for a very long time indeed because there are so many
+       different ways the + and * repeats can carve up the  subject,  and  all
        have to be tested before failure can be reported.
 
        At the end of a match, the values set for any capturing subpatterns are
        those from the outermost level of the recursion at which the subpattern
-       value is set.  If you want to obtain  intermediate  values,  a  callout
-       function  can be used (see below and the pcrecallout documentation). If
+       value  is  set.   If  you want to obtain intermediate values, a callout
+       function can be used (see below and the pcrecallout documentation).  If
        the pattern above is matched against
 
          (ab(cd)ef)
 
-       the value for the capturing parentheses is  "ef",  which  is  the  last
-       value  taken  on at the top level. If additional parentheses are added,
+       the  value  for  the  capturing  parentheses is "ef", which is the last
+       value taken on at the top level. If additional parentheses  are  added,
        giving
 
          \( ( ( (?>[^()]+) | (?R) )* ) \)
             ^                        ^
             ^                        ^
 
-       the string they capture is "ab(cd)ef", the contents of  the  top  level
-       parentheses.  If there are more than 15 capturing parentheses in a pat-
+       the  string  they  capture is "ab(cd)ef", the contents of the top level
+       parentheses. If there are more than 15 capturing parentheses in a  pat-
        tern, PCRE has to obtain extra memory to store data during a recursion,
-       which  it  does  by  using pcre_malloc, freeing it via pcre_free after-
-       wards. If  no  memory  can  be  obtained,  the  match  fails  with  the
+       which it does by using pcre_malloc, freeing  it  via  pcre_free  after-
+       wards.  If  no  memory  can  be  obtained,  the  match  fails  with the
        PCRE_ERROR_NOMEMORY error.
 
-       Do  not  confuse  the (?R) item with the condition (R), which tests for
-       recursion.  Consider this pattern, which matches text in  angle  brack-
-       ets,  allowing for arbitrary nesting. Only digits are allowed in nested
-       brackets (that is, when recursing), whereas any characters are  permit-
+       Do not confuse the (?R) item with the condition (R),  which  tests  for
+       recursion.   Consider  this pattern, which matches text in angle brack-
+       ets, allowing for arbitrary nesting. Only digits are allowed in  nested
+       brackets  (that is, when recursing), whereas any characters are permit-
        ted at the outer level.
 
          < (?: (?(R) \d++  | [^<>]*+) | (?R)) * >
 
-       In  this  pattern, (?(R) is the start of a conditional subpattern, with
-       two different alternatives for the recursive and  non-recursive  cases.
+       In this pattern, (?(R) is the start of a conditional  subpattern,  with
+       two  different  alternatives for the recursive and non-recursive cases.
        The (?R) item is the actual recursive call.
 
    Recursion difference from Perl
 
-       In  PCRE (like Python, but unlike Perl), a recursive subpattern call is
+       In PCRE (like Python, but unlike Perl), a recursive subpattern call  is
        always treated as an atomic group. That is, once it has matched some of
        the subject string, it is never re-entered, even if it contains untried
-       alternatives and there is a subsequent matching failure.  This  can  be
-       illustrated  by the following pattern, which purports to match a palin-
-       dromic string that contains an odd number of characters  (for  example,
+       alternatives  and  there  is a subsequent matching failure. This can be
+       illustrated by the following pattern, which purports to match a  palin-
+       dromic  string  that contains an odd number of characters (for example,
        "a", "aba", "abcba", "abcdcba"):
 
          ^(.|(.)(?1)\2)$
 
        The idea is that it either matches a single character, or two identical
-       characters surrounding a sub-palindrome. In Perl, this  pattern  works;
-       in  PCRE  it  does  not if the pattern is longer than three characters.
+       characters  surrounding  a sub-palindrome. In Perl, this pattern works;
+       in PCRE it does not if the pattern is  longer  than  three  characters.
        Consider the subject string "abcba":
 
-       At the top level, the first character is matched, but as it is  not  at
+       At  the  top level, the first character is matched, but as it is not at
        the end of the string, the first alternative fails; the second alterna-
        tive is taken and the recursion kicks in. The recursive call to subpat-
-       tern  1  successfully  matches the next character ("b"). (Note that the
+       tern 1 successfully matches the next character ("b").  (Note  that  the
        beginning and end of line tests are not part of the recursion).
 
-       Back at the top level, the next character ("c") is compared  with  what
-       subpattern  2 matched, which was "a". This fails. Because the recursion
-       is treated as an atomic group, there are now  no  backtracking  points,
-       and  so  the  entire  match fails. (Perl is able, at this point, to re-
-       enter the recursion and try the second alternative.)  However,  if  the
+       Back  at  the top level, the next character ("c") is compared with what
+       subpattern 2 matched, which was "a". This fails. Because the  recursion
+       is  treated  as  an atomic group, there are now no backtracking points,
+       and so the entire match fails. (Perl is able, at  this  point,  to  re-
+       enter  the  recursion  and try the second alternative.) However, if the
        pattern is written with the alternatives in the other order, things are
        different:
 
          ^((.)(?1)\2|.)$
 
-       This time, the recursing alternative is tried first, and  continues  to
-       recurse  until  it runs out of characters, at which point the recursion
-       fails. But this time we do have  another  alternative  to  try  at  the
-       higher  level.  That  is  the  big difference: in the previous case the
+       This  time,  the recursing alternative is tried first, and continues to
+       recurse until it runs out of characters, at which point  the  recursion
+       fails.  But  this  time  we  do  have another alternative to try at the
+       higher level. That is the big difference:  in  the  previous  case  the
        remaining alternative is at a deeper recursion level, which PCRE cannot
        use.
 
        To change the pattern so that matches all palindromic strings, not just
-       those with an odd number of characters, it is tempting  to  change  the
+       those  with  an  odd number of characters, it is tempting to change the
        pattern to this:
 
          ^((.)(?1)\2|.?)$
 
-       Again,  this  works  in Perl, but not in PCRE, and for the same reason.
-       When a deeper recursion has matched a single character,  it  cannot  be
-       entered  again  in  order  to match an empty string. The solution is to
-       separate the two cases, and write out the odd and even cases as  alter-
+       Again, this works in Perl, but not in PCRE, and for  the  same  reason.
+       When  a  deeper  recursion has matched a single character, it cannot be
+       entered again in order to match an empty string.  The  solution  is  to
+       separate  the two cases, and write out the odd and even cases as alter-
        natives at the higher level:
 
          ^(?:((.)(?1)\2|)|((.)(?3)\4|.))
 
-       If  you  want  to match typical palindromic phrases, the pattern has to
+       If you want to match typical palindromic phrases, the  pattern  has  to
        ignore all non-word characters, which can be done like this:
 
          ^\W*+(?:((.)\W*+(?1)\W*+\2|)|((.)\W*+(?3)\W*+4|\W*+.\W*+))\W*+$
 
        If run with the PCRE_CASELESS option, this pattern matches phrases such
        as "A man, a plan, a canal: Panama!" and it works well in both PCRE and
-       Perl. Note the use of the possessive quantifier *+ to avoid  backtrack-
-       ing  into  sequences of non-word characters. Without this, PCRE takes a
-       great deal longer (ten times or more) to  match  typical  phrases,  and
+       Perl.  Note the use of the possessive quantifier *+ to avoid backtrack-
+       ing into sequences of non-word characters. Without this, PCRE  takes  a
+       great  deal  longer  (ten  times or more) to match typical phrases, and
        Perl takes so long that you think it has gone into a loop.
 
 
 SUBPATTERNS AS SUBROUTINES
 
        If the syntax for a recursive subpattern reference (either by number or
-       by name) is used outside the parentheses to which it refers,  it  oper-
-       ates  like a subroutine in a programming language. The "called" subpat-
+       by  name)  is used outside the parentheses to which it refers, it oper-
+       ates like a subroutine in a programming language. The "called"  subpat-
        tern may be defined before or after the reference. A numbered reference
        can be absolute or relative, as in these examples:
 
@@ -4915,110 +4920,110 @@ SUBPATTERNS AS SUBROUTINES
 
          (sens|respons)e and \1ibility
 
-       matches  "sense and sensibility" and "response and responsibility", but
+       matches "sense and sensibility" and "response and responsibility",  but
        not "sense and responsibility". If instead the pattern
 
          (sens|respons)e and (?1)ibility
 
-       is used, it does match "sense and responsibility" as well as the  other
-       two  strings.  Another  example  is  given  in the discussion of DEFINE
+       is  used, it does match "sense and responsibility" as well as the other
+       two strings. Another example is  given  in  the  discussion  of  DEFINE
        above.
 
        Like recursive subpatterns, a "subroutine" call is always treated as an
-       atomic  group. That is, once it has matched some of the subject string,
-       it is never re-entered, even if it contains  untried  alternatives  and
+       atomic group. That is, once it has matched some of the subject  string,
+       it  is  never  re-entered, even if it contains untried alternatives and
        there is a subsequent matching failure.
 
-       When  a  subpattern is used as a subroutine, processing options such as
+       When a subpattern is used as a subroutine, processing options  such  as
        case-independence are fixed when the subpattern is defined. They cannot
        be changed for different calls. For example, consider this pattern:
 
          (abc)(?i:(?-1))
 
-       It  matches  "abcabc". It does not match "abcABC" because the change of
+       It matches "abcabc". It does not match "abcABC" because the  change  of
        processing option does not affect the called subpattern.
 
 
 ONIGURUMA SUBROUTINE SYNTAX
 
-       For compatibility with Oniguruma, the non-Perl syntax \g followed by  a
+       For  compatibility with Oniguruma, the non-Perl syntax \g followed by a
        name or a number enclosed either in angle brackets or single quotes, is
-       an alternative syntax for referencing a  subpattern  as  a  subroutine,
-       possibly  recursively. Here are two of the examples used above, rewrit-
+       an  alternative  syntax  for  referencing a subpattern as a subroutine,
+       possibly recursively. Here are two of the examples used above,  rewrit-
        ten using this syntax:
 
          (?<pn> \( ( (?>[^()]+) | \g<pn> )* \) )
          (sens|respons)e and \g'1'ibility
 
-       PCRE supports an extension to Oniguruma: if a number is preceded  by  a
+       PCRE  supports  an extension to Oniguruma: if a number is preceded by a
        plus or a minus sign it is taken as a relative reference. For example:
 
          (abc)(?i:\g<-1>)
 
-       Note  that \g{...} (Perl syntax) and \g<...> (Oniguruma syntax) are not
-       synonymous. The former is a back reference; the latter is a  subroutine
+       Note that \g{...} (Perl syntax) and \g<...> (Oniguruma syntax) are  not
+       synonymous.  The former is a back reference; the latter is a subroutine
        call.
 
 
 CALLOUTS
 
        Perl has a feature whereby using the sequence (?{...}) causes arbitrary
-       Perl code to be obeyed in the middle of matching a regular  expression.
+       Perl  code to be obeyed in the middle of matching a regular expression.
        This makes it possible, amongst other things, to extract different sub-
        strings that match the same pair of parentheses when there is a repeti-
        tion.
 
        PCRE provides a similar feature, but of course it cannot obey arbitrary
        Perl code. The feature is called "callout". The caller of PCRE provides
-       an  external function by putting its entry point in the global variable
-       pcre_callout.  By default, this variable contains NULL, which  disables
+       an external function by putting its entry point in the global  variable
+       pcre_callout.   By default, this variable contains NULL, which disables
        all calling out.
 
-       Within  a  regular  expression,  (?C) indicates the points at which the
-       external function is to be called. If you want  to  identify  different
-       callout  points, you can put a number less than 256 after the letter C.
-       The default value is zero.  For example, this pattern has  two  callout
+       Within a regular expression, (?C) indicates the  points  at  which  the
+       external  function  is  to be called. If you want to identify different
+       callout points, you can put a number less than 256 after the letter  C.
+       The  default  value is zero.  For example, this pattern has two callout
        points:
 
          (?C1)abc(?C2)def
 
        If the PCRE_AUTO_CALLOUT flag is passed to pcre_compile(), callouts are
-       automatically installed before each item in the pattern. They  are  all
+       automatically  installed  before each item in the pattern. They are all
        numbered 255.
 
        During matching, when PCRE reaches a callout point (and pcre_callout is
-       set), the external function is called. It is provided with  the  number
-       of  the callout, the position in the pattern, and, optionally, one item
-       of data originally supplied by the caller of pcre_exec().  The  callout
-       function  may cause matching to proceed, to backtrack, or to fail alto-
+       set),  the  external function is called. It is provided with the number
+       of the callout, the position in the pattern, and, optionally, one  item
+       of  data  originally supplied by the caller of pcre_exec(). The callout
+       function may cause matching to proceed, to backtrack, or to fail  alto-
        gether. A complete description of the interface to the callout function
        is given in the pcrecallout documentation.
 
 
 BACKTRACKING CONTROL
 
-       Perl  5.10 introduced a number of "Special Backtracking Control Verbs",
+       Perl 5.10 introduced a number of "Special Backtracking Control  Verbs",
        which are described in the Perl documentation as "experimental and sub-
-       ject  to  change or removal in a future version of Perl". It goes on to
-       say: "Their usage in production code should be noted to avoid  problems
+       ject to change or removal in a future version of Perl". It goes  on  to
+       say:  "Their usage in production code should be noted to avoid problems
        during upgrades." The same remarks apply to the PCRE features described
        in this section.
 
-       Since these verbs are specifically related  to  backtracking,  most  of
-       them  can  be  used  only  when  the  pattern  is  to  be matched using
+       Since  these  verbs  are  specifically related to backtracking, most of
+       them can be  used  only  when  the  pattern  is  to  be  matched  using
        pcre_exec(), which uses a backtracking algorithm. With the exception of
        (*FAIL), which behaves like a failing negative assertion, they cause an
        error if encountered by pcre_dfa_exec().
 
        If any of these verbs are used in an assertion subpattern, their effect
-       is  confined  to that subpattern; it does not extend to the surrounding
-       pattern.  Note that assertion subpatterns are processed as anchored  at
+       is confined to that subpattern; it does not extend to  the  surrounding
+       pattern.   Note that assertion subpatterns are processed as anchored at
        the point where they are tested.
 
-       The  new verbs make use of what was previously invalid syntax: an open-
+       The new verbs make use of what was previously invalid syntax: an  open-
        ing parenthesis followed by an asterisk. In Perl, they are generally of
        the form (*VERB:ARG) but PCRE does not support the use of arguments, so
-       its general form is just (*VERB). Any number of these verbs  may  occur
+       its  general  form is just (*VERB). Any number of these verbs may occur
        in a pattern. There are two kinds:
 
    Verbs that act immediately
@@ -5027,94 +5032,94 @@ BACKTRACKING CONTROL
 
           (*ACCEPT)
 
-       This  verb causes the match to end successfully, skipping the remainder
-       of the pattern. When inside a recursion, only the innermost pattern  is
-       ended  immediately.  If  the (*ACCEPT) is inside capturing parentheses,
+       This verb causes the match to end successfully, skipping the  remainder
+       of  the pattern. When inside a recursion, only the innermost pattern is
+       ended immediately. If the (*ACCEPT) is  inside  capturing  parentheses,
        the data so far is captured. (This feature was added to PCRE at release
        8.00.) For example:
 
          A((?:A|B(*ACCEPT)|C)D)
 
-       This  matches  "AB", "AAD", or "ACD"; when it matches "AB", "B" is cap-
+       This matches "AB", "AAD", or "ACD"; when it matches "AB", "B"  is  cap-
        tured by the outer parentheses.
 
          (*FAIL) or (*F)
 
-       This verb causes the match to fail, forcing backtracking to  occur.  It
-       is  equivalent to (?!) but easier to read. The Perl documentation notes
-       that it is probably useful only when combined  with  (?{})  or  (??{}).
-       Those  are,  of course, Perl features that are not present in PCRE. The
-       nearest equivalent is the callout feature, as for example in this  pat-
+       This  verb  causes the match to fail, forcing backtracking to occur. It
+       is equivalent to (?!) but easier to read. The Perl documentation  notes
+       that  it  is  probably  useful only when combined with (?{}) or (??{}).
+       Those are, of course, Perl features that are not present in  PCRE.  The
+       nearest  equivalent is the callout feature, as for example in this pat-
        tern:
 
          a+(?C)(*FAIL)
 
-       A  match  with the string "aaaa" always fails, but the callout is taken
+       A match with the string "aaaa" always fails, but the callout  is  taken
        before each backtrack happens (in this example, 10 times).
 
    Verbs that act after backtracking
 
        The following verbs do nothing when they are encountered. Matching con-
-       tinues  with what follows, but if there is no subsequent match, a fail-
-       ure is forced.  The verbs  differ  in  exactly  what  kind  of  failure
+       tinues with what follows, but if there is no subsequent match, a  fail-
+       ure  is  forced.   The  verbs  differ  in  exactly what kind of failure
        occurs.
 
          (*COMMIT)
 
-       This  verb  causes  the whole match to fail outright if the rest of the
-       pattern does not match. Even if the pattern is unanchored,  no  further
-       attempts  to find a match by advancing the start point take place. Once
-       (*COMMIT) has been passed, pcre_exec() is committed to finding a  match
+       This verb causes the whole match to fail outright if the  rest  of  the
+       pattern  does  not match. Even if the pattern is unanchored, no further
+       attempts to find a match by advancing the start point take place.  Once
+       (*COMMIT)  has been passed, pcre_exec() is committed to finding a match
        at the current starting point, or not at all. For example:
 
          a+(*COMMIT)b
 
-       This  matches  "xxaab" but not "aacaab". It can be thought of as a kind
+       This matches "xxaab" but not "aacaab". It can be thought of as  a  kind
        of dynamic anchor, or "I've started, so I must finish."
 
          (*PRUNE)
 
-       This verb causes the match to fail at the current position if the  rest
+       This  verb causes the match to fail at the current position if the rest
        of the pattern does not match. If the pattern is unanchored, the normal
-       "bumpalong" advance to the next starting character then happens.  Back-
-       tracking  can  occur as usual to the left of (*PRUNE), or when matching
-       to the right of (*PRUNE), but if there is no match to the right,  back-
-       tracking  cannot  cross (*PRUNE).  In simple cases, the use of (*PRUNE)
+       "bumpalong"  advance to the next starting character then happens. Back-
+       tracking can occur as usual to the left of (*PRUNE), or  when  matching
+       to  the right of (*PRUNE), but if there is no match to the right, back-
+       tracking cannot cross (*PRUNE).  In simple cases, the use  of  (*PRUNE)
        is just an alternative to an atomic group or possessive quantifier, but
-       there  are  some uses of (*PRUNE) that cannot be expressed in any other
+       there are some uses of (*PRUNE) that cannot be expressed in  any  other
        way.
 
          (*SKIP)
 
-       This verb is like (*PRUNE), except that if the pattern  is  unanchored,
-       the  "bumpalong" advance is not to the next character, but to the posi-
-       tion in the subject where (*SKIP) was  encountered.  (*SKIP)  signifies
-       that  whatever  text  was  matched leading up to it cannot be part of a
+       This  verb  is like (*PRUNE), except that if the pattern is unanchored,
+       the "bumpalong" advance is not to the next character, but to the  posi-
+       tion  in  the  subject where (*SKIP) was encountered. (*SKIP) signifies
+       that whatever text was matched leading up to it cannot  be  part  of  a
        successful match. Consider:
 
          a+(*SKIP)b
 
-       If the subject is "aaaac...",  after  the  first  match  attempt  fails
-       (starting  at  the  first  character in the string), the starting point
+       If  the  subject  is  "aaaac...",  after  the first match attempt fails
+       (starting at the first character in the  string),  the  starting  point
        skips on to start the next attempt at "c". Note that a possessive quan-
-       tifer  does not have the same effect in this example; although it would
-       suppress backtracking  during  the  first  match  attempt,  the  second
-       attempt  would  start at the second character instead of skipping on to
+       tifer does not have the same effect in this example; although it  would
+       suppress  backtracking  during  the  first  match  attempt,  the second
+       attempt would start at the second character instead of skipping  on  to
        "c".
 
          (*THEN)
 
        This verb causes a skip to the next alternation if the rest of the pat-
        tern does not match. That is, it cancels pending backtracking, but only
-       within the current alternation. Its name  comes  from  the  observation
+       within  the  current  alternation.  Its name comes from the observation
        that it can be used for a pattern-based if-then-else block:
 
          ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 
-       If  the COND1 pattern matches, FOO is tried (and possibly further items
-       after the end of the group if FOO succeeds);  on  failure  the  matcher
-       skips  to  the second alternative and tries COND2, without backtracking
-       into COND1. If (*THEN) is used outside  of  any  alternation,  it  acts
+       If the COND1 pattern matches, FOO is tried (and possibly further  items
+       after  the  end  of  the group if FOO succeeds); on failure the matcher
+       skips to the second alternative and tries COND2,  without  backtracking
+       into  COND1.  If  (*THEN)  is  used outside of any alternation, it acts
        exactly like (*PRUNE).
 
 
@@ -5132,7 +5137,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 18 September 2009
+       Last updated: 22 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
  

@@ -2845,4 +2845,20 @@ a random value. /Ix
 /^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
     XYabcdY
 
+/(?<=b(?1)|zzz)(a)/
+    xbaax
+    xzzzax 
+
+/(a)(?<=b\1)/
+
+/(a)(?<=b+(?1))/
+
+/(a+)(?<=b(?1))/
+
+/(a(?<=b(?1)))/
+
+/(?<=b(?1))xyz/
+
+/(?<=b(?1))xyz(b+)pqrstuvew/
+
 /-- End of testinput2 --/
