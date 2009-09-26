@@ -145,6 +145,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 3
 Starting byte set: c d e 
     this sentence eventually mentions a cat
  0: cat
@@ -156,6 +157,7 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
+Subject length lower bound = 3
 Starting byte set: C D E c d e 
     this sentence eventually mentions a CAT cat
  0: CAT
@@ -167,6 +169,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a|[^\dZ])/IS
@@ -174,6 +177,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
@@ -194,6 +198,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: \x09 \x0a \x0c \x0d \x20 a b 
 
 /(ab\2)/
@@ -527,6 +532,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(?i)[abcd]/IS
@@ -534,6 +540,7 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: A B C D a b c d 
 
 /(?m)[xy]|(b|c)/IS
@@ -541,6 +548,7 @@ Capturing subpattern count = 1
 Options: multiline
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: b c x y 
 
 /(^a|^b)/Im
@@ -605,13 +613,15 @@ Capturing subpattern count = 1
 No options
 First char = 'b' (caseless)
 No need char
-Study returned NULL
+Subject length lower bound = 1
+No set of starting bytes
 
 /(a*b|(?i:c*(?-i)d))/IS
 Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: C a b c d 
 
 /a$/I
@@ -676,6 +686,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?<!foo)(alpha|omega)/IS
@@ -683,6 +694,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'a'
+Subject length lower bound = 5
 Starting byte set: a o 
 
 /(?!alphabet)[ab]/IS
@@ -690,6 +702,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?<=foo\n)^bar/Im
@@ -1658,7 +1671,8 @@ Capturing subpattern count = 0
 Options: anchored
 No first char
 Need char = 'd'
-Study returned NULL
+Subject length lower bound = 4
+No set of starting bytes
 
 /\(             # ( at start
   (?:           # Non-capturing bracket
@@ -1890,6 +1904,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
   _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 
@@ -1951,6 +1966,7 @@ Contains explicit CR or LF match
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 
 
 /^[[:cntrl:]]/DZ
@@ -3421,6 +3437,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /[^a]/I
@@ -3440,6 +3457,7 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = '6'
+Subject length lower bound = 4
 Starting byte set: 0 1 2 3 4 5 6 7 8 9 
 
 /a^b/I
@@ -3473,6 +3491,7 @@ Capturing subpattern count = 0
 Options: caseless
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: A B a b 
 
 /[ab](?i)cd/IS
@@ -3480,6 +3499,7 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = 'd' (caseless)
+Subject length lower bound = 3
 Starting byte set: a b 
 
 /abc(?C)def/I
@@ -3830,6 +3850,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?R)/I
@@ -4614,7 +4635,8 @@ Capturing subpattern count = 3
 Options: caseless
 No first char
 Need char = 'g' (caseless)
-Study returned NULL
+Subject length lower bound = 8
+No set of starting bytes
      Baby Bjorn Active Carrier - With free SHIPPING!!
  0: Baby Bjorn Active Carrier - With free SHIPPING!!
  1: Baby Bjorn Active Carrier - With free SHIPPING!!
@@ -4632,7 +4654,8 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = 'b'
-Study returned NULL
+Subject length lower bound = 1
+No set of starting bytes
 
 /(a|b)*.?c/ISDZ
 ------------------------------------------------------------------
@@ -4652,7 +4675,8 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'c'
-Study returned NULL
+Subject length lower bound = 1
+No set of starting bytes
 
 /abc(?C255)de(?C)f/DZ
 ------------------------------------------------------------------
@@ -5435,6 +5459,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 Compiled regex written to testsavedregex
 Study data written to testsavedregex
@@ -5455,6 +5480,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b 
 Compiled regex written to testsavedregex
 Study data written to testsavedregex
@@ -6167,6 +6193,7 @@ Capturing subpattern count = 0
 No options
 No first char
 Need char = ','
+Subject length lower bound = 1
 Starting byte set: \x09 \x0a \x0c \x0d \x20 , 
     \x0b,\x0b
  0: ,
@@ -6471,6 +6498,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: C a b c d 
 
 /()[ab]xyz/IS
@@ -6478,6 +6506,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b 
 
 /(|)[ab]xyz/IS
@@ -6485,6 +6514,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b 
 
 /(|c)[ab]xyz/IS
@@ -6492,6 +6522,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c 
 
 /(|c?)[ab]xyz/IS
@@ -6499,6 +6530,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c 
 
 /(d?|c?)[ab]xyz/IS
@@ -6506,6 +6538,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c d 
 
 /(d?|c)[ab]xyz/IS
@@ -6513,6 +6546,7 @@ Capturing subpattern count = 1
 No options
 No first char
 Need char = 'z'
+Subject length lower bound = 4
 Starting byte set: a b c d 
 
 /^a*b\d/DZ
@@ -6605,6 +6639,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a+|b*)[cd]/IS
@@ -6612,6 +6647,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a*|b+)[cd]/IS
@@ -6619,6 +6655,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: a b c d 
 
 /(a+|b+)[cd]/IS
@@ -6626,6 +6663,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 2
 Starting byte set: a b 
 
 /((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
@@ -9069,6 +9107,7 @@ Capturing subpattern count = 1
 No options
 No first char
 No need char
+Subject length lower bound = 1
 Starting byte set: x y z 
 
 /(?(?=.*b)b|^)/CI
@@ -9837,5 +9876,348 @@ Failed: reference to non-existent subpattern at offset 8
 
 /(?<=b(?1))xyz(b+)pqrstuvew/
 Failed: lookbehind assertion is not fixed length at offset 26
+
+/(a|bc)\1/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|bc)\1{2,3}/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 3
+Starting byte set: a b 
+
+/(a|bc)(?1)/SI
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|b\1)(a|b\1)/SI
+Capturing subpattern count = 2
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|b\1){2}/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|bbbb\1)(a|bbbb\1)/SI
+Capturing subpattern count = 2
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/(a|bbbb\1){2}/SI
+Capturing subpattern count = 1
+Max back reference = 1
+No options
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b 
+
+/^From +([^ ]+) +[a-zA-Z][a-zA-Z][a-zA-Z] +[a-zA-Z][a-zA-Z][a-zA-Z] +[0-9]?[0-9] +[0-9][0-9]:[0-9][0-9]/SI
+Capturing subpattern count = 1
+Options: anchored
+No first char
+Need char = ':'
+Subject length lower bound = 22
+No set of starting bytes
+
+/  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*                          # optional leading comment
+(?:    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)                    # initial word
+(?:  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)  )* # further okay, if led by a period
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+# address
+|                     #  or
+(?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)             # one word, optionally followed by....
+(?:
+[^()<>@,;:".\\\[\]\x80-\xff\000-\010\012-\037]  |  # atom and space parts, or...
+\(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)       |  # comments, or...
+
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+# quoted strings
+)*
+<  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*                     # leading <
+(?:  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+
+(?:  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  ,  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+)* # further okay, if led by comma
+:                                # closing colon
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  )? #       optional route
+(?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)                    # initial word
+(?:  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|
+" (?:                      # opening quote...
+[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
+|                     #    or
+\\ [^\x80-\xff]           #   Escaped something (something != CR)
+)* "  # closing quote
+)  )* # further okay, if led by a period
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  @  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*    (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                           # initial subdomain
+(?:                                  #
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  \.                        # if led by a period...
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*   (?:
+[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
+(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
+|   \[                         # [
+(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
+\]                        #           ]
+)                     #   ...further okay
+)*
+#       address spec
+(?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*  > #                  trailing >
+# name and address
+)  (?: [\040\t] |  \(
+(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
+\)  )*                       # optional trailing comment
+/xSI
+Capturing subpattern count = 0
+Contains explicit CR or LF match
+Options: extended
+No first char
+No need char
+Subject length lower bound = 3
+Starting byte set: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
+  9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
+  f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f 
+
+/<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/isIS
+Capturing subpattern count = 11
+Options: caseless dotall
+First char = '<'
+Need char = '>'
+Subject length lower bound = 47
+No set of starting bytes
+
+"(?>.*/)foo"SI
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'o'
+Subject length lower bound = 4
+No set of starting bytes
+
+/(?(?=[^a-z]+[a-z])  \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} ) /xSI
+Capturing subpattern count = 0
+Options: extended
+No first char
+Need char = '-'
+Subject length lower bound = 8
+No set of starting bytes
+
+/(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))/iSI
+Capturing subpattern count = 1
+Options: caseless
+No first char
+No need char
+Subject length lower bound = 1
+Starting byte set: A B C a b c 
+
+/(?:c|d)(?:)(?:aaaaaaaa(?:)(?:bbbbbbbb)(?:bbbbbbbb(?:))(?:bbbbbbbb(?:)(?:bbbbbbbb)))/SI
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+Subject length lower bound = 41
+Starting byte set: c d 
+
+/<a[\s]+href[\s]*=[\s]*          # find <a href=
+ ([\"\'])?                       # find single or double quote
+ (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isxSI
+Capturing subpattern count = 3
+Max back reference = 1
+Options: caseless extended dotall
+First char = '<'
+Need char = '='
+Subject length lower bound = 9
+No set of starting bytes
+
+/^(?!:)                       # colon disallowed at start
+  (?:                         # start of item
+    (?: [0-9a-f]{1,4} |       # 1-4 hex digits or
+    (?(1)0 | () ) )           # if null previously matched, fail; else null
+    :                         # followed by colon
+  ){1,7}                      # end item; 1-7 of them required               
+  [0-9a-f]{1,4} $             # final hex number at end of string
+  (?(1)|.)                    # check that there was an empty component
+  /xiIS
+Capturing subpattern count = 1
+Options: anchored caseless extended
+No first char
+Need char = ':'
+Subject length lower bound = 2
+No set of starting bytes
 
 /-- End of testinput2 --/

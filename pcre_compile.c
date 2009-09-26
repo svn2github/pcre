@@ -1550,7 +1550,9 @@ for (;;)
 
 /* This little function scans through a compiled pattern until it finds a
 capturing bracket with the given number, or, if the number is negative, an
-instance of OP_REVERSE for a lookbehind.
+instance of OP_REVERSE for a lookbehind. The function is global in the C sense 
+so that it can be called from pcre_study() when finding the minimum matching 
+length.
 
 Arguments:
   code        points to start of expression
@@ -1560,8 +1562,8 @@ Arguments:
 Returns:      pointer to the opcode for the bracket, or NULL if not found
 */
 
-static const uschar *
-find_bracket(const uschar *code, BOOL utf8, int number)
+const uschar *
+_pcre_find_bracket(const uschar *code, BOOL utf8, int number)
 {
 for (;;)
   {
@@ -5072,7 +5074,8 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           if (lengthptr == NULL)
             {
             *code = OP_END;
-            if (recno != 0) called = find_bracket(cd->start_code, utf8, recno);
+            if (recno != 0) 
+              called = _pcre_find_bracket(cd->start_code, utf8, recno);
 
             /* Forward reference */
 
@@ -6582,7 +6585,7 @@ while (errorcode == 0 && cd->hwm > cworkspace)
   cd->hwm -= LINK_SIZE;
   offset = GET(cd->hwm, 0);
   recno = GET(codestart, offset);
-  groupptr = find_bracket(codestart, utf8, recno);
+  groupptr = _pcre_find_bracket(codestart, utf8, recno);
   if (groupptr == NULL) errorcode = ERR53;
     else PUT(((uschar *)codestart), offset, groupptr - codestart);
   }
@@ -6609,9 +6612,9 @@ if (cd->check_lookbehind)
   of zero, but that is a pathological case, and it does no harm.) When we find 
   one, we temporarily terminate the branch it is in while we scan it. */
    
-  for (cc = (uschar *)find_bracket(codestart, utf8, -1);
+  for (cc = (uschar *)_pcre_find_bracket(codestart, utf8, -1);
        cc != NULL;
-       cc = (uschar *)find_bracket(cc, utf8, -1))
+       cc = (uschar *)_pcre_find_bracket(cc, utf8, -1))
     { 
     if (GET(cc, 1) == 0)
       { 

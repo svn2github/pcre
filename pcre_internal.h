@@ -549,6 +549,7 @@ compatibility. */
 /* Options for the "extra" block produced by pcre_study(). */
 
 #define PCRE_STUDY_MAPPED   0x01     /* a map of starting chars exists */
+#define PCRE_STUDY_MINLEN   0x02     /* a minimum length field exists */
 
 /* Masks for identifying the public options that are permitted at compile
 time, run time, or study time, respectively. */
@@ -1491,7 +1492,7 @@ Because people can now save and re-use compiled patterns, any additions to this
 structure should be made at the end, and something earlier (e.g. a new
 flag in the options or one of the dummy fields) should indicate that the new
 fields are present. Currently PCRE always sets the dummy fields to zero.
-NOTE NOTE NOTE:
+NOTE NOTE NOTE
 */
 
 typedef struct real_pcre {
@@ -1518,8 +1519,9 @@ remark (see NOTE above) about extending this structure applies. */
 
 typedef struct pcre_study_data {
   pcre_uint32 size;               /* Total that was malloced */
-  pcre_uint32 options;
-  uschar start_bits[32];
+  pcre_uint32 flags;              /* Private flags */
+  uschar start_bits[32];          /* Starting char bits */
+  pcre_uint32 minlength;          /* Minimum subject length */ 
 } pcre_study_data;
 
 /* Structure for building a chain of open capturing subpatterns during 
@@ -1722,15 +1724,16 @@ extern const uschar _pcre_OP_lengths[];
 one of the exported public functions. They have to be "external" in the C
 sense, but are not part of the PCRE public API. */
 
-extern BOOL         _pcre_is_newline(const uschar *, int, const uschar *,
-                      int *, BOOL);
-extern int          _pcre_ord2utf8(int, uschar *);
-extern real_pcre   *_pcre_try_flipped(const real_pcre *, real_pcre *,
-                      const pcre_study_data *, pcre_study_data *);
-extern int          _pcre_valid_utf8(const uschar *, int);
-extern BOOL         _pcre_was_newline(const uschar *, int, const uschar *,
-                      int *, BOOL);
-extern BOOL         _pcre_xclass(int, const uschar *);
+extern const uschar *_pcre_find_bracket(const uschar *, BOOL, int);
+extern BOOL          _pcre_is_newline(const uschar *, int, const uschar *,
+                       int *, BOOL);
+extern int           _pcre_ord2utf8(int, uschar *);
+extern real_pcre    *_pcre_try_flipped(const real_pcre *, real_pcre *,
+                       const pcre_study_data *, pcre_study_data *);
+extern int           _pcre_valid_utf8(const uschar *, int);
+extern BOOL          _pcre_was_newline(const uschar *, int, const uschar *,
+                       int *, BOOL);
+extern BOOL          _pcre_xclass(int, const uschar *);
 
 
 /* Unicode character database (UCD) */

@@ -772,19 +772,19 @@ help speed up matching, \fBpcre_study()\fP returns a pointer to a
 results of the study.
 .P
 The returned value from \fBpcre_study()\fP can be passed directly to
-\fBpcre_exec()\fP. However, a \fBpcre_extra\fP block also contains other
-fields that can be set by the caller before the block is passed; these are
-described
+\fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP. However, a \fBpcre_extra\fP block
+also contains other fields that can be set by the caller before the block is
+passed; these are described
 .\" HTML <a href="#extradata">
 .\" </a>
 below
 .\"
 in the section on matching a pattern.
 .P
-If studying the pattern does not produce any additional information
+If studying the pattern does not produce any useful information,
 \fBpcre_study()\fP returns NULL. In that circumstance, if the calling program
-wants to pass any of the other fields to \fBpcre_exec()\fP, it must set up its
-own \fBpcre_extra\fP block.
+wants to pass any of the other fields to \fBpcre_exec()\fP or 
+\fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
 .P
 The second argument of \fBpcre_study()\fP contains option bits. At present, no
 options are defined, and this argument should always be zero.
@@ -804,9 +804,18 @@ This is a typical call to \fBpcre_study\fP():
     0,              /* no options exist */
     &error);        /* set to NULL or points to a message */
 .sp
-At present, studying a pattern is useful only for non-anchored patterns that do
-not have a single fixed starting character. A bitmap of possible starting
-bytes is created.
+Studying a pattern does two things: first, a lower bound for the length of
+subject string that is needed to match the pattern is computed. This does not 
+mean that there are any strings of that length that match, but it does 
+guarantee that no shorter strings match. The value is used by 
+\fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP to avoid wasting time by trying to 
+match strings that are shorter than the lower bound. You can find out the value 
+in a calling program via the \fBpcre_fullinfo()\fP function.
+.P
+Studying a pattern is also useful for non-anchored patterns that do not have a
+single fixed starting character. A bitmap of possible starting bytes is
+created. This speeds up finding a position in the subject at which to start 
+matching.
 .
 .
 .\" HTML <a name="localesupport"></a>
@@ -971,6 +980,16 @@ follows something of variable length. For example, for the pattern
 /^a\ed+z\ed+/ the returned value is "z", but for /^a\edz\ed/ the returned value
 is -1.
 .sp
+  PCRE_INFO_MINLENGTH
+.sp
+If the pattern was studied and a minimum length for matching subject strings
+was computed, its value is returned. Otherwise the returned value is -1. The
+value is a number of characters, not bytes (there may be a difference in UTF-8
+mode). The fourth argument should point to an \fBint\fP variable. A
+non-negative value is a lower bound to the length of any matching string. There
+may not be any strings of that length that do actually match, but every string
+that does match is at least that long.
+.sp
   PCRE_INFO_NAMECOUNT
   PCRE_INFO_NAMEENTRYSIZE
   PCRE_INFO_NAMETABLE
@@ -1059,7 +1078,8 @@ variable.
 Return the size of the data block pointed to by the \fIstudy_data\fP field in
 a \fBpcre_extra\fP block. That is, it is the value that was passed to
 \fBpcre_malloc()\fP when PCRE was getting memory into which to place the data
-created by \fBpcre_study()\fP. The fourth argument should point to a
+created by \fBpcre_study()\fP. If \fBpcre_extra\fP is NULL, or there is no
+study data, zero is returned. The fourth argument should point to a
 \fBsize_t\fP variable.
 .
 .
@@ -1121,7 +1141,7 @@ is different. (This seems a highly unlikely scenario.)
 .P
 The function \fBpcre_exec()\fP is called to match a subject string against a
 compiled pattern, which is passed in the \fIcode\fP argument. If the
-pattern has been studied, the result of the study should be passed in the
+pattern was studied, the result of the study should be passed in the
 \fIextra\fP argument. This function is the main matching facility of the
 library, and it operates in a Perl-like manner. For specialist use there is
 also an alternative matching function, which is described
@@ -2023,6 +2043,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 September 2009
+Last updated: 26 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

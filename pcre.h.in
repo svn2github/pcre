@@ -177,6 +177,7 @@ both, so we keep them all distinct. */
 #define PCRE_INFO_OKPARTIAL         12
 #define PCRE_INFO_JCHANGED          13
 #define PCRE_INFO_HASCRORLF         14
+#define PCRE_INFO_MINLENGTH         15
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */

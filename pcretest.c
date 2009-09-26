@@ -1451,7 +1451,8 @@ while (!done)
         {
         pcre_study_data *rsd = (pcre_study_data *)(extra->study_data);
         rsd->size = byteflip(rsd->size, sizeof(rsd->size));
-        rsd->options = byteflip(rsd->options, sizeof(rsd->options));
+        rsd->flags = byteflip(rsd->flags, sizeof(rsd->flags));
+        rsd->minlength = byteflip(rsd->minlength, sizeof(rsd->minlength));
         }
       }
 
@@ -1628,10 +1629,14 @@ while (!done)
         else
           {
           uschar *start_bits = NULL;
+          int minlength;
+           
+          new_info(re, extra, PCRE_INFO_MINLENGTH, &minlength);
+          fprintf(outfile, "Subject length lower bound = %d\n", minlength);  
+ 
           new_info(re, extra, PCRE_INFO_FIRSTTABLE, &start_bits);
-
           if (start_bits == NULL)
-            fprintf(outfile, "No starting byte set\n");
+            fprintf(outfile, "No set of starting bytes\n");
           else
             {
             int i;
@@ -2150,7 +2155,7 @@ while (!done)
           {
           int workspace[1000];
           for (i = 0; i < timeitm; i++)
-            count = pcre_dfa_exec(re, NULL, (char *)bptr, len, start_offset,
+            count = pcre_dfa_exec(re, extra, (char *)bptr, len, start_offset,
               options | g_notempty, use_offsets, use_size_offsets, workspace,
               sizeof(workspace)/sizeof(int));
           }
@@ -2213,7 +2218,7 @@ while (!done)
       else if (all_use_dfa || use_dfa)
         {
         int workspace[1000];
-        count = pcre_dfa_exec(re, NULL, (char *)bptr, len, start_offset,
+        count = pcre_dfa_exec(re, extra, (char *)bptr, len, start_offset,
           options | g_notempty, use_offsets, use_size_offsets, workspace,
           sizeof(workspace)/sizeof(int));
         if (count == 0)

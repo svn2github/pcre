@@ -2651,7 +2651,7 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_TABLES) != 0)
     md->tables = extra_data->tables;
   }
-
+  
 /* Check that the first field in the block is the magic number. If it is not,
 test for a regex that was compiled on a host of opposite endianness. If this is
 the case, flipped values are put in internal_re and internal_study if there was
@@ -2790,8 +2790,8 @@ if (!anchored)
     }
   else
     {
-    if (startline && study != NULL &&
-         (study->options & PCRE_STUDY_MAPPED) != 0)
+    if (!startline && study != NULL &&
+         (study->flags & PCRE_STUDY_MAPPED) != 0)
       start_bits = study->start_bits;
     }
   }
@@ -2842,13 +2842,11 @@ for (;;)
       }
 
     /* There are some optimizations that avoid running the match if a known
-    starting point is not found, or if a known later character is not present.
-    However, there is an option that disables these, for testing and for
-    ensuring that all callouts do actually occur. */
+    starting point is not found. However, there is an option that disables
+    these, for testing and for ensuring that all callouts do actually occur. */
 
     if ((options & PCRE_NO_START_OPTIMIZE) == 0)
       {
-
       /* Advance to a known first byte. */
 
       if (first_byte >= 0)
@@ -2914,66 +2912,75 @@ for (;;)
     /* Restore fudged end_subject */
 
     end_subject = save_end_subject;
-    }
 
-  /* If req_byte is set, we know that that character must appear in the subject
-  for the match to succeed. If the first character is set, req_byte must be
-  later in the subject; otherwise the test starts at the match point. This
-  optimization can save a huge amount of work in patterns with nested unlimited
-  repeats that aren't going to match. Writing separate code for cased/caseless
-  versions makes it go faster, as does using an autoincrement and backing off
-  on a match.
+    /* The following two optimizations are disabled for partial matching or if 
+    disabling is explicitly requested (and of course, by the test above, this 
+    code is not obeyed when restarting after a partial match). */
+    
+    if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
+        (options & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) == 0)
+      {   
+      /* If the pattern was studied, a minimum subject length may be set. This
+      is a lower bound; no actual string of that length may actually match the
+      pattern. Although the value is, strictly, in characters, we treat it as
+      bytes to avoid spending too much time in this optimization. */
 
-  HOWEVER: when the subject string is very, very long, searching to its end can
-  take a long time, and give bad performance on quite ordinary patterns. This
-  showed up when somebody was matching /^C/ on a 32-megabyte string... so we
-  don't do this when the string is sufficiently long.
-
-  ALSO: this processing is disabled when partial matching is requested, and can
-  also be explicitly deactivated. Furthermore, we have to disable when
-  restarting after a partial match, because the required character may have
-  already been matched. */
-
-  if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
-      req_byte >= 0 &&
-      end_subject - current_subject < REQ_BYTE_MAX &&
-      (options & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_DFA_RESTART)) == 0)
-    {
-    register const uschar *p = current_subject + ((first_byte >= 0)? 1 : 0);
-
-    /* We don't need to repeat the search if we haven't yet reached the
-    place we found it at last time. */
-
-    if (p > req_byte_ptr)
-      {
-      if (req_byte_caseless)
+      if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
+          end_subject - current_subject < study->minlength)
+        return PCRE_ERROR_NOMATCH;
+    
+      /* If req_byte is set, we know that that character must appear in the
+      subject for the match to succeed. If the first character is set, req_byte
+      must be later in the subject; otherwise the test starts at the match
+      point. This optimization can save a huge amount of work in patterns with
+      nested unlimited repeats that aren't going to match. Writing separate
+      code for cased/caseless versions makes it go faster, as does using an
+      autoincrement and backing off on a match.
+      
+      HOWEVER: when the subject string is very, very long, searching to its end
+      can take a long time, and give bad performance on quite ordinary
+      patterns. This showed up when somebody was matching /^C/ on a 32-megabyte
+      string... so we don't do this when the string is sufficiently long. */
+      
+      if (req_byte >= 0 && end_subject - current_subject < REQ_BYTE_MAX)
         {
-        while (p < end_subject)
+        register const uschar *p = current_subject + ((first_byte >= 0)? 1 : 0);
+      
+        /* We don't need to repeat the search if we haven't yet reached the
+        place we found it at last time. */
+      
+        if (p > req_byte_ptr)
           {
-          register int pp = *p++;
-          if (pp == req_byte || pp == req_byte2) { p--; break; }
+          if (req_byte_caseless)
+            {
+            while (p < end_subject)
+              {
+              register int pp = *p++;
+              if (pp == req_byte || pp == req_byte2) { p--; break; }
+              }
+            }
+          else
+            {
+            while (p < end_subject)
+              {
+              if (*p++ == req_byte) { p--; break; }
+              }
+            }
+      
+          /* If we can't find the required character, break the matching loop,
+          which will cause a return or PCRE_ERROR_NOMATCH. */
+      
+          if (p >= end_subject) break;
+      
+          /* If we have found the required character, save the point where we
+          found it, so that we don't search again next time round the loop if
+          the start hasn't passed this character yet. */
+      
+          req_byte_ptr = p;
           }
-        }
-      else
-        {
-        while (p < end_subject)
-          {
-          if (*p++ == req_byte) { p--; break; }
-          }
-        }
-
-      /* If we can't find the required character, break the matching loop,
-      which will cause a return or PCRE_ERROR_NOMATCH. */
-
-      if (p >= end_subject) break;
-
-      /* If we have found the required character, save the point where we
-      found it, so that we don't search again next time round the loop if
-      the start hasn't passed this character yet. */
-
-      req_byte_ptr = p;
+        }   
       }
-    }
+    }   /* End of optimizations that are done when not restarting */
 
   /* OK, now we can do the business */
 

@@ -178,15 +178,8 @@ others are relatively new.
     o A required byte from alternatives - not just the last char, but an
       earlier one if common to all alternatives.
 
-    o Minimum length of subject needed (see also next . bullet).
-
     o Friedl contains other ideas.
     
-. There was a request for a way of finding the minimum subject length that can
-  match a given pattern. (If this were available, it could be usefully added
-  to study() - see above.) This is easy for simple cases, but I haven't figured 
-  out how to handle recursion.   
-
 . If Perl gets to a consistent state over the settings of capturing sub-
   patterns inside repeats, see if we can match it. One example of the
   difference is the matching of /(main(O)?)+/ against mainOmain, where PCRE
@@ -308,4 +301,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 September 2009
+Last updated: 26 September 2009

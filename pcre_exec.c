@@ -5121,7 +5121,7 @@ if (!anchored)
     }
   else
     if (!startline && study != NULL &&
-      (study->options & PCRE_STUDY_MAPPED) != 0)
+      (study->flags & PCRE_STUDY_MAPPED) != 0)
         start_bits = study->start_bits;
   }
 
@@ -5247,74 +5247,86 @@ for(;;)
   /* Restore fudged end_subject */
 
   end_subject = save_end_subject;
+  
+  /* The following two optimizations are disabled for partial matching or if 
+  disabling is explicitly requested. */
+  
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0 && !md->partial) 
+    { 
+    /* If the pattern was studied, a minimum subject length may be set. This is
+    a lower bound; no actual string of that length may actually match the
+    pattern. Although the value is, strictly, in characters, we treat it as
+    bytes to avoid spending too much time in this optimization. */
+    
+    if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
+        end_subject - start_match < study->minlength)
+      {
+      rc = MATCH_NOMATCH;
+      break;     
+      }
+ 
+    /* If req_byte is set, we know that that character must appear in the
+    subject for the match to succeed. If the first character is set, req_byte
+    must be later in the subject; otherwise the test starts at the match point.
+    This optimization can save a huge amount of backtracking in patterns with
+    nested unlimited repeats that aren't going to match. Writing separate code
+    for cased/caseless versions makes it go faster, as does using an
+    autoincrement and backing off on a match.
+    
+    HOWEVER: when the subject string is very, very long, searching to its end
+    can take a long time, and give bad performance on quite ordinary patterns.
+    This showed up when somebody was matching something like /^\d+C/ on a
+    32-megabyte string... so we don't do this when the string is sufficiently
+    long. */
+    
+    if (req_byte >= 0 && end_subject - start_match < REQ_BYTE_MAX)
+      {
+      register USPTR p = start_match + ((first_byte >= 0)? 1 : 0);
+    
+      /* We don't need to repeat the search if we haven't yet reached the
+      place we found it at last time. */
+    
+      if (p > req_byte_ptr)
+        {
+        if (req_byte_caseless)
+          {
+          while (p < end_subject)
+            {
+            register int pp = *p++;
+            if (pp == req_byte || pp == req_byte2) { p--; break; }
+            }
+          }
+        else
+          {
+          while (p < end_subject)
+            {
+            if (*p++ == req_byte) { p--; break; }
+            }
+          }
+    
+        /* If we can't find the required character, break the matching loop,
+        forcing a match failure. */
+    
+        if (p >= end_subject)
+          {
+          rc = MATCH_NOMATCH;
+          break;
+          }
+    
+        /* If we have found the required character, save the point where we
+        found it, so that we don't search again next time round the loop if
+        the start hasn't passed this character yet. */
+    
+        req_byte_ptr = p;
+        }
+      }
+    }   
 
 #ifdef DEBUG  /* Sigh. Some compilers never learn. */
   printf(">>>> Match against: ");
   pchars(start_match, end_subject - start_match, TRUE, md);
   printf("\n");
 #endif
-
-  /* If req_byte is set, we know that that character must appear in the
-  subject for the match to succeed. If the first character is set, req_byte
-  must be later in the subject; otherwise the test starts at the match point.
-  This optimization can save a huge amount of backtracking in patterns with
-  nested unlimited repeats that aren't going to match. Writing separate code
-  for cased/caseless versions makes it go faster, as does using an
-  autoincrement and backing off on a match.
-
-  HOWEVER: when the subject string is very, very long, searching to its end
-  can take a long time, and give bad performance on quite ordinary patterns.
-  This showed up when somebody was matching something like /^\d+C/ on a
-  32-megabyte string... so we don't do this when the string is sufficiently
-  long.
-
-  ALSO: this processing is disabled when partial matching is requested, or if
-  disabling is explicitly requested. */
-
-  if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
-      req_byte >= 0 &&
-      end_subject - start_match < REQ_BYTE_MAX &&
-      !md->partial)
-    {
-    register USPTR p = start_match + ((first_byte >= 0)? 1 : 0);
-
-    /* We don't need to repeat the search if we haven't yet reached the
-    place we found it at last time. */
-
-    if (p > req_byte_ptr)
-      {
-      if (req_byte_caseless)
-        {
-        while (p < end_subject)
-          {
-          register int pp = *p++;
-          if (pp == req_byte || pp == req_byte2) { p--; break; }
-          }
-        }
-      else
-        {
-        while (p < end_subject)
-          {
-          if (*p++ == req_byte) { p--; break; }
-          }
-        }
-
-      /* If we can't find the required character, break the matching loop,
-      forcing a match failure. */
-
-      if (p >= end_subject)
-        {
-        rc = MATCH_NOMATCH;
-        break;
-        }
-
-      /* If we have found the required character, save the point where we
-      found it, so that we don't search again next time round the loop if
-      the start hasn't passed this character yet. */
-
-      req_byte_ptr = p;
-      }
-    }
 
   /* OK, we can now run the match. If "hitend" is set afterwards, remember the
   first starting point for which a partial match was found. */

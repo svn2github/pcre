@@ -4489,4 +4489,22 @@
 /(?=C)/g+
     ABCDECBA
 
+/(abc|def|xyz)/I
+    terhjk;abcdaadsfe
+    the quick xyz brown fox 
+    \Yterhjk;abcdaadsfe
+    \Ythe quick xyz brown fox 
+    ** Failers
+    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+    \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+
+/(abc|def|xyz)/SI
+    terhjk;abcdaadsfe
+    the quick xyz brown fox 
+    \Yterhjk;abcdaadsfe
+    \Ythe quick xyz brown fox 
+    ** Failers
+    thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+    \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
+
 /-- End of testinput7 --/

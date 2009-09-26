@@ -135,6 +135,22 @@ Version 8.00 ??-???-??
     pattern matches a fixed length string. PCRE did not allow this; now it 
     does. Neither allows recursion. 
     
+25. I finally figured out how to implement a request to provide the minimum 
+    length of subject string that was needed in order to match a given pattern. 
+    (It was back references and recursion that I had previously got hung up 
+    on.) This code has now been added to pcre_study(); it finds a lower bound 
+    to the length of subject needed. It is not necessarily the greatest lower
+    bound, but using it to avoid searching strings that are too short does give
+    some useful speed-ups. The value is available to calling programs via
+    pcre_fullinfo().
+    
+26. While implementing 25, I discovered to my embarrassment that pcretest had
+    not been passing the result of pcre_study() to pcre_dfa_exec(), so the
+    study optimizations had never been tested with that matching function.
+    Oops. What is worse, even when it was passed study data, there was a bug in
+    pcre_dfa_exec() that meant it never actually used it. Double oops. There
+    were also very few tests of studied patterns with pcre_dfa_exec().
+    
 
 Version 7.9 11-Apr-09
 ---------------------
