@@ -395,7 +395,9 @@ avoiding the use of the stack.
 Either of the functions \fBpcre_compile()\fP or \fBpcre_compile2()\fP can be
 called to compile a pattern into an internal form. The only difference between
 the two interfaces is that \fBpcre_compile2()\fP has an additional argument,
-\fIerrorcodeptr\fP, via which a numerical error code can be returned.
+\fIerrorcodeptr\fP, via which a numerical error code can be returned. To avoid 
+too much repetition, we refer just to \fBpcre_compile()\fP below, but the 
+information applies equally to \fBpcre_compile2()\fP.
 .P
 The pattern is a C string terminated by a binary zero, and is passed in the
 \fIpattern\fP argument. A pointer to a single block of memory that is obtained
@@ -412,23 +414,23 @@ argument, which is an address (see below).
 The \fIoptions\fP argument contains various bit settings that affect the
 compilation. It should be zero if no options are required. The available
 options are described below. Some of them (in particular, those that are
-compatible with Perl, but also some others) can also be set and unset from
+compatible with Perl, but some others as well) can also be set and unset from
 within the pattern (see the detailed description in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
 documentation). For those options that can be different in different parts of
-the pattern, the contents of the \fIoptions\fP argument specifies their initial
-settings at the start of compilation and execution. The PCRE_ANCHORED and
-PCRE_NEWLINE_\fIxxx\fP options can be set at the time of matching as well as at
-compile time.
+the pattern, the contents of the \fIoptions\fP argument specifies their
+settings at the start of compilation and execution. The PCRE_ANCHORED, 
+PCRE_BSR_\fIxxx\fP, and PCRE_NEWLINE_\fIxxx\fP options can be set at the time
+of matching as well as at compile time.
 .P
 If \fIerrptr\fP is NULL, \fBpcre_compile()\fP returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fP returns
 NULL, and sets the variable pointed to by \fIerrptr\fP to point to a textual
 error message. This is a static string that is part of the library. You must
 not try to free it. The byte offset from the start of the pattern to the
-character that was being processes when the error was discovered is placed in
+character that was being processed when the error was discovered is placed in
 the variable pointed to by \fIerroffset\fP, which must not be NULL. If it is,
 an immediate error is given. Some errors are not detected until checks are
 carried out when the whole pattern has been scanned; in this case the offset is
@@ -984,7 +986,7 @@ is -1.
 .sp
 If the pattern was studied and a minimum length for matching subject strings
 was computed, its value is returned. Otherwise the returned value is -1. The
-value is a number of characters, not bytes (there may be a difference in UTF-8
+value is a number of characters, not bytes (this may be relevant in UTF-8
 mode). The fourth argument should point to an \fBint\fP variable. A
 non-negative value is a lower bound to the length of any matching string. There
 may not be any strings of that length that do actually match, but every string
@@ -1209,7 +1211,7 @@ the block by setting the other fields and their corresponding flag bits.
 The \fImatch_limit\fP field provides a means of preventing PCRE from using up a
 vast amount of resources when running patterns that are not going to match,
 but which have a very large number of possibilities in their search trees. The
-classic example is the use of nested unlimited repeats.
+classic example is a pattern that uses nested unlimited repeats.
 .P
 Internally, PCRE uses a function called \fBmatch()\fP which it calls repeatedly
 (sometimes recursively). The limit set by \fImatch_limit\fP is imposed on the
@@ -1508,7 +1510,7 @@ the \fIovector\fP is not big enough to remember the related substrings, PCRE
 has to get additional memory for use during matching. Thus it is usually
 advisable to supply an \fIovector\fP.
 .P
-The \fBpcre_info()\fP function can be used to find out how many capturing
+The \fBpcre_fullinfo()\fP function can be used to find out how many capturing
 subpatterns there are in a compiled pattern. The smallest size for
 \fIovector\fP that will allow for \fIn\fP captured substrings, in addition to
 the offsets of the substring matched by the whole pattern, is (\fIn\fP+1)*3.
@@ -2043,6 +2045,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 September 2009
+Last updated: 29 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -5,9 +5,8 @@ PCRE - Perl-compatible regular expressions
 .rs
 .sp
 This document describes the differences in the ways that PCRE and Perl handle
-regular expressions. The differences described here are mainly with respect to
-Perl 5.8, though PCRE versions 7.0 and later contain some features that are
-in Perl 5.10.
+regular expressions. The differences described here are with respect to Perl
+5.10.
 .P
 1. PCRE has only a subset of Perl's UTF-8 and Unicode support. Details of what
 it does have are given in the
@@ -86,7 +85,7 @@ section on recursion differences from Perl
 .\"
 in the
 .\" HREF
-\fBpcrecompat\fP
+\fBpcrepattern\fP
 .\"
 page.
 .P
@@ -98,14 +97,30 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 (*COMMIT), (*PRUNE), (*SKIP), and (*THEN), but only in the forms without an
 argument. PCRE does not support (*MARK).
 .P
-12. PCRE provides some extensions to the Perl regular expression facilities.
-Perl 5.10 will include new features that are not in earlier versions, some of
-which (such as named parentheses) have been in PCRE for some time. This list is
-with respect to Perl 5.10:
+12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern 
+names is not as general as Perl's. This is a consequence of the fact the PCRE 
+works internally just with numbers, using an external table to translate 
+between numbers and names. The following are some specific differences:
 .sp
-(a) Although lookbehind assertions must match fixed length strings, each
-alternative branch of a lookbehind assertion can match a different length of
-string. Perl requires them all to have the same length.
+(a) After matching a pattern such as (?|(?<a>A)|(?<b)B) where the two capturing 
+parentheses have the same number but different names, it is not possible to 
+distinguish which parentheses matched, because both names map to capturing
+subpattern number 1.
+.sp
+(b) A condition test for a subpattern with a name that is duplicated gives
+unpredictable results. For example, when the pattern
+(?:(?<a>A)|(?<a>B))(?('a')...|...) is compiled (the PCRE_DUPNAMES option is
+required), the condition test (?('a') is set to test whether subpattern 1 has
+matched, ignoring subpattern 2, even though it has the same name.
+.P
+13. PCRE provides some extensions to the Perl regular expression facilities.
+Perl 5.10 includes new features that are not in earlier versions of Perl, some
+of which (such as named parentheses) have been in PCRE for some time. This list
+is with respect to Perl 5.10:
+.sp
+(a) Although lookbehind assertions in PCRE must match fixed length strings,
+each alternative branch of a lookbehind assertion can match a different length
+of string. Perl requires them all to have the same length.
 .sp
 (b) If PCRE_DOLLAR_ENDONLY is set and PCRE_MULTILINE is not set, the $
 meta-character matches only at the very end of the string.
@@ -155,6 +170,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 18 September 2009
+Last updated: 29 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

@@ -32,10 +32,13 @@ whether or not a partial match is preferred to an alternative complete match,
 though the details differ between the two matching functions. If both options
 are set, PCRE_PARTIAL_HARD takes precedence.
 .P
-Setting a partial matching option disables one of PCRE's optimizations. PCRE
+Setting a partial matching option disables two of PCRE's optimizations. PCRE
 remembers the last literal byte in a pattern, and abandons matching immediately
 if such a byte is not present in the subject string. This optimization cannot
-be used for a subject string that might match only partially.
+be used for a subject string that might match only partially. If the pattern 
+was studied, PCRE knows the minimum length of a matching string, and does not 
+bother to run the matching function on shorter strings. This optimization is 
+also disabled for partial matching.
 .
 .
 .SH "PARTIAL MATCHING USING pcre_exec()"
@@ -53,7 +56,7 @@ instead of PCRE_ERROR_NOMATCH. If there are at least two slots in the offsets
 vector, the first of them is set to the offset of the earliest character that
 was inspected when the partial match was found. For convenience, the second
 offset points to the end of the string so that a substring can easily be
-extracted.
+identified.
 .P
 For the majority of patterns, the first offset identifies the start of the
 partially matched string. However, for patterns that contain lookbehind
@@ -358,6 +361,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 September 2009
+Last updated: 29 September 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
