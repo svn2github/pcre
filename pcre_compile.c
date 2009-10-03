@@ -341,7 +341,9 @@ static const char error_texts[] =
   "number is too big\0"
   "subpattern name expected\0"
   "digit expected after (?+\0"
-  "] is an invalid data character in JavaScript compatibility mode";
+  "] is an invalid data character in JavaScript compatibility mode\0"
+  /* 65 */
+  "different names for subpatterns of the same number are not allowed"; 
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4867,11 +4869,24 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
               }
             }
 
-          /* In the real compile, create the entry in the table */
+          /* In the real compile, create the entry in the table, maintaining
+          alphabetical order. Duplicate names for different numbers are
+          permitted only if PCRE_DUPNAMES is set. Duplicate names for the same
+          number are always OK. (An existing number can be re-used if (?|
+          appears in the pattern.) In either event, a duplicate name results in
+          a duplicate entry in the table, even if the number is the same. This
+          is because the number of names, and hence the table size, is computed
+          in the pre-compile, and it affects various numbers and pointers which
+          would all have to be modified, and the compiled code moved down, if
+          duplicates with the same number were omitted from the table. This 
+          doesn't seem worth the hassle. However, *different* names for the
+          same number are not permitted. */
 
           else
             {
+            BOOL dupname = FALSE;
             slot = cd->name_table;
+ 
             for (i = 0; i < cd->names_found; i++)
               {
               int crc = memcmp(name, slot+2, namelen);
@@ -4879,22 +4894,54 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                 {
                 if (slot[2+namelen] == 0)
                   {
-                  if ((options & PCRE_DUPNAMES) == 0)
+                  if (GET2(slot, 0) != cd->bracount + 1 &&
+                      (options & PCRE_DUPNAMES) == 0)
                     {
                     *errorcodeptr = ERR43;
                     goto FAILED;
                     }
+                  else dupname = TRUE;   
                   }
-                else crc = -1;      /* Current name is substring */
+                else crc = -1;      /* Current name is a substring */
                 }
+                
+              /* Make space in the table and break the loop for an earlier 
+              name. For a duplicate or later name, carry on. We do this for 
+              duplicates so that in the simple case (when ?(| is not used) they 
+              are in order of their numbers. */
+                
               if (crc < 0)
                 {
                 memmove(slot + cd->name_entry_size, slot,
                   (cd->names_found - i) * cd->name_entry_size);
                 break;
                 }
+                
+              /* Continue the loop for a later or duplicate name */
+               
               slot += cd->name_entry_size;
               }
+              
+            /* For non-duplicate names, check for a duplicate number before
+            adding the new name. */
+              
+            if (!dupname)
+              {
+              uschar *cslot = cd->name_table;
+              for (i = 0; i < cd->names_found; i++)
+                {
+                if (cslot != slot)
+                  {
+                  if (GET2(cslot, 0) == cd->bracount + 1)
+                    {
+                    *errorcodeptr = ERR65;
+                    goto FAILED;
+                    }    
+                  }
+                else i--;   
+                cslot += cd->name_entry_size;
+                }  
+              }   
 
             PUT2(slot, 0, cd->bracount + 1);
             memcpy(slot + 2, name, namelen);
@@ -4902,10 +4949,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             }
           }
 
-        /* In both cases, count the number of names we've encountered. */
+        /* In both pre-compile and compile, count the number of names we've
+        encountered. */
 
-        ptr++;                    /* Move past > or ' */
         cd->names_found++;
+        ptr++;                    /* Move past > or ' */
         goto NUMBERED_GROUP;
 
 

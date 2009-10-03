@@ -10220,4 +10220,24 @@ Need char = ':'
 Subject length lower bound = 2
 No set of starting bytes
 
+/(?|(?<a>A)|(?<a>B))/I
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  a   1
+  a   1
+No options
+No first char
+No need char
+    AB\Ca
+ 0: A
+ 1: A
+  C A (1) a
+    BA\Ca
+ 0: B
+ 1: B
+  C B (1) a
+
+/(?|(?<a>A)|(?<b>B))/ 
+Failed: different names for subpatterns of the same number are not allowed at offset 15
+
 /-- End of testinput2 --/

@@ -1012,10 +1012,27 @@ entry; both of these return an \fBint\fP value. The entry size depends on the
 length of the longest name. PCRE_INFO_NAMETABLE returns a pointer to the first
 entry of the table (a pointer to \fBchar\fP). The first two bytes of each entry
 are the number of the capturing parenthesis, most significant byte first. The
-rest of the entry is the corresponding name, zero terminated. The names are in
-alphabetical order. When PCRE_DUPNAMES is set, duplicate names are in order of
-their parentheses numbers. For example, consider the following pattern (assume
-PCRE_EXTENDED is set, so white space - including newlines - is ignored):
+rest of the entry is the corresponding name, zero terminated. 
+.P
+The names are in alphabetical order. Duplicate names may appear if (?| is used
+to create multiple groups with the same number, as described in the
+.\" HTML <a href="pcrepattern.html#dupsubpatternnumber">
+.\" </a>
+section on duplicate subpattern numbers
+.\"
+in the
+.\" HREF
+\fBpcrepattern\fP
+.\"
+page. Duplicate names for subpatterns with different numbers are permitted only 
+if PCRE_DUPNAMES is set. In all cases of duplicate names, they appear in the 
+table in the order in which they were found in the pattern. In the absence of 
+(?| this is the order of increasing number; when (?| is used this is not 
+necessarily the case because later subpatterns may have lower numbers.
+.P
+As a simple example of the name/number table, consider the following pattern
+(assume PCRE_EXTENDED is set, so white space - including newlines - is
+ignored):
 .sp
 .\" JOIN
   (?<date> (?<year>(\ed\ed)?\ed\ed) -
@@ -1789,10 +1806,20 @@ then call \fBpcre_copy_substring()\fP or \fBpcre_get_substring()\fP, as
 appropriate. \fBNOTE:\fP If PCRE_DUPNAMES is set and there are duplicate names,
 the behaviour may not be what you want (see the next section).
 .P
-\fBWarning:\fP If the pattern uses the "(?|" feature to set up multiple
-subpatterns with the same number, you cannot use names to distinguish them,
-because names are not included in the compiled code. The matching process uses
-only numbers.
+\fBWarning:\fP If the pattern uses the (?| feature to set up multiple
+subpatterns with the same number, as described in the
+.\" HTML <a href="pcrepattern.html#dupsubpatternnumber">
+.\" </a>
+section on duplicate subpattern numbers
+.\"
+in the
+.\" HREF
+\fBpcrepattern\fP
+.\"
+page, you cannot use names to distinguish the different subpatterns, because
+names are not included in the compiled code. The matching process uses only
+numbers. For this reason, the use of different names for subpatterns of the
+same number causes an error at compile time.
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
 .rs
@@ -1802,9 +1829,12 @@ only numbers.
 .B const char *\fIname\fP, char **\fIfirst\fP, char **\fIlast\fP);
 .PP
 When a pattern is compiled with the PCRE_DUPNAMES option, names for subpatterns
-are not required to be unique. Normally, patterns with duplicate names are such
-that in any one match, only one of the named subpatterns participates. An
-example is shown in the
+are not required to be unique. (Duplicate names are always allowed for
+subpatterns with the same number, created by using the (?| feature. Indeed, if
+such subpatterns are named, they are required to use the same names.)
+.P
+Normally, patterns with duplicate names are such that in any one match, only
+one of the named subpatterns participates. An example is shown in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
@@ -2045,6 +2075,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2009
+Last updated: 03 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

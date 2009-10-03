@@ -1175,7 +1175,6 @@ pattern matches "abcabc" or "defabc":
 .sp
   /(?|(abc)|(def))(?1)/
 .sp
-.P
 An alternative approach to using the "branch reset" feature is to use
 duplicate named subpatterns, as described in the next section.
 .
@@ -1216,11 +1215,13 @@ extracting the name-to-number translation table from a compiled pattern. There
 is also a convenience function for extracting a captured substring by name.
 .P
 By default, a name must be unique within a pattern, but it is possible to relax
-this constraint by setting the PCRE_DUPNAMES option at compile time. This can
-be useful for patterns where only one instance of the named parentheses can
-match. Suppose you want to match the name of a weekday, either as a 3-letter
-abbreviation or as the full name, and in both cases you want to extract the
-abbreviation. This pattern (ignoring the line breaks) does the job:
+this constraint by setting the PCRE_DUPNAMES option at compile time. (Duplicate
+names are also always permitted for subpatterns with the same number, set up as 
+described in the previous section.) Duplicate names can be useful for patterns
+where only one instance of the named parentheses can match. Suppose you want to
+match the name of a weekday, either as a 3-letter abbreviation or as the full
+name, and in both cases you want to extract the abbreviation. This pattern
+(ignoring the line breaks) does the job:
 .sp
   (?<DN>Mon|Fri|Sun)(?:day)?|
   (?<DN>Tue)(?:sday)?|
@@ -1244,8 +1245,10 @@ details of the interfaces for handling named subpatterns, see the
 documentation.
 .P
 \fBWarning:\fP You cannot use different names to distinguish between two
-subpatterns with the same number (see the previous section) because PCRE uses
-only the numbers when matching.
+subpatterns with the same number because PCRE uses only the numbers when
+matching. For this reason, an error is given at compile time if different names
+are given to subpatterns with the same number. However, you can give the same
+name to subpatterns with the same number, even when PCRE_DUPNAMES is not set.
 .
 .
 .SH REPETITION
@@ -2388,6 +2391,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 30 September 2009
+Last updated: 03 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

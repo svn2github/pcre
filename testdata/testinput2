@@ -3098,4 +3098,10 @@ a random value. /Ix
   (?(1)|.)                    # check that there was an empty component
   /xiIS
 
+/(?|(?<a>A)|(?<a>B))/I
+    AB\Ca
+    BA\Ca
+
+/(?|(?<a>A)|(?<b>B))/ 
+
 /-- End of testinput2 --/

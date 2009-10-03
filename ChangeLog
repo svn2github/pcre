@@ -151,6 +151,12 @@ Version 8.00 ??-???-??
     pcre_dfa_exec() that meant it never actually used it. Double oops. There
     were also very few tests of studied patterns with pcre_dfa_exec().
     
+27. If (?| is used to create subpatterns with duplicate numbers, they are now
+    allowed to have the same name, even if PCRE_DUPNAMES is not set. However,
+    on the other side of the coin, they are no longer allowed to have different
+    names, because these cannot be distinguished in PCRE, and this has caused
+    confusion. (This is a difference from Perl.)
+    
 
 Version 7.9 11-Apr-09
 ---------------------

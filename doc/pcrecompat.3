@@ -102,10 +102,12 @@ names is not as general as Perl's. This is a consequence of the fact the PCRE
 works internally just with numbers, using an external table to translate 
 between numbers and names. The following are some specific differences:
 .sp
-(a) After matching a pattern such as (?|(?<a>A)|(?<b)B) where the two capturing 
-parentheses have the same number but different names, it is not possible to 
-distinguish which parentheses matched, because both names map to capturing
-subpattern number 1.
+(a) A pattern such as (?|(?<a>A)|(?<b)B), where the two capturing 
+parentheses have the same number but different names, is not supported, and 
+causes an error at compile time. If it were allowed, it would not be possible 
+to distinguish which parentheses matched, because both names map to capturing
+subpattern number 1. To avoid this confusing situation, an error is given at 
+compile time.
 .sp
 (b) A condition test for a subpattern with a name that is duplicated gives
 unpredictable results. For example, when the pattern
@@ -170,6 +172,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2009
+Last updated: 03 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

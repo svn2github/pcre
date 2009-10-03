@@ -600,4 +600,32 @@ No match
  0: a
  1: a
 
+/^(?|(abc)|(def))\1/
+    abcabc
+ 0: abcabc
+ 1: abc
+    defdef 
+ 0: defdef
+ 1: def
+    ** Failers
+No match
+    abcdef
+No match
+    defabc   
+No match
+    
+/^(?|(abc)|(def))(?1)/
+    abcabc
+ 0: abcabc
+ 1: abc
+    defabc
+ 0: defabc
+ 1: def
+    ** Failers
+No match
+    defdef
+No match
+    abcdef    
+No match
+
 /-- End of testinput11 --/

@@ -283,4 +283,18 @@
 /(?<X>a)(?<=b(?&X))/
     baz
 
+/^(?|(abc)|(def))\1/
+    abcabc
+    defdef 
+    ** Failers
+    abcdef
+    defabc   
+    
+/^(?|(abc)|(def))(?1)/
+    abcabc
+    defabc
+    ** Failers
+    defdef
+    abcdef    
+
 /-- End of testinput11 --/

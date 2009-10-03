@@ -141,7 +141,9 @@ static const int eint[] = {
   REG_BADPAT,  /* number is too big */
   REG_BADPAT,  /* subpattern name expected */
   REG_BADPAT,  /* digit expected after (?+ */
-  REG_BADPAT   /* ] is an invalid data character in JavaScript compatibility mode */
+  REG_BADPAT,  /* ] is an invalid data character in JavaScript compatibility mode */
+  /* 65 */
+  REG_BADPAT   /* different names for subpatterns of the same number are not allowed */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */
