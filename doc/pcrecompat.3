@@ -98,22 +98,14 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 argument. PCRE does not support (*MARK).
 .P
 12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern 
-names is not as general as Perl's. This is a consequence of the fact the PCRE 
-works internally just with numbers, using an external table to translate 
-between numbers and names. The following are some specific differences:
-.sp
-(a) A pattern such as (?|(?<a>A)|(?<b)B), where the two capturing 
-parentheses have the same number but different names, is not supported, and 
-causes an error at compile time. If it were allowed, it would not be possible 
-to distinguish which parentheses matched, because both names map to capturing
-subpattern number 1. To avoid this confusing situation, an error is given at 
-compile time.
-.sp
-(b) A condition test for a subpattern with a name that is duplicated gives
-unpredictable results. For example, when the pattern
-(?:(?<a>A)|(?<a>B))(?('a')...|...) is compiled (the PCRE_DUPNAMES option is
-required), the condition test (?('a') is set to test whether subpattern 1 has
-matched, ignoring subpattern 2, even though it has the same name.
+names is not as general as Perl's. This is a consequence of the fact the PCRE
+works internally just with numbers, using an external table to translate
+between numbers and names. In particular, a pattern such as (?|(?<a>A)|(?<b)B),
+where the two capturing parentheses have the same number but different names,
+is not supported, and causes an error at compile time. If it were allowed, it
+would not be possible to distinguish which parentheses matched, because both
+names map to capturing subpattern number 1. To avoid this confusing situation,
+an error is given at compile time.
 .P
 13. PCRE provides some extensions to the Perl regular expression facilities.
 Perl 5.10 includes new features that are not in earlier versions of Perl, some
@@ -172,6 +164,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 October 2009
+Last updated: 04 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

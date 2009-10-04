@@ -157,6 +157,14 @@ Version 8.00 ??-???-??
     names, because these cannot be distinguished in PCRE, and this has caused
     confusion. (This is a difference from Perl.)
     
+28. When duplicate subpattern names are present (necessarily with different 
+    numbers, as required by 27 above), and a test is made by name in a 
+    conditional pattern, either for a subpattern having been matched, or for 
+    recursion in such a pattern, all the associated numbered subpatterns are 
+    tested, and the overall condition is true if the condition is true for any
+    one of them. This is the way Perl works, and is also more like the way
+    testing by number works.
+    
 
 Version 7.9 11-Apr-09
 ---------------------

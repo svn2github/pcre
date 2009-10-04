@@ -839,18 +839,139 @@ for (;;)
 
     /* Now see what the actual condition is */
 
-    if (condcode == OP_RREF)         /* Recursion test */
+    if (condcode == OP_RREF || condcode == OP_NRREF)    /* Recursion test */
       {
-      offset = GET2(ecode, LINK_SIZE + 2);     /* Recursion group number*/
-      condition = md->recursive != NULL &&
-        (offset == RREF_ANY || offset == md->recursive->group_num);
-      ecode += condition? 3 : GET(ecode, 1);
-      }
+      if (md->recursive == NULL)                /* Not recursing => FALSE */
+        {
+        condition = FALSE;  
+        ecode += GET(ecode, 1);                         
+        } 
+      else
+        {    
+        int recno = GET2(ecode, LINK_SIZE + 2);   /* Recursion group number*/
+        condition =  (recno == RREF_ANY || recno == md->recursive->group_num);
+          
+        /* If the test is for recursion into a specific subpattern, and it is
+        false, but the test was set up by name, scan the table to see if the
+        name refers to any other numbers, and test them. The condition is true
+        if any one is set. */
+         
+        if (!condition && condcode == OP_NRREF && recno != RREF_ANY)
+          {
+          uschar *slotA = md->name_table;
+          for (i = 0; i < md->name_count; i++)
+            { 
+            if (GET2(slotA, 0) == recno) break; 
+            slotA += md->name_entry_size;
+            }
+             
+          /* Found a name for the number - there can be only one; duplicate
+          names for different numbers are allowed, but not vice versa. First
+          scan down for duplicates. */
+            
+          if (i < md->name_count)
+            {    
+            uschar *slotB = slotA;
+            while (slotB > md->name_table)
+              {
+              slotB -= md->name_entry_size;
+              if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
+                {
+                condition = GET2(slotB, 0) == md->recursive->group_num;
+                if (condition) break;   
+                }    
+              else break;
+              } 
+        
+            /* Scan up for duplicates */
+        
+            if (!condition)
+              { 
+              slotB = slotA;
+              for (i++; i < md->name_count; i++)
+                {
+                slotB += md->name_entry_size;
+                if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
+                  {
+                  condition = GET2(slotB, 0) == md->recursive->group_num;
+                  if (condition) break;
+                  }    
+                else break;
+                }  
+              } 
+            }
+          }  
+        
+        /* Chose branch according to the condition */
+         
+        ecode += condition? 3 : GET(ecode, 1);
+        }
+      }   
 
-    else if (condcode == OP_CREF)    /* Group used test */
+    else if (condcode == OP_CREF || condcode == OP_NCREF)  /* Group used test */
       {
       offset = GET2(ecode, LINK_SIZE+2) << 1;  /* Doubled ref number */
       condition = offset < offset_top && md->offset_vector[offset] >= 0;
+      
+      /* If the numbered capture is unset, but the reference was by name,
+      scan the table to see if the name refers to any other numbers, and test 
+      them. The condition is true if any one is set. This is tediously similar 
+      to the code above, but not close enough to try to amalgamate. */ 
+      
+      if (!condition && condcode == OP_NCREF)
+        {
+        int refno = offset >> 1; 
+        uschar *slotA = md->name_table;
+         
+        for (i = 0; i < md->name_count; i++)
+          { 
+          if (GET2(slotA, 0) == refno) break; 
+          slotA += md->name_entry_size;
+          }
+           
+        /* Found a name for the number - there can be only one; duplicate names 
+        for different numbers are allowed, but not vice versa. First scan down 
+        for duplicates. */
+          
+        if (i < md->name_count)
+          {    
+          uschar *slotB = slotA;
+          while (slotB > md->name_table)
+            {
+            slotB -= md->name_entry_size;
+            if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
+              {
+              offset = GET2(slotB, 0) << 1;
+              condition = offset < offset_top && 
+                md->offset_vector[offset] >= 0;
+              if (condition) break;   
+              }    
+            else break;
+            } 
+      
+          /* Scan up for duplicates */
+      
+          if (!condition)
+            { 
+            slotB = slotA;
+            for (i++; i < md->name_count; i++)
+              {
+              slotB += md->name_entry_size;
+              if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
+                {
+                offset = GET2(slotB, 0) << 1;
+                condition = offset < offset_top && 
+                  md->offset_vector[offset] >= 0;
+                if (condition) break;   
+                }    
+              else break;
+              } 
+            }   
+          }
+        }  
+         
+      /* Chose branch according to the condition */
+
       ecode += condition? 3 : GET(ecode, 1);
       }
 
@@ -4888,6 +5009,13 @@ if ((options & ~PUBLIC_EXEC_OPTIONS) != 0) return PCRE_ERROR_BADOPTION;
 if (re == NULL || subject == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
+
+/* This information is for finding all the numbers associated with a given 
+name, for condition testing. */
+
+md->name_table = (uschar *)re + re->name_table_offset;
+md->name_count = re->name_count;
+md->name_entry_size = re->name_entry_size;
 
 /* Fish out the optional data from the extra_data structure, first setting
 the default values. */

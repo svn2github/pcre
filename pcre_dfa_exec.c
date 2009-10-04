@@ -2287,7 +2287,8 @@ for (;;)
 
         /* Back reference conditions are not supported */
 
-        if (condcode == OP_CREF) return PCRE_ERROR_DFA_UCOND;
+        if (condcode == OP_CREF || condcode == OP_NCREF) 
+          return PCRE_ERROR_DFA_UCOND;
 
         /* The DEFINE condition is always false */
 
@@ -2298,7 +2299,7 @@ for (;;)
         which means "test if in any recursion". We can't test for specifically
         recursed groups. */
 
-        else if (condcode == OP_RREF)
+        else if (condcode == OP_RREF || condcode == OP_NRREF)
           {
           int value = GET2(code, LINK_SIZE+2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;

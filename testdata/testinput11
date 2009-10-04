@@ -297,4 +297,10 @@
     defdef
     abcdef    
 
+/(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |b(?<quote> (?<apostrophe>')|(?<realquote>")) ) (?('quote')[a-z]+|[0-9]+)/xJ
+    a\"aaaaa
+    b\"aaaaa 
+    ** Failers 
+    b\"11111
+
 /-- End of testinput11 --/

@@ -3104,4 +3104,25 @@ a random value. /Ix
 
 /(?|(?<a>A)|(?<b>B))/ 
 
+/(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |
+    b(?<quote> (?<apostrophe>')|(?<realquote>")) ) 
+    (?('quote')[a-z]+|[0-9]+)/JIx
+    a"aaaaa
+    b"aaaaa 
+    ** Failers 
+    b"11111
+    a"11111 
+    
+/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDx
+    abcdX
+    eX
+    ** Failers
+    abcdY
+    ey     
+    
+/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDx
+    abcdd
+    ** Failers
+    abcdde  
+
 /-- End of testinput2 --/

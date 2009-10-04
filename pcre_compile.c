@@ -1317,7 +1317,9 @@ for (;;)
 
     case OP_CALLOUT:
     case OP_CREF:
+    case OP_NCREF:
     case OP_RREF:
+    case OP_NRREF:
     case OP_DEF:
     code += _pcre_OP_lengths[*code];
     break;
@@ -1432,7 +1434,9 @@ for (;;)
 
     case OP_REVERSE:
     case OP_CREF:
+    case OP_NCREF:
     case OP_RREF:
+    case OP_NRREF:
     case OP_DEF:
     case OP_OPT:
     case OP_CALLOUT:
@@ -4654,7 +4658,10 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           }
 
         /* Otherwise (did not start with "+" or "-"), start by looking for the
-        name. */
+        name. If we find a name, add one to the opcode to change OP_CREF or 
+        OP_RREF into OP_NCREF or OP_NRREF. These behave exactly the same, 
+        except they record that the reference was originally to a name. The 
+        information is used to check duplicate names. */
 
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
@@ -4669,6 +4676,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           {
           recno = GET2(slot, 0);
           PUT2(code, 2+LINK_SIZE, recno);
+          code[1+LINK_SIZE]++;
           }
 
         /* Search the pattern for a forward reference */
@@ -4677,6 +4685,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                         (options & PCRE_EXTENDED) != 0)) > 0)
           {
           PUT2(code, 2+LINK_SIZE, i);
+          code[1+LINK_SIZE]++;
           }
 
         /* If terminator == 0 it means that the name followed directly after
@@ -6156,7 +6165,9 @@ do {
      switch (*scode)
        {
        case OP_CREF:
+       case OP_NCREF:
        case OP_RREF:
+       case OP_NRREF:
        case OP_DEF:
        return FALSE;
 

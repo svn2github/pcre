@@ -628,4 +628,23 @@ No match
     abcdef    
 No match
 
+/(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |b(?<quote> (?<apostrophe>')|(?<realquote>")) ) (?('quote')[a-z]+|[0-9]+)/xJ
+    a\"aaaaa
+ 0: a"aaaaa
+ 1: "
+ 2: <unset>
+ 3: "
+    b\"aaaaa 
+ 0: b"aaaaa
+ 1: <unset>
+ 2: <unset>
+ 3: <unset>
+ 4: "
+ 5: <unset>
+ 6: "
+    ** Failers 
+No match
+    b\"11111
+No match
+
 /-- End of testinput11 --/

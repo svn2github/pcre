@@ -7469,7 +7469,7 @@ No match
         ^
         CBra 1
         Cond
-      2 Cond ref
+      2 Cond nref
         y
         Ket
         [()]
@@ -10239,5 +10239,137 @@ No need char
 
 /(?|(?<a>A)|(?<b>B))/ 
 Failed: different names for subpatterns of the same number are not allowed at offset 15
+
+/(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |
+    b(?<quote> (?<apostrophe>')|(?<realquote>")) ) 
+    (?('quote')[a-z]+|[0-9]+)/JIx
+Capturing subpattern count = 6
+Named capturing subpatterns:
+  apostrophe   2
+  apostrophe   5
+  quote        1
+  quote        4
+  realquote    3
+  realquote    6
+Options: extended dupnames
+No first char
+No need char
+    a"aaaaa
+ 0: a"aaaaa
+ 1: "
+ 2: <unset>
+ 3: "
+    b"aaaaa 
+ 0: b"aaaaa
+ 1: <unset>
+ 2: <unset>
+ 3: <unset>
+ 4: "
+ 5: <unset>
+ 6: "
+    ** Failers 
+No match
+    b"11111
+No match
+    a"11111 
+No match
+    
+/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDx
+------------------------------------------------------------------
+  0  79 Bra
+  3     ^
+  4  43 Bra
+  7   7 CBra 1
+ 12     a
+ 14   7 Ket
+ 17   7 CBra 2
+ 22     b
+ 24   7 Ket
+ 27   7 CBra 3
+ 32     c
+ 34   7 Ket
+ 37   7 CBra 4
+ 42     d
+ 44   7 Ket
+ 47  13 Alt
+ 50   7 CBra 1
+ 55     e
+ 57   7 Ket
+ 60  56 Ket
+ 63   8 Cond
+ 66   4 Cond nref
+ 69     X
+ 71   5 Alt
+ 74     Y
+ 76  13 Ket
+ 79  79 Ket
+ 82     End
+------------------------------------------------------------------
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  D   4
+  D   1
+Options: anchored extended dupnames
+No first char
+No need char
+    abcdX
+ 0: abcdX
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+    eX
+ 0: eX
+ 1: e
+    ** Failers
+No match
+    abcdY
+No match
+    ey     
+No match
+    
+/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDx
+------------------------------------------------------------------
+  0  65 Bra
+  3   7 CBra 1
+  8     a
+ 10   7 Ket
+ 13   7 CBra 2
+ 18     b
+ 20   7 Ket
+ 23   7 CBra 3
+ 28     c
+ 30   7 Ket
+ 33  29 CBra 4
+ 38     d
+ 40   7 Cond
+ 43     Cond nrecurse 1
+ 46     $
+ 47  12 Alt
+ 50   6 Once
+ 53  33 Recurse
+ 56   6 Ket
+ 59  19 Ket
+ 62  29 Ket
+ 65  65 Ket
+ 68     End
+------------------------------------------------------------------
+Capturing subpattern count = 4
+Named capturing subpatterns:
+  A   1
+  A   4
+Options: extended dupnames
+First char = 'a'
+Need char = 'd'
+    abcdd
+ 0: abcdd
+ 1: a
+ 2: b
+ 3: c
+ 4: dd
+    ** Failers
+No match
+    abcdde  
+No match
 
 /-- End of testinput2 --/

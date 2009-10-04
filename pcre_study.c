@@ -140,7 +140,9 @@ for (;;)
 
     case OP_REVERSE:
     case OP_CREF:
+    case OP_NCREF:
     case OP_RREF:
+    case OP_NRREF:
     case OP_DEF:
     case OP_OPT:
     case OP_CALLOUT:

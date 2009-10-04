@@ -1347,29 +1347,33 @@ enum {
   OP_SCBRA,          /* 98 Start of capturing bracket, check empty */
   OP_SCOND,          /* 99 Conditional group, check empty */
 
+  /* The next two pairs must (respectively) be kept together. */
+   
   OP_CREF,           /* 100 Used to hold a capture number as condition */
-  OP_RREF,           /* 101 Used to hold a recursion number as condition */
-  OP_DEF,            /* 102 The DEFINE condition */
+  OP_NCREF,          /* 101 Same, but generaged by a name reference*/
+  OP_RREF,           /* 102 Used to hold a recursion number as condition */
+  OP_NRREF,          /* 103 Same, but generaged by a name reference*/
+  OP_DEF,            /* 104 The DEFINE condition */
 
-  OP_BRAZERO,        /* 103 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 104 order. */
+  OP_BRAZERO,        /* 105 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 106 order. */
 
   /* These are backtracking control verbs */
 
-  OP_PRUNE,          /* 105 */
-  OP_SKIP,           /* 106 */
-  OP_THEN,           /* 107 */
-  OP_COMMIT,         /* 108 */
+  OP_PRUNE,          /* 107 */
+  OP_SKIP,           /* 108 */
+  OP_THEN,           /* 109 */
+  OP_COMMIT,         /* 110 */
 
   /* These are forced failure and success verbs */
 
-  OP_FAIL,           /* 109 */
-  OP_ACCEPT,         /* 110 */
-  OP_CLOSE,          /* 111 Used before OP_ACCEPT to close open captures */ 
+  OP_FAIL,           /* 111 */
+  OP_ACCEPT,         /* 112 */
+  OP_CLOSE,          /* 113 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO        /* 112 */
+  OP_SKIPZERO        /* 114 */
 };
 
 
@@ -1393,7 +1397,8 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",     \
   "AssertB", "AssertB not", "Reverse",                            \
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
-  "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero",    \
+  "Cond ref", "Cond nref", "Cond rec", "Cond nrec", "Cond def",   \
+  "Brazero", "Braminzero",                                        \
   "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
   "Close", "Skip zero"
 
@@ -1455,15 +1460,16 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* SBRA                                   */ \
   3+LINK_SIZE,                   /* SCBRA                                  */ \
   1+LINK_SIZE,                   /* SCOND                                  */ \
-  3,                             /* CREF                                   */ \
-  3,                             /* RREF                                   */ \
+  3, 3,                          /* CREF, NCREF                            */ \
+  3, 3,                          /* RREF, NRREF                            */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
   1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
   1, 1, 3, 1                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
 
 
-/* A magic value for OP_RREF to indicate the "any recursion" condition. */
+/* A magic value for OP_RREF and OP_NRREF to indicate the "any recursion"
+condition. */
 
 #define RREF_ANY  0xffff
 
@@ -1521,17 +1527,17 @@ typedef struct pcre_study_data {
   pcre_uint32 size;               /* Total that was malloced */
   pcre_uint32 flags;              /* Private flags */
   uschar start_bits[32];          /* Starting char bits */
-  pcre_uint32 minlength;          /* Minimum subject length */ 
+  pcre_uint32 minlength;          /* Minimum subject length */
 } pcre_study_data;
 
-/* Structure for building a chain of open capturing subpatterns during 
-compiling, so that instructions to close them can be compiled when (*ACCEPT) is 
+/* Structure for building a chain of open capturing subpatterns during
+compiling, so that instructions to close them can be compiled when (*ACCEPT) is
 encountered. */
 
 typedef struct open_capitem {
   struct open_capitem *next;    /* Chain link */
   pcre_uint16 number;           /* Capture number */
-} open_capitem;    
+} open_capitem;
 
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
@@ -1545,7 +1551,7 @@ typedef struct compile_data {
   const uschar *start_code;     /* The start of the compiled code */
   const uschar *start_pattern;  /* The start of the pattern */
   const uschar *end_pattern;    /* The end of the pattern */
-  open_capitem *open_caps;      /* Chain of open capture items */ 
+  open_capitem *open_caps;      /* Chain of open capture items */
   uschar *hwm;                  /* High watermark of workspace */
   uschar *name_table;           /* The name/number table */
   int  names_found;             /* Number of entries so far */
@@ -1558,7 +1564,7 @@ typedef struct compile_data {
   int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
   BOOL had_accept;              /* (*ACCEPT) encountered */
-  BOOL check_lookbehind;        /* Lookbehinds need later checking */ 
+  BOOL check_lookbehind;        /* Lookbehinds need later checking */
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */
   uschar nl[4];                 /* Newline string when fixed length */
@@ -1582,7 +1588,7 @@ typedef struct recursion_info {
   USPTR save_start;             /* Old value of mstart */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
-  int offset_top;               /* Current value of offset_top */ 
+  int offset_top;               /* Current value of offset_top */
 } recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject
@@ -1607,6 +1613,9 @@ typedef struct match_data {
   int    offset_max;            /* The maximum usable for return data */
   int    nltype;                /* Newline type */
   int    nllen;                 /* Newline string length */
+  int    name_count;            /* Number of names in name table */
+  int    name_entry_size;       /* Size of entry in names table */
+  uschar *name_table;           /* Table of names */  
   uschar nl[4];                 /* Newline string when fixed */
   const uschar *lcc;            /* Points to lower casing table */
   const uschar *ctypes;         /* Points to table of type maps */

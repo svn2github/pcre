@@ -1175,7 +1175,15 @@ pattern matches "abcabc" or "defabc":
 .sp
   /(?|(abc)|(def))(?1)/
 .sp
-An alternative approach to using the "branch reset" feature is to use
+If a
+.\" HTML <a href="#conditions">
+.\" </a>
+condition test
+.\"
+for a subpattern's having matched refers to a non-unique number, the test is
+true if any of the subpatterns of that number have matched.
+.P
+An alternative approach to using this "branch reset" feature is to use
 duplicate named subpatterns, as described in the next section.
 .
 .
@@ -1188,7 +1196,8 @@ if an expression is modified, the numbers may change. To help with this
 difficulty, PCRE supports the naming of subpatterns. This feature was not
 added to Perl until release 5.10. Python had the feature earlier, and PCRE
 introduced it at release 4.0, using the Python syntax. PCRE now supports both
-the Perl and the Python syntax.
+the Perl and the Python syntax. Perl allows identically numbered subpatterns to
+have different names, but PCRE does not.
 .P
 In PCRE, a subpattern can be named in one of three ways: (?<name>...) or
 (?'name'...) as in Perl, or (?P<name>...) as in Python. References to capturing
@@ -1235,10 +1244,23 @@ subpattern, as described in the previous section.)
 .P
 The convenience function for extracting the data by name returns the substring
 for the first (and in this example, the only) subpattern of that name that
-matched. This saves searching to find which numbered subpattern it was. If you
-make a reference to a non-unique named subpattern from elsewhere in the
-pattern, the one that corresponds to the lowest number is used. For further
-details of the interfaces for handling named subpatterns, see the
+matched. This saves searching to find which numbered subpattern it was. 
+.P
+If you make a backreference to a non-unique named subpattern from elsewhere in
+the pattern, the one that corresponds to the first occurrence of the name is
+used. In the absence of duplicate numbers (see the previous section) this is
+the one with the lowest number. If you use a named reference in a condition
+test (see the
+.\"
+.\" HTML <a href="#conditions">
+.\" </a>
+section about conditions
+.\"
+below), either to check whether a subpattern has matched, or to check for 
+recursion, all subpatterns with the same name are tested. If the condition is
+true for any one of them, the overall condition is true. This is the same
+behaviour as testing by number. For further details of the interfaces for
+handling named subpatterns, see the
 .\" HREF
 \fBpcreapi\fP
 .\"
@@ -1877,6 +1899,9 @@ Rewriting the above example to use a named subpattern gives this:
 .sp
   (?<OPEN> \e( )?    [^()]+    (?(<OPEN>) \e) )
 .sp
+If the name used in a condition of this kind is a duplicate, the test is 
+applied to all subpatterns of the same name, and is true if any one of them has 
+matched.
 .
 .SS "Checking for pattern recursion"
 .rs
@@ -1890,14 +1915,16 @@ letter R, for example:
 .sp
 the condition is true if the most recent recursion is into a subpattern whose
 number or name is given. This condition does not check the entire recursion
-stack.
+stack. If the name used in a condition of this kind is a duplicate, the test is 
+applied to all subpatterns of the same name, and is true if any one of them is 
+the most recent recursion. 
 .P
 At "top level", all these recursion test conditions are false. 
 .\" HTML <a href="#recursion">
 .\" </a>
-Recursive patterns
+The syntax for recursive patterns
 .\"
-are described below.
+is described below.
 .
 .SS "Defining subpatterns for use by reference only"
 .rs
@@ -2391,6 +2418,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 October 2009
+Last updated: 04 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
