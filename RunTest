@@ -60,7 +60,7 @@ while [ $# -gt 0 ] ; do
     9) do9=yes;;
    10) do10=yes;;
    11) do11=yes;;
-   12) do12=yes;;  
+   12) do12=yes;;
    valgrind) valgrind="valgrind -q";;
     *) echo "Unknown test number $1"; exit 1;;
   esac
@@ -124,7 +124,7 @@ if [ $do1 = no -a $do2 = no -a $do3 = no -a $do4 = no -a \
   if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do9=yes; fi
   if [ $link_size -eq 2 -a $ucp -ne 0 ] ; then do10=yes; fi
   do11=yes
-  if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do12=yes; fi  
+  if [ $utf8 -ne 0 -a $ucp -ne 0 ] ; then do12=yes; fi
 fi
 
 # Show which release

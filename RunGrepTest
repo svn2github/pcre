@@ -29,9 +29,9 @@ cf="diff -ub"
 # that lacks a -u option. Try to deal with this; better do the test for the -b
 # option as well.
 
-if diff -u /dev/null /dev/null; then 
+if diff -u /dev/null /dev/null; then
   if diff -ub /dev/null /dev/null; then cf="diff -ub"; else cf="diff -u"; fi
-else 
+else
   if diff -b /dev/null /dev/null; then cf="diff -b"; else cf="diff"; fi
 fi
 

@@ -343,7 +343,7 @@ static const char error_texts[] =
   "digit expected after (?+\0"
   "] is an invalid data character in JavaScript compatibility mode\0"
   /* 65 */
-  "different names for subpatterns of the same number are not allowed"; 
+  "different names for subpatterns of the same number are not allowed";
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1102,7 +1102,7 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
       if (name != NULL && lorn == ptr - thisname &&
           strncmp((const char *)name, (const char *)thisname, lorn) == 0)
         return *count;
-      term++;   
+      term++;
       }
     }
   }
@@ -1148,10 +1148,10 @@ for (; *ptr != 0; ptr++)
           break;
         }
       else if (!negate_class && ptr[1] == CHAR_CIRCUMFLEX_ACCENT)
-        { 
+        {
         negate_class = TRUE;
         ptr++;
-        }  
+        }
       else break;
       }
 
@@ -1340,22 +1340,22 @@ for (;;)
 
 /* Scan a branch and compute the fixed length of subject that will match it,
 if the length is fixed. This is needed for dealing with backward assertions.
-In UTF8 mode, the result is in characters rather than bytes. The branch is 
+In UTF8 mode, the result is in characters rather than bytes. The branch is
 temporarily terminated with OP_END when this function is called.
 
-This function is called when a backward assertion is encountered, so that if it 
-fails, the error message can point to the correct place in the pattern. 
+This function is called when a backward assertion is encountered, so that if it
+fails, the error message can point to the correct place in the pattern.
 However, we cannot do this when the assertion contains subroutine calls,
-because they can be forward references. We solve this by remembering this case 
+because they can be forward references. We solve this by remembering this case
 and doing the check at the end; a flag specifies which mode we are running in.
 
 Arguments:
   code     points to the start of the pattern (the bracket)
   options  the compiling options
-  atend    TRUE if called when the pattern is complete 
-  cd       the "compile data" structure 
+  atend    TRUE if called when the pattern is complete
+  cd       the "compile data" structure
 
-Returns:   the fixed length, 
+Returns:   the fixed length,
              or -1 if there is no fixed length,
              or -2 if \C was encountered
              or -3 if an OP_RECURSE item was encountered and atend is FALSE
@@ -1405,21 +1405,21 @@ for (;;)
     cc += 1 + LINK_SIZE;
     branchlength = 0;
     break;
-    
+
     /* A true recursion implies not fixed length, but a subroutine call may
     be OK. If the subroutine is a forward reference, we can't deal with
     it until the end of the pattern, so return -3. */
-    
+
     case OP_RECURSE:
     if (!atend) return -3;
     cs = ce = (uschar *)cd->start_code + GET(cc, 1);  /* Start subpattern */
     do ce += GET(ce, 1); while (*ce == OP_ALT);       /* End subpattern */
     if (cc > cs && cc < ce) return -1;                /* Recursion */
     d = find_fixedlength(cs + 2, options, atend, cd);
-    if (d < 0) return d; 
+    if (d < 0) return d;
     branchlength += d;
     cc += 1 + LINK_SIZE;
-    break;   
+    break;
 
     /* Skip over assertive subpatterns */
 
@@ -1459,7 +1459,7 @@ for (;;)
     branchlength++;
     cc += 2;
 #ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0) 
+    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0)
       cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
@@ -1471,7 +1471,7 @@ for (;;)
     branchlength += GET2(cc,1);
     cc += 4;
 #ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0) 
+    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0)
       cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
@@ -1556,8 +1556,8 @@ for (;;)
 
 /* This little function scans through a compiled pattern until it finds a
 capturing bracket with the given number, or, if the number is negative, an
-instance of OP_REVERSE for a lookbehind. The function is global in the C sense 
-so that it can be called from pcre_study() when finding the minimum matching 
+instance of OP_REVERSE for a lookbehind. The function is global in the C sense
+so that it can be called from pcre_study() when finding the minimum matching
 length.
 
 Arguments:
@@ -1581,12 +1581,12 @@ for (;;)
   the table is zero; the actual length is stored in the compiled code. */
 
   if (c == OP_XCLASS) code += GET(code, 1);
-  
+
   /* Handle recursion */
-  
+
   else if (c == OP_REVERSE)
     {
-    if (number < 0) return (uschar *)code; 
+    if (number < 0) return (uschar *)code;
     code += _pcre_OP_lengths[c];
     }
 
@@ -1957,7 +1957,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_POSQUERY:
     if (utf8 && code[1] >= 0xc0) code += _pcre_utf8_table4[code[1] & 0x3f];
     break;
- 
+
     case OP_UPTO:
     case OP_MINUPTO:
     case OP_POSUPTO:
@@ -3915,15 +3915,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       if (repeat_max == 0) goto END_REPEAT;
 
-      /*--------------------------------------------------------------------*/ 
+      /*--------------------------------------------------------------------*/
       /* This code is obsolete from release 8.00; the restriction was finally
       removed: */
-       
+
       /* All real repeats make it impossible to handle partial matching (maybe
       one day we will be able to remove this restriction). */
-       
+
       /* if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL; */
-      /*--------------------------------------------------------------------*/ 
+      /*--------------------------------------------------------------------*/
 
       /* Combine the op_type with the repeat_type */
 
@@ -4070,7 +4070,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         goto END_REPEAT;
         }
 
-      /*--------------------------------------------------------------------*/ 
+      /*--------------------------------------------------------------------*/
       /* This code is obsolete from release 8.00; the restriction was finally
       removed: */
 
@@ -4078,7 +4078,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
       one day we will be able to remove this restriction). */
 
       /* if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL; */
-      /*--------------------------------------------------------------------*/ 
+      /*--------------------------------------------------------------------*/
 
       if (repeat_min == 0 && repeat_max == -1)
         *code++ = OP_CRSTAR + repeat_type;
@@ -4393,11 +4393,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
     if (possessive_quantifier)
       {
       int len;
-       
+
       if (*tempcode == OP_TYPEEXACT)
         tempcode += _pcre_OP_lengths[*tempcode] +
-          ((tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP)? 2 : 0);   
-           
+          ((tempcode[3] == OP_PROP || tempcode[3] == OP_NOTPROP)? 2 : 0);
+
       else if (*tempcode == OP_EXACT || *tempcode == OP_NOTEXACT)
         {
         tempcode += _pcre_OP_lengths[*tempcode];
@@ -4405,8 +4405,8 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         if (utf8 && tempcode[-1] >= 0xc0)
           tempcode += _pcre_utf8_table4[tempcode[-1] & 0x3f];
 #endif
-        }         
- 
+        }
+
       len = code - tempcode;
       if (len > 0) switch (*tempcode)
         {
@@ -4485,17 +4485,17 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             strncmp((char *)name, vn, namelen) == 0)
           {
           /* Check for open captures before ACCEPT */
-            
+
           if (verbs[i].op == OP_ACCEPT)
             {
-            open_capitem *oc; 
-            cd->had_accept = TRUE; 
+            open_capitem *oc;
+            cd->had_accept = TRUE;
             for (oc = cd->open_caps; oc != NULL; oc = oc->next)
               {
               *code++ = OP_CLOSE;
-              PUT2INC(code, 0, oc->number); 
-              }  
-            }  
+              PUT2INC(code, 0, oc->number);
+              }
+            }
           *code++ = verbs[i].op;
           break;
           }
@@ -4658,9 +4658,9 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           }
 
         /* Otherwise (did not start with "+" or "-"), start by looking for the
-        name. If we find a name, add one to the opcode to change OP_CREF or 
-        OP_RREF into OP_NCREF or OP_NRREF. These behave exactly the same, 
-        except they record that the reference was originally to a name. The 
+        name. If we find a name, add one to the opcode to change OP_CREF or
+        OP_RREF into OP_NCREF or OP_NRREF. These behave exactly the same,
+        except they record that the reference was originally to a name. The
         information is used to check duplicate names. */
 
         slot = cd->name_table;
@@ -4887,7 +4887,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           is because the number of names, and hence the table size, is computed
           in the pre-compile, and it affects various numbers and pointers which
           would all have to be modified, and the compiled code moved down, if
-          duplicates with the same number were omitted from the table. This 
+          duplicates with the same number were omitted from the table. This
           doesn't seem worth the hassle. However, *different* names for the
           same number are not permitted. */
 
@@ -4895,7 +4895,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             {
             BOOL dupname = FALSE;
             slot = cd->name_table;
- 
+
             for (i = 0; i < cd->names_found; i++)
               {
               int crc = memcmp(name, slot+2, namelen);
@@ -4909,31 +4909,31 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                     *errorcodeptr = ERR43;
                     goto FAILED;
                     }
-                  else dupname = TRUE;   
+                  else dupname = TRUE;
                   }
                 else crc = -1;      /* Current name is a substring */
                 }
-                
-              /* Make space in the table and break the loop for an earlier 
-              name. For a duplicate or later name, carry on. We do this for 
-              duplicates so that in the simple case (when ?(| is not used) they 
+
+              /* Make space in the table and break the loop for an earlier
+              name. For a duplicate or later name, carry on. We do this for
+              duplicates so that in the simple case (when ?(| is not used) they
               are in order of their numbers. */
-                
+
               if (crc < 0)
                 {
                 memmove(slot + cd->name_entry_size, slot,
                   (cd->names_found - i) * cd->name_entry_size);
                 break;
                 }
-                
+
               /* Continue the loop for a later or duplicate name */
-               
+
               slot += cd->name_entry_size;
               }
-              
+
             /* For non-duplicate names, check for a duplicate number before
             adding the new name. */
-              
+
             if (!dupname)
               {
               uschar *cslot = cd->name_table;
@@ -4945,12 +4945,12 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                     {
                     *errorcodeptr = ERR65;
                     goto FAILED;
-                    }    
+                    }
                   }
-                else i--;   
+                else i--;
                 cslot += cd->name_entry_size;
-                }  
-              }   
+                }
+              }
 
             PUT2(slot, 0, cd->bracount + 1);
             memcpy(slot + 2, name, namelen);
@@ -5131,7 +5131,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           if (lengthptr == NULL)
             {
             *code = OP_END;
-            if (recno != 0) 
+            if (recno != 0)
               called = _pcre_find_bracket(cd->start_code, utf8, recno);
 
             /* Forward reference */
@@ -5812,8 +5812,8 @@ if (*code == OP_CBRA)
   capnumber = GET2(code, 1 + LINK_SIZE);
   capitem.number = capnumber;
   capitem.next = cd->open_caps;
-  cd->open_caps = &capitem;  
-  } 
+  cd->open_caps = &capitem;
+  }
 
 /* Offset is set zero to mark that this bracket is still open */
 
@@ -5909,10 +5909,10 @@ for (;;)
 
     /* If lookbehind, check that this branch matches a fixed-length string, and
     put the length into the OP_REVERSE item. Temporarily mark the end of the
-    branch with OP_END. If the branch contains OP_RECURSE, the result is -3 
+    branch with OP_END. If the branch contains OP_RECURSE, the result is -3
     because there may be forward references that we can't check here. Set a
-    flag to cause another lookbehind check at the end. Why not do it all at the 
-    end? Because common, erroneous checks are picked up here and the offset of 
+    flag to cause another lookbehind check at the end. Why not do it all at the
+    end? Because common, erroneous checks are picked up here and the offset of
     the problem can be shown. */
 
     if (lookbehind)
@@ -5923,8 +5923,8 @@ for (;;)
       DPRINTF(("fixed length = %d\n", fixed_length));
       if (fixed_length == -3)
         {
-        cd->check_lookbehind = TRUE; 
-        }   
+        cd->check_lookbehind = TRUE;
+        }
       else if (fixed_length < 0)
         {
         *errorcodeptr = (fixed_length == -2)? ERR36 : ERR25;
@@ -5958,9 +5958,9 @@ for (;;)
         }
       while (branch_length > 0);
       }
-      
+
     /* If it was a capturing subpattern, remove it from the chain. */
-    
+
     if (capnumber > 0) cd->open_caps = cd->open_caps->next;
 
     /* Fill in the ket */
@@ -6654,7 +6654,7 @@ subpattern. */
 
 if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 
-/* If there were any lookbehind assertions that contained OP_RECURSE 
+/* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
 because they may contain forward references. Actual recursions can't be fixed
 length, but subroutine calls can. It is done like this so that those without
@@ -6665,21 +6665,21 @@ length, and set their lengths. */
 if (cd->check_lookbehind)
   {
   uschar *cc = (uschar *)codestart;
-   
-  /* Loop, searching for OP_REVERSE items, and process those that do not have 
-  their length set. (Actually, it will also re-process any that have a length 
-  of zero, but that is a pathological case, and it does no harm.) When we find 
+
+  /* Loop, searching for OP_REVERSE items, and process those that do not have
+  their length set. (Actually, it will also re-process any that have a length
+  of zero, but that is a pathological case, and it does no harm.) When we find
   one, we temporarily terminate the branch it is in while we scan it. */
-   
+
   for (cc = (uschar *)_pcre_find_bracket(codestart, utf8, -1);
        cc != NULL;
        cc = (uschar *)_pcre_find_bracket(cc, utf8, -1))
-    { 
+    {
     if (GET(cc, 1) == 0)
-      { 
-      int fixed_length; 
+      {
+      int fixed_length;
       uschar *be = cc - 1 - LINK_SIZE + GET(cc, -LINK_SIZE);
-      int end_op = *be; 
+      int end_op = *be;
       *be = OP_END;
       fixed_length = find_fixedlength(cc, re->options, TRUE, cd);
       *be = end_op;
@@ -6687,13 +6687,13 @@ if (cd->check_lookbehind)
       if (fixed_length < 0)
         {
         errorcode = (fixed_length == -2)? ERR36 : ERR25;
-        break;   
+        break;
         }
       PUT(cc, 1, fixed_length);
       }
     cc += 1 + LINK_SIZE;
-    }  
-  } 
+    }
+  }
 
 /* Failed to compile, or error while post-processing */
 

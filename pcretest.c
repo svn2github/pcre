@@ -1305,7 +1305,7 @@ while (!done)
     if ((options & PCRE_DOTALL) != 0) cflags |= REG_DOTALL;
     if ((options & PCRE_NO_AUTO_CAPTURE) != 0) cflags |= REG_NOSUB;
     if ((options & PCRE_UTF8) != 0) cflags |= REG_UTF8;
-    if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY; 
+    if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
     rc = regcomp(&preg, (char *)p, cflags);
 
@@ -1630,10 +1630,10 @@ while (!done)
           {
           uschar *start_bits = NULL;
           int minlength;
-           
+
           new_info(re, extra, PCRE_INFO_MINLENGTH, &minlength);
-          fprintf(outfile, "Subject length lower bound = %d\n", minlength);  
- 
+          fprintf(outfile, "Subject length lower bound = %d\n", minlength);
+
           new_info(re, extra, PCRE_INFO_FIRSTTABLE, &start_bits);
           if (start_bits == NULL)
             fprintf(outfile, "No set of starting bytes\n");
@@ -1977,7 +1977,7 @@ while (!done)
         case 'N':
         if ((options & PCRE_NOTEMPTY) != 0)
           options = (options & ~PCRE_NOTEMPTY) | PCRE_NOTEMPTY_ATSTART;
-        else    
+        else
           options |= PCRE_NOTEMPTY;
         continue;
 
@@ -2001,7 +2001,7 @@ while (!done)
         continue;
 
         case 'P':
-        options |= ((options & PCRE_PARTIAL_SOFT) == 0)? 
+        options |= ((options & PCRE_PARTIAL_SOFT) == 0)?
           PCRE_PARTIAL_SOFT : PCRE_PARTIAL_HARD;
         continue;
 
@@ -2377,8 +2377,8 @@ while (!done)
           {
           fprintf(outfile, ": ");
           pchars(bptr + use_offsets[0], use_offsets[1] - use_offsets[0],
-            outfile);   
-          }   
+            outfile);
+          }
         fprintf(outfile, "\n");
         break;  /* Out of the /g loop */
         }

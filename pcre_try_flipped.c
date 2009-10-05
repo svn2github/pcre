@@ -129,7 +129,7 @@ if (study != NULL)
   *internal_study = *study;   /* To copy other fields */
   internal_study->size = byteflip(study->size, sizeof(study->size));
   internal_study->flags = byteflip(study->flags, sizeof(study->flags));
-  internal_study->minlength = byteflip(study->minlength, 
+  internal_study->minlength = byteflip(study->minlength,
     sizeof(study->minlength));
   }
 

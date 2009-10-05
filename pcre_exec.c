@@ -843,34 +843,34 @@ for (;;)
       {
       if (md->recursive == NULL)                /* Not recursing => FALSE */
         {
-        condition = FALSE;  
-        ecode += GET(ecode, 1);                         
-        } 
+        condition = FALSE;
+        ecode += GET(ecode, 1);
+        }
       else
-        {    
+        {
         int recno = GET2(ecode, LINK_SIZE + 2);   /* Recursion group number*/
         condition =  (recno == RREF_ANY || recno == md->recursive->group_num);
-          
+
         /* If the test is for recursion into a specific subpattern, and it is
         false, but the test was set up by name, scan the table to see if the
         name refers to any other numbers, and test them. The condition is true
         if any one is set. */
-         
+
         if (!condition && condcode == OP_NRREF && recno != RREF_ANY)
           {
           uschar *slotA = md->name_table;
           for (i = 0; i < md->name_count; i++)
-            { 
-            if (GET2(slotA, 0) == recno) break; 
+            {
+            if (GET2(slotA, 0) == recno) break;
             slotA += md->name_entry_size;
             }
-             
+
           /* Found a name for the number - there can be only one; duplicate
           names for different numbers are allowed, but not vice versa. First
           scan down for duplicates. */
-            
+
           if (i < md->name_count)
-            {    
+            {
             uschar *slotB = slotA;
             while (slotB > md->name_table)
               {
@@ -878,15 +878,15 @@ for (;;)
               if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
                 {
                 condition = GET2(slotB, 0) == md->recursive->group_num;
-                if (condition) break;   
-                }    
+                if (condition) break;
+                }
               else break;
-              } 
-        
+              }
+
             /* Scan up for duplicates */
-        
+
             if (!condition)
-              { 
+              {
               slotB = slotA;
               for (i++; i < md->name_count; i++)
                 {
@@ -895,46 +895,46 @@ for (;;)
                   {
                   condition = GET2(slotB, 0) == md->recursive->group_num;
                   if (condition) break;
-                  }    
+                  }
                 else break;
-                }  
-              } 
+                }
+              }
             }
-          }  
-        
+          }
+
         /* Chose branch according to the condition */
-         
+
         ecode += condition? 3 : GET(ecode, 1);
         }
-      }   
+      }
 
     else if (condcode == OP_CREF || condcode == OP_NCREF)  /* Group used test */
       {
       offset = GET2(ecode, LINK_SIZE+2) << 1;  /* Doubled ref number */
       condition = offset < offset_top && md->offset_vector[offset] >= 0;
-      
+
       /* If the numbered capture is unset, but the reference was by name,
-      scan the table to see if the name refers to any other numbers, and test 
-      them. The condition is true if any one is set. This is tediously similar 
-      to the code above, but not close enough to try to amalgamate. */ 
-      
+      scan the table to see if the name refers to any other numbers, and test
+      them. The condition is true if any one is set. This is tediously similar
+      to the code above, but not close enough to try to amalgamate. */
+
       if (!condition && condcode == OP_NCREF)
         {
-        int refno = offset >> 1; 
+        int refno = offset >> 1;
         uschar *slotA = md->name_table;
-         
+
         for (i = 0; i < md->name_count; i++)
-          { 
-          if (GET2(slotA, 0) == refno) break; 
+          {
+          if (GET2(slotA, 0) == refno) break;
           slotA += md->name_entry_size;
           }
-           
-        /* Found a name for the number - there can be only one; duplicate names 
-        for different numbers are allowed, but not vice versa. First scan down 
+
+        /* Found a name for the number - there can be only one; duplicate names
+        for different numbers are allowed, but not vice versa. First scan down
         for duplicates. */
-          
+
         if (i < md->name_count)
-          {    
+          {
           uschar *slotB = slotA;
           while (slotB > md->name_table)
             {
@@ -942,17 +942,17 @@ for (;;)
             if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
               {
               offset = GET2(slotB, 0) << 1;
-              condition = offset < offset_top && 
+              condition = offset < offset_top &&
                 md->offset_vector[offset] >= 0;
-              if (condition) break;   
-              }    
+              if (condition) break;
+              }
             else break;
-            } 
-      
+            }
+
           /* Scan up for duplicates */
-      
+
           if (!condition)
-            { 
+            {
             slotB = slotA;
             for (i++; i < md->name_count; i++)
               {
@@ -960,16 +960,16 @@ for (;;)
               if (strcmp((char *)slotA + 2, (char *)slotB + 2) == 0)
                 {
                 offset = GET2(slotB, 0) << 1;
-                condition = offset < offset_top && 
+                condition = offset < offset_top &&
                   md->offset_vector[offset] >= 0;
-                if (condition) break;   
-                }    
+                if (condition) break;
+                }
               else break;
-              } 
-            }   
+              }
+            }
           }
-        }  
-         
+        }
+
       /* Chose branch according to the condition */
 
       ecode += condition? 3 : GET(ecode, 1);
@@ -1030,15 +1030,15 @@ for (;;)
       ecode += 1 + LINK_SIZE;
       }
     break;
-    
+
 
     /* Before OP_ACCEPT there may be any number of OP_CLOSE opcodes,
     to close any currently open capturing brackets. */
-    
+
     case OP_CLOSE:
-    number = GET2(ecode, 1); 
+    number = GET2(ecode, 1);
     offset = number << 1;
-      
+
 #ifdef DEBUG
       printf("end bracket %d at *ACCEPT", number);
       printf("\n");
@@ -1053,7 +1053,7 @@ for (;;)
       if (offset_top <= offset) offset_top = offset + 2;
       }
     ecode += 3;
-    break;   
+    break;
 
 
     /* End of the pattern, either real or forced. If we are in a top-level
@@ -1069,7 +1069,7 @@ for (;;)
       md->recursive = rec->prevrec;
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
-      offset_top = rec->offset_top;   
+      offset_top = rec->save_offset_top;
       mstart = rec->save_start;
       ims = original_ims;
       ecode = rec->after_call;
@@ -1261,7 +1261,7 @@ for (;;)
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
       new_recursive.save_start = mstart;
-      new_recursive.offset_top = offset_top; 
+      new_recursive.save_offset_top = offset_top;
       mstart = eptr;
 
       /* OK, now we can do the recursion. For each top-level alternative we
@@ -1460,7 +1460,7 @@ for (;;)
       {
       number = GET2(prev, 1+LINK_SIZE);
       offset = number << 1;
-      
+
 #ifdef DEBUG
       printf("end bracket %d", number);
       printf("\n");
@@ -1486,7 +1486,7 @@ for (;;)
         mstart = rec->save_start;
         memcpy(md->offset_vector, rec->offset_save,
           rec->saved_max * sizeof(int));
-        offset_top = rec->offset_top;   
+        offset_top = rec->save_offset_top;
         ecode = rec->after_call;
         ims = original_ims;
         break;
@@ -5010,7 +5010,7 @@ if (re == NULL || subject == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
 
-/* This information is for finding all the numbers associated with a given 
+/* This information is for finding all the numbers associated with a given
 name, for condition testing. */
 
 md->name_table = (uschar *)re + re->name_table_offset;
@@ -5375,24 +5375,24 @@ for(;;)
   /* Restore fudged end_subject */
 
   end_subject = save_end_subject;
-  
-  /* The following two optimizations are disabled for partial matching or if 
+
+  /* The following two optimizations are disabled for partial matching or if
   disabling is explicitly requested. */
-  
-  if ((options & PCRE_NO_START_OPTIMIZE) == 0 && !md->partial) 
-    { 
+
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0 && !md->partial)
+    {
     /* If the pattern was studied, a minimum subject length may be set. This is
     a lower bound; no actual string of that length may actually match the
     pattern. Although the value is, strictly, in characters, we treat it as
     bytes to avoid spending too much time in this optimization. */
-    
+
     if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
         end_subject - start_match < study->minlength)
       {
       rc = MATCH_NOMATCH;
-      break;     
+      break;
       }
- 
+
     /* If req_byte is set, we know that that character must appear in the
     subject for the match to succeed. If the first character is set, req_byte
     must be later in the subject; otherwise the test starts at the match point.
@@ -5400,20 +5400,20 @@ for(;;)
     nested unlimited repeats that aren't going to match. Writing separate code
     for cased/caseless versions makes it go faster, as does using an
     autoincrement and backing off on a match.
-    
+
     HOWEVER: when the subject string is very, very long, searching to its end
     can take a long time, and give bad performance on quite ordinary patterns.
     This showed up when somebody was matching something like /^\d+C/ on a
     32-megabyte string... so we don't do this when the string is sufficiently
     long. */
-    
+
     if (req_byte >= 0 && end_subject - start_match < REQ_BYTE_MAX)
       {
       register USPTR p = start_match + ((first_byte >= 0)? 1 : 0);
-    
+
       /* We don't need to repeat the search if we haven't yet reached the
       place we found it at last time. */
-    
+
       if (p > req_byte_ptr)
         {
         if (req_byte_caseless)
@@ -5431,24 +5431,24 @@ for(;;)
             if (*p++ == req_byte) { p--; break; }
             }
           }
-    
+
         /* If we can't find the required character, break the matching loop,
         forcing a match failure. */
-    
+
         if (p >= end_subject)
           {
           rc = MATCH_NOMATCH;
           break;
           }
-    
+
         /* If we have found the required character, save the point where we
         found it, so that we don't search again next time round the loop if
         the start hasn't passed this character yet. */
-    
+
         req_byte_ptr = p;
         }
       }
-    }   
+    }
 
 #ifdef DEBUG  /* Sigh. Some compilers never learn. */
   printf(">>>> Match against: ");
@@ -5575,7 +5575,7 @@ if (rc == MATCH_MATCH)
   too many to fit into the vector. */
 
   rc = md->offset_overflow? 0 : md->end_offset_top/2;
-  
+
   /* If there is space, set up the whole thing as substring 0. The value of
   md->start_match_ptr might be modified if \K was encountered on the success
   matching path. */

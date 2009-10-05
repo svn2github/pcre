@@ -335,6 +335,8 @@ DATA LINES
                       (any number of digits)
          \R         pass the PCRE_DFA_RESTART option to pcre_dfa_exec()
          \S         output details of memory get/free calls during matching
+         \Y         pass the PCRE_NO_START_OPTIMIZE option to pcre_exec()
+                      or pcre_dfa_exec()
          \Z         pass the PCRE_NOTEOL option to pcre_exec()
                       or pcre_dfa_exec()
          \?         pass the PCRE_NO_UTF8_CHECK option to
@@ -661,5 +663,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 11 September 2009
+       Last updated: 26 September 2009
        Copyright (c) 1997-2009 University of Cambridge.

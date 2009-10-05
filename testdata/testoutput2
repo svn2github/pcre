@@ -10274,36 +10274,36 @@ No match
     a"11111 
 No match
     
-/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDx
+/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDZx
 ------------------------------------------------------------------
-  0  79 Bra
-  3     ^
-  4  43 Bra
-  7   7 CBra 1
- 12     a
- 14   7 Ket
- 17   7 CBra 2
- 22     b
- 24   7 Ket
- 27   7 CBra 3
- 32     c
- 34   7 Ket
- 37   7 CBra 4
- 42     d
- 44   7 Ket
- 47  13 Alt
- 50   7 CBra 1
- 55     e
- 57   7 Ket
- 60  56 Ket
- 63   8 Cond
- 66   4 Cond nref
- 69     X
- 71   5 Alt
- 74     Y
- 76  13 Ket
- 79  79 Ket
- 82     End
+        Bra
+        ^
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Ket
+        Alt
+        CBra 1
+        e
+        Ket
+        Ket
+        Cond
+      4 Cond nref
+        X
+        Alt
+        Y
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 4
 Named capturing subpatterns:
@@ -10328,31 +10328,31 @@ No match
     ey     
 No match
     
-/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDx
+/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDZx
 ------------------------------------------------------------------
-  0  65 Bra
-  3   7 CBra 1
-  8     a
- 10   7 Ket
- 13   7 CBra 2
- 18     b
- 20   7 Ket
- 23   7 CBra 3
- 28     c
- 30   7 Ket
- 33  29 CBra 4
- 38     d
- 40   7 Cond
- 43     Cond nrecurse 1
- 46     $
- 47  12 Alt
- 50   6 Once
- 53  33 Recurse
- 56   6 Ket
- 59  19 Ket
- 62  29 Ket
- 65  65 Ket
- 68     End
+        Bra
+        CBra 1
+        a
+        Ket
+        CBra 2
+        b
+        Ket
+        CBra 3
+        c
+        Ket
+        CBra 4
+        d
+        Cond
+        Cond nrecurse 1
+        $
+        Alt
+        Once
+        Recurse
+        Ket
+        Ket
+        Ket
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 4
 Named capturing subpatterns:

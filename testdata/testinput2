@@ -3113,14 +3113,14 @@ a random value. /Ix
     b"11111
     a"11111 
     
-/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDx
+/^(?|(a)(b)(c)(?<D>d)|(?<D>e)) (?('D')X|Y)/JDZx
     abcdX
     eX
     ** Failers
     abcdY
     ey     
     
-/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDx
+/(?<A>a) (b)(c)  (?<A>d  (?(R&A)$ | (?4)) )/JDZx
     abcdd
     ** Failers
     abcdde  

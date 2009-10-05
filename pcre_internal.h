@@ -1348,7 +1348,7 @@ enum {
   OP_SCOND,          /* 99 Conditional group, check empty */
 
   /* The next two pairs must (respectively) be kept together. */
-   
+
   OP_CREF,           /* 100 Used to hold a capture number as condition */
   OP_NCREF,          /* 101 Same, but generaged by a name reference*/
   OP_RREF,           /* 102 Used to hold a recursion number as condition */
@@ -1588,7 +1588,7 @@ typedef struct recursion_info {
   USPTR save_start;             /* Old value of mstart */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
-  int offset_top;               /* Current value of offset_top */
+  int save_offset_top;          /* Current value of offset_top */
 } recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject
@@ -1615,7 +1615,7 @@ typedef struct match_data {
   int    nllen;                 /* Newline string length */
   int    name_count;            /* Number of names in name table */
   int    name_entry_size;       /* Size of entry in names table */
-  uschar *name_table;           /* Table of names */  
+  uschar *name_table;           /* Table of names */
   uschar nl[4];                 /* Newline string when fixed */
   const uschar *lcc;            /* Points to lower casing table */
   const uschar *ctypes;         /* Points to table of type maps */

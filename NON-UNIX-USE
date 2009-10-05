@@ -12,10 +12,10 @@ This document contains the following sections:
   Comments about Win32 builds
   Building PCRE on Windows with CMake
   Use of relative paths with CMake on Windows
-  Testing with runtest.bat
+  Testing with RunTest.bat
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
-  Building PCRE on Stratus OpenVOS 
+  Building PCRE on Stratus OpenVOS
 
 
 GENERAL
@@ -37,10 +37,10 @@ wrapper functions are a separate issue (see below).
 
 The PCRE distribution includes a "configure" file for use by the Configure/Make
 build system, as found in many Unix-like environments. There is also support
-support for CMake, which some users prefer, in particular in Windows
-environments. There are some instructions for CMake under Windows in the
-section entitled "Building PCRE with CMake" below. CMake can also be used to
-build PCRE in Unix-like systems.
+support for CMake, which some users prefer, especially in Windows environments.
+There are some instructions for CMake under Windows in the section entitled
+"Building PCRE with CMake" below. CMake can also be used to build PCRE in
+Unix-like systems.
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
@@ -304,10 +304,10 @@ were contributed by a PCRE user.
 7.  Select the particular IDE / build tool that you are using (Visual
     Studio, MSYS makefiles, MinGW makefiles, etc.)
 
-8.  The GUI will then list several configuration options. This is where 
+8.  The GUI will then list several configuration options. This is where
     you can enable UTF-8 support or other PCRE optional features.
 
-9.  Hit "Configure" again. The adjacent "Generate" button should now be 
+9.  Hit "Configure" again. The adjacent "Generate" button should now be
     active.
 
 10. Hit "Generate".
@@ -460,7 +460,7 @@ I built pcre on OpenVOS Release 17.0.1at using GNU Tools 3.4a without any
 problems. I used the following packages to build PCRE:
 
   ftp://ftp.stratus.com/pub/vos/posix/ga/posix.save.evf.gz
-     
+
 Please read and follow the instructions that come with these packages. To start
 the build of pcre, from the root of the package type:
 
@@ -494,5 +494,5 @@ build.log file in the root of the package also.
 
 
 =========================
-Last Updated: 09 September 2009
+Last Updated: 05 October 2009
 ****

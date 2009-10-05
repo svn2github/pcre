@@ -395,8 +395,8 @@ avoiding the use of the stack.
 Either of the functions \fBpcre_compile()\fP or \fBpcre_compile2()\fP can be
 called to compile a pattern into an internal form. The only difference between
 the two interfaces is that \fBpcre_compile2()\fP has an additional argument,
-\fIerrorcodeptr\fP, via which a numerical error code can be returned. To avoid 
-too much repetition, we refer just to \fBpcre_compile()\fP below, but the 
+\fIerrorcodeptr\fP, via which a numerical error code can be returned. To avoid
+too much repetition, we refer just to \fBpcre_compile()\fP below, but the
 information applies equally to \fBpcre_compile2()\fP.
 .P
 The pattern is a C string terminated by a binary zero, and is passed in the
@@ -421,7 +421,7 @@ within the pattern (see the detailed description in the
 .\"
 documentation). For those options that can be different in different parts of
 the pattern, the contents of the \fIoptions\fP argument specifies their
-settings at the start of compilation and execution. The PCRE_ANCHORED, 
+settings at the start of compilation and execution. The PCRE_ANCHORED,
 PCRE_BSR_\fIxxx\fP, and PCRE_NEWLINE_\fIxxx\fP options can be set at the time
 of matching as well as at compile time.
 .P
@@ -785,7 +785,7 @@ in the section on matching a pattern.
 .P
 If studying the pattern does not produce any useful information,
 \fBpcre_study()\fP returns NULL. In that circumstance, if the calling program
-wants to pass any of the other fields to \fBpcre_exec()\fP or 
+wants to pass any of the other fields to \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
 .P
 The second argument of \fBpcre_study()\fP contains option bits. At present, no
@@ -807,16 +807,16 @@ This is a typical call to \fBpcre_study\fP():
     &error);        /* set to NULL or points to a message */
 .sp
 Studying a pattern does two things: first, a lower bound for the length of
-subject string that is needed to match the pattern is computed. This does not 
-mean that there are any strings of that length that match, but it does 
-guarantee that no shorter strings match. The value is used by 
-\fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP to avoid wasting time by trying to 
-match strings that are shorter than the lower bound. You can find out the value 
+subject string that is needed to match the pattern is computed. This does not
+mean that there are any strings of that length that match, but it does
+guarantee that no shorter strings match. The value is used by
+\fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP to avoid wasting time by trying to
+match strings that are shorter than the lower bound. You can find out the value
 in a calling program via the \fBpcre_fullinfo()\fP function.
 .P
 Studying a pattern is also useful for non-anchored patterns that do not have a
 single fixed starting character. A bitmap of possible starting bytes is
-created. This speeds up finding a position in the subject at which to start 
+created. This speeds up finding a position in the subject at which to start
 matching.
 .
 .
@@ -1012,7 +1012,7 @@ entry; both of these return an \fBint\fP value. The entry size depends on the
 length of the longest name. PCRE_INFO_NAMETABLE returns a pointer to the first
 entry of the table (a pointer to \fBchar\fP). The first two bytes of each entry
 are the number of the capturing parenthesis, most significant byte first. The
-rest of the entry is the corresponding name, zero terminated. 
+rest of the entry is the corresponding name, zero terminated.
 .P
 The names are in alphabetical order. Duplicate names may appear if (?| is used
 to create multiple groups with the same number, as described in the
@@ -1024,10 +1024,10 @@ in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
-page. Duplicate names for subpatterns with different numbers are permitted only 
-if PCRE_DUPNAMES is set. In all cases of duplicate names, they appear in the 
-table in the order in which they were found in the pattern. In the absence of 
-(?| this is the order of increasing number; when (?| is used this is not 
+page. Duplicate names for subpatterns with different numbers are permitted only
+if PCRE_DUPNAMES is set. In all cases of duplicate names, they appear in the
+table in the order in which they were found in the pattern. In the absence of
+(?| this is the order of increasing number; when (?| is used this is not
 necessarily the case because later subpatterns may have lower numbers.
 .P
 As a simple example of the name/number table, consider the following pattern
@@ -1371,7 +1371,7 @@ valid, so PCRE searches further into the string for occurrences of "a" or "b".
 .sp
   PCRE_NOTEMPTY_ATSTART
 .sp
-This is like PCRE_NOTEMPTY, except that an empty string match that is not at 
+This is like PCRE_NOTEMPTY, except that an empty string match that is not at
 the start of the subject is permitted. If the pattern is anchored, such a match
 can occur only if the pattern contains \eK.
 .P
@@ -1427,7 +1427,7 @@ PCRE_NO_UTF8_CHECK is set, the effect of passing an invalid UTF-8 string as a
 subject, or a value of \fIstartoffset\fP that does not point to the start of a
 UTF-8 character, is undefined. Your program may crash.
 .sp
-  PCRE_PARTIAL_HARD 
+  PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT
 .sp
 These options turn on the partial matching feature. For backwards
@@ -1634,7 +1634,7 @@ documentation for details of partial matching.
 .sp
 This code is no longer in use. It was formerly returned when the PCRE_PARTIAL
 option was used with a compiled pattern containing items that were not
-supported for partial matching. From release 8.00 onwards, there are no 
+supported for partial matching. From release 8.00 onwards, there are no
 restrictions on partial matching.
 .sp
   PCRE_ERROR_INTERNAL       (-14)
@@ -1898,7 +1898,7 @@ a compiled pattern, using a matching algorithm that scans the subject string
 just once, and does not backtrack. This has different characteristics to the
 normal algorithm, and is not compatible with Perl. Some of the features of PCRE
 patterns are not supported. Nevertheless, there are times when this kind of
-matching can be useful. For a discussion of the two matching algorithms, and a 
+matching can be useful. For a discussion of the two matching algorithms, and a
 list of features that \fBpcre_dfa_exec()\fP does not support, see the
 .\" HREF
 \fBpcrematching\fP
@@ -1944,7 +1944,7 @@ and PCRE_DFA_RESTART. All but the last four of these are exactly the same as
 for \fBpcre_exec()\fP, so their description is not repeated here.
 .sp
   PCRE_PARTIAL_HARD
-  PCRE_PARTIAL_SOFT 
+  PCRE_PARTIAL_SOFT
 .sp
 These have the same general effect as they do for \fBpcre_exec()\fP, but the
 details are slightly different. When PCRE_PARTIAL_HARD is set for

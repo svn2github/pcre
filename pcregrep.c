@@ -1367,11 +1367,11 @@ if (filenames == FN_NOMATCH_ONLY)
 if (count_only)
   {
   if (count > 0 || !omit_zero_count)
-    { 
-    if (printname != NULL && filenames != FN_NONE) 
+    {
+    if (printname != NULL && filenames != FN_NONE)
       fprintf(stdout, "%s:", printname);
     fprintf(stdout, "%d\n", count);
-    } 
+    }
   }
 
 return rc;
@@ -1936,9 +1936,9 @@ for (i = 1; i < argc; i++)
       {
       char *opbra = strchr(op->long_name, '(');
       char *equals = strchr(op->long_name, '=');
- 
+
       /* Handle options with only one spelling of the name */
- 
+
       if (opbra == NULL)     /* Does not contain '(' */
         {
         if (equals == NULL)  /* Not thing=data case */
@@ -1961,36 +1961,36 @@ for (i = 1; i < argc; i++)
             }
           }
         }
-        
+
       /* Handle options with an alternate spelling of the name */
- 
-      else 
+
+      else
         {
         char buff1[24];
         char buff2[24];
-         
+
         int baselen = opbra - op->long_name;
         int fulllen = strchr(op->long_name, ')') - op->long_name + 1;
-        int arglen = (argequals == NULL || equals == NULL)? 
+        int arglen = (argequals == NULL || equals == NULL)?
           (int)strlen(arg) : argequals - arg;
- 
+
         sprintf(buff1, "%.*s", baselen, op->long_name);
         sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
-         
-        if (strncmp(arg, buff1, arglen) == 0 || 
+
+        if (strncmp(arg, buff1, arglen) == 0 ||
            strncmp(arg, buff2, arglen) == 0)
           {
           if (equals != NULL && argequals != NULL)
             {
-            option_data = argequals; 
+            option_data = argequals;
             if (*option_data == '=')
               {
-              option_data++;  
+              option_data++;
               longopwasequals = TRUE;
-              } 
-            }  
+              }
+            }
           break;
-          } 
+          }
         }
       }
 

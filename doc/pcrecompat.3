@@ -77,7 +77,7 @@ the
 documentation for details.
 .P
 9. Subpatterns that are called recursively or as "subroutines" are always
-treated as atomic groups in PCRE. This is like Python, but unlike Perl. There 
+treated as atomic groups in PCRE. This is like Python, but unlike Perl. There
 is a discussion of an example that explains this in more detail in the
 .\" HTML <a href="pcrepattern.html#recursiondifference">
 .\" </a>
@@ -97,7 +97,7 @@ the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 (*COMMIT), (*PRUNE), (*SKIP), and (*THEN), but only in the forms without an
 argument. PCRE does not support (*MARK).
 .P
-12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern 
+12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
 names is not as general as Perl's. This is a consequence of the fact the PCRE
 works internally just with numbers, using an external table to translate
 between numbers and names. In particular, a pattern such as (?|(?<a>A)|(?<b)B),

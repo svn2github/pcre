@@ -213,7 +213,7 @@ begins with a lookbehind assertion (including \eb or \eB).
 If any call to \fBpcre_exec()\fP in a \fB/g\fP or \fB/G\fP sequence matches an
 empty string, the next call is done with the PCRE_NOTEMPTY_ATSTART and
 PCRE_ANCHORED flags set in order to search for another, non-empty, match at the
-same point. If this second match fails, the start offset is advanced by one 
+same point. If this second match fails, the start offset is advanced by one
 character, and the normal match is retried. This imitates the way Perl handles
 such cases when using the \fB/g\fP modifier or the \fBsplit()\fP function.
 .
@@ -357,14 +357,14 @@ recognized:
 .\" JOIN
   \eN         pass the PCRE_NOTEMPTY option to \fBpcre_exec()\fP
                or \fBpcre_dfa_exec()\fP; if used twice, pass the
-               PCRE_NOTEMPTY_ATSTART option 
+               PCRE_NOTEMPTY_ATSTART option
 .\" JOIN
   \eOdd       set the size of the output vector passed to
                \fBpcre_exec()\fP to dd (any number of digits)
 .\" JOIN
   \eP         pass the PCRE_PARTIAL_SOFT option to \fBpcre_exec()\fP
                or \fBpcre_dfa_exec()\fP; if used twice, pass the
-               PCRE_PARTIAL_HARD option 
+               PCRE_PARTIAL_HARD option
 .\" JOIN
   \eQdd       set the PCRE_MATCH_LIMIT_RECURSION limit to dd
                (any number of digits)
@@ -551,7 +551,7 @@ the subject where there is at least one match. For example:
 .sp
 (Using the normal matching function on this data finds only "tang".) The
 longest matching string is always given first (and numbered zero). After a
-PCRE_ERROR_PARTIAL return, the output is "Partial match:", followed by the 
+PCRE_ERROR_PARTIAL return, the output is "Partial match:", followed by the
 partially matching substring.
 .P
 If \fB/g\fP is present on the pattern, the search for further matches resumes

@@ -74,9 +74,9 @@ this is a kind of "DFA algorithm", though it is not implemented as a
 traditional finite state machine (it keeps multiple states active
 simultaneously).
 .P
-Although the general principle of this matching algorithm is that it scans the 
-subject string only once, without backtracking, there is one exception: when a 
-lookaround assertion is encountered, the characters following or preceding the 
+Although the general principle of this matching algorithm is that it scans the
+subject string only once, without backtracking, there is one exception: when a
+lookaround assertion is encountered, the characters following or preceding the
 current point have to be independently inspected.
 .P
 The scan continues until either the end of the subject is reached, or there are
@@ -152,9 +152,9 @@ callouts.
 never needs to backtrack, it is possible to pass very long subject strings to
 the matching function in several pieces, checking for partial matching each
 time. The
-.\" HREF                                                                
+.\" HREF
 \fBpcrepartial\fP
-.\"                                                           
+.\"
 documentation gives details of partial matching.
 .
 .

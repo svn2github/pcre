@@ -45,9 +45,9 @@ FSM). This is NOT Perl- compatible, but it has advantages in certain
 applications. */
 
 
-/* NOTE ABOUT PERFORMANCE: A user of this function sent some code that improved 
-the performance of his patterns greatly. I could not use it as it stood, as it 
-was not thread safe, and made assumptions about pattern sizes. Also, it caused 
+/* NOTE ABOUT PERFORMANCE: A user of this function sent some code that improved
+the performance of his patterns greatly. I could not use it as it stood, as it
+was not thread safe, and made assumptions about pattern sizes. Also, it caused
 test 7 to loop, and test 9 to crash with a segfault.
 
 The issue is the check for duplicate states, which is done by a simple linear
@@ -68,7 +68,7 @@ was the extra time to initialize the index. This had to be done for each call
 of internal_dfa_exec(). (The supplied patch used a static vector, initialized
 only once - I suspect this was the cause of the problems with the tests.)
 
-Overall, I concluded that the gains in some cases did not outweigh the losses 
+Overall, I concluded that the gains in some cases did not outweigh the losses
 in others, so I abandoned this code. */
 
 
@@ -417,11 +417,11 @@ if (*first_op == OP_REVERSE)
       current_subject - start_subject : max_back;
     current_subject -= gone_back;
     }
-    
+
   /* Save the earliest consulted character */
-  
-  if (current_subject < md->start_used_ptr) 
-    md->start_used_ptr = current_subject; 
+
+  if (current_subject < md->start_used_ptr)
+    md->start_used_ptr = current_subject;
 
   /* Now we can process the individual branches. */
 
@@ -488,7 +488,7 @@ for (;;)
   int clen, dlen;
   unsigned int c, d;
   int forced_fail = 0;
-  int reached_end = 0; 
+  int reached_end = 0;
 
   /* Make the new state list into the active state list and empty the
   new state list. */
@@ -578,7 +578,7 @@ for (;;)
         }
       }
 
-    /* Check for a duplicate state with the same count, and skip if found. 
+    /* Check for a duplicate state with the same count, and skip if found.
     See the note at the head of this module about the possibility of improving
     performance here. */
 
@@ -647,7 +647,7 @@ for (;;)
 /* ========================================================================== */
       /* Reached a closing bracket. If not at the end of the pattern, carry
       on with the next opcode. Otherwise, unless we have an empty string and
-      PCRE_NOTEMPTY is set, or PCRE_NOTEMPTY_ATSTART is set and we are at the 
+      PCRE_NOTEMPTY is set, or PCRE_NOTEMPTY_ATSTART is set and we are at the
       start of the subject, save the match data, shifting up all previous
       matches so we always have the longest first. */
 
@@ -662,10 +662,10 @@ for (;;)
           ADD_ACTIVE(state_offset - GET(code, 1), 0);
           }
         }
-      else 
+      else
         {
-        reached_end++;    /* Count branches that reach the end */ 
-        if (ptr > current_subject || 
+        reached_end++;    /* Count branches that reach the end */
+        if (ptr > current_subject ||
             ((md->moptions & PCRE_NOTEMPTY) == 0 &&
               ((md->moptions & PCRE_NOTEMPTY_ATSTART) == 0 ||
                 current_subject > start_subject + md->start_offset)))
@@ -689,7 +689,7 @@ for (;;)
               match_count, rlevel*2-2, SP));
             return match_count;
             }
-          }   
+          }
         }
       break;
 
@@ -839,7 +839,7 @@ for (;;)
         if (ptr > start_subject)
           {
           const uschar *temp = ptr - 1;
-          if (temp < md->start_used_ptr) md->start_used_ptr = temp; 
+          if (temp < md->start_used_ptr) md->start_used_ptr = temp;
 #ifdef SUPPORT_UTF8
           if (utf8) BACKCHAR(temp);
 #endif
@@ -848,13 +848,13 @@ for (;;)
           }
         else left_word = 0;
 
-        if (clen > 0) 
+        if (clen > 0)
           right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
         else              /* This is a fudge to ensure that if this is the */
           {               /* last item in the pattern, we don't count it as */
           reached_end--;  /* reached, thus disabling a partial match. */
           right_word = 0;
-          } 
+          }
 
         if ((left_word == right_word) == (codevalue == OP_NOT_WORD_BOUNDARY))
           { ADD_ACTIVE(state_offset + 1, 0); }
@@ -2287,7 +2287,7 @@ for (;;)
 
         /* Back reference conditions are not supported */
 
-        if (condcode == OP_CREF || condcode == OP_NCREF) 
+        if (condcode == OP_CREF || condcode == OP_NCREF)
           return PCRE_ERROR_DFA_UCOND;
 
         /* The DEFINE condition is always false */
@@ -2531,7 +2531,7 @@ for (;;)
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
-        reached_end != workspace[1] &&               /* Not all reached end */ 
+        reached_end != workspace[1] &&               /* Not all reached end */
         forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (md->moptions & PCRE_PARTIAL_HARD) != 0      /* Hard partial */
@@ -2652,7 +2652,7 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_TABLES) != 0)
     md->tables = extra_data->tables;
   }
-  
+
 /* Check that the first field in the block is the magic number. If it is not,
 test for a regex that was compiled on a host of opposite endianness. If this is
 the case, flipped values are put in internal_re and internal_study if there was
@@ -2914,13 +2914,13 @@ for (;;)
 
     end_subject = save_end_subject;
 
-    /* The following two optimizations are disabled for partial matching or if 
-    disabling is explicitly requested (and of course, by the test above, this 
+    /* The following two optimizations are disabled for partial matching or if
+    disabling is explicitly requested (and of course, by the test above, this
     code is not obeyed when restarting after a partial match). */
-    
+
     if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
         (options & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) == 0)
-      {   
+      {
       /* If the pattern was studied, a minimum subject length may be set. This
       is a lower bound; no actual string of that length may actually match the
       pattern. Although the value is, strictly, in characters, we treat it as
@@ -2929,7 +2929,7 @@ for (;;)
       if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
           end_subject - current_subject < study->minlength)
         return PCRE_ERROR_NOMATCH;
-    
+
       /* If req_byte is set, we know that that character must appear in the
       subject for the match to succeed. If the first character is set, req_byte
       must be later in the subject; otherwise the test starts at the match
@@ -2937,19 +2937,19 @@ for (;;)
       nested unlimited repeats that aren't going to match. Writing separate
       code for cased/caseless versions makes it go faster, as does using an
       autoincrement and backing off on a match.
-      
+
       HOWEVER: when the subject string is very, very long, searching to its end
       can take a long time, and give bad performance on quite ordinary
       patterns. This showed up when somebody was matching /^C/ on a 32-megabyte
       string... so we don't do this when the string is sufficiently long. */
-      
+
       if (req_byte >= 0 && end_subject - current_subject < REQ_BYTE_MAX)
         {
         register const uschar *p = current_subject + ((first_byte >= 0)? 1 : 0);
-      
+
         /* We don't need to repeat the search if we haven't yet reached the
         place we found it at last time. */
-      
+
         if (p > req_byte_ptr)
           {
           if (req_byte_caseless)
@@ -2967,26 +2967,26 @@ for (;;)
               if (*p++ == req_byte) { p--; break; }
               }
             }
-      
+
           /* If we can't find the required character, break the matching loop,
           which will cause a return or PCRE_ERROR_NOMATCH. */
-      
+
           if (p >= end_subject) break;
-      
+
           /* If we have found the required character, save the point where we
           found it, so that we don't search again next time round the loop if
           the start hasn't passed this character yet. */
-      
+
           req_byte_ptr = p;
           }
-        }   
+        }
       }
     }   /* End of optimizations that are done when not restarting */
 
   /* OK, now we can do the business */
 
   md->start_used_ptr = current_subject;
-   
+
   rc = internal_dfa_exec(
     md,                                /* fixed match data */
     md->start_code,                    /* this subexpression's code */

@@ -35,9 +35,9 @@ are set, PCRE_PARTIAL_HARD takes precedence.
 Setting a partial matching option disables two of PCRE's optimizations. PCRE
 remembers the last literal byte in a pattern, and abandons matching immediately
 if such a byte is not present in the subject string. This optimization cannot
-be used for a subject string that might match only partially. If the pattern 
-was studied, PCRE knows the minimum length of a matching string, and does not 
-bother to run the matching function on shorter strings. This optimization is 
+be used for a subject string that might match only partially. If the pattern
+was studied, PCRE knows the minimum length of a matching string, and does not
+bother to run the matching function on shorter strings. This optimization is
 also disabled for partial matching.
 .
 .
