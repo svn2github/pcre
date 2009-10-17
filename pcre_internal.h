@@ -1210,8 +1210,8 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
 OP_EOD must correspond in order to the list of escapes immediately above.
 
 *** NOTE NOTE NOTE *** Whenever this list is updated, the two macro definitions
-that follow must also be updated to match. There is also a table called
-"coptable" in pcre_dfa_exec.c that must be updated. */
+that follow must also be updated to match. There are also tables called
+"coptable" and "poptable" in pcre_dfa_exec.c that must be updated. */
 
 enum {
   OP_END,            /* 0 End of pattern */
@@ -1375,6 +1375,10 @@ enum {
 
   OP_SKIPZERO        /* 114 */
 };
+
+/* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
+definitions that follow must also be updated to match. There are also tables
+called "coptable" cna "poptable" in pcre_dfa_exec.c that must be updated. */
 
 
 /* This macro defines textual names for all the opcodes. These are used only

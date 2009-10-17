@@ -3125,4 +3125,26 @@ a random value. /Ix
     ** Failers
     abcdde  
 
+/abcd*/
+    xxxxabcd\P
+    xxxxabcd\P\P
+
+/abcd*/i
+    xxxxabcd\P
+    xxxxabcd\P\P
+    XXXXABCD\P
+    XXXXABCD\P\P
+
+/abc\d*/
+    xxxxabc1\P
+    xxxxabc1\P\P
+
+/(a)bc\1*/
+    xxxxabca\P
+    xxxxabca\P\P
+
+/abc[de]*/
+    xxxxabcde\P
+    xxxxabcde\P\P
+
 /-- End of testinput2 --/

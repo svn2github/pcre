@@ -667,4 +667,22 @@
 /X/8f<any> 
     A\x{1ec5}ABCXYZ
 
+/abcd*/8
+    xxxxabcd\P
+    xxxxabcd\P\P
+
+/abcd*/i8
+    xxxxabcd\P
+    xxxxabcd\P\P
+    XXXXABCD\P
+    XXXXABCD\P\P
+
+/abc\d*/8
+    xxxxabc1\P
+    xxxxabc1\P\P
+
+/abc[de]*/8
+    xxxxabcde\P
+    xxxxabcde\P\P
+
 /-- End of testinput8 --/ 

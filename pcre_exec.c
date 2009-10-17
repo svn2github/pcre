@@ -415,7 +415,7 @@ the subject. */
     }
 
 #define SCHECK_PARTIAL()\
-  if (md->partial && eptr > mstart)\
+  if (md->partial != 0 && eptr > mstart)\
     {\
     md->hitend = TRUE;\
     if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);\
@@ -2146,7 +2146,11 @@ for (;;)
         pp = eptr;
         for (i = min; i < max; i++)
           {
-          if (!match_ref(offset, eptr, length, md, ims)) break;
+          if (!match_ref(offset, eptr, length, md, ims)) 
+            {
+            CHECK_PARTIAL(); 
+            break;
+            } 
           eptr += length;
           }
         while (eptr >= pp)
@@ -2315,7 +2319,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c > 255)
               {
@@ -2341,7 +2349,11 @@ for (;;)
           {
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             c = *eptr;
             if ((data[c/8] & (1 << (c&7))) == 0) break;
             eptr++;
@@ -2446,7 +2458,11 @@ for (;;)
         for (i = min; i < max; i++)
           {
           int len = 1;
-          if (eptr >= md->end_subject) break;
+          if (eptr >= md->end_subject) 
+            {
+            SCHECK_PARTIAL(); 
+            break;
+            } 
           GETCHARLENTEST(c, eptr, len);
           if (!_pcre_xclass(c, data)) break;
           eptr += len;
@@ -2685,7 +2701,11 @@ for (;;)
                      eptr <= md->end_subject - oclength &&
                      memcmp(eptr, occhars, oclength) == 0) eptr += oclength;
 #endif  /* SUPPORT_UCP */
-            else break;
+            else 
+              {
+              CHECK_PARTIAL(); 
+              break;
+              } 
             }
 
           if (possessive) continue;
@@ -2763,7 +2783,12 @@ for (;;)
         pp = eptr;
         for (i = min; i < max; i++)
           {
-          if (eptr >= md->end_subject || fc != md->lcc[*eptr]) break;
+          if (eptr >= md->end_subject) 
+            {
+            SCHECK_PARTIAL();
+            break;
+            } 
+          if (fc != md->lcc[*eptr]) break;
           eptr++;
           }
 
@@ -2817,7 +2842,12 @@ for (;;)
         pp = eptr;
         for (i = min; i < max; i++)
           {
-          if (eptr >= md->end_subject || fc != *eptr) break;
+          if (eptr >= md->end_subject) 
+            {
+            SCHECK_PARTIAL(); 
+            break;
+            } 
+          if (fc != *eptr) break;
           eptr++;
           }
         if (possessive) continue;
@@ -3029,7 +3059,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(d, eptr, len);
             if (d < 256) d = md->lcc[d];
             if (fc == d) break;
@@ -3050,7 +3084,12 @@ for (;;)
           {
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || fc == md->lcc[*eptr]) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL();
+              break;
+              } 
+            if (fc == md->lcc[*eptr]) break;
             eptr++;
             }
           if (possessive) continue;
@@ -3159,7 +3198,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(d, eptr, len);
             if (fc == d) break;
             eptr += len;
@@ -3179,7 +3222,12 @@ for (;;)
           {
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || fc == *eptr) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
+            if (fc == *eptr) break;
             eptr++;
             }
           if (possessive) continue;
@@ -4335,7 +4383,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (prop_fail_result) break;
             eptr+= len;
@@ -4346,7 +4398,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
@@ -4361,7 +4417,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
@@ -4374,7 +4434,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
@@ -4387,7 +4451,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
@@ -4416,7 +4484,11 @@ for (;;)
         {
         for (i = min; i < max; i++)
           {
-          if (eptr >= md->end_subject) break;
+          if (eptr >= md->end_subject) 
+            {
+            SCHECK_PARTIAL(); 
+            break;
+            } 
           GETCHARINCTEST(c, eptr);
           prop_category = UCD_CATEGORY(c);
           if (prop_category == ucp_M) break;
@@ -4436,6 +4508,7 @@ for (;;)
         /* eptr is now past the end of the maximum run */
 
         if (possessive) continue;
+
         for(;;)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM45);
@@ -4471,7 +4544,12 @@ for (;;)
             {
             for (i = min; i < max; i++)
               {
-              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+              if (eptr >= md->end_subject) 
+                {
+                SCHECK_PARTIAL(); 
+                break;
+                } 
+              if (IS_NEWLINE(eptr)) break;
               eptr++;
               while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
@@ -4483,7 +4561,12 @@ for (;;)
             {
             for (i = min; i < max; i++)
               {
-              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+              if (eptr >= md->end_subject) 
+                {
+                SCHECK_PARTIAL(); 
+                break;
+                } 
+              if (IS_NEWLINE(eptr)) break;
               eptr++;
               while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
@@ -4495,7 +4578,11 @@ for (;;)
             {
             for (i = min; i < max; i++)
               {
-              if (eptr >= md->end_subject) break;
+              if (eptr >= md->end_subject) 
+                {
+                SCHECK_PARTIAL(); 
+                break;
+                } 
               eptr++;
               while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
@@ -4508,15 +4595,22 @@ for (;;)
           case OP_ANYBYTE:
           c = max - min;
           if (c > (unsigned int)(md->end_subject - eptr))
-            c = md->end_subject - eptr;
-          eptr += c;
+            {
+            eptr = md->end_subject;
+            SCHECK_PARTIAL();
+            }  
+          else eptr += c;
           break;
 
           case OP_ANYNL:
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c == 0x000d)
               {
@@ -4541,7 +4635,11 @@ for (;;)
             {
             BOOL gotspace;
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             switch(c)
               {
@@ -4579,7 +4677,11 @@ for (;;)
             {
             BOOL gotspace;
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             switch(c)
               {
@@ -4603,7 +4705,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c < 256 && (md->ctypes[c] & ctype_digit) != 0) break;
             eptr+= len;
@@ -4614,7 +4720,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c >= 256 ||(md->ctypes[c] & ctype_digit) == 0) break;
             eptr+= len;
@@ -4625,7 +4735,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c < 256 && (md->ctypes[c] & ctype_space) != 0) break;
             eptr+= len;
@@ -4636,7 +4750,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c >= 256 ||(md->ctypes[c] & ctype_space) == 0) break;
             eptr+= len;
@@ -4647,7 +4765,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c < 256 && (md->ctypes[c] & ctype_word) != 0) break;
             eptr+= len;
@@ -4658,7 +4780,11 @@ for (;;)
           for (i = min; i < max; i++)
             {
             int len = 1;
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             GETCHARLEN(c, eptr, len);
             if (c >= 256 || (md->ctypes[c] & ctype_word) == 0) break;
             eptr+= len;
@@ -4690,7 +4816,12 @@ for (;;)
           case OP_ANY:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL();
+              break;
+              } 
+            if (IS_NEWLINE(eptr)) break;
             eptr++;
             }
           break;
@@ -4699,14 +4830,21 @@ for (;;)
           case OP_ANYBYTE:
           c = max - min;
           if (c > (unsigned int)(md->end_subject - eptr))
-            c = md->end_subject - eptr;
-          eptr += c;
+            {
+            eptr = md->end_subject;
+            SCHECK_PARTIAL();
+            }    
+          else eptr += c;
           break;
 
           case OP_ANYNL:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             c = *eptr;
             if (c == 0x000d)
               {
@@ -4727,7 +4865,11 @@ for (;;)
           case OP_NOT_HSPACE:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             c = *eptr;
             if (c == 0x09 || c == 0x20 || c == 0xa0) break;
             eptr++;
@@ -4737,7 +4879,11 @@ for (;;)
           case OP_HSPACE:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             c = *eptr;
             if (c != 0x09 && c != 0x20 && c != 0xa0) break;
             eptr++;
@@ -4747,7 +4893,11 @@ for (;;)
           case OP_NOT_VSPACE:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             c = *eptr;
             if (c == 0x0a || c == 0x0b || c == 0x0c || c == 0x0d || c == 0x85)
               break;
@@ -4758,7 +4908,11 @@ for (;;)
           case OP_VSPACE:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject) break;
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
+              break;
+              } 
             c = *eptr;
             if (c != 0x0a && c != 0x0b && c != 0x0c && c != 0x0d && c != 0x85)
               break;
@@ -4769,8 +4923,12 @@ for (;;)
           case OP_NOT_DIGIT:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || (md->ctypes[*eptr] & ctype_digit) != 0)
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
               break;
+              } 
+            if ((md->ctypes[*eptr] & ctype_digit) != 0) break;
             eptr++;
             }
           break;
@@ -4778,8 +4936,12 @@ for (;;)
           case OP_DIGIT:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || (md->ctypes[*eptr] & ctype_digit) == 0)
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
               break;
+              } 
+            if ((md->ctypes[*eptr] & ctype_digit) == 0) break;
             eptr++;
             }
           break;
@@ -4787,8 +4949,12 @@ for (;;)
           case OP_NOT_WHITESPACE:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || (md->ctypes[*eptr] & ctype_space) != 0)
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
               break;
+              } 
+            if ((md->ctypes[*eptr] & ctype_space) != 0) break;
             eptr++;
             }
           break;
@@ -4796,8 +4962,12 @@ for (;;)
           case OP_WHITESPACE:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || (md->ctypes[*eptr] & ctype_space) == 0)
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
               break;
+              } 
+            if ((md->ctypes[*eptr] & ctype_space) == 0) break;
             eptr++;
             }
           break;
@@ -4805,8 +4975,12 @@ for (;;)
           case OP_NOT_WORDCHAR:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || (md->ctypes[*eptr] & ctype_word) != 0)
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
               break;
+              } 
+            if ((md->ctypes[*eptr] & ctype_word) != 0) break;
             eptr++;
             }
           break;
@@ -4814,8 +4988,12 @@ for (;;)
           case OP_WORDCHAR:
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || (md->ctypes[*eptr] & ctype_word) == 0)
+            if (eptr >= md->end_subject) 
+              {
+              SCHECK_PARTIAL(); 
               break;
+              } 
+            if ((md->ctypes[*eptr] & ctype_word) == 0) break;
             eptr++;
             }
           break;

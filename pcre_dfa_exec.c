@@ -109,8 +109,9 @@ never stored, so we push them well clear of the normal opcodes. */
 character that is to be tested in some way. This makes is possible to
 centralize the loading of these characters. In the case of Type * etc, the
 "character" is the opcode for \D, \d, \S, \s, \W, or \w, which will always be a
-small value. ***NOTE*** If the start of this table is modified, the two tables
-that follow must also be modified. */
+small value. Non-zero values in the table are the offsets from the opcode where 
+the character is to be found. ***NOTE*** If the start of this table is
+modified, the three tables that follow must also be modified. */
 
 static const uschar coptable[] = {
   0,                             /* End                                    */
@@ -160,7 +161,64 @@ static const uschar coptable[] = {
   0,                             /* DEF                                    */
   0, 0,                          /* BRAZERO, BRAMINZERO                    */
   0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
-  0, 0, 0                        /* FAIL, ACCEPT, SKIPZERO                 */
+  0, 0, 0, 0                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
+};
+
+/* This table identifies those opcodes that inspect a character. It is used to 
+remember the fact that a character could have been inspected when the end of
+the subject is reached, in order to support PCRE_PARTIAL_HARD behaviour.
+***NOTE*** If the start of this table is modified, the two tables that follow
+must also be modified. */
+
+static const uschar poptable[] = {
+  0,                             /* End                                    */
+  0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
+  1, 1, 1, 1, 1, 1,              /* \D, \d, \S, \s, \W, \w                 */
+  1, 1, 1,                       /* Any, AllAny, Anybyte                   */
+  1, 1, 1,                       /* NOTPROP, PROP, EXTUNI                  */
+  1, 1, 1, 1, 1,                 /* \R, \H, \h, \V, \v                     */
+  0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
+  1,                             /* Char                                   */
+  1,                             /* Charnc                                 */
+  1,                             /* not                                    */
+  /* Positive single-char repeats                                          */
+  1, 1, 1, 1, 1, 1,              /* *, *?, +, +?, ?, ??                    */
+  1, 1, 1,                       /* upto, minupto, exact                   */
+  1, 1, 1, 1,                    /* *+, ++, ?+, upto+                      */
+  /* Negative single-char repeats - only for chars < 256                   */
+  1, 1, 1, 1, 1, 1,              /* NOT *, *?, +, +?, ?, ??                */
+  1, 1, 1,                       /* NOT upto, minupto, exact               */
+  1, 1, 1, 1,                    /* NOT *+, ++, ?+, upto+                  */
+  /* Positive type repeats                                                 */
+  1, 1, 1, 1, 1, 1,              /* Type *, *?, +, +?, ?, ??               */
+  1, 1, 1,                       /* Type upto, minupto, exact              */
+  1, 1, 1, 1,                    /* Type *+, ++, ?+, upto+                 */
+  /* Character class & ref repeats                                         */
+  1, 1, 1, 1, 1, 1,              /* *, *?, +, +?, ?, ??                    */
+  1, 1,                          /* CRRANGE, CRMINRANGE                    */
+  1,                             /* CLASS                                  */
+  1,                             /* NCLASS                                 */
+  1,                             /* XCLASS - variable length               */
+  0,                             /* REF                                    */
+  0,                             /* RECURSE                                */
+  0,                             /* CALLOUT                                */
+  0,                             /* Alt                                    */
+  0,                             /* Ket                                    */
+  0,                             /* KetRmax                                */
+  0,                             /* KetRmin                                */
+  0,                             /* Assert                                 */
+  0,                             /* Assert not                             */
+  0,                             /* Assert behind                          */
+  0,                             /* Assert behind not                      */
+  0,                             /* Reverse                                */
+  0, 0, 0, 0,                    /* ONCE, BRA, CBRA, COND                  */
+  0, 0, 0,                       /* SBRA, SCBRA, SCOND                     */
+  0,                             /* CREF                                   */
+  0,                             /* RREF                                   */
+  0,                             /* DEF                                    */
+  0, 0,                          /* BRAZERO, BRAMINZERO                    */
+  0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
+  0, 0, 0, 0                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
@@ -489,6 +547,7 @@ for (;;)
   unsigned int c, d;
   int forced_fail = 0;
   int reached_end = 0;
+  BOOL could_continue = FALSE;
 
   /* Make the new state list into the active state list and empty the
   new state list. */
@@ -596,6 +655,12 @@ for (;;)
 
     code = start_code + state_offset;
     codevalue = *code;
+    
+    /* If this opcode inspects a character, but we are at the end of the 
+    subject, remember the fact so that we can support PCRE_PARTIAL_HARD. */
+
+    if (clen == 0 && poptable[codevalue] != 0)
+      could_continue = TRUE; 
 
     /* If this opcode is followed by an inline character, load it. It is
     tempting to test for the presence of a subject character here, but that
@@ -2522,16 +2587,24 @@ for (;;)
   /* We have finished the processing at the current subject character. If no
   new states have been set for the next character, we have found all the
   matches that we are going to find. If we are at the top level and partial
-  matching has been requested, check for appropriate conditions. The "forced_
-  fail" variable counts the number of (*F) encountered for the character. If it
-  is equal to the original active_count (saved in workspace[1]) it means that
-  (*F) was found on every active state. In this case we don't want to give a
-  partial match. */
+  matching has been requested, check for appropriate conditions. 
+  
+  The "forced_ fail" variable counts the number of (*F) encountered for the
+  character. If it is equal to the original active_count (saved in
+  workspace[1]) it means that (*F) was found on every active state. In this
+  case we don't want to give a partial match. 
+  
+  The "reached_end" variable counts the number of threads that have reached the 
+  end of the pattern. The "could_continue" variable is true if a thread could 
+  have continued but for the fact that the end of the subject was reached. */
 
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
-        reached_end != workspace[1] &&               /* Not all reached end */
+        (                                            /* either... */
+        reached_end != workspace[1] ||               /* Not all reached end */
+          could_continue                             /* or some could go on */
+        ) &&                                         /* and... */
         forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (md->moptions & PCRE_PARTIAL_HARD) != 0      /* Hard partial */

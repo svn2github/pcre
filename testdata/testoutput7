@@ -7514,4 +7514,38 @@ No match
     \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
 No match
 
+/abcd*/
+    xxxxabcd\P
+ 0: abcd
+ 1: abc
+    xxxxabcd\P\P
+Partial match: abcd
+
+/abcd*/i
+    xxxxabcd\P
+ 0: abcd
+ 1: abc
+    xxxxabcd\P\P
+Partial match: abcd
+    XXXXABCD\P
+ 0: ABCD
+ 1: ABC
+    XXXXABCD\P\P
+Partial match: ABCD
+
+/abc\d*/
+    xxxxabc1\P
+ 0: abc1
+ 1: abc
+    xxxxabc1\P\P
+Partial match: abc1
+
+/abc[de]*/
+    xxxxabcde\P
+ 0: abcde
+ 1: abcd
+ 2: abc
+    xxxxabcde\P\P
+Partial match: abcde
+
 /-- End of testinput7 --/

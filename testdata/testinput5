@@ -720,4 +720,26 @@ can't tell the difference.) --/
     the cat\P
     the cat\P\P
 
+/abcd*/8
+    xxxxabcd\P
+    xxxxabcd\P\P
+
+/abcd*/i8
+    xxxxabcd\P
+    xxxxabcd\P\P
+    XXXXABCD\P
+    XXXXABCD\P\P
+
+/abc\d*/8
+    xxxxabc1\P
+    xxxxabc1\P\P
+
+/(a)bc\1*/8
+    xxxxabca\P
+    xxxxabca\P\P
+
+/abc[de]*/8
+    xxxxabcde\P
+    xxxxabcde\P\P
+
 /-- End of testinput5 --/

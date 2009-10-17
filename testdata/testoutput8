@@ -1286,4 +1286,38 @@ No match
     A\x{1ec5}ABCXYZ
  0: X
 
+/abcd*/8
+    xxxxabcd\P
+ 0: abcd
+ 1: abc
+    xxxxabcd\P\P
+Partial match: abcd
+
+/abcd*/i8
+    xxxxabcd\P
+ 0: abcd
+ 1: abc
+    xxxxabcd\P\P
+Partial match: abcd
+    XXXXABCD\P
+ 0: ABCD
+ 1: ABC
+    XXXXABCD\P\P
+Partial match: ABCD
+
+/abc\d*/8
+    xxxxabc1\P
+ 0: abc1
+ 1: abc
+    xxxxabc1\P\P
+Partial match: abc1
+
+/abc[de]*/8
+    xxxxabcde\P
+ 0: abcde
+ 1: abcd
+ 2: abc
+    xxxxabcde\P\P
+Partial match: abcde
+
 /-- End of testinput8 --/ 

@@ -10372,4 +10372,39 @@ No match
     abcdde  
 No match
 
+/abcd*/
+    xxxxabcd\P
+ 0: abcd
+    xxxxabcd\P\P
+Partial match: abcd
+
+/abcd*/i
+    xxxxabcd\P
+ 0: abcd
+    xxxxabcd\P\P
+Partial match: abcd
+    XXXXABCD\P
+ 0: ABCD
+    XXXXABCD\P\P
+Partial match: ABCD
+
+/abc\d*/
+    xxxxabc1\P
+ 0: abc1
+    xxxxabc1\P\P
+Partial match: abc1
+
+/(a)bc\1*/
+    xxxxabca\P
+ 0: abca
+ 1: a
+    xxxxabca\P\P
+Partial match: abca
+
+/abc[de]*/
+    xxxxabcde\P
+ 0: abcde
+    xxxxabcde\P\P
+Partial match: abcde
+
 /-- End of testinput2 --/

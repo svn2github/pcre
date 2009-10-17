@@ -58,8 +58,7 @@ Version 8.00 05-Oct-09
 10. Partial matching has been split into two forms: PCRE_PARTIAL_SOFT, which is
     synonymous with PCRE_PARTIAL, for backwards compatibility, and
     PCRE_PARTIAL_HARD, which causes a partial match to supersede a full match,
-    and may be more useful for multi-segment matching, especially with
-    pcre_exec().
+    and may be more useful for multi-segment matching.
 
 11. Partial matching with pcre_exec() is now more intuitive. A partial match
     used to be given if ever the end of the subject was reached; now it is

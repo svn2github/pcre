@@ -4507,4 +4507,22 @@
     thejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
     \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
 
+/abcd*/
+    xxxxabcd\P
+    xxxxabcd\P\P
+
+/abcd*/i
+    xxxxabcd\P
+    xxxxabcd\P\P
+    XXXXABCD\P
+    XXXXABCD\P\P
+
+/abc\d*/
+    xxxxabc1\P
+    xxxxabc1\P\P
+
+/abc[de]*/
+    xxxxabcde\P
+    xxxxabcde\P\P
+
 /-- End of testinput7 --/
