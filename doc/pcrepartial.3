@@ -320,7 +320,8 @@ matching multi-segment data. The example above then behaves differently:
 .P
 4. Patterns that contain alternatives at the top level which do not all
 start with the same pattern item may not work as expected when
-\fBpcre_dfa_exec()\fP is used. For example, consider this pattern:
+PCRE_DFA_RESTART is used with \fBpcre_dfa_exec()\fP. For example, consider this
+pattern:
 .sp
   1234|3789
 .sp
@@ -345,6 +346,8 @@ each time:
   data> 1237890
    0: 3789
 .sp
+Of course, instead of using PCRE_DFA_PARTIAL, the same technique of re-running
+the entire match can also be used with \fBpcre_dfa_exec()\fP.
 .
 .
 .SH AUTHOR
@@ -361,6 +364,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2009
+Last updated: 18 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

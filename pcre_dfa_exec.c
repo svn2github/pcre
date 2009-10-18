@@ -109,7 +109,7 @@ never stored, so we push them well clear of the normal opcodes. */
 character that is to be tested in some way. This makes is possible to
 centralize the loading of these characters. In the case of Type * etc, the
 "character" is the opcode for \D, \d, \S, \s, \W, or \w, which will always be a
-small value. Non-zero values in the table are the offsets from the opcode where 
+small value. Non-zero values in the table are the offsets from the opcode where
 the character is to be found. ***NOTE*** If the start of this table is
 modified, the three tables that follow must also be modified. */
 
@@ -164,15 +164,14 @@ static const uschar coptable[] = {
   0, 0, 0, 0                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
 };
 
-/* This table identifies those opcodes that inspect a character. It is used to 
+/* This table identifies those opcodes that inspect a character. It is used to
 remember the fact that a character could have been inspected when the end of
-the subject is reached, in order to support PCRE_PARTIAL_HARD behaviour.
-***NOTE*** If the start of this table is modified, the two tables that follow
-must also be modified. */
+the subject is reached. ***NOTE*** If the start of this table is modified, the
+two tables that follow must also be modified. */
 
 static const uschar poptable[] = {
   0,                             /* End                                    */
-  0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
+  0, 0, 0, 1, 1,                 /* \A, \G, \K, \B, \b                     */
   1, 1, 1, 1, 1, 1,              /* \D, \d, \S, \s, \W, \w                 */
   1, 1, 1,                       /* Any, AllAny, Anybyte                   */
   1, 1, 1,                       /* NOTPROP, PROP, EXTUNI                  */
@@ -546,7 +545,6 @@ for (;;)
   int clen, dlen;
   unsigned int c, d;
   int forced_fail = 0;
-  int reached_end = 0;
   BOOL could_continue = FALSE;
 
   /* Make the new state list into the active state list and empty the
@@ -655,12 +653,12 @@ for (;;)
 
     code = start_code + state_offset;
     codevalue = *code;
-    
-    /* If this opcode inspects a character, but we are at the end of the 
-    subject, remember the fact so that we can support PCRE_PARTIAL_HARD. */
+
+    /* If this opcode inspects a character, but we are at the end of the
+    subject, remember the fact for use when testing for a partial match. */
 
     if (clen == 0 && poptable[codevalue] != 0)
-      could_continue = TRUE; 
+      could_continue = TRUE;
 
     /* If this opcode is followed by an inline character, load it. It is
     tempting to test for the presence of a subject character here, but that
@@ -729,7 +727,6 @@ for (;;)
         }
       else
         {
-        reached_end++;    /* Count branches that reach the end */
         if (ptr > current_subject ||
             ((md->moptions & PCRE_NOTEMPTY) == 0 &&
               ((md->moptions & PCRE_NOTEMPTY_ATSTART) == 0 ||
@@ -915,11 +912,7 @@ for (;;)
 
         if (clen > 0)
           right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
-        else              /* This is a fudge to ensure that if this is the */
-          {               /* last item in the pattern, we don't count it as */
-          reached_end--;  /* reached, thus disabling a partial match. */
-          right_word = 0;
-          }
+        else right_word = 0;
 
         if ((left_word == right_word) == (codevalue == OP_NOT_WORD_BOUNDARY))
           { ADD_ACTIVE(state_offset + 1, 0); }
@@ -2587,24 +2580,20 @@ for (;;)
   /* We have finished the processing at the current subject character. If no
   new states have been set for the next character, we have found all the
   matches that we are going to find. If we are at the top level and partial
-  matching has been requested, check for appropriate conditions. 
-  
+  matching has been requested, check for appropriate conditions.
+
   The "forced_ fail" variable counts the number of (*F) encountered for the
   character. If it is equal to the original active_count (saved in
   workspace[1]) it means that (*F) was found on every active state. In this
-  case we don't want to give a partial match. 
-  
-  The "reached_end" variable counts the number of threads that have reached the 
-  end of the pattern. The "could_continue" variable is true if a thread could 
-  have continued but for the fact that the end of the subject was reached. */
+  case we don't want to give a partial match.
+
+  The "could_continue" variable is true if a state could have continued but
+  for the fact that the end of the subject was reached. */
 
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
-        (                                            /* either... */
-        reached_end != workspace[1] ||               /* Not all reached end */
-          could_continue                             /* or some could go on */
-        ) &&                                         /* and... */
+        could_continue &&                            /* Some could go on */
         forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (md->moptions & PCRE_PARTIAL_HARD) != 0      /* Hard partial */

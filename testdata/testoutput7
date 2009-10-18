@@ -7514,12 +7514,24 @@ No match
     \Ythejk;adlfj aenjl;fda asdfasd ehj;kjxyasiupd
 No match
 
-/abcd*/
+/abcd*/+
     xxxxabcd\P
  0: abcd
+ 0+ 
  1: abc
     xxxxabcd\P\P
 Partial match: abcd
+    dddxxx\R 
+ 0: ddd
+ 0+ xxx
+ 1: dd
+ 2: d
+ 3: 
+    xxxxabcd\P\P
+Partial match: abcd
+    xxx\R 
+ 0: 
+ 0+ xxx
 
 /abcd*/i
     xxxxabcd\P
