@@ -303,4 +303,37 @@
     ** Failers 
     b\"11111
 
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+    CCD
+    ** Failers
+    CAD   
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+    BCD 
+    ** Failers
+    ABCD
+    CAD
+    BAD    
+
+/(?:(?1)|B)(A(*ACCEPT)XX|C)D/
+    AAD
+    ACD
+    BAD
+    BCD
+    BAX  
+    ** Failers
+    ACX
+    ABC   
+
+/(?(DEFINE)(A))B(?1)C/
+    BAC
+
+/(?(DEFINE)((A)\2))B(?1)C/
+    BAAC
+
+/(?<pn> \( ( [^()]++ | (?&pn) )* \) )/x
+    (ab(cd)ef)
+
 /-- End of testinput11 --/

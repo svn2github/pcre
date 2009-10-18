@@ -2074,10 +2074,9 @@ the match runs for a very long time indeed because there are so many different
 ways the + and * repeats can carve up the subject, and all have to be tested
 before failure can be reported.
 .P
-At the end of a match, the values set for any capturing subpatterns are those
-from the outermost level of the recursion at which the subpattern value is set.
-If you want to obtain intermediate values, a callout function can be used (see
-below and the
+At the end of a match, the values of capturing parentheses are those from
+the outermost level. If you want to obtain intermediate values, a callout
+function can be used (see below and the
 .\" HREF
 \fBpcrecallout\fP
 .\"
@@ -2085,18 +2084,15 @@ documentation). If the pattern above is matched against
 .sp
   (ab(cd)ef)
 .sp
-the value for the capturing parentheses is "ef", which is the last value taken
-on at the top level. If additional parentheses are added, giving
-.sp
-  \e( ( ( [^()]++ | (?R) )* ) \e)
-     ^                        ^
-     ^                        ^
-.sp
-the string they capture is "ab(cd)ef", the contents of the top level
-parentheses. If there are more than 15 capturing parentheses in a pattern, PCRE
-has to obtain extra memory to store data during a recursion, which it does by
-using \fBpcre_malloc\fP, freeing it via \fBpcre_free\fP afterwards. If no
-memory can be obtained, the match fails with the PCRE_ERROR_NOMEMORY error.
+the value for the inner capturing parentheses (numbered 2) is "ef", which is
+the last value taken on at the top level. If a capturing subpattern is not
+matched at the top level, its final value is unset, even if it is (temporarily)
+set at a deeper level.
+.P
+If there are more than 15 capturing parentheses in a pattern, PCRE has to
+obtain extra memory to store data during a recursion, which it does by using
+\fBpcre_malloc\fP, freeing it via \fBpcre_free\fP afterwards. If no memory can
+be obtained, the match fails with the PCRE_ERROR_NOMEMORY error.
 .P
 Do not confuse the (?R) item with the condition (R), which tests for recursion.
 Consider this pattern, which matches text in angle brackets, allowing for
@@ -2207,10 +2203,11 @@ matches "sense and sensibility" and "response and responsibility", but not
 is used, it does match "sense and responsibility" as well as the other two
 strings. Another example is given in the discussion of DEFINE above.
 .P
-Like recursive subpatterns, a "subroutine" call is always treated as an atomic
+Like recursive subpatterns, a subroutine call is always treated as an atomic
 group. That is, once it has matched some of the subject string, it is never
 re-entered, even if it contains untried alternatives and there is a subsequent
-matching failure.
+matching failure. Any capturing parentheses that are set during the subroutine 
+call revert to their previous values afterwards.
 .P
 When a subpattern is used as a subroutine, processing options such as
 case-independence are fixed when the subpattern is defined. They cannot be
@@ -2294,10 +2291,10 @@ a backtracking algorithm. With the exception of (*FAIL), which behaves like a
 failing negative assertion, they cause an error if encountered by
 \fBpcre_dfa_exec()\fP.
 .P
-If any of these verbs are used in an assertion subpattern, their effect is
-confined to that subpattern; it does not extend to the surrounding pattern.
-Note that assertion subpatterns are processed as anchored at the point where
-they are tested.
+If any of these verbs are used in an assertion or subroutine subpattern 
+(including recursive subpatterns), their effect is confined to that subpattern;
+it does not extend to the surrounding pattern. Note that such subpatterns are
+processed as anchored at the point where they are tested.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. In Perl, they are generally of the form
@@ -2418,6 +2415,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 04 October 2009
+Last updated: 18 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi

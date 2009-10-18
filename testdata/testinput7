@@ -4528,4 +4528,18 @@
     xxxxabcde\P
     xxxxabcde\P\P
 
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+    CCD
+    ** Failers
+    CAD   
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+    BCD 
+    ** Failers
+    ABCD
+    CAD
+    BAD    
+
 /-- End of testinput7 --/

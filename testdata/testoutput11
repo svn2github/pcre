@@ -647,4 +647,69 @@ No match
     b\"11111
 No match
 
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+ 0: BC
+ 1: C
+    CCD
+ 0: CC
+ 1: C
+    ** Failers
+No match
+    CAD   
+No match
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+ 0: CC
+ 1: C
+    BCD 
+ 0: BC
+ 1: C
+    ** Failers
+No match
+    ABCD
+No match
+    CAD
+No match
+    BAD    
+No match
+
+/(?:(?1)|B)(A(*ACCEPT)XX|C)D/
+    AAD
+ 0: AA
+ 1: A
+    ACD
+ 0: ACD
+ 1: C
+    BAD
+ 0: BA
+ 1: A
+    BCD
+ 0: BCD
+ 1: C
+    BAX  
+ 0: BA
+ 1: A
+    ** Failers
+No match
+    ACX
+No match
+    ABC   
+No match
+
+/(?(DEFINE)(A))B(?1)C/
+    BAC
+ 0: BAC
+
+/(?(DEFINE)((A)\2))B(?1)C/
+    BAAC
+ 0: BAAC
+
+/(?<pn> \( ( [^()]++ | (?&pn) )* \) )/x
+    (ab(cd)ef)
+ 0: (ab(cd)ef)
+ 1: (ab(cd)ef)
+ 2: ef
+
 /-- End of testinput11 --/

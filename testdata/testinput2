@@ -3147,4 +3147,17 @@ a random value. /Ix
     xxxxabcde\P
     xxxxabcde\P\P
 
+/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
+    and not behaving as specified in that it *does* bumpalong after hitting
+    (*COMMIT). --/ 
+
+/(?1)(A(*COMMIT)|B)D/
+    ABD
+    XABD
+    BAD
+    ABXABD  
+    ** Failers 
+    ABX 
+    BAXBAD  
+
 /-- End of testinput2 --/

@@ -7560,4 +7560,28 @@ Partial match: abc1
     xxxxabcde\P\P
 Partial match: abcde
 
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+ 0: BC
+    CCD
+ 0: CC
+    ** Failers
+No match
+    CAD   
+No match
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+ 0: CC
+    BCD 
+ 0: BC
+    ** Failers
+No match
+    ABCD
+No match
+    CAD
+No match
+    BAD    
+No match
+
 /-- End of testinput7 --/

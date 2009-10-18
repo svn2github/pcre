@@ -10407,4 +10407,28 @@ Partial match: abca
     xxxxabcde\P\P
 Partial match: abcde
 
+/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
+    and not behaving as specified in that it *does* bumpalong after hitting
+    (*COMMIT). --/ 
+
+/(?1)(A(*COMMIT)|B)D/
+    ABD
+ 0: ABD
+ 1: B
+    XABD
+ 0: ABD
+ 1: B
+    BAD
+ 0: BAD
+ 1: A
+    ABXABD  
+ 0: ABD
+ 1: B
+    ** Failers 
+No match
+    ABX 
+No match
+    BAXBAD  
+No match
+
 /-- End of testinput2 --/
