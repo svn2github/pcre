@@ -25,6 +25,8 @@ if not exist testout md testout
 %pcretest% -q -dfa %srcdir%\testdata\testinput8 > testout\testoutput8
 %pcretest% -q -dfa %srcdir%\testdata\testinput9 > testout\testoutput9
 %pcretest% -q      %srcdir%\testdata\testinput10 > testout\testoutput10
+%pcretest% -q      %srcdir%\testdata\testinput11 > testout\testoutput11
+%pcretest% -q      %srcdir%\testdata\testinput12 > testout\testoutput12
 
 fc /n %srcdir%\testdata\testoutput1 testout\testoutput1
 fc /n %srcdir%\testdata\testoutput2 testout\testoutput2
