@@ -40,6 +40,7 @@ dist_html_DATA = \
   doc/html/pcrebuild.html \
   doc/html/pcrecallout.html \
   doc/html/pcrecompat.html \
+  doc/html/pcredemo.html \
   doc/html/pcregrep.html \
   doc/html/pcrematching.html \
   doc/html/pcrepartial.html \
