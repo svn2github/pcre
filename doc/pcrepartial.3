@@ -139,7 +139,7 @@ so returns that when PCRE_PARTIAL_HARD is set.
 .SH "PARTIAL MATCHING AND WORD BOUNDARIES"
 .rs
 .sp
-If a pattern ends with one of sequences \ew or \eW, which test for word
+If a pattern ends with one of sequences \eb or \eB, which test for word
 boundaries, partial matching with PCRE_PARTIAL_SOFT can give counter-intuitive
 results. Consider this pattern:
 .sp
@@ -247,7 +247,7 @@ Consider an unanchored pattern that matches dates:
   data> The date is 23ja\eP
   Partial match: 23ja
 .sp
-The this stage, an application could discard the text preceding "23ja", add on
+At this stage, an application could discard the text preceding "23ja", add on
 text from the next segment, and call \fBpcre_exec()\fP again. Unlike
 \fBpcre_dfa_exec()\fP, the entire matching string must always be available, and
 the complete matching process occurs for each call, so more memory and more
@@ -337,7 +337,7 @@ patterns or patterns such as:
   1234|ABCD
 .sp
 where no string can be a partial match for both alternatives. This is not a
-problem if \fPpcre_exec()\fP is used, because the entire match has to be rerun
+problem if \fBpcre_exec()\fP is used, because the entire match has to be rerun
 each time:
 .sp
     re> /1234|3789/
@@ -347,7 +347,11 @@ each time:
    0: 3789
 .sp
 Of course, instead of using PCRE_DFA_PARTIAL, the same technique of re-running
-the entire match can also be used with \fBpcre_dfa_exec()\fP.
+the entire match can also be used with \fBpcre_dfa_exec()\fP. Another 
+possibility is to work with two buffers. If a partial match at offset \fIn\fP 
+in the first buffer is followed by "no match" when PCRE_DFA_RESTART is used on 
+the second buffer, you can then try a new match starting at offset \fIn+1\fP in 
+the first buffer.
 .
 .
 .SH AUTHOR
@@ -364,6 +368,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 18 October 2009
+Last updated: 19 October 2009
 Copyright (c) 1997-2009 University of Cambridge.
 .fi
