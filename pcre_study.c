@@ -314,15 +314,15 @@ for (;;)
     logic is that a recursion can only make sense if there is another
     alternation that stops the recursing. That will provide the minimum length
     (when no recursion happens). A backreference within the group that it is
-    referencing behaves in the same way. 
-    
+    referencing behaves in the same way.
+
     If PCRE_JAVASCRIPT_COMPAT is set, a backreference to an unset bracket
     matches an empty string (by default it causes a matching failure), so in
     that case we must set the minimum length to zero. */
 
     case OP_REF:
     if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
-      {  
+      {
       ce = cs = (uschar *)_pcre_find_bracket(startcode, utf8, GET2(cc, 1));
       if (cs == NULL) return -2;
       do ce += GET(ce, 1); while (*ce == OP_ALT);
@@ -333,7 +333,7 @@ for (;;)
         }
       else d = find_minlength(cs, startcode, options);
       }
-    else d = 0;    
+    else d = 0;
     cc += 3;
 
     /* Handle repeated back references */

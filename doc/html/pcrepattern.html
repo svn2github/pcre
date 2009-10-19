@@ -2050,27 +2050,24 @@ ways the + and * repeats can carve up the subject, and all have to be tested
 before failure can be reported.
 </P>
 <P>
-At the end of a match, the values set for any capturing subpatterns are those
-from the outermost level of the recursion at which the subpattern value is set.
-If you want to obtain intermediate values, a callout function can be used (see
-below and the
+At the end of a match, the values of capturing parentheses are those from
+the outermost level. If you want to obtain intermediate values, a callout
+function can be used (see below and the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation). If the pattern above is matched against
 <pre>
   (ab(cd)ef)
 </pre>
-the value for the capturing parentheses is "ef", which is the last value taken
-on at the top level. If additional parentheses are added, giving
-<pre>
-  \( ( ( [^()]++ | (?R) )* ) \)
-     ^                        ^
-     ^                        ^
-</pre>
-the string they capture is "ab(cd)ef", the contents of the top level
-parentheses. If there are more than 15 capturing parentheses in a pattern, PCRE
-has to obtain extra memory to store data during a recursion, which it does by
-using <b>pcre_malloc</b>, freeing it via <b>pcre_free</b> afterwards. If no
-memory can be obtained, the match fails with the PCRE_ERROR_NOMEMORY error.
+the value for the inner capturing parentheses (numbered 2) is "ef", which is
+the last value taken on at the top level. If a capturing subpattern is not
+matched at the top level, its final value is unset, even if it is (temporarily)
+set at a deeper level.
+</P>
+<P>
+If there are more than 15 capturing parentheses in a pattern, PCRE has to
+obtain extra memory to store data during a recursion, which it does by using
+<b>pcre_malloc</b>, freeing it via <b>pcre_free</b> afterwards. If no memory can
+be obtained, the match fails with the PCRE_ERROR_NOMEMORY error.
 </P>
 <P>
 Do not confuse the (?R) item with the condition (R), which tests for recursion.
@@ -2183,10 +2180,11 @@ is used, it does match "sense and responsibility" as well as the other two
 strings. Another example is given in the discussion of DEFINE above.
 </P>
 <P>
-Like recursive subpatterns, a "subroutine" call is always treated as an atomic
+Like recursive subpatterns, a subroutine call is always treated as an atomic
 group. That is, once it has matched some of the subject string, it is never
 re-entered, even if it contains untried alternatives and there is a subsequent
-matching failure.
+matching failure. Any capturing parentheses that are set during the subroutine
+call revert to their previous values afterwards.
 </P>
 <P>
 When a subpattern is used as a subroutine, processing options such as
@@ -2267,10 +2265,10 @@ failing negative assertion, they cause an error if encountered by
 <b>pcre_dfa_exec()</b>.
 </P>
 <P>
-If any of these verbs are used in an assertion subpattern, their effect is
-confined to that subpattern; it does not extend to the surrounding pattern.
-Note that assertion subpatterns are processed as anchored at the point where
-they are tested.
+If any of these verbs are used in an assertion or subroutine subpattern
+(including recursive subpatterns), their effect is confined to that subpattern;
+it does not extend to the surrounding pattern. Note that such subpatterns are
+processed as anchored at the point where they are tested.
 </P>
 <P>
 The new verbs make use of what was previously invalid syntax: an opening
@@ -2388,7 +2386,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 04 October 2009
+Last updated: 18 October 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

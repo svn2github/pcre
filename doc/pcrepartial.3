@@ -347,10 +347,10 @@ each time:
    0: 3789
 .sp
 Of course, instead of using PCRE_DFA_PARTIAL, the same technique of re-running
-the entire match can also be used with \fBpcre_dfa_exec()\fP. Another 
-possibility is to work with two buffers. If a partial match at offset \fIn\fP 
-in the first buffer is followed by "no match" when PCRE_DFA_RESTART is used on 
-the second buffer, you can then try a new match starting at offset \fIn+1\fP in 
+the entire match can also be used with \fBpcre_dfa_exec()\fP. Another
+possibility is to work with two buffers. If a partial match at offset \fIn\fP
+in the first buffer is followed by "no match" when PCRE_DFA_RESTART is used on
+the second buffer, you can then try a new match starting at offset \fIn+1\fP in
 the first buffer.
 .
 .

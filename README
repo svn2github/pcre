@@ -479,6 +479,16 @@ running the "configure" script:
   CXXLDFLAGS="-lstd_v2 -lCsup_v2"
 
 
+Using Sun's compilers for Solaris
+---------------------------------
+
+A user reports that the following configurations work on Solaris 9 sparcv9 and
+Solaris 9 x86 (32-bit):
+
+  Solaris 9 sparcv9: ./configure --disable-cpp CC=/bin/cc CFLAGS="-m64 -g"
+  Solaris 9 x86:     ./configure --disable-cpp CC=/bin/cc CFLAGS="-g"
+
+
 Using PCRE from MySQL
 ---------------------
 
@@ -786,4 +796,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 05 October 2009
+Last updated: 19 October 2009

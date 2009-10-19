@@ -165,7 +165,7 @@ so returns that when PCRE_PARTIAL_HARD is set.
 </P>
 <br><a name="SEC4" href="#TOC1">PARTIAL MATCHING AND WORD BOUNDARIES</a><br>
 <P>
-If a pattern ends with one of sequences \w or \W, which test for word
+If a pattern ends with one of sequences \b or \B, which test for word
 boundaries, partial matching with PCRE_PARTIAL_SOFT can give counter-intuitive
 results. Consider this pattern:
 <pre>
@@ -269,7 +269,7 @@ Consider an unanchored pattern that matches dates:
   data&#62; The date is 23ja\P
   Partial match: 23ja
 </pre>
-The this stage, an application could discard the text preceding "23ja", add on
+At this stage, an application could discard the text preceding "23ja", add on
 text from the next segment, and call <b>pcre_exec()</b> again. Unlike
 <b>pcre_dfa_exec()</b>, the entire matching string must always be available, and
 the complete matching process occurs for each call, so more memory and more
@@ -347,7 +347,8 @@ matching multi-segment data. The example above then behaves differently:
 <P>
 4. Patterns that contain alternatives at the top level which do not all
 start with the same pattern item may not work as expected when
-<b>pcre_dfa_exec()</b> is used. For example, consider this pattern:
+PCRE_DFA_RESTART is used with <b>pcre_dfa_exec()</b>. For example, consider this
+pattern:
 <pre>
   1234|3789
 </pre>
@@ -363,7 +364,7 @@ patterns or patterns such as:
   1234|ABCD
 </pre>
 where no string can be a partial match for both alternatives. This is not a
-problem if \fPpcre_exec()\fP is used, because the entire match has to be rerun
+problem if <b>pcre_exec()</b> is used, because the entire match has to be rerun
 each time:
 <pre>
     re&#62; /1234|3789/
@@ -371,8 +372,13 @@ each time:
   Partial match: 123
   data&#62; 1237890
    0: 3789
-
-</PRE>
+</pre>
+Of course, instead of using PCRE_DFA_PARTIAL, the same technique of re-running
+the entire match can also be used with <b>pcre_dfa_exec()</b>. Another
+possibility is to work with two buffers. If a partial match at offset <i>n</i>
+in the first buffer is followed by "no match" when PCRE_DFA_RESTART is used on
+the second buffer, you can then try a new match starting at offset <i>n+1</i> in
+the first buffer.
 </P>
 <br><a name="SEC10" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -385,7 +391,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC11" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 September 2009
+Last updated: 19 October 2009
 <br>
 Copyright &copy; 1997-2009 University of Cambridge.
 <br>

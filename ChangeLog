@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.00 05-Oct-09
+Version 8.00 19-Oct-09
 ----------------------
 
 1.  The table for translating pcre_compile() error codes into POSIX error codes

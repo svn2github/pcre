@@ -4904,28 +4904,22 @@ RECURSIVE PATTERNS
        so many different ways the + and * repeats can carve  up  the  subject,
        and all have to be tested before failure can be reported.
 
-       At the end of a match, the values set for any capturing subpatterns are
-       those from the outermost level of the recursion at which the subpattern
-       value  is  set.   If  you want to obtain intermediate values, a callout
-       function can be used (see below and the pcrecallout documentation).  If
-       the pattern above is matched against
+       At  the  end  of a match, the values of capturing parentheses are those
+       from the outermost level. If you want to obtain intermediate values,  a
+       callout  function can be used (see below and the pcrecallout documenta-
+       tion). If the pattern above is matched against
 
          (ab(cd)ef)
 
-       the  value  for  the  capturing  parentheses is "ef", which is the last
-       value taken on at the top level. If additional parentheses  are  added,
-       giving
+       the value for the inner capturing parentheses  (numbered  2)  is  "ef",
+       which  is the last value taken on at the top level. If a capturing sub-
+       pattern is not matched at the top level, its final value is unset, even
+       if it is (temporarily) set at a deeper level.
 
-         \( ( ( [^()]++ | (?R) )* ) \)
-            ^                        ^
-            ^                        ^
-
-       the  string  they  capture is "ab(cd)ef", the contents of the top level
-       parentheses. If there are more than 15 capturing parentheses in a  pat-
-       tern, PCRE has to obtain extra memory to store data during a recursion,
-       which it does by using pcre_malloc, freeing  it  via  pcre_free  after-
-       wards.  If  no  memory  can  be  obtained,  the  match  fails  with the
-       PCRE_ERROR_NOMEMORY error.
+       If  there are more than 15 capturing parentheses in a pattern, PCRE has
+       to obtain extra memory to store data during a recursion, which it  does
+       by using pcre_malloc, freeing it via pcre_free afterwards. If no memory
+       can be obtained, the match fails with the PCRE_ERROR_NOMEMORY error.
 
        Do not confuse the (?R) item with the condition (R),  which  tests  for
        recursion.   Consider  this pattern, which matches text in angle brack-
@@ -5039,10 +5033,12 @@ SUBPATTERNS AS SUBROUTINES
        two strings. Another example is  given  in  the  discussion  of  DEFINE
        above.
 
-       Like recursive subpatterns, a "subroutine" call is always treated as an
+       Like  recursive  subpatterns, a subroutine call is always treated as an
        atomic group. That is, once it has matched some of the subject  string,
        it  is  never  re-entered, even if it contains untried alternatives and
-       there is a subsequent matching failure.
+       there is a subsequent matching failure. Any capturing parentheses  that
+       are  set  during  the  subroutine  call revert to their previous values
+       afterwards.
 
        When a subpattern is used as a subroutine, processing options  such  as
        case-independence are fixed when the subpattern is defined. They cannot
@@ -5125,15 +5121,16 @@ BACKTRACKING CONTROL
        (*FAIL), which behaves like a failing negative assertion, they cause an
        error if encountered by pcre_dfa_exec().
 
-       If any of these verbs are used in an assertion subpattern, their effect
-       is confined to that subpattern; it does not extend to  the  surrounding
-       pattern.   Note that assertion subpatterns are processed as anchored at
-       the point where they are tested.
+       If any of these verbs are used in an assertion or subroutine subpattern
+       (including recursive subpatterns), their effect  is  confined  to  that
+       subpattern;  it  does  not extend to the surrounding pattern. Note that
+       such subpatterns are processed as anchored at the point where they  are
+       tested.
 
-       The new verbs make use of what was previously invalid syntax: an  open-
+       The  new verbs make use of what was previously invalid syntax: an open-
        ing parenthesis followed by an asterisk. In Perl, they are generally of
        the form (*VERB:ARG) but PCRE does not support the use of arguments, so
-       its  general  form is just (*VERB). Any number of these verbs may occur
+       its general form is just (*VERB). Any number of these verbs  may  occur
        in a pattern. There are two kinds:
 
    Verbs that act immediately
@@ -5142,94 +5139,94 @@ BACKTRACKING CONTROL
 
           (*ACCEPT)
 
-       This verb causes the match to end successfully, skipping the  remainder
-       of  the pattern. When inside a recursion, only the innermost pattern is
-       ended immediately. If (*ACCEPT) is inside  capturing  parentheses,  the
-       data  so  far  is  captured. (This feature was added to PCRE at release
+       This  verb causes the match to end successfully, skipping the remainder
+       of the pattern. When inside a recursion, only the innermost pattern  is
+       ended  immediately.  If  (*ACCEPT) is inside capturing parentheses, the
+       data so far is captured. (This feature was added  to  PCRE  at  release
        8.00.) For example:
 
          A((?:A|B(*ACCEPT)|C)D)
 
-       This matches "AB", "AAD", or "ACD"; when it matches "AB", "B"  is  cap-
+       This  matches  "AB", "AAD", or "ACD"; when it matches "AB", "B" is cap-
        tured by the outer parentheses.
 
          (*FAIL) or (*F)
 
-       This  verb  causes the match to fail, forcing backtracking to occur. It
-       is equivalent to (?!) but easier to read. The Perl documentation  notes
-       that  it  is  probably  useful only when combined with (?{}) or (??{}).
-       Those are, of course, Perl features that are not present in  PCRE.  The
-       nearest  equivalent is the callout feature, as for example in this pat-
+       This verb causes the match to fail, forcing backtracking to  occur.  It
+       is  equivalent to (?!) but easier to read. The Perl documentation notes
+       that it is probably useful only when combined  with  (?{})  or  (??{}).
+       Those  are,  of course, Perl features that are not present in PCRE. The
+       nearest equivalent is the callout feature, as for example in this  pat-
        tern:
 
          a+(?C)(*FAIL)
 
-       A match with the string "aaaa" always fails, but the callout  is  taken
+       A  match  with the string "aaaa" always fails, but the callout is taken
        before each backtrack happens (in this example, 10 times).
 
    Verbs that act after backtracking
 
        The following verbs do nothing when they are encountered. Matching con-
-       tinues with what follows, but if there is no subsequent match, a  fail-
-       ure  is  forced.   The  verbs  differ  in  exactly what kind of failure
+       tinues  with what follows, but if there is no subsequent match, a fail-
+       ure is forced.  The verbs  differ  in  exactly  what  kind  of  failure
        occurs.
 
          (*COMMIT)
 
-       This verb causes the whole match to fail outright if the  rest  of  the
-       pattern  does  not match. Even if the pattern is unanchored, no further
-       attempts to find a match by advancing the starting  point  take  place.
-       Once  (*COMMIT)  has been passed, pcre_exec() is committed to finding a
+       This  verb  causes  the whole match to fail outright if the rest of the
+       pattern does not match. Even if the pattern is unanchored,  no  further
+       attempts  to  find  a match by advancing the starting point take place.
+       Once (*COMMIT) has been passed, pcre_exec() is committed to  finding  a
        match at the current starting point, or not at all. For example:
 
          a+(*COMMIT)b
 
-       This matches "xxaab" but not "aacaab". It can be thought of as  a  kind
+       This  matches  "xxaab" but not "aacaab". It can be thought of as a kind
        of dynamic anchor, or "I've started, so I must finish."
 
          (*PRUNE)
 
-       This  verb causes the match to fail at the current position if the rest
+       This verb causes the match to fail at the current position if the  rest
        of the pattern does not match. If the pattern is unanchored, the normal
-       "bumpalong"  advance to the next starting character then happens. Back-
-       tracking can occur as usual to the left of (*PRUNE), or  when  matching
-       to  the right of (*PRUNE), but if there is no match to the right, back-
-       tracking cannot cross (*PRUNE).  In simple cases, the use  of  (*PRUNE)
+       "bumpalong" advance to the next starting character then happens.  Back-
+       tracking  can  occur as usual to the left of (*PRUNE), or when matching
+       to the right of (*PRUNE), but if there is no match to the right,  back-
+       tracking  cannot  cross (*PRUNE).  In simple cases, the use of (*PRUNE)
        is just an alternative to an atomic group or possessive quantifier, but
-       there are some uses of (*PRUNE) that cannot be expressed in  any  other
+       there  are  some uses of (*PRUNE) that cannot be expressed in any other
        way.
 
          (*SKIP)
 
-       This  verb  is like (*PRUNE), except that if the pattern is unanchored,
-       the "bumpalong" advance is not to the next character, but to the  posi-
-       tion  in  the  subject where (*SKIP) was encountered. (*SKIP) signifies
-       that whatever text was matched leading up to it cannot  be  part  of  a
+       This verb is like (*PRUNE), except that if the pattern  is  unanchored,
+       the  "bumpalong" advance is not to the next character, but to the posi-
+       tion in the subject where (*SKIP) was  encountered.  (*SKIP)  signifies
+       that  whatever  text  was  matched leading up to it cannot be part of a
        successful match. Consider:
 
          a+(*SKIP)b
 
-       If  the  subject  is  "aaaac...",  after  the first match attempt fails
-       (starting at the first character in the  string),  the  starting  point
+       If the subject is "aaaac...",  after  the  first  match  attempt  fails
+       (starting  at  the  first  character in the string), the starting point
        skips on to start the next attempt at "c". Note that a possessive quan-
-       tifer does not have the same effect as this example; although it  would
-       suppress  backtracking  during  the  first  match  attempt,  the second
-       attempt would start at the second character instead of skipping  on  to
+       tifer  does not have the same effect as this example; although it would
+       suppress backtracking  during  the  first  match  attempt,  the  second
+       attempt  would  start at the second character instead of skipping on to
        "c".
 
          (*THEN)
 
        This verb causes a skip to the next alternation if the rest of the pat-
        tern does not match. That is, it cancels pending backtracking, but only
-       within  the  current  alternation.  Its name comes from the observation
+       within the current alternation. Its name  comes  from  the  observation
        that it can be used for a pattern-based if-then-else block:
 
          ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 
-       If the COND1 pattern matches, FOO is tried (and possibly further  items
-       after  the  end  of  the group if FOO succeeds); on failure the matcher
-       skips to the second alternative and tries COND2,  without  backtracking
-       into  COND1.  If  (*THEN)  is  used outside of any alternation, it acts
+       If  the COND1 pattern matches, FOO is tried (and possibly further items
+       after the end of the group if FOO succeeds);  on  failure  the  matcher
+       skips  to  the second alternative and tries COND2, without backtracking
+       into COND1. If (*THEN) is used outside  of  any  alternation,  it  acts
        exactly like (*PRUNE).
 
 
@@ -5247,7 +5244,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 October 2009
+       Last updated: 18 October 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -5754,7 +5751,7 @@ PARTIAL MATCHING USING pcre_dfa_exec()
 
 PARTIAL MATCHING AND WORD BOUNDARIES
 
-       If  a  pattern ends with one of sequences \w or \W, which test for word
+       If  a  pattern ends with one of sequences \b or \B, which test for word
        boundaries, partial matching with PCRE_PARTIAL_SOFT can  give  counter-
        intuitive results. Consider this pattern:
 
@@ -5861,7 +5858,7 @@ MULTI-SEGMENT MATCHING WITH pcre_exec()
          data> The date is 23ja\P
          Partial match: 23ja
 
-       The this stage, an application could discard the text preceding "23ja",
+       At  this stage, an application could discard the text preceding "23ja",
        add on text from the next segment, and call pcre_exec()  again.  Unlike
        pcre_dfa_exec(),  the  entire matching string must always be available,
        and the complete matching process occurs for each call, so more  memory
@@ -5938,24 +5935,25 @@ ISSUES WITH MULTI-SEGMENT MATCHING
 
        4. Patterns that contain alternatives at the top level which do not all
        start with the  same  pattern  item  may  not  work  as  expected  when
-       pcre_dfa_exec() is used. For example, consider this pattern:
+       PCRE_DFA_RESTART  is  used  with pcre_dfa_exec(). For example, consider
+       this pattern:
 
          1234|3789
 
-       If  the  first  part of the subject is "ABC123", a partial match of the
-       first alternative is found at offset 3. There is no partial  match  for
+       If the first part of the subject is "ABC123", a partial  match  of  the
+       first  alternative  is found at offset 3. There is no partial match for
        the second alternative, because such a match does not start at the same
-       point in the subject string. Attempting to  continue  with  the  string
-       "7890"  does  not  yield  a  match because only those alternatives that
-       match at one point in the subject are remembered.  The  problem  arises
-       because  the  start  of the second alternative matches within the first
-       alternative. There is no problem with  anchored  patterns  or  patterns
+       point  in  the  subject  string. Attempting to continue with the string
+       "7890" does not yield a match  because  only  those  alternatives  that
+       match  at  one  point in the subject are remembered. The problem arises
+       because the start of the second alternative matches  within  the  first
+       alternative.  There  is  no  problem with anchored patterns or patterns
        such as:
 
          1234|ABCD
 
-       where  no  string can be a partial match for both alternatives. This is
-       not a problem if pcre_exec() is used, because the entire match  has  to
+       where no string can be a partial match for both alternatives.  This  is
+       not  a  problem if pcre_exec() is used, because the entire match has to
        be rerun each time:
 
            re> /1234|3789/
@@ -5963,6 +5961,13 @@ ISSUES WITH MULTI-SEGMENT MATCHING
          Partial match: 123
          data> 1237890
           0: 3789
+
+       Of course, instead of using PCRE_DFA_PARTIAL, the same technique of re-
+       running the entire match can also be used with pcre_dfa_exec(). Another
+       possibility is to work with two buffers. If a partial match at offset n
+       in  the first buffer is followed by "no match" when PCRE_DFA_RESTART is
+       used on the second buffer, you can then try a  new  match  starting  at
+       offset n+1 in the first buffer.
 
 
 AUTHOR
@@ -5974,7 +5979,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 29 September 2009
+       Last updated: 19 October 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
 
