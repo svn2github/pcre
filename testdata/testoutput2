@@ -10431,4 +10431,36 @@ No match
     BAXBAD  
 No match
 
+/(\3)(\1)(a)/<JS>
+    cat
+ 0: a
+ 1: 
+ 2: 
+ 3: a
+
+/(\3)(\1)(a)/SI<JS>
+Capturing subpattern count = 3
+Max back reference = 3
+Options:
+No first char
+Need char = 'a'
+Subject length lower bound = 1
+No set of starting bytes
+    cat
+ 0: a
+ 1: 
+ 2: 
+ 3: a
+
+/(\3)(\1)(a)/SI
+Capturing subpattern count = 3
+Max back reference = 3
+No options
+No first char
+Need char = 'a'
+Subject length lower bound = 3
+No set of starting bytes
+    cat
+No match
+
 /-- End of testinput2 --/
