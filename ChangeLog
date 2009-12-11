@@ -1,6 +1,15 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.01 11-Dec-09
+----------------------
+
+1.  If a pattern contained a conditional subpattern with only one branch (in
+    particular, this includes all (DEFINE) patterns), a call to pcre_study() 
+    computed the wrong minimum data length (which is of course zero for such 
+    subpatterns).
+
+
 Version 8.00 19-Oct-09
 ----------------------
 

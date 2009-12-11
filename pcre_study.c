@@ -96,13 +96,28 @@ for (;;)
 
   switch (op)
     {
+    case OP_COND:
+    case OP_SCOND:
+
+    /* If there is only one branch in a condition, the implied branch has zero
+    length, so we don't add anything. This covers the DEFINE "condition"
+    automatically. */
+
+    cs = cc + GET(cc, 1);
+    if (*cs != OP_ALT)
+      {
+      cc = cs + 1 + LINK_SIZE;
+      break;
+      }
+
+    /* Otherwise we can fall through and treat it the same as any other
+    subpattern. */
+
     case OP_CBRA:
     case OP_SCBRA:
     case OP_BRA:
     case OP_SBRA:
     case OP_ONCE:
-    case OP_COND:
-    case OP_SCOND:
     d = find_minlength(cc, startcode, options);
     if (d < 0) return d;
     branchlength += d;

@@ -10463,4 +10463,27 @@ No set of starting bytes
     cat
 No match
 
+/i(?(DEFINE)(?<s>a))/SI
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  s   1
+No options
+First char = 'i'
+No need char
+Subject length lower bound = 1
+No set of starting bytes
+    i
+ 0: i
+    
+/()i(?(1)a)/SI 
+Capturing subpattern count = 1
+No options
+No first char
+Need char = 'i'
+Subject length lower bound = 1
+Starting byte set: i 
+    ia
+ 0: ia
+ 1: 
+
 /-- End of testinput2 --/

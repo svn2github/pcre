@@ -3169,4 +3169,10 @@ a random value. /Ix
 /(\3)(\1)(a)/SI
     cat
 
+/i(?(DEFINE)(?<s>a))/SI
+    i
+    
+/()i(?(1)a)/SI 
+    ia
+
 /-- End of testinput2 --/
