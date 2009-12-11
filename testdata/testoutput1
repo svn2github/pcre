@@ -6649,4 +6649,16 @@ No match
  0: %ab%
  1: 
 
+/(?i)a(?-i)b|c/
+    XabX
+ 0: ab
+    XAbX
+ 0: Ab
+    CcC 
+ 0: c
+    ** Failers
+No match
+    XABX   
+No match
+
 /-- End of testinput1 --/

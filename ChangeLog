@@ -8,6 +8,13 @@ Version 8.01 11-Dec-09
     particular, this includes all (DEFINE) patterns), a call to pcre_study() 
     computed the wrong minimum data length (which is of course zero for such 
     subpatterns).
+    
+2.  For patterns such as (?i)a(?-i)b|c where an option setting at the start of 
+    the pattern is reset in the first branch, pcre_compile() failed with
+    "internal error: code overflow at offset...". This happened only when
+    the reset was to the original external option setting. (An optimization 
+    abstracts leading options settings into an external setting, which was the 
+    cause of this.)
 
 
 Version 8.00 19-Oct-09

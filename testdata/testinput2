@@ -3175,4 +3175,15 @@ a random value. /Ix
 /()i(?(1)a)/SI 
     ia
 
+/(?i)a(?-i)b|c/BZ
+    XabX
+    XAbX
+    CcC 
+    ** Failers
+    XABX   
+
+/(?i)a(?s)b|c/BZ
+
+/(?i)a(?s-i)b|c/BZ
+
 /-- End of testinput2 --/

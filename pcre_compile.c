@@ -5248,7 +5248,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             {
             cd->external_options = newoptions;
             }
-         else
+          else
             {
             if ((options & PCRE_IMS) != (newoptions & PCRE_IMS))
               {
@@ -5783,6 +5783,7 @@ int branchfirstbyte, branchreqbyte;
 int length;
 int orig_bracount;
 int max_bracount;
+int old_external_options = cd->external_options;
 branch_chain bc;
 
 bc.outer = bcptr;
@@ -5858,6 +5859,15 @@ for (;;)
     *ptrptr = ptr;
     return FALSE;
     }
+
+  /* If the external options have changed during this branch, it means that we
+  are at the top level, and a leading option setting has been encountered. We
+  need to re-set the original option values to take account of this so that,
+  during the pre-compile phase, we know to allow for a re-set at the start of
+  subsequent branches. */
+
+  if (old_external_options != cd->external_options)
+    oldims = cd->external_options & PCRE_IMS;
 
   /* Keep the highest bracket count in case (?| was used and some branch
   has fewer than the rest. */
@@ -5969,7 +5979,7 @@ for (;;)
     PUT(code, 1, code - start_bracket);
     code += 1 + LINK_SIZE;
 
-    /* Resetting option if needed */
+    /* Reset options if needed. */
 
     if ((options & PCRE_IMS) != oldims && *ptr == CHAR_RIGHT_PARENTHESIS)
       {

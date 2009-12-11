@@ -4067,4 +4067,11 @@
 /^%((?(?=[a])[^%])|b)*%$/
     %ab%
 
+/(?i)a(?-i)b|c/
+    XabX
+    XAbX
+    CcC 
+    ** Failers
+    XABX   
+
 /-- End of testinput1 --/
