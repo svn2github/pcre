@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,11 @@ supporting internal functions that are not used by other modules. */
 #include "pcre_internal.h"
 
 
-/* When DEBUG is defined, we need the pcre_printint() function, which is also
-used by pcretest. DEBUG is not defined when building a production library. */
+/* When PCRE_DEBUG is defined, we need the pcre_printint() function, which is
+also used by pcretest. PCRE_DEBUG is not defined when building a production
+library. */
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 #include "pcre_printint.src"
 #endif
 
@@ -1994,9 +1995,10 @@ static BOOL
 could_be_empty(const uschar *code, const uschar *endcode, branch_chain *bcptr,
   BOOL utf8)
 {
-while (bcptr != NULL && bcptr->current >= code)
+while (bcptr != NULL && bcptr->current_branch >= code)
   {
-  if (!could_be_empty_branch(bcptr->current, endcode, utf8)) return FALSE;
+  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf8)) 
+    return FALSE;
   bcptr = bcptr->outer;
   }
 return TRUE;
@@ -2658,7 +2660,7 @@ BOOL utf8 = FALSE;
 uschar *utf8_char = NULL;
 #endif
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 if (lengthptr != NULL) DPRINTF((">> start branch\n"));
 #endif
 
@@ -2717,7 +2719,7 @@ for (;; ptr++)
 
   if (lengthptr != NULL)
     {
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
     if (code > cd->hwm) cd->hwm = code;                 /* High water info */
 #endif
     if (code > cd->start_workspace + COMPILE_WORK_SIZE) /* Check for overrun */
@@ -4213,13 +4215,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           {
           /* In the pre-compile phase, we don't actually do the replication. We
           just adjust the length as if we had. Do some paranoid checks for
-          potential integer overflow. */
+          potential integer overflow. The INT64_OR_DOUBLE type is a 64-bit
+          integer type when available, otherwise double. */
 
           if (lengthptr != NULL)
             {
             int delta = (repeat_min - 1)*length_prevgroup;
-            if ((double)(repeat_min - 1)*(double)length_prevgroup >
-                                                            (double)INT_MAX ||
+            if ((INT64_OR_DOUBLE)(repeat_min - 1)*
+                  (INT64_OR_DOUBLE)length_prevgroup > 
+                    (INT64_OR_DOUBLE)INT_MAX ||
                 OFLOW_MAX - *lengthptr < delta)
               {
               *errorcodeptr = ERR20;
@@ -4265,15 +4269,16 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         just adjust the length as if we had. For each repetition we must add 1
         to the length for BRAZERO and for all but the last repetition we must
         add 2 + 2*LINKSIZE to allow for the nesting that occurs. Do some
-        paranoid checks to avoid integer overflow. */
+        paranoid checks to avoid integer overflow. The INT64_OR_DOUBLE type is 
+        a 64-bit integer type when available, otherwise double. */
 
         if (lengthptr != NULL && repeat_max > 0)
           {
           int delta = repeat_max * (length_prevgroup + 1 + 2 + 2*LINK_SIZE) -
                       2 - 2*LINK_SIZE;   /* Last one doesn't nest */
-          if ((double)repeat_max *
-                (double)(length_prevgroup + 1 + 2 + 2*LINK_SIZE)
-                  > (double)INT_MAX ||
+          if ((INT64_OR_DOUBLE)repeat_max *
+                (INT64_OR_DOUBLE)(length_prevgroup + 1 + 2 + 2*LINK_SIZE)
+                  > (INT64_OR_DOUBLE)INT_MAX ||
               OFLOW_MAX - *lengthptr < delta)
             {
             *errorcodeptr = ERR20;
@@ -5787,7 +5792,7 @@ int old_external_options = cd->external_options;
 branch_chain bc;
 
 bc.outer = bcptr;
-bc.current = code;
+bc.current_branch = code;
 
 firstbyte = reqbyte = REQ_UNSET;
 
@@ -6028,7 +6033,7 @@ for (;;)
     {
     *code = OP_ALT;
     PUT(code, 1, code - last_branch);
-    bc.current = last_branch = code;
+    bc.current_branch = last_branch = code;
     code += 1 + LINK_SIZE;
     }
 
@@ -6641,7 +6646,7 @@ if debugging, leave the test till after things are printed out. */
 
 *code++ = OP_END;
 
-#ifndef DEBUG
+#ifndef PCRE_DEBUG
 if (code - codestart > length) errorcode = ERR23;
 #endif
 
@@ -6765,7 +6770,7 @@ if (reqbyte >= 0 &&
 /* Print out the compiled data if debugging is enabled. This is never the
 case when building a production library. */
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 
 printf("Length = %d top_bracket = %d top_backref = %d\n",
   length, re->top_bracket, re->top_backref);
@@ -6803,7 +6808,7 @@ if (code - codestart > length)
   if (errorcodeptr != NULL) *errorcodeptr = ERR23;
   return NULL;
   }
-#endif   /* DEBUG */
+#endif   /* PCRE_DEBUG */
 
 return (pcre *)re;
 }

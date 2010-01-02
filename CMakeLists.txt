@@ -35,6 +35,7 @@
 #            to disable the final configuration report.
 # 2009-04-11 PH applied Christian Ehrlicher's patch to show compiler flags that
 #            are set by specifying a release type.
+# 2010-01-02 PH added test for stdint.h
 
 PROJECT(PCRE C CXX)
 
@@ -55,6 +56,7 @@ INCLUDE(CheckFunctionExists)
 INCLUDE(CheckTypeSize)
 
 CHECK_INCLUDE_FILE(dirent.h     HAVE_DIRENT_H)
+CHECK_INCLUDE_FILE(stdint.h     HAVE_STDINT_H)
 CHECK_INCLUDE_FILE(sys/stat.h   HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILE(sys/types.h  HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE(unistd.h     HAVE_UNISTD_H)

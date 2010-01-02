@@ -9,7 +9,7 @@ dnl empty.
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [01])
 m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2009-12-11])
+m4_define(pcre_date, [2010-01-02])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -65,6 +65,9 @@ fi
 AC_LANG_PUSH(C++)
 AC_COMPILE_IFELSE(AC_LANG_PROGRAM([],[]),, CXX=""; CXXCP=""; CXXFLAGS="")
 AC_LANG_POP
+
+# Check for a 64-bit integer type
+AC_TYPE_INT64_T
 
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL

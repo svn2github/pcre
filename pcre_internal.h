@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,10 @@ functions whose names all begin with "_pcre_". */
 #ifndef PCRE_INTERNAL_H
 #define PCRE_INTERNAL_H
 
-/* Define DEBUG to get debugging output on stdout. */
+/* Define PCRE_DEBUG to get debugging output on stdout. */
 
 #if 0
-#define DEBUG
+#define PCRE_DEBUG
 #endif
 
 /* We do not support both EBCDIC and UTF-8 at the same time. The "configure"
@@ -74,7 +74,7 @@ It turns out that the Mac Debugging.h header also defines the macro DPRINTF, so
 be absolutely sure we get our version. */
 
 #undef DPRINTF
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 #define DPRINTF(p) printf p
 #else
 #define DPRINTF(p) /* Nothing */
@@ -86,8 +86,6 @@ setjmp and stdarg are used is when NO_RECURSE is set. */
 
 #include <ctype.h>
 #include <limits.h>
-#include <setjmp.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -184,6 +182,23 @@ preprocessor time in standard C environments. */
   typedef long int pcre_int32;
 #else
   #error Cannot determine a type for 32-bit unsigned integers
+#endif
+
+/* When checking for integer overflow in pcre_compile(), we need to handle 
+large integers. If a 64-bit integer type is available, we can use that. 
+Otherwise we have to cast to double, which of course requires floating point 
+arithmetic. Handle this by defining a macro for the appropriate type. If 
+stdint.h is available, include it; it may define INT64_MAX. The macro int64_t 
+may be set by "configure". */
+
+#if HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#if defined INT64_MAX || defined int64_t
+#define INT64_OR_DOUBLE int64_t
+#else
+#define INT64_OR_DOUBLE double
 #endif
 
 /* All character handling must be done as unsigned characters. Otherwise there
@@ -1579,7 +1594,7 @@ branches, for testing for left recursion. */
 
 typedef struct branch_chain {
   struct branch_chain *outer;
-  uschar *current;
+  uschar *current_branch;
 } branch_chain;
 
 /* Structure for items in a linked list that represents an explicit recursive
