@@ -336,4 +336,25 @@
 /(?<pn> \( ( [^()]++ | (?&pn) )* \) )/x
     (ab(cd)ef)
 
+/^(?!a(*SKIP)b)/
+    ac
+    
+/^(?=a(*SKIP)b|ac)/
+    ** Failers
+    ac
+    
+/^(?=a(*THEN)b|ac)/
+    ac
+    
+/^(?=a(*PRUNE)b)/
+    ab  
+    ** Failers 
+    ac
+
+/^(?=a(*ACCEPT)b)/
+    ac
+
+/^(?(?!a(*SKIP)b))/
+    ac
+
 /-- End of testinput11 --/

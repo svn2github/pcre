@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language (but see
 below for why this module is different).
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -2298,7 +2298,8 @@ for (;;)
           ims,                                  /* the current ims flags */
           rlevel,                               /* function recursion level */
           recursing);                           /* pass on regex recursion */
-
+          
+        if (rc == PCRE_ERROR_DFA_UITEM) return rc;
         if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
             { ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); }
         }
@@ -2389,6 +2390,7 @@ for (;;)
             rlevel,                               /* function recursion level */
             recursing);                           /* pass on regex recursion */
 
+          if (rc == PCRE_ERROR_DFA_UITEM) return rc;
           if ((rc >= 0) ==
                 (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
             { ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); }

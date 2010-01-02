@@ -712,4 +712,34 @@ No match
  1: (ab(cd)ef)
  2: ef
 
+/^(?!a(*SKIP)b)/
+    ac
+ 0: 
+    
+/^(?=a(*SKIP)b|ac)/
+    ** Failers
+No match
+    ac
+No match
+    
+/^(?=a(*THEN)b|ac)/
+    ac
+ 0: 
+    
+/^(?=a(*PRUNE)b)/
+    ab  
+ 0: 
+    ** Failers 
+No match
+    ac
+No match
+
+/^(?=a(*ACCEPT)b)/
+    ac
+ 0: 
+
+/^(?(?!a(*SKIP)b))/
+    ac
+ 0: 
+
 /-- End of testinput11 --/

@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1133,7 +1133,9 @@ for (;;)
     offset_top = md->end_offset_top;
     continue;
 
-    /* Negative assertion: all branches must fail to match */
+    /* Negative assertion: all branches must fail to match. Encountering SKIP,
+    PRUNE, or COMMIT means we must assume failure without checking subsequent 
+    branches. */
 
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
@@ -1142,6 +1144,11 @@ for (;;)
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM5);
       if (rrc == MATCH_MATCH) RRETURN(MATCH_NOMATCH);
+      if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
+        {
+        do ecode += GET(ecode,1); while (*ecode == OP_ALT);
+        break; 
+        }  
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }

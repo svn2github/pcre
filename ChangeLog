@@ -5,16 +5,27 @@ Version 8.01 11-Dec-09
 ----------------------
 
 1.  If a pattern contained a conditional subpattern with only one branch (in
-    particular, this includes all (DEFINE) patterns), a call to pcre_study() 
-    computed the wrong minimum data length (which is of course zero for such 
+    particular, this includes all (DEFINE) patterns), a call to pcre_study()
+    computed the wrong minimum data length (which is of course zero for such
     subpatterns).
-    
-2.  For patterns such as (?i)a(?-i)b|c where an option setting at the start of 
+
+2.  For patterns such as (?i)a(?-i)b|c where an option setting at the start of
     the pattern is reset in the first branch, pcre_compile() failed with
     "internal error: code overflow at offset...". This happened only when
-    the reset was to the original external option setting. (An optimization 
-    abstracts leading options settings into an external setting, which was the 
+    the reset was to the original external option setting. (An optimization
+    abstracts leading options settings into an external setting, which was the
     cause of this.)
+
+3.  A pattern such as ^(?!a(*SKIP)b) where a negative assertion contained one
+    of the verbs SKIP, PRUNE, or COMMIT, did not work correctly. When the
+    assertion pattern did not match (meaning that the assertion was true), it
+    was incorrectly treated as false if the SKIP had been reached during the
+    matching. This also applied to assertions used as conditions.
+
+4.  If an item that is not supported by pcre_dfa_exec() was encountered in an
+    assertion subpattern, including such a pattern used as a condition,
+    unpredictable results occurred, instead of the error return
+    PCRE_ERROR_DFA_UITEM.
 
 
 Version 8.00 19-Oct-09
