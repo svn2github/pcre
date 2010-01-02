@@ -26,6 +26,10 @@ Version 8.01 11-Dec-09
     assertion subpattern, including such a pattern used as a condition,
     unpredictable results occurred, instead of the error return
     PCRE_ERROR_DFA_UITEM.
+    
+5.  The C++ GlobalReplace function was not working like Perl for the special
+    situation when an empty string is matched. It now does the fancy magic
+    stuff that is necessary. 
 
 
 Version 8.00 19-Oct-09
