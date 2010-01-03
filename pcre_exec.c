@@ -5572,7 +5572,7 @@ for(;;)
     bytes to avoid spending too much time in this optimization. */
 
     if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
-        end_subject - start_match < study->minlength)
+        (pcre_uint32)(end_subject - start_match) < study->minlength)
       {
       rc = MATCH_NOMATCH;
       break;

@@ -53,6 +53,9 @@ Version 8.01 11-Dec-09
     instead, thus avoiding the use of floating point arithmetic. (There is no 
     other use of FP in PCRE.) If int64_t is not found, the fallback is to 
     double. 
+    
+9.  Added two casts to avoid signed/unsigned warnings from VS Studio Express 
+    2005 (difference between two addresses compared to an unsigned value).
        
 
 

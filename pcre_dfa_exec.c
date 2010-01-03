@@ -2991,7 +2991,7 @@ for (;;)
       bytes to avoid spending too much time in this optimization. */
 
       if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
-          end_subject - current_subject < study->minlength)
+          (pcre_uint32)(end_subject - current_subject) < study->minlength)
         return PCRE_ERROR_NOMATCH;
 
       /* If req_byte is set, we know that that character must appear in the
