@@ -76,6 +76,11 @@ Version 8.01 11-Dec-09
       Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
       
     I have done both of these things.
+    
+12. Although pcre_dfa_exec() does not use nearly as much stack as pcre_exec()
+    most of the time, it *can* run out if it is given a pattern that contains a 
+    runaway infinite recursion. I updated the discussion in the pcrestack man 
+    page.  
  
 
 
