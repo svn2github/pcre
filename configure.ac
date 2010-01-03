@@ -8,7 +8,7 @@ dnl empty.
 
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [01])
-m4_define(pcre_prerelease, [])
+m4_define(pcre_prerelease, [-RC1])
 m4_define(pcre_date, [2010-01-02])
 
 # Libtool shared library interface versions (current:revision:age)
@@ -21,6 +21,9 @@ AC_INIT(PCRE, pcre_major.pcre_minor[]pcre_prerelease, , pcre)
 AC_CONFIG_SRCDIR([pcre.h.in])
 AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
 AC_CONFIG_HEADERS(config.h)
+
+# This was added at the suggestion of libtoolize (03-Jan-10)
+AC_CONFIG_MACRO_DIR([m4])
 
 # The default CFLAGS and CXXFLAGS in Autoconf are "-g -O2" for gcc and just
 # "-g" for any other compiler. There doesn't seem to be a standard way of

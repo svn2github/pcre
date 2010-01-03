@@ -67,6 +67,16 @@ Version 8.01 11-Dec-09
       - The compiler thus generates a "C" signature for the test function.
       - The linker fails to find the "C" function.
       - PCRE fails to configure if asked to do so against libbz2.
+      
+11. When running libtoolize from libtool-2.2.6b as part of autogen.sh, these
+    messages were output:
+
+      Consider adding `AC_CONFIG_MACRO_DIR([m4])' to configure.ac and
+      rerunning libtoolize, to keep the correct libtool macros in-tree.
+      Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
+      
+    I have done both of these things.
+ 
 
 
 Version 8.00 19-Oct-09
