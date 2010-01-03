@@ -81,6 +81,13 @@ Version 8.01 11-Dec-09
     most of the time, it *can* run out if it is given a pattern that contains a 
     runaway infinite recursion. I updated the discussion in the pcrestack man 
     page.  
+    
+13. Now that we have gone to the x.xx style of version numbers, the minor 
+    version may start with zero. Using 08 or 09 is a bad idea because users 
+    might check the value of PCRE_MINOR in their code, and 08 or 09 may be 
+    interpreted as invalid octal numbers. I've updated the previous comment in 
+    configure.ac, and also added a check that gives an error if 08 or 09 are 
+    used.
  
 
 

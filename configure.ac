@@ -1,10 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl NOTE FOR MAINTAINERS: Do not use major or minor version numbers with
-dnl leading zeros, because they may be treated as octal constants. The
-dnl PCRE_PRERELEASE feature is for identifying release candidates. It might
-dnl be defined as -RC2, for example. For real releases, it should be defined
-dnl empty.
+dnl NOTE FOR MAINTAINERS: Do not use minor version numbers 08 or 09 because
+dnl the leading zeros may cause them to be treated as invalid octal constants
+dnl if a PCRE user writes code that uses PCRE_MINOR as a number. There is now
+dnl a check further down that throws an error if 08 or 09 are used.
+
+dnl The PCRE_PRERELEASE feature is for identifying release candidates. It might
+dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [01])
@@ -81,6 +83,15 @@ PCRE_MAJOR="pcre_major"
 PCRE_MINOR="pcre_minor"
 PCRE_PRERELEASE="pcre_prerelease"
 PCRE_DATE="pcre_date"
+
+if test "$PCRE_MINOR" = "08" -o "$PCRE_MINOR" = "09"
+then
+  echo "***"
+  echo "*** Minor version number $PCRE_MINOR must not be used. ***"
+  echo "*** Use only 01 to 07 or 10 onwards, to avoid octal issues. ***" 
+  echo "***" 
+  exit 1
+fi    
 
 AC_SUBST(PCRE_MAJOR)
 AC_SUBST(PCRE_MINOR)
