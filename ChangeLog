@@ -26,37 +26,47 @@ Version 8.01 11-Dec-09
     assertion subpattern, including such a pattern used as a condition,
     unpredictable results occurred, instead of the error return
     PCRE_ERROR_DFA_UITEM.
-    
+
 5.  The C++ GlobalReplace function was not working like Perl for the special
     situation when an empty string is matched. It now does the fancy magic
-    stuff that is necessary. 
-    
-6.  In pcre_internal.h, obsolete includes to setjmp.h and stdarg.h have been 
+    stuff that is necessary.
+
+6.  In pcre_internal.h, obsolete includes to setjmp.h and stdarg.h have been
     removed. (These were left over from very, very early versions of PCRE.)
-    
+
 7.  Some cosmetic changes to the code to make life easier when compiling it
     as part of something else:
-    
-    (a) Change DEBUG to PCRE_DEBUG. 
-    
-    (b) In pcre_compile(), rename the member of the "branch_chain" structure 
-        called "current" as "current_branch", to prevent a collision with the 
+
+    (a) Change DEBUG to PCRE_DEBUG.
+
+    (b) In pcre_compile(), rename the member of the "branch_chain" structure
+        called "current" as "current_branch", to prevent a collision with the
         Linux macro when compiled as a kernel module.
-        
-    (c) In pcre_study(), rename the function set_bit() as set_table_bit(), to 
-        prevent a collision with the Linux macro when compiled as a kernel 
+
+    (c) In pcre_study(), rename the function set_bit() as set_table_bit(), to
+        prevent a collision with the Linux macro when compiled as a kernel
         module.
-        
+
 8.  In pcre_compile() there are some checks for integer overflows that used to
     cast potentially large values to (double). This has been changed to that
-    when building, a check for int64_t is made, and if it is found, it is used 
-    instead, thus avoiding the use of floating point arithmetic. (There is no 
-    other use of FP in PCRE.) If int64_t is not found, the fallback is to 
-    double. 
-    
-9.  Added two casts to avoid signed/unsigned warnings from VS Studio Express 
+    when building, a check for int64_t is made, and if it is found, it is used
+    instead, thus avoiding the use of floating point arithmetic. (There is no
+    other use of FP in PCRE.) If int64_t is not found, the fallback is to
+    double.
+
+9.  Added two casts to avoid signed/unsigned warnings from VS Studio Express
     2005 (difference between two addresses compared to an unsigned value).
-       
+
+10. Change the standard AC_CHECK_LIB test for libbz2 in configure.ac to a
+    custom one, because of the following reported problem in Windows:
+
+      - libbz2 uses the Pascal calling convention (WINAPI) for the functions
+        under Win32.
+      - The standard autoconf AC_CHECK_LIB fails to include "bzlib.h",
+        therefore missing the function definition.
+      - The compiler thus generates a "C" signature for the test function.
+      - The linker fails to find the "C" function.
+      - PCRE fails to configure if asked to do so against libbz2.
 
 
 Version 8.00 19-Oct-09

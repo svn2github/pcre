@@ -368,10 +368,39 @@ AC_CHECK_FUNCS(bcopy memmove strerror)
 AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H=1])
 AC_CHECK_LIB([z], [gzopen], [HAVE_LIBZ=1])
 
-# Check for the availability of libbz2
+# Check for the availability of libbz2. Originally we just used AC_CHECK_LIB,
+# as for libz. However, this had the following problem, diagnosed and fixed by
+# a user:
+#
+#   - libbz2 uses the Pascal calling convention (WINAPI) for the functions
+#     under Win32.
+#   - The standard autoconf AC_CHECK_LIB fails to include "bzlib.h",
+#     therefore missing the function definition.
+#   - The compiler thus generates a "C" signature for the test function.
+#   - The linker fails to find the "C" function.
+#   - PCRE fails to configure if asked to do so against libbz2.
+#
+# Solution:
+#
+#   - Replace the AC_CHECK_LIB test with a custom test.
 
 AC_CHECK_HEADERS([bzlib.h], [HAVE_BZLIB_H=1])
-AC_CHECK_LIB([bz2], [BZ2_bzopen], [HAVE_LIBBZ2=1])
+# Original test
+# AC_CHECK_LIB([bz2], [BZ2_bzopen], [HAVE_LIBBZ2=1])
+#
+# Custom test follows
+
+AC_MSG_CHECKING([for libbz2])
+OLD_LIBS="$LIBS"
+LIBS="$LIBS -lbz2"
+AC_LINK_IFELSE( AC_LANG_PROGRAM([[
+#ifdef HAVE_BZLIB_H
+#include <bzlib.h>
+#endif]],
+[[return (int)BZ2_bzopen("conftest", "rb");]]),
+[AC_MSG_RESULT([yes]);HAVE_LIBBZ2=1; break;],
+AC_MSG_RESULT([no]))
+LIBS="$OLD_LIBS"
 
 # Check for the availabiity of libreadline
 
