@@ -90,7 +90,19 @@ Version 8.01 11-Dec-09
     used.
     
 14. Change 8.00/11 was not quite complete: code had been accidentally omitted,
-    causing partial matching to fail where the end of the subject matched \W.
+    causing partial matching to fail when the end of the subject matched \W
+    in a UTF-8 pattern where \W was quantified with a minimum of 3.
+    
+15. There were some discrepancies between the declarations in pcre_internal.h
+    of _pcre_is_newline(), _pcre_was_newline(), and _pcre_valid_utf8() and 
+    their definitions. The declarations used "const uschar *" and the
+    definitions used USPTR. Even though USPTR is normally defined as "const
+    unsigned char *" (and uschar is typedeffed as "unsigned char"), it was
+    reported that: "This difference in casting confuses some C++ compilers, for
+    example, SunCC recognizes above declarations as different functions and
+    generates broken code for hbpcre." I have changed the declarations to use 
+    USPTR.
+        
  
 
 

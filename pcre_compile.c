@@ -6449,7 +6449,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
 
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
-     (*erroroffset = _pcre_valid_utf8((uschar *)pattern, -1)) >= 0)
+     (*erroroffset = _pcre_valid_utf8((USPTR)pattern, -1)) >= 0)
   {
   errorcode = ERR44;
   goto PCRE_EARLY_ERROR_RETURN2;
