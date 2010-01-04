@@ -102,7 +102,10 @@ Version 8.01 11-Dec-09
     example, SunCC recognizes above declarations as different functions and
     generates broken code for hbpcre." I have changed the declarations to use 
     USPTR.
-        
+    
+16. GNU libtool is named differently on some systems. The autogen.sh script now 
+    tries several variants such as glibtoolize (MacOSX) and libtoolize1x
+    (FreeBSD).
  
 
 
