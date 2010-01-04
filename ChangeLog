@@ -88,6 +88,9 @@ Version 8.01 11-Dec-09
     interpreted as invalid octal numbers. I've updated the previous comment in 
     configure.ac, and also added a check that gives an error if 08 or 09 are 
     used.
+    
+14. Change 8.00/11 was not quite complete: code had been accidentally omitted,
+    causing partial matching to fail where the end of the subject matched \W.
  
 
 

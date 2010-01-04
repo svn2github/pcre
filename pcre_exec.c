@@ -1134,7 +1134,7 @@ for (;;)
     continue;
 
     /* Negative assertion: all branches must fail to match. Encountering SKIP,
-    PRUNE, or COMMIT means we must assume failure without checking subsequent 
+    PRUNE, or COMMIT means we must assume failure without checking subsequent
     branches. */
 
     case OP_ASSERT_NOT:
@@ -1147,8 +1147,8 @@ for (;;)
       if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
         {
         do ecode += GET(ecode,1); while (*ecode == OP_ALT);
-        break; 
-        }  
+        break;
+        }
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
@@ -3695,8 +3695,12 @@ for (;;)
         case OP_NOT_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject ||
-             (*eptr < 128 && (md->ctypes[*eptr] & ctype_word) != 0))
+          if (eptr >= md->end_subject)
+            {
+            SCHECK_PARTIAL();
+            RRETURN(MATCH_NOMATCH);
+            }
+          if (*eptr < 128 && (md->ctypes[*eptr] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
           while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80);
           }
