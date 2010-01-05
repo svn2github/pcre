@@ -821,6 +821,8 @@ bool Arg::parse_longlong_radix(const char* str,
   long long r = strtoll(str, &end, radix);
 #elif defined HAVE__STRTOI64
   long long r = _strtoi64(str, &end, radix);
+#elif defined HAVE_STRTOIMAX
+  long long r = strtoimax(str, &end, radix);
 #else
 #error parse_longlong_radix: cannot convert input to a long-long
 #endif
@@ -851,6 +853,8 @@ bool Arg::parse_ulonglong_radix(const char* str,
   unsigned long long r = strtoull(str, &end, radix);
 #elif defined HAVE__STRTOI64
   unsigned long long r = _strtoui64(str, &end, radix);
+#elif defined HAVE_STRTOIMAX
+  unsigned long long r = strtoumax(str, &end, radix);
 #else
 #error parse_ulonglong_radix: cannot convert input to a long-long
 #endif

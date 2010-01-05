@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.01 11-Dec-09
+Version 8.01 06-Jan-10
 ----------------------
 
 1.  If a pattern contained a conditional subpattern with only one branch (in
@@ -67,46 +67,51 @@ Version 8.01 11-Dec-09
       - The compiler thus generates a "C" signature for the test function.
       - The linker fails to find the "C" function.
       - PCRE fails to configure if asked to do so against libbz2.
-      
+
 11. When running libtoolize from libtool-2.2.6b as part of autogen.sh, these
     messages were output:
 
       Consider adding `AC_CONFIG_MACRO_DIR([m4])' to configure.ac and
       rerunning libtoolize, to keep the correct libtool macros in-tree.
       Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
-      
+
     I have done both of these things.
-    
+
 12. Although pcre_dfa_exec() does not use nearly as much stack as pcre_exec()
-    most of the time, it *can* run out if it is given a pattern that contains a 
-    runaway infinite recursion. I updated the discussion in the pcrestack man 
-    page.  
-    
-13. Now that we have gone to the x.xx style of version numbers, the minor 
-    version may start with zero. Using 08 or 09 is a bad idea because users 
-    might check the value of PCRE_MINOR in their code, and 08 or 09 may be 
-    interpreted as invalid octal numbers. I've updated the previous comment in 
-    configure.ac, and also added a check that gives an error if 08 or 09 are 
+    most of the time, it *can* run out if it is given a pattern that contains a
+    runaway infinite recursion. I updated the discussion in the pcrestack man
+    page.
+
+13. Now that we have gone to the x.xx style of version numbers, the minor
+    version may start with zero. Using 08 or 09 is a bad idea because users
+    might check the value of PCRE_MINOR in their code, and 08 or 09 may be
+    interpreted as invalid octal numbers. I've updated the previous comment in
+    configure.ac, and also added a check that gives an error if 08 or 09 are
     used.
-    
+
 14. Change 8.00/11 was not quite complete: code had been accidentally omitted,
     causing partial matching to fail when the end of the subject matched \W
     in a UTF-8 pattern where \W was quantified with a minimum of 3.
-    
+
 15. There were some discrepancies between the declarations in pcre_internal.h
-    of _pcre_is_newline(), _pcre_was_newline(), and _pcre_valid_utf8() and 
+    of _pcre_is_newline(), _pcre_was_newline(), and _pcre_valid_utf8() and
     their definitions. The declarations used "const uschar *" and the
     definitions used USPTR. Even though USPTR is normally defined as "const
     unsigned char *" (and uschar is typedeffed as "unsigned char"), it was
     reported that: "This difference in casting confuses some C++ compilers, for
     example, SunCC recognizes above declarations as different functions and
-    generates broken code for hbpcre." I have changed the declarations to use 
+    generates broken code for hbpcre." I have changed the declarations to use
     USPTR.
-    
-16. GNU libtool is named differently on some systems. The autogen.sh script now 
+
+16. GNU libtool is named differently on some systems. The autogen.sh script now
     tries several variants such as glibtoolize (MacOSX) and libtoolize1x
     (FreeBSD).
- 
+
+17. Applied Craig's patch that fixes an HP aCC compile error in pcre 8.00
+    (strtoXX undefined when compiling pcrecpp.cc). The patch contains this
+    comment: "Figure out how to create a longlong from a string: strtoll and
+    equivalent. It's not enough to call AC_CHECK_FUNCS: hpux has a strtoll, for
+    instance, but it only takes 2 args instead of 3!"
 
 
 Version 8.00 19-Oct-09

@@ -11,7 +11,7 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [01])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2010-01-02])
+m4_define(pcre_date, [2010-01-06])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -340,6 +340,49 @@ AC_CHECK_HEADERS(bits/type_traits.h, [pcre_have_bits_type_traits="1"],
 AC_CHECK_HEADERS(type_traits.h, [pcre_have_type_traits="1"],
                                 [pcre_have_type_traits="0"])
 
+# (This isn't c++-specific, but is only used in pcrecpp.cc, so try this
+# in a c++ context.  This matters becuase strtoimax is C99 and may not
+# be supported by the C++ compiler.)
+# Figure out how to create a longlong from a string: strtoll and
+# equiv.  It's not enough to call AC_CHECK_FUNCS: hpux has a
+# strtoll, for instance, but it only takes 2 args instead of 3!
+# We have to call AH_TEMPLATE since AC_DEFINE_UNQUOTED below is complex.
+AH_TEMPLATE(HAVE_STRTOQ, [Define to 1 if you have `strtoq'.])
+AH_TEMPLATE(HAVE_STRTOLL, [Define to 1 if you have `strtoll'.])
+AH_TEMPLATE(HAVE__STRTOI64, [Define to 1 if you have `_strtoi64'.])
+AH_TEMPLATE(HAVE_STRTOIMAX, [Define to 1 if you have `strtoimax'.])
+have_strto_fn=0
+for fn in srtoq strtoll _strtoi64 strtoimax; do
+  AC_MSG_CHECKING([for $fn])
+  if test "$fn" = strtoimax; then
+    include=stdint.h
+  else
+    include=stdlib.h
+  fi
+  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([#include <$include>],
+                                    [char* e; return $fn("100", &e, 10)]),
+                    [AC_MSG_RESULT(yes)
+                     AC_DEFINE_UNQUOTED(HAVE_`echo $fn | tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ`, 1,
+                                        [Define to 1 if you have `$fn'.])
+                     have_strto_fn=1
+                     break],
+                    [AC_MSG_RESULT(no)])
+done
+
+if test "$have_strto_fn" = 1; then
+  AC_CHECK_TYPES([long long],
+                 [pcre_have_long_long="1"],
+                 [pcre_have_long_long="0"])
+  AC_CHECK_TYPES([unsigned long long],
+                 [pcre_have_ulong_long="1"],
+                 [pcre_have_ulong_long="0"])
+else
+  pcre_have_long_long="0"
+  pcre_have_ulong_long="0"
+fi
+AC_SUBST(pcre_have_long_long)
+AC_SUBST(pcre_have_ulong_long)
+
 AC_LANG_POP
 fi
 # Using AC_SUBST eliminates the need to include config.h in a public .h file
@@ -354,24 +397,6 @@ AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xy
 
 AC_C_CONST
 AC_TYPE_SIZE_T
-
-pcre_have_strotolonglong=0
-AC_CHECK_FUNCS(strtoq strtoll _strtoi64, [pcre_have_strotolonglong="1"; break])
-# If we can't convert a string to a long long, pretend we don't even
-# have a long long.
-if test $pcre_have_strotolonglong = "0"; then
-   pcre_have_long_long="0"
-   pcre_have_ulong_long="0"
-else
-  AC_CHECK_TYPES([long long],
-                 [pcre_have_long_long="1"],
-                 [pcre_have_long_long="0"])
-  AC_CHECK_TYPES([unsigned long long],
-                 [pcre_have_ulong_long="1"],
-                 [pcre_have_ulong_long="0"])
-fi
-AC_SUBST(pcre_have_long_long)
-AC_SUBST(pcre_have_ulong_long)
 
 # Checks for library functions.
 
