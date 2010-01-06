@@ -88,10 +88,10 @@ if test "$PCRE_MINOR" = "08" -o "$PCRE_MINOR" = "09"
 then
   echo "***"
   echo "*** Minor version number $PCRE_MINOR must not be used. ***"
-  echo "*** Use only 01 to 07 or 10 onwards, to avoid octal issues. ***" 
-  echo "***" 
+  echo "*** Use only 01 to 07 or 10 onwards, to avoid octal issues. ***"
+  echo "***"
   exit 1
-fi    
+fi
 
 AC_SUBST(PCRE_MAJOR)
 AC_SUBST(PCRE_MINOR)

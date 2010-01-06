@@ -7,7 +7,7 @@ of calling the PCRE regular expression library from a C program. See the
 pcresample documentation for a short discussion ("man pcresample" if you have
 the PCRE man pages installed).
 
-In Unix-like environments, if PCRE is installed in your standard system 
+In Unix-like environments, if PCRE is installed in your standard system
 libraries, you should be able to compile this program using this command:
 
 gcc -Wall pcredemo.c -lpcre -o pcredemo

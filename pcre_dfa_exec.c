@@ -2298,7 +2298,7 @@ for (;;)
           ims,                                  /* the current ims flags */
           rlevel,                               /* function recursion level */
           recursing);                           /* pass on regex recursion */
-          
+
         if (rc == PCRE_ERROR_DFA_UITEM) return rc;
         if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
             { ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); }

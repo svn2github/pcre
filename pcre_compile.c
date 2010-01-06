@@ -1997,7 +1997,7 @@ could_be_empty(const uschar *code, const uschar *endcode, branch_chain *bcptr,
 {
 while (bcptr != NULL && bcptr->current_branch >= code)
   {
-  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf8)) 
+  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf8))
     return FALSE;
   bcptr = bcptr->outer;
   }
@@ -4222,7 +4222,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             {
             int delta = (repeat_min - 1)*length_prevgroup;
             if ((INT64_OR_DOUBLE)(repeat_min - 1)*
-                  (INT64_OR_DOUBLE)length_prevgroup > 
+                  (INT64_OR_DOUBLE)length_prevgroup >
                     (INT64_OR_DOUBLE)INT_MAX ||
                 OFLOW_MAX - *lengthptr < delta)
               {
@@ -4269,7 +4269,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         just adjust the length as if we had. For each repetition we must add 1
         to the length for BRAZERO and for all but the last repetition we must
         add 2 + 2*LINKSIZE to allow for the nesting that occurs. Do some
-        paranoid checks to avoid integer overflow. The INT64_OR_DOUBLE type is 
+        paranoid checks to avoid integer overflow. The INT64_OR_DOUBLE type is
         a 64-bit integer type when available, otherwise double. */
 
         if (lengthptr != NULL && repeat_max > 0)

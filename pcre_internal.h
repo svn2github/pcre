@@ -184,11 +184,11 @@ preprocessor time in standard C environments. */
   #error Cannot determine a type for 32-bit unsigned integers
 #endif
 
-/* When checking for integer overflow in pcre_compile(), we need to handle 
-large integers. If a 64-bit integer type is available, we can use that. 
-Otherwise we have to cast to double, which of course requires floating point 
-arithmetic. Handle this by defining a macro for the appropriate type. If 
-stdint.h is available, include it; it may define INT64_MAX. The macro int64_t 
+/* When checking for integer overflow in pcre_compile(), we need to handle
+large integers. If a 64-bit integer type is available, we can use that.
+Otherwise we have to cast to double, which of course requires floating point
+arithmetic. Handle this by defining a macro for the appropriate type. If
+stdint.h is available, include it; it may define INT64_MAX. The macro int64_t
 may be set by "configure". */
 
 #if HAVE_STDINT_H

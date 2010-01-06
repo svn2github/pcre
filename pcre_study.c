@@ -444,7 +444,7 @@ Returns:        nothing
 */
 
 static void
-set_table_bit(uschar *start_bits, unsigned int c, BOOL caseless, 
+set_table_bit(uschar *start_bits, unsigned int c, BOOL caseless,
   compile_data *cd)
 {
 start_bits[c/8] |= (1 << (c&7));
