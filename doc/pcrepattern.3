@@ -217,7 +217,7 @@ one of the following escape sequences than the binary character it represents:
   \en        linefeed (hex 0A)
   \er        carriage return (hex 0D)
   \et        tab (hex 09)
-  \eddd      character with octal code ddd, or backreference
+  \eddd      character with octal code ddd, or back reference
   \exhh      character with hex code hh
   \ex{hhh..} character with hex code hhh..
 .sp
@@ -1163,9 +1163,9 @@ stored.
   / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
   # 1            2         2  3        2     3     4
 .sp
-A backreference to a numbered subpattern uses the most recent value that is set
-for that number by any subpattern. The following pattern matches "abcabc" or
-"defdef":
+A back reference to a numbered subpattern uses the most recent value that is
+set for that number by any subpattern. The following pattern matches "abcabc"
+or "defdef":
 .sp
   /(?|(abc)|(def))\e1/
 .sp
@@ -1204,7 +1204,7 @@ In PCRE, a subpattern can be named in one of three ways: (?<name>...) or
 parentheses from other parts of the pattern, such as
 .\" HTML <a href="#backreferences">
 .\" </a>
-backreferences,
+back references,
 .\"
 .\" HTML <a href="#recursion">
 .\" </a>
@@ -1246,7 +1246,7 @@ The convenience function for extracting the data by name returns the substring
 for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was.
 .P
-If you make a backreference to a non-unique named subpattern from elsewhere in
+If you make a back reference to a non-unique named subpattern from elsewhere in
 the pattern, the one that corresponds to the first occurrence of the name is
 used. In the absence of duplicate numbers (see the previous section) this is
 the one with the lowest number. If you use a named reference in a condition
@@ -1399,7 +1399,7 @@ worth setting PCRE_DOTALL in order to obtain this optimization, or
 alternatively using ^ to indicate anchoring explicitly.
 .P
 However, there is one situation where the optimization cannot be used. When .*
-is inside capturing parentheses that are the subject of a backreference
+is inside capturing parentheses that are the subject of a back reference
 elsewhere in the pattern, a match at the start may fail where a later one
 succeeds. Consider, for example:
 .sp
@@ -1628,7 +1628,10 @@ whitespace. Otherwise, the \eg{ syntax or an empty comment (see
 "Comments"
 .\"
 below) can be used.
-.P
+.
+.SS "Recursive back references"
+.rs
+.sp
 A back reference that occurs inside the parentheses to which it refers fails
 when the subpattern is first used, so, for example, (a\e1) never matches.
 However, such references can be useful inside repeated subpatterns. For
@@ -1642,6 +1645,15 @@ to the previous iteration. In order for this to work, the pattern must be such
 that the first iteration does not need to match the back reference. This can be
 done using alternation, as in the example above, or by a quantifier with a
 minimum of zero.
+.P
+Back references of this type cause the group that they reference to be treated
+as an
+.\" HTML <a href="#atomicgroup">
+.\" </a>
+atomic group.
+.\"
+Once the whole group has been matched, a subsequent matching failure cannot
+cause backtracking into the middle of the group.
 .
 .
 .\" HTML <a name="bigassertions"></a>
@@ -2415,6 +2427,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 18 October 2009
-Copyright (c) 1997-2009 University of Cambridge.
+Last updated: 11 January 2010
+Copyright (c) 1997-2010 University of Cambridge.
 .fi

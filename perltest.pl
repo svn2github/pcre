@@ -133,7 +133,8 @@ for (;;)
     last if ($_ eq "");
     $x = eval "\"$_\"";   # To get escapes processed
 
-    # Empty array for holding results, then do the matching.
+    # Empty array for holding results, ensure $REGERROR and $REGMARK are
+    # unset, then do the matching.
 
     @subs = ();
 
@@ -156,6 +157,9 @@ for (;;)
          "push \@subs,\$16;" .
          "push \@subs,\$'; }";
 
+    undef $REGERROR;
+    undef $REGMARK;
+
     eval "${cmd} (\$x =~ ${pattern}) {" . $pushes;
 
     if ($@)
@@ -165,7 +169,10 @@ for (;;)
       }
     elsif (scalar(@subs) == 0)
       {
-      printf $outfile "No match\n";
+      printf $outfile "No match";
+      if (defined $REGERROR && $REGERROR != 1)
+        { print $outfile (", mark = $REGERROR"); }
+      printf $outfile "\n";
       }
     else
       {
@@ -186,6 +193,8 @@ for (;;)
           }
         splice(@subs, 0, 18);
         }
+      if (defined $REGMARK && $REGMARK != 1)
+        { print $outfile ("MK: $REGMARK\n"); }
       }
     }
   }

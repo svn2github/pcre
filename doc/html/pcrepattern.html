@@ -239,7 +239,7 @@ one of the following escape sequences than the binary character it represents:
   \n        linefeed (hex 0A)
   \r        carriage return (hex 0D)
   \t        tab (hex 09)
-  \ddd      character with octal code ddd, or backreference
+  \ddd      character with octal code ddd, or back reference
   \xhh      character with hex code hh
   \x{hhh..} character with hex code hhh..
 </pre>
@@ -1157,9 +1157,9 @@ stored.
   / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
   # 1            2         2  3        2     3     4
 </pre>
-A backreference to a numbered subpattern uses the most recent value that is set
-for that number by any subpattern. The following pattern matches "abcabc" or
-"defdef":
+A back reference to a numbered subpattern uses the most recent value that is
+set for that number by any subpattern. The following pattern matches "abcabc"
+or "defdef":
 <pre>
   /(?|(abc)|(def))\1/
 </pre>
@@ -1193,7 +1193,7 @@ have different names, but PCRE does not.
 In PCRE, a subpattern can be named in one of three ways: (?&#60;name&#62;...) or
 (?'name'...) as in Perl, or (?P&#60;name&#62;...) as in Python. References to capturing
 parentheses from other parts of the pattern, such as
-<a href="#backreferences">backreferences,</a>
+<a href="#backreferences">back references,</a>
 <a href="#recursion">recursion,</a>
 and
 <a href="#conditions">conditions,</a>
@@ -1232,7 +1232,7 @@ for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was.
 </P>
 <P>
-If you make a backreference to a non-unique named subpattern from elsewhere in
+If you make a back reference to a non-unique named subpattern from elsewhere in
 the pattern, the one that corresponds to the first occurrence of the name is
 used. In the absence of duplicate numbers (see the previous section) this is
 the one with the lowest number. If you use a named reference in a condition
@@ -1385,7 +1385,7 @@ alternatively using ^ to indicate anchoring explicitly.
 </P>
 <P>
 However, there is one situation where the optimization cannot be used. When .*
-is inside capturing parentheses that are the subject of a backreference
+is inside capturing parentheses that are the subject of a back reference
 elsewhere in the pattern, a match at the start may fail where a later one
 succeeds. Consider, for example:
 <pre>
@@ -1616,6 +1616,9 @@ whitespace. Otherwise, the \g{ syntax or an empty comment (see
 <a href="#comments">"Comments"</a>
 below) can be used.
 </P>
+<br><b>
+Recursive back references
+</b><br>
 <P>
 A back reference that occurs inside the parentheses to which it refers fails
 when the subpattern is first used, so, for example, (a\1) never matches.
@@ -1630,6 +1633,13 @@ to the previous iteration. In order for this to work, the pattern must be such
 that the first iteration does not need to match the back reference. This can be
 done using alternation, as in the example above, or by a quantifier with a
 minimum of zero.
+</P>
+<P>
+Back references of this type cause the group that they reference to be treated
+as an
+<a href="#atomicgroup">atomic group.</a>
+Once the whole group has been matched, a subsequent matching failure cannot
+cause backtracking into the middle of the group.
 <a name="bigassertions"></a></P>
 <br><a name="SEC18" href="#TOC1">ASSERTIONS</a><br>
 <P>
@@ -2386,9 +2396,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 October 2009
+Last updated: 11 January 2010
 <br>
-Copyright &copy; 1997-2009 University of Cambridge.
+Copyright &copy; 1997-2010 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

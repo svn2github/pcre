@@ -1551,11 +1551,13 @@ typedef struct pcre_study_data {
 
 /* Structure for building a chain of open capturing subpatterns during
 compiling, so that instructions to close them can be compiled when (*ACCEPT) is
-encountered. */
+encountered. This is also used to identify subpatterns that contain recursive
+back references to themselves, so that they can be made atomic. */
 
 typedef struct open_capitem {
   struct open_capitem *next;    /* Chain link */
   pcre_uint16 number;           /* Capture number */
+  pcre_uint16 flag;             /* Set TRUE if recursive back ref */
 } open_capitem;
 
 /* Structure for passing "static" information around between the functions

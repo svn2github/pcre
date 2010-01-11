@@ -5590,6 +5590,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       if (-c >= ESC_REF)
         {
+        open_capitem *oc;
         recno = -c - ESC_REF;
 
         HANDLE_REFERENCE:    /* Come here from named backref handling */
@@ -5599,6 +5600,19 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         PUT2INC(code, 0, recno);
         cd->backref_map |= (recno < 32)? (1 << recno) : 1;
         if (recno > cd->top_backref) cd->top_backref = recno;
+
+        /* Check to see if this back reference is recursive, that it, it
+        is inside the group that it references. A flag is set so that the
+        group can be made atomic. */
+
+        for (oc = cd->open_caps; oc != NULL; oc = oc->next)
+          {
+          if (oc->number == recno)
+            {
+            oc->flag = TRUE;
+            break;
+            }
+          }
         }
 
       /* So are Unicode property matches, if supported. */
@@ -5811,13 +5825,15 @@ them global. It tests the value of length for (2 + 2*LINK_SIZE) in the
 pre-compile phase to find out whether anything has yet been compiled or not. */
 
 /* If this is a capturing subpattern, add to the chain of open capturing items
-so that we can detect them if (*ACCEPT) is encountered. */
+so that we can detect them if (*ACCEPT) is encountered. This is also used to
+detect groups that contain recursive back references to themselves. */
 
 if (*code == OP_CBRA)
   {
   capnumber = GET2(code, 1 + LINK_SIZE);
   capitem.number = capnumber;
   capitem.next = cd->open_caps;
+  capitem.flag = FALSE;
   cd->open_caps = &capitem;
   }
 
@@ -5974,15 +5990,32 @@ for (;;)
       while (branch_length > 0);
       }
 
-    /* If it was a capturing subpattern, remove it from the chain. */
-
-    if (capnumber > 0) cd->open_caps = cd->open_caps->next;
-
     /* Fill in the ket */
 
     *code = OP_KET;
     PUT(code, 1, code - start_bracket);
     code += 1 + LINK_SIZE;
+
+    /* If it was a capturing subpattern, check to see if it contained any
+    recursive back references. If so, we must wrap it in atomic brackets.
+    In any event, remove the block from the chain. */
+
+    if (capnumber > 0)
+      {
+      if (cd->open_caps->flag)
+        {
+        memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
+          code - start_bracket);
+        *start_bracket = OP_ONCE;
+        code += 1 + LINK_SIZE;
+        PUT(start_bracket, 1, code - start_bracket);
+        *code = OP_KET;
+        PUT(code, 1, code - start_bracket);
+        code += 1 + LINK_SIZE;
+        length += 2 + 2*LINK_SIZE;
+        }
+      cd->open_caps = cd->open_caps->next;
+      }
 
     /* Reset options if needed. */
 

@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.01 06-Jan-10
+Version 8.01 01-Jan-10
 ----------------------
 
 1.  If a pattern contained a conditional subpattern with only one branch (in
@@ -112,6 +112,21 @@ Version 8.01 06-Jan-10
     comment: "Figure out how to create a longlong from a string: strtoll and
     equivalent. It's not enough to call AC_CHECK_FUNCS: hpux has a strtoll, for
     instance, but it only takes 2 args instead of 3!"
+
+18. A subtle bug concerned with back references has been fixed by a change of
+    specification, with a corresponding code fix. A pattern such as
+    ^(xa|=?\1a)+$ which contains a back reference inside the group to which it
+    refers, was giving matches when it shouldn't. For example, xa=xaaa would
+    match that pattern. Interestingly, Perl (at least up to 5.11.3) has the
+    same bug. Such groups have to be quantified to be useful, or contained
+    inside another quantified group. (If there's no repetition, the reference
+    can never match.) The problem arises because, having left the group and
+    moved on to the rest of the pattern, a later failure that backtracks into
+    the group uses the captured value from the final iteration of the group
+    rather than the correct earlier one. I have fixed this in PCRE by forcing
+    any group that contains a reference to itself to be an atomic group; that
+    is, there cannot be any backtracking into it once it has completed. This is
+    similar to recursive and subroutine calls.
 
 
 Version 8.00 19-Oct-09

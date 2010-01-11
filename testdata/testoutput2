@@ -857,7 +857,7 @@ No match
     a
 No match
 
-/This one is here because I think Perl 5.005_02 gets the setting of $1 wrong/I
+/This one is here because Perl behaves differently; see also the following/I
 Capturing subpattern count = 0
 No options
 First char = 'T'
@@ -869,9 +869,34 @@ Max back reference = 1
 Options: anchored
 No first char
 No need char
+    aaaa
+No match
     aaaaaa
- 0: aaaaaa
- 1: aa
+No match
+    
+/Perl does not fail these two for the final subjects. Neither did PCRE until/
+/release 8.01. The problem is in backtracking into a subpattern that contains/
+No match
+/a recursive reference to itself. PCRE has now made these into atomic patterns./
+No match
+
+/^(xa|=?\1a){2}$/
+    xa=xaa
+ 0: xa=xaa
+ 1: =xaa
+    ** Failers
+No match
+    xa=xaaa
+No match
+
+/^(xa|=?\1a)+$/
+    xa=xaa
+ 0: xa=xaa
+ 1: =xaa
+    ** Failers
+No match
+    xa=xaaa
+No match
 
 /These are syntax tests from Perl 5.005/I
 Capturing subpattern count = 0
@@ -10534,5 +10559,42 @@ No match
         Ket
         End
 ------------------------------------------------------------------
+
+/^(ab(c\1)d|x){2}$/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once
+        CBra 1
+        ab
+        CBra 2
+        c
+        \1
+        Ket
+        d
+        Alt
+        x
+        Ket
+        Ket
+        Once
+        CBra 1
+        ab
+        CBra 2
+        c
+        \1
+        Ket
+        d
+        Alt
+        x
+        Ket
+        Ket
+        $
+        Ket
+        End
+------------------------------------------------------------------
+    xabcxd
+ 0: xabcxd
+ 1: abcxd
+ 2: cx
 
 /-- End of testinput2 --/
