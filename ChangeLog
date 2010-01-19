@@ -1,13 +1,13 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.01 01-Jan-10
-----------------------
+Version 8.01 19-Jan-2010
+------------------------
 
 1.  If a pattern contained a conditional subpattern with only one branch (in
-    particular, this includes all (DEFINE) patterns), a call to pcre_study()
+    particular, this includes all (*DEFINE) patterns), a call to pcre_study()
     computed the wrong minimum data length (which is of course zero for such
-    subpatterns).
+    subpatterns). This could cause incorrect "no match" results.
 
 2.  For patterns such as (?i)a(?-i)b|c where an option setting at the start of
     the pattern is reset in the first branch, pcre_compile() failed with
@@ -61,9 +61,9 @@ Version 8.01 01-Jan-10
     custom one, because of the following reported problem in Windows:
 
       - libbz2 uses the Pascal calling convention (WINAPI) for the functions
-        under Win32.
+          under Win32.
       - The standard autoconf AC_CHECK_LIB fails to include "bzlib.h",
-        therefore missing the function definition.
+          therefore missing the function definition.
       - The compiler thus generates a "C" signature for the test function.
       - The linker fails to find the "C" function.
       - PCRE fails to configure if asked to do so against libbz2.
