@@ -4,12 +4,13 @@
 
 # The source file pcre_tables.c contains (amongst other things), a table that
 # is indexed by script name. In order to reduce the number of relocations when
-# loading the library, the names are held as a single large string, with 
+# loading the library, the names are held as a single large string, with
 # offsets in the table. This is tedious to maintain by hand. Therefore, this
 # script is used to generate the table. The output is sent to stdout.
 
 # Modified by PH 17-March-2009 to generate the more verbose form that works
-# for UTF-support in EBCDIC as well as ASCII environments. 
+# for UTF-support in EBCDIC as well as ASCII environments.
+# Modified by PH 01-March-2010 to add new scripts from Unicode 5.2.0.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -21,9 +22,14 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  # New for Unicode 5.0
  'Balinese', 'Cuneiform', 'Nko', 'Phags_Pa', 'Phoenician', \
  # New for Unicode 5.1
- 'Carian', 'Cham', 'Kayah_Li', 'Lepcha', 'Lycian', 'Lydian', 'Ol_Chiki', 'Rejang', 'Saurashtra', 'Sundanese', 'Vai'
+ 'Carian', 'Cham', 'Kayah_Li', 'Lepcha', 'Lycian', 'Lydian', 'Ol_Chiki', 'Rejang', 'Saurashtra', 'Sundanese', 'Vai', \
+ # New for Unicode 5.2
+ 'Avestan', 'Bamum', 'Egyptian_Hieroglyphs', 'Imperial_Aramaic', \
+ 'Inscriptional_Pahlavi', 'Inscriptional_Parthian', \
+ 'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
+ 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet'
  ]
- 
+
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
   'Mc', 'Me', 'Mn', 'Nd', 'Nl', 'No', 'Pc', 'Pd', 'Pe', 'Pf', 'Pi', 'Po', 'Ps',
   'Sc', 'Sk', 'Sm', 'So', 'Zl', 'Zp', 'Zs' ]
@@ -46,11 +52,11 @@ for utt in utt_table:
         for c in utt[0]:
                 if c == '_':
                         print 'STR_UNDERSCORE',
-                elif c == '&':         
-                        print 'STR_AMPERSAND', 
-                else:           
+                elif c == '&':
+                        print 'STR_AMPERSAND',
+                else:
                         print 'STR_%s' % c,;
-        print '"\\0"'           
+        print '"\\0"'
 
 # Print the actual table, using the string names
 
@@ -61,7 +67,7 @@ for utt in utt_table:
 	if utt == utt_table[-1]:
 		last = ';'
         print '  STRING_%s0%s' % (utt[0].replace('&', '_AMPERSAND'), last)
-# This was how it was done before the EBCDIC-compatible modification.         
+# This was how it was done before the EBCDIC-compatible modification.
 #        print '  "%s\\0"%s' % (utt[0], last)
 
 print '\nconst ucp_type_table _pcre_utt[] = { '

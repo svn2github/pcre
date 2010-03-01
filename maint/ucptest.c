@@ -169,6 +169,34 @@ switch(script)
   case ucp_Tifinagh:    scriptname = US"Tifinagh"; break;
   case ucp_Ugaritic:    scriptname = US"Ugaritic"; break;
   case ucp_Yi:          scriptname = US"Yi"; break;
+  /* New for Unicode 5.1: */
+  case ucp_Carian:      scriptname = US"Carian"; break;
+  case ucp_Cham:        scriptname = US"Cham"; break;
+  case ucp_Kayah_Li:    scriptname = US"Kayah_Li"; break;
+  case ucp_Lepcha:      scriptname = US"Lepcha"; break;
+  case ucp_Lycian:      scriptname = US"Lycian"; break;
+  case ucp_Lydian:      scriptname = US"Lydian"; break;
+  case ucp_Ol_Chiki:    scriptname = US"Ol_Chiki"; break;
+  case ucp_Rejang:      scriptname = US"Rejang"; break;
+  case ucp_Saurashtra:  scriptname = US"Saurashtra"; break;
+  case ucp_Sundanese:   scriptname = US"Sundanese"; break;
+  case ucp_Vai:         scriptname = US"Vai"; break;
+  /* New for Unicode 5.2: */
+  case ucp_Avestan:     scriptname = US"Avestan"; break;
+  case ucp_Bamum:       scriptname = US"Bamum"; break;
+  case ucp_Egyptian_Hieroglyphs: scriptname = US"Egyptian_Hieroglyphs"; break;
+  case ucp_Imperial_Aramaic: scriptname = US"Imperial_Aramaic"; break;
+  case ucp_Inscriptional_Pahlavi: scriptname = US"Inscriptional_Pahlavi"; break;
+  case ucp_Inscriptional_Parthian: scriptname = US"Inscriptional_Parthian"; break;
+  case ucp_Javanese:    scriptname = US"Javanese"; break;
+  case ucp_Kaithi:      scriptname = US"Kaithi"; break;
+  case ucp_Lisu:        scriptname = US"Lisu"; break;
+  case ucp_Meetei_Mayek: scriptname = US"Meetei_Mayek"; break;
+  case ucp_Old_South_Arabian: scriptname = US"Old_South_Arabian"; break;
+  case ucp_Old_Turkic:  scriptname = US"Old_Turkic"; break;
+  case ucp_Samaritan:   scriptname = US"Samaritan"; break;
+  case ucp_Tai_Tham:    scriptname = US"Tai_Tham"; break;
+  case ucp_Tai_Viet:    scriptname = US"Tai_Viet"; break;
   }
 
 printf("%04x %s: %s %s", c, typename, fulltypename, scriptname);

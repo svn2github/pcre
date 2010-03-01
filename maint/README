@@ -70,9 +70,21 @@ GenerateUtt.py scripts must be edited to add the new names. Then MultiStage2.py
 can be run to generate a new version of pcre_ucd.c, and GenerateUtt.py can be
 run to generate the tricky tables for inclusion in pcre_tables.c.
 
+If MultiStage2.py gives the error "ValueError: list.index(x): x not in list",
+the cause is usually a missing (or misspelt) name in the list of scripts. I 
+couldn't find a straightforward list of scripts on the Unicode site, but 
+there's a useful Wikipedia page that list them, and notes the Unicode version 
+in which they were introduced:
+
+http://en.wikipedia.org/wiki/Unicode_scripts#Table_of_Unicode_scripts
+
 The ucptest program can be compiled and used to check that the new tables in
 pcre_ucd.c work properly, using the data files in ucptestdata to check a number
-of test characters.
+of test characters. The source file ucptest.c must be updated whenever new
+Unicode script names are added.
+
+Note also that both the pcresyntax.3 and pcrepattern.3 man pages contain lists 
+of Unicode script names.
 
 
 Preparing for a PCRE release

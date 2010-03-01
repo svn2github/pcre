@@ -66,6 +66,8 @@
 # individual character types such as ucp_Cc to the general types like ucp_C.
 #
 #  Philip Hazel, 03 July 2008
+#
+# 01-March-2010: Updated list of scripts for Unicode 5.2.0
 ##############################################################################
 
 
@@ -102,7 +104,6 @@ def read_table(file_name, get_value, default_value):
                 if len(chardata) <= 1:
                         continue
                 value = get_value(chardata)
-                
                 m = re.match(r'([0-9a-fA-F]+)(\.\.([0-9a-fA-F]+))?$', chardata[0])
                 char = int(m.group(1), 16)
                 if m.group(3) is None:
@@ -246,7 +247,13 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
 # New for Unicode 5.0
  'Balinese', 'Cuneiform', 'Nko', 'Phags_Pa', 'Phoenician', \
 # New for Unicode 5.1
- 'Carian', 'Cham', 'Kayah_Li', 'Lepcha', 'Lycian', 'Lydian', 'Ol_Chiki', 'Rejang', 'Saurashtra', 'Sundanese', 'Vai']
+ 'Carian', 'Cham', 'Kayah_Li', 'Lepcha', 'Lycian', 'Lydian', 'Ol_Chiki', 'Rejang', 'Saurashtra', 'Sundanese', 'Vai', \
+# New for Unicode 5.2
+ 'Avestan', 'Bamum', 'Egyptian_Hieroglyphs', 'Imperial_Aramaic', \
+ 'Inscriptional_Pahlavi', 'Inscriptional_Parthian', \
+ 'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
+ 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet'
+ ]
  
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
   'Mc', 'Me', 'Mn', 'Nd', 'Nl', 'No', 'Pc', 'Pd', 'Pe', 'Pf', 'Pi', 'Po', 'Ps',

@@ -324,3 +324,18 @@ a840 Letter: Other letter Phags_Pa
 findprop 1d79 a77d
 1d79 Letter: Lower case letter Latin a77d
 a77d Letter: Upper case letter Latin 1d79
+
+findprop  0800  083e  a4d0  a4f7  aa80  aadf
+0800 Letter: Other letter Samaritan
+083e Punctuation: Other punctuation Samaritan
+a4d0 Letter: Other letter Lisu
+a4f7 Letter: Other letter Lisu
+aa80 Letter: Other letter Tai_Viet
+aadf Punctuation: Other punctuation Tai_Viet
+findprop 10b00 10b35 13000 1342e 10840 10855
+10b00 Letter: Other letter Avestan
+10b35 Letter: Other letter Avestan
+13000 Letter: Other letter Egyptian_Hieroglyphs
+1342e Letter: Other letter Egyptian_Hieroglyphs
+10840 Letter: Other letter Imperial_Aramaic
+10855 Letter: Other letter Imperial_Aramaic
