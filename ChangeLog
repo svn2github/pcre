@@ -11,6 +11,9 @@ Version 8.02 01-Mar-2010
     
 3.  Updated the licensing terms in the pcregexp.pas file, as agreed with the
     original author of that file, following a query about its status. 
+    
+4.  On systems that do not have stdint.h (e.g. Solaris), check for and include 
+    inttypes.h instead. This fixes a bug that was introduced by change 8.01/8.
 
 
 Version 8.01 19-Jan-2010

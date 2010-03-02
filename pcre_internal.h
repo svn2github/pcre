@@ -188,11 +188,14 @@ preprocessor time in standard C environments. */
 large integers. If a 64-bit integer type is available, we can use that.
 Otherwise we have to cast to double, which of course requires floating point
 arithmetic. Handle this by defining a macro for the appropriate type. If
-stdint.h is available, include it; it may define INT64_MAX. The macro int64_t
-may be set by "configure". */
+stdint.h is available, include it; it may define INT64_MAX. Systems that do not
+have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
+by "configure". */
 
 #if HAVE_STDINT_H
 #include <stdint.h>
+#elif HAVE_INTTYPES_H
+#include <inttypes.h>
 #endif
 
 #if defined INT64_MAX || defined int64_t
