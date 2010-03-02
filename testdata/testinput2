@@ -3203,5 +3203,9 @@ a random value. /Ix
 
 /^(ab(c\1)d|x){2}$/BZ
     xabcxd
+    
+/^(?&t)*+(?(DEFINE)(?<t>.))$/BZ
+
+/^(?&t)*(?(DEFINE)(?<t>.))$/BZ
 
 /-- End of testinput2 --/

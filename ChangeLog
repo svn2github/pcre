@@ -14,6 +14,11 @@ Version 8.02 01-Mar-2010
     
 4.  On systems that do not have stdint.h (e.g. Solaris), check for and include 
     inttypes.h instead. This fixes a bug that was introduced by change 8.01/8.
+    
+5.  A pattern such as (?&t)*+(?(DEFINE)(?<t>.)) which has a possessive
+    quantifier applied to a forward-referencing subroutine call, could compile
+    incorrect code or give the error "internal error: previously-checked
+    referenced subpattern not found".
 
 
 Version 8.01 19-Jan-2010

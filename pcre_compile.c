@@ -4430,7 +4430,12 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         case OP_NOTQUERY: *tempcode = OP_NOTPOSQUERY; break;
         case OP_NOTUPTO:  *tempcode = OP_NOTPOSUPTO; break;
 
+        /* Because we are moving code along, we must ensure that any
+        pending recursive references are updated. */
+          
         default:
+        *code = OP_END;
+        adjust_recurse(tempcode, 1 + LINK_SIZE, utf8, cd, save_hwm);
         memmove(tempcode + 1+LINK_SIZE, tempcode, len);
         code += 1 + LINK_SIZE;
         len += 1 + LINK_SIZE;
@@ -5149,6 +5154,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                 *errorcodeptr = ERR15;
                 goto FAILED;
                 }
+                 
+              /* Fudge the value of "called" so that when it is inserted as an
+              offset below, what it actually inserted is the reference number 
+              of the group. */
+                
               called = cd->start_code + recno;
               PUTINC(cd->hwm, 0, code + 2 + LINK_SIZE - cd->start_code);
               }
@@ -6804,7 +6814,6 @@ if (reqbyte >= 0 &&
 case when building a production library. */
 
 #ifdef PCRE_DEBUG
-
 printf("Length = %d top_bracket = %d top_backref = %d\n",
   length, re->top_bracket, re->top_backref);
 
