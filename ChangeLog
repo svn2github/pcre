@@ -8,6 +8,9 @@ Version 8.02 01-Mar-2010
 
 2.  Added the option --libs-cpp to pcre-config, but only when C++ support is
     configured.
+    
+3.  Updated the licensing terms in the pcregexp.pas file, as agreed with the
+    original author of that file, following a query about its status. 
 
 
 Version 8.01 19-Jan-2010
