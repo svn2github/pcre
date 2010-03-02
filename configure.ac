@@ -104,11 +104,13 @@ then
   htmldir='${docdir}/html'
 fi
 
-# Handle --disable-cpp
+# Handle --disable-cpp. The substitution of enable_cpp is needed for use in
+# pcre-config.
 AC_ARG_ENABLE(cpp,
               AS_HELP_STRING([--disable-cpp],
                              [disable C++ support]),
               , enable_cpp=yes)
+AC_SUBST(enable_cpp)              
 
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
