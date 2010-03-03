@@ -19,6 +19,11 @@ Version 8.02 01-Mar-2010
     quantifier applied to a forward-referencing subroutine call, could compile
     incorrect code or give the error "internal error: previously-checked
     referenced subpattern not found".
+    
+6.  Both MS Visual Studio and Symbian OS have problems with initializing 
+    variables to point to external functions. For these systems, therefore,
+    pcre_malloc etc. are now initialized to local functions that call the
+    relevant global functions.
 
 
 Version 8.01 19-Jan-2010
