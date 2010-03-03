@@ -24,6 +24,11 @@ Version 8.02 01-Mar-2010
     variables to point to external functions. For these systems, therefore,
     pcre_malloc etc. are now initialized to local functions that call the
     relevant global functions.
+    
+7.  There were two entries missing in the vectors called coptable and poptable
+    in pcre_dfa_exec.c. This could lead to memory accesses outsize the vectors.
+    I've fixed the data, and added a kludgy way of testing at compile time that 
+    the lengths are correct (equal to the number of opcodes).  
 
 
 Version 8.01 19-Jan-2010

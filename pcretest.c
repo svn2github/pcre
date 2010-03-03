@@ -118,18 +118,19 @@ external symbols to prevent clashes. */
 
 /* We also need the pcre_printint() function for printing out compiled
 patterns. This function is in a separate file so that it can be included in
-pcre_compile.c when that module is compiled with debugging enabled.
+pcre_compile.c when that module is compiled with debugging enabled. It needs to 
+know which case is being compiled. */
 
-The definition of the macro PRINTABLE, which determines whether to print an
-output character as-is or as a hex value when showing compiled patterns, is
-contained in this file. We uses it here also, in cases when the locale has not
-been explicitly changed, so as to get consistent output from systems that
-differ in their output from isprint() even in the "C" locale. */
-
+#define COMPILING_PCRETEST
 #include "pcre_printint.src"
 
-#define PRINTHEX(c) (locale_set? isprint(c) : PRINTABLE(c))
+/* The definition of the macro PRINTABLE, which determines whether to print an
+output character as-is or as a hex value when showing compiled patterns, is
+contained in the printint.src file. We uses it here also, in cases when the
+locale has not been explicitly changed, so as to get consistent output from
+systems that differ in their output from isprint() even in the "C" locale. */
 
+#define PRINTHEX(c) (locale_set? isprint(c) : PRINTABLE(c))
 
 /* It is possible to compile this test program without including support for
 testing the POSIX interface, though this is not available via the standard

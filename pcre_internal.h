@@ -1391,7 +1391,13 @@ enum {
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO        /* 114 */
+  OP_SKIPZERO,       /* 114 */
+
+  /* This is not an opcode, but is used to check that tables indexed by opcode
+  are the correct length, in order to catch updating errors - there have been
+  some in the past. */
+
+  OP_TABLE_LENGTH
 };
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
@@ -1439,8 +1445,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1, 1, 1,                 /* \A, \G, \K, \B, \b                     */ \
   1, 1, 1, 1, 1, 1,              /* \D, \d, \S, \s, \W, \w                 */ \
   1, 1, 1,                       /* Any, AllAny, Anybyte                   */ \
-  3, 3, 1,                       /* NOTPROP, PROP, EXTUNI                  */ \
+  3, 3,                          /* \P, \p                                 */ \
   1, 1, 1, 1, 1,                 /* \R, \H, \h, \V, \v                     */ \
+  1,                             /* \X                                     */ \
   1, 1, 2, 1, 1,                 /* \Z, \z, Opt, ^, $                      */ \
   2,                             /* Char  - the minimum length             */ \
   2,                             /* Charnc  - the minimum length           */ \
