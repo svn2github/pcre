@@ -29,6 +29,15 @@ Version 8.02 01-Mar-2010
     in pcre_dfa_exec.c. This could lead to memory accesses outsize the vectors.
     I've fixed the data, and added a kludgy way of testing at compile time that 
     the lengths are correct (equal to the number of opcodes).  
+    
+8.  Following on from 7, I added a similar kludge to check the length of the 
+    eint vector in pcreposix.c. 
+    
+9.  Error texts for pcre_compile() are held as one long string to avoid too 
+    much relocation at load time. To find a text, the string is searched, 
+    counting zeros. There was no check for running off the end of the string,
+    which could happen if a new error number was added without updating the
+    string. 
 
 
 Version 8.01 19-Jan-2010

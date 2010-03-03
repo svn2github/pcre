@@ -1502,8 +1502,9 @@ condition. */
 
 #define RREF_ANY  0xffff
 
-/* Error code numbers. They are given names so that they can more easily be
-tracked. */
+/* Compile time error code numbers. They are given names so that they can more
+easily be tracked. When a new number is added, the table called eint in 
+pcreposix.c must be updated. */
 
 enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR10, ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19,
@@ -1511,7 +1512,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
-       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65 };
+       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERRCOUNT };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit

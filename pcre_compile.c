@@ -263,7 +263,11 @@ the number of relocations needed when a shared library is loaded dynamically,
 it is now one long string. We cannot use a table of offsets, because the
 lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead, we
 simply count through to the one we want - this isn't a performance issue
-because these strings are used only when there is a compilation error. */
+because these strings are used only when there is a compilation error. 
+
+Each substring ends with \0 to insert a null character. This includes the final 
+substring, so that the whole string ends with \0\0, which can be detected when 
+counting through. */
 
 static const char error_texts[] =
   "no error\0"
@@ -344,8 +348,7 @@ static const char error_texts[] =
   "digit expected after (?+\0"
   "] is an invalid data character in JavaScript compatibility mode\0"
   /* 65 */
-  "different names for subpatterns of the same number are not allowed";
-
+  "different names for subpatterns of the same number are not allowed\0";
 
 /* Table to identify digits and hex digits. This is used when compiling
 patterns. Note that the tables in chartables are dependent on the locale, and
@@ -503,7 +506,11 @@ static const char *
 find_error_text(int n)
 {
 const char *s = error_texts;
-for (; n > 0; n--) while (*s++ != 0) {};
+for (; n > 0; n--) 
+  {
+  while (*s++ != 0) {};
+  if (*s == 0) return "Error text not found (please report)";
+  } 
 return s;
 }
 
