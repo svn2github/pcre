@@ -357,4 +357,26 @@
 /^(?(?!a(*SKIP)b))/
     ac
 
+/(?>a\Kb)/
+    ab
+
+/((?>a\Kb))/
+    ab
+
+/(a\Kb)/
+    ab
+    
+/^a\Kcz|ac/
+    ac
+    
+/(?>a\Kbz|ab)/
+    ab 
+
+/^(?&t)(?(DEFINE)(?<t>a\Kb))$/
+    ab
+
+/^([^()]|\((?1)*\))*$/
+    a(b)c
+    a(b(c)d)e 
+
 /-- End of testinput11 --/

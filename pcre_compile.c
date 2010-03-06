@@ -1450,6 +1450,7 @@ for (;;)
     case OP_CALLOUT:
     case OP_SOD:
     case OP_SOM:
+    case OP_SET_SOM:
     case OP_EOD:
     case OP_EODN:
     case OP_CIRC:

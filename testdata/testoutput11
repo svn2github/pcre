@@ -742,4 +742,38 @@ No match
     ac
  0: 
 
+/(?>a\Kb)/
+    ab
+ 0: b
+
+/((?>a\Kb))/
+    ab
+ 0: b
+ 1: ab
+
+/(a\Kb)/
+    ab
+ 0: b
+ 1: ab
+    
+/^a\Kcz|ac/
+    ac
+ 0: ac
+    
+/(?>a\Kbz|ab)/
+    ab 
+ 0: ab
+
+/^(?&t)(?(DEFINE)(?<t>a\Kb))$/
+    ab
+ 0: b
+
+/^([^()]|\((?1)*\))*$/
+    a(b)c
+ 0: a(b)c
+ 1: c
+    a(b(c)d)e 
+ 0: a(b(c)d)e
+ 1: e
+
 /-- End of testinput11 --/

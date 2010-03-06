@@ -10637,4 +10637,32 @@ No match
         End
 ------------------------------------------------------------------
 
+/ -- The first four of these are not in the Perl 5.10 test because Perl 
+     documents that the use of \K in assertions is "not well defined". The
+     last is here because Perl gives the match as "b" rather than "ab". I
+     believe this to be a Perl bug. --/  
+      
+/(?=a\Kb)ab/
+    ab 
+ 0: b
+
+/(?!a\Kb)ac/
+    ac 
+ 0: ac
+    
+/^abc(?<=b\Kc)d/
+    abcd
+ 0: cd
+
+/^abc(?<!b\Kq)d/
+    abcd
+ 0: abcd
+
+/(?>a\Kb)z|(ab)/
+    ab 
+ 0: ab
+ 1: ab
+
+/----------------------/
+
 /-- End of testinput2 --/

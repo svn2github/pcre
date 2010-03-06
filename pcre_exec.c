@@ -1070,7 +1070,6 @@ for (;;)
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
       offset_top = rec->save_offset_top;
-      mstart = rec->save_start;
       ims = original_ims;
       ecode = rec->after_call;
       break;
@@ -1114,7 +1113,11 @@ for (;;)
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM4);
-      if (rrc == MATCH_MATCH) break;
+      if (rrc == MATCH_MATCH) 
+        {
+        mstart = md->start_match_ptr;   /* In case \K reset it */
+        break;
+        } 
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
@@ -1267,9 +1270,7 @@ for (;;)
 
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
-      new_recursive.save_start = mstart;
       new_recursive.save_offset_top = offset_top;
-      mstart = eptr;
 
       /* OK, now we can do the recursion. For each top-level alternative we
       restore the offset and recursion data. */
@@ -1316,7 +1317,8 @@ for (;;)
     a move back into the brackets. Friedl calls these "atomic" subpatterns.
     Check the alternative branches in turn - the matching won't pass the KET
     for this kind of subpattern. If any one branch matches, we carry on as at
-    the end of a normal bracket, leaving the subject pointer. */
+    the end of a normal bracket, leaving the subject pointer, but resetting
+    the start-of-match value in case it was changed by \K. */
 
     case OP_ONCE:
     prev = ecode;
@@ -1325,7 +1327,11 @@ for (;;)
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM7);
-      if (rrc == MATCH_MATCH) break;
+      if (rrc == MATCH_MATCH) 
+        {
+        mstart = md->start_match_ptr;
+        break;
+        } 
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
@@ -1444,9 +1450,10 @@ for (;;)
       }
     else saved_eptr = NULL;
 
-    /* If we are at the end of an assertion group, stop matching and return
-    MATCH_MATCH, but record the current high water mark for use by positive
-    assertions. Do this also for the "once" (atomic) groups. */
+    /* If we are at the end of an assertion group or an atomic group, stop
+    matching and return MATCH_MATCH, but record the current high water mark for
+    use by positive assertions. We also need to record the match start in case
+    it was changed by \K. */
 
     if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT ||
         *prev == OP_ASSERTBACK || *prev == OP_ASSERTBACK_NOT ||
@@ -1454,6 +1461,7 @@ for (;;)
       {
       md->end_match_ptr = eptr;      /* For ONCE */
       md->end_offset_top = offset_top;
+      md->start_match_ptr = mstart;
       RRETURN(MATCH_MATCH);
       }
 
@@ -1490,7 +1498,6 @@ for (;;)
         recursion_info *rec = md->recursive;
         DPRINTF(("Recursion (%d) succeeded - continuing\n", number));
         md->recursive = rec->prevrec;
-        mstart = rec->save_start;
         memcpy(md->offset_vector, rec->offset_save,
           rec->saved_max * sizeof(int));
         offset_top = rec->save_offset_top;

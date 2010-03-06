@@ -38,6 +38,13 @@ Version 8.02 01-Mar-2010
     counting zeros. There was no check for running off the end of the string,
     which could happen if a new error number was added without updating the
     string. 
+    
+10. \K gave a compile-time error if it appeared in a lookbehind assersion. 
+    
+11. \K was not working if it appeared in an atomic group or in a group that
+    was called as a "subroutine", or in an assertion. Perl 5.11 documents that 
+    \K is "not well defined" if used in an assertion. PCRE now accepts it if 
+    the assertion is positive, but not if it is negative. 
 
 
 Version 8.01 19-Jan-2010

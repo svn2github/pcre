@@ -1617,7 +1617,6 @@ typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
   int group_num;                /* Number of group that was called */
   const uschar *after_call;     /* "Return value": points after the call in the expr */
-  USPTR save_start;             /* Old value of mstart */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
   int save_offset_top;          /* Current value of offset_top */

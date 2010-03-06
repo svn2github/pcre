@@ -737,6 +737,10 @@ For example, when the pattern
   (foo)\eKbar
 .sp
 matches "foobar", the first substring is still set to "foo".
+.P
+Perl documents that the use of \eK within assertions is "not well defined". In 
+PCRE, \eK is acted upon when it occurs inside positive assertions, but is 
+ignored in negative assertions.
 .
 .
 .\" HTML <a name="smallassertions"></a>
@@ -2453,6 +2457,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 March 2010
+Last updated: 06 March 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
