@@ -45,6 +45,12 @@ Version 8.02 01-Mar-2010
     was called as a "subroutine", or in an assertion. Perl 5.11 documents that 
     \K is "not well defined" if used in an assertion. PCRE now accepts it if 
     the assertion is positive, but not if it is negative. 
+    
+12. Change 11 fortuitously reduced the size of the stack frame used in the
+    "match()" function of pcre_exec.c by one pointer. Forthcoming 
+    implementation of support for (*MARK) will need an extra pointer on the 
+    stack; I have reserved it now, so that the stack frame size does not
+    decrease.
 
 
 Version 8.01 19-Jan-2010
