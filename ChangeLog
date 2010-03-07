@@ -51,6 +51,12 @@ Version 8.02 01-Mar-2010
     implementation of support for (*MARK) will need an extra pointer on the 
     stack; I have reserved it now, so that the stack frame size does not
     decrease.
+    
+13. A pattern such as (?P<L1>(?P<L2>0)|(?P>L2)(?P>L1)) in which the only other 
+    item in branch that calls a recursion is a subroutine call - as in the 
+    second branch in the above example - was incorrectly given the compile-
+    time error "recursive call could loop indefinitely" because pcre_compile()
+    was not correctly checking the subroutine for matching a non-empty string. 
 
 
 Version 8.01 19-Jan-2010

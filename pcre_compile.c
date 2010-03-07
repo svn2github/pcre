@@ -1785,12 +1785,14 @@ Arguments:
   code        points to start of search
   endcode     points to where to stop
   utf8        TRUE if in UTF8 mode
+  cd          contains pointers to tables etc.
 
 Returns:      TRUE if what is matched could be empty
 */
 
 static BOOL
-could_be_empty_branch(const uschar *code, const uschar *endcode, BOOL utf8)
+could_be_empty_branch(const uschar *code, const uschar *endcode, BOOL utf8,
+  compile_data *cd)
 {
 register int c;
 for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE);
@@ -1800,7 +1802,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   const uschar *ccode;
 
   c = *code;
-
+  
   /* Skip over forward assertions; the other assertions are skipped by
   first_significant_code() with a TRUE final argument. */
 
@@ -1820,6 +1822,22 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     c = *code;
     continue;
     }
+    
+  /* For a recursion/subroutine call, if its end has been reached, which
+  implies a subroutine call, we can scan it. */
+  
+  if (c == OP_RECURSE)
+    {
+    const uschar *scode = cd->start_code + GET(code, 1);
+    if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
+    do
+      {
+      if (!could_be_empty_branch(scode, endcode, utf8, cd)) return FALSE;
+      scode += GET(scode, 1);
+      }
+    while (*scode == OP_ALT);
+    continue;
+    }   
 
   /* For other groups, scan the branches. */
 
@@ -1839,7 +1857,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
       empty_branch = FALSE;
       do
         {
-        if (!empty_branch && could_be_empty_branch(code, endcode, utf8))
+        if (!empty_branch && could_be_empty_branch(code, endcode, utf8, cd))
           empty_branch = TRUE;
         code += GET(code, 1);
         }
@@ -1973,6 +1991,11 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     if (utf8 && code[3] >= 0xc0) code += _pcre_utf8_table4[code[3] & 0x3f];
     break;
 #endif
+
+    /* None of the remaining opcodes are required to match a character. */
+     
+    default:
+    break;  
     }
   }
 
@@ -1995,17 +2018,18 @@ Arguments:
   endcode     points to where to stop (current RECURSE item)
   bcptr       points to the chain of current (unclosed) branch starts
   utf8        TRUE if in UTF-8 mode
+  cd          pointers to tables etc 
 
 Returns:      TRUE if what is matched could be empty
 */
 
 static BOOL
 could_be_empty(const uschar *code, const uschar *endcode, branch_chain *bcptr,
-  BOOL utf8)
+  BOOL utf8, compile_data *cd)
 {
 while (bcptr != NULL && bcptr->current_branch >= code)
   {
-  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf8))
+  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf8, cd))
     return FALSE;
   bcptr = bcptr->outer;
   }
@@ -4363,7 +4387,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           uschar *scode = bracode;
           do
             {
-            if (could_be_empty_branch(scode, ketcode, utf8))
+            if (could_be_empty_branch(scode, ketcode, utf8, cd))
               {
               *bracode += OP_SBRA - OP_BRA;
               break;
@@ -5176,7 +5200,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             recursion that could loop for ever, and diagnose that case. */
 
             else if (GET(called, 1) == 0 &&
-                     could_be_empty(called, code, bcptr, utf8))
+                     could_be_empty(called, code, bcptr, utf8, cd))
               {
               *errorcodeptr = ERR40;
               goto FAILED;
