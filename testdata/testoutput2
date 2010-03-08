@@ -10665,4 +10665,7 @@ No match
 
 /----------------------/
 
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+Failed: recursive call could loop indefinitely at offset 31
+
 /-- End of testinput2 --/

@@ -3230,4 +3230,6 @@ a random value. /Ix
 
 /----------------------/
 
+/(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
+
 /-- End of testinput2 --/

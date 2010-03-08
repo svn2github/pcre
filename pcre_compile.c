@@ -1828,14 +1828,20 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   
   if (c == OP_RECURSE)
     {
+    BOOL empty_branch = FALSE; 
     const uschar *scode = cd->start_code + GET(code, 1);
     if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
     do
       {
-      if (!could_be_empty_branch(scode, endcode, utf8, cd)) return FALSE;
+      if (could_be_empty_branch(scode, endcode, utf8, cd))
+        {
+        empty_branch = TRUE;
+        break;  
+        }  
       scode += GET(scode, 1);
       }
     while (*scode == OP_ALT);
+    if (!empty_branch) return FALSE;  /* All branches are non-empty */
     continue;
     }   
 
