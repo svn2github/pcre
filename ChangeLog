@@ -62,6 +62,8 @@ Version 8.02 01-Mar-2010
     overrun had occurred. This is a "should never occur" error, but it can be 
     triggered by pathological patterns such as hundreds of nested parentheses.
     The checks now trigger 100 bytes before the end of the workspace. 
+    
+15. Fix typo in configure.ac: "srtoq" should be "strtoq". 
 
 
 Version 8.01 19-Jan-2010

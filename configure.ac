@@ -354,7 +354,7 @@ AH_TEMPLATE(HAVE_STRTOLL, [Define to 1 if you have `strtoll'.])
 AH_TEMPLATE(HAVE__STRTOI64, [Define to 1 if you have `_strtoi64'.])
 AH_TEMPLATE(HAVE_STRTOIMAX, [Define to 1 if you have `strtoimax'.])
 have_strto_fn=0
-for fn in srtoq strtoll _strtoi64 strtoimax; do
+for fn in strtoq strtoll _strtoi64 strtoimax; do
   AC_MSG_CHECKING([for $fn])
   if test "$fn" = strtoimax; then
     include=stdint.h
