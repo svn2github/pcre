@@ -57,6 +57,11 @@ Version 8.02 01-Mar-2010
     second branch in the above example - was incorrectly given the compile-
     time error "recursive call could loop indefinitely" because pcre_compile()
     was not correctly checking the subroutine for matching a non-empty string. 
+    
+14. The checks for overrunning compiling workspace could trigger after an
+    overrun had occurred. This is a "should never occur" error, but it can be 
+    triggered by pathological patterns such as hundreds of nested parentheses.
+    The checks now trigger 100 bytes before the end of the workspace. 
 
 
 Version 8.01 19-Jan-2010
