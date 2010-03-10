@@ -511,13 +511,17 @@ Those that are not part of an identified script are lumped together as
 <P>
 Arabic,
 Armenian,
+Avestan,
 Balinese,
+Bamum,
 Bengali,
 Bopomofo,
 Braille,
 Buginese,
 Buhid,
 Canadian_Aboriginal,
+Carian,
+Cham,
 Cherokee,
 Common,
 Coptic,
@@ -526,6 +530,7 @@ Cypriot,
 Cyrillic,
 Deseret,
 Devanagari,
+Egyptian_Hieroglyphs,
 Ethiopic,
 Georgian,
 Glagolitic,
@@ -538,16 +543,27 @@ Hangul,
 Hanunoo,
 Hebrew,
 Hiragana,
+Imperial_Aramaic,
 Inherited,
+Inscriptional_Pahlavi,
+Inscriptional_Parthian,
+Javanese,
+Kaithi,
 Kannada,
 Katakana,
+Kayah_Li,
 Kharoshthi,
 Khmer,
 Lao,
 Latin,
+Lepcha,
 Limbu,
 Linear_B,
+Lisu,
+Lycian,
+Lydian,
 Malayalam,
+Meetei_Mayek,
 Mongolian,
 Myanmar,
 New_Tai_Lue,
@@ -555,18 +571,27 @@ Nko,
 Ogham,
 Old_Italic,
 Old_Persian,
+Old_South_Arabian,
+Old_Turkic,
+Ol_Chiki,
 Oriya,
 Osmanya,
 Phags_Pa,
 Phoenician,
+Rejang,
 Runic,
+Samaritan,
+Saurashtra,
 Shavian,
 Sinhala,
+Sundanese,
 Syloti_Nagri,
 Syriac,
 Tagalog,
 Tagbanwa,
 Tai_Le,
+Tai_Tham,
+Tai_Viet,
 Tamil,
 Telugu,
 Thaana,
@@ -574,6 +599,7 @@ Thai,
 Tibetan,
 Tifinagh,
 Ugaritic,
+Vai,
 Yi.
 </P>
 <P>
@@ -705,6 +731,11 @@ For example, when the pattern
   (foo)\Kbar
 </pre>
 matches "foobar", the first substring is still set to "foo".
+</P>
+<P>
+Perl documents that the use of \K within assertions is "not well defined". In
+PCRE, \K is acted upon when it occurs inside positive assertions, but is
+ignored in negative assertions.
 <a name="smallassertions"></a></P>
 <br><b>
 Simple assertions
@@ -2396,7 +2427,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 January 2010
+Last updated: 06 March 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

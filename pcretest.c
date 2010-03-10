@@ -118,7 +118,7 @@ external symbols to prevent clashes. */
 
 /* We also need the pcre_printint() function for printing out compiled
 patterns. This function is in a separate file so that it can be included in
-pcre_compile.c when that module is compiled with debugging enabled. It needs to 
+pcre_compile.c when that module is compiled with debugging enabled. It needs to
 know which case is being compiled. */
 
 #define COMPILING_PCRETEST

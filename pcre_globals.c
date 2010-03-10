@@ -43,10 +43,10 @@ PCRE is thread-clean and doesn't use any global variables in the normal sense.
 However, it calls memory allocation and freeing functions via the four
 indirections below, and it can optionally do callouts, using the fifth
 indirection. These values can be changed by the caller, but are shared between
-all threads. 
+all threads.
 
-For MS Visual Studio and Symbian OS, there are problems in initializing these 
-variables to non-local functions. In these cases, therefore, an indirection via 
+For MS Visual Studio and Symbian OS, there are problems in initializing these
+variables to non-local functions. In these cases, therefore, an indirection via
 a local function is used.
 
 Also, when compiling for Virtual Pascal, things are done differently, and

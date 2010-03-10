@@ -92,7 +92,7 @@ is 4 there is plenty of room. */
 
 #define COMPILE_WORK_SIZE (4096)
 
-/* The overrun tests check for a slightly smaller size so that they detect the 
+/* The overrun tests check for a slightly smaller size so that they detect the
 overrun before it actually does run off the end of the data block. */
 
 #define WORK_SIZE_CHECK (COMPILE_WORK_SIZE - 100)
@@ -268,10 +268,10 @@ the number of relocations needed when a shared library is loaded dynamically,
 it is now one long string. We cannot use a table of offsets, because the
 lengths of inserts such as XSTRING(MAX_NAME_SIZE) are not known. Instead, we
 simply count through to the one we want - this isn't a performance issue
-because these strings are used only when there is a compilation error. 
+because these strings are used only when there is a compilation error.
 
-Each substring ends with \0 to insert a null character. This includes the final 
-substring, so that the whole string ends with \0\0, which can be detected when 
+Each substring ends with \0 to insert a null character. This includes the final
+substring, so that the whole string ends with \0\0, which can be detected when
 counting through. */
 
 static const char error_texts[] =
@@ -511,11 +511,11 @@ static const char *
 find_error_text(int n)
 {
 const char *s = error_texts;
-for (; n > 0; n--) 
+for (; n > 0; n--)
   {
   while (*s++ != 0) {};
   if (*s == 0) return "Error text not found (please report)";
-  } 
+  }
 return s;
 }
 
@@ -1807,7 +1807,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
   const uschar *ccode;
 
   c = *code;
-  
+
   /* Skip over forward assertions; the other assertions are skipped by
   first_significant_code() with a TRUE final argument. */
 
@@ -1827,13 +1827,13 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     c = *code;
     continue;
     }
-    
+
   /* For a recursion/subroutine call, if its end has been reached, which
   implies a subroutine call, we can scan it. */
-  
+
   if (c == OP_RECURSE)
     {
-    BOOL empty_branch = FALSE; 
+    BOOL empty_branch = FALSE;
     const uschar *scode = cd->start_code + GET(code, 1);
     if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
     do
@@ -1841,14 +1841,14 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
       if (could_be_empty_branch(scode, endcode, utf8, cd))
         {
         empty_branch = TRUE;
-        break;  
-        }  
+        break;
+        }
       scode += GET(scode, 1);
       }
     while (*scode == OP_ALT);
     if (!empty_branch) return FALSE;  /* All branches are non-empty */
     continue;
-    }   
+    }
 
   /* For other groups, scan the branches. */
 
@@ -2004,9 +2004,9 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 #endif
 
     /* None of the remaining opcodes are required to match a character. */
-     
+
     default:
-    break;  
+    break;
     }
   }
 
@@ -2029,7 +2029,7 @@ Arguments:
   endcode     points to where to stop (current RECURSE item)
   bcptr       points to the chain of current (unclosed) branch starts
   utf8        TRUE if in UTF-8 mode
-  cd          pointers to tables etc 
+  cd          pointers to tables etc
 
 Returns:      TRUE if what is matched could be empty
 */
@@ -4475,7 +4475,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
         /* Because we are moving code along, we must ensure that any
         pending recursive references are updated. */
-          
+
         default:
         *code = OP_END;
         adjust_recurse(tempcode, 1 + LINK_SIZE, utf8, cd, save_hwm);
@@ -5197,11 +5197,11 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                 *errorcodeptr = ERR15;
                 goto FAILED;
                 }
-                 
+
               /* Fudge the value of "called" so that when it is inserted as an
-              offset below, what it actually inserted is the reference number 
+              offset below, what it actually inserted is the reference number
               of the group. */
-                
+
               called = cd->start_code + recno;
               PUTINC(cd->hwm, 0, code + 2 + LINK_SIZE - cd->start_code);
               }

@@ -372,7 +372,7 @@ switch(rc)
   error if the vector eint, which is indexed by compile-time error number, is
   not the correct length. It seems to be the only way to do such a check at
   compile time, as the sizeof() operator does not work in the C preprocessor.
-  As all the PCRE_ERROR_xxx values are negative, we can use 0 and 1. */ 
+  As all the PCRE_ERROR_xxx values are negative, we can use 0 and 1. */
 
   case 0:
   case (sizeof(eint)/sizeof(int) == ERRCOUNT):

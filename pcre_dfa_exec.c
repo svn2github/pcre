@@ -714,12 +714,12 @@ for (;;)
       opcode, are not the correct length. It seems to be the only way to do
       such a check at compile time, as the sizeof() operator does not work
       in the C preprocessor. */
-      
+
       case OP_TABLE_LENGTH:
-      case OP_TABLE_LENGTH + 
+      case OP_TABLE_LENGTH +
         ((sizeof(coptable) == OP_TABLE_LENGTH) &&
          (sizeof(poptable) == OP_TABLE_LENGTH)):
-      break;           
+      break;
 
 /* ========================================================================== */
       /* Reached a closing bracket. If not at the end of the pattern, carry

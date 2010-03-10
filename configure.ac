@@ -11,7 +11,7 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [02])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2010-03-01])
+m4_define(pcre_date, [2010-03-10])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -110,7 +110,7 @@ AC_ARG_ENABLE(cpp,
               AS_HELP_STRING([--disable-cpp],
                              [disable C++ support]),
               , enable_cpp=yes)
-AC_SUBST(enable_cpp)              
+AC_SUBST(enable_cpp)
 
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,

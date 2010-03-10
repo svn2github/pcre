@@ -1503,7 +1503,7 @@ condition. */
 #define RREF_ANY  0xffff
 
 /* Compile time error code numbers. They are given names so that they can more
-easily be tracked. When a new number is added, the table called eint in 
+easily be tracked. When a new number is added, the table called eint in
 pcreposix.c must be updated. */
 
 enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
