@@ -875,6 +875,7 @@ so that PCRE works on both ASCII and EBCDIC platforms, in non-UTF-mode only. */
 #define STRING_COMMIT0              "COMMIT\0"
 #define STRING_F0                   "F\0"
 #define STRING_FAIL0                "FAIL\0"
+#define STRING_MARK0                "MARK\0"
 #define STRING_PRUNE0               "PRUNE\0"
 #define STRING_SKIP0                "SKIP\0"
 #define STRING_THEN                 "THEN"
@@ -1127,6 +1128,7 @@ only. */
 #define STRING_COMMIT0              STR_C STR_O STR_M STR_M STR_I STR_T "\0"
 #define STRING_F0                   STR_F "\0"
 #define STRING_FAIL0                STR_F STR_A STR_I STR_L "\0"
+#define STRING_MARK0                STR_M STR_A STR_R STR_K "\0"
 #define STRING_PRUNE0               STR_P STR_R STR_U STR_N STR_E "\0"
 #define STRING_SKIP0                STR_S STR_K STR_I STR_P "\0"
 #define STRING_THEN                 STR_T STR_H STR_E STR_N
@@ -1378,20 +1380,24 @@ enum {
 
   /* These are backtracking control verbs */
 
-  OP_PRUNE,          /* 107 */
-  OP_SKIP,           /* 108 */
-  OP_THEN,           /* 109 */
-  OP_COMMIT,         /* 110 */
+  OP_MARK,           /* 107 always has an argument */
+  OP_PRUNE,          /* 108 */
+  OP_PRUNE_ARG,      /* 109 same, but with argument */
+  OP_SKIP,           /* 110 */
+  OP_SKIP_ARG,       /* 111 same, but with argument */
+  OP_THEN,           /* 112 */
+  OP_THEN_ARG,       /* 113 same, but with argument */
+  OP_COMMIT,         /* 114 */
 
   /* These are forced failure and success verbs */
 
-  OP_FAIL,           /* 111 */
-  OP_ACCEPT,         /* 112 */
-  OP_CLOSE,          /* 113 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 115 */
+  OP_ACCEPT,         /* 116 */
+  OP_CLOSE,          /* 117 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 114 */
+  OP_SKIPZERO,       /* 118 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1402,7 +1408,7 @@ enum {
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
 definitions that follow must also be updated to match. There are also tables
-called "coptable" cna "poptable" in pcre_dfa_exec.c that must be updated. */
+called "coptable" and "poptable" in pcre_dfa_exec.c that must be updated. */
 
 
 /* This macro defines textual names for all the opcodes. These are used only
@@ -1427,7 +1433,8 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
   "Cond ref", "Cond nref", "Cond rec", "Cond nrec", "Cond def",   \
   "Brazero", "Braminzero",                                        \
-  "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
+  "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
+  "*THEN", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",                \
   "Close", "Skip zero"
 
 
@@ -1493,8 +1500,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 3,                          /* RREF, NRREF                            */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
-  1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
-  1, 1, 3, 1                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
+  3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG,                */ \
+  1, 3, 1, 3,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */ \
+  1, 1, 1, 3, 1                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
 
 
 /* A magic value for OP_RREF and OP_NRREF to indicate the "any recursion"
@@ -1512,7 +1520,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
-       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERRCOUNT };
+       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERRCOUNT };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit
@@ -1674,6 +1682,7 @@ typedef struct match_data {
   int    eptrn;                 /* Next free eptrblock */
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
+  const uschar *mark;           /* Mark pointer to pass back */ 
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

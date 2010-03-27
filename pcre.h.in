@@ -200,6 +200,7 @@ these bits, just add new ones on the end, in order to remain compatible. */
 #define PCRE_EXTRA_CALLOUT_DATA           0x0004
 #define PCRE_EXTRA_TABLES                 0x0008
 #define PCRE_EXTRA_MATCH_LIMIT_RECURSION  0x0010
+#define PCRE_EXTRA_MARK                   0x0020
 
 /* Types */
 
@@ -225,6 +226,7 @@ typedef struct pcre_extra {
   void *callout_data;             /* Data passed back in callouts */
   const unsigned char *tables;    /* Pointer to character tables */
   unsigned long int match_limit_recursion; /* Max recursive calls to match() */
+  unsigned char **mark;           /* For passing back a mark pointer */
 } pcre_extra;
 
 /* The structure for passing out data via the pcre_callout_function. We use a

@@ -106,7 +106,7 @@ never stored, so we push them well clear of the normal opcodes. */
 
 
 /* This table identifies those opcodes that are followed immediately by a
-character that is to be tested in some way. This makes is possible to
+character that is to be tested in some way. This makes it possible to
 centralize the loading of these characters. In the case of Type * etc, the
 "character" is the opcode for \D, \d, \S, \s, \W, or \w, which will always be a
 small value. Non-zero values in the table are the offsets from the opcode where
@@ -161,8 +161,9 @@ static const uschar coptable[] = {
   0, 0,                          /* RREF, NRREF                            */
   0,                             /* DEF                                    */
   0, 0,                          /* BRAZERO, BRAMINZERO                    */
-  0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
-  0, 0, 0, 0                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
+  0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG,                */
+  0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */
+  0, 0, 0, 0, 0                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -218,8 +219,9 @@ static const uschar poptable[] = {
   0, 0,                          /* RREF, NRREF                            */
   0,                             /* DEF                                    */
   0, 0,                          /* BRAZERO, BRAMINZERO                    */
-  0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
-  0, 0, 0, 0                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
+  0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG,                */
+  0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */
+  0, 0, 0, 0, 0                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,

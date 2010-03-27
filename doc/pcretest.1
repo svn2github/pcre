@@ -224,6 +224,16 @@ such cases when using the \fB/g\fP modifier or the \fBsplit()\fP function.
 There are yet more modifiers for controlling the way \fBpcretest\fP
 operates.
 .P
+The \fB/8\fP modifier causes \fBpcretest\fP to call PCRE with the PCRE_UTF8
+option set. This turns on support for UTF-8 character handling in PCRE,
+provided that it was compiled with this support enabled. This modifier also
+causes any non-printing characters in output strings to be printed using the
+\ex{hh...} notation if they are valid UTF-8 sequences.
+.P
+If the \fB/?\fP modifier is used with \fB/8\fP, it causes \fBpcretest\fP to
+call \fBpcre_compile()\fP with the PCRE_NO_UTF8_CHECK option, to suppress the
+checking of the string for UTF-8 validity.
+.P
 The \fB/+\fP modifier requests that as well as outputting the substring that
 matched the entire pattern, pcretest should in addition output the remainder of
 the subject string. This is useful for tests where the subject contains
@@ -236,22 +246,6 @@ also present, this data is replaced by spaces. This is a special feature for
 use in the automatic test scripts; it ensures that the same output is generated
 for different internal link sizes.
 .P
-The \fB/L\fP modifier must be followed directly by the name of a locale, for
-example,
-.sp
-  /pattern/Lfr_FR
-.sp
-For this reason, it must be the last modifier. The given locale is set,
-\fBpcre_maketables()\fP is called to build a set of character tables for the
-locale, and this is then passed to \fBpcre_compile()\fP when compiling the
-regular expression. Without an \fB/L\fP modifier, NULL is passed as the tables
-pointer; that is, \fB/L\fP applies only to the expression on which it appears.
-.P
-The \fB/I\fP modifier requests that \fBpcretest\fP output information about the
-compiled pattern (whether it is anchored, has a fixed first character, and
-so on). It does this by calling \fBpcre_fullinfo()\fP after compiling a
-pattern. If the pattern is studied, the results of that are also output.
-.P
 The \fB/D\fP modifier is a PCRE debugging feature, and is equivalent to
 \fB/BI\fP, that is, both the \fB/B\fP and the \fB/I\fP modifiers.
 .P
@@ -263,9 +257,31 @@ available when the POSIX interface to PCRE is being used, that is, when the
 \fB/P\fP pattern modifier is specified. See also the section about saving and
 reloading compiled patterns below.
 .P
-The \fB/S\fP modifier causes \fBpcre_study()\fP to be called after the
-expression has been compiled, and the results used when the expression is
-matched.
+The \fB/I\fP modifier requests that \fBpcretest\fP output information about the
+compiled pattern (whether it is anchored, has a fixed first character, and
+so on). It does this by calling \fBpcre_fullinfo()\fP after compiling a
+pattern. If the pattern is studied, the results of that are also output.
+.P
+The \fB/K\fP modifier requests \fBpcretest\fP to show names from backtracking
+control verbs that are returned from calls to \fBpcre_exec()\fP. It causes
+\fBpcretest\fP to create a \fBpcre_extra\fP block if one has not already been
+created by a call to \fBpcre_study()\fP, and to set the PCRE_EXTRA_MARK flag
+and the \fBmark\fP field within it, every time that \fBpcre_exec()\fP is
+called. If the variable that the \fBmark\fP field points to is non-NULL for a
+match, non-match, or partial match, \fBpcretest\fP prints the string to which 
+it points. For a match, this is shown on a line by itself, tagged with "MK:". 
+For a non-match it is added to the message.
+.P
+The \fB/L\fP modifier must be followed directly by the name of a locale, for
+example,
+.sp
+  /pattern/Lfr_FR
+.sp
+For this reason, it must be the last modifier. The given locale is set,
+\fBpcre_maketables()\fP is called to build a set of character tables for the
+locale, and this is then passed to \fBpcre_compile()\fP when compiling the
+regular expression. Without an \fB/L\fP modifier, NULL is passed as the tables
+pointer; that is, \fB/L\fP applies only to the expression on which it appears.
 .P
 The \fB/M\fP modifier causes the size of memory block used to hold the compiled
 pattern to be output.
@@ -276,15 +292,9 @@ API rather than its native API. When this is done, all other modifiers except
 present, and REG_NEWLINE is set if \fB/m\fP is present. The wrapper functions
 force PCRE_DOLLAR_ENDONLY always, and PCRE_DOTALL unless REG_NEWLINE is set.
 .P
-The \fB/8\fP modifier causes \fBpcretest\fP to call PCRE with the PCRE_UTF8
-option set. This turns on support for UTF-8 character handling in PCRE,
-provided that it was compiled with this support enabled. This modifier also
-causes any non-printing characters in output strings to be printed using the
-\ex{hh...} notation if they are valid UTF-8 sequences.
-.P
-If the \fB/?\fP modifier is used with \fB/8\fP, it causes \fBpcretest\fP to
-call \fBpcre_compile()\fP with the PCRE_NO_UTF8_CHECK option, to suppress the
-checking of the string for UTF-8 validity.
+The \fB/S\fP modifier causes \fBpcre_study()\fP to be called after the
+expression has been compiled, and the results used when the expression is
+matched.
 .
 .
 .SH "DATA LINES"
@@ -731,6 +741,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 September 2009
-Copyright (c) 1997-2009 University of Cambridge.
+Last updated: 26 March 2010
+Copyright (c) 1997-2010 University of Cambridge.
 .fi

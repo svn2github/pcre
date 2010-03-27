@@ -1040,11 +1040,13 @@ while (!done)
 #endif
 
   const char *error;
+  unsigned char *markptr; 
   unsigned char *p, *pp, *ppp;
   unsigned char *to_file = NULL;
   const unsigned char *tables = NULL;
   unsigned long int true_size, true_study_size = 0;
   size_t size, regex_gotten_store;
+  int do_mark = 0; 
   int do_study = 0;
   int do_debug = debug;
   int do_G = 0;
@@ -1226,6 +1228,7 @@ while (!done)
       case 'G': do_G = 1; break;
       case 'I': do_showinfo = 1; break;
       case 'J': options |= PCRE_DUPNAMES; break;
+      case 'K': do_mark = 1; break; 
       case 'M': log_store = 1; break;
       case 'N': options |= PCRE_NO_AUTO_CAPTURE; break;
 
@@ -1419,6 +1422,19 @@ while (!done)
       else if (extra != NULL)
         true_study_size = ((pcre_study_data *)(extra->study_data))->size;
       }
+      
+    /* If /K was present, we set up for handling MARK data. */
+    
+    if (do_mark)
+      {
+      if (extra == NULL)
+        {
+        extra = (pcre_extra *)malloc(sizeof(pcre_extra));
+        extra->flags = 0;
+        }
+      extra->mark = &markptr;   
+      extra->flags |= PCRE_EXTRA_MARK;
+      }    
 
     /* If the 'F' option was present, we flip the bytes of all the integer
     fields in the regex data block and the study block. This is to make it
@@ -2145,6 +2161,8 @@ while (!done)
 
     for (;; gmatched++)    /* Loop for /g or /G */
       {
+      markptr = NULL; 
+       
       if (timeitm > 0)
         {
         register int i;
@@ -2289,6 +2307,8 @@ while (!done)
               }
             }
           }
+          
+        if (markptr != NULL) fprintf(outfile, "MK: %s\n", markptr);
 
         for (i = 0; i < 32; i++)
           {
@@ -2373,7 +2393,8 @@ while (!done)
 
       else if (count == PCRE_ERROR_PARTIAL)
         {
-        fprintf(outfile, "Partial match");
+        if (markptr == NULL) fprintf(outfile, "Partial match");
+          else fprintf(outfile, "Partial match, mark=%s", markptr);
         if (use_size_offsets > 1)
           {
           fprintf(outfile, ": ");
@@ -2440,7 +2461,11 @@ while (!done)
           {
           if (count == PCRE_ERROR_NOMATCH)
             {
-            if (gmatched == 0) fprintf(outfile, "No match\n");
+            if (gmatched == 0) 
+              {
+              if (markptr == NULL) fprintf(outfile, "No match\n");
+                else fprintf(outfile, "No match, mark = %s\n", markptr);
+              }    
             }
           else fprintf(outfile, "Error %d\n", count);
           break;  /* Out of the /g loop */

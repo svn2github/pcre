@@ -85,15 +85,19 @@ for (;;)
 
   # The private /+ modifier means "print $' afterwards".
 
-  $showrest = ($pattern =~ s/\+(?=[a-z]*$)//);
+  $showrest = ($pattern =~ s/\+(?=[a-zA-Z]*$)//);
 
   # Remove /8 from a UTF-8 pattern.
 
-  $utf8 = $pattern =~ s/8(?=[a-z]*$)//;
+  $utf8 = $pattern =~ s/8(?=[a-zA-Z]*$)//;
 
   # Remove /J from a pattern with duplicate names.
 
-  $pattern =~ s/J(?=[a-z]*$)//;
+  $pattern =~ s/J(?=[a-zA-Z]*$)//;
+  
+  # Remove /K from a pattern (asks pcretest to check MARK data) */ 
+
+  $pattern =~ s/K(?=[a-zA-Z]*$)//;
 
   # Check that the pattern is valid
 
@@ -127,8 +131,9 @@ for (;;)
     chomp;
     printf $outfile "$_\n" if $infile ne "STDIN";
 
-    s/\s+$//;
-    s/^\s+//;
+    s/\s+$//;  # Remove trailing space
+    s/^\s+//;  # Remove leading space
+    s/\\Y//g;  # Remove \Y (pcretest flag to set PCRE_NO_START_OPTIMIZE)
 
     last if ($_ eq "");
     $x = eval "\"$_\"";   # To get escapes processed

@@ -135,7 +135,7 @@ static const int eint[] = {
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
   REG_BADPAT,  /* a numbered reference must not be zero */
-  REG_BADPAT,  /* (*VERB) with an argument is not supported */
+  REG_BADPAT,  /* an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT) */
   /* 60 */
   REG_BADPAT,  /* (*VERB) not recognized */
   REG_BADPAT,  /* number is too big */
@@ -143,7 +143,8 @@ static const int eint[] = {
   REG_BADPAT,  /* digit expected after (?+ */
   REG_BADPAT,  /* ] is an invalid data character in JavaScript compatibility mode */
   /* 65 */
-  REG_BADPAT   /* different names for subpatterns of the same number are not allowed */
+  REG_BADPAT,  /* different names for subpatterns of the same number are not allowed */
+  REG_BADPAT,  /* (*MARK) must have an argument */
 };
 
 /* Table of texts corresponding to POSIX error codes */
