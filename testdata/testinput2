@@ -3438,5 +3438,19 @@ with \Y. ---/
 
 /^(ab (c+(*FAIL)cd) | xyz)/x
     abcccd  
+    
+/--- Perl 5.11 gets some of these wrong ---/ 
+
+/(?>.(*ACCEPT))*?5/
+    abcde
+
+/(.(*ACCEPT))*?5/
+    abcde
+
+/(.(*ACCEPT))5/
+    abcde
+
+/(.(*ACCEPT))*5/
+    abcde
 
 /-- End of testinput2 --/

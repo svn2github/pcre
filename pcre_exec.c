@@ -71,11 +71,12 @@ defined PCRE_ERROR_xxx codes, which are all negative. */
 /* Special internal returns from the match() function. Make them sufficiently
 negative to avoid the external error codes. */
 
-#define MATCH_COMMIT       (-999)
-#define MATCH_PRUNE        (-998)
-#define MATCH_SKIP         (-997)
-#define MATCH_SKIP_ARG     (-996)
-#define MATCH_THEN         (-995)
+#define MATCH_ACCEPT       (-999)
+#define MATCH_COMMIT       (-998)
+#define MATCH_PRUNE        (-997)
+#define MATCH_SKIP         (-996)
+#define MATCH_SKIP_ARG     (-995)
+#define MATCH_THEN         (-994)
 
 /* This is a convenience macro for code that occurs many times. */
 
@@ -1157,7 +1158,7 @@ for (;;)
     md->end_match_ptr = eptr;           /* Record where we ended */
     md->end_offset_top = offset_top;    /* and how many extracts were taken */
     md->start_match_ptr = mstart;       /* and the start (\K can modify) */
-    MRRETURN(MATCH_MATCH);
+    MRRETURN(((op == OP_END)? MATCH_MATCH : MATCH_ACCEPT));
 
     /* Change option settings */
 
@@ -1179,7 +1180,7 @@ for (;;)
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM4);
-      if (rrc == MATCH_MATCH)
+      if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
         {
         mstart = md->start_match_ptr;   /* In case \K reset it */
         break;
@@ -1212,7 +1213,7 @@ for (;;)
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM5);
-      if (rrc == MATCH_MATCH) MRRETURN(MATCH_NOMATCH);
+      if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) MRRETURN(MATCH_NOMATCH);
       if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
         {
         do ecode += GET(ecode,1); while (*ecode == OP_ALT);
@@ -1347,7 +1348,7 @@ for (;;)
         {
         RMATCH(eptr, callpat + _pcre_OP_lengths[*callpat], offset_top,
           md, ims, eptrb, flags, RM6);
-        if (rrc == MATCH_MATCH)
+        if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
           DPRINTF(("Recursion matched\n"));
           md->recursive = new_recursive.prevrec;
@@ -1393,7 +1394,7 @@ for (;;)
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM7);
-      if (rrc == MATCH_MATCH)
+      if (rrc == MATCH_MATCH)  /* Note: _not_ MATCH_ACCEPT */
         {
         mstart = md->start_match_ptr;
         break;
@@ -5823,7 +5824,7 @@ capturing parentheses than vector slots. */
 
 ENDLOOP:
 
-if (rc == MATCH_MATCH)
+if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   {
   if (using_temporary_offsets)
     {

@@ -10981,5 +10981,26 @@ No match
 /^(ab (c+(*FAIL)cd) | xyz)/x
     abcccd  
 No match
+    
+/--- Perl 5.11 gets some of these wrong ---/ 
+
+/(?>.(*ACCEPT))*?5/
+    abcde
+ 0: a
+
+/(.(*ACCEPT))*?5/
+    abcde
+ 0: a
+ 1: a
+
+/(.(*ACCEPT))5/
+    abcde
+ 0: a
+ 1: a
+
+/(.(*ACCEPT))*5/
+    abcde
+ 0: a
+ 1: a
 
 /-- End of testinput2 --/
