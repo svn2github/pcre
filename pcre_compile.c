@@ -195,7 +195,7 @@ typedef struct verbitem {
 
 static const char verbnames[] =
   "\0"                       /* Empty name is a shorthand for MARK */
-  STRING_MARK0 
+  STRING_MARK0
   STRING_ACCEPT0
   STRING_COMMIT0
   STRING_F0
@@ -206,7 +206,7 @@ static const char verbnames[] =
 
 static const verbitem verbs[] = {
   { 0, -1,        OP_MARK },
-  { 4, -1,        OP_MARK }, 
+  { 4, -1,        OP_MARK },
   { 6, OP_ACCEPT, -1 },
   { 6, OP_COMMIT, -1 },
   { 1, OP_FAIL,   -1 },
@@ -359,7 +359,7 @@ static const char error_texts[] =
   "] is an invalid data character in JavaScript compatibility mode\0"
   /* 65 */
   "different names for subpatterns of the same number are not allowed\0"
-  "(*MARK) must have an argument\0" 
+  "(*MARK) must have an argument\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1622,7 +1622,7 @@ for (;;)
 
   /* Otherwise, we can get the item's length from the table, except that for
   repeated character types, we have to test for \p and \P, which have an extra
-  two bytes of parameters, and for MARK/PRUNE/SKIP/THEN with an argument, we 
+  two bytes of parameters, and for MARK/PRUNE/SKIP/THEN with an argument, we
   must add in its length. */
 
   else
@@ -1647,13 +1647,13 @@ for (;;)
       case OP_TYPEPOSUPTO:
       if (code[3] == OP_PROP || code[3] == OP_NOTPROP) code += 2;
       break;
-      
+
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
       case OP_THEN_ARG:
       code += code[1];
-      break;     
+      break;
       }
 
     /* Add in the fixed length from the table */
@@ -1725,7 +1725,7 @@ for (;;)
 
   /* Otherwise, we can get the item's length from the table, except that for
   repeated character types, we have to test for \p and \P, which have an extra
-  two bytes of parameters, and for MARK/PRUNE/SKIP/THEN with an argument, we 
+  two bytes of parameters, and for MARK/PRUNE/SKIP/THEN with an argument, we
   must add in its length. */
 
   else
@@ -1750,13 +1750,13 @@ for (;;)
       case OP_TYPEEXACT:
       if (code[3] == OP_PROP || code[3] == OP_NOTPROP) code += 2;
       break;
-      
+
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
       case OP_THEN_ARG:
       code += code[1];
-      break;     
+      break;
       }
 
     /* Add in the fixed length from the table */
@@ -2034,7 +2034,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_SKIP_ARG:
     case OP_THEN_ARG:
     code += code[1];
-    break;     
+    break;
 
     /* None of the remaining opcodes are required to match a character. */
 
@@ -4547,18 +4547,18 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
     /* First deal with various "verbs" that can be introduced by '*'. */
 
-    if (*(++ptr) == CHAR_ASTERISK && 
+    if (*(++ptr) == CHAR_ASTERISK &&
          ((cd->ctypes[ptr[1]] & ctype_letter) != 0 || ptr[1] == ':'))
       {
       int i, namelen;
-      int arglen = 0; 
+      int arglen = 0;
       const char *vn = verbnames;
       const uschar *name = ptr + 1;
-      const uschar *arg = NULL; 
+      const uschar *arg = NULL;
       previous = NULL;
       while ((cd->ctypes[*++ptr] & ctype_letter) != 0) {};
       namelen = ptr - name;
-      
+
       if (*ptr == CHAR_COLON)
         {
         arg = ++ptr;
@@ -4566,15 +4566,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           || *ptr == '_') ptr++;
         arglen = ptr - arg;
         }
- 
+
       if (*ptr != CHAR_RIGHT_PARENTHESIS)
         {
         *errorcodeptr = ERR60;
         goto FAILED;
         }
-         
+
       /* Scan the table of verb names */
-       
+
       for (i = 0; i < verbcount; i++)
         {
         if (namelen == verbs[i].len &&
@@ -4592,39 +4592,39 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
               PUT2INC(code, 0, oc->number);
               }
             }
-            
+
           /* Handle the cases with/without an argument */
-          
-          if (arglen == 0) 
+
+          if (arglen == 0)
             {
             if (verbs[i].op < 0)   /* Argument is mandatory */
               {
               *errorcodeptr = ERR66;
-              goto FAILED;  
-              }  
+              goto FAILED;
+              }
             *code++ = verbs[i].op;
-            } 
- 
+            }
+
           else
             {
             if (verbs[i].op_arg < 0)   /* Argument is forbidden */
               {
               *errorcodeptr = ERR59;
-              goto FAILED;  
-              }  
+              goto FAILED;
+              }
             *code++ = verbs[i].op_arg;
             *code++ = arglen;
             memcpy(code, arg, arglen);
-            code += arglen;   
-            *code++ = 0; 
-            }    
- 
+            code += arglen;
+            *code++ = 0;
+            }
+
           break;  /* Found verb, exit loop */
           }
-           
+
         vn += verbs[i].len + 1;
         }
-         
+
       if (i < verbcount) continue;    /* Successfully handled a verb */
       *errorcodeptr = ERR60;          /* Verb not recognized */
       goto FAILED;

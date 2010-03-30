@@ -748,12 +748,14 @@ out of use. To avoid confusion, they have not been re-used.
   57  \g is not followed by a braced, angle-bracketed, or quoted
         name/number or by a plain number
   58  a numbered reference must not be zero
-  59  (*VERB) with an argument is not supported
+  59  an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)
   60  (*VERB) not recognized
   61  number is too big
   62  subpattern name expected
   63  digit expected after (?+
   64  ] is an invalid data character in JavaScript compatibility mode
+  65  different names for subpatterns of the same number are not allowed
+  66  (*MARK) must have an argument
 </pre>
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -1207,6 +1209,7 @@ fields (not necessarily in this order):
   unsigned long int <i>match_limit_recursion</i>;
   void *<i>callout_data</i>;
   const unsigned char *<i>tables</i>;
+  unsigned char **<i>mark</i>;
 </pre>
 The <i>flags</i> field is a bitmap that specifies which of the other fields
 are set. The flag bits are:
@@ -1216,6 +1219,7 @@ are set. The flag bits are:
   PCRE_EXTRA_MATCH_LIMIT_RECURSION
   PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_TABLES
+  PCRE_EXTRA_MARK
 </pre>
 Other flag bits should be set to zero. The <i>study_data</i> field is set in the
 <b>pcre_extra</b> block that is returned by <b>pcre_study()</b>, together with
@@ -1282,6 +1286,21 @@ the external tables might be at a different address when <b>pcre_exec()</b> is
 called. See the
 <a href="pcreprecompile.html"><b>pcreprecompile</b></a>
 documentation for a discussion of saving compiled patterns for later use.
+</P>
+<P>
+If PCRE_EXTRA_MARK is set in the <i>flags</i> field, the <i>mark</i> field must
+be set to point to a <b>char *</b> variable. If the pattern contains any
+backtracking control verbs such as (*MARK:NAME), and the execution ends up with
+a name to pass back, a pointer to the name string (zero terminated) is placed
+in the variable pointed to by the <i>mark</i> field. The names are within the
+compiled pattern; if you wish to retain such a name you must copy it before
+freeing the memory of a compiled pattern. If there is no name to pass back, the
+variable pointed to by the <i>mark</i> field set to NULL. For details of the
+backtracking control verbs, see the section entitled
+<a href="pcrepattern#backtrackcontrol">"Backtracking control"</a>
+in the
+<a href="pcrepattern.html"><b>pcrepattern</b></a>
+documentation.
 <a name="execoptions"></a></P>
 <br><b>
 Option bits for <b>pcre_exec()</b>
@@ -2067,9 +2086,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 October 2009
+Last updated: 26 March 2010
 <br>
-Copyright &copy; 1997-2009 University of Cambridge.
+Copyright &copy; 1997-2010 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

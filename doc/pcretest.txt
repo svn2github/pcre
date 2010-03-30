@@ -207,6 +207,16 @@ PATTERN MODIFIERS
 
        There are yet more modifiers for controlling the way pcretest operates.
 
+       The  /8 modifier causes pcretest to call PCRE with the PCRE_UTF8 option
+       set. This turns on support for UTF-8 character handling in  PCRE,  pro-
+       vided  that  it  was  compiled with this support enabled. This modifier
+       also causes any non-printing characters in output strings to be printed
+       using the \x{hh...} notation if they are valid UTF-8 sequences.
+
+       If  the  /?  modifier  is  used  with  /8,  it  causes pcretest to call
+       pcre_compile() with the  PCRE_NO_UTF8_CHECK  option,  to  suppress  the
+       checking of the string for UTF-8 validity.
+
        The  /+ modifier requests that as well as outputting the substring that
        matched the entire pattern, pcretest  should  in  addition  output  the
        remainder  of  the  subject  string. This is useful for tests where the
@@ -219,24 +229,6 @@ PATTERN MODIFIERS
        feature for use in the automatic test scripts; it ensures that the same
        output is generated for different internal link sizes.
 
-       The  /L modifier must be followed directly by the name of a locale, for
-       example,
-
-         /pattern/Lfr_FR
-
-       For this reason, it must be the last modifier. The given locale is set,
-       pcre_maketables()  is called to build a set of character tables for the
-       locale, and this is then passed to pcre_compile()  when  compiling  the
-       regular  expression.  Without  an  /L  modifier,  NULL is passed as the
-       tables pointer; that is, /L applies only to the expression on which  it
-       appears.
-
-       The  /I  modifier  requests  that pcretest output information about the
-       compiled pattern (whether it is anchored, has a fixed first  character,
-       and  so  on). It does this by calling pcre_fullinfo() after compiling a
-       pattern. If the pattern is studied, the results of that are  also  out-
-       put.
-
        The  /D modifier is a PCRE debugging feature, and is equivalent to /BI,
        that is, both the /B and the /I modifiers.
 
@@ -248,27 +240,45 @@ PATTERN MODIFIERS
        used,  that is, when the /P pattern modifier is specified. See also the
        section about saving and reloading compiled patterns below.
 
-       The /S modifier causes pcre_study() to be called after  the  expression
-       has been compiled, and the results used when the expression is matched.
+       The /I modifier requests that pcretest  output  information  about  the
+       compiled  pattern (whether it is anchored, has a fixed first character,
+       and so on). It does this by calling pcre_fullinfo() after  compiling  a
+       pattern.  If  the pattern is studied, the results of that are also out-
+       put.
 
-       The  /M  modifier causes the size of memory block used to hold the com-
+       The /K modifier requests pcretest to show names from backtracking  con-
+       trol  verbs  that  are  returned  from  calls to pcre_exec(). It causes
+       pcretest to create a pcre_extra block if one has not already been  cre-
+       ated by a call to pcre_study(), and to set the PCRE_EXTRA_MARK flag and
+       the mark field within it, every time that pcre_exec() is called. If the
+       variable  that  the  mark field points to is non-NULL for a match, non-
+       match, or partial match, pcretest prints the string to which it points.
+       For a match, this is shown on a line by itself, tagged with "MK:".  For
+       a non-match it is added to the message.
+
+       The /L modifier must be followed directly by the name of a locale,  for
+       example,
+
+         /pattern/Lfr_FR
+
+       For this reason, it must be the last modifier. The given locale is set,
+       pcre_maketables() is called to build a set of character tables for  the
+       locale,  and  this  is then passed to pcre_compile() when compiling the
+       regular expression. Without an /L  modifier,  NULL  is  passed  as  the
+       tables  pointer; that is, /L applies only to the expression on which it
+       appears.
+
+       The /M modifier causes the size of memory block used to hold  the  com-
        piled pattern to be output.
 
-       The /P modifier causes pcretest to call PCRE via the POSIX wrapper  API
-       rather  than  its  native  API.  When this is done, all other modifiers
-       except /i, /m, and /+ are ignored. REG_ICASE is set if /i  is  present,
-       and  REG_NEWLINE  is  set if /m is present. The wrapper functions force
+       The  /P modifier causes pcretest to call PCRE via the POSIX wrapper API
+       rather than its native API. When this  is  done,  all  other  modifiers
+       except  /i,  /m, and /+ are ignored. REG_ICASE is set if /i is present,
+       and REG_NEWLINE is set if /m is present. The  wrapper  functions  force
        PCRE_DOLLAR_ENDONLY always, and PCRE_DOTALL unless REG_NEWLINE is set.
 
-       The /8 modifier causes pcretest to call PCRE with the PCRE_UTF8  option
-       set.  This  turns on support for UTF-8 character handling in PCRE, pro-
-       vided that it was compiled with this  support  enabled.  This  modifier
-       also causes any non-printing characters in output strings to be printed
-       using the \x{hh...} notation if they are valid UTF-8 sequences.
-
-       If the /? modifier  is  used  with  /8,  it  causes  pcretest  to  call
-       pcre_compile()  with  the  PCRE_NO_UTF8_CHECK  option,  to suppress the
-       checking of the string for UTF-8 validity.
+       The  /S  modifier causes pcre_study() to be called after the expression
+       has been compiled, and the results used when the expression is matched.
 
 
 DATA LINES
@@ -663,5 +673,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 September 2009
-       Copyright (c) 1997-2009 University of Cambridge.
+       Last updated: 26 March 2010
+       Copyright (c) 1997-2010 University of Cambridge.

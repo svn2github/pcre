@@ -1212,7 +1212,7 @@ fields (not necessarily in this order):
   unsigned long int \fImatch_limit_recursion\fP;
   void *\fIcallout_data\fP;
   const unsigned char *\fItables\fP;
-  unsigned char **\fImark\fP; 
+  unsigned char **\fImark\fP;
 .sp
 The \fIflags\fP field is a bitmap that specifies which of the other fields
 are set. The flag bits are:
@@ -1222,7 +1222,7 @@ are set. The flag bits are:
   PCRE_EXTRA_MATCH_LIMIT_RECURSION
   PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_TABLES
-  PCRE_EXTRA_MARK 
+  PCRE_EXTRA_MARK
 .sp
 Other flag bits should be set to zero. The \fIstudy_data\fP field is set in the
 \fBpcre_extra\fP block that is returned by \fBpcre_study()\fP, together with
@@ -1287,7 +1287,7 @@ called. See the
 documentation for a discussion of saving compiled patterns for later use.
 .P
 If PCRE_EXTRA_MARK is set in the \fIflags\fP field, the \fImark\fP field must
-be set to point to a \fBchar *\fP variable. If the pattern contains any 
+be set to point to a \fBchar *\fP variable. If the pattern contains any
 backtracking control verbs such as (*MARK:NAME), and the execution ends up with
 a name to pass back, a pointer to the name string (zero terminated) is placed
 in the variable pointed to by the \fImark\fP field. The names are within the

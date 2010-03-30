@@ -1682,7 +1682,7 @@ typedef struct match_data {
   int    eptrn;                 /* Next free eptrblock */
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
-  const uschar *mark;           /* Mark pointer to pass back */ 
+  const uschar *mark;           /* Mark pointer to pass back */
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

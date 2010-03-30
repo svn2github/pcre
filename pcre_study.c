@@ -412,15 +412,15 @@ for (;;)
     if (utf8 && cc[-1] >= 0xc0) cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
-    
+
     /* Skip these, but we need to add in the name length. */
-    
+
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
     case OP_THEN_ARG:
     cc += _pcre_OP_lengths[op] + cc[1];
-    break; 
+    break;
 
     /* For the record, these are the opcodes that are matched by "default":
     OP_ACCEPT, OP_CLOSE, OP_COMMIT, OP_FAIL, OP_PRUNE, OP_SET_SOM, OP_SKIP,

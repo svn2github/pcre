@@ -255,7 +255,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
-       RM51,  RM52, RM53, RM54 };
+       RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58 };
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -685,23 +685,23 @@ for (;;)
     case OP_MARK:
     markptr = ecode + 2;
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM51);
-      
-    /* A return of MATCH_SKIP_ARG means that matching failed at SKIP with an 
-    argument, and we must check whether that argument matches this MARK's 
-    argument. It is passed back in md->start_match_ptr (an overloading of that 
-    variable). If it does match, we reset that variable to the current subject 
-    position and return MATCH_SKIP. Otherwise, pass back the return code 
+      ims, eptrb, flags, RM55);
+
+    /* A return of MATCH_SKIP_ARG means that matching failed at SKIP with an
+    argument, and we must check whether that argument matches this MARK's
+    argument. It is passed back in md->start_match_ptr (an overloading of that
+    variable). If it does match, we reset that variable to the current subject
+    position and return MATCH_SKIP. Otherwise, pass back the return code
     unaltered. */
-     
-    if (rrc == MATCH_SKIP_ARG && 
+
+    if (rrc == MATCH_SKIP_ARG &&
         strcmp((char *)markptr, (char *)(md->start_match_ptr)) == 0)
       {
       md->start_match_ptr = eptr;
       RRETURN(MATCH_SKIP);
       }
 
-    if (md->mark == NULL) md->mark = markptr;   
+    if (md->mark == NULL) md->mark = markptr;
     RRETURN(rrc);
 
     case OP_FAIL:
@@ -721,7 +721,7 @@ for (;;)
 
     case OP_PRUNE_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM51);
+      ims, eptrb, flags, RM56);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->mark = ecode + 2;
     RRETURN(MATCH_PRUNE);
@@ -735,17 +735,17 @@ for (;;)
 
     case OP_SKIP_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM53);
+      ims, eptrb, flags, RM57);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    
-    /* Pass back the current skip name by overloading md->start_match_ptr and 
-    returning the special MATCH_SKIP_ARG return code. This will either be 
-    caught by a matching MARK, or get to the top, where it is treated the same 
+
+    /* Pass back the current skip name by overloading md->start_match_ptr and
+    returning the special MATCH_SKIP_ARG return code. This will either be
+    caught by a matching MARK, or get to the top, where it is treated the same
     as PRUNE. */
-     
+
     md->start_match_ptr = ecode + 2;
-    RRETURN(MATCH_SKIP_ARG); 
- 
+    RRETURN(MATCH_SKIP_ARG);
+
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM54);
@@ -754,7 +754,7 @@ for (;;)
 
     case OP_THEN_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM54);
+      ims, eptrb, flags, RM58);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->mark = ecode + 2;
     RRETURN(MATCH_THEN);
@@ -852,8 +852,8 @@ for (;;)
 
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, ims,
           eptrb, flags, RM48);
-        if (rrc == MATCH_NOMATCH) md->mark = markptr; 
-        RRETURN(rrc); 
+        if (rrc == MATCH_NOMATCH) md->mark = markptr;
+        RRETURN(rrc);
         }
 
       /* For non-final alternatives, continue the loop for a NOMATCH result;
@@ -1158,7 +1158,12 @@ for (;;)
     md->end_match_ptr = eptr;           /* Record where we ended */
     md->end_offset_top = offset_top;    /* and how many extracts were taken */
     md->start_match_ptr = mstart;       /* and the start (\K can modify) */
-    MRRETURN(((op == OP_END)? MATCH_MATCH : MATCH_ACCEPT));
+
+    /* For some reason, the macros don't work properly if an expression is
+    given as the argument to MRRETURN when the heap is in use. */
+
+    rrc = (op == OP_END)? MATCH_MATCH : MATCH_ACCEPT;
+    MRRETURN(rrc);
 
     /* Change option settings */
 
@@ -5133,7 +5138,7 @@ switch (frame->Xwhere)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(17)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
-  LBL(53) LBL(54)
+  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58)
 #ifdef SUPPORT_UTF8
   LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
@@ -5722,7 +5727,7 @@ for(;;)
 
   /* OK, we can now run the match. If "hitend" is set afterwards, remember the
   first starting point for which a partial match was found. */
-  
+
   md->start_match_ptr = start_match;
   md->start_used_ptr = start_match;
   md->match_call_count = 0;
@@ -5732,13 +5737,13 @@ for(;;)
 
   switch(rc)
     {
-    /* NOMATCH and PRUNE advance by one character. If MATCH_SKIP_ARG reaches 
-    this level it means that a MARK that matched the SKIP's arg was not found. 
+    /* NOMATCH and PRUNE advance by one character. If MATCH_SKIP_ARG reaches
+    this level it means that a MARK that matched the SKIP's arg was not found.
     We treat this as NOMATCH. THEN at this level acts exactly like PRUNE. */
 
     case MATCH_NOMATCH:
     case MATCH_PRUNE:
-    case MATCH_SKIP_ARG: 
+    case MATCH_SKIP_ARG:
     case MATCH_THEN:
     new_start_match = start_match + 1;
 #ifdef SUPPORT_UTF8
@@ -5866,21 +5871,21 @@ if (using_temporary_offsets)
   DPRINTF(("Freeing temporary memory\n"));
   (pcre_free)(md->offset_vector);
   }
-  
-/* For anything other than nomatch or partial match, just return the code. */ 
+
+/* For anything other than nomatch or partial match, just return the code. */
 
 if (rc != MATCH_NOMATCH && rc != PCRE_ERROR_PARTIAL)
   {
   DPRINTF((">>>> error: returning %d\n", rc));
   return rc;
   }
-  
+
 /* Handle partial matches - disable any mark data */
- 
+
 if (start_partial != NULL)
   {
   DPRINTF((">>>> returning PCRE_ERROR_PARTIAL\n"));
-  md->mark = NULL; 
+  md->mark = NULL;
   if (offsetcount > 1)
     {
     offsets[0] = start_partial - (USPTR)subject;
@@ -5888,22 +5893,22 @@ if (start_partial != NULL)
     }
   rc = PCRE_ERROR_PARTIAL;
   }
-  
+
 /* This is the classic nomatch case */
- 
+
 else
   {
   DPRINTF((">>>> returning PCRE_ERROR_NOMATCH\n"));
   rc = PCRE_ERROR_NOMATCH;
   }
-  
+
 /* Return the MARK data if it has been requested. */
-  
+
 RETURN_MARK:
 
 if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_MARK) != 0)
   *(extra_data->mark) = (unsigned char *)(md->mark);
-return rc; 
+return rc;
 }
 
 /* End of pcre_exec.c */
