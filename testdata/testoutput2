@@ -3228,19 +3228,19 @@ Failed: POSIX collating elements are not supported at offset 0
 Failed: POSIX named classes are supported only within a class at offset 0
 
 /\l/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\L/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\N{name}/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\u/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /\U/I
-Failed: PCRE does not support \L, \l, \N, \U, or \u at offset 1
+Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
 /[/I
 Failed: missing terminating ] for character class at offset 1
@@ -11032,5 +11032,53 @@ No match
     abcde
  0: a
  1: a
+
+/A\NB./BZ
+------------------------------------------------------------------
+        Bra
+        A
+        Any
+        B
+        Any
+        Ket
+        End
+------------------------------------------------------------------
+  ACBD
+ 0: ACBD
+  ** Failers
+No match
+  A\nB
+No match
+  ACB\n   
+No match
+
+/A\NB./sBZ
+------------------------------------------------------------------
+        Bra
+        A
+        Any
+        B
+        AllAny
+        Ket
+        End
+------------------------------------------------------------------
+  ACBD
+ 0: ACBD
+  ACB\n 
+ 0: ACB\x0a
+  ** Failers
+No match
+  A\nB  
+No match
+  
+/A\NB/<crlf>
+  A\nB
+ 0: A\x0aB
+  A\rB
+ 0: A\x0dB
+  ** Failers
+No match
+  A\r\nB    
+No match
 
 /-- End of testinput2 --/

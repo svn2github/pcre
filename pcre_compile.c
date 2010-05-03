@@ -124,7 +124,7 @@ static const short int escapes[] = {
      -ESC_H,                  0,
      0,                       -ESC_K,
      0,                       0,
-     0,                       0,
+     -ESC_N,                  0,
      -ESC_P,                  -ESC_Q,
      -ESC_R,                  -ESC_S,
      0,                       0,
@@ -171,7 +171,7 @@ static const short int escapes[] = {
 /*  B8 */     0,     0,      0,       0,      0,   ']',    '=',    '-',
 /*  C0 */   '{',-ESC_A, -ESC_B,  -ESC_C, -ESC_D,-ESC_E,      0, -ESC_G,
 /*  C8 */-ESC_H,     0,      0,       0,      0,     0,      0,      0,
-/*  D0 */   '}',     0, -ESC_K,       0,      0,     0,      0, -ESC_P,
+/*  D0 */   '}',     0, -ESC_K,       0,      0,-ESC_N,      0, -ESC_P,
 /*  D8 */-ESC_Q,-ESC_R,      0,       0,      0,     0,      0,      0,
 /*  E0 */  '\\',     0, -ESC_S,       0,      0,-ESC_V, -ESC_W, -ESC_X,
 /*  E8 */     0,-ESC_Z,      0,       0,      0,     0,      0,      0,
@@ -324,7 +324,7 @@ static const char error_texts[] =
   /* 35 */
   "invalid condition (?(0)\0"
   "\\C not allowed in lookbehind assertion\0"
-  "PCRE does not support \\L, \\l, \\N, \\U, or \\u\0"
+  "PCRE does not support \\L, \\l, \\N{name}, \\U, or \\u\0"
   "number after (?C is > 255\0"
   "closing ) for (?C expected\0"
   /* 40 */
@@ -593,7 +593,6 @@ else
 
     case CHAR_l:
     case CHAR_L:
-    case CHAR_N:
     case CHAR_u:
     case CHAR_U:
     *errorcodeptr = ERR37;
@@ -830,6 +829,12 @@ else
     break;
     }
   }
+  
+/* Perl supports \N{name} for character names, as well as plain \N for "not 
+newline". PCRE does not support \N{name}. */
+
+if (c == -ESC_N && ptr[1] == CHAR_LEFT_CURLY_BRACKET)
+  *errorcodeptr = ERR37; 
 
 *ptrptr = ptr;
 return c;
@@ -3500,14 +3505,11 @@ for (;; ptr++)
           d = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
           if (*errorcodeptr != 0) goto FAILED;
 
-          /* \b is backspace; \X is literal X; \R is literal R; any other
-          special means the '-' was literal */
+          /* \b is backspace; any other special means the '-' was literal */
 
           if (d < 0)
             {
-            if (d == -ESC_b) d = CHAR_BS;
-            else if (d == -ESC_X) d = CHAR_X;
-            else if (d == -ESC_R) d = CHAR_R; else
+            if (d == -ESC_b) d = CHAR_BS; else
               {
               ptr = oldptr;
               goto LONE_SINGLE_CHARACTER;  /* A few lines below */

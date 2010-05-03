@@ -16,6 +16,9 @@ Version 8.10 03 May-2010
 4.  Inside a character class, PCRE always treated \R and \X as literals, 
     whereas Perl faults them if its -w option is set. I have changed PCRE so
     that it faults them when PCRE_EXTRA is set.
+    
+5.  Added support for \N, which always matches any character other than
+    newline. (It is the same as "." when PCRE_DOTALL is not set.)
 
 
 Version 8.02 19-Mar-2010

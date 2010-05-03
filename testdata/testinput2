@@ -3463,4 +3463,22 @@ with \Y. ---/
 /(.(*ACCEPT))*5/
     abcde
 
+/A\NB./BZ
+  ACBD
+  ** Failers
+  A\nB
+  ACB\n   
+
+/A\NB./sBZ
+  ACBD
+  ACB\n 
+  ** Failers
+  A\nB  
+  
+/A\NB/<crlf>
+  A\nB
+  A\rB
+  ** Failers
+  A\r\nB    
+
 /-- End of testinput2 --/

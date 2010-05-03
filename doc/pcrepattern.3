@@ -95,9 +95,11 @@ Perl-compatible, are recognized only at the very start of a pattern, and that
 they must be in upper case. If more than one of them is present, the last one
 is used.
 .P
-The newline convention does not affect what the \eR escape sequence matches. By
-default, this is any Unicode newline sequence, for Perl compatibility. However,
-this can be changed; see the description of \eR in the section entitled
+The newline convention affects the interpretation of the dot metacharacter when
+PCRE_DOTALL is not set, and also the behaviour of \eN. However, it does not
+affect what the \eR escape sequence matches. By default, this is any Unicode
+newline sequence, for Perl compatibility. However, this can be changed; see the
+description of \eR in the section entitled
 .\" HTML <a href="#newlineseq">
 .\" </a>
 "Newline sequences"
@@ -296,14 +298,10 @@ zero, because no more than three octal digits are ever read.
 All the sequences that define a single character value can be used both inside
 and outside character classes. In addition, inside a character class, the
 sequence \eb is interpreted as the backspace character (hex 08). The sequences
-\eB, \eR, and \eX are not special inside a character class. Like any other
+\eB, \eN, \eR, and \eX are not special inside a character class. Like any other
 unrecognized escape sequences, they are treated as the literal characters "B",
-"R", and "X" by default, but cause an error if the PCRE_EXTRA option is set.
-Outside a character class, these sequences have different meanings
-.\" HTML <a href="#uniextseq">
-.\" </a>
-(see below).
-.\"
+"N", "R", and "X" by default, but cause an error if the PCRE_EXTRA option is
+set. Outside a character class, these sequences have different meanings.
 .
 .
 .SS "Absolute and relative back references"
@@ -345,8 +343,7 @@ call.
 .SS "Generic character types"
 .rs
 .sp
-Another use of backslash is for specifying generic character types. The
-following are always recognized:
+Another use of backslash is for specifying generic character types:
 .sp
   \ed     any decimal digit
   \eD     any character that is not a decimal digit
@@ -359,8 +356,17 @@ following are always recognized:
   \ew     any "word" character
   \eW     any "non-word" character
 .sp
-Each pair of escape sequences partitions the complete set of characters into
-two disjoint sets. Any given character matches one, and only one, of each pair.
+There is also the single sequence \eN, which matches a non-newline character. 
+This is the same as 
+.\" HTML <a href="#fullstopdot">
+.\" </a>
+the "." metacharacter 
+.\"
+when PCRE_DOTALL is not set.
+.P
+Each pair of lower and upper case escape sequences partitions the complete set
+of characters into two disjoint sets. Any given character matches one, and only
+one, of each pair.
 .P
 These character type sequences can appear both inside and outside character
 classes. They each match one character of the appropriate type. If the current
@@ -864,7 +870,8 @@ end of the subject in both modes, and if all branches of a pattern start with
 \eA it is always anchored, whether or not PCRE_MULTILINE is set.
 .
 .
-.SH "FULL STOP (PERIOD, DOT)"
+.\" HTML <a name="fullstopdot"></a>
+.SH "FULL STOP (PERIOD, DOT) AND \eN"
 .rs
 .sp
 Outside a character class, a dot in the pattern matches any one character in
@@ -886,6 +893,10 @@ to match it.
 The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
+.P
+The escape sequence \eN always behaves as a dot does when PCRE_DOTALL is not 
+set. In other words, it matches any one character except one that signifies the 
+end of a line.
 .
 .
 .SH "MATCHING A SINGLE BYTE"

@@ -1209,9 +1209,10 @@ contain UTF-8 characters with values greater than 255. */
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
-definitions below, up to ESC_z. There's a dummy for OP_ANY because it
-corresponds to "." rather than an escape sequence, and another for OP_ALLANY
-(which is used for [^] in JavaScript compatibility mode).
+definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
+corresponds to "." in DOTALL mode rather than an escape sequence. It is also
+used for [^] in JavaScript compatibility mode. In non-DOTALL mode, "." behaves 
+like \N.
 
 The final escape must be ESC_REF as subsequent values are used for
 backreferences (\1, \2, \3, etc). There are two tests in the code for an escape
@@ -1221,7 +1222,7 @@ put in between that don't consume a character, that code will have to change.
 */
 
 enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
-       ESC_W, ESC_w, ESC_dum1, ESC_dum2, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
+       ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
        ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z, ESC_E, ESC_Q, ESC_g, ESC_k,
        ESC_REF };
 
@@ -1249,8 +1250,8 @@ enum {
   OP_WHITESPACE,         /*  9 \s */
   OP_NOT_WORDCHAR,       /* 10 \W */
   OP_WORDCHAR,           /* 11 \w */
-  OP_ANY,            /* 12 Match any character (subject to DOTALL) */
-  OP_ALLANY,         /* 13 Match any character (not subject to DOTALL) */
+  OP_ANY,            /* 12 Match any character except newline */
+  OP_ALLANY,         /* 13 Match any character */
   OP_ANYBYTE,        /* 14 Match any byte (\C); different to OP_ANY for UTF-8 */
   OP_NOTPROP,        /* 15 \P (not Unicode property) */
   OP_PROP,           /* 16 \p (Unicode property) */
