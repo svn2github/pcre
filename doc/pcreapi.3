@@ -553,8 +553,9 @@ set, any backslash in a pattern that is followed by a letter that has no
 special meaning causes an error, thus reserving these combinations for future
 expansion. By default, as in Perl, a backslash followed by a letter with no
 special meaning is treated as a literal. (Perl can, however, be persuaded to
-give a warning for this.) There are at present no other features controlled by
-this option. It can also be set by a (?X) option setting within a pattern.
+give an error for this, by running it with the -w option.) There are at present
+no other features controlled by this option. It can also be set by a (?X)
+option setting within a pattern.
 .sp
   PCRE_FIRSTLINE
 .sp
@@ -2099,6 +2100,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 March 2010
+Last updated: 03 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

@@ -3204,19 +3204,18 @@ for (;; ptr++)
 
       /* Backslash may introduce a single character, or it may introduce one
       of the specials, which just set a flag. The sequence \b is a special
-      case. Inside a class (and only there) it is treated as backspace.
-      Elsewhere it marks a word boundary. Other escapes have preset maps ready
-      to 'or' into the one we are building. We assume they have more than one
-      character in them, so set class_charcount bigger than one. */
+      case. Inside a class (and only there) it is treated as backspace. We
+      assume that other escapes have more than one character in them, so set
+      class_charcount bigger than one. Unrecognized escapes fall through and
+      are either treated as literal characters (by default), or are faulted if
+      PCRE_EXTRA is set. */
 
       if (c == CHAR_BACKSLASH)
         {
         c = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
         if (*errorcodeptr != 0) goto FAILED;
 
-        if (-c == ESC_b) c = CHAR_BS;       /* \b is backspace in a class */
-        else if (-c == ESC_X) c = CHAR_X;   /* \X is literal X in a class */
-        else if (-c == ESC_R) c = CHAR_R;   /* \R is literal R in a class */
+        if (-c == ESC_b) c = CHAR_BS;    /* \b is backspace in a class */
         else if (-c == ESC_Q)            /* Handle start of quoted string */
           {
           if (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)

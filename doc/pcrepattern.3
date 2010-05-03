@@ -295,10 +295,11 @@ zero, because no more than three octal digits are ever read.
 .P
 All the sequences that define a single character value can be used both inside
 and outside character classes. In addition, inside a character class, the
-sequence \eb is interpreted as the backspace character (hex 08), and the
-sequences \eR and \eX are interpreted as the characters "R" and "X",
-respectively. Outside a character class, these sequences have different
-meanings
+sequence \eb is interpreted as the backspace character (hex 08). The sequences
+\eB, \eR, and \eX are not special inside a character class. Like any other
+unrecognized escape sequences, they are treated as the literal characters "B",
+"R", and "X" by default, but cause an error if the PCRE_EXTRA option is set.
+Outside a character class, these sequences have different meanings
 .\" HTML <a href="#uniextseq">
 .\" </a>
 (see below).
@@ -478,7 +479,9 @@ convention, for example, a pattern can start with:
 .sp
   (*ANY)(*BSR_ANYCRLF)
 .sp
-Inside a character class, \eR matches the letter "R".
+Inside a character class, \eR is treated as an unrecognized escape sequence, 
+and so matches the letter "R" by default, but causes an error if PCRE_EXTRA is
+set.
 .
 .
 .\" HTML <a name="uniextseq"></a>
@@ -765,8 +768,11 @@ The backslashed assertions are:
   \ez     matches only at the end of the subject
   \eG     matches at the first matching position in the subject
 .sp
-These assertions may not appear in character classes (but note that \eb has a
-different meaning, namely the backspace character, inside a character class).
+Inside a character class, \eb has a different meaning; it matches the backspace
+character. If any other of these assertions appears in a character class, by 
+default it matches the corresponding literal character (for example, \eB
+matches the letter B). However, if the PCRE_EXTRA option is set, an "invalid
+escape sequence" error is generated instead.
 .P
 A word boundary is a position in the subject string where the current character
 and the previous character do not both match \ew or \eW (i.e. one matches
@@ -2580,6 +2586,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 March 2010
+Last updated: 03 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
