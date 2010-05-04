@@ -25,6 +25,8 @@ Version 8.10 03 May-2010
     declared with attribute warn_unused_result" were given. Just casting the
     result to (void) does not stop the warnings; a more elaborate fudge is 
     needed. I've used a macro to implement this.  
+    
+7.  Minor change to pcretest.c to avoid a compiler warning. 
 
 
 Version 8.02 19-Mar-2010

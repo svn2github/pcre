@@ -251,7 +251,7 @@ for (;;)
     /* Read the next line by normal means, prompting if the file is stdin. */
 
       {
-      if (f == stdin) printf(prompt);
+      if (f == stdin) printf("%s", prompt);
       if (fgets((char *)here, rlen,  f) == NULL)
         return (here == start)? NULL : start;
       }
