@@ -19,6 +19,12 @@ Version 8.10 03 May-2010
     
 5.  Added support for \N, which always matches any character other than
     newline. (It is the same as "." when PCRE_DOTALL is not set.)
+    
+6.  When compiling pcregrep with newer versions of gcc which may have
+    FORTIFY_SOURCE set, several warnings "ignoring return value of 'fwrite', 
+    declared with attribute warn_unused_result" were given. Just casting the
+    result to (void) does not stop the warnings; a more elaborate fudge is 
+    needed. I've used a macro to implement this.  
 
 
 Version 8.02 19-Mar-2010
