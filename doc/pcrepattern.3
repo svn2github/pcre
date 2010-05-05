@@ -505,10 +505,16 @@ The extra escape sequences are:
   \eX       an extended Unicode sequence
 .sp
 The property names represented by \fIxx\fP above are limited to the Unicode
-script names, the general category properties, and "Any", which matches any
-character (including newline). Other properties such as "InMusicalSymbols" are
-not currently supported by PCRE. Note that \eP{Any} does not match any
-characters, so always causes a match failure.
+script names, the general category properties, "Any", which matches any
+character (including newline), and some special PCRE properties (described
+in the 
+.\" HTML <a href="#extraprops">
+.\" </a>
+next section). 
+.\"
+Other Perl properties such as "InMusicalSymbols" are not currently supported by
+PCRE. Note that \eP{Any} does not match any characters, so always causes a
+match failure.
 .P
 Sets of Unicode characters are defined as belonging to certain scripts. A
 character from one of these sets can be matched using a script name. For
@@ -613,10 +619,10 @@ Ugaritic,
 Vai,
 Yi.
 .P
-Each character has exactly one general category property, specified by a
-two-letter abbreviation. For compatibility with Perl, negation can be specified
-by including a circumflex between the opening brace and the property name. For
-example, \ep{^Lu} is the same as \eP{Lu}.
+Each character has exactly one Unicode general category property, specified by
+a two-letter abbreviation. For compatibility with Perl, negation can be
+specified by including a circumflex between the opening brace and the property
+name. For example, \ep{^Lu} is the same as \eP{Lu}.
 .P
 If only one letter is specified with \ep or \eP, it includes all the general
 category properties that start with that letter. In this case, in the absence
@@ -716,6 +722,27 @@ Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \ed and \ew do not use Unicode
 properties in PCRE.
+.
+.
+.\" HTML <a name="extraprops"></a>
+.SS PCRE's additional properties
+.rs
+.sp
+As well as the standard Unicode properties described in the previous 
+section, PCRE supports four more that make it possible to convert traditional 
+escape sequences such as \ew and \es and POSIX character classes to use Unicode
+properties. These are:
+.sp
+  Xan   Any alphanumeric character
+  Xps   Any POSIX space character
+  Xsp   Any Perl space character
+  Xwd   Any Perl "word" character
+.sp
+Xan matches characters that have either the L (letter) or the N (number) 
+property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or 
+carriage return, and any other character that has the Z (separator) property.
+Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the 
+same characters as Xan, plus underscore.
 .
 .
 .\" HTML <a name="resetmatchstart"></a>
@@ -2597,6 +2624,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 May 2010
+Last updated: 05 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

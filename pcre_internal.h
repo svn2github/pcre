@@ -1190,9 +1190,13 @@ only. */
 
 #define PT_ANY        0    /* Any property - matches all chars */
 #define PT_LAMP       1    /* L& - the union of Lu, Ll, Lt */
-#define PT_GC         2    /* General characteristic (e.g. L) */
-#define PT_PC         3    /* Particular characteristic (e.g. Lu) */
+#define PT_GC         2    /* Specified general characteristic (e.g. L) */
+#define PT_PC         3    /* Specified particular characteristic (e.g. Lu) */
 #define PT_SC         4    /* Script (e.g. Han) */
+#define PT_ALNUM      5    /* Alphanumeric - the union of L and N */
+#define PT_SPACE      6    /* Perl space - Z plus 9,10,12,13 */
+#define PT_PXSPACE    7    /* POSIX space - Z plus 9,10,11,12,13 */
+#define PT_WORD       8    /* Word - L plus N plus underscore */
 
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain UTF-8 characters with values greater than 255. */

@@ -211,5 +211,152 @@ of case for anything other than the ASCII letters. --/
     A\x{300}\x{301}\x{302}BC 
     *** Failers
     \x{300}  
+    
+/-- These are PCRE's extra properties to help with Unicodizing \d etc. --/
+
+/^\p{Xan}/8
+    ABCD
+    1234
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}   
+    ** Failers
+    _ABC   
+
+/^\p{Xan}+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    ** Failers
+    _ABC   
+
+/^\p{Xan}+?/8
+    \x{6ca}\x{a6c}\x{10a7}_
+
+/^\p{Xan}*/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    
+/^\p{Xan}{2,9}/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    
+/^\p{Xan}{2,9}?/8
+    \x{6ca}\x{a6c}\x{10a7}_
+    
+/^[\p{Xan}]/8
+    ABCD1234_
+    1234abcd_
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}   
+    ** Failers
+    _ABC   
+ 
+/^[\p{Xan}]+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    ** Failers
+    _ABC   
+
+/^>\p{Xsp}/8
+    >\x{1680}\x{2028}\x{0b}
+    >\x{a0} 
+    ** Failers
+    \x{0b} 
+
+/^>\p{Xsp}+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xsp}+?/8
+    >\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xsp}*/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xsp}{2,9}/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xsp}{2,9}?/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>[\p{Xsp}]/8
+    >\x{2028}\x{0b}
+ 
+/^>[\p{Xsp}]+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xps}/8
+    >\x{1680}\x{2028}\x{0b}
+    >\x{a0} 
+    ** Failers
+    \x{0b} 
+
+/^>\p{Xps}+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xps}+?/8
+    >\x{1680}\x{2028}\x{0b}
+
+/^>\p{Xps}*/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xps}{2,9}/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>\p{Xps}{2,9}?/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+    
+/^>[\p{Xps}]/8
+    >\x{2028}\x{0b}
+ 
+/^>[\p{Xps}]+/8
+    > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
+
+/^\p{Xwd}/8
+    ABCD
+    1234
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}
+    _ABC    
+    ** Failers
+    [] 
+
+/^\p{Xwd}+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+
+/^\p{Xwd}+?/8
+    \x{6ca}\x{a6c}\x{10a7}_
+
+/^\p{Xwd}*/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+    
+/^\p{Xwd}{2,9}/8
+    A_B12\x{6ca}\x{a6c}\x{10a7}
+    
+/^\p{Xwd}{2,9}?/8
+    \x{6ca}\x{a6c}\x{10a7}_
+    
+/^[\p{Xwd}]/8
+    ABCD1234_
+    1234abcd_
+    \x{6ca}
+    \x{a6c}
+    \x{10a7}   
+    _ABC 
+    ** Failers
+    []   
+ 
+/^[\p{Xwd}]+/8
+    ABCD1234\x{6ca}\x{a6c}\x{10a7}_
+
+/-- A check not in UTF-8 mode --/
+
+/^[\p{Xwd}]+/
+    ABCD1234_
+    
+/-- Some negative checks --/
+
+/^[\P{Xwd}]+/8
+    !.+\x{019}\x{35a}AB
+
+/^[\p{^Xwd}]+/8
+    !.+\x{019}\x{35a}AB
 
 /-- End of testinput12 --/

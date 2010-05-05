@@ -45,6 +45,7 @@ syntax.
   \eD         a character that is not a decimal digit
   \eh         a horizontal whitespace character
   \eH         a character that is not a horizontal whitespace character
+  \eN         a character that is not a newline 
   \ep{\fIxx\fP}     a character with the \fIxx\fP property
   \eP{\fIxx\fP}     a character without the \fIxx\fP property
   \eR         a newline sequence
@@ -59,7 +60,7 @@ syntax.
 In PCRE, \ed, \eD, \es, \eS, \ew, and \eW recognize only ASCII characters.
 .
 .
-.SH "GENERAL CATEGORY PROPERTY CODES FOR \ep and \eP"
+.SH "GENERAL CATEGORY PROPERTIES FOR \ep and \eP"
 .rs
 .sp
   C          Other
@@ -106,6 +107,15 @@ In PCRE, \ed, \eD, \es, \eS, \ew, and \eW recognize only ASCII characters.
   Zl         Line separator
   Zp         Paragraph separator
   Zs         Space separator
+.
+.
+.SH "PCRE SPECIAL CATEGORY PROPERTIES FOR \ep and \eP"
+.rs
+.sp
+  Xan        Alphanumeric: union of properties L and N
+  Xps        POSIX space: property Z or tab, NL, VT, FF, CR
+  Xsp        Perl space: property Z or tab, NL, FF, CR
+  Xwd        Perl word: property Xan or underscore 
 .
 .
 .SH "SCRIPT NAMES FOR \ep AND \eP"
@@ -459,6 +469,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 March 2010
+Last updated: 05 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

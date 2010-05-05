@@ -11,6 +11,7 @@
 # Modified by PH 17-March-2009 to generate the more verbose form that works
 # for UTF-support in EBCDIC as well as ASCII environments.
 # Modified by PH 01-March-2010 to add new scripts from Unicode 5.2.0.
+# Modified by PH 04-May-2010 to add new "X.." special categories.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -36,11 +37,22 @@ category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
 
 general_category_names = ['C', 'L', 'M', 'N', 'P', 'S', 'Z']
 
+# First add the Unicode script and category names.
+
 utt_table  = zip(script_names, ['PT_SC'] * len(script_names))
 utt_table += zip(category_names, ['PT_PC'] * len(category_names))
 utt_table += zip(general_category_names, ['PT_GC'] * len(general_category_names))
-utt_table.append(('L&', 'PT_LAMP'))
+
+# Now add our own specials.
+
 utt_table.append(('Any', 'PT_ANY'))
+utt_table.append(('L&',  'PT_LAMP'))
+utt_table.append(('Xan', 'PT_ALNUM'))
+utt_table.append(('Xps', 'PT_PXSPACE'))
+utt_table.append(('Xsp', 'PT_SPACE'))
+utt_table.append(('Xwd', 'PT_WORD'))
+
+# Sort the table.
 
 utt_table.sort()
 
@@ -74,7 +86,8 @@ print '\nconst ucp_type_table _pcre_utt[] = { '
 offset = 0
 last = ','
 for utt in utt_table:
-	if utt[1] in ('PT_ANY', 'PT_LAMP'):
+	if utt[1] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE', 
+          'PT_SPACE', 'PT_WORD'):
 		value = '0'
 	else:
 		value = 'ucp_' + utt[0]
