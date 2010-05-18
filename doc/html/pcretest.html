@@ -204,6 +204,8 @@ effect as they do in Perl. For example:
 The following table shows additional modifiers for setting PCRE options that do
 not correspond to anything in Perl:
 <pre>
+  <b>/8</b>              PCRE_UTF8
+  <b>/?</b>              PCRE_NO_UTF8_CHECK 
   <b>/A</b>              PCRE_ANCHORED
   <b>/C</b>              PCRE_AUTO_CALLOUT
   <b>/E</b>              PCRE_DOLLAR_ENDONLY
@@ -211,6 +213,7 @@ not correspond to anything in Perl:
   <b>/J</b>              PCRE_DUPNAMES
   <b>/N</b>              PCRE_NO_AUTO_CAPTURE
   <b>/U</b>              PCRE_UNGREEDY
+  <b>/W</b>              PCRE_UCP 
   <b>/X</b>              PCRE_EXTRA
   <b>/&#60;JS&#62;</b>           PCRE_JAVASCRIPT_COMPAT
   <b>/&#60;cr&#62;</b>           PCRE_NEWLINE_CR
@@ -221,15 +224,18 @@ not correspond to anything in Perl:
   <b>/&#60;bsr_anycrlf&#62;</b>  PCRE_BSR_ANYCRLF
   <b>/&#60;bsr_unicode&#62;</b>  PCRE_BSR_UNICODE
 </pre>
-Those specifying line ending sequences are literal strings as shown, but the
-letters can be in either case. This example sets multiline matching with CRLF
-as the line ending sequence:
+The modifiers that are enclosed in angle brackets are literal strings as shown,
+including the angle brackets, but the letters can be in either case. This
+example sets multiline matching with CRLF as the line ending sequence:
 <pre>
   /^abc/m&#60;crlf&#62;
 </pre>
-Details of the meanings of these PCRE options are given in the
+As well as turning on the PCRE_UTF8 option, the <b>/8</b> modifier also causes
+any non-printing characters in output strings to be printed using the
+\x{hh...} notation if they are valid UTF-8 sequences. Full details of the PCRE
+options are given in the
 <a href="pcreapi.html"><b>pcreapi</b></a>
-documentation.
+documentation. 
 </P>
 <br><b>
 Finding all matches in a string
@@ -258,18 +264,6 @@ Other modifiers
 <P>
 There are yet more modifiers for controlling the way <b>pcretest</b>
 operates.
-</P>
-<P>
-The <b>/8</b> modifier causes <b>pcretest</b> to call PCRE with the PCRE_UTF8
-option set. This turns on support for UTF-8 character handling in PCRE,
-provided that it was compiled with this support enabled. This modifier also
-causes any non-printing characters in output strings to be printed using the
-\x{hh...} notation if they are valid UTF-8 sequences.
-</P>
-<P>
-If the <b>/?</b> modifier is used with <b>/8</b>, it causes <b>pcretest</b> to
-call <b>pcre_compile()</b> with the PCRE_NO_UTF8_CHECK option, to suppress the
-checking of the string for UTF-8 validity.
 </P>
 <P>
 The <b>/+</b> modifier requests that as well as outputting the substring that
@@ -720,7 +714,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 March 2010
+Last updated: 12 May 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

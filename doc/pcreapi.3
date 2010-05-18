@@ -636,6 +636,24 @@ were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
 in Perl.
 .sp
+  PCRE_UCP
+.sp
+This option changes the way PCRE processes \eb, \ed, \es, \ew, and some of the
+POSIX character classes. By default, only ASCII characters are recognized, but
+if PCRE_UCP is set, Unicode properties are used instead to classify characters.
+More details are given in the section on
+.\" HTML <a href="pcre.html#genericchartypes">
+.\" </a>
+generic character types
+.\"
+in the
+.\" HREF
+\fBpcrepattern\fP
+.\"
+page. If you set PCRE_UCP, matching one of the items it affects takes much
+longer. The option is available only if PCRE has been compiled with Unicode
+property support.
+.sp
   PCRE_UNGREEDY
 .sp
 This option inverts the "greediness" of the quantifiers so that they are not
@@ -756,6 +774,7 @@ out of use. To avoid confusion, they have not been re-used.
   64  ] is an invalid data character in JavaScript compatibility mode
   65  different names for subpatterns of the same number are not allowed
   66  (*MARK) must have an argument
+  67  this version of PCRE is not compiled with PCRE_UCP support
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -830,11 +849,13 @@ matching.
 PCRE handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
-less than 128. Higher-valued codes never match escapes such as \ew or \ed, but
-can be tested with \ep if PCRE is built with Unicode character property
-support. The use of locales with Unicode is discouraged. If you are handling
-characters with codes greater than 128, you should either use UTF-8 and
-Unicode, or use locales, but not try to mix the two.
+less than 128. By default, higher-valued codes never match escapes such as \ew
+or \ed, but they can be tested with \ep if PCRE is built with Unicode character
+property support. Alternatively, the PCRE_UCP option can be set at compile
+time; this causes \ew and friends to use Unicode property support instead of
+built-in tables. The use of locales with Unicode is discouraged. If you are
+handling characters with codes greater than 128, you should either use UTF-8
+and Unicode, or use locales, but not try to mix the two.
 .P
 PCRE contains an internal set of tables that are used when the final argument
 of \fBpcre_compile()\fP is NULL. These are sufficient for many applications.
@@ -2100,6 +2121,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 May 2010
+Last updated: 16 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

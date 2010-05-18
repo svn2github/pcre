@@ -1718,14 +1718,30 @@ for (;;)
 #ifdef SUPPORT_UTF8
       if (utf8)
         {
+        /* Get status of previous character */
+          
         if (eptr == md->start_subject) prev_is_word = FALSE; else
           {
           USPTR lastptr = eptr - 1;
           while((*lastptr & 0xc0) == 0x80) lastptr--;
           if (lastptr < md->start_used_ptr) md->start_used_ptr = lastptr;
           GETCHAR(c, lastptr);
+#ifdef SUPPORT_UCP          
+          if (md->use_ucp)
+            {
+            if (c == '_') prev_is_word = TRUE; else
+              { 
+              int cat = UCD_CATEGORY(c);
+              prev_is_word = (cat == ucp_L || cat == ucp_N);
+              } 
+            }  
+          else 
+#endif          
           prev_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
           }
+          
+        /* Get status of next character */
+         
         if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
@@ -1734,26 +1750,68 @@ for (;;)
         else
           {
           GETCHAR(c, eptr);
+#ifdef SUPPORT_UCP          
+          if (md->use_ucp)
+            {
+            if (c == '_') cur_is_word = TRUE; else
+              { 
+              int cat = UCD_CATEGORY(c);
+              cur_is_word = (cat == ucp_L || cat == ucp_N);
+              } 
+            }  
+          else 
+#endif          
           cur_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
           }
         }
       else
 #endif
 
-      /* Not in UTF-8 mode */
+      /* Not in UTF-8 mode, but we may still have PCRE_UCP set, and for 
+      consistency with the behaviour of \w we do use it in this case. */
 
         {
+        /* Get status of previous character */
+          
         if (eptr == md->start_subject) prev_is_word = FALSE; else
           {
           if (eptr <= md->start_used_ptr) md->start_used_ptr = eptr - 1;
+#ifdef SUPPORT_UCP          
+          if (md->use_ucp)
+            {
+            c = eptr[-1]; 
+            if (c == '_') prev_is_word = TRUE; else
+              { 
+              int cat = UCD_CATEGORY(c);
+              prev_is_word = (cat == ucp_L || cat == ucp_N);
+              } 
+            }  
+          else 
+#endif          
           prev_is_word = ((md->ctypes[eptr[-1]] & ctype_word) != 0);
           }
+          
+        /* Get status of next character */
+         
         if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
           cur_is_word = FALSE;
           }
-        else cur_is_word = ((md->ctypes[*eptr] & ctype_word) != 0);
+        else 
+#ifdef SUPPORT_UCP          
+        if (md->use_ucp)
+          {
+          c = *eptr; 
+          if (c == '_') cur_is_word = TRUE; else
+            { 
+            int cat = UCD_CATEGORY(c);
+            cur_is_word = (cat == ucp_L || cat == ucp_N);
+            } 
+          }  
+        else 
+#endif          
+        cur_is_word = ((md->ctypes[*eptr] & ctype_word) != 0);
         }
 
       /* Now see if the situation is what we want */
@@ -5607,6 +5665,7 @@ end_subject = md->end_subject;
 
 md->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 utf8 = md->utf8 = (re->options & PCRE_UTF8) != 0;
+md->use_ucp = (re->options & PCRE_UCP) != 0;
 md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 
 md->notbol = (options & PCRE_NOTBOL) != 0;

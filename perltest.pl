@@ -99,6 +99,10 @@ for (;;)
 
   $pattern =~ s/K(?=[a-zA-Z]*$)//;
 
+  # Remove /W from a pattern (asks pcretest to set PCRE_UCP)
+
+  $pattern =~ s/W(?=[a-zA-Z]*$)//;
+
   # Check that the pattern is valid
 
   eval "\$_ =~ ${pattern}";

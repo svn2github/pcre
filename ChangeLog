@@ -29,8 +29,13 @@ Version 8.10 03 May-2010
 7.  Minor change to pcretest.c to avoid a compiler warning. 
 
 8.  Added four artifical Unicode properties to help with an option to make
-    \s etc use properties. The new properties are: Xan (alphanumeric), Xsp 
-    (Perl space), Xps (POSIX space), and Xwd (word).
+    \s etc use properties (see next item). The new properties are: Xan
+    (alphanumeric), Xsp (Perl space), Xps (POSIX space), and Xwd (word).
+    
+9.  Added PCRE_UCP to make \b, \d, \s, \w, and certain POSIX character classes
+    use Unicode properties. (*UCP) at the start of a pattern can be used to set 
+    this option. Modified pcretest to add /W to test this facility. Added
+    REG_UCP to make it available via the POSIX interface.
 
 
 Version 8.02 19-Mar-2010

@@ -741,9 +741,8 @@ return 0;
 *         Check newline indicator                *
 *************************************************/
 
-/* This is used both at compile and run-time to check for <xxx> escapes, where
-xxx is LF, CR, CRLF, ANYCRLF, or ANY. Print a message and return 0 if there is
-no match.
+/* This is used both at compile and run-time to check for <xxx> escapes. Print
+a message and return 0 if there is no match.
 
 Arguments:
   p           points after the leading '<'
@@ -1238,6 +1237,7 @@ while (!done)
 
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;
+      case 'W': options |= PCRE_UCP; break; 
       case 'X': options |= PCRE_EXTRA; break;
       case 'Z': debug_lengths = 0; break;
       case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
@@ -1268,7 +1268,7 @@ while (!done)
 
       case '<':
         {
-        if (strncmp((char *)pp, "JS>", 3) == 0)
+        if (strncmpic(pp, (uschar *)"JS>", 3) == 0)
           {
           options |= PCRE_JAVASCRIPT_COMPAT;
           pp += 3;
@@ -1309,6 +1309,7 @@ while (!done)
     if ((options & PCRE_DOTALL) != 0) cflags |= REG_DOTALL;
     if ((options & PCRE_NO_AUTO_CAPTURE) != 0) cflags |= REG_NOSUB;
     if ((options & PCRE_UTF8) != 0) cflags |= REG_UTF8;
+    if ((options & PCRE_UCP) != 0) cflags |= REG_UCP;
     if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
     rc = regcomp(&preg, (char *)p, cflags);
@@ -1555,7 +1556,7 @@ while (!done)
       if (do_flip) all_options = byteflip(all_options, sizeof(all_options));
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -1569,6 +1570,7 @@ while (!done)
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
           ((get_options & PCRE_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
           ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
+          ((get_options & PCRE_UCP) != 0)? " ucp" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "",
           ((get_options & PCRE_DUPNAMES) != 0)? " dupnames" : "");
 

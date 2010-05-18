@@ -1994,4 +1994,44 @@ No match
 10: AB
 11: A
 
+/-- Unicode properties for \b abd \B --/
+
+/\b...\B/8W
+    abc_
+ 0: abc
+    \x{37e}abc\x{376} 
+ 0: abc
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+ 0: \x{376}\x{371}\x{393}
+    !\x{c0}++\x{c1}\x{c2} 
+ 0: ++\x{c1}
+    !\x{c0}+++++ 
+ 0: \x{c0}++
+
+/-- Without PCRE_UCP, non-ASCII always fail, even if < 256  --/
+
+/\b...\B/8
+    abc_
+ 0: abc
+    ** Failers 
+ 0: Fai
+    \x{37e}abc\x{376} 
+No match
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+No match
+    !\x{c0}++\x{c1}\x{c2} 
+No match
+    !\x{c0}+++++ 
+No match
+
+/-- With PCRE_UCP, non-UTF8 chars that are < 256 still check properties  --/
+
+/\b...\B/W
+    abc_
+ 0: abc
+    !\x{c0}++\x{c1}\x{c2} 
+ 0: ++\xc1
+    !\x{c0}+++++ 
+ 0: \xc0++
+
 /-- End of testinput9 --/ 

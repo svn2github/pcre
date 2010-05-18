@@ -42,6 +42,16 @@ in the main
 .\"
 page.
 .P
+Another special sequence that may appear at the start of a pattern or in 
+combination with (*UTF8) is:
+.sp
+  (*UCP)
+.sp
+This has the same effect as setting the PCRE_UCP option: it causes sequences 
+such as \ed and \ew to use Unicode properties to determine character types, 
+instead of recognizing only characters with codes less than 128 via a lookup 
+table.
+.P
 The remainder of this document discusses the patterns that are supported by
 PCRE when its main matching function, \fBpcre_exec()\fP, is used.
 From release 6.0, PCRE offers a second matching function,
@@ -340,6 +350,7 @@ subroutine
 call.
 .
 .
+.\" HTML <a name="genericchartypes"></a>
 .SS "Generic character types"
 .rs
 .sp
@@ -366,11 +377,9 @@ when PCRE_DOTALL is not set.
 .P
 Each pair of lower and upper case escape sequences partitions the complete set
 of characters into two disjoint sets. Any given character matches one, and only
-one, of each pair.
-.P
-These character type sequences can appear both inside and outside character
+one, of each pair. The sequences can appear both inside and outside character
 classes. They each match one character of the appropriate type. If the current
-matching point is at the end of the subject string, all of them fail, since
+matching point is at the end of the subject string, all of them fail, because
 there is no character to match.
 .P
 For compatibility with Perl, \es does not match the VT character (code 11).
@@ -379,16 +388,44 @@ are HT (9), LF (10), FF (12), CR (13), and space (32). If "use locale;" is
 included in a Perl script, \es may match the VT character. In PCRE, it never
 does.
 .P
-In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
-\ew, and always match \eD, \eS, and \eW. This is true even when Unicode
-character property support is available. These sequences retain their original
-meanings from before UTF-8 support was available, mainly for efficiency
-reasons. Note that this also affects \eb, because it is defined in terms of \ew
-and \eW.
+A "word" character is an underscore or any character that is a letter or digit.
+By default, the definition of letters and digits is controlled by PCRE's
+low-valued character tables, and may vary if locale-specific matching is taking
+place (see
+.\" HTML <a href="pcreapi.html#localesupport">
+.\" </a>
+"Locale support"
+.\"
+in the
+.\" HREF
+\fBpcreapi\fP
+.\"
+page). For example, in a French locale such as "fr_FR" in Unix-like systems,
+or "french" in Windows, some character codes greater than 128 are used for
+accented letters, and these are then matched by \ew. The use of locales with
+Unicode is discouraged.
+.P
+By default, in UTF-8 mode, characters with values greater than 128 never match
+\ed, \es, or \ew, and always match \eD, \eS, and \eW. These sequences retain
+their original meanings from before UTF-8 support was available, mainly for
+efficiency reasons. However, if PCRE is compiled with Unicode property support, 
+and the PCRE_UCP option is set, the behaviour is changed so that Unicode
+properties are used to determine character types, as follows:
+.sp
+  \ed  any character that \ep{Nd} matches (decimal digit)
+  \es  any character that \ep{Z} matches, plus HT, LF, FF, CR
+  \ew  any character that \ep{L} or \ep{N} matches, plus underscore
+.sp
+The upper case escapes match the inverse sets of characters. Note that \ed
+matches only decimal digits, whereas \ew matches any Unicode digit, as well as 
+any Unicode letter, and underscore. Note also that PCRE_UCP affects \eb, and
+\eB because they are defined in terms of \ew and \eW. Matching these sequences
+is noticeably slower when PCRE_UCP is set.
 .P
 The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the
-other sequences, these do match certain high-valued codepoints in UTF-8 mode.
-The horizontal space characters are:
+other sequences, which match only ASCII characters by default, these always
+match certain high-valued codepoints in UTF-8 mode, whether or not PCRE_UCP is 
+set. The horizontal space characters are:
 .sp
   U+0009     Horizontal tab
   U+0020     Space
@@ -419,23 +456,6 @@ The vertical space characters are:
   U+0085     Next line
   U+2028     Line separator
   U+2029     Paragraph separator
-.P
-A "word" character is an underscore or any character less than 256 that is a
-letter or digit. The definition of letters and digits is controlled by PCRE's
-low-valued character tables, and may vary if locale-specific matching is taking
-place (see
-.\" HTML <a href="pcreapi.html#localesupport">
-.\" </a>
-"Locale support"
-.\"
-in the
-.\" HREF
-\fBpcreapi\fP
-.\"
-page). For example, in a French locale such as "fr_FR" in Unix-like systems,
-or "french" in Windows, some character codes greater than 128 are used for
-accented letters, and these are matched by \ew. The use of locales with Unicode
-is discouraged.
 .
 .
 .\" HTML <a name="newlineseq"></a>
@@ -481,13 +501,13 @@ These override the default and the options given to \fBpcre_compile()\fP or
 which are not Perl-compatible, are recognized only at the very start of a
 pattern, and that they must be in upper case. If more than one of them is
 present, the last one is used. They can be combined with a change of newline
-convention, for example, a pattern can start with:
+convention; for example, a pattern can start with:
 .sp
   (*ANY)(*BSR_ANYCRLF)
 .sp
-Inside a character class, \eR is treated as an unrecognized escape sequence, 
-and so matches the letter "R" by default, but causes an error if PCRE_EXTRA is
-set.
+They can also be combined with the (*UTF8) or (*UCP) special sequences. Inside
+a character class, \eR is treated as an unrecognized escape sequence, and so
+matches the letter "R" by default, but causes an error if PCRE_EXTRA is set.
 .
 .
 .\" HTML <a name="uniextseq"></a>
@@ -721,7 +741,9 @@ non-UTF-8 mode \eX matches any one character.
 Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \ed and \ew do not use Unicode
-properties in PCRE.
+properties in PCRE by default, though you can make them do so by setting the 
+PCRE_UCP option for \fBpcre_compile()\fP or by starting the pattern with
+(*UCP).
 .
 .
 .\" HTML <a name="extraprops"></a>
@@ -731,7 +753,8 @@ properties in PCRE.
 As well as the standard Unicode properties described in the previous 
 section, PCRE supports four more that make it possible to convert traditional 
 escape sequences such as \ew and \es and POSIX character classes to use Unicode
-properties. These are:
+properties. PCRE uses these non-standard, non-Perl properties internally when
+PCRE_UCP is set. They are:
 .sp
   Xan   Any alphanumeric character
   Xps   Any POSIX space character
@@ -810,10 +833,12 @@ escape sequence" error is generated instead.
 A word boundary is a position in the subject string where the current character
 and the previous character do not both match \ew or \eW (i.e. one matches
 \ew and the other matches \eW), or the start or end of the string if the
-first or last character matches \ew, respectively. Neither PCRE nor Perl has a
-separte "start of word" or "end of word" metasequence. However, whatever
-follows \eb normally determines which it is. For example, the fragment
-\eba matches "a" at the start of a word.
+first or last character matches \ew, respectively. In UTF-8 mode, the meanings
+of \ew and \eW can be changed by setting the PCRE_UCP option. When this is
+done, it also affects \eb and \eB. Neither PCRE nor Perl has a separate "start
+of word" or "end of word" metasequence. However, whatever follows \eb normally
+determines which it is. For example, the fragment \eba matches "a" at the start
+of a word.
 .P
 The \eA, \eZ, and \ez assertions differ from the traditional circumflex and
 dollar (described in the next section) in that they only ever match at the very
@@ -1018,12 +1043,12 @@ characters in both cases. In UTF-8 mode, PCRE supports the concept of case for
 characters with values greater than 128 only when it is compiled with Unicode
 property support.
 .P
-The character types \ed, \eD, \ep, \eP, \es, \eS, \ew, and \eW may also appear
-in a character class, and add the characters that they match to the class. For
-example, [\edABCDEF] matches any hexadecimal digit. A circumflex can
-conveniently be used with the upper case character types to specify a more
-restricted set of characters than the matching lower case type. For example,
-the class [^\eW_] matches any letter or digit, but not underscore.
+The character types \ed, \eD, \eh, \eH, \ep, \eP, \es, \eS, \ev, \eV, \ew, and
+\eW may also appear in a character class, and add the characters that they
+match to the class. For example, [\edABCDEF] matches any hexadecimal digit. A
+circumflex can conveniently be used with the upper case character types to
+specify a more restricted set of characters than the matching lower case type.
+For example, the class [^\eW_] matches any letter or digit, but not underscore.
 .P
 The only metacharacters that are recognized in character classes are backslash,
 hyphen (only where it can be interpreted as specifying a range), circumflex
@@ -1043,7 +1068,7 @@ this notation. For example,
   [01[:alpha:]%]
 .sp
 matches "0", "1", any alphabetic character, or "%". The supported class names
-are
+are:
 .sp
   alnum    letters and digits
   alpha    letters
@@ -1054,7 +1079,7 @@ are
   graph    printing characters, excluding space
   lower    lower case letters
   print    printing characters, including space
-  punct    printing characters, excluding letters and digits
+  punct    printing characters, excluding letters and digits and space
   space    white space (not quite the same as \es)
   upper    upper case letters
   word     "word" characters (same as \ew)
@@ -1075,8 +1100,24 @@ matches "1", "2", or any non-digit. PCRE (and Perl) also recognize the POSIX
 syntax [.ch.] and [=ch=] where "ch" is a "collating element", but these are not
 supported, and an error is given if they are encountered.
 .P
-In UTF-8 mode, characters with values greater than 128 do not match any of
-the POSIX character classes.
+By default, in UTF-8 mode, characters with values greater than 128 do not match
+any of the POSIX character classes. However, if the PCRE_UCP option is passed
+to \fBpcre_compile()\fP, some of the classes are changed so that Unicode 
+character properties are used. This is achieved by replacing the POSIX classes 
+by other sequences, as follows:
+.sp
+  [:alnum:]  becomes  \ep{Xan}
+  [:alpha:]  becomes  \ep{L}
+  [:blank:]  becomes  \eh 
+  [:digit:]  becomes  \ep{Nd}
+  [:lower:]  becomes  \ep{Ll}
+  [:space:]  becomes  \ep{Xps} 
+  [:upper:]  becomes  \ep{Lu}
+  [:word:]   becomes  \ep{Xwd}
+.sp
+Negated versions, such as [:^alpha:] use \eP instead of \ep. The other POSIX
+classes are unchanged, and match only characters with code points less than
+128.
 .
 .
 .SH "VERTICAL BAR"
@@ -1155,8 +1196,9 @@ section entitled
 .\" </a>
 "Newline sequences"
 .\"
-above. There is also the (*UTF8) leading sequence that can be used to set UTF-8
-mode; this is equivalent to setting the PCRE_UTF8 option.
+above. There are also the (*UTF8) and (*UCP) leading sequences that can be used
+to set UTF-8 and Unicode property modes; they are equivalent to setting the
+PCRE_UTF8 and the PCRE_UCP options, respectively.
 .
 .
 .\" HTML <a name="subpattern"></a>
@@ -2624,6 +2666,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 May 2010
+Last updated: 18 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

@@ -560,8 +560,9 @@ set, any backslash in a pattern that is followed by a letter that has no
 special meaning causes an error, thus reserving these combinations for future
 expansion. By default, as in Perl, a backslash followed by a letter with no
 special meaning is treated as a literal. (Perl can, however, be persuaded to
-give a warning for this.) There are at present no other features controlled by
-this option. It can also be set by a (?X) option setting within a pattern.
+give an error for this, by running it with the -w option.) There are at present
+no other features controlled by this option. It can also be set by a (?X)
+option setting within a pattern.
 <pre>
   PCRE_FIRSTLINE
 </pre>
@@ -2086,7 +2087,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 March 2010
+Last updated: 03 May 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

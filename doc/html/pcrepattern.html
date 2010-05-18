@@ -18,7 +18,7 @@ man page, in case the conversion went wrong.
 <li><a name="TOC3" href="#SEC3">CHARACTERS AND METACHARACTERS</a>
 <li><a name="TOC4" href="#SEC4">BACKSLASH</a>
 <li><a name="TOC5" href="#SEC5">CIRCUMFLEX AND DOLLAR</a>
-<li><a name="TOC6" href="#SEC6">FULL STOP (PERIOD, DOT)</a>
+<li><a name="TOC6" href="#SEC6">FULL STOP (PERIOD, DOT) AND \N</a>
 <li><a name="TOC7" href="#SEC7">MATCHING A SINGLE BYTE</a>
 <li><a name="TOC8" href="#SEC8">SQUARE BRACKETS AND CHARACTER CLASSES</a>
 <li><a name="TOC9" href="#SEC9">POSIX CHARACTER CLASSES</a>
@@ -124,9 +124,11 @@ they must be in upper case. If more than one of them is present, the last one
 is used.
 </P>
 <P>
-The newline convention does not affect what the \R escape sequence matches. By
-default, this is any Unicode newline sequence, for Perl compatibility. However,
-this can be changed; see the description of \R in the section entitled
+The newline convention affects the interpretation of the dot metacharacter when
+PCRE_DOTALL is not set, and also the behaviour of \N. However, it does not
+affect what the \R escape sequence matches. By default, this is any Unicode
+newline sequence, for Perl compatibility. However, this can be changed; see the
+description of \R in the section entitled
 <a href="#newlineseq">"Newline sequences"</a>
 below. A change of \R setting can be combined with a change of newline
 convention.
@@ -308,11 +310,11 @@ zero, because no more than three octal digits are ever read.
 <P>
 All the sequences that define a single character value can be used both inside
 and outside character classes. In addition, inside a character class, the
-sequence \b is interpreted as the backspace character (hex 08), and the
-sequences \R and \X are interpreted as the characters "R" and "X",
-respectively. Outside a character class, these sequences have different
-meanings
-<a href="#uniextseq">(see below).</a>
+sequence \b is interpreted as the backspace character (hex 08). The sequences
+\B, \N, \R, and \X are not special inside a character class. Like any other
+unrecognized escape sequences, they are treated as the literal characters "B",
+"N", "R", and "X" by default, but cause an error if the PCRE_EXTRA option is
+set. Outside a character class, these sequences have different meanings.
 </P>
 <br><b>
 Absolute and relative back references
@@ -337,13 +339,12 @@ Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>no
 synonymous. The former is a back reference; the latter is a
 <a href="#subpatternsassubroutines">subroutine</a>
 call.
-</P>
+<a name="genericchartypes"></a></P>
 <br><b>
 Generic character types
 </b><br>
 <P>
-Another use of backslash is for specifying generic character types. The
-following are always recognized:
+Another use of backslash is for specifying generic character types:
 <pre>
   \d     any decimal digit
   \D     any character that is not a decimal digit
@@ -356,8 +357,15 @@ following are always recognized:
   \w     any "word" character
   \W     any "non-word" character
 </pre>
-Each pair of escape sequences partitions the complete set of characters into
-two disjoint sets. Any given character matches one, and only one, of each pair.
+There is also the single sequence \N, which matches a non-newline character. 
+This is the same as 
+<a href="#fullstopdot">the "." metacharacter</a>
+when PCRE_DOTALL is not set.
+</P>
+<P>
+Each pair of lower and upper case escape sequences partitions the complete set
+of characters into two disjoint sets. Any given character matches one, and only
+one, of each pair.
 </P>
 <P>
 These character type sequences can appear both inside and outside character
@@ -475,7 +483,9 @@ convention, for example, a pattern can start with:
 <pre>
   (*ANY)(*BSR_ANYCRLF)
 </pre>
-Inside a character class, \R matches the letter "R".
+Inside a character class, \R is treated as an unrecognized escape sequence, 
+and so matches the letter "R" by default, but causes an error if PCRE_EXTRA is
+set.
 <a name="uniextseq"></a></P>
 <br><b>
 Unicode character properties
@@ -492,10 +502,13 @@ The extra escape sequences are:
   \X       an extended Unicode sequence
 </pre>
 The property names represented by <i>xx</i> above are limited to the Unicode
-script names, the general category properties, and "Any", which matches any
-character (including newline). Other properties such as "InMusicalSymbols" are
-not currently supported by PCRE. Note that \P{Any} does not match any
-characters, so always causes a match failure.
+script names, the general category properties, "Any", which matches any
+character (including newline), and some special PCRE properties (described
+in the 
+<a href="#extraprops">next section).</a>
+Other Perl properties such as "InMusicalSymbols" are not currently supported by
+PCRE. Note that \P{Any} does not match any characters, so always causes a
+match failure.
 </P>
 <P>
 Sets of Unicode characters are defined as belonging to certain scripts. A
@@ -603,10 +616,10 @@ Vai,
 Yi.
 </P>
 <P>
-Each character has exactly one general category property, specified by a
-two-letter abbreviation. For compatibility with Perl, negation can be specified
-by including a circumflex between the opening brace and the property name. For
-example, \p{^Lu} is the same as \P{Lu}.
+Each character has exactly one Unicode general category property, specified by
+a two-letter abbreviation. For compatibility with Perl, negation can be
+specified by including a circumflex between the opening brace and the property
+name. For example, \p{^Lu} is the same as \P{Lu}.
 </P>
 <P>
 If only one letter is specified with \p or \P, it includes all the general
@@ -708,6 +721,26 @@ Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \d and \w do not use Unicode
 properties in PCRE.
+<a name="extraprops"></a></P>
+<br><b>
+PCRE's additional properties
+</b><br>
+<P>
+As well as the standard Unicode properties described in the previous 
+section, PCRE supports four more that make it possible to convert traditional 
+escape sequences such as \w and \s and POSIX character classes to use Unicode
+properties. These are:
+<pre>
+  Xan   Any alphanumeric character
+  Xps   Any POSIX space character
+  Xsp   Any Perl space character
+  Xwd   Any Perl "word" character
+</pre>
+Xan matches characters that have either the L (letter) or the N (number) 
+property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or 
+carriage return, and any other character that has the Z (separator) property.
+Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the 
+same characters as Xan, plus underscore.
 <a name="resetmatchstart"></a></P>
 <br><b>
 Resetting the match start
@@ -756,8 +789,11 @@ The backslashed assertions are:
   \z     matches only at the end of the subject
   \G     matches at the first matching position in the subject
 </pre>
-These assertions may not appear in character classes (but note that \b has a
-different meaning, namely the backspace character, inside a character class).
+Inside a character class, \b has a different meaning; it matches the backspace
+character. If any other of these assertions appears in a character class, by 
+default it matches the corresponding literal character (for example, \B
+matches the letter B). However, if the PCRE_EXTRA option is set, an "invalid
+escape sequence" error is generated instead.
 </P>
 <P>
 A word boundary is a position in the subject string where the current character
@@ -853,8 +889,8 @@ PCRE_DOLLAR_ENDONLY option is ignored if PCRE_MULTILINE is set.
 Note that the sequences \A, \Z, and \z can be used to match the start and
 end of the subject in both modes, and if all branches of a pattern start with
 \A it is always anchored, whether or not PCRE_MULTILINE is set.
-</P>
-<br><a name="SEC6" href="#TOC1">FULL STOP (PERIOD, DOT)</a><br>
+<a name="fullstopdot"></a></P>
+<br><a name="SEC6" href="#TOC1">FULL STOP (PERIOD, DOT) AND \N</a><br>
 <P>
 Outside a character class, a dot in the pattern matches any one character in
 the subject string except (by default) a character that signifies the end of a
@@ -878,6 +914,11 @@ to match it.
 The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
+</P>
+<P>
+The escape sequence \N always behaves as a dot does when PCRE_DOTALL is not 
+set. In other words, it matches any one character except one that signifies the 
+end of a line.
 </P>
 <br><a name="SEC7" href="#TOC1">MATCHING A SINGLE BYTE</a><br>
 <P>
@@ -2548,7 +2589,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 March 2010
+Last updated: 05 May 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

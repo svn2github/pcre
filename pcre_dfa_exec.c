@@ -922,13 +922,37 @@ for (;;)
           if (utf8) BACKCHAR(temp);
 #endif
           GETCHARTEST(d, temp);
+#ifdef SUPPORT_UCP          
+          if ((md->poptions & PCRE_UCP) != 0)
+            {
+            if (d == '_') left_word = TRUE; else
+              { 
+              int cat = UCD_CATEGORY(d);
+              left_word = (cat == ucp_L || cat == ucp_N);
+              } 
+            }  
+          else 
+#endif          
           left_word = d < 256 && (ctypes[d] & ctype_word) != 0;
           }
-        else left_word = 0;
+        else left_word = FALSE;
 
         if (clen > 0)
+          { 
+#ifdef SUPPORT_UCP          
+          if ((md->poptions & PCRE_UCP) != 0)
+            {
+            if (c == '_') right_word = TRUE; else
+              { 
+              int cat = UCD_CATEGORY(c);
+              right_word = (cat == ucp_L || cat == ucp_N);
+              } 
+            }  
+          else 
+#endif          
           right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
-        else right_word = 0;
+          } 
+        else right_word = FALSE;
 
         if ((left_word == right_word) == (codevalue == OP_NOT_WORD_BOUNDARY))
           { ADD_ACTIVE(state_offset + 1, 0); }

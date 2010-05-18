@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -145,6 +145,7 @@ static const int eint[] = {
   /* 65 */
   REG_BADPAT,  /* different names for subpatterns of the same number are not allowed */
   REG_BADPAT,  /* (*MARK) must have an argument */
+  REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UCP support */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -248,6 +249,7 @@ if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
 if ((cflags & REG_DOTALL) != 0)   options |= PCRE_DOTALL;
 if ((cflags & REG_NOSUB) != 0)    options |= PCRE_NO_AUTO_CAPTURE;
 if ((cflags & REG_UTF8) != 0)     options |= PCRE_UTF8;
+if ((cflags & REG_UCP) != 0)      options |= PCRE_UCP;
 if ((cflags & REG_UNGREEDY) != 0) options |= PCRE_UNGREEDY;
 
 preg->re_pcre = pcre_compile2(pattern, options, &errorcode, &errorptr,

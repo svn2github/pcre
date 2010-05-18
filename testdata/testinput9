@@ -960,4 +960,30 @@
 /^[\p{Xwd}]+/8
     ABCD1234\x{6ca}\x{a6c}\x{10a7}_
 
+/-- Unicode properties for \b abd \B --/
+
+/\b...\B/8W
+    abc_
+    \x{37e}abc\x{376} 
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+    !\x{c0}++\x{c1}\x{c2} 
+    !\x{c0}+++++ 
+
+/-- Without PCRE_UCP, non-ASCII always fail, even if < 256  --/
+
+/\b...\B/8
+    abc_
+    ** Failers 
+    \x{37e}abc\x{376} 
+    \x{37e}\x{376}\x{371}\x{393}\x{394} 
+    !\x{c0}++\x{c1}\x{c2} 
+    !\x{c0}+++++ 
+
+/-- With PCRE_UCP, non-UTF8 chars that are < 256 still check properties  --/
+
+/\b...\B/W
+    abc_
+    !\x{c0}++\x{c1}\x{c2} 
+    !\x{c0}+++++ 
+
 /-- End of testinput9 --/ 
