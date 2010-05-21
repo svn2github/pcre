@@ -170,6 +170,7 @@ static BOOL do_colour = FALSE;
 static BOOL file_offsets = FALSE;
 static BOOL hyphenpending = FALSE;
 static BOOL invert = FALSE;
+static BOOL line_buffered = FALSE;
 static BOOL line_offsets = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
@@ -206,6 +207,7 @@ used to identify them. */
 #define N_NULL         (-9)
 #define N_LOFFSETS     (-10)
 #define N_FOFFSETS     (-11)
+#define N_LBUFFER      (-12)
 
 static option_item optionlist[] = {
   { OP_NODATA,    N_NULL,   NULL,              "",              "  terminate options" },
@@ -228,6 +230,7 @@ static option_item optionlist[] = {
   { OP_NODATA,    'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
   { OP_NODATA,    'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,    N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
+  { OP_NODATA,    N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,    N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
@@ -339,12 +342,18 @@ return (statbuf.st_mode & S_IFMT) == S_IFREG;
 }
 
 
-/************* Test stdout for being a terminal in Unix **********/
+/************* Test for a terminal in Unix **********/
 
 static BOOL
 is_stdout_tty(void)
 {
 return isatty(fileno(stdout));
+}
+
+static BOOL
+is_file_tty(FILE *f)
+{
+return isatty(fileno(f));
 }
 
 
@@ -459,12 +468,18 @@ return !isdirectory(filename);
 }
 
 
-/************* Test stdout for being a terminal in Win32 **********/
+/************* Test for a terminal in Win32 **********/
 
 /* I don't know how to do this; assume never */
 
 static BOOL
 is_stdout_tty(void)
+{
+return FALSE;
+}
+
+static BOOL
+is_file_tty(FILE *f)
 {
 return FALSE;
 }
@@ -491,7 +506,7 @@ void closedirectory(directory_type *dir) {}
 int isregfile(char *filename) { return 1; }
 
 
-/************* Test stdout for being a terminal when we can't do it **********/
+/************* Test for a terminal when we can't do it **********/
 
 static BOOL
 is_stdout_tty(void)
@@ -499,6 +514,11 @@ is_stdout_tty(void)
 return FALSE;
 }
 
+static BOOL
+is_file_tty(FILE *f)
+{
+return FALSE;
+}
 
 #endif
 
@@ -523,6 +543,40 @@ if (n < 0 || n >= sys_nerr) return "unknown error number";
 return sys_errlist[n];
 }
 #endif /* HAVE_STRERROR */
+
+
+
+/*************************************************
+*            Read one line of input              *
+*************************************************/
+
+/* Normally, input is read using fread() into a large buffer, so many lines may 
+be read at once. However, doing this for tty input means that no output appears 
+until a lot of input has been typed. Instead, tty input is handled line by
+line. We cannot use fgets() for this, because it does not stop at a binary
+zero, and therefore there is no way of telling how many characters it has read, 
+because there may be binary zeros embedded in the data.
+
+Arguments:
+  buffer     the buffer to read into
+  length     the maximum number of characters to read
+  f          the file
+  
+Returns:     the number of characters read, zero at end of file
+*/   
+
+static int
+read_one_line(char *buffer, int length, FILE *f)
+{
+int c;
+int yield = 0;
+while ((c = fgetc(f)) != EOF)
+  {
+  buffer[yield++] = c;
+  if (c == '\n' || yield >= length) break; 
+  } 
+return yield;   
+}
 
 
 
@@ -924,6 +978,7 @@ char *ptr = buffer;
 char *endptr;
 size_t bufflength;
 BOOL endhyphenpending = FALSE;
+BOOL input_line_buffered = line_buffered;
 FILE *in = NULL;                    /* Ensure initialized */
 
 #ifdef SUPPORT_LIBZ
@@ -961,9 +1016,12 @@ else
 
   {
   in = (FILE *)handle;
-  bufflength = fread(buffer, 1, 3*MBUFTHIRD, in);
+  if (is_file_tty(in)) input_line_buffered = TRUE;
+  bufflength = input_line_buffered? 
+    read_one_line(buffer, 3*MBUFTHIRD, in) :
+    fread(buffer, 1, 3*MBUFTHIRD, in);
   }
-
+  
 endptr = buffer + bufflength;
 
 /* Loop while the current pointer is not at the end of the file. For large
@@ -1272,8 +1330,10 @@ while (ptr < endptr)
       else FWRITE(ptr, 1, linelength + endlinelength, stdout);
       }
 
-    /* End of doing what has to be done for a match */
+    /* End of doing what has to be done for a match. If --line-buffered was
+    given, flush the output. */
 
+    if (line_buffered) fflush(stdout);
     rc = 0;    /* Had some success */
 
     /* Remember where the last match happened for after_context. We remember
@@ -1307,6 +1367,16 @@ while (ptr < endptr)
   ptr += linelength + endlinelength;
   filepos += linelength + endlinelength;
   linenumber++;
+  
+  /* If input is line buffered, and the buffer is not yet full, read another 
+  line and add it into the buffer. */
+  
+  if (input_line_buffered && bufflength < sizeof(buffer))
+    {
+    int add = read_one_line(ptr, sizeof(buffer) - (ptr - buffer), in);
+    bufflength += add;
+    endptr += add; 
+    }   
 
   /* If we haven't yet reached the end of the file (the buffer is full), and
   the current point is in the top 1/3 of the buffer, slide the buffer down by
@@ -1342,8 +1412,10 @@ while (ptr < endptr)
     else
 #endif
 
-    bufflength = 2*MBUFTHIRD + fread(buffer + 2*MBUFTHIRD, 1, MBUFTHIRD, in);
-
+    bufflength = 2*MBUFTHIRD + 
+      (input_line_buffered? 
+       read_one_line(buffer + 2*MBUFTHIRD, MBUFTHIRD, in) : 
+       fread(buffer + 2*MBUFTHIRD, 1, MBUFTHIRD, in));
     endptr = buffer + bufflength;
 
     /* Adjust any last match point */
@@ -1694,6 +1766,7 @@ switch(letter)
   case N_FOFFSETS: file_offsets = TRUE; break;
   case N_HELP: help(); exit(0);
   case N_LOFFSETS: line_offsets = number = TRUE; break;
+  case N_LBUFFER: line_buffered = TRUE; break; 
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
@@ -2215,7 +2288,7 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     if (cs != NULL) colour_string = cs;
     }
   }
-
+  
 /* Interpret the newline type; the default settings are Unix-like. */
 
 if (strcmp(newline, "cr") == 0 || strcmp(newline, "CR") == 0)

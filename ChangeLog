@@ -36,6 +36,8 @@ Version 8.10 03 May-2010
     use Unicode properties. (*UCP) at the start of a pattern can be used to set 
     this option. Modified pcretest to add /W to test this facility. Added
     REG_UCP to make it available via the POSIX interface.
+    
+10. Added --line-buffered to pcregrep. 
 
 
 Version 8.02 19-Mar-2010
