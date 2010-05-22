@@ -43,6 +43,12 @@ Version 8.10 03 May-2010
     studied, and the match started with a letter with a code point greater than 
     127 whose first byte was different to the first byte of the other case of
     the letter, the other case of this starting letter was not recognized.
+    
+12. pcreposix.c included pcre.h before including pcre_internal.h. This caused a
+    conflict in the definition of PCRE_EXP_DECL. I have removed the include of 
+    pcre.h as pcre_internal.h includes pcre.h itself. (This may be a bit of
+    historical tidying that never got done.)
+ 
 
 
 Version 8.02 19-Mar-2010

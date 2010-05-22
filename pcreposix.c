@@ -57,7 +57,6 @@ previously been set. */
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
-#include "pcre.h"
 #include "pcre_internal.h"
 #include "pcreposix.h"
 
