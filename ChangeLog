@@ -39,6 +39,11 @@ Version 8.10 03 May-2010
     
 10. Added --line-buffered to pcregrep. 
 
+11. In UTF-8 mode, if a pattern that was compiled with PCRE_CASELESS was 
+    studied, and the match started with a letter with a code point greater than 
+    127 whose first byte was different to the first byte of the other case of
+    the letter, the other case of this starting letter was not recognized.
+
 
 Version 8.02 19-Mar-2010
 ------------------------

@@ -440,25 +440,51 @@ for (;;)
 *      Set a bit and maybe its alternate case    *
 *************************************************/
 
-/* Given a character, set its bit in the table, and also the bit for the other
-version of a letter if we are caseless.
+/* Given a character, set its first byte's bit in the table, and also the 
+corresponding bit for the other version of a letter if we are caseless. In
+UTF-8 mode, for characters greater than 127, we can only do the caseless thing
+when Unicode property support is available.
 
 Arguments:
   start_bits    points to the bit map
-  c             is the character
+  p             points to the character
   caseless      the caseless flag
   cd            the block with char table pointers
+  utf8          TRUE for UTF-8 mode 
 
-Returns:        nothing
+Returns:        pointer after the character
 */
 
-static void
-set_table_bit(uschar *start_bits, unsigned int c, BOOL caseless,
-  compile_data *cd)
+static const uschar *
+set_table_bit(uschar *start_bits, const uschar *p, BOOL caseless,
+  compile_data *cd, BOOL utf8)
 {
+unsigned int c = *p;
 start_bits[c/8] |= (1 << (c&7));
+
+#ifdef SUPPORT_UTF8
+if (utf8 && c > 127)
+  {
+  GETCHARINC(c, p);
+#ifdef SUPPORT_UCP
+  if (caseless)
+    {
+    uschar buff[8]; 
+    c = UCD_OTHERCASE(c);
+    (void)_pcre_ord2utf8(c, buff); 
+    c = buff[0];
+    start_bits[c/8] |= (1 << (c&7));
+    }  
+#endif 
+  return p;
+  }
+#endif    
+
+/* Not UTF-8 mode, or character is less than 127. */
+
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0)
   start_bits[cd->fcc[c]/8] |= (1 << (cd->fcc[c]&7));
+return p + 1;
 }
 
 
@@ -616,12 +642,7 @@ do
       case OP_QUERY:
       case OP_MINQUERY:
       case OP_POSQUERY:
-      set_table_bit(start_bits, tcode[1], caseless, cd);
-      tcode += 2;
-#ifdef SUPPORT_UTF8
-      if (utf8 && tcode[-1] >= 0xc0)
-        tcode += _pcre_utf8_table4[tcode[-1] & 0x3f];
-#endif
+      tcode = set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
       break;
 
       /* Single-char upto sets the bit and tries the next */
@@ -629,12 +650,7 @@ do
       case OP_UPTO:
       case OP_MINUPTO:
       case OP_POSUPTO:
-      set_table_bit(start_bits, tcode[3], caseless, cd);
-      tcode += 4;
-#ifdef SUPPORT_UTF8
-      if (utf8 && tcode[-1] >= 0xc0)
-        tcode += _pcre_utf8_table4[tcode[-1] & 0x3f];
-#endif
+      tcode = set_table_bit(start_bits, tcode + 3, caseless, cd, utf8);
       break;
 
       /* At least one single char sets the bit and stops */
@@ -647,11 +663,14 @@ do
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
-      set_table_bit(start_bits, tcode[1], caseless, cd);
+      (void)set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
       try_next = FALSE;
       break;
 
-      /* Single character type sets the bits and stops */
+      /* Single character types set the bits and stop. Note that if PCRE_UCP 
+      is set, we do not see these op codes because \d etc are converted to 
+      properties. Therefore, these apply in the case when only ASCII characters 
+      are recognized to match the types. */
 
       case OP_NOT_DIGIT:
       for (c = 0; c < 32; c++)
