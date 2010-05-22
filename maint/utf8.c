@@ -36,7 +36,7 @@ static const unsigned char utf8_table4[] = {
 *************************************************/
 
 /* This function takes an integer value in the range 0 - 0x7fffffff
-and encodes it as a UTF-8 character in 0 to 6 bytes.
+and encodes it as a UTF-8 character in 1 to 6 bytes.
 
 Arguments:   
   cvalue     the character value 
