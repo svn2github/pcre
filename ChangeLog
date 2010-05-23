@@ -48,6 +48,12 @@ Version 8.10 03 May-2010
     conflict in the definition of PCRE_EXP_DECL. I have removed the include of 
     pcre.h as pcre_internal.h includes pcre.h itself. (This may be a bit of
     historical tidying that never got done.)
+    
+13. If a pattern that was studied started with a repeated Unicode property
+    test, for example, \p{Nd}+, there was the theoretical possibility of
+    setting up an incorrect bitmap of starting bytes, but fortunately it could 
+    not have actually happened in practice until change 8 above was made (it 
+    added property types that matched character-matching opcodes).
  
 
 

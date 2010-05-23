@@ -750,6 +750,7 @@ do
       case OP_TYPEPOSQUERY:
       switch(tcode[1])
         {
+        default:
         case OP_ANY:
         case OP_ALLANY:
         return SSB_FAIL;
