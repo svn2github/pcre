@@ -54,6 +54,9 @@ Version 8.10 03 May-2010
     setting up an incorrect bitmap of starting bytes, but fortunately it could 
     not have actually happened in practice until change 8 above was made (it 
     added property types that matched character-matching opcodes).
+    
+14. pcre_study() now recognizes \h, \v, and \R when constructing a bit map of 
+    possible starting bytes for non-anchored patterns. 
  
 
 

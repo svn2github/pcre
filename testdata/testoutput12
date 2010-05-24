@@ -1059,4 +1059,12 @@ Starting byte set: \xd0 \xd1
     \x{451}\x{440}\x{441}\x{442}\x{443}\x{444}\x{445}\x{446}\x{447}\x{448}\x{449}\x{44a}\x{44b}\x{44c}\x{44d}\x{44e}\x{44f}
  0: \x{451}\x{440}\x{441}\x{442}\x{443}\x{444}\x{445}\x{446}\x{447}\x{448}\x{449}\x{44a}\x{44b}\x{44c}\x{44d}\x{44e}\x{44f}
 
+/\p{Xps}*/SI
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = 0
+No set of starting bytes
+
 /-- End of testinput12 --/

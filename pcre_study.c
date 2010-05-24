@@ -48,6 +48,7 @@ supporting functions. */
 
 #include "pcre_internal.h"
 
+#define SET_BIT(c) start_bits[c/8] |= (1 << (c&7))
 
 /* Returns from set_start_bits() */
 
@@ -460,7 +461,8 @@ set_table_bit(uschar *start_bits, const uschar *p, BOOL caseless,
   compile_data *cd, BOOL utf8)
 {
 unsigned int c = *p;
-start_bits[c/8] |= (1 << (c&7));
+
+SET_BIT(c);
 
 #ifdef SUPPORT_UTF8
 if (utf8 && c > 127)
@@ -472,8 +474,7 @@ if (utf8 && c > 127)
     uschar buff[8]; 
     c = UCD_OTHERCASE(c);
     (void)_pcre_ord2utf8(c, buff); 
-    c = buff[0];
-    start_bits[c/8] |= (1 << (c&7));
+    SET_BIT(buff[0]); 
     }  
 #endif 
   return p;
@@ -482,8 +483,7 @@ if (utf8 && c > 127)
 
 /* Not UTF-8 mode, or character is less than 127. */
 
-if (caseless && (cd->ctypes[c] & ctype_letter) != 0)
-  start_bits[cd->fcc[c]/8] |= (1 << (cd->fcc[c]&7));
+if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
 return p + 1;
 }
 
@@ -666,6 +666,36 @@ do
       (void)set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
       try_next = FALSE;
       break;
+      
+      /* Special spacing and line-terminating items. These recognize specific 
+      lists of characters. The difference between VSPACE and ANYNL is that the 
+      latter can match the two-character CRLF sequence, but that is not 
+      relevant for finding the first character, so their code here is 
+      identical. */
+      
+      case OP_HSPACE:
+      SET_BIT(0x09);
+      SET_BIT(0x20);
+      SET_BIT(0xA0);
+      if (utf8)
+        {  
+        SET_BIT(0xE1);  /* For U+1680, U+180E */
+        SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
+        SET_BIT(0xE3);  /* For U+3000 */ 
+        }
+      try_next = FALSE;
+      break;         
+
+      case OP_ANYNL:  
+      case OP_VSPACE:
+      SET_BIT(0x0A); 
+      SET_BIT(0x0B); 
+      SET_BIT(0x0C); 
+      SET_BIT(0x0D); 
+      SET_BIT(0x85); 
+      if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */ 
+      try_next = FALSE;
+      break;  
 
       /* Single character types set the bits and stop. Note that if PCRE_UCP 
       is set, we do not see these op codes because \d etc are converted to 
@@ -727,6 +757,7 @@ do
 
       case OP_TYPEPLUS:
       case OP_TYPEMINPLUS:
+      case OP_TYPEPOSPLUS: 
       tcode++;
       break;
 
@@ -754,7 +785,29 @@ do
         case OP_ANY:
         case OP_ALLANY:
         return SSB_FAIL;
-
+        
+        case OP_HSPACE:
+        SET_BIT(0x09);
+        SET_BIT(0x20);
+        SET_BIT(0xA0);
+        if (utf8)
+          {  
+          SET_BIT(0xE1);  /* For U+1680, U+180E */
+          SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
+          SET_BIT(0xE3);  /* For U+3000 */ 
+          }
+        break;         
+  
+        case OP_ANYNL:  
+        case OP_VSPACE:
+        SET_BIT(0x0A); 
+        SET_BIT(0x0B); 
+        SET_BIT(0x0C); 
+        SET_BIT(0x0D); 
+        SET_BIT(0x85); 
+        if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */ 
+        break;  
+ 
         case OP_NOT_DIGIT:
         for (c = 0; c < 32; c++)
           start_bits[c] |= ~cd->cbits[c+cbit_digit];
