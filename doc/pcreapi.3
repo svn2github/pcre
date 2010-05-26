@@ -132,6 +132,12 @@ an application that uses PCRE. The header file defines the macros PCRE_MAJOR
 and PCRE_MINOR to contain the major and minor release numbers for the library.
 Applications can use these to include support for different releases of PCRE.
 .P
+In a Windows environment, if you want to statically link an application program
+against a non-dll \fBpcre.a\fP file, you must define PCRE_STATIC before
+including \fBpcre.h\fP, because otherwise the \fBpcre_malloc()\fP and
+\fBpcre_free()\fP exported functions will be declared
+\fB__declspec(dllimport)\fP, with unwanted results.
+.P
 The functions \fBpcre_compile()\fP, \fBpcre_compile2()\fP, \fBpcre_study()\fP,
 and \fBpcre_exec()\fP are used for compiling and matching regular expressions
 in a Perl-compatible manner. A sample program that demonstrates the simplest
@@ -2121,6 +2127,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 16 May 2010
+Last updated: 26 May 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
