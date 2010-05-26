@@ -134,8 +134,8 @@ Applications can use these to include support for different releases of PCRE.
 .P
 In a Windows environment, if you want to statically link an application program
 against a non-dll \fBpcre.a\fP file, you must define PCRE_STATIC before
-including \fBpcre.h\fP, because otherwise the \fBpcre_malloc()\fP and
-\fBpcre_free()\fP exported functions will be declared
+including \fBpcre.h\fP or \fBpcrecpp.h\fP, because otherwise the
+\fBpcre_malloc()\fP and \fBpcre_free()\fP exported functions will be declared
 \fB__declspec(dllimport)\fP, with unwanted results.
 .P
 The functions \fBpcre_compile()\fP, \fBpcre_compile2()\fP, \fBpcre_study()\fP,
