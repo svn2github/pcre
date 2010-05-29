@@ -57,6 +57,8 @@ Version 8.10 03 May-2010
     
 14. pcre_study() now recognizes \h, \v, and \R when constructing a bit map of 
     possible starting bytes for non-anchored patterns. 
+    
+15. The "auto-possessify" feature of pcre_compile() now recognizes \R. 
  
 
 

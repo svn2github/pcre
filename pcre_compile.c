@@ -2544,6 +2544,9 @@ if (next >= 0) switch(op_code)
   else
 #endif  /* SUPPORT_UTF8 */
   return (item == cd->fcc[next]);  /* Non-UTF-8 mode */
+  
+  /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set. 
+  When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */ 
 
   case OP_DIGIT:
   return next > 127 || (cd->ctypes[next] & ctype_digit) == 0;
@@ -2586,11 +2589,12 @@ if (next >= 0) switch(op_code)
     case 0x202f:
     case 0x205f:
     case 0x3000:
-    return op_code != OP_HSPACE;
+    return op_code == OP_NOT_HSPACE;
     default:
-    return op_code == OP_HSPACE;
+    return op_code != OP_NOT_HSPACE;
     }
 
+  case OP_ANYNL:
   case OP_VSPACE:
   case OP_NOT_VSPACE:
   switch(next)
@@ -2602,9 +2606,9 @@ if (next >= 0) switch(op_code)
     case 0x85:
     case 0x2028:
     case 0x2029:
-    return op_code != OP_VSPACE;
+    return op_code == OP_NOT_VSPACE;
     default:
-    return op_code == OP_VSPACE;
+    return op_code != OP_NOT_VSPACE;
     }
 
   default:
@@ -2612,7 +2616,10 @@ if (next >= 0) switch(op_code)
   }
 
 
-/* Handle the case when the next item is \d, \s, etc. */
+/* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP 
+is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are 
+generated only when PCRE_UCP is *not* set, that is, when only ASCII 
+characteristics are recognized. */
 
 switch(op_code)
   {
@@ -2691,32 +2698,35 @@ switch(op_code)
 
   case OP_DIGIT:
   return next == -ESC_D || next == -ESC_s || next == -ESC_W ||
-         next == -ESC_h || next == -ESC_v;
+         next == -ESC_h || next == -ESC_v || next == -ESC_R;
 
   case OP_NOT_DIGIT:
   return next == -ESC_d;
 
   case OP_WHITESPACE:
-  return next == -ESC_S || next == -ESC_d || next == -ESC_w;
+  return next == -ESC_S || next == -ESC_d || next == -ESC_w || next == -ESC_R;
 
   case OP_NOT_WHITESPACE:
   return next == -ESC_s || next == -ESC_h || next == -ESC_v;
 
   case OP_HSPACE:
-  return next == -ESC_S || next == -ESC_H || next == -ESC_d || next == -ESC_w;
+  return next == -ESC_S || next == -ESC_H || next == -ESC_d || 
+         next == -ESC_w || next == -ESC_v || next == -ESC_R;
 
   case OP_NOT_HSPACE:
   return next == -ESC_h;
 
   /* Can't have \S in here because VT matches \S (Perl anomaly) */
+  case OP_ANYNL: 
   case OP_VSPACE:
   return next == -ESC_V || next == -ESC_d || next == -ESC_w;
 
   case OP_NOT_VSPACE:
-  return next == -ESC_v;
+  return next == -ESC_v || next == -ESC_R;
 
   case OP_WORDCHAR:
-  return next == -ESC_W || next == -ESC_s || next == -ESC_h || next == -ESC_v;
+  return next == -ESC_W || next == -ESC_s || next == -ESC_h || 
+         next == -ESC_v || next == -ESC_R;
 
   case OP_NOT_WORDCHAR:
   return next == -ESC_w || next == -ESC_d;

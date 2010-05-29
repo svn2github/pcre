@@ -3481,4 +3481,14 @@ with \Y. ---/
   ** Failers
   A\r\nB    
 
+/\R+b/BZ
+
+/\R+\n/BZ
+
+/\R+\d/BZ
+
+/\d*\R/BZ
+
+/\s*\R/BZ
+
 /-- End of testinput2 --/
