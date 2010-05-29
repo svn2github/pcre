@@ -255,7 +255,8 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM21,  RM22, RM23, RM24, RM25, RM26, RM27, RM28, RM29, RM30,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
-       RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58 };
+       RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
+       RM61,  RM62 };
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -314,9 +315,9 @@ argument of match(), which never changes. */
 
 #define RRETURN(ra)\
   {\
-  heapframe *newframe = frame;\
-  frame = newframe->Xprevframe;\
-  (pcre_stack_free)(newframe);\
+  heapframe *oldframe = frame;\
+  frame = oldframe->Xprevframe;\
+  (pcre_stack_free)(oldframe);\
   if (frame != NULL)\
     {\
     rrc = ra;\
@@ -1719,29 +1720,29 @@ for (;;)
       if (utf8)
         {
         /* Get status of previous character */
-          
+
         if (eptr == md->start_subject) prev_is_word = FALSE; else
           {
           USPTR lastptr = eptr - 1;
           while((*lastptr & 0xc0) == 0x80) lastptr--;
           if (lastptr < md->start_used_ptr) md->start_used_ptr = lastptr;
           GETCHAR(c, lastptr);
-#ifdef SUPPORT_UCP          
+#ifdef SUPPORT_UCP
           if (md->use_ucp)
             {
             if (c == '_') prev_is_word = TRUE; else
-              { 
+              {
               int cat = UCD_CATEGORY(c);
               prev_is_word = (cat == ucp_L || cat == ucp_N);
-              } 
-            }  
-          else 
-#endif          
+              }
+            }
+          else
+#endif
           prev_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
           }
-          
+
         /* Get status of next character */
-         
+
         if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
@@ -1750,67 +1751,67 @@ for (;;)
         else
           {
           GETCHAR(c, eptr);
-#ifdef SUPPORT_UCP          
+#ifdef SUPPORT_UCP
           if (md->use_ucp)
             {
             if (c == '_') cur_is_word = TRUE; else
-              { 
+              {
               int cat = UCD_CATEGORY(c);
               cur_is_word = (cat == ucp_L || cat == ucp_N);
-              } 
-            }  
-          else 
-#endif          
+              }
+            }
+          else
+#endif
           cur_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
           }
         }
       else
 #endif
 
-      /* Not in UTF-8 mode, but we may still have PCRE_UCP set, and for 
+      /* Not in UTF-8 mode, but we may still have PCRE_UCP set, and for
       consistency with the behaviour of \w we do use it in this case. */
 
         {
         /* Get status of previous character */
-          
+
         if (eptr == md->start_subject) prev_is_word = FALSE; else
           {
           if (eptr <= md->start_used_ptr) md->start_used_ptr = eptr - 1;
-#ifdef SUPPORT_UCP          
+#ifdef SUPPORT_UCP
           if (md->use_ucp)
             {
-            c = eptr[-1]; 
+            c = eptr[-1];
             if (c == '_') prev_is_word = TRUE; else
-              { 
+              {
               int cat = UCD_CATEGORY(c);
               prev_is_word = (cat == ucp_L || cat == ucp_N);
-              } 
-            }  
-          else 
-#endif          
+              }
+            }
+          else
+#endif
           prev_is_word = ((md->ctypes[eptr[-1]] & ctype_word) != 0);
           }
-          
+
         /* Get status of next character */
-         
+
         if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
           cur_is_word = FALSE;
           }
-        else 
-#ifdef SUPPORT_UCP          
+        else
+#ifdef SUPPORT_UCP
         if (md->use_ucp)
           {
-          c = *eptr; 
+          c = *eptr;
           if (c == '_') cur_is_word = TRUE; else
-            { 
+            {
             int cat = UCD_CATEGORY(c);
             cur_is_word = (cat == ucp_L || cat == ucp_N);
-            } 
-          }  
-        else 
-#endif          
+            }
+          }
+        else
+#endif
         cur_is_word = ((md->ctypes[*eptr] & ctype_word) != 0);
         }
 
@@ -2134,37 +2135,37 @@ for (;;)
         if ((ecode[2] != prop->script) == (op == OP_PROP))
           MRRETURN(MATCH_NOMATCH);
         break;
-        
+
         /* These are specials */
-        
+
         case PT_ALNUM:
         if ((_pcre_ucp_gentype[prop->chartype] == ucp_L ||
              _pcre_ucp_gentype[prop->chartype] == ucp_N) == (op == OP_NOTPROP))
           MRRETURN(MATCH_NOMATCH);
-        break;   
- 
+        break;
+
         case PT_SPACE:    /* Perl space */
         if ((_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
              c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
                == (op == OP_NOTPROP))
           MRRETURN(MATCH_NOMATCH);
-        break;   
- 
+        break;
+
         case PT_PXSPACE:  /* POSIX space */
         if ((_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
-             c == CHAR_HT || c == CHAR_NL || c == CHAR_VT || 
+             c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
              c == CHAR_FF || c == CHAR_CR)
                == (op == OP_NOTPROP))
           MRRETURN(MATCH_NOMATCH);
-        break;   
+        break;
 
-        case PT_WORD:   
+        case PT_WORD:
         if ((_pcre_ucp_gentype[prop->chartype] == ucp_L ||
-             _pcre_ucp_gentype[prop->chartype] == ucp_N || 
+             _pcre_ucp_gentype[prop->chartype] == ucp_N ||
              c == CHAR_UNDERSCORE) == (op == OP_NOTPROP))
           MRRETURN(MATCH_NOMATCH);
-        break;   
-        
+        break;
+
         /* This should never occur */
 
         default:
@@ -3582,7 +3583,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
-          
+
           case PT_ALNUM:
           for (i = 1; i <= min; i++)
             {
@@ -3592,13 +3593,13 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_L || prop_category == ucp_N) 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_L || prop_category == ucp_N)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
-          
+
           case PT_SPACE:    /* Perl space */
           for (i = 1; i <= min; i++)
             {
@@ -3608,14 +3609,14 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL || 
-                 c == CHAR_FF || c == CHAR_CR) 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+                 c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
-          
+
           case PT_PXSPACE:  /* POSIX space */
           for (i = 1; i <= min; i++)
             {
@@ -3625,15 +3626,15 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL || 
-                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR) 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
-          
-          case PT_WORD:   
+
+          case PT_WORD:
           for (i = 1; i <= min; i++)
             {
             if (eptr >= md->end_subject)
@@ -3642,14 +3643,14 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
+            prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_L || prop_category == ucp_N ||
-                 c == CHAR_UNDERSCORE) 
+                 c == CHAR_UNDERSCORE)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
-          
+
           /* This should not occur */
 
           default:
@@ -4294,7 +4295,7 @@ for (;;)
           case PT_ALNUM:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
+            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM59);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4303,17 +4304,17 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINC(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_L || prop_category == ucp_N) 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_L || prop_category == ucp_N)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
-          
-          case PT_SPACE:    /* Perl space */ 
+
+          case PT_SPACE:    /* Perl space */
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
+            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM60);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4322,18 +4323,18 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINC(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL || 
-                 c == CHAR_FF || c == CHAR_CR) 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+                 c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
-           
+
           case PT_PXSPACE:  /* POSIX space */
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
+            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM61);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4342,18 +4343,18 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINC(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL || 
-                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR) 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
-          
-          case PT_WORD: 
+
+          case PT_WORD:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
+            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM62);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4362,17 +4363,17 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINC(c, eptr);
-            prop_category = UCD_CATEGORY(c); 
-            if ((prop_category == ucp_L || 
+            prop_category = UCD_CATEGORY(c);
+            if ((prop_category == ucp_L ||
                  prop_category == ucp_N ||
-                 c == CHAR_UNDERSCORE) 
+                 c == CHAR_UNDERSCORE)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
 
           /* This should never occur */
-           
+
           default:
           RRETURN(PCRE_ERROR_INTERNAL);
           }
@@ -4794,7 +4795,7 @@ for (;;)
             eptr+= len;
             }
           break;
-          
+
           case PT_ALNUM:
           for (i = min; i < max; i++)
             {
@@ -4806,7 +4807,7 @@ for (;;)
               }
             GETCHARLEN(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L || prop_category == ucp_N) 
+            if ((prop_category == ucp_L || prop_category == ucp_N)
                  == prop_fail_result)
               break;
             eptr+= len;
@@ -4825,7 +4826,7 @@ for (;;)
             GETCHARLEN(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_FF || c == CHAR_CR) 
+                 c == CHAR_FF || c == CHAR_CR)
                  == prop_fail_result)
               break;
             eptr+= len;
@@ -4844,7 +4845,7 @@ for (;;)
             GETCHARLEN(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR) 
+                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
                  == prop_fail_result)
               break;
             eptr+= len;
@@ -5462,6 +5463,7 @@ switch (frame->Xwhere)
   LBL(32) LBL(34) LBL(42) LBL(46)
 #ifdef SUPPORT_UCP
   LBL(36) LBL(37) LBL(38) LBL(39) LBL(40) LBL(41) LBL(44) LBL(45)
+  LBL(59) LBL(60) LBL(61) LBL(62)
 #endif  /* SUPPORT_UCP */
 #endif  /* SUPPORT_UTF8 */
   default:
