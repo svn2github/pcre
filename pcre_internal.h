@@ -475,7 +475,8 @@ know we are in UTF-8 mode. */
       } \
     }
 
-/* Get the next character, testing for UTF-8 mode, and advancing the pointer */
+/* Get the next character, testing for UTF-8 mode, and advancing the pointer.
+This is called when we don't know if we are in UTF-8 mode. */
 
 #define GETCHARINCTEST(c, eptr) \
   c = *eptr++; \
@@ -512,7 +513,7 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
 
 /* Get the next UTF-8 character, testing for UTF-8 mode, not advancing the
 pointer, incrementing length if there are extra bytes. This is called when we
-know we are in UTF-8 mode. */
+do not know if we are in UTF-8 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
   c = *eptr; \

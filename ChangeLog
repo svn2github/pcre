@@ -59,6 +59,11 @@ Version 8.10 03 May-2010
     possible starting bytes for non-anchored patterns. 
     
 15. The "auto-possessify" feature of pcre_compile() now recognizes \R. 
+
+16. If a repeated Unicode property match (e.g. \p{Lu}*) was used with non-UTF-8
+    input, it could crash or give wrong results if characters with values 
+    greater than 0xc0 were present in the subject string. (Detail: it assumed 
+    UTF-8 input when processing these items.)
  
 
 

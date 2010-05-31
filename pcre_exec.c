@@ -4213,7 +4213,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             if (prop_fail_result) MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4229,7 +4229,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
                  prop_chartype == ucp_Ll ||
@@ -4249,7 +4249,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -4267,7 +4267,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -4285,7 +4285,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -4303,7 +4303,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_L || prop_category == ucp_N)
                    == prop_fail_result)
@@ -4322,7 +4322,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_FF || c == CHAR_CR)
@@ -4342,7 +4342,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
@@ -4362,7 +4362,7 @@ for (;;)
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
-            GETCHARINC(c, eptr);
+            GETCHARINCTEST(c, eptr);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_L ||
                  prop_category == ucp_N ||
@@ -4720,7 +4720,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             if (prop_fail_result) break;
             eptr+= len;
             }
@@ -4735,7 +4735,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
                  prop_chartype == ucp_Ll ||
@@ -4754,7 +4754,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
               break;
@@ -4771,7 +4771,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
               break;
@@ -4788,7 +4788,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
               break;
@@ -4805,7 +4805,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_L || prop_category == ucp_N)
                  == prop_fail_result)
@@ -4823,7 +4823,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_FF || c == CHAR_CR)
@@ -4842,7 +4842,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
@@ -4861,7 +4861,7 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            GETCHARLEN(c, eptr, len);
+            GETCHARLENTEST(c, eptr, len);
             prop_category = UCD_CATEGORY(c);
             if ((prop_category == ucp_L || prop_category == ucp_N ||
                  c == CHAR_UNDERSCORE) == prop_fail_result)
