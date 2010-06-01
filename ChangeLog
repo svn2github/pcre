@@ -64,6 +64,9 @@ Version 8.10 03 May-2010
     input, it could crash or give wrong results if characters with values 
     greater than 0xc0 were present in the subject string. (Detail: it assumed 
     UTF-8 input when processing these items.)
+    
+17. Added a lot of (int) casts to avoid compiler warnings in systems where
+    size_t is 64-bit.
  
 
 

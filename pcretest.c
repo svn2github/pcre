@@ -221,7 +221,7 @@ uschar *here = start;
 
 for (;;)
   {
-  int rlen = buffer_size - (here - buffer);
+  int rlen = (int)(buffer_size - (here - buffer));
 
   if (rlen > 1000)
     {
@@ -1163,7 +1163,7 @@ while (!done)
     }
 
   pp = p;
-  poffset = p - buffer;
+  poffset = (int)(p - buffer);
 
   for(;;)
     {
@@ -2080,7 +2080,7 @@ while (!done)
       *q++ = c;
       }
     *q = 0;
-    len = q - dbuffer;
+    len = (int)(q - dbuffer);
 
     /* Move the data to the end of the buffer so that a read over the end of
     the buffer will be seen by valgrind, even if it doesn't cause a crash. If

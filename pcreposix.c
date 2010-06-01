@@ -338,13 +338,13 @@ if ((eflags & REG_STARTEND) != 0)
 else
   {
   so = 0;
-  eo = strlen(string);
+  eo = (int)strlen(string);
   }
 
 rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string + so, (eo - so),
-  0, options, ovector, nmatch * 3);
+  0, options, ovector, (int)(nmatch * 3));
 
-if (rc == 0) rc = nmatch;    /* All captured slots were filled in */
+if (rc == 0) rc = (int)nmatch;    /* All captured slots were filled in */
 
 /* Successful match */
 

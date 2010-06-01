@@ -794,7 +794,8 @@ for (;;)
       save_capture_last = md->capture_last;
 
       DPRINTF(("saving %d %d %d\n", save_offset1, save_offset2, save_offset3));
-      md->offset_vector[md->offset_end - number] = eptr - md->start_subject;
+      md->offset_vector[md->offset_end - number] = 
+        (int)(eptr - md->start_subject);
 
       flags = (op == OP_SCBRA)? match_cbegroup : 0;
       do
@@ -889,9 +890,9 @@ for (;;)
         cb.callout_number   = ecode[LINK_SIZE+2];
         cb.offset_vector    = md->offset_vector;
         cb.subject          = (PCRE_SPTR)md->start_subject;
-        cb.subject_length   = md->end_subject - md->start_subject;
-        cb.start_match      = mstart - md->start_subject;
-        cb.current_position = eptr - md->start_subject;
+        cb.subject_length   = (int)(md->end_subject - md->start_subject);
+        cb.start_match      = (int)(mstart - md->start_subject);
+        cb.current_position = (int)(eptr - md->start_subject);
         cb.pattern_position = GET(ecode, LINK_SIZE + 3);
         cb.next_item_length = GET(ecode, 3 + 2*LINK_SIZE);
         cb.capture_top      = offset_top/2;
@@ -1117,7 +1118,7 @@ for (;;)
       {
       md->offset_vector[offset] =
         md->offset_vector[md->offset_end - number];
-      md->offset_vector[offset+1] = eptr - md->start_subject;
+      md->offset_vector[offset+1] = (int)(eptr - md->start_subject);
       if (offset_top <= offset) offset_top = offset + 2;
       }
     ecode += 3;
@@ -1280,9 +1281,9 @@ for (;;)
       cb.callout_number   = ecode[1];
       cb.offset_vector    = md->offset_vector;
       cb.subject          = (PCRE_SPTR)md->start_subject;
-      cb.subject_length   = md->end_subject - md->start_subject;
-      cb.start_match      = mstart - md->start_subject;
-      cb.current_position = eptr - md->start_subject;
+      cb.subject_length   = (int)(md->end_subject - md->start_subject);
+      cb.start_match      = (int)(mstart - md->start_subject);
+      cb.current_position = (int)(eptr - md->start_subject);
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
       cb.capture_top      = offset_top/2;
@@ -1559,7 +1560,7 @@ for (;;)
         {
         md->offset_vector[offset] =
           md->offset_vector[md->offset_end - number];
-        md->offset_vector[offset+1] = eptr - md->start_subject;
+        md->offset_vector[offset+1] = (int)(eptr - md->start_subject);
         if (offset_top <= offset) offset_top = offset + 2;
         }
 
@@ -2233,7 +2234,7 @@ for (;;)
       referenced subpattern. */
 
       if (offset >= offset_top || md->offset_vector[offset] < 0)
-        length = (md->jscript_compat)? 0 : md->end_subject - eptr + 1;
+        length = (md->jscript_compat)? 0 : (int)(md->end_subject - eptr + 1);
       else
         length = md->offset_vector[offset+1] - md->offset_vector[offset];
 
@@ -6176,8 +6177,8 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
 
   if (offsetcount < 2) rc = 0; else
     {
-    offsets[0] = md->start_match_ptr - md->start_subject;
-    offsets[1] = md->end_match_ptr - md->start_subject;
+    offsets[0] = (int)(md->start_match_ptr - md->start_subject);
+    offsets[1] = (int)(md->end_match_ptr - md->start_subject);
     }
 
   DPRINTF((">>>> returning %d\n", rc));
@@ -6209,8 +6210,8 @@ if (start_partial != NULL)
   md->mark = NULL;
   if (offsetcount > 1)
     {
-    offsets[0] = start_partial - (USPTR)subject;
-    offsets[1] = end_subject - (USPTR)subject;
+    offsets[0] = (int)(start_partial - (USPTR)subject);
+    offsets[1] = (int)(end_subject - (USPTR)subject);
     }
   rc = PCRE_ERROR_PARTIAL;
   }

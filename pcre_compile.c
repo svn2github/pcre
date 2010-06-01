@@ -2316,8 +2316,8 @@ auto_callout(uschar *code, const uschar *ptr, compile_data *cd)
 {
 *code++ = OP_CALLOUT;
 *code++ = 255;
-PUT(code, 0, ptr - cd->start_pattern);  /* Pattern offset */
-PUT(code, LINK_SIZE, 0);                /* Default length */
+PUT(code, 0, (int)(ptr - cd->start_pattern));  /* Pattern offset */
+PUT(code, LINK_SIZE, 0);                       /* Default length */
 return code + 2*LINK_SIZE;
 }
 
@@ -2342,7 +2342,7 @@ Returns:             nothing
 static void
 complete_callout(uschar *previous_callout, const uschar *ptr, compile_data *cd)
 {
-int length = ptr - cd->start_pattern - GET(previous_callout, 2);
+int length = (int)(ptr - cd->start_pattern - GET(previous_callout, 2));
 PUT(previous_callout, 2 + LINK_SIZE, length);
 }
 
@@ -2901,7 +2901,7 @@ for (;; ptr++)
       goto FAILED;
       }
 
-    *lengthptr += code - last_code;
+    *lengthptr += (int)(code - last_code);
     DPRINTF(("length=%d added %d c=%c\n", *lengthptr, code - last_code, c));
 
     /* If "previous" is set and it is not at the start of the work space, move
@@ -3019,7 +3019,7 @@ for (;; ptr++)
         *errorcodeptr = ERR20;
         goto FAILED;
         }
-      *lengthptr += code - last_code;   /* To include callout length */
+      *lengthptr += (int)(code - last_code);   /* To include callout length */
       DPRINTF((">> end branch\n"));
       }
     return TRUE;
@@ -3224,7 +3224,7 @@ for (;; ptr++)
           ptr++;
           }
 
-        posix_class = check_posix_name(ptr, tempptr - ptr);
+        posix_class = check_posix_name(ptr, (int)(tempptr - ptr));
         if (posix_class < 0)
           {
           *errorcodeptr = ERR30;
@@ -4254,7 +4254,7 @@ for (;; ptr++)
       {
       register int i;
       int ketoffset = 0;
-      int len = code - previous;
+      int len = (int)(code - previous);
       uschar *bralink = NULL;
 
       /* Repeating a DEFINE group is pointless */
@@ -4275,7 +4275,7 @@ for (;; ptr++)
         {
         register uschar *ket = previous;
         do ket += GET(ket, 1); while (*ket != OP_KET);
-        ketoffset = code - ket;
+        ketoffset = (int)(code - ket);
         }
 
       /* The case of a zero minimum is special because of the need to stick
@@ -4343,7 +4343,7 @@ for (;; ptr++)
           /* We chain together the bracket offset fields that have to be
           filled in later when the ends of the brackets are reached. */
 
-          offset = (bralink == NULL)? 0 : previous - bralink;
+          offset = (bralink == NULL)? 0 : (int)(previous - bralink);
           bralink = previous;
           PUTINC(previous, 0, offset);
           }
@@ -4452,7 +4452,7 @@ for (;; ptr++)
             {
             int offset;
             *code++ = OP_BRA;
-            offset = (bralink == NULL)? 0 : code - bralink;
+            offset = (bralink == NULL)? 0 : (int)(code - bralink);
             bralink = code;
             PUTINC(code, 0, offset);
             }
@@ -4473,7 +4473,7 @@ for (;; ptr++)
         while (bralink != NULL)
           {
           int oldlinkoffset;
-          int offset = code - bralink + 1;
+          int offset = (int)(code - bralink + 1);
           uschar *bra = code - offset;
           oldlinkoffset = GET(bra, 1);
           bralink = (oldlinkoffset == 0)? NULL : bralink - oldlinkoffset;
@@ -4561,7 +4561,7 @@ for (;; ptr++)
 #endif
         }
 
-      len = code - tempcode;
+      len = (int)(code - tempcode);
       if (len > 0) switch (*tempcode)
         {
         case OP_STAR:  *tempcode = OP_POSSTAR; break;
@@ -4630,7 +4630,7 @@ for (;; ptr++)
       const uschar *arg = NULL;
       previous = NULL;
       while ((cd->ctypes[*++ptr] & ctype_letter) != 0) {};
-      namelen = ptr - name;
+      namelen = (int)(ptr - name);
 
       if (*ptr == CHAR_COLON)
         {
@@ -4818,7 +4818,7 @@ for (;; ptr++)
               recno * 10 + *ptr - CHAR_0 : -1;
           ptr++;
           }
-        namelen = ptr - name;
+        namelen = (int)(ptr - name);
 
         if ((terminator > 0 && *ptr++ != terminator) ||
             *ptr++ != CHAR_RIGHT_PARENTHESIS)
@@ -5014,8 +5014,8 @@ for (;; ptr++)
             goto FAILED;
             }
           *code++ = n;
-          PUT(code, 0, ptr - cd->start_pattern + 1);  /* Pattern offset */
-          PUT(code, LINK_SIZE, 0);                    /* Default length */
+          PUT(code, 0, (int)(ptr - cd->start_pattern + 1)); /* Pattern offset */
+          PUT(code, LINK_SIZE, 0);                          /* Default length */
           code += 2 * LINK_SIZE;
           }
         previous = NULL;
@@ -5048,7 +5048,7 @@ for (;; ptr++)
           name = ++ptr;
 
           while ((cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
-          namelen = ptr - name;
+          namelen = (int)(ptr - name);
 
           /* In the pre-compile phase, just do a syntax check. */
 
@@ -5178,7 +5178,7 @@ for (;; ptr++)
         NAMED_REF_OR_RECURSE:
         name = ++ptr;
         while ((cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
-        namelen = ptr - name;
+        namelen = (int)(ptr - name);
 
         /* In the pre-compile phase, do a syntax check and set a dummy
         reference number. */
@@ -5347,7 +5347,7 @@ for (;; ptr++)
               of the group. */
 
               called = cd->start_code + recno;
-              PUTINC(cd->hwm, 0, code + 2 + LINK_SIZE - cd->start_code);
+              PUTINC(cd->hwm, 0, (int)(code + 2 + LINK_SIZE - cd->start_code));
               }
 
             /* If not a forward reference, and the subpattern is still open,
@@ -5371,7 +5371,7 @@ for (;; ptr++)
           code += 1 + LINK_SIZE;
 
           *code = OP_RECURSE;
-          PUT(code, 1, called - cd->start_code);
+          PUT(code, 1, (int)(called - cd->start_code));
           code += 1 + LINK_SIZE;
 
           *code = OP_KET;
@@ -6189,7 +6189,7 @@ for (;;)
     {
     if (lengthptr == NULL)
       {
-      int branch_length = code - last_branch;
+      int branch_length = (int)(code - last_branch);
       do
         {
         int prev_length = GET(last_branch, 1);
@@ -6203,7 +6203,7 @@ for (;;)
     /* Fill in the ket */
 
     *code = OP_KET;
-    PUT(code, 1, code - start_bracket);
+    PUT(code, 1, (int)(code - start_bracket));
     code += 1 + LINK_SIZE;
 
     /* If it was a capturing subpattern, check to see if it contained any
@@ -6218,9 +6218,9 @@ for (;;)
           code - start_bracket);
         *start_bracket = OP_ONCE;
         code += 1 + LINK_SIZE;
-        PUT(start_bracket, 1, code - start_bracket);
+        PUT(start_bracket, 1, (int)(code - start_bracket));
         *code = OP_KET;
-        PUT(code, 1, code - start_bracket);
+        PUT(code, 1, (int)(code - start_bracket));
         code += 1 + LINK_SIZE;
         length += 2 + 2*LINK_SIZE;
         }
@@ -6275,7 +6275,7 @@ for (;;)
   else
     {
     *code = OP_ALT;
-    PUT(code, 1, code - last_branch);
+    PUT(code, 1, (int)(code - last_branch));
     bc.current_branch = last_branch = code;
     code += 1 + LINK_SIZE;
     }
@@ -6847,7 +6847,7 @@ regex compiled on a system with 4-byte pointers is run on another with 8-byte
 pointers. */
 
 re->magic_number = MAGIC_NUMBER;
-re->size = size;
+re->size = (int)size;
 re->options = cd->external_options;
 re->flags = cd->external_flags;
 re->dummy1 = 0;
@@ -6918,7 +6918,7 @@ while (errorcode == 0 && cd->hwm > cworkspace)
   recno = GET(codestart, offset);
   groupptr = _pcre_find_bracket(codestart, utf8, recno);
   if (groupptr == NULL) errorcode = ERR53;
-    else PUT(((uschar *)codestart), offset, groupptr - codestart);
+    else PUT(((uschar *)codestart), offset, (int)(groupptr - codestart));
   }
 
 /* Give an error if there's back reference to a non-existent capturing
@@ -6973,7 +6973,7 @@ if (errorcode != 0)
   {
   (pcre_free)(re);
   PCRE_EARLY_ERROR_RETURN:
-  *erroroffset = ptr - (const uschar *)pattern;
+  *erroroffset = (int)(ptr - (const uschar *)pattern);
   PCRE_EARLY_ERROR_RETURN2:
   *errorptr = find_error_text(errorcode);
   if (errorcodeptr != NULL) *errorcodeptr = errorcode;

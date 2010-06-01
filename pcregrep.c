@@ -909,7 +909,7 @@ match_patterns(char *matchptr, size_t length, int *offsets, int *mrc)
 int i;
 for (i = 0; i < pattern_count; i++)
   {
-  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0,
+  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, (int)length, 0,
     PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
   if (*mrc >= 0) return TRUE;
   if (*mrc == PCRE_ERROR_NOMATCH) continue;
@@ -1365,7 +1365,7 @@ while (ptr < endptr)
   offset to the current line is maintained in filepos. */
 
   ptr += linelength + endlinelength;
-  filepos += linelength + endlinelength;
+  filepos += (int)(linelength + endlinelength);
   linenumber++;
   
   /* If input is line buffered, and the buffer is not yet full, read another 
@@ -1531,7 +1531,7 @@ if ((sep = isdirectory(pathname)) != 0)
       {
       int frc, nflen;
       sprintf(buffer, "%.512s%c%.128s", pathname, sep, nextfile);
-      nflen = strlen(nextfile);
+      nflen = (int)(strlen(nextfile));
 
       if (isdirectory(buffer))
         {
@@ -1575,7 +1575,7 @@ skipping was not requested. The scan proceeds. If this is the first and only
 argument at top level, we don't show the file name, unless we are only showing
 the file name, or the filename was forced (-H). */
 
-pathlen = strlen(pathname);
+pathlen = (int)(strlen(pathname));
 
 /* Open using zlib if it is supported and the file name ends with .gz. */
 
@@ -2028,8 +2028,9 @@ for (i = 1; i < argc; i++)
           }
         else                 /* Special case xxx=data */
           {
-          int oplen = equals - op->long_name;
-          int arglen = (argequals == NULL)? (int)strlen(arg) : argequals - arg;
+          int oplen = (int)(equals - op->long_name);
+          int arglen = (argequals == NULL)? 
+            (int)strlen(arg) : (int)(argequals - arg);
           if (oplen == arglen && strncmp(arg, op->long_name, oplen) == 0)
             {
             option_data = arg + arglen;
@@ -2050,10 +2051,10 @@ for (i = 1; i < argc; i++)
         char buff1[24];
         char buff2[24];
 
-        int baselen = opbra - op->long_name;
-        int fulllen = strchr(op->long_name, ')') - op->long_name + 1;
+        int baselen = (int)(opbra - op->long_name);
+        int fulllen = (int)(strchr(op->long_name, ')') - op->long_name + 1);
         int arglen = (argequals == NULL || equals == NULL)?
-          (int)strlen(arg) : argequals - arg;
+          (int)strlen(arg) : (int)(argequals - arg);
 
         sprintf(buff1, "%.*s", baselen, op->long_name);
         sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
@@ -2205,7 +2206,7 @@ for (i = 1; i < argc; i++)
         {
         char *equals = strchr(op->long_name, '=');
         int nlen = (equals == NULL)? (int)strlen(op->long_name) :
-          equals - op->long_name;
+          (int)(equals - op->long_name);
         fprintf(stderr, "pcregrep: Malformed number \"%s\" after --%.*s\n",
           option_data, nlen, op->long_name);
         }
