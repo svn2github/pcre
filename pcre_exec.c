@@ -295,6 +295,7 @@ argument of match(), which never changes. */
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
   {\
   heapframe *newframe = (pcre_stack_malloc)(sizeof(heapframe));\
+  if (heapframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
@@ -488,6 +489,7 @@ heap whenever RMATCH() does a "recursion". See the macro definitions above. */
 
 #ifdef NO_RECURSE
 heapframe *frame = (pcre_stack_malloc)(sizeof(heapframe));
+if (frame == NULL) RRETURN(PCRE_ERROR_NOMEMORY);
 frame->Xprevframe = NULL;            /* Marks the top level */
 
 /* Copy in the original argument variables */
@@ -794,7 +796,7 @@ for (;;)
       save_capture_last = md->capture_last;
 
       DPRINTF(("saving %d %d %d\n", save_offset1, save_offset2, save_offset3));
-      md->offset_vector[md->offset_end - number] = 
+      md->offset_vector[md->offset_end - number] =
         (int)(eptr - md->start_subject);
 
       flags = (op == OP_SCBRA)? match_cbegroup : 0;
