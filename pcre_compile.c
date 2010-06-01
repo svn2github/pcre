@@ -2392,6 +2392,69 @@ for (++c; c <= d; c++)
 
 return TRUE;
 }
+
+
+
+/*************************************************
+*        Check a character and a property        *
+*************************************************/
+
+/* This function is called by check_auto_possessive() when a property item
+is adjacent to a fixed character.
+
+Arguments:
+  c            the character
+  ptype        the property type
+  pdata        the data for the type
+  negated      TRUE if it's a negated property (\P or \p{^)
+  
+Returns:       TRUE if auto-possessifying is OK
+*/    
+
+static BOOL
+check_char_prop(int c, int ptype, int pdata, BOOL negated)
+{
+const ucd_record *prop = GET_UCD(c);
+switch(ptype)
+  {
+  case PT_LAMP:
+  return (prop->chartype == ucp_Lu ||
+          prop->chartype == ucp_Ll ||
+          prop->chartype == ucp_Lt) == negated;
+
+  case PT_GC:
+  return (pdata == _pcre_ucp_gentype[prop->chartype]) == negated;
+
+  case PT_PC:
+  return (pdata == prop->chartype) == negated;
+
+  case PT_SC:
+  return (pdata == prop->script) == negated;
+
+  /* These are specials */
+
+  case PT_ALNUM:
+  return (_pcre_ucp_gentype[prop->chartype] == ucp_L ||
+          _pcre_ucp_gentype[prop->chartype] == ucp_N) == negated;
+
+  case PT_SPACE:    /* Perl space */
+  return (_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
+          c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
+          == negated;
+
+  case PT_PXSPACE:  /* POSIX space */
+  return (_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
+          c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
+          c == CHAR_FF || c == CHAR_CR)
+          == negated;
+
+  case PT_WORD:
+  return (_pcre_ucp_gentype[prop->chartype] == ucp_L ||
+          _pcre_ucp_gentype[prop->chartype] == ucp_N ||
+          c == CHAR_UNDERSCORE) == negated;
+  }
+return FALSE;  
+}
 #endif  /* SUPPORT_UCP */
 
 
@@ -2405,10 +2468,8 @@ whether the next thing could possibly match the repeated item. If not, it makes
 sense to automatically possessify the repeated item.
 
 Arguments:
-  op_code       the repeated op code
-  this          data for this item, depends on the opcode
+  previous      pointer to the repeated opcode
   utf8          TRUE in UTF-8 mode
-  utf8_char     used for utf8 character bytes, NULL if not relevant
   ptr           next character in pattern
   options       options bits
   cd            contains pointers to tables etc.
@@ -2417,10 +2478,11 @@ Returns:        TRUE if possessifying is wanted
 */
 
 static BOOL
-check_auto_possessive(int op_code, int item, BOOL utf8, uschar *utf8_char,
-  const uschar *ptr, int options, compile_data *cd)
+check_auto_possessive(const uschar *previous, BOOL utf8, const uschar *ptr, 
+  int options, compile_data *cd)
 {
-int next;
+int c, next;
+int op_code = *previous++;
 
 /* Skip whitespace and comments in extended mode */
 
@@ -2481,33 +2543,30 @@ if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
   strncmp((char *)ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
     return FALSE;
 
-/* Now compare the next item with the previous opcode. If the previous is a
-positive single character match, "item" either contains the character or, if
-"item" is greater than 127 in utf8 mode, the character's bytes are in
-utf8_char. */
-
-
-/* Handle cases when the next item is a character. */
+/* Now compare the next item with the previous opcode. First, handle cases when
+the next item is a character. */
 
 if (next >= 0) switch(op_code)
   {
   case OP_CHAR:
-#ifdef SUPPORT_UTF8
-  if (utf8 && item > 127) { GETCHAR(item, utf8_char); }
+#ifdef SUPPORT_UTF8  
+  GETCHARTEST(c, previous);
 #else
-  (void)(utf8_char);  /* Keep compiler happy by referencing function argument */
-#endif
-  return item != next;
+  c = *previous;
+#endif      
+  return c != next; 
 
   /* For CHARNC (caseless character) we must check the other case. If we have
   Unicode property support, we can use it to test the other case of
   high-valued characters. */
 
   case OP_CHARNC:
-#ifdef SUPPORT_UTF8
-  if (utf8 && item > 127) { GETCHAR(item, utf8_char); }
-#endif
-  if (item == next) return FALSE;
+#ifdef SUPPORT_UTF8  
+  GETCHARTEST(c, previous);
+#else
+  c = *previous;
+#endif      
+  if (c == next) return FALSE;
 #ifdef SUPPORT_UTF8
   if (utf8)
     {
@@ -2518,16 +2577,16 @@ if (next >= 0) switch(op_code)
 #else
     othercase = NOTACHAR;
 #endif
-    return (unsigned int)item != othercase;
+    return (unsigned int)c != othercase;
     }
   else
 #endif  /* SUPPORT_UTF8 */
-  return (item != cd->fcc[next]);  /* Non-UTF-8 mode */
+  return (c != cd->fcc[next]);  /* Non-UTF-8 mode */
 
-  /* For OP_NOT, "item" must be a single-byte character. */
+  /* For OP_NOT, its data is always a single-byte character. */
 
   case OP_NOT:
-  if (item == next) return TRUE;
+  if ((c = *previous) == next) return TRUE;
   if ((options & PCRE_CASELESS) == 0) return FALSE;
 #ifdef SUPPORT_UTF8
   if (utf8)
@@ -2539,11 +2598,11 @@ if (next >= 0) switch(op_code)
 #else
     othercase = NOTACHAR;
 #endif
-    return (unsigned int)item == othercase;
+    return (unsigned int)c == othercase;
     }
   else
 #endif  /* SUPPORT_UTF8 */
-  return (item == cd->fcc[next]);  /* Non-UTF-8 mode */
+  return (c == cd->fcc[next]);  /* Non-UTF-8 mode */
   
   /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set. 
   When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */ 
@@ -2611,6 +2670,14 @@ if (next >= 0) switch(op_code)
     return op_code != OP_NOT_VSPACE;
     }
 
+#ifdef SUPPORT_UCP
+  case OP_PROP:
+  return check_char_prop(next, previous[0], previous[1], FALSE);
+ 
+  case OP_NOTPROP:
+  return check_char_prop(next, previous[0], previous[1], TRUE);
+#endif
+
   default:
   return FALSE;
   }
@@ -2619,38 +2686,41 @@ if (next >= 0) switch(op_code)
 /* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP 
 is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are 
 generated only when PCRE_UCP is *not* set, that is, when only ASCII 
-characteristics are recognized. */
+characteristics are recognized. Similarly, the opcodes OP_DIGIT etc. are 
+replaced by OP_PROP codes when PCRE_UCP is set. */
 
 switch(op_code)
   {
   case OP_CHAR:
   case OP_CHARNC:
-#ifdef SUPPORT_UTF8
-  if (utf8 && item > 127) { GETCHAR(item, utf8_char); }
-#endif
+#ifdef SUPPORT_UTF8  
+  GETCHARTEST(c, previous);
+#else
+  c = *previous;
+#endif      
   switch(-next)
     {
     case ESC_d:
-    return item > 127 || (cd->ctypes[item] & ctype_digit) == 0;
+    return c > 127 || (cd->ctypes[c] & ctype_digit) == 0;
 
     case ESC_D:
-    return item <= 127 && (cd->ctypes[item] & ctype_digit) != 0;
+    return c <= 127 && (cd->ctypes[c] & ctype_digit) != 0;
 
     case ESC_s:
-    return item > 127 || (cd->ctypes[item] & ctype_space) == 0;
+    return c > 127 || (cd->ctypes[c] & ctype_space) == 0;
 
     case ESC_S:
-    return item <= 127 && (cd->ctypes[item] & ctype_space) != 0;
+    return c <= 127 && (cd->ctypes[c] & ctype_space) != 0;
 
     case ESC_w:
-    return item > 127 || (cd->ctypes[item] & ctype_word) == 0;
+    return c > 127 || (cd->ctypes[c] & ctype_word) == 0;
 
     case ESC_W:
-    return item <= 127 && (cd->ctypes[item] & ctype_word) != 0;
+    return c <= 127 && (cd->ctypes[c] & ctype_word) != 0;
 
     case ESC_h:
     case ESC_H:
-    switch(item)
+    switch(c)
       {
       case 0x09:
       case 0x20:
@@ -2678,7 +2748,7 @@ switch(op_code)
 
     case ESC_v:
     case ESC_V:
-    switch(item)
+    switch(c)
       {
       case 0x0a:
       case 0x0b:
@@ -2691,10 +2761,61 @@ switch(op_code)
       default:
       return -next == ESC_v;
       }
+      
+    /* When PCRE_UCP is set, these values get generated for \d etc. Find 
+    their substitutions and process them. The result will always be either 
+    -ESC_p or -ESC_P. Then fall through to process those values. */
+  
+#ifdef SUPPORT_UCP
+    case ESC_du:
+    case ESC_DU:
+    case ESC_wu:
+    case ESC_WU:
+    case ESC_su:
+    case ESC_SU:
+      {
+      int temperrorcode = 0;
+      ptr = substitutes[-next - ESC_DU];
+      next = check_escape(&ptr, &temperrorcode, 0, options, FALSE);
+      if (temperrorcode != 0) return FALSE;
+      ptr++;    /* For compatibility */
+      }
+    /* Fall through */   
+
+    case ESC_p:
+    case ESC_P:
+      {
+      int ptype, pdata, errorcodeptr;
+      BOOL negated;  
+        
+      ptr--;      /* Make ptr point at the p or P */
+      ptype = get_ucp(&ptr, &negated, &pdata, &errorcodeptr);
+      if (ptype < 0) return FALSE;
+      ptr++;      /* Point past the final curly ket */
+      
+      /* If the property item is optional, we have to give up. (When generated
+      from \d etc by PCRE_UCP, this test will have been applied much earlier,
+      to the original \d etc. At this point, ptr will point to a zero byte. */
+      
+      if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
+        strncmp((char *)ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
+          return FALSE;
+      
+      /* Do the property check. */
+      
+      return check_char_prop(c, ptype, pdata, (next == -ESC_P) != negated);
+      } 
+#endif
 
     default:
     return FALSE;
     }
+    
+  /* In principle, support for Unicode properties should be integrated here as 
+  well. It means re-organizing the above code so as to get hold of the property 
+  values before switching on the op-code. However, I wonder how many patterns 
+  combine ASCII \d etc with Unicode properties? (Note that if PCRE_UCP is set, 
+  these op-codes are never generated.) */ 
 
   case OP_DIGIT:
   return next == -ESC_D || next == -ESC_s || next == -ESC_W ||
@@ -3998,8 +4119,7 @@ for (;; ptr++)
 
       if (!possessive_quantifier &&
           repeat_max < 0 &&
-          check_auto_possessive(*previous, c, utf8, utf8_char, ptr + 1,
-            options, cd))
+          check_auto_possessive(previous, utf8, ptr + 1, options, cd))
         {
         repeat_type = 0;    /* Force greedy */
         possessive_quantifier = TRUE;
@@ -4020,7 +4140,7 @@ for (;; ptr++)
       c = previous[1];
       if (!possessive_quantifier &&
           repeat_max < 0 &&
-          check_auto_possessive(OP_NOT, c, utf8, NULL, ptr + 1, options, cd))
+          check_auto_possessive(previous, utf8, ptr + 1, options, cd))
         {
         repeat_type = 0;    /* Force greedy */
         possessive_quantifier = TRUE;
@@ -4044,7 +4164,7 @@ for (;; ptr++)
 
       if (!possessive_quantifier &&
           repeat_max < 0 &&
-          check_auto_possessive(c, 0, utf8, NULL, ptr + 1, options, cd))
+          check_auto_possessive(previous, utf8, ptr + 1, options, cd))
         {
         repeat_type = 0;    /* Force greedy */
         possessive_quantifier = TRUE;

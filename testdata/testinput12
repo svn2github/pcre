@@ -485,4 +485,22 @@ of case for anything other than the ASCII letters. --/
 
 /\p{Xps}*/SI
 
+/\p{Lu}+9\p{Lu}+B\p{Lu}+b/BZ
+
+/\p{^Lu}+9\p{^Lu}+B\p{^Lu}+b/BZ
+
+/\P{Lu}+9\P{Lu}+B\P{Lu}+b/BZ
+
+/\p{Han}+X\p{Greek}+\x{370}/BZ8
+
+/\p{Xan}+!\p{Xan}+A/BZ
+
+/\p{Xsp}+!\p{Xsp}\t/BZ
+
+/\p{Xps}+!\p{Xps}\t/BZ
+
+/\p{Xwd}+!\p{Xwd}_/BZ
+
+/A+\p{N}A+\dB+\p{N}*B+\d*/WBZ
+
 /-- End of testinput12 --/
