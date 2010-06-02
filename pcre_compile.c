@@ -4757,7 +4757,7 @@ for (;; ptr++)
         arg = ++ptr;
         while ((cd->ctypes[*ptr] & (ctype_letter|ctype_digit)) != 0
           || *ptr == '_') ptr++;
-        arglen = ptr - arg;
+        arglen = (int)(ptr - arg);
         }
 
       if (*ptr != CHAR_RIGHT_PARENTHESIS)
