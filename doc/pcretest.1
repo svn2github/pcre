@@ -169,7 +169,7 @@ The following table shows additional modifiers for setting PCRE compile-time
 options that do not correspond to anything in Perl:
 .sp
   \fB/8\fP              PCRE_UTF8
-  \fB/?\fP              PCRE_NO_UTF8_CHECK 
+  \fB/?\fP              PCRE_NO_UTF8_CHECK
   \fB/A\fP              PCRE_ANCHORED
   \fB/C\fP              PCRE_AUTO_CALLOUT
   \fB/E\fP              PCRE_DOLLAR_ENDONLY
@@ -177,7 +177,7 @@ options that do not correspond to anything in Perl:
   \fB/J\fP              PCRE_DUPNAMES
   \fB/N\fP              PCRE_NO_AUTO_CAPTURE
   \fB/U\fP              PCRE_UNGREEDY
-  \fB/W\fP              PCRE_UCP 
+  \fB/W\fP              PCRE_UCP
   \fB/X\fP              PCRE_EXTRA
   \fB/<JS>\fP           PCRE_JAVASCRIPT_COMPAT
   \fB/<cr>\fP           PCRE_NEWLINE_CR
@@ -201,7 +201,7 @@ options are given in the
 .\" HREF
 \fBpcreapi\fP
 .\"
-documentation. 
+documentation.
 .
 .
 .SS "Finding all matches in a string"
@@ -291,14 +291,14 @@ matched.
 .rs
 .sp
 The \fB/P\fP modifier causes \fBpcretest\fP to call PCRE via the POSIX wrapper
-API rather than its native API. When \fB/P\fP is set, the following modifiers 
+API rather than its native API. When \fB/P\fP is set, the following modifiers
 set options for the \fBregcomp()\fP function:
 .sp
   /i    REG_ICASE
   /m    REG_NEWLINE
   /N    REG_NOSUB
   /s    REG_DOTALL     )
-  /U    REG_UNGREEDY   ) These options are not part of   
+  /U    REG_UNGREEDY   ) These options are not part of
   /W    REG_UCP        )   the POSIX standard
   /8    REG_UTF8       )
 .sp

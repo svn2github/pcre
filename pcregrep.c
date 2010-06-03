@@ -104,10 +104,10 @@ enum { DEE_READ, DEE_SKIP };
 
 enum { EL_LF, EL_CR, EL_CRLF, EL_ANY, EL_ANYCRLF };
 
-/* In newer versions of gcc, with FORTIFY_SOURCE set (the default in some 
-environments), a warning is issued if the value of fwrite() is ignored. 
-Unfortunately, casting to (void) does not suppress the warning. To get round 
-this, we use a macro that compiles a fudge. Oddly, this does not also seem to 
+/* In newer versions of gcc, with FORTIFY_SOURCE set (the default in some
+environments), a warning is issued if the value of fwrite() is ignored.
+Unfortunately, casting to (void) does not suppress the warning. To get round
+this, we use a macro that compiles a fudge. Oddly, this does not also seem to
 apply to fprintf(). */
 
 #define FWRITE(a,b,c,d) if (fwrite(a,b,c,d)) {}
@@ -550,20 +550,20 @@ return sys_errlist[n];
 *            Read one line of input              *
 *************************************************/
 
-/* Normally, input is read using fread() into a large buffer, so many lines may 
-be read at once. However, doing this for tty input means that no output appears 
+/* Normally, input is read using fread() into a large buffer, so many lines may
+be read at once. However, doing this for tty input means that no output appears
 until a lot of input has been typed. Instead, tty input is handled line by
 line. We cannot use fgets() for this, because it does not stop at a binary
-zero, and therefore there is no way of telling how many characters it has read, 
+zero, and therefore there is no way of telling how many characters it has read,
 because there may be binary zeros embedded in the data.
 
 Arguments:
   buffer     the buffer to read into
   length     the maximum number of characters to read
   f          the file
-  
+
 Returns:     the number of characters read, zero at end of file
-*/   
+*/
 
 static int
 read_one_line(char *buffer, int length, FILE *f)
@@ -573,9 +573,9 @@ int yield = 0;
 while ((c = fgetc(f)) != EOF)
   {
   buffer[yield++] = c;
-  if (c == '\n' || yield >= length) break; 
-  } 
-return yield;   
+  if (c == '\n' || yield >= length) break;
+  }
+return yield;
 }
 
 
@@ -1017,11 +1017,11 @@ else
   {
   in = (FILE *)handle;
   if (is_file_tty(in)) input_line_buffered = TRUE;
-  bufflength = input_line_buffered? 
+  bufflength = input_line_buffered?
     read_one_line(buffer, 3*MBUFTHIRD, in) :
     fread(buffer, 1, 3*MBUFTHIRD, in);
   }
-  
+
 endptr = buffer + bufflength;
 
 /* Loop while the current pointer is not at the end of the file. For large
@@ -1321,7 +1321,7 @@ while (ptr < endptr)
           FWRITE(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
           fprintf(stdout, "%c[00m", 0x1b);
           }
-        FWRITE(ptr + last_offset, 1, 
+        FWRITE(ptr + last_offset, 1,
           (linelength + endlinelength) - last_offset, stdout);
         }
 
@@ -1367,16 +1367,16 @@ while (ptr < endptr)
   ptr += linelength + endlinelength;
   filepos += (int)(linelength + endlinelength);
   linenumber++;
-  
-  /* If input is line buffered, and the buffer is not yet full, read another 
+
+  /* If input is line buffered, and the buffer is not yet full, read another
   line and add it into the buffer. */
-  
+
   if (input_line_buffered && bufflength < sizeof(buffer))
     {
     int add = read_one_line(ptr, sizeof(buffer) - (ptr - buffer), in);
     bufflength += add;
-    endptr += add; 
-    }   
+    endptr += add;
+    }
 
   /* If we haven't yet reached the end of the file (the buffer is full), and
   the current point is in the top 1/3 of the buffer, slide the buffer down by
@@ -1412,9 +1412,9 @@ while (ptr < endptr)
     else
 #endif
 
-    bufflength = 2*MBUFTHIRD + 
-      (input_line_buffered? 
-       read_one_line(buffer + 2*MBUFTHIRD, MBUFTHIRD, in) : 
+    bufflength = 2*MBUFTHIRD +
+      (input_line_buffered?
+       read_one_line(buffer + 2*MBUFTHIRD, MBUFTHIRD, in) :
        fread(buffer + 2*MBUFTHIRD, 1, MBUFTHIRD, in));
     endptr = buffer + bufflength;
 
@@ -1766,7 +1766,7 @@ switch(letter)
   case N_FOFFSETS: file_offsets = TRUE; break;
   case N_HELP: help(); exit(0);
   case N_LOFFSETS: line_offsets = number = TRUE; break;
-  case N_LBUFFER: line_buffered = TRUE; break; 
+  case N_LBUFFER: line_buffered = TRUE; break;
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
@@ -2029,7 +2029,7 @@ for (i = 1; i < argc; i++)
         else                 /* Special case xxx=data */
           {
           int oplen = (int)(equals - op->long_name);
-          int arglen = (argequals == NULL)? 
+          int arglen = (argequals == NULL)?
             (int)strlen(arg) : (int)(argequals - arg);
           if (oplen == arglen && strncmp(arg, op->long_name, oplen) == 0)
             {
@@ -2289,7 +2289,7 @@ if (colour_option != NULL && strcmp(colour_option, "never") != 0)
     if (cs != NULL) colour_string = cs;
     }
   }
-  
+
 /* Interpret the newline type; the default settings are Unix-like. */
 
 if (strcmp(newline, "cr") == 0 || strcmp(newline, "CR") == 0)

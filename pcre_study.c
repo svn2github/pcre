@@ -441,7 +441,7 @@ for (;;)
 *      Set a bit and maybe its alternate case    *
 *************************************************/
 
-/* Given a character, set its first byte's bit in the table, and also the 
+/* Given a character, set its first byte's bit in the table, and also the
 corresponding bit for the other version of a letter if we are caseless. In
 UTF-8 mode, for characters greater than 127, we can only do the caseless thing
 when Unicode property support is available.
@@ -451,7 +451,7 @@ Arguments:
   p             points to the character
   caseless      the caseless flag
   cd            the block with char table pointers
-  utf8          TRUE for UTF-8 mode 
+  utf8          TRUE for UTF-8 mode
 
 Returns:        pointer after the character
 */
@@ -471,15 +471,15 @@ if (utf8 && c > 127)
 #ifdef SUPPORT_UCP
   if (caseless)
     {
-    uschar buff[8]; 
+    uschar buff[8];
     c = UCD_OTHERCASE(c);
-    (void)_pcre_ord2utf8(c, buff); 
-    SET_BIT(buff[0]); 
-    }  
-#endif 
+    (void)_pcre_ord2utf8(c, buff);
+    SET_BIT(buff[0]);
+    }
+#endif
   return p;
   }
-#endif    
+#endif
 
 /* Not UTF-8 mode, or character is less than 127. */
 
@@ -666,40 +666,40 @@ do
       (void)set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
       try_next = FALSE;
       break;
-      
-      /* Special spacing and line-terminating items. These recognize specific 
-      lists of characters. The difference between VSPACE and ANYNL is that the 
-      latter can match the two-character CRLF sequence, but that is not 
-      relevant for finding the first character, so their code here is 
+
+      /* Special spacing and line-terminating items. These recognize specific
+      lists of characters. The difference between VSPACE and ANYNL is that the
+      latter can match the two-character CRLF sequence, but that is not
+      relevant for finding the first character, so their code here is
       identical. */
-      
+
       case OP_HSPACE:
       SET_BIT(0x09);
       SET_BIT(0x20);
       SET_BIT(0xA0);
       if (utf8)
-        {  
+        {
         SET_BIT(0xE1);  /* For U+1680, U+180E */
         SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
-        SET_BIT(0xE3);  /* For U+3000 */ 
+        SET_BIT(0xE3);  /* For U+3000 */
         }
       try_next = FALSE;
-      break;         
+      break;
 
-      case OP_ANYNL:  
+      case OP_ANYNL:
       case OP_VSPACE:
-      SET_BIT(0x0A); 
-      SET_BIT(0x0B); 
-      SET_BIT(0x0C); 
-      SET_BIT(0x0D); 
-      SET_BIT(0x85); 
-      if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */ 
+      SET_BIT(0x0A);
+      SET_BIT(0x0B);
+      SET_BIT(0x0C);
+      SET_BIT(0x0D);
+      SET_BIT(0x85);
+      if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */
       try_next = FALSE;
-      break;  
+      break;
 
-      /* Single character types set the bits and stop. Note that if PCRE_UCP 
-      is set, we do not see these op codes because \d etc are converted to 
-      properties. Therefore, these apply in the case when only ASCII characters 
+      /* Single character types set the bits and stop. Note that if PCRE_UCP
+      is set, we do not see these op codes because \d etc are converted to
+      properties. Therefore, these apply in the case when only ASCII characters
       are recognized to match the types. */
 
       case OP_NOT_DIGIT:
@@ -757,7 +757,7 @@ do
 
       case OP_TYPEPLUS:
       case OP_TYPEMINPLUS:
-      case OP_TYPEPOSPLUS: 
+      case OP_TYPEPOSPLUS:
       tcode++;
       break;
 
@@ -785,29 +785,29 @@ do
         case OP_ANY:
         case OP_ALLANY:
         return SSB_FAIL;
-        
+
         case OP_HSPACE:
         SET_BIT(0x09);
         SET_BIT(0x20);
         SET_BIT(0xA0);
         if (utf8)
-          {  
+          {
           SET_BIT(0xE1);  /* For U+1680, U+180E */
           SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
-          SET_BIT(0xE3);  /* For U+3000 */ 
+          SET_BIT(0xE3);  /* For U+3000 */
           }
-        break;         
-  
-        case OP_ANYNL:  
+        break;
+
+        case OP_ANYNL:
         case OP_VSPACE:
-        SET_BIT(0x0A); 
-        SET_BIT(0x0B); 
-        SET_BIT(0x0C); 
-        SET_BIT(0x0D); 
-        SET_BIT(0x85); 
-        if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */ 
-        break;  
- 
+        SET_BIT(0x0A);
+        SET_BIT(0x0B);
+        SET_BIT(0x0C);
+        SET_BIT(0x0D);
+        SET_BIT(0x85);
+        if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */
+        break;
+
         case OP_NOT_DIGIT:
         for (c = 0; c < 32; c++)
           start_bits[c] |= ~cd->cbits[c+cbit_digit];

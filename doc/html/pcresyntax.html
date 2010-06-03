@@ -81,7 +81,7 @@ syntax.
   \D         a character that is not a decimal digit
   \h         a horizontal whitespace character
   \H         a character that is not a horizontal whitespace character
-  \N         a character that is not a newline 
+  \N         a character that is not a newline
   \p{<i>xx</i>}     a character with the <i>xx</i> property
   \P{<i>xx</i>}     a character without the <i>xx</i> property
   \R         a newline sequence
@@ -93,7 +93,9 @@ syntax.
   \W         a "non-word" character
   \X         an extended Unicode sequence
 </pre>
-In PCRE, \d, \D, \s, \S, \w, and \W recognize only ASCII characters.
+In PCRE, by default, \d, \D, \s, \S, \w, and \W recognize only ASCII
+characters, even in UTF-8 mode. However, this can be changed by setting the
+PCRE_UCP option.
 </P>
 <br><a name="SEC5" href="#TOC1">GENERAL CATEGORY PROPERTIES FOR \p and \P</a><br>
 <P>
@@ -150,7 +152,7 @@ In PCRE, \d, \D, \s, \S, \w, and \W recognize only ASCII characters.
   Xan        Alphanumeric: union of properties L and N
   Xps        POSIX space: property Z or tab, NL, VT, FF, CR
   Xsp        Perl space: property Z or tab, NL, FF, CR
-  Xwd        Perl word: property Xan or underscore 
+  Xwd        Perl word: property Xan or underscore
 </PRE>
 </P>
 <br><a name="SEC7" href="#TOC1">SCRIPT NAMES FOR \p AND \P</a><br>
@@ -272,7 +274,8 @@ Yi.
   word        same as \w
   xdigit      hexadecimal digit
 </pre>
-In PCRE, POSIX character set names recognize only ASCII characters. You can use
+In PCRE, POSIX character set names recognize only ASCII characters by default,
+but some of them use Unicode properties if PCRE_UCP is set. You can use
 \Q...\E inside a character class.
 </P>
 <br><a name="SEC9" href="#TOC1">QUANTIFIERS</a><br>
@@ -299,7 +302,7 @@ In PCRE, POSIX character set names recognize only ASCII characters. You can use
 <br><a name="SEC10" href="#TOC1">ANCHORS AND SIMPLE ASSERTIONS</a><br>
 <P>
 <pre>
-  \b          word boundary (only ASCII letters recognized)
+  \b          word boundary
   \B          not a word boundary
   ^           start of subject
                also after internal newline in multiline mode
@@ -360,10 +363,11 @@ In PCRE, POSIX character set names recognize only ASCII characters. You can use
   (?x)            extended (ignore white space)
   (?-...)         unset option(s)
 </pre>
-The following is recognized only at the start of a pattern or after one of the
+The following are recognized only at the start of a pattern or after one of the
 newline-setting options with similar syntax:
 <pre>
-  (*UTF8)         set UTF-8 mode
+  (*UTF8)         set UTF-8 mode (PCRE_UTF8)
+  (*UCP)          set PCRE_UCP (use Unicode properties for \d etc)
 </PRE>
 </P>
 <br><a name="SEC17" href="#TOC1">LOOKAHEAD AND LOOKBEHIND ASSERTIONS</a><br>
@@ -449,7 +453,7 @@ pattern is not anchored.
 <br><a name="SEC22" href="#TOC1">NEWLINE CONVENTIONS</a><br>
 <P>
 These are recognized only at the very start of the pattern or after a
-(*BSR_...) or (*UTF8) option.
+(*BSR_...) or (*UTF8) or (*UCP) option.
 <pre>
   (*CR)           carriage return only
   (*LF)           linefeed only
@@ -461,7 +465,7 @@ These are recognized only at the very start of the pattern or after a
 <br><a name="SEC23" href="#TOC1">WHAT \R MATCHES</a><br>
 <P>
 These are recognized only at the very start of the pattern or after a
-(*...) option that sets the newline convention or UTF-8 mode.
+(*...) option that sets the newline convention or UTF-8 or UCP mode.
 <pre>
   (*BSR_ANYCRLF)  CR, LF, or CRLF
   (*BSR_UNICODE)  any Unicode newline sequence
@@ -490,7 +494,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 05 May 2010
+Last updated: 12 May 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

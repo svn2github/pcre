@@ -1218,7 +1218,7 @@ value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
 definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
 corresponds to "." in DOTALL mode rather than an escape sequence. It is also
-used for [^] in JavaScript compatibility mode. In non-DOTALL mode, "." behaves 
+used for [^] in JavaScript compatibility mode. In non-DOTALL mode, "." behaves
 like \N.
 
 The special values ESC_DU, ESC_du, etc. are used instead of ESC_D, ESC_d, etc.
@@ -1235,9 +1235,9 @@ put in between that don't consume a character, that code will have to change.
 
 enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
-       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z, 
+       ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z,
        ESC_E, ESC_Q, ESC_g, ESC_k,
-       ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu, 
+       ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu,
        ESC_REF };
 
 /* Opcode table: Starting from 1 (i.e. after OP_END), the values up to
@@ -1677,7 +1677,7 @@ typedef struct match_data {
   BOOL   noteol;                /* NOTEOL flag */
   BOOL   utf8;                  /* UTF8 flag */
   BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */
-  BOOL   use_ucp;               /* PCRE_UCP flag */ 
+  BOOL   use_ucp;               /* PCRE_UCP flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
   BOOL   notempty_atstart;      /* Empty string match at start not wanted */

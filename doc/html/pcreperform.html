@@ -105,6 +105,15 @@ an alternative pattern that does not use character properties, it will probably
 be faster.
 </P>
 <P>
+By default, the escape sequences \b, \d, \s, and \w, and the POSIX
+character classes such as [:alpha:] do not use Unicode properties, partly for
+backwards compatibility, and partly for performance reasons. However, you can
+set PCRE_UCP if you want Unicode character properties to be used. This can
+double the matching time for items such as \d, when matched with
+<b>pcre_exec()</b>; the performance loss is less with <b>pcre_dfa_exec()</b>, and
+in both cases there is not much difference for \b.
+</P>
+<P>
 When a pattern begins with .* not in parentheses, or in parentheses that are
 not the subject of a backreference, and the PCRE_DOTALL option is set, the
 pattern is implicitly anchored by PCRE, since it can match only at the start of
@@ -177,7 +186,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 07 March 2010
+Last updated: 16 May 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

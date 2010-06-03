@@ -45,7 +45,7 @@ syntax.
   \eD         a character that is not a decimal digit
   \eh         a horizontal whitespace character
   \eH         a character that is not a horizontal whitespace character
-  \eN         a character that is not a newline 
+  \eN         a character that is not a newline
   \ep{\fIxx\fP}     a character with the \fIxx\fP property
   \eP{\fIxx\fP}     a character without the \fIxx\fP property
   \eR         a newline sequence
@@ -58,7 +58,7 @@ syntax.
   \eX         an extended Unicode sequence
 .sp
 In PCRE, by default, \ed, \eD, \es, \eS, \ew, and \eW recognize only ASCII
-characters, even in UTF-8 mode. However, this can be changed by setting the 
+characters, even in UTF-8 mode. However, this can be changed by setting the
 PCRE_UCP option.
 .
 .
@@ -117,7 +117,7 @@ PCRE_UCP option.
   Xan        Alphanumeric: union of properties L and N
   Xps        POSIX space: property Z or tab, NL, VT, FF, CR
   Xsp        Perl space: property Z or tab, NL, FF, CR
-  Xwd        Perl word: property Xan or underscore 
+  Xwd        Perl word: property Xan or underscore
 .
 .
 .SH "SCRIPT NAMES FOR \ep AND \eP"
@@ -241,7 +241,7 @@ Yi.
   word        same as \ew
   xdigit      hexadecimal digit
 .sp
-In PCRE, POSIX character set names recognize only ASCII characters by default, 
+In PCRE, POSIX character set names recognize only ASCII characters by default,
 but some of them use Unicode properties if PCRE_UCP is set. You can use
 \eQ...\eE inside a character class.
 .

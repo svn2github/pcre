@@ -112,12 +112,12 @@ while ((t = *data++) != XCL_END)
       break;
 
       case PT_LAMP:
-      if ((prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || 
+      if ((prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
            prop->chartype == ucp_Lt) == (t == XCL_PROP)) return !negated;
       break;
 
       case PT_GC:
-      if ((data[1] == _pcre_ucp_gentype[prop->chartype]) == (t == XCL_PROP)) 
+      if ((data[1] == _pcre_ucp_gentype[prop->chartype]) == (t == XCL_PROP))
         return !negated;
       break;
 
@@ -128,33 +128,33 @@ while ((t = *data++) != XCL_END)
       case PT_SC:
       if ((data[1] == prop->script) == (t == XCL_PROP)) return !negated;
       break;
-      
+
       case PT_ALNUM:
       if ((_pcre_ucp_gentype[prop->chartype] == ucp_L ||
            _pcre_ucp_gentype[prop->chartype] == ucp_N) == (t == XCL_PROP))
         return !negated;
-      break;         
-      
+      break;
+
       case PT_SPACE:    /* Perl space */
       if ((_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
-           c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR) 
+           c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
              == (t == XCL_PROP))
         return !negated;
-      break;         
+      break;
 
       case PT_PXSPACE:  /* POSIX space */
       if ((_pcre_ucp_gentype[prop->chartype] == ucp_Z ||
            c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
            c == CHAR_FF || c == CHAR_CR) == (t == XCL_PROP))
         return !negated;
-      break;         
+      break;
 
-      case PT_WORD:    
+      case PT_WORD:
       if ((_pcre_ucp_gentype[prop->chartype] == ucp_L ||
-           _pcre_ucp_gentype[prop->chartype] == ucp_N || c == CHAR_UNDERSCORE) 
+           _pcre_ucp_gentype[prop->chartype] == ucp_N || c == CHAR_UNDERSCORE)
              == (t == XCL_PROP))
         return !negated;
-      break;         
+      break;
 
       /* This should never occur, but compilers may mutter if there is no
       default. */

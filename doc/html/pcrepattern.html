@@ -78,6 +78,17 @@ in the main
 page.
 </P>
 <P>
+Another special sequence that may appear at the start of a pattern or in
+combination with (*UTF8) is:
+<pre>
+  (*UCP)
+</pre>
+This has the same effect as setting the PCRE_UCP option: it causes sequences
+such as \d and \w to use Unicode properties to determine character types,
+instead of recognizing only characters with codes less than 128 via a lookup
+table.
+</P>
+<P>
 The remainder of this document discusses the patterns that are supported by
 PCRE when its main matching function, <b>pcre_exec()</b>, is used.
 From release 6.0, PCRE offers a second matching function,
@@ -357,20 +368,17 @@ Another use of backslash is for specifying generic character types:
   \w     any "word" character
   \W     any "non-word" character
 </pre>
-There is also the single sequence \N, which matches a non-newline character. 
-This is the same as 
+There is also the single sequence \N, which matches a non-newline character.
+This is the same as
 <a href="#fullstopdot">the "." metacharacter</a>
 when PCRE_DOTALL is not set.
 </P>
 <P>
 Each pair of lower and upper case escape sequences partitions the complete set
 of characters into two disjoint sets. Any given character matches one, and only
-one, of each pair.
-</P>
-<P>
-These character type sequences can appear both inside and outside character
+one, of each pair. The sequences can appear both inside and outside character
 classes. They each match one character of the appropriate type. If the current
-matching point is at the end of the subject string, all of them fail, since
+matching point is at the end of the subject string, all of them fail, because
 there is no character to match.
 </P>
 <P>
@@ -381,17 +389,41 @@ included in a Perl script, \s may match the VT character. In PCRE, it never
 does.
 </P>
 <P>
-In UTF-8 mode, characters with values greater than 128 never match \d, \s, or
-\w, and always match \D, \S, and \W. This is true even when Unicode
-character property support is available. These sequences retain their original
-meanings from before UTF-8 support was available, mainly for efficiency
-reasons. Note that this also affects \b, because it is defined in terms of \w
-and \W.
+A "word" character is an underscore or any character that is a letter or digit.
+By default, the definition of letters and digits is controlled by PCRE's
+low-valued character tables, and may vary if locale-specific matching is taking
+place (see
+<a href="pcreapi.html#localesupport">"Locale support"</a>
+in the
+<a href="pcreapi.html"><b>pcreapi</b></a>
+page). For example, in a French locale such as "fr_FR" in Unix-like systems,
+or "french" in Windows, some character codes greater than 128 are used for
+accented letters, and these are then matched by \w. The use of locales with
+Unicode is discouraged.
+</P>
+<P>
+By default, in UTF-8 mode, characters with values greater than 128 never match
+\d, \s, or \w, and always match \D, \S, and \W. These sequences retain
+their original meanings from before UTF-8 support was available, mainly for
+efficiency reasons. However, if PCRE is compiled with Unicode property support,
+and the PCRE_UCP option is set, the behaviour is changed so that Unicode
+properties are used to determine character types, as follows:
+<pre>
+  \d  any character that \p{Nd} matches (decimal digit)
+  \s  any character that \p{Z} matches, plus HT, LF, FF, CR
+  \w  any character that \p{L} or \p{N} matches, plus underscore
+</pre>
+The upper case escapes match the inverse sets of characters. Note that \d
+matches only decimal digits, whereas \w matches any Unicode digit, as well as
+any Unicode letter, and underscore. Note also that PCRE_UCP affects \b, and
+\B because they are defined in terms of \w and \W. Matching these sequences
+is noticeably slower when PCRE_UCP is set.
 </P>
 <P>
 The sequences \h, \H, \v, and \V are Perl 5.10 features. In contrast to the
-other sequences, these do match certain high-valued codepoints in UTF-8 mode.
-The horizontal space characters are:
+other sequences, which match only ASCII characters by default, these always
+match certain high-valued codepoints in UTF-8 mode, whether or not PCRE_UCP is
+set. The horizontal space characters are:
 <pre>
   U+0009     Horizontal tab
   U+0020     Space
@@ -422,21 +454,8 @@ The vertical space characters are:
   U+0085     Next line
   U+2028     Line separator
   U+2029     Paragraph separator
-</PRE>
+<a name="newlineseq"></a></PRE>
 </P>
-<P>
-A "word" character is an underscore or any character less than 256 that is a
-letter or digit. The definition of letters and digits is controlled by PCRE's
-low-valued character tables, and may vary if locale-specific matching is taking
-place (see
-<a href="pcreapi.html#localesupport">"Locale support"</a>
-in the
-<a href="pcreapi.html"><b>pcreapi</b></a>
-page). For example, in a French locale such as "fr_FR" in Unix-like systems,
-or "french" in Windows, some character codes greater than 128 are used for
-accented letters, and these are matched by \w. The use of locales with Unicode
-is discouraged.
-<a name="newlineseq"></a></P>
 <br><b>
 Newline sequences
 </b><br>
@@ -479,13 +498,13 @@ These override the default and the options given to <b>pcre_compile()</b> or
 which are not Perl-compatible, are recognized only at the very start of a
 pattern, and that they must be in upper case. If more than one of them is
 present, the last one is used. They can be combined with a change of newline
-convention, for example, a pattern can start with:
+convention; for example, a pattern can start with:
 <pre>
   (*ANY)(*BSR_ANYCRLF)
 </pre>
-Inside a character class, \R is treated as an unrecognized escape sequence, 
-and so matches the letter "R" by default, but causes an error if PCRE_EXTRA is
-set.
+They can also be combined with the (*UTF8) or (*UCP) special sequences. Inside
+a character class, \R is treated as an unrecognized escape sequence, and so
+matches the letter "R" by default, but causes an error if PCRE_EXTRA is set.
 <a name="uniextseq"></a></P>
 <br><b>
 Unicode character properties
@@ -504,7 +523,7 @@ The extra escape sequences are:
 The property names represented by <i>xx</i> above are limited to the Unicode
 script names, the general category properties, "Any", which matches any
 character (including newline), and some special PCRE properties (described
-in the 
+in the
 <a href="#extraprops">next section).</a>
 Other Perl properties such as "InMusicalSymbols" are not currently supported by
 PCRE. Note that \P{Any} does not match any characters, so always causes a
@@ -720,26 +739,29 @@ non-UTF-8 mode \X matches any one character.
 Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \d and \w do not use Unicode
-properties in PCRE.
+properties in PCRE by default, though you can make them do so by setting the
+PCRE_UCP option for <b>pcre_compile()</b> or by starting the pattern with
+(*UCP).
 <a name="extraprops"></a></P>
 <br><b>
 PCRE's additional properties
 </b><br>
 <P>
-As well as the standard Unicode properties described in the previous 
-section, PCRE supports four more that make it possible to convert traditional 
+As well as the standard Unicode properties described in the previous
+section, PCRE supports four more that make it possible to convert traditional
 escape sequences such as \w and \s and POSIX character classes to use Unicode
-properties. These are:
+properties. PCRE uses these non-standard, non-Perl properties internally when
+PCRE_UCP is set. They are:
 <pre>
   Xan   Any alphanumeric character
   Xps   Any POSIX space character
   Xsp   Any Perl space character
   Xwd   Any Perl "word" character
 </pre>
-Xan matches characters that have either the L (letter) or the N (number) 
-property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or 
+Xan matches characters that have either the L (letter) or the N (number)
+property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or
 carriage return, and any other character that has the Z (separator) property.
-Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the 
+Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the
 same characters as Xan, plus underscore.
 <a name="resetmatchstart"></a></P>
 <br><b>
@@ -790,7 +812,7 @@ The backslashed assertions are:
   \G     matches at the first matching position in the subject
 </pre>
 Inside a character class, \b has a different meaning; it matches the backspace
-character. If any other of these assertions appears in a character class, by 
+character. If any other of these assertions appears in a character class, by
 default it matches the corresponding literal character (for example, \B
 matches the letter B). However, if the PCRE_EXTRA option is set, an "invalid
 escape sequence" error is generated instead.
@@ -799,10 +821,12 @@ escape sequence" error is generated instead.
 A word boundary is a position in the subject string where the current character
 and the previous character do not both match \w or \W (i.e. one matches
 \w and the other matches \W), or the start or end of the string if the
-first or last character matches \w, respectively. Neither PCRE nor Perl has a
-separte "start of word" or "end of word" metasequence. However, whatever
-follows \b normally determines which it is. For example, the fragment
-\ba matches "a" at the start of a word.
+first or last character matches \w, respectively. In UTF-8 mode, the meanings
+of \w and \W can be changed by setting the PCRE_UCP option. When this is
+done, it also affects \b and \B. Neither PCRE nor Perl has a separate "start
+of word" or "end of word" metasequence. However, whatever follows \b normally
+determines which it is. For example, the fragment \ba matches "a" at the start
+of a word.
 </P>
 <P>
 The \A, \Z, and \z assertions differ from the traditional circumflex and
@@ -916,8 +940,8 @@ dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 </P>
 <P>
-The escape sequence \N always behaves as a dot does when PCRE_DOTALL is not 
-set. In other words, it matches any one character except one that signifies the 
+The escape sequence \N always behaves as a dot does when PCRE_DOTALL is not
+set. In other words, it matches any one character except one that signifies the
 end of a line.
 </P>
 <br><a name="SEC7" href="#TOC1">MATCHING A SINGLE BYTE</a><br>
@@ -1016,12 +1040,12 @@ characters with values greater than 128 only when it is compiled with Unicode
 property support.
 </P>
 <P>
-The character types \d, \D, \p, \P, \s, \S, \w, and \W may also appear
-in a character class, and add the characters that they match to the class. For
-example, [\dABCDEF] matches any hexadecimal digit. A circumflex can
-conveniently be used with the upper case character types to specify a more
-restricted set of characters than the matching lower case type. For example,
-the class [^\W_] matches any letter or digit, but not underscore.
+The character types \d, \D, \h, \H, \p, \P, \s, \S, \v, \V, \w, and
+\W may also appear in a character class, and add the characters that they
+match to the class. For example, [\dABCDEF] matches any hexadecimal digit. A
+circumflex can conveniently be used with the upper case character types to
+specify a more restricted set of characters than the matching lower case type.
+For example, the class [^\W_] matches any letter or digit, but not underscore.
 </P>
 <P>
 The only metacharacters that are recognized in character classes are backslash,
@@ -1040,7 +1064,7 @@ this notation. For example,
   [01[:alpha:]%]
 </pre>
 matches "0", "1", any alphabetic character, or "%". The supported class names
-are
+are:
 <pre>
   alnum    letters and digits
   alpha    letters
@@ -1051,7 +1075,7 @@ are
   graph    printing characters, excluding space
   lower    lower case letters
   print    printing characters, including space
-  punct    printing characters, excluding letters and digits
+  punct    printing characters, excluding letters and digits and space
   space    white space (not quite the same as \s)
   upper    upper case letters
   word     "word" characters (same as \w)
@@ -1074,8 +1098,24 @@ syntax [.ch.] and [=ch=] where "ch" is a "collating element", but these are not
 supported, and an error is given if they are encountered.
 </P>
 <P>
-In UTF-8 mode, characters with values greater than 128 do not match any of
-the POSIX character classes.
+By default, in UTF-8 mode, characters with values greater than 128 do not match
+any of the POSIX character classes. However, if the PCRE_UCP option is passed
+to <b>pcre_compile()</b>, some of the classes are changed so that Unicode
+character properties are used. This is achieved by replacing the POSIX classes
+by other sequences, as follows:
+<pre>
+  [:alnum:]  becomes  \p{Xan}
+  [:alpha:]  becomes  \p{L}
+  [:blank:]  becomes  \h
+  [:digit:]  becomes  \p{Nd}
+  [:lower:]  becomes  \p{Ll}
+  [:space:]  becomes  \p{Xps}
+  [:upper:]  becomes  \p{Lu}
+  [:word:]   becomes  \p{Xwd}
+</pre>
+Negated versions, such as [:^alpha:] use \P instead of \p. The other POSIX
+classes are unchanged, and match only characters with code points less than
+128.
 </P>
 <br><a name="SEC10" href="#TOC1">VERTICAL BAR</a><br>
 <P>
@@ -1148,8 +1188,9 @@ pattern can contain special leading sequences such as (*CRLF) to override what
 the application has set or what has been defaulted. Details are given in the
 section entitled
 <a href="#newlineseq">"Newline sequences"</a>
-above. There is also the (*UTF8) leading sequence that can be used to set UTF-8
-mode; this is equivalent to setting the PCRE_UTF8 option.
+above. There are also the (*UTF8) and (*UCP) leading sequences that can be used
+to set UTF-8 and Unicode property modes; they are equivalent to setting the
+PCRE_UTF8 and the PCRE_UCP options, respectively.
 <a name="subpattern"></a></P>
 <br><a name="SEC12" href="#TOC1">SUBPATTERNS</a><br>
 <P>
@@ -2589,7 +2630,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 05 May 2010
+Last updated: 18 May 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

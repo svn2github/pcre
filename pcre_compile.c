@@ -261,8 +261,8 @@ static const int posix_class_maps[] = {
   cbit_xdigit,-1,          0              /* xdigit */
 };
 
-/* Table of substitutes for \d etc when PCRE_UCP is set. The POSIX class 
-substitutes must be in the order of the names, defined above, and there are 
+/* Table of substitutes for \d etc when PCRE_UCP is set. The POSIX class
+substitutes must be in the order of the names, defined above, and there are
 both positive and negative cases. NULL means no substitute. */
 
 #ifdef SUPPORT_UCP
@@ -272,14 +272,14 @@ static const uschar *substitutes[] = {
   (uschar *)"\\P{Xsp}",   /* \S */       /* NOTE: Xsp is Perl space */
   (uschar *)"\\p{Xsp}",   /* \s */
   (uschar *)"\\P{Xwd}",   /* \W */
-  (uschar *)"\\p{Xwd}"    /* \w */   
+  (uschar *)"\\p{Xwd}"    /* \w */
 };
-  
+
 static const uschar *posix_substitutes[] = {
   (uschar *)"\\p{L}",     /* alpha */
-  (uschar *)"\\p{Ll}",    /* lower */ 
-  (uschar *)"\\p{Lu}",    /* upper */ 
-  (uschar *)"\\p{Xan}",   /* alnum */ 
+  (uschar *)"\\p{Ll}",    /* lower */
+  (uschar *)"\\p{Lu}",    /* upper */
+  (uschar *)"\\p{Xan}",   /* alnum */
   NULL,                   /* ascii */
   (uschar *)"\\h",        /* blank */
   NULL,                   /* cntrl */
@@ -289,12 +289,12 @@ static const uschar *posix_substitutes[] = {
   NULL,                   /* punct */
   (uschar *)"\\p{Xps}",   /* space */    /* NOTE: Xps is POSIX space */
   (uschar *)"\\p{Xwd}",   /* word */
-  NULL,                   /* xdigit */         
+  NULL,                   /* xdigit */
   /* Negated cases */
   (uschar *)"\\P{L}",     /* ^alpha */
-  (uschar *)"\\P{Ll}",    /* ^lower */ 
-  (uschar *)"\\P{Lu}",    /* ^upper */ 
-  (uschar *)"\\P{Xan}",   /* ^alnum */ 
+  (uschar *)"\\P{Ll}",    /* ^lower */
+  (uschar *)"\\P{Lu}",    /* ^upper */
+  (uschar *)"\\P{Xan}",   /* ^alnum */
   NULL,                   /* ^ascii */
   (uschar *)"\\H",        /* ^blank */
   NULL,                   /* ^cntrl */
@@ -304,10 +304,10 @@ static const uschar *posix_substitutes[] = {
   NULL,                   /* ^punct */
   (uschar *)"\\P{Xps}",   /* ^space */   /* NOTE: Xps is POSIX space */
   (uschar *)"\\P{Xwd}",   /* ^word */
-  NULL                    /* ^xdigit */         
+  NULL                    /* ^xdigit */
 };
 #define POSIX_SUBSIZE (sizeof(posix_substitutes)/sizeof(uschar *))
-#endif   
+#endif
 
 #define STRING(a)  # a
 #define XSTRING(s) STRING(s)
@@ -407,7 +407,7 @@ static const char error_texts[] =
   /* 65 */
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
-  "this version of PCRE is not compiled with PCRE_UCP support\0" 
+  "this version of PCRE is not compiled with PCRE_UCP support\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -2407,9 +2407,9 @@ Arguments:
   ptype        the property type
   pdata        the data for the type
   negated      TRUE if it's a negated property (\P or \p{^)
-  
+
 Returns:       TRUE if auto-possessifying is OK
-*/    
+*/
 
 static BOOL
 check_char_prop(int c, int ptype, int pdata, BOOL negated)
@@ -2453,7 +2453,7 @@ switch(ptype)
           _pcre_ucp_gentype[prop->chartype] == ucp_N ||
           c == CHAR_UNDERSCORE) == negated;
   }
-return FALSE;  
+return FALSE;
 }
 #endif  /* SUPPORT_UCP */
 
@@ -2478,7 +2478,7 @@ Returns:        TRUE if possessifying is wanted
 */
 
 static BOOL
-check_auto_possessive(const uschar *previous, BOOL utf8, const uschar *ptr, 
+check_auto_possessive(const uschar *previous, BOOL utf8, const uschar *ptr,
   int options, compile_data *cd)
 {
 int c, next;
@@ -2549,23 +2549,23 @@ the next item is a character. */
 if (next >= 0) switch(op_code)
   {
   case OP_CHAR:
-#ifdef SUPPORT_UTF8  
+#ifdef SUPPORT_UTF8
   GETCHARTEST(c, previous);
 #else
   c = *previous;
-#endif      
-  return c != next; 
+#endif
+  return c != next;
 
   /* For CHARNC (caseless character) we must check the other case. If we have
   Unicode property support, we can use it to test the other case of
   high-valued characters. */
 
   case OP_CHARNC:
-#ifdef SUPPORT_UTF8  
+#ifdef SUPPORT_UTF8
   GETCHARTEST(c, previous);
 #else
   c = *previous;
-#endif      
+#endif
   if (c == next) return FALSE;
 #ifdef SUPPORT_UTF8
   if (utf8)
@@ -2603,9 +2603,9 @@ if (next >= 0) switch(op_code)
   else
 #endif  /* SUPPORT_UTF8 */
   return (c == cd->fcc[next]);  /* Non-UTF-8 mode */
-  
-  /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set. 
-  When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */ 
+
+  /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set.
+  When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
 
   case OP_DIGIT:
   return next > 127 || (cd->ctypes[next] & ctype_digit) == 0;
@@ -2673,7 +2673,7 @@ if (next >= 0) switch(op_code)
 #ifdef SUPPORT_UCP
   case OP_PROP:
   return check_char_prop(next, previous[0], previous[1], FALSE);
- 
+
   case OP_NOTPROP:
   return check_char_prop(next, previous[0], previous[1], TRUE);
 #endif
@@ -2683,21 +2683,21 @@ if (next >= 0) switch(op_code)
   }
 
 
-/* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP 
-is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are 
-generated only when PCRE_UCP is *not* set, that is, when only ASCII 
-characteristics are recognized. Similarly, the opcodes OP_DIGIT etc. are 
+/* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP
+is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are
+generated only when PCRE_UCP is *not* set, that is, when only ASCII
+characteristics are recognized. Similarly, the opcodes OP_DIGIT etc. are
 replaced by OP_PROP codes when PCRE_UCP is set. */
 
 switch(op_code)
   {
   case OP_CHAR:
   case OP_CHARNC:
-#ifdef SUPPORT_UTF8  
+#ifdef SUPPORT_UTF8
   GETCHARTEST(c, previous);
 #else
   c = *previous;
-#endif      
+#endif
   switch(-next)
     {
     case ESC_d:
@@ -2761,11 +2761,11 @@ switch(op_code)
       default:
       return -next == ESC_v;
       }
-      
-    /* When PCRE_UCP is set, these values get generated for \d etc. Find 
-    their substitutions and process them. The result will always be either 
+
+    /* When PCRE_UCP is set, these values get generated for \d etc. Find
+    their substitutions and process them. The result will always be either
     -ESC_p or -ESC_P. Then fall through to process those values. */
-  
+
 #ifdef SUPPORT_UCP
     case ESC_du:
     case ESC_DU:
@@ -2780,42 +2780,42 @@ switch(op_code)
       if (temperrorcode != 0) return FALSE;
       ptr++;    /* For compatibility */
       }
-    /* Fall through */   
+    /* Fall through */
 
     case ESC_p:
     case ESC_P:
       {
       int ptype, pdata, errorcodeptr;
-      BOOL negated;  
-        
+      BOOL negated;
+
       ptr--;      /* Make ptr point at the p or P */
       ptype = get_ucp(&ptr, &negated, &pdata, &errorcodeptr);
       if (ptype < 0) return FALSE;
       ptr++;      /* Point past the final curly ket */
-      
+
       /* If the property item is optional, we have to give up. (When generated
       from \d etc by PCRE_UCP, this test will have been applied much earlier,
       to the original \d etc. At this point, ptr will point to a zero byte. */
-      
+
       if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
         strncmp((char *)ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
           return FALSE;
-      
+
       /* Do the property check. */
-      
+
       return check_char_prop(c, ptype, pdata, (next == -ESC_P) != negated);
-      } 
+      }
 #endif
 
     default:
     return FALSE;
     }
-    
-  /* In principle, support for Unicode properties should be integrated here as 
-  well. It means re-organizing the above code so as to get hold of the property 
-  values before switching on the op-code. However, I wonder how many patterns 
-  combine ASCII \d etc with Unicode properties? (Note that if PCRE_UCP is set, 
-  these op-codes are never generated.) */ 
+
+  /* In principle, support for Unicode properties should be integrated here as
+  well. It means re-organizing the above code so as to get hold of the property
+  values before switching on the op-code. However, I wonder how many patterns
+  combine ASCII \d etc with Unicode properties? (Note that if PCRE_UCP is set,
+  these op-codes are never generated.) */
 
   case OP_DIGIT:
   return next == -ESC_D || next == -ESC_s || next == -ESC_W ||
@@ -2831,14 +2831,14 @@ switch(op_code)
   return next == -ESC_s || next == -ESC_h || next == -ESC_v;
 
   case OP_HSPACE:
-  return next == -ESC_S || next == -ESC_H || next == -ESC_d || 
+  return next == -ESC_S || next == -ESC_H || next == -ESC_d ||
          next == -ESC_w || next == -ESC_v || next == -ESC_R;
 
   case OP_NOT_HSPACE:
   return next == -ESC_h;
 
   /* Can't have \S in here because VT matches \S (Perl anomaly) */
-  case OP_ANYNL: 
+  case OP_ANYNL:
   case OP_VSPACE:
   return next == -ESC_V || next == -ESC_d || next == -ESC_w;
 
@@ -2846,7 +2846,7 @@ switch(op_code)
   return next == -ESC_v || next == -ESC_R;
 
   case OP_WORDCHAR:
-  return next == -ESC_W || next == -ESC_s || next == -ESC_h || 
+  return next == -ESC_W || next == -ESC_s || next == -ESC_h ||
          next == -ESC_v || next == -ESC_R;
 
   case OP_NOT_WORDCHAR:
@@ -2982,7 +2982,7 @@ for (;; ptr++)
 
   c = *ptr;
 
-  /* If we are at the end of a nested substitution, revert to the outer level 
+  /* If we are at the end of a nested substitution, revert to the outer level
   string. Nesting only happens one level deep. */
 
   if (c == 0 && nestptr != NULL)
@@ -3289,7 +3289,7 @@ for (;; ptr++)
         {                           /* Braces are required because the */
         GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
         }
-        
+
       /* In the pre-compile phase, accumulate the length of any UTF-8 extra
       data and reset the pointer. This is so that very large classes that
       contain a zillion UTF-8 characters no longer overwrite the work space
@@ -3358,22 +3358,22 @@ for (;; ptr++)
 
         if ((options & PCRE_CASELESS) != 0 && posix_class <= 2)
           posix_class = 0;
-          
-        /* When PCRE_UCP is set, some of the POSIX classes are converted to 
+
+        /* When PCRE_UCP is set, some of the POSIX classes are converted to
         different escape sequences that use Unicode properties. */
-        
+
 #ifdef SUPPORT_UCP
         if ((options & PCRE_UCP) != 0)
           {
           int pc = posix_class + ((local_negate)? POSIX_SUBSIZE/2 : 0);
           if (posix_substitutes[pc] != NULL)
             {
-            nestptr = tempptr + 1; 
+            nestptr = tempptr + 1;
             ptr = posix_substitutes[pc] - 1;
-            continue; 
-            } 
-          }   
-#endif           
+            continue;
+            }
+          }
+#endif
         /* In the non-UCP case, we build the bit map for the POSIX class in a
         chunk of local store because we may be adding and subtracting from it,
         and we don't want to subtract bits that may be in the main map already.
@@ -3460,7 +3460,7 @@ for (;; ptr++)
             case ESC_SU:
             nestptr = ptr;
             ptr = substitutes[-c - ESC_DU] - 1;  /* Just before substitute */
-            class_charcount -= 2;                /* Undo! */ 
+            class_charcount -= 2;                /* Undo! */
             continue;
 #endif
             case ESC_d:
@@ -3911,7 +3911,7 @@ for (;; ptr++)
     can cause firstbyte to be set. Otherwise, there can be no first char if
     this item is first, whatever repeat count may follow. In the case of
     reqbyte, save the previous value for reinstating. */
-    
+
 #ifdef SUPPORT_UTF8
     if (class_charcount == 1 && !class_utf8 &&
       (!utf8 || !negate_class || class_lastchar < 128))
@@ -3991,7 +3991,7 @@ for (;; ptr++)
       }
 #endif
 
-    /* If there are no characters > 255, or they are all to be included or 
+    /* If there are no characters > 255, or they are all to be included or
     excluded, set the opcode to OP_CLASS or OP_NCLASS, depending on whether the
     whole class was negated and whether there were negative specials such as \S
     (non-UCP) in the class. Then copy the 32-byte map into the code vector,
@@ -5795,7 +5795,7 @@ for (;; ptr++)
 
     /* ===================================================================*/
     /* Handle metasequences introduced by \. For ones like \d, the ESC_ values
-    are arranged to be the negation of the corresponding OP_values in the 
+    are arranged to be the negation of the corresponding OP_values in the
     default case when PCRE_UCP is not set. For the back references, the values
     are ESC_REF plus the reference number. Only back references and those types
     that consume a character may be repeated. We can test for values between
@@ -5973,11 +5973,11 @@ for (;; ptr++)
           ptr = substitutes[-c - ESC_DU] - 1;  /* Just before substitute */
           }
         else
-#endif    
-          {  
+#endif
+          {
           previous = (-c > ESC_b && -c < ESC_Z)? code : NULL;
           *code++ = -c;
-          } 
+          }
         }
       continue;
       }
@@ -6809,7 +6809,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
     options = (options & ~(PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) | newbsr;
   else break;
   }
-  
+
 utf8 = (options & PCRE_UTF8) != 0;
 
 /* Can't support UTF8 unless PCRE has been compiled to include the code. */
@@ -6835,8 +6835,8 @@ if (utf8)
 if ((options & PCRE_UCP) != 0)
   {
   errorcode = ERR67;
-  goto PCRE_EARLY_ERROR_RETURN;  
-  } 
+  goto PCRE_EARLY_ERROR_RETURN;
+  }
 #endif
 
 /* Check validity of \R options. */

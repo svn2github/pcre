@@ -283,13 +283,13 @@ are being output. If not supplied, "(standard input)" is used. There is no
 short form for this option.
 .TP
 \fB--line-buffered\fP
-When this option is given, input is read and processed line by line, and the 
-output is flushed after each write. By default, input is read in large chunks, 
-unless \fBpcregrep\fP can determine that it is reading from a terminal (which 
-is currently possible only in Unix environments). Output to terminal is 
-normally automatically flushed by the operating system. This option can be 
-useful when the input or output is attached to a pipe and you do not want 
-\fBpcregrep\fP to buffer up large amounts of data. However, its use will affect 
+When this option is given, input is read and processed line by line, and the
+output is flushed after each write. By default, input is read in large chunks,
+unless \fBpcregrep\fP can determine that it is reading from a terminal (which
+is currently possible only in Unix environments). Output to terminal is
+normally automatically flushed by the operating system. This option can be
+useful when the input or output is attached to a pipe and you do not want
+\fBpcregrep\fP to buffer up large amounts of data. However, its use will affect
 performance, and the \fB-M\fP (multiline) option ceases to work.
 .TP
 \fB--line-offsets\fP
@@ -317,7 +317,7 @@ that \fBpcregrep\fP buffers the input file as it scans it. However,
 \fBpcregrep\fP ensures that at least 8K characters or the rest of the document
 (whichever is the shorter) are available for forward matching, and similarly
 the previous 8K characters (or all the previous characters, if fewer than 8K)
-are guaranteed to be available for lookbehind assertions. This option does not 
+are guaranteed to be available for lookbehind assertions. This option does not
 work when input is read line by line (see \fP--line-buffered\fP.)
 .TP
 \fB-N\fP \fInewline-type\fP, \fB--newline=\fP\fInewline-type\fP

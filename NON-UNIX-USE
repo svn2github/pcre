@@ -188,7 +188,7 @@ significantly slower when this is done. There is more about stack usage in the
 LINKING PROGRAMS IN WINDOWS ENVIRONMENTS
 
 If you want to statically link a program against a PCRE library in the form of
-a non-dll .a file, you must define PCRE_STATIC before including pcre.h or 
+a non-dll .a file, you must define PCRE_STATIC before including pcre.h or
 pcrecpp.h, otherwise the pcre_malloc() and pcre_free() exported functions will
 be declared __declspec(dllimport), with unwanted results.
 

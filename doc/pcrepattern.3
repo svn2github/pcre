@@ -42,14 +42,14 @@ in the main
 .\"
 page.
 .P
-Another special sequence that may appear at the start of a pattern or in 
+Another special sequence that may appear at the start of a pattern or in
 combination with (*UTF8) is:
 .sp
   (*UCP)
 .sp
-This has the same effect as setting the PCRE_UCP option: it causes sequences 
-such as \ed and \ew to use Unicode properties to determine character types, 
-instead of recognizing only characters with codes less than 128 via a lookup 
+This has the same effect as setting the PCRE_UCP option: it causes sequences
+such as \ed and \ew to use Unicode properties to determine character types,
+instead of recognizing only characters with codes less than 128 via a lookup
 table.
 .P
 The remainder of this document discusses the patterns that are supported by
@@ -367,11 +367,11 @@ Another use of backslash is for specifying generic character types:
   \ew     any "word" character
   \eW     any "non-word" character
 .sp
-There is also the single sequence \eN, which matches a non-newline character. 
-This is the same as 
+There is also the single sequence \eN, which matches a non-newline character.
+This is the same as
 .\" HTML <a href="#fullstopdot">
 .\" </a>
-the "." metacharacter 
+the "." metacharacter
 .\"
 when PCRE_DOTALL is not set.
 .P
@@ -408,7 +408,7 @@ Unicode is discouraged.
 By default, in UTF-8 mode, characters with values greater than 128 never match
 \ed, \es, or \ew, and always match \eD, \eS, and \eW. These sequences retain
 their original meanings from before UTF-8 support was available, mainly for
-efficiency reasons. However, if PCRE is compiled with Unicode property support, 
+efficiency reasons. However, if PCRE is compiled with Unicode property support,
 and the PCRE_UCP option is set, the behaviour is changed so that Unicode
 properties are used to determine character types, as follows:
 .sp
@@ -417,14 +417,14 @@ properties are used to determine character types, as follows:
   \ew  any character that \ep{L} or \ep{N} matches, plus underscore
 .sp
 The upper case escapes match the inverse sets of characters. Note that \ed
-matches only decimal digits, whereas \ew matches any Unicode digit, as well as 
+matches only decimal digits, whereas \ew matches any Unicode digit, as well as
 any Unicode letter, and underscore. Note also that PCRE_UCP affects \eb, and
 \eB because they are defined in terms of \ew and \eW. Matching these sequences
 is noticeably slower when PCRE_UCP is set.
 .P
 The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the
 other sequences, which match only ASCII characters by default, these always
-match certain high-valued codepoints in UTF-8 mode, whether or not PCRE_UCP is 
+match certain high-valued codepoints in UTF-8 mode, whether or not PCRE_UCP is
 set. The horizontal space characters are:
 .sp
   U+0009     Horizontal tab
@@ -527,10 +527,10 @@ The extra escape sequences are:
 The property names represented by \fIxx\fP above are limited to the Unicode
 script names, the general category properties, "Any", which matches any
 character (including newline), and some special PCRE properties (described
-in the 
+in the
 .\" HTML <a href="#extraprops">
 .\" </a>
-next section). 
+next section).
 .\"
 Other Perl properties such as "InMusicalSymbols" are not currently supported by
 PCRE. Note that \eP{Any} does not match any characters, so always causes a
@@ -741,7 +741,7 @@ non-UTF-8 mode \eX matches any one character.
 Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \ed and \ew do not use Unicode
-properties in PCRE by default, though you can make them do so by setting the 
+properties in PCRE by default, though you can make them do so by setting the
 PCRE_UCP option for \fBpcre_compile()\fP or by starting the pattern with
 (*UCP).
 .
@@ -750,8 +750,8 @@ PCRE_UCP option for \fBpcre_compile()\fP or by starting the pattern with
 .SS PCRE's additional properties
 .rs
 .sp
-As well as the standard Unicode properties described in the previous 
-section, PCRE supports four more that make it possible to convert traditional 
+As well as the standard Unicode properties described in the previous
+section, PCRE supports four more that make it possible to convert traditional
 escape sequences such as \ew and \es and POSIX character classes to use Unicode
 properties. PCRE uses these non-standard, non-Perl properties internally when
 PCRE_UCP is set. They are:
@@ -761,10 +761,10 @@ PCRE_UCP is set. They are:
   Xsp   Any Perl space character
   Xwd   Any Perl "word" character
 .sp
-Xan matches characters that have either the L (letter) or the N (number) 
-property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or 
+Xan matches characters that have either the L (letter) or the N (number)
+property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or
 carriage return, and any other character that has the Z (separator) property.
-Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the 
+Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the
 same characters as Xan, plus underscore.
 .
 .
@@ -825,7 +825,7 @@ The backslashed assertions are:
   \eG     matches at the first matching position in the subject
 .sp
 Inside a character class, \eb has a different meaning; it matches the backspace
-character. If any other of these assertions appears in a character class, by 
+character. If any other of these assertions appears in a character class, by
 default it matches the corresponding literal character (for example, \eB
 matches the letter B). However, if the PCRE_EXTRA option is set, an "invalid
 escape sequence" error is generated instead.
@@ -946,8 +946,8 @@ The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 .P
-The escape sequence \eN always behaves as a dot does when PCRE_DOTALL is not 
-set. In other words, it matches any one character except one that signifies the 
+The escape sequence \eN always behaves as a dot does when PCRE_DOTALL is not
+set. In other words, it matches any one character except one that signifies the
 end of a line.
 .
 .
@@ -1102,16 +1102,16 @@ supported, and an error is given if they are encountered.
 .P
 By default, in UTF-8 mode, characters with values greater than 128 do not match
 any of the POSIX character classes. However, if the PCRE_UCP option is passed
-to \fBpcre_compile()\fP, some of the classes are changed so that Unicode 
-character properties are used. This is achieved by replacing the POSIX classes 
+to \fBpcre_compile()\fP, some of the classes are changed so that Unicode
+character properties are used. This is achieved by replacing the POSIX classes
 by other sequences, as follows:
 .sp
   [:alnum:]  becomes  \ep{Xan}
   [:alpha:]  becomes  \ep{L}
-  [:blank:]  becomes  \eh 
+  [:blank:]  becomes  \eh
   [:digit:]  becomes  \ep{Nd}
   [:lower:]  becomes  \ep{Ll}
-  [:space:]  becomes  \ep{Xps} 
+  [:space:]  becomes  \ep{Xps}
   [:upper:]  becomes  \ep{Lu}
   [:word:]   becomes  \ep{Xwd}
 .sp

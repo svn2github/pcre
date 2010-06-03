@@ -161,6 +161,13 @@ and PCRE_MINOR to contain the major and minor release numbers for the library.
 Applications can use these to include support for different releases of PCRE.
 </P>
 <P>
+In a Windows environment, if you want to statically link an application program
+against a non-dll <b>pcre.a</b> file, you must define PCRE_STATIC before
+including <b>pcre.h</b> or <b>pcrecpp.h</b>, because otherwise the
+<b>pcre_malloc()</b> and <b>pcre_free()</b> exported functions will be declared
+<b>__declspec(dllimport)</b>, with unwanted results.
+</P>
+<P>
 The functions <b>pcre_compile()</b>, <b>pcre_compile2()</b>, <b>pcre_study()</b>,
 and <b>pcre_exec()</b> are used for compiling and matching regular expressions
 in a Perl-compatible manner. A sample program that demonstrates the simplest
@@ -649,6 +656,19 @@ were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
 in Perl.
 <pre>
+  PCRE_UCP
+</pre>
+This option changes the way PCRE processes \b, \d, \s, \w, and some of the
+POSIX character classes. By default, only ASCII characters are recognized, but
+if PCRE_UCP is set, Unicode properties are used instead to classify characters.
+More details are given in the section on
+<a href="pcre.html#genericchartypes">generic character types</a>
+in the
+<a href="pcrepattern.html"><b>pcrepattern</b></a>
+page. If you set PCRE_UCP, matching one of the items it affects takes much
+longer. The option is available only if PCRE has been compiled with Unicode
+property support.
+<pre>
   PCRE_UNGREEDY
 </pre>
 This option inverts the "greediness" of the quantifiers so that they are not
@@ -757,6 +777,7 @@ out of use. To avoid confusion, they have not been re-used.
   64  ] is an invalid data character in JavaScript compatibility mode
   65  different names for subpatterns of the same number are not allowed
   66  (*MARK) must have an argument
+  67  this version of PCRE is not compiled with PCRE_UCP support
 </pre>
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -829,11 +850,13 @@ matching.
 PCRE handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character
 value. When running in UTF-8 mode, this applies only to characters with codes
-less than 128. Higher-valued codes never match escapes such as \w or \d, but
-can be tested with \p if PCRE is built with Unicode character property
-support. The use of locales with Unicode is discouraged. If you are handling
-characters with codes greater than 128, you should either use UTF-8 and
-Unicode, or use locales, but not try to mix the two.
+less than 128. By default, higher-valued codes never match escapes such as \w
+or \d, but they can be tested with \p if PCRE is built with Unicode character
+property support. Alternatively, the PCRE_UCP option can be set at compile
+time; this causes \w and friends to use Unicode property support instead of
+built-in tables. The use of locales with Unicode is discouraged. If you are
+handling characters with codes greater than 128, you should either use UTF-8
+and Unicode, or use locales, but not try to mix the two.
 </P>
 <P>
 PCRE contains an internal set of tables that are used when the final argument
@@ -1623,6 +1646,11 @@ If a pattern contains back references, but the <i>ovector</i> that is passed to
 gets a block of memory at the start of matching to use for this purpose. If the
 call via <b>pcre_malloc()</b> fails, this error is given. The memory is
 automatically freed at the end of matching.
+</P>
+<P>
+This error is also given if <b>pcre_stack_malloc()</b> fails in
+<b>pcre_exec()</b>. This can happen only when PCRE has been compiled with
+<b>--disable-stack-for-recursion</b>.
 <pre>
   PCRE_ERROR_NOSUBSTRING    (-7)
 </pre>
@@ -2087,7 +2115,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 03 May 2010
+Last updated: 01 June 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

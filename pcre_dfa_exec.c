@@ -922,36 +922,36 @@ for (;;)
           if (utf8) BACKCHAR(temp);
 #endif
           GETCHARTEST(d, temp);
-#ifdef SUPPORT_UCP          
+#ifdef SUPPORT_UCP
           if ((md->poptions & PCRE_UCP) != 0)
             {
             if (d == '_') left_word = TRUE; else
-              { 
+              {
               int cat = UCD_CATEGORY(d);
               left_word = (cat == ucp_L || cat == ucp_N);
-              } 
-            }  
-          else 
-#endif          
+              }
+            }
+          else
+#endif
           left_word = d < 256 && (ctypes[d] & ctype_word) != 0;
           }
         else left_word = FALSE;
 
         if (clen > 0)
-          { 
-#ifdef SUPPORT_UCP          
+          {
+#ifdef SUPPORT_UCP
           if ((md->poptions & PCRE_UCP) != 0)
             {
             if (c == '_') right_word = TRUE; else
-              { 
+              {
               int cat = UCD_CATEGORY(c);
               right_word = (cat == ucp_L || cat == ucp_N);
-              } 
-            }  
-          else 
-#endif          
+              }
+            }
+          else
+#endif
           right_word = c < 256 && (ctypes[c] & ctype_word) != 0;
-          } 
+          }
         else right_word = FALSE;
 
         if ((left_word == right_word) == (codevalue == OP_NOT_WORD_BOUNDARY))
@@ -979,7 +979,7 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || 
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
                prop->chartype == ucp_Lt;
           break;
 
@@ -994,30 +994,30 @@ for (;;)
           case PT_SC:
           OK = prop->script == code[2];
           break;
-          
+
           /* These are specials for combination cases. */
-          
+
           case PT_ALNUM:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N;
-          break;        
- 
+          break;
+
           case PT_SPACE:    /* Perl space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR;
-          break;  
- 
+          break;
+
           case PT_PXSPACE:  /* POSIX space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
                c == CHAR_FF || c == CHAR_CR;
-          break;      
- 
+          break;
+
           case PT_WORD:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
-          break;            
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1173,7 +1173,7 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || 
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
             prop->chartype == ucp_Lt;
           break;
 
@@ -1190,28 +1190,28 @@ for (;;)
           break;
 
           /* These are specials for combination cases. */
-          
+
           case PT_ALNUM:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N;
-          break;        
- 
+          break;
+
           case PT_SPACE:    /* Perl space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR;
-          break;  
- 
+          break;
+
           case PT_PXSPACE:  /* POSIX space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
                c == CHAR_FF || c == CHAR_CR;
-          break;      
- 
+          break;
+
           case PT_WORD:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
-          break;            
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1420,7 +1420,7 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || 
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
             prop->chartype == ucp_Lt;
           break;
 
@@ -1435,30 +1435,30 @@ for (;;)
           case PT_SC:
           OK = prop->script == code[3];
           break;
-          
+
           /* These are specials for combination cases. */
-          
+
           case PT_ALNUM:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N;
-          break;        
- 
+          break;
+
           case PT_SPACE:    /* Perl space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR;
-          break;  
- 
+          break;
+
           case PT_PXSPACE:  /* POSIX space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
                c == CHAR_FF || c == CHAR_CR;
-          break;      
- 
+          break;
+
           case PT_WORD:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
-          break;            
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1692,7 +1692,7 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || 
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
             prop->chartype == ucp_Lt;
           break;
 
@@ -1707,30 +1707,30 @@ for (;;)
           case PT_SC:
           OK = prop->script == code[5];
           break;
-          
+
           /* These are specials for combination cases. */
-          
+
           case PT_ALNUM:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N;
-          break;        
- 
+          break;
+
           case PT_SPACE:    /* Perl space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR;
-          break;  
- 
+          break;
+
           case PT_PXSPACE:  /* POSIX space */
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_Z ||
                c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
                c == CHAR_FF || c == CHAR_CR;
-          break;      
- 
+          break;
+
           case PT_WORD:
           OK = _pcre_ucp_gentype[prop->chartype] == ucp_L ||
                _pcre_ucp_gentype[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
-          break;            
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -2623,7 +2623,7 @@ for (;;)
 
           do { end_subpattern += GET(end_subpattern, 1); }
             while (*end_subpattern == OP_ALT);
-          next_state_offset = 
+          next_state_offset =
             (int)(end_subpattern - start_code + LINK_SIZE + 1);
 
           /* If the end of this subpattern is KETRMAX or KETRMIN, we must
