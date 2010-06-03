@@ -295,7 +295,7 @@ argument of match(), which never changes. */
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
   {\
   heapframe *newframe = (pcre_stack_malloc)(sizeof(heapframe));\
-  if (heapframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
+  if (newframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
