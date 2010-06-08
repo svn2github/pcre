@@ -69,6 +69,9 @@ Version 8.10 03-Jun-2010
 17. Added a check for running out of memory when PCRE is compiled with
     --disable-stack-for-recursion (#990).
     
+18. If the last data line in a file for pcretest does not have a newline on
+    the end, a newline was missing in the output. 
+    
 
 
 Version 8.02 19-Mar-2010

@@ -1786,7 +1786,11 @@ while (!done)
       {
       if (extend_inputline(infile, buffer + len, "data> ") == NULL)
         {
-        if (len > 0) break;
+        if (len > 0)    /* Reached EOF without hitting a newline */
+          {
+          fprintf(outfile, "\n"); 
+          break;
+          } 
         done = 1;
         goto CONTINUE;
         }
@@ -2081,7 +2085,7 @@ while (!done)
       }
     *q = 0;
     len = (int)(q - dbuffer);
-
+    
     /* Move the data to the end of the buffer so that a read over the end of
     the buffer will be seen by valgrind, even if it doesn't cause a crash. If
     we are using the POSIX interface, we must include the terminating zero. */
