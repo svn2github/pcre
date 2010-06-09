@@ -5959,8 +5959,16 @@ for(;;)
       while (start_match < end_subject)
         {
         register unsigned int c = *start_match;
-        if ((start_bits[c/8] & (1 << (c&7))) == 0) start_match++;
-          else break;
+        if ((start_bits[c/8] & (1 << (c&7))) == 0) 
+          {
+          start_match++;
+#ifdef SUPPORT_UTF8
+          if (utf8)
+            while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
+              start_match++;
+#endif            
+          }
+        else break;
         }
       }
     }   /* Starting optimizations */

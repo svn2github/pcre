@@ -72,6 +72,18 @@ Version 8.10 03-Jun-2010
 18. If the last data line in a file for pcretest does not have a newline on
     the end, a newline was missing in the output. 
     
+19. The default pcre_chartables.c file recognizes only ASCII characters (values 
+    less than 128) in its various bitmaps. However, there is a facility for 
+    generating tables according to the current locale when PCRE is compiled. It 
+    turns out that in some environments, 0x85 and 0xa0, which are Unicode space 
+    characters, are recognized by isspace() and therefore were getting set in 
+    these tables. This caused a problem in UTF-8 mode when pcre_study() was
+    used to create a list of bytes that can start a match. For \s, it was
+    including 0x85 and 0xa0, which of course cannot start UTF-8 characters. I
+    have changed the code so that only real ASCII characters (less than 128)
+    are set in this case because the \s etc escapes are documented as 
+    recognizing only ASCII characters. (When PCRE_UCP is set - see 9 above - 
+    the code is different altogether.)
 
 
 Version 8.02 19-Mar-2010

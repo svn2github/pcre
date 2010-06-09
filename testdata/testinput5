@@ -777,4 +777,6 @@ can't tell the difference.) --/
     
 /\v+A/SI8
 
+/\s?xxx\s/8SI
+
 /-- End of testinput5 --/

@@ -519,6 +519,7 @@ set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless,
 {
 register int c;
 int yield = SSB_DONE;
+int table_limit = utf8? 16:32;
 
 #if 0
 /* ========================================================================= */
@@ -676,13 +677,14 @@ do
       case OP_HSPACE:
       SET_BIT(0x09);
       SET_BIT(0x20);
-      SET_BIT(0xA0);
       if (utf8)
         {
+        SET_BIT(0xC2);  /* For U+00A0 */ 
         SET_BIT(0xE1);  /* For U+1680, U+180E */
         SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
         SET_BIT(0xE3);  /* For U+3000 */
         }
+      else SET_BIT(0xA0);
       try_next = FALSE;
       break;
 
@@ -692,24 +694,33 @@ do
       SET_BIT(0x0B);
       SET_BIT(0x0C);
       SET_BIT(0x0D);
-      SET_BIT(0x85);
-      if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */
+      if (utf8) 
+        { 
+        SET_BIT(0xC2);  /* For U+0085 */ 
+        SET_BIT(0xE2);  /* For U+2028, U+2029 */
+        } 
+      else SET_BIT(0x85);
       try_next = FALSE;
       break;
 
       /* Single character types set the bits and stop. Note that if PCRE_UCP
       is set, we do not see these op codes because \d etc are converted to
       properties. Therefore, these apply in the case when only ASCII characters
-      are recognized to match the types. */
+      are recognized to match the types. In UTF-8 mode, we must restrict 
+      ourselves to bytes less than 128, as otherwise there can be confusion 
+      with bytes in the middle of UTF-8 characters. (In a "traditional" 
+      environment, the tables will only recognize ASCII characters anyway, but 
+      in at least one Windows environment, some higher bytes bits were set in 
+      the tables.) */
 
       case OP_NOT_DIGIT:
-      for (c = 0; c < 32; c++)
+      for (c = 0; c < table_limit; c++)
         start_bits[c] |= ~cd->cbits[c+cbit_digit];
       try_next = FALSE;
       break;
 
       case OP_DIGIT:
-      for (c = 0; c < 32; c++)
+      for (c = 0; c < table_limit; c++)
         start_bits[c] |= cd->cbits[c+cbit_digit];
       try_next = FALSE;
       break;
@@ -718,7 +729,7 @@ do
       discard it. */
 
       case OP_NOT_WHITESPACE:
-      for (c = 0; c < 32; c++)
+      for (c = 0; c < table_limit; c++)
         {
         int d = cd->cbits[c+cbit_space];
         if (c == 1) d &= ~0x08;
@@ -731,7 +742,7 @@ do
       discard it. */
 
       case OP_WHITESPACE:
-      for (c = 0; c < 32; c++)
+      for (c = 0; c < table_limit; c++)
         {
         int d = cd->cbits[c+cbit_space];
         if (c == 1) d &= ~0x08;
@@ -741,13 +752,13 @@ do
       break;
 
       case OP_NOT_WORDCHAR:
-      for (c = 0; c < 32; c++)
+      for (c = 0; c < table_limit; c++)
         start_bits[c] |= ~cd->cbits[c+cbit_word];
       try_next = FALSE;
       break;
 
       case OP_WORDCHAR:
-      for (c = 0; c < 32; c++)
+      for (c = 0; c < table_limit; c++)
         start_bits[c] |= cd->cbits[c+cbit_word];
       try_next = FALSE;
       break;
@@ -789,13 +800,14 @@ do
         case OP_HSPACE:
         SET_BIT(0x09);
         SET_BIT(0x20);
-        SET_BIT(0xA0);
         if (utf8)
           {
+          SET_BIT(0xC2);  /* For U+00A0 */ 
           SET_BIT(0xE1);  /* For U+1680, U+180E */
           SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
           SET_BIT(0xE3);  /* For U+3000 */
           }
+        else SET_BIT(0xA0);
         break;
 
         case OP_ANYNL:
@@ -804,17 +816,21 @@ do
         SET_BIT(0x0B);
         SET_BIT(0x0C);
         SET_BIT(0x0D);
-        SET_BIT(0x85);
-        if (utf8) SET_BIT(0xE2);    /* For U+2028, U+2029 */
+        if (utf8) 
+          {
+          SET_BIT(0xC2);  /* For U+0085 */ 
+          SET_BIT(0xE2);  /* For U+2028, U+2029 */
+          } 
+        else SET_BIT(0x85);
         break;
 
         case OP_NOT_DIGIT:
-        for (c = 0; c < 32; c++)
+        for (c = 0; c < table_limit; c++)
           start_bits[c] |= ~cd->cbits[c+cbit_digit];
         break;
 
         case OP_DIGIT:
-        for (c = 0; c < 32; c++)
+        for (c = 0; c < table_limit; c++)
           start_bits[c] |= cd->cbits[c+cbit_digit];
         break;
 
@@ -822,7 +838,7 @@ do
         discard it. */
 
         case OP_NOT_WHITESPACE:
-        for (c = 0; c < 32; c++)
+        for (c = 0; c < table_limit; c++)
           {
           int d = cd->cbits[c+cbit_space];
           if (c == 1) d &= ~0x08;
@@ -834,7 +850,7 @@ do
         discard it. */
 
         case OP_WHITESPACE:
-        for (c = 0; c < 32; c++)
+        for (c = 0; c < table_limit; c++)
           {
           int d = cd->cbits[c+cbit_space];
           if (c == 1) d &= ~0x08;
@@ -843,12 +859,12 @@ do
         break;
 
         case OP_NOT_WORDCHAR:
-        for (c = 0; c < 32; c++)
+        for (c = 0; c < table_limit; c++)
           start_bits[c] |= ~cd->cbits[c+cbit_word];
         break;
 
         case OP_WORDCHAR:
-        for (c = 0; c < 32; c++)
+        for (c = 0; c < table_limit; c++)
           start_bits[c] |= cd->cbits[c+cbit_word];
         break;
         }
