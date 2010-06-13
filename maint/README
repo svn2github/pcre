@@ -35,6 +35,12 @@ MultiStage2.py   A Python script that generates the file pcre_ucd.c from three
                  Unicode web site. Run this script in the "maint" directory.
                  The generated file contains the tables for a 2-stage lookup
                  of Unicode properties.
+                 
+pcre_chartables.c.non-standard
+                 This is a set of character tables that came from a Windows
+                 system. It has characters greater than 128 that are set as
+                 spaces, amongst other things. I kept it so that it can be
+                 used for testing from time to time.    
 
 README           This file.
 
