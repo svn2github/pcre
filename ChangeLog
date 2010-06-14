@@ -77,12 +77,18 @@ Version 8.10 03-Jun-2010
     generating tables according to the current locale when PCRE is compiled. It 
     turns out that in some environments, 0x85 and 0xa0, which are Unicode space 
     characters, are recognized by isspace() and therefore were getting set in 
-    these tables. This caused a problem in UTF-8 mode when pcre_study() was
-    used to create a list of bytes that can start a match. For \s, it was
-    including 0x85 and 0xa0, which of course cannot start UTF-8 characters. I
-    have changed the code so that only real ASCII characters (less than 128)
-    and the correct starting bytes for UTF-8 encodings are set in this case.
-    (When PCRE_UCP is set - see 9 above - the code is different altogether.)
+    these tables, and indeed these tables seem to approximate to ISO 8859. This
+    caused a problem in UTF-8 mode when pcre_study() was used to create a list
+    of bytes that can start a match. For \s, it was including 0x85 and 0xa0,
+    which of course cannot start UTF-8 characters. I have changed the code so
+    that only real ASCII characters (less than 128) and the correct starting
+    bytes for UTF-8 encodings are set for characters greater than 127 when in 
+    UTF-8 mode. (When PCRE_UCP is set - see 9 above - the code is different
+    altogether.)
+    
+20. Added the /T option to pcretest so as to be able to run tests with non-
+    standard character tables, thus making it possible to include the tests
+    used for 19 above in the standard set of tests.  
 
 
 Version 8.02 19-Mar-2010
