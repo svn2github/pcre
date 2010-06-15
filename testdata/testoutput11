@@ -864,6 +864,12 @@ with the handling of backtracking verbs. ---/
     AAAC
  0: AC
 
+/--- Don't loop! ---/
+
+/(*:A)A+(*SKIP:A)(B|Z)/K
+    AAAC
+No match, mark = A
+
 /--- This should succeed, as a non-existent skip name disables the skip ---/ 
 
 /A(*MARK:A)A+(*SKIP:B)(B|Z) | AC/xK

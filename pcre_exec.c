@@ -6069,13 +6069,28 @@ for(;;)
 
   switch(rc)
     {
-    /* NOMATCH and PRUNE advance by one character. If MATCH_SKIP_ARG reaches
-    this level it means that a MARK that matched the SKIP's arg was not found.
-    We treat this as NOMATCH. THEN at this level acts exactly like PRUNE. */
+    /* SKIP passes back the next starting point explicitly, but if it is the 
+    same as the match we have just done, treat it as NOMATCH. */
+
+    case MATCH_SKIP:
+    if (md->start_match_ptr != start_match)
+      {  
+      new_start_match = md->start_match_ptr;
+      break;
+      }
+    /* Fall through */
+    
+    /* If MATCH_SKIP_ARG reaches this level it means that a MARK that matched
+    the SKIP's arg was not found. We also treat this as NOMATCH. */
+     
+    case MATCH_SKIP_ARG:
+    /* Fall through */ 
+
+    /* NOMATCH and PRUNE advance by one character. THEN at this level acts
+    exactly like PRUNE. */
 
     case MATCH_NOMATCH:
     case MATCH_PRUNE:
-    case MATCH_SKIP_ARG:
     case MATCH_THEN:
     new_start_match = start_match + 1;
 #ifdef SUPPORT_UTF8
@@ -6083,12 +6098,6 @@ for(;;)
       while(new_start_match < end_subject && (*new_start_match & 0xc0) == 0x80)
         new_start_match++;
 #endif
-    break;
-
-    /* SKIP passes back the next starting point explicitly. */
-
-    case MATCH_SKIP:
-    new_start_match = md->start_match_ptr;
     break;
 
     /* COMMIT disables the bumpalong, but otherwise behaves as NOMATCH. */
