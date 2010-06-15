@@ -89,6 +89,11 @@ Version 8.10 03-Jun-2010
 20. Added the /T option to pcretest so as to be able to run tests with non-
     standard character tables, thus making it possible to include the tests
     used for 19 above in the standard set of tests.  
+    
+21. A pattern such as (?&t)(?#()(?(DEFINE)(?<t>a)) which has a forward 
+    reference to a subpattern the other side of a comment that contains an 
+    opening parenthesis caused either an internal compiling error, or a 
+    reference to the wrong subpattern.
 
 
 Version 8.02 19-Mar-2010

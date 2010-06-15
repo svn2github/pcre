@@ -478,4 +478,9 @@ however, we need the complication for Perl. ---/
 /(\w+)b(*COMMIT)\w{2}/
     abbb
 
+/--- Check opening parens in comment when seeking forward reference. ---/ 
+
+/(?&t)(?#()(?(DEFINE)(?<t>a))/
+    bac
+
 /-- End of testinput11 --/

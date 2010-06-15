@@ -936,4 +936,10 @@ No match
     abbb
 No match
 
+/--- Check opening parens in comment when seeking forward reference. ---/ 
+
+/(?&t)(?#()(?(DEFINE)(?<t>a))/
+    bac
+ 0: a
+
 /-- End of testinput11 --/
