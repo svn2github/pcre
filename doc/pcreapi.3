@@ -1443,12 +1443,17 @@ sample program.
   PCRE_NO_START_OPTIMIZE
 .sp
 There are a number of optimizations that \fBpcre_exec()\fP uses at the start of
-a match, in order to speed up the process. For example, if it is known that a
-match must start with a specific character, it searches the subject for that
-character, and fails immediately if it cannot find it, without actually running
-the main matching function. When callouts are in use, these optimizations can
-cause them to be skipped. This option disables the "start-up" optimizations,
-causing performance to suffer, but ensuring that the callouts do occur.
+a match, in order to speed up the process. For example, if it is known that an
+unanchored match must start with a specific character, it searches the subject
+for that character, and fails immediately if it cannot find it, without
+actually running the main matching function. This means that a special item 
+such as (*COMMIT) at the start of a pattern is not considered until after a
+suitable starting point for the match has been found. When callouts are in use,
+these "start-up" optimizations can cause them to be skipped if the pattern is
+never actually used. The PCRE_NO_START_OPTIMIZE option disables the start-up
+optimizations, causing performance to suffer, but ensuring that the callouts do
+occur, and that items such as (*COMMIT) are considered at every possible
+starting position in the subject string.
 .sp
   PCRE_NO_UTF8_CHECK
 .sp
@@ -1995,9 +2000,10 @@ Here is an example of a simple call to \fBpcre_dfa_exec()\fP:
 The unused bits of the \fIoptions\fP argument for \fBpcre_dfa_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
-PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST,
-and PCRE_DFA_RESTART. All but the last four of these are exactly the same as
-for \fBpcre_exec()\fP, so their description is not repeated here.
+PCRE_NO_UTF8_CHECK, PCRE_BSR_ANYCRLF, PCRE_BSR_UNICODE, PCRE_NO_START_OPTIMIZE,
+PCRE_PARTIAL_HARD, PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART.
+All but the last four of these are exactly the same as for \fBpcre_exec()\fP,
+so their description is not repeated here.
 .sp
   PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT
@@ -2131,6 +2137,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 June 2010
+Last updated: 15 June 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
