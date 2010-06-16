@@ -1130,9 +1130,9 @@ dealing with. The very first call may not start with a parenthesis. */
 if (ptr[0] == CHAR_LEFT_PARENTHESIS)
   {
   /* Handle specials such as (*SKIP) or (*UTF8) etc. */
-  
+
   if (ptr[1] == CHAR_ASTERISK) ptr += 2;
- 
+
   /* Handle a normal, unnamed capturing parenthesis. */
 
   else if (ptr[1] != CHAR_QUESTION_MARK)
@@ -1150,14 +1150,14 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
     ptr += 3;
     dup_parens = TRUE;
     }
-    
+
   /* Handle comments; all characters are allowed until a ket is reached. */
 
   else if (ptr[2] == CHAR_NUMBER_SIGN)
     {
     for (ptr += 3; *ptr != 0; ptr++) if (*ptr == CHAR_RIGHT_PARENTHESIS) break;
     goto FAIL_EXIT;
-    }  
+    }
 
   /* Handle a condition. If it is an assertion, just carry on so that it
   is processed as normal. If not, skip to the closing parenthesis of the
@@ -1295,7 +1295,7 @@ for (; *ptr != 0; ptr++)
   else if (*ptr == CHAR_RIGHT_PARENTHESIS)
     {
     if (dup_parens && *count < hwm_count) *count = hwm_count;
-    goto FAIL_EXIT; 
+    goto FAIL_EXIT;
     }
 
   else if (*ptr == CHAR_VERTICAL_LINE && dup_parens)

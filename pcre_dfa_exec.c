@@ -3109,14 +3109,14 @@ for (;;)
         while (current_subject < end_subject)
           {
           register unsigned int c = *current_subject;
-          if ((start_bits[c/8] & (1 << (c&7))) == 0) 
+          if ((start_bits[c/8] & (1 << (c&7))) == 0)
             {
             current_subject++;
 #ifdef SUPPORT_UTF8
             if (utf8)
-              while(current_subject < end_subject && 
+              while(current_subject < end_subject &&
                     (*current_subject & 0xc0) == 0x80) current_subject++;
-#endif            
+#endif
             }
           else break;
           }

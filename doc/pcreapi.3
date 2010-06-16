@@ -1446,7 +1446,7 @@ There are a number of optimizations that \fBpcre_exec()\fP uses at the start of
 a match, in order to speed up the process. For example, if it is known that an
 unanchored match must start with a specific character, it searches the subject
 for that character, and fails immediately if it cannot find it, without
-actually running the main matching function. This means that a special item 
+actually running the main matching function. This means that a special item
 such as (*COMMIT) at the start of a pattern is not considered until after a
 suitable starting point for the match has been found. When callouts are in use,
 these "start-up" optimizations can cause them to be skipped if the pattern is

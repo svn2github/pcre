@@ -1,10 +1,10 @@
 News about PCRE releases
 ------------------------
 
-Release 8.10 03-Jun-2010
+Release 8.10 16-Jun-2010
 ------------------------
 
-There are two major additions: support for (*MAKR) and friends, and the option
+There are two major additions: support for (*MARK) and friends, and the option
 PCRE_UCP, which changes the behaviour of \b, \d, \s, and \w (and their
 opposites) so that they make use of Unicode properties. There are also a number
 of lesser new features, and several bugs have been fixed. A new option,

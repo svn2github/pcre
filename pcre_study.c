@@ -504,7 +504,7 @@ Arguments:
   start_bits     the starting bitmap
   cbit type      the type of character wanted
   table_limit    32 for non-UTF-8; 16 for UTF-8
-  cd             the block with char table pointers 
+  cd             the block with char table pointers
 
 Returns:         nothing
 */
@@ -513,7 +513,7 @@ static void
 set_type_bits(uschar *start_bits, int cbit_type, int table_limit,
   compile_data *cd)
 {
-register int c; 
+register int c;
 for (c = 0; c < table_limit; c++) start_bits[c] |= cd->cbits[c+cbit_type];
 if (table_limit == 32) return;
 for (c = 128; c < 256; c++)
@@ -522,9 +522,9 @@ for (c = 128; c < 256; c++)
     {
     uschar buff[8];
     (void)_pcre_ord2utf8(c, buff);
-    SET_BIT(buff[0]);  
-    }  
-  }        
+    SET_BIT(buff[0]);
+    }
+  }
 }
 
 
@@ -535,16 +535,16 @@ for (c = 128; c < 256; c++)
 /* This function sets starting bits for a negative character type such as \D.
 In UTF-8 mode, we can only do a direct setting for bytes less than 128, as
 otherwise there can be confusion with bytes in the middle of UTF-8 characters.
-Unlike in the positive case, where we can set appropriate starting bits for 
+Unlike in the positive case, where we can set appropriate starting bits for
 specific high-valued UTF-8 characters, in this case we have to set the bits for
-all high-valued characters. The lowest is 0xc2, but we overkill by starting at 
+all high-valued characters. The lowest is 0xc2, but we overkill by starting at
 0xc0 (192) for simplicity.
 
 Arguments:
   start_bits     the starting bitmap
   cbit type      the type of character wanted
   table_limit    32 for non-UTF-8; 16 for UTF-8
-  cd             the block with char table pointers 
+  cd             the block with char table pointers
 
 Returns:         nothing
 */
@@ -553,7 +553,7 @@ static void
 set_nottype_bits(uschar *start_bits, int cbit_type, int table_limit,
   compile_data *cd)
 {
-register int c; 
+register int c;
 for (c = 0; c < table_limit; c++) start_bits[c] |= ~cd->cbits[c+cbit_type];
 if (table_limit != 32) for (c = 24; c < 32; c++) start_bits[c] = 0xff;
 }
@@ -750,7 +750,7 @@ do
       SET_BIT(0x20);
       if (utf8)
         {
-        SET_BIT(0xC2);  /* For U+00A0 */ 
+        SET_BIT(0xC2);  /* For U+00A0 */
         SET_BIT(0xE1);  /* For U+1680, U+180E */
         SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
         SET_BIT(0xE3);  /* For U+3000 */
@@ -765,18 +765,18 @@ do
       SET_BIT(0x0B);
       SET_BIT(0x0C);
       SET_BIT(0x0D);
-      if (utf8) 
-        { 
-        SET_BIT(0xC2);  /* For U+0085 */ 
+      if (utf8)
+        {
+        SET_BIT(0xC2);  /* For U+0085 */
         SET_BIT(0xE2);  /* For U+2028, U+2029 */
-        } 
+        }
       else SET_BIT(0x85);
       try_next = FALSE;
       break;
 
       /* Single character types set the bits and stop. Note that if PCRE_UCP
       is set, we do not see these op codes because \d etc are converted to
-      properties. Therefore, these apply in the case when only characters less 
+      properties. Therefore, these apply in the case when only characters less
       than 256 are recognized to match the types. */
 
       case OP_NOT_DIGIT:
@@ -817,7 +817,7 @@ do
       set_type_bits(start_bits, cbit_word, table_limit, cd);
       try_next = FALSE;
       break;
- 
+
       /* One or more character type fudges the pointer and restarts, knowing
       it will hit a single character type and stop there. */
 
@@ -857,7 +857,7 @@ do
         SET_BIT(0x20);
         if (utf8)
           {
-          SET_BIT(0xC2);  /* For U+00A0 */ 
+          SET_BIT(0xC2);  /* For U+00A0 */
           SET_BIT(0xE1);  /* For U+1680, U+180E */
           SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
           SET_BIT(0xE3);  /* For U+3000 */
@@ -871,11 +871,11 @@ do
         SET_BIT(0x0B);
         SET_BIT(0x0C);
         SET_BIT(0x0D);
-        if (utf8) 
+        if (utf8)
           {
-          SET_BIT(0xC2);  /* For U+0085 */ 
+          SET_BIT(0xC2);  /* For U+0085 */
           SET_BIT(0xE2);  /* For U+2028, U+2029 */
-          } 
+          }
         else SET_BIT(0x85);
         break;
 
@@ -892,7 +892,7 @@ do
 
         case OP_NOT_WHITESPACE:
         set_nottype_bits(start_bits, cbit_space, table_limit, cd);
-        start_bits[1] |= 0x08; 
+        start_bits[1] |= 0x08;
         break;
 
         /* The cbit_space table has vertical tab as whitespace; we have to

@@ -5959,14 +5959,14 @@ for(;;)
       while (start_match < end_subject)
         {
         register unsigned int c = *start_match;
-        if ((start_bits[c/8] & (1 << (c&7))) == 0) 
+        if ((start_bits[c/8] & (1 << (c&7))) == 0)
           {
           start_match++;
 #ifdef SUPPORT_UTF8
           if (utf8)
             while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
               start_match++;
-#endif            
+#endif
           }
         else break;
         }
@@ -6069,22 +6069,22 @@ for(;;)
 
   switch(rc)
     {
-    /* SKIP passes back the next starting point explicitly, but if it is the 
+    /* SKIP passes back the next starting point explicitly, but if it is the
     same as the match we have just done, treat it as NOMATCH. */
 
     case MATCH_SKIP:
     if (md->start_match_ptr != start_match)
-      {  
+      {
       new_start_match = md->start_match_ptr;
       break;
       }
     /* Fall through */
-    
+
     /* If MATCH_SKIP_ARG reaches this level it means that a MARK that matched
     the SKIP's arg was not found. We also treat this as NOMATCH. */
-     
+
     case MATCH_SKIP_ARG:
-    /* Fall through */ 
+    /* Fall through */
 
     /* NOMATCH and PRUNE advance by one character. THEN at this level acts
     exactly like PRUNE. */

@@ -194,12 +194,12 @@ static uschar *pbuffer = NULL;
 *         Alternate character tables             *
 *************************************************/
 
-/* By default, the "tables" pointer when calling PCRE is set to NULL, thereby 
-using the default tables of the library. However, the T option can be used to 
-select alternate sets of tables, for different kinds of testing. Note also that 
+/* By default, the "tables" pointer when calling PCRE is set to NULL, thereby
+using the default tables of the library. However, the T option can be used to
+select alternate sets of tables, for different kinds of testing. Note also that
 the L (locale) option also adjusts the tables. */
 
-/* This is the set of tables distributed as default with PCRE. It recognizes 
+/* This is the set of tables distributed as default with PCRE. It recognizes
 only ASCII characters. */
 
 static const unsigned char tables0[] = {
@@ -371,8 +371,8 @@ graph, print, punct, and cntrl. Other classes are built from combinations. */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 240-247 */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};/* 248-255 */
 
-/* This is a set of tables that came orginally from a Windows user. It seems to 
-be at least an approximation of ISO 8859. In particular, there are characters 
+/* This is a set of tables that came orginally from a Windows user. It seems to
+be at least an approximation of ISO 8859. In particular, there are characters
 greater than 128 that are marked as spaces, letters, etc. */
 
 static const unsigned char tables1[] = {
@@ -1567,25 +1567,25 @@ while (!done)
       case 'Z': debug_lengths = 0; break;
       case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
       case '?': options |= PCRE_NO_UTF8_CHECK; break;
-      
+
       case 'T':
       switch (*pp++)
         {
         case '0': tables = tables0; break;
         case '1': tables = tables1; break;
-        
+
         case '\r':
         case '\n':
-        case ' ':  
-        case 0:   
+        case ' ':
+        case 0:
         fprintf(outfile, "** Missing table number after /T\n");
-        goto SKIP_DATA; 
-         
-        default:  
+        goto SKIP_DATA;
+
+        default:
         fprintf(outfile, "** Bad table number \"%c\" after /T\n", pp[-1]);
-        goto SKIP_DATA;   
+        goto SKIP_DATA;
         }
-      break;      
+      break;
 
       case 'L':
       ppp = pp;
@@ -2081,12 +2081,12 @@ while (!done)
 
       new_free(re);
       if (extra != NULL) new_free(extra);
-      if (locale_set) 
+      if (locale_set)
         {
         new_free((void *)tables);
         setlocale(LC_CTYPE, "C");
-        locale_set = 0; 
-        } 
+        locale_set = 0;
+        }
       continue;  /* With next regex */
       }
     }        /* End of non-POSIX compile */
@@ -2137,9 +2137,9 @@ while (!done)
         {
         if (len > 0)    /* Reached EOF without hitting a newline */
           {
-          fprintf(outfile, "\n"); 
+          fprintf(outfile, "\n");
           break;
-          } 
+          }
         done = 1;
         goto CONTINUE;
         }
@@ -2434,7 +2434,7 @@ while (!done)
       }
     *q = 0;
     len = (int)(q - dbuffer);
-    
+
     /* Move the data to the end of the buffer so that a read over the end of
     the buffer will be seen by valgrind, even if it doesn't cause a crash. If
     we are using the POSIX interface, we must include the terminating zero. */

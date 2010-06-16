@@ -287,16 +287,16 @@ The \fB/S\fP modifier causes \fBpcre_study()\fP to be called after the
 expression has been compiled, and the results used when the expression is
 matched.
 .P
-The \fB/T\fP modifier must be followed by a single digit. It causes a specific 
-set of built-in character tables to be passed to \fBpcre_compile()\fP. It is 
-used in the standard PCRE tests to check behaviour with different character 
+The \fB/T\fP modifier must be followed by a single digit. It causes a specific
+set of built-in character tables to be passed to \fBpcre_compile()\fP. It is
+used in the standard PCRE tests to check behaviour with different character
 tables. The digit specifies the tables as follows:
 .sp
-  0   the default ASCII tables, as distributed in 
+  0   the default ASCII tables, as distributed in
         pcre_chartables.c.dist
   1   a set of tables defining ISO 8859 characters
 .sp
-In table 1, some characters whose codes are greater than 128 are identified as 
+In table 1, some characters whose codes are greater than 128 are identified as
 letters, digits, spaces, etc.
 .
 .

@@ -318,8 +318,9 @@ example,
 For this reason, it must be the last modifier. The given locale is set,
 <b>pcre_maketables()</b> is called to build a set of character tables for the
 locale, and this is then passed to <b>pcre_compile()</b> when compiling the
-regular expression. Without an <b>/L</b> modifier, NULL is passed as the tables
-pointer; that is, <b>/L</b> applies only to the expression on which it appears.
+regular expression. Without an <b>/L</b> (or <b>/T</b>) modifier, NULL is passed
+as the tables pointer; that is, <b>/L</b> applies only to the expression on
+which it appears.
 </P>
 <P>
 The <b>/M</b> modifier causes the size of memory block used to hold the compiled
@@ -329,6 +330,19 @@ pattern to be output.
 The <b>/S</b> modifier causes <b>pcre_study()</b> to be called after the
 expression has been compiled, and the results used when the expression is
 matched.
+</P>
+<P>
+The <b>/T</b> modifier must be followed by a single digit. It causes a specific
+set of built-in character tables to be passed to <b>pcre_compile()</b>. It is
+used in the standard PCRE tests to check behaviour with different character
+tables. The digit specifies the tables as follows:
+<pre>
+  0   the default ASCII tables, as distributed in
+        pcre_chartables.c.dist
+  1   a set of tables defining ISO 8859 characters
+</pre>
+In table 1, some characters whose codes are greater than 128 are identified as
+letters, digits, spaces, etc.
 </P>
 <br><b>
 Using the POSIX wrapper API
@@ -726,7 +740,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 16 May 2010
+Last updated: 14 June 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

@@ -2122,161 +2122,166 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
 
        There  are a number of optimizations that pcre_exec() uses at the start
        of a match, in order to speed up the process. For  example,  if  it  is
-       known  that  a  match must start with a specific character, it searches
-       the subject for that character, and fails immediately if it cannot find
-       it,  without actually running the main matching function. When callouts
-       are in use, these optimizations can cause  them  to  be  skipped.  This
-       option  disables  the  "start-up" optimizations, causing performance to
-       suffer, but ensuring that the callouts do occur.
+       known that an unanchored match must start with a specific character, it
+       searches the subject for that character, and fails  immediately  if  it
+       cannot  find  it,  without actually running the main matching function.
+       This means that a special item such as (*COMMIT) at the start of a pat-
+       tern  is  not  considered until after a suitable starting point for the
+       match has been found. When callouts are in use, these "start-up"  opti-
+       mizations can cause them to be skipped if the pattern is never actually
+       used. The PCRE_NO_START_OPTIMIZE option disables the start-up optimiza-
+       tions, causing performance to suffer, but ensuring that the callouts do
+       occur, and that items such as (*COMMIT) are considered at every  possi-
+       ble starting position in the subject string.
 
          PCRE_NO_UTF8_CHECK
 
        When PCRE_UTF8 is set at compile time, the validity of the subject as a
-       UTF-8  string is automatically checked when pcre_exec() is subsequently
-       called.  The value of startoffset is also checked  to  ensure  that  it
-       points  to  the start of a UTF-8 character. There is a discussion about
-       the validity of UTF-8 strings in the section on UTF-8  support  in  the
-       main  pcre  page.  If  an  invalid  UTF-8  sequence  of bytes is found,
-       pcre_exec() returns the error PCRE_ERROR_BADUTF8. If  startoffset  con-
+       UTF-8 string is automatically checked when pcre_exec() is  subsequently
+       called.   The  value  of  startoffset is also checked to ensure that it
+       points to the start of a UTF-8 character. There is a  discussion  about
+       the  validity  of  UTF-8 strings in the section on UTF-8 support in the
+       main pcre page. If  an  invalid  UTF-8  sequence  of  bytes  is  found,
+       pcre_exec()  returns  the error PCRE_ERROR_BADUTF8. If startoffset con-
        tains an invalid value, PCRE_ERROR_BADUTF8_OFFSET is returned.
 
-       If  you  already  know that your subject is valid, and you want to skip
-       these   checks   for   performance   reasons,   you   can    set    the
-       PCRE_NO_UTF8_CHECK  option  when calling pcre_exec(). You might want to
-       do this for the second and subsequent calls to pcre_exec() if  you  are
-       making  repeated  calls  to  find  all  the matches in a single subject
-       string. However, you should be  sure  that  the  value  of  startoffset
-       points  to  the  start of a UTF-8 character. When PCRE_NO_UTF8_CHECK is
-       set, the effect of passing an invalid UTF-8 string as a subject,  or  a
-       value  of startoffset that does not point to the start of a UTF-8 char-
+       If you already know that your subject is valid, and you  want  to  skip
+       these    checks    for   performance   reasons,   you   can   set   the
+       PCRE_NO_UTF8_CHECK option when calling pcre_exec(). You might  want  to
+       do  this  for the second and subsequent calls to pcre_exec() if you are
+       making repeated calls to find all  the  matches  in  a  single  subject
+       string.  However,  you  should  be  sure  that the value of startoffset
+       points to the start of a UTF-8 character.  When  PCRE_NO_UTF8_CHECK  is
+       set,  the  effect of passing an invalid UTF-8 string as a subject, or a
+       value of startoffset that does not point to the start of a UTF-8  char-
        acter, is undefined. Your program may crash.
 
          PCRE_PARTIAL_HARD
          PCRE_PARTIAL_SOFT
 
-       These options turn on the partial matching feature. For backwards  com-
-       patibility,  PCRE_PARTIAL is a synonym for PCRE_PARTIAL_SOFT. A partial
-       match occurs if the end of the subject string is reached  successfully,
-       but  there  are not enough subject characters to complete the match. If
-       this happens when PCRE_PARTIAL_HARD  is  set,  pcre_exec()  immediately
-       returns  PCRE_ERROR_PARTIAL.  Otherwise,  if  PCRE_PARTIAL_SOFT is set,
-       matching continues by testing any other alternatives. Only if they  all
-       fail  is  PCRE_ERROR_PARTIAL  returned (instead of PCRE_ERROR_NOMATCH).
+       These  options turn on the partial matching feature. For backwards com-
+       patibility, PCRE_PARTIAL is a synonym for PCRE_PARTIAL_SOFT. A  partial
+       match  occurs if the end of the subject string is reached successfully,
+       but there are not enough subject characters to complete the  match.  If
+       this  happens  when  PCRE_PARTIAL_HARD  is set, pcre_exec() immediately
+       returns PCRE_ERROR_PARTIAL. Otherwise,  if  PCRE_PARTIAL_SOFT  is  set,
+       matching  continues by testing any other alternatives. Only if they all
+       fail is PCRE_ERROR_PARTIAL returned  (instead  of  PCRE_ERROR_NOMATCH).
        The portion of the string that was inspected when the partial match was
-       found  is  set  as  the first matching string. There is a more detailed
+       found is set as the first matching string. There  is  a  more  detailed
        discussion in the pcrepartial documentation.
 
    The string to be matched by pcre_exec()
 
-       The subject string is passed to pcre_exec() as a pointer in subject,  a
+       The  subject string is passed to pcre_exec() as a pointer in subject, a
        length (in bytes) in length, and a starting byte offset in startoffset.
        In UTF-8 mode, the byte offset must point to the start of a UTF-8 char-
-       acter.  Unlike  the pattern string, the subject may contain binary zero
-       bytes. When the starting offset is zero, the search for a match  starts
-       at  the  beginning  of  the subject, and this is by far the most common
+       acter. Unlike the pattern string, the subject may contain  binary  zero
+       bytes.  When the starting offset is zero, the search for a match starts
+       at the beginning of the subject, and this is by  far  the  most  common
        case.
 
-       A non-zero starting offset is useful when searching for  another  match
-       in  the same subject by calling pcre_exec() again after a previous suc-
-       cess.  Setting startoffset differs from just passing over  a  shortened
-       string  and  setting  PCRE_NOTBOL  in the case of a pattern that begins
+       A  non-zero  starting offset is useful when searching for another match
+       in the same subject by calling pcre_exec() again after a previous  suc-
+       cess.   Setting  startoffset differs from just passing over a shortened
+       string and setting PCRE_NOTBOL in the case of  a  pattern  that  begins
        with any kind of lookbehind. For example, consider the pattern
 
          \Biss\B
 
-       which finds occurrences of "iss" in the middle of  words.  (\B  matches
-       only  if  the  current position in the subject is not a word boundary.)
-       When applied to the string "Mississipi" the first call  to  pcre_exec()
-       finds  the  first  occurrence. If pcre_exec() is called again with just
-       the remainder of the subject,  namely  "issipi",  it  does  not  match,
+       which  finds  occurrences  of "iss" in the middle of words. (\B matches
+       only if the current position in the subject is not  a  word  boundary.)
+       When  applied  to the string "Mississipi" the first call to pcre_exec()
+       finds the first occurrence. If pcre_exec() is called  again  with  just
+       the  remainder  of  the  subject,  namely  "issipi", it does not match,
        because \B is always false at the start of the subject, which is deemed
-       to be a word boundary. However, if pcre_exec()  is  passed  the  entire
+       to  be  a  word  boundary. However, if pcre_exec() is passed the entire
        string again, but with startoffset set to 4, it finds the second occur-
-       rence of "iss" because it is able to look behind the starting point  to
+       rence  of "iss" because it is able to look behind the starting point to
        discover that it is preceded by a letter.
 
-       If  a  non-zero starting offset is passed when the pattern is anchored,
+       If a non-zero starting offset is passed when the pattern  is  anchored,
        one attempt to match at the given offset is made. This can only succeed
-       if  the  pattern  does  not require the match to be at the start of the
+       if the pattern does not require the match to be at  the  start  of  the
        subject.
 
    How pcre_exec() returns captured substrings
 
-       In general, a pattern matches a certain portion of the subject, and  in
-       addition,  further  substrings  from  the  subject may be picked out by
-       parts of the pattern. Following the usage  in  Jeffrey  Friedl's  book,
-       this  is  called "capturing" in what follows, and the phrase "capturing
-       subpattern" is used for a fragment of a pattern that picks out  a  sub-
-       string.  PCRE  supports several other kinds of parenthesized subpattern
+       In  general, a pattern matches a certain portion of the subject, and in
+       addition, further substrings from the subject  may  be  picked  out  by
+       parts  of  the  pattern.  Following the usage in Jeffrey Friedl's book,
+       this is called "capturing" in what follows, and the  phrase  "capturing
+       subpattern"  is  used for a fragment of a pattern that picks out a sub-
+       string. PCRE supports several other kinds of  parenthesized  subpattern
        that do not cause substrings to be captured.
 
        Captured substrings are returned to the caller via a vector of integers
-       whose  address is passed in ovector. The number of elements in the vec-
-       tor is passed in ovecsize, which must be a non-negative  number.  Note:
+       whose address is passed in ovector. The number of elements in the  vec-
+       tor  is  passed in ovecsize, which must be a non-negative number. Note:
        this argument is NOT the size of ovector in bytes.
 
-       The  first  two-thirds of the vector is used to pass back captured sub-
-       strings, each substring using a pair of integers. The  remaining  third
-       of  the  vector is used as workspace by pcre_exec() while matching cap-
-       turing subpatterns, and is not available for passing back  information.
-       The  number passed in ovecsize should always be a multiple of three. If
+       The first two-thirds of the vector is used to pass back  captured  sub-
+       strings,  each  substring using a pair of integers. The remaining third
+       of the vector is used as workspace by pcre_exec() while  matching  cap-
+       turing  subpatterns, and is not available for passing back information.
+       The number passed in ovecsize should always be a multiple of three.  If
        it is not, it is rounded down.
 
-       When a match is successful, information about  captured  substrings  is
-       returned  in  pairs  of integers, starting at the beginning of ovector,
-       and continuing up to two-thirds of its length at the  most.  The  first
-       element  of  each pair is set to the byte offset of the first character
-       in a substring, and the second is set to the byte offset of  the  first
-       character  after  the end of a substring. Note: these values are always
+       When  a  match  is successful, information about captured substrings is
+       returned in pairs of integers, starting at the  beginning  of  ovector,
+       and  continuing  up  to two-thirds of its length at the most. The first
+       element of each pair is set to the byte offset of the  first  character
+       in  a  substring, and the second is set to the byte offset of the first
+       character after the end of a substring. Note: these values  are  always
        byte offsets, even in UTF-8 mode. They are not character counts.
 
-       The first pair of integers, ovector[0]  and  ovector[1],  identify  the
-       portion  of  the subject string matched by the entire pattern. The next
-       pair is used for the first capturing subpattern, and so on.  The  value
+       The  first  pair  of  integers, ovector[0] and ovector[1], identify the
+       portion of the subject string matched by the entire pattern.  The  next
+       pair  is  used for the first capturing subpattern, and so on. The value
        returned by pcre_exec() is one more than the highest numbered pair that
-       has been set.  For example, if two substrings have been  captured,  the
-       returned  value is 3. If there are no capturing subpatterns, the return
+       has  been  set.  For example, if two substrings have been captured, the
+       returned value is 3. If there are no capturing subpatterns, the  return
        value from a successful match is 1, indicating that just the first pair
        of offsets has been set.
 
        If a capturing subpattern is matched repeatedly, it is the last portion
        of the string that it matched that is returned.
 
-       If the vector is too small to hold all the captured substring  offsets,
+       If  the vector is too small to hold all the captured substring offsets,
        it is used as far as possible (up to two-thirds of its length), and the
-       function returns a value of zero. If the substring offsets are  not  of
-       interest,  pcre_exec()  may  be  called with ovector passed as NULL and
-       ovecsize as zero. However, if the pattern contains back references  and
-       the  ovector is not big enough to remember the related substrings, PCRE
-       has to get additional memory for use during matching. Thus it  is  usu-
+       function  returns  a value of zero. If the substring offsets are not of
+       interest, pcre_exec() may be called with ovector  passed  as  NULL  and
+       ovecsize  as zero. However, if the pattern contains back references and
+       the ovector is not big enough to remember the related substrings,  PCRE
+       has  to  get additional memory for use during matching. Thus it is usu-
        ally advisable to supply an ovector.
 
        The pcre_fullinfo() function can be used to find out how many capturing
-       subpatterns there are in a compiled  pattern.  The  smallest  size  for
-       ovector  that  will allow for n captured substrings, in addition to the
+       subpatterns  there  are  in  a  compiled pattern. The smallest size for
+       ovector that will allow for n captured substrings, in addition  to  the
        offsets of the substring matched by the whole pattern, is (n+1)*3.
 
-       It is possible for capturing subpattern number n+1 to match  some  part
+       It  is  possible for capturing subpattern number n+1 to match some part
        of the subject when subpattern n has not been used at all. For example,
-       if the string "abc" is matched  against  the  pattern  (a|(z))(bc)  the
+       if  the  string  "abc"  is  matched against the pattern (a|(z))(bc) the
        return from the function is 4, and subpatterns 1 and 3 are matched, but
-       2 is not. When this happens, both values in  the  offset  pairs  corre-
+       2  is  not.  When  this happens, both values in the offset pairs corre-
        sponding to unused subpatterns are set to -1.
 
-       Offset  values  that correspond to unused subpatterns at the end of the
-       expression are also set to -1. For example,  if  the  string  "abc"  is
-       matched  against the pattern (abc)(x(yz)?)? subpatterns 2 and 3 are not
-       matched. The return from the function is 2, because  the  highest  used
+       Offset values that correspond to unused subpatterns at the end  of  the
+       expression  are  also  set  to  -1. For example, if the string "abc" is
+       matched against the pattern (abc)(x(yz)?)? subpatterns 2 and 3 are  not
+       matched.  The  return  from the function is 2, because the highest used
        capturing subpattern number is 1. However, you can refer to the offsets
-       for the second and third capturing subpatterns if  you  wish  (assuming
+       for  the  second  and third capturing subpatterns if you wish (assuming
        the vector is large enough, of course).
 
-       Some  convenience  functions  are  provided for extracting the captured
+       Some convenience functions are provided  for  extracting  the  captured
        substrings as separate strings. These are described below.
 
    Error return values from pcre_exec()
 
-       If pcre_exec() fails, it returns a negative number. The  following  are
+       If  pcre_exec()  fails, it returns a negative number. The following are
        defined in the header file:
 
          PCRE_ERROR_NOMATCH        (-1)
@@ -2285,7 +2290,7 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
 
          PCRE_ERROR_NULL           (-2)
 
-       Either  code  or  subject  was  passed as NULL, or ovector was NULL and
+       Either code or subject was passed as NULL,  or  ovector  was  NULL  and
        ovecsize was not zero.
 
          PCRE_ERROR_BADOPTION      (-3)
@@ -2294,74 +2299,74 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
 
          PCRE_ERROR_BADMAGIC       (-4)
 
-       PCRE stores a 4-byte "magic number" at the start of the compiled  code,
+       PCRE  stores a 4-byte "magic number" at the start of the compiled code,
        to catch the case when it is passed a junk pointer and to detect when a
        pattern that was compiled in an environment of one endianness is run in
-       an  environment  with the other endianness. This is the error that PCRE
+       an environment with the other endianness. This is the error  that  PCRE
        gives when the magic number is not present.
 
          PCRE_ERROR_UNKNOWN_OPCODE (-5)
 
        While running the pattern match, an unknown item was encountered in the
-       compiled  pattern.  This  error  could be caused by a bug in PCRE or by
+       compiled pattern. This error could be caused by a bug  in  PCRE  or  by
        overwriting of the compiled pattern.
 
          PCRE_ERROR_NOMEMORY       (-6)
 
-       If a pattern contains back references, but the ovector that  is  passed
+       If  a  pattern contains back references, but the ovector that is passed
        to pcre_exec() is not big enough to remember the referenced substrings,
-       PCRE gets a block of memory at the start of matching to  use  for  this
-       purpose.  If the call via pcre_malloc() fails, this error is given. The
+       PCRE  gets  a  block of memory at the start of matching to use for this
+       purpose. If the call via pcre_malloc() fails, this error is given.  The
        memory is automatically freed at the end of matching.
 
-       This error is also given if pcre_stack_malloc() fails  in  pcre_exec().
-       This  can happen only when PCRE has been compiled with --disable-stack-
+       This  error  is also given if pcre_stack_malloc() fails in pcre_exec().
+       This can happen only when PCRE has been compiled with  --disable-stack-
        for-recursion.
 
          PCRE_ERROR_NOSUBSTRING    (-7)
 
-       This error is used by the pcre_copy_substring(),  pcre_get_substring(),
+       This  error is used by the pcre_copy_substring(), pcre_get_substring(),
        and  pcre_get_substring_list()  functions  (see  below).  It  is  never
        returned by pcre_exec().
 
          PCRE_ERROR_MATCHLIMIT     (-8)
 
-       The backtracking limit, as specified by  the  match_limit  field  in  a
-       pcre_extra  structure  (or  defaulted) was reached. See the description
+       The  backtracking  limit,  as  specified  by the match_limit field in a
+       pcre_extra structure (or defaulted) was reached.  See  the  description
        above.
 
          PCRE_ERROR_CALLOUT        (-9)
 
        This error is never generated by pcre_exec() itself. It is provided for
-       use  by  callout functions that want to yield a distinctive error code.
+       use by callout functions that want to yield a distinctive  error  code.
        See the pcrecallout documentation for details.
 
          PCRE_ERROR_BADUTF8        (-10)
 
-       A string that contains an invalid UTF-8 byte sequence was passed  as  a
+       A  string  that contains an invalid UTF-8 byte sequence was passed as a
        subject.
 
          PCRE_ERROR_BADUTF8_OFFSET (-11)
 
        The UTF-8 byte sequence that was passed as a subject was valid, but the
-       value of startoffset did not point to the beginning of a UTF-8  charac-
+       value  of startoffset did not point to the beginning of a UTF-8 charac-
        ter.
 
          PCRE_ERROR_PARTIAL        (-12)
 
-       The  subject  string did not match, but it did match partially. See the
+       The subject string did not match, but it did match partially.  See  the
        pcrepartial documentation for details of partial matching.
 
          PCRE_ERROR_BADPARTIAL     (-13)
 
-       This code is no longer in  use.  It  was  formerly  returned  when  the
-       PCRE_PARTIAL  option  was used with a compiled pattern containing items
-       that were  not  supported  for  partial  matching.  From  release  8.00
+       This  code  is  no  longer  in  use.  It was formerly returned when the
+       PCRE_PARTIAL option was used with a compiled pattern  containing  items
+       that  were  not  supported  for  partial  matching.  From  release 8.00
        onwards, there are no restrictions on partial matching.
 
          PCRE_ERROR_INTERNAL       (-14)
 
-       An  unexpected  internal error has occurred. This error could be caused
+       An unexpected internal error has occurred. This error could  be  caused
        by a bug in PCRE or by overwriting of the compiled pattern.
 
          PCRE_ERROR_BADCOUNT       (-15)
@@ -2371,7 +2376,7 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
          PCRE_ERROR_RECURSIONLIMIT (-21)
 
        The internal recursion limit, as specified by the match_limit_recursion
-       field  in  a  pcre_extra  structure (or defaulted) was reached. See the
+       field in a pcre_extra structure (or defaulted)  was  reached.  See  the
        description above.
 
          PCRE_ERROR_BADNEWLINE     (-23)
@@ -2394,78 +2399,78 @@ EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
        int pcre_get_substring_list(const char *subject,
             int *ovector, int stringcount, const char ***listptr);
 
-       Captured substrings can be  accessed  directly  by  using  the  offsets
-       returned  by  pcre_exec()  in  ovector.  For convenience, the functions
+       Captured  substrings  can  be  accessed  directly  by using the offsets
+       returned by pcre_exec() in  ovector.  For  convenience,  the  functions
        pcre_copy_substring(),    pcre_get_substring(),    and    pcre_get_sub-
-       string_list()  are  provided for extracting captured substrings as new,
-       separate, zero-terminated strings. These functions identify  substrings
-       by  number.  The  next section describes functions for extracting named
+       string_list() are provided for extracting captured substrings  as  new,
+       separate,  zero-terminated strings. These functions identify substrings
+       by number. The next section describes functions  for  extracting  named
        substrings.
 
-       A substring that contains a binary zero is correctly extracted and  has
-       a  further zero added on the end, but the result is not, of course, a C
-       string.  However, you can process such a string  by  referring  to  the
-       length  that  is  returned  by  pcre_copy_substring() and pcre_get_sub-
+       A  substring that contains a binary zero is correctly extracted and has
+       a further zero added on the end, but the result is not, of course, a  C
+       string.   However,  you  can  process such a string by referring to the
+       length that is  returned  by  pcre_copy_substring()  and  pcre_get_sub-
        string().  Unfortunately, the interface to pcre_get_substring_list() is
-       not  adequate for handling strings containing binary zeros, because the
+       not adequate for handling strings containing binary zeros, because  the
        end of the final string is not independently indicated.
 
-       The first three arguments are the same for all  three  of  these  func-
-       tions:  subject  is  the subject string that has just been successfully
+       The  first  three  arguments  are the same for all three of these func-
+       tions: subject is the subject string that has  just  been  successfully
        matched, ovector is a pointer to the vector of integer offsets that was
        passed to pcre_exec(), and stringcount is the number of substrings that
-       were captured by the match, including the substring  that  matched  the
+       were  captured  by  the match, including the substring that matched the
        entire regular expression. This is the value returned by pcre_exec() if
-       it is greater than zero. If pcre_exec() returned zero, indicating  that
-       it  ran out of space in ovector, the value passed as stringcount should
+       it  is greater than zero. If pcre_exec() returned zero, indicating that
+       it ran out of space in ovector, the value passed as stringcount  should
        be the number of elements in the vector divided by three.
 
-       The functions pcre_copy_substring() and pcre_get_substring() extract  a
-       single  substring,  whose  number  is given as stringnumber. A value of
-       zero extracts the substring that matched the  entire  pattern,  whereas
-       higher  values  extract  the  captured  substrings.  For pcre_copy_sub-
-       string(), the string is placed in buffer,  whose  length  is  given  by
-       buffersize,  while  for  pcre_get_substring()  a new block of memory is
-       obtained via pcre_malloc, and its address is  returned  via  stringptr.
-       The  yield  of  the function is the length of the string, not including
+       The  functions pcre_copy_substring() and pcre_get_substring() extract a
+       single substring, whose number is given as  stringnumber.  A  value  of
+       zero  extracts  the  substring that matched the entire pattern, whereas
+       higher values  extract  the  captured  substrings.  For  pcre_copy_sub-
+       string(),  the  string  is  placed  in buffer, whose length is given by
+       buffersize, while for pcre_get_substring() a new  block  of  memory  is
+       obtained  via  pcre_malloc,  and its address is returned via stringptr.
+       The yield of the function is the length of the  string,  not  including
        the terminating zero, or one of these error codes:
 
          PCRE_ERROR_NOMEMORY       (-6)
 
-       The buffer was too small for pcre_copy_substring(), or the  attempt  to
+       The  buffer  was too small for pcre_copy_substring(), or the attempt to
        get memory failed for pcre_get_substring().
 
          PCRE_ERROR_NOSUBSTRING    (-7)
 
        There is no substring whose number is stringnumber.
 
-       The  pcre_get_substring_list()  function  extracts  all  available sub-
-       strings and builds a list of pointers to them. All this is  done  in  a
+       The pcre_get_substring_list()  function  extracts  all  available  sub-
+       strings  and  builds  a list of pointers to them. All this is done in a
        single block of memory that is obtained via pcre_malloc. The address of
-       the memory block is returned via listptr, which is also  the  start  of
-       the  list  of  string pointers. The end of the list is marked by a NULL
-       pointer. The yield of the function is zero if all  went  well,  or  the
+       the  memory  block  is returned via listptr, which is also the start of
+       the list of string pointers. The end of the list is marked  by  a  NULL
+       pointer.  The  yield  of  the function is zero if all went well, or the
        error code
 
          PCRE_ERROR_NOMEMORY       (-6)
 
        if the attempt to get the memory block failed.
 
-       When  any of these functions encounter a substring that is unset, which
-       can happen when capturing subpattern number n+1 matches  some  part  of
-       the  subject, but subpattern n has not been used at all, they return an
+       When any of these functions encounter a substring that is unset,  which
+       can  happen  when  capturing subpattern number n+1 matches some part of
+       the subject, but subpattern n has not been used at all, they return  an
        empty string. This can be distinguished from a genuine zero-length sub-
-       string  by inspecting the appropriate offset in ovector, which is nega-
+       string by inspecting the appropriate offset in ovector, which is  nega-
        tive for unset substrings.
 
-       The two convenience functions pcre_free_substring() and  pcre_free_sub-
-       string_list()  can  be  used  to free the memory returned by a previous
+       The  two convenience functions pcre_free_substring() and pcre_free_sub-
+       string_list() can be used to free the memory  returned  by  a  previous
        call  of  pcre_get_substring()  or  pcre_get_substring_list(),  respec-
-       tively.  They  do  nothing  more  than  call the function pointed to by
-       pcre_free, which of course could be called directly from a  C  program.
-       However,  PCRE is used in some situations where it is linked via a spe-
-       cial  interface  to  another  programming  language  that  cannot   use
-       pcre_free  directly;  it is for these cases that the functions are pro-
+       tively. They do nothing more than  call  the  function  pointed  to  by
+       pcre_free,  which  of course could be called directly from a C program.
+       However, PCRE is used in some situations where it is linked via a  spe-
+       cial   interface  to  another  programming  language  that  cannot  use
+       pcre_free directly; it is for these cases that the functions  are  pro-
        vided.
 
 
@@ -2484,7 +2489,7 @@ EXTRACTING CAPTURED SUBSTRINGS BY NAME
             int stringcount, const char *stringname,
             const char **stringptr);
 
-       To extract a substring by name, you first have to find associated  num-
+       To  extract a substring by name, you first have to find associated num-
        ber.  For example, for this pattern
 
          (a+)b(?<xxx>\d+)...
@@ -2493,35 +2498,35 @@ EXTRACTING CAPTURED SUBSTRINGS BY NAME
        be unique (PCRE_DUPNAMES was not set), you can find the number from the
        name by calling pcre_get_stringnumber(). The first argument is the com-
        piled pattern, and the second is the name. The yield of the function is
-       the  subpattern  number,  or PCRE_ERROR_NOSUBSTRING (-7) if there is no
+       the subpattern number, or PCRE_ERROR_NOSUBSTRING (-7) if  there  is  no
        subpattern of that name.
 
        Given the number, you can extract the substring directly, or use one of
        the functions described in the previous section. For convenience, there
        are also two functions that do the whole job.
 
-       Most   of   the   arguments    of    pcre_copy_named_substring()    and
-       pcre_get_named_substring()  are  the  same  as  those for the similarly
-       named functions that extract by number. As these are described  in  the
-       previous  section,  they  are not re-described here. There are just two
+       Most    of    the    arguments   of   pcre_copy_named_substring()   and
+       pcre_get_named_substring() are the same  as  those  for  the  similarly
+       named  functions  that extract by number. As these are described in the
+       previous section, they are not re-described here. There  are  just  two
        differences:
 
-       First, instead of a substring number, a substring name is  given.  Sec-
+       First,  instead  of a substring number, a substring name is given. Sec-
        ond, there is an extra argument, given at the start, which is a pointer
-       to the compiled pattern. This is needed in order to gain access to  the
+       to  the compiled pattern. This is needed in order to gain access to the
        name-to-number translation table.
 
-       These  functions call pcre_get_stringnumber(), and if it succeeds, they
-       then call pcre_copy_substring() or pcre_get_substring(),  as  appropri-
-       ate.  NOTE:  If PCRE_DUPNAMES is set and there are duplicate names, the
+       These functions call pcre_get_stringnumber(), and if it succeeds,  they
+       then  call  pcre_copy_substring() or pcre_get_substring(), as appropri-
+       ate. NOTE: If PCRE_DUPNAMES is set and there are duplicate  names,  the
        behaviour may not be what you want (see the next section).
 
        Warning: If the pattern uses the (?| feature to set up multiple subpat-
-       terns  with  the  same number, as described in the section on duplicate
-       subpattern numbers in the pcrepattern page, you  cannot  use  names  to
-       distinguish  the  different subpatterns, because names are not included
-       in the compiled code. The matching process uses only numbers. For  this
-       reason,  the  use of different names for subpatterns of the same number
+       terns with the same number, as described in the  section  on  duplicate
+       subpattern  numbers  in  the  pcrepattern page, you cannot use names to
+       distinguish the different subpatterns, because names are  not  included
+       in  the compiled code. The matching process uses only numbers. For this
+       reason, the use of different names for subpatterns of the  same  number
        causes an error at compile time.
 
 
@@ -2530,51 +2535,51 @@ DUPLICATE SUBPATTERN NAMES
        int pcre_get_stringtable_entries(const pcre *code,
             const char *name, char **first, char **last);
 
-       When a pattern is compiled with the  PCRE_DUPNAMES  option,  names  for
-       subpatterns  are not required to be unique. (Duplicate names are always
-       allowed for subpatterns with the same number, created by using the  (?|
-       feature.  Indeed,  if  such subpatterns are named, they are required to
+       When  a  pattern  is  compiled with the PCRE_DUPNAMES option, names for
+       subpatterns are not required to be unique. (Duplicate names are  always
+       allowed  for subpatterns with the same number, created by using the (?|
+       feature. Indeed, if such subpatterns are named, they  are  required  to
        use the same names.)
 
        Normally, patterns with duplicate names are such that in any one match,
-       only  one of the named subpatterns participates. An example is shown in
+       only one of the named subpatterns participates. An example is shown  in
        the pcrepattern documentation.
 
-       When   duplicates   are   present,   pcre_copy_named_substring()    and
-       pcre_get_named_substring()  return the first substring corresponding to
-       the given name that is set. If  none  are  set,  PCRE_ERROR_NOSUBSTRING
-       (-7)  is  returned;  no  data  is returned. The pcre_get_stringnumber()
-       function returns one of the numbers that are associated with the  name,
+       When    duplicates   are   present,   pcre_copy_named_substring()   and
+       pcre_get_named_substring() return the first substring corresponding  to
+       the  given  name  that  is set. If none are set, PCRE_ERROR_NOSUBSTRING
+       (-7) is returned; no  data  is  returned.  The  pcre_get_stringnumber()
+       function  returns one of the numbers that are associated with the name,
        but it is not defined which it is.
 
-       If  you want to get full details of all captured substrings for a given
-       name, you must use  the  pcre_get_stringtable_entries()  function.  The
+       If you want to get full details of all captured substrings for a  given
+       name,  you  must  use  the pcre_get_stringtable_entries() function. The
        first argument is the compiled pattern, and the second is the name. The
-       third and fourth are pointers to variables which  are  updated  by  the
+       third  and  fourth  are  pointers to variables which are updated by the
        function. After it has run, they point to the first and last entries in
-       the name-to-number table  for  the  given  name.  The  function  itself
-       returns  the  length  of  each entry, or PCRE_ERROR_NOSUBSTRING (-7) if
-       there are none. The format of the table is described above in the  sec-
-       tion  entitled  Information  about  a  pattern.  Given all the relevant
-       entries for the name, you can extract each of their numbers, and  hence
+       the  name-to-number  table  for  the  given  name.  The function itself
+       returns the length of each entry,  or  PCRE_ERROR_NOSUBSTRING  (-7)  if
+       there  are none. The format of the table is described above in the sec-
+       tion entitled Information about a  pattern.   Given  all  the  relevant
+       entries  for the name, you can extract each of their numbers, and hence
        the captured data, if any.
 
 
 FINDING ALL POSSIBLE MATCHES
 
-       The  traditional  matching  function  uses a similar algorithm to Perl,
+       The traditional matching function uses a  similar  algorithm  to  Perl,
        which stops when it finds the first match, starting at a given point in
-       the  subject.  If you want to find all possible matches, or the longest
-       possible match, consider using the alternative matching  function  (see
-       below)  instead.  If you cannot use the alternative function, but still
-       need to find all possible matches, you can kludge it up by  making  use
+       the subject. If you want to find all possible matches, or  the  longest
+       possible  match,  consider using the alternative matching function (see
+       below) instead. If you cannot use the alternative function,  but  still
+       need  to  find all possible matches, you can kludge it up by making use
        of the callout facility, which is described in the pcrecallout documen-
        tation.
 
        What you have to do is to insert a callout right at the end of the pat-
-       tern.   When your callout function is called, extract and save the cur-
-       rent matched substring. Then return  1,  which  forces  pcre_exec()  to
-       backtrack  and  try other alternatives. Ultimately, when it runs out of
+       tern.  When your callout function is called, extract and save the  cur-
+       rent  matched  substring.  Then  return  1, which forces pcre_exec() to
+       backtrack and try other alternatives. Ultimately, when it runs  out  of
        matches, pcre_exec() will yield PCRE_ERROR_NOMATCH.
 
 
@@ -2585,26 +2590,26 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
             int options, int *ovector, int ovecsize,
             int *workspace, int wscount);
 
-       The function pcre_dfa_exec()  is  called  to  match  a  subject  string
-       against  a  compiled pattern, using a matching algorithm that scans the
-       subject string just once, and does not backtrack.  This  has  different
-       characteristics  to  the  normal  algorithm, and is not compatible with
-       Perl. Some of the features of PCRE patterns are not  supported.  Never-
-       theless,  there are times when this kind of matching can be useful. For
-       a discussion of the two matching algorithms, and  a  list  of  features
-       that  pcre_dfa_exec() does not support, see the pcrematching documenta-
+       The  function  pcre_dfa_exec()  is  called  to  match  a subject string
+       against a compiled pattern, using a matching algorithm that  scans  the
+       subject  string  just  once, and does not backtrack. This has different
+       characteristics to the normal algorithm, and  is  not  compatible  with
+       Perl.  Some  of the features of PCRE patterns are not supported. Never-
+       theless, there are times when this kind of matching can be useful.  For
+       a  discussion  of  the  two matching algorithms, and a list of features
+       that pcre_dfa_exec() does not support, see the pcrematching  documenta-
        tion.
 
-       The arguments for the pcre_dfa_exec() function  are  the  same  as  for
+       The  arguments  for  the  pcre_dfa_exec()  function are the same as for
        pcre_exec(), plus two extras. The ovector argument is used in a differ-
-       ent way, and this is described below. The other  common  arguments  are
-       used  in  the  same way as for pcre_exec(), so their description is not
+       ent  way,  and  this is described below. The other common arguments are
+       used in the same way as for pcre_exec(), so their  description  is  not
        repeated here.
 
-       The two additional arguments provide workspace for  the  function.  The
-       workspace  vector  should  contain at least 20 elements. It is used for
+       The  two  additional  arguments provide workspace for the function. The
+       workspace vector should contain at least 20 elements. It  is  used  for
        keeping  track  of  multiple  paths  through  the  pattern  tree.  More
-       workspace  will  be  needed for patterns and subjects where there are a
+       workspace will be needed for patterns and subjects where  there  are  a
        lot of potential matches.
 
        Here is an example of a simple call to pcre_dfa_exec():
@@ -2626,11 +2631,12 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
    Option bits for pcre_dfa_exec()
 
-       The unused bits of the options argument  for  pcre_dfa_exec()  must  be
-       zero.  The  only  bits  that  may  be  set are PCRE_ANCHORED, PCRE_NEW-
+       The  unused  bits  of  the options argument for pcre_dfa_exec() must be
+       zero. The only bits  that  may  be  set  are  PCRE_ANCHORED,  PCRE_NEW-
        LINE_xxx,        PCRE_NOTBOL,        PCRE_NOTEOL,        PCRE_NOTEMPTY,
-       PCRE_NOTEMPTY_ATSTART, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, PCRE_PAR-
-       TIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART. All  but  the  last
+       PCRE_NOTEMPTY_ATSTART,      PCRE_NO_UTF8_CHECK,       PCRE_BSR_ANYCRLF,
+       PCRE_BSR_UNICODE,  PCRE_NO_START_OPTIMIZE, PCRE_PARTIAL_HARD, PCRE_PAR-
+       TIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART.  All but  the  last
        four  of  these  are  exactly  the  same  as  for pcre_exec(), so their
        description is not repeated here.
 
@@ -2753,7 +2759,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 June 2010
+       Last updated: 15 June 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
 

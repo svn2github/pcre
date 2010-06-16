@@ -260,15 +260,27 @@ PATTERN MODIFIERS
        For this reason, it must be the last modifier. The given locale is set,
        pcre_maketables()  is called to build a set of character tables for the
        locale, and this is then passed to pcre_compile()  when  compiling  the
-       regular  expression.  Without  an  /L  modifier,  NULL is passed as the
-       tables pointer; that is, /L applies only to the expression on which  it
-       appears.
+       regular  expression.  Without an /L (or /T) modifier, NULL is passed as
+       the tables pointer; that is, /L applies only to the expression on which
+       it appears.
 
        The  /M  modifier causes the size of memory block used to hold the com-
        piled pattern to be output.
 
        The /S modifier causes pcre_study() to be called after  the  expression
        has been compiled, and the results used when the expression is matched.
+
+       The  /T  modifier  must be followed by a single digit. It causes a spe-
+       cific set of built-in character tables to be passed to  pcre_compile().
+       It is used in the standard PCRE tests to check behaviour with different
+       character tables. The digit specifies the tables as follows:
+
+         0   the default ASCII tables, as distributed in
+               pcre_chartables.c.dist
+         1   a set of tables defining ISO 8859 characters
+
+       In table 1, some characters whose codes are greater than 128 are  iden-
+       tified as letters, digits, spaces, etc.
 
    Using the POSIX wrapper API
 
@@ -680,5 +692,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 16 May 2010
+       Last updated: 14 June 2010
        Copyright (c) 1997-2010 University of Cambridge.

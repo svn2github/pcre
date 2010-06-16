@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.10 03-Jun-2010
+Version 8.10 16-Jun-2010
 ------------------------
 
 1.  Added support for (*MARK:ARG) and for ARG additions to PRUNE, SKIP, and
@@ -42,7 +42,7 @@ Version 8.10 03-Jun-2010
 11. In UTF-8 mode, if a pattern that was compiled with PCRE_CASELESS was
     studied, and the match started with a letter with a code point greater than
     127 whose first byte was different to the first byte of the other case of
-    the letter, the other case of this starting letter was not recognized 
+    the letter, the other case of this starting letter was not recognized
     (#976).
 
 12. If a pattern that was studied started with a repeated Unicode property
@@ -68,31 +68,31 @@ Version 8.10 03-Jun-2010
 
 17. Added a check for running out of memory when PCRE is compiled with
     --disable-stack-for-recursion (#990).
-    
+
 18. If the last data line in a file for pcretest does not have a newline on
-    the end, a newline was missing in the output. 
-    
-19. The default pcre_chartables.c file recognizes only ASCII characters (values 
-    less than 128) in its various bitmaps. However, there is a facility for 
-    generating tables according to the current locale when PCRE is compiled. It 
-    turns out that in some environments, 0x85 and 0xa0, which are Unicode space 
-    characters, are recognized by isspace() and therefore were getting set in 
+    the end, a newline was missing in the output.
+
+19. The default pcre_chartables.c file recognizes only ASCII characters (values
+    less than 128) in its various bitmaps. However, there is a facility for
+    generating tables according to the current locale when PCRE is compiled. It
+    turns out that in some environments, 0x85 and 0xa0, which are Unicode space
+    characters, are recognized by isspace() and therefore were getting set in
     these tables, and indeed these tables seem to approximate to ISO 8859. This
     caused a problem in UTF-8 mode when pcre_study() was used to create a list
     of bytes that can start a match. For \s, it was including 0x85 and 0xa0,
     which of course cannot start UTF-8 characters. I have changed the code so
     that only real ASCII characters (less than 128) and the correct starting
-    bytes for UTF-8 encodings are set for characters greater than 127 when in 
+    bytes for UTF-8 encodings are set for characters greater than 127 when in
     UTF-8 mode. (When PCRE_UCP is set - see 9 above - the code is different
     altogether.)
-    
+
 20. Added the /T option to pcretest so as to be able to run tests with non-
     standard character tables, thus making it possible to include the tests
-    used for 19 above in the standard set of tests.  
-    
-21. A pattern such as (?&t)(?#()(?(DEFINE)(?<t>a)) which has a forward 
-    reference to a subpattern the other side of a comment that contains an 
-    opening parenthesis caused either an internal compiling error, or a 
+    used for 19 above in the standard set of tests.
+
+21. A pattern such as (?&t)(?#()(?(DEFINE)(?<t>a)) which has a forward
+    reference to a subpattern the other side of a comment that contains an
+    opening parenthesis caused either an internal compiling error, or a
     reference to the wrong subpattern.
 
 

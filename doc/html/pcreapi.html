@@ -1438,12 +1438,17 @@ sample program.
   PCRE_NO_START_OPTIMIZE
 </pre>
 There are a number of optimizations that <b>pcre_exec()</b> uses at the start of
-a match, in order to speed up the process. For example, if it is known that a
-match must start with a specific character, it searches the subject for that
-character, and fails immediately if it cannot find it, without actually running
-the main matching function. When callouts are in use, these optimizations can
-cause them to be skipped. This option disables the "start-up" optimizations,
-causing performance to suffer, but ensuring that the callouts do occur.
+a match, in order to speed up the process. For example, if it is known that an
+unanchored match must start with a specific character, it searches the subject
+for that character, and fails immediately if it cannot find it, without
+actually running the main matching function. This means that a special item
+such as (*COMMIT) at the start of a pattern is not considered until after a
+suitable starting point for the match has been found. When callouts are in use,
+these "start-up" optimizations can cause them to be skipped if the pattern is
+never actually used. The PCRE_NO_START_OPTIMIZE option disables the start-up
+optimizations, causing performance to suffer, but ensuring that the callouts do
+occur, and that items such as (*COMMIT) are considered at every possible
+starting position in the subject string.
 <pre>
   PCRE_NO_UTF8_CHECK
 </pre>
@@ -1987,9 +1992,10 @@ Option bits for <b>pcre_dfa_exec()</b>
 The unused bits of the <i>options</i> argument for <b>pcre_dfa_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
-PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST,
-and PCRE_DFA_RESTART. All but the last four of these are exactly the same as
-for <b>pcre_exec()</b>, so their description is not repeated here.
+PCRE_NO_UTF8_CHECK, PCRE_BSR_ANYCRLF, PCRE_BSR_UNICODE, PCRE_NO_START_OPTIMIZE,
+PCRE_PARTIAL_HARD, PCRE_PARTIAL_SOFT, PCRE_DFA_SHORTEST, and PCRE_DFA_RESTART.
+All but the last four of these are exactly the same as for <b>pcre_exec()</b>,
+so their description is not repeated here.
 <pre>
   PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT
@@ -2115,7 +2121,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 June 2010
+Last updated: 15 June 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

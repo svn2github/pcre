@@ -57,9 +57,9 @@ previously been set. */
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
-/* We include pcre.h before pcre_internal.h so that the PCRE library functions 
+/* We include pcre.h before pcre_internal.h so that the PCRE library functions
 are declared as "import" for Windows by defining PCRE_EXP_DECL as "import".
-This is needed even though pcre_internal.h itself includes pcre.h, because it 
+This is needed even though pcre_internal.h itself includes pcre.h, because it
 does so after it has set PCRE_EXP_DECL to "export" if it is not already set. */
 
 #include "pcre.h"
