@@ -848,6 +848,16 @@ Studying a pattern is also useful for non-anchored patterns that do not have a
 single fixed starting character. A bitmap of possible starting bytes is
 created. This speeds up finding a position in the subject at which to start
 matching.
+.P
+The two optimizations just described can be disabled by setting the 
+PCRE_NO_START_OPTIMIZE option when calling \fBpcre_exec()\fP or 
+\fBpcre_dfa_exec()\fP. You might want to do this if your pattern contains 
+callouts, or make use of (*MARK), and you make use of these in cases where 
+matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+.\" HTML <a href="#execoptions">
+.\" </a>
+below.
+.\"
 .
 .
 .\" HTML <a name="localesupport"></a>
@@ -2168,6 +2178,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 20 June 2010
+Last updated: 21 June 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
