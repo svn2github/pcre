@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.10 16-Jun-2010
+Version 8.10 25-Jun-2010
 ------------------------
 
 1.  Added support for (*MARK:ARG) and for ARG additions to PRUNE, SKIP, and

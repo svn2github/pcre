@@ -762,7 +762,8 @@ out of use. To avoid confusion, they have not been re-used.
   50  [this code is not in use]
   51  octal value is greater than \377 (not in UTF-8 mode)
   52  internal error: overran compiling workspace
-  53  internal error: previously-checked referenced subpattern not found
+  53  internal error: previously-checked referenced subpattern
+        not found
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
   56  inconsistent NEWLINE options
@@ -775,7 +776,8 @@ out of use. To avoid confusion, they have not been re-used.
   62  subpattern name expected
   63  digit expected after (?+
   64  ] is an invalid data character in JavaScript compatibility mode
-  65  different names for subpatterns of the same number are not allowed
+  65  different names for subpatterns of the same number are
+        not allowed
   66  (*MARK) must have an argument
   67  this version of PCRE is not compiled with PCRE_UCP support
 </pre>
@@ -844,6 +846,14 @@ Studying a pattern is also useful for non-anchored patterns that do not have a
 single fixed starting character. A bitmap of possible starting bytes is
 created. This speeds up finding a position in the subject at which to start
 matching.
+</P>
+<P>
+The two optimizations just described can be disabled by setting the
+PCRE_NO_START_OPTIMIZE option when calling <b>pcre_exec()</b> or
+<b>pcre_dfa_exec()</b>. You might want to do this if your pattern contains
+callouts, or make use of (*MARK), and you make use of these in cases where
+matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+<a href="#execoptions">below.</a>
 <a name="localesupport"></a></P>
 <br><a name="SEC10" href="#TOC1">LOCALE SUPPORT</a><br>
 <P>
@@ -1443,12 +1453,42 @@ unanchored match must start with a specific character, it searches the subject
 for that character, and fails immediately if it cannot find it, without
 actually running the main matching function. This means that a special item
 such as (*COMMIT) at the start of a pattern is not considered until after a
-suitable starting point for the match has been found. When callouts are in use,
-these "start-up" optimizations can cause them to be skipped if the pattern is
-never actually used. The PCRE_NO_START_OPTIMIZE option disables the start-up
-optimizations, causing performance to suffer, but ensuring that the callouts do
-occur, and that items such as (*COMMIT) are considered at every possible
-starting position in the subject string.
+suitable starting point for the match has been found. When callouts or (*MARK)
+items are in use, these "start-up" optimizations can cause them to be skipped
+if the pattern is never actually used. The start-up optimizations are in effect
+a pre-scan of the subject that takes place before the pattern is run.
+</P>
+<P>
+The PCRE_NO_START_OPTIMIZE option disables the start-up optimizations, possibly
+causing performance to suffer, but ensuring that in cases where the result is
+"no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
+are considered at every possible starting position in the subject string.
+Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
+Consider the pattern
+<pre>
+  (*COMMIT)ABC
+</pre>
+When this is compiled, PCRE records the fact that a match must start with the
+character "A". Suppose the subject string is "DEFABC". The start-up
+optimization scans along the subject, finds "A" and runs the first match
+attempt from there. The (*COMMIT) item means that the pattern must match the
+current starting position, which in this case, it does. However, if the same
+match is run with PCRE_NO_START_OPTIMIZE set, the initial scan along the
+subject string does not happen. The first match attempt is run starting from
+"D" and when this fails, (*COMMIT) prevents any further matches being tried, so
+the overall result is "no match". If the pattern is studied, more start-up
+optimizations may be used. For example, a minimum length for the subject may be
+recorded. Consider the pattern
+<pre>
+  (*MARK:A)(X|Y)
+</pre>
+The minimum length for a match is one character. If the subject is "ABC", there
+will be attempts to match "ABC", "BC", "C", and then finally an empty string.
+If the pattern is studied, the final attempt does not take place, because PCRE
+knows that the subject is too short, and so the (*MARK) is never encountered.
+In this case, studying the pattern does not affect the overall match result,
+which is still "no match", but it does affect the auxiliary information that is
+returned.
 <pre>
   PCRE_NO_UTF8_CHECK
 </pre>
@@ -2121,7 +2161,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 15 June 2010
+Last updated: 21 June 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>
