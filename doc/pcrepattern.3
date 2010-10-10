@@ -2644,6 +2644,24 @@ behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN) if the
 overall match fails. If (*THEN) is not directly inside an alternation, it acts
 like (*PRUNE).
 .
+.P
+The above verbs provide four different "strengths" of control when subsequent 
+matching fails. (*THEN) is the weakest, carrying on the match at the next
+alternation. (*PRUNE) comes next, failing the match at the current starting
+position, but allowing an advance to the next character (for an unanchored
+pattern). (*SKIP) is similar, except that the advance may be more than one
+character. (*COMMIT) is the strongest, causing the entire match to fail.
+.P
+If more than one is present in a pattern, the "stongest" one wins. For example,
+consider this pattern, where A, B, etc. are complex pattern fragments:
+.sp
+  (A(*COMMIT)B(*THEN)C|D)
+.sp
+Once A has matched, PCRE is committed to this match, at the current starting
+position. If subsequently B matches, but C does not, the normal (*THEN) action
+of trying the next alternation (that is, D) does not happen because (*COMMIT)
+overrides.
+.
 .
 .SH "SEE ALSO"
 .rs

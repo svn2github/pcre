@@ -10,6 +10,12 @@ Version 8.11 10-Oct-2010
     at the same level (in this case, to look for "c"). The Perl documentation 
     is clear that when (*THEN) is backtracked onto, it goes to the "next 
     alternative in the innermost enclosing group".
+    
+2.  (*COMMIT) was not overriding (*THEN), as it does in Perl. In a pattern 
+    such as   (A(*COMMIT)B(*THEN)C|D)  any failure after matching A should
+    result in overall failure. Similarly, (*COMMIT) now overrides (*PRUNE) and
+    (*SKIP), (*SKIP) overrides (*PRUNE) and (*THEN), and (*PRUNE) overrides 
+    (*THEN). 
 
 
 Version 8.10 25-Jun-2010

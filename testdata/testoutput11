@@ -942,4 +942,18 @@ No match
     bac
  0: a
 
+/--- COMMIT should override THEN ---/
+
+/(?>(*COMMIT)(?>yes|no)(*THEN)(*F))?/
+  yes
+No match
+
+/(?>(*COMMIT)(yes|no)(*THEN)(*F))?/
+  yes
+No match
+
+/^((yes|no)(*THEN)(*F))?/
+  yes
+ 0: 
+
 /-- End of testinput11 --/
