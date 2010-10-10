@@ -1514,8 +1514,9 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 3,                          /* RREF, NRREF                            */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
-  3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG,                */ \
-  1, 3, 1, 3,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */ \
+  3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG                 */ \
+  1, 3,                          /* SKIP, SKIP_ARG                         */ \
+  1+LINK_SIZE, 3+LINK_SIZE,      /* THEN, THEN_ARG                         */ \
   1, 1, 1, 3, 1                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
 
 

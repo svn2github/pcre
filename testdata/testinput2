@@ -3464,22 +3464,22 @@ with \Y. ---/
     abcde
 
 /A\NB./BZ
-  ACBD
-  ** Failers
-  A\nB
-  ACB\n   
+    ACBD
+    *** Failers
+    A\nB
+    ACB\n   
 
 /A\NB./sBZ
-  ACBD
-  ACB\n 
-  ** Failers
-  A\nB  
+    ACBD
+    ACB\n 
+    *** Failers
+    A\nB  
   
 /A\NB/<crlf>
-  A\nB
-  A\rB
-  ** Failers
-  A\r\nB    
+    A\nB
+    A\rB
+    ** Failers
+    A\r\nB    
 
 /\R+b/BZ
 
@@ -3490,5 +3490,13 @@ with \Y. ---/
 /\d*\R/BZ
 
 /\s*\R/BZ
+
+/-- Perl treats this one differently, not failing the second string. I believe
+    that is a bug in Perl. --/
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+    *** Failers 
+    abcxy 
 
 /-- End of testinput2 --/

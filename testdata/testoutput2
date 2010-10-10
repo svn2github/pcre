@@ -11043,13 +11043,13 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-  ACBD
+    ACBD
  0: ACBD
-  ** Failers
+    *** Failers
 No match
-  A\nB
+    A\nB
 No match
-  ACB\n   
+    ACB\n   
 No match
 
 /A\NB./sBZ
@@ -11062,23 +11062,23 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-  ACBD
+    ACBD
  0: ACBD
-  ACB\n 
+    ACB\n 
  0: ACB\x0a
-  ** Failers
+    *** Failers
 No match
-  A\nB  
+    A\nB  
 No match
   
 /A\NB/<crlf>
-  A\nB
+    A\nB
  0: A\x0aB
-  A\rB
+    A\rB
  0: A\x0dB
-  ** Failers
+    ** Failers
 No match
-  A\r\nB    
+    A\r\nB    
 No match
 
 /\R+b/BZ
@@ -11125,5 +11125,17 @@ No match
         Ket
         End
 ------------------------------------------------------------------
+
+/-- Perl treats this one differently, not failing the second string. I believe
+    that is a bug in Perl. --/
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+ 0: abcd
+ 1: abcd
+    *** Failers 
+No match
+    abcxy 
+No match
 
 /-- End of testinput2 --/

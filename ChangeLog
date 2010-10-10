@@ -1,6 +1,17 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.11 10-Oct-2010
+------------------------
+
+1.  (*THEN) was not working properly if there were untried alternatives prior
+    to it in the current branch. For example, in ((a|b)(*THEN)(*F)|c..) it 
+    backtracked to try for "b" instead of moving to the next alternative branch 
+    at the same level (in this case, to look for "c"). The Perl documentation 
+    is clear that when (*THEN) is backtracked onto, it goes to the "next 
+    alternative in the innermost enclosing group".
+
+
 Version 8.10 25-Jun-2010
 ------------------------
 

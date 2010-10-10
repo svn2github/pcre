@@ -2630,10 +2630,10 @@ matching name is found, normal "bumpalong" of one character happens (the
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
-This verb causes a skip to the next alternation if the rest of the pattern does
-not match. That is, it cancels pending backtracking, but only within the
-current alternation. Its name comes from the observation that it can be used
-for a pattern-based if-then-else block:
+This verb causes a skip to the next alternation in the innermost enclosing 
+group if the rest of the pattern does not match. That is, it cancels pending
+backtracking, but only within the current alternation. Its name comes from the
+observation that it can be used for a pattern-based if-then-else block:
 .sp
   ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 .sp
@@ -2666,6 +2666,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 18 May 2010
+Last updated: 10 October 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

@@ -1724,8 +1724,11 @@ for (;;)
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
-      case OP_THEN_ARG:
       code += code[1];
+      break;
+
+      case OP_THEN_ARG:
+      code += code[1+LINK_SIZE];
       break;
       }
 
@@ -1827,8 +1830,11 @@ for (;;)
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
-      case OP_THEN_ARG:
       code += code[1];
+      break;
+
+      case OP_THEN_ARG:
+      code += code[1+LINK_SIZE];
       break;
       }
 
@@ -2105,8 +2111,11 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
-    case OP_THEN_ARG:
     code += code[1];
+    break;
+
+    case OP_THEN_ARG:
+    code += code[1+LINK_SIZE];
     break;
 
     /* None of the remaining opcodes are required to match a character. */
@@ -4808,7 +4817,12 @@ for (;; ptr++)
               *errorcodeptr = ERR66;
               goto FAILED;
               }
-            *code++ = verbs[i].op;
+            *code = verbs[i].op;
+            if (*code++ == OP_THEN)
+              {
+              PUT(code, 0, code - bcptr->current_branch - 1);
+              code += LINK_SIZE; 
+              }  
             }
 
           else
@@ -4818,7 +4832,12 @@ for (;; ptr++)
               *errorcodeptr = ERR59;
               goto FAILED;
               }
-            *code++ = verbs[i].op_arg;
+            *code = verbs[i].op_arg;
+            if (*code++ == OP_THEN_ARG)
+              {
+              PUT(code, 0, code - bcptr->current_branch - 1);
+              code += LINK_SIZE; 
+              }  
             *code++ = arglen;
             memcpy(code, arg, arglen);
             code += arglen;
