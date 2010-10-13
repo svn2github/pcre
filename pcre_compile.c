@@ -3503,9 +3503,14 @@ for (;; ptr++)
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_word];
             continue;
 
+            /* Perl 5.004 onwards omits VT from \s, but we must preserve it
+            if it was previously set by something earlier in the character 
+            class. */ 
+
             case ESC_s:
-            for (c = 0; c < 32; c++) classbits[c] |= cbits[c+cbit_space];
-            classbits[1] &= ~0x08;   /* Perl 5.004 onwards omits VT from \s */
+            classbits[0] |= cbits[cbit_space];
+            classbits[1] |= cbits[cbit_space+1] & ~0x08; 
+            for (c = 2; c < 32; c++) classbits[c] |= cbits[c+cbit_space];
             continue;
 
             case ESC_S:

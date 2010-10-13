@@ -16,6 +16,11 @@ Version 8.11 10-Oct-2010
     result in overall failure. Similarly, (*COMMIT) now overrides (*PRUNE) and
     (*SKIP), (*SKIP) overrides (*PRUNE) and (*THEN), and (*PRUNE) overrides 
     (*THEN). 
+    
+3.  If \s appeared in a character class, it removed the VT character from
+    the class, even if it had been included by some previous item, for example
+    in [\x00-\xff\s]. (This was a bug related to the fact that VT is not part 
+    of \s, but is part of the POSIX "space" class.)  
 
 
 Version 8.10 25-Jun-2010

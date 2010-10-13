@@ -4073,4 +4073,7 @@
     ** Failers
     XABX   
 
+/[\x00-\xff\s]+/
+    \x0a\x0b\x0c\x0d
+
 /-- End of testinput1 --/

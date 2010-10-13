@@ -6658,4 +6658,8 @@ No match
     XABX   
 No match
 
+/[\x00-\xff\s]+/
+    \x0a\x0b\x0c\x0d
+ 0: \x0a\x0b\x0c\x0d
+
 /-- End of testinput1 --/
