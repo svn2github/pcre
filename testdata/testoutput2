@@ -11138,4 +11138,62 @@ No match
     abcxy 
 No match
 
+/(?<=abc)def/
+    abc\P\P
+Partial match: abc
+
+/abc$/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc$/m
+    abc
+ 0: abc
+    abc\n
+ 0: abc
+    abc\P\P
+Partial match: abc
+    abc\n\P\P 
+ 0: abc
+    abc\P
+ 0: abc
+    abc\n\P
+ 0: abc
+
+/abc\z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\Z/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\b/
+    abc
+ 0: abc
+    abc\P
+ 0: abc
+    abc\P\P
+Partial match: abc
+
+/abc\B/
+    abc
+No match
+    abc\P
+Partial match: abc
+    abc\P\P
+Partial match: abc
+
 /-- End of testinput2 --/

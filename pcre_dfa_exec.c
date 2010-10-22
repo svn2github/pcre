@@ -831,7 +831,12 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_EOD:
-      if (ptr >= end_subject) { ADD_ACTIVE(state_offset + 1, 0); }
+      if (ptr >= end_subject) 
+        { 
+        if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
+          could_continue = TRUE;
+        else { ADD_ACTIVE(state_offset + 1, 0); }
+        }
       break;
 
       /*-----------------------------------------------------------------*/
@@ -871,7 +876,9 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_EODN:
-      if (clen == 0 || (IS_NEWLINE(ptr) && ptr == end_subject - md->nllen))
+      if (clen == 0 && (md->moptions & PCRE_PARTIAL_HARD) != 0)
+        could_continue = TRUE;
+      else if (clen == 0 || (IS_NEWLINE(ptr) && ptr == end_subject - md->nllen))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 
@@ -879,7 +886,9 @@ for (;;)
       case OP_DOLL:
       if ((md->moptions & PCRE_NOTEOL) == 0)
         {
-        if (clen == 0 ||
+        if (clen == 0 && (md->moptions & PCRE_PARTIAL_HARD) != 0)
+          could_continue = TRUE;
+        else if (clen == 0 ||
             ((md->poptions & PCRE_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr) &&
                ((ims & PCRE_MULTILINE) != 0 || ptr == end_subject - md->nllen)
             ))
@@ -2744,8 +2753,8 @@ for (;;)
         ((md->moptions & PCRE_PARTIAL_SOFT) != 0 &&  /* Soft partial and */
          match_count < 0)                            /* no matches */
         ) &&                                         /* And... */
-        ptr >= end_subject &&                     /* Reached end of subject */
-        ptr > current_subject)                    /* Matched non-empty string */
+        ptr >= end_subject &&                  /* Reached end of subject */
+        ptr > md->start_used_ptr)              /* Inspected non-empty string */
       {
       if (offsetcount >= 2)
         {

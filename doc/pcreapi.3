@@ -1532,12 +1532,21 @@ These options turn on the partial matching feature. For backwards
 compatibility, PCRE_PARTIAL is a synonym for PCRE_PARTIAL_SOFT. A partial match
 occurs if the end of the subject string is reached successfully, but there are
 not enough subject characters to complete the match. If this happens when
-PCRE_PARTIAL_HARD is set, \fBpcre_exec()\fP immediately returns
-PCRE_ERROR_PARTIAL. Otherwise, if PCRE_PARTIAL_SOFT is set, matching continues
-by testing any other alternatives. Only if they all fail is PCRE_ERROR_PARTIAL
-returned (instead of PCRE_ERROR_NOMATCH). The portion of the string that
-was inspected when the partial match was found is set as the first matching
-string. There is a more detailed discussion in the
+PCRE_PARTIAL_SOFT (but not PCRE_PARTIAL_HARD) is set, matching continues by
+testing any remaining alternatives. Only if no complete match can be found is
+PCRE_ERROR_PARTIAL returned instead of PCRE_ERROR_NOMATCH. In other words,
+PCRE_PARTIAL_SOFT says that the caller is prepared to handle a partial match,
+but only if no complete match can be found.
+.P
+If PCRE_PARTIAL_HARD is set, it overrides PCRE_PARTIAL_SOFT. In this case, if a
+partial match is found, \fBpcre_exec()\fP immediately returns
+PCRE_ERROR_PARTIAL, without considering any other alternatives. In other words,
+when PCRE_PARTIAL_HARD is set, a partial match is considered to be more 
+important that an alternative complete match.
+.P
+In both cases, the portion of the string that was inspected when the partial
+match was found is set as the first matching string. There is a more detailed
+discussion of partial and multi-segment matching, with examples, in the
 .\" HREF
 \fBpcrepartial\fP
 .\"
@@ -2059,6 +2068,12 @@ is converted into PCRE_ERROR_PARTIAL if the end of the subject is reached,
 there have been no complete matches, but there is still at least one matching
 possibility. The portion of the string that was inspected when the longest
 partial match was found is set as the first matching string in both cases.
+There is a more detailed discussion of partial and multi-segment matching, with
+examples, in the
+.\" HREF
+\fBpcrepartial\fP
+.\"
+documentation.
 .sp
   PCRE_DFA_SHORTEST
 .sp
@@ -2178,6 +2193,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 June 2010
+Last updated: 22 October 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

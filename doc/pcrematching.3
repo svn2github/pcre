@@ -151,11 +151,13 @@ callouts.
 2. Because the alternative algorithm scans the subject string just once, and
 never needs to backtrack, it is possible to pass very long subject strings to
 the matching function in several pieces, checking for partial matching each
-time. The
+time. It is possible to do multi-segment matching using \fBpcre_exec()\fP (by 
+retaining partially matched substrings), but it is more complicated. The
 .\" HREF
 \fBpcrepartial\fP
 .\"
-documentation gives details of partial matching.
+documentation gives details of partial matching and discusses multi-segment 
+matching.
 .
 .
 .SH "DISADVANTAGES OF THE ALTERNATIVE ALGORITHM"
@@ -187,6 +189,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2009
-Copyright (c) 1997-2009 University of Cambridge.
+Last updated: 22 October 2010
+Copyright (c) 1997-2010 University of Cambridge.
 .fi

@@ -4560,4 +4560,40 @@
 /^(?(?!a(*SKIP)b))/
     ac
 
+/(?<=abc)def/
+    abc\P\P
+
+/abc$/
+    abc
+    abc\P
+    abc\P\P
+
+/abc$/m
+    abc
+    abc\n
+    abc\P\P
+    abc\n\P\P 
+    abc\P
+    abc\n\P
+
+/abc\z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\Z/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\b/
+    abc
+    abc\P
+    abc\P\P
+
+/abc\B/
+    abc
+    abc\P
+    abc\P\P
+
 /-- End of testinput7 --/

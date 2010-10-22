@@ -499,9 +499,11 @@ When a match succeeds, pcretest outputs the list of captured substrings that
 \fBpcre_exec()\fP returns, starting with number 0 for the string that matched
 the whole pattern. Otherwise, it outputs "No match" when the return is
 PCRE_ERROR_NOMATCH, and "Partial match:" followed by the partially matching
-substring when \fBpcre_exec()\fP returns PCRE_ERROR_PARTIAL. For any other
-returns, it outputs the PCRE negative error number. Here is an example of an
-interactive \fBpcretest\fP run.
+substring when \fBpcre_exec()\fP returns PCRE_ERROR_PARTIAL. (Note that this is
+the entire substring that was inspected during the partial match; it may
+include characters before the actual match start if a lookbehind assertion,
+\eK, \eb, or \eB was involved.) For any other returns, it outputs the PCRE
+negative error number. Here is an example of an interactive \fBpcretest\fP run.
 .sp
   $ pcretest
   PCRE version 7.0 30-Nov-2006
@@ -584,7 +586,9 @@ the subject where there is at least one match. For example:
 (Using the normal matching function on this data finds only "tang".) The
 longest matching string is always given first (and numbered zero). After a
 PCRE_ERROR_PARTIAL return, the output is "Partial match:", followed by the
-partially matching substring.
+partially matching substring. (Note that this is the entire substring that was
+inspected during the partial match; it may include characters before the actual
+match start if a lookbehind assertion, \eK, \eb, or \eB was involved.)
 .P
 If \fB/g\fP is present on the pattern, the search for further matches resumes
 at the end of the longest match. For example:
@@ -763,6 +767,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 June 2010
+Last updated: 22 October 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

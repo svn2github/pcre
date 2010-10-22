@@ -2313,7 +2313,9 @@ while (!done)
 #endif
           use_dfa = 1;
         continue;
+#endif
 
+#if !defined NODFA
         case 'F':
         options |= PCRE_DFA_SHORTEST;
         continue;

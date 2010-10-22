@@ -21,6 +21,24 @@ Version 8.11 10-Oct-2010
     the class, even if it had been included by some previous item, for example
     in [\x00-\xff\s]. (This was a bug related to the fact that VT is not part 
     of \s, but is part of the POSIX "space" class.)  
+    
+4.  A partial match never returns an empty string (because you can always
+    match an empty string at the end of the subject); however the checking for
+    an empty string was starting at the "start of match" point. This has been
+    changed to the "earliest inspected character" point, because the returned
+    data for a partial match starts at this character. This means that, for
+    example, /(?<=abc)def/ gives a partial match for the subject "abc"
+    (previously it gave "no match").
+
+5.  Changes have been made to the way PCRE_PARTIAL_HARD affects the matching
+    of $, \z, \Z, \b, and \B. If the match point is at the end of the string, 
+    previously a full match would be given. However, setting PCRE_PARTIAL_HARD
+    has an implication that the given string is incomplete (because a partial 
+    match is preferred over a full match). For this reason, these items now 
+    give a partial match in this situation. [Aside: previously, the one case
+    /t\b/ matched against "cat" with PCRE_PARTIAL_HARD set did return a partial
+    match rather than a full match, which was wrong by the old rules, but is 
+    now correct.] 
 
 
 Version 8.10 25-Jun-2010

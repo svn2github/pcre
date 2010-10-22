@@ -422,17 +422,18 @@ immediately. The second one is used when we already know we are past the end of
 the subject. */
 
 #define CHECK_PARTIAL()\
-  if (md->partial != 0 && eptr >= md->end_subject && eptr > mstart)\
-    {\
-    md->hitend = TRUE;\
-    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL);\
+  if (md->partial != 0 && eptr >= md->end_subject && \
+      eptr > md->start_used_ptr) \
+    { \
+    md->hitend = TRUE; \
+    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL); \
     }
 
 #define SCHECK_PARTIAL()\
-  if (md->partial != 0 && eptr > mstart)\
-    {\
-    md->hitend = TRUE;\
-    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL);\
+  if (md->partial != 0 && eptr > md->start_used_ptr) \
+    { \
+    md->hitend = TRUE; \
+    if (md->partial > 1) MRRETURN(PCRE_ERROR_PARTIAL); \
     }
 
 
@@ -711,18 +712,18 @@ for (;;)
     MRRETURN(MATCH_NOMATCH);
 
     /* COMMIT overrides PRUNE, SKIP, and THEN */
-     
+
     case OP_COMMIT:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM52);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE &&
-        rrc != MATCH_SKIP && rrc != MATCH_SKIP_ARG && 
-        rrc != MATCH_THEN) 
+        rrc != MATCH_SKIP && rrc != MATCH_SKIP_ARG &&
+        rrc != MATCH_THEN)
       RRETURN(rrc);
     MRRETURN(MATCH_COMMIT);
 
     /* PRUNE overrides THEN */
-     
+
     case OP_PRUNE:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM51);
@@ -737,11 +738,11 @@ for (;;)
     RRETURN(MATCH_PRUNE);
 
     /* SKIP overrides PRUNE and THEN */
-     
+
     case OP_SKIP:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       ims, eptrb, flags, RM53);
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN) 
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
       RRETURN(rrc);
     md->start_match_ptr = eptr;   /* Pass back current position */
     MRRETURN(MATCH_SKIP);
@@ -749,7 +750,7 @@ for (;;)
     case OP_SKIP_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
       ims, eptrb, flags, RM57);
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN) 
+    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
       RRETURN(rrc);
 
     /* Pass back the current skip name by overloading md->start_match_ptr and
@@ -759,11 +760,11 @@ for (;;)
 
     md->start_match_ptr = ecode + 2;
     RRETURN(MATCH_SKIP_ARG);
-    
+
     /* For THEN (and THEN_ARG) we pass back the address of the bracket or
-    the alt that is at the start of the current branch. This makes it possible 
-    to skip back past alternatives that precede the THEN within the current 
-    branch. */ 
+    the alt that is at the start of the current branch. This makes it possible
+    to skip back past alternatives that precede the THEN within the current
+    branch. */
 
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
@@ -773,7 +774,7 @@ for (;;)
     MRRETURN(MATCH_THEN);
 
     case OP_THEN_ARG:
-    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1+LINK_SIZE], 
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1+LINK_SIZE],
       offset_top, md, ims, eptrb, flags, RM58);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->start_match_ptr = ecode - GET(ecode, 1);
@@ -1704,37 +1705,40 @@ for (;;)
       if (eptr < md->end_subject)
         { if (!IS_NEWLINE(eptr)) MRRETURN(MATCH_NOMATCH); }
       else
-        { if (md->noteol) MRRETURN(MATCH_NOMATCH); }
+        { 
+        if (md->noteol) MRRETURN(MATCH_NOMATCH); 
+        SCHECK_PARTIAL();
+        }
       ecode++;
       break;
       }
-    else
+    else  /* Not multiline */
       {
       if (md->noteol) MRRETURN(MATCH_NOMATCH);
-      if (!md->endonly)
-        {
-        if (eptr != md->end_subject &&
-            (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
-          MRRETURN(MATCH_NOMATCH);
-        ecode++;
-        break;
-        }
+      if (!md->endonly) goto ASSERT_NL_OR_EOS;
       }
+ 
     /* ... else fall through for endonly */
 
     /* End of subject assertion (\z) */
 
     case OP_EOD:
     if (eptr < md->end_subject) MRRETURN(MATCH_NOMATCH);
+    SCHECK_PARTIAL();
     ecode++;
     break;
 
     /* End of subject or ending \n assertion (\Z) */
 
     case OP_EODN:
-    if (eptr != md->end_subject &&
+    ASSERT_NL_OR_EOS:
+    if (eptr < md->end_subject &&
         (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
       MRRETURN(MATCH_NOMATCH);
+      
+    /* Either at end of string or \n before end. */
+ 
+    SCHECK_PARTIAL();
     ecode++;
     break;
 

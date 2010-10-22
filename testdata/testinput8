@@ -685,4 +685,8 @@
     xxxxabcde\P
     xxxxabcde\P\P
 
+/\bthe cat\b/8
+    the cat\P
+    the cat\P\P
+
 /-- End of testinput8 --/ 
