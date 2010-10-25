@@ -494,4 +494,14 @@ however, we need the complication for Perl. ---/
 /^((yes|no)(*THEN)(*F))?/
   yes
 
+/b?(*SKIP)c/
+    bc
+    abc
+   
+/(*SKIP)bc/
+    a
+
+/(*SKIP)b/
+    a 
+
 /-- End of testinput11 --/

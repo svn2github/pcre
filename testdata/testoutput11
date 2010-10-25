@@ -956,4 +956,18 @@ No match
   yes
  0: 
 
+/b?(*SKIP)c/
+    bc
+ 0: bc
+    abc
+ 0: bc
+   
+/(*SKIP)bc/
+    a
+No match
+
+/(*SKIP)b/
+    a 
+No match
+
 /-- End of testinput11 --/
