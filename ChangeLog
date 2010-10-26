@@ -39,6 +39,19 @@ Version 8.11 10-Oct-2010
     /t\b/ matched against "cat" with PCRE_PARTIAL_HARD set did return a partial
     match rather than a full match, which was wrong by the old rules, but is 
     now correct.] 
+    
+6.  There was a bug in the handling of #-introduced comments, recognized when
+    PCRE_EXTENDED is set, when PCRE_NEWLINE_ANY and PCRE_UTF8 were also set.
+    If a UTF-8 multi-byte character included the byte 0x85 (e.g. +U0445, whose
+    UTF-8 encoding is 0xd1,0x85), this was misinterpreted as a newline when
+    scanning for the end of the comment. (*Character* 0x85 is an "any" newline,
+    but *byte* 0x85 is not, in UTF-8 mode). This bug was present in several 
+    places in pcre_compile().
+    
+7.  Related to (6) above, when pcre_compile() was skipping #-introduced 
+    comments when looking ahead for named forward references to subpatterns, 
+    the only newline sequence it recognized was NL. It now handles newlines 
+    according to the set newline convention.
 
 
 Version 8.10 25-Jun-2010

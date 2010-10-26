@@ -1110,6 +1110,7 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
+  utf8         TRUE if we are in UTF-8 mode 
   count        pointer to the current capturing subpattern number (updated)
 
 Returns:       the number of the named subpattern, or -1 if not found
@@ -1117,7 +1118,7 @@ Returns:       the number of the named subpattern, or -1 if not found
 
 static int
 find_parens_sub(uschar **ptrptr, compile_data *cd, const uschar *name, int lorn,
-  BOOL xmode, int *count)
+  BOOL xmode, BOOL utf8, int *count)
 {
 uschar *ptr = *ptrptr;
 int start_count = *count;
@@ -1278,7 +1279,15 @@ for (; *ptr != 0; ptr++)
 
   if (xmode && *ptr == CHAR_NUMBER_SIGN)
     {
-    while (*(++ptr) != 0 && *ptr != CHAR_NL) {};
+    ptr++; 
+    while (*ptr != 0)
+      {
+      if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
+      ptr++;
+#ifdef SUPPORT_UTF8         
+      if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
+      }
     if (*ptr == 0) goto FAIL_EXIT;
     continue;
     }
@@ -1287,7 +1296,7 @@ for (; *ptr != 0; ptr++)
 
   if (*ptr == CHAR_LEFT_PARENTHESIS)
     {
-    int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, count);
+    int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf8, count);
     if (rc > 0) return rc;
     if (*ptr == 0) goto FAIL_EXIT;
     }
@@ -1333,12 +1342,14 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
+  utf8         TRUE if we are in UTF-8 mode 
 
 Returns:       the number of the found subpattern, or -1 if not found
 */
 
 static int
-find_parens(compile_data *cd, const uschar *name, int lorn, BOOL xmode)
+find_parens(compile_data *cd, const uschar *name, int lorn, BOOL xmode,
+  BOOL utf8)
 {
 uschar *ptr = (uschar *)cd->start_pattern;
 int count = 0;
@@ -1351,7 +1362,7 @@ matching closing parens. That is why we have to have a loop. */
 
 for (;;)
   {
-  rc = find_parens_sub(&ptr, cd, name, lorn, xmode, &count);
+  rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf8, &count);
   if (rc > 0 || *ptr++ == 0) break;
   }
 
@@ -2515,8 +2526,15 @@ if ((options & PCRE_EXTENDED) != 0)
     while ((cd->ctypes[*ptr] & ctype_space) != 0) ptr++;
     if (*ptr == CHAR_NUMBER_SIGN)
       {
-      while (*(++ptr) != 0)
+      ptr++; 
+      while (*ptr != 0)
+        {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
+        ptr++;
+#ifdef SUPPORT_UTF8         
+        if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
+        }
       }
     else break;
     }
@@ -2552,8 +2570,15 @@ if ((options & PCRE_EXTENDED) != 0)
     while ((cd->ctypes[*ptr] & ctype_space) != 0) ptr++;
     if (*ptr == CHAR_NUMBER_SIGN)
       {
-      while (*(++ptr) != 0)
+      ptr++; 
+      while (*ptr != 0)
+        {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
+        ptr++;
+#ifdef SUPPORT_UTF8         
+        if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
+        }
       }
     else break;
     }
@@ -3126,9 +3151,14 @@ for (;; ptr++)
     if ((cd->ctypes[c] & ctype_space) != 0) continue;
     if (c == CHAR_NUMBER_SIGN)
       {
-      while (*(++ptr) != 0)
+      ptr++; 
+      while (*ptr != 0)
         {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
+        ptr++;
+#ifdef SUPPORT_UTF8         
+        if (utf8) while ((*ptr & 0xc0) == 0x80) ptr++;
+#endif
         }
       if (*ptr != 0) continue;
 
@@ -5036,7 +5066,7 @@ for (;; ptr++)
         /* Search the pattern for a forward reference */
 
         else if ((i = find_parens(cd, name, namelen,
-                        (options & PCRE_EXTENDED) != 0)) > 0)
+                        (options & PCRE_EXTENDED) != 0, utf8)) > 0)
           {
           PUT2(code, 2+LINK_SIZE, i);
           code[1+LINK_SIZE]++;
@@ -5382,7 +5412,7 @@ for (;; ptr++)
             }
           else if ((recno =                /* Forward back reference */
                     find_parens(cd, name, namelen,
-                      (options & PCRE_EXTENDED) != 0)) <= 0)
+                      (options & PCRE_EXTENDED) != 0, utf8)) <= 0)
             {
             *errorcodeptr = ERR15;
             goto FAILED;
@@ -5493,7 +5523,7 @@ for (;; ptr++)
             if (called == NULL)
               {
               if (find_parens(cd, NULL, recno,
-                    (options & PCRE_EXTENDED) != 0) < 0)
+                    (options & PCRE_EXTENDED) != 0, utf8) < 0)
                 {
                 *errorcodeptr = ERR15;
                 goto FAILED;

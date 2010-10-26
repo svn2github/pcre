@@ -794,4 +794,19 @@ can't tell the difference.) --/
     \x{a2} \x{84} 
     A Z 
 
+'A#хц'8x<any>BZ
+
+'A#хц
+  PQ'8x<any>BZ
+  
+/a+#хaa
+  z#XX?/8x<any>BZ 
+
+/a+#хaa
+  z#х?/8x<any>BZ 
+
+/\g{A}xxx#bXX(?'A'123)(?'A'456)/8x<any>BZ
+
+/\g{A}xxx#bх(?'A'123)(?'A'456)/8x<any>BZ
+
 /-- End of testinput5 --/
