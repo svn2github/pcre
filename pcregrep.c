@@ -363,9 +363,10 @@ return isatty(fileno(f));
 Lionel Fourquaux. David Burgess added a patch to define INVALID_FILE_ATTRIBUTES
 when it did not exist. David Byron added a patch that moved the #include of
 <windows.h> to before the INVALID_FILE_ATTRIBUTES definition rather than after.
-*/
+The double test below stops gcc 4.4.4 grumbling that HAVE_WINDOWS_H is
+undefined when it is indeed undefined. */
 
-#elif HAVE_WINDOWS_H
+#elif defined HAVE_WINDOWS_H && HAVE_WINDOWS_H
 
 #ifndef STRICT
 # define STRICT
@@ -2196,10 +2197,17 @@ for (i = 1; i < argc; i++)
     {
     *((char **)op->dataptr) = option_data;
     }
+
+  /* Avoid the use of strtoul() because SunOS4 doesn't have it. This is used
+  only for unpicking arguments, so just keep it simple. */
+
   else
     {
-    char *endptr;
-    int n = strtoul(option_data, &endptr, 10);
+    int n = 0;
+    char *endptr = option_data;
+    while (*endptr != 0 && isspace((unsigned char)(*endptr))) endptr++;
+    while (isdigit((unsigned char)(*endptr)))
+      n = n * 10 + (int)(*endptr++ - '0');
     if (*endptr != 0)
       {
       if (longop)

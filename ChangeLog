@@ -52,6 +52,10 @@ Version 8.11 10-Oct-2010
     comments when looking ahead for named forward references to subpatterns, 
     the only newline sequence it recognized was NL. It now handles newlines 
     according to the set newline convention.
+    
+8.  SunOS4 doesn't have strerror() or strtoul(); pcregrep dealt with the 
+    former, but used strtoul(), whereas pcretest avoided strtoul() but did not 
+    cater for a lack of strerror(). These oversights have been fixed.
 
 
 Version 8.10 25-Jun-2010
