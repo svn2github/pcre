@@ -1966,7 +1966,14 @@ already been matched. The two possible forms of conditional subpattern are:
 .sp
 If the condition is satisfied, the yes-pattern is used; otherwise the
 no-pattern (if present) is used. If there are more than two alternatives in the
-subpattern, a compile-time error occurs.
+subpattern, a compile-time error occurs. Each of the two alternatives may
+itself contain nested subpatterns of any form, including conditional 
+subpatterns; the restriction to two alternatives applies only at the level of
+the condition. This pattern fragment is an example where the alternatives are 
+complex:
+.sp
+  (?(1) (A|B|C) | (D | (?(2)E|F) | E) )
+.sp
 .P
 There are four kinds of condition: references to subpatterns, references to
 recursion, a pseudo-condition called DEFINE, and assertions.
