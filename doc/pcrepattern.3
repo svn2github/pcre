@@ -210,6 +210,7 @@ Perl, $ and @ cause variable interpolation. Note the following examples:
   \eQabc\eE\e$\eQxyz\eE   abc$xyz        abc$xyz
 .sp
 The \eQ...\eE sequence is recognized both inside and outside character classes.
+An isolated \eE that is not preceded by \eQ is ignored.
 .
 .
 .\" HTML <a name="digitsafterbackslash"></a>
@@ -2684,6 +2685,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 October 2010
+Last updated: 26 October 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
