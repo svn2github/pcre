@@ -5,7 +5,7 @@
     either because PCRE can't be compatible, or there is a possible Perl 
     bug. --/  
   
-/-- Originally, the Perl 5.10 and 5.11 things were in here too, but now I have 
+/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
     separated many (most?) of them out into test 11. However, there may still 
     be some that were overlooked. --/   
 
@@ -3170,9 +3170,9 @@ a random value. /Ix
     xxxxabcde\P
     xxxxabcde\P\P
 
-/-- This is not in the Perl 5.10 test because Perl seems currently to be broken
-    and not behaving as specified in that it *does* bumpalong after hitting
-    (*COMMIT). --/ 
+/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+    broken and not behaving as specified in that it *does* bumpalong after
+    hitting (*COMMIT). --/
 
 /(?1)(A(*COMMIT)|B)D/
     ABD
@@ -3216,7 +3216,7 @@ a random value. /Ix
 
 /^(?&t)*(?(DEFINE)(?<t>.))$/BZ
 
-/ -- The first four of these are not in the Perl 5.10 test because Perl 
+/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
      documents that the use of \K in assertions is "not well defined". The
      last is here because Perl gives the match as "b" rather than "ab". I
      believe this to be a Perl bug. --/  

@@ -1,4 +1,4 @@
-/-- These tests are for the Perl 5.10 features that PCRE supports. --/
+/-- These tests are for the Perl >= 5.10 features that PCRE supports. --/
 
 /\H\h\V\v/
     X X\x0a
