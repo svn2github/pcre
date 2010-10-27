@@ -293,6 +293,15 @@ can't tell the difference.) --/
  0: X\x{0a}abc
  1: \x{0a}
  2: abc
+
+/-- This one is here because Perl gives out a grumbly error message (quite 
+correctly, but that messes up comparisons). --/
+    
+/a\Cb/8
+    *** Failers 
+No match
+    a\x{100}b 
+No match
     
 /^[ab]/8DZ
 ------------------------------------------------------------------

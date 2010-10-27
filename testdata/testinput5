@@ -66,6 +66,13 @@ can't tell the difference.) --/
 /X(\C)(.*)/8
     X\x{1234}
     X\nabc 
+
+/-- This one is here because Perl gives out a grumbly error message (quite 
+correctly, but that messes up comparisons). --/
+    
+/a\Cb/8
+    *** Failers 
+    a\x{100}b 
     
 /^[ab]/8DZ
     bar

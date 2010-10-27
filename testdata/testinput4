@@ -463,7 +463,8 @@
 /a\Cb/8
     aXb
     a\nb
-    *** Failers 
+    
+/a\C\Cb/8 
     a\x{100}b 
 
 /[z-\x{100}]/8i

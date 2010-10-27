@@ -802,10 +802,10 @@ No match
  0: aXb
     a\nb
  0: a\x{0a}b
-    *** Failers 
-No match
+    
+/a\C\Cb/8 
     a\x{100}b 
-No match
+ 0: a\x{100}b
 
 /[z-\x{100}]/8i
     z
