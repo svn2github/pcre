@@ -245,6 +245,12 @@ echo "---------------------------- Test 59 -----------------------------" >>test
 echo "---------------------------- Test 60 -----------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep --regexp PATTERN ./testdata/grepinput) >>testtry
 
+echo "---------------------------- Test 61 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --match-limit=1000 -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
+
+echo "---------------------------- Test 62 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --recursion-limit=1000 -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

@@ -307,6 +307,32 @@ the value in the \fBLC_ALL\fP or \fBLC_CTYPE\fP environment variables. If no
 locale is specified, the PCRE library's default (usually the "C" locale) is
 used. There is no short form for this option.
 .TP
+\fB--match-limit\fP=\fInumber\fP 
+Processing some regular expression patterns can require a very large amount of
+memory, leading in some cases to a program crash if not enough is available.
+Other patterns may take a very long time to search for all possible matching 
+strings. The \fBpcre_exec()\fP function that is called by \fBpcregrep\fP to do
+the matching has two parameters that can limit the resources that it uses. 
+.sp
+The \fB--match-limit\fP option provides a means of limiting resource usage
+when processing patterns that are not going to match, but which have a very
+large number of possibilities in their search trees. The classic example is a
+pattern that uses nested unlimited repeats. Internally, PCRE uses a function
+called \fBmatch()\fP which it calls repeatedly (sometimes recursively). The
+limit set by \fb--match-limit\fP is imposed on the number of times this
+function is called during a match, which has the effect of limiting the amount
+of backtracking that can take place.
+.sp
+The \fB--recursion-limit\fP option is similar to \fB--match-limit\fP, but
+instead of limiting the total number of times that \fBmatch()\fP is called, it
+limits the depth of recursive calls, which in turn limits the amount of memory
+that can be used. The recursion depth is a smaller number than the total number
+of calls, because not all calls to \fBmatch()\fP are recursive. This limit is
+of use only if it is set smaller than \fB--match-limit\fP.
+.sp
+There are no short forms for these options. The default settings are specified 
+when the PCRE library is compiled, with the default default being 10 million.
+.TP
 \fB-M\fP, \fB--multiline\fP
 Allow patterns to match more than one line. When this option is given, patterns
 may usefully contain literal newline characters and internal occurrences of ^
@@ -364,6 +390,9 @@ taking note of any \fB--include\fP and \fB--exclude\fP settings. By default, a
 directory is read as a normal file; in some operating systems this gives an
 immediate end-of-file. This option is a shorthand for setting the \fB-d\fP
 option to "recurse".
+.TP
+\fB--recursion-limit\fP=\fInumber\fP
+See \fB--match-limit\fP above.
 .TP
 \fB-s\fP, \fB--no-messages\fP
 Suppress error messages about non-existent or unreadable files. Such files are
@@ -496,6 +525,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 May 2010
+Last updated: 30 October 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

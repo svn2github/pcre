@@ -165,6 +165,9 @@ static int error_count = 0;
 static int filenames = FN_DEFAULT;
 static int process_options = 0;
 
+static unsigned long int match_limit = 0;
+static unsigned long int match_limit_recursion = 0;
+
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
 static BOOL file_offsets = FALSE;
@@ -176,6 +179,7 @@ static BOOL multiline = FALSE;
 static BOOL number = FALSE;
 static BOOL omit_zero_count = FALSE;
 static BOOL only_matching = FALSE;
+static BOOL resource_error = FALSE;
 static BOOL quiet = FALSE;
 static BOOL silent = FALSE;
 static BOOL utf8 = FALSE;
@@ -208,6 +212,8 @@ used to identify them. */
 #define N_LOFFSETS     (-10)
 #define N_FOFFSETS     (-11)
 #define N_LBUFFER      (-12)
+#define N_M_LIMIT      (-13)
+#define N_M_LIMIT_REC  (-14)
 
 static option_item optionlist[] = {
   { OP_NODATA,    N_NULL,   NULL,              "",              "  terminate options" },
@@ -215,9 +221,9 @@ static option_item optionlist[] = {
   { OP_NUMBER,    'A',      &after_context,    "after-context=number", "set number of following context lines" },
   { OP_NUMBER,    'B',      &before_context,   "before-context=number", "set number of prior context lines" },
   { OP_OP_STRING, N_COLOUR, &colour_option,    "color=option",  "matched text color option" },
+  { OP_OP_STRING, N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
   { OP_NUMBER,    'C',      &both_context,     "context=number", "set number of context lines, before & after" },
   { OP_NODATA,    'c',      NULL,              "count",         "print only a count of matching lines per FILE" },
-  { OP_OP_STRING, N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
   { OP_STRING,    'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
   { OP_STRING,    'd',      &dee_option,       "directories=action", "how to handle directories" },
   { OP_PATLIST,   'e',      NULL,              "regex(p)=pattern", "specify pattern (may be used more than once)" },
@@ -233,6 +239,8 @@ static option_item optionlist[] = {
   { OP_NODATA,    N_LBUFFER, NULL,             "line-buffered", "use line buffering" },
   { OP_NODATA,    N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
+  { OP_NUMBER,    N_M_LIMIT,&match_limit,      "match-limit=number", "set PCRE match limit option" },
+  { OP_NUMBER,    N_M_LIMIT_REC,&match_limit_recursion, "recursion-limit=number", "set PCRE match recursion limit option" },
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
   { OP_STRING,    'N',      &newline,          "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
@@ -410,7 +418,7 @@ dir = (directory_type *) malloc(sizeof(*dir));
 if ((pattern == NULL) || (dir == NULL))
   {
   fprintf(stderr, "pcregrep: malloc failed\n");
-  exit(2);
+  pcregrep_exit(2);
   }
 memcpy(pattern, filename, len);
 memcpy(&(pattern[len]), "\\*", 3);
@@ -544,6 +552,31 @@ if (n < 0 || n >= sys_nerr) return "unknown error number";
 return sys_errlist[n];
 }
 #endif /* HAVE_STRERROR */
+
+
+
+/*************************************************
+*         Exit from the program                  *
+*************************************************/
+
+/* If there has been a resource error, give a suitable message.
+
+Argument:  the return code
+Returns:   does not return
+*/
+
+static void
+pcregrep_exit(int rc)
+{
+if (resource_error)
+  {
+  fprintf(stderr, "pcregrep: Error %d or %d means that a resource limit "
+    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT);
+  fprintf(stderr, "pcregrep: Check your regex for nested unlimited loops.\n");
+  }
+
+exit(rc);
+}
 
 
 
@@ -908,28 +941,30 @@ static BOOL
 match_patterns(char *matchptr, size_t length, int *offsets, int *mrc)
 {
 int i;
+size_t slen = length;
+const char *msg = "this text:\n\n";
+if (slen > 200)
+  {
+  slen = 200;
+  msg = "text that starts:\n\n";
+  } 
 for (i = 0; i < pattern_count; i++)
   {
   *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, (int)length, 0,
     PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
   if (*mrc >= 0) return TRUE;
   if (*mrc == PCRE_ERROR_NOMATCH) continue;
-  fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", *mrc);
+  fprintf(stderr, "pcregrep: pcre_exec() gave error %d while matching ", *mrc);
   if (pattern_count > 1) fprintf(stderr, "pattern number %d to ", i+1);
-  fprintf(stderr, "this text:\n");
-  FWRITE(matchptr, 1, length, stderr);   /* In case binary zero included */
-  fprintf(stderr, "\n");
-  if (error_count == 0 &&
-      (*mrc == PCRE_ERROR_MATCHLIMIT || *mrc == PCRE_ERROR_RECURSIONLIMIT))
-    {
-    fprintf(stderr, "pcregrep: error %d means that a resource limit "
-      "was exceeded\n", *mrc);
-    fprintf(stderr, "pcregrep: check your regex for nested unlimited loops\n");
-    }
+  fprintf(stderr, "%s", msg);
+  FWRITE(matchptr, 1, slen, stderr);   /* In case binary zero included */
+  fprintf(stderr, "\n\n");
+  if (*mrc == PCRE_ERROR_MATCHLIMIT || *mrc == PCRE_ERROR_RECURSIONLIMIT)
+    resource_error = TRUE;
   if (error_count++ > 20)
     {
-    fprintf(stderr, "pcregrep: too many errors - abandoned\n");
-    exit(2);
+    fprintf(stderr, "pcregrep: Too many errors - abandoned.\n");
+    pcregrep_exit(2);
     }
   return invert;    /* No more matching; don't show the line again */
   }
@@ -1069,7 +1104,7 @@ while (ptr < endptr)
           ptr = malloc(newlen + 1);
           if (!ptr) {
                   printf("out of memory");
-                  exit(2);
+                  pcregrep_exit(2);
           }
           endptr = ptr;
           strcpy(endptr, jfriedl_prefix); endptr += strlen(jfriedl_prefix);
@@ -1765,7 +1800,7 @@ handle_option(int letter, int options)
 switch(letter)
   {
   case N_FOFFSETS: file_offsets = TRUE; break;
-  case N_HELP: help(); exit(0);
+  case N_HELP: help(); pcregrep_exit(0);
   case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_LBUFFER: line_buffered = TRUE; break;
   case 'c': count_only = TRUE; break;
@@ -1788,12 +1823,12 @@ switch(letter)
 
   case 'V':
   fprintf(stderr, "pcregrep version %s\n", pcre_version());
-  exit(0);
+  pcregrep_exit(0);
   break;
 
   default:
   fprintf(stderr, "pcregrep: Unknown option -%c\n", letter);
-  exit(usage(2));
+  pcregrep_exit(usage(2));
   }
 
 return options;
@@ -1989,7 +2024,7 @@ for (i = 1; i < argc; i++)
   if (argv[i][1] == 0)
     {
     if (pattern_filename != NULL || pattern_count > 0) break;
-      else exit(usage(2));
+      else pcregrep_exit(usage(2));
     }
 
   /* Handle a long name option, or -- to terminate the options */
@@ -2080,7 +2115,7 @@ for (i = 1; i < argc; i++)
     if (op->one_char == 0)
       {
       fprintf(stderr, "pcregrep: Unknown option %s\n", argv[i]);
-      exit(usage(2));
+      pcregrep_exit(usage(2));
       }
     }
 
@@ -2122,7 +2157,7 @@ for (i = 1; i < argc; i++)
         {
         fprintf(stderr, "pcregrep: Unknown option letter '%c' in \"%s\"\n",
           *s, argv[i]);
-        exit(usage(2));
+        pcregrep_exit(usage(2));
         }
       if (op->type != OP_NODATA || s[1] == 0)
         {
@@ -2172,7 +2207,7 @@ for (i = 1; i < argc; i++)
     if (i >= argc - 1 || longopwasequals)
       {
       fprintf(stderr, "pcregrep: Data missing after %s\n", argv[i]);
-      exit(usage(2));
+      pcregrep_exit(usage(2));
       }
     option_data = argv[++i];
     }
@@ -2203,7 +2238,7 @@ for (i = 1; i < argc; i++)
 
   else
     {
-    int n = 0;
+    unsigned long int n = 0;
     char *endptr = option_data;
     while (*endptr != 0 && isspace((unsigned char)(*endptr))) endptr++;
     while (isdigit((unsigned char)(*endptr)))
@@ -2221,7 +2256,7 @@ for (i = 1; i < argc; i++)
       else
         fprintf(stderr, "pcregrep: Malformed number \"%s\" after -%c\n",
           option_data, op->one_char);
-      exit(usage(2));
+      pcregrep_exit(usage(2));
       }
     *((int *)op->dataptr) = n;
     }
@@ -2244,7 +2279,7 @@ if ((only_matching && (file_offsets || line_offsets)) ||
   {
   fprintf(stderr, "pcregrep: Cannot mix --only-matching, --file-offsets "
     "and/or --line-offsets\n");
-  exit(usage(2));
+  pcregrep_exit(usage(2));
   }
 
 if (file_offsets || line_offsets) only_matching = TRUE;
@@ -2455,6 +2490,35 @@ for (j = 0; j < pattern_count; j++)
     }
   hint_count++;
   }
+  
+/* If --match-limit or --recursion-limit was set, put the value(s) into the
+pcre_extra block for each pattern. */
+
+if (match_limit > 0 || match_limit_recursion > 0)
+  {
+  for (j = 0; j < pattern_count; j++)
+    {
+    if (hints_list[j] == NULL)
+      {
+      hints_list[j] = malloc(sizeof(pcre_extra));
+      if (hints_list[j] == NULL) 
+        {
+        fprintf(stderr, "pcregrep: malloc failed\n");
+        pcregrep_exit(2);
+        }
+      }
+    if (match_limit > 0)
+      { 
+      hints_list[j]->flags |= PCRE_EXTRA_MATCH_LIMIT;
+      hints_list[j]->match_limit = match_limit;
+      }  
+    if (match_limit_recursion > 0)
+      { 
+      hints_list[j]->flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+      hints_list[j]->match_limit_recursion = match_limit_recursion;
+      }  
+    }
+  } 
 
 /* If there are include or exclude patterns, compile them. */
 
@@ -2537,10 +2601,13 @@ if (pattern_list != NULL)
   }
 if (hints_list != NULL)
   {
-  for (i = 0; i < hint_count; i++) free(hints_list[i]);
+  for (i = 0; i < hint_count; i++) 
+    {
+    if (hints_list[i] != NULL) free(hints_list[i]);
+    } 
   free(hints_list);
   }
-return rc;
+pcregrep_exit(rc);
 
 EXIT2:
 rc = 2;

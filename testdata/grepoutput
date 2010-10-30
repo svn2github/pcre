@@ -351,12 +351,16 @@ aaaaa0
 aaaaa2
 RC=0
 ======== STDERR ========
-pcregrep: pcre_exec() error -8 while matching this text:
+pcregrep: pcre_exec() gave error -8 while matching this text:
+
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-pcregrep: error -8 means that a resource limit was exceeded
-pcregrep: check your regex for nested unlimited loops
-pcregrep: pcre_exec() error -8 while matching this text:
+
+pcregrep: pcre_exec() gave error -8 while matching this text:
+
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+pcregrep: Error -8 or -21 means that a resource limit was exceeded.
+pcregrep: Check your regex for nested unlimited loops.
 ---------------------------- Test 38 ------------------------------
 This line contains a binary zero here > < for testing.
 ---------------------------- Test 39 ------------------------------
@@ -447,3 +451,21 @@ Check up on PATTERN near the end.
 PATTERN at the start of a line.
 In the middle of a line, PATTERN appears.
 Check up on PATTERN near the end.
+---------------------------- Test 61 -----------------------------
+pcregrep: pcre_exec() gave error -8 while matching text that starts:
+
+This is a file of miscellaneous text that is used as test data for checking
+that the pcregrep command is working correctly. The file must be more than 24K
+long so that it needs more than a single read
+
+pcregrep: Error -8 or -21 means that a resource limit was exceeded.
+pcregrep: Check your regex for nested unlimited loops.
+---------------------------- Test 62 -----------------------------
+pcregrep: pcre_exec() gave error -21 while matching text that starts:
+
+This is a file of miscellaneous text that is used as test data for checking
+that the pcregrep command is working correctly. The file must be more than 24K
+long so that it needs more than a single read
+
+pcregrep: Error -8 or -21 means that a resource limit was exceeded.
+pcregrep: Check your regex for nested unlimited loops.
