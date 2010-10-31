@@ -59,6 +59,8 @@ Version 8.11 10-Oct-2010
     
 9.  Added --match-limit and --recursion-limit to pcregrep. 
 
+10. Added two casts needed to build with Visual Studio when NO_RECURSE is set.
+
 
 Version 8.10 25-Jun-2010
 ------------------------

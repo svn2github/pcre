@@ -294,7 +294,7 @@ argument of match(), which never changes. */
 
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
   {\
-  heapframe *newframe = (pcre_stack_malloc)(sizeof(heapframe));\
+  heapframe *newframe = (heapframe *)(pcre_stack_malloc)(sizeof(heapframe));\
   if (newframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
@@ -489,7 +489,7 @@ heap storage. Set up the top-level frame here; others are obtained from the
 heap whenever RMATCH() does a "recursion". See the macro definitions above. */
 
 #ifdef NO_RECURSE
-heapframe *frame = (pcre_stack_malloc)(sizeof(heapframe));
+heapframe *frame = (heapframe *)(pcre_stack_malloc)(sizeof(heapframe));
 if (frame == NULL) RRETURN(PCRE_ERROR_NOMEMORY);
 frame->Xprevframe = NULL;            /* Marks the top level */
 
