@@ -2111,23 +2111,26 @@ dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.
 .SH COMMENTS
 .rs
 .sp
-The sequence (?# marks the start of a comment that continues up to the next
-closing parenthesis. Nested parentheses are not permitted. The characters
-that make up a comment play no part in the pattern matching at all.
+There are two ways of including comments in patterns that are processed by 
+PCRE. In both cases, the start of the comment must not be in a character class,
+nor in the middle of any other sequence of related characters such as (?: or a
+subpattern name or number. The characters that make up a comment play no part
+in the pattern matching.
 .P
-If the PCRE_EXTENDED option is set, an unescaped # character outside a
-character class introduces a comment that continues to immediately after the
-next newline character or character sequence in the pattern. Which characters 
-are interpreted as newlines is controlled by the options passed to 
-\fBpcre_compile()\fP or by a special sequence at the start of the pattern, as
-described in the section entitled
+The sequence (?# marks the start of a comment that continues up to the next
+closing parenthesis. Nested parentheses are not permitted. If the PCRE_EXTENDED
+option is set, an unescaped # character also introduces a comment, which in
+this case continues to immediately after the next newline character or
+character sequence in the pattern. Which characters are interpreted as newlines
+is controlled by the options passed to \fBpcre_compile()\fP or by a special
+sequence at the start of the pattern, as described in the section entitled
 .\" HTML <a href="#recursion">
 .\" </a>
 "Newline conventions"
 .\"
-above. Note that end of a comment is a literal newline sequence in the pattern; 
-escape sequences that happen to represent a newline do not terminate a comment. 
-For example, consider this pattern when PCRE_EXTENDED is set, and the default 
+above. Note that end of this type of comment is a literal newline sequence in
+the pattern; escape sequences that happen to represent a newline do not count.
+For example, consider this pattern when PCRE_EXTENDED is set, and the default
 newline convention is in force:
 .sp
   abc #comment \en still comment
@@ -2135,7 +2138,7 @@ newline convention is in force:
 On encountering the # character, \fBpcre_compile()\fP skips along, looking for 
 a newline in the pattern. The sequence \en is still literal at this stage, so
 it does not terminate the comment. Only an actual character with the code value
-0x0a does so.
+0x0a (the default newline) does so.
 .
 .
 .\" HTML <a name="recursion"></a>
@@ -2711,6 +2714,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 October 2010
+Last updated: 31 October 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
