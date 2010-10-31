@@ -1204,6 +1204,8 @@ while (ptr < endptr)
         matchptr += offsets[1];
         length -= offsets[1];
         match = FALSE;
+        if (line_buffered) fflush(stdout);
+        rc = 0;    /* Had some success */
         goto ONLY_MATCHING_RESTART;
         }
       }

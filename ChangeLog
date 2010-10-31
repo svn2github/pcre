@@ -61,6 +61,9 @@ Version 8.11 10-Oct-2010
 
 10. Added two casts needed to build with Visual Studio when NO_RECURSE is set.
 
+11. When the -o option was used, pcregrep was setting a return code of 1, even
+    when matches were found, and --line-buffered was not being honoured.
+
 
 Version 8.10 25-Jun-2010
 ------------------------
