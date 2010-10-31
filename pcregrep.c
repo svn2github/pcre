@@ -163,6 +163,7 @@ static int dee_action = dee_READ;
 static int DEE_action = DEE_READ;
 static int error_count = 0;
 static int filenames = FN_DEFAULT;
+static int only_matching = -1;
 static int process_options = 0;
 
 static unsigned long int match_limit = 0;
@@ -178,7 +179,6 @@ static BOOL line_offsets = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
 static BOOL omit_zero_count = FALSE;
-static BOOL only_matching = FALSE;
 static BOOL resource_error = FALSE;
 static BOOL quiet = FALSE;
 static BOOL silent = FALSE;
@@ -244,7 +244,7 @@ static option_item optionlist[] = {
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
   { OP_STRING,    'N',      &newline,          "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
-  { OP_NODATA,    'o',      NULL,              "only-matching", "show only the part of the line that matched" },
+  { OP_OP_NUMBER, 'o',      &only_matching,    "only-matching=n", "show only the part of the line that matched" },
   { OP_NODATA,    'q',      NULL,              "quiet",         "suppress output, just set return code" },
   { OP_NODATA,    'r',      NULL,              "recursive",     "recursively scan sub-directories" },
   { OP_STRING,    N_EXCLUDE,&exclude_pattern,  "exclude=pattern","exclude matching files when recursing" },
@@ -1174,33 +1174,40 @@ while (ptr < endptr)
 
     else if (quiet) return 0;
 
-    /* The --only-matching option prints just the substring that matched, and
-    the --file-offsets and --line-offsets options output offsets for the
-    matching substring (they both force --only-matching). None of these options
+    /* The --only-matching option prints just the substring that matched, or a 
+    captured portion of it, as long as this string is not empty, and the
+    --file-offsets and --line-offsets options output offsets for the matching
+    substring (they both force --only-matching = 0). None of these options
     prints any context. Afterwards, adjust the start and length, and then jump
     back to look for further matches in the same line. If we are in invert
-    mode, however, nothing is printed - this could be still useful because the
-    return code is set. */
+    mode, however, nothing is printed and we do not restart - this could still
+    be useful because the return code is set. */
 
-    else if (only_matching)
+    else if (only_matching >= 0)
       {
       if (!invert)
         {
         if (printname != NULL) fprintf(stdout, "%s:", printname);
         if (number) fprintf(stdout, "%d:", linenumber);
         if (line_offsets)
-          fprintf(stdout, "%d,%d", (int)(matchptr + offsets[0] - ptr),
+          fprintf(stdout, "%d,%d\n", (int)(matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
         else if (file_offsets)
-          fprintf(stdout, "%d,%d", (int)(filepos + matchptr + offsets[0] - ptr),
+          fprintf(stdout, "%d,%d\n", 
+            (int)(filepos + matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
-        else
+        else if (only_matching < mrc)
           {
-          if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-          FWRITE(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
-          if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+          int plen = offsets[2*only_matching + 1] - offsets[2*only_matching];
+          if (plen > 0)
+            {  
+            if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+            FWRITE(matchptr + offsets[only_matching*2], 1, plen, stdout);
+            if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+            fprintf(stdout, "\n");
+            } 
           }
-        fprintf(stdout, "\n");
+        else if (printname != NULL || number) fprintf(stdout, "\n");
         matchptr += offsets[1];
         length -= offsets[1];
         match = FALSE;
@@ -1465,7 +1472,7 @@ while (ptr < endptr)
 /* End of file; print final "after" lines if wanted; do_after_lines sets
 hyphenpending if it prints something. */
 
-if (!only_matching && !count_only)
+if (only_matching < 0 && !count_only)
   {
   do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
   hyphenpending |= endhyphenpending;
@@ -1814,7 +1821,7 @@ switch(letter)
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
   case 'n': number = TRUE; break;
-  case 'o': only_matching = TRUE; break;
+  case 'o': only_matching = 0; break;
   case 'q': quiet = TRUE; break;
   case 'r': dee_action = dee_RECURSE; break;
   case 's': silent = TRUE; break;
@@ -2154,18 +2161,34 @@ for (i = 1; i < argc; i++)
     while (*s != 0)
       {
       for (op = optionlist; op->one_char != 0; op++)
-        { if (*s == op->one_char) break; }
+        { 
+        if (*s == op->one_char) break; 
+        }
       if (op->one_char == 0)
         {
         fprintf(stderr, "pcregrep: Unknown option letter '%c' in \"%s\"\n",
           *s, argv[i]);
         pcregrep_exit(usage(2));
         }
-      if (op->type != OP_NODATA || s[1] == 0)
-        {
-        option_data = s+1;
-        break;
+        
+      /* Check for a single-character option that has data: OP_OP_NUMBER
+      is used for one that either has a numerical number or defaults, i.e. the 
+      data is optional. If a digit follows, there is data; if not, carry on
+      with other single-character options in the same string. */
+       
+      option_data = s+1;
+      if (op->type == OP_OP_NUMBER)
+        { 
+        if (isdigit((unsigned char)s[1])) break; 
         }
+      else   /* Check for end or a dataless option */
+        {     
+        if (op->type != OP_NODATA || s[1] == 0) break;
+        }   
+        
+      /* Handle a single-character option with no data, then loop for the 
+      next character in the string. */
+
       pcre_options = handle_option(*s++, pcre_options);
       }
     }
@@ -2182,8 +2205,8 @@ for (i = 1; i < argc; i++)
 
   /* If the option type is OP_OP_STRING or OP_OP_NUMBER, it's an option that
   either has a value or defaults to something. It cannot have data in a
-  separate item. At the moment, the only such options are "colo(u)r" and
-  Jeffrey Friedl's special -S debugging option. */
+  separate item. At the moment, the only such options are "colo(u)r", 
+  "only-matching", and Jeffrey Friedl's special -S debugging option. */
 
   if (*option_data == 0 &&
       (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER))
@@ -2193,6 +2216,11 @@ for (i = 1; i < argc; i++)
       case N_COLOUR:
       colour_option = (char *)"auto";
       break;
+      
+      case 'o':
+      only_matching = 0;
+      break;  
+ 
 #ifdef JFRIEDL_DEBUG
       case 'S':
       S_arg = 0;
@@ -2274,9 +2302,9 @@ if (both_context > 0)
   }
 
 /* Only one of --only-matching, --file-offsets, or --line-offsets is permitted.
-However, the latter two set the only_matching flag. */
+However, the latter two set only_matching. */
 
-if ((only_matching && (file_offsets || line_offsets)) ||
+if ((only_matching >= 0 && (file_offsets || line_offsets)) ||
     (file_offsets && line_offsets))
   {
   fprintf(stderr, "pcregrep: Cannot mix --only-matching, --file-offsets "
@@ -2284,7 +2312,7 @@ if ((only_matching && (file_offsets || line_offsets)) ||
   pcregrep_exit(usage(2));
   }
 
-if (file_offsets || line_offsets) only_matching = TRUE;
+if (file_offsets || line_offsets) only_matching = 0;
 
 /* If a locale has not been provided as an option, see if the LC_CTYPE or
 LC_ALL environment variable is set, and if so, use it. */

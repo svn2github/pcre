@@ -525,3 +525,16 @@ long so that it needs more than a single read
 pcregrep: Error -8 or -21 means that a resource limit was exceeded.
 pcregrep: Check your regex for nested unlimited loops.
 RC=1
+---------------------------- Test 64 ------------------------------
+appears
+RC=0
+---------------------------- Test 65 ------------------------------
+pear
+RC=0
+---------------------------- Test 66 ------------------------------
+RC=0
+---------------------------- Test 67 ------------------------------
+RC=0
+---------------------------- Test 68 ------------------------------
+pear
+RC=0

@@ -307,6 +307,26 @@ echo "---------------------------- Test 63 -----------------------------" >>test
 (cd $srcdir; $valgrind $pcregrep --recursion-limit=1000 -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 64 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o1 '(?<=PAT)TERN (ap(pear)s)' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 65 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o2 '(?<=PAT)TERN (ap(pear)s)' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 66 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o3 '(?<=PAT)TERN (ap(pear)s)' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 67 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o12 '(?<=PAT)TERN (ap(pear)s)' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 68 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --only-matching=2 '(?<=PAT)TERN (ap(pear)s)' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

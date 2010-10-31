@@ -63,6 +63,9 @@ Version 8.11 10-Oct-2010
 
 11. When the -o option was used, pcregrep was setting a return code of 1, even
     when matches were found, and --line-buffered was not being honoured.
+    
+12. Added an optional parentheses number to the -o and --only-matching options
+    of pcregrep. 
 
 
 Version 8.10 25-Jun-2010
