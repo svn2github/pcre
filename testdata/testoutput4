@@ -1119,4 +1119,13 @@ No match
  0: a\x{c0}a\x{c0}
  1: a\x{c0}
 
+/A*/g8
+    AAB\x{123}BAA
+ 0: AA
+ 0: 
+ 0: 
+ 0: 
+ 0: AA
+ 0: 
+
 /-- End of testinput4 --/

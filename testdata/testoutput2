@@ -8787,6 +8787,27 @@ No match
 No match
     a\x85b 
 No match
+    
+/(*ANY).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
+
+/(*ANYCRLF).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
+
+/(*CRLF).*/g
+    abc\r\ndef
+ 0: abc
+ 0: 
+ 0: def
+ 0: 
 
 /a\Rb/I<bsr_anycrlf>
 Capturing subpattern count = 0

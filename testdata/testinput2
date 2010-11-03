@@ -2346,6 +2346,15 @@ a random value. /Ix
     a\nb  
     a\r\nb  
     a\x85b 
+    
+/(*ANY).*/g
+    abc\r\ndef
+
+/(*ANYCRLF).*/g
+    abc\r\ndef
+
+/(*CRLF).*/g
+    abc\r\ndef
 
 /a\Rb/I<bsr_anycrlf>
     a\rb

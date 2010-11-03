@@ -2791,11 +2791,13 @@ while (!done)
       to advance the start offset, and continue. We won't be at the end of the
       string - that was checked before setting g_notempty.
 
-      Complication arises in the case when the newline option is "any" or
-      "anycrlf". If the previous match was at the end of a line terminated by
-      CRLF, an advance of one character just passes the \r, whereas we should
-      prefer the longer newline sequence, as does the code in pcre_exec().
-      Fudge the offset value to achieve this.
+      Complication arises in the case when the newline convention is "any",
+      "crlf", or "anycrlf". If the previous match was at the end of a line 
+      terminated by CRLF, an advance of one character just passes the \r, 
+      whereas we should prefer the longer newline sequence, as does the code in
+      pcre_exec(). Fudge the offset value to achieve this. We check for a 
+      newline setting in the pattern; if none was set, use pcre_config() to 
+      find the default.
 
       Otherwise, in the case of UTF-8 matching, the advance must be one
       character, not one byte. */
@@ -2820,6 +2822,7 @@ while (!done)
                     (d == -1)? PCRE_NEWLINE_ANY : 0;
             }
           if (((obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANY ||
+               (obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_CRLF ||
                (obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANYCRLF)
               &&
               start_offset < len - 1 &&
@@ -2830,10 +2833,8 @@ while (!done)
             {
             while (start_offset + onechar < len)
               {
-              int tb = bptr[start_offset+onechar];
-              if (tb <= 127) break;
-              tb &= 0xc0;
-              if (tb != 0 && tb != 0xc0) onechar++;
+              if ((bptr[start_offset+onechar] & 0xc0) != 0x80) break;
+              onechar++; 
               }
             }
           use_offsets[1] = start_offset + onechar;

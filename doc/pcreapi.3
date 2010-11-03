@@ -1450,7 +1450,10 @@ the
 .\" HREF
 \fBpcredemo\fP
 .\"
-sample program.
+sample program. In the most general case, you have to check to see if the 
+newline convention recognizes CRLF as a newline, and if so, and the current 
+character is CR followed by LF, advance the starting offset by two characters
+instead of one.
 .sp
   PCRE_NO_START_OPTIMIZE
 .sp
@@ -2193,6 +2196,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 October 2010
+Last updated: 01 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

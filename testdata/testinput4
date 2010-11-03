@@ -641,4 +641,7 @@
     a\x{c0}aaaa/ 
     a\x{c0}a\x{c0}aaa/ 
 
+/A*/g8
+    AAB\x{123}BAA
+
 /-- End of testinput4 --/

@@ -66,6 +66,22 @@ Version 8.11 10-Oct-2010
     
 12. Added an optional parentheses number to the -o and --only-matching options
     of pcregrep. 
+    
+13. Imitating Perl's /g action for multiple matches is tricky when the pattern
+    can match an empty string. The code to do it in pcretest and pcredemo 
+    needed fixing:
+    
+    (a) When the newline convention was "crlf", pcretest got it wrong, skipping
+        only one byte after an empty string match just before CRLF (this case
+        just got forgotten; "any" and "anycrlf" were OK).
+        
+    (b) The pcretest code also had a bug, causing it to loop forever in UTF-8
+        mode when an empty string match preceded an ASCII character followed by 
+        a non-ASCII character. (The code for advancing by one character rather
+        than one byte was nonsense.) 
+        
+    (c) The pcredemo.c sample program did not have any code at all to handle
+        the cases when CRLF is a valid newline sequence. 
 
 
 Version 8.10 25-Jun-2010
