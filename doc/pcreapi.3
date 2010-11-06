@@ -1674,9 +1674,14 @@ Offset values that correspond to unused subpatterns at the end of the
 expression are also set to -1. For example, if the string "abc" is matched
 against the pattern (abc)(x(yz)?)? subpatterns 2 and 3 are not matched. The
 return from the function is 2, because the highest used capturing subpattern
-number is 1. However, you can refer to the offsets for the second and third
-capturing subpatterns if you wish (assuming the vector is large enough, of
-course).
+number is 1, and the offsets for for the second and third capturing subpatterns
+(assuming the vector is large enough, of course) are set to -1.
+.P
+\fBNote\fP: Elements of \fIovector\fP that do not correspond to capturing
+parentheses in the pattern are never changed. That is, if a pattern contains
+\fIn\fP capturing parentheses, no more than \fIovector[0]\fP to
+\fIovector[2n+1]\fP are set by \fBpcre_exec()\fP. The other elements retain
+whatever values they previously had.
 .P
 Some convenience functions are provided for extracting the captured substrings
 as separate strings. These are described below.
