@@ -366,6 +366,36 @@ locale is specified, the PCRE library's default (usually the "C" locale) is
 used. There is no short form for this option.
 </P>
 <P>
+<b>--match-limit</b>=<i>number</i> 
+Processing some regular expression patterns can require a very large amount of
+memory, leading in some cases to a program crash if not enough is available.
+Other patterns may take a very long time to search for all possible matching 
+strings. The <b>pcre_exec()</b> function that is called by <b>pcregrep</b> to do
+the matching has two parameters that can limit the resources that it uses. 
+<br>
+<br>
+The <b>--match-limit</b> option provides a means of limiting resource usage
+when processing patterns that are not going to match, but which have a very
+large number of possibilities in their search trees. The classic example is a
+pattern that uses nested unlimited repeats. Internally, PCRE uses a function
+called <b>match()</b> which it calls repeatedly (sometimes recursively). The
+limit set by \fb--match-limit\fP is imposed on the number of times this
+function is called during a match, which has the effect of limiting the amount
+of backtracking that can take place.
+<br>
+<br>
+The <b>--recursion-limit</b> option is similar to <b>--match-limit</b>, but
+instead of limiting the total number of times that <b>match()</b> is called, it
+limits the depth of recursive calls, which in turn limits the amount of memory
+that can be used. The recursion depth is a smaller number than the total number
+of calls, because not all calls to <b>match()</b> are recursive. This limit is
+of use only if it is set smaller than <b>--match-limit</b>.
+<br>
+<br>
+There are no short forms for these options. The default settings are specified 
+when the PCRE library is compiled, with the default default being 10 million.
+</P>
+<P>
 <b>-M</b>, <b>--multiline</b>
 Allow patterns to match more than one line. When this option is given, patterns
 may usefully contain literal newline characters and internal occurrences of ^
@@ -380,7 +410,7 @@ are guaranteed to be available for lookbehind assertions. This option does not
 work when input is read line by line (see \fP--line-buffered\fP.)
 </P>
 <P>
-<b>-N</b> <i>newline-type</i>, <b>--newline=</b><i>newline-type</i>
+<b>-N</b> <i>newline-type</i>, <b>--newline</b>=<i>newline-type</i>
 The PCRE library supports five different conventions for indicating
 the ends of lines. They are the single-character sequences CR (carriage return)
 and LF (linefeed), the two-character sequence CRLF, an "anycrlf" convention,
@@ -409,13 +439,26 @@ output, it precedes the line number. This option is forced if
 </P>
 <P>
 <b>-o</b>, <b>--only-matching</b>
-Show only the part of the line that matched a pattern. In this mode, no
-context is shown. That is, the <b>-A</b>, <b>-B</b>, and <b>-C</b> options are
-ignored. If there is more than one match in a line, each of them is shown
-separately. If <b>-o</b> is combined with <b>-v</b> (invert the sense of the
-match to find non-matching lines), no output is generated, but the return code
-is set appropriately. This option is mutually exclusive with
-<b>--file-offsets</b> and <b>--line-offsets</b>.
+Show only the part of the line that matched a pattern instead of the whole
+line. In this mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>, and
+<b>-C</b> options are ignored. If there is more than one match in a line, each
+of them is shown separately. If <b>-o</b> is combined with <b>-v</b> (invert the
+sense of the match to find non-matching lines), no output is generated, but the
+return code is set appropriately. If the matched portion of the line is empty,
+nothing is output unless the file name or line number are being printed, in
+which case they are shown on an otherwise empty line. This option is mutually
+exclusive with <b>--file-offsets</b> and <b>--line-offsets</b>.
+</P>
+<P>
+<b>-o</b><i>number</i>, <b>--only-matching</b>=<i>number</i>
+Show only the part of the line that matched the capturing parentheses of the 
+given number. Up to 32 capturing parentheses are supported. Because these
+options can be given without an argument (see above), if an argument is
+present, it must be given in the same shell item, for example, -o3 or
+--only-matching=2. The comments given for the non-argument case above also 
+apply to this case. If the specified capturing parentheses do not exist in the 
+pattern, or were not set in the match, nothing is output unless the file name 
+or line number are being printed.
 </P>
 <P>
 <b>-q</b>, <b>--quiet</b>
@@ -429,6 +472,10 @@ taking note of any <b>--include</b> and <b>--exclude</b> settings. By default, a
 directory is read as a normal file; in some operating systems this gives an
 immediate end-of-file. This option is a shorthand for setting the <b>-d</b>
 option to "recurse".
+</P>
+<P>
+<b>--recursion-limit</b>=<i>number</i>
+See <b>--match-limit</b> above.
 </P>
 <P>
 <b>-s</b>, <b>--no-messages</b>
@@ -550,7 +597,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 May 2010
+Last updated: 31 October 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

@@ -82,6 +82,16 @@ Version 8.11 10-Oct-2010
         
     (c) The pcredemo.c sample program did not have any code at all to handle
         the cases when CRLF is a valid newline sequence. 
+        
+14. Neither pcre_exec() nor pcre_dfa_exec() was checking that the value given
+    as a starting offset was within the subject string. There is now a new
+    error, PCRE_ERROR_BADOFFSET, which is returned if the starting offset is 
+    negative or greater than the length of the string. In order to test this, 
+    pcretest is extended to allow the setting of negative starting offsets.
+    
+15. In both pcre_exec() and pcre_dfa_exec() the code for checking that the 
+    starting offset points to the beginning of a UTF-8 character was 
+    unnecessarily clumsy. I tidied it up.  
 
 
 Version 8.10 25-Jun-2010

@@ -816,4 +816,12 @@ correctly, but that messes up comparisons). --/
 
 /\g{A}xxx#bх(?'A'123)(?'A'456)/8x<any>BZ
 
+/a+/8
+    a\x{123}aa\>1
+    a\x{123}aa\>2
+    a\x{123}aa\>3
+    a\x{123}aa\>4
+    a\x{123}aa\>5
+    a\x{123}aa\>6
+
 /-- End of testinput5 --/

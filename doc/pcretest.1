@@ -414,10 +414,10 @@ recognized:
 .\" JOIN
   \e?         pass the PCRE_NO_UTF8_CHECK option to
                \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP
-  \e>dd       start the match at offset dd (any number of digits);
 .\" JOIN
-               this sets the \fIstartoffset\fP argument for \fBpcre_exec()\fP
-               or \fBpcre_dfa_exec()\fP
+  \e>dd       start the match at offset dd (optional "-"; then
+               any number of digits); this sets the \fIstartoffset\fP 
+               argument for \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP
 .\" JOIN
   \e<cr>      pass the PCRE_NEWLINE_CR option to \fBpcre_exec()\fP
                or \fBpcre_dfa_exec()\fP
@@ -770,6 +770,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 November 2010
+Last updated: 06 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

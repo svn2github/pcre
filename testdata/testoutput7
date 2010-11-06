@@ -7668,4 +7668,21 @@ Partial match: abc
     abc\P\P
 Partial match: abc
 
+/.+/
+    abc\>0
+ 0: abc
+ 1: ab
+ 2: a
+    abc\>1
+ 0: bc
+ 1: b
+    abc\>2
+ 0: c
+    abc\>3
+No match
+    abc\>4
+Error -24
+    abc\>-4 
+Error -24
+
 /-- End of testinput7 --/

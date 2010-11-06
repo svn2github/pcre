@@ -260,12 +260,12 @@ test characters of any code value, but, by default, the characters that PCRE
 recognizes as digits, spaces, or word characters remain the same set as before,
 all with values less than 256. This remains true even when PCRE is built to
 include Unicode property support, because to do otherwise would slow down PCRE
-in many common cases. Note that this also applies to \b, because it is defined
-in terms of \w and \W. If you really want to test for a wider sense of, say,
-"digit", you can use explicit Unicode property tests such as \p{Nd}.
-Alternatively, if you set the PCRE_UCP option, the way that the character
-escapes work is changed so that Unicode properties are used to determine which
-characters match. There are more details in the section on
+in many common cases. Note in particular that this applies to \b and \B,
+because they are defined in terms of \w and \W. If you really want to test
+for a wider sense of, say, "digit", you can use explicit Unicode property tests
+such as \p{Nd}. Alternatively, if you set the PCRE_UCP option, the way that
+the character escapes work is changed so that Unicode properties are used to
+determine which characters match. There are more details in the section on
 <a href="pcrepattern.html#genericchartypes">generic character types</a>
 in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
@@ -307,7 +307,7 @@ two digits 10, at the domain cam.ac.uk.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 12 May 2010
+Last updated: 22 October 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

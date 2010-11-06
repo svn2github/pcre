@@ -1515,7 +1515,8 @@ in the main
 \fBpcre\fP
 .\"
 page. If an invalid UTF-8 sequence of bytes is found, \fBpcre_exec()\fP returns
-the error PCRE_ERROR_BADUTF8. If \fIstartoffset\fP contains an invalid value,
+the error PCRE_ERROR_BADUTF8. If \fIstartoffset\fP contains a value that does 
+not point to the start of a UTF-8 character (or to the end of the subject),
 PCRE_ERROR_BADUTF8_OFFSET is returned.
 .P
 If you already know that your subject is valid, and you want to skip these
@@ -1523,10 +1524,10 @@ checks for performance reasons, you can set the PCRE_NO_UTF8_CHECK option when
 calling \fBpcre_exec()\fP. You might want to do this for the second and
 subsequent calls to \fBpcre_exec()\fP if you are making repeated calls to find
 all the matches in a single subject string. However, you should be sure that
-the value of \fIstartoffset\fP points to the start of a UTF-8 character. When
-PCRE_NO_UTF8_CHECK is set, the effect of passing an invalid UTF-8 string as a
-subject, or a value of \fIstartoffset\fP that does not point to the start of a
-UTF-8 character, is undefined. Your program may crash.
+the value of \fIstartoffset\fP points to the start of a UTF-8 character (or the
+end of the subject). When PCRE_NO_UTF8_CHECK is set, the effect of passing an
+invalid UTF-8 string as a subject or an invalid value of \fIstartoffset\fP is
+undefined. Your program may crash.
 .sp
   PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT
@@ -1555,15 +1556,20 @@ discussion of partial and multi-segment matching, with examples, in the
 .\"
 documentation.
 .
+.
 .SS "The string to be matched by \fBpcre_exec()\fP"
 .rs
 .sp
 The subject string is passed to \fBpcre_exec()\fP as a pointer in
 \fIsubject\fP, a length (in bytes) in \fIlength\fP, and a starting byte offset
-in \fIstartoffset\fP. In UTF-8 mode, the byte offset must point to the start of
-a UTF-8 character. Unlike the pattern string, the subject may contain binary
-zero bytes. When the starting offset is zero, the search for a match starts at
-the beginning of the subject, and this is by far the most common case.
+in \fIstartoffset\fP. If this is negative or greater than the length of the 
+subject, \fBpcre_exec()\fP returns PCRE_ERROR_BADOFFSET.
+.P
+In UTF-8 mode, the byte offset must point to the start of a UTF-8 character (or
+the end of the subject). Unlike the pattern string, the subject may contain
+binary zero bytes. When the starting offset is zero, the search for a match
+starts at the beginning of the subject, and this is by far the most common
+case.
 .P
 A non-zero starting offset is useful when searching for another match in the
 same subject by calling \fBpcre_exec()\fP again after a previous success.
@@ -1583,9 +1589,24 @@ start of the subject, which is deemed to be a word boundary. However, if
 set to 4, it finds the second occurrence of "iss" because it is able to look
 behind the starting point to discover that it is preceded by a letter.
 .P
+Finding all the matches in a subject is tricky when the pattern can match an
+empty string. It is possible to emulate Perl's /g behaviour by first trying the
+match again at the same offset, with the PCRE_NOTEMPTY_ATSTART and
+PCRE_ANCHORED options, and then if that fails, advancing the starting offset
+and trying an ordinary match again. There is some code that demonstrates how to
+do this in the
+.\" HREF
+\fBpcredemo\fP
+.\"
+sample program. In the most general case, you have to check to see if the 
+newline convention recognizes CRLF as a newline, and if so, and the current 
+character is CR followed by LF, advance the starting offset by two characters
+instead of one.
+.P
 If a non-zero starting offset is passed when the pattern is anchored, one
 attempt to match at the given offset is made. This can only succeed if the
 pattern does not require the match to be at the start of the subject.
+.
 .
 .SS "How \fBpcre_exec()\fP returns captured substrings"
 .rs
@@ -1769,6 +1790,11 @@ description above.
   PCRE_ERROR_BADNEWLINE     (-23)
 .sp
 An invalid combination of PCRE_NEWLINE_\fIxxx\fP options was given.
+.sp
+  PCRE_ERROR_BADOFFSET      (-24)
+.sp
+The value of \fIstartoffset\fP was negative or greater than the length of the 
+subject, that is, the value in \fIlength\fP.
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .
@@ -2196,6 +2222,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 November 2010
+Last updated: 06 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

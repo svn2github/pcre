@@ -185,9 +185,11 @@ callouts.
 2. Because the alternative algorithm scans the subject string just once, and
 never needs to backtrack, it is possible to pass very long subject strings to
 the matching function in several pieces, checking for partial matching each
-time. The
+time. It is possible to do multi-segment matching using <b>pcre_exec()</b> (by 
+retaining partially matched substrings), but it is more complicated. The
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
-documentation gives details of partial matching.
+documentation gives details of partial matching and discusses multi-segment 
+matching.
 </P>
 <br><a name="SEC6" href="#TOC1">DISADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
 <P>
@@ -216,9 +218,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 September 2009
+Last updated: 22 October 2010
 <br>
-Copyright &copy; 1997-2009 University of Cambridge.
+Copyright &copy; 1997-2010 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

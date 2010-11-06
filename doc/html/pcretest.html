@@ -254,9 +254,12 @@ begins with a lookbehind assertion (including \b or \B).
 If any call to <b>pcre_exec()</b> in a <b>/g</b> or <b>/G</b> sequence matches an
 empty string, the next call is done with the PCRE_NOTEMPTY_ATSTART and
 PCRE_ANCHORED flags set in order to search for another, non-empty, match at the
-same point. If this second match fails, the start offset is advanced by one
-character, and the normal match is retried. This imitates the way Perl handles
-such cases when using the <b>/g</b> modifier or the <b>split()</b> function.
+same point. If this second match fails, the start offset is advanced, and the
+normal match is retried. This imitates the way Perl handles such cases when
+using the <b>/g</b> modifier or the <b>split()</b> function. Normally, the start 
+offset is advanced by one character, but if the newline convention recognizes 
+CRLF as a newline, and the current character is CR followed by LF, an advance 
+of two is used.
 </P>
 <br><b>
 Other modifiers
@@ -412,8 +415,8 @@ recognized:
   \Y         pass the PCRE_NO_START_OPTIMIZE option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \Z         pass the PCRE_NOTEOL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \?         pass the PCRE_NO_UTF8_CHECK option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
-  \&#62;dd       start the match at offset dd (any number of digits);
-               this sets the <i>startoffset</i> argument for <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
+  \&#62;dd       start the match at offset dd (optional "-"; then any number of digits); this sets the <i>startoffset</i> 
+               argument for <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#60;cr&#62;      pass the PCRE_NEWLINE_CR option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#60;lf&#62;      pass the PCRE_NEWLINE_LF option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#60;crlf&#62;    pass the PCRE_NEWLINE_CRLF option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
@@ -489,9 +492,11 @@ When a match succeeds, pcretest outputs the list of captured substrings that
 <b>pcre_exec()</b> returns, starting with number 0 for the string that matched
 the whole pattern. Otherwise, it outputs "No match" when the return is
 PCRE_ERROR_NOMATCH, and "Partial match:" followed by the partially matching
-substring when <b>pcre_exec()</b> returns PCRE_ERROR_PARTIAL. For any other
-returns, it outputs the PCRE negative error number. Here is an example of an
-interactive <b>pcretest</b> run.
+substring when <b>pcre_exec()</b> returns PCRE_ERROR_PARTIAL. (Note that this is
+the entire substring that was inspected during the partial match; it may
+include characters before the actual match start if a lookbehind assertion,
+\K, \b, or \B was involved.) For any other returns, it outputs the PCRE
+negative error number. Here is an example of an interactive <b>pcretest</b> run.
 <pre>
   $ pcretest
   PCRE version 7.0 30-Nov-2006
@@ -573,7 +578,9 @@ the subject where there is at least one match. For example:
 (Using the normal matching function on this data finds only "tang".) The
 longest matching string is always given first (and numbered zero). After a
 PCRE_ERROR_PARTIAL return, the output is "Partial match:", followed by the
-partially matching substring.
+partially matching substring. (Note that this is the entire substring that was
+inspected during the partial match; it may include characters before the actual
+match start if a lookbehind assertion, \K, \b, or \B was involved.)
 </P>
 <P>
 If <b>/g</b> is present on the pattern, the search for further matches resumes
@@ -740,7 +747,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 14 June 2010
+Last updated: 06 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

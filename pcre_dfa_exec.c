@@ -2844,6 +2844,7 @@ if (re == NULL || subject == NULL || workspace == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
 if (wscount < 20) return PCRE_ERROR_DFA_WSSIZE;
+if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
 
 /* We need to find the pointer to any study data before we test for byte
 flipping, so we scan the extra_data block first. This may set two fields in the
@@ -2966,12 +2967,8 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
     return PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
-    int tb = ((uschar *)subject)[start_offset];
-    if (tb > 127)
-      {
-      tb &= 0xc0;
-      if (tb != 0 && tb != 0xc0) return PCRE_ERROR_BADUTF8_OFFSET;
-      }
+    int tb = ((USPTR)subject)[start_offset] & 0xc0;
+    if (tb == 0x80) return PCRE_ERROR_BADUTF8_OFFSET;
     }
   }
 #endif

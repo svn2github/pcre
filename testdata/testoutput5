@@ -2292,4 +2292,18 @@ Starting byte set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x0b \x0e
         End
 ------------------------------------------------------------------
 
+/a+/8
+    a\x{123}aa\>1
+ 0: aa
+    a\x{123}aa\>2
+Error -11
+    a\x{123}aa\>3
+ 0: aa
+    a\x{123}aa\>4
+ 0: a
+    a\x{123}aa\>5
+No match
+    a\x{123}aa\>6
+Error -24
+
 /-- End of testinput5 --/

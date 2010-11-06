@@ -99,7 +99,7 @@ alternative function, and how it differs from the normal function, are
 discussed in the
 <a href="pcrematching.html"><b>pcrematching</b></a>
 page.
-</P>
+<a name="newlines"></a></P>
 <br><a name="SEC2" href="#TOC1">NEWLINE CONVENTIONS</a><br>
 <P>
 PCRE supports five different conventions for indicating line breaks in
@@ -234,6 +234,7 @@ Perl, $ and @ cause variable interpolation. Note the following examples:
   \Qabc\E\$\Qxyz\E   abc$xyz        abc$xyz
 </pre>
 The \Q...\E sequence is recognized both inside and outside character classes.
+An isolated \E that is not preceded by \Q is ignored.
 <a name="digitsafterbackslash"></a></P>
 <br><b>
 Non-printing characters
@@ -1936,7 +1937,15 @@ already been matched. The two possible forms of conditional subpattern are:
 </pre>
 If the condition is satisfied, the yes-pattern is used; otherwise the
 no-pattern (if present) is used. If there are more than two alternatives in the
-subpattern, a compile-time error occurs.
+subpattern, a compile-time error occurs. Each of the two alternatives may
+itself contain nested subpatterns of any form, including conditional 
+subpatterns; the restriction to two alternatives applies only at the level of
+the condition. This pattern fragment is an example where the alternatives are 
+complex:
+<pre>
+  (?(1) (A|B|C) | (D | (?(2)E|F) | E) )
+
+</PRE>
 </P>
 <P>
 There are four kinds of condition: references to subpatterns, references to
@@ -2071,14 +2080,32 @@ dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.
 <a name="comments"></a></P>
 <br><a name="SEC20" href="#TOC1">COMMENTS</a><br>
 <P>
-The sequence (?# marks the start of a comment that continues up to the next
-closing parenthesis. Nested parentheses are not permitted. The characters
-that make up a comment play no part in the pattern matching at all.
+There are two ways of including comments in patterns that are processed by 
+PCRE. In both cases, the start of the comment must not be in a character class,
+nor in the middle of any other sequence of related characters such as (?: or a
+subpattern name or number. The characters that make up a comment play no part
+in the pattern matching.
 </P>
 <P>
-If the PCRE_EXTENDED option is set, an unescaped # character outside a
-character class introduces a comment that continues to immediately after the
-next newline in the pattern.
+The sequence (?# marks the start of a comment that continues up to the next
+closing parenthesis. Nested parentheses are not permitted. If the PCRE_EXTENDED
+option is set, an unescaped # character also introduces a comment, which in
+this case continues to immediately after the next newline character or
+character sequence in the pattern. Which characters are interpreted as newlines
+is controlled by the options passed to <b>pcre_compile()</b> or by a special
+sequence at the start of the pattern, as described in the section entitled
+<a href="#recursion">"Newline conventions"</a>
+above. Note that end of this type of comment is a literal newline sequence in
+the pattern; escape sequences that happen to represent a newline do not count.
+For example, consider this pattern when PCRE_EXTENDED is set, and the default
+newline convention is in force:
+<pre>
+  abc #comment \n still comment
+</pre>
+On encountering the # character, <b>pcre_compile()</b> skips along, looking for 
+a newline in the pattern. The sequence \n is still literal at this stage, so
+it does not terminate the comment. Only an actual character with the code value
+0x0a (the default newline) does so.
 <a name="recursion"></a></P>
 <br><a name="SEC21" href="#TOC1">RECURSIVE PATTERNS</a><br>
 <P>
@@ -2600,10 +2627,10 @@ matching name is found, normal "bumpalong" of one character happens (the
 <pre>
   (*THEN) or (*THEN:NAME)
 </pre>
-This verb causes a skip to the next alternation if the rest of the pattern does
-not match. That is, it cancels pending backtracking, but only within the
-current alternation. Its name comes from the observation that it can be used
-for a pattern-based if-then-else block:
+This verb causes a skip to the next alternation in the innermost enclosing 
+group if the rest of the pattern does not match. That is, it cancels pending
+backtracking, but only within the current alternation. Its name comes from the
+observation that it can be used for a pattern-based if-then-else block:
 <pre>
   ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 </pre>
@@ -2613,6 +2640,25 @@ second alternative and tries COND2, without backtracking into COND1. The
 behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN) if the
 overall match fails. If (*THEN) is not directly inside an alternation, it acts
 like (*PRUNE).
+</P>
+<P>
+The above verbs provide four different "strengths" of control when subsequent 
+matching fails. (*THEN) is the weakest, carrying on the match at the next
+alternation. (*PRUNE) comes next, failing the match at the current starting
+position, but allowing an advance to the next character (for an unanchored
+pattern). (*SKIP) is similar, except that the advance may be more than one
+character. (*COMMIT) is the strongest, causing the entire match to fail.
+</P>
+<P>
+If more than one is present in a pattern, the "stongest" one wins. For example,
+consider this pattern, where A, B, etc. are complex pattern fragments:
+<pre>
+  (A(*COMMIT)B(*THEN)C|D)
+</pre>
+Once A has matched, PCRE is committed to this match, at the current starting
+position. If subsequently B matches, but C does not, the normal (*THEN) action
+of trying the next alternation (that is, D) does not happen because (*COMMIT)
+overrides.
 </P>
 <br><a name="SEC26" href="#TOC1">SEE ALSO</a><br>
 <P>
@@ -2630,7 +2676,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 18 May 2010
+Last updated: 31 October 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

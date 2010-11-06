@@ -1443,7 +1443,10 @@ if that fails, by advancing the starting offset (see below) and trying an
 ordinary match again. There is some code that demonstrates how to do this in
 the
 <a href="pcredemo.html"><b>pcredemo</b></a>
-sample program.
+sample program. In the most general case, you have to check to see if the 
+newline convention recognizes CRLF as a newline, and if so, and the current 
+character is CR followed by LF, advance the starting offset by two characters
+instead of one.
 <pre>
   PCRE_NO_START_OPTIMIZE
 </pre>
@@ -1501,7 +1504,8 @@ strings in the
 in the main
 <a href="pcre.html"><b>pcre</b></a>
 page. If an invalid UTF-8 sequence of bytes is found, <b>pcre_exec()</b> returns
-the error PCRE_ERROR_BADUTF8. If <i>startoffset</i> contains an invalid value,
+the error PCRE_ERROR_BADUTF8. If <i>startoffset</i> contains a value that does 
+not point to the start of a UTF-8 character (or to the end of the subject),
 PCRE_ERROR_BADUTF8_OFFSET is returned.
 </P>
 <P>
@@ -1510,10 +1514,10 @@ checks for performance reasons, you can set the PCRE_NO_UTF8_CHECK option when
 calling <b>pcre_exec()</b>. You might want to do this for the second and
 subsequent calls to <b>pcre_exec()</b> if you are making repeated calls to find
 all the matches in a single subject string. However, you should be sure that
-the value of <i>startoffset</i> points to the start of a UTF-8 character. When
-PCRE_NO_UTF8_CHECK is set, the effect of passing an invalid UTF-8 string as a
-subject, or a value of <i>startoffset</i> that does not point to the start of a
-UTF-8 character, is undefined. Your program may crash.
+the value of <i>startoffset</i> points to the start of a UTF-8 character (or the
+end of the subject). When PCRE_NO_UTF8_CHECK is set, the effect of passing an
+invalid UTF-8 string as a subject or an invalid value of <i>startoffset</i> is
+undefined. Your program may crash.
 <pre>
   PCRE_PARTIAL_HARD
   PCRE_PARTIAL_SOFT
@@ -1522,12 +1526,23 @@ These options turn on the partial matching feature. For backwards
 compatibility, PCRE_PARTIAL is a synonym for PCRE_PARTIAL_SOFT. A partial match
 occurs if the end of the subject string is reached successfully, but there are
 not enough subject characters to complete the match. If this happens when
-PCRE_PARTIAL_HARD is set, <b>pcre_exec()</b> immediately returns
-PCRE_ERROR_PARTIAL. Otherwise, if PCRE_PARTIAL_SOFT is set, matching continues
-by testing any other alternatives. Only if they all fail is PCRE_ERROR_PARTIAL
-returned (instead of PCRE_ERROR_NOMATCH). The portion of the string that
-was inspected when the partial match was found is set as the first matching
-string. There is a more detailed discussion in the
+PCRE_PARTIAL_SOFT (but not PCRE_PARTIAL_HARD) is set, matching continues by
+testing any remaining alternatives. Only if no complete match can be found is
+PCRE_ERROR_PARTIAL returned instead of PCRE_ERROR_NOMATCH. In other words,
+PCRE_PARTIAL_SOFT says that the caller is prepared to handle a partial match,
+but only if no complete match can be found.
+</P>
+<P>
+If PCRE_PARTIAL_HARD is set, it overrides PCRE_PARTIAL_SOFT. In this case, if a
+partial match is found, <b>pcre_exec()</b> immediately returns
+PCRE_ERROR_PARTIAL, without considering any other alternatives. In other words,
+when PCRE_PARTIAL_HARD is set, a partial match is considered to be more 
+important that an alternative complete match.
+</P>
+<P>
+In both cases, the portion of the string that was inspected when the partial
+match was found is set as the first matching string. There is a more detailed
+discussion of partial and multi-segment matching, with examples, in the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 documentation.
 </P>
@@ -1537,10 +1552,15 @@ The string to be matched by <b>pcre_exec()</b>
 <P>
 The subject string is passed to <b>pcre_exec()</b> as a pointer in
 <i>subject</i>, a length (in bytes) in <i>length</i>, and a starting byte offset
-in <i>startoffset</i>. In UTF-8 mode, the byte offset must point to the start of
-a UTF-8 character. Unlike the pattern string, the subject may contain binary
-zero bytes. When the starting offset is zero, the search for a match starts at
-the beginning of the subject, and this is by far the most common case.
+in <i>startoffset</i>. If this is negative or greater than the length of the 
+subject, <b>pcre_exec()</b> returns PCRE_ERROR_BADOFFSET.
+</P>
+<P>
+In UTF-8 mode, the byte offset must point to the start of a UTF-8 character (or
+the end of the subject). Unlike the pattern string, the subject may contain
+binary zero bytes. When the starting offset is zero, the search for a match
+starts at the beginning of the subject, and this is by far the most common
+case.
 </P>
 <P>
 A non-zero starting offset is useful when searching for another match in the
@@ -1560,6 +1580,19 @@ start of the subject, which is deemed to be a word boundary. However, if
 <b>pcre_exec()</b> is passed the entire string again, but with <i>startoffset</i>
 set to 4, it finds the second occurrence of "iss" because it is able to look
 behind the starting point to discover that it is preceded by a letter.
+</P>
+<P>
+Finding all the matches in a subject is tricky when the pattern can match an
+empty string. It is possible to emulate Perl's /g behaviour by first trying the
+match again at the same offset, with the PCRE_NOTEMPTY_ATSTART and
+PCRE_ANCHORED options, and then if that fails, advancing the starting offset
+and trying an ordinary match again. There is some code that demonstrates how to
+do this in the
+<a href="pcredemo.html"><b>pcredemo</b></a>
+sample program. In the most general case, you have to check to see if the 
+newline convention recognizes CRLF as a newline, and if so, and the current 
+character is CR followed by LF, advance the starting offset by two characters
+instead of one.
 </P>
 <P>
 If a non-zero starting offset is passed when the pattern is anchored, one
@@ -1756,6 +1789,11 @@ description above.
   PCRE_ERROR_BADNEWLINE     (-23)
 </pre>
 An invalid combination of PCRE_NEWLINE_<i>xxx</i> options was given.
+<pre>
+  PCRE_ERROR_BADOFFSET      (-24)
+</pre>
+The value of <i>startoffset</i> was negative or greater than the length of the 
+subject, that is, the value in <i>length</i>.
 </P>
 <P>
 Error numbers -16 to -20 and -22 are not used by <b>pcre_exec()</b>.
@@ -2050,6 +2088,10 @@ is converted into PCRE_ERROR_PARTIAL if the end of the subject is reached,
 there have been no complete matches, but there is still at least one matching
 possibility. The portion of the string that was inspected when the longest
 partial match was found is set as the first matching string in both cases.
+There is a more detailed discussion of partial and multi-segment matching, with
+examples, in the
+<a href="pcrepartial.html"><b>pcrepartial</b></a>
+documentation.
 <pre>
   PCRE_DFA_SHORTEST
 </pre>
@@ -2161,7 +2203,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 June 2010
+Last updated: 06 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

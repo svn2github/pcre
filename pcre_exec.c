@@ -5634,6 +5634,7 @@ if ((options & ~PUBLIC_EXEC_OPTIONS) != 0) return PCRE_ERROR_BADOPTION;
 if (re == NULL || subject == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
+if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
 
 /* This information is for finding all the numbers associated with a given
 name, for condition testing. */
@@ -5804,12 +5805,8 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
     return PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
-    int tb = ((USPTR)subject)[start_offset];
-    if (tb > 127)
-      {
-      tb &= 0xc0;
-      if (tb != 0 && tb != 0xc0) return PCRE_ERROR_BADUTF8_OFFSET;
-      }
+    int tb = ((USPTR)subject)[start_offset] & 0xc0;
+    if (tb == 0x80) return PCRE_ERROR_BADUTF8_OFFSET;
     }
   }
 #endif

@@ -205,9 +205,11 @@ PATTERN MODIFIERS
        string,  the  next  call  is  done  with  the PCRE_NOTEMPTY_ATSTART and
        PCRE_ANCHORED flags set in order  to  search  for  another,  non-empty,
        match  at  the same point. If this second match fails, the start offset
-       is advanced by one character, and the normal  match  is  retried.  This
-       imitates  the way Perl handles such cases when using the /g modifier or
-       the split() function.
+       is advanced, and the normal match is retried.  This  imitates  the  way
+       Perl handles such cases when using the /g modifier or the split() func-
+       tion. Normally, the start offset is advanced by one character,  but  if
+       the  newline  convention  recognizes CRLF as a newline, and the current
+       character is CR followed by LF, an advance of two is used.
 
    Other modifiers
 
@@ -370,9 +372,9 @@ DATA LINES
                       or pcre_dfa_exec()
          \?         pass the PCRE_NO_UTF8_CHECK option to
                       pcre_exec() or pcre_dfa_exec()
-         \>dd       start the match at offset dd (any number of digits);
-                      this sets the startoffset argument for pcre_exec()
-                      or pcre_dfa_exec()
+         \>dd       start the match at offset dd (optional "-"; then
+                      any number of digits); this sets the startoffset
+                      argument for pcre_exec() or pcre_dfa_exec()
          \<cr>      pass the PCRE_NEWLINE_CR option to pcre_exec()
                       or pcre_dfa_exec()
          \<lf>      pass the PCRE_NEWLINE_LF option to pcre_exec()
@@ -449,8 +451,11 @@ DEFAULT OUTPUT FROM PCRETEST
        matched  the  whole  pattern. Otherwise, it outputs "No match" when the
        return is PCRE_ERROR_NOMATCH, and "Partial match:" followed by the par-
        tially  matching substring when pcre_exec() returns PCRE_ERROR_PARTIAL.
-       For any other returns, it outputs the PCRE negative error number.  Here
-       is an example of an interactive pcretest run.
+       (Note that this is the entire substring that was inspected  during  the
+       partial  match; it may include characters before the actual match start
+       if a lookbehind assertion, \K, \b, or \B was involved.) For  any  other
+       returns,  it outputs the PCRE negative error number. Here is an example
+       of an interactive pcretest run.
 
          $ pcretest
          PCRE version 7.0 30-Nov-2006
@@ -462,11 +467,11 @@ DEFAULT OUTPUT FROM PCRETEST
          data> xyz
          No match
 
-       Note  that unset capturing substrings that are not followed by one that
-       is set are not returned by pcre_exec(), and are not shown by  pcretest.
-       In  the following example, there are two capturing substrings, but when
-       the first data line is matched, the  second,  unset  substring  is  not
-       shown.  An "internal" unset substring is shown as "<unset>", as for the
+       Note that unset capturing substrings that are not followed by one  that
+       is  set are not returned by pcre_exec(), and are not shown by pcretest.
+       In the following example, there are two capturing substrings, but  when
+       the  first  data  line  is  matched, the second, unset substring is not
+       shown. An "internal" unset substring is shown as "<unset>", as for  the
        second data line.
 
            re> /(a)|(b)/
@@ -478,11 +483,11 @@ DEFAULT OUTPUT FROM PCRETEST
           1: <unset>
           2: b
 
-       If the strings contain any non-printing characters, they are output  as
-       \0x  escapes,  or  as \x{...} escapes if the /8 modifier was present on
-       the pattern. See below for the definition of  non-printing  characters.
-       If  the pattern has the /+ modifier, the output for substring 0 is fol-
-       lowed by the the rest of the subject string, identified  by  "0+"  like
+       If  the strings contain any non-printing characters, they are output as
+       \0x escapes, or as \x{...} escapes if the /8 modifier  was  present  on
+       the  pattern.  See below for the definition of non-printing characters.
+       If the pattern has the /+ modifier, the output for substring 0 is  fol-
+       lowed  by  the  the rest of the subject string, identified by "0+" like
        this:
 
            re> /cat/+
@@ -490,7 +495,7 @@ DEFAULT OUTPUT FROM PCRETEST
           0: cat
           0+ aract
 
-       If  the  pattern  has  the /g or /G modifier, the results of successive
+       If the pattern has the /g or /G modifier,  the  results  of  successive
        matching attempts are output in sequence, like this:
 
            re> /\Bi(\w\w)/g
@@ -504,24 +509,24 @@ DEFAULT OUTPUT FROM PCRETEST
 
        "No match" is output only if the first match attempt fails.
 
-       If any of the sequences \C, \G, or \L are present in a data  line  that
-       is  successfully  matched,  the substrings extracted by the convenience
+       If  any  of the sequences \C, \G, or \L are present in a data line that
+       is successfully matched, the substrings extracted  by  the  convenience
        functions are output with C, G, or L after the string number instead of
        a colon. This is in addition to the normal full list. The string length
-       (that is, the return from the extraction function) is given  in  paren-
+       (that  is,  the return from the extraction function) is given in paren-
        theses after each string for \C and \G.
 
        Note that whereas patterns can be continued over several lines (a plain
        ">" prompt is used for continuations), data lines may not. However new-
-       lines  can  be included in data by means of the \n escape (or \r, \r\n,
+       lines can be included in data by means of the \n escape (or  \r,  \r\n,
        etc., depending on the newline sequence setting).
 
 
 OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
 
-       When the alternative matching function, pcre_dfa_exec(),  is  used  (by
-       means  of  the \D escape sequence or the -dfa command line option), the
-       output consists of a list of all the matches that start  at  the  first
+       When  the  alternative  matching function, pcre_dfa_exec(), is used (by
+       means of the \D escape sequence or the -dfa command line  option),  the
+       output  consists  of  a list of all the matches that start at the first
        point in the subject where there is at least one match. For example:
 
            re> /(tang|tangerine|tan)/
@@ -530,10 +535,13 @@ OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
           1: tang
           2: tan
 
-       (Using  the  normal  matching function on this data finds only "tang".)
-       The longest matching string is always given first (and numbered  zero).
+       (Using the normal matching function on this data  finds  only  "tang".)
+       The  longest matching string is always given first (and numbered zero).
        After a PCRE_ERROR_PARTIAL return, the output is "Partial match:", fol-
-       lowed by the partially matching substring.
+       lowed  by  the  partially  matching  substring.  (Note that this is the
+       entire substring that was inspected during the partial  match;  it  may
+       include characters before the actual match start if a lookbehind asser-
+       tion, \K, \b, or \B was involved.)
 
        If /g is present on the pattern, the search for further matches resumes
        at the end of the longest match. For example:
@@ -692,5 +700,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 June 2010
+       Last updated: 06 November 2010
        Copyright (c) 1997-2010 University of Cambridge.

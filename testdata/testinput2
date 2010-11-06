@@ -3544,4 +3544,12 @@ with \Y. ---/
     abc\P
     abc\P\P
 
+/.+/
+    abc\>0
+    abc\>1
+    abc\>2
+    abc\>3
+    abc\>4
+    abc\>-4 
+
 /-- End of testinput2 --/

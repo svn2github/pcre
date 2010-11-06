@@ -2132,6 +2132,7 @@ while (!done)
     int getlist = 0;
     int gmatched = 0;
     int start_offset = 0;
+    int start_offset_sign = 1; 
     int g_notempty = 0;
     int use_dfa = 0;
 
@@ -2264,7 +2265,13 @@ while (!done)
         continue;
 
         case '>':
+        if (*p == '-') 
+          {
+          start_offset_sign = -1;
+          p++;
+          }    
         while(isdigit(*p)) start_offset = start_offset * 10 + *p++ - '0';
+        start_offset *= start_offset_sign; 
         continue;
 
         case 'A':  /* Option setting */
