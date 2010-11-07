@@ -344,7 +344,8 @@ recognized:
   \et         tab (\ex09)
   \ev         vertical tab (\ex0b)
   \ennn       octal character (up to 3 octal digits)
-  \exhh       hexadecimal character (up to 2 hex digits)
+               always a byte unless > 255 in UTF-8 mode 
+  \exhh       hexadecimal byte (up to 2 hex digits)
 .\" JOIN
   \ex{hh...}  hexadecimal character, any number of digits
                in UTF-8 mode
@@ -434,6 +435,13 @@ recognized:
   \e<any>     pass the PCRE_NEWLINE_ANY option to \fBpcre_exec()\fP
                or \fBpcre_dfa_exec()\fP
 .sp
+Note that \exhh always specifies one byte, even in UTF-8 mode; this makes it 
+possible to construct invalid UTF-8 sequences for testing purposes. On the 
+other hand, \ex{hh} is interpreted as a UTF-8 character in UTF-8 mode,
+generating more than one byte if the value is greater than 127. When not in 
+UTF-8 mode, it generates one byte for values less than 256, and causes an error 
+for greater values.
+.P
 The escapes that specify line ending sequences are literal strings, exactly as
 shown. No more than one newline setting should be present in any data line.
 .P
@@ -770,6 +778,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 November 2010
+Last updated: 07 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
