@@ -797,7 +797,7 @@ No need char
 Failed: invalid UTF-8 string at offset 2
 
 /ร/8
-Failed: invalid UTF-8 string at offset 0
+Failed: invalid UTF-8 string at offset 1
 
 /รรรxxx/8
 Failed: invalid UTF-8 string at offset 1
@@ -823,6 +823,12 @@ Error -10
 Error -10
     รรร\?
 No match
+    \xe1\x88 
+Error -10
+    \P\xe1\x88 
+Error -10
+    \P\P\xe1\x88 
+Error -25
 
 /anything/8
     \xc0\x80

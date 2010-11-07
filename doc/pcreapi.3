@@ -435,12 +435,16 @@ If \fIerrptr\fP is NULL, \fBpcre_compile()\fP returns NULL immediately.
 Otherwise, if compilation of a pattern fails, \fBpcre_compile()\fP returns
 NULL, and sets the variable pointed to by \fIerrptr\fP to point to a textual
 error message. This is a static string that is part of the library. You must
-not try to free it. The byte offset from the start of the pattern to the
-character that was being processed when the error was discovered is placed in
-the variable pointed to by \fIerroffset\fP, which must not be NULL. If it is,
-an immediate error is given. Some errors are not detected until checks are
-carried out when the whole pattern has been scanned; in this case the offset is
-set to the end of the pattern.
+not try to free it. The offset from the start of the pattern to the byte that
+was being processed when the error was discovered is placed in the variable
+pointed to by \fIerroffset\fP, which must not be NULL. If it is, an immediate
+error is given. Some errors are not detected until checks are carried out when
+the whole pattern has been scanned; in this case the offset is set to the end
+of the pattern. 
+.P
+Note that the offset is in bytes, not characters, even in UTF-8 mode. It may 
+point into the middle of a UTF-8 character (for example, when
+PCRE_ERROR_BADUTF8 is returned for an invalid UTF-8 string).
 .P
 If \fBpcre_compile2()\fP is used instead of \fBpcre_compile()\fP, and the
 \fIerrorcodeptr\fP argument is not NULL, a non-zero error code number is
@@ -1515,9 +1519,11 @@ in the main
 \fBpcre\fP
 .\"
 page. If an invalid UTF-8 sequence of bytes is found, \fBpcre_exec()\fP returns
-the error PCRE_ERROR_BADUTF8. If \fIstartoffset\fP contains a value that does 
-not point to the start of a UTF-8 character (or to the end of the subject),
-PCRE_ERROR_BADUTF8_OFFSET is returned.
+the error PCRE_ERROR_BADUTF8 or, if PCRE_PARTIAL_HARD is set and the problem is
+a truncated UTF-8 character at the end of the subject, PCRE_ERROR_SHORTUTF8. If
+\fIstartoffset\fP contains a value that does not point to the start of a UTF-8
+character (or to the end of the subject), PCRE_ERROR_BADUTF8_OFFSET is
+returned.
 .P
 If you already know that your subject is valid, and you want to skip these
 checks for performance reasons, you can set the PCRE_NO_UTF8_CHECK option when
@@ -1756,11 +1762,14 @@ documentation for details.
   PCRE_ERROR_BADUTF8        (-10)
 .sp
 A string that contains an invalid UTF-8 byte sequence was passed as a subject.
+However, if PCRE_PARTIAL_HARD is set and the problem is a truncated UTF-8 
+character at the end of the subject, PCRE_ERROR_SHORTUTF8 is used instead.
 .sp
   PCRE_ERROR_BADUTF8_OFFSET (-11)
 .sp
 The UTF-8 byte sequence that was passed as a subject was valid, but the value
-of \fIstartoffset\fP did not point to the beginning of a UTF-8 character.
+of \fIstartoffset\fP did not point to the beginning of a UTF-8 character or the 
+end of the subject.
 .sp
   PCRE_ERROR_PARTIAL        (-12)
 .sp
@@ -1800,6 +1809,12 @@ An invalid combination of PCRE_NEWLINE_\fIxxx\fP options was given.
 .sp
 The value of \fIstartoffset\fP was negative or greater than the length of the 
 subject, that is, the value in \fIlength\fP.
+.sp
+  PCRE_ERROR_SHORTUTF8      (-25)
+.sp
+The subject string ended with an incomplete (truncated) UTF-8 character, and 
+the PCRE_PARTIAL_HARD option was set. Without this option, PCRE_ERROR_BADUTF8 
+is returned in this situation.
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .

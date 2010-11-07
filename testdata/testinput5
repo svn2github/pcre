@@ -205,6 +205,9 @@ correctly, but that messes up comparisons). --/
     ร
     รรร
     รรร\?
+    \xe1\x88 
+    \P\xe1\x88 
+    \P\P\xe1\x88 
 
 /anything/8
     \xc0\x80

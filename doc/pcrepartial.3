@@ -113,6 +113,12 @@ an earlier partial match over a later complete match. For this reason, the
 assumption is made that the end of the supplied subject string may not be the
 true end of the available data, and so, if \ez, \eZ, \eb, \eB, or $ are
 encountered at the end of the subject, the result is PCRE_ERROR_PARTIAL.
+.P
+Setting PCRE_PARTIAL_HARD also affects the way \fBpcre_exec()\fP checks UTF-8 
+subject strings for validity. Normally, an invalid UTF-8 sequence causes the
+error PCRE_ERROR_BADUTF8. However, in the special case of a truncated UTF-8 
+character at the end of the subject, PCRE_ERROR_SHORTUTF8 is returned when 
+PCRE_PARTIAL_HARD is set.
 .
 .
 .SS "Comparing hard and soft partial matching"
@@ -406,6 +412,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 October 2010
+Last updated: 07 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

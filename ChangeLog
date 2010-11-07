@@ -92,6 +92,9 @@ Version 8.11 10-Oct-2010
 15. In both pcre_exec() and pcre_dfa_exec() the code for checking that the 
     starting offset points to the beginning of a UTF-8 character was 
     unnecessarily clumsy. I tidied it up.  
+    
+16. Added PCRE_ERROR_SHORTUTF8 to make it possible to distinguish between a
+    bad UTF-8 sequence and one that is incomplete. 
 
 
 Version 8.10 25-Jun-2010
