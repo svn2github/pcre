@@ -95,6 +95,13 @@ Version 8.11 10-Oct-2010
     
 16. Added PCRE_ERROR_SHORTUTF8 to make it possible to distinguish between a
     bad UTF-8 sequence and one that is incomplete. 
+    
+17. Nobody had reported that the --include_dir option, which was added in 
+    release 7.7 should have been called --include-dir (hyphen, not underscore) 
+    for compatibility with GNU grep. I have changed it to --include-dir, but 
+    left --include_dir as an undocumented synonym, and the same for 
+    --exclude-dir, though that is not available in GNU grep, at least as of 
+    release 2.5.4. 
 
 
 Version 8.10 25-Jun-2010

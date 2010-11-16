@@ -249,8 +249,17 @@ static option_item optionlist[] = {
   { OP_NODATA,    'r',      NULL,              "recursive",     "recursively scan sub-directories" },
   { OP_STRING,    N_EXCLUDE,&exclude_pattern,  "exclude=pattern","exclude matching files when recursing" },
   { OP_STRING,    N_INCLUDE,&include_pattern,  "include=pattern","include matching files when recursing" },
+  { OP_STRING,    N_EXCLUDE_DIR,&exclude_dir_pattern, "exclude-dir=pattern","exclude matching directories when recursing" },
+  { OP_STRING,    N_INCLUDE_DIR,&include_dir_pattern, "include-dir=pattern","include matching directories when recursing" },
+
+  /* These two were accidentally implemented with underscores instead of
+  hyphens in the option names. As this was not discovered for several releases,
+  the incorrect versions are left in the table for compatibility. However, the
+  --help function misses out any option that has an underscore in its name. */
+    
   { OP_STRING,    N_EXCLUDE_DIR,&exclude_dir_pattern, "exclude_dir=pattern","exclude matching directories when recursing" },
   { OP_STRING,    N_INCLUDE_DIR,&include_dir_pattern, "include_dir=pattern","include matching directories when recursing" },
+
 #ifdef JFRIEDL_DEBUG
   { OP_OP_NUMBER, 'S',      &S_arg,            "jeffS",         "replace matched (sub)string with X" },
 #endif
@@ -1782,10 +1791,21 @@ for (op = optionlist; op->one_char != 0; op++)
   {
   int n;
   char s[4];
+  
+  /* Two options were accidentally implemented and documented with underscores
+  instead of hyphens in their names, something that was not noticed for quite a
+  few releases. When fixing this, I left the underscored versions in the list 
+  in case people were using them. However, we don't want to display them in the 
+  help data. There are no other options that contain underscores, and we do not 
+  expect ever to implement such options. Therefore, just omit any option that 
+  contains an underscore. */
+  
+  if (strchr(op->long_name, '_') != NULL) continue; 
+   
   if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); else strcpy(s, "   ");
-  n = 30 - printf("  %s --%s", s, op->long_name);
+  n = 31 - printf("  %s --%s", s, op->long_name);
   if (n < 1) n = 1;
-  printf("%.*s%s\n", n, "                    ", op->help_text);
+  printf("%.*s%s\n", n, "                     ", op->help_text);
   }
 
 printf("\nWhen reading patterns from a file instead of using a command line option,\n");

@@ -182,19 +182,19 @@ that matched.
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
 the \fB-r\fP (recursive search) option, any regular files whose names match the
 pattern are excluded. Subdirectories are not excluded by this option; they are
-searched recursively, subject to the \fB--exclude_dir\fP and
+searched recursively, subject to the \fB--exclude-dir\fP and
 \fB--include_dir\fP options. The pattern is a PCRE regular expression, and is
 matched against the final component of the file name (not the entire path). If
 a file name matches both \fB--include\fP and \fB--exclude\fP, it is excluded.
 There is no short form for this option.
 .TP
-\fB--exclude_dir\fP=\fIpattern\fP
+\fB--exclude-dir\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the contents of a directory as a consequence
 of the \fB-r\fP (recursive search) option, any subdirectories whose names match
 the pattern are excluded. (Note that the \fP--exclude\fP option does not affect
 subdirectories.) The pattern is a PCRE regular expression, and is matched
 against the final component of the name (not the entire path). If a
-subdirectory name matches both \fB--include_dir\fP and \fB--exclude_dir\fP, it
+subdirectory name matches both \fB--include-dir\fP and \fB--exclude-dir\fP, it
 is excluded. There is no short form for this option.
 .TP
 \fB-F\fP, \fB--fixed-strings\fP
@@ -248,19 +248,19 @@ Ignore upper/lower case distinctions during comparisons.
 When \fBpcregrep\fP is searching the files in a directory as a consequence of
 the \fB-r\fP (recursive search) option, only those regular files whose names
 match the pattern are included. Subdirectories are always included and searched
-recursively, subject to the \fP--include_dir\fP and \fB--exclude_dir\fP
+recursively, subject to the \fP--include-dir\fP and \fB--exclude-dir\fP
 options. The pattern is a PCRE regular expression, and is matched against the
 final component of the file name (not the entire path). If a file name matches
 both \fB--include\fP and \fB--exclude\fP, it is excluded. There is no short
 form for this option.
 .TP
-\fB--include_dir\fP=\fIpattern\fP
+\fB--include-dir\fP=\fIpattern\fP
 When \fBpcregrep\fP is searching the contents of a directory as a consequence
 of the \fB-r\fP (recursive search) option, only those subdirectories whose
 names match the pattern are included. (Note that the \fB--include\fP option
 does not affect subdirectories.) The pattern is a PCRE regular expression, and
 is matched against the final component of the name (not the entire path). If a
-subdirectory name matches both \fB--include_dir\fP and \fB--exclude_dir\fP, it
+subdirectory name matches both \fB--include-dir\fP and \fB--exclude-dir\fP, it
 is excluded. There is no short form for this option.
 .TP
 \fB-L\fP, \fB--files-without-match\fP
@@ -458,11 +458,18 @@ convert this to an appropriate sequence if the output is sent to a file.
 .SH "OPTIONS COMPATIBILITY"
 .rs
 .sp
-The majority of short and long forms of \fBpcregrep\fP's options are the same
-as in the GNU \fBgrep\fP program. Any long option of the form
+Many of the short and long forms of \fBpcregrep\fP's options are the same
+as in the GNU \fBgrep\fP program (version 2.5.4). Any long option of the form
 \fB--xxx-regexp\fP (GNU terminology) is also available as \fB--xxx-regex\fP
-(PCRE terminology). However, the \fB--locale\fP, \fB-M\fP, \fB--multiline\fP,
-\fB-u\fP, and \fB--utf-8\fP options are specific to \fBpcregrep\fP. If both the
+(PCRE terminology). However, the \fB--file-offsets\fP, \fB--include-dir\fP,
+\fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP, \fB-M\fP,
+\fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--recursion-limit\fP,
+\fB-u\fP, and \fB--utf-8\fP options are specific to \fBpcregrep\fP, as is the
+use of the \fB--only-matching\fP option with a capturing parentheses number.
+.P
+Although most of the common options work the same way, a few are different in
+\fBpcregrep\fP. For example, the \fB--include\fP option's argument is a glob
+for GNU \fBgrep\fP, but a regular expression for \fBpcregrep\fP. If both the
 \fB-c\fP and \fB-l\fP options are given, GNU grep lists only file names,
 without counts, but \fBpcregrep\fP gives the counts.
 .
@@ -471,14 +478,18 @@ without counts, but \fBpcregrep\fP gives the counts.
 .rs
 .sp
 There are four different ways in which an option with data can be specified.
-If a short form option is used, the data may follow immediately, or in the next
-command line item. For example:
+If a short form option is used, the data may follow immediately, or (with one
+exception) in the next command line item. For example:
 .sp
   -f/some/file
   -f /some/file
 .sp
+The exception is the \fB-o\fP option, which may appear with or without data. 
+Because of this, if data is present, it must follow immediately in the same 
+item, for example -o3.
+.P
 If a long form option is used, the data may appear in the same command line
-item, separated by an equals character, or (with one exception) it may appear
+item, separated by an equals character, or (with two exceptions) it may appear
 in the next command line item. For example:
 .sp
   --file=/some/file
@@ -489,10 +500,10 @@ in a shell command, and have the shell expand ~ to a home directory, you must
 separate the file name from the option, because the shell does not treat ~
 specially unless it is at the start of an item.
 .P
-The exception to the above is the \fB--colour\fP (or \fB--color\fP) option,
-for which the data is optional. If this option does have data, it must be given
-in the first form, using an equals character. Otherwise it will be assumed that
-it has no data.
+The exceptions to the above are the \fB--colour\fP (or \fB--color\fP) and
+\fB--only-matching\fP options, for which the data is optional. If one of these
+options does have data, it must be given in the first form, using an equals
+character. Otherwise \fBpcregrep\P will assume that it has no data.
 .
 .
 .SH "MATCHING ERRORS"
@@ -505,6 +516,11 @@ digit. The PCRE matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, \fBpcregrep\fP outputs an error
 message and the line that caused the problem to the standard error stream. If
 there are more than 20 such errors, \fBpcregrep\fP gives up.
+.P
+The \fB--match-limit\fP option of \fBpcregrep\fP can be used to set the overall
+resource limit; there is a second option called \fB--recursion-limit\fP that
+sets a limit on the amount of memory (usually stack) that is used (see the 
+discussion of these options above).
 .
 .
 .SH DIAGNOSTICS
@@ -537,6 +553,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 31 October 2010
+Last updated: 16 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
