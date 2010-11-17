@@ -30,11 +30,10 @@ support for one or two .NET and Oniguruma syntax items, and there is an option
 for requesting some minor changes that give better JavaScript compatibility.
 </P>
 <P>
-The current implementation of PCRE corresponds approximately with Perl
-5.10/5.11, including support for UTF-8 encoded strings and Unicode general
-category properties. However, UTF-8 and Unicode support has to be explicitly
-enabled; it is not the default. The Unicode tables correspond to Unicode
-release 5.2.0.
+The current implementation of PCRE corresponds approximately with Perl 5.12,
+including support for UTF-8 encoded strings and Unicode general category
+properties. However, UTF-8 and Unicode support has to be explicitly enabled; it
+is not the default. The Unicode tables correspond to Unicode release 5.2.0.
 </P>
 <P>
 In addition to the Perl-compatible matching function, PCRE contains an
@@ -276,9 +275,9 @@ documentation.
 low-valued characters, unless the PCRE_UCP option is set.
 </P>
 <P>
-8. However, the Perl 5.10 horizontal and vertical whitespace matching escapes
-(\h, \H, \v, and \V) do match all the appropriate Unicode characters,
-whether or not PCRE_UCP is set.
+8. However, the horizontal and vertical whitespace matching escapes (\h, \H,
+\v, and \V) do match all the appropriate Unicode characters, whether or not
+PCRE_UCP is set.
 </P>
 <P>
 9. Case-insensitive matching applies only to characters whose values are less
@@ -286,10 +285,9 @@ than 128, unless PCRE is built with Unicode property support. Even when Unicode
 property support is available, PCRE still uses its own character tables when
 checking the case of low-valued characters, so as not to degrade performance.
 The Unicode property information is used only for characters with higher
-values. Even when Unicode property support is available, PCRE supports
-case-insensitive matching only when there is a one-to-one mapping between a
-letter's cases. There are a small number of many-to-one mappings in Unicode;
-these are not supported by PCRE.
+values. Furthermore, PCRE supports case-insensitive matching only when there is
+a one-to-one mapping between a letter's cases. There are a small number of
+many-to-one mappings in Unicode; these are not supported by PCRE.
 </P>
 <br><a name="SEC5" href="#TOC1">AUTHOR</a><br>
 <P>
@@ -307,7 +305,7 @@ two digits 10, at the domain cam.ac.uk.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 October 2010
+Last updated: 13 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

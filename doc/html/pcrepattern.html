@@ -421,10 +421,11 @@ any Unicode letter, and underscore. Note also that PCRE_UCP affects \b, and
 is noticeably slower when PCRE_UCP is set.
 </P>
 <P>
-The sequences \h, \H, \v, and \V are Perl 5.10 features. In contrast to the
-other sequences, which match only ASCII characters by default, these always
-match certain high-valued codepoints in UTF-8 mode, whether or not PCRE_UCP is
-set. The horizontal space characters are:
+The sequences \h, \H, \v, and \V are features that were added to Perl at 
+release 5.10. In contrast to the other sequences, which match only ASCII
+characters by default, these always match certain high-valued codepoints in
+UTF-8 mode, whether or not PCRE_UCP is set. The horizontal space characters
+are:
 <pre>
   U+0009     Horizontal tab
   U+0020     Space
@@ -462,8 +463,7 @@ Newline sequences
 </b><br>
 <P>
 Outside a character class, by default, the escape sequence \R matches any
-Unicode newline sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \R is
-equivalent to the following:
+Unicode newline sequence. In non-UTF-8 mode \R is equivalent to the following:
 <pre>
   (?&#62;\r\n|\n|\x0b|\f|\r|\x85)
 </pre>
@@ -769,9 +769,8 @@ same characters as Xan, plus underscore.
 Resetting the match start
 </b><br>
 <P>
-The escape sequence \K, which is a Perl 5.10 feature, causes any previously
-matched characters not to be included in the final matched sequence. For
-example, the pattern:
+The escape sequence \K causes any previously matched characters not to be
+included in the final matched sequence. For example, the pattern:
 <pre>
   foo\Kbar
 </pre>
@@ -941,17 +940,17 @@ dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 </P>
 <P>
-The escape sequence \N always behaves as a dot does when PCRE_DOTALL is not
-set. In other words, it matches any one character except one that signifies the
-end of a line.
+The escape sequence \N behaves like a dot, except that it is not affected by 
+the PCRE_DOTALL option. In other words, it matches any character except one
+that signifies the end of a line.
 </P>
 <br><a name="SEC7" href="#TOC1">MATCHING A SINGLE BYTE</a><br>
 <P>
 Outside a character class, the escape sequence \C matches any one byte, both
 in and out of UTF-8 mode. Unlike a dot, it always matches any line-ending
 characters. The feature is provided in Perl in order to match individual bytes
-in UTF-8 mode. Because it breaks up UTF-8 characters into individual bytes,
-what remains in the string may be a malformed UTF-8 string. For this reason,
+in UTF-8 mode. Because it breaks up UTF-8 characters into individual bytes, the
+rest of the string may start with a malformed UTF-8 character. For this reason,
 the \C escape sequence is best avoided.
 </P>
 <P>
@@ -1166,7 +1165,7 @@ extracted by the <b>pcre_fullinfo()</b> function).
 </P>
 <P>
 An option change within a subpattern (see below for a description of
-subpatterns) affects only that part of the current pattern that follows it, so
+subpatterns) affects only that part of the subpattern that follows it, so
 <pre>
   (a(?i)b)c
 </pre>
@@ -1203,18 +1202,16 @@ Turning part of a pattern into a subpattern does two things:
 <pre>
   cat(aract|erpillar|)
 </pre>
-matches one of the words "cat", "cataract", or "caterpillar". Without the
-parentheses, it would match "cataract", "erpillar" or an empty string.
+matches "cataract", "caterpillar", or "cat". Without the parentheses, it would
+match "cataract", "erpillar" or an empty string.
 <br>
 <br>
 2. It sets up the subpattern as a capturing subpattern. This means that, when
 the whole pattern matches, that portion of the subject string that matched the
 subpattern is passed back to the caller via the <i>ovector</i> argument of
 <b>pcre_exec()</b>. Opening parentheses are counted from left to right (starting
-from 1) to obtain numbers for the capturing subpatterns.
-</P>
-<P>
-For example, if the string "the red king" is matched against the pattern
+from 1) to obtain numbers for the capturing subpatterns. For example, if the
+string "the red king" is matched against the pattern
 <pre>
   the ((red|white) (king|queen))
 </pre>
@@ -1262,10 +1259,9 @@ at captured substring number one, whichever alternative matched. This construct
 is useful when you want to capture part, but not all, of one of a number of
 alternatives. Inside a (?| group, parentheses are numbered as usual, but the
 number is reset at the start of each branch. The numbers of any capturing
-buffers that follow the subpattern start after the highest number used in any
-branch. The following example is taken from the Perl documentation.
-The numbers underneath show in which buffer the captured content will be
-stored.
+parentheses that follow the subpattern start after the highest number used in
+any branch. The following example is taken from the Perl documentation. The
+numbers underneath show in which buffer the captured content will be stored.
 <pre>
   # before  ---------------branch-reset----------- after
   / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
@@ -1377,7 +1373,7 @@ items:
   the \C escape sequence
   the \X escape sequence (in UTF-8 mode with Unicode properties)
   the \R escape sequence
-  an escape such as \d that matches a single character
+  an escape such as \d or \pL that matches a single character
   a character class
   a back reference (see next section)
   a parenthesized subpattern (unless it is an assertion)
@@ -1418,8 +1414,10 @@ The quantifier {0} is permitted, causing the expression to behave as if the
 previous item and the quantifier were not present. This may be useful for
 subpatterns that are referenced as
 <a href="#subpatternsassubroutines">subroutines</a>
-from elsewhere in the pattern. Items other than subpatterns that have a {0}
-quantifier are omitted from the compiled pattern.
+from elsewhere in the pattern (but see also the section entitled
+<a href="#subdefine">"Defining subpatterns for use by reference only"</a>
+below). Items other than subpatterns that have a {0} quantifier are omitted
+from the compiled pattern.
 </P>
 <P>
 For convenience, the three most common quantifiers have single-character
@@ -1655,9 +1653,9 @@ subpattern is possible using named parentheses (see below).
 </P>
 <P>
 Another way of avoiding the ambiguity inherent in the use of digits following a
-backslash is to use the \g escape sequence, which is a feature introduced in
-Perl 5.10. This escape must be followed by an unsigned number or a negative
-number, optionally enclosed in braces. These examples are all identical:
+backslash is to use the \g escape sequence. This escape must be followed by an
+unsigned number or a negative number, optionally enclosed in braces. These
+examples are all identical:
 <pre>
   (ring), \1
   (ring), \g1
@@ -1804,8 +1802,8 @@ lookbehind assertion is needed to achieve the other effect.
 If you want to force a matching failure at some point in a pattern, the most
 convenient way to do it is with (?!) because an empty string always matches, so
 an assertion that requires there not to be an empty string must always fail.
-The Perl 5.10 backtracking control verb (*FAIL) or (*F) is essentially a
-synonym for (?!).
+The backtracking control verb (*FAIL) or (*F) is essentially a synonym for
+(?!).
 <a name="lookbehind"></a></P>
 <br><b>
 Lookbehind assertions
@@ -1829,8 +1827,8 @@ is permitted, but
 </pre>
 causes an error at compile time. Branches that match different length strings
 are permitted only at the top level of a lookbehind assertion. This is an
-extension compared with Perl (5.8 and 5.10), which requires all branches to
-match the same length of string. An assertion such as
+extension compared with Perl, which requires all branches to match the same
+length of string. An assertion such as
 <pre>
   (?&#60;=ab(c|de))
 </pre>
@@ -1840,7 +1838,7 @@ branches:
 <pre>
   (?&#60;=abc|abde)
 </pre>
-In some cases, the Perl 5.10 escape sequence \K
+In some cases, the escape sequence \K
 <a href="#resetmatchstart">(see above)</a>
 can be used instead of a lookbehind assertion to get round the fixed-length
 restriction.
@@ -2035,7 +2033,7 @@ the most recent recursion.
 At "top level", all these recursion test conditions are false.
 <a href="#recursion">The syntax for recursive patterns</a>
 is described below.
-</P>
+<a name="subdefine"></a></P>
 <br><b>
 Defining subpatterns for use by reference only
 </b><br>
@@ -2094,11 +2092,11 @@ this case continues to immediately after the next newline character or
 character sequence in the pattern. Which characters are interpreted as newlines
 is controlled by the options passed to <b>pcre_compile()</b> or by a special
 sequence at the start of the pattern, as described in the section entitled
-<a href="#recursion">"Newline conventions"</a>
-above. Note that end of this type of comment is a literal newline sequence in
-the pattern; escape sequences that happen to represent a newline do not count.
-For example, consider this pattern when PCRE_EXTENDED is set, and the default
-newline convention is in force:
+<a href="#newlines">"Newline conventions"</a>
+above. Note that the end of this type of comment is a literal newline sequence
+in the pattern; escape sequences that happen to represent a newline do not
+count. For example, consider this pattern when PCRE_EXTENDED is set, and the
+default newline convention is in force:
 <pre>
   abc #comment \n still comment
 </pre>
@@ -2163,11 +2161,10 @@ them instead of the whole pattern.
 </P>
 <P>
 In a larger pattern, keeping track of parenthesis numbers can be tricky. This
-is made easier by the use of relative references (a Perl 5.10 feature).
-Instead of (?1) in the pattern above you can write (?-2) to refer to the second
-most recently opened parentheses preceding the recursion. In other words, a
-negative number counts capturing parentheses leftwards from the point at which
-it is encountered.
+is made easier by the use of relative references. Instead of (?1) in the
+pattern above you can write (?-2) to refer to the second most recently opened
+parentheses preceding the recursion. In other words, a negative number counts
+capturing parentheses leftwards from the point at which it is encountered.
 </P>
 <P>
 It is also possible to refer to subsequently opened parentheses, by writing
@@ -2676,7 +2673,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 31 October 2010
+Last updated: 17 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

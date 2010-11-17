@@ -143,6 +143,13 @@ assumption is made that the end of the supplied subject string may not be the
 true end of the available data, and so, if \z, \Z, \b, \B, or $ are
 encountered at the end of the subject, the result is PCRE_ERROR_PARTIAL.
 </P>
+<P>
+Setting PCRE_PARTIAL_HARD also affects the way <b>pcre_exec()</b> checks UTF-8 
+subject strings for validity. Normally, an invalid UTF-8 sequence causes the
+error PCRE_ERROR_BADUTF8. However, in the special case of a truncated UTF-8 
+character at the end of the subject, PCRE_ERROR_SHORTUTF8 is returned when 
+PCRE_PARTIAL_HARD is set.
+</P>
 <br><b>
 Comparing hard and soft partial matching
 </b><br>
@@ -380,10 +387,7 @@ multi-segment data. The example above then behaves differently:
   Partial match: do
   data&#62; gsb\R\P\P\D
   Partial match: gsb
-
-</PRE>
-</P>
-<P>
+</pre>
 4. Patterns that contain alternatives at the top level which do not all
 start with the same pattern item may not work as expected when
 PCRE_DFA_RESTART is used with <b>pcre_dfa_exec()</b>. For example, consider this
@@ -430,7 +434,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC11" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 October 2010
+Last updated: 07 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

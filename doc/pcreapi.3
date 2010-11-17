@@ -440,9 +440,9 @@ was being processed when the error was discovered is placed in the variable
 pointed to by \fIerroffset\fP, which must not be NULL. If it is, an immediate
 error is given. Some errors are not detected until checks are carried out when
 the whole pattern has been scanned; in this case the offset is set to the end
-of the pattern. 
+of the pattern.
 .P
-Note that the offset is in bytes, not characters, even in UTF-8 mode. It may 
+Note that the offset is in bytes, not characters, even in UTF-8 mode. It may
 point into the middle of a UTF-8 character (for example, when
 PCRE_ERROR_BADUTF8 is returned for an invalid UTF-8 string).
 .P
@@ -523,12 +523,13 @@ pattern.
 .sp
   PCRE_DOTALL
 .sp
-If this bit is set, a dot metacharater in the pattern matches all characters,
-including those that indicate newline. Without it, a dot does not match when
-the current position is at a newline. This option is equivalent to Perl's /s
-option, and it can be changed within a pattern by a (?s) option setting. A
-negative class such as [^a] always matches newline characters, independent of
-the setting of this option.
+If this bit is set, a dot metacharacter in the pattern matches a character of
+any value, including one that indicates a newline. However, it only ever
+matches one character, even if newlines are coded as CRLF. Without this option,
+a dot does not match when the current position is at a newline. This option is
+equivalent to Perl's /s option, and it can be changed within a pattern by a
+(?s) option setting. A negative class such as [^a] always matches newline
+characters, independent of the setting of this option.
 .sp
   PCRE_DUPNAMES
 .sp
@@ -550,10 +551,21 @@ unescaped # outside a character class and the next newline, inclusive, are also
 ignored. This is equivalent to Perl's /x option, and it can be changed within a
 pattern by a (?x) option setting.
 .P
+Which characters are interpreted as newlines
+is controlled by the options passed to \fBpcre_compile()\fP or by a special
+sequence at the start of the pattern, as described in the section entitled
+.\" HTML <a href="pcrepattern.html#newlines">
+.\" </a>
+"Newline conventions"
+.\"
+in the \fBpcrepattern\fP documentation. Note that the end of this type of
+comment is a literal newline sequence in the pattern; escape sequences that
+happen to represent a newline do not count.
+.P
 This option makes it possible to include comments inside complicated patterns.
 Note, however, that this applies only to data characters. Whitespace characters
 may never appear within special character sequences in a pattern, for example
-within the sequence (?( which introduces a conditional subpattern.
+within the sequence (?( that introduces a conditional subpattern.
 .sp
   PCRE_EXTRA
 .sp
@@ -628,12 +640,12 @@ option, the combination may or may not be sensible. For example,
 PCRE_NEWLINE_CR with PCRE_NEWLINE_LF is equivalent to PCRE_NEWLINE_CRLF, but
 other combinations may yield unused numbers and cause an error.
 .P
-The only time that a line break is specially recognized when compiling a
-pattern is if PCRE_EXTENDED is set, and an unescaped # outside a character
-class is encountered. This indicates a comment that lasts until after the next
-line break sequence. In other circumstances, line break sequences are treated
-as literal data, except that in PCRE_EXTENDED mode, both CR and LF are treated
-as whitespace characters and are therefore ignored.
+The only time that a line break in a pattern is specially recognized when
+compiling is when PCRE_EXTENDED is set. CR and LF are whitespace characters,
+and so are ignored in this mode. Also, an unescaped # outside a character class
+indicates a comment that lasts until after the next line break sequence. In
+other circumstances, line break sequences in patterns are treated as literal
+data.
 .P
 The newline option that is set at compile time becomes the default that is used
 for \fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP, but it can be overridden.
@@ -648,10 +660,10 @@ in Perl.
 .sp
   PCRE_UCP
 .sp
-This option changes the way PCRE processes \eb, \ed, \es, \ew, and some of the
-POSIX character classes. By default, only ASCII characters are recognized, but
-if PCRE_UCP is set, Unicode properties are used instead to classify characters.
-More details are given in the section on
+This option changes the way PCRE processes \eB, \eb, \eD, \ed, \eS, \es, \eW,
+\ew, and some of the POSIX character classes. By default, only ASCII characters
+are recognized, but if PCRE_UCP is set, Unicode properties are used instead to
+classify characters. More details are given in the section on
 .\" HTML <a href="pcre.html#genericchartypes">
 .\" </a>
 generic character types
@@ -856,8 +868,8 @@ matching.
 The two optimizations just described can be disabled by setting the
 PCRE_NO_START_OPTIMIZE option when calling \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP. You might want to do this if your pattern contains
-callouts, or make use of (*MARK), and you make use of these in cases where
-matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+callouts or (*MARK), and you want to make use of these facilities in cases
+where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
 .\" HTML <a href="#execoptions">
 .\" </a>
 below.
@@ -1454,8 +1466,8 @@ the
 .\" HREF
 \fBpcredemo\fP
 .\"
-sample program. In the most general case, you have to check to see if the 
-newline convention recognizes CRLF as a newline, and if so, and the current 
+sample program. In the most general case, you have to check to see if the
+newline convention recognizes CRLF as a newline, and if so, and the current
 character is CR followed by LF, advance the starting offset by two characters
 instead of one.
 .sp
@@ -1551,7 +1563,7 @@ but only if no complete match can be found.
 If PCRE_PARTIAL_HARD is set, it overrides PCRE_PARTIAL_SOFT. In this case, if a
 partial match is found, \fBpcre_exec()\fP immediately returns
 PCRE_ERROR_PARTIAL, without considering any other alternatives. In other words,
-when PCRE_PARTIAL_HARD is set, a partial match is considered to be more 
+when PCRE_PARTIAL_HARD is set, a partial match is considered to be more
 important that an alternative complete match.
 .P
 In both cases, the portion of the string that was inspected when the partial
@@ -1568,14 +1580,12 @@ documentation.
 .sp
 The subject string is passed to \fBpcre_exec()\fP as a pointer in
 \fIsubject\fP, a length (in bytes) in \fIlength\fP, and a starting byte offset
-in \fIstartoffset\fP. If this is negative or greater than the length of the 
-subject, \fBpcre_exec()\fP returns PCRE_ERROR_BADOFFSET.
-.P
-In UTF-8 mode, the byte offset must point to the start of a UTF-8 character (or
-the end of the subject). Unlike the pattern string, the subject may contain
-binary zero bytes. When the starting offset is zero, the search for a match
-starts at the beginning of the subject, and this is by far the most common
-case.
+in \fIstartoffset\fP. If this is negative or greater than the length of the
+subject, \fBpcre_exec()\fP returns PCRE_ERROR_BADOFFSET. When the starting
+offset is zero, the search for a match starts at the beginning of the subject,
+and this is by far the most common case. In UTF-8 mode, the byte offset must
+point to the start of a UTF-8 character (or the end of the subject). Unlike the
+pattern string, the subject may contain binary zero bytes.
 .P
 A non-zero starting offset is useful when searching for another match in the
 same subject by calling \fBpcre_exec()\fP again after a previous success.
@@ -1604,8 +1614,8 @@ do this in the
 .\" HREF
 \fBpcredemo\fP
 .\"
-sample program. In the most general case, you have to check to see if the 
-newline convention recognizes CRLF as a newline, and if so, and the current 
+sample program. In the most general case, you have to check to see if the
+newline convention recognizes CRLF as a newline, and if so, and the current
 character is CR followed by LF, advance the starting offset by two characters
 instead of one.
 .P
@@ -1762,13 +1772,13 @@ documentation for details.
   PCRE_ERROR_BADUTF8        (-10)
 .sp
 A string that contains an invalid UTF-8 byte sequence was passed as a subject.
-However, if PCRE_PARTIAL_HARD is set and the problem is a truncated UTF-8 
+However, if PCRE_PARTIAL_HARD is set and the problem is a truncated UTF-8
 character at the end of the subject, PCRE_ERROR_SHORTUTF8 is used instead.
 .sp
   PCRE_ERROR_BADUTF8_OFFSET (-11)
 .sp
 The UTF-8 byte sequence that was passed as a subject was valid, but the value
-of \fIstartoffset\fP did not point to the beginning of a UTF-8 character or the 
+of \fIstartoffset\fP did not point to the beginning of a UTF-8 character or the
 end of the subject.
 .sp
   PCRE_ERROR_PARTIAL        (-12)
@@ -1807,13 +1817,13 @@ An invalid combination of PCRE_NEWLINE_\fIxxx\fP options was given.
 .sp
   PCRE_ERROR_BADOFFSET      (-24)
 .sp
-The value of \fIstartoffset\fP was negative or greater than the length of the 
+The value of \fIstartoffset\fP was negative or greater than the length of the
 subject, that is, the value in \fIlength\fP.
 .sp
   PCRE_ERROR_SHORTUTF8      (-25)
 .sp
-The subject string ended with an incomplete (truncated) UTF-8 character, and 
-the PCRE_PARTIAL_HARD option was set. Without this option, PCRE_ERROR_BADUTF8 
+The subject string ended with an incomplete (truncated) UTF-8 character, and
+the PCRE_PARTIAL_HARD option was set. Without this option, PCRE_ERROR_BADUTF8
 is returned in this situation.
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
@@ -2242,6 +2252,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 November 2010
+Last updated: 13 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

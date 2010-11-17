@@ -424,10 +424,11 @@ any Unicode letter, and underscore. Note also that PCRE_UCP affects \eb, and
 \eB because they are defined in terms of \ew and \eW. Matching these sequences
 is noticeably slower when PCRE_UCP is set.
 .P
-The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the
-other sequences, which match only ASCII characters by default, these always
-match certain high-valued codepoints in UTF-8 mode, whether or not PCRE_UCP is
-set. The horizontal space characters are:
+The sequences \eh, \eH, \ev, and \eV are features that were added to Perl at 
+release 5.10. In contrast to the other sequences, which match only ASCII
+characters by default, these always match certain high-valued codepoints in
+UTF-8 mode, whether or not PCRE_UCP is set. The horizontal space characters
+are:
 .sp
   U+0009     Horizontal tab
   U+0020     Space
@@ -465,8 +466,7 @@ The vertical space characters are:
 .rs
 .sp
 Outside a character class, by default, the escape sequence \eR matches any
-Unicode newline sequence. This is a Perl 5.10 feature. In non-UTF-8 mode \eR is
-equivalent to the following:
+Unicode newline sequence. In non-UTF-8 mode \eR is equivalent to the following:
 .sp
   (?>\er\en|\en|\ex0b|\ef|\er|\ex85)
 .sp
@@ -774,9 +774,8 @@ same characters as Xan, plus underscore.
 .SS "Resetting the match start"
 .rs
 .sp
-The escape sequence \eK, which is a Perl 5.10 feature, causes any previously
-matched characters not to be included in the final matched sequence. For
-example, the pattern:
+The escape sequence \eK causes any previously matched characters not to be
+included in the final matched sequence. For example, the pattern:
 .sp
   foo\eKbar
 .sp
@@ -948,9 +947,9 @@ The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 .P
-The escape sequence \eN always behaves as a dot does when PCRE_DOTALL is not
-set. In other words, it matches any one character except one that signifies the
-end of a line.
+The escape sequence \eN behaves like a dot, except that it is not affected by 
+the PCRE_DOTALL option. In other words, it matches any character except one
+that signifies the end of a line.
 .
 .
 .SH "MATCHING A SINGLE BYTE"
@@ -959,8 +958,8 @@ end of a line.
 Outside a character class, the escape sequence \eC matches any one byte, both
 in and out of UTF-8 mode. Unlike a dot, it always matches any line-ending
 characters. The feature is provided in Perl in order to match individual bytes
-in UTF-8 mode. Because it breaks up UTF-8 characters into individual bytes,
-what remains in the string may be a malformed UTF-8 string. For this reason,
+in UTF-8 mode. Because it breaks up UTF-8 characters into individual bytes, the
+rest of the string may start with a malformed UTF-8 character. For this reason,
 the \eC escape sequence is best avoided.
 .P
 PCRE does not allow \eC to appear in lookbehind assertions
@@ -1173,7 +1172,7 @@ extracts it into the global options (and it will therefore show up in data
 extracted by the \fBpcre_fullinfo()\fP function).
 .P
 An option change within a subpattern (see below for a description of
-subpatterns) affects only that part of the current pattern that follows it, so
+subpatterns) affects only that part of the subpattern that follows it, so
 .sp
   (a(?i)b)c
 .sp
@@ -1214,16 +1213,15 @@ Turning part of a pattern into a subpattern does two things:
 .sp
   cat(aract|erpillar|)
 .sp
-matches one of the words "cat", "cataract", or "caterpillar". Without the
-parentheses, it would match "cataract", "erpillar" or an empty string.
+matches "cataract", "caterpillar", or "cat". Without the parentheses, it would
+match "cataract", "erpillar" or an empty string.
 .sp
 2. It sets up the subpattern as a capturing subpattern. This means that, when
 the whole pattern matches, that portion of the subject string that matched the
 subpattern is passed back to the caller via the \fIovector\fP argument of
 \fBpcre_exec()\fP. Opening parentheses are counted from left to right (starting
-from 1) to obtain numbers for the capturing subpatterns.
-.P
-For example, if the string "the red king" is matched against the pattern
+from 1) to obtain numbers for the capturing subpatterns. For example, if the
+string "the red king" is matched against the pattern
 .sp
   the ((red|white) (king|queen))
 .sp
@@ -1272,10 +1270,9 @@ at captured substring number one, whichever alternative matched. This construct
 is useful when you want to capture part, but not all, of one of a number of
 alternatives. Inside a (?| group, parentheses are numbered as usual, but the
 number is reset at the start of each branch. The numbers of any capturing
-buffers that follow the subpattern start after the highest number used in any
-branch. The following example is taken from the Perl documentation.
-The numbers underneath show in which buffer the captured content will be
-stored.
+parentheses that follow the subpattern start after the highest number used in
+any branch. The following example is taken from the Perl documentation. The
+numbers underneath show in which buffer the captured content will be stored.
 .sp
   # before  ---------------branch-reset----------- after
   / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
@@ -1402,7 +1399,7 @@ items:
   the \eC escape sequence
   the \eX escape sequence (in UTF-8 mode with Unicode properties)
   the \eR escape sequence
-  an escape such as \ed that matches a single character
+  an escape such as \ed or \epL that matches a single character
   a character class
   a back reference (see next section)
   a parenthesized subpattern (unless it is an assertion)
@@ -1444,8 +1441,13 @@ subpatterns that are referenced as
 .\" </a>
 subroutines
 .\"
-from elsewhere in the pattern. Items other than subpatterns that have a {0}
-quantifier are omitted from the compiled pattern.
+from elsewhere in the pattern (but see also the section entitled
+.\" HTML <a href="#subdefine">
+.\" </a>
+"Defining subpatterns for use by reference only"
+.\"
+below). Items other than subpatterns that have a {0} quantifier are omitted
+from the compiled pattern.
 .P
 For convenience, the three most common quantifiers have single-character
 abbreviations:
@@ -1670,9 +1672,9 @@ no such problem when named parentheses are used. A back reference to any
 subpattern is possible using named parentheses (see below).
 .P
 Another way of avoiding the ambiguity inherent in the use of digits following a
-backslash is to use the \eg escape sequence, which is a feature introduced in
-Perl 5.10. This escape must be followed by an unsigned number or a negative
-number, optionally enclosed in braces. These examples are all identical:
+backslash is to use the \eg escape sequence. This escape must be followed by an
+unsigned number or a negative number, optionally enclosed in braces. These
+examples are all identical:
 .sp
   (ring), \e1
   (ring), \eg1
@@ -1686,10 +1688,10 @@ example:
   (abc(def)ghi)\eg{-1}
 .sp
 The sequence \eg{-1} is a reference to the most recently started capturing
-subpattern before \eg, that is, is it equivalent to \e2. Similarly, \eg{-2}
-would be equivalent to \e1. The use of relative references can be helpful in
-long patterns, and also in patterns that are created by joining together
-fragments that contain references within themselves.
+subpattern before \eg, that is, is it equivalent to \e2 in this example.
+Similarly, \eg{-2} would be equivalent to \e1. The use of relative references
+can be helpful in long patterns, and also in patterns that are created by
+joining together fragments that contain references within themselves.
 .P
 A back reference matches whatever actually matched the capturing subpattern in
 the current subject string, rather than anything matching the subpattern
@@ -1825,8 +1827,7 @@ lookbehind assertion is needed to achieve the other effect.
 If you want to force a matching failure at some point in a pattern, the most
 convenient way to do it is with (?!) because an empty string always matches, so
 an assertion that requires there not to be an empty string must always fail.
-The Perl 5.10 backtracking control verb (*FAIL) or (*F) is essentially a
-synonym for (?!).
+The backtracking control verb (*FAIL) or (*F) is a synonym for (?!).
 .
 .
 .\" HTML <a name="lookbehind"></a>
@@ -1851,8 +1852,8 @@ is permitted, but
 .sp
 causes an error at compile time. Branches that match different length strings
 are permitted only at the top level of a lookbehind assertion. This is an
-extension compared with Perl (5.8 and 5.10), which requires all branches to
-match the same length of string. An assertion such as
+extension compared with Perl, which requires all branches to match the same
+length of string. An assertion such as
 .sp
   (?<=ab(c|de))
 .sp
@@ -1862,7 +1863,7 @@ branches:
 .sp
   (?<=abc|abde)
 .sp
-In some cases, the Perl 5.10 escape sequence \eK
+In some cases, the escape sequence \eK
 .\" HTML <a href="#resetmatchstart">
 .\" </a>
 (see above)
@@ -1990,12 +1991,13 @@ matched. If there is more than one capturing subpattern with the same number
 .\" </a>
 section about duplicate subpattern numbers),
 .\"
-the condition is true if any of them have been set. An alternative notation is
+the condition is true if any of them have matched. An alternative notation is
 to precede the digits with a plus or minus sign. In this case, the subpattern
 number is relative rather than absolute. The most recently opened parentheses
-can be referenced by (?(-1), the next most recent by (?(-2), and so on. In
-looping constructs it can also make sense to refer to subsequent groups with
-constructs such as (?(+2).
+can be referenced by (?(-1), the next most recent by (?(-2), and so on. Inside
+loops it can also make sense to refer to subsequent groups. The next 
+parentheses to be opened can be referenced as (?(+1), and so on. (The value
+zero in any of these forms is not used; it provokes a compile-time error.)
 .P
 Consider the following pattern, which contains non-significant white space to
 make it more readable (assume the PCRE_EXTENDED option) and to divide it into
@@ -2006,8 +2008,8 @@ three parts for ease of discussion:
 The first part matches an optional opening parenthesis, and if that
 character is present, sets it as the first captured substring. The second part
 matches one or more characters that are not parentheses. The third part is a
-conditional subpattern that tests whether the first set of parentheses matched
-or not. If they did, that is, if subject started with an opening parenthesis,
+conditional subpattern that tests whether or not the first set of parentheses
+matched. If they did, that is, if subject started with an opening parenthesis,
 the condition is true, and so the yes-pattern is executed and a closing
 parenthesis is required. Otherwise, since no-pattern is not present, the
 subpattern matches nothing. In other words, this pattern matches a sequence of
@@ -2063,6 +2065,7 @@ The syntax for recursive patterns
 .\"
 is described below.
 .
+.\" HTML <a name="subdefine"></a>
 .SS "Defining subpatterns for use by reference only"
 .rs
 .sp
@@ -2075,8 +2078,9 @@ point in the pattern; the idea of DEFINE is that it can be used to define
 .\" </a>
 "subroutines"
 .\"
-is described below.) For example, a pattern to match an IPv4 address could be
-written like this (ignore whitespace and line breaks):
+is described below.) For example, a pattern to match an IPv4 address such as
+"192.168.23.245" could be written like this (ignore whitespace and line
+breaks):
 .sp
   (?(DEFINE) (?<byte> 2[0-4]\ed | 25[0-5] | 1\ed\ed | [1-9]?\ed) )
   \eb (?&byte) (\e.(?&byte)){3} \eb
@@ -2124,14 +2128,14 @@ this case continues to immediately after the next newline character or
 character sequence in the pattern. Which characters are interpreted as newlines
 is controlled by the options passed to \fBpcre_compile()\fP or by a special
 sequence at the start of the pattern, as described in the section entitled
-.\" HTML <a href="#recursion">
+.\" HTML <a href="#newlines">
 .\" </a>
 "Newline conventions"
 .\"
-above. Note that end of this type of comment is a literal newline sequence in
-the pattern; escape sequences that happen to represent a newline do not count.
-For example, consider this pattern when PCRE_EXTENDED is set, and the default
-newline convention is in force:
+above. Note that the end of this type of comment is a literal newline sequence
+in the pattern; escape sequences that happen to represent a newline do not
+count. For example, consider this pattern when PCRE_EXTENDED is set, and the
+default newline convention is in force:
 .sp
   abc #comment \en still comment
 .sp
@@ -2196,11 +2200,10 @@ We have put the pattern into parentheses, and caused the recursion to refer to
 them instead of the whole pattern.
 .P
 In a larger pattern, keeping track of parenthesis numbers can be tricky. This
-is made easier by the use of relative references (a Perl 5.10 feature).
-Instead of (?1) in the pattern above you can write (?-2) to refer to the second
-most recently opened parentheses preceding the recursion. In other words, a
-negative number counts capturing parentheses leftwards from the point at which
-it is encountered.
+is made easier by the use of relative references. Instead of (?1) in the
+pattern above you can write (?-2) to refer to the second most recently opened
+parentheses preceding the recursion. In other words, a negative number counts
+capturing parentheses leftwards from the point at which it is encountered.
 .P
 It is also possible to refer to subsequently opened parentheses, by writing
 references such as (?+2). However, these cannot be recursive because the
@@ -2303,8 +2306,9 @@ time we do have another alternative to try at the higher level. That is the big
 difference: in the previous case the remaining alternative is at a deeper
 recursion level, which PCRE cannot use.
 .P
-To change the pattern so that matches all palindromic strings, not just those
-with an odd number of characters, it is tempting to change the pattern to this:
+To change the pattern so that it matches all palindromic strings, not just
+those with an odd number of characters, it is tempting to change the pattern to
+this:
 .sp
   ^((.)(?1)\e2|.?)$
 .sp
@@ -2714,6 +2718,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 31 October 2010
+Last updated: 17 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

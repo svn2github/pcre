@@ -443,12 +443,17 @@ If <i>errptr</i> is NULL, <b>pcre_compile()</b> returns NULL immediately.
 Otherwise, if compilation of a pattern fails, <b>pcre_compile()</b> returns
 NULL, and sets the variable pointed to by <i>errptr</i> to point to a textual
 error message. This is a static string that is part of the library. You must
-not try to free it. The byte offset from the start of the pattern to the
-character that was being processed when the error was discovered is placed in
-the variable pointed to by <i>erroffset</i>, which must not be NULL. If it is,
-an immediate error is given. Some errors are not detected until checks are
-carried out when the whole pattern has been scanned; in this case the offset is
-set to the end of the pattern.
+not try to free it. The offset from the start of the pattern to the byte that
+was being processed when the error was discovered is placed in the variable
+pointed to by <i>erroffset</i>, which must not be NULL. If it is, an immediate
+error is given. Some errors are not detected until checks are carried out when
+the whole pattern has been scanned; in this case the offset is set to the end
+of the pattern.
+</P>
+<P>
+Note that the offset is in bytes, not characters, even in UTF-8 mode. It may
+point into the middle of a UTF-8 character (for example, when
+PCRE_ERROR_BADUTF8 is returned for an invalid UTF-8 string).
 </P>
 <P>
 If <b>pcre_compile2()</b> is used instead of <b>pcre_compile()</b>, and the
@@ -528,12 +533,13 @@ pattern.
 <pre>
   PCRE_DOTALL
 </pre>
-If this bit is set, a dot metacharater in the pattern matches all characters,
-including those that indicate newline. Without it, a dot does not match when
-the current position is at a newline. This option is equivalent to Perl's /s
-option, and it can be changed within a pattern by a (?s) option setting. A
-negative class such as [^a] always matches newline characters, independent of
-the setting of this option.
+If this bit is set, a dot metacharacter in the pattern matches a character of
+any value, including one that indicates a newline. However, it only ever
+matches one character, even if newlines are coded as CRLF. Without this option,
+a dot does not match when the current position is at a newline. This option is
+equivalent to Perl's /s option, and it can be changed within a pattern by a
+(?s) option setting. A negative class such as [^a] always matches newline
+characters, independent of the setting of this option.
 <pre>
   PCRE_DUPNAMES
 </pre>
@@ -554,10 +560,19 @@ ignored. This is equivalent to Perl's /x option, and it can be changed within a
 pattern by a (?x) option setting.
 </P>
 <P>
+Which characters are interpreted as newlines
+is controlled by the options passed to <b>pcre_compile()</b> or by a special
+sequence at the start of the pattern, as described in the section entitled
+<a href="pcrepattern.html#newlines">"Newline conventions"</a>
+in the <b>pcrepattern</b> documentation. Note that the end of this type of
+comment is a literal newline sequence in the pattern; escape sequences that
+happen to represent a newline do not count.
+</P>
+<P>
 This option makes it possible to include comments inside complicated patterns.
 Note, however, that this applies only to data characters. Whitespace characters
 may never appear within special character sequences in a pattern, for example
-within the sequence (?( which introduces a conditional subpattern.
+within the sequence (?( that introduces a conditional subpattern.
 <pre>
   PCRE_EXTRA
 </pre>
@@ -637,12 +652,12 @@ PCRE_NEWLINE_CR with PCRE_NEWLINE_LF is equivalent to PCRE_NEWLINE_CRLF, but
 other combinations may yield unused numbers and cause an error.
 </P>
 <P>
-The only time that a line break is specially recognized when compiling a
-pattern is if PCRE_EXTENDED is set, and an unescaped # outside a character
-class is encountered. This indicates a comment that lasts until after the next
-line break sequence. In other circumstances, line break sequences are treated
-as literal data, except that in PCRE_EXTENDED mode, both CR and LF are treated
-as whitespace characters and are therefore ignored.
+The only time that a line break in a pattern is specially recognized when
+compiling is when PCRE_EXTENDED is set. CR and LF are whitespace characters,
+and so are ignored in this mode. Also, an unescaped # outside a character class
+indicates a comment that lasts until after the next line break sequence. In
+other circumstances, line break sequences in patterns are treated as literal
+data.
 </P>
 <P>
 The newline option that is set at compile time becomes the default that is used
@@ -658,10 +673,10 @@ in Perl.
 <pre>
   PCRE_UCP
 </pre>
-This option changes the way PCRE processes \b, \d, \s, \w, and some of the
-POSIX character classes. By default, only ASCII characters are recognized, but
-if PCRE_UCP is set, Unicode properties are used instead to classify characters.
-More details are given in the section on
+This option changes the way PCRE processes \B, \b, \D, \d, \S, \s, \W,
+\w, and some of the POSIX character classes. By default, only ASCII characters
+are recognized, but if PCRE_UCP is set, Unicode properties are used instead to
+classify characters. More details are given in the section on
 <a href="pcre.html#genericchartypes">generic character types</a>
 in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
@@ -851,8 +866,8 @@ matching.
 The two optimizations just described can be disabled by setting the
 PCRE_NO_START_OPTIMIZE option when calling <b>pcre_exec()</b> or
 <b>pcre_dfa_exec()</b>. You might want to do this if your pattern contains
-callouts, or make use of (*MARK), and you make use of these in cases where
-matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+callouts or (*MARK), and you want to make use of these facilities in cases
+where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
 <a href="#execoptions">below.</a>
 <a name="localesupport"></a></P>
 <br><a name="SEC10" href="#TOC1">LOCALE SUPPORT</a><br>
@@ -1443,8 +1458,8 @@ if that fails, by advancing the starting offset (see below) and trying an
 ordinary match again. There is some code that demonstrates how to do this in
 the
 <a href="pcredemo.html"><b>pcredemo</b></a>
-sample program. In the most general case, you have to check to see if the 
-newline convention recognizes CRLF as a newline, and if so, and the current 
+sample program. In the most general case, you have to check to see if the
+newline convention recognizes CRLF as a newline, and if so, and the current
 character is CR followed by LF, advance the starting offset by two characters
 instead of one.
 <pre>
@@ -1504,9 +1519,11 @@ strings in the
 in the main
 <a href="pcre.html"><b>pcre</b></a>
 page. If an invalid UTF-8 sequence of bytes is found, <b>pcre_exec()</b> returns
-the error PCRE_ERROR_BADUTF8. If <i>startoffset</i> contains a value that does 
-not point to the start of a UTF-8 character (or to the end of the subject),
-PCRE_ERROR_BADUTF8_OFFSET is returned.
+the error PCRE_ERROR_BADUTF8 or, if PCRE_PARTIAL_HARD is set and the problem is
+a truncated UTF-8 character at the end of the subject, PCRE_ERROR_SHORTUTF8. If
+<i>startoffset</i> contains a value that does not point to the start of a UTF-8
+character (or to the end of the subject), PCRE_ERROR_BADUTF8_OFFSET is
+returned.
 </P>
 <P>
 If you already know that your subject is valid, and you want to skip these
@@ -1536,7 +1553,7 @@ but only if no complete match can be found.
 If PCRE_PARTIAL_HARD is set, it overrides PCRE_PARTIAL_SOFT. In this case, if a
 partial match is found, <b>pcre_exec()</b> immediately returns
 PCRE_ERROR_PARTIAL, without considering any other alternatives. In other words,
-when PCRE_PARTIAL_HARD is set, a partial match is considered to be more 
+when PCRE_PARTIAL_HARD is set, a partial match is considered to be more
 important that an alternative complete match.
 </P>
 <P>
@@ -1552,15 +1569,12 @@ The string to be matched by <b>pcre_exec()</b>
 <P>
 The subject string is passed to <b>pcre_exec()</b> as a pointer in
 <i>subject</i>, a length (in bytes) in <i>length</i>, and a starting byte offset
-in <i>startoffset</i>. If this is negative or greater than the length of the 
-subject, <b>pcre_exec()</b> returns PCRE_ERROR_BADOFFSET.
-</P>
-<P>
-In UTF-8 mode, the byte offset must point to the start of a UTF-8 character (or
-the end of the subject). Unlike the pattern string, the subject may contain
-binary zero bytes. When the starting offset is zero, the search for a match
-starts at the beginning of the subject, and this is by far the most common
-case.
+in <i>startoffset</i>. If this is negative or greater than the length of the
+subject, <b>pcre_exec()</b> returns PCRE_ERROR_BADOFFSET. When the starting
+offset is zero, the search for a match starts at the beginning of the subject,
+and this is by far the most common case. In UTF-8 mode, the byte offset must
+point to the start of a UTF-8 character (or the end of the subject). Unlike the
+pattern string, the subject may contain binary zero bytes.
 </P>
 <P>
 A non-zero starting offset is useful when searching for another match in the
@@ -1589,8 +1603,8 @@ PCRE_ANCHORED options, and then if that fails, advancing the starting offset
 and trying an ordinary match again. There is some code that demonstrates how to
 do this in the
 <a href="pcredemo.html"><b>pcredemo</b></a>
-sample program. In the most general case, you have to check to see if the 
-newline convention recognizes CRLF as a newline, and if so, and the current 
+sample program. In the most general case, you have to check to see if the
+newline convention recognizes CRLF as a newline, and if so, and the current
 character is CR followed by LF, advance the starting offset by two characters
 instead of one.
 </P>
@@ -1675,9 +1689,15 @@ Offset values that correspond to unused subpatterns at the end of the
 expression are also set to -1. For example, if the string "abc" is matched
 against the pattern (abc)(x(yz)?)? subpatterns 2 and 3 are not matched. The
 return from the function is 2, because the highest used capturing subpattern
-number is 1. However, you can refer to the offsets for the second and third
-capturing subpatterns if you wish (assuming the vector is large enough, of
-course).
+number is 1, and the offsets for for the second and third capturing subpatterns
+(assuming the vector is large enough, of course) are set to -1.
+</P>
+<P>
+<b>Note</b>: Elements of <i>ovector</i> that do not correspond to capturing
+parentheses in the pattern are never changed. That is, if a pattern contains
+<i>n</i> capturing parentheses, no more than <i>ovector[0]</i> to
+<i>ovector[2n+1]</i> are set by <b>pcre_exec()</b>. The other elements retain
+whatever values they previously had.
 </P>
 <P>
 Some convenience functions are provided for extracting the captured substrings
@@ -1752,11 +1772,14 @@ documentation for details.
   PCRE_ERROR_BADUTF8        (-10)
 </pre>
 A string that contains an invalid UTF-8 byte sequence was passed as a subject.
+However, if PCRE_PARTIAL_HARD is set and the problem is a truncated UTF-8
+character at the end of the subject, PCRE_ERROR_SHORTUTF8 is used instead.
 <pre>
   PCRE_ERROR_BADUTF8_OFFSET (-11)
 </pre>
 The UTF-8 byte sequence that was passed as a subject was valid, but the value
-of <i>startoffset</i> did not point to the beginning of a UTF-8 character.
+of <i>startoffset</i> did not point to the beginning of a UTF-8 character or the
+end of the subject.
 <pre>
   PCRE_ERROR_PARTIAL        (-12)
 </pre>
@@ -1792,8 +1815,14 @@ An invalid combination of PCRE_NEWLINE_<i>xxx</i> options was given.
 <pre>
   PCRE_ERROR_BADOFFSET      (-24)
 </pre>
-The value of <i>startoffset</i> was negative or greater than the length of the 
+The value of <i>startoffset</i> was negative or greater than the length of the
 subject, that is, the value in <i>length</i>.
+<pre>
+  PCRE_ERROR_SHORTUTF8      (-25)
+</pre>
+The subject string ended with an incomplete (truncated) UTF-8 character, and
+the PCRE_PARTIAL_HARD option was set. Without this option, PCRE_ERROR_BADUTF8
+is returned in this situation.
 </P>
 <P>
 Error numbers -16 to -20 and -22 are not used by <b>pcre_exec()</b>.
@@ -2203,7 +2232,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 November 2010
+Last updated: 13 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>
