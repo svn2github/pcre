@@ -408,9 +408,10 @@ capturing parenthesis numbers in back references. */
 
 /* When UTF-8 encoding is being used, a character is no longer just a single
 byte. The macros for character handling generate simple sequences when used in
-byte-mode, and more complicated ones for UTF-8 characters. BACKCHAR should
-never be called in byte mode. To make sure it can never even appear when UTF-8
-support is omitted, we don't even define it. */
+byte-mode, and more complicated ones for UTF-8 characters. GETCHARLENTEST is
+not used when UTF-8 is not supported, so it is not defined, and BACKCHAR should
+never be called in byte mode. To make sure they can never even appear when
+UTF-8 support is omitted, we don't even define them. */
 
 #ifndef SUPPORT_UTF8
 #define GETCHAR(c, eptr) c = *eptr;
@@ -418,43 +419,83 @@ support is omitted, we don't even define it. */
 #define GETCHARINC(c, eptr) c = *eptr++;
 #define GETCHARINCTEST(c, eptr) c = *eptr++;
 #define GETCHARLEN(c, eptr, len) c = *eptr;
+/* #define GETCHARLENTEST(c, eptr, len) */
 /* #define BACKCHAR(eptr) */
 
 #else   /* SUPPORT_UTF8 */
+
+/* These macros were originally written in the form of loops that used data
+from the tables whose names start with _pcre_utf8_table. They were rewritten by
+a user so as not to use loops, because in some environments this gives a
+significant performance advantage, and it seems never to do any harm. */
+
+/* Base macro to pick up the remaining bytes of a UTF-8 character, not
+advancing the pointer. */
+
+#define GETUTF8(c, eptr) \
+    { \
+    if ((c & 0x20) == 0) \
+      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
+    else if ((c & 0x10) == 0) \
+      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+    else if ((c & 0x08) == 0) \
+      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
+      ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
+    else if ((c & 0x04) == 0) \
+      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
+          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
+          (eptr[4] & 0x3f); \
+    else \
+      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
+          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
+          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+    }
 
 /* Get the next UTF-8 character, not advancing the pointer. This is called when
 we know we are in UTF-8 mode. */
 
 #define GETCHAR(c, eptr) \
   c = *eptr; \
-  if (c >= 0xc0) \
-    { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
-      { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
-      } \
-    }
+  if (c >= 0xc0) GETUTF8(c, eptr);
 
 /* Get the next UTF-8 character, testing for UTF-8 mode, and not advancing the
 pointer. */
 
 #define GETCHARTEST(c, eptr) \
   c = *eptr; \
-  if (utf8 && c >= 0xc0) \
+  if (utf8 && c >= 0xc0) GETUTF8(c, eptr);
+
+/* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
+the pointer. */
+
+#define GETUTF8INC(c, eptr) \
     { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
+    if ((c & 0x20) == 0) \
+      c = ((c & 0x1f) << 6) | (*eptr++ & 0x3f); \
+    else if ((c & 0x10) == 0) \
       { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
+      c = ((c & 0x0f) << 12) | ((*eptr & 0x3f) << 6) | (eptr[1] & 0x3f); \
+      eptr += 2; \
+      } \
+    else if ((c & 0x08) == 0) \
+      { \
+      c = ((c & 0x07) << 18) | ((*eptr & 0x3f) << 12) | \
+          ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      eptr += 3; \
+      } \
+    else if ((c & 0x04) == 0) \
+      { \
+      c = ((c & 0x03) << 24) | ((*eptr & 0x3f) << 18) | \
+          ((eptr[1] & 0x3f) << 12) | ((eptr[2] & 0x3f) << 6) | \
+          (eptr[3] & 0x3f); \
+      eptr += 4; \
+      } \
+    else \
+      { \
+      c = ((c & 0x01) << 30) | ((*eptr & 0x3f) << 24) | \
+          ((eptr[1] & 0x3f) << 18) | ((eptr[2] & 0x3f) << 12) | \
+          ((eptr[3] & 0x3f) << 6) | (eptr[4] & 0x3f); \
+      eptr += 5; \
       } \
     }
 
@@ -463,32 +504,49 @@ know we are in UTF-8 mode. */
 
 #define GETCHARINC(c, eptr) \
   c = *eptr++; \
-  if (c >= 0xc0) \
-    { \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    while (gcaa-- > 0) \
-      { \
-      gcss -= 6; \
-      c |= (*eptr++ & 0x3f) << gcss; \
-      } \
-    }
+  if (c >= 0xc0) GETUTF8INC(c, eptr);
 
 /* Get the next character, testing for UTF-8 mode, and advancing the pointer.
 This is called when we don't know if we are in UTF-8 mode. */
 
 #define GETCHARINCTEST(c, eptr) \
   c = *eptr++; \
-  if (utf8 && c >= 0xc0) \
+  if (utf8 && c >= 0xc0) GETUTF8INC(c, eptr);
+
+/* Base macro to pick up the remaining bytes of a UTF-8 character, not
+advancing the pointer, incrementing the length. */
+
+#define GETUTF8LEN(c, eptr, len) \
     { \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    while (gcaa-- > 0) \
+    if ((c & 0x20) == 0) \
       { \
-      gcss -= 6; \
-      c |= (*eptr++ & 0x3f) << gcss; \
+      c = ((c & 0x1f) << 6) | (eptr[1] & 0x3f); \
+      len++; \
+      } \
+    else if ((c & 0x10)  == 0) \
+      { \
+      c = ((c & 0x0f) << 12) | ((eptr[1] & 0x3f) << 6) | (eptr[2] & 0x3f); \
+      len += 2; \
+      } \
+    else if ((c & 0x08)  == 0) \
+      {\
+      c = ((c & 0x07) << 18) | ((eptr[1] & 0x3f) << 12) | \
+          ((eptr[2] & 0x3f) << 6) | (eptr[3] & 0x3f); \
+      len += 3; \
+      } \
+    else if ((c & 0x04)  == 0) \
+      { \
+      c = ((c & 0x03) << 24) | ((eptr[1] & 0x3f) << 18) | \
+          ((eptr[2] & 0x3f) << 12) | ((eptr[3] & 0x3f) << 6) | \
+          (eptr[4] & 0x3f); \
+      len += 4; \
+      } \
+    else \
+      {\
+      c = ((c & 0x01) << 30) | ((eptr[1] & 0x3f) << 24) | \
+          ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
+          ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
+      len += 5; \
       } \
     }
 
@@ -497,19 +555,7 @@ if there are extra bytes. This is called when we know we are in UTF-8 mode. */
 
 #define GETCHARLEN(c, eptr, len) \
   c = *eptr; \
-  if (c >= 0xc0) \
-    { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
-      { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
-      } \
-    len += gcaa; \
-    }
+  if (c >= 0xc0) GETUTF8LEN(c, eptr, len);
 
 /* Get the next UTF-8 character, testing for UTF-8 mode, not advancing the
 pointer, incrementing length if there are extra bytes. This is called when we
@@ -517,19 +563,7 @@ do not know if we are in UTF-8 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
   c = *eptr; \
-  if (utf8 && c >= 0xc0) \
-    { \
-    int gcii; \
-    int gcaa = _pcre_utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int gcss = 6*gcaa; \
-    c = (c & _pcre_utf8_table3[gcaa]) << gcss; \
-    for (gcii = 1; gcii <= gcaa; gcii++) \
-      { \
-      gcss -= 6; \
-      c |= (eptr[gcii] & 0x3f) << gcss; \
-      } \
-    len += gcaa; \
-    }
+  if (utf8 && c >= 0xc0) GETUTF8LEN(c, eptr, len);
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
@@ -537,7 +571,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 
 #define BACKCHAR(eptr) while((*eptr & 0xc0) == 0x80) eptr--
 
-#endif
+#endif  /* SUPPORT_UTF8 */
 
 
 /* In case there is no definition of offsetof() provided - though any proper

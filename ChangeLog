@@ -102,6 +102,12 @@ Version 8.11 10-Oct-2010
     left --include_dir as an undocumented synonym, and the same for 
     --exclude-dir, though that is not available in GNU grep, at least as of 
     release 2.5.4. 
+    
+18. At a user's suggestion, the macros GETCHAR and friends (which pick up UTF-8 
+    characters from a string of bytes) have been redefined so as not to use
+    loops, in order to improve performance in some environments. At the same 
+    time, I abstracted some of the common code into auxiliary macros to save 
+    repetition (this should not affect the compiled code).
 
 
 Version 8.10 25-Jun-2010
