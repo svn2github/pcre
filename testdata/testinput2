@@ -3552,4 +3552,6 @@ with \Y. ---/
     abc\>4
     abc\>-4 
 
+/^\cģ/
+
 /-- End of testinput2 --/

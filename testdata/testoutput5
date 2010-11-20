@@ -2312,4 +2312,7 @@ No match
     a\x{123}aa\>6
 Error -24
 
+/^\cģ/8
+Failed: \c must be followed by an ASCII character at offset 3
+
 /-- End of testinput5 --/

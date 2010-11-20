@@ -108,6 +108,11 @@ Version 8.11 10-Oct-2010
     loops, in order to improve performance in some environments. At the same 
     time, I abstracted some of the common code into auxiliary macros to save 
     repetition (this should not affect the compiled code).
+    
+19. If \c was followed by a multibyte UTF-8 character, bad things happened. A 
+    compile-time error is now given if \c is not followed by an ASCII 
+    character, that is, a byte less than 128. (In EBCDIC mode, the code is 
+    different, and any byte value is allowed.)
 
 
 Version 8.10 25-Jun-2010

@@ -408,6 +408,7 @@ static const char error_texts[] =
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "this version of PCRE is not compiled with PCRE_UCP support\0"
+  "\\c must be followed by an ASCII character\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -841,7 +842,8 @@ else
     break;
 
     /* For \c, a following letter is upper-cased; then the 0x40 bit is flipped.
-    This coding is ASCII-specific, but then the whole concept of \cx is
+    An error is given if the byte following \c is not an ASCII character. This
+    coding is ASCII-specific, but then the whole concept of \cx is
     ASCII-specific. (However, an EBCDIC equivalent has now been added.) */
 
     case CHAR_c:
@@ -851,11 +853,15 @@ else
       *errorcodeptr = ERR2;
       break;
       }
-
-#ifndef EBCDIC  /* ASCII/UTF-8 coding */
+#ifndef EBCDIC    /* ASCII/UTF-8 coding */
+    if (c > 127)  /* Excludes all non-ASCII in either mode */
+      {
+      *errorcodeptr = ERR68;
+      break;  
+      }      
     if (c >= CHAR_a && c <= CHAR_z) c -= 32;
     c ^= 0x40;
-#else           /* EBCDIC coding */
+#else             /* EBCDIC coding */
     if (c >= CHAR_a && c <= CHAR_z) c += 64;
     c ^= 0xC0;
 #endif

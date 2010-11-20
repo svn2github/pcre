@@ -11231,4 +11231,7 @@ Error -24
     abc\>-4 
 Error -24
 
+/^\cģ/
+Failed: \c must be followed by an ASCII character at offset 3
+
 /-- End of testinput2 --/

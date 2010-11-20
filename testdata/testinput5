@@ -827,4 +827,6 @@ correctly, but that messes up comparisons). --/
     a\x{123}aa\>5
     a\x{123}aa\>6
 
+/^\cģ/8
+
 /-- End of testinput5 --/
