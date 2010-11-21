@@ -6859,6 +6859,8 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
     { skipatstart += 7; options |= PCRE_UTF8; continue; }
   else if (strncmp((char *)(ptr+skipatstart+2), STRING_UCP_RIGHTPAR, 4) == 0)
     { skipatstart += 6; options |= PCRE_UCP; continue; }
+  else if (strncmp((char *)(ptr+skipatstart+2), STRING_NO_START_OPT_RIGHTPAR, 13) == 0)
+    { skipatstart += 15; options |= PCRE_NO_START_OPTIMIZE; continue; }
 
   if (strncmp((char *)(ptr+skipatstart+2), STRING_CR_RIGHTPAR, 3) == 0)
     { skipatstart += 5; newnl = PCRE_NEWLINE_CR; }

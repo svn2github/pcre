@@ -4411,6 +4411,9 @@
   abc\Y
   abcxypqr  
   abcxypqr\Y  
+
+/(*NO_START_OPT)xyz/C
+  abcxyz 
   
 /(?C)ab/
   ab

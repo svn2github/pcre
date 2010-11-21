@@ -2584,6 +2584,12 @@ a random value. /Ix
   abc\Y
   abcxypqr  
   abcxypqr\Y  
+  
+/(*NO_START_OPT)xyz/C
+  abcxyz 
+
+/xyz/CY
+  abcxyz 
 
 /^"((?(?=[a])[^"])|b)*"$/C
     "ab"

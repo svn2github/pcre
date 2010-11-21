@@ -113,6 +113,13 @@ Version 8.11 10-Oct-2010
     compile-time error is now given if \c is not followed by an ASCII 
     character, that is, a byte less than 128. (In EBCDIC mode, the code is 
     different, and any byte value is allowed.)
+    
+20. Recognize (*NO_START_OPT) at the start of a pattern to set the PCRE_NO_
+    START_OPTIMIZE option, which is now allowed at compile time - but just
+    passed through to pcre_exec() or pcre_dfa_exec(). This makes it available
+    to pcregrep and other applications that have no direct access to PCRE 
+    options. The new /Y option in pcretest sets this option when calling 
+    pcre_compile().  
 
 
 Version 8.10 25-Jun-2010

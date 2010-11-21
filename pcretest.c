@@ -1588,6 +1588,7 @@ while (!done)
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'W': options |= PCRE_UCP; break;
       case 'X': options |= PCRE_EXTRA; break;
+      case 'Y': options |= PCRE_NO_START_OPTIMISE; break;
       case 'Z': debug_lengths = 0; break;
       case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
       case '?': options |= PCRE_NO_UTF8_CHECK; break;
@@ -1924,7 +1925,7 @@ while (!done)
       if (do_flip) all_options = byteflip(all_options, sizeof(all_options));
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -1940,6 +1941,7 @@ while (!done)
           ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
           ((get_options & PCRE_UCP) != 0)? " ucp" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "",
+          ((get_options & PCRE_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
           ((get_options & PCRE_DUPNAMES) != 0)? " dupnames" : "");
 
       if (jchanged) fprintf(outfile, "Duplicate name status changes\n");

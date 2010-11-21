@@ -24,7 +24,7 @@ syntax.
 .rs
 .sp
   \ea         alarm, that is, the BEL character (hex 07)
-  \ecx        "control-x", where x is any character
+  \ecx        "control-x", where x is any ASCII character
   \ee         escape (hex 1B)
   \ef         formfeed (hex 0C)
   \en         newline (hex 0A)
@@ -336,6 +336,7 @@ but some of them use Unicode properties if PCRE_UCP is set. You can use
 The following are recognized only at the start of a pattern or after one of the
 newline-setting options with similar syntax:
 .sp
+  (*NO_START_OPT) no start-match optimization (PCRE_NO_START_OPTIMIZE)
   (*UTF8)         set UTF-8 mode (PCRE_UTF8)
   (*UCP)          set PCRE_UCP (use Unicode properties for \ed etc)
 .
@@ -473,6 +474,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 May 2010
+Last updated: 21 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

@@ -129,7 +129,7 @@ compile-time only bits for runtime options, or vice versa. */
 #define PCRE_BSR_ANYCRLF        0x00800000  /* Compile, exec, DFA exec */
 #define PCRE_BSR_UNICODE        0x01000000  /* Compile, exec, DFA exec */
 #define PCRE_JAVASCRIPT_COMPAT  0x02000000  /* Compile */
-#define PCRE_NO_START_OPTIMIZE  0x04000000  /* Exec, DFA exec */
+#define PCRE_NO_START_OPTIMIZE  0x04000000  /* Compile, exec, DFA exec */
 #define PCRE_NO_START_OPTIMISE  0x04000000  /* Synonym */
 #define PCRE_PARTIAL_HARD       0x08000000  /* Exec, DFA exec */
 #define PCRE_NOTEMPTY_ATSTART   0x10000000  /* Exec, DFA exec */

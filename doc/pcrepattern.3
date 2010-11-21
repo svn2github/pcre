@@ -52,6 +52,11 @@ such as \ed and \ew to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 128 via a lookup
 table.
 .P
+If a pattern starts with (*NO_START_OPT), it has the same effect as setting the
+PCRE_NO_START_OPTIMIZE option either at compile or matching time. There are 
+also some more of these special sequences that are concerned with the handling 
+of newlines; they are described below.
+.P
 The remainder of this document discusses the patterns that are supported by
 PCRE when its main matching function, \fBpcre_exec()\fP, is used.
 From release 6.0, PCRE offers a second matching function,

@@ -5936,9 +5936,10 @@ for(;;)
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later character is not present.
   However, there is an option that disables these, for testing and for ensuring
-  that all callouts do actually occur. */
+  that all callouts do actually occur. The option can be set in the regex by 
+  (*NO_START_OPT) or passed in match-time options. */
 
-  if ((options & PCRE_NO_START_OPTIMIZE) == 0)
+  if (((options | re->options) & PCRE_NO_START_OPTIMIZE) == 0)
     {
     /* Advance to a unique first byte if there is one. */
 
