@@ -1052,12 +1052,28 @@ characters in both cases. In UTF-8 mode, PCRE supports the concept of case for
 characters with values greater than 128 only when it is compiled with Unicode
 property support.
 .P
-The character types \ed, \eD, \eh, \eH, \ep, \eP, \es, \eS, \ev, \eV, \ew, and
-\eW may also appear in a character class, and add the characters that they
-match to the class. For example, [\edABCDEF] matches any hexadecimal digit. A
-circumflex can conveniently be used with the upper case character types to
+The character escape sequences \ed, \eD, \eh, \eH, \ep, \eP, \es, \eS, \ev,
+\eV, \ew, and \eW may appear in a character class, and add the characters that
+they match to the class. For example, [\edABCDEF] matches any hexadecimal
+digit. In UTF-8 mode, the PCRE_UCP option affects the meanings of \ed, \es, \ew
+and their upper case partners, just as it does when they appear outside a
+character class, as described in the section entitled
+.\" HTML <a href="#genericchartypes">
+.\" </a>
+"Generic character types"
+.\"
+above. The escape sequence \eb has a different meaning inside a character
+class; it matches the backspace character. The sequences \eB, \eN, \eR, and \eX
+are not special inside a character class. Like any other unrecognized escape
+sequences, they are treated as the literal characters "B", "N", "R", and "X" by
+default, but cause an error if the PCRE_EXTRA option is set.
+.P
+A circumflex can conveniently be used with the upper case character types to
 specify a more restricted set of characters than the matching lower case type.
-For example, the class [^\eW_] matches any letter or digit, but not underscore.
+For example, the class [^\eW_] matches any letter or digit, but not underscore,
+whereas [\ew] includes underscore. A positive character class should be read as 
+"something OR something OR ..." and a negative class as "NOT something AND NOT 
+something AND NOT ...".
 .P
 The only metacharacters that are recognized in character classes are backslash,
 hyphen (only where it can be interpreted as specifying a range), circumflex
@@ -2726,6 +2742,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 20 November 2010
+Last updated: 21 November 2010
 Copyright (c) 1997-2010 University of Cambridge.
 .fi
