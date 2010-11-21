@@ -61,9 +61,9 @@ if the subject is not long enough, or, for unanchored patterns, if it has
 been scanned far enough.
 .P
 You can disable these optimizations by passing the PCRE_NO_START_OPTIMIZE
-option to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP. This slows down the
-matching process, but does ensure that callouts such as the example above are
-obeyed.
+option to \fBpcre_compile()\fP, \fBpcre_exec()\fP, or \fBpcre_dfa_exec()\fP,
+or by starting the pattern with (*NO_START_OPT). This slows down the matching
+process, but does ensure that callouts such as the example above are obeyed.
 .
 .
 .SH "THE CALLOUT INTERFACE"
@@ -184,6 +184,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2009
-Copyright (c) 1997-2009 University of Cambridge.
+Last updated: 21 November 2010
+Copyright (c) 1997-2010 University of Cambridge.
 .fi

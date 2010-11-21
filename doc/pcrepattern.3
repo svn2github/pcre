@@ -2502,7 +2502,8 @@ minimum length of matching subject, or that a particular character must be
 present. When one of these optimizations suppresses the running of a match, any
 included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
-when calling \fBpcre_exec()\fP.
+when calling \fBpcre_compile()\fP or \fBpcre_exec()\fP, or by starting the
+pattern with (*NO_START_OPT).
 .
 .
 .SS "Verbs that act immediately"
