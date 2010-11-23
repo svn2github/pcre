@@ -1105,10 +1105,21 @@ top-level call starts at the beginning of the pattern. All other calls must
 start at a parenthesis. It scans along a pattern's text looking for capturing
 subpatterns, and counting them. If it finds a named pattern that matches the
 name it is given, it returns its number. Alternatively, if the name is NULL, it
-returns when it reaches a given numbered subpattern. We know that if (?P< is
-encountered, the name will be terminated by '>' because that is checked in the
-first pass. Recursion is used to keep track of subpatterns that reset the
-capturing group numbers - the (?| feature.
+returns when it reaches a given numbered subpattern. Recursion is used to keep
+track of subpatterns that reset the capturing group numbers - the (?| feature.
+
+This function was originally called only from the second pass, in which we know
+that if (?< or (?' or (?P< is encountered, the name will be correctly
+terminated because that is checked in the first pass. There is now one call to
+this function in the first pass, to check for a recursive back reference by
+name (so that we can make the whole group atomic). In this case, we need check
+only up to the current position in the pattern, and that is still OK because 
+and previous occurrences will have been checked. To make this work, the test 
+for "end of pattern" is a check against cd->end_pattern in the main loop, 
+instead of looking for a binary zero. This means that the special first-pass
+call can adjust cd->end_pattern temporarily. (Checks for binary zero while 
+processing items within the loop are OK, because afterwards the main loop will 
+terminate.)
 
 Arguments:
   ptrptr       address of the current character pointer (updated)
@@ -1209,9 +1220,11 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
   }
 
 /* Past any initial parenthesis handling, scan for parentheses or vertical
-bars. */
+bars. Stop if we get to cd->end_pattern. Note that this is important for the 
+first-pass call when this value is temporarily adjusted to stop at the current 
+position. So DO NOT change this to a test for binary zero. */
 
-for (; *ptr != 0; ptr++)
+for (; ptr < cd->end_pattern; ptr++)
   {
   /* Skip over backslashed characters and also entire \Q...\E */
 
@@ -5373,11 +5386,17 @@ for (;; ptr++)
         while ((cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
-        /* In the pre-compile phase, do a syntax check and set a dummy
-        reference number. */
+        /* In the pre-compile phase, do a syntax check. We used to just set
+        a dummy reference number, because it was not used in the first pass.
+        However, with the change of recursive back references to be atomic,
+        we have to look for the number so that this state can be identified, as
+        otherwise the incorrect length is computed. If it's not a backwards
+        reference, the dummy number will do. */
 
         if (lengthptr != NULL)
           {
+          const uschar *temp; 
+           
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -5393,7 +5412,22 @@ for (;; ptr++)
             *errorcodeptr = ERR48;
             goto FAILED;
             }
-          recno = 0;
+            
+          /* The name table does not exist in the first pass, so we cannot
+          do a simple search as in the code below. Instead, we have to scan the 
+          pattern to find the number. It is important that we scan it only as
+          far as we have got because the syntax of named subpatterns has not 
+          been checked for the rest of the pattern, and find_parens() assumes 
+          correct syntax. In any case, it's a waste of resources to scan 
+          further. We stop the scan at the current point by temporarily 
+          adjusting the value of cd->endpattern. */
+          
+          temp = cd->end_pattern;
+          cd->end_pattern = ptr;
+          recno = find_parens(cd, name, namelen, 
+            (options & PCRE_EXTENDED) != 0, utf8);
+          cd->end_pattern = temp;   
+          if (recno < 0) recno = 0;    /* Forward ref; set dummy number */
           }
 
         /* In the real compile, seek the name in the table. We check the name

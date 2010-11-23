@@ -120,6 +120,12 @@ Version 8.11 10-Oct-2010
     to pcregrep and other applications that have no direct access to PCRE 
     options. The new /Y option in pcretest sets this option when calling 
     pcre_compile().  
+    
+21. Change 18 of release 8.01 broke the use of named subpatterns for recursive
+    back references. Groups containing recursive back references were forced to 
+    be atomic by that change, but in the case of named groups, the amount of 
+    memory required was incorrectly computed, leading to "Failed: internal 
+    error: code overflow". This has been fixed.  
 
 
 Version 8.10 25-Jun-2010

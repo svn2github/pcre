@@ -970,4 +970,9 @@ No match
     a 
 No match
 
+/(?P<abn>(?P=abn)xxx|)+/
+    xxx
+ 0: 
+ 1: 
+
 /-- End of testinput11 --/

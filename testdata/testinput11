@@ -504,4 +504,7 @@ however, we need the complication for Perl. ---/
 /(*SKIP)b/
     a 
 
+/(?P<abn>(?P=abn)xxx|)+/
+    xxx
+
 /-- End of testinput11 --/

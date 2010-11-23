@@ -11258,4 +11258,51 @@ Error -24
 /^\cģ/
 Failed: \c must be followed by an ASCII character at offset 3
 
+/(?P<abn>(?P=abn)xxx)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        \1
+        xxx
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a\1z)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        a
+        \1
+        z
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/BZ
+Failed: syntax error in subpattern name (missing terminator) at offset 29
+
+/(?P<abn>(?P=axn)xxx)/BZ
+Failed: reference to non-existent subpattern at offset 15
+
+/(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        \2
+        xxx
+        Ket
+        CBra 2
+        yy
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- End of testinput2 --/

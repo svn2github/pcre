@@ -3560,4 +3560,14 @@ with \Y. ---/
 
 /^\cģ/
 
+/(?P<abn>(?P=abn)xxx)/BZ
+
+/(a\1z)/BZ
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/BZ
+
+/(?P<abn>(?P=axn)xxx)/BZ
+
+/(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
+
 /-- End of testinput2 --/
