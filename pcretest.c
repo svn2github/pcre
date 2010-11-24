@@ -2134,7 +2134,7 @@ while (!done)
     int getlist = 0;
     int gmatched = 0;
     int start_offset = 0;
-    int start_offset_sign = 1; 
+    int start_offset_sign = 1;
     int g_notempty = 0;
     int use_dfa = 0;
 
@@ -2267,13 +2267,13 @@ while (!done)
         continue;
 
         case '>':
-        if (*p == '-') 
+        if (*p == '-')
           {
           start_offset_sign = -1;
           p++;
-          }    
+          }
         while(isdigit(*p)) start_offset = start_offset * 10 + *p++ - '0';
-        start_offset *= start_offset_sign; 
+        start_offset *= start_offset_sign;
         continue;
 
         case 'A':  /* Option setting */
@@ -2801,11 +2801,11 @@ while (!done)
       string - that was checked before setting g_notempty.
 
       Complication arises in the case when the newline convention is "any",
-      "crlf", or "anycrlf". If the previous match was at the end of a line 
-      terminated by CRLF, an advance of one character just passes the \r, 
+      "crlf", or "anycrlf". If the previous match was at the end of a line
+      terminated by CRLF, an advance of one character just passes the \r,
       whereas we should prefer the longer newline sequence, as does the code in
-      pcre_exec(). Fudge the offset value to achieve this. We check for a 
-      newline setting in the pattern; if none was set, use pcre_config() to 
+      pcre_exec(). Fudge the offset value to achieve this. We check for a
+      newline setting in the pattern; if none was set, use pcre_config() to
       find the default.
 
       Otherwise, in the case of UTF-8 matching, the advance must be one
@@ -2843,7 +2843,7 @@ while (!done)
             while (start_offset + onechar < len)
               {
               if ((bptr[start_offset+onechar] & 0xc0) != 0x80) break;
-              onechar++; 
+              onechar++;
               }
             }
           use_offsets[1] = start_offset + onechar;

@@ -72,19 +72,19 @@ Arguments:
 
 Returns:       < 0    if the string is a valid UTF-8 string
                >= 0   otherwise; the value is the offset of the bad byte
-               
+
 Bad bytes can be:
 
   . An isolated byte whose most significant bits are 0x80, because this
     can only correctly appear within a UTF-8 character;
-      
+
   . A byte whose most significant bits are 0xc0, but whose other bits indicate
-    that there are more than 3 additional bytes (i.e. an RFC 2279 starting 
+    that there are more than 3 additional bytes (i.e. an RFC 2279 starting
     byte, which is no longer valid under RFC 3629);
-    
+
   .
-  
-The returned offset may also be equal to the length of the string; this means 
+
+The returned offset may also be equal to the length of the string; this means
 that one or more bytes is missing from the final UTF-8 character.
 */
 

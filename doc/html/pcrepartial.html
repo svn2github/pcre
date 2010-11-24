@@ -73,9 +73,9 @@ subject string is reached successfully, but matching cannot continue because
 more characters are needed. However, at least one character in the subject must
 have been inspected. This character need not form part of the final matched
 string; lookbehind assertions and the \K escape sequence provide ways of
-inspecting characters before the start of a matched substring. The requirement 
-for inspecting at least one character exists because an empty string can always 
-be matched; without such a restriction there would always be a partial match of 
+inspecting characters before the start of a matched substring. The requirement
+for inspecting at least one character exists because an empty string can always
+be matched; without such a restriction there would always be a partial match of
 an empty string at the end of the subject.
 </P>
 <P>
@@ -83,7 +83,7 @@ If there are at least two slots in the offsets vector when <b>pcre_exec()</b>
 returns with a partial match, the first slot is set to the offset of the
 earliest character that was inspected when the partial match was found. For
 convenience, the second offset points to the end of the subject so that a
-substring can easily be identified. 
+substring can easily be identified.
 </P>
 <P>
 For the majority of patterns, the first offset identifies the start of the
@@ -100,7 +100,7 @@ with extra characters added to the subject.
 </P>
 <P>
 What happens when a partial match is identified depends on which of the two
-partial matching options are set. 
+partial matching options are set.
 </P>
 <br><b>
 PCRE_PARTIAL_SOFT with pcre_exec()
@@ -112,10 +112,10 @@ alternatives in the pattern are tried. If no complete match can be found,
 <b>pcre_exec()</b> returns PCRE_ERROR_PARTIAL instead of PCRE_ERROR_NOMATCH.
 </P>
 <P>
-This option is "soft" because it prefers a complete match over a partial match. 
-All the various matching items in a pattern behave as if the subject string is 
+This option is "soft" because it prefers a complete match over a partial match.
+All the various matching items in a pattern behave as if the subject string is
 potentially complete. For example, \z, \Z, and $ match at the end of the
-subject, as normal, and for \b and \B the end of the subject is treated as a 
+subject, as normal, and for \b and \B the end of the subject is treated as a
 non-alphanumeric.
 </P>
 <P>
@@ -137,17 +137,17 @@ PCRE_PARTIAL_HARD with pcre_exec()
 <P>
 If PCRE_PARTIAL_HARD is set for <b>pcre_exec()</b>, it returns
 PCRE_ERROR_PARTIAL as soon as a partial match is found, without continuing to
-search for possible complete matches. This option is "hard" because it prefers 
+search for possible complete matches. This option is "hard" because it prefers
 an earlier partial match over a later complete match. For this reason, the
 assumption is made that the end of the supplied subject string may not be the
 true end of the available data, and so, if \z, \Z, \b, \B, or $ are
 encountered at the end of the subject, the result is PCRE_ERROR_PARTIAL.
 </P>
 <P>
-Setting PCRE_PARTIAL_HARD also affects the way <b>pcre_exec()</b> checks UTF-8 
+Setting PCRE_PARTIAL_HARD also affects the way <b>pcre_exec()</b> checks UTF-8
 subject strings for validity. Normally, an invalid UTF-8 sequence causes the
-error PCRE_ERROR_BADUTF8. However, in the special case of a truncated UTF-8 
-character at the end of the subject, PCRE_ERROR_SHORTUTF8 is returned when 
+error PCRE_ERROR_BADUTF8. However, in the special case of a truncated UTF-8
+character at the end of the subject, PCRE_ERROR_SHORTUTF8 is returned when
 PCRE_PARTIAL_HARD is set.
 </P>
 <br><b>
@@ -304,8 +304,8 @@ From release 8.00, <b>pcre_exec()</b> can also be used to do multi-segment
 matching. Unlike <b>pcre_dfa_exec()</b>, it is not possible to restart the
 previous match with a new segment of data. Instead, new data must be added to
 the previous subject string, and the entire match re-run, starting from the
-point where the partial match occurred. Earlier data can be discarded. It is 
-best to use PCRE_PARTIAL_HARD in this situation, because it does not treat the 
+point where the partial match occurred. Earlier data can be discarded. It is
+best to use PCRE_PARTIAL_HARD in this situation, because it does not treat the
 end of a segment as the end of the subject when matching \z, \Z, \b, \B,
 and $. Consider an unanchored pattern that matches dates:
 <pre>
@@ -333,8 +333,8 @@ whichever matching function is used.
 <P>
 1. If the pattern contains a test for the beginning of a line, you need to pass
 the PCRE_NOTBOL option when the subject string for any call does start at the
-beginning of a line. There is also a PCRE_NOTEOL option, but in practice when 
-doing multi-segment matching you should be using PCRE_PARTIAL_HARD, which 
+beginning of a line. There is also a PCRE_NOTEOL option, but in practice when
+doing multi-segment matching you should be using PCRE_PARTIAL_HARD, which
 includes the effect of PCRE_NOTEOL.
 </P>
 <P>

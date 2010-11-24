@@ -81,9 +81,9 @@ been scanned far enough.
 </P>
 <P>
 You can disable these optimizations by passing the PCRE_NO_START_OPTIMIZE
-option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>. This slows down the
-matching process, but does ensure that callouts such as the example above are
-obeyed.
+option to <b>pcre_compile()</b>, <b>pcre_exec()</b>, or <b>pcre_dfa_exec()</b>,
+or by starting the pattern with (*NO_START_OPT). This slows down the matching
+process, but does ensure that callouts such as the example above are obeyed.
 </P>
 <br><a name="SEC3" href="#TOC1">THE CALLOUT INTERFACE</a><br>
 <P>
@@ -206,9 +206,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 September 2009
+Last updated: 21 November 2010
 <br>
-Copyright &copy; 1997-2009 University of Cambridge.
+Copyright &copy; 1997-2010 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

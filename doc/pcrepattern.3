@@ -53,8 +53,8 @@ instead of recognizing only characters with codes less than 128 via a lookup
 table.
 .P
 If a pattern starts with (*NO_START_OPT), it has the same effect as setting the
-PCRE_NO_START_OPTIMIZE option either at compile or matching time. There are 
-also some more of these special sequences that are concerned with the handling 
+PCRE_NO_START_OPTIMIZE option either at compile or matching time. There are
+also some more of these special sequences that are concerned with the handling
 of newlines; they are described below.
 .P
 The remainder of this document discusses the patterns that are supported by
@@ -189,7 +189,7 @@ The following sections describe the use of each of the metacharacters.
 The backslash character has several uses. Firstly, if it is followed by a
 character that is not a number or a letter, it takes away any special meaning
 that character may have. This use of backslash as an escape character applies
-both inside and outside character classes. 
+both inside and outside character classes.
 .P
 For example, if you want to match a * character, you write \e* in the pattern.
 This escaping action applies whether or not the following character would
@@ -198,7 +198,7 @@ non-alphanumeric with backslash to specify that it stands for itself. In
 particular, if you want to match a backslash, you write \e\e.
 .P
 In UTF-8 mode, only ASCII numbers and letters have any special meaning after a
-backslash. All other characters (in particular, those whose codepoints are 
+backslash. All other characters (in particular, those whose codepoints are
 greater than 127) are treated as literals.
 .P
 If a pattern is compiled with the PCRE_EXTENDED option, whitespace in the
@@ -247,10 +247,10 @@ one of the following escape sequences than the binary character it represents:
 The precise effect of \ecx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
 Thus \ecz becomes hex 1A (z is 7A), but \ec{ becomes hex 3B ({ is 7B), while
-\ec; becomes hex 7B (; is 3B). If the byte following \ec has a value greater 
-than 127, a compile-time error occurs. This locks out non-ASCII characters in 
-both byte mode and UTF-8 mode. (When PCRE is compiled in EBCDIC mode, all byte 
-values are valid. A lower case letter is converted to upper case, and then the 
+\ec; becomes hex 7B (; is 3B). If the byte following \ec has a value greater
+than 127, a compile-time error occurs. This locks out non-ASCII characters in
+both byte mode and UTF-8 mode. (When PCRE is compiled in EBCDIC mode, all byte
+values are valid. A lower case letter is converted to upper case, and then the
 0xc0 bits are flipped.)
 .P
 After \ex, from zero to two hexadecimal digits are read (letters can be in
@@ -437,7 +437,7 @@ any Unicode letter, and underscore. Note also that PCRE_UCP affects \eb, and
 \eB because they are defined in terms of \ew and \eW. Matching these sequences
 is noticeably slower when PCRE_UCP is set.
 .P
-The sequences \eh, \eH, \ev, and \eV are features that were added to Perl at 
+The sequences \eh, \eH, \ev, and \eV are features that were added to Perl at
 release 5.10. In contrast to the other sequences, which match only ASCII
 characters by default, these always match certain high-valued codepoints in
 UTF-8 mode, whether or not PCRE_UCP is set. The horizontal space characters
@@ -960,7 +960,7 @@ The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 .P
-The escape sequence \eN behaves like a dot, except that it is not affected by 
+The escape sequence \eN behaves like a dot, except that it is not affected by
 the PCRE_DOTALL option. In other words, it matches any character except one
 that signifies the end of a line.
 .
@@ -1076,8 +1076,8 @@ default, but cause an error if the PCRE_EXTRA option is set.
 A circumflex can conveniently be used with the upper case character types to
 specify a more restricted set of characters than the matching lower case type.
 For example, the class [^\eW_] matches any letter or digit, but not underscore,
-whereas [\ew] includes underscore. A positive character class should be read as 
-"something OR something OR ..." and a negative class as "NOT something AND NOT 
+whereas [\ew] includes underscore. A positive character class should be read as
+"something OR something OR ..." and a negative class as "NOT something AND NOT
 something AND NOT ...".
 .P
 The only metacharacters that are recognized in character classes are backslash,
@@ -1997,9 +1997,9 @@ already been matched. The two possible forms of conditional subpattern are:
 If the condition is satisfied, the yes-pattern is used; otherwise the
 no-pattern (if present) is used. If there are more than two alternatives in the
 subpattern, a compile-time error occurs. Each of the two alternatives may
-itself contain nested subpatterns of any form, including conditional 
+itself contain nested subpatterns of any form, including conditional
 subpatterns; the restriction to two alternatives applies only at the level of
-the condition. This pattern fragment is an example where the alternatives are 
+the condition. This pattern fragment is an example where the alternatives are
 complex:
 .sp
   (?(1) (A|B|C) | (D | (?(2)E|F) | E) )
@@ -2024,7 +2024,7 @@ the condition is true if any of them have matched. An alternative notation is
 to precede the digits with a plus or minus sign. In this case, the subpattern
 number is relative rather than absolute. The most recently opened parentheses
 can be referenced by (?(-1), the next most recent by (?(-2), and so on. Inside
-loops it can also make sense to refer to subsequent groups. The next 
+loops it can also make sense to refer to subsequent groups. The next
 parentheses to be opened can be referenced as (?(+1), and so on. (The value
 zero in any of these forms is not used; it provokes a compile-time error.)
 .P
@@ -2144,7 +2144,7 @@ dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.
 .SH COMMENTS
 .rs
 .sp
-There are two ways of including comments in patterns that are processed by 
+There are two ways of including comments in patterns that are processed by
 PCRE. In both cases, the start of the comment must not be in a character class,
 nor in the middle of any other sequence of related characters such as (?: or a
 subpattern name or number. The characters that make up a comment play no part
@@ -2168,7 +2168,7 @@ default newline convention is in force:
 .sp
   abc #comment \en still comment
 .sp
-On encountering the # character, \fBpcre_compile()\fP skips along, looking for 
+On encountering the # character, \fBpcre_compile()\fP skips along, looking for
 a newline in the pattern. The sequence \en is still literal at this stage, so
 it does not terminate the comment. Only an actual character with the code value
 0x0a (the default newline) does so.
@@ -2694,7 +2694,7 @@ matching name is found, normal "bumpalong" of one character happens (the
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
-This verb causes a skip to the next alternation in the innermost enclosing 
+This verb causes a skip to the next alternation in the innermost enclosing
 group if the rest of the pattern does not match. That is, it cancels pending
 backtracking, but only within the current alternation. Its name comes from the
 observation that it can be used for a pattern-based if-then-else block:
@@ -2709,7 +2709,7 @@ overall match fails. If (*THEN) is not directly inside an alternation, it acts
 like (*PRUNE).
 .
 .P
-The above verbs provide four different "strengths" of control when subsequent 
+The above verbs provide four different "strengths" of control when subsequent
 matching fails. (*THEN) is the weakest, carrying on the match at the next
 alternation. (*PRUNE) comes next, failing the match at the current starting
 position, but allowing an advance to the next character (for an unanchored

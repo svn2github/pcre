@@ -1499,8 +1499,8 @@ a pre-scan of the subject that takes place before the pattern is run.
 The PCRE_NO_START_OPTIMIZE option disables the start-up optimizations, possibly
 causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
-are considered at every possible starting position in the subject string. If 
-PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching 
+are considered at every possible starting position in the subject string. If
+PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
 time.
 .P
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.

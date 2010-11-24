@@ -435,8 +435,9 @@ within the pattern (see the detailed description in the
 documentation). For those options that can be different in different parts of
 the pattern, the contents of the <i>options</i> argument specifies their
 settings at the start of compilation and execution. The PCRE_ANCHORED,
-PCRE_BSR_<i>xxx</i>, and PCRE_NEWLINE_<i>xxx</i> options can be set at the time
-of matching as well as at compile time.
+PCRE_BSR_<i>xxx</i>, PCRE_NEWLINE_<i>xxx</i>, PCRE_NO_UTF8_CHECK, and
+PCRE_NO_START_OPT options can be set at the time of matching as well as at
+compile time.
 </P>
 <P>
 If <i>errptr</i> is NULL, <b>pcre_compile()</b> returns NULL immediately.
@@ -670,6 +671,14 @@ the pattern. Any opening parenthesis that is not followed by ? behaves as if it
 were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
 in Perl.
+<pre>
+  NO_START_OPTIMIZE
+</pre>
+This is an option that acts at matching time; that is, it is really an option
+for <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>. If it is set at compile time,
+it is remembered with the compiled pattern and assumed at matching time. For
+details see the discussion of PCRE_NO_START_OPTIMIZE
+<a href="#execoptions">below.</a>
 <pre>
   PCRE_UCP
 </pre>
@@ -1480,7 +1489,11 @@ a pre-scan of the subject that takes place before the pattern is run.
 The PCRE_NO_START_OPTIMIZE option disables the start-up optimizations, possibly
 causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
-are considered at every possible starting position in the subject string.
+are considered at every possible starting position in the subject string. If
+PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
+time.
+</P>
+<P>
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
 Consider the pattern
 <pre>
@@ -2232,7 +2245,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 November 2010
+Last updated: 21 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

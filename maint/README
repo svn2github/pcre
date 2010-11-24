@@ -109,27 +109,13 @@ distribution for a new release.
 . Compile and test with many different config options, and combinations of
   options. The maint/ManyConfigTests script now encapsulates this testing.
 
-. Run perltest.pl on the test data for tests 1, 4, 6, and 11. The first two can
-  be run with Perl 5.8 or >= 5.10; the last two require Perl >= 5.10. The
-  output should match the PCRE test output, apart from the version
-  identification at the start of each test. The other tests are not
-  Perl-compatible (they use various PCRE-specific features or options).
+. Run perltest.pl on the test data for tests 1, 4, 6, and 11. The output should
+  match the PCRE test output, apart from the version identification at the
+  start of each test. The other tests are not Perl-compatible (they use various
+  PCRE-specific features or options).
 
 . Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
   valgrind", though that takes quite a long time.
-
-. It may also useful to test with Electric Fence, though the fact that it
-  grumbles for missing free() calls can be a nuisance. (A missing free() in
-  pcretest is hardly a big problem.) To build with EF, use:
-
-    LIBS='/usr/lib/libefence.a -lpthread' with ./configure.
-
-  Then all normal runs use it to check for buffer overflow. Also run everything
-  with:
-
-    EF_PROTECT_BELOW=1 <whatever>
-
-  because there have been problems with lookbehinds that looked too far.
 
 . Test with the emulated memmove() function by undefining HAVE_MEMMOVE and
   HAVE_BCOPY in config.h. You may see a number of "pcre_memmove defined but not
@@ -329,4 +315,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 03 June 2010
+Last updated: 24 November 2010

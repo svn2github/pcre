@@ -215,6 +215,7 @@ options that do not correspond to anything in Perl:
   <b>/U</b>              PCRE_UNGREEDY
   <b>/W</b>              PCRE_UCP
   <b>/X</b>              PCRE_EXTRA
+  <b>/Y</b>              PCRE_NO_START_OPTIMIZE
   <b>/&#60;JS&#62;</b>           PCRE_JAVASCRIPT_COMPAT
   <b>/&#60;cr&#62;</b>           PCRE_NEWLINE_CR
   <b>/&#60;lf&#62;</b>           PCRE_NEWLINE_LF
@@ -256,9 +257,9 @@ empty string, the next call is done with the PCRE_NOTEMPTY_ATSTART and
 PCRE_ANCHORED flags set in order to search for another, non-empty, match at the
 same point. If this second match fails, the start offset is advanced, and the
 normal match is retried. This imitates the way Perl handles such cases when
-using the <b>/g</b> modifier or the <b>split()</b> function. Normally, the start 
-offset is advanced by one character, but if the newline convention recognizes 
-CRLF as a newline, and the current character is CR followed by LF, an advance 
+using the <b>/g</b> modifier or the <b>split()</b> function. Normally, the start
+offset is advanced by one character, but if the newline convention recognizes
+CRLF as a newline, and the current character is CR followed by LF, an advance
 of two is used.
 </P>
 <br><b>
@@ -385,7 +386,7 @@ recognized:
   \t         tab (\x09)
   \v         vertical tab (\x0b)
   \nnn       octal character (up to 3 octal digits)
-               always a byte unless &#62; 255 in UTF-8 mode 
+               always a byte unless &#62; 255 in UTF-8 mode
   \xhh       hexadecimal byte (up to 2 hex digits)
   \x{hh...}  hexadecimal character, any number of digits in UTF-8 mode
   \A         pass the PCRE_ANCHORED option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
@@ -416,7 +417,7 @@ recognized:
   \Y         pass the PCRE_NO_START_OPTIMIZE option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \Z         pass the PCRE_NOTEOL option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \?         pass the PCRE_NO_UTF8_CHECK option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
-  \&#62;dd       start the match at offset dd (optional "-"; then any number of digits); this sets the <i>startoffset</i> 
+  \&#62;dd       start the match at offset dd (optional "-"; then any number of digits); this sets the <i>startoffset</i>
                argument for <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#60;cr&#62;      pass the PCRE_NEWLINE_CR option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#60;lf&#62;      pass the PCRE_NEWLINE_LF option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
@@ -424,11 +425,11 @@ recognized:
   \&#60;anycrlf&#62; pass the PCRE_NEWLINE_ANYCRLF option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
   \&#60;any&#62;     pass the PCRE_NEWLINE_ANY option to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>
 </pre>
-Note that \xhh always specifies one byte, even in UTF-8 mode; this makes it 
-possible to construct invalid UTF-8 sequences for testing purposes. On the 
+Note that \xhh always specifies one byte, even in UTF-8 mode; this makes it
+possible to construct invalid UTF-8 sequences for testing purposes. On the
 other hand, \x{hh} is interpreted as a UTF-8 character in UTF-8 mode,
-generating more than one byte if the value is greater than 127. When not in 
-UTF-8 mode, it generates one byte for values less than 256, and causes an error 
+generating more than one byte if the value is greater than 127. When not in
+UTF-8 mode, it generates one byte for values less than 256, and causes an error
 for greater values.
 </P>
 <P>
@@ -756,7 +757,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 07 November 2010
+Last updated: 21 November 2010
 <br>
 Copyright &copy; 1997-2010 University of Cambridge.
 <br>

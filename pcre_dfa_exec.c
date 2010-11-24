@@ -831,8 +831,8 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_EOD:
-      if (ptr >= end_subject) 
-        { 
+      if (ptr >= end_subject)
+        {
         if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
           could_continue = TRUE;
         else { ADD_ACTIVE(state_offset + 1, 0); }
@@ -2963,9 +2963,9 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int tb; 
+  int tb;
   if ((tb = _pcre_valid_utf8((uschar *)subject, length)) >= 0)
-    return (tb == length && (options & PCRE_PARTIAL_HARD) != 0)? 
+    return (tb == length && (options & PCRE_PARTIAL_HARD) != 0)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
@@ -3057,7 +3057,7 @@ for (;;)
 
     /* There are some optimizations that avoid running the match if a known
     starting point is not found. However, there is an option that disables
-    these, for testing and for ensuring that all callouts do actually occur. 
+    these, for testing and for ensuring that all callouts do actually occur.
     The option can be set in the regex by (*NO_START_OPT) or passed in
     match-time options. */
 

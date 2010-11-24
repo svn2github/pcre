@@ -260,7 +260,7 @@ if (!find_all)     /* Check for -g */
   }
 
 /* Before running the loop, check for UTF-8 and whether CRLF is a valid newline
-sequence. First, find the options with which the regex was compiled; extract 
+sequence. First, find the options with which the regex was compiled; extract
 the UTF-8 state, and mask off all but the newline options. */
 
 (void)pcre_fullinfo(re, NULL, PCRE_INFO_OPTIONS, &option_bits);
@@ -286,7 +286,7 @@ if (option_bits == 0)
 
 /* See if CRLF is a valid newline sequence. */
 
-crlf_is_newline = 
+crlf_is_newline =
      option_bits == PCRE_NEWLINE_ANY ||
      option_bits == PCRE_NEWLINE_CRLF ||
      option_bits == PCRE_NEWLINE_ANYCRLF;
@@ -345,11 +345,11 @@ for (;;)
     else if (utf8)                              /* Otherwise, ensure we */
       {                                         /* advance a whole UTF-8 */
       while (ovector[1] < subject_length)       /* character. */
-        {                               
+        {
         if ((subject[ovector[1]] & 0xc0) != 0x80) break;
         ovector[1] += 1;
         }
-      }  
+      }
     continue;    /* Go round the loop again */
     }
 

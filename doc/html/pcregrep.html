@@ -366,12 +366,12 @@ locale is specified, the PCRE library's default (usually the "C" locale) is
 used. There is no short form for this option.
 </P>
 <P>
-<b>--match-limit</b>=<i>number</i> 
+<b>--match-limit</b>=<i>number</i>
 Processing some regular expression patterns can require a very large amount of
 memory, leading in some cases to a program crash if not enough is available.
-Other patterns may take a very long time to search for all possible matching 
+Other patterns may take a very long time to search for all possible matching
 strings. The <b>pcre_exec()</b> function that is called by <b>pcregrep</b> to do
-the matching has two parameters that can limit the resources that it uses. 
+the matching has two parameters that can limit the resources that it uses.
 <br>
 <br>
 The <b>--match-limit</b> option provides a means of limiting resource usage
@@ -392,7 +392,7 @@ of calls, because not all calls to <b>match()</b> are recursive. This limit is
 of use only if it is set smaller than <b>--match-limit</b>.
 <br>
 <br>
-There are no short forms for these options. The default settings are specified 
+There are no short forms for these options. The default settings are specified
 when the PCRE library is compiled, with the default default being 10 million.
 </P>
 <P>
@@ -451,13 +451,13 @@ exclusive with <b>--file-offsets</b> and <b>--line-offsets</b>.
 </P>
 <P>
 <b>-o</b><i>number</i>, <b>--only-matching</b>=<i>number</i>
-Show only the part of the line that matched the capturing parentheses of the 
+Show only the part of the line that matched the capturing parentheses of the
 given number. Up to 32 capturing parentheses are supported. Because these
 options can be given without an argument (see above), if an argument is
 present, it must be given in the same shell item, for example, -o3 or
---only-matching=2. The comments given for the non-argument case above also 
-apply to this case. If the specified capturing parentheses do not exist in the 
-pattern, or were not set in the match, nothing is output unless the file name 
+--only-matching=2. The comments given for the non-argument case above also
+apply to this case. If the specified capturing parentheses do not exist in the
+pattern, or were not set in the match, nothing is output unless the file name
 or line number are being printed.
 </P>
 <P>
@@ -554,8 +554,8 @@ exception) in the next command line item. For example:
   -f/some/file
   -f /some/file
 </pre>
-The exception is the <b>-o</b> option, which may appear with or without data. 
-Because of this, if data is present, it must follow immediately in the same 
+The exception is the <b>-o</b> option, which may appear with or without data.
+Because of this, if data is present, it must follow immediately in the same
 item, for example -o3.
 </P>
 <P>
@@ -575,7 +575,7 @@ specially unless it is at the start of an item.
 The exceptions to the above are the <b>--colour</b> (or <b>--color</b>) and
 <b>--only-matching</b> options, for which the data is optional. If one of these
 options does have data, it must be given in the first form, using an equals
-character. Otherwise \fBpcregrep\P will assume that it has no data.
+character. Otherwise <b>pcregrep</b> will assume that it has no data.
 </P>
 <br><a name="SEC9" href="#TOC1">MATCHING ERRORS</a><br>
 <P>
@@ -590,7 +590,7 @@ there are more than 20 such errors, <b>pcregrep</b> gives up.
 <P>
 The <b>--match-limit</b> option of <b>pcregrep</b> can be used to set the overall
 resource limit; there is a second option called <b>--recursion-limit</b> that
-sets a limit on the amount of memory (usually stack) that is used (see the 
+sets a limit on the amount of memory (usually stack) that is used (see the
 discussion of these options above).
 </P>
 <br><a name="SEC10" href="#TOC1">DIAGNOSTICS</a><br>

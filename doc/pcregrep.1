@@ -307,12 +307,12 @@ the value in the \fBLC_ALL\fP or \fBLC_CTYPE\fP environment variables. If no
 locale is specified, the PCRE library's default (usually the "C" locale) is
 used. There is no short form for this option.
 .TP
-\fB--match-limit\fP=\fInumber\fP 
+\fB--match-limit\fP=\fInumber\fP
 Processing some regular expression patterns can require a very large amount of
 memory, leading in some cases to a program crash if not enough is available.
-Other patterns may take a very long time to search for all possible matching 
+Other patterns may take a very long time to search for all possible matching
 strings. The \fBpcre_exec()\fP function that is called by \fBpcregrep\fP to do
-the matching has two parameters that can limit the resources that it uses. 
+the matching has two parameters that can limit the resources that it uses.
 .sp
 The \fB--match-limit\fP option provides a means of limiting resource usage
 when processing patterns that are not going to match, but which have a very
@@ -330,7 +330,7 @@ that can be used. The recursion depth is a smaller number than the total number
 of calls, because not all calls to \fBmatch()\fP are recursive. This limit is
 of use only if it is set smaller than \fB--match-limit\fP.
 .sp
-There are no short forms for these options. The default settings are specified 
+There are no short forms for these options. The default settings are specified
 when the PCRE library is compiled, with the default default being 10 million.
 .TP
 \fB-M\fP, \fB--multiline\fP
@@ -383,13 +383,13 @@ which case they are shown on an otherwise empty line. This option is mutually
 exclusive with \fB--file-offsets\fP and \fB--line-offsets\fP.
 .TP
 \fB-o\fP\fInumber\fP, \fB--only-matching\fP=\fInumber\fP
-Show only the part of the line that matched the capturing parentheses of the 
+Show only the part of the line that matched the capturing parentheses of the
 given number. Up to 32 capturing parentheses are supported. Because these
 options can be given without an argument (see above), if an argument is
 present, it must be given in the same shell item, for example, -o3 or
---only-matching=2. The comments given for the non-argument case above also 
-apply to this case. If the specified capturing parentheses do not exist in the 
-pattern, or were not set in the match, nothing is output unless the file name 
+--only-matching=2. The comments given for the non-argument case above also
+apply to this case. If the specified capturing parentheses do not exist in the
+pattern, or were not set in the match, nothing is output unless the file name
 or line number are being printed.
 .TP
 \fB-q\fP, \fB--quiet\fP
@@ -484,8 +484,8 @@ exception) in the next command line item. For example:
   -f/some/file
   -f /some/file
 .sp
-The exception is the \fB-o\fP option, which may appear with or without data. 
-Because of this, if data is present, it must follow immediately in the same 
+The exception is the \fB-o\fP option, which may appear with or without data.
+Because of this, if data is present, it must follow immediately in the same
 item, for example -o3.
 .P
 If a long form option is used, the data may appear in the same command line
@@ -503,7 +503,7 @@ specially unless it is at the start of an item.
 The exceptions to the above are the \fB--colour\fP (or \fB--color\fP) and
 \fB--only-matching\fP options, for which the data is optional. If one of these
 options does have data, it must be given in the first form, using an equals
-character. Otherwise \fBpcregrep\P will assume that it has no data.
+character. Otherwise \fBpcregrep\fP will assume that it has no data.
 .
 .
 .SH "MATCHING ERRORS"
@@ -519,7 +519,7 @@ there are more than 20 such errors, \fBpcregrep\fP gives up.
 .P
 The \fB--match-limit\fP option of \fBpcregrep\fP can be used to set the overall
 resource limit; there is a second option called \fB--recursion-limit\fP that
-sets a limit on the amount of memory (usually stack) that is used (see the 
+sets a limit on the amount of memory (usually stack) that is used (see the
 discussion of these options above).
 .
 .

@@ -560,7 +560,7 @@ OPTIONS WITH DATA
        The  exceptions  to the above are the --colour (or --color) and --only-
        matching options, for which the data  is  optional.  If  one  of  these
        options  does  have  data, it must be given in the first form, using an
-       equals character. Otherwise pcregrepP will assume that it has no data.
+       equals character. Otherwise pcregrep will assume that it has no data.
 
 
 MATCHING ERRORS

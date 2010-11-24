@@ -96,7 +96,7 @@ extern "C" {
 #endif
 
 /* Options. Some are compile-time only, some are run-time only, and some are
-both, so we keep them all distinct. However, almost all the bits in the options 
+both, so we keep them all distinct. However, almost all the bits in the options
 word are now used. In the long run, we may have to re-use some of the
 compile-time only bits for runtime options, or vice versa. */
 

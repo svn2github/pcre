@@ -1705,8 +1705,8 @@ for (;;)
       if (eptr < md->end_subject)
         { if (!IS_NEWLINE(eptr)) MRRETURN(MATCH_NOMATCH); }
       else
-        { 
-        if (md->noteol) MRRETURN(MATCH_NOMATCH); 
+        {
+        if (md->noteol) MRRETURN(MATCH_NOMATCH);
         SCHECK_PARTIAL();
         }
       ecode++;
@@ -1717,7 +1717,7 @@ for (;;)
       if (md->noteol) MRRETURN(MATCH_NOMATCH);
       if (!md->endonly) goto ASSERT_NL_OR_EOS;
       }
- 
+
     /* ... else fall through for endonly */
 
     /* End of subject assertion (\z) */
@@ -1735,9 +1735,9 @@ for (;;)
     if (eptr < md->end_subject &&
         (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
       MRRETURN(MATCH_NOMATCH);
-      
+
     /* Either at end of string or \n before end. */
- 
+
     SCHECK_PARTIAL();
     ecode++;
     break;
@@ -5801,9 +5801,9 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int tb; 
+  int tb;
   if ((tb = _pcre_valid_utf8((USPTR)subject, length)) >= 0)
-    return (tb == length && md->partial > 1)? 
+    return (tb == length && md->partial > 1)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
@@ -5936,7 +5936,7 @@ for(;;)
   /* There are some optimizations that avoid running the match if a known
   starting point is not found, or if a known later character is not present.
   However, there is an option that disables these, for testing and for ensuring
-  that all callouts do actually occur. The option can be set in the regex by 
+  that all callouts do actually occur. The option can be set in the regex by
   (*NO_START_OPT) or passed in match-time options. */
 
   if (((options | re->options) & PCRE_NO_START_OPTIMIZE) == 0)

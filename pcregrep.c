@@ -256,7 +256,7 @@ static option_item optionlist[] = {
   hyphens in the option names. As this was not discovered for several releases,
   the incorrect versions are left in the table for compatibility. However, the
   --help function misses out any option that has an underscore in its name. */
-    
+
   { OP_STRING,    N_EXCLUDE_DIR,&exclude_dir_pattern, "exclude_dir=pattern","exclude matching directories when recursing" },
   { OP_STRING,    N_INCLUDE_DIR,&include_dir_pattern, "include_dir=pattern","include matching directories when recursing" },
 
@@ -956,7 +956,7 @@ if (slen > 200)
   {
   slen = 200;
   msg = "text that starts:\n\n";
-  } 
+  }
 for (i = 0; i < pattern_count; i++)
   {
   *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, (int)length, 0,
@@ -1183,7 +1183,7 @@ while (ptr < endptr)
 
     else if (quiet) return 0;
 
-    /* The --only-matching option prints just the substring that matched, or a 
+    /* The --only-matching option prints just the substring that matched, or a
     captured portion of it, as long as this string is not empty, and the
     --file-offsets and --line-offsets options output offsets for the matching
     substring (they both force --only-matching = 0). None of these options
@@ -1202,19 +1202,19 @@ while (ptr < endptr)
           fprintf(stdout, "%d,%d\n", (int)(matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
         else if (file_offsets)
-          fprintf(stdout, "%d,%d\n", 
+          fprintf(stdout, "%d,%d\n",
             (int)(filepos + matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
         else if (only_matching < mrc)
           {
           int plen = offsets[2*only_matching + 1] - offsets[2*only_matching];
           if (plen > 0)
-            {  
+            {
             if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
             FWRITE(matchptr + offsets[only_matching*2], 1, plen, stdout);
             if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
             fprintf(stdout, "\n");
-            } 
+            }
           }
         else if (printname != NULL || number) fprintf(stdout, "\n");
         matchptr += offsets[1];
@@ -1791,17 +1791,17 @@ for (op = optionlist; op->one_char != 0; op++)
   {
   int n;
   char s[4];
-  
+
   /* Two options were accidentally implemented and documented with underscores
   instead of hyphens in their names, something that was not noticed for quite a
-  few releases. When fixing this, I left the underscored versions in the list 
-  in case people were using them. However, we don't want to display them in the 
-  help data. There are no other options that contain underscores, and we do not 
-  expect ever to implement such options. Therefore, just omit any option that 
+  few releases. When fixing this, I left the underscored versions in the list
+  in case people were using them. However, we don't want to display them in the
+  help data. There are no other options that contain underscores, and we do not
+  expect ever to implement such options. Therefore, just omit any option that
   contains an underscore. */
-  
-  if (strchr(op->long_name, '_') != NULL) continue; 
-   
+
+  if (strchr(op->long_name, '_') != NULL) continue;
+
   if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); else strcpy(s, "   ");
   n = 31 - printf("  %s --%s", s, op->long_name);
   if (n < 1) n = 1;
@@ -2181,8 +2181,8 @@ for (i = 1; i < argc; i++)
     while (*s != 0)
       {
       for (op = optionlist; op->one_char != 0; op++)
-        { 
-        if (*s == op->one_char) break; 
+        {
+        if (*s == op->one_char) break;
         }
       if (op->one_char == 0)
         {
@@ -2190,23 +2190,23 @@ for (i = 1; i < argc; i++)
           *s, argv[i]);
         pcregrep_exit(usage(2));
         }
-        
+
       /* Check for a single-character option that has data: OP_OP_NUMBER
-      is used for one that either has a numerical number or defaults, i.e. the 
+      is used for one that either has a numerical number or defaults, i.e. the
       data is optional. If a digit follows, there is data; if not, carry on
       with other single-character options in the same string. */
-       
+
       option_data = s+1;
       if (op->type == OP_OP_NUMBER)
-        { 
-        if (isdigit((unsigned char)s[1])) break; 
+        {
+        if (isdigit((unsigned char)s[1])) break;
         }
       else   /* Check for end or a dataless option */
-        {     
+        {
         if (op->type != OP_NODATA || s[1] == 0) break;
-        }   
-        
-      /* Handle a single-character option with no data, then loop for the 
+        }
+
+      /* Handle a single-character option with no data, then loop for the
       next character in the string. */
 
       pcre_options = handle_option(*s++, pcre_options);
@@ -2225,7 +2225,7 @@ for (i = 1; i < argc; i++)
 
   /* If the option type is OP_OP_STRING or OP_OP_NUMBER, it's an option that
   either has a value or defaults to something. It cannot have data in a
-  separate item. At the moment, the only such options are "colo(u)r", 
+  separate item. At the moment, the only such options are "colo(u)r",
   "only-matching", and Jeffrey Friedl's special -S debugging option. */
 
   if (*option_data == 0 &&
@@ -2236,11 +2236,11 @@ for (i = 1; i < argc; i++)
       case N_COLOUR:
       colour_option = (char *)"auto";
       break;
-      
+
       case 'o':
       only_matching = 0;
-      break;  
- 
+      break;
+
 #ifdef JFRIEDL_DEBUG
       case 'S':
       S_arg = 0;
@@ -2540,7 +2540,7 @@ for (j = 0; j < pattern_count; j++)
     }
   hint_count++;
   }
-  
+
 /* If --match-limit or --recursion-limit was set, put the value(s) into the
 pcre_extra block for each pattern. */
 
@@ -2551,24 +2551,24 @@ if (match_limit > 0 || match_limit_recursion > 0)
     if (hints_list[j] == NULL)
       {
       hints_list[j] = malloc(sizeof(pcre_extra));
-      if (hints_list[j] == NULL) 
+      if (hints_list[j] == NULL)
         {
         fprintf(stderr, "pcregrep: malloc failed\n");
         pcregrep_exit(2);
         }
       }
     if (match_limit > 0)
-      { 
+      {
       hints_list[j]->flags |= PCRE_EXTRA_MATCH_LIMIT;
       hints_list[j]->match_limit = match_limit;
-      }  
+      }
     if (match_limit_recursion > 0)
-      { 
+      {
       hints_list[j]->flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
       hints_list[j]->match_limit_recursion = match_limit_recursion;
-      }  
+      }
     }
-  } 
+  }
 
 /* If there are include or exclude patterns, compile them. */
 
@@ -2651,10 +2651,10 @@ if (pattern_list != NULL)
   }
 if (hints_list != NULL)
   {
-  for (i = 0; i < hint_count; i++) 
+  for (i = 0; i < hint_count; i++)
     {
     if (hints_list[i] != NULL) free(hints_list[i]);
-    } 
+    }
   free(hints_list);
   }
 pcregrep_exit(rc);

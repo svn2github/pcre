@@ -168,6 +168,7 @@ PATTERN MODIFIERS
          /U              PCRE_UNGREEDY
          /W              PCRE_UCP
          /X              PCRE_EXTRA
+         /Y              PCRE_NO_START_OPTIMIZE
          /<JS>           PCRE_JAVASCRIPT_COMPAT
          /<cr>           PCRE_NEWLINE_CR
          /<lf>           PCRE_NEWLINE_LF
@@ -708,5 +709,5 @@ AUTHOR
 
 REVISION
 
-       Last updated: 07 November 2010
+       Last updated: 21 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
