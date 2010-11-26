@@ -127,6 +127,9 @@ Version 8.11 24-Nov-2010
     memory required was incorrectly computed, leading to "Failed: internal
     error: code overflow". This has been fixed.
 
+22. Some patches to pcre_stringpiece.h, pcre_stringpiece_unittest.cc, and
+    pcretest.c, to avoid build problems in some Borland environments.
+
 
 Version 8.10 25-Jun-2010
 ------------------------

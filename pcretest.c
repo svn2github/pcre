@@ -79,6 +79,14 @@ input mode under Windows. */
 #define fileno _fileno
 #endif
 
+/* A user sent this fix for Borland Builder 5 under Windows. */
+
+#ifdef __BORLANDC__
+#define _setmode(handle, mode) setmode(handle, mode)
+#endif
+
+/* Not Windows */
+
 #else
 #include <sys/time.h>          /* These two includes are needed */
 #include <sys/resource.h>      /* for setrlimit(). */
