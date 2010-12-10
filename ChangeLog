@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.11 24-Nov-2010
+Version 8.11 10-Dec-2010
 ------------------------
 
 1.  (*THEN) was not working properly if there were untried alternatives prior

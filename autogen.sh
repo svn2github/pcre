@@ -1,7 +1,7 @@
 #!/bin/sh
 
 set -ex
-rm -rf autom4te.cache
+rm -rf autom4te.cache Makefile.in aclocal.m4
 aclocal --force
 
 # GNU libtool is named differently on some systems.  This code tries several
