@@ -319,7 +319,7 @@ when processing patterns that are not going to match, but which have a very
 large number of possibilities in their search trees. The classic example is a
 pattern that uses nested unlimited repeats. Internally, PCRE uses a function
 called \fBmatch()\fP which it calls repeatedly (sometimes recursively). The
-limit set by \fb--match-limit\fP is imposed on the number of times this
+limit set by \fB--match-limit\fP is imposed on the number of times this
 function is called during a match, which has the effect of limiting the amount
 of backtracking that can take place.
 .sp

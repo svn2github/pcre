@@ -2,7 +2,7 @@
 This file contains a concatenation of the PCRE man pages, converted to plain
 text format for ease of searching with a text editor, or for use on systems
 that do not have a man page processor. The small individual files that give
-synopses of each function in the library have not been included. Neither has
+synopses of each function in the library have not been included. Neither has 
 the pcredemo program. There are separate text files for the pcregrep and
 pcretest commands.
 -----------------------------------------------------------------------------
@@ -269,8 +269,8 @@ REVISION
        Last updated: 13 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREBUILD(3)                                                      PCREBUILD(3)
 
 
@@ -600,8 +600,8 @@ REVISION
        Last updated: 29 September 2009
        Copyright (c) 1997-2009 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
@@ -804,8 +804,8 @@ REVISION
        Last updated: 17 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREAPI(3)                                                          PCREAPI(3)
 
 
@@ -2877,8 +2877,8 @@ REVISION
        Last updated: 21 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
@@ -3059,8 +3059,8 @@ REVISION
        Last updated: 21 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
@@ -3215,8 +3215,8 @@ REVISION
        Last updated: 31 October 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
@@ -5694,8 +5694,8 @@ REVISION
        Last updated: 21 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESYNTAX(3)                                                    PCRESYNTAX(3)
 
 
@@ -6064,8 +6064,8 @@ REVISION
        Last updated: 21 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
@@ -6484,8 +6484,8 @@ REVISION
        Last updated: 07 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
@@ -6512,6 +6512,7 @@ SAVING AND RE-USING PRECOMPILED PCRE PATTERNS
 
 
 SAVING A COMPILED PATTERN
+
        The value returned by pcre_compile() points to a single block of memory
        that  holds  the compiled pattern and associated data. You can find the
        length of this block in bytes by calling pcre_fullinfo() with an  argu-
@@ -6608,8 +6609,8 @@ REVISION
        Last updated: 17 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
@@ -6776,8 +6777,8 @@ REVISION
        Last updated: 16 May 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
@@ -7039,8 +7040,8 @@ REVISION
        Last updated: 16 May 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECPP(3)                                                          PCRECPP(3)
 
 
@@ -7380,8 +7381,8 @@ REVISION
 
        Last updated: 17 March 2009
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
@@ -7616,5 +7617,5 @@ REVISION
        Last updated: 03 January 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 

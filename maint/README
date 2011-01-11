@@ -35,12 +35,12 @@ MultiStage2.py   A Python script that generates the file pcre_ucd.c from three
                  Unicode web site. Run this script in the "maint" directory.
                  The generated file contains the tables for a 2-stage lookup
                  of Unicode properties.
-                 
+
 pcre_chartables.c.non-standard
                  This is a set of character tables that came from a Windows
                  system. It has characters greater than 128 that are set as
                  spaces, amongst other things. I kept it so that it can be
-                 used for testing from time to time.    
+                 used for testing from time to time.
 
 README           This file.
 
@@ -117,33 +117,34 @@ distribution for a new release.
 . Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
   valgrind", though that takes quite a long time.
 
-. Test with the emulated memmove() function by undefining HAVE_MEMMOVE and
-  HAVE_BCOPY in config.h. You may see a number of "pcre_memmove defined but not
-  used" warnings for the modules in which there is no call to memmove(). These
-  can be ignored.
+. It is possible to test with the emulated memmove() function by undefining
+  HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often. You
+  may see a number of "pcre_memmove defined but not used" warnings for the
+  modules in which there is no call to memmove(). These can be ignored.
 
 . Documentation: check AUTHORS, COPYING, ChangeLog (check version and date),
   INSTALL, LICENCE, NEWS (check version and date), NON-UNIX-USE, and README.
   Many of these won't need changing, but over the long term things do change.
 
-. Man pages: Check all man pages for \ not followed by e or f or " because
-  that indicates a markup error. However, there is one exception: pcredemo.3,
-  which is created from the pcredemo.c program. It contains three instances
-  of \\n.
-
-. When the release is built, test it on a number of different operating
-  systems if possible, and using different compilers as well. For example,
-  on Solaris it is helpful to test using Sun's cc compiler as a change from
-  gcc. Adding -xarch=v9 to the cc options does a 64-bit test, but it also
-  needs -S 64 for pcretest to increase the stack size for test 2.
+. I used to test new releases myself on a number of different operating
+  systems, using different compilers as well. For example, on Solaris it is
+  helpful to test using Sun's cc compiler as a change from gcc. Adding
+  -xarch=v9 to the cc options does a 64-bit test, but it also needs -S 64 for
+  pcretest to increase the stack size for test 2. Since I retired I can no
+  longer do this, but instead I rely on putting out release candidates for
+  folks on the pcre-dev list to test.
 
 
 Making a PCRE release
 =====================
 
 Run PrepareRelease and commit the files that it changes (by removing trailing
-spaces). Then run "make distcheck" to create the tarballs and the zipball.
-Double-check with "svn status", then create an SVN tagged copy:
+spaces). The first thing this script does is to run CheckMan on the man pages;
+if it finds any markup errors, it reports them and then aborts.
+
+Once PrepareRelease has run clean, run "make distcheck" to create the tarballs
+and the zipball. Double-check with "svn status", then create an SVN tagged
+copy:
 
   svn copy svn://vcs.exim.org/pcre/code/trunk \
            svn://vcs.exim.org/pcre/code/tags/pcre-8.xx
@@ -204,17 +205,22 @@ others are relatively new.
 
 . Unicode
 
+  * There has been a request for direct support of 16-bit characters and
+    UTF-16 (Bugzilla #1049). However, since Unicode is moving beyond purely
+    16-bit characters, is this worth it at all? One possible way of handling
+    16-bit characters would be to "load" them in the same way that UTF-8
+    characters are loaded. Another possibility is to provide a set of
+    translation functions, and build an index during translation so that the
+    returned offsets can automatically be translated (using the index) after a
+    match.
+
   * A different approach to Unicode might be to use a typedef to do everything
     in unsigned shorts instead of unsigned chars. Actually, we'd have to have a
     new typedef to distinguish data from bits of compiled pattern that are in
     bytes, I think. There would need to be conversion functions in and out. I
     don't think this is particularly trivial - and anyway, Unicode now has
-    characters that need more than 16 bits, so is this at all sensible?
-
-  * There has been a request for direct support of 16-bit characters and
-    UTF-16. However, since Unicode is moving beyond purely 16-bit characters,
-    is this worth it at all? One possible way of handling 16-bit characters
-    would be to "load" them in the same way that UTF-8 characters are loaded.
+    characters that need more than 16 bits, so is this at all sensible? I
+    suspect not.
 
 . Allow errorptr and erroroffset to be NULL. I don't like this idea.
 
@@ -315,4 +321,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 24 November 2010
+Last updated: 12 January 2011

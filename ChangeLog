@@ -1,6 +1,13 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.12 11-Jan-2011
+------------------------
+
+1.  Fixed some typos in the markup of the man pages, and wrote a script that
+    checks for such things as part of the documentation building process.
+
+
 Version 8.11 10-Dec-2010
 ------------------------
 
