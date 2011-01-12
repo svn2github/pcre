@@ -11,6 +11,11 @@ Version 8.12 12-Jan-2011
     --match-limit and --recursion-limit options (added for 8.11). In
     particular, this made one of the standard tests crash. (The integer value 
     went into the wrong half of a long int.)
+    
+3.  If the --colour option was given to pcregrep with -v (invert match), it
+    did strange things, either producing crazy output, or crashing. It should,
+    of course, ignore a request for colour when reporting lines that do not 
+    match. 
 
 
 Version 8.11 10-Dec-2010

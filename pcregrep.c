@@ -1355,9 +1355,9 @@ while (ptr < endptr)
 #endif
 
       /* We have to split the line(s) up if colouring, and search for further
-      matches. */
+      matches, but not of course if the line is a non-match. */
 
-      if (do_colour)
+      if (do_colour && !invert)
         {
         int last_offset = 0;
         FWRITE(ptr, 1, offsets[0], stdout);
