@@ -1,11 +1,16 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.12 11-Jan-2011
+Version 8.12 12-Jan-2011
 ------------------------
 
 1.  Fixed some typos in the markup of the man pages, and wrote a script that
     checks for such things as part of the documentation building process.
+    
+2.  On a big-endian 64-bit system, pcregrep did not correctly process the
+    --match-limit and --recursion-limit options (added for 8.11). In
+    particular, this made one of the standard tests crash. (The integer value 
+    went into the wrong half of a long int.)
 
 
 Version 8.11 10-Dec-2010
