@@ -296,6 +296,30 @@ const char utf8_table4[] = {
 
 
 /*************************************************
+*         Exit from the program                  *
+*************************************************/
+
+/* If there has been a resource error, give a suitable message.
+
+Argument:  the return code
+Returns:   does not return
+*/
+
+static void
+pcregrep_exit(int rc)
+{
+if (resource_error)
+  {
+  fprintf(stderr, "pcregrep: Error %d or %d means that a resource limit "
+    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT);
+  fprintf(stderr, "pcregrep: Check your regex for nested unlimited loops.\n");
+  }
+
+exit(rc);
+}
+
+
+/*************************************************
 *            OS-specific functions               *
 *************************************************/
 
@@ -561,31 +585,6 @@ if (n < 0 || n >= sys_nerr) return "unknown error number";
 return sys_errlist[n];
 }
 #endif /* HAVE_STRERROR */
-
-
-
-/*************************************************
-*         Exit from the program                  *
-*************************************************/
-
-/* If there has been a resource error, give a suitable message.
-
-Argument:  the return code
-Returns:   does not return
-*/
-
-static void
-pcregrep_exit(int rc)
-{
-if (resource_error)
-  {
-  fprintf(stderr, "pcregrep: Error %d or %d means that a resource limit "
-    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT);
-  fprintf(stderr, "pcregrep: Check your regex for nested unlimited loops.\n");
-  }
-
-exit(rc);
-}
 
 
 

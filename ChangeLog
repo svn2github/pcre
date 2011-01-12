@@ -16,6 +16,11 @@ Version 8.12 12-Jan-2011
     did strange things, either producing crazy output, or crashing. It should,
     of course, ignore a request for colour when reporting lines that do not 
     match. 
+    
+4.  If pcregrep was compiled under Windows, there was a reference to the 
+    function pcregrep_exit() before it was defined. I am assuming this was
+    the cause of the "error C2371: 'pcregrep_exit' : redefinition;" that was 
+    reported by a user. I've moved the definition above the reference.
 
 
 Version 8.11 10-Dec-2010
