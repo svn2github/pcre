@@ -17,11 +17,18 @@ Version 8.12 12-Jan-2011
     of course, ignore a request for colour when reporting lines that do not 
     match. 
     
-4.  If pcregrep was compiled under Windows, there was a reference to the 
+4.  Another pcregrep bug caused similar problems if --colour was specified with
+    -M (multiline) and the pattern match finished with a line ending.
+    
+5.  In pcregrep, when a pattern that ended with a literal newline sequence was
+    matched in multiline mode, the following line was shown as part of the
+    match. This seems wrong, so I have changed it.
+    
+6.  If pcregrep was compiled under Windows, there was a reference to the 
     function pcregrep_exit() before it was defined. I am assuming this was
     the cause of the "error C2371: 'pcregrep_exit' : redefinition;" that was 
     reported by a user. I've moved the definition above the reference.
-
+    
 
 Version 8.11 10-Dec-2010
 ------------------------

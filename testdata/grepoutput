@@ -373,6 +373,7 @@ RC=2
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 36 -----------------------------
+./testdata/grepinput3
 ./testdata/grepinput8
 ./testdata/grepinputx
 RC=0
@@ -477,6 +478,7 @@ This line contains [1;31mpattern[00m not on a [1;31mline by itself[00m.
 RC=0
 ---------------------------- Test 56 -----------------------------
 ./testdata/grepinput:456
+./testdata/grepinput3:0
 ./testdata/grepinput8:0
 ./testdata/grepinputv:1
 ./testdata/grepinputx:0
@@ -581,3 +583,15 @@ RC=0
 41:
 43:This is the last line of this file.
 RC=0
+---------------------------- Test 70 -----------------------------
+[1;31mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[00m[1;31mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[00m[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[00m[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[00m[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+
+[00mRC=0

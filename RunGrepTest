@@ -336,6 +336,10 @@ echo "---------------------------- Test 69 -----------------------------" >>test
 (cd $srcdir; $valgrind $pcregrep -vn --colour=always pattern ./testdata/grepinputx) >>testtry
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 70 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --color=always -M "triple:\t.*\n\n" ./testdata/grepinput3) >>testtry
+echo "RC=$?" >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

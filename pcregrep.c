@@ -634,7 +634,7 @@ Arguments:
   endptr    end of available data
   lenptr    where to put the length of the eol sequence
 
-Returns:    pointer to the last byte of the line
+Returns:    pointer to the last byte of the line, including the newline byte(s)
 */
 
 static char *
@@ -1316,22 +1316,16 @@ while (ptr < endptr)
       (invert not set). Because the PCRE_FIRSTLINE option is set, the start of
       the match will always be before the first newline sequence. */
 
-      if (multiline)
+      if (multiline & !invert)
         {
-        int ellength;
-        char *endmatch = ptr;
-        if (!invert)
+        char *endmatch = ptr + offsets[1];
+        t = ptr;
+        while (t < endmatch)
           {
-          endmatch += offsets[1];
-          t = ptr;
-          while (t < endmatch)
-            {
-            t = end_of_line(t, endptr, &ellength);
-            if (t <= endmatch) linenumber++; else break;
-            }
+          t = end_of_line(t, endptr, &endlinelength);
+          if (t < endmatch) linenumber++; else break;
           }
-        endmatch = end_of_line(endmatch, endptr, &ellength);
-        linelength = endmatch - ptr - ellength;
+        linelength = t - ptr - endlinelength;
         }
 
       /*** NOTE: Use only fwrite() to output the data line, so that binary
@@ -1355,9 +1349,10 @@ while (ptr < endptr)
 
       /* We have to split the line(s) up if colouring, and search for further
       matches, but not of course if the line is a non-match. */
-
+      
       if (do_colour && !invert)
         {
+        int plength; 
         int last_offset = 0;
         FWRITE(ptr, 1, offsets[0], stdout);
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
@@ -1374,8 +1369,14 @@ while (ptr < endptr)
           FWRITE(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
           fprintf(stdout, "%c[00m", 0x1b);
           }
-        FWRITE(ptr + last_offset, 1,
-          (linelength + endlinelength) - last_offset, stdout);
+
+        /* In multiline mode, we may have already printed the complete line
+        and its line-ending characters (if they matched the pattern), so there 
+        may be no more to print. */
+        
+        plength = (linelength + endlinelength) - last_offset;
+        if (plength > 0)
+          FWRITE(ptr + last_offset, 1, plength, stdout);
         }
 
       /* Not colouring; no need to search for further matches */
