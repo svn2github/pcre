@@ -1363,7 +1363,8 @@ while (ptr < endptr)
           last_offset += offsets[1];
           matchptr += offsets[1];
           length -= offsets[1];
-          if (!match_patterns(matchptr, length, offsets, &mrc)) break;
+          if (last_offset >= linelength + endlinelength ||
+              !match_patterns(matchptr, length, offsets, &mrc)) break;
           FWRITE(matchptr, 1, offsets[0], stdout);
           fprintf(stdout, "%c[%sm", 0x1b, colour_string);
           FWRITE(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);

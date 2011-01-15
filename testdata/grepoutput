@@ -590,8 +590,6 @@ RC=0
 
 [00m[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
-[00m[1;31mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
-
 [00m[1;31mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 
 [00mRC=0
