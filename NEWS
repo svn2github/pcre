@@ -4,7 +4,7 @@ News about PCRE releases
 Release 8.12 15-Jan-2011
 ------------------------
 
-This release fixes some bugs in pcregrep, one of which caused the tests to fail 
+This release fixes some bugs in pcregrep, one of which caused the tests to fail
 on 64-bit big-endian systems. There are no changes to the code of the library.
 
 

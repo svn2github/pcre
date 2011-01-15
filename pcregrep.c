@@ -1349,10 +1349,10 @@ while (ptr < endptr)
 
       /* We have to split the line(s) up if colouring, and search for further
       matches, but not of course if the line is a non-match. */
-      
+
       if (do_colour && !invert)
         {
-        int plength; 
+        int plength;
         int last_offset = 0;
         FWRITE(ptr, 1, offsets[0], stdout);
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
@@ -1372,9 +1372,9 @@ while (ptr < endptr)
           }
 
         /* In multiline mode, we may have already printed the complete line
-        and its line-ending characters (if they matched the pattern), so there 
+        and its line-ending characters (if they matched the pattern), so there
         may be no more to print. */
-        
+
         plength = (linelength + endlinelength) - last_offset;
         if (plength > 0)
           FWRITE(ptr + last_offset, 1, plength, stdout);
