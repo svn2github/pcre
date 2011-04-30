@@ -16,6 +16,9 @@
 #
 # It requires three Unicode data tables, DerivedGeneralCategory.txt,
 # Scripts.txt, and UnicodeData.txt, to be in the Unicode.tables subdirectory.
+# The first of these is found in the "extracted" subdirectory of the Unicode
+# database (UCD) on the Unicode web site; the other two are directly in the
+# UCD directory.
 #
 # Minor modifications made to this script:
 #  Added #! line at start
@@ -68,6 +71,7 @@
 #  Philip Hazel, 03 July 2008
 #
 # 01-March-2010: Updated list of scripts for Unicode 5.2.0
+# 30-April-2011: Updated list of scripts for Unicode 6.0.0
 ##############################################################################
 
 
@@ -252,7 +256,9 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Avestan', 'Bamum', 'Egyptian_Hieroglyphs', 'Imperial_Aramaic', \
  'Inscriptional_Pahlavi', 'Inscriptional_Parthian', \
  'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
- 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet'
+ 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet', \
+# New for Unicode 6.0.0
+ 'Batak', 'Brahmi', 'Mandaic'  
  ]
  
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',

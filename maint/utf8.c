@@ -135,9 +135,17 @@ return i+1;
 int
 main(int argc, char **argv)
 {
-int i;
+int i = 1;
+int show = 0;
 unsigned char buffer[8];
-for (i = 1; i < argc; i++)
+
+if (strcmp(argv[1], "-s") == 0)
+  {
+  show = 1;
+  i = 2;
+  }   
+
+for (; i < argc; i++)
   {
   unsigned char *x = argv[i];
   if (strncmp(x, "0x", 2) == 0)
@@ -146,8 +154,16 @@ for (i = 1; i < argc; i++)
     int d = strtol(x+2, NULL, 16);
     int rc = ord2utf8(d, buffer);
     printf("0x%08x => ", d); 
-    if (rc <= 0) printf("*** Error %d ***", rc);
-      else for (j = 0; j < rc; j++) printf("%02x ", buffer[j]);
+    if (rc <= 0) printf("*** Error %d ***", rc); else 
+      {
+      for (j = 0; j < rc; j++) printf("%02x ", buffer[j]);
+      if (show)
+        {
+        printf(">");
+        for (j = 0; j < rc; j++) printf("%c", buffer[j]);
+        printf("<"); 
+        }  
+      } 
     printf("\n");   
     }
   else

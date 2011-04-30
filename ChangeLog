@@ -1,6 +1,12 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.13 30-Apr-2011
+------------------------
+
+1.  The Unicode data tables have been updated to Unicode 6.0.0.
+
+
 Version 8.12 15-Jan-2011
 ------------------------
 

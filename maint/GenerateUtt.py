@@ -6,12 +6,16 @@
 # is indexed by script name. In order to reduce the number of relocations when
 # loading the library, the names are held as a single large string, with
 # offsets in the table. This is tedious to maintain by hand. Therefore, this
-# script is used to generate the table. The output is sent to stdout.
+# script is used to generate the table. The output is sent to stdout; usually
+# that should be directed to a temporary file. Then pcre_tables.c can be edited
+# by replacing the relevant definitions and table therein with the temporary
+# file.
 
 # Modified by PH 17-March-2009 to generate the more verbose form that works
 # for UTF-support in EBCDIC as well as ASCII environments.
-# Modified by PH 01-March-2010 to add new scripts from Unicode 5.2.0.
+# Modified by PH 01-March-2010 to add new scripts for Unicode 5.2.0.
 # Modified by PH 04-May-2010 to add new "X.." special categories.
+# Modified by PH 30-April-2011 to add new scripts for Unicode 6.0.0
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -28,7 +32,9 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Avestan', 'Bamum', 'Egyptian_Hieroglyphs', 'Imperial_Aramaic', \
  'Inscriptional_Pahlavi', 'Inscriptional_Parthian', \
  'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
- 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet'
+ 'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet', \
+ # New for Unicode 6.0.0
+ 'Batak', 'Brahmi', 'Mandaic'  
  ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
