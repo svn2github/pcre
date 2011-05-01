@@ -6,6 +6,8 @@ Version 8.13 30-Apr-2011
 
 1.  The Unicode data tables have been updated to Unicode 6.0.0.
 
+2.  Two minor typos in pcre_internal.h have been fixed.
+
 
 Version 8.12 15-Jan-2011
 ------------------------
