@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <limits.h>      /* for SHRT_MIN, USHRT_MAX, etc */
+#include <string.h>      /* for memcpy */
 #include <assert.h>
 #include <errno.h>
 #include <string>

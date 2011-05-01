@@ -8,6 +8,10 @@ Version 8.13 30-Apr-2011
 
 2.  Two minor typos in pcre_internal.h have been fixed.
 
+3.  Added #include <string.h> to pcre_scanner_unittest.cc, pcrecpp.cc, and 
+    pcrecpp_unittest.cc. They are needed for strcmp(), memset(), and strchr() 
+    in some environments (e.g. Solaris 10/SPARC using Sun Studio 12U2). 
+
 
 Version 8.12 15-Jan-2011
 ------------------------

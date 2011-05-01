@@ -38,6 +38,7 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>      /* for memset and strcmp */
 #include <cassert>
 #include <vector>
 #include "pcrecpp.h"
