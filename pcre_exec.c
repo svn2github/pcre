@@ -193,6 +193,7 @@ if ((ims & PCRE_CASELESS) != 0)
     while (p < endptr)
       {
       int c, d;
+      if (eptr >= md->end_subject) return -1;
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
       if (c != d && c != UCD_OTHERCASE(d)) return -1;
@@ -204,16 +205,21 @@ if ((ims & PCRE_CASELESS) != 0)
 
   /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
   is no UCP support. */
-
-  while (length-- > 0)
-    { if (md->lcc[*p++] != md->lcc[*eptr++]) return -1; }
+    {
+    if (eptr + length > md->end_subject) return -1; 
+    while (length-- > 0)
+      { if (md->lcc[*p++] != md->lcc[*eptr++]) return -1; }
+    }   
   }
 
 /* In the caseful case, we can just compare the bytes, whether or not we
 are in UTF-8 mode. */
 
 else
-  { while (length-- > 0) if (*p++ != *eptr++) return -1; }
+  { 
+  if (eptr + length > md->end_subject) return -1; 
+  while (length-- > 0) if (*p++ != *eptr++) return -1; 
+  }
 
 return eptr - eptr_start;
 }

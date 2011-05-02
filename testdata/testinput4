@@ -644,4 +644,10 @@
 /A*/g8
     AAB\x{123}BAA
 
+/(abc)\1/8i
+   abc
+
+/(abc)\1/8
+   abc
+
 /-- End of testinput4 --/

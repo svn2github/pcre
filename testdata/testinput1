@@ -4079,4 +4079,10 @@
 /^\c/
     ?
 
+/(abc)\1/i
+   abc
+
+/(abc)\1/
+   abc
+
 /-- End of testinput1 --/

@@ -1128,4 +1128,12 @@ No match
  0: AA
  0: 
 
+/(abc)\1/8i
+   abc
+No match
+
+/(abc)\1/8
+   abc
+No match
+
 /-- End of testinput4 --/
