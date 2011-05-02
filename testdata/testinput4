@@ -1,4 +1,4 @@
-/-- This set of tests if for UTF-8 support, excluding Unicode properties. It is
+/-- This set of tests is for UTF-8 support, excluding Unicode properties. It is
     compatible with all versions of Perl 5. --/
    
 /a.b/8

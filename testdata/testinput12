@@ -503,4 +503,44 @@ of case for anything other than the ASCII letters. --/
 
 /A+\p{N}A+\dB+\p{N}*B+\d*/WBZ
 
+/-- These behaved oddly in Perl, so they are kept in this test --/
+
+/(\x{23a}\x{23a}\x{23a})?\1/8i
+    \x{23a}\x{23a}\x{23a}\x{2c65}\x{2c65}
+
+/(ȺȺȺ)?\1/8i
+    ȺȺȺⱥⱥ
+
+/(\x{23a}\x{23a}\x{23a})?\1/8i
+    \x{23a}\x{23a}\x{23a}\x{2c65}\x{2c65}\x{2c65}
+
+/(ȺȺȺ)?\1/8i
+    ȺȺȺⱥⱥⱥ
+
+/(\x{23a}\x{23a}\x{23a})\1/8i
+    \x{23a}\x{23a}\x{23a}\x{2c65}\x{2c65}
+
+/(ȺȺȺ)\1/8i
+    ȺȺȺⱥⱥ
+
+/(\x{23a}\x{23a}\x{23a})\1/8i
+    \x{23a}\x{23a}\x{23a}\x{2c65}\x{2c65}\x{2c65}
+
+/(ȺȺȺ)\1/8i
+    ȺȺȺⱥⱥⱥ
+
+/(\x{2c65}\x{2c65})\1/8i
+    \x{2c65}\x{2c65}\x{23a}\x{23a}
+    
+/(ⱥⱥ)\1/8i
+    ⱥⱥȺȺ 
+    
+/(\x{23a}\x{23a}\x{23a})\1Y/8i
+    X\x{23a}\x{23a}\x{23a}\x{2c65}\x{2c65}\x{2c65}YZ
+
+/(\x{2c65}\x{2c65})\1Y/8i
+    X\x{2c65}\x{2c65}\x{23a}\x{23a}YZ
+
+/-- --/ 
+
 /-- End of testinput12 --/

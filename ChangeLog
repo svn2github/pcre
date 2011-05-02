@@ -8,9 +8,18 @@ Version 8.13 30-Apr-2011
 
 2.  Two minor typos in pcre_internal.h have been fixed.
 
-3.  Added #include <string.h> to pcre_scanner_unittest.cc, pcrecpp.cc, and 
-    pcrecpp_unittest.cc. They are needed for strcmp(), memset(), and strchr() 
-    in some environments (e.g. Solaris 10/SPARC using Sun Studio 12U2). 
+3.  Added #include <string.h> to pcre_scanner_unittest.cc, pcrecpp.cc, and
+    pcrecpp_unittest.cc. They are needed for strcmp(), memset(), and strchr()
+    in some environments (e.g. Solaris 10/SPARC using Sun Studio 12U2).
+
+4.  There were a number of related bugs in the code for matching backrefences
+    caselessly in UTF-8 mode when codes for the characters concerned were
+    different numbers of bytes. For example, U+023A and U+2C65 are an upper
+    and lower case pair, using 2 and 3 bytes, respectively. The main bugs were:
+    (a) A reference to 3 copies of a 2-byte code matched only 2 of a 3-byte
+    code. (b) A reference to 2 copies of a 3-byte code would not match 2 of a
+    2-byte code at the end of the subject (it thought there wasn't enough data
+    left).
 
 
 Version 8.12 15-Jan-2011

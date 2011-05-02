@@ -132,24 +132,27 @@ while (length-- > 0)
 *          Match a back-reference                *
 *************************************************/
 
-/* If a back reference hasn't been set, the length that is passed is greater
-than the number of characters left in the string, so the match fails.
+/* Normally, if a back reference hasn't been set, the length that is passed is
+negative, so the match always fails. However, in JavaScript compatibility mode,
+the length passed is zero. Note that in caseless UTF-8 mode, the number of 
+subject bytes matched may be different to the number of reference bytes.
 
 Arguments:
   offset      index into the offset vector
-  eptr        points into the subject
-  length      length to be matched
+  eptr        pointer into the subject
+  length      length of reference to be matched (number of bytes)
   md          points to match data block
   ims         the ims flags
 
-Returns:      TRUE if matched
+Returns:      < 0 if not matched, otherwise the number of subject bytes matched
 */
 
-static BOOL
+static int
 match_ref(int offset, register USPTR eptr, int length, match_data *md,
   unsigned long int ims)
 {
-USPTR p = md->start_subject + md->offset_vector[offset];
+USPTR eptr_start = eptr;
+register USPTR p = md->start_subject + md->offset_vector[offset];
 
 #ifdef PCRE_DEBUG
 if (eptr >= md->end_subject)
@@ -164,9 +167,9 @@ pchars(p, length, FALSE, md);
 printf("\n");
 #endif
 
-/* Always fail if not enough characters left */
+/* Always fail if reference not set (and not JavaScript compatible). */
 
-if (length > md->end_subject - eptr) return FALSE;
+if (length < 0) return -1;
 
 /* Separate the caseless case for speed. In UTF-8 mode we can only do this
 properly if Unicode properties are supported. Otherwise, we can check only
@@ -178,13 +181,21 @@ if ((ims & PCRE_CASELESS) != 0)
 #ifdef SUPPORT_UCP
   if (md->utf8)
     {
-    USPTR endptr = eptr + length;
-    while (eptr < endptr)
+    /* Match characters up to the end of the reference. NOTE: the number of 
+    bytes matched may differ, because there are some characters whose upper and
+    lower case versions code as different numbers of bytes. For example, U+023A
+    (2 bytes in UTF-8) is the upper case version of U+2C65 (3 bytes in UTF-8);
+    a sequence of 3 of the former uses 6 bytes, as does a sequence of two of
+    the latter. It is important, therefore, to check the length along the 
+    reference, not along the subject (earlier code did this wrong). */
+ 
+    USPTR endptr = p + length;
+    while (p < endptr)
       {
       int c, d;
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
-      if (c != d && c != UCD_OTHERCASE(d)) return FALSE;
+      if (c != d && c != UCD_OTHERCASE(d)) return -1;
       }
     }
   else
@@ -195,16 +206,16 @@ if ((ims & PCRE_CASELESS) != 0)
   is no UCP support. */
 
   while (length-- > 0)
-    { if (md->lcc[*p++] != md->lcc[*eptr++]) return FALSE; }
+    { if (md->lcc[*p++] != md->lcc[*eptr++]) return -1; }
   }
 
 /* In the caseful case, we can just compare the bytes, whether or not we
 are in UTF-8 mode. */
 
 else
-  { while (length-- > 0) if (*p++ != *eptr++) return FALSE; }
+  { while (length-- > 0) if (*p++ != *eptr++) return -1; }
 
-return TRUE;
+return eptr - eptr_start;
 }
 
 
@@ -2252,129 +2263,129 @@ for (;;)
     loops). */
 
     case OP_REF:
+    offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
+    ecode += 3;
+
+    /* If the reference is unset, there are two possibilities:
+
+    (a) In the default, Perl-compatible state, set the length negative;
+    this ensures that every attempt at a match fails. We can't just fail
+    here, because of the possibility of quantifiers with zero minima.
+
+    (b) If the JavaScript compatibility flag is set, set the length to zero
+    so that the back reference matches an empty string.
+
+    Otherwise, set the length to the length of what was matched by the
+    referenced subpattern. */
+
+    if (offset >= offset_top || md->offset_vector[offset] < 0)
+      length = (md->jscript_compat)? 0 : -1;
+    else
+      length = md->offset_vector[offset+1] - md->offset_vector[offset];
+
+    /* Set up for repetition, or handle the non-repeated case */
+
+    switch (*ecode)
       {
-      offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
-      ecode += 3;
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPLUS:
+      case OP_CRMINPLUS:
+      case OP_CRQUERY:
+      case OP_CRMINQUERY:
+      c = *ecode++ - OP_CRSTAR;
+      minimize = (c & 1) != 0;
+      min = rep_min[c];                 /* Pick up values from tables; */
+      max = rep_max[c];                 /* zero for max => infinity */
+      if (max == 0) max = INT_MAX;
+      break;
 
-      /* If the reference is unset, there are two possibilities:
+      case OP_CRRANGE:
+      case OP_CRMINRANGE:
+      minimize = (*ecode == OP_CRMINRANGE);
+      min = GET2(ecode, 1);
+      max = GET2(ecode, 3);
+      if (max == 0) max = INT_MAX;
+      ecode += 5;
+      break;
 
-      (a) In the default, Perl-compatible state, set the length to be longer
-      than the amount of subject left; this ensures that every attempt at a
-      match fails. We can't just fail here, because of the possibility of
-      quantifiers with zero minima.
-
-      (b) If the JavaScript compatibility flag is set, set the length to zero
-      so that the back reference matches an empty string.
-
-      Otherwise, set the length to the length of what was matched by the
-      referenced subpattern. */
-
-      if (offset >= offset_top || md->offset_vector[offset] < 0)
-        length = (md->jscript_compat)? 0 : (int)(md->end_subject - eptr + 1);
-      else
-        length = md->offset_vector[offset+1] - md->offset_vector[offset];
-
-      /* Set up for repetition, or handle the non-repeated case */
-
-      switch (*ecode)
+      default:               /* No repeat follows */
+      if ((length = match_ref(offset, eptr, length, md, ims)) < 0)
         {
-        case OP_CRSTAR:
-        case OP_CRMINSTAR:
-        case OP_CRPLUS:
-        case OP_CRMINPLUS:
-        case OP_CRQUERY:
-        case OP_CRMINQUERY:
-        c = *ecode++ - OP_CRSTAR;
-        minimize = (c & 1) != 0;
-        min = rep_min[c];                 /* Pick up values from tables; */
-        max = rep_max[c];                 /* zero for max => infinity */
-        if (max == 0) max = INT_MAX;
-        break;
-
-        case OP_CRRANGE:
-        case OP_CRMINRANGE:
-        minimize = (*ecode == OP_CRMINRANGE);
-        min = GET2(ecode, 1);
-        max = GET2(ecode, 3);
-        if (max == 0) max = INT_MAX;
-        ecode += 5;
-        break;
-
-        default:               /* No repeat follows */
-        if (!match_ref(offset, eptr, length, md, ims))
-          {
-          CHECK_PARTIAL();
-          MRRETURN(MATCH_NOMATCH);
-          }
-        eptr += length;
-        continue;              /* With the main loop */
-        }
-
-      /* If the length of the reference is zero, just continue with the
-      main loop. */
-
-      if (length == 0) continue;
-
-      /* First, ensure the minimum number of matches are present. We get back
-      the length of the reference string explicitly rather than passing the
-      address of eptr, so that eptr can be a register variable. */
-
-      for (i = 1; i <= min; i++)
-        {
-        if (!match_ref(offset, eptr, length, md, ims))
-          {
-          CHECK_PARTIAL();
-          MRRETURN(MATCH_NOMATCH);
-          }
-        eptr += length;
-        }
-
-      /* If min = max, continue at the same level without recursion.
-      They are not both allowed to be zero. */
-
-      if (min == max) continue;
-
-      /* If minimizing, keep trying and advancing the pointer */
-
-      if (minimize)
-        {
-        for (fi = min;; fi++)
-          {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM14);
-          if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (fi >= max) MRRETURN(MATCH_NOMATCH);
-          if (!match_ref(offset, eptr, length, md, ims))
-            {
-            CHECK_PARTIAL();
-            MRRETURN(MATCH_NOMATCH);
-            }
-          eptr += length;
-          }
-        /* Control never gets here */
-        }
-
-      /* If maximizing, find the longest string and work backwards */
-
-      else
-        {
-        pp = eptr;
-        for (i = min; i < max; i++)
-          {
-          if (!match_ref(offset, eptr, length, md, ims))
-            {
-            CHECK_PARTIAL();
-            break;
-            }
-          eptr += length;
-          }
-        while (eptr >= pp)
-          {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM15);
-          if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          eptr -= length;
-          }
+        CHECK_PARTIAL();
         MRRETURN(MATCH_NOMATCH);
         }
+      eptr += length;
+      continue;              /* With the main loop */
+      }
+
+    /* Handle repeated back references. If the length of the reference is
+    zero, just continue with the main loop. */
+
+    if (length == 0) continue;
+
+    /* First, ensure the minimum number of matches are present. We get back
+    the length of the reference string explicitly rather than passing the
+    address of eptr, so that eptr can be a register variable. */
+
+    for (i = 1; i <= min; i++)
+      {
+      int slength; 
+      if ((slength = match_ref(offset, eptr, length, md, ims)) < 0)
+        {
+        CHECK_PARTIAL();
+        MRRETURN(MATCH_NOMATCH);
+        }
+      eptr += slength;
+      }
+
+    /* If min = max, continue at the same level without recursion.
+    They are not both allowed to be zero. */
+
+    if (min == max) continue;
+
+    /* If minimizing, keep trying and advancing the pointer */
+
+    if (minimize)
+      {
+      for (fi = min;; fi++)
+        {
+        int slength; 
+        RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM14);
+        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+        if (fi >= max) MRRETURN(MATCH_NOMATCH);
+        if ((slength = match_ref(offset, eptr, length, md, ims)) < 0)
+          {
+          CHECK_PARTIAL();
+          MRRETURN(MATCH_NOMATCH);
+          }
+        eptr += slength;
+        }
+      /* Control never gets here */
+      }
+
+    /* If maximizing, find the longest string and work backwards */
+
+    else
+      {
+      pp = eptr;
+      for (i = min; i < max; i++)
+        {
+        int slength; 
+        if ((slength = match_ref(offset, eptr, length, md, ims)) < 0)
+          {
+          CHECK_PARTIAL();
+          break;
+          }
+        eptr += slength;
+        }
+      while (eptr >= pp)
+        {
+        RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM15);
+        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+        eptr -= length;
+        }
+      MRRETURN(MATCH_NOMATCH);
       }
     /* Control never gets here */
 
