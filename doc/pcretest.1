@@ -25,8 +25,8 @@ documentation.
 .rs
 .TP 10
 \fB-b\fP
-Behave as if each regex has the \fB/B\fP (show bytecode) modifier; the internal
-form is output after compilation.
+Behave as if each regex has the \fB/B\fP (show byte code) modifier; the
+internal form is output after compilation.
 .TP 10
 \fB-C\fP
 Output the version number of the PCRE library, and all available information
@@ -76,7 +76,7 @@ set.
 Do not output the version number of \fBpcretest\fP at the start of execution.
 .TP 10
 \fB-S\fP \fIsize\fP
-On Unix-like systems, set the size of the runtime stack to \fIsize\fP
+On Unix-like systems, set the size of the run-time stack to \fIsize\fP
 megabytes.
 .TP 10
 \fB-t\fP
@@ -154,7 +154,7 @@ pcretest to read the next line as a continuation of the regular expression.
 A pattern may be followed by any number of modifiers, which are mostly single
 characters. Following Perl usage, these are referred to below as, for example,
 "the \fB/i\fP modifier", even though the delimiter of the pattern need not
-always be a slash, and no slash is used when writing modifiers. Whitespace may
+always be a slash, and no slash is used when writing modifiers. White space may
 appear between the final pattern delimiter and the first modifier, and between
 the modifiers themselves.
 .P
@@ -327,8 +327,8 @@ ignored.
 .rs
 .sp
 Before each data line is passed to \fBpcre_exec()\fP, leading and trailing
-whitespace is removed, and it is then scanned for \e escapes. Some of these are
-pretty esoteric features, intended for checking out some of the more
+white space is removed, and it is then scanned for \e escapes. Some of these
+are pretty esoteric features, intended for checking out some of the more
 complicated features of PCRE. If you are just testing "ordinary" regular
 expressions, you probably don't need any of these. The following escapes are
 recognized:
@@ -336,7 +336,7 @@ recognized:
   \ea         alarm (BEL, \ex07)
   \eb         backspace (\ex08)
   \ee         escape (\ex27)
-  \ef         formfeed (\ex0c)
+  \ef         form feed (\ex0c)
   \en         newline (\ex0a)
 .\" JOIN
   \eqdd       set the PCRE_MATCH_LIMIT limit to dd
@@ -712,7 +712,7 @@ function to distinguish printing and non-printing characters.
 .rs
 .sp
 The facilities described in this section are not available when the POSIX
-inteface to PCRE is being used, that is, when the \fB/P\fP pattern modifier is
+interface to PCRE is being used, that is, when the \fB/P\fP pattern modifier is
 specified.
 .P
 When the POSIX interface is not in use, you can cause \fBpcretest\fP to write a
@@ -736,7 +736,7 @@ exact copy of the compiled pattern. If there is additional study data, this
 follows immediately after the compiled pattern. After writing the file,
 \fBpcretest\fP expects to read a new pattern.
 .P
-A saved pattern can be reloaded into \fBpcretest\fP by specifing < and a file
+A saved pattern can be reloaded into \fBpcretest\fP by specifying < and a file
 name instead of a pattern. The name of the file must not contain a < character,
 as otherwise \fBpcretest\fP will interpret the line as a pattern delimited by <
 characters.
@@ -789,6 +789,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 May 2011
+Last updated: 07 May 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
