@@ -20,6 +20,22 @@ Version 8.13 30-Apr-2011
     code. (b) A reference to 2 copies of a 3-byte code would not match 2 of a
     2-byte code at the end of the subject (it thought there wasn't enough data
     left).
+    
+5.  Comprehensive information about what went wrong is now returned by 
+    pcre_exec() and pcre_dfa_exec() when the UTF-8 string check fails, as long 
+    as the output vector has at least 2 elements. The offset of the start of 
+    the failing character and a reason code are placed in the vector.
+    
+6.  When the UTF-8 string check fails for pcre_compile(), the offset that is 
+    now returned is for the first byte of the failing character, instead of the 
+    last byte inspected. This is an incompatible change, but I hope it is small 
+    enough not to be a problem. It makes the returned offset consistent with
+    pcre_exec() and pcre_dfa_exec().
+    
+7.  pcretest now gives a text phrase as well as the error number when
+    pcre_exec() or pcre_dfa_exec() fails; if the error is a UTF-8 check
+    failure, the offset and reason code are output.
+    
 
 
 Version 8.12 15-Jan-2011

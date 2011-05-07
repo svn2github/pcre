@@ -98,19 +98,19 @@ No match
 
 /abc/8
     ร]
-Error -10
+Error -10 (bad UTF-8 string) offset=0 reason=6
     ร
-Error -10
+Error -10 (bad UTF-8 string) offset=0 reason=1
     รรร
-Error -10
+Error -10 (bad UTF-8 string) offset=0 reason=6
     รรร\?
 No match
     \xe1\x88 
-Error -10
+Error -10 (bad UTF-8 string) offset=0 reason=1
     \P\xe1\x88 
-Error -10
+Error -10 (bad UTF-8 string) offset=0 reason=1
     \P\P\xe1\x88 
-Error -25
+Error -25 (short UTF-8 string) offset=0 reason=1
 
 /a.b/8
     acb
@@ -1337,7 +1337,7 @@ Partial match: the cat
  0: aa
  1: a
     a\x{123}aa\>2
-Error -11
+Error -11 (bad UTF-8 offset)
     a\x{123}aa\>3
  0: aa
  1: a
@@ -1346,6 +1346,6 @@ Error -11
     a\x{123}aa\>5
 No match
     a\x{123}aa\>6
-Error -24
+Error -24 (bad offset value)
 
 /-- End of testinput8 --/ 

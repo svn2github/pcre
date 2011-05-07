@@ -507,18 +507,22 @@ found. This is always the shortest possible match.
 This section describes the output when the normal matching function,
 \fBpcre_exec()\fP, is being used.
 .P
-When a match succeeds, pcretest outputs the list of captured substrings that
-\fBpcre_exec()\fP returns, starting with number 0 for the string that matched
-the whole pattern. Otherwise, it outputs "No match" when the return is
+When a match succeeds, \fBpcretest\fP outputs the list of captured substrings
+that \fBpcre_exec()\fP returns, starting with number 0 for the string that
+matched the whole pattern. Otherwise, it outputs "No match" when the return is
 PCRE_ERROR_NOMATCH, and "Partial match:" followed by the partially matching
 substring when \fBpcre_exec()\fP returns PCRE_ERROR_PARTIAL. (Note that this is
 the entire substring that was inspected during the partial match; it may
 include characters before the actual match start if a lookbehind assertion,
-\eK, \eb, or \eB was involved.) For any other returns, it outputs the PCRE
-negative error number. Here is an example of an interactive \fBpcretest\fP run.
+\eK, \eb, or \eB was involved.) For any other return, \fBpcretest\fP outputs
+the PCRE negative error number and a short descriptive phrase. If the error is
+a failed UTF-8 string check, the byte offset of the start of the failing
+character and the reason code are also output, provided that the size of the 
+output vector is at least two. Here is an example of an interactive
+\fBpcretest\fP run.
 .sp
   $ pcretest
-  PCRE version 7.0 30-Nov-2006
+  PCRE version 8.13 2011-04-30
 .sp
     re> /^abc(\ed+)/
   data> abc123
@@ -527,11 +531,11 @@ negative error number. Here is an example of an interactive \fBpcretest\fP run.
   data> xyz
   No match
 .sp
-Note that unset capturing substrings that are not followed by one that is set
-are not returned by \fBpcre_exec()\fP, and are not shown by \fBpcretest\fP. In
-the following example, there are two capturing substrings, but when the first
-data line is matched, the second, unset substring is not shown. An "internal"
-unset substring is shown as "<unset>", as for the second data line.
+Unset capturing substrings that are not followed by one that is set are not
+returned by \fBpcre_exec()\fP, and are not shown by \fBpcretest\fP. In the
+following example, there are two capturing substrings, but when the first data
+line is matched, the second, unset substring is not shown. An "internal" unset
+substring is shown as "<unset>", as for the second data line.
 .sp
     re> /(a)|(b)/
   data> a
@@ -565,7 +569,13 @@ matching attempts are output in sequence, like this:
    0: ipp
    1: pp
 .sp
-"No match" is output only if the first match attempt fails.
+"No match" is output only if the first match attempt fails. Here is an example 
+of a failure message (the offset 4 that is specified by \e>4 is past the end of 
+the subject string):
+.sp
+    re> /xyz/
+  data> xyz\>4
+  Error -24 (bad offset value)      
 .P
 If any of the sequences \fB\eC\fP, \fB\eG\fP, or \fB\eL\fP are present in a
 data line that is successfully matched, the substrings extracted by the
@@ -779,6 +789,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 November 2010
-Copyright (c) 1997-2010 University of Cambridge.
+Last updated: 06 May 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi

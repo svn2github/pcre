@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2011 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -5812,16 +5812,24 @@ defined (though never set). So there's no harm in leaving this code. */
 if (md->partial && (re->flags & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
-/* Check a UTF-8 string if required. Unfortunately there's no way of passing
-back the character offset. */
+/* Check a UTF-8 string if required. Pass back the character offset and error 
+code if a results vector is available. */
 
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int tb;
-  if ((tb = _pcre_valid_utf8((USPTR)subject, length)) >= 0)
-    return (tb == length && md->partial > 1)?
+  int errorcode; 
+  int tb = _pcre_valid_utf8((USPTR)subject, length, &errorcode);
+  if (tb >= 0)
+    {
+    if (offsetcount >= 2)
+      {
+      offsets[0] = tb;
+      offsets[1] = errorcode;
+      }    
+    return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
+    }   
   if (start_offset > 0 && start_offset < length)
     {
     tb = ((USPTR)subject)[start_offset] & 0xc0;

@@ -208,6 +208,19 @@ correctly, but that messes up comparisons). --/
     \xe1\x88 
     \P\xe1\x88 
     \P\P\xe1\x88 
+    XX\xea
+    \O0XX\xea
+    \O1XX\xea
+    \O2XX\xea
+    XX\xf1
+    XX\xf8  
+    XX\xfc
+    ZZ\xea\xaf\x20YY
+    ZZ\xfd\xbf\xbf\x2f\xbf\xbfYY  
+    ZZ\xfd\xbf\xbf\xbf\x2f\xbfYY  
+    ZZ\xfd\xbf\xbf\xbf\xbf\x2fYY  
+    ZZ\xffYY
+    ZZ\xfeYY  
 
 /anything/8
     \xc0\x80

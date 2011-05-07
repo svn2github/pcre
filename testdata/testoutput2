@@ -11251,9 +11251,9 @@ Partial match: abc
     abc\>3
 No match
     abc\>4
-Error -24
+Error -24 (bad offset value)
     abc\>-4 
-Error -24
+Error -24 (bad offset value)
 
 /^\cģ/
 Failed: \c must be followed by an ASCII character at offset 3

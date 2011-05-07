@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language (but see
 below for why this module is different).
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2011 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -2963,10 +2963,18 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int tb;
-  if ((tb = _pcre_valid_utf8((uschar *)subject, length)) >= 0)
-    return (tb == length && (options & PCRE_PARTIAL_HARD) != 0)?
+  int errorcode; 
+  int tb = _pcre_valid_utf8((uschar *)subject, length, &errorcode);
+  if (tb >= 0)
+    {
+    if (offsetcount >= 2)
+      {
+      offsets[0] = tb;
+      offsets[1] = errorcode;
+      }    
+    return (errorcode <= PCRE_UTF8_ERR5 && (options & PCRE_PARTIAL_HARD) != 0)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
+    }  
   if (start_offset > 0 && start_offset < length)
     {
     tb = ((USPTR)subject)[start_offset] & 0xc0;

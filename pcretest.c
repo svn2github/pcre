@@ -197,6 +197,37 @@ static uschar *buffer = NULL;
 static uschar *dbuffer = NULL;
 static uschar *pbuffer = NULL;
 
+/* Textual explanations for runtime error codes */
+
+static const char *errtexts[] = {
+  NULL,  /* 0 is no error */
+  NULL,  /* NOMATCH is handled specially */
+  "NULL argument passed",
+  "bad option value",
+  "magic number missing",
+  "unknown opcode - pattern overwritten?",
+  "no more memory",
+  NULL,  /* never returned by pcre_exec() or pcre_dfa_exec() */       
+  "match limit exceeded",
+  "callout error code",
+  NULL,  /* BADUTF8 is handled specially */
+  "bad UTF-8 offset",
+  NULL,  /* PARTIAL is handled specially */
+  "not used - internal error",
+  "internal error - pattern overwritten?",
+  "bad count value",
+  "item unsupported for DFA matching",
+  "backreference condition or recursion test not supported for DFA matching",
+  "match limit not supported for DFA matching",
+  "workspace size exceeded in DFA matching",
+  "too much recursion for DFA matching",     
+  "recursion limit exceeded",
+  "not used - internal error",
+  "invalid combination of newline options",
+  "bad offset value",
+  NULL  /* SHORTUTF8 is handled specially */
+};
+          
 
 /*************************************************
 *         Alternate character tables             *
@@ -2858,15 +2889,31 @@ while (!done)
           }
         else
           {
-          if (count == PCRE_ERROR_NOMATCH)
-            {
+          switch(count)
+            {  
+            case PCRE_ERROR_NOMATCH:
             if (gmatched == 0)
               {
               if (markptr == NULL) fprintf(outfile, "No match\n");
                 else fprintf(outfile, "No match, mark = %s\n", markptr);
               }
+            break;
+            
+            case PCRE_ERROR_BADUTF8:
+            case PCRE_ERROR_SHORTUTF8:
+            fprintf(outfile, "Error %d (%s UTF-8 string)", count,
+              (count == PCRE_ERROR_BADUTF8)? "bad" : "short");
+            if (use_size_offsets >= 2)
+              fprintf(outfile, " offset=%d reason=%d", use_offsets[0], 
+                use_offsets[1]);
+            fprintf(outfile, "\n");         
+            break;     
+              
+            default:
+            fprintf(outfile, "Error %d (%s)\n", count, errtexts[-count]);
+            break;
             }
-          else fprintf(outfile, "Error %d\n", count);
+               
           break;  /* Out of the /g loop */
           }
         }

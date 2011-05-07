@@ -6431,7 +6431,7 @@ No match
 
 /^(?(2)a|(1)(2))+$/
     123a
-Error -17
+Error -17 (backreference condition or recursion test not supported for DFA matching)
 
 /(?<=a|bbbb)c/
     ac
@@ -7459,7 +7459,7 @@ Partial match: dogs
 
 /abc\K123/
     xyzabc123pqr
-Error -16
+Error -16 (item unsupported for DFA matching)
     
 /(?<=abc)123/
     xyzabc123pqr 
@@ -7598,29 +7598,29 @@ No match
 
 /^(?!a(*SKIP)b)/
     ac
-Error -16
+Error -16 (item unsupported for DFA matching)
     
 /^(?=a(*SKIP)b|ac)/
     ** Failers
 No match
     ac
-Error -16
+Error -16 (item unsupported for DFA matching)
     
 /^(?=a(*THEN)b|ac)/
     ac
-Error -16
+Error -16 (item unsupported for DFA matching)
     
 /^(?=a(*PRUNE)b)/
     ab  
-Error -16
+Error -16 (item unsupported for DFA matching)
     ** Failers 
 No match
     ac
-Error -16
+Error -16 (item unsupported for DFA matching)
 
 /^(?(?!a(*SKIP)b))/
     ac
-Error -16
+Error -16 (item unsupported for DFA matching)
 
 /(?<=abc)def/
     abc\P\P
@@ -7693,8 +7693,8 @@ Partial match: abc
     abc\>3
 No match
     abc\>4
-Error -24
+Error -24 (bad offset value)
     abc\>-4 
-Error -24
+Error -24 (bad offset value)
 
 /-- End of testinput7 --/

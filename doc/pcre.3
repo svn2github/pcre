@@ -14,7 +14,7 @@ for requesting some minor changes that give better JavaScript compatibility.
 The current implementation of PCRE corresponds approximately with Perl 5.12,
 including support for UTF-8 encoded strings and Unicode general category
 properties. However, UTF-8 and Unicode support has to be explicitly enabled; it
-is not the default. The Unicode tables correspond to Unicode release 5.2.0.
+is not the default. The Unicode tables correspond to Unicode release 6.0.0.
 .P
 In addition to the Perl-compatible matching function, PCRE contains an
 alternative function that matches the same compiled patterns in a different
@@ -208,13 +208,17 @@ available as independent code points in the UTF-8 encoding. (In other words,
 the whole surrogate thing is a fudge for UTF-16 which unfortunately messes up
 UTF-8.)
 .P
-If an invalid UTF-8 string is passed to PCRE, an error return
-(PCRE_ERROR_BADUTF8) is given. In some situations, you may already know that
-your strings are valid, and therefore want to skip these checks in order to
-improve performance. If you set the PCRE_NO_UTF8_CHECK flag at compile time or
-at run time, PCRE assumes that the pattern or subject it is given
-(respectively) contains only valid UTF-8 codes. In this case, it does not
-diagnose an invalid UTF-8 string.
+If an invalid UTF-8 string is passed to PCRE, an error return is given. At 
+compile time, the only additional information is the offset to the first byte 
+of the failing character. The runtime functions (\fBpcre_exec()\fP and
+\fBpcre_dfa_exec()\fP), pass back this information as well as a more detailed
+reason code if the caller has provided memory in which to do this.
+.P
+In some situations, you may already know that your strings are valid, and
+therefore want to skip these checks in order to improve performance. If you set
+the PCRE_NO_UTF8_CHECK flag at compile time or at run time, PCRE assumes that
+the pattern or subject it is given (respectively) contains only valid UTF-8
+codes. In this case, it does not diagnose an invalid UTF-8 string.
 .P
 If you pass an invalid UTF-8 string when PCRE_NO_UTF8_CHECK is set, what
 happens depends on why the string is invalid. If the string conforms to the
@@ -304,6 +308,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 13 November 2010
-Copyright (c) 1997-2010 University of Cambridge.
+Last updated: 07 May 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi
