@@ -842,4 +842,17 @@ correctly, but that messes up comparisons). --/
 
 /^\cģ/8
 
+/(\R*)(.)/s8
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/(\R)*(.)/s8
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/(\X*)(.)/s8
+    A\x{300}
+
 /-- End of testinput5 --/

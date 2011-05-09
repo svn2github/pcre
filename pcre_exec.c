@@ -2017,6 +2017,7 @@ for (;;)
     switch(c)
       {
       default: MRRETURN(MATCH_NOMATCH);
+       
       case 0x000d:
       if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
       break;
@@ -3791,6 +3792,7 @@ for (;;)
           switch(c)
             {
             default: MRRETURN(MATCH_NOMATCH);
+             
             case 0x000d:
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
@@ -4067,9 +4069,11 @@ for (;;)
           switch(*eptr++)
             {
             default: MRRETURN(MATCH_NOMATCH);
+             
             case 0x000d:
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
+             
             case 0x000a:
             break;
 
@@ -5258,7 +5262,11 @@ for (;;)
           RRETURN(PCRE_ERROR_INTERNAL);
           }
 
-        /* eptr is now past the end of the maximum run */
+        /* eptr is now past the end of the maximum run. If possessive, we are
+        done (no backing up). Otherwise, match at this position; anything other
+        than no match is immediately returned. For nomatch, back up one
+        character, unless we are matching \R and the last thing matched was
+        \r\n, in which case, back up two bytes. */
 
         if (possessive) continue;
         for(;;)
@@ -5267,6 +5275,8 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr);
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' && 
+              eptr[-1] == '\r') eptr--;
           }
         }
       else
@@ -5465,14 +5475,20 @@ for (;;)
           RRETURN(PCRE_ERROR_INTERNAL);
           }
 
-        /* eptr is now past the end of the maximum run */
+        /* eptr is now past the end of the maximum run. If possessive, we are
+        done (no backing up). Otherwise, match at this position; anything other
+        than no match is immediately returned. For nomatch, back up one
+        character (byte), unless we are matching \R and the last thing matched
+        was \r\n, in which case, back up two bytes. */
 
         if (possessive) continue;
         while (eptr >= pp)
           {
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM47);
-          eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+          eptr--;
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' && 
+              eptr[-1] == '\r') eptr--;
           }
         }
 

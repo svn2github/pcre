@@ -3570,4 +3570,23 @@ with \Y. ---/
 
 /(?P<abn>(?P=axn)xxx)(?<axn>yy)/BZ
 
+/-- These tests are here because Perl gets the first one wrong. --/
+
+/(\R*)(.)/s
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/(\R)*(.)/s
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/((?>\r\n|\n|\x0b|\f|\r|\x85)*)(.)/s
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/-- --/
+
 /-- End of testinput2 --/

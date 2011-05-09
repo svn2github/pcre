@@ -11305,4 +11305,50 @@ Failed: reference to non-existent subpattern at offset 15
         End
 ------------------------------------------------------------------
 
+/-- These tests are here because Perl gets the first one wrong. --/
+
+/(\R*)(.)/s
+    \r\n
+ 0: \x0d
+ 1: 
+ 2: \x0d
+    \r\r\n\n\r 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+    \r\r\n\n\r\n 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+
+/(\R)*(.)/s
+    \r\n
+ 0: \x0d
+ 1: <unset>
+ 2: \x0d
+    \r\r\n\n\r 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0a
+ 2: \x0d
+    \r\r\n\n\r\n 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0a
+ 2: \x0d
+
+/((?>\r\n|\n|\x0b|\f|\r|\x85)*)(.)/s
+    \r\n
+ 0: \x0d
+ 1: 
+ 2: \x0d
+    \r\r\n\n\r 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+    \r\r\n\n\r\n 
+ 0: \x0d\x0d\x0a\x0a\x0d
+ 1: \x0d\x0d\x0a\x0a
+ 2: \x0d
+
+/-- --/
+
 /-- End of testinput2 --/

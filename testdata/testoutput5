@@ -2341,4 +2341,38 @@ Error -24 (bad offset value)
 /^\cģ/8
 Failed: \c must be followed by an ASCII character at offset 3
 
+/(\R*)(.)/s8
+    \r\n
+ 0: \x{0d}
+ 1: 
+ 2: \x{0d}
+    \r\r\n\n\r 
+ 0: \x{0d}\x{0d}\x{0a}\x{0a}\x{0d}
+ 1: \x{0d}\x{0d}\x{0a}\x{0a}
+ 2: \x{0d}
+    \r\r\n\n\r\n 
+ 0: \x{0d}\x{0d}\x{0a}\x{0a}\x{0d}
+ 1: \x{0d}\x{0d}\x{0a}\x{0a}
+ 2: \x{0d}
+
+/(\R)*(.)/s8
+    \r\n
+ 0: \x{0d}
+ 1: <unset>
+ 2: \x{0d}
+    \r\r\n\n\r 
+ 0: \x{0d}\x{0d}\x{0a}\x{0a}\x{0d}
+ 1: \x{0a}
+ 2: \x{0d}
+    \r\r\n\n\r\n 
+ 0: \x{0d}\x{0d}\x{0a}\x{0a}\x{0d}
+ 1: \x{0a}
+ 2: \x{0d}
+
+/(\X*)(.)/s8
+    A\x{300}
+ 0: A
+ 1: 
+ 2: A
+
 /-- End of testinput5 --/

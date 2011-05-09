@@ -36,6 +36,13 @@ Version 8.13 30-Apr-2011
     pcre_exec() or pcre_dfa_exec() fails; if the error is a UTF-8 check
     failure, the offset and reason code are output.
     
+8.  When \R was used with a maximizing quantifier it failed to skip backwards 
+    over a \r\n pair if the subsequent match failed. Instead, it just skipped
+    back over a single character (\n). This seems wrong (because it treated the 
+    two characters as a single entity when going forwards), conflicts with the
+    documentation that \R is equivalent to (?>\r\n|\n|...etc), and makes the
+    behaviour of \R* different to (\R)*, which also seems wrong. The behaviour 
+    has been changed.
 
 
 Version 8.12 15-Jan-2011
