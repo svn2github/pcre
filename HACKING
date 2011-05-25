@@ -68,7 +68,7 @@ things I did for 6.8 was to fix Yet Another Bug in the memory computation. Then
 I had a flash of inspiration as to how I could run the real compile function in
 a "fake" mode that enables it to compute how much memory it would need, while
 actually only ever using a few hundred bytes of working memory, and without too
-many tests of the mode that might slow it down. So I re-factored the compiling
+many tests of the mode that might slow it down. So I refactored the compiling
 functions to work this way. This got rid of about 600 lines of source. It
 should make future maintenance and development easier. As this was such a major 
 change, I never released 6.8, instead upping the number to 7.0 (other quite 
@@ -108,6 +108,16 @@ needed at compile time to produce a traditional FSM where only one state is
 ever active at once. I believe some other regex matchers work this way.
 
 
+Changeable options
+------------------
+
+The /i, /m, or /s options (PCRE_CASELESS, PCRE_MULTILINE, PCRE_DOTALL) may
+change in the middle of patterns. From PCRE 8.13, their processing is handled
+entirely at compile time by generating different opcodes for the different
+settings. The runtime functions do not need to keep track of an options state 
+any more.
+
+
 Format of compiled patterns
 ---------------------------
 
@@ -124,8 +134,6 @@ greater than 64K are going to be processed. In this description, we assume the
 "normal" compilation options. Data values that are counts (e.g. for
 quantifiers) are always just two bytes long.
 
-A list of the opcodes follows:
-
 Opcodes with no following data
 ------------------------------
 
@@ -138,7 +146,8 @@ These items are all just one byte long
   OP_SOD                 match start of data: \A
   OP_SOM,                start of match (subject + offset): \G
   OP_SET_SOM,            set start of match (\K) 
-  OP_CIRC                ^ (start of data, or after \n in multiline)
+  OP_CIRC                ^ (start of data)
+  OP_CIRCM               ^ multiline mode (start of data or after newline)
   OP_NOT_WORD_BOUNDARY   \W
   OP_WORD_BOUNDARY       \w
   OP_NOT_DIGIT           \D
@@ -153,7 +162,8 @@ These items are all just one byte long
   OP_WORDCHAR            \w
   OP_EODN                match end of data or \n at end: \Z
   OP_EOD                 match end of data: \z
-  OP_DOLL                $ (end of data, or before \n in multiline)
+  OP_DOLL                $ (end of data, or before final newline)
+  OP_DOLLM               $ multiline mode (end of data or before newline)
   OP_EXTUNI              match an extended Unicode character 
   OP_ANYNL               match any Unicode newline sequence 
   
@@ -177,33 +187,45 @@ two, the name follows immediately; for OP_THEN_ARG, it follows the LINK_SIZE
 offset value.
   
 
+Matching literal characters
+---------------------------
+
+The OP_CHAR opcode is followed by a single character that is to be matched 
+casefully. For caseless matching, OP_CHARI is used. In UTF-8 mode, the 
+character may be more than one byte long. (Earlier versions of PCRE used 
+multi-character strings, but this was changed to allow some new features to be 
+added.)
+
+
 Repeating single characters
 ---------------------------
 
 The common repeats (*, +, ?) when applied to a single character use the
-following opcodes:
+following opcodes, which come in caseful and caseless versions:
 
-  OP_STAR
-  OP_MINSTAR
-  OP_POSSTAR 
-  OP_PLUS
-  OP_MINPLUS
-  OP_POSPLUS 
-  OP_QUERY
-  OP_MINQUERY
-  OP_POSQUERY 
+  Caseful         Caseless
+  OP_STAR         OP_STARI      
+  OP_MINSTAR      OP_MINSTARI   
+  OP_POSSTAR      OP_POSSTARI   
+  OP_PLUS         OP_PLUSI      
+  OP_MINPLUS      OP_MINPLUSI   
+  OP_POSPLUS      OP_POSPLUSI   
+  OP_QUERY        OP_QUERYI     
+  OP_MINQUERY     OP_MINQUERYI  
+  OP_POSQUERY     OP_POSQUERYI  
 
 In ASCII mode, these are two-byte items; in UTF-8 mode, the length is variable.
 Those with "MIN" in their name are the minimizing versions. Those with "POS" in 
 their names are possessive versions. Each is followed by the character that is
-to be repeated. Other repeats make use of
+to be repeated. Other repeats make use of these opcodes:
 
-  OP_UPTO
-  OP_MINUPTO
-  OP_POSUPTO 
-  OP_EXACT
+  Caseful         Caseless
+  OP_UPTO         OP_UPTOI    
+  OP_MINUPTO      OP_MINUPTOI 
+  OP_POSUPTO      OP_POSUPTOI 
+  OP_EXACT        OP_EXACTI   
 
-which are followed by a two-byte count (most significant first) and the
+Each of these is followed by a two-byte count (most significant first) and the
 repeated character. OP_UPTO matches from 0 to the given number. A repeat with a
 non-zero minimum and a fixed maximum is coded as an OP_EXACT followed by an
 OP_UPTO (or OP_MINUPTO or OPT_POSUPTO).
@@ -244,57 +266,50 @@ three bytes: OP_PROP or OP_NOTPROP and then the desired property type and
 value.
 
 
-Matching literal characters
----------------------------
-
-The OP_CHAR opcode is followed by a single character that is to be matched 
-casefully. For caseless matching, OP_CHARNC is used. In UTF-8 mode, the 
-character may be more than one byte long. (Earlier versions of PCRE used 
-multi-character strings, but this was changed to allow some new features to be 
-added.)
-
-
 Character classes
 -----------------
 
-If there is only one character, OP_CHAR or OP_CHARNC is used for a positive
-class, and OP_NOT for a negative one (that is, for something like [^a]).
-However, in UTF-8 mode, the use of OP_NOT applies only to characters with
-values < 128, because OP_NOT is confined to single bytes.
+If there is only one character, OP_CHAR or OP_CHARI is used for a positive
+class, and OP_NOT or OP_NOTI for a negative one (that is, for something like
+[^a]). However, in UTF-8 mode, the use of OP_NOT[I] applies only to characters
+with values < 128, because OP_NOT[I] is confined to single bytes.
 
-Another set of repeating opcodes (OP_NOTSTAR etc.) are used for a repeated,
-negated, single-character class. The normal ones (OP_STAR etc.) are used for a
-repeated positive single-character class.
+Another set of 13 repeating opcodes (called OP_NOTSTAR etc.) are used for a
+repeated, negated, single-character class. The normal single-character opcodes
+(OP_STAR, etc.) are used for a repeated positive single-character class.
 
-When there's more than one character in a class and all the characters are less
-than 256, OP_CLASS is used for a positive class, and OP_NCLASS for a negative
-one. In either case, the opcode is followed by a 32-byte bit map containing a 1
-bit for every character that is acceptable. The bits are counted from the least
-significant end of each byte.
+When there is more than one character in a class and all the characters are
+less than 256, OP_CLASS is used for a positive class, and OP_NCLASS for a
+negative one. In either case, the opcode is followed by a 32-byte bit map
+containing a 1 bit for every character that is acceptable. The bits are counted
+from the least significant end of each byte. In caseless mode, bits for both 
+cases are set.
 
 The reason for having both OP_CLASS and OP_NCLASS is so that, in UTF-8 mode,
 subject characters with values greater than 256 can be handled correctly. For
-OP_CLASS they don't match, whereas for OP_NCLASS they do.
+OP_CLASS they do not match, whereas for OP_NCLASS they do.
 
 For classes containing characters with values > 255, OP_XCLASS is used. It
 optionally uses a bit map (if any characters lie within it), followed by a list
-of pairs and single characters. There is a flag character than indicates
-whether it's a positive or a negative class.
+of pairs (for a range) and single characters. In caseless mode, both cases are 
+explicitly listed. There is a flag character than indicates whether it is a
+positive or a negative class.
 
 
 Back references
 ---------------
 
-OP_REF is followed by two bytes containing the reference number.
+OP_REF (caseful) or OP_REFI (caseless) is followed by two bytes containing the
+reference number.
 
 
 Repeating character classes and back references
 -----------------------------------------------
 
 Single-character classes are handled specially (see above). This section
-applies to OP_CLASS and OP_REF. In both cases, the repeat information follows
-the base item. The matching code looks at the following opcode to see if it is
-one of
+applies to OP_CLASS and OP_REF[I]. In both cases, the repeat information
+follows the base item. The matching code looks at the following opcode to see
+if it is one of
 
   OP_CRSTAR
   OP_CRMINSTAR
@@ -423,18 +438,5 @@ start of the following item, and another two-byte item giving the length of the
 next item.
 
 
-Changing options
-----------------
-
-If any of the /i, /m, or /s options are changed within a pattern, an OP_OPT
-opcode is compiled, followed by one byte containing the new settings of these
-flags. If there are several alternatives, there is an occurrence of OP_OPT at
-the start of all those following the first options change, to set appropriate
-options for the start of the alternative. Immediately after the end of the
-group there is another such item to reset the flags to their previous values. A
-change of flag right at the very start of the pattern can be handled entirely
-at compile time, and so does not cause anything to be put into the compiled
-data.
-
 Philip Hazel
-October 2010
+May 2011

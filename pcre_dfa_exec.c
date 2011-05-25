@@ -121,18 +121,25 @@ static const uschar coptable[] = {
   0, 0,                          /* \P, \p                                 */
   0, 0, 0, 0, 0,                 /* \R, \H, \h, \V, \v                     */
   0,                             /* \X                                     */
-  0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
+  0, 0, 0, 0, 0, 0,              /* \Z, \z, ^, ^M, $, $M                   */
   1,                             /* Char                                   */
-  1,                             /* Charnc                                 */
+  1,                             /* Chari                                  */
   1,                             /* not                                    */
+  1,                             /* noti                                   */
   /* Positive single-char repeats                                          */
   1, 1, 1, 1, 1, 1,              /* *, *?, +, +?, ?, ??                    */
   3, 3, 3,                       /* upto, minupto, exact                   */
   1, 1, 1, 3,                    /* *+, ++, ?+, upto+                      */
+  1, 1, 1, 1, 1, 1,              /* *I, *?I, +I, +?I, ?I, ??I              */
+  3, 3, 3,                       /* upto I, minupto I, exact I             */
+  1, 1, 1, 3,                    /* *+I, ++I, ?+I, upto+I                  */
   /* Negative single-char repeats - only for chars < 256                   */
   1, 1, 1, 1, 1, 1,              /* NOT *, *?, +, +?, ?, ??                */
   3, 3, 3,                       /* NOT upto, minupto, exact               */
-  1, 1, 1, 3,                    /* NOT *+, ++, ?+, updo+                  */
+  1, 1, 1, 3,                    /* NOT *+, ++, ?+, upto+                  */
+  1, 1, 1, 1, 1, 1,              /* NOT *I, *?I, +I, +?I, ?I, ??I          */
+  3, 3, 3,                       /* NOT upto I, minupto I, exact I         */
+  1, 1, 1, 3,                    /* NOT *+I, ++I, ?+I, upto+I              */
   /* Positive type repeats                                                 */
   1, 1, 1, 1, 1, 1,              /* Type *, *?, +, +?, ?, ??               */
   3, 3, 3,                       /* Type upto, minupto, exact              */
@@ -144,6 +151,7 @@ static const uschar coptable[] = {
   0,                             /* NCLASS                                 */
   0,                             /* XCLASS - variable length               */
   0,                             /* REF                                    */
+  0,                             /* REFI                                   */
   0,                             /* RECURSE                                */
   0,                             /* CALLOUT                                */
   0,                             /* Alt                                    */
@@ -179,18 +187,25 @@ static const uschar poptable[] = {
   1, 1,                          /* \P, \p                                 */
   1, 1, 1, 1, 1,                 /* \R, \H, \h, \V, \v                     */
   1,                             /* \X                                     */
-  0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
+  0, 0, 0, 0, 0, 0,              /* \Z, \z, ^, ^M, $, $M                   */
   1,                             /* Char                                   */
-  1,                             /* Charnc                                 */
+  1,                             /* Chari                                  */
   1,                             /* not                                    */
+  1,                             /* noti                                   */
   /* Positive single-char repeats                                          */
   1, 1, 1, 1, 1, 1,              /* *, *?, +, +?, ?, ??                    */
   1, 1, 1,                       /* upto, minupto, exact                   */
   1, 1, 1, 1,                    /* *+, ++, ?+, upto+                      */
+  1, 1, 1, 1, 1, 1,              /* *I, *?I, +I, +?I, ?I, ??I              */
+  1, 1, 1,                       /* upto I, minupto I, exact I             */
+  1, 1, 1, 1,                    /* *+I, ++I, ?+I, upto+I                  */
   /* Negative single-char repeats - only for chars < 256                   */
   1, 1, 1, 1, 1, 1,              /* NOT *, *?, +, +?, ?, ??                */
   1, 1, 1,                       /* NOT upto, minupto, exact               */
   1, 1, 1, 1,                    /* NOT *+, ++, ?+, upto+                  */
+  1, 1, 1, 1, 1, 1,              /* NOT *I, *?I, +I, +?I, ?I, ??I          */
+  1, 1, 1,                       /* NOT upto I, minupto I, exact I         */
+  1, 1, 1, 1,                    /* NOT *+I, ++I, ?+I, upto+I              */
   /* Positive type repeats                                                 */
   1, 1, 1, 1, 1, 1,              /* Type *, *?, +, +?, ?, ??               */
   1, 1, 1,                       /* Type upto, minupto, exact              */
@@ -202,6 +217,7 @@ static const uschar poptable[] = {
   1,                             /* NCLASS                                 */
   1,                             /* XCLASS - variable length               */
   0,                             /* REF                                    */
+  0,                             /* REFI                                   */
   0,                             /* RECURSE                                */
   0,                             /* CALLOUT                                */
   0,                             /* Alt                                    */
@@ -252,7 +268,6 @@ these structures in, is a vector of ints. */
 typedef struct stateblock {
   int offset;                     /* Offset to opcode */
   int count;                      /* Count for repeats */
-  int ims;                        /* ims flag bits */
   int data;                       /* Some use extra data */
 } stateblock;
 
@@ -308,7 +323,6 @@ Arguments:
   offsetcount       size of same
   workspace         vector of workspace
   wscount           size of same
-  ims               the current ims flags
   rlevel            function call recursion level
   recursing         regex recursive call level
 
@@ -325,7 +339,6 @@ for the current character, one for the following character). */
     { \
     next_active_state->offset = (x); \
     next_active_state->count  = (y); \
-    next_active_state->ims    = ims; \
     next_active_state++; \
     DPRINTF(("%.*sADD_ACTIVE(%d,%d)\n", rlevel*2-2, SP, (x), (y))); \
     } \
@@ -336,7 +349,6 @@ for the current character, one for the following character). */
     { \
     next_active_state->offset = (x); \
     next_active_state->count  = (y); \
-    next_active_state->ims    = ims; \
     next_active_state->data   = (z); \
     next_active_state++; \
     DPRINTF(("%.*sADD_ACTIVE_DATA(%d,%d,%d)\n", rlevel*2-2, SP, (x), (y), (z))); \
@@ -348,7 +360,6 @@ for the current character, one for the following character). */
     { \
     next_new_state->offset = (x); \
     next_new_state->count  = (y); \
-    next_new_state->ims    = ims; \
     next_new_state++; \
     DPRINTF(("%.*sADD_NEW(%d,%d)\n", rlevel*2-2, SP, (x), (y))); \
     } \
@@ -359,7 +370,6 @@ for the current character, one for the following character). */
     { \
     next_new_state->offset = (x); \
     next_new_state->count  = (y); \
-    next_new_state->ims    = ims; \
     next_new_state->data   = (z); \
     next_new_state++; \
     DPRINTF(("%.*sADD_NEW_DATA(%d,%d,%d)\n", rlevel*2-2, SP, (x), (y), (z))); \
@@ -378,7 +388,6 @@ internal_dfa_exec(
   int offsetcount,
   int *workspace,
   int wscount,
-  int ims,
   int  rlevel,
   int  recursing)
 {
@@ -605,6 +614,7 @@ for (;;)
   for (i = 0; i < active_count; i++)
     {
     stateblock *current_state = active_states + i;
+    BOOL caseless = FALSE; 
     const uschar *code;
     int state_offset = current_state->offset;
     int count, codevalue, rrc;
@@ -615,10 +625,6 @@ for (;;)
       else if (c > 32 && c < 127) printf("'%c'\n", c);
         else printf("0x%02x\n", c);
 #endif
-
-    /* This variable is referred to implicity in the ADD_xxx macros. */
-
-    ims = current_state->ims;
 
     /* A negative offset is a special case meaning "hold off going to this
     (negated) state until the number of characters in the data field have
@@ -822,10 +828,14 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_CIRC:
+      if (ptr == start_subject && (md->moptions & PCRE_NOTBOL) == 0)
+        { ADD_ACTIVE(state_offset + 1, 0); }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_CIRCM:
       if ((ptr == start_subject && (md->moptions & PCRE_NOTBOL) == 0) ||
-          ((ims & PCRE_MULTILINE) != 0 &&
-            ptr != end_subject &&
-            WAS_NEWLINE(ptr)))
+          (ptr != end_subject && WAS_NEWLINE(ptr)))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 
@@ -837,12 +847,6 @@ for (;;)
           could_continue = TRUE;
         else { ADD_ACTIVE(state_offset + 1, 0); }
         }
-      break;
-
-      /*-----------------------------------------------------------------*/
-      case OP_OPT:
-      ims = code[1];
-      ADD_ACTIVE(state_offset + 2, 0);
       break;
 
       /*-----------------------------------------------------------------*/
@@ -890,11 +894,23 @@ for (;;)
           could_continue = TRUE;
         else if (clen == 0 ||
             ((md->poptions & PCRE_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr) &&
-               ((ims & PCRE_MULTILINE) != 0 || ptr == end_subject - md->nllen)
+               (ptr == end_subject - md->nllen)
             ))
           { ADD_ACTIVE(state_offset + 1, 0); }
         }
-      else if ((ims & PCRE_MULTILINE) != 0 && IS_NEWLINE(ptr))
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_DOLLM:
+      if ((md->moptions & PCRE_NOTEOL) == 0)
+        {
+        if (clen == 0 && (md->moptions & PCRE_PARTIAL_HARD) != 0)
+          could_continue = TRUE;
+        else if (clen == 0 ||
+            ((md->poptions & PCRE_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr)))
+          { ADD_ACTIVE(state_offset + 1, 0); }
+        }
+      else if (IS_NEWLINE(ptr))
         { ADD_ACTIVE(state_offset + 1, 0); }
       break;
 
@@ -1950,7 +1966,7 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
-      case OP_CHARNC:
+      case OP_CHARI:
       if (clen == 0) break;
 
 #ifdef SUPPORT_UTF8
@@ -2136,19 +2152,35 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
-      /* Match a negated single character. This is only used for one-byte
-      characters, that is, we know that d < 256. The character we are
+      /* Match a negated single character casefully. This is only used for
+      one-byte characters, that is, we know that d < 256. The character we are
       checking (c) can be multibyte. */
 
       case OP_NOT:
-      if (clen > 0)
-        {
-        unsigned int otherd = ((ims & PCRE_CASELESS) != 0)? fcc[d] : d;
-        if (c != d && c != otherd) { ADD_NEW(state_offset + dlen + 1, 0); }
-        }
+      if (clen > 0 && c != d) { ADD_NEW(state_offset + dlen + 1, 0); }
       break;
 
       /*-----------------------------------------------------------------*/
+      /* Match a negated single character caselessly. This is only used for
+      one-byte characters, that is, we know that d < 256. The character we are
+      checking (c) can be multibyte. */
+
+      case OP_NOTI:
+      if (clen > 0 && c != d && c != fcc[d]) 
+        { ADD_NEW(state_offset + dlen + 1, 0); }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_PLUSI:
+      case OP_MINPLUSI:
+      case OP_POSPLUSI:
+      case OP_NOTPLUSI:
+      case OP_NOTMINPLUSI:
+      case OP_NOTPOSPLUSI:
+      caseless = TRUE;
+      codevalue -= OP_STARI - OP_STAR;
+ 
+      /* Fall through */
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
@@ -2160,7 +2192,7 @@ for (;;)
       if (clen > 0)
         {
         unsigned int otherd = NOTACHAR;
-        if ((ims & PCRE_CASELESS) != 0)
+        if (caseless)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -2188,6 +2220,15 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_QUERYI:
+      case OP_MINQUERYI:
+      case OP_POSQUERYI:
+      case OP_NOTQUERYI:
+      case OP_NOTMINQUERYI:
+      case OP_NOTPOSQUERYI:
+      caseless = TRUE;
+      codevalue -= OP_STARI - OP_STAR;
+      /* Fall through */
       case OP_QUERY:
       case OP_MINQUERY:
       case OP_POSQUERY:
@@ -2198,7 +2239,7 @@ for (;;)
       if (clen > 0)
         {
         unsigned int otherd = NOTACHAR;
-        if ((ims & PCRE_CASELESS) != 0)
+        if (caseless)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -2224,6 +2265,15 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_STARI:
+      case OP_MINSTARI:
+      case OP_POSSTARI:
+      case OP_NOTSTARI:
+      case OP_NOTMINSTARI:
+      case OP_NOTPOSSTARI:
+      caseless = TRUE;
+      codevalue -= OP_STARI - OP_STAR;
+      /* Fall through */
       case OP_STAR:
       case OP_MINSTAR:
       case OP_POSSTAR:
@@ -2234,7 +2284,7 @@ for (;;)
       if (clen > 0)
         {
         unsigned int otherd = NOTACHAR;
-        if ((ims & PCRE_CASELESS) != 0)
+        if (caseless)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -2260,13 +2310,18 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_EXACTI:
+      case OP_NOTEXACTI:
+      caseless = TRUE;
+      codevalue -= OP_STARI - OP_STAR;
+      /* Fall through */
       case OP_EXACT:
       case OP_NOTEXACT:
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
         unsigned int otherd = NOTACHAR;
-        if ((ims & PCRE_CASELESS) != 0)
+        if (caseless)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -2290,6 +2345,15 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_UPTOI:
+      case OP_MINUPTOI:
+      case OP_POSUPTOI:
+      case OP_NOTUPTOI:
+      case OP_NOTMINUPTOI:
+      case OP_NOTPOSUPTOI:
+      caseless = TRUE;
+      codevalue -= OP_STARI - OP_STAR;
+      /* Fall through */
       case OP_UPTO:
       case OP_MINUPTO:
       case OP_POSUPTO:
@@ -2301,7 +2365,7 @@ for (;;)
       if (clen > 0)
         {
         unsigned int otherd = NOTACHAR;
-        if ((ims & PCRE_CASELESS) != 0)
+        if (caseless)
           {
 #ifdef SUPPORT_UTF8
           if (utf8 && d >= 128)
@@ -2444,7 +2508,6 @@ for (;;)
           sizeof(local_offsets)/sizeof(int),    /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
-          ims,                                  /* the current ims flags */
           rlevel,                               /* function recursion level */
           recursing);                           /* pass on regex recursion */
 
@@ -2535,7 +2598,6 @@ for (;;)
             sizeof(local_offsets)/sizeof(int),    /* size of same */
             local_workspace,                      /* workspace vector */
             sizeof(local_workspace)/sizeof(int),  /* size of same */
-            ims,                                  /* the current ims flags */
             rlevel,                               /* function recursion level */
             recursing);                           /* pass on regex recursion */
 
@@ -2568,7 +2630,6 @@ for (;;)
           sizeof(local_offsets)/sizeof(int),    /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
-          ims,                                  /* the current ims flags */
           rlevel,                               /* function recursion level */
           recursing + 1);                       /* regex recurse level */
 
@@ -2620,7 +2681,6 @@ for (;;)
           sizeof(local_offsets)/sizeof(int),    /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
-          ims,                                  /* the current ims flags */
           rlevel,                               /* function recursion level */
           recursing);                           /* pass on regex recursion */
 
@@ -3227,7 +3287,6 @@ for (;;)
     offsetcount,                       /* size of same */
     workspace,                         /* workspace vector */
     wscount,                           /* size of same */
-    re->options & (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL), /* ims flags */
     0,                                 /* function recurse level */
     0);                                /* regex recurse level */
 

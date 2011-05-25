@@ -5,16 +5,14 @@ are all themselves checked in other tests. Unicode, including property support,
 is required for these tests. --/
 
 /((?i)b)/BM
-Memory allocation (code space): 21
+Memory allocation (code space): 17
 ------------------------------------------------------------------
-  0  17 Bra
-  3   9 CBra 1
-  8  01 Opt
- 10  NC b
- 12   9 Ket
- 15  00 Opt
- 17  17 Ket
- 20     End
+  0  13 Bra
+  3   7 CBra 1
+  8  /i b
+ 10   7 Ket
+ 13  13 Ket
+ 16     End
 ------------------------------------------------------------------
 
 /(?s)(.*X|^B)/BM
@@ -33,21 +31,18 @@ Memory allocation (code space): 25
 ------------------------------------------------------------------
 
 /(?s:.*X|^B)/BM
-Memory allocation (code space): 29
+Memory allocation (code space): 23
 ------------------------------------------------------------------
-  0  25 Bra
-  3   9 Bra
-  6  04 Opt
-  8     AllAny*
- 10     X
- 12   8 Alt
- 15  04 Opt
- 17     ^
- 18     B
- 20  17 Ket
- 23  00 Opt
- 25  25 Ket
- 28     End
+  0  19 Bra
+  3   7 Bra
+  6     AllAny*
+  8     X
+ 10   6 Alt
+ 13     ^
+ 14     B
+ 16  13 Ket
+ 19  19 Ket
+ 22     End
 ------------------------------------------------------------------
 
 /^[[:alnum:]]/BM
@@ -538,7 +533,7 @@ Memory allocation (code space): 48
 Memory allocation (code space): 25
 ------------------------------------------------------------------
   0  21 Bra
-  3  NC A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+  3  /i A\x{391}\x{10427}\x{ff3a}\x{1fb0}
  21  21 Ket
  24     End
 ------------------------------------------------------------------

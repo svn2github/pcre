@@ -142,14 +142,14 @@ Arguments:
   eptr        pointer into the subject
   length      length of reference to be matched (number of bytes)
   md          points to match data block
-  ims         the ims flags
+  caseless    TRUE if caseless
 
 Returns:      < 0 if not matched, otherwise the number of subject bytes matched
 */
 
 static int
 match_ref(int offset, register USPTR eptr, int length, match_data *md,
-  unsigned long int ims)
+  BOOL caseless)
 {
 USPTR eptr_start = eptr;
 register USPTR p = md->start_subject + md->offset_vector[offset];
@@ -175,7 +175,7 @@ if (length < 0) return -1;
 properly if Unicode properties are supported. Otherwise, we can check only
 ASCII characters. */
 
-if ((ims & PCRE_CASELESS) != 0)
+if (caseless)
   {
 #ifdef SUPPORT_UTF8
 #ifdef SUPPORT_UCP
@@ -283,10 +283,10 @@ actually used in this definition. */
 #define REGISTER register
 
 #ifdef PCRE_DEBUG
-#define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
+#define RMATCH(ra,rb,rc,rd,re,rf,rw) \
   { \
   printf("match() called in line %d\n", __LINE__); \
-  rrc = match(ra,rb,mstart,markptr,rc,rd,re,rf,rg,rdepth+1); \
+  rrc = match(ra,rb,mstart,markptr,rc,rd,re,rf,rdepth+1); \
   printf("to line %d\n", __LINE__); \
   }
 #define RRETURN(ra) \
@@ -295,8 +295,8 @@ actually used in this definition. */
   return ra; \
   }
 #else
-#define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
-  rrc = match(ra,rb,mstart,markptr,rc,rd,re,rf,rg,rdepth+1)
+#define RMATCH(ra,rb,rc,rd,re,rf,rw) \
+  rrc = match(ra,rb,mstart,markptr,rc,rd,re,rf,rdepth+1)
 #define RRETURN(ra) return ra
 #endif
 
@@ -309,7 +309,7 @@ argument of match(), which never changes. */
 
 #define REGISTER
 
-#define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
+#define RMATCH(ra,rb,rc,rd,re,rf,rw)\
   {\
   heapframe *newframe = (heapframe *)(pcre_stack_malloc)(sizeof(heapframe));\
   if (newframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
@@ -319,9 +319,8 @@ argument of match(), which never changes. */
   newframe->Xmstart = mstart;\
   newframe->Xmarkptr = markptr;\
   newframe->Xoffset_top = rc;\
-  newframe->Xims = re;\
-  newframe->Xeptrb = rf;\
-  newframe->Xflags = rg;\
+  newframe->Xeptrb = re;\
+  newframe->Xflags = rf;\
   newframe->Xrdepth = frame->Xrdepth + 1;\
   newframe->Xprevframe = frame;\
   frame = newframe;\
@@ -357,7 +356,6 @@ typedef struct heapframe {
   USPTR Xmstart;
   USPTR Xmarkptr;
   int Xoffset_top;
-  long int Xims;
   eptrblock *Xeptrb;
   int Xflags;
   unsigned int Xrdepth;
@@ -379,8 +377,6 @@ typedef struct heapframe {
   BOOL Xcur_is_word;
   BOOL Xcondition;
   BOOL Xprev_is_word;
-
-  unsigned long int Xoriginal_ims;
 
 #ifdef SUPPORT_UCP
   int Xprop_type;
@@ -467,7 +463,6 @@ Arguments:
    markptr     pointer to the most recent MARK name, or NULL
    offset_top  current top pointer
    md          pointer to "static" info for the match
-   ims         current /i, /m, and /s options
    eptrb       pointer to chain of blocks containing eptr at start of
                  brackets - for testing for empty matches
    flags       can contain
@@ -485,8 +480,8 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 
 static int
 match(REGISTER USPTR eptr, REGISTER const uschar *ecode, USPTR mstart,
-  const uschar *markptr, int offset_top, match_data *md, unsigned long int ims,
-  eptrblock *eptrb, int flags, unsigned int rdepth)
+  const uschar *markptr, int offset_top, match_data *md, eptrblock *eptrb, 
+  int flags, unsigned int rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
 so they can be ordinary variables in all cases. Mark some of them with
@@ -498,6 +493,7 @@ register unsigned int c;   /* Character values not kept over RMATCH() calls */
 register BOOL utf8;        /* Local copy of UTF-8 flag for speed */
 
 BOOL minimize, possessive; /* Quantifier options */
+BOOL caseless;
 int condcode;
 
 /* When recursion is not being used, all "local" variables that have to be
@@ -517,7 +513,6 @@ frame->Xecode = ecode;
 frame->Xmstart = mstart;
 frame->Xmarkptr = markptr;
 frame->Xoffset_top = offset_top;
-frame->Xims = ims;
 frame->Xeptrb = eptrb;
 frame->Xflags = flags;
 frame->Xrdepth = rdepth;
@@ -533,7 +528,6 @@ HEAP_RECURSE:
 #define mstart             frame->Xmstart
 #define markptr            frame->Xmarkptr
 #define offset_top         frame->Xoffset_top
-#define ims                frame->Xims
 #define eptrb              frame->Xeptrb
 #define flags              frame->Xflags
 #define rdepth             frame->Xrdepth
@@ -556,8 +550,6 @@ HEAP_RECURSE:
 #define cur_is_word        frame->Xcur_is_word
 #define condition          frame->Xcondition
 #define prev_is_word       frame->Xprev_is_word
-
-#define original_ims       frame->Xoriginal_ims
 
 #ifdef SUPPORT_UCP
 #define prop_type          frame->Xprop_type
@@ -611,8 +603,6 @@ recursion_info new_recursive;      /* within blocks below are for variables  */
 BOOL cur_is_word;                  /* a recursive call to RMATCH().          */
 BOOL condition;
 BOOL prev_is_word;
-
-unsigned long int original_ims;
 
 #ifdef SUPPORT_UCP
 int prop_type;
@@ -676,8 +666,6 @@ haven't exceeded the recursive call limit. */
 if (md->match_call_count++ >= md->match_limit) RRETURN(PCRE_ERROR_MATCHLIMIT);
 if (rdepth >= md->match_limit_recursion) RRETURN(PCRE_ERROR_RECURSIONLIMIT);
 
-original_ims = ims;    /* Save for resetting on ')' */
-
 /* At the start of a group with an unlimited repeat that may match an empty
 string, the match_cbegroup flag is set. When this is the case, add the current
 subject pointer to the chain of such remembered pointers, to be checked when we
@@ -706,7 +694,7 @@ for (;;)
     case OP_MARK:
     markptr = ecode + 2;
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM55);
+      eptrb, flags, RM55);
 
     /* A return of MATCH_SKIP_ARG means that matching failed at SKIP with an
     argument, and we must check whether that argument matches this MARK's
@@ -732,7 +720,7 @@ for (;;)
 
     case OP_COMMIT:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-      ims, eptrb, flags, RM52);
+      eptrb, flags, RM52);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE &&
         rrc != MATCH_SKIP && rrc != MATCH_SKIP_ARG &&
         rrc != MATCH_THEN)
@@ -743,13 +731,13 @@ for (;;)
 
     case OP_PRUNE:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-      ims, eptrb, flags, RM51);
+      eptrb, flags, RM51);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
     MRRETURN(MATCH_PRUNE);
 
     case OP_PRUNE_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM56);
+      eptrb, flags, RM56);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
     md->mark = ecode + 2;
     RRETURN(MATCH_PRUNE);
@@ -758,7 +746,7 @@ for (;;)
 
     case OP_SKIP:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-      ims, eptrb, flags, RM53);
+      eptrb, flags, RM53);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
       RRETURN(rrc);
     md->start_match_ptr = eptr;   /* Pass back current position */
@@ -766,7 +754,7 @@ for (;;)
 
     case OP_SKIP_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
-      ims, eptrb, flags, RM57);
+      eptrb, flags, RM57);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
       RRETURN(rrc);
 
@@ -785,14 +773,14 @@ for (;;)
 
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-      ims, eptrb, flags, RM54);
+      eptrb, flags, RM54);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->start_match_ptr = ecode - GET(ecode, 1);
     MRRETURN(MATCH_THEN);
 
     case OP_THEN_ARG:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1+LINK_SIZE],
-      offset_top, md, ims, eptrb, flags, RM58);
+      offset_top, md, eptrb, flags, RM58);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->start_match_ptr = ecode - GET(ecode, 1);
     md->mark = ecode + LINK_SIZE + 2;
@@ -839,7 +827,7 @@ for (;;)
       do
         {
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-          ims, eptrb, flags, RM1);
+          eptrb, flags, RM1);
         if (rrc != MATCH_NOMATCH &&
             (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           RRETURN(rrc);
@@ -892,8 +880,8 @@ for (;;)
 
         /* Possibly empty group; can't use tail recursion. */
 
-        RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, ims,
-          eptrb, flags, RM48);
+        RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb, 
+          flags, RM48);
         if (rrc == MATCH_NOMATCH) md->mark = markptr;
         RRETURN(rrc);
         }
@@ -901,8 +889,8 @@ for (;;)
       /* For non-final alternatives, continue the loop for a NOMATCH result;
       otherwise return. */
 
-      RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, ims,
-        eptrb, flags, RM2);
+      RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb, 
+        flags, RM2);
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
@@ -1098,7 +1086,7 @@ for (;;)
 
     else
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL,
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL,
           match_condassert, RM3);
       if (rrc == MATCH_MATCH)
         {
@@ -1128,7 +1116,7 @@ for (;;)
       ecode += 1 + LINK_SIZE;
       if (op == OP_SCOND)        /* Possibly empty group */
         {
-        RMATCH(eptr, ecode, offset_top, md, ims, eptrb, match_cbegroup, RM49);
+        RMATCH(eptr, ecode, offset_top, md, eptrb, match_cbegroup, RM49);
         RRETURN(rrc);
         }
       else                       /* Group must match something */
@@ -1182,7 +1170,6 @@ for (;;)
       memmove(md->offset_vector, rec->offset_save,
         rec->saved_max * sizeof(int));
       offset_top = rec->save_offset_top;
-      ims = original_ims;
       ecode = rec->after_call;
       break;
       }
@@ -1210,14 +1197,6 @@ for (;;)
     rrc = (op == OP_END)? MATCH_MATCH : MATCH_ACCEPT;
     MRRETURN(rrc);
 
-    /* Change option settings */
-
-    case OP_OPT:
-    ims = ecode[1];
-    ecode += 2;
-    DPRINTF(("ims set to %02lx\n", ims));
-    break;
-
     /* Assertion brackets. Check the alternative branches in turn - the
     matching won't pass the KET for an assertion. If any one branch matches,
     the assertion is true. Lookbehind assertions have an OP_REVERSE item at the
@@ -1228,7 +1207,7 @@ for (;;)
     case OP_ASSERTBACK:
     do
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, 0,
         RM4);
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
         {
@@ -1263,7 +1242,7 @@ for (;;)
     case OP_ASSERTBACK_NOT:
     do
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, 0,
         RM5);
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) MRRETURN(MATCH_NOMATCH);
       if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
@@ -1401,7 +1380,7 @@ for (;;)
       do
         {
         RMATCH(eptr, callpat + _pcre_OP_lengths[*callpat], offset_top,
-          md, ims, eptrb, flags, RM6);
+          md, eptrb, flags, RM6);
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
           DPRINTF(("Recursion matched\n"));
@@ -1448,7 +1427,7 @@ for (;;)
 
     do
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM7);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, 0, RM7);
       if (rrc == MATCH_MATCH)  /* Note: _not_ MATCH_ACCEPT */
         {
         mstart = md->start_match_ptr;
@@ -1487,19 +1466,11 @@ for (;;)
 
     /* The repeating kets try the rest of the pattern or restart from the
     preceding bracket, in the appropriate order. The second "call" of match()
-    uses tail recursion, to avoid using another stack frame. We need to reset
-    any options that changed within the bracket before re-running it, so
-    check the next opcode. */
-
-    if (ecode[1+LINK_SIZE] == OP_OPT)
-      {
-      ims = (ims & ~PCRE_IMS) | ecode[4];
-      DPRINTF(("ims set to %02lx at group repeat\n", ims));
-      }
+    uses tail recursion, to avoid using another stack frame. */
 
     if (*ecode == OP_KETRMIN)
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM8);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, 0, RM8);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode = prev;
       flags = 0;
@@ -1507,7 +1478,7 @@ for (;;)
       }
     else  /* OP_KETRMAX */
       {
-      RMATCH(eptr, prev, offset_top, md, ims, eptrb, match_cbegroup, RM9);
+      RMATCH(eptr, prev, offset_top, md, eptrb, match_cbegroup, RM9);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
       flags = 0;
@@ -1531,7 +1502,7 @@ for (;;)
     case OP_BRAZERO:
       {
       next = ecode+1;
-      RMATCH(eptr, next, offset_top, md, ims, eptrb, 0, RM10);
+      RMATCH(eptr, next, offset_top, md, eptrb, 0, RM10);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       do next += GET(next,1); while (*next == OP_ALT);
       ecode = next + 1 + LINK_SIZE;
@@ -1542,7 +1513,7 @@ for (;;)
       {
       next = ecode+1;
       do next += GET(next, 1); while (*next == OP_ALT);
-      RMATCH(eptr, next + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0, RM11);
+      RMATCH(eptr, next + 1+LINK_SIZE, offset_top, md, eptrb, 0, RM11);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode++;
       }
@@ -1626,16 +1597,9 @@ for (;;)
           rec->saved_max * sizeof(int));
         offset_top = rec->save_offset_top;
         ecode = rec->after_call;
-        ims = original_ims;
         break;
         }
       }
-
-    /* For both capturing and non-capturing groups, reset the value of the ims
-    flags, in case they got changed during the group. */
-
-    ims = original_ims;
-    DPRINTF(("ims reset to %02lx\n", ims));
 
     /* For a non-repeating ket, just continue at this level. This also
     happens for a repeating ket if no characters were matched in the group.
@@ -1658,11 +1622,11 @@ for (;;)
 
     if (*ecode == OP_KETRMIN)
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, eptrb, 0, RM12);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, 0, RM12);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       if (flags != 0)    /* Could match an empty string */
         {
-        RMATCH(eptr, prev, offset_top, md, ims, eptrb, flags, RM50);
+        RMATCH(eptr, prev, offset_top, md, eptrb, flags, RM50);
         RRETURN(rrc);
         }
       ecode = prev;
@@ -1670,7 +1634,7 @@ for (;;)
       }
     else  /* OP_KETRMAX */
       {
-      RMATCH(eptr, prev, offset_top, md, ims, eptrb, flags, RM13);
+      RMATCH(eptr, prev, offset_top, md, eptrb, flags, RM13);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
       flags = 0;
@@ -1678,24 +1642,25 @@ for (;;)
       }
     /* Control never gets here */
 
-    /* Start of subject unless notbol, or after internal newline if multiline */
+    /* Not multiline mode: start of subject assertion, unless notbol. */
 
     case OP_CIRC:
     if (md->notbol && eptr == md->start_subject) MRRETURN(MATCH_NOMATCH);
-    if ((ims & PCRE_MULTILINE) != 0)
-      {
-      if (eptr != md->start_subject &&
-          (eptr == md->end_subject || !WAS_NEWLINE(eptr)))
-        MRRETURN(MATCH_NOMATCH);
-      ecode++;
-      break;
-      }
-    /* ... else fall through */
-
+     
     /* Start of subject assertion */
 
     case OP_SOD:
     if (eptr != md->start_subject) MRRETURN(MATCH_NOMATCH);
+    ecode++;
+    break;
+    
+    /* Multiline mode: start of subject unless notbol, or after any newline. */
+
+    case OP_CIRCM:
+    if (md->notbol && eptr == md->start_subject) MRRETURN(MATCH_NOMATCH);
+    if (eptr != md->start_subject &&
+        (eptr == md->end_subject || !WAS_NEWLINE(eptr)))
+      MRRETURN(MATCH_NOMATCH);
     ecode++;
     break;
 
@@ -1713,27 +1678,26 @@ for (;;)
     ecode++;
     break;
 
-    /* Assert before internal newline if multiline, or before a terminating
-    newline unless endonly is set, else end of subject unless noteol is set. */
+    /* Multiline mode: assert before any newline, or before end of subject
+    unless noteol is set. */
 
-    case OP_DOLL:
-    if ((ims & PCRE_MULTILINE) != 0)
-      {
-      if (eptr < md->end_subject)
-        { if (!IS_NEWLINE(eptr)) MRRETURN(MATCH_NOMATCH); }
-      else
-        {
-        if (md->noteol) MRRETURN(MATCH_NOMATCH);
-        SCHECK_PARTIAL();
-        }
-      ecode++;
-      break;
-      }
-    else  /* Not multiline */
+    case OP_DOLLM:
+    if (eptr < md->end_subject)
+      { if (!IS_NEWLINE(eptr)) MRRETURN(MATCH_NOMATCH); }
+    else
       {
       if (md->noteol) MRRETURN(MATCH_NOMATCH);
-      if (!md->endonly) goto ASSERT_NL_OR_EOS;
+      SCHECK_PARTIAL();
       }
+    ecode++;
+    break;
+
+    /* Not multiline mode: assert before a terminating newline or before end of 
+    subject unless noteol is set. */
+
+    case OP_DOLL:
+    if (md->noteol) MRRETURN(MATCH_NOMATCH);
+    if (!md->endonly) goto ASSERT_NL_OR_EOS;
 
     /* ... else fall through for endonly */
 
@@ -2270,6 +2234,8 @@ for (;;)
     loops). */
 
     case OP_REF:
+    case OP_REFI: 
+    caseless = op == OP_REFI; 
     offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
     ecode += 3;
 
@@ -2317,7 +2283,7 @@ for (;;)
       break;
 
       default:               /* No repeat follows */
-      if ((length = match_ref(offset, eptr, length, md, ims)) < 0)
+      if ((length = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
         CHECK_PARTIAL();
         MRRETURN(MATCH_NOMATCH);
@@ -2338,7 +2304,7 @@ for (;;)
     for (i = 1; i <= min; i++)
       {
       int slength; 
-      if ((slength = match_ref(offset, eptr, length, md, ims)) < 0)
+      if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
         CHECK_PARTIAL();
         MRRETURN(MATCH_NOMATCH);
@@ -2358,10 +2324,10 @@ for (;;)
       for (fi = min;; fi++)
         {
         int slength; 
-        RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM14);
+        RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM14);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         if (fi >= max) MRRETURN(MATCH_NOMATCH);
-        if ((slength = match_ref(offset, eptr, length, md, ims)) < 0)
+        if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
           CHECK_PARTIAL();
           MRRETURN(MATCH_NOMATCH);
@@ -2379,7 +2345,7 @@ for (;;)
       for (i = min; i < max; i++)
         {
         int slength; 
-        if ((slength = match_ref(offset, eptr, length, md, ims)) < 0)
+        if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
           CHECK_PARTIAL();
           break;
@@ -2388,7 +2354,7 @@ for (;;)
         }
       while (eptr >= pp)
         {
-        RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM15);
+        RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM15);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         eptr -= length;
         }
@@ -2498,7 +2464,7 @@ for (;;)
           {
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM16);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM16);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -2523,7 +2489,7 @@ for (;;)
           {
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM17);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM17);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -2569,7 +2535,7 @@ for (;;)
             }
           for (;;)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM18);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM18);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (eptr-- == pp) break;        /* Stop if tried at original pos */
             BACKCHAR(eptr);
@@ -2592,7 +2558,7 @@ for (;;)
             }
           while (eptr >= pp)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM19);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM19);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
             }
@@ -2668,7 +2634,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM20);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM20);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) MRRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
@@ -2701,7 +2667,7 @@ for (;;)
           }
         for(;;)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM21);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM21);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           if (utf8) BACKCHAR(eptr);
@@ -2746,7 +2712,7 @@ for (;;)
 
     /* Match a single character, caselessly */
 
-    case OP_CHARNC:
+    case OP_CHARI:
 #ifdef SUPPORT_UTF8
     if (utf8)
       {
@@ -2806,23 +2772,28 @@ for (;;)
     /* Match a single character repeatedly. */
 
     case OP_EXACT:
+    case OP_EXACTI:
     min = max = GET2(ecode, 1);
     ecode += 3;
     goto REPEATCHAR;
 
     case OP_POSUPTO:
+    case OP_POSUPTOI:
     possessive = TRUE;
     /* Fall through */
 
     case OP_UPTO:
+    case OP_UPTOI:
     case OP_MINUPTO:
+    case OP_MINUPTOI:
     min = 0;
     max = GET2(ecode, 1);
-    minimize = *ecode == OP_MINUPTO;
+    minimize = *ecode == OP_MINUPTO || *ecode == OP_MINUPTOI;
     ecode += 3;
     goto REPEATCHAR;
 
     case OP_POSSTAR:
+    case OP_POSSTARI:
     possessive = TRUE;
     min = 0;
     max = INT_MAX;
@@ -2830,6 +2801,7 @@ for (;;)
     goto REPEATCHAR;
 
     case OP_POSPLUS:
+    case OP_POSPLUSI:
     possessive = TRUE;
     min = 1;
     max = INT_MAX;
@@ -2837,6 +2809,7 @@ for (;;)
     goto REPEATCHAR;
 
     case OP_POSQUERY:
+    case OP_POSQUERYI:
     possessive = TRUE;
     min = 0;
     max = 1;
@@ -2844,14 +2817,19 @@ for (;;)
     goto REPEATCHAR;
 
     case OP_STAR:
+    case OP_STARI:
     case OP_MINSTAR:
+    case OP_MINSTARI:
     case OP_PLUS:
+    case OP_PLUSI:
     case OP_MINPLUS:
+    case OP_MINPLUSI:
     case OP_QUERY:
+    case OP_QUERYI:
     case OP_MINQUERY:
-    c = *ecode++ - OP_STAR;
+    case OP_MINQUERYI:
+    c = *ecode++ - ((op < OP_STARI)? OP_STAR : OP_STARI);
     minimize = (c & 1) != 0;
-
     min = rep_min[c];                 /* Pick up values from tables; */
     max = rep_max[c];                 /* zero for max => infinity */
     if (max == 0) max = INT_MAX;
@@ -2874,7 +2852,7 @@ for (;;)
         {
 #ifdef SUPPORT_UCP
         unsigned int othercase;
-        if ((ims & PCRE_CASELESS) != 0 &&
+        if (op >= OP_STARI &&     /* Caseless */
             (othercase = UCD_OTHERCASE(fc)) != fc)
           oclength = _pcre_ord2utf8(othercase, occhars);
         else oclength = 0;
@@ -2902,7 +2880,7 @@ for (;;)
           {
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM22);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM22);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr <= md->end_subject - length &&
@@ -2944,7 +2922,7 @@ for (;;)
 
           for(;;)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM23);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM23);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (eptr == pp) { MRRETURN(MATCH_NOMATCH); }
 #ifdef SUPPORT_UCP
@@ -2981,7 +2959,7 @@ for (;;)
     DPRINTF(("matching %c{%d,%d} against subject %.*s\n", fc, min, max,
       max, eptr));
 
-    if ((ims & PCRE_CASELESS) != 0)
+    if (op >= OP_STARI)  /* Caseless */
       {
       fc = md->lcc[fc];
       for (i = 1; i <= min; i++)
@@ -2998,7 +2976,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM24);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM24);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) MRRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
@@ -3028,7 +3006,7 @@ for (;;)
 
         while (eptr >= pp)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM25);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM25);
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           }
@@ -3057,7 +3035,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM26);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM26);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) MRRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
@@ -3086,7 +3064,7 @@ for (;;)
 
         while (eptr >= pp)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM27);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM27);
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           }
@@ -3099,6 +3077,7 @@ for (;;)
     checking can be multibyte. */
 
     case OP_NOT:
+    case OP_NOTI: 
     if (eptr >= md->end_subject)
       {
       SCHECK_PARTIAL();
@@ -3106,7 +3085,7 @@ for (;;)
       }
     ecode++;
     GETCHARINCTEST(c, eptr);
-    if ((ims & PCRE_CASELESS) != 0)
+    if (op == OP_NOTI)         /* The caseless case */
       {
 #ifdef SUPPORT_UTF8
       if (c < 256)
@@ -3114,7 +3093,7 @@ for (;;)
       c = md->lcc[c];
       if (md->lcc[*ecode++] == c) MRRETURN(MATCH_NOMATCH);
       }
-    else
+    else    /* Caseful */
       {
       if (*ecode++ == c) MRRETURN(MATCH_NOMATCH);
       }
@@ -3128,19 +3107,23 @@ for (;;)
     about... */
 
     case OP_NOTEXACT:
+    case OP_NOTEXACTI:
     min = max = GET2(ecode, 1);
     ecode += 3;
     goto REPEATNOTCHAR;
 
     case OP_NOTUPTO:
+    case OP_NOTUPTOI:
     case OP_NOTMINUPTO:
+    case OP_NOTMINUPTOI:
     min = 0;
     max = GET2(ecode, 1);
-    minimize = *ecode == OP_NOTMINUPTO;
+    minimize = *ecode == OP_NOTMINUPTO || *ecode == OP_NOTMINUPTOI;
     ecode += 3;
     goto REPEATNOTCHAR;
 
     case OP_NOTPOSSTAR:
+    case OP_NOTPOSSTARI:
     possessive = TRUE;
     min = 0;
     max = INT_MAX;
@@ -3148,6 +3131,7 @@ for (;;)
     goto REPEATNOTCHAR;
 
     case OP_NOTPOSPLUS:
+    case OP_NOTPOSPLUSI:
     possessive = TRUE;
     min = 1;
     max = INT_MAX;
@@ -3155,6 +3139,7 @@ for (;;)
     goto REPEATNOTCHAR;
 
     case OP_NOTPOSQUERY:
+    case OP_NOTPOSQUERYI:
     possessive = TRUE;
     min = 0;
     max = 1;
@@ -3162,6 +3147,7 @@ for (;;)
     goto REPEATNOTCHAR;
 
     case OP_NOTPOSUPTO:
+    case OP_NOTPOSUPTOI:
     possessive = TRUE;
     min = 0;
     max = GET2(ecode, 1);
@@ -3169,12 +3155,18 @@ for (;;)
     goto REPEATNOTCHAR;
 
     case OP_NOTSTAR:
+    case OP_NOTSTARI:
     case OP_NOTMINSTAR:
+    case OP_NOTMINSTARI:
     case OP_NOTPLUS:
+    case OP_NOTPLUSI:
     case OP_NOTMINPLUS:
+    case OP_NOTMINPLUSI:
     case OP_NOTQUERY:
+    case OP_NOTQUERYI:
     case OP_NOTMINQUERY:
-    c = *ecode++ - OP_NOTSTAR;
+    case OP_NOTMINQUERYI:
+    c = *ecode++ - ((op >= OP_NOTSTARI)? OP_NOTSTARI: OP_NOTSTAR);
     minimize = (c & 1) != 0;
     min = rep_min[c];                 /* Pick up values from tables; */
     max = rep_max[c];                 /* zero for max => infinity */
@@ -3196,7 +3188,7 @@ for (;;)
     DPRINTF(("negative matching %c{%d,%d} against subject %.*s\n", fc, min, max,
       max, eptr));
 
-    if ((ims & PCRE_CASELESS) != 0)
+    if (op >= OP_NOTSTARI)     /* Caseless */
       {
       fc = md->lcc[fc];
 
@@ -3244,7 +3236,7 @@ for (;;)
           register unsigned int d;
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM28);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM28);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -3263,7 +3255,7 @@ for (;;)
           {
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM29);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM29);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -3304,7 +3296,7 @@ for (;;)
         if (possessive) continue;
         for(;;)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM30);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM30);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (eptr-- == pp) break;        /* Stop if tried at original pos */
             BACKCHAR(eptr);
@@ -3327,7 +3319,7 @@ for (;;)
           if (possessive) continue;
           while (eptr >= pp)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM31);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM31);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
             }
@@ -3384,7 +3376,7 @@ for (;;)
           register unsigned int d;
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM32);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM32);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -3402,7 +3394,7 @@ for (;;)
           {
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM33);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM33);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -3442,7 +3434,7 @@ for (;;)
           if (possessive) continue;
           for(;;)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM34);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM34);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (eptr-- == pp) break;        /* Stop if tried at original pos */
             BACKCHAR(eptr);
@@ -3465,7 +3457,7 @@ for (;;)
           if (possessive) continue;
           while (eptr >= pp)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM35);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM35);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
             }
@@ -4263,7 +4255,7 @@ for (;;)
           case PT_ANY:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM36);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM36);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4279,7 +4271,7 @@ for (;;)
           case PT_LAMP:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM37);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM37);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4299,7 +4291,7 @@ for (;;)
           case PT_GC:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM38);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM38);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4317,7 +4309,7 @@ for (;;)
           case PT_PC:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM39);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM39);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4335,7 +4327,7 @@ for (;;)
           case PT_SC:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM40);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM40);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4353,7 +4345,7 @@ for (;;)
           case PT_ALNUM:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM59);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM59);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4372,7 +4364,7 @@ for (;;)
           case PT_SPACE:    /* Perl space */
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM60);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM60);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4392,7 +4384,7 @@ for (;;)
           case PT_PXSPACE:  /* POSIX space */
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM61);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM61);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4412,7 +4404,7 @@ for (;;)
           case PT_WORD:
           for (fi = min;; fi++)
             {
-            RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM62);
+            RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM62);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
             if (eptr >= md->end_subject)
@@ -4444,7 +4436,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM41);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM41);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) MRRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
@@ -4476,7 +4468,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM42);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM42);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) MRRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
@@ -4639,7 +4631,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM43);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM43);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) MRRETURN(MATCH_NOMATCH);
           if (eptr >= md->end_subject)
@@ -4937,7 +4929,7 @@ for (;;)
         if (possessive) continue;
         for(;;)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM44);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM44);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           if (utf8) BACKCHAR(eptr);
@@ -4978,7 +4970,7 @@ for (;;)
 
         for(;;)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM45);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM45);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           for (;;)                        /* Move back over one extended */
@@ -5271,7 +5263,7 @@ for (;;)
         if (possessive) continue;
         for(;;)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM46);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM46);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr);
@@ -5484,7 +5476,7 @@ for (;;)
         if (possessive) continue;
         while (eptr >= pp)
           {
-          RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM47);
+          RMATCH(eptr, ecode, offset_top, md, eptrb, 0, RM47);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
           if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' && 
@@ -5556,7 +5548,6 @@ Undefine all the macros that were defined above to handle this. */
 #undef ecode
 #undef mstart
 #undef offset_top
-#undef ims
 #undef eptrb
 #undef flags
 
@@ -5573,8 +5564,6 @@ Undefine all the macros that were defined above to handle this. */
 #undef cur_is_word
 #undef condition
 #undef prev_is_word
-
-#undef original_ims
 
 #undef ctype
 #undef length
@@ -5637,7 +5626,6 @@ int first_byte = -1;
 int req_byte = -1;
 int req_byte2 = -1;
 int newline;
-unsigned long int ims;
 BOOL using_temporary_offsets = FALSE;
 BOOL anchored;
 BOOL startline;
@@ -5853,12 +5841,6 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
     }
   }
 #endif
-
-/* The ims options can vary during the matching as a result of the presence
-of (?ims) items in the pattern. They are kept in a local variable so that
-restoring at the exit of a group is easy. */
-
-ims = re->options & (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL);
 
 /* If the expression has got more back references than the offsets supplied can
 hold, we get a temporary chunk of working store to use during the matching.
@@ -6138,7 +6120,7 @@ for(;;)
   md->start_match_ptr = start_match;
   md->start_used_ptr = start_match;
   md->match_call_count = 0;
-  rc = match(start_match, md->start_code, start_match, NULL, 2, md, ims, NULL,
+  rc = match(start_match, md->start_code, start_match, NULL, 2, md, NULL,
     0, 0);
   if (md->hitend && start_partial == NULL) start_partial = md->start_used_ptr;
 

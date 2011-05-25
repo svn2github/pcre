@@ -160,14 +160,15 @@ for (;;)
     case OP_RREF:
     case OP_NRREF:
     case OP_DEF:
-    case OP_OPT:
     case OP_CALLOUT:
     case OP_SOD:
     case OP_SOM:
     case OP_EOD:
     case OP_EODN:
     case OP_CIRC:
+    case OP_CIRCM:
     case OP_DOLL:
+    case OP_DOLLM:
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
     cc += _pcre_OP_lengths[*cc];
@@ -186,8 +187,9 @@ for (;;)
     /* Handle literal characters and + repetitions */
 
     case OP_CHAR:
-    case OP_CHARNC:
+    case OP_CHARI:
     case OP_NOT:
+    case OP_NOTI:
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -337,6 +339,7 @@ for (;;)
     that case we must set the minimum length to zero. */
 
     case OP_REF:
+    case OP_REFI:
     if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
       {
       ce = cs = (uschar *)_pcre_find_bracket(startcode, utf8, GET2(cc, 1));
@@ -391,23 +394,50 @@ for (;;)
 
     /* Anything else does not or need not match a character. We can get the
     item's length from the table, but for those that can match zero occurrences
-    of a character, we must take special action for UTF-8 characters. */
+    of a character, we must take special action for UTF-8 characters. As it
+    happens, the "NOT" versions of these opcodes are used at present only for
+    ASCII characters, so they could be omitted from this list. However, in
+    future that may change, so we leave them in this special case. */
 
     case OP_UPTO:
+    case OP_UPTOI:
     case OP_NOTUPTO:
+    case OP_NOTUPTOI:
     case OP_MINUPTO:
+    case OP_MINUPTOI:
     case OP_NOTMINUPTO:
+    case OP_NOTMINUPTOI:
     case OP_POSUPTO:
+    case OP_POSUPTOI:
+    case OP_NOTPOSUPTO:
+    case OP_NOTPOSUPTOI:
+
     case OP_STAR:
+    case OP_STARI:
+    case OP_NOTSTAR:
+    case OP_NOTSTARI:
     case OP_MINSTAR:
+    case OP_MINSTARI:
     case OP_NOTMINSTAR:
+    case OP_NOTMINSTARI:
     case OP_POSSTAR:
+    case OP_POSSTARI:
     case OP_NOTPOSSTAR:
+    case OP_NOTPOSSTARI:
+
     case OP_QUERY:
+    case OP_QUERYI:
+    case OP_NOTQUERY:
+    case OP_NOTQUERYI:
     case OP_MINQUERY:
+    case OP_MINQUERYI:
     case OP_NOTMINQUERY:
+    case OP_NOTMINQUERYI:
     case OP_POSQUERY:
+    case OP_POSQUERYI:
     case OP_NOTPOSQUERY:
+    case OP_NOTPOSQUERYI:
+
     cc += _pcre_OP_lengths[op];
 #ifdef SUPPORT_UTF8
     if (utf8 && cc[-1] >= 0xc0) cc += _pcre_utf8_table4[cc[-1] & 0x3f];
@@ -679,13 +709,6 @@ do
       tcode += 1 + LINK_SIZE;
       break;
 
-      /* Skip over an option setting, changing the caseless flag */
-
-      case OP_OPT:
-      caseless = (tcode[1] & PCRE_CASELESS) != 0;
-      tcode += 2;
-      break;
-
       /* BRAZERO does the bracket, but carries on. */
 
       case OP_BRAZERO:
@@ -720,6 +743,15 @@ do
       tcode = set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
       break;
 
+      case OP_STARI:
+      case OP_MINSTARI:
+      case OP_POSSTARI:
+      case OP_QUERYI:
+      case OP_MINQUERYI:
+      case OP_POSQUERYI:
+      tcode = set_table_bit(start_bits, tcode + 1, TRUE, cd, utf8);
+      break;
+
       /* Single-char upto sets the bit and tries the next */
 
       case OP_UPTO:
@@ -728,17 +760,30 @@ do
       tcode = set_table_bit(start_bits, tcode + 3, caseless, cd, utf8);
       break;
 
+      case OP_UPTOI:
+      case OP_MINUPTOI:
+      case OP_POSUPTOI:
+      tcode = set_table_bit(start_bits, tcode + 3, TRUE, cd, utf8);
+      break;
+
       /* At least one single char sets the bit and stops */
 
-      case OP_EXACT:       /* Fall through */
+      case OP_EXACT:
       tcode += 2;
-
+      /* Fall through */
       case OP_CHAR:
-      case OP_CHARNC:
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
       (void)set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
+      try_next = FALSE;
+      break;
+
+      case OP_CHARI:
+      case OP_PLUSI:
+      case OP_MINPLUSI:
+      case OP_POSPLUSI:
+      (void)set_table_bit(start_bits, tcode + 1, TRUE, cd, utf8);
       try_next = FALSE;
       break;
 

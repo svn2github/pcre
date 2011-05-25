@@ -975,4 +975,23 @@ No match
  0: 
  1: 
 
+/(?i:([^b]))(?1)/
+    aa
+ 0: aa
+ 1: a
+    aA     
+ 0: aA
+ 1: a
+    ** Failers
+ 0: **
+ 1: *
+    ab
+No match
+    aB
+No match
+    Ba
+No match
+    ba
+No match
+
 /-- End of testinput11 --/

@@ -1397,9 +1397,9 @@ return rc;
 
 /* This is called by several functions that scan a compiled expression looking
 for a fixed first character, or an anchoring op code etc. It skips over things
-that do not influence this. For some calls, a change of option is important.
-For some calls, it makes sense to skip negative forward and all backward
-assertions, and also the \b assertion; for others it does not.
+that do not influence this. For some calls, it makes sense to skip negative
+forward and all backward assertions, and also the \b assertion; for others it
+does not.
 
 Arguments:
   code         pointer to the start of the group
@@ -1419,12 +1419,6 @@ for (;;)
   {
   switch ((int)*code)
     {
-    case OP_OPT:
-    if (optbit > 0 && ((int)code[1] & optbit) != (*options & optbit))
-      *options = (int)code[1];
-    code += 2;
-    break;
-
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
@@ -1561,7 +1555,6 @@ for (;;)
     case OP_RREF:
     case OP_NRREF:
     case OP_DEF:
-    case OP_OPT:
     case OP_CALLOUT:
     case OP_SOD:
     case OP_SOM:
@@ -1569,7 +1562,9 @@ for (;;)
     case OP_EOD:
     case OP_EODN:
     case OP_CIRC:
+    case OP_CIRCM:
     case OP_DOLL:
+    case OP_DOLLM:
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
     cc += _pcre_OP_lengths[*cc];
@@ -1578,8 +1573,9 @@ for (;;)
     /* Handle literal characters */
 
     case OP_CHAR:
-    case OP_CHARNC:
+    case OP_CHARI:
     case OP_NOT:
+    case OP_NOTI: 
     branchlength++;
     cc += 2;
 #ifdef SUPPORT_UTF8
@@ -1774,20 +1770,33 @@ for (;;)
     if (utf8) switch(c)
       {
       case OP_CHAR:
-      case OP_CHARNC:
+      case OP_CHARI:
       case OP_EXACT:
+      case OP_EXACTI:
       case OP_UPTO:
+      case OP_UPTOI:
       case OP_MINUPTO:
+      case OP_MINUPTOI:
       case OP_POSUPTO:
+      case OP_POSUPTOI:
       case OP_STAR:
+      case OP_STARI:
       case OP_MINSTAR:
+      case OP_MINSTARI:
       case OP_POSSTAR:
+      case OP_POSSTARI:
       case OP_PLUS:
+      case OP_PLUSI:
       case OP_MINPLUS:
+      case OP_MINPLUSI:
       case OP_POSPLUS:
+      case OP_POSPLUSI:
       case OP_QUERY:
+      case OP_QUERYI:
       case OP_MINQUERY:
+      case OP_MINQUERYI:
       case OP_POSQUERY:
+      case OP_POSQUERYI:
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
@@ -1880,20 +1889,33 @@ for (;;)
     if (utf8) switch(c)
       {
       case OP_CHAR:
-      case OP_CHARNC:
+      case OP_CHARI:
       case OP_EXACT:
+      case OP_EXACTI:
       case OP_UPTO:
+      case OP_UPTOI:
       case OP_MINUPTO:
+      case OP_MINUPTOI:
       case OP_POSUPTO:
+      case OP_POSUPTOI:
       case OP_STAR:
+      case OP_STARI:
       case OP_MINSTAR:
+      case OP_MINSTARI:
       case OP_POSSTAR:
+      case OP_POSSTARI:
       case OP_PLUS:
+      case OP_PLUSI:
       case OP_MINPLUS:
+      case OP_MINPLUSI:
       case OP_POSPLUS:
+      case OP_POSPLUSI:
       case OP_QUERY:
+      case OP_QUERYI:
       case OP_MINQUERY:
+      case OP_MINQUERYI:
       case OP_POSQUERY:
+      case OP_POSQUERYI:
       if (code[-1] >= 0xc0) code += _pcre_utf8_table4[code[-1] & 0x3f];
       break;
       }
@@ -2071,8 +2093,9 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_ALLANY:
     case OP_ANYBYTE:
     case OP_CHAR:
-    case OP_CHARNC:
+    case OP_CHARI:
     case OP_NOT:
+    case OP_NOTI:
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -2120,17 +2143,26 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 
 #ifdef SUPPORT_UTF8
     case OP_STAR:
+    case OP_STARI:
     case OP_MINSTAR:
+    case OP_MINSTARI:
     case OP_POSSTAR:
+    case OP_POSSTARI:
     case OP_QUERY:
+    case OP_QUERYI:
     case OP_MINQUERY:
+    case OP_MINQUERYI:
     case OP_POSQUERY:
+    case OP_POSQUERYI:
     if (utf8 && code[1] >= 0xc0) code += _pcre_utf8_table4[code[1] & 0x3f];
     break;
 
     case OP_UPTO:
+    case OP_UPTOI:
     case OP_MINUPTO:
+    case OP_MINUPTOI:
     case OP_POSUPTO:
+    case OP_POSUPTOI:
     if (utf8 && code[3] >= 0xc0) code += _pcre_utf8_table4[code[3] & 0x3f];
     break;
 #endif
@@ -2622,11 +2654,11 @@ if (next >= 0) switch(op_code)
 #endif
   return c != next;
 
-  /* For CHARNC (caseless character) we must check the other case. If we have
+  /* For CHARI (caseless character) we must check the other case. If we have
   Unicode property support, we can use it to test the other case of
   high-valued characters. */
 
-  case OP_CHARNC:
+  case OP_CHARI:
 #ifdef SUPPORT_UTF8
   GETCHARTEST(c, previous);
 #else
@@ -2649,11 +2681,15 @@ if (next >= 0) switch(op_code)
 #endif  /* SUPPORT_UTF8 */
   return (c != cd->fcc[next]);  /* Non-UTF-8 mode */
 
-  /* For OP_NOT, its data is always a single-byte character. */
+  /* For OP_NOT and OP_NOTI, the data is always a single-byte character. These
+  opcodes are not used for multi-byte characters, because they are coded using 
+  an XCLASS instead. */
 
   case OP_NOT:
+  return (c = *previous) == next;
+ 
+  case OP_NOTI: 
   if ((c = *previous) == next) return TRUE;
-  if ((options & PCRE_CASELESS) == 0) return FALSE;
 #ifdef SUPPORT_UTF8
   if (utf8)
     {
@@ -2758,7 +2794,7 @@ replaced by OP_PROP codes when PCRE_UCP is set. */
 switch(op_code)
   {
   case OP_CHAR:
-  case OP_CHARNC:
+  case OP_CHARI:
 #ifdef SUPPORT_UTF8
   GETCHARTEST(c, previous);
 #else
@@ -3222,17 +3258,18 @@ for (;; ptr++)
     the setting of any following char as a first character. */
 
     case CHAR_CIRCUMFLEX_ACCENT:
+    previous = NULL;
     if ((options & PCRE_MULTILINE) != 0)
       {
       if (firstbyte == REQ_UNSET) firstbyte = REQ_NONE;
+      *code++ = OP_CIRCM;
       }
-    previous = NULL;
-    *code++ = OP_CIRC;
+    else *code++ = OP_CIRC;
     break;
 
     case CHAR_DOLLAR_SIGN:
     previous = NULL;
-    *code++ = OP_DOLL;
+    *code++ = ((options & PCRE_MULTILINE) != 0)? OP_DOLLM : OP_DOLL;
     break;
 
     /* There can never be a first char if '.' is first, whatever happens about
@@ -3978,15 +4015,15 @@ for (;; ptr++)
 
     In UTF-8 mode, we can optimize the negative case only if there were no
     characters >= 128 because OP_NOT and the related opcodes like OP_NOTSTAR
-    operate on single-bytes only. This is an historical hangover. Maybe one day
-    we can tidy these opcodes to handle multi-byte characters.
+    operate on single-bytes characters only. This is an historical hangover.
+    Maybe one day we can tidy these opcodes to handle multi-byte characters.
 
     The optimization throws away the bit map. We turn the item into a
-    1-character OP_CHAR[NC] if it's positive, or OP_NOT if it's negative. Note
-    that OP_NOT does not support multibyte characters. In the positive case, it
-    can cause firstbyte to be set. Otherwise, there can be no first char if
-    this item is first, whatever repeat count may follow. In the case of
-    reqbyte, save the previous value for reinstating. */
+    1-character OP_CHAR[I] if it's positive, or OP_NOT[I] if it's negative.
+    Note that OP_NOT[I] does not support multibyte characters. In the positive
+    case, it can cause firstbyte to be set. Otherwise, there can be no first
+    char if this item is first, whatever repeat count may follow. In the case
+    of reqbyte, save the previous value for reinstating. */
 
 #ifdef SUPPORT_UTF8
     if (class_charcount == 1 && !class_utf8 &&
@@ -3997,13 +4034,13 @@ for (;; ptr++)
       {
       zeroreqbyte = reqbyte;
 
-      /* The OP_NOT opcode works on one-byte characters only. */
+      /* The OP_NOT[I] opcodes work on one-byte characters only. */
 
       if (negate_class)
         {
         if (firstbyte == REQ_UNSET) firstbyte = REQ_NONE;
         zerofirstbyte = firstbyte;
-        *code++ = OP_NOT;
+        *code++ = ((options & PCRE_CASELESS) != 0)? OP_NOTI: OP_NOT;
         *code++ = class_lastchar;
         break;
         }
@@ -4161,8 +4198,10 @@ for (;; ptr++)
     the first thing in a branch because the x will have gone into firstbyte
     instead.  */
 
-    if (*previous == OP_CHAR || *previous == OP_CHARNC)
+    if (*previous == OP_CHAR || *previous == OP_CHARI)
       {
+      op_type = (*previous == OP_CHAR)? 0 : OP_STARI - OP_STAR;
+        
       /* Deal with UTF-8 characters that take up more than one byte. It's
       easier to write this out separately than try to macrify it. Use c to
       hold the length of the character in bytes, plus 0x80 to flag that it's a
@@ -4207,12 +4246,12 @@ for (;; ptr++)
     /* If previous was a single negated character ([^a] or similar), we use
     one of the special opcodes, replacing it. The code is shared with single-
     character repeats by setting opt_type to add a suitable offset into
-    repeat_type. We can also test for auto-possessification. OP_NOT is
-    currently used only for single-byte chars. */
+    repeat_type. We can also test for auto-possessification. OP_NOT and OP_NOTI 
+    are currently used only for single-byte chars. */
 
-    else if (*previous == OP_NOT)
+    else if (*previous == OP_NOT || *previous == OP_NOTI)
       {
-      op_type = OP_NOTSTAR - OP_STAR;  /* Use "not" opcodes */
+      op_type = ((*previous == OP_NOT)? OP_NOTSTAR : OP_NOTSTARI) - OP_STAR;
       c = previous[1];
       if (!possessive_quantifier &&
           repeat_max < 0 &&
@@ -4409,7 +4448,8 @@ for (;; ptr++)
 #ifdef SUPPORT_UTF8
              *previous == OP_XCLASS ||
 #endif
-             *previous == OP_REF)
+             *previous == OP_REF ||
+             *previous == OP_REFI)
       {
       if (repeat_max == 0)
         {
@@ -4463,9 +4503,7 @@ for (;; ptr++)
 
       /* If the maximum repeat count is unlimited, find the end of the bracket
       by scanning through from the start, and compute the offset back to it
-      from the current code pointer. There may be an OP_OPT setting following
-      the final KET, so we can't find the end just by going back from the code
-      pointer. */
+      from the current code pointer. */
 
       if (repeat_max == -1)
         {
@@ -4765,15 +4803,25 @@ for (;; ptr++)
         case OP_QUERY: *tempcode = OP_POSQUERY; break;
         case OP_UPTO:  *tempcode = OP_POSUPTO; break;
 
-        case OP_TYPESTAR:  *tempcode = OP_TYPEPOSSTAR; break;
-        case OP_TYPEPLUS:  *tempcode = OP_TYPEPOSPLUS; break;
-        case OP_TYPEQUERY: *tempcode = OP_TYPEPOSQUERY; break;
-        case OP_TYPEUPTO:  *tempcode = OP_TYPEPOSUPTO; break;
+        case OP_STARI:  *tempcode = OP_POSSTARI; break;
+        case OP_PLUSI:  *tempcode = OP_POSPLUSI; break;
+        case OP_QUERYI: *tempcode = OP_POSQUERYI; break;
+        case OP_UPTOI:  *tempcode = OP_POSUPTOI; break;
 
         case OP_NOTSTAR:  *tempcode = OP_NOTPOSSTAR; break;
         case OP_NOTPLUS:  *tempcode = OP_NOTPOSPLUS; break;
         case OP_NOTQUERY: *tempcode = OP_NOTPOSQUERY; break;
         case OP_NOTUPTO:  *tempcode = OP_NOTPOSUPTO; break;
+
+        case OP_NOTSTARI:  *tempcode = OP_NOTPOSSTARI; break;
+        case OP_NOTPLUSI:  *tempcode = OP_NOTPOSPLUSI; break;
+        case OP_NOTQUERYI: *tempcode = OP_NOTPOSQUERYI; break;
+        case OP_NOTUPTOI:  *tempcode = OP_NOTPOSUPTOI; break;
+
+        case OP_TYPESTAR:  *tempcode = OP_TYPEPOSSTAR; break;
+        case OP_TYPEPLUS:  *tempcode = OP_TYPEPOSPLUS; break;
+        case OP_TYPEQUERY: *tempcode = OP_TYPEPOSQUERY; break;
+        case OP_TYPEUPTO:  *tempcode = OP_TYPEPOSUPTO; break;
 
         /* Because we are moving code along, we must ensure that any
         pending recursive references are updated. */
@@ -5679,11 +5727,6 @@ for (;; ptr++)
             }
           else
             {
-            if ((options & PCRE_IMS) != (newoptions & PCRE_IMS))
-              {
-              *code++ = OP_OPT;
-              *code++ = newoptions & PCRE_IMS;
-              }
             greedy_default = ((newoptions & PCRE_UNGREEDY) != 0);
             greedy_non_default = greedy_default ^ 1;
             req_caseopt = ((newoptions & PCRE_CASELESS) != 0)? REQ_CASELESS : 0;
@@ -6021,7 +6064,7 @@ for (;; ptr++)
         HANDLE_REFERENCE:    /* Come here from named backref handling */
         if (firstbyte == REQ_UNSET) firstbyte = REQ_NONE;
         previous = code;
-        *code++ = OP_REF;
+        *code++ = ((options & PCRE_CASELESS) != 0)? OP_REFI : OP_REF;
         PUT2INC(code, 0, recno);
         cd->backref_map |= (recno < 32)? (1 << recno) : 1;
         if (recno > cd->top_backref) cd->top_backref = recno;
@@ -6129,7 +6172,7 @@ for (;; ptr++)
 
     ONE_CHAR:
     previous = code;
-    *code++ = ((options & PCRE_CASELESS) != 0)? OP_CHARNC : OP_CHAR;
+    *code++ = ((options & PCRE_CASELESS) != 0)? OP_CHARI : OP_CHAR;
     for (c = 0; c < mclength; c++) *code++ = mcbuffer[c];
 
     /* Remember if \r or \n were seen */
@@ -6193,11 +6236,6 @@ return FALSE;
 /* On entry, ptr is pointing past the bracket character, but on return it
 points to the closing bracket, or vertical bar, or end of string. The code
 variable is pointing at the byte into which the BRA operator has been stored.
-If the ims options are changed at the start (for a (?ims: group) or during any
-branch, we need to insert an OP_OPT item at the start of every following branch
-to ensure they get set correctly at run time, and also pass the new options
-into every subsequent branch compile.
-
 This function is used during the pre-compile phase when we are trying to find
 out the amount of memory needed, as well as during the real compile phase. The
 value of lengthptr distinguishes the two phases.
@@ -6288,15 +6326,6 @@ for (;;)
   uses the same numbers. */
 
   if (reset_bracount) cd->bracount = orig_bracount;
-
-  /* Handle a change of ims options at the start of the branch */
-
-  if ((options & PCRE_IMS) != oldims)
-    {
-    *code++ = OP_OPT;
-    *code++ = options & PCRE_IMS;
-    length += 2;
-    }
 
   /* Set up dummy OP_REVERSE if lookbehind assertion */
 
@@ -6454,15 +6483,6 @@ for (;;)
       cd->open_caps = cd->open_caps->next;
       }
 
-    /* Reset options if needed. */
-
-    if ((options & PCRE_IMS) != oldims && *ptr == CHAR_RIGHT_PARENTHESIS)
-      {
-      *code++ = OP_OPT;
-      *code++ = oldims;
-      length += 2;
-      }
-
     /* Retain the highest bracket number, in case resetting was used. */
 
     cd->bracount = max_bracount;
@@ -6522,8 +6542,8 @@ for (;;)
 /* Try to find out if this is an anchored regular expression. Consider each
 alternative branch. If they all start with OP_SOD or OP_CIRC, or with a bracket
 all of whose alternatives start with OP_SOD or OP_CIRC (recurse ad lib), then
-it's anchored. However, if this is a multiline pattern, then only OP_SOD
-counts, since OP_CIRC can match in the middle.
+it's anchored. However, if this is a multiline pattern, then only OP_SOD will
+be found, because ^ generates OP_CIRCM in that mode.
 
 We can also consider a regex to be anchored if OP_SOM starts all its branches.
 This is the code for \G, which means "match at start of match position, taking
@@ -6597,9 +6617,7 @@ do {
 
    /* Check for explicit anchoring */
 
-   else if (op != OP_SOD && op != OP_SOM &&
-           ((*options & PCRE_MULTILINE) != 0 || op != OP_CIRC))
-     return FALSE;
+   else if (op != OP_SOD && op != OP_SOM && op != OP_CIRC) return FALSE;
    code += GET(code, 1);
    }
 while (*code == OP_ALT);   /* Loop for each alternative */
@@ -6699,7 +6717,7 @@ do {
 
    /* Check for explicit circumflex */
 
-   else if (op != OP_CIRC) return FALSE;
+   else if (op != OP_CIRC && op != OP_CIRCM) return FALSE;
 
    /* Move on to the next alternative */
 
@@ -6760,7 +6778,7 @@ do {
      scode += 2;
 
      case OP_CHAR:
-     case OP_CHARNC:
+     case OP_CHARI:
      case OP_PLUS:
      case OP_MINPLUS:
      case OP_POSPLUS:

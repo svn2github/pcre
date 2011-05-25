@@ -4085,4 +4085,49 @@
 /(abc)\1/
    abc
 
+/[^a]*/i
+    12abc
+    12ABC
+
+/[^a]*+/i
+    12abc
+    12ABC
+
+/[^a]*?X/i
+    ** Failers
+    12abc
+    12ABC
+    
+/[^a]+?X/i   
+    ** Failers
+    12abc
+    12ABC
+
+/[^a]?X/i
+    12aXbcX
+    12AXBCX
+    BCX 
+
+/[^a]??X/i
+    12aXbcX
+    12AXBCX
+    BCX
+    
+/[^a]?+X/i
+    12aXbcX
+    12AXBCX
+    BCX 
+
+/[^a]{2,3}/i
+    abcdef
+    ABCDEF  
+
+/[^a]{2,3}?/i
+    abcdef
+    ABCDEF  
+
+/[^a]{2,3}+/i
+    abcdef
+    ABCDEF  
+
 /-- End of testinput1 --/

@@ -6674,4 +6674,74 @@ No match
    abc
 No match
 
+/[^a]*/i
+    12abc
+ 0: 12
+    12ABC
+ 0: 12
+
+/[^a]*+/i
+    12abc
+ 0: 12
+    12ABC
+ 0: 12
+
+/[^a]*?X/i
+    ** Failers
+No match
+    12abc
+No match
+    12ABC
+No match
+    
+/[^a]+?X/i   
+    ** Failers
+No match
+    12abc
+No match
+    12ABC
+No match
+
+/[^a]?X/i
+    12aXbcX
+ 0: X
+    12AXBCX
+ 0: X
+    BCX 
+ 0: CX
+
+/[^a]??X/i
+    12aXbcX
+ 0: X
+    12AXBCX
+ 0: X
+    BCX
+ 0: CX
+    
+/[^a]?+X/i
+    12aXbcX
+ 0: cX
+    12AXBCX
+ 0: CX
+    BCX 
+ 0: CX
+
+/[^a]{2,3}/i
+    abcdef
+ 0: bcd
+    ABCDEF  
+ 0: BCD
+
+/[^a]{2,3}?/i
+    abcdef
+ 0: bc
+    ABCDEF  
+ 0: BC
+
+/[^a]{2,3}+/i
+    abcdef
+ 0: bcd
+    ABCDEF  
+ 0: BCD
+
 /-- End of testinput1 --/

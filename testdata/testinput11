@@ -507,4 +507,13 @@ however, we need the complication for Perl. ---/
 /(?P<abn>(?P=abn)xxx|)+/
     xxx
 
+/(?i:([^b]))(?1)/
+    aa
+    aA     
+    ** Failers
+    ab
+    aB
+    Ba
+    ba
+
 /-- End of testinput11 --/

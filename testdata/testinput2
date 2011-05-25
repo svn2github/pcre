@@ -3589,4 +3589,8 @@ with \Y. ---/
 
 /-- --/
 
+/^abc$/BZ
+
+/^abc$/BZm
+
 /-- End of testinput2 --/

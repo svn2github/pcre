@@ -43,6 +43,15 @@ Version 8.13 30-Apr-2011
     documentation that \R is equivalent to (?>\r\n|\n|...etc), and makes the
     behaviour of \R* different to (\R)*, which also seems wrong. The behaviour 
     has been changed.
+    
+9.  Some internal refactoring has changed the processing so that the handling 
+    of the PCRE_CASELESS and PCRE_MULTILINE options is done entirely at compile
+    time (the PCRE_DOTALL option was changed this way some time ago: version
+    7.7 change 16). This has made it possible to abolish the OP_OPT op code, 
+    which was always a bit of a fudge. It also means that there is one less 
+    argument for the match() function, which reduces its stack requirements 
+    slightly. This change also fixes an incompatibility with Perl: the pattern
+    (?i:([^b]))(?1) should not match "ab", but previously PCRE gave a match.
 
 
 Version 8.12 15-Jan-2011
