@@ -855,4 +855,20 @@ correctly, but that messes up comparisons). --/
 /(\X*)(.)/s8
     A\x{300}
 
+/\x{1234}+/iS8I
+
+/\x{1234}+?/iS8I
+
+/\x{1234}++/iS8I
+
+/\x{1234}{2}/iS8I
+
+/[^\x{1234}]+/iS8I   
+
+/[^\x{1234}]+?/iS8I   
+
+/[^\x{1234}]++/iS8I   
+
+/[^\x{1234}]{2}/iS8I
+
 /-- End of testinput5 --/

@@ -73,6 +73,7 @@ Arguments:
 Returns:   the minimum length
            -1 if \C was encountered
            -2 internal error (missing capturing bracket)
+           -3 internal error (opcode not listed) 
 */
 
 static int
@@ -191,11 +192,17 @@ for (;;)
     case OP_NOT:
     case OP_NOTI:
     case OP_PLUS:
+    case OP_PLUSI:
     case OP_MINPLUS:
+    case OP_MINPLUSI:
     case OP_POSPLUS:
+    case OP_POSPLUSI:
     case OP_NOTPLUS:
+    case OP_NOTPLUSI:
     case OP_NOTMINPLUS:
+    case OP_NOTMINPLUSI:
     case OP_NOTPOSPLUS:
+    case OP_NOTPOSPLUSI:
     branchlength++;
     cc += 2;
 #ifdef SUPPORT_UTF8
@@ -214,7 +221,9 @@ for (;;)
     need to skip over a multibyte character in UTF8 mode.  */
 
     case OP_EXACT:
+    case OP_EXACTI:
     case OP_NOTEXACT:
+    case OP_NOTEXACTI:
     branchlength += GET2(cc,1);
     cc += 4;
 #ifdef SUPPORT_UTF8
@@ -397,7 +406,8 @@ for (;;)
     of a character, we must take special action for UTF-8 characters. As it
     happens, the "NOT" versions of these opcodes are used at present only for
     ASCII characters, so they could be omitted from this list. However, in
-    future that may change, so we leave them in this special case. */
+    future that may change, so we include them here so as not to leave a 
+    gotcha for a future maintainer. */
 
     case OP_UPTO:
     case OP_UPTOI:
@@ -456,13 +466,24 @@ for (;;)
     cc += _pcre_OP_lengths[op] + cc[1+LINK_SIZE];
     break;
 
-    /* For the record, these are the opcodes that are matched by "default":
-    OP_ACCEPT, OP_CLOSE, OP_COMMIT, OP_FAIL, OP_PRUNE, OP_SET_SOM, OP_SKIP,
-    OP_THEN. */
+    /* The remaining opcodes are just skipped over. */
 
-    default:
+    case OP_ACCEPT:
+    case OP_CLOSE:
+    case OP_COMMIT:
+    case OP_FAIL:
+    case OP_PRUNE:
+    case OP_SET_SOM:
+    case OP_SKIP:
+    case OP_THEN:       
     cc += _pcre_OP_lengths[op];
     break;
+     
+    /* This should not occur: we list all opcodes explicitly so that when
+    new ones get added they are properly considered. */
+
+    default:
+    return -3;
     }
   }
 /* Control never gets here */
@@ -608,7 +629,6 @@ function fails unless the result is SSB_DONE.
 Arguments:
   code         points to an expression
   start_bits   points to a 32-byte table, initialized to 0
-  caseless     the current state of the caseless flag
   utf8         TRUE if in UTF-8 mode
   cd           the block with char table pointers
 
@@ -618,8 +638,8 @@ Returns:       SSB_FAIL     => Failed to find any starting bytes
 */
 
 static int
-set_start_bits(const uschar *code, uschar *start_bits, BOOL caseless,
-  BOOL utf8, compile_data *cd)
+set_start_bits(const uschar *code, uschar *start_bits, BOOL utf8, 
+  compile_data *cd)
 {
 register int c;
 int yield = SSB_DONE;
@@ -668,7 +688,7 @@ do
       case OP_SCBRA:
       case OP_ONCE:
       case OP_ASSERT:
-      rc = set_start_bits(tcode, start_bits, caseless, utf8, cd);
+      rc = set_start_bits(tcode, start_bits, utf8, cd);
       if (rc == SSB_FAIL) return SSB_FAIL;
       if (rc == SSB_DONE) try_next = FALSE; else
         {
@@ -713,7 +733,7 @@ do
 
       case OP_BRAZERO:
       case OP_BRAMINZERO:
-      if (set_start_bits(++tcode, start_bits, caseless, utf8, cd) == SSB_FAIL)
+      if (set_start_bits(++tcode, start_bits, utf8, cd) == SSB_FAIL)
         return SSB_FAIL;
 /* =========================================================================
       See the comment at the head of this function concerning the next line,
@@ -740,7 +760,7 @@ do
       case OP_QUERY:
       case OP_MINQUERY:
       case OP_POSQUERY:
-      tcode = set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
+      tcode = set_table_bit(start_bits, tcode + 1, FALSE, cd, utf8);
       break;
 
       case OP_STARI:
@@ -757,7 +777,7 @@ do
       case OP_UPTO:
       case OP_MINUPTO:
       case OP_POSUPTO:
-      tcode = set_table_bit(start_bits, tcode + 3, caseless, cd, utf8);
+      tcode = set_table_bit(start_bits, tcode + 3, FALSE, cd, utf8);
       break;
 
       case OP_UPTOI:
@@ -775,10 +795,13 @@ do
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
-      (void)set_table_bit(start_bits, tcode + 1, caseless, cd, utf8);
+      (void)set_table_bit(start_bits, tcode + 1, FALSE, cd, utf8);
       try_next = FALSE;
       break;
 
+      case OP_EXACTI:
+      tcode += 2;
+      /* Fall through */
       case OP_CHARI:
       case OP_PLUSI:
       case OP_MINPLUSI:
@@ -1120,14 +1143,18 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
   /* See if we can find a fixed set of initial characters for the pattern. */
 
   memset(start_bits, 0, 32 * sizeof(uschar));
-  bits_set = set_start_bits(code, start_bits,
-    (re->options & PCRE_CASELESS) != 0, (re->options & PCRE_UTF8) != 0,
+  bits_set = set_start_bits(code, start_bits, (re->options & PCRE_UTF8) != 0,
     &compile_block) == SSB_DONE;
   }
 
 /* Find the minimum length of subject string. */
 
-min = find_minlength(code, code, re->options);
+switch(min = find_minlength(code, code, re->options))
+  {
+  case -2: *errorptr = "internal error: missing capturing bracket"; break;
+  case -3: *errorptr = "internal error: opcode not recognized"; break;  
+  default: break;
+  } 
 
 /* Return NULL if no optimization is possible. */
 
