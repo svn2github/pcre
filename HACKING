@@ -349,8 +349,9 @@ number immediately follows the offset, always as a 2-byte item.
 
 OP_KET is used for subpatterns that do not repeat indefinitely, while
 OP_KETRMIN and OP_KETRMAX are used for indefinite repetitions, minimally or
-maximally respectively. All three are followed by LINK_SIZE bytes giving (as a
-positive number) the offset back to the matching bracket opcode.
+maximally respectively (see below for possessive repetitions). All three are
+followed by LINK_SIZE bytes giving (as a positive number) the offset back to
+the matching bracket opcode.
 
 If a subpattern is quantified such that it is permitted to match zero times, it
 is preceded by one of OP_BRAZERO, OP_BRAMINZERO, or OP_SKIPZERO. These are
@@ -376,6 +377,15 @@ whether it could match an empty string. If this is the case, the opcode in the
 final replication is changed to OP_SBRA or OP_SCBRA. This tells the matcher
 that it needs to check for matching an empty string when it hits OP_KETRMIN or
 OP_KETRMAX, and if so, to break the loop.
+
+Possessive brackets
+-------------------
+
+When a repeated group (capturing or non-capturing) is marked as possessive by
+the "+" notation, e.g. (abc)++, different opcodes are used. Their names all
+have POS on the end, e.g. OP_BRAPOS instead of OP_BRA and OP_SCPBRPOS instead 
+of OP_SCBRA. The end of such a group is marked by OP_KETRPOS. If the minimum 
+repetition is zero, the group is preceded by OP_BRAPOSZERO.
 
 
 Assertions

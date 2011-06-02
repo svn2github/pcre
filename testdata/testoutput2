@@ -2990,12 +2990,10 @@ No need char
 /(x)*+/DZ
 ------------------------------------------------------------------
         Bra
-        Once
-        Brazero
-        CBra 1
+        Braposzero
+        CBraPos 1
         x
-        KetRmax
-        Ket
+        KetRpos
         Ket
         End
 ------------------------------------------------------------------
@@ -11355,5 +11353,198 @@ Failed: reference to non-existent subpattern at offset 15
         Ket
         End
 ------------------------------------------------------------------
+
+/^(a)*+(\w)/S
+    aaaaX
+ 0: aaaaX
+ 1: a
+ 2: X
+    ** Failers 
+No match
+    aaaa
+No match
+
+/^(?:a)*+(\w)/S
+    aaaaX
+ 0: aaaaX
+ 1: X
+    ** Failers 
+No match
+    aaaa
+No match
+
+/(a)++1234/SDZ
+------------------------------------------------------------------
+        Bra
+        CBraPos 1
+        a
+        KetRpos
+        1234
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+No options
+First char = 'a'
+Need char = '4'
+Subject length lower bound = 5
+No set of starting bytes
+
+/([abc])++1234/SI
+Capturing subpattern count = 1
+No options
+No first char
+Need char = '4'
+Subject length lower bound = 5
+Starting byte set: a b c 
+
+/(?<=(abc)+)X/
+Failed: lookbehind assertion is not fixed length at offset 10
+
+/(^ab)/I
+Capturing subpattern count = 1
+Options: anchored
+No first char
+No need char
+
+/(^ab)++/I
+Capturing subpattern count = 1
+Options: anchored
+No first char
+No need char
+
+/(^ab|^)+/I
+Capturing subpattern count = 1
+Options: anchored
+No first char
+No need char
+
+/(^ab|^)++/I
+Capturing subpattern count = 1
+Options: anchored
+No first char
+No need char
+
+/(?:^ab)/I
+Capturing subpattern count = 0
+Options: anchored
+No first char
+No need char
+
+/(?:^ab)++/I
+Capturing subpattern count = 0
+Options: anchored
+No first char
+No need char
+
+/(?:^ab|^)+/I
+Capturing subpattern count = 0
+Options: anchored
+No first char
+No need char
+
+/(?:^ab|^)++/I
+Capturing subpattern count = 0
+Options: anchored
+No first char
+No need char
+
+/(.*ab)/I
+Capturing subpattern count = 1
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(.*ab)++/I
+Capturing subpattern count = 1
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(.*ab|.*)+/I
+Capturing subpattern count = 1
+No options
+First char at start or follows newline
+No need char
+
+/(.*ab|.*)++/I
+Capturing subpattern count = 1
+No options
+First char at start or follows newline
+No need char
+
+/(?:.*ab)/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(?:.*ab)++/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'b'
+
+/(?:.*ab|.*)+/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+No need char
+
+/(?:.*ab|.*)++/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+No need char
+
+/(?=a)[bcd]/I
+Capturing subpattern count = 0
+No options
+First char = 'a'
+No need char
+
+/((?=a))[bcd]/I
+Capturing subpattern count = 1
+No options
+First char = 'a'
+No need char
+
+/((?=a))+[bcd]/I
+Capturing subpattern count = 1
+No options
+First char = 'a'
+No need char
+
+/((?=a))++[bcd]/I
+Capturing subpattern count = 1
+No options
+First char = 'a'
+No need char
+
+/(?=a+)[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+No need char
+
+/(?=a+?)[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+No need char
+
+/(?=a++)[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+No need char
+
+/(?=a{3})[bcd]/iI
+Capturing subpattern count = 0
+Options: caseless
+First char = 'a' (caseless)
+Need char = 'a' (caseless)
+
+/(abc)\1+/S
 
 /-- End of testinput2 --/

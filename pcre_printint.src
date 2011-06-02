@@ -238,16 +238,21 @@ for(;;)
     continue;
 
     case OP_CBRA:
+    case OP_CBRAPOS: 
     case OP_SCBRA:
+    case OP_SCBRAPOS: 
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
     fprintf(f, "%s %d", OP_names[*code], GET2(code, 1+LINK_SIZE));
     break;
 
     case OP_BRA:
+    case OP_BRAPOS: 
     case OP_SBRA:
+    case OP_SBRAPOS: 
     case OP_KETRMAX:
     case OP_KETRMIN:
+    case OP_KETRPOS: 
     case OP_ALT:
     case OP_KET:
     case OP_ASSERT:

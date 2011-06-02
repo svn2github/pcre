@@ -158,17 +158,18 @@ static const uschar coptable[] = {
   0,                             /* Ket                                    */
   0,                             /* KetRmax                                */
   0,                             /* KetRmin                                */
+  0,                             /* KetRpos                                */
   0,                             /* Assert                                 */
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
   0,                             /* Reverse                                */
-  0, 0, 0, 0,                    /* ONCE, BRA, CBRA, COND                  */
-  0, 0, 0,                       /* SBRA, SCBRA, SCOND                     */
+  0, 0, 0, 0, 0, 0,              /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, COND */
+  0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, NCREF                            */
   0, 0,                          /* RREF, NRREF                            */
   0,                             /* DEF                                    */
-  0, 0,                          /* BRAZERO, BRAMINZERO                    */
+  0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
   0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG,                */
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */
   0, 0, 0, 0, 0                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
@@ -224,17 +225,18 @@ static const uschar poptable[] = {
   0,                             /* Ket                                    */
   0,                             /* KetRmax                                */
   0,                             /* KetRmin                                */
+  0,                             /* KetRpos                                */
   0,                             /* Assert                                 */
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
   0,                             /* Reverse                                */
-  0, 0, 0, 0,                    /* ONCE, BRA, CBRA, COND                  */
-  0, 0, 0,                       /* SBRA, SCBRA, SCOND                     */
+  0, 0, 0, 0, 0, 0,              /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, COND */
+  0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, NCREF                            */
   0, 0,                          /* RREF, NRREF                            */
   0,                             /* DEF                                    */
-  0, 0,                          /* BRAZERO, BRAMINZERO                    */
+  0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
   0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG,                */
   0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */
   0, 0, 0, 0, 0                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
@@ -435,7 +437,8 @@ next_new_state = new_states = active_states + wscount;
 new_count = 0;
 
 first_op = this_start_code + 1 + LINK_SIZE +
-  ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA)? 2:0);
+  ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA ||
+    *this_start_code == OP_CBRAPOS || *this_start_code == OP_SCBRAPOS)? 2:0);
 
 /* The first thing in any (sub) pattern is a bracket of some sort. Push all
 the alternative states onto the list, and find out where the end is. This
@@ -534,7 +537,9 @@ else
   else
     {
     int length = 1 + LINK_SIZE +
-      ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA)? 2:0);
+      ((*this_start_code == OP_CBRA || *this_start_code == OP_SCBRA ||
+        *this_start_code == OP_CBRAPOS || *this_start_code == OP_SCBRAPOS)? 
+        2:0);
     do
       {
       ADD_NEW((int)(end_code - start_code + length), 0);
@@ -731,7 +736,12 @@ for (;;)
 
 /* ========================================================================== */
       /* Reached a closing bracket. If not at the end of the pattern, carry
-      on with the next opcode. Otherwise, unless we have an empty string and
+      on with the next opcode. For repeating opcodes, also add the repeat 
+      state. Note that KETRPOS will always be encountered at the end of the 
+      subpattern, because the possessive subpattern repeats are always handled 
+      using recursive calls. Thus, it never adds any new states.
+       
+      At the end of the (sub)pattern, unless we have an empty string and
       PCRE_NOTEMPTY is set, or PCRE_NOTEMPTY_ATSTART is set and we are at the
       start of the subject, save the match data, shifting up all previous
       matches so we always have the longest first. */
@@ -739,6 +749,7 @@ for (;;)
       case OP_KET:
       case OP_KETRMIN:
       case OP_KETRMAX:
+      case OP_KETRPOS: 
       if (code != end_code)
         {
         ADD_ACTIVE(state_offset + 1 + LINK_SIZE, 0);
@@ -2667,6 +2678,96 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_BRAPOS:
+      case OP_SBRAPOS:
+      case OP_CBRAPOS:
+      case OP_SCBRAPOS:
+      case OP_BRAPOSZERO: 
+        {
+        int charcount, matched_count;
+        const uschar *local_ptr = ptr;
+        BOOL allow_zero;
+        
+        if (codevalue == OP_BRAPOSZERO)
+          {
+          allow_zero = TRUE;
+          codevalue = *(++code);  /* Codevalue will be one of above BRAs */
+          }
+        else allow_zero = FALSE;          
+        
+        /* Loop to match the subpattern as many times as possible as if it were 
+        a complete pattern. */ 
+           
+        for (matched_count = 0;; matched_count++)
+          {
+          int local_offsets[2];
+          int local_workspace[1000];
+        
+          int rc = internal_dfa_exec(
+            md,                                   /* fixed match data */
+            code,                                 /* this subexpression's code */
+            local_ptr,                            /* where we currently are */
+            (int)(ptr - start_subject),           /* start offset */
+            local_offsets,                        /* offset vector */
+            sizeof(local_offsets)/sizeof(int),    /* size of same */
+            local_workspace,                      /* workspace vector */
+            sizeof(local_workspace)/sizeof(int),  /* size of same */
+            rlevel,                               /* function recursion level */
+            recursing);                           /* pass on regex recursion */
+            
+          /* Failed to match */
+           
+          if (rc < 0) 
+            {
+            if (rc != PCRE_ERROR_NOMATCH) return rc;
+            break;
+            } 
+          
+          /* Matched: break the loop if zero characters matched. */
+           
+          charcount = local_offsets[1] - local_offsets[0];
+          if (charcount == 0) break; 
+          local_ptr += charcount;    /* Advance temporary position ptr */
+          }      
+
+        /* At this point we have matched the subpattern matched_count
+        times, and local_ptr is pointing to the character after the end of the 
+        last match. */ 
+
+        if (matched_count > 0 || allow_zero)
+          { 
+          const uschar *end_subpattern = code;
+          int next_state_offset;
+  
+          do { end_subpattern += GET(end_subpattern, 1); }
+            while (*end_subpattern == OP_ALT);
+          next_state_offset =
+            (int)(end_subpattern - start_code + LINK_SIZE + 1);
+
+          /* Optimization: if there are no more active states, and there
+          are no new states yet set up, then skip over the subject string
+          right here, to save looping. Otherwise, set up the new state to swing
+          into action when the end of the matched substring is reached. */
+
+          if (i + 1 >= active_count && new_count == 0)
+            {
+            ptr = local_ptr;
+            clen = 0;
+            ADD_NEW(next_state_offset, 0);
+            }
+          else
+            {
+            const uschar *p = ptr;
+            const uschar *pp = local_ptr;
+            charcount = pp - p; 
+            while (p < pp) if ((*p++ & 0xc0) == 0x80) charcount--;
+            ADD_NEW_DATA(-next_state_offset, 0, (charcount - 1));
+            }
+          }   
+        }   
+      break;
+ 
+      /*-----------------------------------------------------------------*/
       case OP_ONCE:
         {
         int local_offsets[2];
@@ -2716,7 +2817,7 @@ for (;;)
           /* Optimization: if there are no more active states, and there
           are no new states yet set up, then skip over the subject string
           right here, to save looping. Otherwise, set up the new state to swing
-          into action when the end of the substring is reached. */
+          into action when the end of the matched substring is reached. */
 
           else if (i + 1 >= active_count && new_count == 0)
             {
@@ -2746,7 +2847,6 @@ for (;;)
             if (repeat_state_offset >= 0)
               { ADD_NEW_DATA(-repeat_state_offset, 0, (charcount - 1)); }
             }
-
           }
         else if (rc != PCRE_ERROR_NOMATCH) return rc;
         }

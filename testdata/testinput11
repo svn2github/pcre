@@ -516,4 +516,72 @@ however, we need the complication for Perl. ---/
     Ba
     ba
 
+/^(?&t)*+(?(DEFINE)(?<t>a))\w$/
+    aaaaaaX
+    ** Failers 
+    aaaaaa 
+
+/^(?&t)*(?(DEFINE)(?<t>a))\w$/
+    aaaaaaX
+    aaaaaa 
+
+/^(a)*+(\w)/
+    aaaaX
+    YZ 
+    ** Failers 
+    aaaa
+
+/^(?:a)*+(\w)/
+    aaaaX
+    YZ 
+    ** Failers 
+    aaaa
+
+/^(a)++(\w)/
+    aaaaX
+    ** Failers 
+    aaaa
+    YZ 
+
+/^(?:a)++(\w)/
+    aaaaX
+    ** Failers 
+    aaaa
+    YZ 
+
+/^(a)?+(\w)/
+    aaaaX
+    YZ 
+
+/^(?:a)?+(\w)/
+    aaaaX
+    YZ 
+
+/^(a){2,}+(\w)/
+    aaaaX
+    ** Failers
+    aaa
+    YZ 
+
+/^(?:a){2,}+(\w)/
+    aaaaX
+    ** Failers
+    aaa
+    YZ 
+
+/(a|)*(?1)b/
+    b
+    ab
+    aab  
+
+/(a)++(?1)b/
+    ** Failers
+    ab 
+    aab
+
+/(a)*+(?1)b/
+    ** Failers
+    ab
+    aab  
+
 /-- End of testinput11 --/

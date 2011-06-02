@@ -4607,4 +4607,34 @@
     abc\>4
     abc\>-4 
 
+/^(?:a)++\w/
+     aaaab
+     ** Failers 
+     aaaa 
+     bbb 
+
+/^(?:aa|(?:a)++\w)/
+     aaaab
+     aaaa 
+     ** Failers 
+     bbb 
+
+/^(?:a)*+\w/
+     aaaab
+     bbb 
+     ** Failers 
+     aaaa 
+
+/^(a)++\w/
+     aaaab
+     ** Failers 
+     aaaa 
+     bbb 
+
+/^(a|)++\w/
+     aaaab
+     ** Failers 
+     aaaa 
+     bbb 
+
 /-- End of testinput7 --/

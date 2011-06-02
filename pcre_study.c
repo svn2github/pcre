@@ -85,7 +85,8 @@ BOOL had_recurse = FALSE;
 register int branchlength = 0;
 register uschar *cc = (uschar *)code + 1 + LINK_SIZE;
 
-if (*code == OP_CBRA || *code == OP_SCBRA) cc += 2;
+if (*code == OP_CBRA || *code == OP_SCBRA ||
+    *code == OP_CBRAPOS || *code == OP_SCBRAPOS) cc += 2;
 
 /* Scan along the opcodes for this branch. If we get to the end of the
 branch, check the length against that of the other branches. */
@@ -119,6 +120,10 @@ for (;;)
     case OP_SCBRA:
     case OP_BRA:
     case OP_SBRA:
+    case OP_CBRAPOS:
+    case OP_SCBRAPOS:
+    case OP_BRAPOS:
+    case OP_SBRAPOS:
     case OP_ONCE:
     d = find_minlength(cc, startcode, options);
     if (d < 0) return d;
@@ -135,6 +140,7 @@ for (;;)
     case OP_KET:
     case OP_KETRMAX:
     case OP_KETRMIN:
+    case OP_KETRPOS: 
     case OP_END:
     if (length < 0 || (!had_recurse && branchlength < length))
       length = branchlength;
@@ -179,6 +185,7 @@ for (;;)
 
     case OP_BRAZERO:
     case OP_BRAMINZERO:
+    case OP_BRAPOSZERO:
     case OP_SKIPZERO:
     cc += _pcre_OP_lengths[*cc];
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -375,7 +382,13 @@ for (;;)
       min = 0;
       cc++;
       break;
-
+      
+      case OP_CRPLUS:                                                           
+      case OP_CRMINPLUS:                                                        
+      min = 1;                                                                  
+      cc++;                                                                     
+      break;    
+       
       case OP_CRRANGE:
       case OP_CRMINRANGE:
       min = GET2(cc, 1);
@@ -664,8 +677,11 @@ volatile int dummy;
 
 do
   {
-  const uschar *tcode = code + (((int)*code == OP_CBRA)? 3:1) + LINK_SIZE;
   BOOL try_next = TRUE;
+  const uschar *tcode = code + 1 + LINK_SIZE;
+  
+  if (*code == OP_CBRA || *code == OP_SCBRA ||
+      *code == OP_CBRAPOS || *code == OP_SCBRAPOS) tcode += 2;
 
   while (try_next)    /* Loop for items in this branch */
     {
@@ -686,6 +702,10 @@ do
       case OP_SBRA:
       case OP_CBRA:
       case OP_SCBRA:
+      case OP_BRAPOS:
+      case OP_SBRAPOS:
+      case OP_CBRAPOS:
+      case OP_SCBRAPOS:
       case OP_ONCE:
       case OP_ASSERT:
       rc = set_start_bits(tcode, start_bits, utf8, cd);
@@ -712,6 +732,7 @@ do
       case OP_KET:
       case OP_KETRMAX:
       case OP_KETRMIN:
+      case OP_KETRPOS: 
       return SSB_CONTINUE;
 
       /* Skip over callout */
@@ -733,6 +754,7 @@ do
 
       case OP_BRAZERO:
       case OP_BRAMINZERO:
+      case OP_BRAPOSZERO:
       if (set_start_bits(++tcode, start_bits, utf8, cd) == SSB_FAIL)
         return SSB_FAIL;
 /* =========================================================================

@@ -7697,4 +7697,55 @@ Error -24 (bad offset value)
     abc\>-4 
 Error -24 (bad offset value)
 
+/^(?:a)++\w/
+     aaaab
+ 0: aaaab
+     ** Failers 
+No match
+     aaaa 
+No match
+     bbb 
+No match
+
+/^(?:aa|(?:a)++\w)/
+     aaaab
+ 0: aaaab
+ 1: aa
+     aaaa 
+ 0: aa
+     ** Failers 
+No match
+     bbb 
+No match
+
+/^(?:a)*+\w/
+     aaaab
+ 0: aaaab
+     bbb 
+ 0: b
+     ** Failers 
+No match
+     aaaa 
+No match
+
+/^(a)++\w/
+     aaaab
+ 0: aaaab
+     ** Failers 
+No match
+     aaaa 
+No match
+     bbb 
+No match
+
+/^(a|)++\w/
+     aaaab
+ 0: aaaab
+     ** Failers 
+No match
+     aaaa 
+No match
+     bbb 
+No match
+
 /-- End of testinput7 --/

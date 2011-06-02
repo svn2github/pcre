@@ -994,4 +994,135 @@ No match
     ba
 No match
 
+/^(?&t)*+(?(DEFINE)(?<t>a))\w$/
+    aaaaaaX
+ 0: aaaaaaX
+    ** Failers 
+No match
+    aaaaaa 
+No match
+
+/^(?&t)*(?(DEFINE)(?<t>a))\w$/
+    aaaaaaX
+ 0: aaaaaaX
+    aaaaaa 
+ 0: aaaaaa
+
+/^(a)*+(\w)/
+    aaaaX
+ 0: aaaaX
+ 1: a
+ 2: X
+    YZ 
+ 0: Y
+ 1: <unset>
+ 2: Y
+    ** Failers 
+No match
+    aaaa
+No match
+
+/^(?:a)*+(\w)/
+    aaaaX
+ 0: aaaaX
+ 1: X
+    YZ 
+ 0: Y
+ 1: Y
+    ** Failers 
+No match
+    aaaa
+No match
+
+/^(a)++(\w)/
+    aaaaX
+ 0: aaaaX
+ 1: a
+ 2: X
+    ** Failers 
+No match
+    aaaa
+No match
+    YZ 
+No match
+
+/^(?:a)++(\w)/
+    aaaaX
+ 0: aaaaX
+ 1: X
+    ** Failers 
+No match
+    aaaa
+No match
+    YZ 
+No match
+
+/^(a)?+(\w)/
+    aaaaX
+ 0: aa
+ 1: a
+ 2: a
+    YZ 
+ 0: Y
+ 1: <unset>
+ 2: Y
+
+/^(?:a)?+(\w)/
+    aaaaX
+ 0: aa
+ 1: a
+    YZ 
+ 0: Y
+ 1: Y
+
+/^(a){2,}+(\w)/
+    aaaaX
+ 0: aaaaX
+ 1: a
+ 2: X
+    ** Failers
+No match
+    aaa
+No match
+    YZ 
+No match
+
+/^(?:a){2,}+(\w)/
+    aaaaX
+ 0: aaaaX
+ 1: X
+    ** Failers
+No match
+    aaa
+No match
+    YZ 
+No match
+
+/(a|)*(?1)b/
+    b
+ 0: b
+ 1: 
+    ab
+ 0: ab
+ 1: 
+    aab  
+ 0: aab
+ 1: 
+
+/(a)++(?1)b/
+    ** Failers
+No match
+    ab 
+No match
+    aab
+No match
+
+/(a)*+(?1)b/
+    ** Failers
+No match
+    ab
+No match
+    aab  
+No match
+
 /-- End of testinput11 --/

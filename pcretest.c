@@ -2910,7 +2910,10 @@ while (!done)
             break;     
               
             default:
-            fprintf(outfile, "Error %d (%s)\n", count, errtexts[-count]);
+            if (count < 0 && (-count) < sizeof(errtexts)/sizeof(const char *)) 
+              fprintf(outfile, "Error %d (%s)\n", count, errtexts[-count]);
+            else 
+              fprintf(outfile, "Error %d (Unexpected value)\n", count);   
             break;
             }
                

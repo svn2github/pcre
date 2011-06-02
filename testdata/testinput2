@@ -3593,4 +3593,70 @@ with \Y. ---/
 
 /^abc$/BZm
 
+/^(a)*+(\w)/S
+    aaaaX
+    ** Failers 
+    aaaa
+
+/^(?:a)*+(\w)/S
+    aaaaX
+    ** Failers 
+    aaaa
+
+/(a)++1234/SDZ
+
+/([abc])++1234/SI
+
+/(?<=(abc)+)X/
+
+/(^ab)/I
+
+/(^ab)++/I
+
+/(^ab|^)+/I
+
+/(^ab|^)++/I
+
+/(?:^ab)/I
+
+/(?:^ab)++/I
+
+/(?:^ab|^)+/I
+
+/(?:^ab|^)++/I
+
+/(.*ab)/I
+
+/(.*ab)++/I
+
+/(.*ab|.*)+/I
+
+/(.*ab|.*)++/I
+
+/(?:.*ab)/I
+
+/(?:.*ab)++/I
+
+/(?:.*ab|.*)+/I
+
+/(?:.*ab|.*)++/I
+
+/(?=a)[bcd]/I
+
+/((?=a))[bcd]/I
+
+/((?=a))+[bcd]/I
+
+/((?=a))++[bcd]/I
+
+/(?=a+)[bcd]/iI
+
+/(?=a+?)[bcd]/iI
+
+/(?=a++)[bcd]/iI
+
+/(?=a{3})[bcd]/iI
+
+/(abc)\1+/S
+
 /-- End of testinput2 --/

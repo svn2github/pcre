@@ -6744,4 +6744,10 @@ No match
     ABCDEF  
  0: BCD
 
+/((a|)+)+Z/
+    Z
+ 0: Z
+ 1: 
+ 2: 
+
 /-- End of testinput1 --/

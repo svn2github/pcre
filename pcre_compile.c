@@ -545,8 +545,8 @@ static const unsigned char ebcdic_chartab[] = { /* chartable partial dup */
 /* Definition to allow mutual recursion */
 
 static BOOL
-  compile_regex(int, int, uschar **, const uschar **, int *, BOOL, BOOL, int,
-    int *, int *, branch_chain *, compile_data *, int *);
+  compile_regex(int, uschar **, const uschar **, int *, BOOL, BOOL, int, int *,
+    int *, branch_chain *, compile_data *, int *);
 
 
 
@@ -1403,17 +1403,13 @@ does not.
 
 Arguments:
   code         pointer to the start of the group
-  options      pointer to external options
-  optbit       the option bit whose changing is significant, or
-                 zero if none are
   skipassert   TRUE if certain assertions are to be skipped
 
 Returns:       pointer to the first significant opcode
 */
 
 static const uschar*
-first_significant_code(const uschar *code, int *options, int optbit,
-  BOOL skipassert)
+first_significant_code(const uschar *code, BOOL skipassert)
 {
 for (;;)
   {
@@ -1468,7 +1464,7 @@ and doing the check at the end; a flag specifies which mode we are running in.
 
 Arguments:
   code     points to the start of the pattern (the bracket)
-  options  the compiling options
+  utf8     TRUE in UTF-8 mode
   atend    TRUE if called when the pattern is complete
   cd       the "compile data" structure
 
@@ -1479,7 +1475,7 @@ Returns:   the fixed length,
 */
 
 static int
-find_fixedlength(uschar *code, int options, BOOL atend, compile_data *cd)
+find_fixedlength(uschar *code, BOOL utf8, BOOL atend, compile_data *cd)
 {
 int length = -1;
 
@@ -1496,11 +1492,17 @@ for (;;)
   register int op = *cc;
   switch (op)
     {
+    /* We only need to continue for OP_CBRA (normal capturing bracket) and
+    OP_BRA (normal non-capturing bracket) because the other variants of these
+    opcodes are all concerned with unlimited repeated groups, which of course
+    are not of fixed length. They will cause a -1 response from the default
+    case of this switch. */
+
     case OP_CBRA:
     case OP_BRA:
     case OP_ONCE:
     case OP_COND:
-    d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), options, atend, cd);
+    d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), utf8, atend, cd);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -1509,12 +1511,12 @@ for (;;)
 
     /* Reached end of a branch; if it's a ket it is the end of a nested
     call. If it's ALT it is an alternation in a nested call. If it is
-    END it's the end of the outer call. All can be handled by the same code. */
+    END it's the end of the outer call. All can be handled by the same code.
+    Note that we must not include the OP_KETRxxx opcodes here, because they
+    all imply an unlimited repeat. */
 
     case OP_ALT:
     case OP_KET:
-    case OP_KETRMAX:
-    case OP_KETRMIN:
     case OP_END:
     if (length < 0) length = branchlength;
       else if (length != branchlength) return -1;
@@ -1532,7 +1534,7 @@ for (;;)
     cs = ce = (uschar *)cd->start_code + GET(cc, 1);  /* Start subpattern */
     do ce += GET(ce, 1); while (*ce == OP_ALT);       /* End subpattern */
     if (cc > cs && cc < ce) return -1;                /* Recursion */
-    d = find_fixedlength(cs + 2, options, atend, cd);
+    d = find_fixedlength(cs + 2, utf8, atend, cd);
     if (d < 0) return d;
     branchlength += d;
     cc += 1 + LINK_SIZE;
@@ -1575,12 +1577,11 @@ for (;;)
     case OP_CHAR:
     case OP_CHARI:
     case OP_NOT:
-    case OP_NOTI: 
+    case OP_NOTI:
     branchlength++;
     cc += 2;
 #ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0)
-      cc += _pcre_utf8_table4[cc[-1] & 0x3f];
+    if (utf8 && cc[-1] >= 0xc0) cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
 
@@ -1591,8 +1592,7 @@ for (;;)
     branchlength += GET2(cc,1);
     cc += 4;
 #ifdef SUPPORT_UTF8
-    if ((options & PCRE_UTF8) != 0 && cc[-1] >= 0xc0)
-      cc += _pcre_utf8_table4[cc[-1] & 0x3f];
+    if (utf8 && cc[-1] >= 0xc0) cc += _pcre_utf8_table4[cc[-1] & 0x3f];
 #endif
     break;
 
@@ -1712,7 +1712,8 @@ for (;;)
 
   /* Handle capturing bracket */
 
-  else if (c == OP_CBRA)
+  else if (c == OP_CBRA || c == OP_SCBRA ||
+           c == OP_CBRAPOS || c == OP_SCBRAPOS)
     {
     int n = GET2(code, 1+LINK_SIZE);
     if (n == number) return (uschar *)code;
@@ -1954,9 +1955,9 @@ could_be_empty_branch(const uschar *code, const uschar *endcode, BOOL utf8,
   compile_data *cd)
 {
 register int c;
-for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE);
+for (code = first_significant_code(code + _pcre_OP_lengths[*code], TRUE);
      code < endcode;
-     code = first_significant_code(code + _pcre_OP_lengths[c], NULL, 0, TRUE))
+     code = first_significant_code(code + _pcre_OP_lengths[c], TRUE))
   {
   const uschar *ccode;
 
@@ -1967,16 +1968,6 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 
   if (c == OP_ASSERT)
     {
-    do code += GET(code, 1); while (*code == OP_ALT);
-    c = *code;
-    continue;
-    }
-
-  /* Groups with zero repeats can of course be empty; skip them. */
-
-  if (c == OP_BRAZERO || c == OP_BRAMINZERO || c == OP_SKIPZERO)
-    {
-    code += _pcre_OP_lengths[c];
     do code += GET(code, 1); while (*code == OP_ALT);
     c = *code;
     continue;
@@ -2004,9 +1995,33 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     continue;
     }
 
+  /* Groups with zero repeats can of course be empty; skip them. */
+
+  if (c == OP_BRAZERO || c == OP_BRAMINZERO || c == OP_SKIPZERO ||
+      c == OP_BRAPOSZERO)
+    {
+    code += _pcre_OP_lengths[c];
+    do code += GET(code, 1); while (*code == OP_ALT);
+    c = *code;
+    continue;
+    }
+
+  /* A nested group that is already marked as "could be empty" can just be
+  skipped. */
+
+  if (c == OP_SBRA  || c == OP_SBRAPOS ||
+      c == OP_SCBRA || c == OP_SCBRAPOS)
+    {
+    do code += GET(code, 1); while (*code == OP_ALT);
+    c = *code;
+    continue;
+    }
+
   /* For other groups, scan the branches. */
 
-  if (c == OP_BRA || c == OP_CBRA || c == OP_ONCE || c == OP_COND)
+  if (c == OP_BRA  || c == OP_BRAPOS ||
+      c == OP_CBRA || c == OP_CBRAPOS ||
+      c == OP_ONCE || c == OP_COND)
     {
     BOOL empty_branch;
     if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */
@@ -2135,6 +2150,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_KET:
     case OP_KETRMAX:
     case OP_KETRMIN:
+    case OP_KETRPOS:
     case OP_ALT:
     return TRUE;
 
@@ -2682,13 +2698,13 @@ if (next >= 0) switch(op_code)
   return (c != cd->fcc[next]);  /* Non-UTF-8 mode */
 
   /* For OP_NOT and OP_NOTI, the data is always a single-byte character. These
-  opcodes are not used for multi-byte characters, because they are coded using 
+  opcodes are not used for multi-byte characters, because they are coded using
   an XCLASS instead. */
 
   case OP_NOT:
   return (c = *previous) == next;
- 
-  case OP_NOTI: 
+
+  case OP_NOTI:
   if ((c = *previous) == next) return TRUE;
 #ifdef SUPPORT_UTF8
   if (utf8)
@@ -4201,7 +4217,7 @@ for (;; ptr++)
     if (*previous == OP_CHAR || *previous == OP_CHARI)
       {
       op_type = (*previous == OP_CHAR)? 0 : OP_STARI - OP_STAR;
-        
+
       /* Deal with UTF-8 characters that take up more than one byte. It's
       easier to write this out separately than try to macrify it. Use c to
       hold the length of the character in bytes, plus 0x80 to flag that it's a
@@ -4246,7 +4262,7 @@ for (;; ptr++)
     /* If previous was a single negated character ([^a] or similar), we use
     one of the special opcodes, replacing it. The code is shared with single-
     character repeats by setting opt_type to add a suitable offset into
-    repeat_type. We can also test for auto-possessification. OP_NOT and OP_NOTI 
+    repeat_type. We can also test for auto-possessification. OP_NOT and OP_NOTI
     are currently used only for single-byte chars. */
 
     else if (*previous == OP_NOT || *previous == OP_NOTI)
@@ -4483,15 +4499,17 @@ for (;; ptr++)
       }
 
     /* If previous was a bracket group, we may have to replicate it in certain
-    cases. */
+    cases. Note that at this point we can encounter only the "basic" BRA and
+    KET opcodes, as this is the place where they get converted into the more
+    special varieties. */
 
     else if (*previous == OP_BRA  || *previous == OP_CBRA ||
              *previous == OP_ONCE || *previous == OP_COND)
       {
       register int i;
-      int ketoffset = 0;
       int len = (int)(code - previous);
       uschar *bralink = NULL;
+      uschar *brazeroptr = NULL;
 
       /* Repeating a DEFINE group is pointless */
 
@@ -4499,17 +4517,6 @@ for (;; ptr++)
         {
         *errorcodeptr = ERR55;
         goto FAILED;
-        }
-
-      /* If the maximum repeat count is unlimited, find the end of the bracket
-      by scanning through from the start, and compute the offset back to it
-      from the current code pointer. */
-
-      if (repeat_max == -1)
-        {
-        register uschar *ket = previous;
-        do ket += GET(ket, 1); while (*ket != OP_KET);
-        ketoffset = (int)(code - ket);
         }
 
       /* The case of a zero minimum is special because of the need to stick
@@ -4553,6 +4560,7 @@ for (;; ptr++)
             *previous++ = OP_SKIPZERO;
             goto END_REPEAT;
             }
+          brazeroptr = previous;    /* Save for possessive optimizing */
           *previous++ = OP_BRAZERO + repeat_type;
           }
 
@@ -4717,35 +4725,54 @@ for (;; ptr++)
           }
         }
 
-      /* If the maximum is unlimited, set a repeater in the final copy. We
-      can't just offset backwards from the current code point, because we
-      don't know if there's been an options resetting after the ket. The
-      correct offset was computed above.
+      /* If the maximum is unlimited, set a repeater in the final copy. For
+      ONCE brackets, that's all we need to do.
+
+      Otherwise, if the quantifier was possessive, we convert the BRA code to
+      the POS form, and the KET code to KETRPOS. (It turns out to be convenient
+      at runtime to detect this kind of subpattern at both the start and at the
+      end.) If the group is preceded by OP_BRAZERO, convert this to
+      OP_BRAPOSZERO. Then cancel the possessive flag so that the default action
+      below, of wrapping everything inside atomic brackets, does not happen.
 
       Then, when we are doing the actual compile phase, check to see whether
-      this group is a non-atomic one that could match an empty string. If so,
-      convert the initial operator to the S form (e.g. OP_BRA -> OP_SBRA) so
-      that runtime checking can be done. [This check is also applied to
-      atomic groups at runtime, but in a different way.] */
+      this group is one that could match an empty string. If so, convert the
+      initial operator to the S form (e.g. OP_BRA -> OP_SBRA) so that runtime
+      checking can be done. [This check is also applied to ONCE groups at
+      runtime, but in a different way.] */
 
       else
         {
-        uschar *ketcode = code - ketoffset;
+        uschar *ketcode = code - 1 - LINK_SIZE;
         uschar *bracode = ketcode - GET(ketcode, 1);
-        *ketcode = OP_KETRMAX + repeat_type;
-        if (lengthptr == NULL && *bracode != OP_ONCE)
+
+        if (*bracode == OP_ONCE)
+          *ketcode = OP_KETRMAX + repeat_type;
+        else
           {
-          uschar *scode = bracode;
-          do
+          if (possessive_quantifier)
             {
-            if (could_be_empty_branch(scode, ketcode, utf8, cd))
-              {
-              *bracode += OP_SBRA - OP_BRA;
-              break;
-              }
-            scode += GET(scode, 1);
+            *bracode += 1;                   /* Switch to xxxPOS opcodes */
+            *ketcode = OP_KETRPOS;
+            if (brazeroptr != NULL) *brazeroptr = OP_BRAPOSZERO;
+            possessive_quantifier = FALSE;
             }
-          while (*scode == OP_ALT);
+          else *ketcode = OP_KETRMAX + repeat_type;
+
+          if (lengthptr == NULL)
+            {
+            uschar *scode = bracode;
+            do
+              {
+              if (could_be_empty_branch(scode, ketcode, utf8, cd))
+                {
+                *bracode += OP_SBRA - OP_BRA;
+                break;
+                }
+              scode += GET(scode, 1);
+              }
+            while (*scode == OP_ALT);
+            }
           }
         }
       }
@@ -5714,9 +5741,8 @@ for (;; ptr++)
         is necessary to ensure we correctly detect the start of the pattern in
         both phases.
 
-        If we are not at the pattern start, compile code to change the ims
-        options if this setting actually changes any of them, and reset the
-        greedy defaults and the case value for firstbyte and reqbyte. */
+        If we are not at the pattern start, reset the greedy defaults and the
+        case value for firstbyte and reqbyte. */
 
         if (*ptr == CHAR_RIGHT_PARENTHESIS)
           {
@@ -5733,9 +5759,7 @@ for (;; ptr++)
             }
 
           /* Change options at this level, and pass them back for use
-          in subsequent branches. When not at the start of the pattern, this
-          information is also necessary so that a resetting item can be
-          compiled at the end of a group (if we are in a group). */
+          in subsequent branches. */
 
           *optionsptr = options = newoptions;
           previous = NULL;       /* This item can't be repeated */
@@ -5773,9 +5797,8 @@ for (;; ptr++)
 
     /* Process nested bracketed regex. Assertions may not be repeated, but
     other kinds can be. All their opcodes are >= OP_ONCE. We copy code into a
-    non-register variable in order to be able to pass its address because some
-    compilers complain otherwise. Pass in a new setting for the ims options if
-    they have changed. */
+    non-register variable (tempcode) in order to be able to pass its address
+    because some compilers complain otherwise. */
 
     previous = (bravalue >= OP_ONCE)? code : NULL;
     *code = bravalue;
@@ -5785,7 +5808,6 @@ for (;; ptr++)
 
     if (!compile_regex(
          newoptions,                   /* The complete new option state */
-         options & PCRE_IMS,           /* The previous ims option state */
          &tempcode,                    /* Where to put code (updated) */
          &ptr,                         /* Input pointer (updated) */
          errorcodeptr,                 /* Where to put an error message */
@@ -6242,7 +6264,6 @@ value of lengthptr distinguishes the two phases.
 
 Arguments:
   options        option bits, including any changes for this subpattern
-  oldims         previous settings of ims option bits
   codeptr        -> the address of the current code pointer
   ptrptr         -> the address of the current pattern pointer
   errorcodeptr   -> pointer to error code variable
@@ -6260,7 +6281,7 @@ Returns:         TRUE on success
 */
 
 static BOOL
-compile_regex(int options, int oldims, uschar **codeptr, const uschar **ptrptr,
+compile_regex(int options, uschar **codeptr, const uschar **ptrptr,
   int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipbytes,
   int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr, compile_data *cd,
   int *lengthptr)
@@ -6277,7 +6298,6 @@ int branchfirstbyte, branchreqbyte;
 int length;
 int orig_bracount;
 int max_bracount;
-int old_external_options = cd->external_options;
 branch_chain bc;
 
 bc.outer = bcptr;
@@ -6301,7 +6321,9 @@ pre-compile phase to find out whether anything has yet been compiled or not. */
 
 /* If this is a capturing subpattern, add to the chain of open capturing items
 so that we can detect them if (*ACCEPT) is encountered. This is also used to
-detect groups that contain recursive back references to themselves. */
+detect groups that contain recursive back references to themselves. Note that 
+only OP_CBRA need be tested here; changing this opcode to one of its variants, 
+e.g. OP_SCBRAPOS, happens later, after the group has been compiled. */
 
 if (*code == OP_CBRA)
   {
@@ -6346,15 +6368,6 @@ for (;;)
     *ptrptr = ptr;
     return FALSE;
     }
-
-  /* If the external options have changed during this branch, it means that we
-  are at the top level, and a leading option setting has been encountered. We
-  need to re-set the original option values to take account of this so that,
-  during the pre-compile phase, we know to allow for a re-set at the start of
-  subsequent branches. */
-
-  if (old_external_options != cd->external_options)
-    oldims = cd->external_options & PCRE_IMS;
 
   /* Keep the highest bracket count in case (?| was used and some branch
   has fewer than the rest. */
@@ -6416,7 +6429,8 @@ for (;;)
       {
       int fixed_length;
       *code = OP_END;
-      fixed_length = find_fixedlength(last_branch, options, FALSE, cd);
+      fixed_length = find_fixedlength(last_branch,  (options & PCRE_UTF8) != 0,
+        FALSE, cd);
       DPRINTF(("fixed length = %d\n", fixed_length));
       if (fixed_length == -3)
         {
@@ -6437,9 +6451,7 @@ for (;;)
   of offsets, with the field in the BRA item now becoming an offset to the
   first alternative. If there are no alternatives, it points to the end of the
   group. The length in the terminating ket is always the length of the whole
-  bracketed item. If any of the ims options were changed inside the group,
-  compile a resetting op-code following, except at the very end of the pattern.
-  Return leaving the pointer at the terminating char. */
+  bracketed item. Return leaving the pointer at the terminating char. */
 
   if (*ptr != CHAR_VERTICAL_LINE)
     {
@@ -6564,7 +6576,6 @@ of the more common cases more precisely.
 
 Arguments:
   code           points to start of expression (the bracket)
-  options        points to the options setting
   bracket_map    a bitmap of which brackets we are inside while testing; this
                   handles up to substring 31; after that we just have to take
                   the less precise approach
@@ -6574,35 +6585,37 @@ Returns:     TRUE or FALSE
 */
 
 static BOOL
-is_anchored(register const uschar *code, int *options, unsigned int bracket_map,
+is_anchored(register const uschar *code, unsigned int bracket_map,
   unsigned int backref_map)
 {
 do {
    const uschar *scode = first_significant_code(code + _pcre_OP_lengths[*code],
-     options, PCRE_MULTILINE, FALSE);
+     FALSE);
    register int op = *scode;
 
    /* Non-capturing brackets */
 
-   if (op == OP_BRA)
+   if (op == OP_BRA  || op == OP_BRAPOS ||
+       op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_anchored(scode, options, bracket_map, backref_map)) return FALSE;
+     if (!is_anchored(scode, bracket_map, backref_map)) return FALSE;
      }
 
    /* Capturing brackets */
 
-   else if (op == OP_CBRA)
+   else if (op == OP_CBRA  || op == OP_CBRAPOS ||
+            op == OP_SCBRA || op == OP_SCBRAPOS)
      {
      int n = GET2(scode, 1+LINK_SIZE);
      int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
-     if (!is_anchored(scode, options, new_map, backref_map)) return FALSE;
+     if (!is_anchored(scode, new_map, backref_map)) return FALSE;
      }
 
    /* Other brackets */
 
    else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
      {
-     if (!is_anchored(scode, options, bracket_map, backref_map)) return FALSE;
+     if (!is_anchored(scode, bracket_map, backref_map)) return FALSE;
      }
 
    /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
@@ -6653,7 +6666,7 @@ is_startline(const uschar *code, unsigned int bracket_map,
 {
 do {
    const uschar *scode = first_significant_code(code + _pcre_OP_lengths[*code],
-     NULL, 0, FALSE);
+     FALSE);
    register int op = *scode;
 
    /* If we are at the start of a conditional assertion group, *both* the
@@ -6680,20 +6693,22 @@ do {
        scode += 1 + LINK_SIZE;
        break;
        }
-     scode = first_significant_code(scode, NULL, 0, FALSE);
+     scode = first_significant_code(scode, FALSE);
      op = *scode;
      }
 
    /* Non-capturing brackets */
 
-   if (op == OP_BRA)
+   if (op == OP_BRA  || op == OP_BRAPOS ||
+       op == OP_SBRA || op == OP_SBRAPOS)
      {
      if (!is_startline(scode, bracket_map, backref_map)) return FALSE;
      }
 
    /* Capturing brackets */
 
-   else if (op == OP_CBRA)
+   else if (op == OP_CBRA  || op == OP_CBRAPOS ||
+            op == OP_SCBRA || op == OP_SCBRAPOS)
      {
      int n = GET2(scode, 1+LINK_SIZE);
      int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
@@ -6743,20 +6758,20 @@ we return that char, otherwise -1.
 
 Arguments:
   code       points to start of expression (the bracket)
-  options    pointer to the options (used to check casing changes)
   inassert   TRUE if in an assertion
 
 Returns:     -1 or the fixed first char
 */
 
 static int
-find_firstassertedchar(const uschar *code, int *options, BOOL inassert)
+find_firstassertedchar(const uschar *code, BOOL inassert)
 {
 register int c = -1;
 do {
    int d;
-   const uschar *scode =
-     first_significant_code(code + 1+LINK_SIZE, options, PCRE_CASELESS, TRUE);
+   int xl = (*code == OP_CBRA || *code == OP_SCBRA ||
+             *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? 2:0;
+   const uschar *scode = first_significant_code(code + 1+LINK_SIZE + xl, TRUE);
    register int op = *scode;
 
    switch(op)
@@ -6765,30 +6780,43 @@ do {
      return -1;
 
      case OP_BRA:
+     case OP_BRAPOS:
      case OP_CBRA:
+     case OP_SCBRA:
+     case OP_CBRAPOS:
+     case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
      case OP_COND:
-     if ((d = find_firstassertedchar(scode, options, op == OP_ASSERT)) < 0)
+     if ((d = find_firstassertedchar(scode, op == OP_ASSERT)) < 0)
        return -1;
      if (c < 0) c = d; else if (c != d) return -1;
      break;
 
-     case OP_EXACT:       /* Fall through */
+     case OP_EXACT:
      scode += 2;
-
+     /* Fall through */
+      
      case OP_CHAR:
-     case OP_CHARI:
      case OP_PLUS:
      case OP_MINPLUS:
      case OP_POSPLUS:
      if (!inassert) return -1;
-     if (c < 0)
-       {
-       c = scode[1];
-       if ((*options & PCRE_CASELESS) != 0) c |= REQ_CASELESS;
-       }
-     else if (c != scode[1]) return -1;
+     if (c < 0) c = scode[1];
+       else if (c != scode[1]) return -1;
+     break;
+
+     case OP_EXACTI:
+     scode += 2;
+     /* Fall through */
+      
+     case OP_CHARI:
+     case OP_PLUSI:
+     case OP_MINPLUSI:
+     case OP_POSPLUSI:
+     if (!inassert) return -1;
+     if (c < 0) c = scode[1] | REQ_CASELESS;
+       else if (c != scode[1]) return -1;
      break;
      }
 
@@ -6939,10 +6967,10 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
 
 utf8 = (options & PCRE_UTF8) != 0;
 
-/* Can't support UTF8 unless PCRE has been compiled to include the code. The 
-return of an error code from _pcre_valid_utf8() is a new feature, introduced in 
-release 8.13. The only use we make of it here is to adjust the offset value to 
-the end of the string for a short string error, for compatibility with previous 
+/* Can't support UTF8 unless PCRE has been compiled to include the code. The
+return of an error code from _pcre_valid_utf8() is a new feature, introduced in
+release 8.13. The only use we make of it here is to adjust the offset value to
+the end of the string for a short string error, for compatibility with previous
 versions. */
 
 #ifdef SUPPORT_UTF8
@@ -7063,9 +7091,8 @@ outside can help speed up starting point checks. */
 ptr += skipatstart;
 code = cworkspace;
 *code = OP_BRA;
-(void)compile_regex(cd->external_options, cd->external_options & PCRE_IMS,
-  &code, &ptr, &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd,
-  &length);
+(void)compile_regex(cd->external_options, &code, &ptr, &errorcode, FALSE, 
+  FALSE, 0, &firstbyte, &reqbyte, NULL, cd, &length);
 if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 
 DPRINTF(("end pre-compile: length=%d workspace=%d\n", length,
@@ -7137,8 +7164,8 @@ of the function here. */
 ptr = (const uschar *)pattern + skipatstart;
 code = (uschar *)codestart;
 *code = OP_BRA;
-(void)compile_regex(re->options, re->options & PCRE_IMS, &code, &ptr,
-  &errorcode, FALSE, FALSE, 0, &firstbyte, &reqbyte, NULL, cd, NULL);
+(void)compile_regex(re->options, &code, &ptr, &errorcode, FALSE, FALSE, 0, 
+  &firstbyte, &reqbyte, NULL, cd, NULL);
 re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
 re->flags = cd->external_flags;
@@ -7204,7 +7231,8 @@ if (cd->check_lookbehind)
       uschar *be = cc - 1 - LINK_SIZE + GET(cc, -LINK_SIZE);
       int end_op = *be;
       *be = OP_END;
-      fixed_length = find_fixedlength(cc, re->options, TRUE, cd);
+      fixed_length = find_fixedlength(cc, (re->options & PCRE_UTF8) != 0, TRUE,
+        cd);
       *be = end_op;
       DPRINTF(("fixed length = %d\n", fixed_length));
       if (fixed_length < 0)
@@ -7243,13 +7271,12 @@ start with ^. and also when all branches start with .* for non-DOTALL matches.
 
 if ((re->options & PCRE_ANCHORED) == 0)
   {
-  int temp_options = re->options;   /* May get changed during these scans */
-  if (is_anchored(codestart, &temp_options, 0, cd->backref_map))
+  if (is_anchored(codestart, 0, cd->backref_map))
     re->options |= PCRE_ANCHORED;
   else
     {
     if (firstbyte < 0)
-      firstbyte = find_firstassertedchar(codestart, &temp_options, FALSE);
+      firstbyte = find_firstassertedchar(codestart, FALSE);
     if (firstbyte >= 0)   /* Remove caseless flag for non-caseable chars */
       {
       int ch = firstbyte & 255;

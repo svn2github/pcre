@@ -4130,4 +4130,7 @@
     abcdef
     ABCDEF  
 
+/((a|)+)+Z/
+    Z
+
 /-- End of testinput1 --/

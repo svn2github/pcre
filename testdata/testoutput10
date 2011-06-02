@@ -111,17 +111,15 @@ Memory allocation (code space): 19
 ------------------------------------------------------------------
 
 /(x)*+/BM
-Memory allocation (code space): 24
+Memory allocation (code space): 18
 ------------------------------------------------------------------
-  0  20 Bra
-  3  14 Once
-  6     Brazero
-  7   7 CBra 1
- 12     x
- 14   7 KetRmax
- 17  14 Ket
- 20  20 Ket
- 23     End
+  0  14 Bra
+  3     Braposzero
+  4   7 CBraPos 1
+  9     x
+ 11   7 KetRpos
+ 14  14 Ket
+ 17     End
 ------------------------------------------------------------------
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/BM

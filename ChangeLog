@@ -52,6 +52,23 @@ Version 8.13 30-Apr-2011
     argument for the match() function, which reduces its stack requirements 
     slightly. This change also fixes an incompatibility with Perl: the pattern
     (?i:([^b]))(?1) should not match "ab", but previously PCRE gave a match.
+    
+10. More internal refactoring has drastically reduced the number of recursive
+    calls to match() for possessively repeated groups such as (abc)++ when 
+    using pcre_exec().
+    
+11. While implementing 10, a number of bugs in the handling of groups were
+    discovered and fixed:
+    
+    (?<=(a)+) was not diagnosed as invalid (non-fixed-length lookbehind).
+    (a|)*(?1) gave a compile-time internal error.
+    ((a|)+)+  did not notice that the outer group could match an empty string. 
+    (^a|^)+   was not marked as anchored.
+    (.*a|.*)+ was not marked as matching at start or after a newline.  
+    
+12. Yet more internal refactoring has removed another argument from the match()
+    function. Special calls to this function are now indicated by setting a 
+    value in a variable in the "match data" data block. 
 
 
 Version 8.12 15-Jan-2011
