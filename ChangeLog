@@ -69,6 +69,11 @@ Version 8.13 30-Apr-2011
 12. Yet more internal refactoring has removed another argument from the match()
     function. Special calls to this function are now indicated by setting a 
     value in a variable in the "match data" data block. 
+    
+13. Be more explicit in pcre_study() instead of relying on "default" for 
+    opcodes that mean there is no starting character; this means that when new 
+    ones are added and accidentally left out of pcre_study(), testing should 
+    pick them up.
 
 
 Version 8.12 15-Jan-2011

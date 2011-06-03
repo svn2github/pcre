@@ -4510,7 +4510,7 @@ for (;; ptr++)
       int len = (int)(code - previous);
       uschar *bralink = NULL;
       uschar *brazeroptr = NULL;
-
+      
       /* Repeating a DEFINE group is pointless */
 
       if (*previous == OP_COND && previous[LINK_SIZE+1] == OP_DEF)
@@ -4731,9 +4731,11 @@ for (;; ptr++)
       Otherwise, if the quantifier was possessive, we convert the BRA code to
       the POS form, and the KET code to KETRPOS. (It turns out to be convenient
       at runtime to detect this kind of subpattern at both the start and at the
-      end.) If the group is preceded by OP_BRAZERO, convert this to
-      OP_BRAPOSZERO. Then cancel the possessive flag so that the default action
-      below, of wrapping everything inside atomic brackets, does not happen.
+      end.) The use of special opcodes makes it possible to reduce greatly the
+      stack usage in pcre_exec(). If the group is preceded by OP_BRAZERO,
+      convert this to OP_BRAPOSZERO. Then cancel the possessive flag so that
+      the default action below, of wrapping everything inside atomic brackets,
+      does not happen.
 
       Then, when we are doing the actual compile phase, check to see whether
       this group is one that could match an empty string. If so, convert the
@@ -4793,13 +4795,18 @@ for (;; ptr++)
       }
 
     /* If the character following a repeat is '+', or if certain optimization
-    tests above succeeded, possessive_quantifier is TRUE. For some of the
-    simpler opcodes, there is an special alternative opcode for this. For
-    anything else, we wrap the entire repeated item inside OP_ONCE brackets.
-    The '+' notation is just syntactic sugar, taken from Sun's Java package,
-    but the special opcodes can optimize it a bit. The repeated item starts at
-    tempcode, not at previous, which might be the first part of a string whose
-    (former) last char we repeated.
+    tests above succeeded, possessive_quantifier is TRUE. For some opcodes,
+    there are special alternative opcodes for this case. For anything else, we
+    wrap the entire repeated item inside OP_ONCE brackets. Logically, the '+'
+    notation is just syntactic sugar, taken from Sun's Java package, but the
+    special opcodes can optimize it. 
+    
+    Possessively repeated subpatterns have already been handled in the code
+    just above, so possessive_quantifier is always FALSE for them at this 
+    stage.
+    
+    Note that the repeated item starts at tempcode, not at previous, which
+    might be the first part of a string whose (former) last char we repeated.
 
     Possessifying an 'exact' quantifier has no effect, so we can ignore it. But
     an 'upto' may follow. We skip over an 'exact' item, and then test the
@@ -5894,7 +5901,7 @@ for (;; ptr++)
         goto FAILED;
         }
       *lengthptr += length_prevgroup - 2 - 2*LINK_SIZE;
-      *code++ = OP_BRA;
+      code++;   /* This already contains bravalue */
       PUTINC(code, 0, 1 + LINK_SIZE);
       *code++ = OP_KET;
       PUTINC(code, 0, 1 + LINK_SIZE);
