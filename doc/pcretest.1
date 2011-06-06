@@ -56,8 +56,7 @@ calling \fBpcre_exec()\fP repeatedly with different limits.
 .TP 10
 \fB-m\fP
 Output the size of each compiled pattern after it has been compiled. This is
-equivalent to adding \fB/M\fP to each regular expression. For compatibility
-with earlier versions of pcretest, \fB-s\fP is a synonym for \fB-m\fP.
+equivalent to adding \fB/M\fP to each regular expression.
 .TP 10
 \fB-o\fP \fIosize\fP
 Set the number of elements in the output vector that is used when calling
@@ -78,6 +77,10 @@ Do not output the version number of \fBpcretest\fP at the start of execution.
 \fB-S\fP \fIsize\fP
 On Unix-like systems, set the size of the run-time stack to \fIsize\fP
 megabytes.
+.TP 10
+\fB-s\fP
+Behave as if each regex has the \fB/S\fP modifier; in other words, force each 
+regex to be studied.
 .TP 10
 \fB-t\fP
 Run each compile, study, and match many times with a timer, and output
@@ -789,6 +792,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 May 2011
+Last updated: 06 June 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

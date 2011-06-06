@@ -3123,23 +3123,21 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int errorcode; 
-  int tb = _pcre_valid_utf8((uschar *)subject, length, &errorcode);
-  if (tb >= 0)
+  int erroroffset; 
+  int errorcode = _pcre_valid_utf8((uschar *)subject, length, &erroroffset);
+  if (errorcode != 0)
     {
     if (offsetcount >= 2)
       {
-      offsets[0] = tb;
+      offsets[0] = erroroffset;
       offsets[1] = errorcode;
       }    
     return (errorcode <= PCRE_UTF8_ERR5 && (options & PCRE_PARTIAL_HARD) != 0)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
     }  
-  if (start_offset > 0 && start_offset < length)
-    {
-    tb = ((USPTR)subject)[start_offset] & 0xc0;
-    if (tb == 0x80) return PCRE_ERROR_BADUTF8_OFFSET;
-    }
+  if (start_offset > 0 && start_offset < length &&
+        (((USPTR)subject)[start_offset] & 0xc0) == 0x80) 
+    return PCRE_ERROR_BADUTF8_OFFSET;
   }
 #endif
 

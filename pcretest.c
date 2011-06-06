@@ -1186,7 +1186,7 @@ printf("  -p       use POSIX interface\n");
 #endif
 printf("  -q       quiet: do not output PCRE version number at start\n");
 printf("  -S <n>   set stack size to <n> megabytes\n");
-printf("  -s       output store (memory) used information\n"
+printf("  -s       force each pattern to be studied\n"
        "  -t       time compilation and execution\n");
 printf("  -t <n>   time compilation and execution, repeating <n> times\n");
 printf("  -tm      time execution (matching) only\n");
@@ -1214,6 +1214,7 @@ int timeit = 0;
 int timeitm = 0;
 int showinfo = 0;
 int showstore = 0;
+int force_study = 0;
 int quiet = 0;
 int size_offsets = 45;
 int size_offsets_max;
@@ -1262,8 +1263,8 @@ while (argc > 1 && argv[op][0] == '-')
   {
   unsigned char *endptr;
 
-  if (strcmp(argv[op], "-s") == 0 || strcmp(argv[op], "-m") == 0)
-    showstore = 1;
+  if (strcmp(argv[op], "-m") == 0) showstore = 1;
+  else if (strcmp(argv[op], "-s") == 0) force_study = 1; 
   else if (strcmp(argv[op], "-q") == 0) quiet = 1;
   else if (strcmp(argv[op], "-b") == 0) debug = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
@@ -1807,10 +1808,10 @@ while (!done)
     true_size = ((real_pcre *)re)->size;
     regex_gotten_store = gotten_store;
 
-    /* If /S was present, study the regexp to generate additional info to
+    /* If -s or /S was present, study the regexp to generate additional info to
     help with the matching. */
 
-    if (do_study)
+    if (do_study || force_study)
       {
       if (timeit > 0)
         {
@@ -2050,7 +2051,7 @@ while (!done)
       so messes up the test suite. (And with the /F option, it might be
       flipped.) */
 
-      if (do_study)
+      if (do_study || force_study)
         {
         if (extra == NULL)
           fprintf(outfile, "Study returned NULL\n");

@@ -6976,13 +6976,12 @@ utf8 = (options & PCRE_UTF8) != 0;
 
 /* Can't support UTF8 unless PCRE has been compiled to include the code. The
 return of an error code from _pcre_valid_utf8() is a new feature, introduced in
-release 8.13. The only use we make of it here is to adjust the offset value to
-the end of the string for a short string error, for compatibility with previous
-versions. */
+release 8.13. It is passed back from pcre_[dfa_]exec(), but at the moment is 
+not used here. */
 
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0 &&
-     (*erroroffset = _pcre_valid_utf8((USPTR)pattern, -1, &errorcode)) >= 0)
+     (errorcode = _pcre_valid_utf8((USPTR)pattern, -1, erroroffset)) != 0)
   {
   errorcode = ERR44;
   goto PCRE_EARLY_ERROR_RETURN2;

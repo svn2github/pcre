@@ -5999,28 +5999,29 @@ if (md->partial && (re->flags & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
 /* Check a UTF-8 string if required. Pass back the character offset and error 
-code if a results vector is available. */
+code for an invalid string if a results vector is available. */
 
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int errorcode; 
-  int tb = _pcre_valid_utf8((USPTR)subject, length, &errorcode);
-  if (tb >= 0)
+  int erroroffset; 
+  int errorcode = _pcre_valid_utf8((USPTR)subject, length, &erroroffset);
+  if (errorcode != 0)
     {
     if (offsetcount >= 2)
       {
-      offsets[0] = tb;
+      offsets[0] = erroroffset;
       offsets[1] = errorcode;
       }    
     return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
-    }   
-  if (start_offset > 0 && start_offset < length)
-    {
-    tb = ((USPTR)subject)[start_offset] & 0xc0;
-    if (tb == 0x80) return PCRE_ERROR_BADUTF8_OFFSET;
-    }
+    } 
+
+  /* Check that a start_offset points to the start of a UTF-8 character. */
+        
+  if (start_offset > 0 && start_offset < length &&
+      (((USPTR)subject)[start_offset] & 0xc0) == 0x80) 
+    return PCRE_ERROR_BADUTF8_OFFSET;
   }
 #endif
 
