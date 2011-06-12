@@ -11547,4 +11547,26 @@ Need char = 'a' (caseless)
 
 /(abc)\1+/S
 
+/-- Perl doesn't get these right IMO (the 3rd is PCRE-specific) --/
+
+/(?1)(?:(b(*ACCEPT))){0}/
+    b
+ 0: b
+
+/(?1)(?:(b(*ACCEPT))){0}c/
+    bc
+ 0: bc
+    ** Failers 
+No match
+    b 
+No match
+
+/(?1)(?:((*ACCEPT))){0}c/
+    c
+ 0: c
+    c\N 
+ 0: c
+
+/-- --/
+
 /-- End of testinput2 --/

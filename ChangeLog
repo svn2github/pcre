@@ -81,6 +81,15 @@ Version 8.13 30-Apr-2011
     and -d etc. It's slightly incompatible, but I'm hoping nobody is still 
     using it. It makes it easier to run collection of tests with study enabled, 
     and thereby test pcre_study() more easily.  
+    
+15. When (*ACCEPT) was used in a subpattern that was called recursively, the
+    restoration of the capturing data to the outer values was not happening 
+    correctly.
+    
+16. If a recursively called subpattern ended with (*ACCEPT) and matched an
+    empty string, and PCRE_NOTEMPTY was set, pcre_exec() thought the whole
+    pattern had matched an empty string, and so incorrectly returned a no
+    match.
 
 
 Version 8.12 15-Jan-2011

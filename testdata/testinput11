@@ -584,4 +584,13 @@ however, we need the complication for Perl. ---/
     ab
     aab  
 
+/(?1)(?:(b)){0}/
+    b
+
+/(foo ( \( ((?:(?> [^()]+ )|(?2))*) \) ) )/x
+    foo(bar(baz)+baz(bop))
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    AB
+
 /-- End of testinput11 --/

@@ -3659,4 +3659,20 @@ with \Y. ---/
 
 /(abc)\1+/S
 
+/-- Perl doesn't get these right IMO (the 3rd is PCRE-specific) --/
+
+/(?1)(?:(b(*ACCEPT))){0}/
+    b
+
+/(?1)(?:(b(*ACCEPT))){0}c/
+    bc
+    ** Failers 
+    b 
+
+/(?1)(?:((*ACCEPT))){0}c/
+    c
+    c\N 
+
+/-- --/
+
 /-- End of testinput2 --/

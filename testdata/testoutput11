@@ -1125,4 +1125,21 @@ No match
     aab  
 No match
 
+/(?1)(?:(b)){0}/
+    b
+ 0: b
+
+/(foo ( \( ((?:(?> [^()]+ )|(?2))*) \) ) )/x
+    foo(bar(baz)+baz(bop))
+ 0: foo(bar(baz)+baz(bop))
+ 1: foo(bar(baz)+baz(bop))
+ 2: (bar(baz)+baz(bop))
+ 3: bar(baz)+baz(bop)
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    AB
+ 0: AB
+ 1: AB
+ 2: B
+
 /-- End of testinput11 --/

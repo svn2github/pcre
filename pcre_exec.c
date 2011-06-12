@@ -1305,22 +1305,24 @@ for (;;)
     break;
 
 
-    /* End of the pattern, either real or forced. If we are in a top-level
-    recursion, we should restore the offsets appropriately and continue from
-    after the call. */
+    /* End of the pattern, either real or forced. If we are in a recursion, we
+    should restore the offsets appropriately, and if it's a top-level
+    recursion, continue from after the call. */
 
     case OP_ACCEPT:
     case OP_END:
-    if (md->recursive != NULL && md->recursive->group_num == 0)
+    if (md->recursive != NULL)
       {
       recursion_info *rec = md->recursive;
-      DPRINTF(("End of pattern in a (?0) recursion\n"));
       md->recursive = rec->prevrec;
-      memmove(md->offset_vector, rec->offset_save,
+      memmove(md->offset_vector, rec->offset_save, 
         rec->saved_max * sizeof(int));
       offset_top = rec->save_offset_top;
-      ecode = rec->after_call;
-      break;
+      if (rec->group_num == 0)
+        {
+        ecode = rec->after_call;
+        break;
+        } 
       }
 
     /* Otherwise, if we have matched an empty string, fail if PCRE_NOTEMPTY is
@@ -1328,14 +1330,14 @@ for (;;)
     the subject. In both cases, backtracking will then try other alternatives,
     if any. */
 
-    if (eptr == mstart &&
+    else if (eptr == mstart &&
         (md->notempty ||
           (md->notempty_atstart &&
             mstart == md->start_subject + md->start_offset)))
       MRRETURN(MATCH_NOMATCH);
 
     /* Otherwise, we have a match. */
-
+    
     md->end_match_ptr = eptr;           /* Record where we ended */
     md->end_offset_top = offset_top;    /* and how many extracts were taken */
     md->start_match_ptr = mstart;       /* and the start (\K can modify) */
@@ -1538,7 +1540,7 @@ for (;;)
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
       new_recursive.save_offset_top = offset_top;
-
+      
       /* OK, now we can do the recursion. For each top-level alternative we
       restore the offset and recursion data. */
 
