@@ -1142,4 +1142,48 @@ No match
  1: AB
  2: B
 
+/\A.*?(?:a|b(*THEN)c)/
+    ba
+ 0: ba
+
+/\A.*?(?:a|bc)/
+    ba
+ 0: ba
+
+/\A.*?(a|b(*THEN)c)/
+    ba
+ 0: ba
+ 1: a
+
+/\A.*?(a|bc)/
+    ba
+ 0: ba
+ 1: a
+
+/\A.*?(?:a|b(*THEN)c)++/
+    ba
+ 0: ba
+
+/\A.*?(?:a|bc)++/
+    ba
+ 0: ba
+
+/\A.*?(a|b(*THEN)c)++/
+    ba
+ 0: ba
+ 1: a
+
+/\A.*?(a|bc)++/
+    ba
+ 0: ba
+ 1: a
+
+/\A.*?(?:a|b(*THEN)c|d)/
+    ba
+ 0: ba
+
+/\A.*?(?:a|bc|d)/
+    ba
+ 0: ba
+
 /-- End of testinput11 --/

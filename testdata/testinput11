@@ -593,4 +593,34 @@ however, we need the complication for Perl. ---/
 /(A (A|B(*ACCEPT)|C) D)(E)/x
     AB
 
+/\A.*?(?:a|b(*THEN)c)/
+    ba
+
+/\A.*?(?:a|bc)/
+    ba
+
+/\A.*?(a|b(*THEN)c)/
+    ba
+
+/\A.*?(a|bc)/
+    ba
+
+/\A.*?(?:a|b(*THEN)c)++/
+    ba
+
+/\A.*?(?:a|bc)++/
+    ba
+
+/\A.*?(a|b(*THEN)c)++/
+    ba
+
+/\A.*?(a|bc)++/
+    ba
+
+/\A.*?(?:a|b(*THEN)c|d)/
+    ba
+
+/\A.*?(?:a|bc|d)/
+    ba
+
 /-- End of testinput11 --/

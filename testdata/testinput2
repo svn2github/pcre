@@ -3673,6 +3673,12 @@ with \Y. ---/
     c
     c\N 
 
+/^.*?(?(?=a)a|b(*THEN)c)/
+    ba
+
+/^.*?(?(?=a)a|bc)/
+    ba
+
 /-- --/
 
 /-- End of testinput2 --/

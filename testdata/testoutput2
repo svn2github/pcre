@@ -4414,12 +4414,12 @@ No first char
 Need char = 'z'
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\M
 Minimum match() limit = 8
-Minimum match() recursion limit = 6
+Minimum match() recursion limit = 7
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\M
 Minimum match() limit = 32768
-Minimum match() recursion limit = 42
+Minimum match() recursion limit = 43
 No match
 
 /(aaa(?C1)bbb|ab)/I
@@ -6411,7 +6411,7 @@ No first char
 No need char
    /* this is a C style comment */\M
 Minimum match() limit = 120
-Minimum match() recursion limit = 6
+Minimum match() recursion limit = 35
  0: /* this is a C style comment */
  1: /* this is a C style comment */
 
@@ -11566,6 +11566,14 @@ No match
  0: c
     c\N 
  0: c
+
+/^.*?(?(?=a)a|b(*THEN)c)/
+    ba
+ 0: ba
+
+/^.*?(?(?=a)a|bc)/
+    ba
+ 0: ba
 
 /-- --/
 

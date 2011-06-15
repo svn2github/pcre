@@ -90,6 +90,13 @@ Version 8.13 30-Apr-2011
     empty string, and PCRE_NOTEMPTY was set, pcre_exec() thought the whole
     pattern had matched an empty string, and so incorrectly returned a no
     match.
+    
+17. There was optimizing code for the last branch of non-capturing parentheses,
+    and also for the obeyed branch of a conditional subexpression, which used 
+    tail recursion to cut down on stack usage. Unfortunately, not that there is 
+    the possibility of (*THEN) occurring in these branches, tail recursion is 
+    no longer possible because the return has to be checked for (*THEN). These 
+    two optimizations have therefore been removed.  
 
 
 Version 8.12 15-Jan-2011

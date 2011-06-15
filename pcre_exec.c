@@ -276,7 +276,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
        RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
-       RM61,  RM62, RM63, RM64 };
+       RM61,  RM62, RM63};
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -858,7 +858,7 @@ for (;;)
       md->offset_vector[offset+1] = save_offset2;
       md->offset_vector[md->offset_end - number] = save_offset3;
 
-      if (rrc != MATCH_THEN) md->mark = markptr;
+      if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
       RRETURN(MATCH_NOMATCH);
       }
 
@@ -875,34 +875,17 @@ for (;;)
 
     /* Non-capturing bracket, except for possessive with unlimited repeat. Loop
     for all the alternatives. When we get to the final alternative within the
-    brackets, we would return the result of a recursive call to match()
-    whatever happened. We can reduce stack usage by turning this into a tail
-    recursion, except in the case of a possibly empty group.*/
+    brackets, we used to return the result of a recursive call to match()
+    whatever happened so it was possible to reduce stack usage by turning this
+    into a tail recursion, except in the case of a possibly empty group. 
+    However, now that there is the possiblity of (*THEN) occurring in the final 
+    alternative, this optimization is no longer possible. */
 
     case OP_BRA:
     case OP_SBRA:
     DPRINTF(("start non-capturing bracket\n"));
     for (;;)
       {
-      if (ecode[GET(ecode, 1)] != OP_ALT)   /* Final alternative */
-        {
-        if (op >= OP_SBRA)   /* Possibly empty group */
-          {
-          md->match_function_type = MATCH_CBEGROUP; 
-          RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb, 
-            RM48);
-          if (rrc == MATCH_NOMATCH) md->mark = markptr;
-          RRETURN(rrc);
-          } 
-        /* Not a possibly empty group; use tail recursion */
-        ecode += _pcre_OP_lengths[*ecode];
-        DPRINTF(("bracket 0 tail recursion\n"));
-        goto TAIL_RECURSE;
-        }
-
-      /* For non-final alternatives, continue the loop for a NOMATCH result;
-      otherwise return. */
-
       if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb, 
         RM2);
@@ -910,8 +893,11 @@ for (;;)
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
       ecode += GET(ecode, 1);
+      if (*ecode != OP_ALT) break; 
       }
-    /* Control never reaches here. */
+
+    if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
+    RRETURN(MATCH_NOMATCH);
 
     /* Handle possessive capturing brackets with an unlimited repeat. We come 
     here from BRAZERO with allow_zero set TRUE. The offset_vector values are
@@ -988,7 +974,7 @@ for (;;)
         md->offset_vector[md->offset_end - number] = save_offset3;
         }
         
-      if (rrc != MATCH_THEN) md->mark = markptr;
+      if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
       if (allow_zero || matched_once)
         { 
         ecode += 1 + LINK_SIZE;
@@ -1026,7 +1012,7 @@ for (;;)
       {
       if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;   
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
-        eptrb, RM64);
+        eptrb, RM48);
       if (rrc == MATCH_KETRPOS)
         {
         eptr = md->end_match_ptr;
@@ -1053,8 +1039,7 @@ for (;;)
     /* Conditional group: compilation checked that there are no more than
     two branches. If the condition is false, skipping the first branch takes us
     past the end if there is only one branch, but that's OK because that is
-    exactly what going to the ket would do. As there is only one branch to be
-    obeyed, we can use tail recursion to avoid using another stack frame. */
+    exactly what going to the ket would do. */
 
     case OP_COND:
     case OP_SCOND:
@@ -1259,20 +1244,20 @@ for (;;)
       }
 
     /* We are now at the branch that is to be obeyed. As there is only one,
-    we can use tail recursion to avoid using another stack frame, except when
-    we have an unlimited repeat of a possibly empty group. If the second
-    alternative doesn't exist, we can just plough on. */
+    we used to use tail recursion to avoid using another stack frame, except
+    when there was unlimited repeat of a possibly empty group. However, that 
+    strategy no longer works because of the possibilty of (*THEN) being 
+    encountered in the branch. A recursive call to match() is always required,
+    unless the second alternative doesn't exist, in which case we can just
+    plough on. */
 
     if (condition || *ecode == OP_ALT)
       {
-      ecode += 1 + LINK_SIZE;
-      if (op == OP_SCOND)        /* Possibly empty group */
-        {
-        md->match_function_type = MATCH_CBEGROUP; 
-        RMATCH(eptr, ecode, offset_top, md, eptrb, RM49);
-        RRETURN(rrc);
-        }
-      else goto TAIL_RECURSE;
+      if (op == OP_SCOND) md->match_function_type = MATCH_CBEGROUP; 
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM49);
+      if (rrc == MATCH_THEN && md->start_match_ptr == ecode) 
+        rrc = MATCH_NOMATCH;
+      RRETURN(rrc);
       }
     else                         /* Condition false & no alternative */
       {
@@ -5703,7 +5688,7 @@ switch (frame->Xwhere)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(17)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
-  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
+  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63)
 #ifdef SUPPORT_UTF8
   LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
