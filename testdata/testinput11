@@ -623,4 +623,7 @@ however, we need the complication for Perl. ---/
 /\A.*?(?:a|bc|d)/
     ba
 
+/(?:(b))++/
+    beetle
+
 /-- End of testinput11 --/

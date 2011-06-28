@@ -1186,4 +1186,9 @@ No match
     ba
  0: ba
 
+/(?:(b))++/
+    beetle
+ 0: b
+ 1: b
+
 /-- End of testinput11 --/
