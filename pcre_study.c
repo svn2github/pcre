@@ -267,10 +267,11 @@ for (;;)
     cc++;
     break;
 
-    /* "Any newline" might match two characters */
+    /* "Any newline" might match two characters, but it also might match just 
+    one. */
 
     case OP_ANYNL:
-    branchlength += 2;
+    branchlength += 1;
     cc++;
     break;
 

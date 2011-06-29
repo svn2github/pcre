@@ -97,6 +97,10 @@ Version 8.13 30-Apr-2011
     the possibility of (*THEN) occurring in these branches, tail recursion is 
     no longer possible because the return has to be checked for (*THEN). These 
     two optimizations have therefore been removed.  
+    
+18. If a pattern containing \R was studied, it was assumed that \R always
+    matched two bytes, thus causing the minimum subject length to be
+    incorrectly computed because \R can also match just one byte.
 
 
 Version 8.12 15-Jan-2011
