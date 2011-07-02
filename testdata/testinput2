@@ -1061,7 +1061,12 @@
 /abc(?C)de(?C1)f/I
     123abcdef
 
-/(?C1)\dabc(?C2)def/I
+/(?C1)\dabc(?C2)def/IS
+    1234abcdef
+    *** Failers
+    abcdef
+
+/(?C1)\dabc(?C2)def/ISS
     1234abcdef
     *** Failers
     abcdef
@@ -1310,7 +1315,12 @@
   abcde
   abcdfe
 
-/a*b/ICDZ
+/a*b/ICDZS
+  ab
+  aaaab
+  aaaacb
+
+/a*b/ICDZSS
   ab
   aaaab
   aaaacb
@@ -1320,9 +1330,16 @@
   aaaab
   aaaacb
 
-/(abc|def)x/ICDZ
+/(abc|def)x/ICDZS
   abcx
   defx
+  ** Failers 
+  abcdefzx
+
+/(abc|def)x/ICDZSS
+  abcx
+  defx
+  ** Failers 
   abcdefzx
 
 /(ab|cd){3,4}/IC
@@ -1330,7 +1347,10 @@
   abcdabcd
   abcdcdcdcdcd
 
-/([ab]{,4}c|xy)/ICDZ
+/([ab]{,4}c|xy)/ICDZS
+    Note: that { does NOT introduce a quantifier
+
+/([ab]{,4}c|xy)/ICDZSS
     Note: that { does NOT introduce a quantifier
 
 /([ab]{1,4}c|xy){4,5}?123/ICDZ
@@ -1404,13 +1424,25 @@
     1X
     123456\P
 
-/abc/I>testsavedregex
+/abc/IS>testsavedregex
 <testsavedregex
     abc
     ** Failers
     bca
 
-/abc/IF>testsavedregex
+/abc/ISS>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    bca
+
+/abc/IFS>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    bca
+
+/abc/IFSS>testsavedregex
 <testsavedregex
     abc
     ** Failers
@@ -1422,7 +1454,19 @@
     ** Failers
     def
 
+/(a|b)/ISS>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    def
+
 /(a|b)/ISF>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    def
+
+/(a|b)/ISSF>testsavedregex
 <testsavedregex
     abc
     ** Failers
@@ -3312,11 +3356,19 @@ name were given. ---/
 /A(*PRUNE:A)B/K
     ACAB
 
-/(*MARK:A)(*PRUNE:B)(C|X)/K
+/(*MARK:A)(*PRUNE:B)(C|X)/KS
     C
     D 
 
-/(*MARK:A)(*THEN:B)(C|X)/K
+/(*MARK:A)(*PRUNE:B)(C|X)/KSS
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/KS
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/KSS
     C
     D 
 
@@ -3678,6 +3730,18 @@ with \Y. ---/
 
 /^.*?(?(?=a)a|bc)/
     ba
+
+/-- --/
+
+/-- These studied versions are here because they are not Perl-compatible; the
+    studying means the mark is not seen. --/
+
+/(*MARK:A)(*SKIP:B)(C|X)/KS
+    C
+    D
+     
+/(*:A)A+(*SKIP:A)(B|Z)/KS
+    AAAC
 
 /-- --/
 

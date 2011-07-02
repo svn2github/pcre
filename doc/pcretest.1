@@ -4,7 +4,7 @@ pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
 .rs
 .sp
-.B pcretest "[options] [source] [destination]"
+.B pcretest "[options] [input file [output file]]"
 .sp
 \fBpcretest\fP was written as a test program for the PCRE regular expression
 library itself, but it can also be used for experimenting with regular
@@ -18,14 +18,17 @@ options, see the
 .\" HREF
 \fBpcreapi\fP
 .\"
-documentation.
+documentation. The input for \fBpcretest\fP is a sequence of regular expression 
+patterns and strings to be matched, as described below. The output shows the 
+result of each match. Options on the command line and the patterns control PCRE 
+options and exactly what is output.
 .
 .
-.SH OPTIONS
+.SH COMMAND LINE OPTIONS
 .rs
 .TP 10
 \fB-b\fP
-Behave as if each regex has the \fB/B\fP (show byte code) modifier; the
+Behave as if each pattern has the \fB/B\fP (show byte code) modifier; the
 internal form is output after compilation.
 .TP 10
 \fB-C\fP
@@ -33,7 +36,7 @@ Output the version number of the PCRE library, and all available information
 about the optional features that are included, and then exit.
 .TP 10
 \fB-d\fP
-Behave as if each regex has the \fB/D\fP (debug) modifier; the internal
+Behave as if each pattern has the \fB/D\fP (debug) modifier; the internal
 form and information about the compiled pattern is output after compilation;
 \fB-d\fP is equivalent to \fB-b -i\fP.
 .TP 10
@@ -46,7 +49,7 @@ standard \fBpcre_exec()\fP function (more detail is given below).
 Output a brief summary these options and then exit.
 .TP 10
 \fB-i\fP
-Behave as if each regex has the \fB/I\fP modifier; information about the
+Behave as if each pattern has the \fB/I\fP modifier; information about the
 compiled pattern is given after compilation.
 .TP 10
 \fB-M\fP
@@ -67,7 +70,7 @@ changed for individual matching calls by including \eO in the data line (see
 below).
 .TP 10
 \fB-p\fP
-Behave as if each regex has the \fB/P\fP modifier; the POSIX wrapper API is
+Behave as if each pattern has the \fB/P\fP modifier; the POSIX wrapper API is
 used to call PCRE. None of the other options has any effect when \fB-p\fP is
 set.
 .TP 10
@@ -79,8 +82,21 @@ On Unix-like systems, set the size of the run-time stack to \fIsize\fP
 megabytes.
 .TP 10
 \fB-s\fP
-Behave as if each regex has the \fB/S\fP modifier; in other words, force each 
-regex to be studied.
+Behave as if each pattern has the \fB/S\fP modifier; in other words, force each
+pattern to be studied. If the \fB/I\fP or \fB/D\fP option is present on a
+pattern (requesting output about the compiled pattern), information about the
+result of studying is not included when studying is caused only by \fB-s\fP and
+neither \fB-i\fP nor \fB-d\fP is present on the command line. This behaviour
+means that the output from tests that are run with and without \fB-s\fP should
+be identical, except when options that output information about the actual
+running of a match are set. The \fB-M\fP, \fB-t\fP, and \fB-tm\fP options,
+which give information about resources used, are likely to produce different
+output with and without \fB-s\fP. Output may also differ if the \fB/C\fP option
+is present on an individual pattern. This uses callouts to trace the the
+matching process, and this may be different between studied and non-studied
+patterns. If the pattern contains (*MARK) items there may also be differences,
+for the same reason. The \fB-s\fP command line option can be overridden for
+specific patterns that should never be studied (see the /S option below).
 .TP 10
 \fB-t\fP
 Run each compile, study, and match many times with a timer, and output
@@ -193,10 +209,10 @@ options that do not correspond to anything in Perl:
   \fB/<bsr_unicode>\fP  PCRE_BSR_UNICODE
 .sp
 The modifiers that are enclosed in angle brackets are literal strings as shown,
-including the angle brackets, but the letters can be in either case. This
-example sets multiline matching with CRLF as the line ending sequence:
+including the angle brackets, but the letters within can be in either case.
+This example sets multiline matching with CRLF as the line ending sequence:
 .sp
-  /^abc/m<crlf>
+  /^abc/m<CRLF>
 .sp
 As well as turning on the PCRE_UTF8 option, the \fB/8\fP modifier also causes
 any non-printing characters in output strings to be printed using the
@@ -290,9 +306,13 @@ which it appears.
 The \fB/M\fP modifier causes the size of memory block used to hold the compiled
 pattern to be output.
 .P
-The \fB/S\fP modifier causes \fBpcre_study()\fP to be called after the
-expression has been compiled, and the results used when the expression is
-matched.
+If the \fB/S\fP modifier appears once, it causes \fBpcre_study()\fP to be
+called after the expression has been compiled, and the results used when the
+expression is matched. If \fB/S\fP appears twice, it suppresses studying, even 
+if it was requested externally by the \fB-s\fP command line option. This makes 
+it possible to specify that certain patterns are always studied, and others are 
+never studied, independently of \fB-s\fP. This feature is used in the test 
+files in a few cases where the output is different when the pattern is studied.
 .P
 The \fB/T\fP modifier must be followed by a single digit. It causes a specific
 set of built-in character tables to be passed to \fBpcre_compile()\fP. It is
@@ -746,7 +766,7 @@ characters.
 For example:
 .sp
    re> </some/file
-  Compiled regex loaded from /some/file
+  Compiled pattern loaded from /some/file
   No study data
 .sp
 When the pattern has been loaded, \fBpcretest\fP proceeds to read data lines in
@@ -792,6 +812,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 June 2011
+Last updated: 02 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

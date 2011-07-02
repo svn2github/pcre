@@ -1436,6 +1436,7 @@ while (!done)
   size_t size, regex_gotten_store;
   int do_mark = 0;
   int do_study = 0;
+  int no_force_study = 0; 
   int do_debug = debug;
   int do_G = 0;
   int do_g = 0;
@@ -1502,7 +1503,7 @@ while (!done)
         }
       }
 
-    fprintf(outfile, "Compiled regex%s loaded from %s\n",
+    fprintf(outfile, "Compiled pattern%s loaded from %s\n",
       do_flip? " (byte-inverted)" : "", p);
 
     /* Need to know if UTF-8 for printing data strings */
@@ -1510,7 +1511,7 @@ while (!done)
     new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
     use_utf8 = (get_options & PCRE_UTF8) != 0;
 
-    /* Now see if there is any following study data */
+    /* Now see if there is any following study data. */
 
     if (true_study_size != 0)
       {
@@ -1624,7 +1625,14 @@ while (!done)
       case 'P': do_posix = 1; break;
 #endif
 
-      case 'S': do_study = 1; break;
+      case 'S': 
+      if (do_study == 0) do_study = 1; else
+        {
+        do_study = 0;
+        no_force_study = 1;
+        }    
+      break;
+
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'W': options |= PCRE_UCP; break;
       case 'X': options |= PCRE_EXTRA; break;
@@ -1808,10 +1816,12 @@ while (!done)
     true_size = ((real_pcre *)re)->size;
     regex_gotten_store = gotten_store;
 
-    /* If -s or /S was present, study the regexp to generate additional info to
-    help with the matching. */
+    /* If -s or /S was present, study the regex to generate additional info to
+    help with the matching, unless the pattern has the SS option, which 
+    suppresses the effect of /S (used for a few test patterns where studying is
+    never sensible). */
 
-    if (do_study || force_study)
+    if (do_study || (force_study && !no_force_study))
       {
       if (timeit > 0)
         {
@@ -2049,9 +2059,12 @@ while (!done)
       /* Don't output study size; at present it is in any case a fixed
       value, but it varies, depending on the computer architecture, and
       so messes up the test suite. (And with the /F option, it might be
-      flipped.) */
+      flipped.) If study was forced by an external -s, don't show this 
+      information unless -i or -d was also present. This means that, except
+      when auto-callouts are involved, the output from runs with and without
+      -s should be identical. */
 
-      if (do_study || force_study)
+      if (do_study || (force_study && showinfo && !no_force_study))
         {
         if (extra == NULL)
           fprintf(outfile, "Study returned NULL\n");
@@ -2129,7 +2142,11 @@ while (!done)
           }
         else
           {
-          fprintf(outfile, "Compiled regex written to %s\n", to_file);
+          fprintf(outfile, "Compiled pattern written to %s\n", to_file);
+          
+          /* If there is study data, write it, but verify the writing only
+          if the studying was requested by /S, not just by -s. */
+ 
           if (extra != NULL)
             {
             if (fwrite(extra->study_data, 1, true_study_size, f) <
@@ -2139,7 +2156,6 @@ while (!done)
                 strerror(errno));
               }
             else fprintf(outfile, "Study data written to %s\n", to_file);
-
             }
           }
         fclose(f);

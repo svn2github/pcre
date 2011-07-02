@@ -3973,13 +3973,13 @@
     ac
     bbbbc
 
-/abc/>testsavedregex
+/abc/SS>testsavedregex
 <testsavedregex
     abc
     *** Failers
     bca
     
-/abc/F>testsavedregex
+/abc/FSS>testsavedregex
 <testsavedregex
     abc
     *** Failers

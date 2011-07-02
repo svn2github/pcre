@@ -3580,7 +3580,27 @@ Need char = 'f'
   1    ^    ^     f
  0: abcdef
 
-/(?C1)\dabc(?C2)def/I
+/(?C1)\dabc(?C2)def/IS
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'f'
+Subject length lower bound = 7
+Starting byte set: 0 1 2 3 4 5 6 7 8 9 
+    1234abcdef
+--->1234abcdef
+  1 ^              \d
+  1  ^             \d
+  1   ^            \d
+  1    ^           \d
+  2    ^   ^       d
+ 0: 4abcdef
+    *** Failers
+No match
+    abcdef
+No match
+
+/(?C1)\dabc(?C2)def/ISS
 Capturing subpattern count = 0
 No options
 No first char
@@ -4778,7 +4798,51 @@ Need char = 'e'
  +4 ^   ^      e
 No match
 
-/a*b/ICDZ
+/a*b/ICDZS
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 2
+        a*+
+        Callout 255 2 1
+        b
+        Callout 255 3 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options:
+No first char
+Need char = 'b'
+Subject length lower bound = 1
+Starting byte set: a b 
+  ab
+--->ab
+ +0 ^      a*
+ +2 ^^     b
+ +3 ^ ^    
+ 0: ab
+  aaaab
+--->aaaab
+ +0 ^         a*
+ +2 ^   ^     b
+ +3 ^    ^    
+ 0: aaaab
+  aaaacb
+--->aaaacb
+ +0 ^          a*
+ +2 ^   ^      b
+ +0  ^         a*
+ +2  ^  ^      b
+ +0   ^        a*
+ +2   ^ ^      b
+ +0    ^       a*
+ +2    ^^      b
+ +0      ^     a*
+ +2      ^     b
+ +3      ^^    
+ 0: b
+
+/a*b/ICDZSS
 ------------------------------------------------------------------
         Bra
         Callout 255 0 2
@@ -4861,7 +4925,83 @@ Need char = 'b'
  +2    ^^      b
 No match
 
-/(abc|def)x/ICDZ
+/(abc|def)x/ICDZS
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 9
+        CBra 1
+        Callout 255 1 1
+        a
+        Callout 255 2 1
+        b
+        Callout 255 3 1
+        c
+        Callout 255 4 0
+        Alt
+        Callout 255 5 1
+        d
+        Callout 255 6 1
+        e
+        Callout 255 7 1
+        f
+        Callout 255 8 0
+        Ket
+        Callout 255 9 1
+        x
+        Callout 255 10 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options:
+No first char
+Need char = 'x'
+Subject length lower bound = 4
+Starting byte set: a d 
+  abcx
+--->abcx
+ +0 ^        (abc|def)
+ +1 ^        a
+ +2 ^^       b
+ +3 ^ ^      c
+ +4 ^  ^     |
+ +9 ^  ^     x
++10 ^   ^    
+ 0: abcx
+ 1: abc
+  defx
+--->defx
+ +0 ^        (abc|def)
+ +1 ^        a
+ +5 ^        d
+ +6 ^^       e
+ +7 ^ ^      f
+ +8 ^  ^     )
+ +9 ^  ^     x
++10 ^   ^    
+ 0: defx
+ 1: def
+  ** Failers 
+No match
+  abcdefzx
+--->abcdefzx
+ +0 ^            (abc|def)
+ +1 ^            a
+ +2 ^^           b
+ +3 ^ ^          c
+ +4 ^  ^         |
+ +9 ^  ^         x
+ +5 ^            d
+ +0    ^         (abc|def)
+ +1    ^         a
+ +5    ^         d
+ +6    ^^        e
+ +7    ^ ^       f
+ +8    ^  ^      )
+ +9    ^  ^      x
+No match
+
+/(abc|def)x/ICDZSS
 ------------------------------------------------------------------
         Bra
         Callout 255 0 9
@@ -4915,6 +5055,8 @@ Need char = 'x'
 +10 ^   ^    
  0: defx
  1: def
+  ** Failers 
+No match
   abcdefzx
 --->abcdefzx
  +0 ^            (abc|def)
@@ -5015,7 +5157,58 @@ No need char
  0: abcdcdcd
  1: cd
 
-/([ab]{,4}c|xy)/ICDZ
+/([ab]{,4}c|xy)/ICDZS
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 14
+        CBra 1
+        Callout 255 1 4
+        [ab]
+        Callout 255 5 1
+        {
+        Callout 255 6 1
+        ,
+        Callout 255 7 1
+        4
+        Callout 255 8 1
+        }
+        Callout 255 9 1
+        c
+        Callout 255 10 0
+        Alt
+        Callout 255 11 1
+        x
+        Callout 255 12 1
+        y
+        Callout 255 13 0
+        Ket
+        Callout 255 14 0
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options:
+No first char
+No need char
+Subject length lower bound = 2
+Starting byte set: a b x 
+    Note: that { does NOT introduce a quantifier
+--->Note: that { does NOT introduce a quantifier
+ +0         ^                                        ([ab]{,4}c|xy)
+ +1         ^                                        [ab]
+ +5         ^^                                       {
++11         ^                                        x
+ +0                                 ^                ([ab]{,4}c|xy)
+ +1                                 ^                [ab]
+ +5                                 ^^               {
++11                                 ^                x
+ +0                                     ^            ([ab]{,4}c|xy)
+ +1                                     ^            [ab]
+ +5                                     ^^           {
++11                                     ^            x
+No match
+
+/([ab]{,4}c|xy)/ICDZSS
 ------------------------------------------------------------------
         Bra
         Callout 255 0 14
@@ -5467,14 +5660,33 @@ No match
     123456\P
 No match
 
-/abc/I>testsavedregex
+/abc/IS>testsavedregex
 Capturing subpattern count = 0
 No options
 First char = 'a'
 Need char = 'c'
-Compiled regex written to testsavedregex
+Subject length lower bound = 3
+No set of starting bytes
+Compiled pattern written to testsavedregex
+Study data written to testsavedregex
 <testsavedregex
-Compiled regex loaded from testsavedregex
+Compiled pattern loaded from testsavedregex
+Study data loaded from testsavedregex
+    abc
+ 0: abc
+    ** Failers
+No match
+    bca
+No match
+
+/abc/ISS>testsavedregex
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern loaded from testsavedregex
 No study data
     abc
  0: abc
@@ -5483,14 +5695,33 @@ No match
     bca
 No match
 
-/abc/IF>testsavedregex
+/abc/IFS>testsavedregex
 Capturing subpattern count = 0
 No options
 First char = 'a'
 Need char = 'c'
-Compiled regex written to testsavedregex
+Subject length lower bound = 3
+No set of starting bytes
+Compiled pattern written to testsavedregex
+Study data written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
+Study data loaded from testsavedregex
+    abc
+ 0: abc
+    ** Failers
+No match
+    bca
+No match
+
+/abc/IFSS>testsavedregex
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 No study data
     abc
  0: abc
@@ -5506,11 +5737,29 @@ No first char
 No need char
 Subject length lower bound = 1
 Starting byte set: a b 
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex loaded from testsavedregex
+Compiled pattern loaded from testsavedregex
 Study data loaded from testsavedregex
+    abc
+ 0: a
+ 1: a
+    ** Failers
+ 0: a
+ 1: a
+    def
+No match
+
+/(a|b)/ISS>testsavedregex
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern loaded from testsavedregex
+No study data
     abc
  0: a
  1: a
@@ -5527,11 +5776,29 @@ No first char
 No need char
 Subject length lower bound = 1
 Starting byte set: a b 
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 Study data loaded from testsavedregex
+    abc
+ 0: a
+ 1: a
+    ** Failers
+ 0: a
+ 1: a
+    def
+No match
+
+/(a|b)/ISSF>testsavedregex
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Compiled pattern written to testsavedregex
+<testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
+No study data
     abc
  0: a
  1: a
@@ -10805,7 +11072,15 @@ name were given. ---/
     ACAB
  0: AB
 
-/(*MARK:A)(*PRUNE:B)(C|X)/K
+/(*MARK:A)(*PRUNE:B)(C|X)/KS
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
+No match
+
+/(*MARK:A)(*PRUNE:B)(C|X)/KSS
     C
  0: C
  1: C
@@ -10813,7 +11088,15 @@ MK: A
     D 
 No match, mark = B
 
-/(*MARK:A)(*THEN:B)(C|X)/K
+/(*MARK:A)(*THEN:B)(C|X)/KS
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
+No match
+
+/(*MARK:A)(*THEN:B)(C|X)/KSS
     C
  0: C
  1: C
@@ -11574,6 +11857,23 @@ No match
 /^.*?(?(?=a)a|bc)/
     ba
  0: ba
+
+/-- --/
+
+/-- These studied versions are here because they are not Perl-compatible; the
+    studying means the mark is not seen. --/
+
+/(*MARK:A)(*SKIP:B)(C|X)/KS
+    C
+ 0: C
+ 1: C
+MK: A
+    D
+No match
+     
+/(*:A)A+(*SKIP:A)(B|Z)/KS
+    AAAC
+No match
 
 /-- --/
 

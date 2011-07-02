@@ -79,8 +79,10 @@ Version 8.13 30-Apr-2011
     synonym of -m (show memory usage). I have changed it to mean "force study 
     for every regex", that is, assume /S for every regex. This is similar to -i 
     and -d etc. It's slightly incompatible, but I'm hoping nobody is still 
-    using it. It makes it easier to run collection of tests with study enabled, 
-    and thereby test pcre_study() more easily.  
+    using it. It makes it easier to run collections of tests with and without
+    study enabled, and thereby test pcre_study() more easily. All the standard 
+    tests are now run with and without -s (but some patterns can be marked as 
+    "never study" - see 20 below).
     
 15. When (*ACCEPT) was used in a subpattern that was called recursively, the
     restoration of the capturing data to the outer values was not happening 
@@ -101,6 +103,13 @@ Version 8.13 30-Apr-2011
 18. If a pattern containing \R was studied, it was assumed that \R always
     matched two bytes, thus causing the minimum subject length to be
     incorrectly computed because \R can also match just one byte.
+    
+19. If a pattern containing (*ACCEPT) was studied, the minimum subject length
+    was incorrectly computed. 
+    
+20. If /S is present twice on a test pattern in pcretest input, it *disables*
+    studying, thereby overriding the use of -s on the command line. This is
+    necessary for one or two tests to keep the output identical in both cases. 
 
 
 Version 8.12 15-Jan-2011

@@ -66,9 +66,10 @@ string of that length that matches. In UTF8 mode, the result is in characters
 rather than bytes.
 
 Arguments:
-  code       pointer to start of group (the bracket)
-  startcode  pointer to start of the whole pattern
-  options    the compiling options
+  code        pointer to start of group (the bracket)
+  startcode   pointer to start of the whole pattern
+  options     the compiling options
+  had_accept  pointer to flag for (*ACCEPT) encountered
 
 Returns:   the minimum length
            -1 if \C was encountered
@@ -77,7 +78,8 @@ Returns:   the minimum length
 */
 
 static int
-find_minlength(const uschar *code, const uschar *startcode, int options)
+find_minlength(const uschar *code, const uschar *startcode, int options,
+  BOOL *had_accept_ptr)
 {
 int length = -1;
 BOOL utf8 = (options & PCRE_UTF8) != 0;
@@ -125,17 +127,23 @@ for (;;)
     case OP_BRAPOS:
     case OP_SBRAPOS:
     case OP_ONCE:
-    d = find_minlength(cc, startcode, options);
+    d = find_minlength(cc, startcode, options, had_accept_ptr);
     if (d < 0) return d;
     branchlength += d;
+    if (*had_accept_ptr) return branchlength; 
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += 1 + LINK_SIZE;
     break;
 
     /* Reached end of a branch; if it's a ket it is the end of a nested
-    call. If it's ALT it is an alternation in a nested call. If it is
-    END it's the end of the outer call. All can be handled by the same code. */
+    call. If it's ALT it is an alternation in a nested call. If it is END it's
+    the end of the outer call. All can be handled by the same code. If it is
+    ACCEPT, it is essentially the same as END, but we set a flag so that
+    counting stops. */
 
+    case OP_ACCEPT: 
+    *had_accept_ptr = TRUE;
+    /* Fall through */ 
     case OP_ALT:
     case OP_KET:
     case OP_KETRMAX:
@@ -144,7 +152,7 @@ for (;;)
     case OP_END:
     if (length < 0 || (!had_recurse && branchlength < length))
       length = branchlength;
-    if (*cc != OP_ALT) return length;
+    if (op != OP_ALT) return length;
     cc += 1 + LINK_SIZE;
     branchlength = 0;
     had_recurse = FALSE;
@@ -367,7 +375,11 @@ for (;;)
         d = 0;
         had_recurse = TRUE;
         }
-      else d = find_minlength(cs, startcode, options);
+      else 
+        {
+        d = find_minlength(cs, startcode, options, had_accept_ptr);
+        *had_accept_ptr = FALSE; 
+        } 
       }
     else d = 0;
     cc += 3;
@@ -411,7 +423,10 @@ for (;;)
     if (cc > cs && cc < ce)
       had_recurse = TRUE;
     else
-      branchlength += find_minlength(cs, startcode, options);
+      { 
+      branchlength += find_minlength(cs, startcode, options, had_accept_ptr);
+      *had_accept_ptr = FALSE;
+      }  
     cc += 1 + LINK_SIZE;
     break;
 
@@ -479,10 +494,9 @@ for (;;)
     case OP_THEN_ARG:
     cc += _pcre_OP_lengths[op] + cc[1+LINK_SIZE];
     break;
-
+    
     /* The remaining opcodes are just skipped over. */
 
-    case OP_ACCEPT:
     case OP_CLOSE:
     case OP_COMMIT:
     case OP_FAIL:
@@ -688,6 +702,7 @@ do
   while (try_next)    /* Loop for items in this branch */
     {
     int rc;
+
     switch(*tcode)
       {
       /* If we reach something we don't understand, it means a new opcode has
@@ -1200,6 +1215,7 @@ pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 int min;
 BOOL bits_set = FALSE;
+BOOL had_accept = FALSE;
 uschar start_bits[32];
 pcre_extra *extra;
 pcre_study_data *study;
@@ -1257,7 +1273,7 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(code, code, re->options))
+switch(min = find_minlength(code, code, re->options, &had_accept))
   {
   case -2: *errorptr = "internal error: missing capturing bracket"; break;
   case -3: *errorptr = "internal error: opcode not recognized"; break;

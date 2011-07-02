@@ -246,6 +246,7 @@
     aaabccc
 
 /(A (A|B(*ACCEPT)|C) D)(E)/x
+    AB
     ABX
     AADE
     ACDE
@@ -403,7 +404,10 @@
     AC
     CB    
     
-/(*MARK:A)(*SKIP:B)(C|X)/K
+/--- Force no study, otherwise mark is not seen. The studied version is in
+     test 2 because it isn't Perl-compatible. ---/
+
+/(*MARK:A)(*SKIP:B)(C|X)/KSS
     C
     D
      
@@ -435,9 +439,9 @@ with the handling of backtracking verbs. ---/
 /A(*:A)A+(*SKIP:A)(B|Z) | AC/xK
     AAAC
 
-/--- Don't loop! ---/
+/--- Don't loop! Force no study, otherwise mark is not seen. ---/
 
-/(*:A)A+(*SKIP:A)(B|Z)/K
+/(*:A)A+(*SKIP:A)(B|Z)/KSS
     AAAC
 
 /--- This should succeed, as a non-existent skip name disables the skip ---/ 

@@ -802,7 +802,7 @@ Failed: invalid UTF-8 string at offset 0
 /√√√xxx/8
 Failed: invalid UTF-8 string at offset 0
 
-/√√√xxx/8?DZ
+/√√√xxx/8?DZSS
 ------------------------------------------------------------------
         Bra
         \X{c0}\X{c0}\X{c0}xxx
@@ -2184,7 +2184,7 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-Subject length lower bound = 2
+Subject length lower bound = 1
 Starting byte set: \x0a \x0b \x0c \x0d \x85 
 
 /\R/SI8
@@ -2192,7 +2192,7 @@ Capturing subpattern count = 0
 Options: utf8
 No first char
 No need char
-Subject length lower bound = 2
+Subject length lower bound = 1
 Starting byte set: \x0a \x0b \x0c \x0d \xc2 \xe2 
 
 /\h*A/SI8

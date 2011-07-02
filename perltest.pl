@@ -103,6 +103,10 @@ for (;;)
 
   $pattern =~ s/W(?=[a-zA-Z]*$)//;
 
+  # Remove /S or /SS from a pattern (asks pcretest to study or not to study)
+
+  $pattern =~ s/S(?=[a-zA-Z]*$)//g;
+
   # Check that the pattern is valid
 
   eval "\$_ =~ ${pattern}";

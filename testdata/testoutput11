@@ -501,6 +501,10 @@ No match
 No match
 
 /(A (A|B(*ACCEPT)|C) D)(E)/x
+    AB
+ 0: AB
+ 1: AB
+ 2: B
     ABX
  0: AB
  1: AB
@@ -821,7 +825,10 @@ No match, mark = A
     CB    
 No match, mark = B
     
-/(*MARK:A)(*SKIP:B)(C|X)/K
+/--- Force no study, otherwise mark is not seen. The studied version is in
+     test 2 because it isn't Perl-compatible. ---/
+
+/(*MARK:A)(*SKIP:B)(C|X)/KSS
     C
  0: C
  1: C
@@ -864,9 +871,9 @@ with the handling of backtracking verbs. ---/
     AAAC
  0: AC
 
-/--- Don't loop! ---/
+/--- Don't loop! Force no study, otherwise mark is not seen. ---/
 
-/(*:A)A+(*SKIP:A)(B|Z)/K
+/(*:A)A+(*SKIP:A)(B|Z)/KSS
     AAAC
 No match, mark = A
 

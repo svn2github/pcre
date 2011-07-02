@@ -1011,10 +1011,10 @@ Partial match: efabbbbbbbbbbbbbbbb
  0: bbbbbbbbbbbbcdX
 
 /(a|b)/SF>testsavedregex
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 Study data loaded from testsavedregex
     abc
  0: a
@@ -6439,10 +6439,10 @@ Error -17 (backreference condition or recursion test not supported for DFA match
     bbbbc
  0: c
 
-/abc/>testsavedregex
-Compiled regex written to testsavedregex
+/abc/SS>testsavedregex
+Compiled pattern written to testsavedregex
 <testsavedregex
-Compiled regex loaded from testsavedregex
+Compiled pattern loaded from testsavedregex
 No study data
     abc
  0: abc
@@ -6451,10 +6451,10 @@ No match
     bca
 No match
     
-/abc/F>testsavedregex
-Compiled regex written to testsavedregex
+/abc/FSS>testsavedregex
+Compiled pattern written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 No study data
     abc
  0: abc
@@ -6464,10 +6464,10 @@ No match
 No match
 
 /(a|b)/S>testsavedregex
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex loaded from testsavedregex
+Compiled pattern loaded from testsavedregex
 Study data loaded from testsavedregex
     abc
  0: a
@@ -6477,10 +6477,10 @@ Study data loaded from testsavedregex
 No match
     
 /(a|b)/SF>testsavedregex
-Compiled regex written to testsavedregex
+Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
-Compiled regex (byte-inverted) loaded from testsavedregex
+Compiled pattern (byte-inverted) loaded from testsavedregex
 Study data loaded from testsavedregex
     abc
  0: a

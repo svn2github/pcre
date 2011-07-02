@@ -2,7 +2,8 @@ Technical Notes about PCRE
 --------------------------
 
 These are very rough technical notes that record potentially useful information 
-about PCRE internals.
+about PCRE internals. For information about testing PCRE, see the pcretest 
+documentation and the comment at the head of the RunTest file.
 
 
 Historical note 1
@@ -449,4 +450,4 @@ next item.
 
 
 Philip Hazel
-May 2011
+July 2011

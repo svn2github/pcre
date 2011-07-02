@@ -595,10 +595,10 @@ compatibility. */
 #define PCRE_JCHANGED      0x0010  /* j option used in regex */
 #define PCRE_HASCRORLF     0x0020  /* explicit \r or \n in pattern */
 
-/* Options for the "extra" block produced by pcre_study(). */
+/* Flags for the "extra" block produced by pcre_study(). */
 
-#define PCRE_STUDY_MAPPED   0x01     /* a map of starting chars exists */
-#define PCRE_STUDY_MINLEN   0x02     /* a minimum length field exists */
+#define PCRE_STUDY_MAPPED  0x0001  /* a map of starting chars exists */
+#define PCRE_STUDY_MINLEN  0x0002  /* a minimum length field exists */
 
 /* Masks for identifying the public options that are permitted at compile
 time, run time, or study time, respectively. */
