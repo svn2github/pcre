@@ -1445,7 +1445,8 @@ enum {
   OP_KETRMIN,        /* 116 order. They are for groups the repeat for ever. */
   OP_KETRPOS,        /* 117 Possessive unlimited repeat. */
 
-  /* The assertions must come before BRA, CBRA, ONCE, and COND.*/
+  /* The assertions must come before BRA, CBRA, ONCE, and COND, and the four
+  asserts must remain in order. */
 
   OP_ASSERT,         /* 118 Positive lookahead */
   OP_ASSERT_NOT,     /* 119 Negative lookahead */
@@ -1455,7 +1456,7 @@ enum {
 
   /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come after the assertions,
   with ONCE first, as there's a test for >= ONCE for a subpattern that isn't an
-  assertion. The POS versions must immediately follow the non-POS versions in 
+  assertion. The POS versions must immediately follow the non-POS versions in
   each case. */
 
   OP_ONCE,           /* 123 Atomic group */
@@ -1484,7 +1485,7 @@ enum {
 
   OP_BRAZERO,        /* 139 These two must remain together and in this */
   OP_BRAMINZERO,     /* 140 order. */
-  OP_BRAPOSZERO,     /* 141 */ 
+  OP_BRAPOSZERO,     /* 141 */
 
   /* These are backtracking control verbs */
 
@@ -1501,11 +1502,12 @@ enum {
 
   OP_FAIL,           /* 150 */
   OP_ACCEPT,         /* 151 */
-  OP_CLOSE,          /* 152 Used before OP_ACCEPT to close open captures */
+  OP_ASSERT_ACCEPT,  /* 152 Used inside assertions */
+  OP_CLOSE,          /* 153 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 153 */
+  OP_SKIPZERO,       /* 154 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -1557,7 +1559,8 @@ some cases doesn't actually use these names at all). */
   "Cond ref", "Cond nref", "Cond rec", "Cond nrec", "Cond def",   \
   "Brazero", "Braminzero", "Braposzero",                          \
   "*MARK", "*PRUNE", "*PRUNE", "*SKIP", "*SKIP",                  \
-  "*THEN", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",                \
+  "*THEN", "*THEN", "*COMMIT", "*FAIL",                           \
+  "*ACCEPT", "*ASSERT_ACCEPT",                                    \
   "Close", "Skip zero"
 
 
@@ -1639,7 +1642,8 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG                 */ \
   1, 3,                          /* SKIP, SKIP_ARG                         */ \
   1+LINK_SIZE, 3+LINK_SIZE,      /* THEN, THEN_ARG                         */ \
-  1, 1, 1, 3, 1                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */ \
+  1, 1, 1, 1,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */ \
+  3, 1                           /* CLOSE, SKIPZERO  */
 
 /* A magic value for OP_RREF and OP_NRREF to indicate the "any recursion"
 condition. */
@@ -1737,6 +1741,7 @@ typedef struct compile_data {
   int  final_bracount;          /* Saved value after first pass */
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
+  int  assert_depth;            /* Depth of nested assertions */ 
   int  external_options;        /* External (initial) options */
   int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
@@ -1793,8 +1798,8 @@ typedef struct match_data {
   int    name_entry_size;       /* Size of entry in names table */
   uschar *name_table;           /* Table of names */
   uschar nl[4];                 /* Newline string when fixed */
-  const uschar *lcc;            /* Points to lower casing table */
-  const uschar *ctypes;         /* Points to table of type maps */
+  const  uschar *lcc;           /* Points to lower casing table */
+  const  uschar *ctypes;        /* Points to table of type maps */
   BOOL   offset_overflow;       /* Set if too many extractions */
   BOOL   notbol;                /* NOTBOL flag */
   BOOL   noteol;                /* NOTEOL flag */
@@ -1806,7 +1811,7 @@ typedef struct match_data {
   BOOL   notempty_atstart;      /* Empty string match at start not wanted */
   BOOL   hitend;                /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
-  const uschar *start_code;     /* For use when recursing */
+  const  uschar *start_code;    /* For use when recursing */
   USPTR  start_subject;         /* Start of the subject string */
   USPTR  end_subject;           /* End of the subject string */
   USPTR  start_match_ptr;       /* Start of matched string */
@@ -1816,12 +1821,12 @@ typedef struct match_data {
   int    end_offset_top;        /* Highwater mark at end of match */
   int    capture_last;          /* Most recent capture number */
   int    start_offset;          /* The start offset value */
-  int    match_function_type;   /* Set for certain special calls of MATCH() */ 
+  int    match_function_type;   /* Set for certain special calls of MATCH() */
   eptrblock *eptrchain;         /* Chain of eptrblocks for tail recursions */
   int    eptrn;                 /* Next free eptrblock */
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
-  const uschar *mark;           /* Mark pointer to pass back */
+  const  uschar *mark;          /* Mark pointer to pass back */
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

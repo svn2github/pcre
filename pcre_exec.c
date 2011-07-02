@@ -1296,6 +1296,7 @@ for (;;)
     recursion, continue from after the call. */
 
     case OP_ACCEPT:
+    case OP_ASSERT_ACCEPT: 
     case OP_END:
     if (md->recursive != NULL)
       {
@@ -1311,12 +1312,12 @@ for (;;)
         } 
       }
 
-    /* Otherwise, if we have matched an empty string, fail if PCRE_NOTEMPTY is
-    set, or if PCRE_NOTEMPTY_ATSTART is set and we have matched at the start of
-    the subject. In both cases, backtracking will then try other alternatives,
-    if any. */
+    /* Otherwise, if we have matched an empty string, fail if not in an 
+    assertion and if either PCRE_NOTEMPTY is set, or if PCRE_NOTEMPTY_ATSTART
+    is set and we have matched at the start of the subject. In both cases,
+    backtracking will then try other alternatives, if any. */
 
-    else if (eptr == mstart &&
+    else if (eptr == mstart && op != OP_ASSERT_ACCEPT &&
         (md->notempty ||
           (md->notempty_atstart &&
             mstart == md->start_subject + md->start_offset)))
@@ -5899,12 +5900,17 @@ utf8 = md->utf8 = (re->options & PCRE_UTF8) != 0;
 md->use_ucp = (re->options & PCRE_UCP) != 0;
 md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 
+/* Some options are unpacked into BOOL variables in the hope that testing
+them will be faster than individual option bits. */
+
 md->notbol = (options & PCRE_NOTBOL) != 0;
 md->noteol = (options & PCRE_NOTEOL) != 0;
 md->notempty = (options & PCRE_NOTEMPTY) != 0;
 md->notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
 md->partial = ((options & PCRE_PARTIAL_HARD) != 0)? 2 :
               ((options & PCRE_PARTIAL_SOFT) != 0)? 1 : 0;
+              
+ 
 md->hitend = FALSE;
 md->mark = NULL;                        /* In case never set */
 

@@ -142,6 +142,7 @@ for (;;)
     counting stops. */
 
     case OP_ACCEPT: 
+    case OP_ASSERT_ACCEPT: 
     *had_accept_ptr = TRUE;
     /* Fall through */ 
     case OP_ALT:
@@ -715,6 +716,7 @@ do
       /* Fail for a valid opcode that implies no starting bits. */
 
       case OP_ACCEPT:
+      case OP_ASSERT_ACCEPT: 
       case OP_ALLANY:
       case OP_ANY:
       case OP_ANYBYTE:

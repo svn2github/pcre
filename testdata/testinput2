@@ -3745,4 +3745,16 @@ with \Y. ---/
 
 /-- --/
 
+"(?=a*(*ACCEPT)b)c"
+    c
+    c\N 
+    
+/(?1)c(?(DEFINE)((*ACCEPT)b))/
+    c
+    c\N  
+    
+/(?>(*ACCEPT)b)c/
+    c
+    c\N  
+
 /-- End of testinput2 --/

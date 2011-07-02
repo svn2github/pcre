@@ -11877,4 +11877,22 @@ No match
 
 /-- --/
 
+"(?=a*(*ACCEPT)b)c"
+    c
+ 0: c
+    c\N 
+ 0: c
+    
+/(?1)c(?(DEFINE)((*ACCEPT)b))/
+    c
+ 0: c
+    c\N  
+ 0: c
+    
+/(?>(*ACCEPT)b)c/
+    c
+ 0: 
+    c\N  
+No match
+
 /-- End of testinput2 --/

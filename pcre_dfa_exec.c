@@ -170,9 +170,10 @@ static const uschar coptable[] = {
   0, 0,                          /* RREF, NRREF                            */
   0,                             /* DEF                                    */
   0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
-  0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG,                */
-  0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */
-  0, 0, 0, 0, 0                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
+  0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG                 */
+  0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
+  0, 0, 0, 0,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */
+  0, 0                           /* CLOSE, SKIPZERO  */
 };
 
 /* This table identifies those opcodes that inspect a character. It is used to
@@ -237,9 +238,10 @@ static const uschar poptable[] = {
   0, 0,                          /* RREF, NRREF                            */
   0,                             /* DEF                                    */
   0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
-  0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG,                */
-  0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG,        */
-  0, 0, 0, 0, 0                  /* COMMIT, FAIL, ACCEPT, CLOSE, SKIPZERO  */
+  0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG                 */
+  0, 0, 0, 0,                    /* SKIP, SKIP_ARG, THEN, THEN_ARG         */
+  0, 0, 0, 0,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */
+  0, 0                           /* CLOSE, SKIPZERO                        */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,

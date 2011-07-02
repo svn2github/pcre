@@ -110,6 +110,9 @@ Version 8.13 30-Apr-2011
 20. If /S is present twice on a test pattern in pcretest input, it *disables*
     studying, thereby overriding the use of -s on the command line. This is
     necessary for one or two tests to keep the output identical in both cases. 
+    
+21. When (*ACCEPT) was used in an assertion that matched an empty string and
+    PCRE_NOTEMPTY was set, PCRE applied the non-empty test to the assertion. 
 
 
 Version 8.12 15-Jan-2011

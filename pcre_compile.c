@@ -4931,22 +4931,29 @@ for (;; ptr++)
         if (namelen == verbs[i].len &&
             strncmp((char *)name, vn, namelen) == 0)
           {
-          /* Check for open captures before ACCEPT */
+          /* Check for open captures before ACCEPT and convert it to 
+          ASSERT_ACCEPT if in an assertion. */
 
           if (verbs[i].op == OP_ACCEPT)
             {
             open_capitem *oc;
+            if (arglen != 0)
+              {
+              *errorcodeptr = ERR59;
+              goto FAILED;
+              }   
             cd->had_accept = TRUE;
             for (oc = cd->open_caps; oc != NULL; oc = oc->next)
               {
               *code++ = OP_CLOSE;
               PUT2INC(code, 0, oc->number);
               }
+            *code++ = (cd->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
             }
 
-          /* Handle the cases with/without an argument */
+          /* Handle other cases with/without an argument */
 
-          if (arglen == 0)
+          else if (arglen == 0)
             {
             if (verbs[i].op < 0)   /* Argument is mandatory */
               {
@@ -5235,6 +5242,7 @@ for (;; ptr++)
         /* ------------------------------------------------------------ */
         case CHAR_EQUALS_SIGN:                 /* Positive lookahead */
         bravalue = OP_ASSERT;
+        cd->assert_depth += 1; 
         ptr++;
         break;
 
@@ -5249,6 +5257,7 @@ for (;; ptr++)
           continue;
           }
         bravalue = OP_ASSERT_NOT;
+        cd->assert_depth += 1; 
         break;
 
 
@@ -5258,11 +5267,13 @@ for (;; ptr++)
           {
           case CHAR_EQUALS_SIGN:               /* Positive lookbehind */
           bravalue = OP_ASSERTBACK;
+          cd->assert_depth += 1; 
           ptr += 2;
           break;
 
           case CHAR_EXCLAMATION_MARK:          /* Negative lookbehind */
           bravalue = OP_ASSERTBACK_NOT;
+          cd->assert_depth += 1; 
           ptr += 2;
           break;
 
@@ -5830,6 +5841,9 @@ for (;; ptr++)
            &length_prevgroup           /* Pre-compile phase */
          ))
       goto FAILED;
+      
+    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT)
+      cd->assert_depth -= 1; 
 
     /* At the end of compiling, code is still pointing to the start of the
     group, while tempcode has been updated to point past the end of the group
@@ -7152,6 +7166,7 @@ field; this time it's used for remembering forward references to subpatterns.
 */
 
 cd->final_bracount = cd->bracount;  /* Save for checking forward references */
+cd->assert_depth = 0;
 cd->bracount = 0;
 cd->names_found = 0;
 cd->name_table = (uschar *)re + re->name_table_offset;
