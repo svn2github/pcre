@@ -847,6 +847,23 @@ for (;;)
         if (rrc != MATCH_NOMATCH &&
             (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           RRETURN(rrc);
+
+        /* If md->end_offset_top is greater than offset_top, it means that the
+        branch we have just failed to match did manage to match some capturing
+        parentheses within an atomic group or an assertion. Although offset_top
+        reverts to its original value at this level, we must unset the captured
+        values in case a later match sets a higher capturing number. Example:
+        matching /((?>(a))b|(a)c)/ against "ac". This captures 3, but we need
+        to ensure that 2 - which was captured in the atomic matching - is
+        unset. */
+      
+        if (md->end_offset_top > offset_top)   
+          {
+          register int *iptr = md->offset_vector + offset_top;
+          register int *iend = md->offset_vector + md->end_offset_top;
+          while (iptr < iend) *iptr++ = -1;
+          }
+
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         if (*ecode != OP_ALT) break; 
@@ -892,6 +909,16 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
+
+      /* See explanatory comment above under OP_CBRA. */
+       
+      if (md->end_offset_top > offset_top)   
+        {
+        register int *iptr = md->offset_vector + offset_top;
+        register int *iend = md->offset_vector + md->end_offset_top;
+        while (iptr < iend) *iptr++ = -1;
+        }
+
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break; 
       }
@@ -962,6 +989,16 @@ for (;;)
         if (rrc != MATCH_NOMATCH &&
             (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           RRETURN(rrc);
+
+        /* See explanatory comment above under OP_CBRA. */
+         
+        if (md->end_offset_top > offset_top)   
+          {
+          register int *iptr = md->offset_vector + offset_top;
+          register int *iend = md->offset_vector + md->end_offset_top;
+          while (iptr < iend) *iptr++ = -1;
+          }
+
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         if (*ecode != OP_ALT) break; 
@@ -1024,6 +1061,16 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
+  
+      /* See explanatory comment above under OP_CBRA. */
+       
+      if (md->end_offset_top > offset_top)   
+        {
+        register int *iptr = md->offset_vector + offset_top;
+        register int *iend = md->offset_vector + md->end_offset_top;
+        while (iptr < iend) *iptr++ = -1;
+        }
+
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break; 
       }
@@ -1366,6 +1413,16 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
+
+      /* See explanatory comment above under OP_CBRA. */
+       
+      if (md->end_offset_top > offset_top)   
+        {
+        register int *iptr = md->offset_vector + offset_top;
+        register int *iend = md->offset_vector + md->end_offset_top;
+        while (iptr < iend) *iptr++ = -1;
+        }
+
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
@@ -1593,6 +1650,16 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
+
+      /* See explanatory comment above under OP_CBRA. */
+       
+      if (md->end_offset_top > offset_top)   
+        {
+        register int *iptr = md->offset_vector + offset_top;
+        register int *iend = md->offset_vector + md->end_offset_top;
+        while (iptr < iend) *iptr++ = -1;
+        }
+
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -1601,8 +1668,8 @@ for (;;)
 
     if (*ecode != OP_ONCE && *ecode != OP_ALT) RRETURN(MATCH_NOMATCH);
 
-    /* Continue as from after the assertion, updating the offsets high water
-    mark, since extracts may have been taken. */
+    /* Continue after the group, updating the offsets high water mark, since
+    extracts may have been taken. */
 
     do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
 
@@ -6298,6 +6365,7 @@ for(;;)
   md->start_used_ptr = start_match;
   md->match_call_count = 0;
   md->match_function_type = 0; 
+  md->end_offset_top = 0;
   rc = match(start_match, md->start_code, start_match, NULL, 2, md, NULL, 0);
   if (md->hitend && start_partial == NULL) start_partial = md->start_used_ptr;
 

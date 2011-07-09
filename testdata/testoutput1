@@ -6750,4 +6750,55 @@ No match
  1: 
  2: 
 
+/(a)b|(a)c/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+
+/(?>(a))b|(a)c/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+
+/(?=(a))ab|(a)c/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+
+/((?>(a))b|(a)c)/
+    ac
+ 0: ac
+ 1: ac
+ 2: <unset>
+ 3: a
+
+/((?>(a))b|(a)c)++/
+    ac
+ 0: ac
+ 1: ac
+ 2: <unset>
+ 3: a
+
+/(?:(?>(a))b|(a)c)++/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+
+/(?=(?>(a))b|(a)c)(..)/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+ 3: ac
+
+/(?>(?>(a))b|(a)c)/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+
 /-- End of testinput1 --/

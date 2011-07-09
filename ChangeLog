@@ -113,6 +113,15 @@ Version 8.13 30-Apr-2011
     
 21. When (*ACCEPT) was used in an assertion that matched an empty string and
     PCRE_NOTEMPTY was set, PCRE applied the non-empty test to the assertion. 
+    
+22. When an atomic group that contained a capturing parenthesis was 
+    successfully matched, but the branch in which it appeared failed, the 
+    capturing was not being forgotten if a higher numbered group was later 
+    captured. For example, /(?>(a))b|(a)c/ when matching "ac" set capturing
+    group 1 to "a", when in fact it should be unset. This applied to multi-
+    branched capturing and non-capturing groups, repeated or not, and also to 
+    positive assertions (capturing in negative assertions is not well defined 
+    in PCRE) and also to nested atomic groups. 
 
 
 Version 8.12 15-Jan-2011
