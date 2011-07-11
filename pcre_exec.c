@@ -847,23 +847,6 @@ for (;;)
         if (rrc != MATCH_NOMATCH &&
             (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           RRETURN(rrc);
-
-        /* If md->end_offset_top is greater than offset_top, it means that the
-        branch we have just failed to match did manage to match some capturing
-        parentheses within an atomic group or an assertion. Although offset_top
-        reverts to its original value at this level, we must unset the captured
-        values in case a later match sets a higher capturing number. Example:
-        matching /((?>(a))b|(a)c)/ against "ac". This captures 3, but we need
-        to ensure that 2 - which was captured in the atomic matching - is
-        unset. */
-      
-        if (md->end_offset_top > offset_top)   
-          {
-          register int *iptr = md->offset_vector + offset_top;
-          register int *iend = md->offset_vector + md->end_offset_top;
-          while (iptr < iend) *iptr++ = -1;
-          }
-
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         if (*ecode != OP_ALT) break; 
@@ -909,16 +892,6 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
-
-      /* See explanatory comment above under OP_CBRA. */
-       
-      if (md->end_offset_top > offset_top)   
-        {
-        register int *iptr = md->offset_vector + offset_top;
-        register int *iend = md->offset_vector + md->end_offset_top;
-        while (iptr < iend) *iptr++ = -1;
-        }
-
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break; 
       }
@@ -989,16 +962,6 @@ for (;;)
         if (rrc != MATCH_NOMATCH &&
             (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           RRETURN(rrc);
-
-        /* See explanatory comment above under OP_CBRA. */
-         
-        if (md->end_offset_top > offset_top)   
-          {
-          register int *iptr = md->offset_vector + offset_top;
-          register int *iend = md->offset_vector + md->end_offset_top;
-          while (iptr < iend) *iptr++ = -1;
-          }
-
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         if (*ecode != OP_ALT) break; 
@@ -1061,16 +1024,6 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
-  
-      /* See explanatory comment above under OP_CBRA. */
-       
-      if (md->end_offset_top > offset_top)   
-        {
-        register int *iptr = md->offset_vector + offset_top;
-        register int *iend = md->offset_vector + md->end_offset_top;
-        while (iptr < iend) *iptr++ = -1;
-        }
-
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break; 
       }
@@ -1413,16 +1366,6 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
-
-      /* See explanatory comment above under OP_CBRA. */
-       
-      if (md->end_offset_top > offset_top)   
-        {
-        register int *iptr = md->offset_vector + offset_top;
-        register int *iend = md->offset_vector + md->end_offset_top;
-        while (iptr < iend) *iptr++ = -1;
-        }
-
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
@@ -1650,16 +1593,6 @@ for (;;)
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
-
-      /* See explanatory comment above under OP_CBRA. */
-       
-      if (md->end_offset_top > offset_top)   
-        {
-        register int *iptr = md->offset_vector + offset_top;
-        register int *iend = md->offset_vector + md->end_offset_top;
-        while (iptr < iend) *iptr++ = -1;
-        }
-
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -1807,6 +1740,25 @@ for (;;)
       md->capture_last = number;
       if (offset >= md->offset_max) md->offset_overflow = TRUE; else
         {
+        /* If offset is greater than offset_top, it means that we are 
+        "skipping" a capturing group, and that group's offsets must be marked 
+        unset. In earlier versions of PCRE, all the offsets were unset at the 
+        start of matching, but this doesn't work because atomic groups and 
+        assertions can cause a value to be set that should later be unset.
+        Example: matching /(?>(a))b|(a)c/ against "ac". This sets group 1 as
+        part of the atomic group, but this is not on the final matching path, 
+        so must be unset when 2 is set. (If there is no group 2, there is no 
+        problem, because offset_top will then be 2, indicating no capture.) */
+         
+        if (offset > offset_top)
+          {
+          register int *iptr = md->offset_vector + offset_top;
+          register int *iend = md->offset_vector + offset;
+          while (iptr < iend) *iptr++ = -1;
+          } 
+ 
+        /* Now make the extraction */
+
         md->offset_vector[offset] =
           md->offset_vector[md->offset_end - number];
         md->offset_vector[offset+1] = (int)(eptr - md->start_subject);
@@ -5859,7 +5811,7 @@ pcre_exec(const pcre *argument_re, const pcre_extra *extra_data,
   PCRE_SPTR subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
 {
-int rc, resetcount, ocount;
+int rc, ocount;
 int first_byte = -1;
 int req_byte = -1;
 int req_byte2 = -1;
@@ -6108,22 +6060,19 @@ md->offset_max = (2*ocount)/3;
 md->offset_overflow = FALSE;
 md->capture_last = -1;
 
-/* Compute the minimum number of offsets that we need to reset each time. Doing
-this makes a huge difference to execution time when there aren't many brackets
-in the pattern. */
-
-resetcount = 2 + re->top_bracket * 2;
-if (resetcount > offsetcount) resetcount = ocount;
-
 /* Reset the working variable associated with each extraction. These should
 never be used unless previously set, but they get saved and restored, and so we
-initialize them to avoid reading uninitialized locations. */
+initialize them to avoid reading uninitialized locations. Also, unset the
+offsets for the matched string. This is really just for tidiness with callouts,
+in case they inspect these fields. */
 
 if (md->offset_vector != NULL)
   {
   register int *iptr = md->offset_vector + ocount;
-  register int *iend = iptr - resetcount/2 + 1;
+  register int *iend = iptr - re->top_bracket;
+  if (iend < md->offset_vector + 2) iend = md->offset_vector + 2;
   while (--iptr >= iend) *iptr = -1;
+  md->offset_vector[0] = md->offset_vector[1] = -1;
   }
 
 /* Set up the first character to match, if available. The first_byte value is
@@ -6157,6 +6106,8 @@ if ((re->flags & PCRE_REQCHSET) != 0)
   }
 
 
+
+
 /* ==========================================================================*/
 
 /* Loop for handling unanchored repeated matching attempts; for anchored regexs
@@ -6166,15 +6117,6 @@ for(;;)
   {
   USPTR save_end_subject = end_subject;
   USPTR new_start_match;
-
-  /* Reset the maximum number of extractions we might see. */
-
-  if (md->offset_vector != NULL)
-    {
-    register int *iptr = md->offset_vector;
-    register int *iend = iptr + resetcount;
-    while (iptr < iend) *iptr++ = -1;
-    }
 
   /* If firstline is TRUE, the start of the match is constrained to the first
   line of a multiline string. That is, the match must be before or at the first
