@@ -122,6 +122,10 @@ Version 8.13 30-Apr-2011
     branched capturing and non-capturing groups, repeated or not, and also to 
     positive assertions (capturing in negative assertions is not well defined 
     in PCRE) and also to nested atomic groups. 
+    
+23. Add the ++ qualifier feature to pcretest, to show the remainder of the 
+    subject after a captured substring (to make it easier to tell which of a 
+    number of identical substrings has been captured).
 
 
 Version 8.12 15-Jan-2011

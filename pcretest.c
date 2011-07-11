@@ -1442,6 +1442,7 @@ while (!done)
   int do_g = 0;
   int do_showinfo = showinfo;
   int do_showrest = 0;
+  int do_showcaprest = 0;
   int do_flip = 0;
   int erroroffset, len, delimiter, poffset;
 
@@ -1607,7 +1608,10 @@ while (!done)
       case 's': options |= PCRE_DOTALL; break;
       case 'x': options |= PCRE_EXTENDED; break;
 
-      case '+': do_showrest = 1; break;
+      case '+':
+      if (do_showrest) do_showcaprest = 1; else do_showrest = 1; 
+      break;
+       
       case 'A': options |= PCRE_ANCHORED; break;
       case 'B': do_debug = 1; break;
       case 'C': options |= PCRE_AUTO_CALLOUT; break;
@@ -2587,9 +2591,9 @@ while (!done)
             (void)pchars(dbuffer + pmatch[i].rm_so,
               pmatch[i].rm_eo - pmatch[i].rm_so, outfile);
             fprintf(outfile, "\n");
-            if (i == 0 && do_showrest)
+            if (do_showcaprest || (i == 0 && do_showrest))
               {
-              fprintf(outfile, " 0+ ");
+              fprintf(outfile, "%2d+ ", (int)i);
               (void)pchars(dbuffer + pmatch[i].rm_eo, len - pmatch[i].rm_eo,
                 outfile);
               fprintf(outfile, "\n");
@@ -2741,15 +2745,12 @@ while (!done)
             (void)pchars(bptr + use_offsets[i],
               use_offsets[i+1] - use_offsets[i], outfile);
             fprintf(outfile, "\n");
-            if (i == 0)
+            if (do_showcaprest || (i == 0 && do_showrest))
               {
-              if (do_showrest)
-                {
-                fprintf(outfile, " 0+ ");
-                (void)pchars(bptr + use_offsets[i+1], len - use_offsets[i+1],
-                  outfile);
-                fprintf(outfile, "\n");
-                }
+              fprintf(outfile, "%2d+ ", i/2);
+              (void)pchars(bptr + use_offsets[i+1], len - use_offsets[i+1],
+                outfile);
+              fprintf(outfile, "\n");
               }
             }
           }
