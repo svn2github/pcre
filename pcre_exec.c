@@ -808,9 +808,10 @@ for (;;)
     subject position in the working slot at the top of the vector. We mustn't
     change the current values of the data slot, because they may be set from a
     previous iteration of this group, and be referred to by a reference inside
-    the group. If we fail to match, we need to restore this value and also the
-    values of the final offsets, in case they were set by a previous iteration
-    of the same bracket.
+    the group. A failure to match might occur after the group has succeeded, 
+    if something later on doesn't match. For this reason, we need to restore
+    the working value and also the values of the final offsets, in case they
+    were set by a previous iteration of the same bracket.
 
     If there isn't enough space in the offset vector, treat this as if it were
     a non-capturing bracket. Don't worry about setting the flag for the error
@@ -1488,9 +1489,7 @@ for (;;)
     65535 such values, which is too large to put on the stack, but using malloc
     for small numbers seems expensive. As a compromise, the stack is used when
     there are no more than REC_STACK_SAVE_MAX values to store; otherwise malloc
-    is used. A problem is what to do if the malloc fails ... there is no way of
-    returning to the top level with an error. Save the top REC_STACK_SAVE_MAX
-    values on the stack, and accept that the rest may be wrong.
+    is used.
 
     There are also other values that have to be saved. We use a chained
     sequence of blocks that actually live on the stack. Thanks to Robin Houston
@@ -1612,8 +1611,7 @@ for (;;)
     /* For a non-repeating ket, just continue at this level. This also
     happens for a repeating ket if no characters were matched in the group.
     This is the forcible breaking of infinite loops as implemented in Perl
-    5.005. If there is an options reset, it will get obeyed in the normal
-    course of events. */
+    5.005. */
 
     if (*ecode == OP_KET || eptr == saved_eptr)
       {
@@ -1630,7 +1628,6 @@ for (;;)
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM8);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode = prev;
-      goto TAIL_RECURSE;
       }
     else  /* OP_KETRMAX */
       {
@@ -1638,8 +1635,9 @@ for (;;)
       RMATCH(eptr, prev, offset_top, md, eptrb, RM9);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
-      goto TAIL_RECURSE;
       }
+    goto TAIL_RECURSE;
+
     /* Control never gets here */
 
     /* An alternation is the end of a branch; scan along to find the end of the
