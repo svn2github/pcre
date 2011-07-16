@@ -1694,6 +1694,7 @@ _pcre_find_bracket(const uschar *code, BOOL utf8, int number)
 for (;;)
   {
   register int c = *code;
+
   if (c == OP_END) return NULL;
 
   /* XCLASS is used for classes that cannot be represented just by a bit
@@ -4726,7 +4727,14 @@ for (;; ptr++)
         }
 
       /* If the maximum is unlimited, set a repeater in the final copy. For
-      ONCE brackets, that's all we need to do.
+      ONCE brackets, that's all we need to do. 
+      
+      (To be done next, after recursion adjusted)
+      However, possessively repeated 
+      ONCE brackets can be converted into non-capturing brackets, as the 
+      behaviour of (?:xx)++ is the same as (?>xx)++ and this saves having to 
+      deal with possessive ONCEs specially.
+      (....) 
 
       Otherwise, if the quantifier was possessive, we convert the BRA code to
       the POS form, and the KET code to KETRPOS. (It turns out to be convenient
@@ -4748,7 +4756,12 @@ for (;; ptr++)
         uschar *ketcode = code - 1 - LINK_SIZE;
         uschar *bracode = ketcode - GET(ketcode, 1);
 
-        if (*bracode == OP_ONCE)
+/****
+        if (*bracode == OP_ONCE && possessive_quantifier)
+          *bracode = OP_BRA; 
+****/
+           
+        if (*bracode == OP_ONCE) 
           *ketcode = OP_KETRMAX + repeat_type;
         else
           {
@@ -5685,7 +5698,7 @@ for (;; ptr++)
           /* Insert the recursion/subroutine item, automatically wrapped inside
           "once" brackets. Set up a "previous group" length so that a
           subsequent quantifier will work. */
-
+          
           *code = OP_ONCE;
           PUT(code, 1, 2 + 2*LINK_SIZE);
           code += 1 + LINK_SIZE;

@@ -4157,4 +4157,22 @@
 /(?>(?>(a))b|(a)c)/
     ac
 
+/(?:(?>([ab])))+a=/+
+    =ba=
+
+/(?>([ab]))+a=/+
+    =ba=
+
+/((?>(a+)b)+(aabab))/
+    aaaabaaabaabab
+
+/(?>a+|ab)+?c/
+    aabc
+
+/(?>a+|ab)+c/
+    aabc
+
+/(?:a+|ab)+c/
+    aabc
+
 /-- End of testinput1 --/

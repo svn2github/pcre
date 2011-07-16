@@ -1765,11 +1765,9 @@ call within the pattern. */
 
 typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
-  int group_num;                /* Number of group that was called */
-  const uschar *after_call;     /* "Return value": points after the call in the expr */
-  int *offset_save;             /* Pointer to start of saved offsets */
-  int saved_max;                /* Number of saved offsets */
-  int save_offset_top;          /* Current value of offset_top */
+  int group_num;                  /* Number of group that was called */
+  int *offset_save;               /* Pointer to start of saved offsets */
+  int saved_max;                  /* Number of saved offsets */
 } recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject
@@ -1827,6 +1825,7 @@ typedef struct match_data {
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
   const  uschar *mark;          /* Mark pointer to pass back */
+  const  uschar *once_target;   /* Where to back up to for atomic groups */ 
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

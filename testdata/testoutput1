@@ -6801,4 +6801,35 @@ No match
  1: <unset>
  2: a
 
+/(?:(?>([ab])))+a=/+
+    =ba=
+ 0: ba=
+ 0+ 
+ 1: b
+
+/(?>([ab]))+a=/+
+    =ba=
+ 0: ba=
+ 0+ 
+ 1: b
+
+/((?>(a+)b)+(aabab))/
+    aaaabaaabaabab
+ 0: aaaabaaabaabab
+ 1: aaaabaaabaabab
+ 2: aaa
+ 3: aabab
+
+/(?>a+|ab)+?c/
+    aabc
+No match
+
+/(?>a+|ab)+c/
+    aabc
+No match
+
+/(?:a+|ab)+c/
+    aabc
+ 0: aabc
+
 /-- End of testinput1 --/

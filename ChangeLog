@@ -126,6 +126,13 @@ Version 8.13 30-Apr-2011
 23. Add the ++ qualifier feature to pcretest, to show the remainder of the 
     subject after a captured substring (to make it easier to tell which of a 
     number of identical substrings has been captured).
+    
+24. The way atomic groups are processed by pcre_exec() has been changed so that
+    if they are repeated, backtracking one repetition now resets captured 
+    values correctly. For example, if ((?>(a+)b)+aabab) is matched against
+    "aaaabaaabaabab" the value of captured group 2 is now correctly recorded as 
+    "aaa". Previously, it would have been "a". As part of this code 
+    refactoring, the way recursive calls are handled has also been changed.
 
 
 Version 8.12 15-Jan-2011

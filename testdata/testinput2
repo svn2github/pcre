@@ -3757,4 +3757,10 @@ with \Y. ---/
     c
     c\N  
 
+/(?:(?>(a)))+a%/++
+    %aa%
+
+/(a)b|ac/++
+    ac\O3
+
 /-- End of testinput2 --/

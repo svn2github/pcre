@@ -11895,4 +11895,17 @@ No match
     c\N  
 No match
 
+/(?:(?>(a)))+a%/++
+    %aa%
+ 0: aa%
+ 0+ 
+ 1: a
+ 1+ a%
+
+/(a)b|ac/++
+    ac\O3
+Matched, but too many substrings
+ 0: ac
+ 0+ 
+
 /-- End of testinput2 --/
