@@ -133,6 +133,10 @@ Version 8.13 30-Apr-2011
     "aaaabaaabaabab" the value of captured group 2 is now correctly recorded as 
     "aaa". Previously, it would have been "a". As part of this code 
     refactoring, the way recursive calls are handled has also been changed.
+    
+24. If an assertion condition captured any substrings, they were not passed 
+    back unless some other capturing happened later. For example, if
+    (?(?=(a))a) was matched against "a", no capturing was returned.
 
 
 Version 8.12 15-Jan-2011

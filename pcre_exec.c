@@ -1253,6 +1253,8 @@ for (;;)
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM3);
       if (rrc == MATCH_MATCH)
         {
+        if (md->end_offset_top > offset_top)
+          offset_top = md->end_offset_top;  /* Captures may have happened */
         condition = TRUE;
         ecode += 1 + LINK_SIZE + GET(ecode, LINK_SIZE + 2);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
@@ -1316,43 +1318,22 @@ for (;;)
     break;
 
 
-    /* End of the pattern, either real or forced. If we are in a recursion, we
-    should restore the offsets appropriately, and if it's a top-level
-    recursion, continue from after the call. */
+    /* End of the pattern, either real or forced. */
 
+    case OP_END:
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT: 
-    case OP_END:
-    
-/* 
-    if (md->recursive != NULL)
-      {
-      recursion_info *rec = md->recursive;
-
-      md->recursive = rec->prevrec;
-
-      memmove(md->offset_vector, rec->offset_save, 
-        rec->saved_max * sizeof(int));
-      offset_top = rec->save_offset_top;
-      if (rec->group_num == 0)
-        {
-        ecode = rec->after_call;
-        break;
-        } 
-      }
-*/
-    /* Otherwise, if we have matched an empty string, fail if not in an 
-    assertion and if either PCRE_NOTEMPTY is set, or if PCRE_NOTEMPTY_ATSTART
+     
+    /* If we have matched an empty string, fail if not in an assertion and not
+    in a recursion if either PCRE_NOTEMPTY is set, or if PCRE_NOTEMPTY_ATSTART
     is set and we have matched at the start of the subject. In both cases,
     backtracking will then try other alternatives, if any. */
 
-/*    else */ if (eptr == mstart && op != OP_ASSERT_ACCEPT &&
-
+    if (eptr == mstart && op != OP_ASSERT_ACCEPT &&
          md->recursive == NULL &&
-
-        (md->notempty ||
-          (md->notempty_atstart &&
-            mstart == md->start_subject + md->start_offset)))
+         (md->notempty ||
+           (md->notempty_atstart &&
+             mstart == md->start_subject + md->start_offset)))
       MRRETURN(MATCH_NOMATCH);
 
     /* Otherwise, we have a match. */

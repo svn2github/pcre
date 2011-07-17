@@ -6832,4 +6832,15 @@ No match
     aabc
  0: aabc
 
+/(?(?=(a))a)/
+    a
+ 0: a
+ 1: a
+
+/(?(?=(a))a)(b)/
+    ab
+ 0: ab
+ 1: a
+ 2: b
+
 /-- End of testinput1 --/

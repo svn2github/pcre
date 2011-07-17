@@ -1198,4 +1198,9 @@ No match
  0: b
  1: b
 
+/(?(?=(a(*ACCEPT)z))a)/
+    a
+ 0: a
+ 1: a
+
 /-- End of testinput11 --/

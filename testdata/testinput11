@@ -630,4 +630,7 @@ however, we need the complication for Perl. ---/
 /(?:(b))++/
     beetle
 
+/(?(?=(a(*ACCEPT)z))a)/
+    a
+
 /-- End of testinput11 --/
