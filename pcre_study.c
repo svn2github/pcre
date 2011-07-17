@@ -70,6 +70,7 @@ Arguments:
   startcode   pointer to start of the whole pattern
   options     the compiling options
   had_accept  pointer to flag for (*ACCEPT) encountered
+  int         RECURSE depth 
 
 Returns:   the minimum length
            -1 if \C was encountered
@@ -79,7 +80,7 @@ Returns:   the minimum length
 
 static int
 find_minlength(const uschar *code, const uschar *startcode, int options,
-  BOOL *had_accept_ptr)
+  BOOL *had_accept_ptr, int recurse_depth)
 {
 int length = -1;
 BOOL utf8 = (options & PCRE_UTF8) != 0;
@@ -127,7 +128,7 @@ for (;;)
     case OP_BRAPOS:
     case OP_SBRAPOS:
     case OP_ONCE:
-    d = find_minlength(cc, startcode, options, had_accept_ptr);
+    d = find_minlength(cc, startcode, options, had_accept_ptr, recurse_depth);
     if (d < 0) return d;
     branchlength += d;
     if (*had_accept_ptr) return branchlength; 
@@ -378,7 +379,8 @@ for (;;)
         }
       else 
         {
-        d = find_minlength(cs, startcode, options, had_accept_ptr);
+        d = find_minlength(cs, startcode, options, had_accept_ptr, 
+          recurse_depth);
         *had_accept_ptr = FALSE; 
         } 
       }
@@ -416,16 +418,20 @@ for (;;)
 
     branchlength += min * d;
     break;
+    
+    /* We can easily detect direct recursion, but not mutual recursion. This is 
+    caught by a recursion depth count. */ 
 
     case OP_RECURSE:
     cs = ce = (uschar *)startcode + GET(cc, 1);
     if (cs == NULL) return -2;
     do ce += GET(ce, 1); while (*ce == OP_ALT);
-    if (cc > cs && cc < ce)
+    if ((cc > cs && cc < ce) || recurse_depth > 10)
       had_recurse = TRUE;
     else
       { 
-      branchlength += find_minlength(cs, startcode, options, had_accept_ptr);
+      branchlength += find_minlength(cs, startcode, options, had_accept_ptr,
+        recurse_depth + 1);
       *had_accept_ptr = FALSE;
       }  
     cc += 1 + LINK_SIZE;
@@ -1275,7 +1281,7 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(code, code, re->options, &had_accept))
+switch(min = find_minlength(code, code, re->options, &had_accept, 0))
   {
   case -2: *errorptr = "internal error: missing capturing bracket"; break;
   case -3: *errorptr = "internal error: opcode not recognized"; break;

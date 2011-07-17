@@ -137,6 +137,13 @@ Version 8.13 30-Apr-2011
 24. If an assertion condition captured any substrings, they were not passed 
     back unless some other capturing happened later. For example, if
     (?(?=(a))a) was matched against "a", no capturing was returned.
+    
+25. When studying a pattern that contained subroutine calls or assertions,
+    the code for finding the minimum length of a possible match was handling 
+    direct recursions such as (xxx(?1)|yyy) but not mutual recursions (where 
+    group 1 called group 2 while simultaneously a separate group 2 called group
+    1). A stack overflow occurred in this case. I have fixed this by limiting
+    the recursion depth to 10.
 
 
 Version 8.12 15-Jan-2011
