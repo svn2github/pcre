@@ -633,4 +633,10 @@ however, we need the complication for Perl. ---/
 /(?(?=(a(*ACCEPT)z))a)/
     a
 
+/^(a)(?1)+ab/
+    aaaab
+    
+/^(a)(?1)++ab/
+    aaaab
+
 /-- End of testinput11 --/

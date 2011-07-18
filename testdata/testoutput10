@@ -166,18 +166,16 @@ Memory allocation (code space): 816
 ------------------------------------------------------------------
 
 /(a(?1)b)/BM
-Memory allocation (code space): 28
+Memory allocation (code space): 22
 ------------------------------------------------------------------
-  0  24 Bra
-  3  18 CBra 1
+  0  18 Bra
+  3  12 CBra 1
   8     a
- 10   6 Once
- 13   3 Recurse
- 16   6 Ket
- 19     b
- 21  18 Ket
- 24  24 Ket
- 27     End
+ 10   3 Recurse
+ 13     b
+ 15  12 Ket
+ 18  18 Ket
+ 21     End
 ------------------------------------------------------------------
 
 /(a(?1)+b)/BM
@@ -234,9 +232,9 @@ Memory allocation (code space): 54
 ------------------------------------------------------------------
 
 /(?P<a>a)...(?P=a)bbb(?P>a)d/BM
-Memory allocation (code space): 43
+Memory allocation (code space): 37
 ------------------------------------------------------------------
-  0  36 Bra
+  0  30 Bra
   3   7 CBra 1
   8     a
  10   7 Ket
@@ -245,12 +243,10 @@ Memory allocation (code space): 43
  15     Any
  16     \1
  19     bbb
- 25   6 Once
- 28   3 Recurse
- 31   6 Ket
- 34     d
- 36  36 Ket
- 39     End
+ 25   3 Recurse
+ 28     d
+ 30  30 Ket
+ 33     End
 ------------------------------------------------------------------
 
 /abc(?C255)de(?C)f/BM

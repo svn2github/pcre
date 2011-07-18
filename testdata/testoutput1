@@ -6843,4 +6843,16 @@ No match
  1: a
  2: b
 
+/^(?:a|ab)++c/
+    aaaabc
+No match
+
+/^(?>a|ab)++c/
+    aaaabc
+No match
+
+/^(?:a|ab)+c/
+    aaaabc
+ 0: aaaabc
+
 /-- End of testinput1 --/

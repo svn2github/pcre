@@ -3771,4 +3771,12 @@ with \Y. ---/
 
 /(abc)(?1)/SI
 
+/^(?>a)++/
+    aa\M
+    aaaaaaaaa\M 
+    
+/(a)(?1)++/
+    aa\M
+    aaaaaaaaa\M  
+
 /-- End of testinput2 --/

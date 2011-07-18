@@ -4004,9 +4004,7 @@ Need char = '<'
         Bra
         CBra 1
         a
-        Once
         Recurse
-        Ket
         b
         Ket
         Ket
@@ -4227,9 +4225,7 @@ Need char = 'a'
         Any
         \1
         bbb
-        Once
         Recurse
-        Ket
         d
         Ket
         End
@@ -4601,9 +4597,7 @@ Need char = ']'
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -4623,9 +4617,7 @@ No need char
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         KetRmax
@@ -4646,9 +4638,7 @@ No need char
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -4657,9 +4647,7 @@ No need char
         a
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -7765,9 +7753,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         [()]
         CBra 1
         Ket
@@ -7801,9 +7787,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         ()
         CBra 1
         Ket
@@ -7815,9 +7799,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         [(\]a]
         CBra 1
         Ket
@@ -7830,9 +7812,7 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
         Recurse
-        Ket
         CBra 1
         Ket
         Ket
@@ -8284,9 +8264,7 @@ No match
         Alt
         c
         Ket
-        Once
         Recurse
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -8298,9 +8276,7 @@ No match
 ------------------------------------------------------------------
         Bra
         xy
-        Once
         Recurse
-        Ket
         CBra 1
         abc
         Ket
@@ -9928,12 +9904,8 @@ Partial match: +ab
 /(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/BZ
 ------------------------------------------------------------------
         Bra
-        Once
         Recurse
-        Ket
-        Once
         Recurse
-        Ket
         Cond
         Cond def
         CBra 1
@@ -9954,12 +9926,8 @@ Partial match: +ab
 /(?&word)(?&element)(?(DEFINE)(?<element><[^\d][^>]>[^<])(?<word>\w*+))/BZ
 ------------------------------------------------------------------
         Bra
-        Once
         Recurse
-        Ket
-        Once
         Recurse
-        Ket
         Cond
         Cond def
         CBra 1
@@ -10700,9 +10668,7 @@ No match
         Cond nrecurse 1
         $
         Alt
-        Once
         Recurse
-        Ket
         Ket
         Ket
         Ket
@@ -10923,12 +10889,10 @@ No match
 ------------------------------------------------------------------
         Bra
         ^
-        Once
-        Brazero
-        Once
+        Braposzero
+        SBraPos
         Recurse
-        KetRmax
-        Ket
+        KetRpos
         Cond
         Cond def
         CBra 1
@@ -11939,5 +11903,27 @@ First char = 'a'
 Need char = 'c'
 Subject length lower bound = 6
 No set of starting bytes
+
+/^(?>a)++/
+    aa\M
+Minimum match() limit = 5
+Minimum match() recursion limit = 3
+ 0: aa
+    aaaaaaaaa\M 
+Minimum match() limit = 12
+Minimum match() recursion limit = 3
+ 0: aaaaaaaaa
+    
+/(a)(?1)++/
+    aa\M
+Minimum match() limit = 7
+Minimum match() recursion limit = 5
+ 0: aa
+ 1: a
+    aaaaaaaaa\M  
+Minimum match() limit = 21
+Minimum match() recursion limit = 5
+ 0: aaaaaaaaa
+ 1: a
 
 /-- End of testinput2 --/

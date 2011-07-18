@@ -1203,4 +1203,13 @@ No match
  0: a
  1: a
 
+/^(a)(?1)+ab/
+    aaaab
+ 0: aaaab
+ 1: a
+    
+/^(a)(?1)++ab/
+    aaaab
+No match
+
 /-- End of testinput11 --/

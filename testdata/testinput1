@@ -4181,4 +4181,13 @@
 /(?(?=(a))a)(b)/
     ab
 
+/^(?:a|ab)++c/
+    aaaabc
+
+/^(?>a|ab)++c/
+    aaaabc
+
+/^(?:a|ab)+c/
+    aaaabc
+
 /-- End of testinput1 --/

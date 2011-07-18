@@ -599,9 +599,7 @@ Need char = 'A'
         Bra
         \x{100}*+
         \d
-        Once
         Recurse
-        Ket
         Ket
         End
 ------------------------------------------------------------------
@@ -906,9 +904,7 @@ No match
         \x{100}abc
         CBra 1
         xyz
-        Once
         Recurse
-        Ket
         Ket
         Ket
         End
@@ -925,9 +921,7 @@ Need char = 'z'
         abc
         CBra 1
         xyz
-        Once
         Recurse
-        Ket
         Ket
         Ket
         End
@@ -944,9 +938,7 @@ Need char = 'z'
         abc
         CBra 1
         xyz
-        Once
         Recurse
-        Ket
         Ket
         Ket
         End
@@ -964,9 +956,7 @@ Need char = 'z'
         \x{100}
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -987,9 +977,7 @@ No need char
         \x{100}
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -998,9 +986,7 @@ No need char
         \x{100}
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -1021,9 +1007,7 @@ No need char
         \x{100}
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -1044,9 +1028,7 @@ No need char
         \x{100}
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
@@ -1055,9 +1037,7 @@ No need char
         \x{100}
         CBra 2
         b
-        Once
         Recurse
-        Ket
         c
         Ket
         Ket
