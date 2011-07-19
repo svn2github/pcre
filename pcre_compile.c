@@ -1975,13 +1975,30 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], TRUE);
     }
 
   /* For a recursion/subroutine call, if its end has been reached, which
-  implies a subroutine call, we can scan it. */
+  implies a backward reference subroutine call, we can scan it. If it's a
+  forward reference subroutine call, we can't. To detect forward reference
+  we have to scan up the list that is kept in the workspace. This function is 
+  called only when doing the real compile, not during the pre-compile that 
+  measures the size of the compiled pattern. */
 
   if (c == OP_RECURSE)
     {
-    BOOL empty_branch = FALSE;
-    const uschar *scode = cd->start_code + GET(code, 1);
+    const uschar *scode;
+    BOOL empty_branch;
+    
+    /* Test for forward reference */
+     
+    for (scode = cd->start_workspace; scode < cd->hwm; scode += LINK_SIZE)
+      if (GET(scode, 0) == code + 1 - cd->start_code) return TRUE;   
+
+    /* Not a forward reference, test for completed backward reference */
+     
+    empty_branch = FALSE;
+    scode = cd->start_code + GET(code, 1);
     if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
+    
+    /* Completed backwards reference */
+     
     do
       {
       if (could_be_empty_branch(scode, endcode, utf8, cd))
@@ -1992,6 +2009,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], TRUE);
       scode += GET(scode, 1);
       }
     while (*scode == OP_ALT);
+     
     if (!empty_branch) return FALSE;  /* All branches are non-empty */
     continue;
     }
@@ -2217,6 +2235,8 @@ return TRUE;
 the current branch of the current pattern to see if it could match the empty
 string. If it could, we must look outwards for branches at other levels,
 stopping when we pass beyond the bracket which is the subject of the recursion.
+This function is called only during the real compile, not during the 
+pre-compile.
 
 Arguments:
   code        points to start of the recursion
