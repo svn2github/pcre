@@ -277,7 +277,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
        RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
-       RM61,  RM62, RM63, RM64, RM65, RM66 };
+       RM61,  RM62, RM63 };
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -384,9 +384,6 @@ typedef struct heapframe {
   int Xprop_type;
   int Xprop_value;
   int Xprop_fail_result;
-  int Xprop_category;
-  int Xprop_chartype;
-  int Xprop_script;
   int Xoclength;
   uschar Xocchars[8];
 #endif
@@ -551,9 +548,6 @@ HEAP_RECURSE:
 #define prop_type          frame->Xprop_type
 #define prop_value         frame->Xprop_value
 #define prop_fail_result   frame->Xprop_fail_result
-#define prop_category      frame->Xprop_category
-#define prop_chartype      frame->Xprop_chartype
-#define prop_script        frame->Xprop_script
 #define oclength           frame->Xoclength
 #define occhars            frame->Xocchars
 #endif
@@ -611,9 +605,6 @@ BOOL prev_is_word;
 int prop_type;
 int prop_value;
 int prop_fail_result;
-int prop_category;
-int prop_chartype;
-int prop_script;
 int oclength;
 uschar occhars[8];
 #endif
@@ -1765,11 +1756,11 @@ for (;;)
 
     if (*ecode == OP_KETRMIN)
       {
-      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM64);
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM7);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       if (*prev == OP_ONCE)
         {
-        RMATCH(eptr, prev, offset_top, md, eptrb, RM66);
+        RMATCH(eptr, prev, offset_top, md, eptrb, RM8);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->once_target = prev;  /* Level at which to change to MATCH_NOMATCH */
         RRETURN(MATCH_ONCE); 
@@ -1791,7 +1782,7 @@ for (;;)
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       if (*prev == OP_ONCE)
         {
-        RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM65);
+        RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM9);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->once_target = prev;
         RRETURN(MATCH_ONCE); 
@@ -2364,20 +2355,13 @@ for (;;)
       MRRETURN(MATCH_NOMATCH);
       }
     GETCHARINCTEST(c, eptr);
+    if (UCD_CATEGORY(c) == ucp_M) MRRETURN(MATCH_NOMATCH);
+    while (eptr < md->end_subject)
       {
-      int category = UCD_CATEGORY(c);
-      if (category == ucp_M) MRRETURN(MATCH_NOMATCH);
-      while (eptr < md->end_subject)
-        {
-        int len = 1;
-        if (!utf8) c = *eptr; else
-          {
-          GETCHARLEN(c, eptr, len);
-          }
-        category = UCD_CATEGORY(c);
-        if (category != ucp_M) break;
-        eptr += len;
-        }
+      int len = 1;
+      if (!utf8) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+      if (UCD_CATEGORY(c) != ucp_M) break;
+      eptr += len;
       }
     ecode++;
     break;
@@ -3731,16 +3715,17 @@ for (;;)
           case PT_LAMP:
           for (i = 1; i <= min; i++)
             {
+            int chartype; 
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_chartype = UCD_CHARTYPE(c);
-            if ((prop_chartype == ucp_Lu ||
-                 prop_chartype == ucp_Ll ||
-                 prop_chartype == ucp_Lt) == prop_fail_result)
+            chartype = UCD_CHARTYPE(c);
+            if ((chartype == ucp_Lu ||
+                 chartype == ucp_Ll ||
+                 chartype == ucp_Lt) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3754,8 +3739,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == prop_value) == prop_fail_result)
+            if ((UCD_CATEGORY(c) == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3769,8 +3753,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_chartype = UCD_CHARTYPE(c);
-            if ((prop_chartype == prop_value) == prop_fail_result)
+            if ((UCD_CHARTYPE(c) == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3784,8 +3767,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_script = UCD_SCRIPT(c);
-            if ((prop_script == prop_value) == prop_fail_result)
+            if ((UCD_SCRIPT(c) == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3793,15 +3775,15 @@ for (;;)
           case PT_ALNUM:
           for (i = 1; i <= min; i++)
             {
+            int category; 
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L || prop_category == ucp_N)
-                   == prop_fail_result)
+            category = UCD_CATEGORY(c);
+            if ((category == ucp_L || category == ucp_N) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           break;
@@ -3815,8 +3797,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -3832,8 +3813,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -3843,15 +3823,15 @@ for (;;)
           case PT_WORD:
           for (i = 1; i <= min; i++)
             {
+            int category; 
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L || prop_category == ucp_N ||
-                 c == CHAR_UNDERSCORE)
+            category = UCD_CATEGORY(c);
+            if ((category == ucp_L || category == ucp_N || c == CHAR_UNDERSCORE)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
@@ -3877,15 +3857,12 @@ for (;;)
             MRRETURN(MATCH_NOMATCH);
             }
           GETCHARINCTEST(c, eptr);
-          prop_category = UCD_CATEGORY(c);
-          if (prop_category == ucp_M) MRRETURN(MATCH_NOMATCH);
+          if (UCD_CATEGORY(c) == ucp_M) MRRETURN(MATCH_NOMATCH);
           while (eptr < md->end_subject)
             {
             int len = 1;
-            if (!utf8) c = *eptr;
-              else { GETCHARLEN(c, eptr, len); }
-            prop_category = UCD_CATEGORY(c);
-            if (prop_category != ucp_M) break;
+            if (!utf8) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+            if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
           }
@@ -4430,6 +4407,7 @@ for (;;)
           case PT_LAMP:
           for (fi = min;; fi++)
             {
+            int chartype; 
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM37);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -4439,10 +4417,10 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_chartype = UCD_CHARTYPE(c);
-            if ((prop_chartype == ucp_Lu ||
-                 prop_chartype == ucp_Ll ||
-                 prop_chartype == ucp_Lt) == prop_fail_result)
+            chartype = UCD_CHARTYPE(c);
+            if ((chartype == ucp_Lu ||
+                 chartype == ucp_Ll ||
+                 chartype == ucp_Lt) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4459,8 +4437,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == prop_value) == prop_fail_result)
+            if ((UCD_CATEGORY(c) == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4477,8 +4454,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_chartype = UCD_CHARTYPE(c);
-            if ((prop_chartype == prop_value) == prop_fail_result)
+            if ((UCD_CHARTYPE(c) == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4495,8 +4471,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_script = UCD_SCRIPT(c);
-            if ((prop_script == prop_value) == prop_fail_result)
+            if ((UCD_SCRIPT(c) == prop_value) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4504,6 +4479,7 @@ for (;;)
           case PT_ALNUM:
           for (fi = min;; fi++)
             {
+            int category; 
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM59);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -4513,9 +4489,8 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L || prop_category == ucp_N)
-                   == prop_fail_result)
+            category = UCD_CATEGORY(c);
+            if ((category == ucp_L || category == ucp_N) == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
             }
           /* Control never gets here */
@@ -4532,8 +4507,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -4552,8 +4526,7 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -4563,6 +4536,7 @@ for (;;)
           case PT_WORD:
           for (fi = min;; fi++)
             {
+            int category; 
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM62);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -4572,9 +4546,9 @@ for (;;)
               MRRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L ||
-                 prop_category == ucp_N ||
+            category = UCD_CATEGORY(c);
+            if ((category == ucp_L ||
+                 category == ucp_N ||
                  c == CHAR_UNDERSCORE)
                    == prop_fail_result)
               MRRETURN(MATCH_NOMATCH);
@@ -4604,20 +4578,16 @@ for (;;)
             MRRETURN(MATCH_NOMATCH);
             }
           GETCHARINCTEST(c, eptr);
-          prop_category = UCD_CATEGORY(c);
-          if (prop_category == ucp_M) MRRETURN(MATCH_NOMATCH);
+          if (UCD_CATEGORY(c) == ucp_M) MRRETURN(MATCH_NOMATCH);
           while (eptr < md->end_subject)
             {
             int len = 1;
-            if (!utf8) c = *eptr;
-              else { GETCHARLEN(c, eptr, len); }
-            prop_category = UCD_CATEGORY(c);
-            if (prop_category != ucp_M) break;
+            if (!utf8) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+            if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
           }
         }
-
       else
 #endif     /* SUPPORT_UCP */
 
@@ -4938,6 +4908,7 @@ for (;;)
           case PT_LAMP:
           for (i = min; i < max; i++)
             {
+            int chartype; 
             int len = 1;
             if (eptr >= md->end_subject)
               {
@@ -4945,10 +4916,10 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_chartype = UCD_CHARTYPE(c);
-            if ((prop_chartype == ucp_Lu ||
-                 prop_chartype == ucp_Ll ||
-                 prop_chartype == ucp_Lt) == prop_fail_result)
+            chartype = UCD_CHARTYPE(c);
+            if ((chartype == ucp_Lu ||
+                 chartype == ucp_Ll ||
+                 chartype == ucp_Lt) == prop_fail_result)
               break;
             eptr+= len;
             }
@@ -4964,9 +4935,7 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == prop_value) == prop_fail_result)
-              break;
+            if ((UCD_CATEGORY(c) == prop_value) == prop_fail_result) break;
             eptr+= len;
             }
           break;
@@ -4981,9 +4950,7 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_chartype = UCD_CHARTYPE(c);
-            if ((prop_chartype == prop_value) == prop_fail_result)
-              break;
+            if ((UCD_CHARTYPE(c) == prop_value) == prop_fail_result) break;
             eptr+= len;
             }
           break;
@@ -4998,9 +4965,7 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_script = UCD_SCRIPT(c);
-            if ((prop_script == prop_value) == prop_fail_result)
-              break;
+            if ((UCD_SCRIPT(c) == prop_value) == prop_fail_result) break;
             eptr+= len;
             }
           break;
@@ -5008,6 +4973,7 @@ for (;;)
           case PT_ALNUM:
           for (i = min; i < max; i++)
             {
+            int category; 
             int len = 1;
             if (eptr >= md->end_subject)
               {
@@ -5015,9 +4981,8 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L || prop_category == ucp_N)
-                 == prop_fail_result)
+            category = UCD_CATEGORY(c);
+            if ((category == ucp_L || category == ucp_N) == prop_fail_result)
               break;
             eptr+= len;
             }
@@ -5033,8 +4998,7 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_FF || c == CHAR_CR)
                  == prop_fail_result)
               break;
@@ -5052,8 +5016,7 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
+            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
                  c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
                  == prop_fail_result)
               break;
@@ -5064,6 +5027,7 @@ for (;;)
           case PT_WORD:
           for (i = min; i < max; i++)
             {
+            int category; 
             int len = 1;
             if (eptr >= md->end_subject)
               {
@@ -5071,8 +5035,8 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            prop_category = UCD_CATEGORY(c);
-            if ((prop_category == ucp_L || prop_category == ucp_N ||
+            category = UCD_CATEGORY(c);
+            if ((category == ucp_L || category == ucp_N ||
                  c == CHAR_UNDERSCORE) == prop_fail_result)
               break;
             eptr+= len;
@@ -5102,23 +5066,20 @@ for (;;)
         {
         for (i = min; i < max; i++)
           {
+          int len = 1; 
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             break;
             }
-          GETCHARINCTEST(c, eptr);
-          prop_category = UCD_CATEGORY(c);
-          if (prop_category == ucp_M) break;
+          if (!utf8) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+          if (UCD_CATEGORY(c) == ucp_M) break;
+          eptr += len; 
           while (eptr < md->end_subject)
             {
-            int len = 1;
-            if (!utf8) c = *eptr; else
-              {
-              GETCHARLEN(c, eptr, len);
-              }
-            prop_category = UCD_CATEGORY(c);
-            if (prop_category != ucp_M) break;
+            len = 1;
+            if (!utf8) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+            if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
           }
@@ -5134,14 +5095,12 @@ for (;;)
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           for (;;)                        /* Move back over one extended */
             {
-            int len = 1;
             if (!utf8) c = *eptr; else
               {
               BACKCHAR(eptr);
-              GETCHARLEN(c, eptr, len);
+              GETCHAR(c, eptr);
               }
-            prop_category = UCD_CATEGORY(c);
-            if (prop_category != ucp_M) break;
+            if (UCD_CATEGORY(c) != ucp_M) break;
             eptr--;
             }
           }
@@ -5678,8 +5637,7 @@ switch (frame->Xwhere)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(17)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
-  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
-  LBL(65) LBL(66) 
+  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) 
 #ifdef SUPPORT_UTF8
   LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)

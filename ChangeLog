@@ -148,6 +148,12 @@ Version 8.13 30-Apr-2011
 26. Updated RunTest.bat in the distribution to the version supplied by Tom
     Fortmann. This supports explicit test numbers on the command line, and has
     argument validation and error reporting.
+    
+27. An instance of \X with an unlimited repeat could fail if at any point the 
+    first character it looked at was a mark character. 
+    
+28. Some minor code refactoring concerning Unicode properties and scripts 
+    should reduce the stack requirement of match() slightly. 
  
 
 

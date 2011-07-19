@@ -2419,4 +2419,12 @@ No need char
 Subject length lower bound = 2
 No set of starting bytes
 
+/^S(\X*)e(\X*)$/8
+    Stéréo
+No match
+    
+/^\X/8 
+    ́réo
+No match
+
 /-- End of testinput5 --/
