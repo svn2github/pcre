@@ -261,6 +261,14 @@ twice, the same action is taken for captured substrings. In each case the
 remainder is output on the following line with a plus character following the 
 capture number.
 .P
+The \fB/=\fP modifier requests that the values of all potential captured 
+parentheses be output after a match by \fBpcre_exec()\fP. By default, only
+those up to the highest one actually used in the match are output
+(corresponding to the return code from \fBpcre_exec()\fP). Values in the 
+offsets vector corresponding to higher numbers should be set to -1, and these 
+are output as "<unset>". This modifier gives a way of checking that this is
+happening.
+.P
 The \fB/B\fP modifier is a debugging feature. It requests that \fBpcretest\fP
 output a representation of the compiled byte code after compilation. Normally
 this information contains length and offset values; however, if \fB/Z\fP is
@@ -815,6 +823,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 July 2011
+Last updated: 20 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

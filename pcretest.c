@@ -1434,6 +1434,7 @@ while (!done)
   const unsigned char *tables = NULL;
   unsigned long int true_size, true_study_size = 0;
   size_t size, regex_gotten_store;
+  int do_allcaps = 0; 
   int do_mark = 0;
   int do_study = 0;
   int no_force_study = 0; 
@@ -1611,7 +1612,8 @@ while (!done)
       case '+':
       if (do_showrest) do_showcaprest = 1; else do_showrest = 1; 
       break;
-       
+      
+      case '=': do_allcaps = 1; break; 
       case 'A': options |= PCRE_ANCHORED; break;
       case 'B': do_debug = 1; break;
       case 'C': options |= PCRE_AUTO_CALLOUT; break;
@@ -2734,11 +2736,31 @@ while (!done)
             do_g = do_G = FALSE;        /* Break g/G loop */
             }
           }
+        
+        /* do_allcaps requests showing of all captures in the pattern, to check
+        unset ones at the end. */
+          
+        if (do_allcaps)
+          {
+          new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
+          count++;   /* Allow for full match */ 
+          if (count * 2 > use_size_offsets) count = use_size_offsets/2;  
+          }  
 
+        /* Output the captured substrings */
+         
         for (i = 0; i < count * 2; i += 2)
           {
           if (use_offsets[i] < 0)
+            { 
+            if (use_offsets[i] != -1)
+              fprintf(outfile, "ERROR: bad negative value %d for offset %d\n",
+                use_offsets[i], i);   
+            if (use_offsets[i+1] != -1)
+              fprintf(outfile, "ERROR: bad negative value %d for offset %d\n",
+                use_offsets[i+1], i+1);   
             fprintf(outfile, "%2d: <unset>\n", i/2);
+            } 
           else
             {
             fprintf(outfile, "%2d: ", i/2);

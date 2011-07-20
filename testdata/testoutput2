@@ -11926,4 +11926,57 @@ Minimum match() recursion limit = 5
  0: aaaaaaaaa
  1: a
 
+/(?:(foo)|(bar)|(baz))X/=
+    bazfooX
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+    foobazbarX
+ 0: barX
+ 1: <unset>
+ 2: bar
+ 3: <unset>
+    barfooX
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+    bazX
+ 0: bazX
+ 1: <unset>
+ 2: <unset>
+ 3: baz
+    foobarbazX    
+ 0: bazX
+ 1: <unset>
+ 2: <unset>
+ 3: baz
+    bazfooX\O0
+Matched, but too many substrings
+    bazfooX\O2
+Matched, but too many substrings
+ 0: fooX
+    bazfooX\O4
+Matched, but too many substrings
+ 0: fooX
+ 1: <unset>
+    bazfooX\O6
+Matched, but too many substrings
+ 0: fooX
+ 1: foo
+ 2: <unset>
+    bazfooX\O8
+Matched, but too many substrings
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+    bazfooX\O10
+Matched, but too many substrings
+ 0: fooX
+ 1: foo
+ 2: <unset>
+ 3: <unset>
+
 /-- End of testinput2 --/

@@ -6370,7 +6370,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   those at the end that need unsetting here. We can't just unset them all at
   the start of the whole thing because they may get set in one branch that is
   not the final matching branch. */
-  
+
   if (md->end_offset_top/2 <= re->top_bracket && offsets != NULL)
     {
     register int *iptr, *iend;

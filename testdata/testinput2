@@ -3779,4 +3779,17 @@ with \Y. ---/
     aa\M
     aaaaaaaaa\M  
 
+/(?:(foo)|(bar)|(baz))X/=
+    bazfooX
+    foobazbarX
+    barfooX
+    bazX
+    foobarbazX    
+    bazfooX\O0
+    bazfooX\O2
+    bazfooX\O4
+    bazfooX\O6
+    bazfooX\O8
+    bazfooX\O10
+
 /-- End of testinput2 --/

@@ -154,7 +154,10 @@ Version 8.13 30-Apr-2011
     
 28. Some minor code refactoring concerning Unicode properties and scripts 
     should reduce the stack requirement of match() slightly. 
- 
+    
+29. Added the '=' option to pcretest to check the setting of unused capturing
+    slots at the end of the pattern, which are documented as being -1, but are
+    not included in the return count.  
 
 
 Version 8.12 15-Jan-2011
