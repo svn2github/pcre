@@ -57,8 +57,8 @@ possible. There are also some static supporting functions. */
 #undef min
 #undef max
 
-/* Values for setting in md->match_function_type to indicate two special types 
-of call to match(). We do it this way to save on using another stack variable, 
+/* Values for setting in md->match_function_type to indicate two special types
+of call to match(). We do it this way to save on using another stack variable,
 as stack usage is to be discouraged. */
 
 #define MATCH_CONDASSERT     1  /* Called to check a condition assertion */
@@ -138,7 +138,7 @@ while (length-- > 0)
 
 /* Normally, if a back reference hasn't been set, the length that is passed is
 negative, so the match always fails. However, in JavaScript compatibility mode,
-the length passed is zero. Note that in caseless UTF-8 mode, the number of 
+the length passed is zero. Note that in caseless UTF-8 mode, the number of
 subject bytes matched may be different to the number of reference bytes.
 
 Arguments:
@@ -185,14 +185,14 @@ if (caseless)
 #ifdef SUPPORT_UCP
   if (md->utf8)
     {
-    /* Match characters up to the end of the reference. NOTE: the number of 
+    /* Match characters up to the end of the reference. NOTE: the number of
     bytes matched may differ, because there are some characters whose upper and
     lower case versions code as different numbers of bytes. For example, U+023A
     (2 bytes in UTF-8) is the upper case version of U+2C65 (3 bytes in UTF-8);
     a sequence of 3 of the former uses 6 bytes, as does a sequence of two of
-    the latter. It is important, therefore, to check the length along the 
+    the latter. It is important, therefore, to check the length along the
     reference, not along the subject (earlier code did this wrong). */
- 
+
     USPTR endptr = p + length;
     while (p < endptr)
       {
@@ -210,19 +210,19 @@ if (caseless)
   /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
   is no UCP support. */
     {
-    if (eptr + length > md->end_subject) return -1; 
+    if (eptr + length > md->end_subject) return -1;
     while (length-- > 0)
       { if (md->lcc[*p++] != md->lcc[*eptr++]) return -1; }
-    }   
+    }
   }
 
 /* In the caseful case, we can just compare the bytes, whether or not we
 are in UTF-8 mode. */
 
 else
-  { 
-  if (eptr + length > md->end_subject) return -1; 
-  while (length-- > 0) if (*p++ != *eptr++) return -1; 
+  {
+  if (eptr + length > md->end_subject) return -1;
+  while (length-- > 0) if (*p++ != *eptr++) return -1;
   }
 
 return eptr - eptr_start;
@@ -475,7 +475,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 
 static int
 match(REGISTER USPTR eptr, REGISTER const uschar *ecode, USPTR mstart,
-  const uschar *markptr, int offset_top, match_data *md, eptrblock *eptrb, 
+  const uschar *markptr, int offset_top, match_data *md, eptrblock *eptrb,
   unsigned int rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
@@ -585,19 +585,19 @@ declarations can be cut out in a block. The only declarations within blocks
 below are for variables that do not have to be preserved over a recursive call
 to RMATCH(). */
 
-#ifdef SUPPORT_UTF8                
-const uschar *charptr;             
-#endif                             
-const uschar *callpat;             
-const uschar *data;                
-const uschar *next;                
-USPTR         pp;                  
-const uschar *prev;                
-USPTR         saved_eptr;          
-                                   
-recursion_info new_recursive;      
-                                   
-BOOL cur_is_word;                  
+#ifdef SUPPORT_UTF8
+const uschar *charptr;
+#endif
+const uschar *callpat;
+const uschar *data;
+const uschar *next;
+USPTR         pp;
+const uschar *prev;
+USPTR         saved_eptr;
+
+recursion_info new_recursive;
+
+BOOL cur_is_word;
 BOOL condition;
 BOOL prev_is_word;
 
@@ -624,9 +624,9 @@ int stacksave[REC_STACK_SAVE_MAX];
 eptrblock newptrb;
 #endif     /* NO_RECURSE */
 
-/* To save space on the stack and in the heap frame, I have doubled up on some 
-of the local variables that are used only in localised parts of the code, but 
-still need to be preserved over recursive calls of match(). These macros define 
+/* To save space on the stack and in the heap frame, I have doubled up on some
+of the local variables that are used only in localised parts of the code, but
+still need to be preserved over recursive calls of match(). These macros define
 the alternative names that are used. */
 
 #define allow_zero    cur_is_word
@@ -672,8 +672,8 @@ if (md->match_call_count++ >= md->match_limit) RRETURN(PCRE_ERROR_MATCHLIMIT);
 if (rdepth >= md->match_limit_recursion) RRETURN(PCRE_ERROR_RECURSIONLIMIT);
 
 /* At the start of a group with an unlimited repeat that may match an empty
-string, the variable md->match_function_type is set to MATCH_CBEGROUP. It is 
-done this way to save having to use another function argument, which would take 
+string, the variable md->match_function_type is set to MATCH_CBEGROUP. It is
+done this way to save having to use another function argument, which would take
 up space on the stack. See also MATCH_CONDASSERT below.
 
 When MATCH_CBEGROUP is set, add the current subject pointer to the chain of
@@ -697,7 +697,7 @@ for (;;)
   {
   minimize = possessive = FALSE;
   op = *ecode;
-  
+
   switch(op)
     {
     case OP_MARK:
@@ -800,7 +800,7 @@ for (;;)
     subject position in the working slot at the top of the vector. We mustn't
     change the current values of the data slot, because they may be set from a
     previous iteration of this group, and be referred to by a reference inside
-    the group. A failure to match might occur after the group has succeeded, 
+    the group. A failure to match might occur after the group has succeeded,
     if something later on doesn't match. For this reason, we need to restore
     the working value and also the values of the final offsets, in case they
     were set by a previous iteration of the same bracket.
@@ -813,7 +813,7 @@ for (;;)
     case OP_SCBRA:
     number = GET2(ecode, 1+LINK_SIZE);
     offset = number << 1;
-    
+
 #ifdef PCRE_DEBUG
     printf("start bracket %d\n", number);
     printf("subject=");
@@ -834,8 +834,8 @@ for (;;)
 
       for (;;)
         {
-        if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP; 
-        RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, 
+        if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;
+        RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
           eptrb, RM1);
         if (rrc == MATCH_ONCE) break;  /* Backing up through an atomic group */
         if (rrc != MATCH_NOMATCH &&
@@ -843,15 +843,15 @@ for (;;)
           RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
-        if (*ecode != OP_ALT) break; 
+        if (*ecode != OP_ALT) break;
         }
 
       DPRINTF(("bracket %d failed\n", number));
       md->offset_vector[offset] = save_offset1;
       md->offset_vector[offset+1] = save_offset2;
       md->offset_vector[md->offset_end - number] = save_offset3;
-      
-      /* At this point, rrc will be one of MATCH_ONCE, MATCH_NOMATCH, or 
+
+      /* At this point, rrc will be one of MATCH_ONCE, MATCH_NOMATCH, or
       MATCH_THEN. */
 
       if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
@@ -875,11 +875,11 @@ for (;;)
     match() whatever happened so it was possible to reduce stack usage by
     turning this into a tail recursion, except in the case of a possibly empty
     group. However, now that there is the possiblity of (*THEN) occurring in
-    the final alternative, this optimization is no longer possible. 
-   
-    MATCH_ONCE is returned when the end of an atomic group is successfully 
-    reached, but subsequent matching fails. It passes back up the tree (causing 
-    captured values to be reset) until the original atomic group level is 
+    the final alternative, this optimization is no longer possible.
+
+    MATCH_ONCE is returned when the end of an atomic group is successfully
+    reached, but subsequent matching fails. It passes back up the tree (causing
+    captured values to be reset) until the original atomic group level is
     reached. This is tested by comparing md->once_target with the start of the
     group. At this point, the return is converted into MATCH_NOMATCH so that
     previous backup points can be taken. */
@@ -892,11 +892,11 @@ for (;;)
     for (;;)
       {
       if (op >= OP_SBRA || op == OP_ONCE) md->match_function_type = MATCH_CBEGROUP;
-      RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb, 
+      RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb,
         RM2);
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
-        {  
+        {
         if (rrc == MATCH_ONCE)
           {
           const uschar *scode = ecode;
@@ -904,29 +904,29 @@ for (;;)
             {
             while (*scode == OP_ALT) scode += GET(scode, 1);
             scode -= GET(scode, 1);
-            }   
+            }
           if (md->once_target == scode) rrc = MATCH_NOMATCH;
-          } 
+          }
         RRETURN(rrc);
-        } 
+        }
       ecode += GET(ecode, 1);
-      if (*ecode != OP_ALT) break; 
+      if (*ecode != OP_ALT) break;
       }
     if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
     RRETURN(MATCH_NOMATCH);
 
-    /* Handle possessive capturing brackets with an unlimited repeat. We come 
+    /* Handle possessive capturing brackets with an unlimited repeat. We come
     here from BRAZERO with allow_zero set TRUE. The offset_vector values are
     handled similarly to the normal case above. However, the matching is
     different. The end of these brackets will always be OP_KETRPOS, which
     returns MATCH_KETRPOS without going further in the pattern. By this means
     we can handle the group by iteration rather than recursion, thereby
     reducing the amount of stack needed. */
-    
+
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
     allow_zero = FALSE;
-    
+
     POSSESSIVE_CAPTURE:
     number = GET2(ecode, 1+LINK_SIZE);
     offset = number << 1;
@@ -941,7 +941,7 @@ for (;;)
     if (offset < md->offset_max)
       {
       matched_once = FALSE;
-      code_offset = ecode - md->start_code; 
+      code_offset = ecode - md->start_code;
 
       save_offset1 = md->offset_vector[offset];
       save_offset2 = md->offset_vector[offset+1];
@@ -949,57 +949,57 @@ for (;;)
       save_capture_last = md->capture_last;
 
       DPRINTF(("saving %d %d %d\n", save_offset1, save_offset2, save_offset3));
- 
-      /* Each time round the loop, save the current subject position for use 
-      when the group matches. For MATCH_MATCH, the group has matched, so we 
-      restart it with a new subject starting position, remembering that we had 
-      at least one match. For MATCH_NOMATCH, carry on with the alternatives, as 
-      usual. If we haven't matched any alternatives in any iteration, check to 
-      see if a previous iteration matched. If so, the group has matched; 
-      continue from afterwards. Otherwise it has failed; restore the previous 
+
+      /* Each time round the loop, save the current subject position for use
+      when the group matches. For MATCH_MATCH, the group has matched, so we
+      restart it with a new subject starting position, remembering that we had
+      at least one match. For MATCH_NOMATCH, carry on with the alternatives, as
+      usual. If we haven't matched any alternatives in any iteration, check to
+      see if a previous iteration matched. If so, the group has matched;
+      continue from afterwards. Otherwise it has failed; restore the previous
       capture values before returning NOMATCH. */
- 
+
       for (;;)
         {
         md->offset_vector[md->offset_end - number] =
           (int)(eptr - md->start_subject);
-        if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;   
+        if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
           eptrb, RM63);
         if (rrc == MATCH_KETRPOS)
           {
           offset_top = md->end_offset_top;
           eptr = md->end_match_ptr;
-          ecode = md->start_code + code_offset; 
+          ecode = md->start_code + code_offset;
           save_capture_last = md->capture_last;
-          matched_once = TRUE; 
-          continue;  
-          }  
+          matched_once = TRUE;
+          continue;
+          }
         if (rrc != MATCH_NOMATCH &&
             (rrc != MATCH_THEN || md->start_match_ptr != ecode))
           RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
-        if (*ecode != OP_ALT) break; 
+        if (*ecode != OP_ALT) break;
         }
 
       if (!matched_once)
-        { 
+        {
         md->offset_vector[offset] = save_offset1;
         md->offset_vector[offset+1] = save_offset2;
         md->offset_vector[md->offset_end - number] = save_offset3;
         }
-        
+
       if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
       if (allow_zero || matched_once)
-        { 
+        {
         ecode += 1 + LINK_SIZE;
         break;
-        }  
- 
+        }
+
       RRETURN(MATCH_NOMATCH);
       }
-      
+
     /* FALL THROUGH ... Insufficient room for saving captured contents. Treat
     as a non-capturing bracket. */
 
@@ -1011,44 +1011,44 @@ for (;;)
     /* VVVVVVVVVVVVVVVVVVVVVVVVV */
     /* VVVVVVVVVVVVVVVVVVVVVVVVV */
 
-    /* Non-capturing possessive bracket with unlimited repeat. We come here 
+    /* Non-capturing possessive bracket with unlimited repeat. We come here
     from BRAZERO with allow_zero = TRUE. The code is similar to the above,
     without the capturing complication. It is written out separately for speed
     and cleanliness. */
 
     case OP_BRAPOS:
     case OP_SBRAPOS:
-    allow_zero = FALSE; 
-    
+    allow_zero = FALSE;
+
     POSSESSIVE_NON_CAPTURE:
     matched_once = FALSE;
-    code_offset = ecode - md->start_code; 
+    code_offset = ecode - md->start_code;
 
     for (;;)
       {
-      if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;   
+      if (op >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
         eptrb, RM48);
       if (rrc == MATCH_KETRPOS)
         {
         offset_top = md->end_offset_top;
         eptr = md->end_match_ptr;
-        ecode = md->start_code + code_offset; 
-        matched_once = TRUE; 
-        continue;  
-        }  
+        ecode = md->start_code + code_offset;
+        matched_once = TRUE;
+        continue;
+        }
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
         RRETURN(rrc);
       ecode += GET(ecode, 1);
-      if (*ecode != OP_ALT) break; 
+      if (*ecode != OP_ALT) break;
       }
-        
-    if (matched_once || allow_zero) 
+
+    if (matched_once || allow_zero)
       {
       ecode += 1 + LINK_SIZE;
       break;
-      } 
+      }
     RRETURN(MATCH_NOMATCH);
 
     /* Control never reaches here. */
@@ -1240,7 +1240,7 @@ for (;;)
 
     else
       {
-      md->match_function_type = MATCH_CONDASSERT; 
+      md->match_function_type = MATCH_CONDASSERT;
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM3);
       if (rrc == MATCH_MATCH)
         {
@@ -1264,17 +1264,17 @@ for (;;)
 
     /* We are now at the branch that is to be obeyed. As there is only one,
     we used to use tail recursion to avoid using another stack frame, except
-    when there was unlimited repeat of a possibly empty group. However, that 
-    strategy no longer works because of the possibilty of (*THEN) being 
+    when there was unlimited repeat of a possibly empty group. However, that
+    strategy no longer works because of the possibilty of (*THEN) being
     encountered in the branch. A recursive call to match() is always required,
     unless the second alternative doesn't exist, in which case we can just
     plough on. */
 
     if (condition || *ecode == OP_ALT)
       {
-      if (op == OP_SCOND) md->match_function_type = MATCH_CBEGROUP; 
+      if (op == OP_SCOND) md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM49);
-      if (rrc == MATCH_THEN && md->start_match_ptr == ecode) 
+      if (rrc == MATCH_THEN && md->start_match_ptr == ecode)
         rrc = MATCH_NOMATCH;
       RRETURN(rrc);
       }
@@ -1313,8 +1313,8 @@ for (;;)
 
     case OP_END:
     case OP_ACCEPT:
-    case OP_ASSERT_ACCEPT: 
-     
+    case OP_ASSERT_ACCEPT:
+
     /* If we have matched an empty string, fail if not in an assertion and not
     in a recursion if either PCRE_NOTEMPTY is set, or if PCRE_NOTEMPTY_ATSTART
     is set and we have matched at the start of the subject. In both cases,
@@ -1328,7 +1328,7 @@ for (;;)
       MRRETURN(MATCH_NOMATCH);
 
     /* Otherwise, we have a match. */
-    
+
     md->end_match_ptr = eptr;           /* Record where we ended */
     md->end_offset_top = offset_top;    /* and how many extracts were taken */
     md->start_match_ptr = mstart;       /* and the start (\K can modify) */
@@ -1343,11 +1343,11 @@ for (;;)
     matching won't pass the KET for an assertion. If any one branch matches,
     the assertion is true. Lookbehind assertions have an OP_REVERSE item at the
     start of each branch to move the current point backwards, so the code at
-    this level is identical to the lookahead case. When the assertion is part 
-    of a condition, we want to return immediately afterwards. The caller of 
-    this incarnation of the match() function will have set MATCH_CONDASSERT in 
-    md->match_function type, and one of these opcodes will be the first opcode 
-    that is processed. We use a local variable that is preserved over calls to 
+    this level is identical to the lookahead case. When the assertion is part
+    of a condition, we want to return immediately afterwards. The caller of
+    this incarnation of the match() function will have set MATCH_CONDASSERT in
+    md->match_function type, and one of these opcodes will be the first opcode
+    that is processed. We use a local variable that is preserved over calls to
     match() to remember this case. */
 
     case OP_ASSERT:
@@ -1357,8 +1357,8 @@ for (;;)
       condassert = TRUE;
       md->match_function_type = 0;
       }
-    else condassert = FALSE;        
-     
+    else condassert = FALSE;
+
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM4);
@@ -1373,7 +1373,7 @@ for (;;)
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
-     
+
     if (*ecode == OP_KET) MRRETURN(MATCH_NOMATCH);
 
     /* If checking an assertion for a condition, return MATCH_MATCH. */
@@ -1399,7 +1399,7 @@ for (;;)
       condassert = TRUE;
       md->match_function_type = 0;
       }
-    else condassert = FALSE;        
+    else condassert = FALSE;
 
     do
       {
@@ -1418,7 +1418,7 @@ for (;;)
     while (*ecode == OP_ALT);
 
     if (condassert) RRETURN(MATCH_MATCH);  /* Condition assertion */
-     
+
     ecode += 1 + LINK_SIZE;
     continue;
 
@@ -1484,9 +1484,9 @@ for (;;)
     /* Recursion either matches the current regex, or some subexpression. The
     offset data is the offset to the starting bracket from the start of the
     whole pattern. (This is so that it works from duplicated subpatterns.)
-    
+
     The state of the capturing groups is preserved over recursion, and
-    re-instated afterwards. We don't know how many are started and not yet 
+    re-instated afterwards. We don't know how many are started and not yet
     finished (offset_top records the completed total) so we just have to save
     all the potential data. There may be up to 65535 such values, which is too
     large to put on the stack, but using malloc for small numbers seems
@@ -1495,7 +1495,7 @@ for (;;)
 
     There are also other values that have to be saved. We use a chained
     sequence of blocks that actually live on the stack. Thanks to Robin Houston
-    for the original version of this logic. It has, however, been hacked around 
+    for the original version of this logic. It has, however, been hacked around
     a lot, so he is not to blame for the current way it works. */
 
     case OP_RECURSE:
@@ -1526,9 +1526,9 @@ for (;;)
         }
       memcpy(new_recursive.offset_save, md->offset_vector,
             new_recursive.saved_max * sizeof(int));
-      
+
       /* OK, now we can do the recursion. After processing each alternative,
-      restore the offset data. If there were nested recursions, md->recursive 
+      restore the offset data. If there were nested recursions, md->recursive
       might be changed, so reset it before looping. */
 
       DPRINTF(("Recursing into group %d\n", new_recursive.group_num));
@@ -1548,9 +1548,9 @@ for (;;)
             (pcre_free)(new_recursive.offset_save);
 
           /* Set where we got to in the subject, and reset the start in case
-          it was changed by \K. This *is* propagated back out of a recursion, 
-          for Perl compatibility. */ 
-           
+          it was changed by \K. This *is* propagated back out of a recursion,
+          for Perl compatibility. */
+
           eptr = md->end_match_ptr;
           mstart = md->start_match_ptr;
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
@@ -1575,7 +1575,7 @@ for (;;)
         (pcre_free)(new_recursive.offset_save);
       MRRETURN(MATCH_NOMATCH);
       }
-      
+
     RECURSION_MATCHED:
     break;
 
@@ -1591,7 +1591,7 @@ for (;;)
     at all - i.e. it could be ()* or ()? or even (){0} in the pattern. Brackets
     with fixed upper repeat limits are compiled as a number of copies, with the
     optional ones preceded by BRAZERO or BRAMINZERO. */
-     
+
     case OP_BRAZERO:
     next = ecode + 1;
     RMATCH(eptr, next, offset_top, md, eptrb, RM10);
@@ -1599,7 +1599,7 @@ for (;;)
     do next += GET(next, 1); while (*next == OP_ALT);
     ecode = next + 1 + LINK_SIZE;
     break;
-    
+
     case OP_BRAMINZERO:
     next = ecode + 1;
     do next += GET(next, 1); while (*next == OP_ALT);
@@ -1613,12 +1613,12 @@ for (;;)
     do next += GET(next,1); while (*next == OP_ALT);
     ecode = next + 1 + LINK_SIZE;
     break;
-    
+
     /* BRAPOSZERO occurs before a possessive bracket group. Don't do anything
     here; just jump to the group, with allow_zero set TRUE. */
-    
+
     case OP_BRAPOSZERO:
-    op = *(++ecode); 
+    op = *(++ecode);
     allow_zero = TRUE;
     if (op == OP_CBRAPOS || op == OP_SCBRAPOS) goto POSSESSIVE_CAPTURE;
       goto POSSESSIVE_NON_CAPTURE;
@@ -1628,9 +1628,9 @@ for (;;)
     case OP_KET:
     case OP_KETRMIN:
     case OP_KETRMAX:
-    case OP_KETRPOS: 
+    case OP_KETRPOS:
     prev = ecode - GET(ecode, 1);
-    
+
     /* If this was a group that remembered the subject start, in order to break
     infinite repeats of empty string matches, retrieve the subject start from
     the chain. Otherwise, set it NULL. */
@@ -1689,23 +1689,23 @@ for (;;)
       md->capture_last = number;
       if (offset >= md->offset_max) md->offset_overflow = TRUE; else
         {
-        /* If offset is greater than offset_top, it means that we are 
-        "skipping" a capturing group, and that group's offsets must be marked 
-        unset. In earlier versions of PCRE, all the offsets were unset at the 
-        start of matching, but this doesn't work because atomic groups and 
+        /* If offset is greater than offset_top, it means that we are
+        "skipping" a capturing group, and that group's offsets must be marked
+        unset. In earlier versions of PCRE, all the offsets were unset at the
+        start of matching, but this doesn't work because atomic groups and
         assertions can cause a value to be set that should later be unset.
         Example: matching /(?>(a))b|(a)c/ against "ac". This sets group 1 as
-        part of the atomic group, but this is not on the final matching path, 
-        so must be unset when 2 is set. (If there is no group 2, there is no 
+        part of the atomic group, but this is not on the final matching path,
+        so must be unset when 2 is set. (If there is no group 2, there is no
         problem, because offset_top will then be 2, indicating no capture.) */
-         
+
         if (offset > offset_top)
           {
           register int *iptr = md->offset_vector + offset_top;
           register int *iend = md->offset_vector + offset;
           while (iptr < iend) *iptr++ = -1;
-          } 
- 
+          }
+
         /* Now make the extraction */
 
         md->offset_vector[offset] =
@@ -1718,10 +1718,10 @@ for (;;)
     /* For an ordinary non-repeating ket, just continue at this level. This
     also happens for a repeating ket if no characters were matched in the
     group. This is the forcible breaking of infinite loops as implemented in
-    Perl 5.005. For a non-repeating atomic group, establish a backup point by 
-    processing the rest of the pattern at a lower level. If this results in a 
-    NOMATCH return, pass MATCH_ONCE back to the original OP_ONCE level, thereby 
-    bypassing intermediate backup points, but resetting any captures that 
+    Perl 5.005. For a non-repeating atomic group, establish a backup point by
+    processing the rest of the pattern at a lower level. If this results in a
+    NOMATCH return, pass MATCH_ONCE back to the original OP_ONCE level, thereby
+    bypassing intermediate backup points, but resetting any captures that
     happened along the way. */
 
     if (*ecode == OP_KET || eptr == saved_eptr)
@@ -1731,22 +1731,22 @@ for (;;)
         RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM12);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->once_target = prev;  /* Level at which to change to MATCH_NOMATCH */
-        RRETURN(MATCH_ONCE); 
-        }  
+        RRETURN(MATCH_ONCE);
+        }
       ecode += 1 + LINK_SIZE;    /* Carry on at this level */
       break;
       }
-      
-    /* OP_KETRPOS is a possessive repeating ket. Remember the current position, 
+
+    /* OP_KETRPOS is a possessive repeating ket. Remember the current position,
     and return the MATCH_KETRPOS. This makes it possible to do the repeats one
     at a time from the outer level, thus saving stack. */
-    
+
     if (*ecode == OP_KETRPOS)
-      {  
+      {
       md->end_match_ptr = eptr;
-      md->end_offset_top = offset_top; 
+      md->end_offset_top = offset_top;
       RRETURN(MATCH_KETRPOS);
-      }  
+      }
 
     /* The normal repeating kets try the rest of the pattern or restart from
     the preceding bracket, in the appropriate order. In the second case, we can
@@ -1763,11 +1763,11 @@ for (;;)
         RMATCH(eptr, prev, offset_top, md, eptrb, RM8);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->once_target = prev;  /* Level at which to change to MATCH_NOMATCH */
-        RRETURN(MATCH_ONCE); 
-        }  
+        RRETURN(MATCH_ONCE);
+        }
       if (*prev >= OP_SBRA)    /* Could match an empty string */
         {
-        md->match_function_type = MATCH_CBEGROUP; 
+        md->match_function_type = MATCH_CBEGROUP;
         RMATCH(eptr, prev, offset_top, md, eptrb, RM50);
         RRETURN(rrc);
         }
@@ -1776,7 +1776,7 @@ for (;;)
       }
     else  /* OP_KETRMAX */
       {
-      if (*prev >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP; 
+      if (*prev >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, prev, offset_top, md, eptrb, RM13);
       if (rrc == MATCH_ONCE && md->once_target == prev) rrc = MATCH_NOMATCH;
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -1785,8 +1785,8 @@ for (;;)
         RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM9);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->once_target = prev;
-        RRETURN(MATCH_ONCE); 
-        }  
+        RRETURN(MATCH_ONCE);
+        }
       ecode += 1 + LINK_SIZE;
       goto TAIL_RECURSE;
       }
@@ -1796,14 +1796,14 @@ for (;;)
 
     case OP_CIRC:
     if (md->notbol && eptr == md->start_subject) MRRETURN(MATCH_NOMATCH);
-     
+
     /* Start of subject assertion */
 
     case OP_SOD:
     if (eptr != md->start_subject) MRRETURN(MATCH_NOMATCH);
     ecode++;
     break;
-    
+
     /* Multiline mode: start of subject unless notbol, or after any newline. */
 
     case OP_CIRCM:
@@ -1842,7 +1842,7 @@ for (;;)
     ecode++;
     break;
 
-    /* Not multiline mode: assert before a terminating newline or before end of 
+    /* Not multiline mode: assert before a terminating newline or before end of
     subject unless noteol is set. */
 
     case OP_DOLL:
@@ -2131,7 +2131,7 @@ for (;;)
     switch(c)
       {
       default: MRRETURN(MATCH_NOMATCH);
-       
+
       case 0x000d:
       if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
       break;
@@ -2377,8 +2377,8 @@ for (;;)
     loops). */
 
     case OP_REF:
-    case OP_REFI: 
-    caseless = op == OP_REFI; 
+    case OP_REFI:
+    caseless = op == OP_REFI;
     offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
     ecode += 3;
 
@@ -2446,7 +2446,7 @@ for (;;)
 
     for (i = 1; i <= min; i++)
       {
-      int slength; 
+      int slength;
       if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
         CHECK_PARTIAL();
@@ -2466,7 +2466,7 @@ for (;;)
       {
       for (fi = min;; fi++)
         {
-        int slength; 
+        int slength;
         RMATCH(eptr, ecode, offset_top, md, eptrb, RM14);
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -2487,7 +2487,7 @@ for (;;)
       pp = eptr;
       for (i = min; i < max; i++)
         {
-        int slength; 
+        int slength;
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
           CHECK_PARTIAL();
@@ -3220,7 +3220,7 @@ for (;;)
     checking can be multibyte. */
 
     case OP_NOT:
-    case OP_NOTI: 
+    case OP_NOTI:
     if (eptr >= md->end_subject)
       {
       SCHECK_PARTIAL();
@@ -3715,7 +3715,7 @@ for (;;)
           case PT_LAMP:
           for (i = 1; i <= min; i++)
             {
-            int chartype; 
+            int chartype;
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3775,7 +3775,7 @@ for (;;)
           case PT_ALNUM:
           for (i = 1; i <= min; i++)
             {
-            int category; 
+            int category;
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3823,7 +3823,7 @@ for (;;)
           case PT_WORD:
           for (i = 1; i <= min; i++)
             {
-            int category; 
+            int category;
             if (eptr >= md->end_subject)
               {
               SCHECK_PARTIAL();
@@ -3920,7 +3920,7 @@ for (;;)
           switch(c)
             {
             default: MRRETURN(MATCH_NOMATCH);
-             
+
             case 0x000d:
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
@@ -4197,11 +4197,11 @@ for (;;)
           switch(*eptr++)
             {
             default: MRRETURN(MATCH_NOMATCH);
-             
+
             case 0x000d:
             if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
             break;
-             
+
             case 0x000a:
             break;
 
@@ -4407,7 +4407,7 @@ for (;;)
           case PT_LAMP:
           for (fi = min;; fi++)
             {
-            int chartype; 
+            int chartype;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM37);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -4479,7 +4479,7 @@ for (;;)
           case PT_ALNUM:
           for (fi = min;; fi++)
             {
-            int category; 
+            int category;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM59);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -4536,7 +4536,7 @@ for (;;)
           case PT_WORD:
           for (fi = min;; fi++)
             {
-            int category; 
+            int category;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM62);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max) MRRETURN(MATCH_NOMATCH);
@@ -4908,7 +4908,7 @@ for (;;)
           case PT_LAMP:
           for (i = min; i < max; i++)
             {
-            int chartype; 
+            int chartype;
             int len = 1;
             if (eptr >= md->end_subject)
               {
@@ -4973,7 +4973,7 @@ for (;;)
           case PT_ALNUM:
           for (i = min; i < max; i++)
             {
-            int category; 
+            int category;
             int len = 1;
             if (eptr >= md->end_subject)
               {
@@ -5027,7 +5027,7 @@ for (;;)
           case PT_WORD:
           for (i = min; i < max; i++)
             {
-            int category; 
+            int category;
             int len = 1;
             if (eptr >= md->end_subject)
               {
@@ -5066,7 +5066,7 @@ for (;;)
         {
         for (i = min; i < max; i++)
           {
-          int len = 1; 
+          int len = 1;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -5074,7 +5074,7 @@ for (;;)
             }
           if (!utf8) c = *eptr; else { GETCHARLEN(c, eptr, len); }
           if (UCD_CATEGORY(c) == ucp_M) break;
-          eptr += len; 
+          eptr += len;
           while (eptr < md->end_subject)
             {
             len = 1;
@@ -5385,7 +5385,7 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr);
-          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' && 
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' &&
               eptr[-1] == '\r') eptr--;
           }
         }
@@ -5597,7 +5597,7 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM47);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
-          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' && 
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' &&
               eptr[-1] == '\r') eptr--;
           }
         }
@@ -5637,7 +5637,7 @@ switch (frame->Xwhere)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(17)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
-  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) 
+  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63)
 #ifdef SUPPORT_UTF8
   LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
@@ -5856,8 +5856,8 @@ md->notempty = (options & PCRE_NOTEMPTY) != 0;
 md->notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
 md->partial = ((options & PCRE_PARTIAL_HARD) != 0)? 2 :
               ((options & PCRE_PARTIAL_SOFT) != 0)? 1 : 0;
-              
- 
+
+
 md->hitend = FALSE;
 md->mark = NULL;                        /* In case never set */
 
@@ -5939,13 +5939,13 @@ defined (though never set). So there's no harm in leaving this code. */
 if (md->partial && (re->flags & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
-/* Check a UTF-8 string if required. Pass back the character offset and error 
+/* Check a UTF-8 string if required. Pass back the character offset and error
 code for an invalid string if a results vector is available. */
 
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  int erroroffset; 
+  int erroroffset;
   int errorcode = _pcre_valid_utf8((USPTR)subject, length, &erroroffset);
   if (errorcode != 0)
     {
@@ -5953,15 +5953,15 @@ if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
       {
       offsets[0] = erroroffset;
       offsets[1] = errorcode;
-      }    
+      }
     return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
-    } 
+    }
 
   /* Check that a start_offset points to the start of a UTF-8 character. */
-        
+
   if (start_offset > 0 && start_offset < length &&
-      (((USPTR)subject)[start_offset] & 0xc0) == 0x80) 
+      (((USPTR)subject)[start_offset] & 0xc0) == 0x80)
     return PCRE_ERROR_BADUTF8_OFFSET;
   }
 #endif
@@ -6234,7 +6234,7 @@ for(;;)
   md->start_match_ptr = start_match;
   md->start_used_ptr = start_match;
   md->match_call_count = 0;
-  md->match_function_type = 0; 
+  md->match_function_type = 0;
   md->end_offset_top = 0;
   rc = match(start_match, md->start_code, start_match, NULL, 2, md, NULL, 0);
   if (md->hitend && start_partial == NULL) start_partial = md->start_used_ptr;
@@ -6359,8 +6359,27 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
 
   /* Set the return code to the number of captured strings, or 0 if there are
   too many to fit into the vector. */
-  
+
   rc = md->offset_overflow? 0 : md->end_offset_top/2;
+
+  /* If there is space in the offset vector, set any unused pairs at the end of
+  the pattern to -1 for backwards compatibility. It is documented that this
+  happens. In earlier versions, the whole set of potential capturing offsets
+  was set to -1 each time round the loop, but this is handled differently now.
+  "Gaps" are set to -1 dynamically instead (this fixes a bug). Thus, it is only 
+  those at the end that need unsetting here. We can't just unset them all at
+  the start of the whole thing because they may get set in one branch that is
+  not the final matching branch. */
+  
+  if (md->end_offset_top/2 <= re->top_bracket && offsets != NULL)
+    {
+    register int *iptr, *iend;
+    int resetcount = 2 + re->top_bracket * 2;
+    if (resetcount > offsetcount) resetcount = ocount;
+    iptr = offsets + md->end_offset_top;
+    iend = offsets + resetcount;
+    while (iptr < iend) *iptr++ = -1;
+    }
 
   /* If there is space, set up the whole thing as substring 0. The value of
   md->start_match_ptr might be modified if \K was encountered on the success
