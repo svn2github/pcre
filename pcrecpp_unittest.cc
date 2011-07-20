@@ -413,7 +413,7 @@ static void TestFindAndConsume() {
 }
 
 static void TestMatchNumberPeculiarity() {
-  printf("Testing match-number peculiaraity\n");
+  printf("Testing match-number peculiarity\n");
 
   string word1;
   string word2;
