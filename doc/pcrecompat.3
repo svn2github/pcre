@@ -50,7 +50,11 @@ Perl documentation says "Because Perl hides the need for the user to understand
 the internal representation of Unicode characters, there is no need to
 implement the somewhat messy concept of surrogates."
 .P
-7. PCRE does support the \eQ...\eE escape for quoting substrings. Characters in
+7. PCRE implements a simpler version of \eX than Perl, which changed to make
+\eX match what Unicode calls an "extended grapheme cluster". This is more 
+complicated than an extended Unicode sequence, which is what PCRE matches.
+.P
+8. PCRE does support the \eQ...\eE escape for quoting substrings. Characters in
 between are treated as literals. This is slightly different from Perl in that $
 and @ are also handled as literals inside the quotes. In Perl, they cause
 variable interpolation (but of course PCRE does not have variables). Note the
@@ -66,7 +70,7 @@ following examples:
 .sp
 The \eQ...\eE sequence is recognized both inside and outside character classes.
 .P
-8. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
+9. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
 constructions. However, there is support for recursive patterns. This is not
 available in Perl 5.8, but it is in Perl 5.10. Also, the PCRE "callout"
 feature allows an external function to be called during pattern matching. See
@@ -76,7 +80,7 @@ the
 .\"
 documentation for details.
 .P
-9. Subpatterns that are called recursively or as "subroutines" are always
+10. Subpatterns that are called recursively or as "subroutines" are always
 treated as atomic groups in PCRE. This is like Python, but unlike Perl. There
 is a discussion of an example that explains this in more detail in the
 .\" HTML <a href="pcrepattern.html#recursiondifference">
@@ -89,11 +93,11 @@ in the
 .\"
 page.
 .P
-10. There are some differences that are concerned with the settings of captured
+11. There are some differences that are concerned with the settings of captured
 strings when part of a pattern is repeated. For example, matching "aba" against
 the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 .P
-11. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
+12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
 names is not as general as Perl's. This is a consequence of the fact the PCRE
 works internally just with numbers, using an external table to translate
 between numbers and names. In particular, a pattern such as (?|(?<a>A)|(?<b)B),
@@ -103,10 +107,10 @@ would not be possible to distinguish which parentheses matched, because both
 names map to capturing subpattern number 1. To avoid this confusing situation,
 an error is given at compile time.
 .P
-12. Perl recognizes comments in some places that PCRE doesn't, for example,
+13. Perl recognizes comments in some places that PCRE doesn't, for example,
 between the ( and ? at the start of a subpattern.
 .P
-13. PCRE provides some extensions to the Perl regular expression facilities.
+14. PCRE provides some extensions to the Perl regular expression facilities.
 Perl 5.10 includes new features that are not in earlier versions of Perl, some
 of which (such as named parentheses) have been in PCRE for some time. This list
 is with respect to Perl 5.10:
@@ -163,6 +167,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 02 May 2011
+Last updated: 20 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

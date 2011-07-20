@@ -757,6 +757,9 @@ Characters with the "mark" property are typically accents that affect the
 preceding character. None of them have codepoints less than 256, so in
 non-UTF-8 mode \eX matches any one character.
 .P
+Note that recent versions of Perl have changed \eX to match what Unicode calls 
+an "extended grapheme cluster", which has a more complicated definition.
+.P
 Matching characters by Unicode property is not fast, because PCRE has to search
 a structure that contains data for over fifteen thousand characters. That is
 why the traditional escape sequences such as \ed and \ew do not use Unicode
@@ -2752,6 +2755,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 June 2011
+Last updated: 20 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
