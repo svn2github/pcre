@@ -165,6 +165,13 @@ Version 8.13 30-Apr-2011
     
 31. A *MARK encountered during the processing of a positive assertion is now
     recorded and passed back (compatible with Perl). 
+    
+32. If --only-matching or --colour was set on a pcregrep call whose pattern
+    had alternative anchored branches, the search for a second match in a line
+    was done as if at the line start. Thus, for example, /^01|^02/ incorrectly
+    matched the line "0102" twice. The same bug affected patterns that started
+    with a backwards assertion. For example /\b01|\b02/ also matched "0102"
+    twice. 
 
 
 Version 8.12 15-Jan-2011

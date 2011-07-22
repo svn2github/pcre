@@ -935,10 +935,11 @@ is used multiple times for the same subject when colouring is enabled, in order
 to find all possible matches.
 
 Arguments:
-  matchptr    the start of the subject
-  length      the length of the subject to match
-  offsets     the offets vector to fill in
-  mrc         address of where to put the result of pcre_exec()
+  matchptr     the start of the subject
+  length       the length of the subject to match
+  startoffset  where to start matching
+  offsets      the offets vector to fill in
+  mrc          address of where to put the result of pcre_exec()
 
 Returns:      TRUE if there was a match
               FALSE if there was no match
@@ -946,7 +947,8 @@ Returns:      TRUE if there was a match
 */
 
 static BOOL
-match_patterns(char *matchptr, size_t length, int *offsets, int *mrc)
+match_patterns(char *matchptr, size_t length, int startoffset, int *offsets, 
+  int *mrc)
 {
 int i;
 size_t slen = length;
@@ -958,8 +960,8 @@ if (slen > 200)
   }
 for (i = 0; i < pattern_count; i++)
   {
-  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, (int)length, 0,
-    PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
+  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, (int)length,
+    startoffset, PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
   if (*mrc >= 0) return TRUE;
   if (*mrc == PCRE_ERROR_NOMATCH) continue;
   fprintf(stderr, "pcregrep: pcre_exec() gave error %d while matching ", *mrc);
@@ -1077,6 +1079,7 @@ while (ptr < endptr)
   {
   int endlinelength;
   int mrc = 0;
+  int startoffset = 0; 
   BOOL match;
   char *matchptr = ptr;
   char *t = ptr;
@@ -1153,7 +1156,7 @@ while (ptr < endptr)
   than NOMATCH. This code is in a subroutine so that it can be re-used for
   finding subsequent matches when colouring matched lines. */
 
-  match = match_patterns(matchptr, length, offsets, &mrc);
+  match = match_patterns(matchptr, length, startoffset, offsets, &mrc);
 
   /* If it's a match or a not-match (as required), do what's wanted. */
 
@@ -1216,11 +1219,14 @@ while (ptr < endptr)
             }
           }
         else if (printname != NULL || number) fprintf(stdout, "\n");
+        /* 
         matchptr += offsets[1];
         length -= offsets[1];
+        */ 
         match = FALSE;
         if (line_buffered) fflush(stdout);
-        rc = 0;    /* Had some success */
+        rc = 0;                 /* Had some success */
+        startoffset = offsets[1];
         goto ONLY_MATCHING_RESTART;
         }
       }
@@ -1360,12 +1366,18 @@ while (ptr < endptr)
         fprintf(stdout, "%c[00m", 0x1b);
         for (;;)
           {
+          /* 
           last_offset += offsets[1];
           matchptr += offsets[1];
           length -= offsets[1];
+          */
+          
+          startoffset = offsets[1];
+          last_offset = startoffset; 
           if (last_offset >= linelength + endlinelength ||
-              !match_patterns(matchptr, length, offsets, &mrc)) break;
-          FWRITE(matchptr, 1, offsets[0], stdout);
+              !match_patterns(matchptr, length, startoffset, offsets, &mrc)) 
+            break;
+          FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
           fprintf(stdout, "%c[%sm", 0x1b, colour_string);
           FWRITE(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
           fprintf(stdout, "%c[00m", 0x1b);

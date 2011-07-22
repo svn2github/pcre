@@ -340,6 +340,54 @@ echo "---------------------------- Test 70 -----------------------------" >>test
 (cd $srcdir; $valgrind $pcregrep --color=always -M "triple:\t.*\n\n" ./testdata/grepinput3) >>testtry
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 71 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o "^01|^02|^03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 72 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --color=always "^01|^02|^03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 73 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o --colour=always "^01|^02|^03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 74 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o "^01|02|^03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 75 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --color=always "^01|02|^03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 76 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o --colour=always "^01|02|^03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 77 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o "^01|^02|03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 78 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --color=always "^01|^02|03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 79 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o --colour=always "^01|^02|03" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 80 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o "\b01|\b02" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 81 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --color=always "\\b01|\\b02" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 82 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o --colour=always "\\b01|\\b02" ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry
