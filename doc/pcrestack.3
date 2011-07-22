@@ -8,7 +8,10 @@ When you call \fBpcre_exec()\fP, it makes use of an internal function called
 \fBmatch()\fP. This calls itself recursively at branch points in the pattern,
 in order to remember the state of the match so that it can back up and try a
 different alternative if the first one fails. As matching proceeds deeper and
-deeper into the tree of possibilities, the recursion depth increases.
+deeper into the tree of possibilities, the recursion depth increases. The
+\fBmatch()\P function is also called in other circumstances, for example,
+whenever a parenthesized sub-pattern is entered, and in certain cases of
+repetition.
 .P
 Not all calls of \fBmatch()\fP increase the recursion depth; for an item such
 as a* it may be called several times at the same level, after matching
@@ -170,6 +173,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 January 2010
-Copyright (c) 1997-2010 University of Cambridge.
+Last updated: 22 July 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi
