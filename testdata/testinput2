@@ -2497,6 +2497,10 @@ a random value. /Ix
 
 /\k{}/
 
+/\k/
+
+/\kabc/
+
 /(?P=)/
 
 /(?P>)/

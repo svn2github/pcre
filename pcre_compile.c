@@ -409,6 +409,7 @@ static const char error_texts[] =
   "(*MARK) must have an argument\0"
   "this version of PCRE is not compiled with PCRE_UCP support\0"
   "\\c must be followed by an ASCII character\0"
+  "\\k is not followed by a braced, angle-bracketed, or quoted name\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -6125,17 +6126,22 @@ for (;; ptr++)
         }
 
       /* \k<name> or \k'name' is a back reference by name (Perl syntax).
-      We also support \k{name} (.NET syntax) */
+      We also support \k{name} (.NET syntax).  */
 
-      if (-c == ESC_k && (ptr[1] == CHAR_LESS_THAN_SIGN ||
-          ptr[1] == CHAR_APOSTROPHE || ptr[1] == CHAR_LEFT_CURLY_BRACKET))
+      if (-c == ESC_k)
         {
+        if ((ptr[1] != CHAR_LESS_THAN_SIGN &&
+          ptr[1] != CHAR_APOSTROPHE && ptr[1] != CHAR_LEFT_CURLY_BRACKET))
+          {
+          *errorcodeptr = ERR69;
+          break;   
+          }
         is_recurse = FALSE;
         terminator = (*(++ptr) == CHAR_LESS_THAN_SIGN)?
           CHAR_GREATER_THAN_SIGN : (*ptr == CHAR_APOSTROPHE)?
           CHAR_APOSTROPHE : CHAR_RIGHT_CURLY_BRACKET;
         goto NAMED_REF_OR_RECURSE;
-        }
+        }   
 
       /* Back references are handled specially; must disable firstbyte if
       not set to cope with cases like (?=(\w+))\1: which would otherwise set

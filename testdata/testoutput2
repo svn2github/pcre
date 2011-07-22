@@ -9246,6 +9246,12 @@ Failed: subpattern name expected at offset 3
 /\k{}/
 Failed: subpattern name expected at offset 3
 
+/\k/
+Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 2
+
+/\kabc/
+Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 5
+
 /(?P=)/
 Failed: subpattern name expected at offset 4
 

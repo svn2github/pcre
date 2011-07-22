@@ -158,6 +158,10 @@ Version 8.13 30-Apr-2011
 29. Added the '=' option to pcretest to check the setting of unused capturing
     slots at the end of the pattern, which are documented as being -1, but are
     not included in the return count.  
+    
+30. If \k was not followed by a braced, angle-bracketed, or quoted name, PCRE
+    compiled something random. Now it gives a compile-time error (as does 
+    Perl). 
 
 
 Version 8.12 15-Jan-2011
