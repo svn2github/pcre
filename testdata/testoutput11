@@ -1212,4 +1212,13 @@ No match
     aaaab
 No match
 
+/^(?=a(*:M))aZ/K
+    aZbc
+ 0: aZ
+MK: M
+
+/^(?!(*:M)b)aZ/K
+    aZbc
+ 0: aZ
+
 /-- End of testinput11 --/

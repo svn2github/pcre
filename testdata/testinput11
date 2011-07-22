@@ -639,4 +639,10 @@ however, we need the complication for Perl. ---/
 /^(a)(?1)++ab/
     aaaab
 
+/^(?=a(*:M))aZ/K
+    aZbc
+
+/^(?!(*:M)b)aZ/K
+    aZbc
+
 /-- End of testinput11 --/

@@ -162,6 +162,9 @@ Version 8.13 30-Apr-2011
 30. If \k was not followed by a braced, angle-bracketed, or quoted name, PCRE
     compiled something random. Now it gives a compile-time error (as does 
     Perl). 
+    
+31. A *MARK encountered during the processing of a positive assertion is now
+    recorded and passed back (compatible with Perl). 
 
 
 Version 8.12 15-Jan-2011

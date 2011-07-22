@@ -2492,8 +2492,10 @@ failing negative assertion, they cause an error if encountered by
 .P
 If any of these verbs are used in an assertion or subroutine subpattern
 (including recursive subpatterns), their effect is confined to that subpattern;
-it does not extend to the surrounding pattern. Note that such subpatterns are
-processed as anchored at the point where they are tested.
+it does not extend to the surrounding pattern, with one exception: a *MARK that
+is encountered in a positive assertion \fIis\fP passed back (compare capturing
+parentheses in assertions). Note that such subpatterns are processed as
+anchored at the point where they are tested.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
@@ -2583,6 +2585,10 @@ The (*MARK) name is tagged with "MK:" in this output, and in this example it
 indicates which of the two alternatives matched. This is a more efficient way
 of obtaining this information than putting each alternative in its own
 capturing parentheses.
+.P
+If (*MARK) is encountered in a positive assertion, its name is recorded and 
+passed back if it is the last-encountered. This does not happen for negative 
+assetions.
 .P
 A name may also be returned after a failed match if the final path through the
 pattern involves (*MARK). However, unless (*MARK) used in conjunction with
@@ -2755,6 +2761,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 20 July 2011
+Last updated: 22 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

@@ -1365,6 +1365,7 @@ for (;;)
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
         {
         mstart = md->start_match_ptr;   /* In case \K reset it */
+        markptr = md->mark;
         break;
         }
       if (rrc != MATCH_NOMATCH &&
@@ -1653,7 +1654,7 @@ for (;;)
       md->end_match_ptr = eptr;      /* For ONCE */
       md->end_offset_top = offset_top;
       md->start_match_ptr = mstart;
-      MRRETURN(MATCH_MATCH);
+      MRRETURN(MATCH_MATCH);         /* Sets md->mark */
       }
 
     /* For capturing groups we have to check the group number back at the start
