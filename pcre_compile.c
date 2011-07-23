@@ -3039,7 +3039,7 @@ int greedy_default, greedy_non_default;
 int firstbyte, reqbyte;
 int zeroreqbyte, zerofirstbyte;
 int req_caseopt, reqvary, tempreqvary;
-int options = *optionsptr;
+int options = *optionsptr;               /* May change dynamically */
 int after_manual_callout = 0;
 int length_prevgroup = 0;
 register int c;
@@ -3056,6 +3056,10 @@ uschar *previous = NULL;
 uschar *previous_callout = NULL;
 uschar *save_hwm = NULL;
 uschar classbits[32];
+
+/* We can fish out the UTF-8 setting once and for all into a BOOL, but we
+must not do this for other options (e.g. PCRE_EXTENDED) because they may change 
+dynamically as we process the pattern. */
 
 #ifdef SUPPORT_UTF8
 BOOL class_utf8;
@@ -3237,7 +3241,7 @@ for (;; ptr++)
     previous_callout = NULL;
     }
 
-  /* In extended mode, skip white space and comments */
+  /* In extended mode, skip white space and comments. */
 
   if ((options & PCRE_EXTENDED) != 0)
     {
@@ -5572,7 +5576,7 @@ for (;; ptr++)
 
           temp = cd->end_pattern;
           cd->end_pattern = ptr;
-          recno = find_parens(cd, name, namelen,
+          recno = find_parens(cd, name, namelen, 
             (options & PCRE_EXTENDED) != 0, utf8);
           cd->end_pattern = temp;
           if (recno < 0) recno = 0;    /* Forward ref; set dummy number */

@@ -109,8 +109,10 @@ would not be possible to distinguish which parentheses matched, because both
 names map to capturing subpattern number 1. To avoid this confusing situation,
 an error is given at compile time.
 .P
-13. Perl recognizes comments in some places that PCRE doesn't, for example,
-between the ( and ? at the start of a subpattern.
+13. Perl recognizes comments in some places that PCRE does not, for example,
+between the ( and ? at the start of a subpattern. If the /x modifier is set, 
+Perl allows whitespace between ( and ? but PCRE never does, even if the 
+PCRE_EXTENDED option is set.
 .P
 14. PCRE provides some extensions to the Perl regular expression facilities.
 Perl 5.10 includes new features that are not in earlier versions of Perl, some
