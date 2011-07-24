@@ -1448,16 +1448,16 @@ enum {
   /* The assertions must come before BRA, CBRA, ONCE, and COND, and the four
   asserts must remain in order. */
 
-  OP_ASSERT,         /* 118 Positive lookahead */
-  OP_ASSERT_NOT,     /* 119 Negative lookahead */
-  OP_ASSERTBACK,     /* 120 Positive lookbehind */
-  OP_ASSERTBACK_NOT, /* 121 Negative lookbehind */
-  OP_REVERSE,        /* 122 Move pointer back - used in lookbehind assertions */
+  OP_REVERSE,        /* 118 Move pointer back - used in lookbehind assertions */
+  OP_ASSERT,         /* 119 Positive lookahead */
+  OP_ASSERT_NOT,     /* 120 Negative lookahead */
+  OP_ASSERTBACK,     /* 121 Positive lookbehind */
+  OP_ASSERTBACK_NOT, /* 122 Negative lookbehind */
 
-  /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come after the assertions,
-  with ONCE first, as there's a test for >= ONCE for a subpattern that isn't an
-  assertion. The POS versions must immediately follow the non-POS versions in
-  each case. */
+  /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come immediately after the
+  assertions, with ONCE first, as there's a test for >= ONCE for a subpattern
+  that isn't an assertion. The POS versions must immediately follow the non-POS
+  versions in each case. */
 
   OP_ONCE,           /* 123 Atomic group */
   OP_BRA,            /* 124 Start of non-capturing bracket */
@@ -1550,7 +1550,7 @@ some cases doesn't actually use these names at all). */
   "class", "nclass", "xclass", "Ref", "Refi",                     \
   "Recurse", "Callout",                                           \
   "Alt", "Ket", "KetRmax", "KetRmin", "KetRpos",                  \
-  "Assert", "Assert not", "AssertB", "AssertB not", "Reverse",    \
+  "Reverse", "Assert", "Assert not", "AssertB", "AssertB not",    \
   "Once",                                                         \
   "Bra", "BraPos", "CBra", "CBraPos",                             \
   "Cond",                                                         \
@@ -1619,11 +1619,11 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* KetRmax                                */ \
   1+LINK_SIZE,                   /* KetRmin                                */ \
   1+LINK_SIZE,                   /* KetRpos                                */ \
+  1+LINK_SIZE,                   /* Reverse                                */ \
   1+LINK_SIZE,                   /* Assert                                 */ \
   1+LINK_SIZE,                   /* Assert not                             */ \
   1+LINK_SIZE,                   /* Assert behind                          */ \
   1+LINK_SIZE,                   /* Assert behind not                      */ \
-  1+LINK_SIZE,                   /* Reverse                                */ \
   1+LINK_SIZE,                   /* ONCE                                   */ \
   1+LINK_SIZE,                   /* BRA                                    */ \
   1+LINK_SIZE,                   /* BRAPOS                                 */ \

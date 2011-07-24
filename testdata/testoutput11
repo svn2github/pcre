@@ -1221,4 +1221,8 @@ MK: M
     aZbc
  0: aZ
 
+/(?(DEFINE)(a))?b(?1)/
+    backgammon
+ 0: ba
+
 /-- End of testinput11 --/

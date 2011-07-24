@@ -1438,7 +1438,7 @@ items:
   an escape such as \ed or \epL that matches a single character
   a character class
   a back reference (see next section)
-  a parenthesized subpattern (unless it is an assertion)
+  a parenthesized subpattern (including assertions)
   a recursive or "subroutine" call to a subpattern
 .sp
 The general repetition quantifier specifies a minimum and maximum number of
@@ -1829,12 +1829,30 @@ those that look ahead of the current position in the subject string, and those
 that look behind it. An assertion subpattern is matched in the normal way,
 except that it does not cause the current matching position to be changed.
 .P
-Assertion subpatterns are not capturing subpatterns, and may not be repeated,
-because it makes no sense to assert the same thing several times. If any kind
-of assertion contains capturing subpatterns within it, these are counted for
-the purposes of numbering the capturing subpatterns in the whole pattern.
-However, substring capturing is carried out only for positive assertions,
-because it does not make sense for negative assertions.
+Assertion subpatterns are not capturing subpatterns. If such an assertion
+contains capturing subpatterns within it, these are counted for the purposes of
+numbering the capturing subpatterns in the whole pattern. However, substring
+capturing is carried out only for positive assertions, because it does not make
+sense for negative assertions.
+.P
+For compatibility with Perl, assertion subpatterns may be repeated, even though
+it makes no sense to assert the same thing several times. In practice, there 
+only three cases:
+.sp
+(1) If the quantifier is {0}, the assertion is never obeyed during matching. 
+However, it may contain internal capturing parenthesized groups that are called 
+from elsewhere via the
+.\" HTML <a href="#subpatternsassubroutines">
+.\" </a>
+subroutine mechanism.
+.\"
+.sp
+(2) If quantifier is {0,n} where n is greater than zero, it is treated as if it 
+were {0,1}. At run time, the rest of the pattern match is tried with and 
+without the assertion, the order depending on the greediness of the quantifier.
+.sp
+(3) If the minimum repetition is greater than zero, the quantifier is ignored. 
+The assertion is obeyed just once when encountered during matching.
 .
 .
 .SS "Lookahead assertions"
@@ -2761,6 +2779,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2011
+Last updated: 24 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

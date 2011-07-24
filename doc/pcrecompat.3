@@ -20,10 +20,12 @@ in the main
 .\"
 page.
 .P
-2. PCRE does not allow repeat quantifiers on assertions. Perl permits them, but
-they do not mean what you might think. For example, (?!a){3} does not assert
-that the next three characters are not "a". It just asserts that the next
-character is not "a" three times.
+2. PCRE allows repeat quantifiers only on parenthesized assertions, but they do
+not mean what you might think. For example, (?!a){3} does not assert that the
+next three characters are not "a". It just asserts that the next character is
+not "a" three times (in principle: PCRE optimizes this to run the assertion 
+just once). Perl allows repeat quantifiers on other assertions such as \b, but 
+these do not seem to have any use.
 .P
 3. Capturing subpatterns that occur inside negative lookahead assertions are
 counted, but their entries in the offsets vector are never set. Perl sets its
@@ -171,6 +173,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 23 July 2011
+Last updated: 24 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

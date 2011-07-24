@@ -393,7 +393,7 @@ static const char error_texts[] =
   "internal error: previously-checked referenced subpattern not found\0"
   "DEFINE group contains more than one branch\0"
   /* 55 */
-  "repeating a DEFINE group is not allowed\0"
+  "repeating a DEFINE group is not allowed\0"  /** DEAD **/
   "inconsistent NEWLINE options\0"
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "a numbered reference must not be zero\0"
@@ -4210,8 +4210,8 @@ for (;; ptr++)
     op_type = 0;                    /* Default single-char op codes */
     possessive_quantifier = FALSE;  /* Default not possessive quantifier */
 
-    /* Save start of previous item, in case we have to move it up to make space
-    for an inserted OP_ONCE for the additional '+' extension. */
+    /* Save start of previous item, in case we have to move it up in order to
+    insert something before it. */
 
     tempcode = previous;
 
@@ -4554,25 +4554,36 @@ for (;; ptr++)
       }
 
     /* If previous was a bracket group, we may have to replicate it in certain
-    cases. Note that at this point we can encounter only the "basic" BRA and
-    KET opcodes, as this is the place where they get converted into the more
-    special varieties. */
+    cases. Note that at this point we can encounter only the "basic" bracket
+    opcodes such as BRA and CBRA, as this is the place where they get converted
+    into the more special varieties such as BRAPOS and SBRA. A test for >=
+    OP_ASSERT and <= OP_COND includes ASSERT, ASSERT_NOT, ASSERTBACK,
+    ASSERTBACK_NOT, ONCE, BRA, CBRA, and COND. Originally, PCRE did not allow 
+    repetition of assertions, but now it does, for Perl compatibility. */
 
-    else if (*previous == OP_BRA  || *previous == OP_CBRA ||
-             *previous == OP_ONCE || *previous == OP_COND)
+    else if (*previous >= OP_ASSERT && *previous <= OP_COND)             
       {
       register int i;
       int len = (int)(code - previous);
       uschar *bralink = NULL;
       uschar *brazeroptr = NULL;
       
-      /* Repeating a DEFINE group is pointless */
+      /* Repeating a DEFINE group is pointless, but Perl allows the syntax, so 
+      we just ignore the repeat. */
 
       if (*previous == OP_COND && previous[LINK_SIZE+1] == OP_DEF)
+        goto END_REPEAT;        
+
+      /* There is no sense in actually repeating assertions. The only potential 
+      use of repetition is in cases when the assertion is optional. Therefore, 
+      if the minimum is greater than zero, just ignore the repeat. If the 
+      maximum is not not zero or one, set it to 1. */   
+
+      if (*previous < OP_ONCE)    /* Assertion */
         {
-        *errorcodeptr = ERR55;
-        goto FAILED;
-        }
+        if (repeat_min > 0) goto END_REPEAT;
+        if (repeat_max < 0 || repeat_max > 1) repeat_max = 1;
+        } 
 
       /* The case of a zero minimum is special because of the need to stick
       OP_BRAZERO in front of it, and because the group appears once in the
@@ -4592,10 +4603,11 @@ for (;; ptr++)
         **   goto END_REPEAT;
         **   }
 
-        However, that fails when a group is referenced as a subroutine from
-        elsewhere in the pattern, so now we stick in OP_SKIPZERO in front of it
-        so that it is skipped on execution. As we don't have a list of which
-        groups are referenced, we cannot do this selectively.
+        However, that fails when a group or a subgroup within it is referenced
+        as a subroutine from elsewhere in the pattern, so now we stick in
+        OP_SKIPZERO in front of it so that it is skipped on execution. As we
+        don't have a list of which groups are referenced, we cannot do this
+        selectively.
 
         If the maximum is 1 or unlimited, we just have to stick in the BRAZERO
         and do no more at this point. However, we do need to adjust any
@@ -5860,12 +5872,12 @@ for (;; ptr++)
       skipbytes = 2;
       }
 
-    /* Process nested bracketed regex. Assertions may not be repeated, but
-    other kinds can be. All their opcodes are >= OP_ONCE. We copy code into a
-    non-register variable (tempcode) in order to be able to pass its address
-    because some compilers complain otherwise. */
+    /* Process nested bracketed regex. Assertions used not to be repeatable,
+    but this was changed for Perl compatibility, so all kinds can now be
+    repeated. We copy code into a non-register variable (tempcode) in order to
+    be able to pass its address because some compilers complain otherwise. */
 
-    previous = (bravalue >= OP_ONCE)? code : NULL;
+    previous = code;                   /* For handling repetition */
     *code = bravalue;
     tempcode = code;
     tempreqvary = cd->req_varyopt;     /* Save value before bracket */

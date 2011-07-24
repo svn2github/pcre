@@ -159,11 +159,11 @@ static const uschar coptable[] = {
   0,                             /* KetRmax                                */
   0,                             /* KetRmin                                */
   0,                             /* KetRpos                                */
+  0,                             /* Reverse                                */
   0,                             /* Assert                                 */
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
-  0,                             /* Reverse                                */
   0, 0, 0, 0, 0, 0,              /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, COND */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, NCREF                            */
@@ -227,11 +227,11 @@ static const uschar poptable[] = {
   0,                             /* KetRmax                                */
   0,                             /* KetRmin                                */
   0,                             /* KetRpos                                */
+  0,                             /* Reverse                                */
   0,                             /* Assert                                 */
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
-  0,                             /* Reverse                                */
   0, 0, 0, 0, 0, 0,              /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, COND */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, NCREF                            */

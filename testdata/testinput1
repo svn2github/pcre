@@ -4190,4 +4190,48 @@
 /^(?:a|ab)+c/
     aaaabc
 
+/(?=abc){3}abc/+
+    abcabcabc
+    ** Failers
+    xyz  
+    
+/(?=abc)+abc/+
+    abcabcabc
+    ** Failers
+    xyz  
+    
+/(?=abc)++abc/+
+    abcabcabc
+    ** Failers
+    xyz  
+    
+/(?=abc){0}xyz/
+    xyz 
+
+/(?=abc){1}xyz/
+    ** Failers
+    xyz 
+    
+/(?=(a))?./
+    ab
+    bc
+      
+/(?=(a))??./
+    ab
+    bc
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+
+/^(?=(?1))?[az]([abc])d/
+    abd 
+    zcdxx 
+
+/^(?!a){0}\w+/
+    aaaaa
+
+/(?<=(abc))?xyz/
+    abcxyz
+    pqrxyz 
+
 /-- End of testinput1 --/

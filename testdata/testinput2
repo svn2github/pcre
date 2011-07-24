@@ -2020,8 +2020,6 @@ a random value. /Ix
 
 /(?(DEFINE) abc) xyz/xI
 
-/(?(DEFINE) abc){3} xyz/x
-
 /(a|)*\d/
   \O0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   \O0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4
@@ -3795,5 +3793,27 @@ with \Y. ---/
     bazfooX\O6
     bazfooX\O8
     bazfooX\O10
+
+/(?=abc){3}abc/BZ
+
+/(?=abc)+abc/BZ
+
+/(?=abc)++abc/BZ
+
+/(?=abc){0}xyz/BZ
+
+/(?=(a))?./BZ
+
+/(?=(a))??./BZ
+
+/^(?=(a)){0}b(?1)/BZ
+
+/(?(DEFINE)(a))?b(?1)/BZ
+
+/^(?=(?1))?[az]([abc])d/BZ
+
+/^(?!a){0}\w+/BZ
+
+/(?<=(abc))?xyz/BZ
 
 /-- End of testinput2 --/

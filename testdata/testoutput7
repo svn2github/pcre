@@ -7749,4 +7749,77 @@ No match
      bbb 
 No match
 
+/(?=abc){3}abc/+
+    abcabcabc
+ 0: abc
+ 0+ abcabc
+    ** Failers
+No match
+    xyz  
+No match
+    
+/(?=abc)+abc/+
+    abcabcabc
+ 0: abc
+ 0+ abcabc
+    ** Failers
+No match
+    xyz  
+No match
+    
+/(?=abc)++abc/+
+    abcabcabc
+ 0: abc
+ 0+ abcabc
+    ** Failers
+No match
+    xyz  
+No match
+    
+/(?=abc){0}xyz/
+    xyz 
+ 0: xyz
+
+/(?=abc){1}xyz/
+    ** Failers
+No match
+    xyz 
+No match
+    
+/(?=(a))?./
+    ab
+ 0: a
+    bc
+ 0: b
+      
+/(?=(a))??./
+    ab
+ 0: a
+    bc
+ 0: b
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+ 0: ba
+
+/^(?=(?1))?[az]([abc])d/
+    abd 
+ 0: abd
+    zcdxx 
+ 0: zcd
+
+/^(?!a){0}\w+/
+    aaaaa
+ 0: aaaaa
+ 1: aaaa
+ 2: aaa
+ 3: aa
+ 4: a
+
+/(?<=(abc))?xyz/
+    abcxyz
+ 0: xyz
+    pqrxyz 
+ 0: xyz
+
 /-- End of testinput7 --/

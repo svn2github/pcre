@@ -6855,4 +6855,77 @@ No match
     aaaabc
  0: aaaabc
 
+/(?=abc){3}abc/+
+    abcabcabc
+ 0: abc
+ 0+ abcabc
+    ** Failers
+No match
+    xyz  
+No match
+    
+/(?=abc)+abc/+
+    abcabcabc
+ 0: abc
+ 0+ abcabc
+    ** Failers
+No match
+    xyz  
+No match
+    
+/(?=abc)++abc/+
+    abcabcabc
+ 0: abc
+ 0+ abcabc
+    ** Failers
+No match
+    xyz  
+No match
+    
+/(?=abc){0}xyz/
+    xyz 
+ 0: xyz
+
+/(?=abc){1}xyz/
+    ** Failers
+No match
+    xyz 
+No match
+    
+/(?=(a))?./
+    ab
+ 0: a
+ 1: a
+    bc
+ 0: b
+      
+/(?=(a))??./
+    ab
+ 0: a
+    bc
+ 0: b
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+ 0: ba
+
+/^(?=(?1))?[az]([abc])d/
+    abd 
+ 0: abd
+ 1: b
+    zcdxx 
+ 0: zcd
+ 1: c
+
+/^(?!a){0}\w+/
+    aaaaa
+ 0: aaaaa
+
+/(?<=(abc))?xyz/
+    abcxyz
+ 0: xyz
+ 1: abc
+    pqrxyz 
+ 0: xyz
+
 /-- End of testinput1 --/

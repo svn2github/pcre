@@ -645,4 +645,7 @@ however, we need the complication for Perl. ---/
 /^(?!(*:M)b)aZ/K
     aZbc
 
+/(?(DEFINE)(a))?b(?1)/
+    backgammon
+
 /-- End of testinput11 --/
