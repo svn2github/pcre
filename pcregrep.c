@@ -1189,10 +1189,10 @@ while (ptr < endptr)
     captured portion of it, as long as this string is not empty, and the
     --file-offsets and --line-offsets options output offsets for the matching
     substring (they both force --only-matching = 0). None of these options
-    prints any context. Afterwards, adjust the start and length, and then jump
-    back to look for further matches in the same line. If we are in invert
-    mode, however, nothing is printed and we do not restart - this could still
-    be useful because the return code is set. */
+    prints any context. Afterwards, adjust the start and then jump back to look
+    for further matches in the same line. If we are in invert mode, however,
+    nothing is printed and we do not restart - this could still be useful
+    because the return code is set. */
 
     else if (only_matching >= 0)
       {
@@ -1219,14 +1219,10 @@ while (ptr < endptr)
             }
           }
         else if (printname != NULL || number) fprintf(stdout, "\n");
-        /* 
-        matchptr += offsets[1];
-        length -= offsets[1];
-        */ 
         match = FALSE;
         if (line_buffered) fflush(stdout);
-        rc = 0;                 /* Had some success */
-        startoffset = offsets[1];
+        rc = 0;                      /* Had some success */
+        startoffset = offsets[1];    /* Restart after the match */
         goto ONLY_MATCHING_RESTART;
         }
       }
@@ -1359,22 +1355,14 @@ while (ptr < endptr)
       if (do_colour && !invert)
         {
         int plength;
-        int last_offset = 0;
         FWRITE(ptr, 1, offsets[0], stdout);
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
         FWRITE(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
         fprintf(stdout, "%c[00m", 0x1b);
         for (;;)
           {
-          /* 
-          last_offset += offsets[1];
-          matchptr += offsets[1];
-          length -= offsets[1];
-          */
-          
           startoffset = offsets[1];
-          last_offset = startoffset; 
-          if (last_offset >= linelength + endlinelength ||
+          if (startoffset >= linelength + endlinelength ||
               !match_patterns(matchptr, length, startoffset, offsets, &mrc)) 
             break;
           FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
@@ -1387,9 +1375,8 @@ while (ptr < endptr)
         and its line-ending characters (if they matched the pattern), so there
         may be no more to print. */
 
-        plength = (linelength + endlinelength) - last_offset;
-        if (plength > 0)
-          FWRITE(ptr + last_offset, 1, plength, stdout);
+        plength = (linelength + endlinelength) - startoffset;
+        if (plength > 0) FWRITE(ptr + startoffset, 1, plength, stdout);
         }
 
       /* Not colouring; no need to search for further matches */
