@@ -180,6 +180,19 @@ Version 8.13 30-Apr-2011
     
 34. A minor code tidy in pcre_compile() when checking options for \R usage. 
 
+35. \g was being checked for fancy things in a character class, when it should
+    just be a literal "g".
+    
+36. PCRE was rejecting [:a[:digit:]] whereas Perl was not. It seems that the
+    appearance of a nested POSIX class supersedes an apparent external class.
+    For example, [:a[:digit:]b:] matches "a", "b", ":", or a digit. Also,
+    unescaped square brackets may also appear as part of class names. For
+    example, [:a[:abc]b:] gives unknown class "[:abc]b:]". PCRE now behaves 
+    more like Perl.
+    
+37. PCRE was giving an error for \N with a braced quantifier such as {1,} (this 
+    was because it thought it was \N{name}, which is not supported).
+
 
 Version 8.12 15-Jan-2011
 ------------------------

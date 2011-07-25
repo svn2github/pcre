@@ -578,6 +578,39 @@ return s;
 
 
 /*************************************************
+*            Check for counted repeat            *
+*************************************************/
+
+/* This function is called when a '{' is encountered in a place where it might
+start a quantifier. It looks ahead to see if it really is a quantifier or not.
+It is only a quantifier if it is one of the forms {ddd} {ddd,} or {ddd,ddd}
+where the ddds are digits.
+
+Arguments:
+  p         pointer to the first char after '{'
+
+Returns:    TRUE or FALSE
+*/
+
+static BOOL
+is_counted_repeat(const uschar *p)
+{
+if ((digitab[*p++] & ctype_digit) == 0) return FALSE;
+while ((digitab[*p] & ctype_digit) != 0) p++;
+if (*p == CHAR_RIGHT_CURLY_BRACKET) return TRUE;
+
+if (*p++ != CHAR_COMMA) return FALSE;
+if (*p == CHAR_RIGHT_CURLY_BRACKET) return TRUE;
+
+if ((digitab[*p++] & ctype_digit) == 0) return FALSE;
+while ((digitab[*p] & ctype_digit) != 0) p++;
+
+return (*p == CHAR_RIGHT_CURLY_BRACKET);
+}
+
+
+
+/*************************************************
 *            Handle escapes                      *
 *************************************************/
 
@@ -648,7 +681,8 @@ else
     *errorcodeptr = ERR37;
     break;
 
-    /* \g must be followed by one of a number of specific things:
+    /* In a character class, \g is just a literal "g". Outside a character 
+    class, \g must be followed by one of a number of specific things:
 
     (1) A number, either plain or braced. If positive, it is an absolute
     backreference. If negative, it is a relative backreference. This is a Perl
@@ -665,6 +699,7 @@ else
     the -ESC_g code (cf \k). */
 
     case CHAR_g:
+    if (isclass) break;
     if (ptr[1] == CHAR_LESS_THAN_SIGN || ptr[1] == CHAR_APOSTROPHE)
       {
       c = -ESC_g;
@@ -886,9 +921,11 @@ else
   }
 
 /* Perl supports \N{name} for character names, as well as plain \N for "not
-newline". PCRE does not support \N{name}. */
+newline". PCRE does not support \N{name}. However, it does support 
+quantification such as \N{2,3}. */
 
-if (c == -ESC_N && ptr[1] == CHAR_LEFT_CURLY_BRACKET)
+if (c == -ESC_N && ptr[1] == CHAR_LEFT_CURLY_BRACKET &&
+     !is_counted_repeat(ptr+2))
   *errorcodeptr = ERR37;
 
 /* If PCRE_UCP is set, we change the values for \d etc. */
@@ -994,39 +1031,6 @@ return -1;
 }
 #endif
 
-
-
-
-/*************************************************
-*            Check for counted repeat            *
-*************************************************/
-
-/* This function is called when a '{' is encountered in a place where it might
-start a quantifier. It looks ahead to see if it really is a quantifier or not.
-It is only a quantifier if it is one of the forms {ddd} {ddd,} or {ddd,ddd}
-where the ddds are digits.
-
-Arguments:
-  p         pointer to the first char after '{'
-
-Returns:    TRUE or FALSE
-*/
-
-static BOOL
-is_counted_repeat(const uschar *p)
-{
-if ((digitab[*p++] & ctype_digit) == 0) return FALSE;
-while ((digitab[*p] & ctype_digit) != 0) p++;
-if (*p == CHAR_RIGHT_CURLY_BRACKET) return TRUE;
-
-if (*p++ != CHAR_COMMA) return FALSE;
-if (*p == CHAR_RIGHT_CURLY_BRACKET) return TRUE;
-
-if ((digitab[*p++] & ctype_digit) == 0) return FALSE;
-while ((digitab[*p] & ctype_digit) != 0) p++;
-
-return (*p == CHAR_RIGHT_CURLY_BRACKET);
-}
 
 
 
@@ -2288,6 +2292,12 @@ where Perl recognizes it as the POSIX class "lower" but PCRE does not recognize
 "l\ower". This is a lesser evil that not diagnosing bad classes when Perl does,
 I think.
 
+A user pointed out that PCRE was rejecting [:a[:digit:]] whereas Perl was not.
+It seems that the appearance of a nested POSIX class supersedes an apparent
+external class. For example, [:a[:digit:]b:] matches "a", "b", ":", or
+a digit. Also, unescaped square brackets may also appear as part of class
+names. For example, [:a[:abc]b:] gives unknown class "[:abc]b:]"in Perl. 
+
 Arguments:
   ptr      pointer to the initial [
   endptr   where to return the end pointer
@@ -2302,14 +2312,20 @@ int terminator;          /* Don't combine these lines; the Solaris cc */
 terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
 for (++ptr; *ptr != 0; ptr++)
   {
-  if (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET) ptr++; else
+  if (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET) 
+    ptr++; 
+  else
     {
-    if (*ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
     if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
       {
       *endptr = ptr;
       return TRUE;
       }
+    if (*ptr == CHAR_LEFT_SQUARE_BRACKET &&
+         (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
+          ptr[1] == CHAR_EQUALS_SIGN) &&
+        check_posix_syntax(ptr, endptr))
+      return FALSE;   
     }
   }
 return FALSE;

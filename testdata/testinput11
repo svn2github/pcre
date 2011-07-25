@@ -648,4 +648,10 @@ however, we need the complication for Perl. ---/
 /(?(DEFINE)(a))?b(?1)/
     backgammon
 
+/^\N+/
+    abc\ndef
+    
+/^\N{1,}/
+    abc\ndef 
+
 /-- End of testinput11 --/

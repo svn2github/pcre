@@ -4234,4 +4234,18 @@
     abcxyz
     pqrxyz 
 
+/^[\g<a>]+/
+    ggg<<<aaa>>>
+    ** Failers
+    \\ga  
+    
+/^[\ga]+/
+    gggagagaxyz 
+    
+/^[:a[:digit:]]+/
+    aaaa444:::Z 
+
+/^[:a[:digit:]:b]+/
+    aaaa444:::bbbZ 
+
 /-- End of testinput1 --/

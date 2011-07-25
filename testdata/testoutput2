@@ -8936,8 +8936,13 @@ Failed: number is too big at offset 19
 /\g6666666666/
 Failed: number is too big at offset 11
 
-/[\g6666666666]/
-Failed: number is too big at offset 12
+/[\g6666666666]/BZ
+------------------------------------------------------------------
+        Bra
+        [6g]
+        Ket
+        End
+------------------------------------------------------------------
 
 /(?1)\c[/
 Failed: reference to non-existent subpattern at offset 3
@@ -12130,5 +12135,8 @@ Matched, but too many substrings
         Ket
         End
 ------------------------------------------------------------------
+
+/[:a[:abc]b:]/
+Failed: unknown POSIX class name at offset 5
 
 /-- End of testinput2 --/

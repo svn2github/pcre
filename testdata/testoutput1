@@ -6928,4 +6928,24 @@ No match
     pqrxyz 
  0: xyz
 
+/^[\g<a>]+/
+    ggg<<<aaa>>>
+ 0: ggg<<<aaa>>>
+    ** Failers
+No match
+    \\ga  
+No match
+    
+/^[\ga]+/
+    gggagagaxyz 
+ 0: gggagaga
+    
+/^[:a[:digit:]]+/
+    aaaa444:::Z 
+ 0: aaaa444:::
+
+/^[:a[:digit:]:b]+/
+    aaaa444:::bbbZ 
+ 0: aaaa444:::bbb
+
 /-- End of testinput1 --/

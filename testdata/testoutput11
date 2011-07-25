@@ -1225,4 +1225,12 @@ MK: M
     backgammon
  0: ba
 
+/^\N+/
+    abc\ndef
+ 0: abc
+    
+/^\N{1,}/
+    abc\ndef 
+ 0: abc
+
 /-- End of testinput11 --/
