@@ -192,6 +192,8 @@ Version 8.13 30-Apr-2011
     
 37. PCRE was giving an error for \N with a braced quantifier such as {1,} (this 
     was because it thought it was \N{name}, which is not supported).
+    
+38. Add minix to OS list not supporting the -S option in pcretest. 
 
 
 Version 8.12 15-Jan-2011

@@ -1298,7 +1298,7 @@ while (argc > 1 && argv[op][0] == '-')
       ((stack_size = get_value((unsigned char *)argv[op+1], &endptr)),
         *endptr == 0))
     {
-#if defined(_WIN32) || defined(WIN32)
+#if defined(_WIN32) || defined(WIN32) || defined(__minix)
     printf("PCRE: -S not supported on this OS\n");
     exit(1);
 #else
