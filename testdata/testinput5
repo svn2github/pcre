@@ -877,4 +877,6 @@ correctly, but that messes up comparisons). --/
 /^\X/8 
     ́réo
 
+//<bsr_anycrlf><bsr_unicode>
+
 /-- End of testinput5 --/

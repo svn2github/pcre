@@ -7084,13 +7084,11 @@ if ((options & PCRE_UCP) != 0)
 
 /* Check validity of \R options. */
 
-switch (options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE))
+if ((options & (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) ==
+     (PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE))
   {
-  case 0:
-  case PCRE_BSR_ANYCRLF:
-  case PCRE_BSR_UNICODE:
-  break;
-  default: errorcode = ERR56; goto PCRE_EARLY_ERROR_RETURN;
+  errorcode = ERR56; 
+  goto PCRE_EARLY_ERROR_RETURN;
   }
 
 /* Handle different types of newline. The three bits give seven cases. The

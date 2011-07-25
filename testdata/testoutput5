@@ -2427,4 +2427,7 @@ No match
     ́réo
 No match
 
+//<bsr_anycrlf><bsr_unicode>
+Failed: inconsistent NEWLINE options at offset 0
+
 /-- End of testinput5 --/

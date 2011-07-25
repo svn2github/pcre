@@ -177,6 +177,8 @@ Version 8.13 30-Apr-2011
     does, and because of capturing effects, quantifying parenthesized 
     assertions may at times be useful. Quantifiers are now allowed for 
     parenthesized assertions.
+    
+34. A minor code tidy in pcre_compile() when checking options for \R usage. 
 
 
 Version 8.12 15-Jan-2011
