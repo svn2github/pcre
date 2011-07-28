@@ -546,8 +546,8 @@ static const unsigned char ebcdic_chartab[] = { /* chartable partial dup */
 /* Definition to allow mutual recursion */
 
 static BOOL
-  compile_regex(int, uschar **, const uschar **, int *, BOOL, BOOL, int, int *,
-    int *, branch_chain *, compile_data *, int *);
+  compile_regex(int, uschar **, const uschar **, int *, BOOL, BOOL, int, int,
+    int *, int *, branch_chain *, compile_data *, int *);
 
 
 
@@ -3035,6 +3035,7 @@ Arguments:
   firstbyteptr   set to initial literal character, or < 0 (REQ_UNSET, REQ_NONE)
   reqbyteptr     set to the last literal character required, else < 0
   bcptr          points to current branch chain
+  cond_depth     conditional nesting depth 
   cd             contains pointers to tables etc.
   lengthptr      NULL during the real compile phase
                  points to length accumulator during pre-compile phase
@@ -3046,7 +3047,7 @@ Returns:         TRUE on success
 static BOOL
 compile_branch(int *optionsptr, uschar **codeptr, const uschar **ptrptr,
   int *errorcodeptr, int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr,
-  compile_data *cd, int *lengthptr)
+  int cond_depth, compile_data *cd, int *lengthptr)
 {
 int repeat_type, op_type;
 int repeat_min = 0, repeat_max = 0;      /* To please picky compilers */
@@ -5759,9 +5760,14 @@ for (;; ptr++)
 
             /* If not a forward reference, and the subpattern is still open,
             this is a recursive call. We check to see if this is a left
-            recursion that could loop for ever, and diagnose that case. */
+            recursion that could loop for ever, and diagnose that case. We
+            must not, however, do this check if we are in a conditional 
+            subpattern because the condition might be testing for recursion in
+            a pattern such as /(?(R)a+|(?R)b)/, which is perfectly valid. 
+            Forever loops are also detected at runtime, so those that occur in 
+            conditional subpatterns will be picked up then. */
 
-            else if (GET(called, 1) == 0 &&
+            else if (GET(called, 1) == 0 && cond_depth <= 0 &&
                      could_be_empty(called, code, bcptr, utf8, cd))
               {
               *errorcodeptr = ERR40;
@@ -5893,27 +5899,29 @@ for (;; ptr++)
     repeated. We copy code into a non-register variable (tempcode) in order to
     be able to pass its address because some compilers complain otherwise. */
 
-    previous = code;                   /* For handling repetition */
-    *code = bravalue;
-    tempcode = code;
-    tempreqvary = cd->req_varyopt;     /* Save value before bracket */
-    length_prevgroup = 0;              /* Initialize for pre-compile phase */
-
-    if (!compile_regex(
-         newoptions,                   /* The complete new option state */
-         &tempcode,                    /* Where to put code (updated) */
-         &ptr,                         /* Input pointer (updated) */
-         errorcodeptr,                 /* Where to put an error message */
+    previous = code;                      /* For handling repetition */
+    *code = bravalue;                     
+    tempcode = code;                      
+    tempreqvary = cd->req_varyopt;        /* Save value before bracket */
+    length_prevgroup = 0;                 /* Initialize for pre-compile phase */
+                                          
+    if (!compile_regex(                   
+         newoptions,                      /* The complete new option state */
+         &tempcode,                       /* Where to put code (updated) */
+         &ptr,                            /* Input pointer (updated) */
+         errorcodeptr,                    /* Where to put an error message */
          (bravalue == OP_ASSERTBACK ||
           bravalue == OP_ASSERTBACK_NOT), /* TRUE if back assert */
-         reset_bracount,               /* True if (?| group */
-         skipbytes,                    /* Skip over bracket number */
-         &subfirstbyte,                /* For possible first char */
-         &subreqbyte,                  /* For possible last char */
-         bcptr,                        /* Current branch chain */
-         cd,                           /* Tables block */
-         (lengthptr == NULL)? NULL :   /* Actual compile phase */
-           &length_prevgroup           /* Pre-compile phase */
+         reset_bracount,                  /* True if (?| group */
+         skipbytes,                       /* Skip over bracket number */
+         cond_depth + 
+           ((bravalue == OP_COND)?1:0),   /* Depth of condition subpatterns */
+         &subfirstbyte,                   /* For possible first char */
+         &subreqbyte,                     /* For possible last char */
+         bcptr,                           /* Current branch chain */
+         cd,                              /* Tables block */
+         (lengthptr == NULL)? NULL :      /* Actual compile phase */
+           &length_prevgroup              /* Pre-compile phase */
          ))
       goto FAILED;
       
@@ -6371,6 +6379,7 @@ Arguments:
   lookbehind     TRUE if this is a lookbehind assertion
   reset_bracount TRUE to reset the count for each branch
   skipbytes      skip this many bytes at start (for brackets and OP_COND)
+  cond_depth     depth of nesting for conditional subpatterns 
   firstbyteptr   place to put the first required character, or a negative number
   reqbyteptr     place to put the last required character, or a negative number
   bcptr          pointer to the chain of currently open branches
@@ -6384,8 +6393,8 @@ Returns:         TRUE on success
 static BOOL
 compile_regex(int options, uschar **codeptr, const uschar **ptrptr,
   int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipbytes,
-  int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr, compile_data *cd,
-  int *lengthptr)
+  int cond_depth, int *firstbyteptr, int *reqbyteptr, branch_chain *bcptr, 
+  compile_data *cd, int *lengthptr)
 {
 const uschar *ptr = *ptrptr;
 uschar *code = *codeptr;
@@ -6464,7 +6473,8 @@ for (;;)
   into the length. */
 
   if (!compile_branch(&options, &code, &ptr, errorcodeptr, &branchfirstbyte,
-        &branchreqbyte, &bc, cd, (lengthptr == NULL)? NULL : &length))
+        &branchreqbyte, &bc, cond_depth, cd, 
+        (lengthptr == NULL)? NULL : &length))
     {
     *ptrptr = ptr;
     return FALSE;
@@ -7190,7 +7200,7 @@ ptr += skipatstart;
 code = cworkspace;
 *code = OP_BRA;
 (void)compile_regex(cd->external_options, &code, &ptr, &errorcode, FALSE, 
-  FALSE, 0, &firstbyte, &reqbyte, NULL, cd, &length);
+  FALSE, 0, 0, &firstbyte, &reqbyte, NULL, cd, &length);
 if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 
 DPRINTF(("end pre-compile: length=%d workspace=%d\n", length,
@@ -7263,7 +7273,7 @@ of the function here. */
 ptr = (const uschar *)pattern + skipatstart;
 code = (uschar *)codestart;
 *code = OP_BRA;
-(void)compile_regex(re->options, &code, &ptr, &errorcode, FALSE, FALSE, 0, 
+(void)compile_regex(re->options, &code, &ptr, &errorcode, FALSE, FALSE, 0, 0,
   &firstbyte, &reqbyte, NULL, cd, NULL);
 re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;

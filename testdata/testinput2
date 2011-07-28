@@ -3818,4 +3818,15 @@ with \Y. ---/
 
 /[:a[:abc]b:]/
 
+/((?2))((?1))/
+    abc
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+
+/(a+|(?R)b)/
+
 /-- End of testinput2 --/

@@ -7822,4 +7822,28 @@ No match
     pqrxyz 
  0: xyz
 
+/((?2))((?1))/
+    abc
+Error -26 (nested recursion at the same subject position)
+
+/(?(R)a+|(?R)b)/
+    aaaabcde
+ 0: aaaab
+
+/(?(R)a+|((?R))b)/
+    aaaabcde
+ 0: aaaab
+
+/((?(R)a+|(?1)b))/
+    aaaabcde
+ 0: aaaab
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+Error -17 (backreference condition or recursion test not supported for DFA matching)
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+Error -26 (nested recursion at the same subject position)
+
 /-- End of testinput7 --/

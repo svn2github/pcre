@@ -12139,4 +12139,19 @@ Matched, but too many substrings
 /[:a[:abc]b:]/
 Failed: unknown POSIX class name at offset 5
 
+/((?2))((?1))/
+    abc
+Error -26 (nested recursion at the same subject position)
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+Error -26 (nested recursion at the same subject position)
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+Error -26 (nested recursion at the same subject position)
+
+/(a+|(?R)b)/
+Failed: recursive call could loop indefinitely at offset 7
+
 /-- End of testinput2 --/

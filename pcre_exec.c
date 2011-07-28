@@ -1501,12 +1501,25 @@ for (;;)
 
     case OP_RECURSE:
       {
+      recursion_info *ri;
+      int recno;
+        
       callpat = md->start_code + GET(ecode, 1);
-      new_recursive.group_num = (callpat == md->start_code)? 0 :
-        GET2(callpat, 1 + LINK_SIZE);
+      recno = (callpat == md->start_code)? 0 :
+        GET2(callpat, 1 + LINK_SIZE);              
+      
+      /* Check for repeating a recursion without advancing the subject pointer. 
+      This should catch convoluted mutual recursions. (Some simple cases are
+      caught at compile time.) */  
+       
+      for (ri = md->recursive; ri != NULL; ri = ri->prevrec)
+        if (recno == ri->group_num && eptr == ri->subject_position) 
+          RRETURN(PCRE_ERROR_RECURSELOOP);
 
       /* Add to "recursing stack" */
 
+      new_recursive.group_num = recno;
+      new_recursive.subject_position = eptr;
       new_recursive.prevrec = md->recursive;
       md->recursive = &new_recursive;
 

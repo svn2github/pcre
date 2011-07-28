@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2011 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1753,7 +1753,7 @@ typedef struct compile_data {
 } compile_data;
 
 /* Structure for maintaining a chain of pointers to the currently incomplete
-branches, for testing for left recursion. */
+branches, for testing for left recursion while compiling. */
 
 typedef struct branch_chain {
   struct branch_chain *outer;
@@ -1761,18 +1761,28 @@ typedef struct branch_chain {
 } branch_chain;
 
 /* Structure for items in a linked list that represents an explicit recursive
-call within the pattern. */
+call within the pattern; used by pcre_exec(). */
 
 typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
   int group_num;                  /* Number of group that was called */
   int *offset_save;               /* Pointer to start of saved offsets */
   int saved_max;                  /* Number of saved offsets */
+  USPTR subject_position;         /* Position at start of recursion */ 
 } recursion_info;
+
+/* A similar structure for pcre_dfa_exec(). */
+
+typedef struct dfa_recursion_info {
+  struct dfa_recursion_info *prevrec;
+  int group_num;
+  USPTR subject_position;
+} dfa_recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject
 pointer at the start of each subpattern, so as to detect when an empty string
-has been matched by a subpattern - to break infinite loops. */
+has been matched by a subpattern - to break infinite loops; used by 
+pcre_exec(). */
 
 typedef struct eptrblock {
   struct eptrblock *epb_prev;
@@ -1832,18 +1842,19 @@ typedef struct match_data {
 functions. */
 
 typedef struct dfa_match_data {
-  const uschar *start_code;     /* Start of the compiled pattern */
-  const uschar *start_subject;  /* Start of the subject string */
-  const uschar *end_subject;    /* End of subject string */
-  const uschar *start_used_ptr; /* Earliest consulted character */
-  const uschar *tables;         /* Character tables */
-  int   start_offset;           /* The start offset value */
-  int   moptions;               /* Match options */
-  int   poptions;               /* Pattern options */
-  int    nltype;                /* Newline type */
-  int    nllen;                 /* Newline string length */
-  uschar nl[4];                 /* Newline string when fixed */
-  void  *callout_data;          /* To pass back to callouts */
+  const uschar *start_code;      /* Start of the compiled pattern */
+  const uschar *start_subject;   /* Start of the subject string */
+  const uschar *end_subject;     /* End of subject string */
+  const uschar *start_used_ptr;  /* Earliest consulted character */
+  const uschar *tables;          /* Character tables */
+  int   start_offset;            /* The start offset value */
+  int   moptions;                /* Match options */
+  int   poptions;                /* Pattern options */
+  int    nltype;                 /* Newline type */
+  int    nllen;                  /* Newline string length */
+  uschar nl[4];                  /* Newline string when fixed */
+  void  *callout_data;           /* To pass back to callouts */
+  dfa_recursion_info *recursive; /* Linked list of recursion data */ 
 } dfa_match_data;
 
 /* Bit definitions for entries in the pcre_ctypes table. */

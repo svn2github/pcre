@@ -1862,6 +1862,16 @@ Information about the failure is returned as for PCRE_ERROR_BADUTF8. It is in
 fact sufficient to detect this case, but this special error code for
 PCRE_PARTIAL_HARD precedes the implementation of returned information; it is
 retained for backwards compatibility.
+.sp
+  PCRE_ERROR_RECURSELOOP    (-26)
+.sp
+This error is returned when \fBpcre_exec()\fP detects a recursion loop within 
+the pattern. Specifically, it means that either the whole pattern or a 
+subpattern has been called recursively for the second time at the same position 
+in the subject string. Some simple patterns that might do this are detected and
+faulted at compile time, but more complicated cases, in particular mutual
+recursions between two different subpatterns, cannot be detected until run
+time.
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .
@@ -2369,6 +2379,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 May 2011
+Last updated: 28 July 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

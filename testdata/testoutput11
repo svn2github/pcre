@@ -1233,4 +1233,23 @@ MK: M
     abc\ndef 
  0: abc
 
+/(?(R)a+|(?R)b)/
+    aaaabcde
+ 0: aaaab
+
+/(?(R)a+|((?R))b)/
+    aaaabcde
+ 0: aaaab
+ 1: aaaa
+
+/((?(R)a+|(?1)b))/
+    aaaabcde
+ 0: aaaab
+ 1: aaaab
+
+/((?(R1)a+|(?1)b))/
+    aaaabcde
+ 0: aaaab
+ 1: aaaab
+
 /-- End of testinput11 --/

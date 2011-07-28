@@ -328,7 +328,6 @@ Arguments:
   workspace         vector of workspace
   wscount           size of same
   rlevel            function call recursion level
-  recursing         regex recursive call level
 
 Returns:            > 0 => number of match offset pairs placed in offsets
                     = 0 => offsets overflowed; longest matches are present
@@ -392,8 +391,7 @@ internal_dfa_exec(
   int offsetcount,
   int *workspace,
   int wscount,
-  int  rlevel,
-  int  recursing)
+  int  rlevel)
 {
 stateblock *active_states, *new_states, *temp_states;
 stateblock *next_active_state, *next_new_state;
@@ -401,6 +399,8 @@ stateblock *next_active_state, *next_new_state;
 const uschar *ctypes, *lcc, *fcc;
 const uschar *ptr;
 const uschar *end_code, *first_op;
+
+dfa_recursion_info new_recursive;
 
 int active_count, new_count, match_count;
 
@@ -425,8 +425,8 @@ wscount = (wscount - (wscount % (INTS_PER_STATEBLOCK * 2))) /
           (2 * INTS_PER_STATEBLOCK);
 
 DPRINTF(("\n%.*s---------------------\n"
-  "%.*sCall to internal_dfa_exec f=%d r=%d\n",
-  rlevel*2-2, SP, rlevel*2-2, SP, rlevel, recursing));
+  "%.*sCall to internal_dfa_exec f=%d\n",
+  rlevel*2-2, SP, rlevel*2-2, SP, rlevel));
 
 ctypes = md->tables + ctypes_offset;
 lcc = md->tables + lcc_offset;
@@ -2521,8 +2521,7 @@ for (;;)
           sizeof(local_offsets)/sizeof(int),    /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
-          rlevel,                               /* function recursion level */
-          recursing);                           /* pass on regex recursion */
+          rlevel);                              /* function recursion level */
 
         if (rc == PCRE_ERROR_DFA_UITEM) return rc;
         if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
@@ -2587,7 +2586,7 @@ for (;;)
           {
           int value = GET2(code, LINK_SIZE+2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;
-          if (recursing > 0)
+          if (md->recursive != NULL) 
             { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
           else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
@@ -2611,8 +2610,7 @@ for (;;)
             sizeof(local_offsets)/sizeof(int),    /* size of same */
             local_workspace,                      /* workspace vector */
             sizeof(local_workspace)/sizeof(int),  /* size of same */
-            rlevel,                               /* function recursion level */
-            recursing);                           /* pass on regex recursion */
+            rlevel);                              /* function recursion level */
 
           if (rc == PCRE_ERROR_DFA_UITEM) return rc;
           if ((rc >= 0) ==
@@ -2627,27 +2625,47 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_RECURSE:
         {
+        dfa_recursion_info *ri; 
         int local_offsets[1000];
         int local_workspace[1000];
+        const uschar *callpat = start_code + GET(code, 1);
+        int recno = (callpat == md->start_code)? 0 :                            
+          GET2(callpat, 1 + LINK_SIZE);   
         int rc;
 
-        DPRINTF(("%.*sStarting regex recursion %d\n", rlevel*2-2, SP,
-          recursing + 1));
+        DPRINTF(("%.*sStarting regex recursion\n", rlevel*2-2, SP));
+        
+        /* Check for repeating a recursion without advancing the subject
+        pointer. This should catch convoluted mutual recursions. (Some simple
+        cases are caught at compile time.) */
+        
+        for (ri = md->recursive; ri != NULL; ri = ri->prevrec)           
+          if (recno == ri->group_num && ptr == ri->subject_position)      
+            return PCRE_ERROR_RECURSELOOP;     
+
+        /* Remember this recursion and where we started it so as to 
+        catch infinite loops. */
+         
+        new_recursive.group_num = recno;
+        new_recursive.subject_position = ptr;
+        new_recursive.prevrec = md->recursive;
+        md->recursive = &new_recursive;   
 
         rc = internal_dfa_exec(
           md,                                   /* fixed match data */
-          start_code + GET(code, 1),            /* this subexpression's code */
+          callpat,                              /* this subexpression's code */
           ptr,                                  /* where we currently are */
           (int)(ptr - start_subject),           /* start offset */
           local_offsets,                        /* offset vector */
           sizeof(local_offsets)/sizeof(int),    /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
-          rlevel,                               /* function recursion level */
-          recursing + 1);                       /* regex recurse level */
+          rlevel);                              /* function recursion level */
 
-        DPRINTF(("%.*sReturn from regex recursion %d: rc=%d\n", rlevel*2-2, SP,
-          recursing + 1, rc));
+        md->recursive = new_recursive.prevrec;  /* Done this recursion */
+
+        DPRINTF(("%.*sReturn from regex recursion: rc=%d\n", rlevel*2-2, SP, 
+          rc));
 
         /* Ran out of internal offsets */
 
@@ -2714,8 +2732,7 @@ for (;;)
             sizeof(local_offsets)/sizeof(int),    /* size of same */
             local_workspace,                      /* workspace vector */
             sizeof(local_workspace)/sizeof(int),  /* size of same */
-            rlevel,                               /* function recursion level */
-            recursing);                           /* pass on regex recursion */
+            rlevel);                              /* function recursion level */
             
           /* Failed to match */
            
@@ -2784,8 +2801,7 @@ for (;;)
           sizeof(local_offsets)/sizeof(int),    /* size of same */
           local_workspace,                      /* workspace vector */
           sizeof(local_workspace)/sizeof(int),  /* size of same */
-          rlevel,                               /* function recursion level */
-          recursing);                           /* pass on regex recursion */
+          rlevel);                              /* function recursion level */
 
         if (rc >= 0)
           {
@@ -3377,6 +3393,7 @@ for (;;)
   /* OK, now we can do the business */
 
   md->start_used_ptr = current_subject;
+  md->recursive = NULL; 
 
   rc = internal_dfa_exec(
     md,                                /* fixed match data */
@@ -3387,8 +3404,7 @@ for (;;)
     offsetcount,                       /* size of same */
     workspace,                         /* workspace vector */
     wscount,                           /* size of same */
-    0,                                 /* function recurse level */
-    0);                                /* regex recurse level */
+    0);                                /* function recurse level */
 
   /* Anything other than "no match" means we are done, always; otherwise, carry
   on only if not anchored. */

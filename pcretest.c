@@ -225,7 +225,8 @@ static const char *errtexts[] = {
   "not used - internal error",
   "invalid combination of newline options",
   "bad offset value",
-  NULL  /* SHORTUTF8 is handled specially */
+  NULL,  /* SHORTUTF8 is handled specially */
+  "nested recursion at the same subject position"
 };
           
 

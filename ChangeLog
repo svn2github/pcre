@@ -195,6 +195,20 @@ Version 8.13 30-Apr-2011
     
 38. Add minix to OS list not supporting the -S option in pcretest. 
 
+39. PCRE tries to detect cases of infinite recursion at compile time, but it
+    cannot analyze patterns in sufficient detail to catch mutual recursions
+    such as ((?1))((?2)). There is now a runtime test that gives an error if a 
+    subgroup is called recursively as a subpattern for a second time at the 
+    same position in the subject string. In previous releases this might have
+    been caught by the recursion limit, or it might have run out of stack. 
+    
+40. A pattern such as /(?(R)a+|(?R)b)/ is quite safe, as the recursion can
+    happen only once. PCRE was, however incorrectly giving a compile time error 
+    "recursive call could loop indefinitely" because it cannot analyze the 
+    pattern in sufficient detail. The compile time test no longer happens when 
+    PCRE is compiling a conditional subpattern, but actual runaway loops are 
+    now caught at runtime (see 39 above).   
+
 
 Version 8.12 15-Jan-2011
 ------------------------

@@ -4681,4 +4681,22 @@
     abcxyz
     pqrxyz 
 
+/((?2))((?1))/
+    abc
+
+/(?(R)a+|(?R)b)/
+    aaaabcde
+
+/(?(R)a+|((?R))b)/
+    aaaabcde
+
+/((?(R)a+|(?1)b))/
+    aaaabcde
+
+/((?(R2)a+|(?1)b))/
+    aaaabcde
+
+/(?(R)a*(?1)|((?R))b)/
+    aaaabcde
+
 /-- End of testinput7 --/

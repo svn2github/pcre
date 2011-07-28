@@ -654,4 +654,16 @@ however, we need the complication for Perl. ---/
 /^\N{1,}/
     abc\ndef 
 
+/(?(R)a+|(?R)b)/
+    aaaabcde
+
+/(?(R)a+|((?R))b)/
+    aaaabcde
+
+/((?(R)a+|(?1)b))/
+    aaaabcde
+
+/((?(R1)a+|(?1)b))/
+    aaaabcde
+
 /-- End of testinput11 --/
