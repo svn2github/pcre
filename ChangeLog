@@ -208,6 +208,10 @@ Version 8.13 30-Apr-2011
     pattern in sufficient detail. The compile time test no longer happens when 
     PCRE is compiling a conditional subpattern, but actual runaway loops are 
     now caught at runtime (see 39 above).   
+    
+41. It seems that Perl allows any characters other than a closing parenthesis
+    to be part of the NAME in (*MARK:NAME) and other backtracking verbs. PCRE 
+    has been changed to be the same. 
 
 
 Version 8.12 15-Jan-2011

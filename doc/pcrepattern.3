@@ -1835,9 +1835,10 @@ numbering the capturing subpatterns in the whole pattern. However, substring
 capturing is carried out only for positive assertions, because it does not make
 sense for negative assertions.
 .P
-For compatibility with Perl, assertion subpatterns may be repeated, even though
-it makes no sense to assert the same thing several times. In practice, there 
-only three cases:
+For compatibility with Perl, assertion subpatterns may be repeated; though
+it makes no sense to assert the same thing several times, the side effect of 
+capturing parentheses may occasionally be useful. In practice, there only three
+cases:
 .sp
 (1) If the quantifier is {0}, the assertion is never obeyed during matching. 
 However, it may contain internal capturing parenthesized groups that are called 

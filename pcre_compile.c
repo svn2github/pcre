@@ -4997,15 +4997,18 @@ for (;; ptr++)
       previous = NULL;
       while ((cd->ctypes[*++ptr] & ctype_letter) != 0) {};
       namelen = (int)(ptr - name);
+      
+      /* It appears that Perl allows any characters whatsoever, other than
+      a closing parenthesis, to appear in arguments, so we no longer insist on 
+      letters, digits, and underscores. */ 
 
       if (*ptr == CHAR_COLON)
         {
         arg = ++ptr;
-        while ((cd->ctypes[*ptr] & (ctype_letter|ctype_digit)) != 0
-          || *ptr == '_') ptr++;
+        while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
         arglen = (int)(ptr - arg);
         }
-
+         
       if (*ptr != CHAR_RIGHT_PARENTHESIS)
         {
         *errorcodeptr = ERR60;

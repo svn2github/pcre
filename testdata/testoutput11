@@ -1252,4 +1252,21 @@ MK: M
  0: aaaab
  1: aaaab
 
+/a(*:any 
+name)/K
+    abc
+ 0: a
+MK: any 
+name
+    
+/a(*:a\x{1234}b)/8K
+    abc
+ 0: a
+MK: a\x{1234}b
+
+/a(*:a£b)/8K 
+    abc
+ 0: a
+MK: a£b
+
 /-- End of testinput11 --/
