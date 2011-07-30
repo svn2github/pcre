@@ -68,7 +68,7 @@ fi
 # AC_PROG_CXX will return "g++" even if no c++ compiler is installed.
 # Check for that case, and just disable c++ code if g++ doesn't run.
 AC_LANG_PUSH(C++)
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([],[]),, CXX=""; CXXCP=""; CXXFLAGS="")
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],, CXX=""; CXXCP=""; CXXFLAGS="")
 AC_LANG_POP
 
 # Check for a 64-bit integer type
@@ -76,7 +76,7 @@ AC_TYPE_INT64_T
 
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_LN_S
 
 PCRE_MAJOR="pcre_major"
@@ -189,6 +189,12 @@ AC_ARG_ENABLE(pcregrep-libbz2,
               AS_HELP_STRING([--enable-pcregrep-libbz2],
                              [link pcregrep with libbz2 to handle .bz2 files]),
               , enable_pcregrep_libbz2=no)
+
+# Handle --with-pcregrep-bufsize=N
+AC_ARG_WITH(pcregrep-bufsize,
+              AS_HELP_STRING([--with-pcregrep-bufsize=N],
+                             [pcregrep buffer size (default=20480)]),
+              , with_pcregrep_bufsize=20480)
 
 # Handle --enable-pcretest-libreadline
 AC_ARG_ENABLE(pcretest-libreadline,
@@ -320,11 +326,11 @@ for flag in "-alias,__ZN7pcrecpp2RE6no_argE,__ZN7pcrecpp6no_argE" \
   LDFLAGS="$OLD_LDFLAGS -Wl,$flag"
   # We try to run the linker with this new ld flag.  If the link fails,
   # we give up and remove the new flag from LDFLAGS.
-  AC_LINK_IFELSE(AC_LANG_PROGRAM([namespace pcrecpp {
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([namespace pcrecpp {
                                     class RE { static int no_arg; };
                                     int RE::no_arg;
                                   }],
-                                 []),
+                                 [])],
                  [AC_MSG_RESULT([yes]);
                   EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS -Wl,$flag";
                   break;],
@@ -361,8 +367,8 @@ for fn in strtoq strtoll _strtoi64 strtoimax; do
   else
     include=stdlib.h
   fi
-  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([#include <$include>],
-                                    [char* e; return $fn("100", &e, 10)]),
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <$include>],
+                                    [char* e; return $fn("100", &e, 10)])],
                     [AC_MSG_RESULT(yes)
                      AC_DEFINE_UNQUOTED(HAVE_`echo $fn | tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ`, 1,
                                         [Define to 1 if you have `$fn'.])
@@ -434,11 +440,11 @@ AC_CHECK_HEADERS([bzlib.h], [HAVE_BZLIB_H=1])
 AC_MSG_CHECKING([for libbz2])
 OLD_LIBS="$LIBS"
 LIBS="$LIBS -lbz2"
-AC_LINK_IFELSE( AC_LANG_PROGRAM([[
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_BZLIB_H
 #include <bzlib.h>
 #endif]],
-[[return (int)BZ2_bzopen("conftest", "rb");]]),
+[[return (int)BZ2_bzopen("conftest", "rb");]])],
 [AC_MSG_RESULT([yes]);HAVE_LIBBZ2=1; break;],
 AC_MSG_RESULT([no]))
 LIBS="$OLD_LIBS"
@@ -499,6 +505,18 @@ if test "$enable_pcregrep_libbz2" = "yes"; then
     Define to allow pcregrep to be linked with libbz2, so that it is
     able to handle .bz2 files.])
 fi
+
+if test $with_pcregrep_bufsize -lt 8192 ; then
+  with_pcregrep_bufsize="8192"
+fi
+   
+AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
+  The value of PCREGREP_BUFSIZE determines the size of buffer used by
+  pcregrep to hold parts of the file it is searching. On systems that
+  support it, "configure" can be used to override the default, which is
+  8192. This is also the minimum value. The actual amount of memory used by
+  pcregrep is three times this number, because it allows for the buffering of
+  "before" and "after" lines.])
 
 if test "$enable_pcretest_libreadline" = "yes"; then
   AC_DEFINE([SUPPORT_LIBREADLINE], [], [
@@ -726,6 +744,7 @@ $PACKAGE-$VERSION configuration summary:
     Match limit recursion ........... : ${with_match_limit_recursion}
     Build shared libs ............... : ${enable_shared}
     Build static libs ............... : ${enable_static}
+    Buffer size for pcregrep ........ : ${with_pcregrep_bufsize} 
     Link pcregrep with libz ......... : ${enable_pcregrep_libz}
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
     Link pcretest with libreadline .. : ${enable_pcretest_libreadline}

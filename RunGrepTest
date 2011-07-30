@@ -388,6 +388,10 @@ echo "---------------------------- Test 82 -----------------------------" >>test
 (cd $srcdir; $valgrind $pcregrep -o --colour=always "\\b01|\\b02" ./testdata/grepinput) >>testtry
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 83 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --buffer-size=100 "^a" ./testdata/grepinput3) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

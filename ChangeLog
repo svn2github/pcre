@@ -212,6 +212,28 @@ Version 8.13 30-Apr-2011
 41. It seems that Perl allows any characters other than a closing parenthesis
     to be part of the NAME in (*MARK:NAME) and other backtracking verbs. PCRE 
     has been changed to be the same. 
+    
+42. Updated configure.ac to put in more quoting round AC_LANG_PROGRAM etc. so
+    as not to get warnings when autogen.sh is called. Also changed 
+    AC_PROG_LIBTOOL (deprecated) to LT_INIT (the current macro).
+    
+43. To help people who use pcregrep to scan files containing exceedingly long 
+    lines, the following changes have been made:
+    
+    (a) The default value of the buffer size parameter has been increased from
+        8K to 20K. (A buffer three times this size is actually used.)
+        
+    (b) The default can be changed by ./configure --with-pcregrep-bufsiz when
+        PCRE is built.
+        
+    (c) A --buffer-size=n option has been added to pcregrep, to allow the size
+        to be set at run time.
+        
+    (d) Numerical values in pcregrep options can be followed by K or M, for
+        example --buffer-size=50K.
+        
+    (e) If a line being scanned overflows pcregrep's buffer, an error is now 
+        given and the return code is set to 2.
 
 
 Version 8.12 15-Jan-2011

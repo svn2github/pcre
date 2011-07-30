@@ -634,3 +634,7 @@ RC=0
 ---------------------------- Test 82 -----------------------------
 [1;31m01[00m
 RC=0
+---------------------------- Test 83 -----------------------------
+pcregrep: line 4 of file ./testdata/grepinput3 is too long for the internal buffer
+pcregrep: check the --buffer_size option
+RC=2
