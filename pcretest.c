@@ -189,6 +189,7 @@ static int locale_set = 0;
 static int show_malloc;
 static int use_utf8;
 static size_t gotten_store;
+static const unsigned char *last_callout_mark = NULL;
 
 /* The buffers grow automatically if very long input lines are encountered. */
 
@@ -959,6 +960,13 @@ fprintf(outfile, "%.*s", (cb->next_item_length == 0)? 1 : cb->next_item_length,
 
 fprintf(outfile, "\n");
 first_callout = 0;
+
+if (cb->mark != last_callout_mark) 
+  {
+  fprintf(outfile, "Latest Mark: %s\n", 
+    (cb->mark == NULL)? "<unset>" : (char *)(cb->mark));
+  last_callout_mark = cb->mark; 
+  } 
 
 if (cb->callout_data != NULL)
   {
@@ -2211,6 +2219,7 @@ while (!done)
 
     pcre_callout = callout;
     first_callout = 1;
+    last_callout_mark = NULL;    
     callout_extra = 0;
     callout_count = 0;
     callout_fail_count = 999999;

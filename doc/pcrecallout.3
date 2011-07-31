@@ -75,21 +75,22 @@ the \fBpcre_exec()\fP and the \fBpcre_dfa_exec()\fP matching functions. The
 only argument to the callout function is a pointer to a \fBpcre_callout\fP
 block. This structure contains the following fields:
 .sp
-  int          \fIversion\fP;
-  int          \fIcallout_number\fP;
-  int         *\fIoffset_vector\fP;
-  const char  *\fIsubject\fP;
-  int          \fIsubject_length\fP;
-  int          \fIstart_match\fP;
-  int          \fIcurrent_position\fP;
-  int          \fIcapture_top\fP;
-  int          \fIcapture_last\fP;
-  void        *\fIcallout_data\fP;
-  int          \fIpattern_position\fP;
-  int          \fInext_item_length\fP;
+  int         \fIversion\fP;
+  int         \fIcallout_number\fP;
+  int        *\fIoffset_vector\fP;
+  const char *\fIsubject\fP;
+  int         \fIsubject_length\fP;
+  int         \fIstart_match\fP;
+  int         \fIcurrent_position\fP;
+  int         \fIcapture_top\fP;
+  int         \fIcapture_last\fP;
+  void       *\fIcallout_data\fP;
+  int         \fIpattern_position\fP;
+  int         \fInext_item_length\fP;
+  const unsigned char *\fImark\fP; 
 .sp
 The \fIversion\fP field is an integer containing the version number of the
-block format. The initial version was 0; the current version is 1. The version
+block format. The initial version was 0; the current version is 2. The version
 number will change again in future if additional fields are added, but the
 intention is never to remove any of the existing fields.
 .P
@@ -152,6 +153,12 @@ of the entire subpattern.
 The \fIpattern_position\fP and \fInext_item_length\fP fields are intended to
 help in distinguishing between different automatic callouts, which all have the
 same callout number. However, they are set for all callouts.
+.P
+The \fImark\fP field is present from version 2 of the \fIpcre_callout\fP 
+structure. In callouts from \fBpcre_exec()\fP it contains a pointer to the 
+zero-terminated name of the most recently passed (*MARK) item in the match, or
+NULL if there are no (*MARK)s in the current matching path. In callouts from
+\fBpcre_dfa_exec()\fP this field always contains NULL.
 .
 .
 .SH "RETURN VALUES"
@@ -184,6 +191,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 November 2010
-Copyright (c) 1997-2010 University of Cambridge.
+Last updated: 31 July 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi

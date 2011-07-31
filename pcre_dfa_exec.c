@@ -2560,6 +2560,7 @@ for (;;)
             cb.capture_top      = 1;
             cb.capture_last     = -1;
             cb.callout_data     = md->callout_data;
+            cb.mark             = NULL;   /* No (*MARK) support */ 
             if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
             }
           if (rrc > 0) break;                      /* Fail this thread */
@@ -2891,6 +2892,7 @@ for (;;)
         cb.capture_top      = 1;
         cb.capture_last     = -1;
         cb.callout_data     = md->callout_data;
+        cb.mark             = NULL;   /* No (*MARK) support */ 
         if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
         }
       if (rrc == 0)

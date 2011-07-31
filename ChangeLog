@@ -234,6 +234,8 @@ Version 8.13 30-Apr-2011
         
     (e) If a line being scanned overflows pcregrep's buffer, an error is now 
         given and the return code is set to 2.
+        
+44. Add a pointer to the latest mark to the callout data block. 
 
 
 Version 8.12 15-Jan-2011

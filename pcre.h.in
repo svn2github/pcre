@@ -280,6 +280,8 @@ typedef struct pcre_callout_block {
   /* ------------------- Added for Version 1 -------------------------- */
   int          pattern_position;  /* Offset to next item in the pattern */
   int          next_item_length;  /* Length of next item in the pattern */
+  /* ------------------- Added for Version 2 -------------------------- */
+  const unsigned char *mark;      /* Pointer to current mark or NULL    */ 
   /* ------------------------------------------------------------------ */
 } pcre_callout_block;
 

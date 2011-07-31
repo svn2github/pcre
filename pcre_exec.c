@@ -1070,7 +1070,7 @@ for (;;)
       if (pcre_callout != NULL)
         {
         pcre_callout_block cb;
-        cb.version          = 1;   /* Version 1 of the callout block */
+        cb.version          = 2;   /* Version 1 of the callout block */
         cb.callout_number   = ecode[LINK_SIZE+2];
         cb.offset_vector    = md->offset_vector;
         cb.subject          = (PCRE_SPTR)md->start_subject;
@@ -1082,6 +1082,7 @@ for (;;)
         cb.capture_top      = offset_top/2;
         cb.capture_last     = md->capture_last;
         cb.callout_data     = md->callout_data;
+        cb.mark             = markptr; 
         if ((rrc = (*pcre_callout)(&cb)) > 0) MRRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
         }
@@ -1464,7 +1465,7 @@ for (;;)
     if (pcre_callout != NULL)
       {
       pcre_callout_block cb;
-      cb.version          = 1;   /* Version 1 of the callout block */
+      cb.version          = 2;   /* Version 1 of the callout block */
       cb.callout_number   = ecode[1];
       cb.offset_vector    = md->offset_vector;
       cb.subject          = (PCRE_SPTR)md->start_subject;
@@ -1476,6 +1477,7 @@ for (;;)
       cb.capture_top      = offset_top/2;
       cb.capture_last     = md->capture_last;
       cb.callout_data     = md->callout_data;
+      cb.mark             = markptr; 
       if ((rrc = (*pcre_callout)(&cb)) > 0) MRRETURN(MATCH_NOMATCH);
       if (rrc < 0) RRETURN(rrc);
       }
