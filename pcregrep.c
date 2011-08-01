@@ -1111,7 +1111,7 @@ while (ptr < endptr)
   if (endlinelength == 0 && t == main_buffer + bufsize)
     {
     fprintf(stderr, "pcregrep: line %d%s%s is too long for the internal buffer\n"
-                    "pcregrep: check the --buffer_size option\n",
+                    "pcregrep: check the --buffer-size option\n",
                     linenumber, 
                     (filename == NULL)? "" : " of file ",
                     (filename == NULL)? "" : filename);
