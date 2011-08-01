@@ -3829,4 +3829,9 @@ with \Y. ---/
 
 /(a+|(?R)b)/
 
+/^(a(*:A)(d|e(*:B))z|aeq)/C
+    adz
+    aez
+    aeqwerty
+
 /-- End of testinput2 --/

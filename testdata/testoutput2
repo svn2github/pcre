@@ -12154,4 +12154,63 @@ Error -26 (nested recursion at the same subject position)
 /(a+|(?R)b)/
 Failed: recursive call could loop indefinitely at offset 7
 
+/^(a(*:A)(d|e(*:B))z|aeq)/C
+    adz
+--->adz
+ +0 ^       ^
+ +1 ^       (a(*:A)(d|e(*:B))z|aeq)
+ +2 ^       a
+ +3 ^^      (*:A)
+ +8 ^^      (d|e(*:B))
+Latest Mark: A
+ +9 ^^      d
++10 ^ ^     |
++18 ^ ^     z
++19 ^  ^    |
++24 ^  ^    
+ 0: adz
+ 1: adz
+ 2: d
+    aez
+--->aez
+ +0 ^       ^
+ +1 ^       (a(*:A)(d|e(*:B))z|aeq)
+ +2 ^       a
+ +3 ^^      (*:A)
+ +8 ^^      (d|e(*:B))
+Latest Mark: A
+ +9 ^^      d
++11 ^^      e
++12 ^ ^     (*:B)
++17 ^ ^     )
+Latest Mark: B
++18 ^ ^     z
++19 ^  ^    |
++24 ^  ^    
+ 0: aez
+ 1: aez
+ 2: e
+    aeqwerty
+--->aeqwerty
+ +0 ^            ^
+ +1 ^            (a(*:A)(d|e(*:B))z|aeq)
+ +2 ^            a
+ +3 ^^           (*:A)
+ +8 ^^           (d|e(*:B))
+Latest Mark: A
+ +9 ^^           d
++11 ^^           e
++12 ^ ^          (*:B)
++17 ^ ^          )
+Latest Mark: B
++18 ^ ^          z
++20 ^            a
+Latest Mark: <unset>
++21 ^^           e
++22 ^ ^          q
++23 ^  ^         )
++24 ^  ^         
+ 0: aeq
+ 1: aeq
+
 /-- End of testinput2 --/
