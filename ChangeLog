@@ -240,6 +240,10 @@ Version 8.13 30-Apr-2011
 45. The pattern /.(*F)/, when applied to "abc" with PCRE_PARTIAL_HARD, gave a
     partial match of an empty string instead of no match. This was specific to
     the use of ".".
+    
+46. The pattern /f.*/8s, when applied to "for" with PCRE_PARTIAL_HARD, gave a
+    complete match instead of a partial match. This bug was dependent on both
+    the PCRE_UTF8 and PCRE_DOTALL options being set.  
 
 
 Version 8.12 15-Jan-2011

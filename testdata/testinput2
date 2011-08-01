@@ -3837,4 +3837,16 @@ with \Y. ---/
 /.(*F)/
     \P\Pabc
 
+/f.*/
+    \P\Pfor
+
+/f.*/s
+    \P\Pfor
+
+/f.*/8
+    \P\Pfor
+
+/f.*/8s
+    \P\Pfor
+
 /-- End of testinput2 --/

@@ -5182,7 +5182,11 @@ for (;;)
               while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
-          else eptr = md->end_subject;   /* Unlimited UTF-8 repeat */
+          else 
+            {
+            eptr = md->end_subject;   /* Unlimited UTF-8 repeat */
+            SCHECK_PARTIAL();
+            } 
           break;
 
           /* The byte case is the same as non-UTF8 */
