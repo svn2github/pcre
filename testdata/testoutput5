@@ -2430,4 +2430,20 @@ No match
 //<bsr_anycrlf><bsr_unicode>
 Failed: inconsistent NEWLINE options at offset 0
 
+/f.*/
+    \P\Pfor
+Partial match: for
+
+/f.*/s
+    \P\Pfor
+Partial match: for
+
+/f.*/8
+    \P\Pfor
+Partial match: for
+
+/f.*/8s
+    \P\Pfor
+Partial match: for
+
 /-- End of testinput5 --/

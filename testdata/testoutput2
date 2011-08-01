@@ -12217,20 +12217,4 @@ Latest Mark: <unset>
     \P\Pabc
 No match
 
-/f.*/
-    \P\Pfor
-Partial match: for
-
-/f.*/s
-    \P\Pfor
-Partial match: for
-
-/f.*/8
-    \P\Pfor
-Partial match: for
-
-/f.*/8s
-    \P\Pfor
-Partial match: for
-
 /-- End of testinput2 --/

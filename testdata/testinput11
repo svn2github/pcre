@@ -670,10 +670,4 @@ however, we need the complication for Perl. ---/
 name)/K
     abc
     
-/a(*:a\x{1234}b)/8K
-    abc
-
-/a(*:a£b)/8K 
-    abc
-
 /-- End of testinput11 --/
