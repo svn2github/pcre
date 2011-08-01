@@ -2349,12 +2349,6 @@ Failed: \c must be followed by an ASCII character at offset 3
  1: \x{0a}
  2: \x{0d}
 
-/(\X*)(.)/s8
-    A\x{300}
- 0: A
- 1: 
- 2: A
-
 /\x{1234}+/iS8I
 Capturing subpattern count = 0
 Options: caseless utf8
@@ -2418,14 +2412,6 @@ No first char
 No need char
 Subject length lower bound = 2
 No set of starting bytes
-
-/^S(\X*)e(\X*)$/8
-    Stéréo
-No match
-    
-/^\X/8 
-    ́réo
-No match
 
 //<bsr_anycrlf><bsr_unicode>
 Failed: inconsistent NEWLINE options at offset 0

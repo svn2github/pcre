@@ -566,4 +566,13 @@ of case for anything other than the ASCII letters. --/
 
 /-- --/ 
 
+/(\X*)(.)/s8
+    A\x{300}
+
+/^S(\X*)e(\X*)$/8
+    Stéréo
+    
+/^\X/8 
+    ́réo
+
 /-- End of testinput13 --/

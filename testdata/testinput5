@@ -852,9 +852,6 @@ correctly, but that messes up comparisons). --/
     \r\r\n\n\r 
     \r\r\n\n\r\n 
 
-/(\X*)(.)/s8
-    A\x{300}
-
 /\x{1234}+/iS8I
 
 /\x{1234}+?/iS8I
@@ -870,12 +867,6 @@ correctly, but that messes up comparisons). --/
 /[^\x{1234}]++/iS8I   
 
 /[^\x{1234}]{2}/iS8I
-
-/^S(\X*)e(\X*)$/8
-    Stéréo
-    
-/^\X/8 
-    ́réo
 
 //<bsr_anycrlf><bsr_unicode>
 
