@@ -12213,4 +12213,8 @@ Latest Mark: <unset>
  0: aeq
  1: aeq
 
+/.(*F)/
+    \P\Pabc
+No match
+
 /-- End of testinput2 --/

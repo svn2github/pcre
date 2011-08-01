@@ -2014,11 +2014,12 @@ for (;;)
     /* Fall through */
 
     case OP_ALLANY:
-    if (eptr++ >= md->end_subject)
-      {
+    if (eptr >= md->end_subject)   /* DO NOT merge the eptr++ here; it must */
+      {                            /* not be updated before SCHECK_PARTIAL. */
       SCHECK_PARTIAL();
       MRRETURN(MATCH_NOMATCH);
       }
+    eptr++;
     if (utf8) while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
     ecode++;
     break;
@@ -2027,11 +2028,12 @@ for (;;)
     any byte, even newline, independent of the setting of PCRE_DOTALL. */
 
     case OP_ANYBYTE:
-    if (eptr++ >= md->end_subject)
-      {
+    if (eptr >= md->end_subject)   /* DO NOT merge the eptr++ here; it must */
+      {                            /* not be updated before SCHECK_PARTIAL. */
       SCHECK_PARTIAL();
       MRRETURN(MATCH_NOMATCH);
       }
+    eptr++;   
     ecode++;
     break;
 

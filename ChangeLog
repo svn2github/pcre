@@ -237,6 +237,10 @@ Version 8.13 30-Apr-2011
         
 44. Add a pointer to the latest mark to the callout data block. 
 
+45. The pattern /.(*F)/, when applied to "abc" with PCRE_PARTIAL_HARD, gave a
+    partial match of an empty string instead of no match. This was specific to
+    the use of ".".
+
 
 Version 8.12 15-Jan-2011
 ------------------------
