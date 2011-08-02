@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.13 30-Apr-2011
+Version 8.13 02-Aug-2011
 ------------------------
 
 1.  The Unicode data tables have been updated to Unicode 6.0.0.
@@ -95,7 +95,7 @@ Version 8.13 30-Apr-2011
     
 17. There was optimizing code for the last branch of non-capturing parentheses,
     and also for the obeyed branch of a conditional subexpression, which used 
-    tail recursion to cut down on stack usage. Unfortunately, not that there is 
+    tail recursion to cut down on stack usage. Unfortunately, now that there is 
     the possibility of (*THEN) occurring in these branches, tail recursion is 
     no longer possible because the return has to be checked for (*THEN). These 
     two optimizations have therefore been removed.  
@@ -107,9 +107,10 @@ Version 8.13 30-Apr-2011
 19. If a pattern containing (*ACCEPT) was studied, the minimum subject length
     was incorrectly computed. 
     
-20. If /S is present twice on a test pattern in pcretest input, it *disables*
-    studying, thereby overriding the use of -s on the command line. This is
-    necessary for one or two tests to keep the output identical in both cases. 
+20. If /S is present twice on a test pattern in pcretest input, it now
+    *disables* studying, thereby overriding the use of -s on the command line 
+    (see 14 above). This is necessary for one or two tests to keep the output
+    identical in both cases.
     
 21. When (*ACCEPT) was used in an assertion that matched an empty string and
     PCRE_NOTEMPTY was set, PCRE applied the non-empty test to the assertion. 
@@ -120,12 +121,12 @@ Version 8.13 30-Apr-2011
     captured. For example, /(?>(a))b|(a)c/ when matching "ac" set capturing
     group 1 to "a", when in fact it should be unset. This applied to multi-
     branched capturing and non-capturing groups, repeated or not, and also to 
-    positive assertions (capturing in negative assertions is not well defined 
+    positive assertions (capturing in negative assertions does not happen 
     in PCRE) and also to nested atomic groups. 
     
 23. Add the ++ qualifier feature to pcretest, to show the remainder of the 
-    subject after a captured substring (to make it easier to tell which of a 
-    number of identical substrings has been captured).
+    subject after a captured substring, to make it easier to tell which of a 
+    number of identical substrings has been captured.
     
 24. The way atomic groups are processed by pcre_exec() has been changed so that
     if they are repeated, backtracking one repetition now resets captured 
@@ -134,94 +135,94 @@ Version 8.13 30-Apr-2011
     "aaa". Previously, it would have been "a". As part of this code 
     refactoring, the way recursive calls are handled has also been changed.
     
-24. If an assertion condition captured any substrings, they were not passed 
+25. If an assertion condition captured any substrings, they were not passed 
     back unless some other capturing happened later. For example, if
     (?(?=(a))a) was matched against "a", no capturing was returned.
     
-25. When studying a pattern that contained subroutine calls or assertions,
+26. When studying a pattern that contained subroutine calls or assertions,
     the code for finding the minimum length of a possible match was handling 
     direct recursions such as (xxx(?1)|yyy) but not mutual recursions (where 
     group 1 called group 2 while simultaneously a separate group 2 called group
     1). A stack overflow occurred in this case. I have fixed this by limiting
     the recursion depth to 10.
     
-26. Updated RunTest.bat in the distribution to the version supplied by Tom
+27. Updated RunTest.bat in the distribution to the version supplied by Tom
     Fortmann. This supports explicit test numbers on the command line, and has
     argument validation and error reporting.
     
-27. An instance of \X with an unlimited repeat could fail if at any point the 
+28. An instance of \X with an unlimited repeat could fail if at any point the 
     first character it looked at was a mark character. 
     
-28. Some minor code refactoring concerning Unicode properties and scripts 
+29. Some minor code refactoring concerning Unicode properties and scripts 
     should reduce the stack requirement of match() slightly. 
     
-29. Added the '=' option to pcretest to check the setting of unused capturing
+30. Added the '=' option to pcretest to check the setting of unused capturing
     slots at the end of the pattern, which are documented as being -1, but are
     not included in the return count.  
     
-30. If \k was not followed by a braced, angle-bracketed, or quoted name, PCRE
+31. If \k was not followed by a braced, angle-bracketed, or quoted name, PCRE
     compiled something random. Now it gives a compile-time error (as does 
     Perl). 
     
-31. A *MARK encountered during the processing of a positive assertion is now
+32. A *MARK encountered during the processing of a positive assertion is now
     recorded and passed back (compatible with Perl). 
     
-32. If --only-matching or --colour was set on a pcregrep call whose pattern
+33. If --only-matching or --colour was set on a pcregrep call whose pattern
     had alternative anchored branches, the search for a second match in a line
     was done as if at the line start. Thus, for example, /^01|^02/ incorrectly
     matched the line "0102" twice. The same bug affected patterns that started
     with a backwards assertion. For example /\b01|\b02/ also matched "0102"
     twice. 
     
-33. Previously, PCRE did not allow quantification of assertions. However, Perl 
+34. Previously, PCRE did not allow quantification of assertions. However, Perl 
     does, and because of capturing effects, quantifying parenthesized 
     assertions may at times be useful. Quantifiers are now allowed for 
     parenthesized assertions.
     
-34. A minor code tidy in pcre_compile() when checking options for \R usage. 
+35. A minor code tidy in pcre_compile() when checking options for \R usage. 
 
-35. \g was being checked for fancy things in a character class, when it should
+36. \g was being checked for fancy things in a character class, when it should
     just be a literal "g".
     
-36. PCRE was rejecting [:a[:digit:]] whereas Perl was not. It seems that the
+37. PCRE was rejecting [:a[:digit:]] whereas Perl was not. It seems that the
     appearance of a nested POSIX class supersedes an apparent external class.
     For example, [:a[:digit:]b:] matches "a", "b", ":", or a digit. Also,
     unescaped square brackets may also appear as part of class names. For
     example, [:a[:abc]b:] gives unknown class "[:abc]b:]". PCRE now behaves 
     more like Perl.
     
-37. PCRE was giving an error for \N with a braced quantifier such as {1,} (this 
+38. PCRE was giving an error for \N with a braced quantifier such as {1,} (this 
     was because it thought it was \N{name}, which is not supported).
     
-38. Add minix to OS list not supporting the -S option in pcretest. 
+39. Add minix to OS list not supporting the -S option in pcretest. 
 
-39. PCRE tries to detect cases of infinite recursion at compile time, but it
+40. PCRE tries to detect cases of infinite recursion at compile time, but it
     cannot analyze patterns in sufficient detail to catch mutual recursions
     such as ((?1))((?2)). There is now a runtime test that gives an error if a 
     subgroup is called recursively as a subpattern for a second time at the 
     same position in the subject string. In previous releases this might have
     been caught by the recursion limit, or it might have run out of stack. 
     
-40. A pattern such as /(?(R)a+|(?R)b)/ is quite safe, as the recursion can
+41. A pattern such as /(?(R)a+|(?R)b)/ is quite safe, as the recursion can
     happen only once. PCRE was, however incorrectly giving a compile time error 
     "recursive call could loop indefinitely" because it cannot analyze the 
     pattern in sufficient detail. The compile time test no longer happens when 
     PCRE is compiling a conditional subpattern, but actual runaway loops are 
-    now caught at runtime (see 39 above).   
+    now caught at runtime (see 40 above).   
     
-41. It seems that Perl allows any characters other than a closing parenthesis
+42. It seems that Perl allows any characters other than a closing parenthesis
     to be part of the NAME in (*MARK:NAME) and other backtracking verbs. PCRE 
     has been changed to be the same. 
     
-42. Updated configure.ac to put in more quoting round AC_LANG_PROGRAM etc. so
+43. Updated configure.ac to put in more quoting round AC_LANG_PROGRAM etc. so
     as not to get warnings when autogen.sh is called. Also changed 
     AC_PROG_LIBTOOL (deprecated) to LT_INIT (the current macro).
     
-43. To help people who use pcregrep to scan files containing exceedingly long 
+44. To help people who use pcregrep to scan files containing exceedingly long 
     lines, the following changes have been made:
     
     (a) The default value of the buffer size parameter has been increased from
-        8K to 20K. (A buffer three times this size is actually used.)
+        8K to 20K. (The actual buffer used is three times this size.)
         
     (b) The default can be changed by ./configure --with-pcregrep-bufsiz when
         PCRE is built.
@@ -235,13 +236,13 @@ Version 8.13 30-Apr-2011
     (e) If a line being scanned overflows pcregrep's buffer, an error is now 
         given and the return code is set to 2.
         
-44. Add a pointer to the latest mark to the callout data block. 
+45. Add a pointer to the latest mark to the callout data block. 
 
-45. The pattern /.(*F)/, when applied to "abc" with PCRE_PARTIAL_HARD, gave a
+46. The pattern /.(*F)/, when applied to "abc" with PCRE_PARTIAL_HARD, gave a
     partial match of an empty string instead of no match. This was specific to
     the use of ".".
     
-46. The pattern /f.*/8s, when applied to "for" with PCRE_PARTIAL_HARD, gave a
+47. The pattern /f.*/8s, when applied to "for" with PCRE_PARTIAL_HARD, gave a
     complete match instead of a partial match. This bug was dependent on both
     the PCRE_UTF8 and PCRE_DOTALL options being set.  
 
