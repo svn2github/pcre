@@ -86,10 +86,10 @@ for (;;)
   # The private /+ modifier means "print $' afterwards".
 
   $showrest = ($pattern =~ s/\+(?=[a-zA-Z]*$)//);
-  
+
   # A doubled version is used by pcretest to print remainders after captures
-  
-  $pattern =~ s/\+(?=[a-zA-Z]*$)//; 
+
+  $pattern =~ s/\+(?=[a-zA-Z]*$)//;
 
   # Remove /8 from a UTF-8 pattern.
 

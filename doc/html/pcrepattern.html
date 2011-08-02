@@ -245,7 +245,11 @@ Perl, $ and @ cause variable interpolation. Note the following examples:
   \Qabc\E\$\Qxyz\E   abc$xyz        abc$xyz
 </pre>
 The \Q...\E sequence is recognized both inside and outside character classes.
-An isolated \E that is not preceded by \Q is ignored.
+An isolated \E that is not preceded by \Q is ignored. If \Q is not followed
+by \E later in the pattern, the literal interpretation continues to the end of
+the pattern (that is, \E is assumed at the end). If the isolated \Q is inside
+a character class, this causes an error, because the character class is not
+terminated.
 <a name="digitsafterbackslash"></a></P>
 <br><b>
 Non-printing characters
@@ -750,6 +754,10 @@ atomic group
 Characters with the "mark" property are typically accents that affect the
 preceding character. None of them have codepoints less than 256, so in
 non-UTF-8 mode \X matches any one character.
+</P>
+<P>
+Note that recent versions of Perl have changed \X to match what Unicode calls
+an "extended grapheme cluster", which has a more complicated definition.
 </P>
 <P>
 Matching characters by Unicode property is not fast, because PCRE has to search
@@ -1405,7 +1413,7 @@ items:
   an escape such as \d or \pL that matches a single character
   a character class
   a back reference (see next section)
-  a parenthesized subpattern (unless it is an assertion)
+  a parenthesized subpattern (including assertions)
   a recursive or "subroutine" call to a subpattern
 </pre>
 The general repetition quantifier specifies a minimum and maximum number of
@@ -1796,12 +1804,32 @@ that look behind it. An assertion subpattern is matched in the normal way,
 except that it does not cause the current matching position to be changed.
 </P>
 <P>
-Assertion subpatterns are not capturing subpatterns, and may not be repeated,
-because it makes no sense to assert the same thing several times. If any kind
-of assertion contains capturing subpatterns within it, these are counted for
-the purposes of numbering the capturing subpatterns in the whole pattern.
-However, substring capturing is carried out only for positive assertions,
-because it does not make sense for negative assertions.
+Assertion subpatterns are not capturing subpatterns. If such an assertion
+contains capturing subpatterns within it, these are counted for the purposes of
+numbering the capturing subpatterns in the whole pattern. However, substring
+capturing is carried out only for positive assertions, because it does not make
+sense for negative assertions.
+</P>
+<P>
+For compatibility with Perl, assertion subpatterns may be repeated; though
+it makes no sense to assert the same thing several times, the side effect of
+capturing parentheses may occasionally be useful. In practice, there only three
+cases:
+<br>
+<br>
+(1) If the quantifier is {0}, the assertion is never obeyed during matching.
+However, it may contain internal capturing parenthesized groups that are called
+from elsewhere via the
+<a href="#subpatternsassubroutines">subroutine mechanism.</a>
+<br>
+<br>
+(2) If quantifier is {0,n} where n is greater than zero, it is treated as if it
+were {0,1}. At run time, the rest of the pattern match is tried with and
+without the assertion, the order depending on the greediness of the quantifier.
+<br>
+<br>
+(3) If the minimum repetition is greater than zero, the quantifier is ignored.
+The assertion is obeyed just once when encountered during matching.
 </P>
 <br><b>
 Lookahead assertions
@@ -2445,8 +2473,10 @@ failing negative assertion, they cause an error if encountered by
 <P>
 If any of these verbs are used in an assertion or subroutine subpattern
 (including recursive subpatterns), their effect is confined to that subpattern;
-it does not extend to the surrounding pattern. Note that such subpatterns are
-processed as anchored at the point where they are tested.
+it does not extend to the surrounding pattern, with one exception: a *MARK that
+is encountered in a positive assertion <i>is</i> passed back (compare capturing
+parentheses in assertions). Note that such subpatterns are processed as
+anchored at the point where they are tested.
 </P>
 <P>
 The new verbs make use of what was previously invalid syntax: an opening
@@ -2534,6 +2564,11 @@ The (*MARK) name is tagged with "MK:" in this output, and in this example it
 indicates which of the two alternatives matched. This is a more efficient way
 of obtaining this information than putting each alternative in its own
 capturing parentheses.
+</P>
+<P>
+If (*MARK) is encountered in a positive assertion, its name is recorded and
+passed back if it is the last-encountered. This does not happen for negative
+assetions.
 </P>
 <P>
 A name may also be returned after a failed match if the final path through the
@@ -2705,9 +2740,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 November 2010
+Last updated: 24 July 2011
 <br>
-Copyright &copy; 1997-2010 University of Cambridge.
+Copyright &copy; 1997-2011 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

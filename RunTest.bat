@@ -4,7 +4,7 @@
 @rem  Philip H also changed test 3 to use "wintest" files.
 @rem
 @rem  Updated by Tom Fortmann to support explicit test numbers on the command line.
-@rem  Added argument validation and added error reporting. 
+@rem  Added argument validation and added error reporting.
 @rem
 @rem  MS Windows batch file to run pcretest on testfiles with the correct
 @rem  options.

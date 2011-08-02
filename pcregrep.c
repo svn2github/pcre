@@ -639,7 +639,7 @@ Arguments:
   endptr    end of available data
   lenptr    where to put the length of the eol sequence
 
-Returns:    pointer after the last byte of the line, 
+Returns:    pointer after the last byte of the line,
             including the newline byte(s)
 */
 
@@ -953,7 +953,7 @@ Returns:      TRUE if there was a match
 */
 
 static BOOL
-match_patterns(char *matchptr, size_t length, int startoffset, int *offsets, 
+match_patterns(char *matchptr, size_t length, int startoffset, int *offsets,
   int *mrc)
 {
 int i;
@@ -1013,7 +1013,7 @@ Arguments:
 
 Returns:       0 if there was at least one match
                1 otherwise (no matches)
-               2 if an overlong line is encountered 
+               2 if an overlong line is encountered
                3 if there is a read error on a .bz2 file
 */
 
@@ -1086,7 +1086,7 @@ while (ptr < endptr)
   {
   int endlinelength;
   int mrc = 0;
-  int startoffset = 0; 
+  int startoffset = 0;
   BOOL match;
   char *matchptr = ptr;
   char *t = ptr;
@@ -1103,20 +1103,20 @@ while (ptr < endptr)
   t = end_of_line(t, endptr, &endlinelength);
   linelength = t - ptr - endlinelength;
   length = multiline? (size_t)(endptr - ptr) : linelength;
-  
-  /* Check to see if the line we are looking at extends right to the very end 
-  of the buffer without a line terminator. This means the line is too long to 
+
+  /* Check to see if the line we are looking at extends right to the very end
+  of the buffer without a line terminator. This means the line is too long to
   handle. */
-  
+
   if (endlinelength == 0 && t == main_buffer + bufsize)
     {
     fprintf(stderr, "pcregrep: line %d%s%s is too long for the internal buffer\n"
                     "pcregrep: check the --buffer-size option\n",
-                    linenumber, 
+                    linenumber,
                     (filename == NULL)? "" : " of file ",
                     (filename == NULL)? "" : filename);
     return 2;
-    }                      
+    }
 
   /* Extra processing for Jeffrey Friedl's debugging. */
 
@@ -1384,7 +1384,7 @@ while (ptr < endptr)
           {
           startoffset = offsets[1];
           if (startoffset >= linelength + endlinelength ||
-              !match_patterns(matchptr, length, startoffset, offsets, &mrc)) 
+              !match_patterns(matchptr, length, startoffset, offsets, &mrc))
             break;
           FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
           fprintf(stdout, "%c[%sm", 0x1b, colour_string);
@@ -1737,7 +1737,7 @@ if (frtype == FR_LIBBZ2)
     else if (!silent)
       fprintf(stderr, "pcregrep: Failed to read %s using bzlib: %s\n",
         pathname, err);
-    rc = 2;    /* The normal "something went wrong" code */     
+    rc = 2;    /* The normal "something went wrong" code */
     }
   BZ2_bzclose(inbz2);
   }
@@ -1830,11 +1830,11 @@ for (op = optionlist; op->one_char != 0; op++)
   printf("%.*s%s\n", n, "                     ", op->help_text);
   }
 
-printf("\nNumbers may be followed by K or M, e.g. --buffer-size=100K.\n"); 
+printf("\nNumbers may be followed by K or M, e.g. --buffer-size=100K.\n");
 printf("The default value for --buffer-size is %d.\n", PCREGREP_BUFSIZE);
 printf("When reading patterns from a file instead of using a command line option,\n");
 printf("trailing white space is removed and blank lines are ignored.\n");
-printf("There is a maximum of %d patterns, each of maximum size %d bytes.\n", 
+printf("There is a maximum of %d patterns, each of maximum size %d bytes.\n",
   MAX_PATTERN_COUNT, PATBUFSIZE);
 
 printf("\nWith no FILEs, read standard input. If fewer than two FILEs given, assume -h.\n");
@@ -2321,14 +2321,14 @@ for (i = 1; i < argc; i++)
       n = n * 10 + (int)(*endptr++ - '0');
     if (toupper(*endptr) == 'K')
       {
-      n *= 1024; 
-      endptr++; 
-      }  
+      n *= 1024;
+      endptr++;
+      }
     else if (toupper(*endptr) == 'M')
       {
-      n *= 1024*1024; 
-      endptr++; 
-      }  
+      n *= 1024*1024;
+      endptr++;
+      }
     if (*endptr != 0)
       {
       if (longop)
@@ -2665,7 +2665,7 @@ if (include_dir_pattern != NULL)
 
 if (i >= argc)
   {
-  rc = pcregrep(stdin, FR_PLAIN, stdin_name, 
+  rc = pcregrep(stdin, FR_PLAIN, stdin_name,
     (filenames > FN_DEFAULT)? stdin_name : NULL);
   goto EXIT;
   }

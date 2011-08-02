@@ -70,7 +70,7 @@ Arguments:
   startcode   pointer to start of the whole pattern
   options     the compiling options
   had_accept  pointer to flag for (*ACCEPT) encountered
-  int         RECURSE depth 
+  int         RECURSE depth
 
 Returns:   the minimum length
            -1 if \C was encountered
@@ -131,7 +131,7 @@ for (;;)
     d = find_minlength(cc, startcode, options, had_accept_ptr, recurse_depth);
     if (d < 0) return d;
     branchlength += d;
-    if (*had_accept_ptr) return branchlength; 
+    if (*had_accept_ptr) return branchlength;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += 1 + LINK_SIZE;
     break;
@@ -142,10 +142,10 @@ for (;;)
     ACCEPT, it is essentially the same as END, but we set a flag so that
     counting stops. */
 
-    case OP_ACCEPT: 
-    case OP_ASSERT_ACCEPT: 
+    case OP_ACCEPT:
+    case OP_ASSERT_ACCEPT:
     *had_accept_ptr = TRUE;
-    /* Fall through */ 
+    /* Fall through */
     case OP_ALT:
     case OP_KET:
     case OP_KETRMAX:
@@ -277,7 +277,7 @@ for (;;)
     cc++;
     break;
 
-    /* "Any newline" might match two characters, but it also might match just 
+    /* "Any newline" might match two characters, but it also might match just
     one. */
 
     case OP_ANYNL:
@@ -377,12 +377,12 @@ for (;;)
         d = 0;
         had_recurse = TRUE;
         }
-      else 
+      else
         {
-        d = find_minlength(cs, startcode, options, had_accept_ptr, 
+        d = find_minlength(cs, startcode, options, had_accept_ptr,
           recurse_depth);
-        *had_accept_ptr = FALSE; 
-        } 
+        *had_accept_ptr = FALSE;
+        }
       }
     else d = 0;
     cc += 3;
@@ -418,9 +418,9 @@ for (;;)
 
     branchlength += min * d;
     break;
-    
-    /* We can easily detect direct recursion, but not mutual recursion. This is 
-    caught by a recursion depth count. */ 
+
+    /* We can easily detect direct recursion, but not mutual recursion. This is
+    caught by a recursion depth count. */
 
     case OP_RECURSE:
     cs = ce = (uschar *)startcode + GET(cc, 1);
@@ -429,11 +429,11 @@ for (;;)
     if ((cc > cs && cc < ce) || recurse_depth > 10)
       had_recurse = TRUE;
     else
-      { 
+      {
       branchlength += find_minlength(cs, startcode, options, had_accept_ptr,
         recurse_depth + 1);
       *had_accept_ptr = FALSE;
-      }  
+      }
     cc += 1 + LINK_SIZE;
     break;
 
@@ -501,7 +501,7 @@ for (;;)
     case OP_THEN_ARG:
     cc += _pcre_OP_lengths[op] + cc[1+LINK_SIZE];
     break;
-    
+
     /* The remaining opcodes are just skipped over. */
 
     case OP_CLOSE:
@@ -722,22 +722,22 @@ do
       /* Fail for a valid opcode that implies no starting bits. */
 
       case OP_ACCEPT:
-      case OP_ASSERT_ACCEPT: 
+      case OP_ASSERT_ACCEPT:
       case OP_ALLANY:
       case OP_ANY:
       case OP_ANYBYTE:
       case OP_CIRC:
-      case OP_CIRCM: 
+      case OP_CIRCM:
       case OP_CLOSE:
       case OP_COMMIT:
       case OP_COND:
-      case OP_CREF: 
+      case OP_CREF:
       case OP_DEF:
       case OP_DOLL:
-      case OP_DOLLM: 
+      case OP_DOLLM:
       case OP_END:
       case OP_EOD:
-      case OP_EODN: 
+      case OP_EODN:
       case OP_EXTUNI:
       case OP_FAIL:
       case OP_MARK:
@@ -745,7 +745,7 @@ do
       case OP_NOT:
       case OP_NOTEXACT:
       case OP_NOTEXACTI:
-      case OP_NOTI:                
+      case OP_NOTI:
       case OP_NOTMINPLUS:
       case OP_NOTMINPLUSI:
       case OP_NOTMINQUERY:
@@ -783,7 +783,7 @@ do
       case OP_REFI:
       case OP_REVERSE:
       case OP_RREF:
-      case OP_SCOND: 
+      case OP_SCOND:
       case OP_SET_SOM:
       case OP_SKIP:
       case OP_SKIP_ARG:
@@ -1160,7 +1160,7 @@ do
           for (c = 0; c < 32; c++) start_bits[c] |= tcode[c];
           }
 
-        /* Advance past the bit map, and act on what follows. For a zero 
+        /* Advance past the bit map, and act on what follows. For a zero
         minimum repeat, continue; otherwise stop processing. */
 
         tcode += 32;
@@ -1178,7 +1178,7 @@ do
           if (((tcode[1] << 8) + tcode[2]) == 0) tcode += 5;
             else try_next = FALSE;
           break;
-          
+
           default:
           try_next = FALSE;
           break;

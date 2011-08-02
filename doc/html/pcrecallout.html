@@ -93,21 +93,22 @@ the <b>pcre_exec()</b> and the <b>pcre_dfa_exec()</b> matching functions. The
 only argument to the callout function is a pointer to a <b>pcre_callout</b>
 block. This structure contains the following fields:
 <pre>
-  int          <i>version</i>;
-  int          <i>callout_number</i>;
-  int         *<i>offset_vector</i>;
-  const char  *<i>subject</i>;
-  int          <i>subject_length</i>;
-  int          <i>start_match</i>;
-  int          <i>current_position</i>;
-  int          <i>capture_top</i>;
-  int          <i>capture_last</i>;
-  void        *<i>callout_data</i>;
-  int          <i>pattern_position</i>;
-  int          <i>next_item_length</i>;
+  int         <i>version</i>;
+  int         <i>callout_number</i>;
+  int        *<i>offset_vector</i>;
+  const char *<i>subject</i>;
+  int         <i>subject_length</i>;
+  int         <i>start_match</i>;
+  int         <i>current_position</i>;
+  int         <i>capture_top</i>;
+  int         <i>capture_last</i>;
+  void       *<i>callout_data</i>;
+  int         <i>pattern_position</i>;
+  int         <i>next_item_length</i>;
+  const unsigned char *<i>mark</i>;
 </pre>
 The <i>version</i> field is an integer containing the version number of the
-block format. The initial version was 0; the current version is 1. The version
+block format. The initial version was 0; the current version is 2. The version
 number will change again in future if additional fields are added, but the
 intention is never to remove any of the existing fields.
 </P>
@@ -180,6 +181,13 @@ The <i>pattern_position</i> and <i>next_item_length</i> fields are intended to
 help in distinguishing between different automatic callouts, which all have the
 same callout number. However, they are set for all callouts.
 </P>
+<P>
+The <i>mark</i> field is present from version 2 of the <i>pcre_callout</i>
+structure. In callouts from <b>pcre_exec()</b> it contains a pointer to the
+zero-terminated name of the most recently passed (*MARK) item in the match, or
+NULL if there are no (*MARK)s in the current matching path. In callouts from
+<b>pcre_dfa_exec()</b> this field always contains NULL.
+</P>
 <br><a name="SEC4" href="#TOC1">RETURN VALUES</a><br>
 <P>
 The external callout function returns an integer to PCRE. If the value is zero,
@@ -206,9 +214,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 November 2010
+Last updated: 31 July 2011
 <br>
-Copyright &copy; 1997-2010 University of Cambridge.
+Copyright &copy; 1997-2011 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

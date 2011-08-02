@@ -1741,7 +1741,7 @@ typedef struct compile_data {
   int  final_bracount;          /* Saved value after first pass */
   int  top_backref;             /* Maximum back reference */
   unsigned int backref_map;     /* Bitmap of low back refs */
-  int  assert_depth;            /* Depth of nested assertions */ 
+  int  assert_depth;            /* Depth of nested assertions */
   int  external_options;        /* External (initial) options */
   int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
@@ -1768,7 +1768,7 @@ typedef struct recursion_info {
   int group_num;                  /* Number of group that was called */
   int *offset_save;               /* Pointer to start of saved offsets */
   int saved_max;                  /* Number of saved offsets */
-  USPTR subject_position;         /* Position at start of recursion */ 
+  USPTR subject_position;         /* Position at start of recursion */
 } recursion_info;
 
 /* A similar structure for pcre_dfa_exec(). */
@@ -1781,7 +1781,7 @@ typedef struct dfa_recursion_info {
 
 /* Structure for building a chain of data for holding the values of the subject
 pointer at the start of each subpattern, so as to detect when an empty string
-has been matched by a subpattern - to break infinite loops; used by 
+has been matched by a subpattern - to break infinite loops; used by
 pcre_exec(). */
 
 typedef struct eptrblock {
@@ -1835,7 +1835,7 @@ typedef struct match_data {
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
   const  uschar *mark;          /* Mark pointer to pass back */
-  const  uschar *once_target;   /* Where to back up to for atomic groups */ 
+  const  uschar *once_target;   /* Where to back up to for atomic groups */
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching
@@ -1854,7 +1854,7 @@ typedef struct dfa_match_data {
   int    nllen;                  /* Newline string length */
   uschar nl[4];                  /* Newline string when fixed */
   void  *callout_data;           /* To pass back to callouts */
-  dfa_recursion_info *recursive; /* Linked list of recursion data */ 
+  dfa_recursion_info *recursive; /* Linked list of recursion data */
 } dfa_match_data;
 
 /* Bit definitions for entries in the pcre_ctypes table. */

@@ -232,7 +232,7 @@ Normally, to pass one or more modifiers to a RE class, you declare
 a <i>RE_Options</i> object, set the appropriate options, and pass this
 object to a RE constructor. Example:
 <pre>
-   RE_options opt;
+   RE_Options opt;
    opt.set_caseless(true);
    if (RE("HELLO", opt).PartialMatch("hello world")) ...
 </pre>
@@ -361,6 +361,8 @@ Copyright &copy; 2007 Google Inc.
 <br><a name="SEC12" href="#TOC1">REVISION</a><br>
 <P>
 Last updated: 17 March 2009
+<br>
+Minor typo fixed: 25 July 2011
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

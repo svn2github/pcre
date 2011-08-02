@@ -157,7 +157,7 @@ enum {
   /* New for Unicode 6.0.0: */
   ucp_Batak,
   ucp_Brahmi,
-  ucp_Mandaic    
+  ucp_Mandaic
 };
 
 #endif

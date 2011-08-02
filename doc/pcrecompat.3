@@ -23,8 +23,8 @@ page.
 2. PCRE allows repeat quantifiers only on parenthesized assertions, but they do
 not mean what you might think. For example, (?!a){3} does not assert that the
 next three characters are not "a". It just asserts that the next character is
-not "a" three times (in principle: PCRE optimizes this to run the assertion 
-just once). Perl allows repeat quantifiers on other assertions such as \b, but 
+not "a" three times (in principle: PCRE optimizes this to run the assertion
+just once). Perl allows repeat quantifiers on other assertions such as \eb, but
 these do not seem to have any use.
 .P
 3. Capturing subpatterns that occur inside negative lookahead assertions are
@@ -39,7 +39,7 @@ terminated by zero. The escape sequence \e0 can be used in the pattern to
 represent a binary zero.
 .P
 5. The following Perl escape sequences are not supported: \el, \eu, \eL,
-\eU, and \eN when followed by a character name or Unicode value. (\eN on its 
+\eU, and \eN when followed by a character name or Unicode value. (\eN on its
 own, matching a non-newline character, is supported.) In fact these are
 implemented by Perl's general string-handling and are not part of its pattern
 matching engine. If any of these are encountered by PCRE, an error is
@@ -55,7 +55,7 @@ the internal representation of Unicode characters, there is no need to
 implement the somewhat messy concept of surrogates."
 .P
 7. PCRE implements a simpler version of \eX than Perl, which changed to make
-\eX match what Unicode calls an "extended grapheme cluster". This is more 
+\eX match what Unicode calls an "extended grapheme cluster". This is more
 complicated than an extended Unicode sequence, which is what PCRE matches.
 .P
 8. PCRE does support the \eQ...\eE escape for quoting substrings. Characters in
@@ -112,8 +112,8 @@ names map to capturing subpattern number 1. To avoid this confusing situation,
 an error is given at compile time.
 .P
 13. Perl recognizes comments in some places that PCRE does not, for example,
-between the ( and ? at the start of a subpattern. If the /x modifier is set, 
-Perl allows whitespace between ( and ? but PCRE never does, even if the 
+between the ( and ? at the start of a subpattern. If the /x modifier is set,
+Perl allows whitespace between ( and ? but PCRE never does, even if the
 PCRE_EXTENDED option is set.
 .P
 14. PCRE provides some extensions to the Perl regular expression facilities.

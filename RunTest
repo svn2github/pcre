@@ -152,7 +152,7 @@ echo PCRE C library tests
 
 if [ $do1 = yes ] ; then
   echo "Test 1: main functionality (Compatible with Perl >= 5.8)"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput1 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput1 testtry
@@ -160,14 +160,14 @@ if [ $do1 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done 
+  done
 fi
 
 # PCRE tests that are not Perl-compatible - API, errors, internals
 
 if [ $do2 = yes ] ; then
   echo "Test 2: API, errors, internals, and non-Perl stuff"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput2 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput2 testtry
@@ -182,7 +182,7 @@ if [ $do2 = yes ] ; then
       exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # Locale-specific tests, provided that either the "fr_FR" or the "french"
@@ -210,7 +210,7 @@ if [ $do3 = yes ] ; then
 
   if [ "$locale" != "" ] ; then
     echo "Test 3: locale-specific features (using '$locale' locale)"
-    for opt in "" "-s"; do 
+    for opt in "" "-s"; do
       $valgrind ./pcretest -q $opt $infile testtry
       if [ $? = 0 ] ; then
         $cf $outfile testtry
@@ -219,13 +219,13 @@ if [ $do3 = yes ] ; then
           echo "Locale test did not run entirely successfully."
           echo "This usually means that there is a problem with the locale"
           echo "settings rather than a bug in PCRE."
-          break; 
+          break;
         else
           if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
         fi
       else exit 1
       fi
-    done   
+    done
   else
     echo "Cannot test locale-specific features - neither the 'fr_FR' nor the"
     echo "'french' locale exists, or the \"locale\" command is not available"
@@ -238,7 +238,7 @@ fi
 
 if [ $do4 = yes ] ; then
   echo "Test 4: UTF-8 support (Compatible with Perl >= 5.8)"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput4 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput4 testtry
@@ -246,12 +246,12 @@ if [ $do4 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 if [ $do5 = yes ] ; then
   echo "Test 5: API, internals, and non-Perl stuff for UTF-8 support"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput5 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput5 testtry
@@ -259,12 +259,12 @@ if [ $do5 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 if [ $do6 = yes ] ; then
   echo "Test 6: Unicode property support (Compatible with Perl >= 5.10)"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput6 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput6 testtry
@@ -272,14 +272,14 @@ if [ $do6 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # Tests for DFA matching support
 
 if [ $do7 = yes ] ; then
   echo "Test 7: DFA matching"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt -dfa $testdata/testinput7 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput7 testtry
@@ -287,12 +287,12 @@ if [ $do7 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 if [ $do8 = yes ] ; then
   echo "Test 8: DFA matching with UTF-8"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt -dfa $testdata/testinput8 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput8 testtry
@@ -300,12 +300,12 @@ if [ $do8 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 if [ $do9 = yes ] ; then
   echo "Test 9: DFA matching with Unicode properties"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt -dfa $testdata/testinput9 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput9 testtry
@@ -313,7 +313,7 @@ if [ $do9 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # Test of internal offsets and code sizes. This test is run only when there
@@ -324,7 +324,7 @@ fi
 
 if [ $do10 = yes ] ; then
   echo "Test 10: Internal offsets and code size tests"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput10 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput10 testtry
@@ -332,14 +332,14 @@ if [ $do10 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # Test of Perl >= 5.10 features without UTF8 support
 
 if [ $do11 = yes ] ; then
   echo "Test 11: Features from Perl >= 5.10 without UTF8 support"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput11 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput11 testtry
@@ -347,14 +347,14 @@ if [ $do11 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # Test of Perl >= 5.10 features with UTF8 support
 
 if [ $do12 = yes ] ; then
   echo "Test 12: Features from Perl >= 5.10 with UTF8 support"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput12 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput12 testtry
@@ -362,14 +362,14 @@ if [ $do12 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # Test non-Perl-compatible Unicode property support
 
 if [ $do13 = yes ] ; then
   echo "Test 13: API, internals, and non-Perl stuff for Unicode property support"
-  for opt in "" "-s"; do 
+  for opt in "" "-s"; do
     $valgrind ./pcretest -q $opt $testdata/testinput13 testtry
     if [ $? = 0 ] ; then
       $cf $testdata/testoutput13 testtry
@@ -377,7 +377,7 @@ if [ $do13 = yes ] ; then
     else exit 1
     fi
     if [ "$opt" = "-s" ] ; then echo "OK with study" ; else echo "OK"; fi
-  done   
+  done
 fi
 
 # End

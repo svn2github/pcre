@@ -1548,7 +1548,7 @@ in the main
 .\"
 page. If an invalid UTF-8 sequence of bytes is found, \fBpcre_exec()\fP returns
 the error PCRE_ERROR_BADUTF8 or, if PCRE_PARTIAL_HARD is set and the problem is
-a truncated UTF-8 character at the end of the subject, PCRE_ERROR_SHORTUTF8. In 
+a truncated UTF-8 character at the end of the subject, PCRE_ERROR_SHORTUTF8. In
 both cases, information about the precise nature of the error may also be
 returned (see the descriptions of these errors in the section entitled \fIError
 return values from\fP \fBpcre_exec()\fP
@@ -1810,7 +1810,7 @@ PCRE_ERROR_SHORTUTF8 is returned instead of PCRE_ERROR_BADUTF8.
 .sp
   PCRE_ERROR_BADUTF8_OFFSET (-11)
 .sp
-The UTF-8 byte sequence that was passed as a subject was checked and found to 
+The UTF-8 byte sequence that was passed as a subject was checked and found to
 be valid (the PCRE_NO_UTF8_CHECK option was not set), but the value of
 \fIstartoffset\fP did not point to the beginning of a UTF-8 character or the
 end of the subject.
@@ -1865,9 +1865,9 @@ retained for backwards compatibility.
 .sp
   PCRE_ERROR_RECURSELOOP    (-26)
 .sp
-This error is returned when \fBpcre_exec()\fP detects a recursion loop within 
-the pattern. Specifically, it means that either the whole pattern or a 
-subpattern has been called recursively for the second time at the same position 
+This error is returned when \fBpcre_exec()\fP detects a recursion loop within
+the pattern. Specifically, it means that either the whole pattern or a
+subpattern has been called recursively for the second time at the same position
 in the subject string. Some simple patterns that might do this are detected and
 faulted at compile time, but more complicated cases, in particular mutual
 recursions between two different subpatterns, cannot be detected until run
@@ -1880,10 +1880,10 @@ Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .SS "Reason codes for invalid UTF-8 strings"
 .rs
 .sp
-When \fBpcre_exec()\fP returns either PCRE_ERROR_BADUTF8 or 
-PCRE_ERROR_SHORTUTF8, and the size of the output vector (\fIovecsize\fP) is at 
-least 2, the offset of the start of the invalid UTF-8 character is placed in 
-the first output vector element (\fIovector[0]\fP) and a reason code is placed 
+When \fBpcre_exec()\fP returns either PCRE_ERROR_BADUTF8 or
+PCRE_ERROR_SHORTUTF8, and the size of the output vector (\fIovecsize\fP) is at
+least 2, the offset of the start of the invalid UTF-8 character is placed in
+the first output vector element (\fIovector[0]\fP) and a reason code is placed
 in the second element (\fIovector[1]\fP). The reason codes are given names in
 the \fBpcre.h\fP header file:
 .sp
@@ -1893,10 +1893,10 @@ the \fBpcre.h\fP header file:
   PCRE_UTF8_ERR4
   PCRE_UTF8_ERR5
 .sp
-The string ends with a truncated UTF-8 character; the code specifies how many 
+The string ends with a truncated UTF-8 character; the code specifies how many
 bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
 no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
-allows for up to 6 bytes, and this is checked first; hence the possibility of 
+allows for up to 6 bytes, and this is checked first; hence the possibility of
 4 or 5 missing bytes.
 .sp
   PCRE_UTF8_ERR6
@@ -1905,42 +1905,42 @@ allows for up to 6 bytes, and this is checked first; hence the possibility of
   PCRE_UTF8_ERR9
   PCRE_UTF8_ERR10
 .sp
-The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the 
+The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
 character do not have the binary value 0b10 (that is, either the most
 significant bit is 0, or the next bit is 1).
-.sp 
+.sp
   PCRE_UTF8_ERR11
   PCRE_UTF8_ERR12
 .sp
-A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long; 
-these code points are excluded by RFC 3629.  
-.sp 
+A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
+these code points are excluded by RFC 3629.
+.sp
   PCRE_UTF8_ERR13
 .sp
-A 4-byte character has a value greater than 0x10fff; these code points are 
+A 4-byte character has a value greater than 0x10fff; these code points are
 excluded by RFC 3629.
-.sp 
+.sp
   PCRE_UTF8_ERR14
 .sp
 A 3-byte character has a value in the range 0xd800 to 0xdfff; this range of
-code points are reserved by RFC 3629 for use with UTF-16, and so are excluded 
+code points are reserved by RFC 3629 for use with UTF-16, and so are excluded
 from UTF-8.
-.sp 
+.sp
   PCRE_UTF8_ERR15
   PCRE_UTF8_ERR16
   PCRE_UTF8_ERR17
   PCRE_UTF8_ERR18
   PCRE_UTF8_ERR19
 .sp
-A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a 
-value that can be represented by fewer bytes, which is invalid. For example, 
+A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
+value that can be represented by fewer bytes, which is invalid. For example,
 the two bytes 0xc0, 0xae give the value 0x2e, whose correct coding uses just
 one byte.
 .sp
   PCRE_UTF8_ERR20
 .sp
-The two most significant bits of the first byte of a character have the binary 
-value 0b10 (that is, the most significant bit is 1 and the second is 0). Such a 
+The two most significant bits of the first byte of a character have the binary
+value 0b10 (that is, the most significant bit is 1 and the second is 0). Such a
 byte can only validly occur as the second or subsequent byte of a multi-byte
 character.
 .sp

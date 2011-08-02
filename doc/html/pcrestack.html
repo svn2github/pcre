@@ -20,7 +20,10 @@ When you call <b>pcre_exec()</b>, it makes use of an internal function called
 <b>match()</b>. This calls itself recursively at branch points in the pattern,
 in order to remember the state of the match so that it can back up and try a
 different alternative if the first one fails. As matching proceeds deeper and
-deeper into the tree of possibilities, the recursion depth increases.
+deeper into the tree of possibilities, the recursion depth increases. The
+<b>match()</b> function is also called in other circumstances, for example,
+whenever a parenthesized sub-pattern is entered, and in certain cases of
+repetition.
 </P>
 <P>
 Not all calls of <b>match()</b> increase the recursion depth; for an item such
@@ -176,9 +179,9 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 03 January 2010
+Last updated: 22 July 2011
 <br>
-Copyright &copy; 1997-2010 University of Cambridge.
+Copyright &copy; 1997-2011 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

@@ -87,7 +87,7 @@ block. This structure contains the following fields:
   void       *\fIcallout_data\fP;
   int         \fIpattern_position\fP;
   int         \fInext_item_length\fP;
-  const unsigned char *\fImark\fP; 
+  const unsigned char *\fImark\fP;
 .sp
 The \fIversion\fP field is an integer containing the version number of the
 block format. The initial version was 0; the current version is 2. The version
@@ -154,8 +154,8 @@ The \fIpattern_position\fP and \fInext_item_length\fP fields are intended to
 help in distinguishing between different automatic callouts, which all have the
 same callout number. However, they are set for all callouts.
 .P
-The \fImark\fP field is present from version 2 of the \fIpcre_callout\fP 
-structure. In callouts from \fBpcre_exec()\fP it contains a pointer to the 
+The \fImark\fP field is present from version 2 of the \fIpcre_callout\fP
+structure. In callouts from \fBpcre_exec()\fP it contains a pointer to the
 zero-terminated name of the most recently passed (*MARK) item in the match, or
 NULL if there are no (*MARK)s in the current matching path. In callouts from
 \fBpcre_dfa_exec()\fP this field always contains NULL.

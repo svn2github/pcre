@@ -32,6 +32,18 @@ The following sections include descriptions of options whose names begin with
 exists as well, but as it specifies the default, it is not described.
 .
 .
+.SH "BUILDING SHARED AND STATIC LIBRARIES"
+.rs
+.sp
+The PCRE building process uses \fBlibtool\fP to build both shared and static
+Unix libraries by default. You can suppress one of these by adding one of
+.sp
+  --disable-shared
+  --disable-static
+.sp
+to the \fBconfigure\fP command, as required.
+.
+.
 .SH "C++ SUPPORT"
 .rs
 .sp
@@ -130,18 +142,6 @@ whatever has been selected as the line ending sequence. If you specify
 the default is changed so that \eR matches only CR, LF, or CRLF. Whatever is
 selected when PCRE is built can be overridden when the library functions are
 called.
-.
-.
-.SH "BUILDING SHARED AND STATIC LIBRARIES"
-.rs
-.sp
-The PCRE building process uses \fBlibtool\fP to build both shared and static
-Unix libraries by default. You can suppress one of these by adding one of
-.sp
-  --disable-shared
-  --disable-static
-.sp
-to the \fBconfigure\fP command, as required.
 .
 .
 .SH "POSIX MALLOC USAGE"
@@ -298,6 +298,23 @@ relevant libraries are installed on your system. Configuration will fail if
 they are not.
 .
 .
+.SH "PCREGREP BUFFER SIZE"
+.rs
+.sp
+\fBpcregrep\fP uses an internal buffer to hold a "window" on the file it is
+scanning, in order to be able to output "before" and "after" lines when it
+finds a match. The size of the buffer is controlled by a parameter whose
+default value is 20K. The buffer itself is three times this size, but because
+of the way it is used for holding "before" lines, the longest line that is
+guaranteed to be processable is the parameter size. You can change the default
+parameter value by adding, for example,
+.sp
+  --with-pcregrep-bufsize=50K
+.sp
+to the \fBconfigure\fP command. The caller of \fPpcregrep\fP can, however,
+override this value by specifying a run-time option.
+.
+.
 .SH "PCRETEST OPTION FOR LIBREADLINE SUPPORT"
 .rs
 .sp
@@ -350,6 +367,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 September 2009
-Copyright (c) 1997-2009 University of Cambridge.
+Last updated: 02 August 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi

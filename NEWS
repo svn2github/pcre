@@ -1,6 +1,16 @@
 News about PCRE releases
 ------------------------
 
+Release 8.13 02-Aug-2011
+------------------------
+
+This is mainly a bug-fix release. There has been a lot of internal refactoring.
+The Unicode tables have been updated. The only new feature in the library is
+the passing of *MARK information to callouts. Some additions have been made to
+pcretest to make testing easier and more comprehensive. There is a new option
+for pcregrep to adjust its internal buffer size.
+
+
 Release 8.12 15-Jan-2011
 ------------------------
 

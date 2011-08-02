@@ -208,8 +208,8 @@ available as independent code points in the UTF-8 encoding. (In other words,
 the whole surrogate thing is a fudge for UTF-16 which unfortunately messes up
 UTF-8.)
 .P
-If an invalid UTF-8 string is passed to PCRE, an error return is given. At 
-compile time, the only additional information is the offset to the first byte 
+If an invalid UTF-8 string is passed to PCRE, an error return is given. At
+compile time, the only additional information is the offset to the first byte
 of the failing character. The runtime functions (\fBpcre_exec()\fP and
 \fBpcre_dfa_exec()\fP), pass back this information as well as a more detailed
 reason code if the caller has provided memory in which to do this.

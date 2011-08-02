@@ -208,7 +208,7 @@ static const char *errtexts[] = {
   "magic number missing",
   "unknown opcode - pattern overwritten?",
   "no more memory",
-  NULL,  /* never returned by pcre_exec() or pcre_dfa_exec() */       
+  NULL,  /* never returned by pcre_exec() or pcre_dfa_exec() */
   "match limit exceeded",
   "callout error code",
   NULL,  /* BADUTF8 is handled specially */
@@ -221,7 +221,7 @@ static const char *errtexts[] = {
   "backreference condition or recursion test not supported for DFA matching",
   "match limit not supported for DFA matching",
   "workspace size exceeded in DFA matching",
-  "too much recursion for DFA matching",     
+  "too much recursion for DFA matching",
   "recursion limit exceeded",
   "not used - internal error",
   "invalid combination of newline options",
@@ -229,7 +229,7 @@ static const char *errtexts[] = {
   NULL,  /* SHORTUTF8 is handled specially */
   "nested recursion at the same subject position"
 };
-          
+
 
 /*************************************************
 *         Alternate character tables             *
@@ -961,12 +961,12 @@ fprintf(outfile, "%.*s", (cb->next_item_length == 0)? 1 : cb->next_item_length,
 fprintf(outfile, "\n");
 first_callout = 0;
 
-if (cb->mark != last_callout_mark) 
+if (cb->mark != last_callout_mark)
   {
-  fprintf(outfile, "Latest Mark: %s\n", 
+  fprintf(outfile, "Latest Mark: %s\n",
     (cb->mark == NULL)? "<unset>" : (char *)(cb->mark));
-  last_callout_mark = cb->mark; 
-  } 
+  last_callout_mark = cb->mark;
+  }
 
 if (cb->callout_data != NULL)
   {
@@ -1273,7 +1273,7 @@ while (argc > 1 && argv[op][0] == '-')
   unsigned char *endptr;
 
   if (strcmp(argv[op], "-m") == 0) showstore = 1;
-  else if (strcmp(argv[op], "-s") == 0) force_study = 1; 
+  else if (strcmp(argv[op], "-s") == 0) force_study = 1;
   else if (strcmp(argv[op], "-q") == 0) quiet = 1;
   else if (strcmp(argv[op], "-b") == 0) debug = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
@@ -1443,10 +1443,10 @@ while (!done)
   const unsigned char *tables = NULL;
   unsigned long int true_size, true_study_size = 0;
   size_t size, regex_gotten_store;
-  int do_allcaps = 0; 
+  int do_allcaps = 0;
   int do_mark = 0;
   int do_study = 0;
-  int no_force_study = 0; 
+  int no_force_study = 0;
   int do_debug = debug;
   int do_G = 0;
   int do_g = 0;
@@ -1619,10 +1619,10 @@ while (!done)
       case 'x': options |= PCRE_EXTENDED; break;
 
       case '+':
-      if (do_showrest) do_showcaprest = 1; else do_showrest = 1; 
+      if (do_showrest) do_showcaprest = 1; else do_showrest = 1;
       break;
-      
-      case '=': do_allcaps = 1; break; 
+
+      case '=': do_allcaps = 1; break;
       case 'A': options |= PCRE_ANCHORED; break;
       case 'B': do_debug = 1; break;
       case 'C': options |= PCRE_AUTO_CALLOUT; break;
@@ -1640,12 +1640,12 @@ while (!done)
       case 'P': do_posix = 1; break;
 #endif
 
-      case 'S': 
+      case 'S':
       if (do_study == 0) do_study = 1; else
         {
         do_study = 0;
         no_force_study = 1;
-        }    
+        }
       break;
 
       case 'U': options |= PCRE_UNGREEDY; break;
@@ -1832,7 +1832,7 @@ while (!done)
     regex_gotten_store = gotten_store;
 
     /* If -s or /S was present, study the regex to generate additional info to
-    help with the matching, unless the pattern has the SS option, which 
+    help with the matching, unless the pattern has the SS option, which
     suppresses the effect of /S (used for a few test patterns where studying is
     never sensible). */
 
@@ -2074,7 +2074,7 @@ while (!done)
       /* Don't output study size; at present it is in any case a fixed
       value, but it varies, depending on the computer architecture, and
       so messes up the test suite. (And with the /F option, it might be
-      flipped.) If study was forced by an external -s, don't show this 
+      flipped.) If study was forced by an external -s, don't show this
       information unless -i or -d was also present. This means that, except
       when auto-callouts are involved, the output from runs with and without
       -s should be identical. */
@@ -2158,10 +2158,10 @@ while (!done)
         else
           {
           fprintf(outfile, "Compiled pattern written to %s\n", to_file);
-          
+
           /* If there is study data, write it, but verify the writing only
           if the studying was requested by /S, not just by -s. */
- 
+
           if (extra != NULL)
             {
             if (fwrite(extra->study_data, 1, true_study_size, f) <
@@ -2219,7 +2219,7 @@ while (!done)
 
     pcre_callout = callout;
     first_callout = 1;
-    last_callout_mark = NULL;    
+    last_callout_mark = NULL;
     callout_extra = 0;
     callout_count = 0;
     callout_fail_count = 999999;
@@ -2746,31 +2746,31 @@ while (!done)
             do_g = do_G = FALSE;        /* Break g/G loop */
             }
           }
-        
+
         /* do_allcaps requests showing of all captures in the pattern, to check
         unset ones at the end. */
-          
+
         if (do_allcaps)
           {
           new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
-          count++;   /* Allow for full match */ 
-          if (count * 2 > use_size_offsets) count = use_size_offsets/2;  
-          }  
+          count++;   /* Allow for full match */
+          if (count * 2 > use_size_offsets) count = use_size_offsets/2;
+          }
 
         /* Output the captured substrings */
-         
+
         for (i = 0; i < count * 2; i += 2)
           {
           if (use_offsets[i] < 0)
-            { 
+            {
             if (use_offsets[i] != -1)
               fprintf(outfile, "ERROR: bad negative value %d for offset %d\n",
-                use_offsets[i], i);   
+                use_offsets[i], i);
             if (use_offsets[i+1] != -1)
               fprintf(outfile, "ERROR: bad negative value %d for offset %d\n",
-                use_offsets[i+1], i+1);   
+                use_offsets[i+1], i+1);
             fprintf(outfile, "%2d: <unset>\n", i/2);
-            } 
+            }
           else
             {
             fprintf(outfile, "%2d: ", i/2);
@@ -2940,7 +2940,7 @@ while (!done)
         else
           {
           switch(count)
-            {  
+            {
             case PCRE_ERROR_NOMATCH:
             if (gmatched == 0)
               {
@@ -2948,25 +2948,25 @@ while (!done)
                 else fprintf(outfile, "No match, mark = %s\n", markptr);
               }
             break;
-            
+
             case PCRE_ERROR_BADUTF8:
             case PCRE_ERROR_SHORTUTF8:
             fprintf(outfile, "Error %d (%s UTF-8 string)", count,
               (count == PCRE_ERROR_BADUTF8)? "bad" : "short");
             if (use_size_offsets >= 2)
-              fprintf(outfile, " offset=%d reason=%d", use_offsets[0], 
+              fprintf(outfile, " offset=%d reason=%d", use_offsets[0],
                 use_offsets[1]);
-            fprintf(outfile, "\n");         
-            break;     
-              
+            fprintf(outfile, "\n");
+            break;
+
             default:
-            if (count < 0 && (-count) < sizeof(errtexts)/sizeof(const char *)) 
+            if (count < 0 && (-count) < sizeof(errtexts)/sizeof(const char *))
               fprintf(outfile, "Error %d (%s)\n", count, errtexts[-count]);
-            else 
-              fprintf(outfile, "Error %d (Unexpected value)\n", count);   
+            else
+              fprintf(outfile, "Error %d (Unexpected value)\n", count);
             break;
             }
-               
+
           break;  /* Out of the /g loop */
           }
         }

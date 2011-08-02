@@ -444,17 +444,17 @@ If <i>errptr</i> is NULL, <b>pcre_compile()</b> returns NULL immediately.
 Otherwise, if compilation of a pattern fails, <b>pcre_compile()</b> returns
 NULL, and sets the variable pointed to by <i>errptr</i> to point to a textual
 error message. This is a static string that is part of the library. You must
-not try to free it. The offset from the start of the pattern to the byte that
-was being processed when the error was discovered is placed in the variable
-pointed to by <i>erroffset</i>, which must not be NULL. If it is, an immediate
-error is given. Some errors are not detected until checks are carried out when
-the whole pattern has been scanned; in this case the offset is set to the end
-of the pattern.
+not try to free it. Normally, the offset from the start of the pattern to the
+byte that was being processed when the error was discovered is placed in the
+variable pointed to by <i>erroffset</i>, which must not be NULL (if it is, an
+immediate error is given). However, for an invalid UTF-8 string, the offset is
+that of the first byte of the failing character. Also, some errors are not
+detected until checks are carried out when the whole pattern has been scanned;
+in these cases the offset passed back is the length of the pattern.
 </P>
 <P>
 Note that the offset is in bytes, not characters, even in UTF-8 mode. It may
-point into the middle of a UTF-8 character (for example, when
-PCRE_ERROR_BADUTF8 is returned for an invalid UTF-8 string).
+sometimes point into the middle of a UTF-8 character.
 </P>
 <P>
 If <b>pcre_compile2()</b> is used instead of <b>pcre_compile()</b>, and the
@@ -561,9 +561,9 @@ ignored. This is equivalent to Perl's /x option, and it can be changed within a
 pattern by a (?x) option setting.
 </P>
 <P>
-Which characters are interpreted as newlines
-is controlled by the options passed to <b>pcre_compile()</b> or by a special
-sequence at the start of the pattern, as described in the section entitled
+Which characters are interpreted as newlines is controlled by the options
+passed to <b>pcre_compile()</b> or by a special sequence at the start of the
+pattern, as described in the section entitled
 <a href="pcrepattern.html#newlines">"Newline conventions"</a>
 in the <b>pcrepattern</b> documentation. Note that the end of this type of
 comment is a literal newline sequence in the pattern; escape sequences that
@@ -939,7 +939,7 @@ internal tables) to <b>pcre_exec()</b>. Although not intended for this purpose,
 this facility could be used to match a pattern in a different locale from the
 one in which it was compiled. Passing table pointers at run time is discussed
 below in the section on matching a pattern.
-</P>
+<a name="infoaboutpattern"></a></P>
 <br><a name="SEC11" href="#TOC1">INFORMATION ABOUT A PATTERN</a><br>
 <P>
 <b>int pcre_fullinfo(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
@@ -1533,9 +1533,13 @@ in the main
 <a href="pcre.html"><b>pcre</b></a>
 page. If an invalid UTF-8 sequence of bytes is found, <b>pcre_exec()</b> returns
 the error PCRE_ERROR_BADUTF8 or, if PCRE_PARTIAL_HARD is set and the problem is
-a truncated UTF-8 character at the end of the subject, PCRE_ERROR_SHORTUTF8. If
-<i>startoffset</i> contains a value that does not point to the start of a UTF-8
-character (or to the end of the subject), PCRE_ERROR_BADUTF8_OFFSET is
+a truncated UTF-8 character at the end of the subject, PCRE_ERROR_SHORTUTF8. In
+both cases, information about the precise nature of the error may also be
+returned (see the descriptions of these errors in the section entitled \fIError
+return values from\fP <b>pcre_exec()</b>
+<a href="#errorlist">below).</a>
+If <i>startoffset</i> contains a value that does not point to the start of a
+UTF-8 character (or to the end of the subject), PCRE_ERROR_BADUTF8_OFFSET is
 returned.
 </P>
 <P>
@@ -1784,14 +1788,21 @@ documentation for details.
 <pre>
   PCRE_ERROR_BADUTF8        (-10)
 </pre>
-A string that contains an invalid UTF-8 byte sequence was passed as a subject.
-However, if PCRE_PARTIAL_HARD is set and the problem is a truncated UTF-8
-character at the end of the subject, PCRE_ERROR_SHORTUTF8 is used instead.
+A string that contains an invalid UTF-8 byte sequence was passed as a subject,
+and the PCRE_NO_UTF8_CHECK option was not set. If the size of the output vector
+(<i>ovecsize</i>) is at least 2, the byte offset to the start of the the invalid
+UTF-8 character is placed in the first element, and a reason code is placed in
+the second element. The reason codes are listed in the
+<a href="#badutf8reasons">following section.</a>
+For backward compatibility, if PCRE_PARTIAL_HARD is set and the problem is a
+truncated UTF-8 character at the end of the subject (reason codes 1 to 5),
+PCRE_ERROR_SHORTUTF8 is returned instead of PCRE_ERROR_BADUTF8.
 <pre>
   PCRE_ERROR_BADUTF8_OFFSET (-11)
 </pre>
-The UTF-8 byte sequence that was passed as a subject was valid, but the value
-of <i>startoffset</i> did not point to the beginning of a UTF-8 character or the
+The UTF-8 byte sequence that was passed as a subject was checked and found to
+be valid (the PCRE_NO_UTF8_CHECK option was not set), but the value of
+<i>startoffset</i> did not point to the beginning of a UTF-8 character or the
 end of the subject.
 <pre>
   PCRE_ERROR_PARTIAL        (-12)
@@ -1833,12 +1844,98 @@ subject, that is, the value in <i>length</i>.
 <pre>
   PCRE_ERROR_SHORTUTF8      (-25)
 </pre>
-The subject string ended with an incomplete (truncated) UTF-8 character, and
-the PCRE_PARTIAL_HARD option was set. Without this option, PCRE_ERROR_BADUTF8
-is returned in this situation.
+This error is returned instead of PCRE_ERROR_BADUTF8 when the subject string
+ends with a truncated UTF-8 character and the PCRE_PARTIAL_HARD option is set.
+Information about the failure is returned as for PCRE_ERROR_BADUTF8. It is in
+fact sufficient to detect this case, but this special error code for
+PCRE_PARTIAL_HARD precedes the implementation of returned information; it is
+retained for backwards compatibility.
+<pre>
+  PCRE_ERROR_RECURSELOOP    (-26)
+</pre>
+This error is returned when <b>pcre_exec()</b> detects a recursion loop within
+the pattern. Specifically, it means that either the whole pattern or a
+subpattern has been called recursively for the second time at the same position
+in the subject string. Some simple patterns that might do this are detected and
+faulted at compile time, but more complicated cases, in particular mutual
+recursions between two different subpatterns, cannot be detected until run
+time.
 </P>
 <P>
 Error numbers -16 to -20 and -22 are not used by <b>pcre_exec()</b>.
+<a name="badutf8reasons"></a></P>
+<br><b>
+Reason codes for invalid UTF-8 strings
+</b><br>
+<P>
+When <b>pcre_exec()</b> returns either PCRE_ERROR_BADUTF8 or
+PCRE_ERROR_SHORTUTF8, and the size of the output vector (<i>ovecsize</i>) is at
+least 2, the offset of the start of the invalid UTF-8 character is placed in
+the first output vector element (<i>ovector[0]</i>) and a reason code is placed
+in the second element (<i>ovector[1]</i>). The reason codes are given names in
+the <b>pcre.h</b> header file:
+<pre>
+  PCRE_UTF8_ERR1
+  PCRE_UTF8_ERR2
+  PCRE_UTF8_ERR3
+  PCRE_UTF8_ERR4
+  PCRE_UTF8_ERR5
+</pre>
+The string ends with a truncated UTF-8 character; the code specifies how many
+bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
+no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
+allows for up to 6 bytes, and this is checked first; hence the possibility of
+4 or 5 missing bytes.
+<pre>
+  PCRE_UTF8_ERR6
+  PCRE_UTF8_ERR7
+  PCRE_UTF8_ERR8
+  PCRE_UTF8_ERR9
+  PCRE_UTF8_ERR10
+</pre>
+The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
+character do not have the binary value 0b10 (that is, either the most
+significant bit is 0, or the next bit is 1).
+<pre>
+  PCRE_UTF8_ERR11
+  PCRE_UTF8_ERR12
+</pre>
+A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
+these code points are excluded by RFC 3629.
+<pre>
+  PCRE_UTF8_ERR13
+</pre>
+A 4-byte character has a value greater than 0x10fff; these code points are
+excluded by RFC 3629.
+<pre>
+  PCRE_UTF8_ERR14
+</pre>
+A 3-byte character has a value in the range 0xd800 to 0xdfff; this range of
+code points are reserved by RFC 3629 for use with UTF-16, and so are excluded
+from UTF-8.
+<pre>
+  PCRE_UTF8_ERR15
+  PCRE_UTF8_ERR16
+  PCRE_UTF8_ERR17
+  PCRE_UTF8_ERR18
+  PCRE_UTF8_ERR19
+</pre>
+A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
+value that can be represented by fewer bytes, which is invalid. For example,
+the two bytes 0xc0, 0xae give the value 0x2e, whose correct coding uses just
+one byte.
+<pre>
+  PCRE_UTF8_ERR20
+</pre>
+The two most significant bits of the first byte of a character have the binary
+value 0b10 (that is, the most significant bit is 1 and the second is 0). Such a
+byte can only validly occur as the second or subsequent byte of a multi-byte
+character.
+<pre>
+  PCRE_UTF8_ERR21
+</pre>
+The first byte of a character has the value 0xfe or 0xff. These values can
+never occur in a valid UTF-8 string.
 </P>
 <br><a name="SEC15" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
 <P>
@@ -2032,7 +2129,8 @@ fourth are pointers to variables which are updated by the function. After it
 has run, they point to the first and last entries in the name-to-number table
 for the given name. The function itself returns the length of each entry, or
 PCRE_ERROR_NOSUBSTRING (-7) if there are none. The format of the table is
-described above in the section entitled <i>Information about a pattern</i>.
+described above in the section entitled <i>Information about a pattern</i>
+<a href="#infoaboutpattern">above.</a>
 Given all the relevant entries for the name, you can extract each of their
 numbers, and hence the captured data, if any.
 </P>
@@ -2245,9 +2343,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 November 2010
+Last updated: 28 July 2011
 <br>
-Copyright &copy; 1997-2010 University of Cambridge.
+Copyright &copy; 1997-2011 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

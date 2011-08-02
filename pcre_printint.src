@@ -180,7 +180,7 @@ utf8 = (options & PCRE_UTF8) != 0;
 for(;;)
   {
   uschar *ccode;
-  const char *flag = "  "; 
+  const char *flag = "  ";
   int c;
   int extra = 0;
 
@@ -238,21 +238,21 @@ for(;;)
     continue;
 
     case OP_CBRA:
-    case OP_CBRAPOS: 
+    case OP_CBRAPOS:
     case OP_SCBRA:
-    case OP_SCBRAPOS: 
+    case OP_SCBRAPOS:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
     fprintf(f, "%s %d", OP_names[*code], GET2(code, 1+LINK_SIZE));
     break;
 
     case OP_BRA:
-    case OP_BRAPOS: 
+    case OP_BRAPOS:
     case OP_SBRA:
-    case OP_SBRAPOS: 
+    case OP_SBRAPOS:
     case OP_KETRMAX:
     case OP_KETRMIN:
-    case OP_KETRPOS: 
+    case OP_KETRPOS:
     case OP_ALT:
     case OP_KET:
     case OP_ASSERT:
@@ -307,7 +307,7 @@ for(;;)
     case OP_MINQUERYI:
     case OP_POSQUERYI:
     flag = "/i";
-    /* Fall through */  
+    /* Fall through */
     case OP_STAR:
     case OP_MINSTAR:
     case OP_POSSTAR:
@@ -345,7 +345,7 @@ for(;;)
     case OP_MINUPTOI:
     case OP_POSUPTOI:
     flag = "/i";
-    /* Fall through */  
+    /* Fall through */
     case OP_EXACT:
     case OP_UPTO:
     case OP_MINUPTO:
@@ -378,7 +378,7 @@ for(;;)
 
     case OP_NOTI:
     flag = "/i";
-    /* Fall through */  
+    /* Fall through */
     case OP_NOT:
     c = code[1];
     if (PRINTABLE(c)) fprintf(f, " %s [^%c]", flag, c);
@@ -395,7 +395,7 @@ for(;;)
     case OP_NOTMINQUERYI:
     case OP_NOTPOSQUERYI:
     flag = "/i";
-    /* Fall through */  
+    /* Fall through */
 
     case OP_NOTSTAR:
     case OP_NOTMINSTAR:
@@ -417,7 +417,7 @@ for(;;)
     case OP_NOTMINUPTOI:
     case OP_NOTPOSUPTOI:
     flag = "/i";
-    /* Fall through */  
+    /* Fall through */
 
     case OP_NOTEXACT:
     case OP_NOTUPTO:
@@ -429,7 +429,7 @@ for(;;)
     if (*code != OP_NOTEXACT && *code != OP_NOTEXACTI) fprintf(f, "0,");
     fprintf(f, "%d}", GET2(code,1));
     if (*code == OP_NOTMINUPTO || *code == OP_NOTMINUPTOI) fprintf(f, "?");
-      else 
+      else
     if (*code == OP_NOTPOSUPTO || *code == OP_NOTPOSUPTOI) fprintf(f, "+");
     break;
 
@@ -441,7 +441,7 @@ for(;;)
 
     case OP_REFI:
     flag = "/i";
-    /* Fall through */  
+    /* Fall through */
     case OP_REF:
     fprintf(f, " %s \\%d", flag, GET2(code,1));
     ccode = code + _pcre_OP_lengths[*code];
@@ -601,12 +601,12 @@ for(;;)
       fprintf(f, "    %s %s", OP_names[*code], code + 2 + LINK_SIZE);
     extra += code[1+LINK_SIZE];
     break;
-    
+
     case OP_CIRCM:
     case OP_DOLLM:
     flag = "/m";
-    /* Fall through */    
-    
+    /* Fall through */
+
     /* Anything else is just an item with no data, but possibly a flag. */
 
     default:

@@ -102,17 +102,19 @@ distribution for a new release.
 . Ensure that the version number and version date are correct in configure.ac.
 
 . If new build options have been added, ensure that they are added to the CMake
-  files as well as to the autoconf files.
+  files as well as to the autoconf files. The relevant files are CMakeLists.txt
+  and config-cmake.h.in. After making a release tarball, test it out with CMake 
+  if there have been changes here.  
 
 . Run ./autogen.sh to ensure everything is up-to-date.
 
 . Compile and test with many different config options, and combinations of
   options. The maint/ManyConfigTests script now encapsulates this testing.
 
-. Run perltest.pl on the test data for tests 1, 4, 6, and 11. The output should
-  match the PCRE test output, apart from the version identification at the
-  start of each test. The other tests are not Perl-compatible (they use various
-  PCRE-specific features or options).
+. Run perltest.pl on the test data for tests 1, 4, 6, 11, and 12. The output 
+  should match the PCRE test output, apart from the version identification at
+  the start of each test. The other tests are not Perl-compatible (they use
+  various PCRE-specific features or options).
 
 . Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
   valgrind", though that takes quite a long time.
@@ -321,4 +323,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 12 January 2011
+Last updated: 02 August 2011

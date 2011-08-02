@@ -14,12 +14,12 @@ man page, in case the conversion went wrong.
 <br>
 <ul>
 <li><a name="TOC1" href="#SEC1">PCRE BUILD-TIME OPTIONS</a>
-<li><a name="TOC2" href="#SEC2">C++ SUPPORT</a>
-<li><a name="TOC3" href="#SEC3">UTF-8 SUPPORT</a>
-<li><a name="TOC4" href="#SEC4">UNICODE CHARACTER PROPERTY SUPPORT</a>
-<li><a name="TOC5" href="#SEC5">CODE VALUE OF NEWLINE</a>
-<li><a name="TOC6" href="#SEC6">WHAT \R MATCHES</a>
-<li><a name="TOC7" href="#SEC7">BUILDING SHARED AND STATIC LIBRARIES</a>
+<li><a name="TOC2" href="#SEC2">BUILDING SHARED AND STATIC LIBRARIES</a>
+<li><a name="TOC3" href="#SEC3">C++ SUPPORT</a>
+<li><a name="TOC4" href="#SEC4">UTF-8 SUPPORT</a>
+<li><a name="TOC5" href="#SEC5">UNICODE CHARACTER PROPERTY SUPPORT</a>
+<li><a name="TOC6" href="#SEC6">CODE VALUE OF NEWLINE</a>
+<li><a name="TOC7" href="#SEC7">WHAT \R MATCHES</a>
 <li><a name="TOC8" href="#SEC8">POSIX MALLOC USAGE</a>
 <li><a name="TOC9" href="#SEC9">HANDLING VERY LARGE PATTERNS</a>
 <li><a name="TOC10" href="#SEC10">AVOIDING EXCESSIVE STACK USAGE</a>
@@ -27,10 +27,11 @@ man page, in case the conversion went wrong.
 <li><a name="TOC12" href="#SEC12">CREATING CHARACTER TABLES AT BUILD TIME</a>
 <li><a name="TOC13" href="#SEC13">USING EBCDIC CODE</a>
 <li><a name="TOC14" href="#SEC14">PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT</a>
-<li><a name="TOC15" href="#SEC15">PCRETEST OPTION FOR LIBREADLINE SUPPORT</a>
-<li><a name="TOC16" href="#SEC16">SEE ALSO</a>
-<li><a name="TOC17" href="#SEC17">AUTHOR</a>
-<li><a name="TOC18" href="#SEC18">REVISION</a>
+<li><a name="TOC15" href="#SEC15">PCREGREP BUFFER SIZE</a>
+<li><a name="TOC16" href="#SEC16">PCRETEST OPTION FOR LIBREADLINE SUPPORT</a>
+<li><a name="TOC17" href="#SEC17">SEE ALSO</a>
+<li><a name="TOC18" href="#SEC18">AUTHOR</a>
+<li><a name="TOC19" href="#SEC19">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE BUILD-TIME OPTIONS</a><br>
 <P>
@@ -61,7 +62,17 @@ The following sections include descriptions of options whose names begin with
 --enable and --disable always come in pairs, so the complementary option always
 exists as well, but as it specifies the default, it is not described.
 </P>
-<br><a name="SEC2" href="#TOC1">C++ SUPPORT</a><br>
+<br><a name="SEC2" href="#TOC1">BUILDING SHARED AND STATIC LIBRARIES</a><br>
+<P>
+The PCRE building process uses <b>libtool</b> to build both shared and static
+Unix libraries by default. You can suppress one of these by adding one of
+<pre>
+  --disable-shared
+  --disable-static
+</pre>
+to the <b>configure</b> command, as required.
+</P>
+<br><a name="SEC3" href="#TOC1">C++ SUPPORT</a><br>
 <P>
 By default, the <b>configure</b> script will search for a C++ compiler and C++
 header files. If it finds them, it automatically builds the C++ wrapper library
@@ -71,7 +82,7 @@ for PCRE. You can disable this by adding
 </pre>
 to the <b>configure</b> command.
 </P>
-<br><a name="SEC3" href="#TOC1">UTF-8 SUPPORT</a><br>
+<br><a name="SEC4" href="#TOC1">UTF-8 SUPPORT</a><br>
 <P>
 To build PCRE with support for UTF-8 Unicode character strings, add
 <pre>
@@ -89,7 +100,7 @@ not possible to support both EBCDIC and UTF-8 codes in the same version of the
 library. Consequently, --enable-utf8 and --enable-ebcdic are mutually
 exclusive.
 </P>
-<br><a name="SEC4" href="#TOC1">UNICODE CHARACTER PROPERTY SUPPORT</a><br>
+<br><a name="SEC5" href="#TOC1">UNICODE CHARACTER PROPERTY SUPPORT</a><br>
 <P>
 UTF-8 support allows PCRE to process character values greater than 255 in the
 strings that it handles. On its own, however, it does not provide any
@@ -109,7 +120,7 @@ supported. Details are given in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
 documentation.
 </P>
-<br><a name="SEC5" href="#TOC1">CODE VALUE OF NEWLINE</a><br>
+<br><a name="SEC6" href="#TOC1">CODE VALUE OF NEWLINE</a><br>
 <P>
 By default, PCRE interprets the linefeed (LF) character as indicating the end
 of a line. This is the normal newline character on Unix-like systems. You can
@@ -142,7 +153,7 @@ Whatever line ending convention is selected when PCRE is built can be
 overridden when the library functions are called. At build time it is
 conventional to use the standard for your operating system.
 </P>
-<br><a name="SEC6" href="#TOC1">WHAT \R MATCHES</a><br>
+<br><a name="SEC7" href="#TOC1">WHAT \R MATCHES</a><br>
 <P>
 By default, the sequence \R in a pattern matches any Unicode newline sequence,
 whatever has been selected as the line ending sequence. If you specify
@@ -152,16 +163,6 @@ whatever has been selected as the line ending sequence. If you specify
 the default is changed so that \R matches only CR, LF, or CRLF. Whatever is
 selected when PCRE is built can be overridden when the library functions are
 called.
-</P>
-<br><a name="SEC7" href="#TOC1">BUILDING SHARED AND STATIC LIBRARIES</a><br>
-<P>
-The PCRE building process uses <b>libtool</b> to build both shared and static
-Unix libraries by default. You can suppress one of these by adding one of
-<pre>
-  --disable-shared
-  --disable-static
-</pre>
-to the <b>configure</b> command, as required.
 </P>
 <br><a name="SEC8" href="#TOC1">POSIX MALLOC USAGE</a><br>
 <P>
@@ -299,7 +300,22 @@ to the <b>configure</b> command. These options naturally require that the
 relevant libraries are installed on your system. Configuration will fail if
 they are not.
 </P>
-<br><a name="SEC15" href="#TOC1">PCRETEST OPTION FOR LIBREADLINE SUPPORT</a><br>
+<br><a name="SEC15" href="#TOC1">PCREGREP BUFFER SIZE</a><br>
+<P>
+<b>pcregrep</b> uses an internal buffer to hold a "window" on the file it is
+scanning, in order to be able to output "before" and "after" lines when it
+finds a match. The size of the buffer is controlled by a parameter whose
+default value is 20K. The buffer itself is three times this size, but because
+of the way it is used for holding "before" lines, the longest line that is
+guaranteed to be processable is the parameter size. You can change the default
+parameter value by adding, for example,
+<pre>
+  --with-pcregrep-bufsize=50K
+</pre>
+to the <b>configure</b> command. The caller of \fPpcregrep\fP can, however,
+override this value by specifying a run-time option.
+</P>
+<br><a name="SEC16" href="#TOC1">PCRETEST OPTION FOR LIBREADLINE SUPPORT</a><br>
 <P>
 If you add
 <pre>
@@ -330,11 +346,11 @@ automatically included, you may need to add something like
 </pre>
 immediately before the <b>configure</b> command.
 </P>
-<br><a name="SEC16" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC17" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcre_config</b>(3).
 </P>
-<br><a name="SEC17" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC18" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -343,11 +359,11 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC18" href="#TOC1">REVISION</a><br>
+<br><a name="SEC19" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 29 September 2009
+Last updated: 02 August 2011
 <br>
-Copyright &copy; 1997-2009 University of Cambridge.
+Copyright &copy; 1997-2011 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

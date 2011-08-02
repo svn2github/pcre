@@ -64,10 +64,10 @@ the range 0 to 0x7fffffff, up to 6 bytes long, but ensuring that they were in
 the canonical format. Once somebody had pointed out RFC 3629 to me (it
 obsoletes 2279), additional restrictions were applied. The values are now
 limited to be between 0 and 0x0010ffff, no more than 4 bytes long, and the
-subrange 0xd000 to 0xdfff is excluded. However, the format of 5-byte and 6-byte 
+subrange 0xd000 to 0xdfff is excluded. However, the format of 5-byte and 6-byte
 characters is still checked.
 
-From release 8.13 more information about the details of the error are passed 
+From release 8.13 more information about the details of the error are passed
 back in the returned value:
 
 PCRE_UTF8_ERR0   No error
@@ -96,7 +96,7 @@ PCRE_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
 Arguments:
   string       points to the string
   length       length of string, or -1 if the string is zero-terminated
-  errp         pointer to an error position offset variable 
+  errp         pointer to an error position offset variable
 
 Returns:       = 0    if the string is a valid UTF-8 string
                > 0    otherwise, setting the offset of the bad character
@@ -117,39 +117,39 @@ if (length < 0)
 for (p = string; length-- > 0; p++)
   {
   register int ab, c, d;
-  
+
   c = *p;
   if (c < 128) continue;                /* ASCII character */
-   
+
   if (c < 0xc0)                         /* Isolated 10xx xxxx byte */
     {
     *erroroffset = p - string;
-    return PCRE_UTF8_ERR20; 
-    } 
+    return PCRE_UTF8_ERR20;
+    }
 
   if (c >= 0xfe)                        /* Invalid 0xfe or 0xff bytes */
     {
     *erroroffset = p - string;
-    return PCRE_UTF8_ERR21; 
-    } 
- 
+    return PCRE_UTF8_ERR21;
+    }
+
   ab = _pcre_utf8_table4[c & 0x3f];     /* Number of additional bytes */
-  if (length < ab) 
+  if (length < ab)
     {
     *erroroffset = p - string;          /* Missing bytes */
     return ab - length;                 /* Codes ERR1 to ERR5 */
-    } 
+    }
   length -= ab;                         /* Length remaining */
 
   /* Check top bits in the second byte */
-   
-  if (((d = *(++p)) & 0xc0) != 0x80) 
+
+  if (((d = *(++p)) & 0xc0) != 0x80)
     {
     *erroroffset = p - string - 1;
-    return PCRE_UTF8_ERR6; 
-    } 
+    return PCRE_UTF8_ERR6;
+    }
 
-  /* For each length, check that the remaining bytes start with the 0x80 bit 
+  /* For each length, check that the remaining bytes start with the 0x80 bit
   set and not the 0x40 bit. Then check for an overlong sequence, and for the
   excluded range 0xd800 to 0xdfff. */
 
@@ -157,92 +157,92 @@ for (p = string; length-- > 0; p++)
     {
     /* 2-byte character. No further bytes to check for 0x80. Check first byte
     for for xx00 000x (overlong sequence). */
-     
-    case 1: if ((c & 0x3e) == 0)  
-      {
-      *erroroffset = p - string - 1;  
-      return PCRE_UTF8_ERR15;   
-      } 
-    break; 
 
-    /* 3-byte character. Check third byte for 0x80. Then check first 2 bytes 
+    case 1: if ((c & 0x3e) == 0)
+      {
+      *erroroffset = p - string - 1;
+      return PCRE_UTF8_ERR15;
+      }
+    break;
+
+    /* 3-byte character. Check third byte for 0x80. Then check first 2 bytes
       for 1110 0000, xx0x xxxx (overlong sequence) or
           1110 1101, 1010 xxxx (0xd800 - 0xdfff) */
-           
+
     case 2:
     if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
       {
-      *erroroffset = p - string - 2;   
+      *erroroffset = p - string - 2;
       return PCRE_UTF8_ERR7;
-      } 
+      }
     if (c == 0xe0 && (d & 0x20) == 0)
       {
       *erroroffset = p - string - 2;
-      return PCRE_UTF8_ERR16; 
-      } 
+      return PCRE_UTF8_ERR16;
+      }
     if (c == 0xed && d >= 0xa0)
       {
       *erroroffset = p - string - 2;
-      return PCRE_UTF8_ERR14;  
-      } 
+      return PCRE_UTF8_ERR14;
+      }
     break;
 
     /* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
        bytes for for 1111 0000, xx00 xxxx (overlong sequence), then check for a
        character greater than 0x0010ffff (f4 8f bf bf) */
-        
+
     case 3:
     if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
       {
-      *erroroffset = p - string - 2;   
+      *erroroffset = p - string - 2;
       return PCRE_UTF8_ERR7;
-      } 
+      }
     if ((*(++p) & 0xc0) != 0x80)     /* Fourth byte */
       {
-      *erroroffset = p - string - 3;   
+      *erroroffset = p - string - 3;
       return PCRE_UTF8_ERR8;
-      } 
+      }
     if (c == 0xf0 && (d & 0x30) == 0)
       {
       *erroroffset = p - string - 3;
-      return PCRE_UTF8_ERR17;  
-      } 
+      return PCRE_UTF8_ERR17;
+      }
     if (c > 0xf4 || (c == 0xf4 && d > 0x8f))
       {
       *erroroffset = p - string - 3;
-      return PCRE_UTF8_ERR13;  
+      return PCRE_UTF8_ERR13;
       }
     break;
 
     /* 5-byte and 6-byte characters are not allowed by RFC 3629, and will be
-    rejected by the length test below. However, we do the appropriate tests 
+    rejected by the length test below. However, we do the appropriate tests
     here so that overlong sequences get diagnosed, and also in case there is
-    ever an option for handling these larger code points. */  
+    ever an option for handling these larger code points. */
 
     /* 5-byte character. Check 3rd, 4th, and 5th bytes for 0x80. Then check for
-    1111 1000, xx00 0xxx */ 
-    
-    case 4: 
+    1111 1000, xx00 0xxx */
+
+    case 4:
     if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
       {
-      *erroroffset = p - string - 2;   
+      *erroroffset = p - string - 2;
       return PCRE_UTF8_ERR7;
-      } 
+      }
     if ((*(++p) & 0xc0) != 0x80)     /* Fourth byte */
       {
-      *erroroffset = p - string - 3;   
+      *erroroffset = p - string - 3;
       return PCRE_UTF8_ERR8;
-      } 
+      }
     if ((*(++p) & 0xc0) != 0x80)     /* Fifth byte */
       {
-      *erroroffset = p - string - 4;   
+      *erroroffset = p - string - 4;
       return PCRE_UTF8_ERR9;
-      } 
-    if (c == 0xf8 && (d & 0x38) == 0) 
+      }
+    if (c == 0xf8 && (d & 0x38) == 0)
       {
       *erroroffset = p - string - 4;
-      return PCRE_UTF8_ERR18; 
-      } 
+      return PCRE_UTF8_ERR18;
+      }
     break;
 
     /* 6-byte character. Check 3rd-6th bytes for 0x80. Then check for
@@ -251,43 +251,43 @@ for (p = string; length-- > 0; p++)
     case 5:
     if ((*(++p) & 0xc0) != 0x80)     /* Third byte */
       {
-      *erroroffset = p - string - 2;   
+      *erroroffset = p - string - 2;
       return PCRE_UTF8_ERR7;
-      } 
+      }
     if ((*(++p) & 0xc0) != 0x80)     /* Fourth byte */
       {
-      *erroroffset = p - string - 3;   
+      *erroroffset = p - string - 3;
       return PCRE_UTF8_ERR8;
-      } 
+      }
     if ((*(++p) & 0xc0) != 0x80)     /* Fifth byte */
       {
-      *erroroffset = p - string - 4;   
+      *erroroffset = p - string - 4;
       return PCRE_UTF8_ERR9;
-      } 
+      }
     if ((*(++p) & 0xc0) != 0x80)     /* Sixth byte */
       {
-      *erroroffset = p - string - 5;   
+      *erroroffset = p - string - 5;
       return PCRE_UTF8_ERR10;
-      } 
-    if (c == 0xfc && (d & 0x3c) == 0) 
+      }
+    if (c == 0xfc && (d & 0x3c) == 0)
       {
       *erroroffset = p - string - 5;
-      return PCRE_UTF8_ERR19; 
-      } 
+      return PCRE_UTF8_ERR19;
+      }
     break;
     }
-    
+
   /* Character is valid under RFC 2279, but 4-byte and 5-byte characters are
   excluded by RFC 3629. The pointer p is currently at the last byte of the
   character. */
 
-  if (ab > 3) 
+  if (ab > 3)
     {
     *erroroffset = p - string - ab;
-    return (ab == 4)? PCRE_UTF8_ERR11 : PCRE_UTF8_ERR12; 
-    } 
+    return (ab == 4)? PCRE_UTF8_ERR11 : PCRE_UTF8_ERR12;
+    }
   }
-   
+
 #else  /* SUPPORT_UTF8 */
 (void)(string);  /* Keep picky compilers happy */
 (void)(length);

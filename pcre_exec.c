@@ -1082,7 +1082,7 @@ for (;;)
         cb.capture_top      = offset_top/2;
         cb.capture_last     = md->capture_last;
         cb.callout_data     = md->callout_data;
-        cb.mark             = markptr; 
+        cb.mark             = markptr;
         if ((rrc = (*pcre_callout)(&cb)) > 0) MRRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
         }
@@ -1477,7 +1477,7 @@ for (;;)
       cb.capture_top      = offset_top/2;
       cb.capture_last     = md->capture_last;
       cb.callout_data     = md->callout_data;
-      cb.mark             = markptr; 
+      cb.mark             = markptr;
       if ((rrc = (*pcre_callout)(&cb)) > 0) MRRETURN(MATCH_NOMATCH);
       if (rrc < 0) RRETURN(rrc);
       }
@@ -1505,17 +1505,17 @@ for (;;)
       {
       recursion_info *ri;
       int recno;
-        
+
       callpat = md->start_code + GET(ecode, 1);
       recno = (callpat == md->start_code)? 0 :
-        GET2(callpat, 1 + LINK_SIZE);              
-      
-      /* Check for repeating a recursion without advancing the subject pointer. 
+        GET2(callpat, 1 + LINK_SIZE);
+
+      /* Check for repeating a recursion without advancing the subject pointer.
       This should catch convoluted mutual recursions. (Some simple cases are
-      caught at compile time.) */  
-       
+      caught at compile time.) */
+
       for (ri = md->recursive; ri != NULL; ri = ri->prevrec)
-        if (recno == ri->group_num && eptr == ri->subject_position) 
+        if (recno == ri->group_num && eptr == ri->subject_position)
           RRETURN(PCRE_ERROR_RECURSELOOP);
 
       /* Add to "recursing stack" */
@@ -2033,7 +2033,7 @@ for (;;)
       SCHECK_PARTIAL();
       MRRETURN(MATCH_NOMATCH);
       }
-    eptr++;   
+    eptr++;
     ecode++;
     break;
 
@@ -5182,11 +5182,11 @@ for (;;)
               while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
-          else 
+          else
             {
             eptr = md->end_subject;   /* Unlimited UTF-8 repeat */
             SCHECK_PARTIAL();
-            } 
+            }
           break;
 
           /* The byte case is the same as non-UTF8 */
@@ -6388,7 +6388,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   the pattern to -1 for backwards compatibility. It is documented that this
   happens. In earlier versions, the whole set of potential capturing offsets
   was set to -1 each time round the loop, but this is handled differently now.
-  "Gaps" are set to -1 dynamically instead (this fixes a bug). Thus, it is only 
+  "Gaps" are set to -1 dynamically instead (this fixes a bug). Thus, it is only
   those at the end that need unsetting here. We can't just unset them all at
   the start of the whole thing because they may get set in one branch that is
   not the final matching branch. */

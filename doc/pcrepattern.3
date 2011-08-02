@@ -220,8 +220,8 @@ Perl, $ and @ cause variable interpolation. Note the following examples:
   \eQabc\eE\e$\eQxyz\eE   abc$xyz        abc$xyz
 .sp
 The \eQ...\eE sequence is recognized both inside and outside character classes.
-An isolated \eE that is not preceded by \eQ is ignored. If \eQ is not followed 
-by \eE later in the pattern, the literal interpretation continues to the end of 
+An isolated \eE that is not preceded by \eQ is ignored. If \eQ is not followed
+by \eE later in the pattern, the literal interpretation continues to the end of
 the pattern (that is, \eE is assumed at the end). If the isolated \eQ is inside
 a character class, this causes an error, because the character class is not
 terminated.
@@ -757,7 +757,7 @@ Characters with the "mark" property are typically accents that affect the
 preceding character. None of them have codepoints less than 256, so in
 non-UTF-8 mode \eX matches any one character.
 .P
-Note that recent versions of Perl have changed \eX to match what Unicode calls 
+Note that recent versions of Perl have changed \eX to match what Unicode calls
 an "extended grapheme cluster", which has a more complicated definition.
 .P
 Matching characters by Unicode property is not fast, because PCRE has to search
@@ -1836,23 +1836,23 @@ capturing is carried out only for positive assertions, because it does not make
 sense for negative assertions.
 .P
 For compatibility with Perl, assertion subpatterns may be repeated; though
-it makes no sense to assert the same thing several times, the side effect of 
+it makes no sense to assert the same thing several times, the side effect of
 capturing parentheses may occasionally be useful. In practice, there only three
 cases:
 .sp
-(1) If the quantifier is {0}, the assertion is never obeyed during matching. 
-However, it may contain internal capturing parenthesized groups that are called 
+(1) If the quantifier is {0}, the assertion is never obeyed during matching.
+However, it may contain internal capturing parenthesized groups that are called
 from elsewhere via the
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
 subroutine mechanism.
 .\"
 .sp
-(2) If quantifier is {0,n} where n is greater than zero, it is treated as if it 
-were {0,1}. At run time, the rest of the pattern match is tried with and 
+(2) If quantifier is {0,n} where n is greater than zero, it is treated as if it
+were {0,1}. At run time, the rest of the pattern match is tried with and
 without the assertion, the order depending on the greediness of the quantifier.
 .sp
-(3) If the minimum repetition is greater than zero, the quantifier is ignored. 
+(3) If the minimum repetition is greater than zero, the quantifier is ignored.
 The assertion is obeyed just once when encountered during matching.
 .
 .
@@ -2605,8 +2605,8 @@ indicates which of the two alternatives matched. This is a more efficient way
 of obtaining this information than putting each alternative in its own
 capturing parentheses.
 .P
-If (*MARK) is encountered in a positive assertion, its name is recorded and 
-passed back if it is the last-encountered. This does not happen for negative 
+If (*MARK) is encountered in a positive assertion, its name is recorded and
+passed back if it is the last-encountered. This does not happen for negative
 assetions.
 .P
 A name may also be returned after a failed match if the final path through the

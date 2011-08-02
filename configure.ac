@@ -509,7 +509,7 @@ fi
 if test $with_pcregrep_bufsize -lt 8192 ; then
   with_pcregrep_bufsize="8192"
 fi
-   
+
 AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
   The value of PCREGREP_BUFSIZE determines the size of buffer used by
   pcregrep to hold parts of the file it is searching. On systems that
@@ -744,7 +744,7 @@ $PACKAGE-$VERSION configuration summary:
     Match limit recursion ........... : ${with_match_limit_recursion}
     Build shared libs ............... : ${enable_shared}
     Build static libs ............... : ${enable_static}
-    Buffer size for pcregrep ........ : ${with_pcregrep_bufsize} 
+    Buffer size for pcregrep ........ : ${with_pcregrep_bufsize}
     Link pcregrep with libz ......... : ${enable_pcregrep_libz}
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
     Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
