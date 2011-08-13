@@ -777,7 +777,7 @@ out of use. To avoid confusion, they have not been re-used.
   34  character value in \ex{...} sequence is too large
   35  invalid condition (?(0)
   36  \eC not allowed in lookbehind assertion
-  37  PCRE does not support \eL, \el, \eN, \eU, or \eu
+  37  PCRE does not support \eL, \el, \eN{name}, \eU, or \eu
   38  number after (?C is > 255
   39  closing ) for (?C expected
   40  recursive call could loop indefinitely
@@ -811,11 +811,14 @@ out of use. To avoid confusion, they have not been re-used.
         not allowed
   66  (*MARK) must have an argument
   67  this version of PCRE is not compiled with PCRE_UCP support
+  68  \ec must be followed by an ASCII character
+  69  \ek is not followed by a braced, angle-bracketed, or quoted name  
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
 .
 .
+.\" HTML <a name="studyingapattern"></a>
 .SH "STUDYING A PATTERN"
 .rs
 .sp
@@ -1165,12 +1168,21 @@ variable.
 .sp
   PCRE_INFO_STUDYSIZE
 .sp
-Return the size of the data block pointed to by the \fIstudy_data\fP field in
-a \fBpcre_extra\fP block. That is, it is the value that was passed to
-\fBpcre_malloc()\fP when PCRE was getting memory into which to place the data
-created by \fBpcre_study()\fP. If \fBpcre_extra\fP is NULL, or there is no
-study data, zero is returned. The fourth argument should point to a
-\fBsize_t\fP variable.
+Return the size of the data block pointed to by the \fIstudy_data\fP field in a
+\fBpcre_extra\fP block. If \fBpcre_extra\fP is NULL, or there is no study data,
+zero is returned. The fourth argument should point to a \fBsize_t\fP variable.
+The \fIstudy_data\fP field is set by \fBpcre_study()\fP to record information
+that will speed up matching (see the section entitled
+.\" HTML <a href="#studyingapattern">
+.\" </a>
+"Studying a pattern" 
+.\"
+above). The format of the \fIstudy_data\fP block is private, but its length
+is made available via this option so that it can be saved and restored (see the
+.\" HREF
+\fBpcreprecompile\fP
+.\"
+documentation for details).
 .
 .
 .SH "OBSOLETE INFO FUNCTION"
@@ -1264,6 +1276,7 @@ Here is an example of a simple call to \fBpcre_exec()\fP:
     0,              /* default options */
     ovector,        /* vector of integers for substring information */
     30);            /* number of elements (NOT size in bytes) */
+.
 .
 .\" HTML <a name="extradata"></a>
 .SS "Extra data for \fBpcre_exec()\fR"
@@ -2379,6 +2392,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 28 July 2011
+Last updated: 13 August 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

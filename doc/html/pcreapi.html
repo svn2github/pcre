@@ -770,7 +770,7 @@ out of use. To avoid confusion, they have not been re-used.
   34  character value in \x{...} sequence is too large
   35  invalid condition (?(0)
   36  \C not allowed in lookbehind assertion
-  37  PCRE does not support \L, \l, \N, \U, or \u
+  37  PCRE does not support \L, \l, \N{name}, \U, or \u
   38  number after (?C is &#62; 255
   39  closing ) for (?C expected
   40  recursive call could loop indefinitely
@@ -804,10 +804,12 @@ out of use. To avoid confusion, they have not been re-used.
         not allowed
   66  (*MARK) must have an argument
   67  this version of PCRE is not compiled with PCRE_UCP support
+  68  \c must be followed by an ASCII character
+  69  \k is not followed by a braced, angle-bracketed, or quoted name  
 </pre>
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
-</P>
+<a name="studyingapattern"></a></P>
 <br><a name="SEC9" href="#TOC1">STUDYING A PATTERN</a><br>
 <P>
 <b>pcre_extra *pcre_study(const pcre *<i>code</i>, int <i>options</i></b>
@@ -1155,12 +1157,16 @@ variable.
 <pre>
   PCRE_INFO_STUDYSIZE
 </pre>
-Return the size of the data block pointed to by the <i>study_data</i> field in
-a <b>pcre_extra</b> block. That is, it is the value that was passed to
-<b>pcre_malloc()</b> when PCRE was getting memory into which to place the data
-created by <b>pcre_study()</b>. If <b>pcre_extra</b> is NULL, or there is no
-study data, zero is returned. The fourth argument should point to a
-<b>size_t</b> variable.
+Return the size of the data block pointed to by the <i>study_data</i> field in a
+<b>pcre_extra</b> block. If <b>pcre_extra</b> is NULL, or there is no study data,
+zero is returned. The fourth argument should point to a <b>size_t</b> variable.
+The <i>study_data</i> field is set by <b>pcre_study()</b> to record information
+that will speed up matching (see the section entitled
+<a href="#studyingapattern">"Studying a pattern"</a>
+above). The format of the <i>study_data</i> block is private, but its length
+is made available via this option so that it can be saved and restored (see the
+<a href="pcreprecompile.html"><b>pcreprecompile</b></a>
+documentation for details).
 </P>
 <br><a name="SEC12" href="#TOC1">OBSOLETE INFO FUNCTION</a><br>
 <P>
@@ -2343,7 +2349,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 28 July 2011
+Last updated: 13 August 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>
