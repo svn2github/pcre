@@ -2159,8 +2159,7 @@ while (!done)
           {
           fprintf(outfile, "Compiled pattern written to %s\n", to_file);
 
-          /* If there is study data, write it, but verify the writing only
-          if the studying was requested by /S, not just by -s. */
+          /* If there is study data, write it. */
 
           if (extra != NULL)
             {
