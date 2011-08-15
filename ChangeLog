@@ -245,6 +245,9 @@ Version 8.13 02-Aug-2011
 47. The pattern /f.*/8s, when applied to "for" with PCRE_PARTIAL_HARD, gave a
     complete match instead of a partial match. This bug was dependent on both
     the PCRE_UTF8 and PCRE_DOTALL options being set.
+    
+48. For a pattern such as /\babc|\bdef/ pcre_study() was failing to set up the
+    starting byte set, because \b was not being ignored. 
 
 
 Version 8.12 15-Jan-2011

@@ -773,7 +773,6 @@ do
       case OP_NOTUPTOI:
       case OP_NOT_HSPACE:
       case OP_NOT_VSPACE:
-      case OP_NOT_WORD_BOUNDARY:
       case OP_NRREF:
       case OP_PROP:
       case OP_PRUNE:
@@ -791,9 +790,15 @@ do
       case OP_SOM:
       case OP_THEN:
       case OP_THEN_ARG:
-      case OP_WORD_BOUNDARY:
       case OP_XCLASS:
       return SSB_FAIL;
+
+      /* We can ignore word boundary tests. */
+       
+      case OP_WORD_BOUNDARY:
+      case OP_NOT_WORD_BOUNDARY:
+      tcode++; 
+      break; 
 
       /* If we hit a bracket or a positive lookahead assertion, recurse to set
       bits from within the subpattern. If it can't find anything, we have to

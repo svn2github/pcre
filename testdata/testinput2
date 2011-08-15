@@ -3837,4 +3837,8 @@ with \Y. ---/
 /.(*F)/
     \P\Pabc
 
+/\btype\b\W*?\btext\b\W*?\bjavascript\b/IS
+
+/\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/IS
+
 /-- End of testinput2 --/
