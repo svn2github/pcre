@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.13 02-Aug-2011
+Version 8.13 16-Aug-2011
 ------------------------
 
 1.  The Unicode data tables have been updated to Unicode 6.0.0.
@@ -224,7 +224,7 @@ Version 8.13 02-Aug-2011
     (a) The default value of the buffer size parameter has been increased from
         8K to 20K. (The actual buffer used is three times this size.)
 
-    (b) The default can be changed by ./configure --with-pcregrep-bufsiz when
+    (b) The default can be changed by ./configure --with-pcregrep-bufsize when
         PCRE is built.
 
     (c) A --buffer-size=n option has been added to pcregrep, to allow the size
@@ -245,9 +245,9 @@ Version 8.13 02-Aug-2011
 47. The pattern /f.*/8s, when applied to "for" with PCRE_PARTIAL_HARD, gave a
     complete match instead of a partial match. This bug was dependent on both
     the PCRE_UTF8 and PCRE_DOTALL options being set.
-    
+
 48. For a pattern such as /\babc|\bdef/ pcre_study() was failing to set up the
-    starting byte set, because \b was not being ignored. 
+    starting byte set, because \b was not being ignored.
 
 
 Version 8.12 15-Jan-2011

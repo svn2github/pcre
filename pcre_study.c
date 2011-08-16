@@ -794,11 +794,11 @@ do
       return SSB_FAIL;
 
       /* We can ignore word boundary tests. */
-       
+
       case OP_WORD_BOUNDARY:
       case OP_NOT_WORD_BOUNDARY:
-      tcode++; 
-      break; 
+      tcode++;
+      break;
 
       /* If we hit a bracket or a positive lookahead assertion, recurse to set
       bits from within the subpattern. If it can't find anything, we have to
