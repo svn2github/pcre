@@ -1,6 +1,15 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.20
+------------
+
+1. Change 37 of 8.13 broke patterns like [:a]...[b:] because it thought it had 
+a POSIX class. After further experiments with Perl, which convinced me that 
+Perl has bugs and confusions, a closing square bracket is no longer allowed in 
+a POSIX name.
+
+
 Version 8.13 16-Aug-2011
 ------------------------
 
@@ -189,7 +198,7 @@ Version 8.13 16-Aug-2011
     For example, [:a[:digit:]b:] matches "a", "b", ":", or a digit. Also,
     unescaped square brackets may also appear as part of class names. For
     example, [:a[:abc]b:] gives unknown class "[:abc]b:]". PCRE now behaves
-    more like Perl.
+    more like Perl. (But see 8.20/1 above.)
 
 38. PCRE was giving an error for \N with a braced quantifier such as {1,} (this
     was because it thought it was \N{name}, which is not supported).
