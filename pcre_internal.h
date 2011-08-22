@@ -624,7 +624,8 @@ time, run time, or study time, respectively. */
    PCRE_DFA_RESTART|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
    PCRE_NO_START_OPTIMIZE)
 
-#define PUBLIC_STUDY_OPTIONS 0   /* None defined */
+#define PUBLIC_STUDY_OPTIONS \
+   PCRE_STUDY_JIT_COMPILE
 
 /* Magic number to provide a small check against being handed junk. Also used
 to detect whether a pattern was compiled on a host of different endianness. */
@@ -1912,6 +1913,10 @@ extern const int    _pcre_utf8_table2[];
 extern const int    _pcre_utf8_table3[];
 extern const uschar _pcre_utf8_table4[];
 
+#ifdef SUPPORT_JIT
+extern const uschar _pcre_utf8_char_sizes[];
+#endif
+
 extern const int    _pcre_utf8_table1_size;
 
 extern const char   _pcre_utt_names[];
@@ -1936,6 +1941,12 @@ extern int           _pcre_valid_utf8(USPTR, int, int *);
 extern BOOL          _pcre_was_newline(USPTR, int, USPTR, int *, BOOL);
 extern BOOL          _pcre_xclass(int, const uschar *);
 
+#ifdef SUPPORT_JIT
+extern void          _pcre_jit_compile(const real_pcre *, pcre_extra *);
+extern int           _pcre_jit_exec(const real_pcre *, void *, PCRE_SPTR, 
+                        int, int, int, int *, int);
+extern void          _pcre_jit_free(void *);
+#endif
 
 /* Unicode character database (UCD) */
 
@@ -1949,7 +1960,9 @@ extern const ucd_record  _pcre_ucd_records[];
 extern const uschar      _pcre_ucd_stage1[];
 extern const pcre_uint16 _pcre_ucd_stage2[];
 extern const int         _pcre_ucp_gentype[];
-
+#ifdef SUPPORT_JIT
+extern const int         _pcre_ucp_typerange[];
+#endif
 
 /* UCD access macros */
 

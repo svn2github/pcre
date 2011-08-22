@@ -13,7 +13,7 @@ pcregrep=`pwd`/pcregrep
 valgrind=
 while [ $# -gt 0 ] ; do
   case $1 in
-    valgrind) valgrind="valgrind -q --leak-check=no";;
+    valgrind) valgrind="valgrind -q --leak-check=no --smc-check=all";;
     *) echo "RunGrepTest: Unknown argument $1"; exit 1;;
   esac
   shift

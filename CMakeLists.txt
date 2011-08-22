@@ -38,6 +38,7 @@
 # 2010-01-02 PH added test for stdint.h
 # 2010-03-02 PH added test for inttypes.h
 # 2011-08-01 PH added PCREGREP_BUFSIZE
+# 2011-08-22 PH added PCRE_SUPPORT_JIT
 
 PROJECT(PCRE C CXX)
 
@@ -112,6 +113,9 @@ SET(PCRE_NO_RECURSE OFF CACHE BOOL
 SET(PCRE_POSIX_MALLOC_THRESHOLD "10" CACHE STRING
     "Threshold for malloc() usage. See POSIX_MALLOC_THRESHOLD in config.h.in for details.")
 
+SET(PCRE_SUPPORT_JIT OFF CACHE BOOL
+    "Enable support for Just-in-time compiling.")
+     
 SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
     "Enable support for Unicode properties. (If set, UTF-8 support will be enabled as well)")
 
@@ -205,6 +209,10 @@ ENDIF(PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
 IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
         SET(SUPPORT_UCP 1)
 ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
+
+IF(PCRE_SUPPORT_JIT)
+        SET(SUPPORT_JIT 1)
+ENDIF(PCRE_SUPPORT_JIT)         
 
 # This next one used to contain
 #       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
@@ -313,6 +321,7 @@ SET(PCRE_SOURCES
   pcre_get.c
   pcre_globals.c
   pcre_info.c
+  pcre_jit_compile.c
   pcre_newline.c
   pcre_maketables.c
   pcre_ord2utf8.c
@@ -429,6 +438,12 @@ IF(PCRE_BUILD_TESTS)
   ADD_EXECUTABLE(pcretest pcretest.c)
   SET(targets ${targets} pcretest)
   TARGET_LINK_LIBRARIES(pcretest pcreposix ${PCRETEST_LIBS})
+  
+  IF(PCRE_SUPPORT_JIT)
+    ADD_EXECUTABLE(pcre_jit_test pcre_jit_test.c)
+    SET(targets ${targets} pcre_jit_test)
+    TARGET_LINK_LIBRARIES(pcre_jit_test pcre)
+  ENDIF(PCRE_SUPPORT_JIT)   
 
   IF(PCRE_BUILD_PCRECPP)
     ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
@@ -439,7 +454,6 @@ IF(PCRE_BUILD_TESTS)
                         PROPERTIES PREFIX ""
       )
     ENDIF(MINGW AND NON_STANDARD_LIB_NAMES AND NOT PCRE_STATIC)
-
 
     ADD_EXECUTABLE(pcre_scanner_unittest pcre_scanner_unittest.cc)
     SET(targets ${targets} pcre_scanner_unittest)
@@ -471,6 +485,12 @@ IF(PCRE_BUILD_TESTS)
           ADD_TEST(pcre_test cmd /C ${PROJECT_SOURCE_DIR}/RunTest.bat)
   ENDIF(WIN32)
 
+  IF(PCRE_SUPPORT_JIT)
+  GET_TARGET_PROPERTY(PCRE_JIT_TEST_EXE
+                      pcre_jit_test
+                      DEBUG_LOCATION)
+  ENDIF(PCRE_SUPPORT_JIT) 
+
   GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
                       pcrecpp_unittest
                       DEBUG_LOCATION)
@@ -483,6 +503,9 @@ IF(PCRE_BUILD_TESTS)
                       pcre_stringpiece_unittest
                       DEBUG_LOCATION)
 
+  IF(PCRE_SUPPORT_JIT)
+  ADD_TEST(pcre_jit_test         ${PCRE_JIT_TEST_EXE})
+  ENDIF(PCRE_SUPPORT_JIT) 
   ADD_TEST(pcrecpp_test          ${PCRECPP_UNITTEST_EXE})
   ADD_TEST(pcre_scanner_test     ${PCRE_SCANNER_UNITTEST_EXE})
   ADD_TEST(pcre_stringpiece_test ${PCRE_STRINGPIECE_UNITTEST_EXE})
@@ -546,6 +569,7 @@ IF(PCRE_SHOW_REPORT)
   MESSAGE(STATUS "  C++ compiler flags .............. : ${CMAKE_CXX_FLAGS}${cxxfsp}${CMAKE_CXX_FLAGS_${buildtype}}")
   MESSAGE(STATUS "")
   MESSAGE(STATUS "  Build C++ library ............... : ${PCRE_BUILD_PCRECPP}")
+  MESSAGE(STATUS "  Enable JIT compiling support .... : ${PCRE_SUPPORT_JIT}")
   MESSAGE(STATUS "  Enable UTF-8 support ............ : ${PCRE_SUPPORT_UNICODE_PROPERTIES}")
   MESSAGE(STATUS "  Unicode properties .............. : ${PCRE_SUPPORT_UNICODE_PROPERTIES}")
   MESSAGE(STATUS "  Newline char/sequence ........... : ${PCRE_NEWLINE}")

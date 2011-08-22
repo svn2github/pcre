@@ -5761,7 +5761,7 @@ pcre_exec(const pcre *argument_re, const pcre_extra *extra_data,
   PCRE_SPTR subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
 {
-int rc, ocount;
+int rc, ocount, arg_offset_max;
 int first_byte = -1;
 int req_byte = -1;
 int req_byte2 = -1;
@@ -5797,8 +5797,59 @@ if (re == NULL || subject == NULL ||
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
 if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
 
-/* This information is for finding all the numbers associated with a given
-name, for condition testing. */
+/* These two settings are used in the code for checking a UTF-8 string that
+follows immediately afterwards. Other values in the md block are used only
+during "normal" pcre_exec() processing, not when the JIT support is in use,
+so they are set up later. */
+
+utf8 = md->utf8 = (re->options & PCRE_UTF8) != 0;
+md->partial = ((options & PCRE_PARTIAL_HARD) != 0)? 2 :
+              ((options & PCRE_PARTIAL_SOFT) != 0)? 1 : 0;
+
+/* Check a UTF-8 string if required. Pass back the character offset and error
+code for an invalid string if a results vector is available. */
+
+#ifdef SUPPORT_UTF8
+if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
+  {
+  int erroroffset;
+  int errorcode = _pcre_valid_utf8((USPTR)subject, length, &erroroffset);
+  if (errorcode != 0)
+    {
+    if (offsetcount >= 2)
+      {
+      offsets[0] = erroroffset;
+      offsets[1] = errorcode;
+      }
+    return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
+      PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
+    }
+
+  /* Check that a start_offset points to the start of a UTF-8 character. */
+  if (start_offset > 0 && start_offset < length &&
+      (((USPTR)subject)[start_offset] & 0xc0) == 0x80)
+    return PCRE_ERROR_BADUTF8_OFFSET;
+  }
+#endif
+
+/* If the pattern was successfully studied with JIT support, run the JIT
+executable instead of the rest of this function. Most options must be set at
+compile time for the JIT code to be usable. Fallback to the normal code path if
+an unsupported flag is set. In particular, JIT does not support partial
+matching. */
+
+#ifdef SUPPORT_JIT
+if (extra_data != NULL
+    && (extra_data->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0
+    && extra_data->executable_jit != NULL
+    && (options & ~(PCRE_NO_UTF8_CHECK | PCRE_NOTBOL | PCRE_NOTEOL |
+                    PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART)) == 0)
+  return _pcre_jit_exec(re, extra_data->executable_jit, subject, length, 
+    start_offset, options, offsets, offsetcount);
+#endif
+
+/* Carry on with non-JIT matching. This information is for finding all the
+numbers associated with a given name, for condition testing. */
 
 md->name_table = (uschar *)re + re->name_table_offset;
 md->name_count = re->name_count;
@@ -5865,7 +5916,6 @@ md->end_subject = md->start_subject + length;
 end_subject = md->end_subject;
 
 md->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
-utf8 = md->utf8 = (re->options & PCRE_UTF8) != 0;
 md->use_ucp = (re->options & PCRE_UCP) != 0;
 md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 
@@ -5876,9 +5926,6 @@ md->notbol = (options & PCRE_NOTBOL) != 0;
 md->noteol = (options & PCRE_NOTEOL) != 0;
 md->notempty = (options & PCRE_NOTEMPTY) != 0;
 md->notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
-md->partial = ((options & PCRE_PARTIAL_HARD) != 0)? 2 :
-              ((options & PCRE_PARTIAL_SOFT) != 0)? 1 : 0;
-
 
 md->hitend = FALSE;
 md->mark = NULL;                        /* In case never set */
@@ -5961,39 +6008,13 @@ defined (though never set). So there's no harm in leaving this code. */
 if (md->partial && (re->flags & PCRE_NOPARTIAL) != 0)
   return PCRE_ERROR_BADPARTIAL;
 
-/* Check a UTF-8 string if required. Pass back the character offset and error
-code for an invalid string if a results vector is available. */
-
-#ifdef SUPPORT_UTF8
-if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
-  {
-  int erroroffset;
-  int errorcode = _pcre_valid_utf8((USPTR)subject, length, &erroroffset);
-  if (errorcode != 0)
-    {
-    if (offsetcount >= 2)
-      {
-      offsets[0] = erroroffset;
-      offsets[1] = errorcode;
-      }
-    return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
-      PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
-    }
-
-  /* Check that a start_offset points to the start of a UTF-8 character. */
-
-  if (start_offset > 0 && start_offset < length &&
-      (((USPTR)subject)[start_offset] & 0xc0) == 0x80)
-    return PCRE_ERROR_BADUTF8_OFFSET;
-  }
-#endif
-
 /* If the expression has got more back references than the offsets supplied can
 hold, we get a temporary chunk of working store to use during the matching.
 Otherwise, we can use the vector supplied, rounding down its size to a multiple
 of 3. */
 
 ocount = offsetcount - (offsetcount % 3);
+arg_offset_max = (2*ocount)/3;
 
 if (re->top_backref > 0 && re->top_backref >= ocount/3)
   {
@@ -6368,21 +6389,22 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   {
   if (using_temporary_offsets)
     {
-    if (offsetcount >= 4)
+    if (arg_offset_max >= 4)
       {
       memcpy(offsets + 2, md->offset_vector + 2,
-        (offsetcount - 2) * sizeof(int));
+        (arg_offset_max - 2) * sizeof(int));
       DPRINTF(("Copied offsets from temporary memory\n"));
       }
-    if (md->end_offset_top > offsetcount) md->offset_overflow = TRUE;
+    if (md->end_offset_top > arg_offset_max) md->offset_overflow = TRUE;
     DPRINTF(("Freeing temporary memory\n"));
     (pcre_free)(md->offset_vector);
     }
 
-  /* Set the return code to the number of captured strings, or 0 if there are
+  /* Set the return code to the number of captured strings, or 0 if there were
   too many to fit into the vector. */
-
-  rc = md->offset_overflow? 0 : md->end_offset_top/2;
+  
+  rc = (md->offset_overflow && md->end_offset_top >= arg_offset_max)?
+    0 : md->end_offset_top/2;
 
   /* If there is space in the offset vector, set any unused pairs at the end of
   the pattern to -1 for backwards compatibility. It is documented that this

@@ -174,6 +174,7 @@ libpcre_la_SOURCES = \
   pcre_globals.c \
   pcre_info.c \
   pcre_internal.h \
+  pcre_jit_compile.c \
   pcre_maketables.c \
   pcre_newline.c \
   pcre_ord2utf8.c \
@@ -196,9 +197,37 @@ nodist_libpcre_la_SOURCES = \
 # pcre_chartables.c, used unless --enable-rebuild-chartables is specified.
 EXTRA_DIST += pcre_printint.src pcre_chartables.c.dist
 
+# The JIT compiler lives in a separate directory, but its files are #included
+# when pcre_jit_compile.c is processed, so they must be distributed.
+EXTRA_DIST += \
+  sljit/sljitConfig.h \
+  sljit/sljitConfigInternal.h \
+  sljit/sljitExecAllocator.c \
+  sljit/sljitLir.c \
+  sljit/sljitLir.h \
+  sljit/sljitNativeARM_Thumb2.c \
+  sljit/sljitNativeARM_v5.c \
+  sljit/sljitNativeMIPS_32.c \
+  sljit/sljitNativeMIPS_common.c \
+  sljit/sljitNativePPC_32.c \
+  sljit/sljitNativePPC_64.c \
+  sljit/sljitNativePPC_common.c \
+  sljit/sljitNativeX86_32.c \
+  sljit/sljitNativeX86_64.c \
+  sljit/sljitNativeX86_common.c \
+  sljit/sljitUtils.c
+
 libpcre_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
 
 CLEANFILES += pcre_chartables.c
+
+## If JIT support is enabled, arrange for the JIT test program to run.
+if WITH_JIT
+TESTS += pcre_jit_test
+noinst_PROGRAMS += pcre_jit_test
+pcre_jit_test_SOURCES = pcre_jit_test.c
+pcre_jit_test_LDADD = libpcre.la
+endif # WITH_JIT
 
 ## A version of the main pcre library that has a posix re API.
 lib_LTLIBRARIES += libpcreposix.la
@@ -321,7 +350,7 @@ test: check ;
 # nice DLL for Windows use". (It is used by the pcre.dll target.)
 DLL_OBJS= pcre_compile.o pcre_config.o \
 	pcre_dfa_exec.o pcre_exec.o pcre_fullinfo.o pcre_get.o \
-	pcre_globals.o pcre_info.o pcre_maketables.o \
+	pcre_globals.o pcre_info.o pcre_jit_compile.o pcre_maketables.o \
 	pcre_newline.o pcre_ord2utf8.o pcre_refcount.o \
 	pcre_study.o pcre_tables.o pcre_try_flipped.o \
 	pcre_ucd.o pcre_valid_utf8.o pcre_version.o \

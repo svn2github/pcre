@@ -140,7 +140,9 @@ for opts in \
   "--enable-newline-is-cr --disable-shared" \
   "--enable-newline-is-crlf --disable-shared" \
   "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
-  "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp"
+  "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp" \
+  "--enable-jit --enable-unicode-properties" \ 
+  "--enable-jit --enable-unicode-properties --with-link-size=3" 
 do
   runtest
 done

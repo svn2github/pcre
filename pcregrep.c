@@ -168,6 +168,7 @@ static int error_count = 0;
 static int filenames = FN_DEFAULT;
 static int only_matching = -1;
 static int process_options = 0;
+static int study_options = 0;
 
 static unsigned long int match_limit = 0;
 static unsigned long int match_limit_recursion = 0;
@@ -238,6 +239,7 @@ static option_item optionlist[] = {
   { OP_NODATA,     'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
   { OP_NODATA,     'i',      NULL,              "ignore-case",   "ignore case distinctions" },
+  { OP_NODATA,     'j',      NULL,              "jit",           "use JIT compiler if available" },
   { OP_NODATA,     'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
   { OP_NODATA,     'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,     N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
@@ -1862,6 +1864,7 @@ switch(letter)
   case 'H': filenames = FN_FORCE; break;
   case 'h': filenames = FN_NONE; break;
   case 'i': options |= PCRE_CASELESS; break;
+  case 'j': study_options |= PCRE_STUDY_JIT_COMPILE; break; 
   case 'l': omit_zero_count = TRUE; filenames = FN_MATCH_ONLY; break;
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
@@ -2571,7 +2574,7 @@ if (pattern_filename != NULL)
 
 for (j = 0; j < pattern_count; j++)
   {
-  hints_list[j] = pcre_study(pattern_list[j], 0, &error);
+  hints_list[j] = pcre_study(pattern_list[j], study_options, &error);
   if (error != NULL)
     {
     char s[16];
@@ -2696,7 +2699,7 @@ if (hints_list != NULL)
   {
   for (i = 0; i < hint_count; i++)
     {
-    if (hints_list[i] != NULL) free(hints_list[i]);
+    if (hints_list[i] != NULL) pcre_free_study(hints_list[i]);
     }
   free(hints_list);
   }
