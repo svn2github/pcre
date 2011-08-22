@@ -4,10 +4,27 @@ ChangeLog for PCRE
 Version 8.20
 ------------
 
-1. Change 37 of 8.13 broke patterns like [:a]...[b:] because it thought it had 
-a POSIX class. After further experiments with Perl, which convinced me that 
-Perl has bugs and confusions, a closing square bracket is no longer allowed in 
-a POSIX name.
+1. Change 37 of 8.13 broke patterns like [:a]...[b:] because it thought it had
+   a POSIX class. After further experiments with Perl, which convinced me that
+   Perl has bugs and confusions, a closing square bracket is no longer allowed
+   in a POSIX name.
+
+2. If a pattern such as /(a)b|ac/ is matched against "ac", there is no captured 
+   substring, but while checking the failing first alternative, substring 1 is 
+   temporarily captured. If the output vector supplied to pcre_exec() was not 
+   big enough for this capture, the yield of the function was still zero 
+   ("insufficient space for captured substrings"). This cannot be totally fixed 
+   without adding another stack variable, which seems a lot of expense for a 
+   edge case. However, I have improved the situation in cases such as
+   /(a)(b)x|abc/ matched against "abc", where the return code indicates that 
+   fewer than the maximum number of slots in the ovector have been set. 
+   
+3. Related to (2) above: when there are more back references in a pattern than 
+   slots in the output vector, pcre_exec() uses temporary memory during 
+   matching, and copies in the captures as far as possible afterwards. It was 
+   using the entire output vector, but this conflicts with the specification 
+   that only 2/3 is used for passing back captured substrings. Now it uses only 
+   the first 2/3, for compatibility. This is, of course, another edge case. 
 
 
 Version 8.13 16-Aug-2011
