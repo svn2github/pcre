@@ -9,9 +9,9 @@ dnl The PCRE_PRERELEASE feature is for identifying release candidates. It might
 dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre_major, [8])
-m4_define(pcre_minor, [13])
-m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2011-08-16])
+m4_define(pcre_minor, [20])
+m4_define(pcre_prerelease, [-RC1])
+m4_define(pcre_date, [2011-08-18])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -111,6 +111,12 @@ AC_ARG_ENABLE(cpp,
                              [disable C++ support]),
               , enable_cpp=yes)
 AC_SUBST(enable_cpp)
+
+# Handle --enable-jit (disabled by default)
+AC_ARG_ENABLE(jit,
+              AS_HELP_STRING([--enable-jit],
+                             [enable Just-In-Time compiling support]),
+              , enable_jit=no)
 
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
@@ -400,6 +406,7 @@ AC_SUBST(pcre_have_bits_type_traits)
 # Conditional compilation
 AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
+AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -468,6 +475,11 @@ AC_SUBST(PCRE_STATIC_CFLAG)
 
 # Here is where pcre specific defines are handled
 
+if test "$enable_jit" = "yes"; then
+  AC_DEFINE([SUPPORT_JIT], [], [
+    Define to enable support for Just-In-Time compiling.])
+fi
+
 if test "$enable_utf8" = "yes"; then
   AC_DEFINE([SUPPORT_UTF8], [], [
     Define to enable support for the UTF-8 Unicode encoding. This will
@@ -478,7 +490,7 @@ fi
 
 if test "$enable_unicode_properties" = "yes"; then
   AC_DEFINE([SUPPORT_UCP], [], [
-    Define to enable support for Unicode properties])
+    Define to enable support for Unicode properties.])
 fi
 
 if test "$enable_stack_for_recursion" = "no"; then
@@ -643,7 +655,7 @@ AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 
 # When we run 'make distcheck', use these arguments.
-DISTCHECK_CONFIGURE_FLAGS="--enable-cpp --enable-unicode-properties"
+DISTCHECK_CONFIGURE_FLAGS="--enable-jit --enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 # Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is
@@ -731,6 +743,7 @@ $PACKAGE-$VERSION configuration summary:
     Extra libraries ................. : ${LIBS}
 
     Build C++ library ............... : ${enable_cpp}
+    Enable JIT compiling support .... : ${enable_jit}
     Enable UTF-8 support ............ : ${enable_utf8}
     Unicode properties .............. : ${enable_unicode_properties}
     Newline char/sequence ........... : ${enable_newline}

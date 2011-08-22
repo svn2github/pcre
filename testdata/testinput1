@@ -4248,4 +4248,7 @@
 /^[:a[:digit:]:b]+/
     aaaa444:::bbbZ 
 
+/[:a]xxx[b:]/
+     :xxx:
+     
 /-- End of testinput1 --/

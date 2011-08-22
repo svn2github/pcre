@@ -1332,7 +1332,34 @@ if (min >= 0)
   study->minlength = min;
   }
 
+extra->executable_jit = NULL;
+#ifdef SUPPORT_JIT
+if ((options & PCRE_STUDY_JIT_COMPILE) != 0) _pcre_jit_compile(re, extra);
+#endif
+
 return extra;
+}
+
+
+/*************************************************
+*          Free the study data                   *
+*************************************************/
+
+/* This function frees the memory that was obtained by pcre_study().
+
+Argument:   a pointer to the pcre_extra block
+Returns:    nothing
+*/
+
+PCRE_EXP_DEFN void
+pcre_free_study(pcre_extra *extra)
+{
+#ifdef SUPPORT_JIT
+if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 && 
+     extra->executable_jit != NULL)
+  _pcre_jit_free(extra->executable_jit);
+#endif
+pcre_free(extra);
 }
 
 /* End of pcre_study.c */

@@ -6948,4 +6948,8 @@ No match
     aaaa444:::bbbZ 
  0: aaaa444:::bbb
 
+/[:a]xxx[b:]/
+     :xxx:
+ 0: :xxx:
+     
 /-- End of testinput1 --/
