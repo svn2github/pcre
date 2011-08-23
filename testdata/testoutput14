@@ -1,0 +1,22 @@
+/-- This test is run only when JIT support is available. It checks for a 
+    successful and an unsuccessful JIT compile. --/
+
+/abc/S+I
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+Subject length lower bound = 3
+No set of starting bytes
+JIT study was successful
+
+/ab\C/S+I
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'b'
+Subject length lower bound = 3
+No set of starting bytes
+JIT study was not successful
+
+/-- End of testinput14 --/

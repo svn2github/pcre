@@ -1,0 +1,8 @@
+/-- This test is run only when JIT support is available. It checks for a 
+    successful and an unsuccessful JIT compile. --/
+
+/abc/S+I
+
+/ab\C/S+I
+
+/-- End of testinput14 --/
