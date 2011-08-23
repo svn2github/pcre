@@ -5836,7 +5836,7 @@ allocate_stack(common, localsize + framesize + alternativesize);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(localsize + framesize + alternativesize - 1), TMP2, 0);
 copy_locals(common, ccbegin, ccend, TRUE, localsize + framesize + alternativesize, framesize + alternativesize);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), RECURSIVE_HEAD, STACK_TOP, 0);
-if (framesize > 0)
+if (needsframe)
   {
   OP2(SLJIT_SUB, TMP2, 0, STACK_TOP, 0, SLJIT_IMM, -STACK(framesize + alternativesize - 1));
   init_frame(common, cc, framesize + alternativesize - 1, alternativesize, FALSE);
@@ -5877,7 +5877,8 @@ while (1)
   }
 /* None of them matched. */
 OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, SLJIT_MEM1(STACK_TOP), STACK(alternativesize));
+if (needsframe)
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, SLJIT_MEM1(STACK_TOP), STACK(alternativesize));
 jump = JUMP(SLJIT_JUMP);
 
 set_jumps(common->accept, LABEL());
