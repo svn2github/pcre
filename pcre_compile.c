@@ -3092,7 +3092,6 @@ uschar *class_utf8data_base;
 uschar utf8_char[6];
 #else
 BOOL utf8 = FALSE;
-uschar *utf8_char = NULL;
 #endif
 
 #ifdef PCRE_DEBUG

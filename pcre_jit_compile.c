@@ -2009,7 +2009,9 @@ static void check_wordboundary(compiler_common *common)
 {
 DEFINE_COMPILER;
 struct sljit_jump *beginend;
+#ifdef SUPPORT_UTF8
 struct sljit_jump *jump;
+#endif
 
 SLJIT_ASSERT(ctype_word == 0x10);
 
@@ -2751,9 +2753,9 @@ DEFINE_COMPILER;
 int length;
 unsigned int c, oc, bit;
 compare_context context;
-struct sljit_label *label;
 struct sljit_jump *jump[4];
 #ifdef SUPPORT_UTF8
+struct sljit_label *label;
 #ifdef SUPPORT_UCP
 uschar propdata[5];
 #endif
