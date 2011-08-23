@@ -12,6 +12,28 @@ Copyright (c) 1997-2011 University of Cambridge
 All rights reserved
 
 
+PCRE JUST-IN-TIME COMPILATION SUPPORT
+-------------------------------------
+
+Written by:       Zoltan Herczeg
+Email local part: hzmester
+Emain domain:     freemail.hu
+
+Copyright(c) 2010-2011 Zoltan Herczeg
+All rights reserved.
+
+
+STACK-LESS JUST-IN-TIME COMPILER
+--------------------------------
+
+Written by:       Zoltan Herczeg
+Email local part: hzmester
+Emain domain:     freemail.hu
+
+Copyright(c) 2009-2011 Zoltan Herczeg
+All rights reserved.
+
+
 THE C++ WRAPPER LIBRARY
 -----------------------
 

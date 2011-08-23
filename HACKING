@@ -89,7 +89,10 @@ The "traditional", and original, matching function is called pcre_exec(), and
 it implements an NFA algorithm, similar to the original Henry Spencer algorithm 
 and the way that Perl works. This is not surprising, since it is intended to be
 as compatible with Perl as possible. This is the function most users of PCRE
-will use most of the time.
+will use most of the time. From release 8.20, if PCRE is compiled with 
+just-in-time (JIT) support, and studying a compiled pattern with JIT is 
+successful, the JIT code is run instead of the normal pcre_exec() code, but the 
+result is the same.
 
 
 Supplementary matching function
@@ -450,4 +453,4 @@ next item.
 
 
 Philip Hazel
-July 2011
+August 2011

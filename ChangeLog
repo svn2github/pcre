@@ -25,6 +25,9 @@ Version 8.20
    using the entire output vector, but this conflicts with the specification 
    that only 2/3 is used for passing back captured substrings. Now it uses only 
    the first 2/3, for compatibility. This is, of course, another edge case. 
+   
+4. Zoltan Herczeg's just-in-time compiler support has been integrated into the
+   main code base, and can be used by building with --enable-jit. 
 
 
 Version 8.13 16-Aug-2011

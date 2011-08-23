@@ -37,15 +37,16 @@ wrapper functions are a separate issue (see below).
 
 The PCRE distribution includes a "configure" file for use by the Configure/Make
 build system, as found in many Unix-like environments. There is also support
-support for CMake, which some users prefer, especially in Windows environments.
-There are some instructions for CMake under Windows in the section entitled
-"Building PCRE with CMake" below. CMake can also be used to build PCRE in
-Unix-like systems.
+for CMake, which some users prefer, especially in Windows environments. There
+are some instructions for CMake under Windows in the section entitled "Building
+PCRE with CMake" below. CMake can also be used to build PCRE in Unix-like
+systems.
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
 
-The following are generic comments about building the PCRE C library "by hand".
+The following are generic instructions for building the PCRE C library "by
+hand":
 
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
      settings that it contains to whatever is appropriate for your environment.
@@ -121,33 +122,51 @@ The following are generic comments about building the PCRE C library "by hand".
      an unusual compiler) so that all included PCRE header files are first
      sought in the current directory. Otherwise you run the risk of picking up
      a previously-installed file from somewhere else.
+     
+ (7) If you have defined SUPPORT_JIT in config.h, you must also compile
+ 
+       pcre_jit_compile.c
+       
+     This file #includes sources from the sljit subdirectory, where there 
+     should be 16 files, all of whose names begin with "sljit".
 
- (7) Now link all the compiled code into an object library in whichever form
+ (8) Now link all the compiled code into an object library in whichever form
      your system keeps such libraries. This is the basic PCRE C library. If
      your system has static and shared libraries, you may have to do this once
      for each type.
 
- (8) Similarly, if you want to build the POSIX wrapper functions, ensure that
+ (9) Similarly, if you want to build the POSIX wrapper functions, ensure that
      you have the pcreposix.h file and then compile pcreposix.c (remembering
      -DHAVE_CONFIG_H if necessary). Link the result (on its own) as the
      pcreposix library.
 
- (9) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
+(10) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
      This needs the functions in the PCRE library when linking. It also needs
      the pcreposix wrapper functions unless you compile it with -DNOPOSIX. The
      pcretest.c program also needs the pcre_printint.src source file, which it
      #includes.
 
-(10) Run pcretest on the testinput files in the testdata directory, and check
-     that the output matches the corresponding testoutput files. Note that the
-     supplied files are in Unix format, with just LF characters as line
-     terminators. You may need to edit them to change this if your system uses
-     a different convention. If you are using Windows, you probably should use
-     the wintestinput3 file instead of testinput3 (and the corresponding output
-     file). This is a locale test; wintestinput3 sets the locale to "french"
-     rather than "fr_FR", and there some minor output differences.
+(11) Run pcretest on the testinput files in the testdata directory, and check
+     that the output matches the corresponding testoutput files. Some tests are
+     relevant only when certain build-time options are selected. For example, 
+     test 4 is for UTF-8 support, and will not run if you have build PCRE 
+     without it. See the comments at the start of each testinput file. If you 
+     have a suitable Unix-like shell, the RunTest script will run the 
+     appropriate tests for you.
+ 
+     Note that the supplied files are in Unix format, with just LF characters
+     as line terminators. You may need to edit them to change this if your
+     system uses a different convention. If you are using Windows, you probably
+     should use the wintestinput3 file instead of testinput3 (and the
+     corresponding output file). This is a locale test; wintestinput3 sets the
+     locale to "french" rather than "fr_FR", and there some minor output
+     differences.
+     
+(12) If you have built PCRE with SUPPORT_JIT, the JIT features will be tested
+     by the testdata files. However, you might also like to build and run
+     the JIT test program, pcre_jit_test.c.
 
-(11) If you want to use the pcregrep command, compile and link pcregrep.c; it
+(13) If you want to use the pcregrep command, compile and link pcregrep.c; it
      uses only the basic PCRE library (it does not need the pcreposix library).
 
 
@@ -238,7 +257,7 @@ On both MinGW and Cygwin, PCRE should build correctly using:
 
 This should create two libraries called libpcre and libpcreposix, and, if you
 have enabled building the C++ wrapper, a third one called libpcrecpp. These are
-independent libraries: when you like with libpcreposix or libpcrecpp you must
+independent libraries: when you link with libpcreposix or libpcrecpp you must
 also link with libpcre, which contains the basic functions. (Some earlier
 releases of PCRE included the basic libpcre functions in libpcreposix. This no
 longer happens.)
@@ -497,5 +516,5 @@ build.log file in the root of the package also.
 
 
 =========================
-Last Updated: 26 May 2010
+Last Updated: 23 August 2011
 ****
