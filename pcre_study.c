@@ -1293,7 +1293,10 @@ switch(min = find_minlength(code, code, re->options, &had_accept, 0))
   default: break;
   }
 
-/* Return NULL if there's been an error or if no optimization is possible. */
+/* Return NULL if there's been an (internal) error or if no optimization is
+possible. A FALSE setting for bits_set is common when there are no obvious
+starting bytes. However a negative value of min occurs only when the pattern
+contains \C, in other words, it's an exceptional case nowadays. */
 
 if (*errorptr != NULL || (!bits_set && min < 0)) return NULL;
 
@@ -1331,6 +1334,8 @@ if (min >= 0)
   study->flags |= PCRE_STUDY_MINLEN;
   study->minlength = min;
   }
+
+/* If JIT support was compiled and requested, attempt the JIT compilation. */
 
 extra->executable_jit = NULL;
 #ifdef SUPPORT_JIT
