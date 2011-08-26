@@ -1050,6 +1050,26 @@ if ((rc = pcre_fullinfo(re, study, option, ptr)) < 0)
 
 
 /*************************************************
+*      Check for supported JIT architecture      *
+*************************************************/
+
+/* If it won't JIT-compile a very simple regex, return FALSE. */
+
+static int check_jit_arch(void)
+{
+const char *error;
+int erroffset, rc;
+pcre *re = pcre_compile("abc", 0, &error, &erroffset, NULL);
+pcre_extra *extra = pcre_study(re, PCRE_STUDY_JIT_COMPILE, &error);
+rc = extra != NULL && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 &&
+  extra->executable_jit != NULL;
+pcre_free_study(extra);
+free(re);
+return rc;
+}
+
+
+/*************************************************
 *         Byte flipping function                 *
 *************************************************/
 
@@ -1358,7 +1378,11 @@ while (argc > 1 && argv[op][0] == '-')
     (void)pcre_config(PCRE_CONFIG_UNICODE_PROPERTIES, &rc);
     printf("  %sUnicode properties support\n", rc? "" : "No ");
     (void)pcre_config(PCRE_CONFIG_JIT, &rc);
-    printf("  %sJust-in-time compiler support\n", rc? "" : "No ");
+    if (rc)
+      printf("  Just-in-time compiler support%s\n", check_jit_arch()? 
+        "" : " (but this architecture is unsupported)");
+    else
+      printf("  No just-in-time compiler support\n");
     (void)pcre_config(PCRE_CONFIG_NEWLINE, &rc);
     /* Note that these values are always the ASCII values, even
     in EBCDIC environments. CR is 13 and NL is 10. */

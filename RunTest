@@ -15,7 +15,7 @@
 
 # When JIT support is available, all the tests are also run with -s+ to test
 # (again, almost) everything with studying and the JIT option. There are also
-# two tests for JIT-specific features, one to be run when JIT support is 
+# two tests for JIT-specific features, one to be run when JIT support is
 # available, and one when it is not.
 
 valgrind=
@@ -48,11 +48,17 @@ utf8=$?
 ucp=$?
 
 jitopt=
-./pcretest -C | ./pcregrep 'No Just-in-time compiler support' >/dev/null
+./pcretest -C | ./pcregrep \
+  'No Just-in-time compiler support|this architecture is unsupported' \
+  >/dev/null
 jit=$?
 if [ $jit -ne 0 ] ; then
   jitopt=-s+
-fi   
+else
+  ./pcretest -C | ./pcregrep 'this architecture is unsupported' >/dev/null
+  jitnotcompiled=$?
+fi
+
 
 # Select which tests to run; for those that are explicitly requested, check
 # that the necessary optional facilities are available.
@@ -151,7 +157,7 @@ else
     echo "Can't run test 15 because JIT support is configured"
     exit 1
   fi
-fi                
+fi
 
 # If no specific tests were requested, select all. Those that are not
 # relevant will be skipped.
@@ -194,9 +200,9 @@ if [ $do1 = yes ] ; then
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
-    if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-    elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-    else echo "  OK" 
+    if [ "$opt" = "-s" ] ; then echo "  OK with study"
+    elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+    else echo "  OK"
     fi
   done
 fi
@@ -219,9 +225,9 @@ if [ $do2 = yes ] ; then
       echo " "
       exit 1
     fi
-    if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-    elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-    else echo "  OK" 
+    if [ "$opt" = "-s" ] ; then echo "  OK with study"
+    elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+    else echo "  OK"
     fi
   done
 fi
@@ -262,9 +268,9 @@ if [ $do3 = yes ] ; then
           echo "settings rather than a bug in PCRE."
           break;
         else
-          if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-          elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-          else echo "  OK" 
+          if [ "$opt" = "-s" ] ; then echo "  OK with study"
+          elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+          else echo "  OK"
           fi
         fi
       else exit 1
@@ -284,7 +290,7 @@ if [ $do4 = yes ] ; then
   echo "Test 4: UTF-8 support (Compatible with Perl >= 5.8)"
   if [ $utf8 -eq 0 ] ; then
     echo "  Skipped because UTF-8 support is not available"
-  else    
+  else
     for opt in "" "-s" $jitopt; do
       $valgrind ./pcretest -q $opt $testdata/testinput4 testtry
       if [ $? = 0 ] ; then
@@ -292,19 +298,19 @@ if [ $do4 = yes ] ; then
         if [ $? != 0 ] ; then exit 1; fi
       else exit 1
       fi
-      if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-      else echo "  OK" 
+      if [ "$opt" = "-s" ] ; then echo "  OK with study"
+      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+      else echo "  OK"
       fi
     done
-  fi   
+  fi
 fi
 
 if [ $do5 = yes ] ; then
   echo "Test 5: API, internals, and non-Perl stuff for UTF-8 support"
   if [ $utf8 -eq 0 ] ; then
     echo "  Skipped because UTF-8 support is not available"
-  else    
+  else
     for opt in "" "-s" $jitopt; do
       $valgrind ./pcretest -q $opt $testdata/testinput5 testtry
       if [ $? = 0 ] ; then
@@ -312,19 +318,19 @@ if [ $do5 = yes ] ; then
         if [ $? != 0 ] ; then exit 1; fi
       else exit 1
       fi
-      if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-      else echo "  OK" 
+      if [ "$opt" = "-s" ] ; then echo "  OK with study"
+      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+      else echo "  OK"
       fi
     done
-  fi   
+  fi
 fi
 
 if [ $do6 = yes ] ; then
   echo "Test 6: Unicode property support (Compatible with Perl >= 5.10)"
   if [ $utf8 -eq 0 -o $ucp -eq 0 ] ; then
     echo "  Skipped because Unicode property support is not available"
-  else    
+  else
     for opt in "" "-s" $jitopt; do
       $valgrind ./pcretest -q $opt $testdata/testinput6 testtry
       if [ $? = 0 ] ; then
@@ -332,12 +338,12 @@ if [ $do6 = yes ] ; then
         if [ $? != 0 ] ; then exit 1; fi
       else exit 1
       fi
-      if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-      else echo "  OK" 
+      if [ "$opt" = "-s" ] ; then echo "  OK with study"
+      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+      else echo "  OK"
       fi
     done
-  fi   
+  fi
 fi
 
 # Tests for DFA matching support
@@ -359,7 +365,7 @@ if [ $do8 = yes ] ; then
   echo "Test 8: DFA matching with UTF-8"
   if [ $utf8 -eq 0 ] ; then
     echo "  Skipped because UTF-8 support is not available"
-  else    
+  else
     for opt in "" "-s"; do
       $valgrind ./pcretest -q $opt -dfa $testdata/testinput8 testtry
       if [ $? = 0 ] ; then
@@ -369,14 +375,14 @@ if [ $do8 = yes ] ; then
       fi
       if [ "$opt" = "-s" ] ; then echo "  OK with study" ; else echo "  OK"; fi
     done
-  fi   
+  fi
 fi
 
 if [ $do9 = yes ] ; then
   echo "Test 9: DFA matching with Unicode properties"
   if [ $utf8 -eq 0 -o $ucp -eq 0 ] ; then
     echo "  Skipped because Unicode property support is not available"
-  else    
+  else
     for opt in "" "-s"; do
       $valgrind ./pcretest -q $opt -dfa $testdata/testinput9 testtry
       if [ $? = 0 ] ; then
@@ -386,7 +392,7 @@ if [ $do9 = yes ] ; then
       fi
       if [ "$opt" = "-s" ] ; then echo "  OK with study" ; else echo "  OK"; fi
     done
-  fi   
+  fi
 fi
 
 # Test of internal offsets and code sizes. This test is run only when there
@@ -397,11 +403,11 @@ fi
 
 if [ $do10 = yes ] ; then
   echo "Test 10: Internal offsets and code size tests"
-  if [ $link_size -ne 2 ] ; then 
+  if [ $link_size -ne 2 ] ; then
     echo "  Skipped because link size is not 2"
-  elif [ $ucp -eq 0 ] ; then 
+  elif [ $ucp -eq 0 ] ; then
     echo "  Skipped because Unicode property support is not available"
-  else   
+  else
     for opt in "" "-s"; do
       $valgrind ./pcretest -q $opt $testdata/testinput10 testtry
       if [ $? = 0 ] ; then
@@ -411,7 +417,7 @@ if [ $do10 = yes ] ; then
       fi
       if [ "$opt" = "-s" ] ; then echo "  OK with study" ; else echo "  OK"; fi
     done
-  fi   
+  fi
 fi
 
 # Test of Perl >= 5.10 features without UTF8 support
@@ -425,9 +431,9 @@ if [ $do11 = yes ] ; then
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
-    if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-    elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-    else echo "  OK" 
+    if [ "$opt" = "-s" ] ; then echo "  OK with study"
+    elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+    else echo "  OK"
     fi
   done
 fi
@@ -438,7 +444,7 @@ if [ $do12 = yes ] ; then
   echo "Test 12: Features from Perl >= 5.10 with UTF8 support"
   if [ $utf8 -eq 0 ] ; then
     echo "  Skipped because UTF-8 support is not available"
-  else    
+  else
     for opt in "" "-s" $jitopt; do
       $valgrind ./pcretest -q $opt $testdata/testinput12 testtry
       if [ $? = 0 ] ; then
@@ -446,12 +452,12 @@ if [ $do12 = yes ] ; then
         if [ $? != 0 ] ; then exit 1; fi
       else exit 1
       fi
-      if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-      else echo "  OK" 
+      if [ "$opt" = "-s" ] ; then echo "  OK with study"
+      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+      else echo "  OK"
       fi
     done
-  fi   
+  fi
 fi
 
 # Test non-Perl-compatible Unicode property support
@@ -460,7 +466,7 @@ if [ $do13 = yes ] ; then
   echo "Test 13: API, internals, and non-Perl stuff for Unicode property support"
   if [ $utf8 -eq 0 -o $ucp -eq 0 ] ; then
     echo "  Skipped because Unicode property support is not available"
-  else    
+  else
     for opt in "" "-s" $jitopt; do
       $valgrind ./pcretest -q $opt $testdata/testinput13 testtry
       if [ $? = 0 ] ; then
@@ -468,20 +474,20 @@ if [ $do13 = yes ] ; then
         if [ $? != 0 ] ; then exit 1; fi
       else exit 1
       fi
-      if [ "$opt" = "-s" ] ; then echo "  OK with study" 
-      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study" 
-      else echo "  OK" 
+      if [ "$opt" = "-s" ] ; then echo "  OK with study"
+      elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"
+      else echo "  OK"
       fi
     done
-  fi   
+  fi
 fi
 
 # Test JIT-specific features when JIT is available
 
 if [ $do14 = yes ] ; then
-  echo "Test 14: JIT-specific features (JIT available)"
+  echo "Test 14: JIT-specific features (JIT available and usable)"
   if [ $jit -eq 0 ] ; then
-    echo "  Skipped because JIT is not available"
+    echo "  Skipped because JIT is not available or not usable"
   else
     $valgrind ./pcretest -q $testdata/testinput14 testtry
     if [ $? = 0 ] ; then
@@ -489,16 +495,18 @@ if [ $do14 = yes ] ; then
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
-    echo "  OK" 
-  fi   
+    echo "  OK"
+  fi
 fi
-   
+
 # Test JIT-specific features when JIT is not available
 
 if [ $do15 = yes ] ; then
-  echo "Test 15: JIT-specific features (JIT not available)"
+  echo "Test 15: JIT-specific features (JIT not available or not usable)"
   if [ $jit -ne 0 ] ; then
     echo "  Skipped because JIT is available"
+  elif [ $jitnotcompiled -eq 0 ] ; then
+    echo "  Skipped because JIT does not support this architecture" 
   else
     $valgrind ./pcretest -q $testdata/testinput15 testtry
     if [ $? = 0 ] ; then
@@ -506,8 +514,8 @@ if [ $do15 = yes ] ; then
       if [ $? != 0 ] ; then exit 1; fi
     else exit 1
     fi
-    echo "  OK" 
-  fi   
+    echo "  OK"
+  fi
 fi
 
 # End

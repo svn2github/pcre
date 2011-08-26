@@ -1,5 +1,6 @@
 /-- This test is run only when JIT support is available. It checks for a 
-    successful and an unsuccessful JIT compile. --/
+    successful and an unsuccessful JIT compile and save/restore behaviour. --/
+** Unknown option 'r'
 
 /abc/S+I
 Capturing subpattern count = 0
@@ -10,13 +11,30 @@ Subject length lower bound = 3
 No set of starting bytes
 JIT study was successful
 
-/ab\C/S+I
+/ab(*COMMIT)/S+I
 Capturing subpattern count = 0
 No options
 First char = 'a'
 Need char = 'b'
-Subject length lower bound = 3
+Subject length lower bound = 2
 No set of starting bytes
 JIT study was not successful
+
+/abc/S+I>testsavedregex
+Capturing subpattern count = 0
+No options
+First char = 'a'
+Need char = 'c'
+Subject length lower bound = 3
+No set of starting bytes
+JIT study was successful
+Compiled pattern written to testsavedregex
+Study data written to testsavedregex
+
+<testsavedregex
+Compiled pattern loaded from testsavedregex
+Study data loaded from testsavedregex
+    abc
+ 0: abc
 
 /-- End of testinput14 --/
