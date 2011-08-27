@@ -78,7 +78,7 @@ static void setstack(pcre_extra *extra)
 	static pcre_jit_stack *stack;
 	if (stack) pcre_jit_stack_free(stack);
 	stack = pcre_jit_stack_alloc(1, 1024 * 1024);
-	pcre_assign_jit_callback(extra, callback, stack);
+	pcre_assign_jit_stack(extra, callback, stack);
 }
 
 /* --------------------------------------------------------------------------------------- */

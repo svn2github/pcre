@@ -360,7 +360,7 @@ PCRE_EXP_DECL const char *pcre_version(void);
 
 PCRE_EXP_DECL pcre_jit_stack *pcre_jit_stack_alloc(int, int);
 PCRE_EXP_DECL void pcre_jit_stack_free(pcre_jit_stack *);
-PCRE_EXP_DECL void pcre_assign_jit_callback(pcre_extra *, pcre_jit_callback, void *);
+PCRE_EXP_DECL void pcre_assign_jit_stack(pcre_extra *, pcre_jit_callback, void *);
 
 #ifdef __cplusplus
 }  /* extern "C" */

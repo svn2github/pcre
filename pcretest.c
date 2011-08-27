@@ -2521,7 +2521,7 @@ while (!done)
           {    
 	  if (jit_stack != NULL) pcre_jit_stack_free(jit_stack);
 	  jit_stack = pcre_jit_stack_alloc(1, n * 1024);
-	  pcre_assign_jit_callback(extra, jit_callback, jit_stack);
+	  pcre_assign_jit_stack(extra, jit_callback, jit_stack);
           } 
         continue;
 

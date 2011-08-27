@@ -6348,7 +6348,7 @@ sljit_free_stack((struct sljit_stack*)stack);
 }
 
 PCRE_EXP_DECL void
-pcre_assign_jit_callback(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
+pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 {
 executable_function *function;
 if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 && extra->executable_jit != NULL)
@@ -6379,7 +6379,7 @@ pcre_jit_stack_free(pcre_jit_stack *stack)
 }
 
 PCRE_EXP_DECL void
-pcre_assign_jit_callback(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
+pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 {
 (void)extra;
 (void)callback;
