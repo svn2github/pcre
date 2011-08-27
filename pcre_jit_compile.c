@@ -6145,7 +6145,7 @@ while (common->currententry != NULL)
   common->currententry = common->currententry->next;
   }
 
-/* Allocating stack, returns with PCRE_ERROR_NOMEMORY if fails. */
+/* Allocating stack, returns with PCRE_ERROR_JIT_STACKLIMIT if fails. */
 /* This is a (really) rare case. */
 set_jumps(common->stackalloc, LABEL());
 /* RETURN_ADDR is not a saved register. */
@@ -6168,7 +6168,7 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 /* Allocation failed. */
 JUMPHERE(alloc_error);
 /* We break the return address cache here, but this is a really rare case. */
-OP1(SLJIT_MOV, MAX_INDEX, 0, SLJIT_IMM, PCRE_ERROR_NOMEMORY);
+OP1(SLJIT_MOV, MAX_INDEX, 0, SLJIT_IMM, PCRE_ERROR_JIT_STACKLIMIT);
 JUMPTO(SLJIT_JUMP, leave);
 
 if (common->revertframes != NULL)

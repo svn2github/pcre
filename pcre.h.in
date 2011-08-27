@@ -164,6 +164,7 @@ compile-time only bits for runtime options, or vice versa. */
 #define PCRE_ERROR_BADOFFSET      (-24)
 #define PCRE_ERROR_SHORTUTF8      (-25)
 #define PCRE_ERROR_RECURSELOOP    (-26)
+#define PCRE_ERROR_JIT_STACKLIMIT (-27)
 
 /* Specific error codes for UTF-8 validity checks */
 

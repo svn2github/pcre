@@ -229,7 +229,8 @@ static const char *errtexts[] = {
   "invalid combination of newline options",
   "bad offset value",
   NULL,  /* SHORTUTF8 is handled specially */
-  "nested recursion at the same subject position"
+  "nested recursion at the same subject position",
+  "JIT stack limit reached" 
 };
 
 
