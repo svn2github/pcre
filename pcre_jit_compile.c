@@ -152,6 +152,7 @@ typedef struct jit_arguments {
   uschar *ptr;
   /* Everything else after. */
   int offsetcount;
+  int calllimit;
   uschar notbol;
   uschar noteol;
   uschar notempty;
@@ -280,6 +281,7 @@ typedef struct compiler_common {
   recurse_entry *entries;
   recurse_entry *currententry;
   jump_list *accept;
+  jump_list *calllimit;
   jump_list *stackalloc;
   jump_list *revertframes;
   jump_list *wordboundary;
@@ -355,15 +357,19 @@ enum {
 #define LOCALS_HEAD      (4 * sizeof(sljit_w))
 /* Head of the last recursion. */
 #define RECURSIVE_HEAD   (5 * sizeof(sljit_w))
+/* Number of recursions. */
+#define CALL_COUNT       (6 * sizeof(sljit_w))
+/* Max limit of recursions. */
+#define CALL_LIMIT       (7 * sizeof(sljit_w))
 /* Last known position of the requested byte. */
-#define REQ_BYTE_PTR     (6 * sizeof(sljit_w))
+#define REQ_BYTE_PTR     (8 * sizeof(sljit_w))
 /* End pointer of the first line. */
-#define FIRSTLINE_END    (7 * sizeof(sljit_w))
+#define FIRSTLINE_END    (9 * sizeof(sljit_w))
 /* The output vector is stored on the stack, and contains pointers
 to characters. The vector data is divided into two groups: the first
 group contains the start / end character pointers, and the second is
 the start pointers when the end of the capturing group has not yet reached. */
-#define OVECTOR_START    (8 * sizeof(sljit_w))
+#define OVECTOR_START    (10 * sizeof(sljit_w))
 #define OVECTOR(i)       (OVECTOR_START + (i) * sizeof(sljit_w))
 #define OVECTOR_PRIV(i)  (common->cbraptr + (i) * sizeof(sljit_w))
 #define PRIV(cc)         (common->localptrs[(cc) - common->start])
@@ -1173,6 +1179,14 @@ while (list_item)
   list_item = list_item->next;
   }
 common->stubs = NULL;
+}
+
+static SLJIT_INLINE void decrease_call_count(compiler_common *common)
+{
+DEFINE_COMPILER;
+
+OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_COUNT, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_COUNT, SLJIT_IMM, 1);
+add_jump(compiler, &common->calllimit, JUMP(SLJIT_C_ZERO));
 }
 
 static SLJIT_INLINE void allocate_stack(compiler_common *common, int size)
@@ -3455,6 +3469,8 @@ if (!minimize)
 
   JUMPHERE(zerolength);
   FALLBACK_AS(iterator_fallback)->hotpath = LABEL();
+
+  decrease_call_count(common);
   return cc;
   }
 
@@ -3492,6 +3508,8 @@ else if (max > 0)
 if (jump != NULL)
   JUMPHERE(jump);
 JUMPHERE(zerolength);
+
+decrease_call_count(common);
 return cc;
 }
 
@@ -4212,6 +4230,9 @@ if (bra == OP_BRAMINZERO)
   /* Continue to the normal fallback. */
   }
 
+if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO)
+  decrease_call_count(common);
+
 /* Skip the other alternatives. */
 while (*cc == OP_ALT)
   cc += GET(cc, 1);
@@ -4436,6 +4457,7 @@ if (!zero)
 
 /* None of them matched. */
 set_jumps(emptymatch, LABEL());
+decrease_call_count(common);
 return cc + 1 + LINK_SIZE;
 }
 
@@ -4696,6 +4718,7 @@ switch(opcode)
   break;
   }
 
+decrease_call_count(common);
 return end;
 }
 
@@ -4939,6 +4962,8 @@ while (cc < ccend)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), STR_PTR, 0);
       }
     FALLBACK_AS(braminzero_fallback)->hotpath = LABEL();
+    if (cc[1] > OP_ASSERTBACK_NOT)
+      decrease_call_count(common);
     break;
 
     case OP_ONCE:
@@ -5969,6 +5994,7 @@ common->stubs = NULL;
 common->entries = NULL;
 common->currententry = NULL;
 common->accept = NULL;
+common->calllimit = NULL;
 common->stackalloc = NULL;
 common->revertframes = NULL;
 common->wordboundary = NULL;
@@ -6025,8 +6051,10 @@ OP1(SLJIT_MOV, TMP1, 0, SLJIT_GENERAL_REG1, 0);
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
 OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, end));
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
+OP1(SLJIT_MOV_SI, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, calllimit));
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, base));
 OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, limit));
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_LIMIT, TMP1, 0);
 
 /* Main part of the matching */
 if ((re->options & PCRE_ANCHORED) == 0)
@@ -6043,8 +6071,11 @@ if ((re->options & PCRE_ANCHORED) == 0)
 if ((re->flags & PCRE_REQCHSET) != 0)
   reqbyte_notfound = search_requested_char(common, re->req_byte, (re->flags & PCRE_FIRSTSET) != 0);
 
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_LIMIT);
 /* Store the current STR_PTR in OVECTOR(0). */
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0), STR_PTR, 0);
+/* Copy the limit of allowed recursions. */
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_COUNT, TMP1, 0);
 
 compile_hotpath(common, rootfallback.cc, ccend, &rootfallback);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
@@ -6171,6 +6202,11 @@ JUMPHERE(alloc_error);
 OP1(SLJIT_MOV, MAX_INDEX, 0, SLJIT_IMM, PCRE_ERROR_JIT_STACKLIMIT);
 JUMPTO(SLJIT_JUMP, leave);
 
+/* Call limit reached. */
+set_jumps(common->calllimit, LABEL());
+OP1(SLJIT_MOV, MAX_INDEX, 0, SLJIT_IMM, PCRE_ERROR_MATCHLIMIT);
+JUMPTO(SLJIT_JUMP, leave);
+
 if (common->revertframes != NULL)
   {
   set_jumps(common->revertframes, LABEL());
@@ -6268,8 +6304,8 @@ return convert_executable_func.call_executable_func(arguments);
 
 int
 _pcre_jit_exec(const real_pcre *re, void *executable_func,
-  PCRE_SPTR subject, int length, int start_offset, int options, int *offsets,
-  int offsetcount)
+  PCRE_SPTR subject, int length, int start_offset, int options,
+  int match_limit, int *offsets, int offsetcount)
 {
 executable_function *function = (executable_function*)executable_func;
 union {
@@ -6285,6 +6321,7 @@ arguments.stack = NULL;
 arguments.str = subject + start_offset;
 arguments.begin = subject;
 arguments.end = subject + length;
+arguments.calllimit = match_limit; /* JIT decreases this value less times. */
 arguments.notbol = (options & PCRE_NOTBOL) != 0;
 arguments.noteol = (options & PCRE_NOTEOL) != 0;
 arguments.notempty = (options & PCRE_NOTEMPTY) != 0;

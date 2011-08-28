@@ -5844,8 +5844,9 @@ if (extra_data != NULL
     && extra_data->executable_jit != NULL
     && (options & ~(PCRE_NO_UTF8_CHECK | PCRE_NOTBOL | PCRE_NOTEOL |
                     PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART)) == 0)
-  return _pcre_jit_exec(re, extra_data->executable_jit, subject, length, 
-    start_offset, options, offsets, offsetcount);
+  return _pcre_jit_exec(re, extra_data->executable_jit, subject, length,
+    start_offset, options, ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0)
+    ? MATCH_LIMIT : extra_data->match_limit, offsets, offsetcount);
 #endif
 
 /* Carry on with non-JIT matching. This information is for finding all the

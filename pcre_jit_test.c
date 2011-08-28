@@ -60,12 +60,11 @@ POSSIBILITY OF SUCH DAMAGE.
 */  
 
 static void setstack(pcre_extra *extra);
-static void regression_tests(void);
+static int regression_tests(void);
 
 int main(void)
 {
-        regression_tests();
-	return 0;
+        return regression_tests();
 }
 
 static pcre_jit_stack* callback(void *arg)
@@ -567,12 +566,20 @@ static struct regression_test_case regression_test_cases[] = {
 
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
-	{ MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aaa+ " },
+        { MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
+	{ MUA, 0, "((a?)+)+b", "aaaaaaaaaaaaa b" },
+ 
+	/* Deep recursion: Stack limit reached. */
+	{ MA, 0, "a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaa" },
+	{ MA, 0, "(?:a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
+	{ MA, 0, "(?:a+?)+?b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
+	{ MA, 0, "(?:a*)*b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
+	{ MA, 0, "(?:a*?)*?b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
 
 	{ 0, 0, NULL, NULL }
 };
 
-static void regression_tests(void)
+static int regression_tests(void)
 {
 	pcre *re;
 	struct regression_test_case *current = regression_test_cases;
@@ -659,10 +666,13 @@ static void regression_tests(void)
 		succesful++;
 	}
 
-	if (total == succesful)
+	if (total == succesful) {
 		printf("\nAll JIT regression tests are successfully passed.\n");
-	else
+		return 0;
+        } else {
 		printf("\nSuccessful test ratio: %d%%\n", succesful * 100 / total);
+                return 1;
+        }         
 }
 
 /* End of pcre_jit_test.c */
