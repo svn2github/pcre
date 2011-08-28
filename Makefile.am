@@ -18,6 +18,7 @@ dist_html_DATA = \
   doc/html/index.html \
   doc/html/pcre.html \
   doc/html/pcre-config.html \
+  doc/html/pcre_assign_jit_stack.html \
   doc/html/pcre_compile.html \
   doc/html/pcre_compile2.html \
   doc/html/pcre_config.html \
@@ -25,6 +26,7 @@ dist_html_DATA = \
   doc/html/pcre_copy_substring.html \
   doc/html/pcre_dfa_exec.html \
   doc/html/pcre_exec.html \
+  doc/html/pcre_free_study.html \
   doc/html/pcre_free_substring.html \
   doc/html/pcre_free_substring_list.html \
   doc/html/pcre_fullinfo.html \
@@ -34,6 +36,8 @@ dist_html_DATA = \
   doc/html/pcre_get_substring.html \
   doc/html/pcre_get_substring_list.html \
   doc/html/pcre_info.html \
+  doc/html/pcre_jit_stack_alloc.html \
+  doc/html/pcre_jit_stack_free.html \
   doc/html/pcre_maketables.html \
   doc/html/pcre_refcount.html \
   doc/html/pcre_study.html \
@@ -44,6 +48,8 @@ dist_html_DATA = \
   doc/html/pcrecompat.html \
   doc/html/pcredemo.html \
   doc/html/pcregrep.html \
+  doc/html/pcrejit.html \
+  doc/html/pcrelimits.html \
   doc/html/pcrematching.html \
   doc/html/pcrepartial.html \
   doc/html/pcrepattern.html \
@@ -53,7 +59,8 @@ dist_html_DATA = \
   doc/html/pcresample.html \
   doc/html/pcrestack.html \
   doc/html/pcresyntax.html \
-  doc/html/pcretest.html
+  doc/html/pcretest.html \
+  doc/html/pcreunicode.html
 
 pcrecpp_html = doc/html/pcrecpp.html
 dist_noinst_DATA = $(pcrecpp_html)
@@ -378,6 +385,7 @@ endif
 dist_man_MANS = \
   doc/pcre.3 \
   doc/pcre-config.1 \
+  doc/pcre_assign_jit_stack.3 \
   doc/pcre_compile.3 \
   doc/pcre_compile2.3 \
   doc/pcre_config.3 \
@@ -385,6 +393,7 @@ dist_man_MANS = \
   doc/pcre_copy_substring.3 \
   doc/pcre_dfa_exec.3 \
   doc/pcre_exec.3 \
+  doc/pcre_free_study.3 \
   doc/pcre_free_substring.3 \
   doc/pcre_free_substring_list.3 \
   doc/pcre_fullinfo.3 \
@@ -394,6 +403,8 @@ dist_man_MANS = \
   doc/pcre_get_substring.3 \
   doc/pcre_get_substring_list.3 \
   doc/pcre_info.3 \
+  doc/pcre_jit_stack_alloc.3 \
+  doc/pcre_jit_stack_free.3 \
   doc/pcre_maketables.3 \
   doc/pcre_refcount.3 \
   doc/pcre_study.3 \
@@ -403,6 +414,8 @@ dist_man_MANS = \
   doc/pcrecallout.3 \
   doc/pcrecompat.3 \
   doc/pcregrep.1 \
+  doc/pcrejit.3 \
+  doc/pcrelimits.3 \
   doc/pcrematching.3 \
   doc/pcrepartial.3 \
   doc/pcrepattern.3 \
@@ -412,7 +425,8 @@ dist_man_MANS = \
   doc/pcresample.3 \
   doc/pcrestack.3 \
   doc/pcresyntax.3 \
-  doc/pcretest.1
+  doc/pcretest.1 \
+  doc/pcreunicode.3
 
 pcrecpp_man = doc/pcrecpp.3
 EXTRA_DIST += $(pcrecpp_man)

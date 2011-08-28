@@ -12,14 +12,17 @@ If you are not using any private character tables (see the
 \fBpcre_maketables()\fP
 .\"
 documentation), this is relatively straightforward. If you are using private
-tables, it is a little bit more complicated.
+tables, it is a little bit more complicated. However, if you are using the 
+just-in-time optimization feature of \fBpcre_study()\fP, it is not possible to 
+save and reload the JIT data.
 .P
 If you save compiled patterns to a file, you can copy them to a different host
 and run them there. This works even if the new host has the opposite endianness
 to the one on which the patterns were compiled. There may be a small
 performance penalty, but it should be insignificant. However, compiling regular
 expressions with one version of PCRE for use with a different version is not
-guaranteed to work and may cause crashes.
+guaranteed to work and may cause crashes, and saving and restoring a compiled 
+pattern loses any JIT optimization data.
 .
 .
 .SH "SAVING A COMPILED PATTERN"
@@ -58,9 +61,11 @@ later use. They could equally well be saved in a database, or in the memory of
 some daemon process that passes them via sockets to the processes that want
 them.
 .P
-If the pattern has been studied, it is also possible to save the study data in
-a similar way to the compiled pattern itself. When studying generates
-additional information, \fBpcre_study()\fP returns a pointer to a
+If the pattern has been studied, it is also possible to save the normal study
+data in a similar way to the compiled pattern itself. However, if the 
+PCRE_STUDY_JIT_COMPILE was used, the just-in-time data that is created cannot
+be saved because it is too dependent on the current environment. When studying
+generates additional information, \fBpcre_study()\fP returns a pointer to a
 \fBpcre_extra\fP data block. Its format is defined in the
 .\" HTML <a href="pcreapi.html#extradata">
 .\" </a>
@@ -111,7 +116,8 @@ If you saved study data with the compiled pattern, you need to create your own
 reloaded study data. You must also set the PCRE_EXTRA_STUDY_DATA bit in the
 \fIflags\fP field to indicate that study data is present. Then pass the
 \fBpcre_extra\fP block to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP in the
-usual way.
+usual way. If the pattern was studied for just-in-time optimization, that data 
+cannot be saved, and so is lost by a save/restore cycle.
 .
 .
 .SH "COMPATIBILITY WITH DIFFERENT PCRE RELEASES"
@@ -136,6 +142,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 November 2010
-Copyright (c) 1997-2010 University of Cambridge.
+Last updated: 26 August 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi

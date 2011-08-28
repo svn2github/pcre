@@ -49,7 +49,7 @@ cat <<End >pcre.txt
 This file contains a concatenation of the PCRE man pages, converted to plain
 text format for ease of searching with a text editor, or for use on systems
 that do not have a man page processor. The small individual files that give
-synopses of each function in the library have not been included. Neither has 
+synopses of each function in the library have not been included. Neither has
 the pcredemo program. There are separate text files for the pcregrep and
 pcretest commands.
 -----------------------------------------------------------------------------
@@ -59,8 +59,9 @@ End
 
 echo "Making pcre.txt"
 for file in pcre pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
-            pcrepattern pcresyntax pcrepartial pcreprecompile \
-            pcreperform pcreposix pcrecpp pcresample pcrestack ; do
+            pcrepattern pcresyntax pcreunicode pcrejit pcrepartial \
+            pcreprecompile pcreperform pcreposix pcrecpp pcresample \
+            pcrelimits pcrestack ; do
   echo "  Processing $file.3"
   nroff -c -man $file.3 >$file.rawtxt
   ../CleanTxt <$file.rawtxt >>pcre.txt
@@ -103,7 +104,7 @@ perl <<"END" >pcredemo.3
             ".  hy \\\\n(HY\n" .
             "..\n" .
             ".\n" .
-            ".EX\n" ; 
+            ".EX\n" ;
   while (<IN>)
     {
     s/\\/\\e/g;
@@ -111,7 +112,7 @@ perl <<"END" >pcredemo.3
     }
   print OUT ".EE\n";
   close(IN);
-  close(OUT);    
+  close(OUT);
 END
 if [ $? != 0 ] ; then exit 1; fi
 
@@ -136,10 +137,12 @@ for file in *.3 ; do
   base=`basename $file .3`
   toc=-toc
   if [ `expr $base : '.*_'` -ne 0 ] ; then toc="" ; fi
-  if [ "$base" = "pcresample" ] || \
-     [ "$base" = "pcrestack" ]  || \
-     [ "$base" = "pcrecompat" ] || \
-     [ "$base" = "pcreperform" ] ; then
+  if [ "$base" = "pcresample" ]  || \
+     [ "$base" = "pcrestack" ]   || \
+     [ "$base" = "pcrecompat" ]  || \
+     [ "$base" = "pcrelimits" ]  || \
+     [ "$base" = "pcreperform" ] || \
+     [ "$base" = "pcreunicode" ] ; then
     toc=""
   fi
   echo "  Making $base.html"

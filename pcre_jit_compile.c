@@ -6388,7 +6388,9 @@ PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 {
 executable_function *function;
-if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 && extra->executable_jit != NULL)
+if (extra != NULL &&
+    (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 && 
+    extra->executable_jit != NULL)
   {
   function = (executable_function*)extra->executable_jit;
   function->callback = callback;

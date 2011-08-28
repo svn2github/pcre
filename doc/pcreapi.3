@@ -1,7 +1,7 @@
 .TH PCREAPI 3
 .SH NAME
 PCRE - Perl-compatible regular expressions
-.SH "PCRE NATIVE API"
+.SH "PCRE NATIVE API BASIC FUNCTIONS"
 .rs
 .sp
 .B #include <pcre.h>
@@ -25,11 +25,25 @@ PCRE - Perl-compatible regular expressions
 .ti +5n
 .B const char **\fIerrptr\fP);
 .PP
+.B void pcre_free_study(pcre_extra *\fIextra\fP);
+.PP
 .B int pcre_exec(const pcre *\fIcode\fP, "const pcre_extra *\fIextra\fP,"
 .ti +5n
 .B "const char *\fIsubject\fP," int \fIlength\fP, int \fIstartoffset\fP,
 .ti +5n
 .B int \fIoptions\fP, int *\fIovector\fP, int \fIovecsize\fP);
+.
+.
+.SH "PCRE NATIVE API AUXILIARY FUNCTIONS"
+.rs
+.sp
+.B pcre_jit_stack *pcre_jit_stack_alloc(int \fIstartsize\fP, int \fImaxsize\fP);
+.PP
+.B void pcre_jit_stack_free(pcre_jit_stack *\fIstack\fP);
+.PP
+.B void pcre_assign_jit_stack(pcre_extra *\fIextra\fP, 
+.ti +5n
+.B pcre_jit_callback \fIcallback\fP, void *\fIdata\fP);
 .PP
 .B int pcre_dfa_exec(const pcre *\fIcode\fP, "const pcre_extra *\fIextra\fP,"
 .ti +5n
@@ -114,12 +128,13 @@ PCRE - Perl-compatible regular expressions
 .sp
 PCRE has its own native API, which is described in this document. There are
 also some wrapper functions that correspond to the POSIX regular expression
-API. These are described in the
+API, but they do not give access to all the functionality. They are described
+in the
 .\" HREF
 \fBpcreposix\fP
 .\"
 documentation. Both of these APIs define a set of C function calls. A C++
-wrapper is distributed with PCRE. It is documented in the
+wrapper is also distributed with PCRE. It is documented in the
 .\" HREF
 \fBpcrecpp\fP
 .\"
@@ -151,6 +166,18 @@ documentation, and the
 \fBpcresample\fP
 .\"
 documentation describes how to compile and run it.
+.P
+Just-in-time compiler support is an optional feature of PCRE that can be built
+in appropriate hardware environments. It greatly speeds up the matching 
+performance of many patterns. Simple programs can request its use if available. 
+More complicated programs might need to make use of the 
+\fBpcre_jit_stack_alloc()\fP, \fBpcre_jit_stack_free()\fP, and 
+\fBpcre_assign_jit_stack()\fP functions in order to control its memory usage.
+These functions are discussed in the
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation.
 .P
 A second matching function, \fBpcre_dfa_exec()\fP, which is not
 Perl-compatible, is also provided. This uses a different algorithm for the
@@ -282,6 +309,13 @@ callout function pointed to by \fBpcre_callout\fP, are shared by all threads.
 .P
 The compiled form of a regular expression is not altered during matching, so
 the same compiled pattern can safely be used by several threads at once.
+.P
+If the just-in-time optimization feature is being used, it needs separate 
+memory stack areas for each thread. See the
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation for more details.
 .
 .
 .SH "SAVING PRECOMPILED PATTERNS FOR LATER USE"
@@ -323,6 +357,11 @@ otherwise it is set to zero.
 .sp
 The output is an integer that is set to one if support for Unicode character
 properties is available; otherwise it is set to zero.
+.sp
+  PCRE_CONFIG_JIT
+.sp
+The output is an integer that is set to one if support for just-in-time 
+compiling is available; otherwise it is set to zero.   
 .sp
   PCRE_CONFIG_NEWLINE
 .sp
@@ -701,13 +740,8 @@ of UTF-8 characters instead of single-byte character strings. However, it is
 available only when PCRE is built to include UTF-8 support. If not, the use
 of this option provokes an error. Details of how this option changes the
 behaviour of PCRE are given in the
-.\" HTML <a href="pcre.html#utf8support">
-.\" </a>
-section on UTF-8 support
-.\"
-in the main
 .\" HREF
-\fBpcre\fP
+\fBpcreunicode\fP
 .\"
 page.
 .sp
@@ -849,8 +883,23 @@ If studying the pattern does not produce any useful information,
 wants to pass any of the other fields to \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
 .P
-The second argument of \fBpcre_study()\fP contains option bits. At present, no
-options are defined, and this argument should always be zero.
+The second argument of \fBpcre_study()\fP contains option bits. There is only 
+one option: PCRE_STUDY_JIT_COMPILE. If this is set, and the just-in-time 
+compiler is available, the pattern is further compiled into machine code that 
+executes much faster than the \fBpcre_exec()\fP matching function. If 
+the just-in-time compiler is not available, this option is ignored. All other 
+bits in the \fIoptions\fP argument must be zero.
+.P
+JIT compilation is a heavyweight optimization. It can take some time for 
+patterns to be analyzed, and for one-off matches and simple patterns the
+benefit of faster execution might be offset by a much slower study time.
+Not all patterns can be optimized by the JIT compiler. For those that cannot be 
+handled, matching automatically falls back to the \fBpcre_exec()\fP
+interpreter. For more details, see the
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation.
 .P
 The third argument for \fBpcre_study()\fP is a pointer for an error message. If
 studying succeeds (even if no data is returned), the variable it points to is
@@ -859,13 +908,29 @@ static string that is part of the library. You must not try to free it. You
 should test the error pointer for NULL after calling \fBpcre_study()\fP, to be
 sure that it has run successfully.
 .P
-This is a typical call to \fBpcre_study\fP():
+When you are finished with a pattern, you can free the memory used for the
+study data by calling \fBpcre_free_study()\fP. This function was added to the
+API for release 8.20. For earlier versions, the memory could be freed with
+\fBpcre_free()\fP, just like the pattern itself. This will still work in cases
+where PCRE_STUDY_JIT_COMPILE is not used, but it is advisable to change to the
+new function when convenient.
+.P
+This is a typical way in which \fBpcre_study\fP() is used (except that in a 
+real application there should be tests for errors):
 .sp
-  pcre_extra *pe;
-  pe = pcre_study(
+  int rc;
+  pcre *re;
+  pcre_extra *sd;
+  re = pcre_compile("pattern", 0, &error, &erroroffset, NULL);
+  sd = pcre_study(
     re,             /* result of pcre_compile() */
-    0,              /* no options exist */
+    0,              /* no options */
     &error);        /* set to NULL or points to a message */
+  rc = pcre_exec(   /* see below for details of pcre_exec() options */
+    re, sd, "subject", 7, 0, 0, ovector, 30);   
+  ...
+  pcre_free_study(sd);
+  pcre_free(re);  
 .sp
 Studying a pattern does two things: first, a lower bound for the length of
 subject string that is needed to match the pattern is computed. This does not
@@ -880,11 +945,15 @@ single fixed starting character. A bitmap of possible starting bytes is
 created. This speeds up finding a position in the subject at which to start
 matching.
 .P
-The two optimizations just described can be disabled by setting the
-PCRE_NO_START_OPTIMIZE option when calling \fBpcre_exec()\fP or
+These two optimizations apply to both \fBpcre_exec()\fP and 
+\fBpcre_dfa_exec()\fP. However, they are not used by \fBpcre_exec()\fP if 
+\fBpcre_study()\fP is called with the PCRE_STUDY_JIT_COMPILE option, and
+just-in-time compiling is successful. The optimizations can be disabled by
+setting the PCRE_NO_START_OPTIMIZE option when calling \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP. You might want to do this if your pattern contains
-callouts or (*MARK), and you want to make use of these facilities in cases
-where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+callouts or (*MARK) (which cannot be handled by the JIT compiler), and you want
+to make use of these facilities in cases where matching fails. See the
+discussion of PCRE_NO_START_OPTIMIZE
 .\" HTML <a href="#execoptions">
 .\" </a>
 below.
@@ -981,7 +1050,7 @@ check against passing an arbitrary memory pointer. Here is a typical call of
   size_t length;
   rc = pcre_fullinfo(
     re,               /* result of pcre_compile() */
-    pe,               /* result of pcre_study(), or NULL */
+    sd,               /* result of pcre_study(), or NULL */
     PCRE_INFO_SIZE,   /* what is required */
     &length);         /* where to put the data */
 .sp
@@ -1045,6 +1114,19 @@ explicit match is either a literal CR or LF character, or \er or \en.
 Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
 0. The fourth argument should point to an \fBint\fP variable. (?J) and
 (?-J) set and unset the local PCRE_DUPNAMES option, respectively.
+.sp
+  PCRE_INFO_JIT
+.sp
+Return 1 if the pattern was studied with the PCRE_STUDY_JIT_COMPILE option, and 
+just-in-time compiling was successful. The fourth argument should point to an
+\fBint\fP variable. A return value of 0 means that JIT support is not available
+in this version of PCRE, or that the pattern was not studied with the 
+PCRE_STUDY_JIT_COMPILE option, or that the JIT compiler could not handle this 
+particular pattern. See the
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation for details of what can and cannot be handled.
 .sp
   PCRE_INFO_LASTLITERAL
 .sp
@@ -1290,6 +1372,7 @@ fields (not necessarily in this order):
 .sp
   unsigned long int \fIflags\fP;
   void *\fIstudy_data\fP;
+  void *\fIexecutable_jit\fP; 
   unsigned long int \fImatch_limit\fP;
   unsigned long int \fImatch_limit_recursion\fP;
   void *\fIcallout_data\fP;
@@ -1300,28 +1383,37 @@ The \fIflags\fP field is a bitmap that specifies which of the other fields
 are set. The flag bits are:
 .sp
   PCRE_EXTRA_STUDY_DATA
+  PCRE_EXTRA_EXECUTABLE_JIT 
   PCRE_EXTRA_MATCH_LIMIT
   PCRE_EXTRA_MATCH_LIMIT_RECURSION
   PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_TABLES
   PCRE_EXTRA_MARK
 .sp
-Other flag bits should be set to zero. The \fIstudy_data\fP field is set in the
-\fBpcre_extra\fP block that is returned by \fBpcre_study()\fP, together with
-the appropriate flag bit. You should not set this yourself, but you may add to
-the block by setting the other fields and their corresponding flag bits.
+Other flag bits should be set to zero. The \fIstudy_data\fP field and sometimes
+the \fIexecutable_jit\fP field are set in the \fBpcre_extra\fP block that is
+returned by \fBpcre_study()\fP, together with the appropriate flag bits. You
+should not set these yourself, but you may add to the block by setting the
+other fields and their corresponding flag bits.
 .P
 The \fImatch_limit\fP field provides a means of preventing PCRE from using up a
 vast amount of resources when running patterns that are not going to match,
 but which have a very large number of possibilities in their search trees. The
 classic example is a pattern that uses nested unlimited repeats.
 .P
-Internally, PCRE uses a function called \fBmatch()\fP which it calls repeatedly
-(sometimes recursively). The limit set by \fImatch_limit\fP is imposed on the
-number of times this function is called during a match, which has the effect of
-limiting the amount of backtracking that can take place. For patterns that are
-not anchored, the count restarts from zero for each position in the subject
-string.
+Internally, \fBpcre_exec()\fP uses a function called \fBmatch()\fP, which it
+calls repeatedly (sometimes recursively). The limit set by \fImatch_limit\fP is
+imposed on the number of times this function is called during a match, which
+has the effect of limiting the amount of backtracking that can take place. For
+patterns that are not anchored, the count restarts from zero for each position
+in the subject string. 
+.P
+When \fBpcre_exec()\fP is called with a pattern that was successfully studied 
+with the PCRE_STUDY_JIT_COMPILE option, the way that the matching is executed 
+is entirely different. However, there is still the possibility of runaway 
+matching that goes on for a very long time, and so the \fImatch_limit\fP value
+is also used in this case (but in a different way) to limit how long the
+matching can continue.
 .P
 The default value for the limit can be set when PCRE is built; the default
 default is 10 million, which handles all but the most extreme cases. You can
@@ -1334,11 +1426,13 @@ The \fImatch_limit_recursion\fP field is similar to \fImatch_limit\fP, but
 instead of limiting the total number of times that \fBmatch()\fP is called, it
 limits the depth of recursion. The recursion depth is a smaller number than the
 total number of calls, because not all calls to \fBmatch()\fP are recursive.
-This limit is of use only if it is set smaller than \fImatch_limit\fP.
+This limit is of use only if it is set smaller than \fImatch_limit\fP. 
 .P
-Limiting the recursion depth limits the amount of stack that can be used, or,
-when PCRE has been compiled to use memory on the heap instead of the stack, the
-amount of heap memory that can be used.
+Limiting the recursion depth limits the amount of machine stack that can be
+used, or, when PCRE has been compiled to use memory on the heap instead of the
+stack, the amount of heap memory that can be used. This limit is relevant, and
+is ignored, when the pattern was successfully studied with
+PCRE_STUDY_JIT_COMPILE.
 .P
 The default value for \fImatch_limit_recursion\fP can be set when PCRE is
 built; the default default is the same value as the default for
@@ -1885,6 +1979,16 @@ in the subject string. Some simple patterns that might do this are detected and
 faulted at compile time, but more complicated cases, in particular mutual
 recursions between two different subpatterns, cannot be detected until run
 time.
+.sp
+  PCRE_ERROR_JIT_STACKLIMIT (-27)
+.sp
+This error is returned when a pattern that was successfully studied using the 
+PCRE_STUDY_JIT_COMPILE option is matched, but the memory available for the 
+just-in-time processing stack is not large enough. See the
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation for more details.   
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .
@@ -2354,8 +2458,9 @@ group. These are not supported.
   PCRE_ERROR_DFA_UMLIMIT    (-18)
 .sp
 This return is given if \fBpcre_dfa_exec()\fP is called with an \fIextra\fP
-block that contains a setting of the \fImatch_limit\fP field. This is not
-supported (it is meaningless).
+block that contains a setting of the \fImatch_limit\fP or
+\fImatch_limit_recursion\fP fields. This is not supported (these fields are
+meaningless for DFA matching).
 .sp
   PCRE_ERROR_DFA_WSSIZE     (-19)
 .sp
@@ -2392,6 +2497,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 August 2011
+Last updated: 27 August 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

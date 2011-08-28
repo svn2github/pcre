@@ -85,6 +85,8 @@ USER DOCUMENTATION
          pcrecpp           details of the C++ wrapper
          pcredemo          a demonstration C program that uses PCRE
          pcregrep          description of the pcregrep command
+         pcrejit           discussion of the just-in-time optimization support
+         pcrelimits        details of size and other limits
          pcrematching      discussion of the two matching algorithms
          pcrepartial       details of the partial matching facility
          pcrepattern       syntax and semantics of supported
@@ -96,167 +98,10 @@ USER DOCUMENTATION
          pcrestack         discussion of stack usage
          pcresyntax        quick syntax reference
          pcretest          description of the pcretest testing command
+         pcreunicode       discussion of Unicode and UTF-8 support
 
        In  addition,  in the "man" and HTML formats, there is a short page for
        each C library function, listing its arguments and results.
-
-
-LIMITATIONS
-
-       There are some size limitations in PCRE but it is hoped that they  will
-       never in practice be relevant.
-
-       The  maximum  length of a compiled pattern is 65539 (sic) bytes if PCRE
-       is compiled with the default internal linkage size of 2. If you want to
-       process  regular  expressions  that are truly enormous, you can compile
-       PCRE with an internal linkage size of 3 or 4 (see the  README  file  in
-       the  source  distribution and the pcrebuild documentation for details).
-       In these cases the limit is substantially larger.  However,  the  speed
-       of execution is slower.
-
-       All values in repeating quantifiers must be less than 65536.
-
-       There is no limit to the number of parenthesized subpatterns, but there
-       can be no more than 65535 capturing subpatterns.
-
-       The maximum length of name for a named subpattern is 32 characters, and
-       the maximum number of named subpatterns is 10000.
-
-       The  maximum  length of a subject string is the largest positive number
-       that an integer variable can hold. However, when using the  traditional
-       matching function, PCRE uses recursion to handle subpatterns and indef-
-       inite repetition.  This means that the available stack space may  limit
-       the size of a subject string that can be processed by certain patterns.
-       For a discussion of stack issues, see the pcrestack documentation.
-
-
-UTF-8 AND UNICODE PROPERTY SUPPORT
-
-       From release 3.3, PCRE has  had  some  support  for  character  strings
-       encoded  in the UTF-8 format. For release 4.0 this was greatly extended
-       to cover most common requirements, and in release 5.0  additional  sup-
-       port for Unicode general category properties was added.
-
-       In  order  process  UTF-8 strings, you must build PCRE to include UTF-8
-       support in the code, and, in addition,  you  must  call  pcre_compile()
-       with  the  PCRE_UTF8  option  flag,  or the pattern must start with the
-       sequence (*UTF8). When either of these is the case,  both  the  pattern
-       and  any  subject  strings  that  are matched against it are treated as
-       UTF-8 strings instead of strings of 1-byte characters.
-
-       If you compile PCRE with UTF-8 support, but do not use it at run  time,
-       the  library will be a bit bigger, but the additional run time overhead
-       is limited to testing the PCRE_UTF8 flag occasionally, so should not be
-       very big.
-
-       If PCRE is built with Unicode character property support (which implies
-       UTF-8 support), the escape sequences \p{..}, \P{..}, and  \X  are  sup-
-       ported.  The available properties that can be tested are limited to the
-       general category properties such as Lu for an upper case letter  or  Nd
-       for  a  decimal number, the Unicode script names such as Arabic or Han,
-       and the derived properties Any and L&. A full  list  is  given  in  the
-       pcrepattern documentation. Only the short names for properties are sup-
-       ported. For example, \p{L} matches a letter. Its Perl synonym,  \p{Let-
-       ter},  is  not  supported.   Furthermore,  in Perl, many properties may
-       optionally be prefixed by "Is", for compatibility with Perl  5.6.  PCRE
-       does not support this.
-
-   Validity of UTF-8 strings
-
-       When  you  set  the  PCRE_UTF8 flag, the strings passed as patterns and
-       subjects are (by default) checked for validity on entry to the relevant
-       functions.  From  release 7.3 of PCRE, the check is according the rules
-       of RFC 3629, which are themselves derived from the  Unicode  specifica-
-       tion.  Earlier  releases  of PCRE followed the rules of RFC 2279, which
-       allows the full range of 31-bit values (0 to 0x7FFFFFFF).  The  current
-       check allows only values in the range U+0 to U+10FFFF, excluding U+D800
-       to U+DFFF.
-
-       The excluded code points are the "Low Surrogate Area"  of  Unicode,  of
-       which  the Unicode Standard says this: "The Low Surrogate Area does not
-       contain any  character  assignments,  consequently  no  character  code
-       charts or namelists are provided for this area. Surrogates are reserved
-       for use with UTF-16 and then must be used in pairs."  The  code  points
-       that  are  encoded  by  UTF-16  pairs are available as independent code
-       points in the UTF-8 encoding. (In  other  words,  the  whole  surrogate
-       thing is a fudge for UTF-16 which unfortunately messes up UTF-8.)
-
-       If an invalid UTF-8 string is passed to PCRE, an error return is given.
-       At compile time, the only additional information is the offset  to  the
-       first byte of the failing character. The runtime functions (pcre_exec()
-       and pcre_dfa_exec()), pass back this information  as  well  as  a  more
-       detailed  reason  code if the caller has provided memory in which to do
-       this.
-
-       In some situations, you may already know that your strings  are  valid,
-       and  therefore  want  to  skip these checks in order to improve perfor-
-       mance. If you set the PCRE_NO_UTF8_CHECK flag at compile time or at run
-       time,  PCRE  assumes  that  the pattern or subject it is given (respec-
-       tively) contains only valid UTF-8 codes. In  this  case,  it  does  not
-       diagnose an invalid UTF-8 string.
-
-       If  you  pass  an  invalid UTF-8 string when PCRE_NO_UTF8_CHECK is set,
-       what happens depends on why the string is invalid. If the  string  con-
-       forms to the "old" definition of UTF-8 (RFC 2279), it is processed as a
-       string of characters in the range 0  to  0x7FFFFFFF.  In  other  words,
-       apart from the initial validity test, PCRE (when in UTF-8 mode) handles
-       strings according to the more liberal rules of RFC  2279.  However,  if
-       the  string does not even conform to RFC 2279, the result is undefined.
-       Your program may crash.
-
-       If you want to process strings  of  values  in  the  full  range  0  to
-       0x7FFFFFFF,  encoded in a UTF-8-like manner as per the old RFC, you can
-       set PCRE_NO_UTF8_CHECK to bypass the more restrictive test. However, in
-       this situation, you will have to apply your own validity check.
-
-   General comments about UTF-8 mode
-
-       1.  An  unbraced  hexadecimal  escape sequence (such as \xb3) matches a
-       two-byte UTF-8 character if the value is greater than 127.
-
-       2. Octal numbers up to \777 are recognized, and  match  two-byte  UTF-8
-       characters for values greater than \177.
-
-       3.  Repeat quantifiers apply to complete UTF-8 characters, not to indi-
-       vidual bytes, for example: \x{100}{3}.
-
-       4. The dot metacharacter matches one UTF-8 character instead of a  sin-
-       gle byte.
-
-       5.  The  escape sequence \C can be used to match a single byte in UTF-8
-       mode, but its use can lead to some strange effects.  This  facility  is
-       not available in the alternative matching function, pcre_dfa_exec().
-
-       6.  The  character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly
-       test characters of any code value, but, by default, the characters that
-       PCRE  recognizes  as digits, spaces, or word characters remain the same
-       set as before, all with values less than 256. This  remains  true  even
-       when  PCRE  is built to include Unicode property support, because to do
-       otherwise would slow down PCRE in many common cases. Note in particular
-       that this applies to \b and \B, because they are defined in terms of \w
-       and \W. If you really want to test for a wider sense of, say,  "digit",
-       you  can  use  explicit Unicode property tests such as \p{Nd}. Alterna-
-       tively, if you set the PCRE_UCP option,  the  way  that  the  character
-       escapes  work  is changed so that Unicode properties are used to deter-
-       mine which characters match. There are more details in the  section  on
-       generic character types in the pcrepattern documentation.
-
-       7.  Similarly,  characters that match the POSIX named character classes
-       are all low-valued characters, unless the PCRE_UCP option is set.
-
-       8. However, the horizontal and  vertical  whitespace  matching  escapes
-       (\h,  \H,  \v, and \V) do match all the appropriate Unicode characters,
-       whether or not PCRE_UCP is set.
-
-       9. Case-insensitive matching applies only to  characters  whose  values
-       are  less than 128, unless PCRE is built with Unicode property support.
-       Even when Unicode property support is available, PCRE  still  uses  its
-       own  character  tables when checking the case of low-valued characters,
-       so as not to degrade performance.  The Unicode property information  is
-       used only for characters with higher values. Furthermore, PCRE supports
-       case-insensitive matching only  when  there  is  a  one-to-one  mapping
-       between  a letter's cases. There are a small number of many-to-one map-
-       pings in Unicode; these are not supported by PCRE.
 
 
 AUTHOR
@@ -272,11 +117,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 07 May 2011
+       Last updated: 24 August 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREBUILD(3)                                                      PCREBUILD(3)
 
 
@@ -622,8 +467,8 @@ REVISION
        Last updated: 02 August 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
@@ -826,8 +671,8 @@ REVISION
        Last updated: 17 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREAPI(3)                                                          PCREAPI(3)
 
 
@@ -1453,8 +1298,8 @@ COMPILING A PATTERN
        strings  of  UTF-8 characters instead of single-byte character strings.
        However, it is available only when PCRE is built to include UTF-8  sup-
        port.  If not, the use of this option provokes an error. Details of how
-       this option changes the behaviour of PCRE are given in the  section  on
-       UTF-8 support in the main pcre page.
+       this option changes the behaviour of PCRE are given in the  pcreunicode
+       page.
 
          PCRE_NO_UTF8_CHECK
 
@@ -2998,8 +2843,8 @@ REVISION
        Last updated: 13 August 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
@@ -3187,8 +3032,8 @@ REVISION
        Last updated: 31 July 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
@@ -3203,54 +3048,53 @@ DIFFERENCES BETWEEN PCRE AND PERL
        respect to Perl versions 5.10 and above.
 
        1.  PCRE has only a subset of Perl's UTF-8 and Unicode support. Details
-       of what it does have are given in the section on UTF-8 support  in  the
-       main pcre page.
+       of what it does have are given in the pcreunicode page.
 
        2. PCRE allows repeat quantifiers only on parenthesized assertions, but
-       they do not mean what you might think. For example, (?!a){3}  does  not
+       they  do  not mean what you might think. For example, (?!a){3} does not
        assert that the next three characters are not "a". It just asserts that
        the next character is not "a" three times (in principle: PCRE optimizes
        this to run the assertion just once). Perl allows repeat quantifiers on
        other assertions such as \b, but these do not seem to have any use.
 
-       3. Capturing subpatterns that occur inside  negative  lookahead  asser-
-       tions  are  counted,  but their entries in the offsets vector are never
-       set. Perl sets its numerical variables from any such patterns that  are
+       3.  Capturing  subpatterns  that occur inside negative lookahead asser-
+       tions are counted, but their entries in the offsets  vector  are  never
+       set.  Perl sets its numerical variables from any such patterns that are
        matched before the assertion fails to match something (thereby succeed-
-       ing), but only if the negative lookahead assertion  contains  just  one
+       ing),  but  only  if the negative lookahead assertion contains just one
        branch.
 
-       4.  Though  binary zero characters are supported in the subject string,
+       4. Though binary zero characters are supported in the  subject  string,
        they are not allowed in a pattern string because it is passed as a nor-
        mal C string, terminated by zero. The escape sequence \0 can be used in
        the pattern to represent a binary zero.
 
-       5. The following Perl escape sequences are not supported: \l,  \u,  \L,
-       \U,  and  \N when followed by a character name or Unicode value. (\N on
+       5.  The  following Perl escape sequences are not supported: \l, \u, \L,
+       \U, and \N when followed by a character name or Unicode value.  (\N  on
        its own, matching a non-newline character, is supported.) In fact these
-       are  implemented  by Perl's general string-handling and are not part of
-       its pattern matching engine. If any of these are encountered  by  PCRE,
+       are implemented by Perl's general string-handling and are not  part  of
+       its  pattern  matching engine. If any of these are encountered by PCRE,
        an error is generated.
 
-       6.  The Perl escape sequences \p, \P, and \X are supported only if PCRE
-       is built with Unicode character property support. The  properties  that
-       can  be tested with \p and \P are limited to the general category prop-
-       erties such as Lu and Nd, script names such as Greek or  Han,  and  the
-       derived  properties  Any  and  L&. PCRE does support the Cs (surrogate)
-       property, which Perl does not; the  Perl  documentation  says  "Because
+       6. The Perl escape sequences \p, \P, and \X are supported only if  PCRE
+       is  built  with Unicode character property support. The properties that
+       can be tested with \p and \P are limited to the general category  prop-
+       erties  such  as  Lu and Nd, script names such as Greek or Han, and the
+       derived properties Any and L&. PCRE does  support  the  Cs  (surrogate)
+       property,  which  Perl  does  not; the Perl documentation says "Because
        Perl hides the need for the user to understand the internal representa-
-       tion of Unicode characters, there is no need to implement the  somewhat
+       tion  of Unicode characters, there is no need to implement the somewhat
        messy concept of surrogates."
 
-       7.  PCRE implements a simpler version of \X than Perl, which changed to
-       make \X match what Unicode calls an "extended grapheme  cluster".  This
-       is  more  complicated  than an extended Unicode sequence, which is what
+       7. PCRE implements a simpler version of \X than Perl, which changed  to
+       make  \X  match what Unicode calls an "extended grapheme cluster". This
+       is more complicated than an extended Unicode sequence,  which  is  what
        PCRE matches.
 
        8. PCRE does support the \Q...\E escape for quoting substrings. Charac-
-       ters  in  between  are  treated as literals. This is slightly different
-       from Perl in that $ and @ are  also  handled  as  literals  inside  the
-       quotes.  In Perl, they cause variable interpolation (but of course PCRE
+       ters in between are treated as literals.  This  is  slightly  different
+       from  Perl  in  that  $  and  @ are also handled as literals inside the
+       quotes. In Perl, they cause variable interpolation (but of course  PCRE
        does not have variables). Note the following examples:
 
            Pattern            PCRE matches      Perl matches
@@ -3260,60 +3104,60 @@ DIFFERENCES BETWEEN PCRE AND PERL
            \Qabc\$xyz\E       abc\$xyz          abc\$xyz
            \Qabc\E\$\Qxyz\E   abc$xyz           abc$xyz
 
-       The \Q...\E sequence is recognized both inside  and  outside  character
+       The  \Q...\E  sequence  is recognized both inside and outside character
        classes.
 
        9. Fairly obviously, PCRE does not support the (?{code}) and (??{code})
-       constructions. However, there is support for recursive  patterns.  This
-       is  not  available  in Perl 5.8, but it is in Perl 5.10. Also, the PCRE
-       "callout" feature allows an external function to be called during  pat-
+       constructions.  However,  there is support for recursive patterns. This
+       is not available in Perl 5.8, but it is in Perl 5.10.  Also,  the  PCRE
+       "callout"  feature allows an external function to be called during pat-
        tern matching. See the pcrecallout documentation for details.
 
-       10.  Subpatterns  that  are  called recursively or as "subroutines" are
-       always treated as atomic groups in  PCRE.  This  is  like  Python,  but
-       unlike  Perl. There is a discussion of an example that explains this in
-       more detail in the section on recursion differences from  Perl  in  the
+       10. Subpatterns that are called recursively  or  as  "subroutines"  are
+       always  treated  as  atomic  groups  in  PCRE. This is like Python, but
+       unlike Perl. There is a discussion of an example that explains this  in
+       more  detail  in  the section on recursion differences from Perl in the
        pcrepattern page.
 
-       11.  There are some differences that are concerned with the settings of
-       captured strings when part of  a  pattern  is  repeated.  For  example,
-       matching  "aba"  against  the  pattern  /^(a(b)?)+$/  in Perl leaves $2
+       11. There are some differences that are concerned with the settings  of
+       captured  strings  when  part  of  a  pattern is repeated. For example,
+       matching "aba" against the  pattern  /^(a(b)?)+$/  in  Perl  leaves  $2
        unset, but in PCRE it is set to "b".
 
-       12. PCRE's handling of duplicate subpattern numbers and duplicate  sub-
+       12.  PCRE's handling of duplicate subpattern numbers and duplicate sub-
        pattern names is not as general as Perl's. This is a consequence of the
        fact the PCRE works internally just with numbers, using an external ta-
-       ble  to  translate  between numbers and names. In particular, a pattern
-       such as (?|(?<a>A)|(?<b)B), where the two  capturing  parentheses  have
-       the  same  number  but different names, is not supported, and causes an
-       error at compile time. If it were allowed, it would not be possible  to
-       distinguish  which  parentheses matched, because both names map to cap-
+       ble to translate between numbers and names. In  particular,  a  pattern
+       such  as  (?|(?<a>A)|(?<b)B),  where the two capturing parentheses have
+       the same number but different names, is not supported,  and  causes  an
+       error  at compile time. If it were allowed, it would not be possible to
+       distinguish which parentheses matched, because both names map  to  cap-
        turing subpattern number 1. To avoid this confusing situation, an error
        is given at compile time.
 
-       13.  Perl  recognizes  comments  in some places that PCRE does not, for
-       example, between the ( and ? at the start of a subpattern.  If  the  /x
-       modifier  is set, Perl allows whitespace between ( and ? but PCRE never
+       13. Perl recognizes comments in some places that  PCRE  does  not,  for
+       example,  between  the  ( and ? at the start of a subpattern. If the /x
+       modifier is set, Perl allows whitespace between ( and ? but PCRE  never
        does, even if the PCRE_EXTENDED option is set.
 
        14. PCRE provides some extensions to the Perl regular expression facil-
-       ities.   Perl  5.10  includes new features that are not in earlier ver-
-       sions of Perl, some of which (such as named parentheses) have  been  in
+       ities.  Perl 5.10 includes new features that are not  in  earlier  ver-
+       sions  of  Perl, some of which (such as named parentheses) have been in
        PCRE for some time. This list is with respect to Perl 5.10:
 
-       (a)  Although  lookbehind  assertions  in  PCRE must match fixed length
-       strings, each alternative branch of a lookbehind assertion can match  a
-       different  length  of  string.  Perl requires them all to have the same
+       (a) Although lookbehind assertions in  PCRE  must  match  fixed  length
+       strings,  each alternative branch of a lookbehind assertion can match a
+       different length of string. Perl requires them all  to  have  the  same
        length.
 
-       (b) If PCRE_DOLLAR_ENDONLY is set and PCRE_MULTILINE is not set, the  $
+       (b)  If PCRE_DOLLAR_ENDONLY is set and PCRE_MULTILINE is not set, the $
        meta-character matches only at the very end of the string.
 
        (c) If PCRE_EXTRA is set, a backslash followed by a letter with no spe-
        cial meaning is faulted. Otherwise, like Perl, the backslash is quietly
        ignored.  (Perl can be made to issue a warning.)
 
-       (d)  If  PCRE_UNGREEDY is set, the greediness of the repetition quanti-
+       (d) If PCRE_UNGREEDY is set, the greediness of the  repetition  quanti-
        fiers is inverted, that is, by default they are not greedy, but if fol-
        lowed by a question mark they are.
 
@@ -3321,10 +3165,10 @@ DIFFERENCES BETWEEN PCRE AND PERL
        tried only at the first matching position in the subject string.
 
        (f) The PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
-       and  PCRE_NO_AUTO_CAPTURE  options for pcre_exec() have no Perl equiva-
+       and PCRE_NO_AUTO_CAPTURE options for pcre_exec() have no  Perl  equiva-
        lents.
 
-       (g) The \R escape sequence can be restricted to match only CR,  LF,  or
+       (g)  The  \R escape sequence can be restricted to match only CR, LF, or
        CRLF by the PCRE_BSR_ANYCRLF option.
 
        (h) The callout facility is PCRE-specific.
@@ -3334,10 +3178,10 @@ DIFFERENCES BETWEEN PCRE AND PERL
        (j) Patterns compiled by PCRE can be saved and re-used at a later time,
        even on different hosts that have the other endianness.
 
-       (k) The alternative matching function (pcre_dfa_exec())  matches  in  a
+       (k)  The  alternative  matching function (pcre_dfa_exec()) matches in a
        different way and is not Perl-compatible.
 
-       (l)  PCRE  recognizes some special sequences such as (*CR) at the start
+       (l) PCRE recognizes some special sequences such as (*CR) at  the  start
        of a pattern that set overall options that cannot be changed within the
        pattern.
 
@@ -3351,11 +3195,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 24 July 2011
+       Last updated: 24 August 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
@@ -3391,8 +3235,8 @@ PCRE REGULAR EXPRESSION DETAILS
        Starting a pattern with this sequence  is  equivalent  to  setting  the
        PCRE_UTF8  option.  This  feature  is  not Perl-compatible. How setting
        UTF-8 mode affects pattern matching  is  mentioned  in  several  places
-       below.  There  is  also  a  summary of UTF-8 features in the section on
-       UTF-8 support in the main pcre page.
+       below.  There  is  also  a summary of UTF-8 features in the pcreunicode
+       page.
 
        Another special sequence that may appear at the start of a  pattern  or
        in combination with (*UTF8) is:
@@ -5860,11 +5704,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 24 July 2011
+       Last updated: 24 August 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESYNTAX(3)                                                    PCRESYNTAX(3)
 
 
@@ -6233,8 +6077,157 @@ REVISION
        Last updated: 21 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
+ 
+ 
+PCREUNICODE(3)                                                  PCREUNICODE(3)
 
 
+NAME
+       PCRE - Perl-compatible regular expressions
+
+
+UTF-8 AND UNICODE PROPERTY SUPPORT
+
+       In  order  process  UTF-8 strings, you must build PCRE to include UTF-8
+       support in the code, and, in addition,  you  must  call  pcre_compile()
+       with  the  PCRE_UTF8  option  flag,  or the pattern must start with the
+       sequence (*UTF8). When either of these is the case,  both  the  pattern
+       and  any  subject  strings  that  are matched against it are treated as
+       UTF-8 strings instead of strings of 1-byte characters.  PCRE  does  not
+       support any other formats (in particular, it does not support UTF-16).
+
+       If  you compile PCRE with UTF-8 support, but do not use it at run time,
+       the library will be a bit bigger, but the additional run time  overhead
+       is limited to testing the PCRE_UTF8 flag occasionally, so should not be
+       very big.
+
+       If PCRE is built with Unicode character property support (which implies
+       UTF-8  support),  the  escape sequences \p{..}, \P{..}, and \X are sup-
+       ported.  The available properties that can be tested are limited to the
+       general  category  properties such as Lu for an upper case letter or Nd
+       for a decimal number, the Unicode script names such as Arabic  or  Han,
+       and  the  derived  properties  Any  and L&. A full list is given in the
+       pcrepattern documentation. Only the short names for properties are sup-
+       ported.  For example, \p{L} matches a letter. Its Perl synonym, \p{Let-
+       ter}, is not supported.  Furthermore,  in  Perl,  many  properties  may
+       optionally  be  prefixed by "Is", for compatibility with Perl 5.6. PCRE
+       does not support this.
+
+   Validity of UTF-8 strings
+
+       When you set the PCRE_UTF8 flag, the strings  passed  as  patterns  and
+       subjects are (by default) checked for validity on entry to the relevant
+       functions. From release 7.3 of PCRE, the check is according  the  rules
+       of  RFC  3629, which are themselves derived from the Unicode specifica-
+       tion. Earlier releases of PCRE followed the rules of  RFC  2279,  which
+       allows  the  full range of 31-bit values (0 to 0x7FFFFFFF). The current
+       check allows only values in the range U+0 to U+10FFFF, excluding U+D800
+       to U+DFFF.
+
+       The  excluded  code  points are the "Low Surrogate Area" of Unicode, of
+       which the Unicode Standard says this: "The Low Surrogate Area does  not
+       contain  any  character  assignments,  consequently  no  character code
+       charts or namelists are provided for this area. Surrogates are reserved
+       for  use  with  UTF-16 and then must be used in pairs." The code points
+       that are encoded by UTF-16 pairs  are  available  as  independent  code
+       points  in  the  UTF-8  encoding.  (In other words, the whole surrogate
+       thing is a fudge for UTF-16 which unfortunately messes up UTF-8.)
+
+       If an invalid UTF-8 string is passed to PCRE, an error return is given.
+       At  compile  time, the only additional information is the offset to the
+       first byte of the failing character. The runtime functions  pcre_exec()
+       and  pcre_dfa_exec() also pass back this information, as well as a more
+       detailed reason code if the caller has provided memory in which  to  do
+       this.
+
+       In  some  situations, you may already know that your strings are valid,
+       and therefore want to skip these checks in  order  to  improve  perfor-
+       mance. If you set the PCRE_NO_UTF8_CHECK flag at compile time or at run
+       time, PCRE assumes that the pattern or subject  it  is  given  (respec-
+       tively)  contains  only  valid  UTF-8  codes. In this case, it does not
+       diagnose an invalid UTF-8 string.
+
+       If you pass an invalid UTF-8 string  when  PCRE_NO_UTF8_CHECK  is  set,
+       what  happens  depends on why the string is invalid. If the string con-
+       forms to the "old" definition of UTF-8 (RFC 2279), it is processed as a
+       string  of  characters  in  the  range 0 to 0x7FFFFFFF. In other words,
+       apart from the initial validity test, PCRE (when in UTF-8 mode) handles
+       strings  according  to  the more liberal rules of RFC 2279. However, if
+       the string does not even conform to RFC 2279, the result is  undefined.
+       Your program may crash.
+
+       If  you  want  to  process  strings  of  values  in the full range 0 to
+       0x7FFFFFFF, encoded in a UTF-8-like manner as per the old RFC, you  can
+       set PCRE_NO_UTF8_CHECK to bypass the more restrictive test. However, in
+       this situation, you will have to apply your own validity check.
+
+   General comments about UTF-8 mode
+
+       1. An unbraced hexadecimal escape sequence (such  as  \xb3)  matches  a
+       two-byte UTF-8 character if the value is greater than 127.
+
+       2.  Octal  numbers  up to \777 are recognized, and match two-byte UTF-8
+       characters for values greater than \177.
+
+       3. Repeat quantifiers apply to complete UTF-8 characters, not to  indi-
+       vidual bytes, for example: \x{100}{3}.
+
+       4.  The dot metacharacter matches one UTF-8 character instead of a sin-
+       gle byte.
+
+       5. The escape sequence \C can be used to match a single byte  in  UTF-8
+       mode,  but  its  use can lead to some strange effects. This facility is
+       not available in the alternative matching function, pcre_dfa_exec().
+
+       6. The character escapes \b, \B, \d, \D, \s, \S, \w, and  \W  correctly
+       test characters of any code value, but, by default, the characters that
+       PCRE recognizes as digits, spaces, or word characters remain  the  same
+       set  as  before,  all with values less than 256. This remains true even
+       when PCRE is built to include Unicode property support, because  to  do
+       otherwise would slow down PCRE in many common cases. Note in particular
+       that this applies to \b and \B, because they are defined in terms of \w
+       and  \W. If you really want to test for a wider sense of, say, "digit",
+       you can use explicit Unicode property tests such  as  \p{Nd}.  Alterna-
+       tively,  if  you  set  the  PCRE_UCP option, the way that the character
+       escapes work is changed so that Unicode properties are used  to  deter-
+       mine  which  characters match. There are more details in the section on
+       generic character types in the pcrepattern documentation.
+
+       7. Similarly, characters that match the POSIX named  character  classes
+       are all low-valued characters, unless the PCRE_UCP option is set.
+
+       8.  However,  the  horizontal  and vertical whitespace matching escapes
+       (\h, \H, \v, and \V) do match all the appropriate  Unicode  characters,
+       whether or not PCRE_UCP is set.
+
+       9.  Case-insensitive  matching  applies only to characters whose values
+       are less than 128, unless PCRE is built with Unicode property  support.
+       Even  when  Unicode  property support is available, PCRE still uses its
+       own character tables when checking the case of  low-valued  characters,
+       so  as not to degrade performance.  The Unicode property information is
+       used only for characters with higher values. Furthermore, PCRE supports
+       case-insensitive  matching  only  when  there  is  a one-to-one mapping
+       between a letter's cases. There are a small number of many-to-one  map-
+       pings in Unicode; these are not supported by PCRE.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 24 August 2011
+       Copyright (c) 1997-2011 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
+------------------------------------------------------------------------------
+ 
+ 
 PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
@@ -6653,8 +6646,8 @@ REVISION
        Last updated: 07 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
@@ -6778,8 +6771,8 @@ REVISION
        Last updated: 17 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
@@ -6946,8 +6939,8 @@ REVISION
        Last updated: 16 May 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
@@ -7209,8 +7202,8 @@ REVISION
        Last updated: 16 May 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECPP(3)                                                          PCRECPP(3)
 
 
@@ -7551,8 +7544,8 @@ REVISION
        Last updated: 17 March 2009
        Minor typo fixed: 25 July 2011
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
@@ -7638,6 +7631,56 @@ REVISION
        Last updated: 17 November 2010
        Copyright (c) 1997-2010 University of Cambridge.
 ------------------------------------------------------------------------------
+PCRELIMITS(3)                                                    PCRELIMITS(3)
+
+
+NAME
+       PCRE - Perl-compatible regular expressions
+
+
+SIZE AND OTHER LIMITATIONS
+
+       There  are some size limitations in PCRE but it is hoped that they will
+       never in practice be relevant.
+
+       The maximum length of a compiled pattern is 65539 (sic) bytes  if  PCRE
+       is compiled with the default internal linkage size of 2. If you want to
+       process regular expressions that are truly enormous,  you  can  compile
+       PCRE  with  an  internal linkage size of 3 or 4 (see the README file in
+       the source distribution and the pcrebuild documentation  for  details).
+       In  these  cases the limit is substantially larger.  However, the speed
+       of execution is slower.
+
+       All values in repeating quantifiers must be less than 65536.
+
+       There is no limit to the number of parenthesized subpatterns, but there
+       can be no more than 65535 capturing subpatterns.
+
+       The maximum length of name for a named subpattern is 32 characters, and
+       the maximum number of named subpatterns is 10000.
+
+       The maximum length of a subject string is the largest  positive  number
+       that  an integer variable can hold. However, when using the traditional
+       matching function, PCRE uses recursion to handle subpatterns and indef-
+       inite  repetition.  This means that the available stack space may limit
+       the size of a subject string that can be processed by certain patterns.
+       For a discussion of stack issues, see the pcrestack documentation.
+
+
+AUTHOR
+
+       Philip Hazel
+       University Computing Service
+       Cambridge CB2 3QH, England.
+
+
+REVISION
+
+       Last updated: 24 August 2011
+       Copyright (c) 1997-2011 University of Cambridge.
+------------------------------------------------------------------------------
+ 
+ 
 PCRESTACK(3)                                                      PCRESTACK(3)
 
 
@@ -7789,5 +7832,5 @@ REVISION
        Last updated: 22 July 2011
        Copyright (c) 1997-2011 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 

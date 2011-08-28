@@ -32,13 +32,15 @@ whether or not a partial match is preferred to an alternative complete match,
 though the details differ between the two matching functions. If both options
 are set, PCRE_PARTIAL_HARD takes precedence.
 .P
-Setting a partial matching option disables two of PCRE's optimizations. PCRE
-remembers the last literal byte in a pattern, and abandons matching immediately
-if such a byte is not present in the subject string. This optimization cannot
-be used for a subject string that might match only partially. If the pattern
-was studied, PCRE knows the minimum length of a matching string, and does not
-bother to run the matching function on shorter strings. This optimization is
-also disabled for partial matching.
+Setting a partial matching option for \fBpcre_exec()\fP disables the use of any
+just-in-time code that was set up by calling \fBpcre_study()\fP with the
+PCRE_STUDY_JIT_COMPILE option. It also disables two of PCRE's standard
+optimizations. PCRE remembers the last literal byte in a pattern, and abandons
+matching immediately if such a byte is not present in the subject string. This
+optimization cannot be used for a subject string that might match only
+partially. If the pattern was studied, PCRE knows the minimum length of a
+matching string, and does not bother to run the matching function on shorter
+strings. This optimization is also disabled for partial matching.
 .
 .
 .SH "PARTIAL MATCHING USING pcre_exec()"
@@ -411,6 +413,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 November 2010
-Copyright (c) 1997-2010 University of Cambridge.
+Last updated: 26 August 2011
+Copyright (c) 1997-2011 University of Cambridge.
 .fi

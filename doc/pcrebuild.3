@@ -98,6 +98,22 @@ supported. Details are given in the
 documentation.
 .
 .
+.SH "JUST-IN-TIME COMPILER SUPPORT"
+.rs
+.sp
+Just-in-time compiler support is included in the build by specifying
+.sp
+  --enable-jit
+.sp
+This support is available only for certain hardware architectures. If this 
+option is set for an unsupported architecture, a compile time error occurs.
+See the 
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation for a discussion of JIT usage.
+.
+.
 .SH "CODE VALUE OF NEWLINE"
 .rs
 .sp
@@ -367,6 +383,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 02 August 2011
+Last updated: 27 August 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

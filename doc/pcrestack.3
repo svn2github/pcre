@@ -19,6 +19,17 @@ different numbers of a's. Furthermore, in a number of cases where the result of
 the recursive call would immediately be passed back as the result of the
 current call (a "tail recursion"), the function is just restarted instead.
 .P
+The above comments apply when \fBpcre_exec()\fP is run in its normal 
+interpretive manner. If the pattern was studied with the 
+PCRE_STUDY_JIT_COMPILE option, and just-in-time compiling was successful, and 
+the options passed to \fBpcre_exec()\fP were not incompatible, the matching 
+process uses the JIT-compiled code instead of the \fBmatch()\fP function. In 
+this case, the memory requirements are handled entirely differently. See the
+.\" HREF
+\fBpcrejit\fP
+.\"
+documentation for details.
+.P
 The \fBpcre_dfa_exec()\fP function operates in an entirely different way, and
 uses recursion only when there is a regular expression recursion or subroutine
 call in the pattern. This includes the processing of assertion and "once-only"
@@ -30,7 +41,7 @@ write patterns with runaway infinite recursions; such patterns will cause
 against this.
 .P
 The comments that follow do NOT apply to \fBpcre_dfa_exec()\fP; they are
-relevant only for \fBpcre_exec()\fP.
+relevant only for \fBpcre_exec()\fP without the JIT optimization.
 .
 .
 .SS "Reducing \fBpcre_exec()\fP's stack usage"
@@ -173,6 +184,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 July 2011
+Last updated: 26 August 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
