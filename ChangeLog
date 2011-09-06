@@ -27,7 +27,9 @@ Version 8.20
    the first 2/3, for compatibility. This is, of course, another edge case. 
    
 4. Zoltan Herczeg's just-in-time compiler support has been integrated into the
-   main code base, and can be used by building with --enable-jit. 
+   main code base, and can be used by building with --enable-jit. When this is
+   done, pcregrep automatically uses it unless --disable-pcregrep-jit or the 
+   runtime --no-jit option is given.
    
 5. When the number of matches in a pcre_dfa_exec() run exactly filled the 
    ovector, the return from the function was zero, implying that there were 
