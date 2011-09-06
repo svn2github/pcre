@@ -118,6 +118,12 @@ AC_ARG_ENABLE(jit,
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
 
+# Handle --disable-pcregrep-jit (enabled by default)
+AC_ARG_ENABLE(pcregrep-jit,
+              AS_HELP_STRING([--disable-pcregrep-jit],
+                             [disable JIT support in pcregrep]),
+              , enable_pcregrep_jit=yes)
+
 # Handle --enable-rebuild-chartables
 AC_ARG_ENABLE(rebuild-chartables,
               AS_HELP_STRING([--enable-rebuild-chartables],
@@ -478,6 +484,13 @@ AC_SUBST(PCRE_STATIC_CFLAG)
 if test "$enable_jit" = "yes"; then
   AC_DEFINE([SUPPORT_JIT], [], [
     Define to enable support for Just-In-Time compiling.])
+else
+  enable_pcregrep_jit="no"
+fi
+
+if test "$enable_pcregrep_jit" = "yes"; then
+  AC_DEFINE([SUPPORT_PCREGREP_JIT], [], [
+    Define to enable JIT support in pcregrep.])    
 fi
 
 if test "$enable_utf8" = "yes"; then
@@ -757,6 +770,7 @@ $PACKAGE-$VERSION configuration summary:
     Match limit recursion ........... : ${with_match_limit_recursion}
     Build shared libs ............... : ${enable_shared}
     Build static libs ............... : ${enable_static}
+    Use JIT in pcregrep ............. : ${enable_pcregrep_jit} 
     Buffer size for pcregrep ........ : ${with_pcregrep_bufsize}
     Link pcregrep with libz ......... : ${enable_pcregrep_libz}
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}

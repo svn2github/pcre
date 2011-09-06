@@ -179,6 +179,9 @@ library. They are also documented in the pcrebuild man page.
   "configure" command. This support is available only for certain hardware 
   architectures. If you try to enable it on an unsupported architecture, there 
   will be a compile time error.
+  
+. When JIT support is enabled, pcregrep automatically makes use of it, unless
+  you add --disable-pcregrep-jit to the "configure" command. 
 
 . If you want to make use of the support for UTF-8 Unicode character strings in
   PCRE, you must add --enable-utf8 to the "configure" command. Without it, the
@@ -839,4 +842,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 27 August 2011
+Last updated: 06 September 2011

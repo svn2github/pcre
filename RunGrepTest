@@ -305,11 +305,11 @@ echo "---------------------------- Test 61 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 62 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep --match-limit=1000 -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
+(cd $srcdir; $valgrind $pcregrep --match-limit=1000 --no-jit -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 63 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep --recursion-limit=1000 -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
+(cd $srcdir; $valgrind $pcregrep --recursion-limit=1000 --no-jit -M 'This is a file(.|\R)*file.' ./testdata/grepinput) >>testtry 2>&1
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 64 ------------------------------" >>testtry

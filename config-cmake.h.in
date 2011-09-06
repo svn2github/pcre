@@ -19,6 +19,7 @@
 #cmakedefine PCRE_STATIC 1
 
 #cmakedefine SUPPORT_JIT 1
+#cmakedefine SUPPORT_PCREGREP_JIT 1
 #cmakedefine SUPPORT_UTF8 1
 #cmakedefine SUPPORT_UCP 1
 #cmakedefine EBCDIC 1

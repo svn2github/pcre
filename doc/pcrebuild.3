@@ -111,7 +111,12 @@ See the
 .\" HREF
 \fBpcrejit\fP
 .\"
-documentation for a discussion of JIT usage.
+documentation for a discussion of JIT usage. When JIT support is enabled,
+pcregrep automatically makes use of it, unless you add
+.sp
+  --disable-pcregrep-jit 
+.sp  
+to the "configure" command. 
 .
 .
 .SH "CODE VALUE OF NEWLINE"
@@ -383,6 +388,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 August 2011
+Last updated: 06 September 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

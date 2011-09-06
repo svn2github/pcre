@@ -83,6 +83,7 @@ If the \fBLC_ALL\fP or \fBLC_CTYPE\fP environment variable is set,
 \fBpcregrep\fP uses the value to set a locale when calling the PCRE library.
 The \fB--locale\fP option can be used to override this.
 .
+.
 .SH "SUPPORT FOR COMPRESSED FILES"
 .rs
 .sp
@@ -387,6 +388,13 @@ for matching lines or a hyphen for context lines. If the filename is also being
 output, it precedes the line number. This option is forced if
 \fB--line-offsets\fP is used.
 .TP
+\fB--no-jit\fP
+If the PCRE library is built with support for just-in-time compiling (which 
+speeds up matching), \fBpcregrep\fP automatically makes use of this, unless it
+was explicitly disabled at build time. This option can be used to disable the
+use of JIT at run time. It is provided for testing and working round problems.
+It should never be needed in normal use.
+.TP
 \fB-o\fP, \fB--only-matching\fP
 Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the \fB-A\fP, \fB-B\fP, and
@@ -569,6 +577,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 30 July 2011
+Last updated: 06 September 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

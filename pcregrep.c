@@ -168,7 +168,12 @@ static int error_count = 0;
 static int filenames = FN_DEFAULT;
 static int only_matching = -1;
 static int process_options = 0;
+
+#ifdef SUPPORT_PCREGREP_JIT
+static int study_options = PCRE_STUDY_JIT_COMPILE;
+#else
 static int study_options = 0;
+#endif
 
 static unsigned long int match_limit = 0;
 static unsigned long int match_limit_recursion = 0;
@@ -219,6 +224,7 @@ used to identify them. */
 #define N_M_LIMIT      (-13)
 #define N_M_LIMIT_REC  (-14)
 #define N_BUFSIZE      (-15)
+#define N_NOJIT        (-16)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "  terminate options" },
@@ -239,7 +245,11 @@ static option_item optionlist[] = {
   { OP_NODATA,     'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
   { OP_NODATA,     'i',      NULL,              "ignore-case",   "ignore case distinctions" },
-  { OP_NODATA,     'j',      NULL,              "jit",           "use JIT compiler if available" },
+#ifdef SUPPORT_PCREGREP_JIT
+  { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "do not use just-in-time compiler optimization" },
+#else
+  { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "ignored: this pcregrep does not support JIT" },
+#endif
   { OP_NODATA,     'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
   { OP_NODATA,     'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,     N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
@@ -317,8 +327,9 @@ pcregrep_exit(int rc)
 {
 if (resource_error)
   {
-  fprintf(stderr, "pcregrep: Error %d or %d means that a resource limit "
-    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT);
+  fprintf(stderr, "pcregrep: Error %d, %d or %d means that a resource limit "
+    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT,
+    PCRE_ERROR_JIT_STACKLIMIT);
   fprintf(stderr, "pcregrep: Check your regex for nested unlimited loops.\n");
   }
 
@@ -977,7 +988,8 @@ for (i = 0; i < pattern_count; i++)
   fprintf(stderr, "%s", msg);
   FWRITE(matchptr, 1, slen, stderr);   /* In case binary zero included */
   fprintf(stderr, "\n\n");
-  if (*mrc == PCRE_ERROR_MATCHLIMIT || *mrc == PCRE_ERROR_RECURSIONLIMIT)
+  if (*mrc == PCRE_ERROR_MATCHLIMIT || *mrc == PCRE_ERROR_RECURSIONLIMIT ||
+      *mrc == PCRE_ERROR_JIT_STACKLIMIT)
     resource_error = TRUE;
   if (error_count++ > 20)
     {
@@ -1857,14 +1869,14 @@ switch(letter)
   {
   case N_FOFFSETS: file_offsets = TRUE; break;
   case N_HELP: help(); pcregrep_exit(0);
-  case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_LBUFFER: line_buffered = TRUE; break;
+  case N_LOFFSETS: line_offsets = number = TRUE; break;
+  case N_NOJIT: study_options &= ~PCRE_STUDY_JIT_COMPILE; break; 
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
   case 'h': filenames = FN_NONE; break;
   case 'i': options |= PCRE_CASELESS; break;
-  case 'j': study_options |= PCRE_STUDY_JIT_COMPILE; break; 
   case 'l': omit_zero_count = TRUE; filenames = FN_MATCH_ONLY; break;
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
@@ -2047,6 +2059,10 @@ BOOL only_one_at_top;
 char *patterns[MAX_PATTERN_COUNT];
 const char *locale_from = "--locale";
 const char *error;
+
+#ifdef SUPPORT_PCREGREP_JIT
+pcre_jit_stack *jit_stack = NULL;
+#endif
 
 /* Set the default line ending value from the default in the PCRE library;
 "lf", "cr", "crlf", and "any" are supported. Anything else is treated as "lf".
@@ -2570,8 +2586,14 @@ if (pattern_filename != NULL)
   if (f != stdin) fclose(f);
   }
 
-/* Study the regular expressions, as we will be running them many times */
+/* Study the regular expressions, as we will be running them many times. Unless 
+JIT has been explicitly disabled, arrange a stack for it to use. */
 
+#ifdef SUPPORT_PCREGREP_JIT
+if ((study_options & PCRE_STUDY_JIT_COMPILE) != 0)
+  jit_stack = pcre_jit_stack_alloc(32*1024, 1024*1024);
+#endif   
+  
 for (j = 0; j < pattern_count; j++)
   {
   hints_list[j] = pcre_study(pattern_list[j], study_options, &error);
@@ -2583,6 +2605,10 @@ for (j = 0; j < pattern_count; j++)
     goto EXIT2;
     }
   hint_count++;
+#ifdef SUPPORT_PCREGREP_JIT
+  if (jit_stack != NULL && hints_list[j] != NULL) 
+    pcre_assign_jit_stack(hints_list[j], NULL, jit_stack);
+#endif
   }
 
 /* If --match-limit or --recursion-limit was set, put the value(s) into the
@@ -2689,6 +2715,9 @@ for (; i < argc; i++)
   }
 
 EXIT:
+#ifdef SUPPORT_PCREGREP_JIT
+if (jit_stack != NULL) pcre_jit_stack_free(jit_stack);
+#endif
 if (main_buffer != NULL) free(main_buffer);
 if (pattern_list != NULL)
   {

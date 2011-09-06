@@ -40,6 +40,7 @@
 # 2011-08-01 PH added PCREGREP_BUFSIZE
 # 2011-08-22 PH added PCRE_SUPPORT_JIT
 # 2011-09-06 PH modified WIN32 ADD_TEST line as suggested by Sergey Cherepanov
+# 2011-09-06 PH added PCRE_SUPPORT_PCREGREP_JIT
 
 PROJECT(PCRE C CXX)
 
@@ -116,6 +117,9 @@ SET(PCRE_POSIX_MALLOC_THRESHOLD "10" CACHE STRING
 
 SET(PCRE_SUPPORT_JIT OFF CACHE BOOL
     "Enable support for Just-in-time compiling.")
+     
+SET(PCRE_SUPPORT_PCREGREP_JIT ON CACHE BOOL
+    "Enable use of Just-in-time compiling in pcregrep.")
      
 SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
     "Enable support for Unicode properties. (If set, UTF-8 support will be enabled as well)")
@@ -213,7 +217,13 @@ ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 
 IF(PCRE_SUPPORT_JIT)
         SET(SUPPORT_JIT 1)
+ELSE
+        SET(PCRE_SUPPORT_PCREGREP_JIT 0)         
 ENDIF(PCRE_SUPPORT_JIT)         
+
+IF(PCRE_SUPPORT_PCREGREP_JIT)
+        SET(SUPPORT_PCREGREP_JIT 1)
+ENDIF(PCRE_SUPPORT_PCREGREP_JIT)         
 
 # This next one used to contain
 #       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
@@ -586,6 +596,7 @@ IF(PCRE_SHOW_REPORT)
   MESSAGE(STATUS "  Build shared libs ............... : ${BUILD_SHARED_LIBS}")
   MESSAGE(STATUS "  Build static libs ............... : ${BUILD_STATIC_LIBS}")
   MESSAGE(STATUS "  Build pcregrep .................. : ${PCRE_BUILD_PCREGREP}")
+  MESSAGE(STATUS "  Enable JIT in pcregrep .......... : ${PCRE_SUPPORT_PCREGREP_JIT}")
   MESSAGE(STATUS "  Buffer size for pcregrep ........ : ${PCREGREP_BUFSIZE}")
   MESSAGE(STATUS "  Build tests (implies pcretest) .. : ${PCRE_BUILD_TESTS}")
   IF(ZLIB_FOUND)
