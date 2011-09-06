@@ -111,7 +111,11 @@ PCRE - Perl-compatible regular expressions
 .B int pcre_config(int \fIwhat\fP, void *\fIwhere\fP);
 .PP
 .B char *pcre_version(void);
-.PP
+.
+.
+.SH "PCRE NATIVE API INDIRECTED FUNCTIONS"
+.rs
+.sp
 .B void *(*pcre_malloc)(size_t);
 .PP
 .B void (*pcre_free)(void *);
@@ -168,11 +172,12 @@ documentation, and the
 documentation describes how to compile and run it.
 .P
 Just-in-time compiler support is an optional feature of PCRE that can be built
-in appropriate hardware environments. It greatly speeds up the matching 
-performance of many patterns. Simple programs can request its use if available. 
-More complicated programs might need to make use of the 
-\fBpcre_jit_stack_alloc()\fP, \fBpcre_jit_stack_free()\fP, and 
-\fBpcre_assign_jit_stack()\fP functions in order to control its memory usage.
+in appropriate hardware environments. It greatly speeds up the matching
+performance of many patterns. Simple programs can easily request that it be
+used if available, by setting an option that is ignored when it is not
+relevant. More complicated programs might need to make use of the functions
+\fBpcre_jit_stack_alloc()\fP, \fBpcre_jit_stack_free()\fP, and
+\fBpcre_assign_jit_stack()\fP in order to control the JIT code's memory usage.
 These functions are discussed in the
 .\" HREF
 \fBpcrejit\fP
@@ -1430,8 +1435,8 @@ This limit is of use only if it is set smaller than \fImatch_limit\fP.
 .P
 Limiting the recursion depth limits the amount of machine stack that can be
 used, or, when PCRE has been compiled to use memory on the heap instead of the
-stack, the amount of heap memory that can be used. This limit is relevant, and
-is ignored, when the pattern was successfully studied with
+stack, the amount of heap memory that can be used. This limit is not relevant,
+and is ignored, if the pattern was successfully studied with
 PCRE_STUDY_JIT_COMPILE.
 .P
 The default value for \fImatch_limit_recursion\fP can be set when PCRE is
@@ -1491,6 +1496,13 @@ zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
 PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and
 PCRE_PARTIAL_HARD.
+.P
+If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
+the only supported options for JIT execution are PCRE_NO_UTF8_CHECK,
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NOTEMPTY_ATSTART. Note in
+particular that partial matching is not supported. If an unsupported option is 
+used, JIT execution is disabled and the normal interpretive code in 
+\fBpcre_exec()\fP is run.
 .sp
   PCRE_ANCHORED
 .sp
@@ -1797,12 +1809,27 @@ string that it matched that is returned.
 .P
 If the vector is too small to hold all the captured substring offsets, it is
 used as far as possible (up to two-thirds of its length), and the function
-returns a value of zero. If the substring offsets are not of interest,
-\fBpcre_exec()\fP may be called with \fIovector\fP passed as NULL and
-\fIovecsize\fP as zero. However, if the pattern contains back references and
-the \fIovector\fP is not big enough to remember the related substrings, PCRE
-has to get additional memory for use during matching. Thus it is usually
-advisable to supply an \fIovector\fP.
+returns a value of zero. If neither the actual string matched not any captured
+substrings are of interest, \fBpcre_exec()\fP may be called with \fIovector\fP
+passed as NULL and \fIovecsize\fP as zero. However, if the pattern contains
+back references and the \fIovector\fP is not big enough to remember the related
+substrings, PCRE has to get additional memory for use during matching. Thus it
+is usually advisable to supply an \fIovector\fP of reasonable size.
+.P
+There are some cases where zero is returned (indicating vector overflow) when
+in fact the vector is exactly the right size for the final match. For example,
+consider the pattern
+.sp
+  (a)(?:(b)c|bd)
+.sp
+If a vector of 6 elements (allowing for only 1 captured substring) is given
+with subject string "abd", \fBpcre_exec()\fP will try to set the second
+captured string, thereby recording a vector overflow, before failing to match
+"c" and backing up to try the second alternative. The zero return, however, 
+does correctly indicate that the maximum number of slots (namely 2) have been
+filled. In similar cases where there is temporary overflow, but the final
+number of used slots is actually less than the maximum, a non-zero value is
+returned.
 .P
 The \fBpcre_fullinfo()\fP function can be used to find out how many capturing
 subpatterns there are in a compiled pattern. The smallest size for
@@ -1823,7 +1850,7 @@ return from the function is 2, because the highest used capturing subpattern
 number is 1, and the offsets for for the second and third capturing subpatterns
 (assuming the vector is large enough, of course) are set to -1.
 .P
-\fBNote\fP: Elements in the first two-thids of \fIovector\fP that do not
+\fBNote\fP: Elements in the first two-thirds of \fIovector\fP that do not
 correspond to capturing parentheses in the pattern are never changed. That is,
 if a pattern contains \fIn\fP capturing parentheses, no more than
 \fIovector[0]\fP to \fIovector[2n+1]\fP are set by \fBpcre_exec()\fP. The other
@@ -1983,8 +2010,8 @@ time.
   PCRE_ERROR_JIT_STACKLIMIT (-27)
 .sp
 This error is returned when a pattern that was successfully studied using the 
-PCRE_STUDY_JIT_COMPILE option is matched, but the memory available for the 
-just-in-time processing stack is not large enough. See the
+PCRE_STUDY_JIT_COMPILE option is being matched, but the memory available for
+the just-in-time processing stack is not large enough. See the
 .\" HREF
 \fBpcrejit\fP
 .\"
@@ -2228,6 +2255,7 @@ page, you cannot use names to distinguish the different subpatterns, because
 names are not included in the compiled code. The matching process uses only
 numbers. For this reason, the use of different names for subpatterns of the
 same number causes an error at compile time.
+.
 .
 .SH "DUPLICATE SUBPATTERN NAMES"
 .rs
@@ -2498,6 +2526,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 August 2011
+Last updated: 06 September 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
