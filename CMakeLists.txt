@@ -39,6 +39,7 @@
 # 2010-03-02 PH added test for inttypes.h
 # 2011-08-01 PH added PCREGREP_BUFSIZE
 # 2011-08-22 PH added PCRE_SUPPORT_JIT
+# 2011-09-06 PH modified WIN32 ADD_TEST line as suggested by Sergey Cherepanov
 
 PROJECT(PCRE C CXX)
 
@@ -482,7 +483,8 @@ IF(PCRE_BUILD_TESTS)
           ADD_TEST(pcre_grep_test ${PROJECT_SOURCE_DIR}/RunGrepTest)
   ENDIF(UNIX)
   IF(WIN32)
-          ADD_TEST(pcre_test cmd /C ${PROJECT_SOURCE_DIR}/RunTest.bat)
+          # ADD_TEST(pcre_test cmd /C ${PROJECT_SOURCE_DIR}/RunTest.bat)
+          ADD_TEST(pcre_test ${PROJECT_SOURCE_DIR}/RunTest.bat)
   ENDIF(WIN32)
 
   IF(PCRE_SUPPORT_JIT)
