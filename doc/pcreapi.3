@@ -1823,11 +1823,11 @@ return from the function is 2, because the highest used capturing subpattern
 number is 1, and the offsets for for the second and third capturing subpatterns
 (assuming the vector is large enough, of course) are set to -1.
 .P
-\fBNote\fP: Elements of \fIovector\fP that do not correspond to capturing
-parentheses in the pattern are never changed. That is, if a pattern contains
-\fIn\fP capturing parentheses, no more than \fIovector[0]\fP to
-\fIovector[2n+1]\fP are set by \fBpcre_exec()\fP. The other elements retain
-whatever values they previously had.
+\fBNote\fP: Elements in the first two-thids of \fIovector\fP that do not
+correspond to capturing parentheses in the pattern are never changed. That is,
+if a pattern contains \fIn\fP capturing parentheses, no more than
+\fIovector[0]\fP to \fIovector[2n+1]\fP are set by \fBpcre_exec()\fP. The other
+elements (in the first two-thirds) retain whatever values they previously had.
 .P
 Some convenience functions are provided for extracting the captured substrings
 as separate strings. These are described below.
@@ -2428,7 +2428,8 @@ returns data, even though the meaning of the strings is different.)
 The strings are returned in reverse order of length; that is, the longest
 matching string is given first. If there were too many matches to fit into
 \fIovector\fP, the yield of the function is zero, and the vector is filled with
-the longest matches.
+the longest matches. Unlike \fBpcre_exec()\fP, \fBpcre_dfa_exec()\fP can use 
+the entire \fIovector\fP for returning matched strings.
 .
 .
 .SS "Error returns from \fBpcre_dfa_exec()\fP"
@@ -2497,6 +2498,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 August 2011
+Last updated: 29 August 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

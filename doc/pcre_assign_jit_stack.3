@@ -36,7 +36,11 @@ stack, the result of calling \fBpcre_jit_stack_alloc()\fP.
 .P
 You may safely assign the same JIT stack to multiple patterns, as long as they 
 are all matched in the same thread. In a multithread application, each thread 
-must use its own JIT stack.
+must use its own JIT stack. For more details, see the
+.\" HREF
+\fBpcrejit\fP
+.\"
+page.
 .P
 There is a complete description of the PCRE native API in the
 .\" HREF

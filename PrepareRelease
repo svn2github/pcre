@@ -202,6 +202,8 @@ files="\
   pcre_get.c \
   pcre_globals.c \
   pcre_info.c \
+  pcre_jit_compile.c \
+  pcre_jit_test.c \  
   pcre_maketables.c \
   pcre_newline.c \
   pcre_ord2utf8.c \

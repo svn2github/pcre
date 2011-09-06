@@ -5,15 +5,15 @@ PCRE - Perl-compatible regular expressions
 .rs
 .sp
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
-pattern matching. However, it comes at the cost of extra processing before the 
-match is performed. Therefore, it is of most benefit when the same pattern is 
-going to be matched many times. This does not necessarily mean many calls of 
+pattern matching. However, it comes at the cost of extra processing before the
+match is performed. Therefore, it is of most benefit when the same pattern is
+going to be matched many times. This does not necessarily mean many calls of
 \fPpcre_exec()\fP; if the pattern is not anchored, matching attempts may take
 place many times at various positions in the subject, even for a single call to
-\fBpcre_exec()\fP. If the subject string is very long, it may still pay to use 
+\fBpcre_exec()\fP. If the subject string is very long, it may still pay to use
 JIT for one-off matches.
 .P
-JIT support applies only to the traditional matching function, 
+JIT support applies only to the traditional matching function,
 \fBpcre_exec()\fP. It does not apply when \fBpcre_dfa_exec()\fP is being used.
 The code for this support was written by Zoltan Herczeg.
 .
@@ -26,14 +26,14 @@ JIT support is an optional feature of PCRE. The "configure" option --enable-jit
 JIT. The support is limited to the following hardware platforms:
 .sp
   ARM v5, v7, and Thumb2
+  Intel x86 32-bit and 64-bit
   MIPS 32-bit
   Power PC 32-bit and 64-bit
-  Intel x86 32-bit and 64-bit
-.sp      
+.sp
 If --enable-jit is set on an unsupported platform, compilation fails.
 .P
-A program can tell if JIT support is available by calling \fBpcre_config()\fP 
-with the PCRE_CONFIG_JIT option. The result is 1 when JIT is available, and 0 
+A program can tell if JIT support is available by calling \fBpcre_config()\fP
+with the PCRE_CONFIG_JIT option. The result is 1 when JIT is available, and 0
 otherwise. However, a simple program does not need to check this in order to
 use JIT. The API is implemented in a way that falls back to the ordinary PCRE
 code if JIT is not available.
@@ -47,12 +47,12 @@ You have to do two things to make use of the JIT support in the simplest way:
   (1) Call \fBpcre_study()\fP with the PCRE_STUDY_JIT_COMPILE option for
       each compiled pattern, and pass the resulting \fBpcre_extra\fP block to
       \fBpcre_exec()\fP.
-      
+
   (2) Use \fBpcre_free_study()\fP to free the \fBpcre_extra\fP block when it is
-      no longer needed instead of just freeing it yourself. This ensures that
-      any JIT data is also freed.
+      no longer needed instead of just freeing it yourself. This 
+      ensures that any JIT data is also freed.
 .sp
-In some circumstances you may need to call additional functions. These are 
+In some circumstances you may need to call additional functions. These are
 described in the section entitled
 .\" HTML <a href="#stackcontrol">
 .\" </a>
@@ -60,16 +60,16 @@ described in the section entitled
 .\"
 below.
 .P
-If JIT support is not available, PCRE_STUDY_JIT_COMPILE is ignored, and no JIT 
-data is set up. Otherwise, the compiled pattern is passed to the JIT compiler, 
-which turns it into machine code that executes much faster than the normal 
-interpretive code. When \fBpcre_exec()\fP is passed a \fBpcre_extra\fP block 
-containing a pointer to JIT code, it obeys that instead of the normal code. The 
-result is identical, but the code runs much faster. 
+If JIT support is not available, PCRE_STUDY_JIT_COMPILE is ignored, and no JIT
+data is set up. Otherwise, the compiled pattern is passed to the JIT compiler,
+which turns it into machine code that executes much faster than the normal
+interpretive code. When \fBpcre_exec()\fP is passed a \fBpcre_extra\fP block
+containing a pointer to JIT code, it obeys that instead of the normal code. The
+result is identical, but the code runs much faster.
 .P
 There are some \fBpcre_exec()\fP options that are not supported for JIT
-execution. There are also some pattern items that JIT cannot handle. Details 
-are given below. In both cases, execution automatically falls back to the 
+execution. There are also some pattern items that JIT cannot handle. Details
+are given below. In both cases, execution automatically falls back to the
 interpretive code.
 .P
 If the JIT compiler finds an unsupported item, no JIT data is generated. You
@@ -84,8 +84,8 @@ JIT compiler was not able to handle the pattern.
 .rs
 .sp
 The only \fBpcre_exec()\fP options that are supported for JIT execution are
-PCRE_NO_UTF8_CHECK, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and 
-PCRE_NOTEMPTY_ATSTART. Note in particular that partial matching is not 
+PCRE_NO_UTF8_CHECK, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and
+PCRE_NOTEMPTY_ATSTART. Note in particular that partial matching is not
 supported.
 .P
 The unsupported pattern items are:
@@ -93,7 +93,7 @@ The unsupported pattern items are:
   \eC            match a single byte, even in UTF-8 mode
   (?Cn)          callouts
   (?(<name>)...  conditional test on setting of a named subpattern
-  (?(R)...       conditional test on whole pattern recursion 
+  (?(R)...       conditional test on whole pattern recursion
   (?(Rn)...      conditional test on recursion, by number
   (?(R&name)...  conditional test on recursion, by name
   (*COMMIT)      )
@@ -101,22 +101,24 @@ The unsupported pattern items are:
   (*PRUNE)       ) the backtracking control verbs
   (*SKIP)        )
   (*THEN)        )
-.sp       
+.sp
 Support for some of these may be added in future.
 .
 .
 .SH "RETURN VALUES FROM JIT EXECUTION"
 .rs
 .sp
-When a pattern is matched using JIT execution, the return values are the same 
-as those given by the interpretive \fBpcre_exec()\fP code, with the addition of 
-one new error code: PCRE_ERROR_JIT_STACKLIMIT. This means that the memory used 
+When a pattern is matched using JIT execution, the return values are the same
+as those given by the interpretive \fBpcre_exec()\fP code, with the addition of
+one new error code: PCRE_ERROR_JIT_STACKLIMIT. This means that the memory used
 for the JIT stack was insufficient. See
 .\" HTML <a href="#stackcontrol">
 .\" </a>
 "Controlling the JIT stack"
 .\"
-below for a discussion of JIT stack usage. 
+below for a discussion of JIT stack usage. For compatibility with the
+interpretive \fBpcre_exec()\fP code, no more than two-thirds of the
+\fIovector\fP argument is used for passing back captured substrings.
 .P
 The error code PCRE_ERROR_MATCHLIMIT is returned by the JIT code if searching a
 very large pattern tree goes on for too long, as it is in the same circumstance
@@ -128,39 +130,44 @@ execution.
 .SH "SAVING AND RESTORING COMPILED PATTERNS"
 .rs
 .sp
-The code that is generated by the JIT compiler is architecture-specific, and is 
-also position dependent. For those reasons it cannot be saved and restored like 
+The code that is generated by the JIT compiler is architecture-specific, and is
+also position dependent. For those reasons it cannot be saved and restored like
 the bytecode and other data of a compiled pattern. You should be able run
 \fBpcre_study()\fP on a saved and restored pattern, and thereby recreate the
 JIT data, but because JIT compilation uses significant resources, it is
-probably not worth doing.
+probably not worth doing this.
 .
 .
 .\" HTML <a name="stackcontrol"></a>
 .SH "CONTROLLING THE JIT STACK"
 .rs
 .sp
-When the compiled JIT code runs, it needs a block of memory to use as a stack. 
-By default, it uses 32K on the machine stack. However, some large or 
-complicated patterns need more than this. The error PCRE_ERROR_JIT_STACKLIMIT 
-is given when there is not enough stack. Three functions are provided for 
-setting up alternative blocks of memory for use as JIT stacks.
+When the compiled JIT code runs, it needs a block of memory to use as a stack.
+By default, it uses 32K on the machine stack. However, some large or
+complicated patterns need more than this. The error PCRE_ERROR_JIT_STACKLIMIT
+is given when there is not enough stack. Three functions are provided for
+managing blocks of memory for use as JIT stacks.
 .P
-The \fBpcre_jit_stack_alloc()\fP function creates a JIT stack. Its arguments 
-are a starting size and a maximum size, and it returns an opaque value 
-of type \fBpcre_jit_stack\fP that represents a JIT stack, or NULL if there is 
+The \fBpcre_jit_stack_alloc()\fP function creates a JIT stack. Its arguments
+are a starting size and a maximum size, and it returns an opaque value
+of type \fBpcre_jit_stack\fP that represents a JIT stack, or NULL if there is
 an error. The \fBpcre_jit_stack_free()\fP function can be used to free a stack
-that is no longer needed.
+that is no longer needed. (For the technically minded: the address space is
+allocated by mmap or VirtualAlloc.)
 .P
-The \fBpcre_assign_jit_stack()\fP function specifies which stack JIT code 
+JIT uses far less memory for recursion than the interpretive code, 
+and a maximum stack size of 512K to 1M should be more than enough for any
+pattern.
+.P
+The \fBpcre_assign_jit_stack()\fP function specifies which stack JIT code
 should use. Its arguments are as follows:
 .sp
   pcre_extra         *extra
   pcre_jit_callback  callback
   void               *data
-.sp    
-The \fIextra\fP argument must be the result of studying a pattern with 
-PCRE_STUDY_JIT_COMPILE. There are three cases for the values of the other two 
+.sp
+The \fIextra\fP argument must be the result of studying a pattern with
+PCRE_STUDY_JIT_COMPILE. There are three cases for the values of the other two
 options:
 .sp
   (1) If \fIcallback\fP is NULL and \fIdata\fP is NULL, an internal 32K block
@@ -170,42 +177,61 @@ options:
       a valid JIT stack, the result of calling \fBpcre_jit_stack_alloc()\fP.
 .sp
   (3) If \fIcallback\fP not NULL, it must point to a function that is called
-      with \fIdata\fP as an argument at the start of matching, in order to 
-      set up a JIT stack. If the result is NULL, the internal 32K stack 
-      is used; otherwise the return value must be a valid JIT stack, 
+      with \fIdata\fP as an argument at the start of matching, in order to
+      set up a JIT stack. If the result is NULL, the internal 32K stack
+      is used; otherwise the return value must be a valid JIT stack,
       the result of calling \fBpcre_jit_stack_alloc()\fP.
 .sp
 You may safely assign the same JIT stack to more than one pattern, as long as
 they are all matched sequentially in the same thread. In a multithread
 application, each thread must use its own JIT stack.
 .P
+Strictly speaking, even more is allowed. You can assign the same stack to any
+number of patterns as long as they are not used for matching by multiple
+threads at the same time. For example, you can assign the same stack to all
+compiled patterns, and use a global mutex in the callback to wait until the
+stack is available for use. However, this is an inefficient solution, and
+not recommended.
+.P
+This is a suggestion for how a typical multithreaded program might operate:
+.sp
+  During thread initalization
+    thread_local_var = pcre_jit_stack_alloc(...)
+  
+  During thread exit
+    pcre_jit_stack_free(thread_local_var)
+  
+  Use a one-line callback function
+    return thread_local_var
+.sp
 All the functions described in this section do nothing if JIT is not available,
-and \fBpcre_assign_jit_stack()\fP does nothing unless the \fBextra\fP argument 
-is non-NULL and points to a \fBpcre_extra\fP block that is the result of a 
+and \fBpcre_assign_jit_stack()\fP does nothing unless the \fBextra\fP argument
+is non-NULL and points to a \fBpcre_extra\fP block that is the result of a
 successful study with PCRE_STUDY_JIT_COMPILE.
 .
 .
 .SH "EXAMPLE CODE"
 .rs
 .sp
-This is a single-threaded example that specifies a JIT stack without using a 
-callback.
+This is a single-threaded example that specifies a JIT stack without using a
+callback. 
 .sp
   int rc;
+  int ovector[30];
   pcre *re;
-  pcre_extra *extra; 
-  pcre_jit_stack *jit_stack; 
-.sp   
+  pcre_extra *extra;
+  pcre_jit_stack *jit_stack;
+.sp
   re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
   /* Check for errors */
   extra = pcre_study(re, PCRE_STUDY_JIT_COMPILE, &error);
-  jit_stack = pcre_jit_stack_alloc(1, 512 * 1024);
+  jit_stack = pcre_jit_stack_alloc(32*1024, 512*1024);
   /* Check for error (NULL) */
   pcre_assign_jit_stack(extra, NULL, jit_stack);
-  rc = pcre_exec(re, extra, subject, length, 0, 0, ovector, ovecsize);
+  rc = pcre_exec(re, extra, subject, length, 0, 0, ovector, 30);
   /* Check results */
   pcre_free(re);
-  pcre_free_study(extra);    
+  pcre_free_study(extra);
 .sp
 .
 .
@@ -229,6 +255,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 28 August 2011
+Last updated: 06 September 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
