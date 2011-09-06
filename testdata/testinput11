@@ -670,4 +670,9 @@ however, we need the complication for Perl. ---/
 name)/K
     abc
     
+/(?>(?&t)c|(?&t))(?(DEFINE)(?<t>a|b(*PRUNE)c))/
+    a
+    ba
+    bba 
+
 /-- End of testinput11 --/

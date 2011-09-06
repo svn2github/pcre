@@ -1259,4 +1259,12 @@ name)/K
 MK: any 
 name
     
+/(?>(?&t)c|(?&t))(?(DEFINE)(?<t>a|b(*PRUNE)c))/
+    a
+ 0: a
+    ba
+ 0: a
+    bba 
+ 0: a
+
 /-- End of testinput11 --/

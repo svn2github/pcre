@@ -4699,4 +4699,8 @@
 /(?(R)a*(?1)|((?R))b)/
     aaaabcde
 
+/(a+)/
+    \O6aaaa
+    \O8aaaa
+
 /-- End of testinput7 --/

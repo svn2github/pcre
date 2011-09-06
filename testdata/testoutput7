@@ -7846,4 +7846,16 @@ Error -17 (backreference condition or recursion test not supported for DFA match
     aaaabcde
 Error -26 (nested recursion at the same subject position)
 
+/(a+)/
+    \O6aaaa
+Matched, but too many subsidiary matches
+ 0: aaaa
+ 1: aaa
+ 2: aa
+    \O8aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+
 /-- End of testinput7 --/
