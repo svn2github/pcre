@@ -28,6 +28,16 @@ Version 8.20
    
 4. Zoltan Herczeg's just-in-time compiler support has been integrated into the
    main code base, and can be used by building with --enable-jit. 
+   
+5. When the number of matches in a pcre_dfa_exec() run exactly filled the 
+   ovector, the return from the function was zero, implying that there were 
+   other matches that did not fit. The correct "exactly full" value is now 
+   returned. 
+   
+6. If a subpattern that was called recursively or as a subroutine contained
+   (*PRUNE) or any other control that caused it to give a non-standard return, 
+   invalid errors such as "Error -26 (nested recursion at the same subject 
+   position)" or even infinite loops could occur. 
 
 
 Version 8.13 16-Aug-2011

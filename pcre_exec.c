@@ -1556,10 +1556,10 @@ for (;;)
           md, eptrb, RM6);
         memcpy(md->offset_vector, new_recursive.offset_save,
             new_recursive.saved_max * sizeof(int));
+        md->recursive = new_recursive.prevrec;
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
           DPRINTF(("Recursion matched\n"));
-          md->recursive = new_recursive.prevrec;
           if (new_recursive.offset_save != stacksave)
             (pcre_free)(new_recursive.offset_save);
 
