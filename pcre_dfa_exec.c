@@ -768,7 +768,7 @@ for (;;)
                 current_subject > start_subject + md->start_offset)))
           {
           if (match_count < 0) match_count = (offsetcount >= 2)? 1 : 0;
-            else if (match_count > 0 && ++match_count * 2 >= offsetcount)
+            else if (match_count > 0 && ++match_count * 2 > offsetcount)
               match_count = 0;
           count = ((match_count == 0)? offsetcount : match_count * 2) - 2;
           if (count > 0) memmove(offsets + 2, offsets, count * sizeof(int));
