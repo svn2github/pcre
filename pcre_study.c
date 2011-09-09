@@ -1230,7 +1230,7 @@ int min;
 BOOL bits_set = FALSE;
 BOOL had_accept = FALSE;
 uschar start_bits[32];
-pcre_extra *extra;
+pcre_extra *extra = NULL;
 pcre_study_data *study;
 const uschar *tables;
 uschar *code;
@@ -1281,66 +1281,79 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
   rc = set_start_bits(code, start_bits, (re->options & PCRE_UTF8) != 0,
     &compile_block);
   bits_set = rc == SSB_DONE;
-  if (rc == SSB_UNKNOWN) *errorptr = "internal error: opcode not recognized";
+  if (rc == SSB_UNKNOWN) 
+    {
+    *errorptr = "internal error: opcode not recognized";
+    return NULL;
+    }  
   }
 
 /* Find the minimum length of subject string. */
 
 switch(min = find_minlength(code, code, re->options, &had_accept, 0))
   {
-  case -2: *errorptr = "internal error: missing capturing bracket"; break;
-  case -3: *errorptr = "internal error: opcode not recognized"; break;
+  case -2: *errorptr = "internal error: missing capturing bracket"; return NULL;
+  case -3: *errorptr = "internal error: opcode not recognized"; return NULL;
   default: break;
   }
 
-/* Return NULL if there's been an (internal) error or if no optimization is
-possible. A FALSE setting for bits_set is common when there are no obvious
-starting bytes. However a negative value of min occurs only when the pattern
-contains \C, in other words, it's an exceptional case nowadays. */
+/* If a set of starting bytes has been identified, or if the minimum length is
+greater than zero, or if JIT optimization has been requested, get a pcre_extra
+block and a pcre_study_data block. The study data is put in the latter, which
+is pointed to by the former, which may also get additional data set later by
+the calling program. At the moment, the size of pcre_study_data is fixed. We
+nevertheless save it in a field for returning via the pcre_fullinfo() function
+so that if it becomes variable in the future, we don't have to change that
+code. */
 
-if (*errorptr != NULL || (!bits_set && min < 0)) return NULL;
-
-/* Get a pcre_extra block and a pcre_study_data block. The study data is put in
-the latter, which is pointed to by the former, which may also get additional
-data set later by the calling program. At the moment, the size of
-pcre_study_data is fixed. We nevertheless save it in a field for returning via
-the pcre_fullinfo() function so that if it becomes variable in the future, we
-don't have to change that code. */
-
-extra = (pcre_extra *)(pcre_malloc)
-  (sizeof(pcre_extra) + sizeof(pcre_study_data));
-
-if (extra == NULL)
-  {
-  *errorptr = "failed to get memory";
-  return NULL;
-  }
-
-study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
-extra->flags = PCRE_EXTRA_STUDY_DATA;
-extra->study_data = study;
-
-study->size = sizeof(pcre_study_data);
-study->flags = 0;
-
-if (bits_set)
-  {
-  study->flags |= PCRE_STUDY_MAPPED;
-  memcpy(study->start_bits, start_bits, sizeof(start_bits));
-  }
-
-if (min >= 0)
-  {
-  study->flags |= PCRE_STUDY_MINLEN;
-  study->minlength = min;
-  }
-
-/* If JIT support was compiled and requested, attempt the JIT compilation. */
-
-extra->executable_jit = NULL;
+if (bits_set || min > 0 
 #ifdef SUPPORT_JIT
-if ((options & PCRE_STUDY_JIT_COMPILE) != 0) _pcre_jit_compile(re, extra);
+    || (options & PCRE_STUDY_JIT_COMPILE) != 0
 #endif
+  )
+  {
+  extra = (pcre_extra *)(pcre_malloc)
+    (sizeof(pcre_extra) + sizeof(pcre_study_data));
+  if (extra == NULL)
+    {
+    *errorptr = "failed to get memory";
+    return NULL;
+    }
+  
+  study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
+  extra->flags = PCRE_EXTRA_STUDY_DATA;
+  extra->study_data = study;
+  
+  study->size = sizeof(pcre_study_data);
+  study->flags = 0;
+  
+  if (bits_set)
+    {
+    study->flags |= PCRE_STUDY_MAPPED;
+    memcpy(study->start_bits, start_bits, sizeof(start_bits));
+    }
+  
+  if (min > 0)
+    {
+    study->flags |= PCRE_STUDY_MINLEN;
+    study->minlength = min;
+    }
+  
+  /* If JIT support was compiled and requested, attempt the JIT compilation.
+  If no starting bytes were found, and the minimum length is zero, and JIT
+  compilation fails, no flags will be set, so abandon the extra block and 
+  return NULL. */
+  
+#ifdef SUPPORT_JIT
+  extra->executable_jit = NULL;
+  if ((options & PCRE_STUDY_JIT_COMPILE) != 0) _pcre_jit_compile(re, extra);
+  if (study->flags == 0)
+    {
+    pcre_free_study(extra);
+    extra = NULL;
+    }     
+#endif
+  }
 
 return extra;
 }

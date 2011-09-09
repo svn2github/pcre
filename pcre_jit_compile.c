@@ -5940,7 +5940,7 @@ fallback_common rootfallback;
 compiler_common common_data;
 compiler_common *common = &common_data;
 const unsigned char *tables = re->tables;
-pcre_study_data *study = (extra->flags & PCRE_EXTRA_STUDY_DATA) != 0 ? extra->study_data : NULL;
+pcre_study_data *study;
 uschar *ccend;
 executable_function *function;
 void *executable_func;
@@ -5951,6 +5951,9 @@ struct sljit_label *empty_match_fallback;
 struct sljit_jump *alloc_error;
 struct sljit_jump *reqbyte_notfound = NULL;
 struct sljit_jump *empty_match;
+
+SLJIT_ASSERT((extra->flags & PCRE_EXTRA_STUDY_DATA) != 0);
+study = extra->study_data;
 
 if (!tables)
   tables = _pcre_default_tables;
