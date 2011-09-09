@@ -1,5 +1,6 @@
-/-- This test is run only when JIT support is available. It checks for a 
-    successful and an unsuccessful JIT compile and save/restore behaviour. --/
+/-- This test is run only when JIT support is available. It checks for a
+successful and an unsuccessful JIT compile and save and restore behaviour,
+and a couple of things that are different with JIT. --/
 
 /abc/S+I
 
@@ -9,5 +10,7 @@
 
 <testsavedregex
     abc
+
+/\p{Xps}*/SI
 
 /-- End of testinput14 --/

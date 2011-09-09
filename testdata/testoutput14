@@ -1,6 +1,6 @@
-/-- This test is run only when JIT support is available. It checks for a 
-    successful and an unsuccessful JIT compile and save/restore behaviour. --/
-** Unknown option 'r'
+/-- This test is run only when JIT support is available. It checks for a
+successful and an unsuccessful JIT compile and save and restore behaviour,
+and a couple of things that are different with JIT. --/
 
 /abc/S+I
 Capturing subpattern count = 0
@@ -36,5 +36,14 @@ Compiled pattern loaded from testsavedregex
 Study data loaded from testsavedregex
     abc
  0: abc
+
+/\p{Xps}*/SI
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = -1
+No set of starting bytes
+JIT study was successful
 
 /-- End of testinput14 --/

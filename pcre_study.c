@@ -1332,22 +1332,23 @@ if (bits_set || min > 0
     study->flags |= PCRE_STUDY_MAPPED;
     memcpy(study->start_bits, start_bits, sizeof(start_bits));
     }
-  
-  if (min > 0)
-    {
-    study->flags |= PCRE_STUDY_MINLEN;
-    study->minlength = min;
-    }
+    
+  /* Always set the minlength value in the block, because the JIT compiler 
+  makes use of it. However, don't set the bit unless the length is greater than 
+  zero - the interpretive pcre_exec() and pcre_dfa_exec() needn't waste time 
+  checking this case. */ 
+   
+  study->minlength = min;
+  if (min > 0) study->flags |= PCRE_STUDY_MINLEN;
   
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT
-  compilation fails, no flags will be set, so abandon the extra block and 
-  return NULL. */
+  compilation fails, abandon the extra block and return NULL. */
   
 #ifdef SUPPORT_JIT
   extra->executable_jit = NULL;
   if ((options & PCRE_STUDY_JIT_COMPILE) != 0) _pcre_jit_compile(re, extra);
-  if (study->flags == 0)
+  if (study->flags == 0 && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) == 0)
     {
     pcre_free_study(extra);
     extra = NULL;
