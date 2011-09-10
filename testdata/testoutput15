@@ -11,7 +11,7 @@ Subject length lower bound = 3
 No set of starting bytes
 JIT support is not available in this version of PCRE
 
-/\p{Xps}*/SI
+/a*/SI
 Capturing subpattern count = 0
 No options
 No first char

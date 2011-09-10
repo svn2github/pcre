@@ -37,7 +37,7 @@ Study data loaded from testsavedregex
     abc
  0: abc
 
-/\p{Xps}*/SI
+/a*/SI
 Capturing subpattern count = 0
 No options
 No first char

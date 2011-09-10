@@ -228,12 +228,14 @@ libpcre_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
 
 CLEANFILES += pcre_chartables.c
 
-## If JIT support is enabled, arrange for the JIT test program to run.
+## If JIT support and UTF-8 is enabled, arrange for the JIT test program to run.
 if WITH_JIT
+if WITH_UTF8
 TESTS += pcre_jit_test
 noinst_PROGRAMS += pcre_jit_test
 pcre_jit_test_SOURCES = pcre_jit_test.c
 pcre_jit_test_LDADD = libpcre.la
+endif # WITH_UTF8
 endif # WITH_JIT
 
 ## A version of the main pcre library that has a posix re API.

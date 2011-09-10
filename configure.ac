@@ -413,6 +413,7 @@ AC_SUBST(pcre_have_bits_type_traits)
 AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
+AM_CONDITIONAL(WITH_UTF8, test "x$enable_utf8" = "xyes")
 
 # Checks for typedefs, structures, and compiler characteristics.
 

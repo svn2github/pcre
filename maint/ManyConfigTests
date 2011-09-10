@@ -66,6 +66,8 @@ function runtest()
 
   conf=`./pcretest -C`
   nl=`expr match "$conf" ".*Newline sequence is \([A-Z]*\)"`
+  jit=`expr match "$conf" ".*[^o] Just-in-time"`
+  utf8=`expr match "$conf" ".*[^o] UTF-8 support"` 
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
     echo "Running C library tests"
@@ -92,6 +94,20 @@ function runtest()
     fi
   else
     echo "Skipping pcregrep tests: newline is $nl"
+  fi
+
+  if [ "$jit" -gt 0 -a $utf8 -gt 0 ]; then
+    echo "Running JIT regression tests"
+    $srcdir/pcre_jit_test >teststdout 2>teststderr
+    if [ $? -ne 0 ]; then
+      echo " "
+      echo "**** Test failed ****"
+      cat teststderr
+      cat teststdout
+      exit 1
+    fi
+  else
+    echo "Skipping JIT regression tests: JIT or UTF-8 not enabled"
   fi
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
@@ -130,8 +146,8 @@ srcdir=.
 for opts in \
   "" \
   "--enable-utf8 --disable-static" \
-  "--disable-stack-for-recursion" \
-  "--enable-utf8 --disable-stack-for-recursion" \
+  "--disable-stack-for-recursion --disable-shared" \
+  "--enable-utf8 --disable-stack-for-recursion --disable-shared" \
   "--enable-unicode-properties --disable-shared" \
   "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-unicode-properties --disable-cpp --with-link-size=3 --disable-shared" \
@@ -141,8 +157,9 @@ for opts in \
   "--enable-newline-is-crlf --disable-shared" \
   "--enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared" \
   "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp" \
-  "--enable-jit --enable-unicode-properties" \ 
-  "--enable-jit --enable-unicode-properties --with-link-size=3" 
+  "--enable-jit --disable-shared" \
+  "--enable-jit --enable-unicode-properties --disable-shared" \
+  "--enable-jit --enable-unicode-properties --with-link-size=3 --disable-shared"
 do
   runtest
 done

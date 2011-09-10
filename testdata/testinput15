@@ -4,6 +4,6 @@ are different without JIT. --/
    
 /abc/S+I
 
-/\p{Xps}*/SI
+/a*/SI
 
 /-- End of testinput15 --/

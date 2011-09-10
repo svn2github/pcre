@@ -11,6 +11,6 @@ and a couple of things that are different with JIT. --/
 <testsavedregex
     abc
 
-/\p{Xps}*/SI
+/a*/SI
 
 /-- End of testinput14 --/
