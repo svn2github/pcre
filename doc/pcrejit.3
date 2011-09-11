@@ -47,9 +47,9 @@ You have to do two things to make use of the JIT support in the simplest way:
   (1) Call \fBpcre_study()\fP with the PCRE_STUDY_JIT_COMPILE option for
       each compiled pattern, and pass the resulting \fBpcre_extra\fP block to
       \fBpcre_exec()\fP.
-
+.sp
   (2) Use \fBpcre_free_study()\fP to free the \fBpcre_extra\fP block when it is
-      no longer needed instead of just freeing it yourself. This 
+      no longer needed instead of just freeing it yourself. This
       ensures that any JIT data is also freed.
 .sp
 In some circumstances you may need to call additional functions. These are
@@ -149,13 +149,13 @@ is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks.
 .P
 The \fBpcre_jit_stack_alloc()\fP function creates a JIT stack. Its arguments
-are a starting size and a maximum size, and it returns a pointer to an opaque 
+are a starting size and a maximum size, and it returns a pointer to an opaque
 structure of type \fBpcre_jit_stack\fP, or NULL if there is an error. The
 \fBpcre_jit_stack_free()\fP function can be used to free a stack that is no
 longer needed. (For the technically minded: the address space is allocated by
 mmap or VirtualAlloc.)
 .P
-JIT uses far less memory for recursion than the interpretive code, 
+JIT uses far less memory for recursion than the interpretive code,
 and a maximum stack size of 512K to 1M should be more than enough for any
 pattern.
 .P
@@ -197,10 +197,10 @@ This is a suggestion for how a typical multithreaded program might operate:
 .sp
   During thread initalization
     thread_local_var = pcre_jit_stack_alloc(...)
-  
+.sp
   During thread exit
     pcre_jit_stack_free(thread_local_var)
-  
+.sp
   Use a one-line callback function
     return thread_local_var
 .sp
@@ -214,7 +214,7 @@ successful study with PCRE_STUDY_JIT_COMPILE.
 .rs
 .sp
 This is a single-threaded example that specifies a JIT stack without using a
-callback. 
+callback.
 .sp
   int rc;
   int ovector[30];
@@ -232,7 +232,7 @@ callback.
   /* Check results */
   pcre_free(re);
   pcre_free_study(extra);
-  pcre_jit_stack_free(jit_stack); 
+  pcre_jit_stack_free(jit_stack);
 .sp
 .
 .

@@ -34,7 +34,7 @@ be extracted that might speed up matching. Its arguments are:
   <i>errptr</i>     Where to put an error message
 </pre>
 If the function succeeds, it returns a value that can be passed to
-<b>pcre_exec()</b> via its <i>extra</i> argument.
+<b>pcre_exec()</b> or <b>pcre_dfa_exec()</b> via their <i>extra</i> arguments.
 </P>
 <P>
 If the function returns NULL, either it could not find any additional
@@ -42,8 +42,11 @@ information, or there was an error. You can tell the difference by looking at
 the error value. It is NULL in first case.
 </P>
 <P>
-There are currently no options defined; the value of the second argument should
-always be zero.
+The only option is PCRE_STUDY_JIT_COMPILE. It requests just-in-time compilation
+if possible. If PCRE has been compiled without JIT support, this option is
+ignored. See the
+<a href="pcrejit.html"><b>pcrejit</b></a>
+page for further details.
 </P>
 <P>
 There is a complete description of the PCRE native API in the

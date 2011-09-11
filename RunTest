@@ -18,8 +18,8 @@
 # two tests for JIT-specific features, one to be run when JIT support is
 # available, and one when it is not.
 
-# The arguments for this script can be individual test numbers, or the word 
-# "valgrind", or "sim" followed by an argument to run cross-compiled 
+# The arguments for this script can be individual test numbers, or the word
+# "valgrind", or "sim" followed by an argument to run cross-compiled
 # executables under a simulator, for example:
 #
 # RunTest 3 sim "qemu-arm -s 8388608"

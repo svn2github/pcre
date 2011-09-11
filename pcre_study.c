@@ -1281,11 +1281,11 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
   rc = set_start_bits(code, start_bits, (re->options & PCRE_UTF8) != 0,
     &compile_block);
   bits_set = rc == SSB_DONE;
-  if (rc == SSB_UNKNOWN) 
+  if (rc == SSB_UNKNOWN)
     {
     *errorptr = "internal error: opcode not recognized";
     return NULL;
-    }  
+    }
   }
 
 /* Find the minimum length of subject string. */
@@ -1306,7 +1306,7 @@ nevertheless save it in a field for returning via the pcre_fullinfo() function
 so that if it becomes variable in the future, we don't have to change that
 code. */
 
-if (bits_set || min > 0 
+if (bits_set || min > 0
 #ifdef SUPPORT_JIT
     || (options & PCRE_STUDY_JIT_COMPILE) != 0
 #endif
@@ -1319,32 +1319,32 @@ if (bits_set || min > 0
     *errorptr = "failed to get memory";
     return NULL;
     }
-  
+
   study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
   extra->flags = PCRE_EXTRA_STUDY_DATA;
   extra->study_data = study;
-  
+
   study->size = sizeof(pcre_study_data);
   study->flags = 0;
-  
+
   if (bits_set)
     {
     study->flags |= PCRE_STUDY_MAPPED;
     memcpy(study->start_bits, start_bits, sizeof(start_bits));
     }
-    
-  /* Always set the minlength value in the block, because the JIT compiler 
-  makes use of it. However, don't set the bit unless the length is greater than 
-  zero - the interpretive pcre_exec() and pcre_dfa_exec() needn't waste time 
-  checking this case. */ 
-   
+
+  /* Always set the minlength value in the block, because the JIT compiler
+  makes use of it. However, don't set the bit unless the length is greater than
+  zero - the interpretive pcre_exec() and pcre_dfa_exec() needn't waste time
+  checking this case. */
+
   study->minlength = min;
   if (min > 0) study->flags |= PCRE_STUDY_MINLEN;
-  
+
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT
   compilation fails, abandon the extra block and return NULL. */
-  
+
 #ifdef SUPPORT_JIT
   extra->executable_jit = NULL;
   if ((options & PCRE_STUDY_JIT_COMPILE) != 0) _pcre_jit_compile(re, extra);
@@ -1352,7 +1352,7 @@ if (bits_set || min > 0
     {
     pcre_free_study(extra);
     extra = NULL;
-    }     
+    }
 #endif
   }
 
@@ -1374,7 +1374,7 @@ PCRE_EXP_DEFN void
 pcre_free_study(pcre_extra *extra)
 {
 #ifdef SUPPORT_JIT
-if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 && 
+if ((extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 &&
      extra->executable_jit != NULL)
   _pcre_jit_free(extra->executable_jit);
 #endif

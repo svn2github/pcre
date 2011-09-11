@@ -117,10 +117,10 @@ SET(PCRE_POSIX_MALLOC_THRESHOLD "10" CACHE STRING
 
 SET(PCRE_SUPPORT_JIT OFF CACHE BOOL
     "Enable support for Just-in-time compiling.")
-     
+
 SET(PCRE_SUPPORT_PCREGREP_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcregrep.")
-     
+
 SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
     "Enable support for Unicode properties. (If set, UTF-8 support will be enabled as well)")
 
@@ -218,12 +218,12 @@ ENDIF(PCRE_SUPPORT_UNICODE_PROPERTIES)
 IF(PCRE_SUPPORT_JIT)
         SET(SUPPORT_JIT 1)
 ELSE
-        SET(PCRE_SUPPORT_PCREGREP_JIT 0)         
-ENDIF(PCRE_SUPPORT_JIT)         
+        SET(PCRE_SUPPORT_PCREGREP_JIT 0)
+ENDIF(PCRE_SUPPORT_JIT)
 
 IF(PCRE_SUPPORT_PCREGREP_JIT)
         SET(SUPPORT_PCREGREP_JIT 1)
-ENDIF(PCRE_SUPPORT_PCREGREP_JIT)         
+ENDIF(PCRE_SUPPORT_PCREGREP_JIT)
 
 # This next one used to contain
 #       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
@@ -449,12 +449,12 @@ IF(PCRE_BUILD_TESTS)
   ADD_EXECUTABLE(pcretest pcretest.c)
   SET(targets ${targets} pcretest)
   TARGET_LINK_LIBRARIES(pcretest pcreposix ${PCRETEST_LIBS})
-  
+
   IF(PCRE_SUPPORT_JIT)
     ADD_EXECUTABLE(pcre_jit_test pcre_jit_test.c)
     SET(targets ${targets} pcre_jit_test)
     TARGET_LINK_LIBRARIES(pcre_jit_test pcre)
-  ENDIF(PCRE_SUPPORT_JIT)   
+  ENDIF(PCRE_SUPPORT_JIT)
 
   IF(PCRE_BUILD_PCRECPP)
     ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
@@ -501,7 +501,7 @@ IF(PCRE_BUILD_TESTS)
   GET_TARGET_PROPERTY(PCRE_JIT_TEST_EXE
                       pcre_jit_test
                       DEBUG_LOCATION)
-  ENDIF(PCRE_SUPPORT_JIT) 
+  ENDIF(PCRE_SUPPORT_JIT)
 
   GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
                       pcrecpp_unittest
@@ -517,7 +517,7 @@ IF(PCRE_BUILD_TESTS)
 
   IF(PCRE_SUPPORT_JIT)
   ADD_TEST(pcre_jit_test         ${PCRE_JIT_TEST_EXE})
-  ENDIF(PCRE_SUPPORT_JIT) 
+  ENDIF(PCRE_SUPPORT_JIT)
   ADD_TEST(pcrecpp_test          ${PCRECPP_UNITTEST_EXE})
   ADD_TEST(pcre_scanner_test     ${PCRE_SCANNER_UNITTEST_EXE})
   ADD_TEST(pcre_stringpiece_test ${PCRE_STRINGPIECE_UNITTEST_EXE})

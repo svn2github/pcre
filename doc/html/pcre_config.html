@@ -26,14 +26,18 @@ DESCRIPTION
 </b><br>
 <P>
 This function makes it possible for a client program to find out which optional
-features are available in the version of the PCRE library it is using. Its
+features are available in the version of the PCRE library it is using. The
 arguments are as follows:
 <pre>
   <i>what</i>     A code specifying what information is required
   <i>where</i>    Points to where to put the data
 </pre>
-The available codes are:
+The <i>where</i> argument must point to an integer variable, except for
+PCRE_CONFIG_MATCH_LIMIT and PCRE_CONFIG_MATCH_LIMIT_RECURSION, when it must
+point to an unsigned long integer. The available codes are:
 <pre>
+  PCRE_CONFIG_JIT           Availability of just-in-time compiler
+                              support (1=yes 0=no)
   PCRE_CONFIG_LINK_SIZE     Internal link size: 2, 3, or 4
   PCRE_CONFIG_MATCH_LIMIT   Internal resource limit
   PCRE_CONFIG_MATCH_LIMIT_RECURSION
@@ -48,9 +52,8 @@ The available codes are:
                                  0             all Unicode line endings
                                  1             CR, LF, or CRLF only
   PCRE_CONFIG_POSIX_MALLOC_THRESHOLD
-                            Threshold of return slots, above
-                              which <b>malloc()</b> is used by
-                              the POSIX API
+                            Threshold of return slots, above which
+                              <b>malloc()</b> is used by the POSIX API
   PCRE_CONFIG_STACKRECURSE  Recursion implementation (1=stack 0=heap)
   PCRE_CONFIG_UTF8          Availability of UTF-8 support (1=yes 0=no)
   PCRE_CONFIG_UNICODE_PROPERTIES

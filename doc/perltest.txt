@@ -3,7 +3,7 @@ The perltest program
 
 The perltest.pl script tests Perl's regular expressions; it has the same
 specification as pcretest, and so can be given identical input, except that
-input patterns can be followed only by Perl's lower case modifiers and certain 
+input patterns can be followed only by Perl's lower case modifiers and certain
 other pcretest modifiers that are either handled or ignored:
 
   /+   recognized and handled by perltest
@@ -18,7 +18,7 @@ other pcretest modifiers that are either handled or ignored:
 The data lines are processed as Perl double-quoted strings, so if they contain
 " $ or @ characters, these have to be escaped. For this reason, all such
 characters in testinput1, testinput4, testinput6, and testinput11 are escaped
-so that they can be used for perltest as well as for pcretest. The pcretest \Y 
+so that they can be used for perltest as well as for pcretest. The pcretest \Y
 escape in data lines is removed.
 
 The special upper case pattern modifiers such as /A that pcretest recognizes,

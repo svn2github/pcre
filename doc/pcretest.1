@@ -262,7 +262,7 @@ remainder of the subject string. This is useful for tests where the subject
 contains multiple copies of the same substring. If the \fB+\fP modifier appears
 twice, the same action is taken for captured substrings. In each case the
 remainder is output on the following line with a plus character following the
-capture number. Note that this modifier must not immediately follow the /S 
+capture number. Note that this modifier must not immediately follow the /S
 modifier because /S+ has another meaning.
 .P
 The \fB/=\fP modifier requests that the values of all potential captured
@@ -329,18 +329,18 @@ it possible to specify that certain patterns are always studied, and others are
 never studied, independently of \fB-s\fP. This feature is used in the test
 files in a few cases where the output is different when the pattern is studied.
 .P
-If the \fB/S\fP modifier is immediately followed by a + character, the call to 
-\fBpcre_study()\fP is made with the PCRE_STUDY_JIT_COMPILE option, requesting 
-just-in-time optimization support if it is available. Note that there is also a 
-\fB/+\fP modifier; it must not be given immediately after \fB/S\fP because this 
-will be misinterpreted. If JIT studying is successful, it will automatically be 
-used when \fBpcre_exec()\fP is run, except when incompatible run-time options 
-are specified. These include the partial matching options; a complete list is 
+If the \fB/S\fP modifier is immediately followed by a + character, the call to
+\fBpcre_study()\fP is made with the PCRE_STUDY_JIT_COMPILE option, requesting
+just-in-time optimization support if it is available. Note that there is also a
+\fB/+\fP modifier; it must not be given immediately after \fB/S\fP because this
+will be misinterpreted. If JIT studying is successful, it will automatically be
+used when \fBpcre_exec()\fP is run, except when incompatible run-time options
+are specified. These include the partial matching options; a complete list is
 given in the
 .\" HREF
 \fBpcrejit\fP
 .\"
-documentation. See also the \fB\eJ\fP escape sequence below for a way of 
+documentation. See also the \fB\eJ\fP escape sequence below for a way of
 setting the size of the JIT stack.
 .P
 The \fB/T\fP modifier must be followed by a single digit. It causes a specific
@@ -439,7 +439,7 @@ recognized:
                ated by next non-alphanumeric character)
 .\" JOIN
   \eJdd       set up a JIT stack of dd kilobytes maximum (any
-               number of digits)              
+               number of digits)
 .\" JOIN
   \eL         call pcre_get_substringlist() after a
                successful match
@@ -507,16 +507,16 @@ passing an empty line as data, since a real empty line terminates the data
 input.
 .P
 The \fB\eJ\fP escape provides a way of setting the maximum stack size that is
-used by the just-in-time optimization code. It is ignored if JIT optimization 
-is not being used. Providing a stack that is larger than the default 32K is 
+used by the just-in-time optimization code. It is ignored if JIT optimization
+is not being used. Providing a stack that is larger than the default 32K is
 necessary only for very complicated patterns.
 .P
 If \eM is present, \fBpcretest\fP calls \fBpcre_exec()\fP several times, with
 different values in the \fImatch_limit\fP and \fImatch_limit_recursion\fP
 fields of the \fBpcre_extra\fP data structure, until it finds the minimum
-numbers for each parameter that allow \fBpcre_exec()\fP to complete without 
-error. Because this is testing a specific feature of the normal interpretive 
-\fBpcre_exec()\fP execution, the use of any JIT optimization that might have 
+numbers for each parameter that allow \fBpcre_exec()\fP to complete without
+error. Because this is testing a specific feature of the normal interpretive
+\fBpcre_exec()\fP execution, the use of any JIT optimization that might have
 been set up by the \fB/S+\fP qualifier of \fB-s+\fP option is disabled.
 .P
 The \fImatch_limit\fP number is a measure of the amount of backtracking
@@ -795,7 +795,7 @@ function to distinguish printing and non-printing characters.
 .sp
 The facilities described in this section are not available when the POSIX
 interface to PCRE is being used, that is, when the \fB/P\fP pattern modifier is
-specified. 
+specified.
 .P
 When the POSIX interface is not in use, you can cause \fBpcretest\fP to write a
 compiled pattern to a file, by following the modifiers with > and a file name.

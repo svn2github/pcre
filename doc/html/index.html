@@ -1,10 +1,10 @@
 <html>
-<!-- This is a manually maintained file that is the root of the HTML version of 
-     the PCRE documentation. When the HTML documents are built from the man 
-     page versions, the entire doc/html directory is emptied, this file is then 
-     copied into doc/html/index.html, and the remaining files therein are 
+<!-- This is a manually maintained file that is the root of the HTML version of
+     the PCRE documentation. When the HTML documents are built from the man
+     page versions, the entire doc/html directory is emptied, this file is then
+     copied into doc/html/index.html, and the remaining files therein are
      created by the 132html script.
--->      
+-->
 <head>
 <title>PCRE specification</title>
 </head>
@@ -83,11 +83,14 @@ The HTML documentation for PCRE comprises the following pages:
 </table>
 
 <p>
-There are also individual pages that summarize the interface for each function 
+There are also individual pages that summarize the interface for each function
 in the library:
 </p>
 
-<table>    
+<table>
+
+<tr><td><a href="pcre_assign_jit_stack.html">pcre_assign_jit_stack</a></td>
+    <td>&nbsp;&nbsp;Assign stack for JIT matching</td></tr>
 
 <tr><td><a href="pcre_compile.html">pcre_compile</a></td>
     <td>&nbsp;&nbsp;Compile a regular expression</td></tr>
@@ -107,6 +110,9 @@ in the library:
 <tr><td><a href="pcre_dfa_exec.html">pcre_dfa_exec</a></td>
     <td>&nbsp;&nbsp;Match a compiled pattern to a subject string
     (DFA algorithm; <i>not</i> Perl compatible)</td></tr>
+
+<tr><td><a href="pcre_free_study.html">pcre_free_study</a></td>
+    <td>&nbsp;&nbsp;Free study data</td></tr>
 
 <tr><td><a href="pcre_exec.html">pcre_exec</a></td>
     <td>&nbsp;&nbsp;Match a compiled pattern to a subject string
@@ -136,9 +142,15 @@ in the library:
 <tr><td><a href="pcre_info.html">pcre_info</a></td>
     <td>&nbsp;&nbsp;Obsolete information extraction function</td></tr>
 
+<tr><td><a href="pcre_jit_stack_alloc.html">pcre_jit_stack_alloc</a></td>
+    <td>&nbsp;&nbsp;Create a stack for JIT matching</td></tr>
+
+<tr><td><a href="pcre_jit_stack_free.html">pcre_jit_stack_free</a></td>
+    <td>&nbsp;&nbsp;Free a JIT matching stack</td></tr>
+
 <tr><td><a href="pcre_maketables.html">pcre_maketables</a></td>
     <td>&nbsp;&nbsp;Build character tables in current locale</td></tr>
-    
+
 <tr><td><a href="pcre_refcount.html">pcre_refcount</a></td>
     <td>&nbsp;&nbsp;Maintain reference count in compiled pattern</td></tr>
 

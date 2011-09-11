@@ -1943,7 +1943,7 @@ extern BOOL          _pcre_xclass(int, const uschar *);
 
 #ifdef SUPPORT_JIT
 extern void          _pcre_jit_compile(const real_pcre *, pcre_extra *);
-extern int           _pcre_jit_exec(const real_pcre *, void *, PCRE_SPTR, 
+extern int           _pcre_jit_exec(const real_pcre *, void *, PCRE_SPTR,
                         int, int, int, int, int *, int);
 extern void          _pcre_jit_free(void *);
 #endif

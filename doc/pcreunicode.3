@@ -12,7 +12,7 @@ the code, and, in addition, you must call
 with the PCRE_UTF8 option flag, or the pattern must start with the sequence
 (*UTF8). When either of these is the case, both the pattern and any subject
 strings that are matched against it are treated as UTF-8 strings instead of
-strings of 1-byte characters. PCRE does not support any other formats (in 
+strings of 1-byte characters. PCRE does not support any other formats (in
 particular, it does not support UTF-16).
 .P
 If you compile PCRE with UTF-8 support, but do not use it at run time, the
@@ -81,7 +81,7 @@ program may crash.
 If you want to process strings of values in the full range 0 to 0x7FFFFFFF,
 encoded in a UTF-8-like manner as per the old RFC, you can set
 PCRE_NO_UTF8_CHECK to bypass the more restrictive test. However, in this
-situation, you will have to apply your own validity check, and avoid the use of 
+situation, you will have to apply your own validity check, and avoid the use of
 JIT optimization.
 .
 .
@@ -101,9 +101,9 @@ bytes, for example: \ex{100}{3}.
 .P
 5. The escape sequence \eC can be used to match a single byte in UTF-8 mode,
 but its use can lead to some strange effects. This facility is not available in
-the alternative matching function, \fBpcre_dfa_exec()\fP, nor is it supported 
-by the JIT optimization of \fBpcre_exec()\fP. If JIT optimization is requested 
-for a pattern that contains \eC, it will not succeed, and so the matching will 
+the alternative matching function, \fBpcre_dfa_exec()\fP, nor is it supported
+by the JIT optimization of \fBpcre_exec()\fP. If JIT optimization is requested
+for a pattern that contains \eC, it will not succeed, and so the matching will
 be carried out by the normal interpretive function.
 .P
 6. The character escapes \eb, \eB, \ed, \eD, \es, \eS, \ew, and \eW correctly

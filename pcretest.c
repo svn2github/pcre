@@ -230,7 +230,7 @@ static const char *errtexts[] = {
   "bad offset value",
   NULL,  /* SHORTUTF8 is handled specially */
   "nested recursion at the same subject position",
-  "JIT stack limit reached" 
+  "JIT stack limit reached"
 };
 
 
@@ -1289,11 +1289,11 @@ while (argc > 1 && argv[op][0] == '-')
 
   if (strcmp(argv[op], "-m") == 0) showstore = 1;
   else if (strcmp(argv[op], "-s") == 0) force_study = 0;
-  else if (strcmp(argv[op], "-s+") == 0) 
+  else if (strcmp(argv[op], "-s+") == 0)
     {
     force_study = 1;
     force_study_options = PCRE_STUDY_JIT_COMPILE;
-    }  
+    }
   else if (strcmp(argv[op], "-q") == 0) quiet = 1;
   else if (strcmp(argv[op], "-b") == 0) debug = 1;
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
@@ -1665,15 +1665,15 @@ while (!done)
 #endif
 
       case 'S':
-      if (do_study == 0) 
+      if (do_study == 0)
         {
-        do_study = 1; 
+        do_study = 1;
         if (*pp == '+')
           {
           study_options |= PCRE_STUDY_JIT_COMPILE;
-          pp++; 
-          }  
-        } 
+          pp++;
+          }
+        }
       else
         {
         do_study = 0;
@@ -2156,22 +2156,22 @@ while (!done)
             fprintf(outfile, "\n");
             }
           }
-          
+
         /* Show this only if the JIT was set by /S, not by -s. */
-         
+
         if ((study_options & PCRE_STUDY_JIT_COMPILE) != 0)
           {
-          int jit; 
+          int jit;
           new_info(re, extra, PCRE_INFO_JIT, &jit);
-          if (jit) 
-            fprintf(outfile, "JIT study was successful\n"); 
-          else 
-#ifdef SUPPORT_JIT           
-            fprintf(outfile, "JIT study was not successful\n"); 
+          if (jit)
+            fprintf(outfile, "JIT study was successful\n");
+          else
+#ifdef SUPPORT_JIT
+            fprintf(outfile, "JIT study was not successful\n");
 #else
-            fprintf(outfile, "JIT support is not available in this version of PCRE\n"); 
+            fprintf(outfile, "JIT support is not available in this version of PCRE\n");
 #endif
-          } 
+          }
         }
       }
 
@@ -2492,17 +2492,17 @@ while (!done)
           getnamesptr = npp;
           }
         continue;
-        
+
         case 'J':
         while(isdigit(*p)) n = n * 10 + *p++ - '0';
-        if (extra != NULL 
-            && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0  
+        if (extra != NULL
+            && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0
             && extra->executable_jit != NULL)
-          {    
+          {
 	  if (jit_stack != NULL) pcre_jit_stack_free(jit_stack);
 	  jit_stack = pcre_jit_stack_alloc(1, n * 1024);
 	  pcre_assign_jit_stack(extra, jit_callback, jit_stack);
-          } 
+          }
         continue;
 
         case 'L':
@@ -2728,7 +2728,7 @@ while (!done)
           extra->flags = 0;
           }
         else extra->flags &= ~PCRE_EXTRA_EXECUTABLE_JIT;
-  
+
         (void)check_match_limit(re, extra, bptr, len, start_offset,
           options|g_notempty, use_offsets, use_size_offsets,
           PCRE_EXTRA_MATCH_LIMIT, &(extra->match_limit),
@@ -3083,11 +3083,11 @@ while (!done)
     setlocale(LC_CTYPE, "C");
     locale_set = 0;
     }
-  if (jit_stack != NULL) 
+  if (jit_stack != NULL)
     {
     pcre_jit_stack_free(jit_stack);
-    jit_stack = NULL; 
-    } 
+    jit_stack = NULL;
+    }
   }
 
 if (infile == stdin) fprintf(outfile, "\n");

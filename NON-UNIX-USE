@@ -122,12 +122,12 @@ hand":
      an unusual compiler) so that all included PCRE header files are first
      sought in the current directory. Otherwise you run the risk of picking up
      a previously-installed file from somewhere else.
-     
+
  (7) If you have defined SUPPORT_JIT in config.h, you must also compile
- 
+
        pcre_jit_compile.c
-       
-     This file #includes sources from the sljit subdirectory, where there 
+
+     This file #includes sources from the sljit subdirectory, where there
      should be 16 files, all of whose names begin with "sljit".
 
  (8) Now link all the compiled code into an object library in whichever form
@@ -148,12 +148,12 @@ hand":
 
 (11) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. Some tests are
-     relevant only when certain build-time options are selected. For example, 
-     test 4 is for UTF-8 support, and will not run if you have build PCRE 
-     without it. See the comments at the start of each testinput file. If you 
-     have a suitable Unix-like shell, the RunTest script will run the 
+     relevant only when certain build-time options are selected. For example,
+     test 4 is for UTF-8 support, and will not run if you have build PCRE
+     without it. See the comments at the start of each testinput file. If you
+     have a suitable Unix-like shell, the RunTest script will run the
      appropriate tests for you.
- 
+
      Note that the supplied files are in Unix format, with just LF characters
      as line terminators. You may need to edit them to change this if your
      system uses a different convention. If you are using Windows, you probably
@@ -161,7 +161,7 @@ hand":
      corresponding output file). This is a locale test; wintestinput3 sets the
      locale to "french" rather than "fr_FR", and there some minor output
      differences.
-     
+
 (12) If you have built PCRE with SUPPORT_JIT, the JIT features will be tested
      by the testdata files. However, you might also like to build and run
      the JIT test program, pcre_jit_test.c.

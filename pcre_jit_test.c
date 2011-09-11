@@ -57,7 +57,7 @@ POSSIBILITY OF SUCH DAMAGE.
  \xe2\x80\xa8 = 0x2028 (Line Separator)
  \xc8\xba = 570 \xe2\xb1\xa5 = 11365 (lowercase length != uppercase length)
  \xcc\x8d = 781 (Something with Mark property)
-*/  
+*/
 
 static void setstack(pcre_extra *extra);
 static int regression_tests(void);
@@ -568,7 +568,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
         { MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
 	{ MUA, 0, "((a?)+)+b", "aaaaaaaaaaaaa b" },
- 
+
 	/* Deep recursion: Stack limit reached. */
 	{ MA, 0, "a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaa" },
 	{ MA, 0, "(?:a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaa b" },
@@ -672,7 +672,7 @@ static int regression_tests(void)
         } else {
 		printf("\nSuccessful test ratio: %d%%\n", succesful * 100 / total);
                 return 1;
-        }         
+        }
 }
 
 /* End of pcre_jit_test.c */

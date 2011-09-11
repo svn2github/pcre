@@ -28,7 +28,9 @@ instead of having to compile them every time the application is run.
 If you are not using any private character tables (see the
 <a href="pcre_maketables.html"><b>pcre_maketables()</b></a>
 documentation), this is relatively straightforward. If you are using private
-tables, it is a little bit more complicated.
+tables, it is a little bit more complicated. However, if you are using the
+just-in-time optimization feature of <b>pcre_study()</b>, it is not possible to
+save and reload the JIT data.
 </P>
 <P>
 If you save compiled patterns to a file, you can copy them to a different host
@@ -36,7 +38,8 @@ and run them there. This works even if the new host has the opposite endianness
 to the one on which the patterns were compiled. There may be a small
 performance penalty, but it should be insignificant. However, compiling regular
 expressions with one version of PCRE for use with a different version is not
-guaranteed to work and may cause crashes.
+guaranteed to work and may cause crashes, and saving and restoring a compiled
+pattern loses any JIT optimization data.
 </P>
 <br><a name="SEC2" href="#TOC1">SAVING A COMPILED PATTERN</a><br>
 <P>
@@ -76,9 +79,11 @@ some daemon process that passes them via sockets to the processes that want
 them.
 </P>
 <P>
-If the pattern has been studied, it is also possible to save the study data in
-a similar way to the compiled pattern itself. When studying generates
-additional information, <b>pcre_study()</b> returns a pointer to a
+If the pattern has been studied, it is also possible to save the normal study
+data in a similar way to the compiled pattern itself. However, if the
+PCRE_STUDY_JIT_COMPILE was used, the just-in-time data that is created cannot
+be saved because it is too dependent on the current environment. When studying
+generates additional information, <b>pcre_study()</b> returns a pointer to a
 <b>pcre_extra</b> data block. Its format is defined in the
 <a href="pcreapi.html#extradata">section on matching a pattern</a>
 in the
@@ -120,7 +125,8 @@ If you saved study data with the compiled pattern, you need to create your own
 reloaded study data. You must also set the PCRE_EXTRA_STUDY_DATA bit in the
 <i>flags</i> field to indicate that study data is present. Then pass the
 <b>pcre_extra</b> block to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b> in the
-usual way.
+usual way. If the pattern was studied for just-in-time optimization, that data
+cannot be saved, and so is lost by a save/restore cycle.
 </P>
 <br><a name="SEC4" href="#TOC1">COMPATIBILITY WITH DIFFERENT PCRE RELEASES</a><br>
 <P>
@@ -138,9 +144,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 November 2010
+Last updated: 26 August 2011
 <br>
-Copyright &copy; 1997-2010 University of Cambridge.
+Copyright &copy; 1997-2011 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

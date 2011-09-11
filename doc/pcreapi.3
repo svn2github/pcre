@@ -41,7 +41,7 @@ PCRE - Perl-compatible regular expressions
 .PP
 .B void pcre_jit_stack_free(pcre_jit_stack *\fIstack\fP);
 .PP
-.B void pcre_assign_jit_stack(pcre_extra *\fIextra\fP, 
+.B void pcre_assign_jit_stack(pcre_extra *\fIextra\fP,
 .ti +5n
 .B pcre_jit_callback \fIcallback\fP, void *\fIdata\fP);
 .PP
@@ -315,7 +315,7 @@ callout function pointed to by \fBpcre_callout\fP, are shared by all threads.
 The compiled form of a regular expression is not altered during matching, so
 the same compiled pattern can safely be used by several threads at once.
 .P
-If the just-in-time optimization feature is being used, it needs separate 
+If the just-in-time optimization feature is being used, it needs separate
 memory stack areas for each thread. See the
 .\" HREF
 \fBpcrejit\fP
@@ -365,8 +365,8 @@ properties is available; otherwise it is set to zero.
 .sp
   PCRE_CONFIG_JIT
 .sp
-The output is an integer that is set to one if support for just-in-time 
-compiling is available; otherwise it is set to zero.   
+The output is an integer that is set to one if support for just-in-time
+compiling is available; otherwise it is set to zero.
 .sp
   PCRE_CONFIG_NEWLINE
 .sp
@@ -888,17 +888,17 @@ If studying the pattern does not produce any useful information,
 wants to pass any of the other fields to \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
 .P
-The second argument of \fBpcre_study()\fP contains option bits. There is only 
-one option: PCRE_STUDY_JIT_COMPILE. If this is set, and the just-in-time 
-compiler is available, the pattern is further compiled into machine code that 
-executes much faster than the \fBpcre_exec()\fP matching function. If 
-the just-in-time compiler is not available, this option is ignored. All other 
+The second argument of \fBpcre_study()\fP contains option bits. There is only
+one option: PCRE_STUDY_JIT_COMPILE. If this is set, and the just-in-time
+compiler is available, the pattern is further compiled into machine code that
+executes much faster than the \fBpcre_exec()\fP matching function. If
+the just-in-time compiler is not available, this option is ignored. All other
 bits in the \fIoptions\fP argument must be zero.
 .P
-JIT compilation is a heavyweight optimization. It can take some time for 
+JIT compilation is a heavyweight optimization. It can take some time for
 patterns to be analyzed, and for one-off matches and simple patterns the
 benefit of faster execution might be offset by a much slower study time.
-Not all patterns can be optimized by the JIT compiler. For those that cannot be 
+Not all patterns can be optimized by the JIT compiler. For those that cannot be
 handled, matching automatically falls back to the \fBpcre_exec()\fP
 interpreter. For more details, see the
 .\" HREF
@@ -920,7 +920,7 @@ API for release 8.20. For earlier versions, the memory could be freed with
 where PCRE_STUDY_JIT_COMPILE is not used, but it is advisable to change to the
 new function when convenient.
 .P
-This is a typical way in which \fBpcre_study\fP() is used (except that in a 
+This is a typical way in which \fBpcre_study\fP() is used (except that in a
 real application there should be tests for errors):
 .sp
   int rc;
@@ -932,10 +932,10 @@ real application there should be tests for errors):
     0,              /* no options */
     &error);        /* set to NULL or points to a message */
   rc = pcre_exec(   /* see below for details of pcre_exec() options */
-    re, sd, "subject", 7, 0, 0, ovector, 30);   
+    re, sd, "subject", 7, 0, 0, ovector, 30);
   ...
   pcre_free_study(sd);
-  pcre_free(re);  
+  pcre_free(re);
 .sp
 Studying a pattern does two things: first, a lower bound for the length of
 subject string that is needed to match the pattern is computed. This does not
@@ -950,8 +950,8 @@ single fixed starting character. A bitmap of possible starting bytes is
 created. This speeds up finding a position in the subject at which to start
 matching.
 .P
-These two optimizations apply to both \fBpcre_exec()\fP and 
-\fBpcre_dfa_exec()\fP. However, they are not used by \fBpcre_exec()\fP if 
+These two optimizations apply to both \fBpcre_exec()\fP and
+\fBpcre_dfa_exec()\fP. However, they are not used by \fBpcre_exec()\fP if
 \fBpcre_study()\fP is called with the PCRE_STUDY_JIT_COMPILE option, and
 just-in-time compiling is successful. The optimizations can be disabled by
 setting the PCRE_NO_START_OPTIMIZE option when calling \fBpcre_exec()\fP or
@@ -1122,11 +1122,11 @@ Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
 .sp
   PCRE_INFO_JIT
 .sp
-Return 1 if the pattern was studied with the PCRE_STUDY_JIT_COMPILE option, and 
+Return 1 if the pattern was studied with the PCRE_STUDY_JIT_COMPILE option, and
 just-in-time compiling was successful. The fourth argument should point to an
 \fBint\fP variable. A return value of 0 means that JIT support is not available
-in this version of PCRE, or that the pattern was not studied with the 
-PCRE_STUDY_JIT_COMPILE option, or that the JIT compiler could not handle this 
+in this version of PCRE, or that the pattern was not studied with the
+PCRE_STUDY_JIT_COMPILE option, or that the JIT compiler could not handle this
 particular pattern. See the
 .\" HREF
 \fBpcrejit\fP
@@ -1377,7 +1377,7 @@ fields (not necessarily in this order):
 .sp
   unsigned long int \fIflags\fP;
   void *\fIstudy_data\fP;
-  void *\fIexecutable_jit\fP; 
+  void *\fIexecutable_jit\fP;
   unsigned long int \fImatch_limit\fP;
   unsigned long int \fImatch_limit_recursion\fP;
   void *\fIcallout_data\fP;
@@ -1388,7 +1388,7 @@ The \fIflags\fP field is a bitmap that specifies which of the other fields
 are set. The flag bits are:
 .sp
   PCRE_EXTRA_STUDY_DATA
-  PCRE_EXTRA_EXECUTABLE_JIT 
+  PCRE_EXTRA_EXECUTABLE_JIT
   PCRE_EXTRA_MATCH_LIMIT
   PCRE_EXTRA_MATCH_LIMIT_RECURSION
   PCRE_EXTRA_CALLOUT_DATA
@@ -1411,11 +1411,11 @@ calls repeatedly (sometimes recursively). The limit set by \fImatch_limit\fP is
 imposed on the number of times this function is called during a match, which
 has the effect of limiting the amount of backtracking that can take place. For
 patterns that are not anchored, the count restarts from zero for each position
-in the subject string. 
+in the subject string.
 .P
-When \fBpcre_exec()\fP is called with a pattern that was successfully studied 
-with the PCRE_STUDY_JIT_COMPILE option, the way that the matching is executed 
-is entirely different. However, there is still the possibility of runaway 
+When \fBpcre_exec()\fP is called with a pattern that was successfully studied
+with the PCRE_STUDY_JIT_COMPILE option, the way that the matching is executed
+is entirely different. However, there is still the possibility of runaway
 matching that goes on for a very long time, and so the \fImatch_limit\fP value
 is also used in this case (but in a different way) to limit how long the
 matching can continue.
@@ -1431,7 +1431,7 @@ The \fImatch_limit_recursion\fP field is similar to \fImatch_limit\fP, but
 instead of limiting the total number of times that \fBmatch()\fP is called, it
 limits the depth of recursion. The recursion depth is a smaller number than the
 total number of calls, because not all calls to \fBmatch()\fP are recursive.
-This limit is of use only if it is set smaller than \fImatch_limit\fP. 
+This limit is of use only if it is set smaller than \fImatch_limit\fP.
 .P
 Limiting the recursion depth limits the amount of machine stack that can be
 used, or, when PCRE has been compiled to use memory on the heap instead of the
@@ -1500,8 +1500,8 @@ PCRE_PARTIAL_HARD.
 If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
 the only supported options for JIT execution are PCRE_NO_UTF8_CHECK,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NOTEMPTY_ATSTART. Note in
-particular that partial matching is not supported. If an unsupported option is 
-used, JIT execution is disabled and the normal interpretive code in 
+particular that partial matching is not supported. If an unsupported option is
+used, JIT execution is disabled and the normal interpretive code in
 \fBpcre_exec()\fP is run.
 .sp
   PCRE_ANCHORED
@@ -1825,7 +1825,7 @@ consider the pattern
 If a vector of 6 elements (allowing for only 1 captured substring) is given
 with subject string "abd", \fBpcre_exec()\fP will try to set the second
 captured string, thereby recording a vector overflow, before failing to match
-"c" and backing up to try the second alternative. The zero return, however, 
+"c" and backing up to try the second alternative. The zero return, however,
 does correctly indicate that the maximum number of slots (namely 2) have been
 filled. In similar cases where there is temporary overflow, but the final
 number of used slots is actually less than the maximum, a non-zero value is
@@ -2009,13 +2009,13 @@ time.
 .sp
   PCRE_ERROR_JIT_STACKLIMIT (-27)
 .sp
-This error is returned when a pattern that was successfully studied using the 
+This error is returned when a pattern that was successfully studied using the
 PCRE_STUDY_JIT_COMPILE option is being matched, but the memory available for
 the just-in-time processing stack is not large enough. See the
 .\" HREF
 \fBpcrejit\fP
 .\"
-documentation for more details.   
+documentation for more details.
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .
@@ -2456,7 +2456,7 @@ returns data, even though the meaning of the strings is different.)
 The strings are returned in reverse order of length; that is, the longest
 matching string is given first. If there were too many matches to fit into
 \fIovector\fP, the yield of the function is zero, and the vector is filled with
-the longest matches. Unlike \fBpcre_exec()\fP, \fBpcre_dfa_exec()\fP can use 
+the longest matches. Unlike \fBpcre_exec()\fP, \fBpcre_dfa_exec()\fP can use
 the entire \fIovector\fP for returning matched strings.
 .
 .

@@ -33,6 +33,16 @@ the recursive call would immediately be passed back as the result of the
 current call (a "tail recursion"), the function is just restarted instead.
 </P>
 <P>
+The above comments apply when <b>pcre_exec()</b> is run in its normal
+interpretive manner. If the pattern was studied with the
+PCRE_STUDY_JIT_COMPILE option, and just-in-time compiling was successful, and
+the options passed to <b>pcre_exec()</b> were not incompatible, the matching
+process uses the JIT-compiled code instead of the <b>match()</b> function. In
+this case, the memory requirements are handled entirely differently. See the
+<a href="pcrejit.html"><b>pcrejit</b></a>
+documentation for details.
+</P>
+<P>
 The <b>pcre_dfa_exec()</b> function operates in an entirely different way, and
 uses recursion only when there is a regular expression recursion or subroutine
 call in the pattern. This includes the processing of assertion and "once-only"
@@ -45,7 +55,7 @@ against this.
 </P>
 <P>
 The comments that follow do NOT apply to <b>pcre_dfa_exec()</b>; they are
-relevant only for <b>pcre_exec()</b>.
+relevant only for <b>pcre_exec()</b> without the JIT optimization.
 </P>
 <br><b>
 Reducing <b>pcre_exec()</b>'s stack usage
@@ -179,7 +189,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 22 July 2011
+Last updated: 26 August 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

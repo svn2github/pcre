@@ -119,7 +119,7 @@ The generated code will be the following:
  jump to D hot path
  C fallback path
  A fallback path
- 
+
  Notice, that the order of fallback code paths are the opposite of the fast
  code paths. In this way the topmost value on the stack is always belong
  to the current fallback code path. The fallback code path must check
@@ -405,7 +405,7 @@ cc += 1 + LINK_SIZE;
 return cc;
 }
 
-/* Functions whose might need modification for all new supported opcodes: 
+/* Functions whose might need modification for all new supported opcodes:
  next_opcode
  get_localspace
  set_localptrs
@@ -2384,7 +2384,7 @@ do
       }
     context->byteptr = 0;
     }
-  
+
 #else
 
   /* Unaligned read is unsupported. */
@@ -3232,7 +3232,7 @@ do
       else if (cc[1] >= 0xc0)
         size += _pcre_utf8_table4[cc[1] & 0x3f];
       }
-    else   
+    else
 #endif
     if (char_has_othercase(common, cc + 1) && char_get_othercase_bit(common, cc + 1) == 0)
       size = 0;
@@ -6392,7 +6392,7 @@ pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userd
 {
 executable_function *function;
 if (extra != NULL &&
-    (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 && 
+    (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 &&
     extra->executable_jit != NULL)
   {
   function = (executable_function*)extra->executable_jit;
@@ -6403,7 +6403,7 @@ if (extra != NULL &&
 
 #else  /* SUPPORT_JIT */
 
-/* These are dummy functions to avoid linking errors when JIT support is not 
+/* These are dummy functions to avoid linking errors when JIT support is not
 being compiled. */
 
 PCRE_EXP_DECL pcre_jit_stack *

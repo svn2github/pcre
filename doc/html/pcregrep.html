@@ -456,6 +456,14 @@ output, it precedes the line number. This option is forced if
 <b>--line-offsets</b> is used.
 </P>
 <P>
+<b>--no-jit</b>
+If the PCRE library is built with support for just-in-time compiling (which
+speeds up matching), <b>pcregrep</b> automatically makes use of this, unless it
+was explicitly disabled at build time. This option can be used to disable the
+use of JIT at run time. It is provided for testing and working round problems.
+It should never be needed in normal use.
+</P>
+<P>
 <b>-o</b>, <b>--only-matching</b>
 Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the <b>-A</b>, <b>-B</b>, and
@@ -634,7 +642,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 July 2011
+Last updated: 06 September 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

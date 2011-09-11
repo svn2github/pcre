@@ -11,7 +11,7 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [20])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2011-08-18])
+m4_define(pcre_date, [2011-09-12])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -491,7 +491,7 @@ fi
 
 if test "$enable_pcregrep_jit" = "yes"; then
   AC_DEFINE([SUPPORT_PCREGREP_JIT], [], [
-    Define to enable JIT support in pcregrep.])    
+    Define to enable JIT support in pcregrep.])
 fi
 
 if test "$enable_utf8" = "yes"; then
@@ -771,7 +771,7 @@ $PACKAGE-$VERSION configuration summary:
     Match limit recursion ........... : ${with_match_limit_recursion}
     Build shared libs ............... : ${enable_shared}
     Build static libs ............... : ${enable_static}
-    Use JIT in pcregrep ............. : ${enable_pcregrep_jit} 
+    Use JIT in pcregrep ............. : ${enable_pcregrep_jit}
     Buffer size for pcregrep ........ : ${with_pcregrep_bufsize}
     Link pcregrep with libz ......... : ${enable_pcregrep_libz}
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}

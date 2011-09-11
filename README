@@ -173,15 +173,15 @@ library. They are also documented in the pcrebuild man page.
   --disable-cpp to the "configure" command. Otherwise, when "configure" is run,
   it will try to find a C++ compiler and C++ header files, and if it succeeds,
   it will try to build the C++ wrapper.
-  
-. If you want to include support for just-in-time compiling, which can give 
-  large performance improvements on certain platforms, add --enable-jit to the 
-  "configure" command. This support is available only for certain hardware 
-  architectures. If you try to enable it on an unsupported architecture, there 
+
+. If you want to include support for just-in-time compiling, which can give
+  large performance improvements on certain platforms, add --enable-jit to the
+  "configure" command. This support is available only for certain hardware
+  architectures. If you try to enable it on an unsupported architecture, there
   will be a compile time error.
-  
+
 . When JIT support is enabled, pcregrep automatically makes use of it, unless
-  you add --disable-pcregrep-jit to the "configure" command. 
+  you add --disable-pcregrep-jit to the "configure" command.
 
 . If you want to make use of the support for UTF-8 Unicode character strings in
   PCRE, you must add --enable-utf8 to the "configure" command. Without it, the
@@ -355,10 +355,10 @@ contains compiler output from tests that "configure" runs.
 
 Once "configure" has run, you can run "make". It builds two libraries, called
 libpcre and libpcreposix, a test program called pcretest, and the pcregrep
-command. If a C++ compiler was found on your system, and you did not disable it 
+command. If a C++ compiler was found on your system, and you did not disable it
 with --disable-cpp, "make" also builds the C++ wrapper library, which is called
 libpcrecpp, and some test programs called pcrecpp_unittest,
-pcre_scanner_unittest, and pcre_stringpiece_unittest. If you enabled JIT 
+pcre_scanner_unittest, and pcre_stringpiece_unittest. If you enabled JIT
 support with --enable-jit, a test program called pcre_jit_test is also built.
 
 The command "make check" runs all the appropriate tests. Details of the PCRE
@@ -394,7 +394,7 @@ system. The following are installed (file names are all relative to the
   Man pages (share/man/man{1,3}):
     pcregrep.1
     pcretest.1
-    pcre-config.1 
+    pcre-config.1
     pcre.3
     pcre*.3 (lots more pages, all starting "pcre")
 
@@ -412,7 +412,7 @@ system. The following are installed (file names are all relative to the
     pcre.txt         (a concatenation of the man(3) pages)
     pcretest.txt     the pcretest man page
     pcregrep.txt     the pcregrep man page
-    pcre-config.txt  the pcre-config man page 
+    pcre-config.txt  the pcre-config man page
 
 If you want to remove PCRE from your system, you can run "make uninstall".
 This removes all the files that "make install" installed. However, it does not
@@ -548,7 +548,7 @@ To test the basic PCRE library on a Unix system, run the RunTest script that is
 created by the configuring process. There is also a script called RunGrepTest
 that tests the options of the pcregrep command. If the C++ wrapper library is
 built, three test programs called pcrecpp_unittest, pcre_scanner_unittest, and
-pcre_stringpiece_unittest are also built. When JIT support is enabled, another 
+pcre_stringpiece_unittest are also built. When JIT support is enabled, another
 test program called pcre_jit_test is built.
 
 Both the scripts and all the program tests are run if you obey "make check" or
@@ -561,10 +561,10 @@ testoutput files. Some tests are relevant only when certain build-time options
 were selected. For example, the tests for UTF-8 support are run only if
 --enable-utf8 was used. RunTest outputs a comment when it skips a test.
 
-Many of the tests that are not skipped are run up to three times. The second 
-run forces pcre_study() to be called for all patterns except for a few in some 
-tests that are marked "never study" (see the pcretest program for how this is 
-done). If JIT support is available, the non-DFA tests are run a third time, 
+Many of the tests that are not skipped are run up to three times. The second
+run forces pcre_study() to be called for all patterns except for a few in some
+tests that are marked "never study" (see the pcretest program for how this is
+done). If JIT support is available, the non-DFA tests are run a third time,
 this time with a forced pcre_study() with the PCRE_STUDY_JIT_COMPILE option.
 
 RunTest uses a file called testtry to hold the main output from pcretest
@@ -638,9 +638,9 @@ higher.
 The thirteenth test checks a number internals and non-Perl features concerned
 with Unicode property support.
 
-The fourteenth test is run only when JIT support is available, and the 
-fifteenth test is run only when JIT support is not available. They test some 
-JIT-specific features such as information output from pcretest about JIT 
+The fourteenth test is run only when JIT support is available, and the
+fifteenth test is run only when JIT support is not available. They test some
+JIT-specific features such as information output from pcretest about JIT
 compilation.
 
 
@@ -721,7 +721,7 @@ The distribution should contain the following files:
   pcre_get.c              ) sources for the functions in the library,
   pcre_globals.c          )   and some internal functions that they use
   pcre_info.c             )
-  pcre_jit_compile.c      ) 
+  pcre_jit_compile.c      )
   pcre_maketables.c       )
   pcre_newline.c          )
   pcre_ord2utf8.c         )
@@ -738,7 +738,7 @@ The distribution should contain the following files:
   pcre.h.in               template for pcre.h when built by "configure"
   pcreposix.h             header for the external POSIX wrapper API
   pcre_internal.h         header for internal use
-  sljit/*                 16 files that make up the JIT compiler 
+  sljit/*                 16 files that make up the JIT compiler
   ucp.h                   header for Unicode property handling
 
   config.h.in             template for config.h, which is built by "configure"
@@ -805,7 +805,7 @@ The distribution should contain the following files:
   mkinstalldirs           script for making install directories
   perltest.pl             Perl test program
   pcre-config.in          source of script which retains PCRE information
-  pcre_jit_test.c         test program for the JIT compiler 
+  pcre_jit_test.c         test program for the JIT compiler
   pcrecpp_unittest.cc          )
   pcre_scanner_unittest.cc     ) test programs for the C++ wrapper
   pcre_stringpiece_unittest.cc )

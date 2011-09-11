@@ -22,7 +22,7 @@ the code, and, in addition, you must call
 with the PCRE_UTF8 option flag, or the pattern must start with the sequence
 (*UTF8). When either of these is the case, both the pattern and any subject
 strings that are matched against it are treated as UTF-8 strings instead of
-strings of 1-byte characters. PCRE does not support any other formats (in 
+strings of 1-byte characters. PCRE does not support any other formats (in
 particular, it does not support UTF-16).
 </P>
 <P>
@@ -83,16 +83,20 @@ codes. In this case, it does not diagnose an invalid UTF-8 string.
 If you pass an invalid UTF-8 string when PCRE_NO_UTF8_CHECK is set, what
 happens depends on why the string is invalid. If the string conforms to the
 "old" definition of UTF-8 (RFC 2279), it is processed as a string of characters
-in the range 0 to 0x7FFFFFFF. In other words, apart from the initial validity
-test, PCRE (when in UTF-8 mode) handles strings according to the more liberal
-rules of RFC 2279. However, if the string does not even conform to RFC 2279,
-the result is undefined. Your program may crash.
+in the range 0 to 0x7FFFFFFF by <b>pcre_dfa_exec()</b> and the interpreted
+version of <b>pcre_exec()</b>. In other words, apart from the initial validity
+test, these functions (when in UTF-8 mode) handle strings according to the more
+liberal rules of RFC 2279. However, the just-in-time (JIT) optimization for
+<b>pcre_exec()</b> supports only RFC 3629. If you are using JIT optimization, or
+if the string does not even conform to RFC 2279, the result is undefined. Your
+program may crash.
 </P>
 <P>
 If you want to process strings of values in the full range 0 to 0x7FFFFFFF,
 encoded in a UTF-8-like manner as per the old RFC, you can set
 PCRE_NO_UTF8_CHECK to bypass the more restrictive test. However, in this
-situation, you will have to apply your own validity check.
+situation, you will have to apply your own validity check, and avoid the use of
+JIT optimization.
 </P>
 <br><b>
 General comments about UTF-8 mode
@@ -115,7 +119,10 @@ bytes, for example: \x{100}{3}.
 <P>
 5. The escape sequence \C can be used to match a single byte in UTF-8 mode,
 but its use can lead to some strange effects. This facility is not available in
-the alternative matching function, <b>pcre_dfa_exec()</b>.
+the alternative matching function, <b>pcre_dfa_exec()</b>, nor is it supported
+by the JIT optimization of <b>pcre_exec()</b>. If JIT optimization is requested
+for a pattern that contains \C, it will not succeed, and so the matching will
+be carried out by the normal interpretive function.
 </P>
 <P>
 6. The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly
@@ -168,7 +175,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 24 August 2011
+Last updated: 06 September 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

@@ -1871,7 +1871,7 @@ switch(letter)
   case N_HELP: help(); pcregrep_exit(0);
   case N_LBUFFER: line_buffered = TRUE; break;
   case N_LOFFSETS: line_offsets = number = TRUE; break;
-  case N_NOJIT: study_options &= ~PCRE_STUDY_JIT_COMPILE; break; 
+  case N_NOJIT: study_options &= ~PCRE_STUDY_JIT_COMPILE; break;
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
@@ -2586,14 +2586,14 @@ if (pattern_filename != NULL)
   if (f != stdin) fclose(f);
   }
 
-/* Study the regular expressions, as we will be running them many times. Unless 
+/* Study the regular expressions, as we will be running them many times. Unless
 JIT has been explicitly disabled, arrange a stack for it to use. */
 
 #ifdef SUPPORT_PCREGREP_JIT
 if ((study_options & PCRE_STUDY_JIT_COMPILE) != 0)
   jit_stack = pcre_jit_stack_alloc(32*1024, 1024*1024);
-#endif   
-  
+#endif
+
 for (j = 0; j < pattern_count; j++)
   {
   hints_list[j] = pcre_study(pattern_list[j], study_options, &error);
@@ -2606,7 +2606,7 @@ for (j = 0; j < pattern_count; j++)
     }
   hint_count++;
 #ifdef SUPPORT_PCREGREP_JIT
-  if (jit_stack != NULL && hints_list[j] != NULL) 
+  if (jit_stack != NULL && hints_list[j] != NULL)
     pcre_assign_jit_stack(hints_list[j], NULL, jit_stack);
 #endif
   }

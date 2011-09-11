@@ -6403,7 +6403,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
 
   /* Set the return code to the number of captured strings, or 0 if there were
   too many to fit into the vector. */
-  
+
   rc = (md->offset_overflow && md->end_offset_top >= arg_offset_max)?
     0 : md->end_offset_top/2;
 

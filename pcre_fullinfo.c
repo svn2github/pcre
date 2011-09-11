@@ -130,7 +130,7 @@ switch (what)
   break;
 
   case PCRE_INFO_JIT:
-  *((int *)where) = extra_data != NULL && 
+  *((int *)where) = extra_data != NULL &&
                     (extra_data->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0 &&
                     extra_data->executable_jit != NULL;
   break;
