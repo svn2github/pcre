@@ -41,6 +41,13 @@ Version 8.20 12-Sep-2011
    (*PRUNE) or any other control that caused it to give a non-standard return,
    invalid errors such as "Error -26 (nested recursion at the same subject
    position)" or even infinite loops could occur.
+   
+7. If a pattern such as /a(*SKIP)c|b(*ACCEPT)|/ was studied, it stopped 
+   computing the minimum length on reaching *ACCEPT, and so ended up with the 
+   wrong value of 1 rather than 0. Further investigation indicates that
+   computing a minimum subject length in the presence of *ACCEPT is difficult
+   (think back references, subroutine calls), and so I have changed the code so
+   that no minimum is registered for a pattern that contains *ACCEPT.
 
 
 Version 8.13 16-Aug-2011

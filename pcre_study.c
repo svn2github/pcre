@@ -66,21 +66,20 @@ string of that length that matches. In UTF8 mode, the result is in characters
 rather than bytes.
 
 Arguments:
-  code        pointer to start of group (the bracket)
-  startcode   pointer to start of the whole pattern
-  options     the compiling options
-  had_accept  pointer to flag for (*ACCEPT) encountered
-  int         RECURSE depth
+  code            pointer to start of group (the bracket)
+  startcode       pointer to start of the whole pattern
+  options         the compiling options
+  int             RECURSE depth
 
 Returns:   the minimum length
-           -1 if \C was encountered
+           -1 if \C in UTF-8 mode or (*ACCEPT) was encountered
            -2 internal error (missing capturing bracket)
            -3 internal error (opcode not listed)
 */
 
 static int
 find_minlength(const uschar *code, const uschar *startcode, int options,
-  BOOL *had_accept_ptr, int recurse_depth)
+  int recurse_depth)
 {
 int length = -1;
 BOOL utf8 = (options & PCRE_UTF8) != 0;
@@ -128,24 +127,25 @@ for (;;)
     case OP_BRAPOS:
     case OP_SBRAPOS:
     case OP_ONCE:
-    d = find_minlength(cc, startcode, options, had_accept_ptr, recurse_depth);
+    d = find_minlength(cc, startcode, options, recurse_depth);
     if (d < 0) return d;
     branchlength += d;
-    if (*had_accept_ptr) return branchlength;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += 1 + LINK_SIZE;
     break;
 
-    /* Reached end of a branch; if it's a ket it is the end of a nested
-    call. If it's ALT it is an alternation in a nested call. If it is END it's
-    the end of the outer call. All can be handled by the same code. If it is
-    ACCEPT, it is essentially the same as END, but we set a flag so that
-    counting stops. */
+    /* ACCEPT makes things far too complicated; we have to give up. */
 
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
-    *had_accept_ptr = TRUE;
-    /* Fall through */
+    return -1; 
+
+    /* Reached end of a branch; if it's a ket it is the end of a nested
+    call. If it's ALT it is an alternation in a nested call. If it is END it's
+    the end of the outer call. All can be handled by the same code. If an 
+    ACCEPT was previously encountered, use the length that was in force at that 
+    time, and pass back the shortest ACCEPT length. */
+ 
     case OP_ALT:
     case OP_KET:
     case OP_KETRMAX:
@@ -379,9 +379,7 @@ for (;;)
         }
       else
         {
-        d = find_minlength(cs, startcode, options, had_accept_ptr,
-          recurse_depth);
-        *had_accept_ptr = FALSE;
+        d = find_minlength(cs, startcode, options, recurse_depth);
         }
       }
     else d = 0;
@@ -430,9 +428,7 @@ for (;;)
       had_recurse = TRUE;
     else
       {
-      branchlength += find_minlength(cs, startcode, options, had_accept_ptr,
-        recurse_depth + 1);
-      *had_accept_ptr = FALSE;
+      branchlength += find_minlength(cs, startcode, options, recurse_depth + 1);
       }
     cc += 1 + LINK_SIZE;
     break;
@@ -1228,7 +1224,6 @@ pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 int min;
 BOOL bits_set = FALSE;
-BOOL had_accept = FALSE;
 uschar start_bits[32];
 pcre_extra *extra = NULL;
 pcre_study_data *study;
@@ -1290,13 +1285,13 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(code, code, re->options, &had_accept, 0))
+switch(min = find_minlength(code, code, re->options, 0))
   {
   case -2: *errorptr = "internal error: missing capturing bracket"; return NULL;
   case -3: *errorptr = "internal error: opcode not recognized"; return NULL;
   default: break;
   }
-
+  
 /* If a set of starting bytes has been identified, or if the minimum length is
 greater than zero, or if JIT optimization has been requested, get a pcre_extra
 block and a pcre_study_data block. The study data is put in the latter, which
@@ -1336,10 +1331,14 @@ if (bits_set || min > 0
   /* Always set the minlength value in the block, because the JIT compiler
   makes use of it. However, don't set the bit unless the length is greater than
   zero - the interpretive pcre_exec() and pcre_dfa_exec() needn't waste time
-  checking this case. */
+  checking the zero case. */
 
-  study->minlength = min;
-  if (min > 0) study->flags |= PCRE_STUDY_MINLEN;
+  if (min > 0) 
+    {
+    study->flags |= PCRE_STUDY_MINLEN;
+    study->minlength = min;
+    }
+  else study->minlength = 0;    
 
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT

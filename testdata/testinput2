@@ -3848,4 +3848,15 @@ with \Y. ---/
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/IS
 
+/a(*SKIP)c|b(*ACCEPT)|/+SI
+    a
+
+/a(*SKIP)c|b(*ACCEPT)cd(*ACCEPT)|x/SI
+    ax
+
+'a*(*ACCEPT)b'+
+    \N\N
+    abc\N\N
+    bbb\N\N 
+
 /-- End of testinput2 --/
