@@ -40,9 +40,12 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include "pcre.h"
 
 #define PCRE_BUG 0x80000000
@@ -64,7 +67,13 @@ static int regression_tests(void);
 
 int main(void)
 {
-        return regression_tests();
+	int jit = 0;
+	pcre_config(PCRE_CONFIG_JIT, &jit);
+	if (!jit) {
+		printf("JIT must be enabled to run pcre_jit_test\n");
+		return 1;
+	}
+	return regression_tests();
 }
 
 static pcre_jit_stack* callback(void *arg)
@@ -120,7 +129,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "[^a-dA-C]", "\xe6\x92\xad\xc3\xa9" },
 	{ CMUA, 0, "[^\xc3\xa9]", "\xc3\xa9\xc3\x89." },
 	{ MUA, 0, "[^\xc3\xa9]", "\xc3\xa9\xc3\x89." },
-        { MUA, 0, "[^a]", "\xc2\x80[]" },
+	{ MUA, 0, "[^a]", "\xc2\x80[]" },
 	{ CMUA, 0, "\xf0\x90\x90\xa7", "\xf0\x90\x91\x8f" },
 	{ CMA, 0, "1a2b3c4", "1a2B3c51A2B3C4" },
 	{ PCRE_CASELESS, 0, "\xff#a", "\xff#\xff\xfe##\xff#A" },
@@ -376,13 +385,13 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(c(ab)?+ab)+", "cabcababcab" },
 	{ MUA, 0, "(?>(a+)b)+aabab", "aaaabaaabaabab" },
 
-        /* Possessive quantifiers. */
-        { MUA, 0, "(?:a|b)++m", "mababbaaxababbaam" },
-        { MUA, 0, "(?:a|b)*+m", "mababbaaxababbaam" },
-        { MUA, 0, "(?:a|b)*+m", "ababbaaxababbaam" },
-        { MUA, 0, "(a|b)++m", "mababbaaxababbaam" },
-        { MUA, 0, "(a|b)*+m", "mababbaaxababbaam" },
-        { MUA, 0, "(a|b)*+m", "ababbaaxababbaam" },
+	/* Possessive quantifiers. */
+	{ MUA, 0, "(?:a|b)++m", "mababbaaxababbaam" },
+	{ MUA, 0, "(?:a|b)*+m", "mababbaaxababbaam" },
+	{ MUA, 0, "(?:a|b)*+m", "ababbaaxababbaam" },
+	{ MUA, 0, "(a|b)++m", "mababbaaxababbaam" },
+	{ MUA, 0, "(a|b)*+m", "mababbaaxababbaam" },
+	{ MUA, 0, "(a|b)*+m", "ababbaaxababbaam" },
 	{ MUA, 0, "(a|b(*ACCEPT))++m", "maaxab" },
 	{ MUA, 0, "(?:b*)++m", "bxbbxbbbxm" },
 	{ MUA, 0, "(?:b*)++m", "bxbbxbbbxbbm" },
@@ -392,12 +401,12 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(b*)++m", "bxbbxbbbxbbm" },
 	{ MUA, 0, "(b*)*+m", "bxbbxbbbxm" },
 	{ MUA, 0, "(b*)*+m", "bxbbxbbbxbbm" },
-        { MUA, 0, "(?:a|(b))++m", "mababbaaxababbaam" },
-        { MUA, 0, "(?:(a)|b)*+m", "mababbaaxababbaam" },
-        { MUA, 0, "(?:(a)|(b))*+m", "ababbaaxababbaam" },
-        { MUA, 0, "(a|(b))++m", "mababbaaxababbaam" },
-        { MUA, 0, "((a)|b)*+m", "mababbaaxababbaam" },
-        { MUA, 0, "((a)|(b))*+m", "ababbaaxababbaam" },
+	{ MUA, 0, "(?:a|(b))++m", "mababbaaxababbaam" },
+	{ MUA, 0, "(?:(a)|b)*+m", "mababbaaxababbaam" },
+	{ MUA, 0, "(?:(a)|(b))*+m", "ababbaaxababbaam" },
+	{ MUA, 0, "(a|(b))++m", "mababbaaxababbaam" },
+	{ MUA, 0, "((a)|b)*+m", "mababbaaxababbaam" },
+	{ MUA, 0, "((a)|(b))*+m", "ababbaaxababbaam" },
 	{ MUA, 0, "(a|(b)(*ACCEPT))++m", "maaxab" },
 	{ MUA, 0, "(?:(b*))++m", "bxbbxbbbxm" },
 	{ MUA, 0, "(?:(b*))++m", "bxbbxbbbxbbm" },
@@ -517,7 +526,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?(?!b)a*)+aak", "aaaaab aaaaak" },
 	{ MUA, 0, "(?(?=(?=(?!(x))a)aa)aaa|(?(?=(?!y)bb)bbb))*k", "abaabbaaabbbaaabbb abaabbaaabbbaaabbbk" },
 
-        /* Set start of match. */
+	/* Set start of match. */
 	{ MUA, 0, "(?:\\Ka)*aaaab", "aaaaaaaa aaaaaaabb" },
 	{ MUA, 0, "(?>\\Ka\\Ka)*aaaab", "aaaaaaaa aaaaaaaaaabb" },
 	{ MUA, 0, "a+\\K(?<=\\Gaa)a", "aaaaaa" },
@@ -566,7 +575,7 @@ static struct regression_test_case regression_test_cases[] = {
 
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
-        { MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
+	{ MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
 	{ MUA, 0, "((a?)+)+b", "aaaaaaaaaaaaa b" },
 
 	/* Deep recursion: Stack limit reached. */
@@ -585,23 +594,43 @@ static int regression_tests(void)
 	struct regression_test_case *current = regression_test_cases;
 	const char *error;
 	pcre_extra *extra;
+	int utf8 = 0, ucp = 0;
 	int ovector1[32];
 	int ovector2[32];
 	int return_value1, return_value2;
 	int i, err_offs;
 	int total = 0, succesful = 0;
 	int counter = 0;
+	int disabled_flags = PCRE_BUG;
 
-	printf("Running JIT regression tests:\n");
+	/* This test compares the behaviour of interpreter and JIT. Although disabling
+	utf8 or ucp may make tests fail, if the pcre_exec result is the SAME, it is
+	still considered successful from pcre_jit_test point of view. */
+
+	pcre_config(PCRE_CONFIG_UTF8, &utf8);
+	pcre_config(PCRE_CONFIG_UNICODE_PROPERTIES, &ucp);
+	if (!utf8)
+		disabled_flags |= PCRE_UTF8;
+	if (!ucp)
+		disabled_flags |= PCRE_UCP;
+
+	printf("Running JIT regression tests with utf8 %s and ucp %s:\n", utf8 ? "enabled" : "disabled", ucp ? "enabled" : "disabled");
 	while (current->pattern) {
-		/* printf("\nPattern: %s :", current->pattern); */
+		/* printf("\nPattern: %s :\n", current->pattern); */
 		total++;
 
 		error = NULL;
-		re = pcre_compile(current->pattern, current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_BUG), &error, &err_offs, NULL);
+		re = pcre_compile(current->pattern, current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | disabled_flags), &error, &err_offs, NULL);
 
 		if (!re) {
-			printf("\nCannot compile pattern: %s\n", current->pattern);
+			if (utf8 && ucp)
+				printf("\nCannot compile pattern: %s\n", current->pattern);
+			else {
+				/* Some patterns cannot be compiled when either of utf8
+				or ucp is disabled. We just skip them. */
+				printf(".");
+				succesful++;
+			}
 			current++;
 			continue;
 		}
@@ -669,10 +698,10 @@ static int regression_tests(void)
 	if (total == succesful) {
 		printf("\nAll JIT regression tests are successfully passed.\n");
 		return 0;
-        } else {
+	} else {
 		printf("\nSuccessful test ratio: %d%%\n", succesful * 100 / total);
-                return 1;
-        }
+		return 1;
+	}
 }
 
 /* End of pcre_jit_test.c */

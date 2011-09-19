@@ -448,11 +448,11 @@ IF(PCRE_BUILD_TESTS)
   SET(targets ${targets} pcretest)
   TARGET_LINK_LIBRARIES(pcretest pcreposix ${PCRETEST_LIBS})
 
-  IF(PCRE_SUPPORT_JIT AND PCRE_SUPPORT_UTF8)
+  IF(PCRE_SUPPORT_JIT)
     ADD_EXECUTABLE(pcre_jit_test pcre_jit_test.c)
     SET(targets ${targets} pcre_jit_test)
     TARGET_LINK_LIBRARIES(pcre_jit_test pcre)
-  ENDIF(PCRE_SUPPORT_JIT AND PCRE_SUPPORT_UTF8)
+  ENDIF(PCRE_SUPPORT_JIT)
 
   IF(PCRE_BUILD_PCRECPP)
     ADD_EXECUTABLE(pcrecpp_unittest pcrecpp_unittest.cc)
@@ -495,11 +495,11 @@ IF(PCRE_BUILD_TESTS)
           ADD_TEST(pcre_test ${PROJECT_SOURCE_DIR}/RunTest.bat)
   ENDIF(WIN32)
 
-  IF(PCRE_SUPPORT_JIT AND PCRE_SUPPORT_UTF8)
+  IF(PCRE_SUPPORT_JIT)
   GET_TARGET_PROPERTY(PCRE_JIT_TEST_EXE
                       pcre_jit_test
                       DEBUG_LOCATION)
-  ENDIF(PCRE_SUPPORT_JIT AND PCRE_SUPPORT_UTF8)
+  ENDIF(PCRE_SUPPORT_JIT)
 
   GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
                       pcrecpp_unittest
@@ -513,9 +513,9 @@ IF(PCRE_BUILD_TESTS)
                       pcre_stringpiece_unittest
                       DEBUG_LOCATION)
 
-  IF(PCRE_SUPPORT_JIT AND PCRE_SUPPORT_UTF8)
+  IF(PCRE_SUPPORT_JIT)
   ADD_TEST(pcre_jit_test         ${PCRE_JIT_TEST_EXE})
-  ENDIF(PCRE_SUPPORT_JIT AND PCRE_SUPPORT_UTF8)
+  ENDIF(PCRE_SUPPORT_JIT)
   ADD_TEST(pcrecpp_test          ${PCRECPP_UNITTEST_EXE})
   ADD_TEST(pcre_scanner_test     ${PCRE_SCANNER_UNITTEST_EXE})
   ADD_TEST(pcre_stringpiece_test ${PCRE_STRINGPIECE_UNITTEST_EXE})
