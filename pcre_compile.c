@@ -5045,6 +5045,9 @@ for (;; ptr++)
               PUT2INC(code, 0, oc->number);
               }
             *code++ = (cd->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
+            
+            /* Do not set firstbyte after *ACCEPT */
+            if (firstbyte == REQ_UNSET) firstbyte = REQ_NONE;
             }
 
           /* Handle other cases with/without an argument */
@@ -6323,7 +6326,7 @@ for (;; ptr++)
     byte, set it from this character, but revert to none on a zero repeat.
     Otherwise, leave the firstbyte value alone, and don't change it on a zero
     repeat. */
-
+    
     if (firstbyte == REQ_UNSET)
       {
       zerofirstbyte = REQ_NONE;
@@ -6340,7 +6343,7 @@ for (;; ptr++)
       else firstbyte = reqbyte = REQ_NONE;
       }
 
-    /* firstbyte was previously set; we can set reqbyte only the length is
+    /* firstbyte was previously set; we can set reqbyte only if the length is
     1 or the matching is caseful. */
 
     else
@@ -7287,7 +7290,7 @@ re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
 re->flags = cd->external_flags;
 
-if (cd->had_accept) reqbyte = -1;   /* Must disable after (*ACCEPT) */
+if (cd->had_accept) reqbyte = REQ_NONE;   /* Must disable after (*ACCEPT) */
 
 /* If not reached end of pattern on success, there's an excess bracket. */
 

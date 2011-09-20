@@ -3874,4 +3874,10 @@ with \Y. ---/
     abc\N\N
     bbb\N\N 
 
+/(*ACCEPT)a/+I
+    bax
+
+/z(*ACCEPT)a/+I
+    baxzbx
+
 /-- End of testinput2 --/

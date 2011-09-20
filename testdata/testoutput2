@@ -12304,4 +12304,22 @@ No match
  0: 
  0+ bb
 
+/(*ACCEPT)a/+I
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+    bax
+ 0: 
+ 0+ bax
+
+/z(*ACCEPT)a/+I
+Capturing subpattern count = 0
+No options
+First char = 'z'
+No need char
+    baxzbx
+ 0: z
+ 0+ bx
+
 /-- End of testinput2 --/
