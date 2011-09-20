@@ -5064,6 +5064,7 @@ for (;; ptr++)
               {
               PUT(code, 0, code - bcptr->current_branch - 1);
               code += LINK_SIZE;
+              cd->external_flags |= PCRE_HASTHEN; 
               }
             }
 

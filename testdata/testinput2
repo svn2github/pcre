@@ -3880,4 +3880,7 @@ with \Y. ---/
 /z(*ACCEPT)a/+I
     baxzbx
 
+/a(?:.)*?a/ims                                                                  
+    \Mabbbbbbbbbbbbbbbbbbbbba
+
 /-- End of testinput2 --/

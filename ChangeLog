@@ -59,6 +59,12 @@ Version 8.20 12-Sep-2011
    
 10. A pathological pattern such as /(*ACCEPT)a/ was miscompiled, thinking that
     the first byte in a match must be "a".
+    
+11. Change 17 for 8.13 increased the recursion depth for patterns like
+    /a(?:.)*?a/ drastically. I've improved things by remembering whether a
+    pattern contains any instances of (*THEN). If it does not, the old 
+    optimizations are restored. It would be nice to do this on a per-group 
+    basis, but at the moment that is not feasible.
 
 
 Version 8.13 16-Aug-2011
@@ -158,7 +164,7 @@ Version 8.13 16-Aug-2011
     tail recursion to cut down on stack usage. Unfortunately, now that there is
     the possibility of (*THEN) occurring in these branches, tail recursion is
     no longer possible because the return has to be checked for (*THEN). These
-    two optimizations have therefore been removed.
+    two optimizations have therefore been removed. [But see 8.20/11 above.]
 
 18. If a pattern containing \R was studied, it was assumed that \R always
     matched two bytes, thus causing the minimum subject length to be

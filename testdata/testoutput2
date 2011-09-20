@@ -4430,12 +4430,12 @@ No first char
 Need char = 'z'
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\M
 Minimum match() limit = 8
-Minimum match() recursion limit = 7
+Minimum match() recursion limit = 6
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazz
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\M
 Minimum match() limit = 32768
-Minimum match() recursion limit = 43
+Minimum match() recursion limit = 42
 No match
 
 /(aaa(?C1)bbb|ab)/I
@@ -6666,7 +6666,7 @@ No first char
 No need char
    /* this is a C style comment */\M
 Minimum match() limit = 120
-Minimum match() recursion limit = 35
+Minimum match() recursion limit = 6
  0: /* this is a C style comment */
  1: /* this is a C style comment */
 
@@ -11951,22 +11951,22 @@ No set of starting bytes
 /^(?>a)++/
     aa\M
 Minimum match() limit = 5
-Minimum match() recursion limit = 3
+Minimum match() recursion limit = 2
  0: aa
     aaaaaaaaa\M 
 Minimum match() limit = 12
-Minimum match() recursion limit = 3
+Minimum match() recursion limit = 2
  0: aaaaaaaaa
     
 /(a)(?1)++/
     aa\M
 Minimum match() limit = 7
-Minimum match() recursion limit = 5
+Minimum match() recursion limit = 4
  0: aa
  1: a
     aaaaaaaaa\M  
 Minimum match() limit = 21
-Minimum match() recursion limit = 5
+Minimum match() recursion limit = 4
  0: aaaaaaaaa
  1: a
 
@@ -12321,5 +12321,11 @@ No need char
     baxzbx
  0: z
  0+ bx
+
+/a(?:.)*?a/ims                                                                  
+    \Mabbbbbbbbbbbbbbbbbbbbba
+Minimum match() limit = 65
+Minimum match() recursion limit = 2
+ 0: abbbbbbbbbbbbbbbbbbbbba
 
 /-- End of testinput2 --/

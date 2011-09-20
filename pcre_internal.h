@@ -594,6 +594,7 @@ compatibility. */
 #define PCRE_STARTLINE     0x0008  /* start after \n for multiline */
 #define PCRE_JCHANGED      0x0010  /* j option used in regex */
 #define PCRE_HASCRORLF     0x0020  /* explicit \r or \n in pattern */
+#define PCRE_HASTHEN       0x0040  /* pattern contains (*THEN) */
 
 /* Flags for the "extra" block produced by pcre_study(). */
 
@@ -1820,6 +1821,7 @@ typedef struct match_data {
   BOOL   notempty_atstart;      /* Empty string match at start not wanted */
   BOOL   hitend;                /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
+  BOOL   hasthen;               /* Pattern contains (*THEN) */ 
   const  uschar *start_code;    /* For use when recursing */
   USPTR  start_subject;         /* Start of the subject string */
   USPTR  end_subject;           /* End of the subject string */
