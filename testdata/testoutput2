@@ -11830,6 +11830,29 @@ No match
     ba
  0: ba
 
+/^.*?(?(?=a)a(*THEN)b|c)/
+    ac
+ 0: ac
+
+/^.*?(?(?=a)a(*THEN)b)c/
+    ac
+ 0: ac
+
+/^.*?(a(*THEN)b)c/
+    aabc
+ 0: aabc
+ 1: ab
+
+/^.*?(a(*THEN)b|z)c/
+    aabc
+ 0: aabc
+ 1: ab
+
+/^.*?(z|a(*THEN)b)c/
+    aabc
+ 0: aabc
+ 1: ab
+
 /-- --/
 
 /-- These studied versions are here because they are not Perl-compatible; the

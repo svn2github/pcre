@@ -48,6 +48,9 @@ Version 8.20 12-Sep-2011
    computing a minimum subject length in the presence of *ACCEPT is difficult
    (think back references, subroutine calls), and so I have changed the code so
    that no minimum is registered for a pattern that contains *ACCEPT.
+   
+8. If (*THEN) was present in the first (true) branch of a conditional group,
+   it was not handled as intended. 
 
 
 Version 8.13 16-Aug-2011

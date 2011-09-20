@@ -1275,8 +1275,21 @@ for (;;)
       {
       if (op == OP_SCOND) md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM49);
-      if (rrc == MATCH_THEN && md->start_match_ptr == ecode)
-        rrc = MATCH_NOMATCH;
+      
+      /* If the result is THEN from within the "true" branch of the condition,
+      md->start_match_ptr will point to the original OP_COND, not to the start 
+      of the branch, so we have do work to see if it matches. If THEN comes 
+      from the "false" branch, md->start_match_ptr does point to OP_ALT. */
+
+      if (rrc == MATCH_THEN)
+        {
+        if (*ecode != OP_ALT)
+          {  
+          do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
+          ecode -= GET(ecode, 1);
+          } 
+        if (md->start_match_ptr == ecode) rrc = MATCH_NOMATCH;   
+        }  
       RRETURN(rrc);
       }
     else                         /* Condition false & no alternative */

@@ -3733,6 +3733,21 @@ with \Y. ---/
 /^.*?(?(?=a)a|bc)/
     ba
 
+/^.*?(?(?=a)a(*THEN)b|c)/
+    ac
+
+/^.*?(?(?=a)a(*THEN)b)c/
+    ac
+
+/^.*?(a(*THEN)b)c/
+    aabc
+
+/^.*?(a(*THEN)b|z)c/
+    aabc
+
+/^.*?(z|a(*THEN)b)c/
+    aabc
+
 /-- --/
 
 /-- These studied versions are here because they are not Perl-compatible; the
