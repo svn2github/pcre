@@ -51,6 +51,9 @@ Version 8.20 12-Sep-2011
    
 8. If (*THEN) was present in the first (true) branch of a conditional group,
    it was not handled as intended. 
+   
+9. Replaced RunTest.bat with the much improved version provided by Sheri 
+   Pierce. 
 
 
 Version 8.13 16-Aug-2011
