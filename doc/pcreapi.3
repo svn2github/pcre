@@ -1331,9 +1331,13 @@ is different. (This seems a highly unlikely scenario.)
 The function \fBpcre_exec()\fP is called to match a subject string against a
 compiled pattern, which is passed in the \fIcode\fP argument. If the
 pattern was studied, the result of the study should be passed in the
-\fIextra\fP argument. This function is the main matching facility of the
-library, and it operates in a Perl-like manner. For specialist use there is
-also an alternative matching function, which is described
+\fIextra\fP argument. You can call \fBpcre_exec()\fP with the same \fIcode\fP
+and \fIextra\fP arguments as many times as you like, in order to match
+different subject strings with the same pattern.
+.P
+This function is the main matching facility of the library, and it operates in
+a Perl-like manner. For specialist use there is also an alternative matching
+function, which is described
 .\" HTML <a href="#dfamatch">
 .\" </a>
 below
@@ -2526,6 +2530,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 September 2011
+Last updated: 23 September 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
