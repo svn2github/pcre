@@ -5943,7 +5943,7 @@ common->lcc = (sljit_w)(tables + lcc_offset);
 common->nltype = NLTYPE_FIXED;
 switch(re->options & PCRE_NEWLINE_BITS)
   {
-  case 0: 
+  case 0:
   /* Compile-time default */
   switch (NEWLINE)
     {

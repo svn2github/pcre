@@ -870,17 +870,17 @@ for (;;)
     /* VVVVVVVVVVVVVVVVVVVVVVVVV */
 
     /* Non-capturing or atomic group, except for possessive with unlimited
-    repeat. Loop for all the alternatives. 
-    
+    repeat. Loop for all the alternatives.
+
     When we get to the final alternative within the brackets, we used to return
     the result of a recursive call to match() whatever happened so it was
     possible to reduce stack usage by turning this into a tail recursion,
     except in the case of a possibly empty group. However, now that there is
     the possiblity of (*THEN) occurring in the final alternative, this
     optimization is no longer always possible.
-    
-    We can optimize if we know there are no (*THEN)s in the pattern; at present 
-    this is the best that can be done. 
+
+    We can optimize if we know there are no (*THEN)s in the pattern; at present
+    this is the best that can be done.
 
     MATCH_ONCE is returned when the end of an atomic group is successfully
     reached, but subsequent matching fails. It passes back up the tree (causing
@@ -899,18 +899,18 @@ for (;;)
       if (op >= OP_SBRA || op == OP_ONCE) md->match_function_type = MATCH_CBEGROUP;
 
       /* If this is not a possibly empty group, and there are no (*THEN)s in
-      the pattern, and this is the final alternative, optimize as described 
+      the pattern, and this is the final alternative, optimize as described
       above. */
 
       else if (!md->hasthen && ecode[GET(ecode, 1)] != OP_ALT)
         {
         ecode += _pcre_OP_lengths[*ecode];
         goto TAIL_RECURSE;
-        }  
+        }
 
       /* In all other cases, we have to make another call to match(). */
 
-      RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb, 
+      RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb,
         RM2);
       if (rrc != MATCH_NOMATCH &&
           (rrc != MATCH_THEN || md->start_match_ptr != ecode))
@@ -1297,31 +1297,31 @@ for (;;)
         {
         ecode += 1 + LINK_SIZE;
         goto TAIL_RECURSE;
-        }  
+        }
 
       /* A call to match() is required. */
- 
+
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM49);
-      
+
       /* If the result is THEN from within the "true" branch of the condition,
-      md->start_match_ptr will point to the original OP_COND, not to the start 
-      of the branch, so we have do work to see if it matches. If THEN comes 
+      md->start_match_ptr will point to the original OP_COND, not to the start
+      of the branch, so we have do work to see if it matches. If THEN comes
       from the "false" branch, md->start_match_ptr does point to OP_ALT. */
 
       if (rrc == MATCH_THEN)
         {
         if (*ecode != OP_ALT)
-          {  
+          {
           do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
           ecode -= GET(ecode, 1);
-          } 
-        if (md->start_match_ptr == ecode) rrc = MATCH_NOMATCH;   
-        }  
+          }
+        if (md->start_match_ptr == ecode) rrc = MATCH_NOMATCH;
+        }
       RRETURN(rrc);
       }
-    
+
      /* Condition false & no alternative; continue after the group. */
-      
+
     else
       {
       ecode += 1 + LINK_SIZE;

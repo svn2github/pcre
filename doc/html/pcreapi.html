@@ -1311,9 +1311,14 @@ is different. (This seems a highly unlikely scenario.)
 The function <b>pcre_exec()</b> is called to match a subject string against a
 compiled pattern, which is passed in the <i>code</i> argument. If the
 pattern was studied, the result of the study should be passed in the
-<i>extra</i> argument. This function is the main matching facility of the
-library, and it operates in a Perl-like manner. For specialist use there is
-also an alternative matching function, which is described
+<i>extra</i> argument. You can call <b>pcre_exec()</b> with the same <i>code</i>
+and <i>extra</i> arguments as many times as you like, in order to match
+different subject strings with the same pattern.
+</P>
+<P>
+This function is the main matching facility of the library, and it operates in
+a Perl-like manner. For specialist use there is also an alternative matching
+function, which is described
 <a href="#dfamatch">below</a>
 in the section about the <b>pcre_dfa_exec()</b> function.
 </P>
@@ -2481,7 +2486,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC24" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 September 2011
+Last updated: 23 September 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

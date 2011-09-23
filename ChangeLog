@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.20 12-Sep-2011
+Version 8.20 23-Sep-2011
 ------------------------
 
 1.  Change 37 of 8.13 broke patterns like [:a]...[b:] because it thought it had
@@ -9,7 +9,7 @@ Version 8.20 12-Sep-2011
     Perl has bugs and confusions, a closing square bracket is no longer allowed
     in a POSIX name. This bug also affected patterns with classes that started
     with full stops.
-    
+
 2.  If a pattern such as /(a)b|ac/ is matched against "ac", there is no
     captured substring, but while checking the failing first alternative,
     substring 1 is temporarily captured. If the output vector supplied to
@@ -20,7 +20,7 @@ Version 8.20 12-Sep-2011
     such as /(a)(b)x|abc/ matched against "abc", where the return code
     indicates that fewer than the maximum number of slots in the ovector have
     been set.
-    
+
 3.  Related to (2) above: when there are more back references in a pattern than
     slots in the output vector, pcre_exec() uses temporary memory during
     matching, and copies in the captures as far as possible afterwards. It was
@@ -28,42 +28,42 @@ Version 8.20 12-Sep-2011
     that only 2/3 is used for passing back captured substrings. Now it uses
     only the first 2/3, for compatibility. This is, of course, another edge
     case.
-    
+
 4.  Zoltan Herczeg's just-in-time compiler support has been integrated into the
     main code base, and can be used by building with --enable-jit. When this is
     done, pcregrep automatically uses it unless --disable-pcregrep-jit or the
     runtime --no-jit option is given.
-    
+
 5.  When the number of matches in a pcre_dfa_exec() run exactly filled the
     ovector, the return from the function was zero, implying that there were
     other matches that did not fit. The correct "exactly full" value is now
     returned.
-    
+
 6.  If a subpattern that was called recursively or as a subroutine contained
     (*PRUNE) or any other control that caused it to give a non-standard return,
     invalid errors such as "Error -26 (nested recursion at the same subject
     position)" or even infinite loops could occur.
-    
+
 7.  If a pattern such as /a(*SKIP)c|b(*ACCEPT)|/ was studied, it stopped
     computing the minimum length on reaching *ACCEPT, and so ended up with the
     wrong value of 1 rather than 0. Further investigation indicates that
     computing a minimum subject length in the presence of *ACCEPT is difficult
     (think back references, subroutine calls), and so I have changed the code
     so that no minimum is registered for a pattern that contains *ACCEPT.
-    
+
 8.  If (*THEN) was present in the first (true) branch of a conditional group,
     it was not handled as intended.
-    
+
 9.  Replaced RunTest.bat with the much improved version provided by Sheri
     Pierce.
-   
+
 10. A pathological pattern such as /(*ACCEPT)a/ was miscompiled, thinking that
     the first byte in a match must be "a".
-    
+
 11. Change 17 for 8.13 increased the recursion depth for patterns like
     /a(?:.)*?a/ drastically. I've improved things by remembering whether a
-    pattern contains any instances of (*THEN). If it does not, the old 
-    optimizations are restored. It would be nice to do this on a per-group 
+    pattern contains any instances of (*THEN). If it does not, the old
+    optimizations are restored. It would be nice to do this on a per-group
     basis, but at the moment that is not feasible.
 
 

@@ -138,14 +138,14 @@ for (;;)
 
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
-    return -1; 
+    return -1;
 
     /* Reached end of a branch; if it's a ket it is the end of a nested
     call. If it's ALT it is an alternation in a nested call. If it is END it's
-    the end of the outer call. All can be handled by the same code. If an 
-    ACCEPT was previously encountered, use the length that was in force at that 
+    the end of the outer call. All can be handled by the same code. If an
+    ACCEPT was previously encountered, use the length that was in force at that
     time, and pass back the shortest ACCEPT length. */
- 
+
     case OP_ALT:
     case OP_KET:
     case OP_KETRMAX:
@@ -1291,7 +1291,7 @@ switch(min = find_minlength(code, code, re->options, 0))
   case -3: *errorptr = "internal error: opcode not recognized"; return NULL;
   default: break;
   }
-  
+
 /* If a set of starting bytes has been identified, or if the minimum length is
 greater than zero, or if JIT optimization has been requested, get a pcre_extra
 block and a pcre_study_data block. The study data is put in the latter, which
@@ -1333,12 +1333,12 @@ if (bits_set || min > 0
   zero - the interpretive pcre_exec() and pcre_dfa_exec() needn't waste time
   checking the zero case. */
 
-  if (min > 0) 
+  if (min > 0)
     {
     study->flags |= PCRE_STUDY_MINLEN;
     study->minlength = min;
     }
-  else study->minlength = 0;    
+  else study->minlength = 0;
 
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT

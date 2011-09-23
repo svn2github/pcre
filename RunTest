@@ -85,7 +85,7 @@ elif [ -d "../testdata" ] ; then
   testdata=../testdata
 else
   echo "Cannot find the testdata directory"
-  exit 1        
+  exit 1
 fi
 
 # Find which optional facilities are available
@@ -268,7 +268,7 @@ if [ $do3 = yes ] ; then
         sed 's/fr_FR/fr/' $testdata/wintestoutput3 >test3output
       else
         locale=
-      fi   
+      fi
     fi
   fi
 
