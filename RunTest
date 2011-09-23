@@ -77,9 +77,15 @@ if diff -u /dev/null /dev/null; then cf="diff -u"; else cf="diff"; fi
 
 # Find the test data
 
-testdata=testdata
 if [ -n "$srcdir" -a -d "$srcdir" ] ; then
   testdata="$srcdir/testdata"
+elif [ -d "./testdata" ] ; then
+  testdata=./testdata
+elif [ -d "../testdata" ] ; then
+  testdata=../testdata
+else
+  echo "Cannot find the testdata directory"
+  exit 1        
 fi
 
 # Find which optional facilities are available
@@ -186,11 +192,11 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do15=yes
 fi
 
-# Show which release
+# Show which release and which test data
 
 echo ""
-echo PCRE C library tests
-./pcretest /dev/null
+echo PCRE C library tests using test data from $testdata
+$sim ./pcretest /dev/null
 
 # Primary test, compatible with JIT and all versions of Perl >= 5.8
 
@@ -237,7 +243,8 @@ fi
 
 # Locale-specific tests, provided that either the "fr_FR" or the "french"
 # locale is available. The former is the Unix-like standard; the latter is
-# for Windows.
+# for Windows. Another possibility is "fr", which needs to be run against
+# the Windows-specific input and output files.
 
 if [ $do3 = yes ] ; then
   locale -a | grep '^fr_FR$' >/dev/null
@@ -246,15 +253,22 @@ if [ $do3 = yes ] ; then
     infile=$testdata/testinput3
     outfile=$testdata/testoutput3
   else
+    infile=test3input
+    outfile=test3output
     locale -a | grep '^french$' >/dev/null
     if [ $? -eq 0 ] ; then
       locale=french
       sed 's/fr_FR/french/' $testdata/testinput3 >test3input
       sed 's/fr_FR/french/' $testdata/testoutput3 >test3output
-      infile=test3input
-      outfile=test3output
     else
-      locale=
+      locale -a | grep '^fr$' >/dev/null
+      if [ $? -eq 0 ] ; then
+        locale=fr
+        sed 's/fr_FR/fr/' $testdata/wintestinput3 >test3input
+        sed 's/fr_FR/fr/' $testdata/wintestoutput3 >test3output
+      else
+        locale=
+      fi   
     fi
   fi
 
