@@ -41,13 +41,21 @@ else
 fi
 
 # If PCRE has been built in a directory other than the source directory, and
-# this test is being run from "make check" as usual, then $(srcdir) will be
-# set. If not, set it to the current directory. We then arrange to run the
-# pcregrep command in the source directory so that the file names that appear
-# in the output are always the same.
+# this test is being run from "make check" as usual, then $srcdir will be
+# set. If not, set it to the current or parent directory, whichever one
+# contains the test data. We then arrange to run the pcregrep command in the
+# source directory so that the file names that appear in the output are always
+# the same.
 
 if [ -z "$srcdir" -o ! -d "$srcdir/testdata" ] ; then
-  srcdir=.
+  if [ -d "./testdata" ] ; then
+    srcdir=.
+  elif [ -d "../testdata" ] ; then
+    srcdir=..
+  else
+    echo "Cannot find the testdata directory"
+    exit 1
+  fi   
 fi
 
 # Check for the availability of UTF-8 support
