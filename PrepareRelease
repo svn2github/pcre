@@ -157,8 +157,9 @@ echo Documentation done
 if [ "$1" = "doc" ] ; then exit; fi
 
 # These files are detrailed; do not detrail the test data because there may be
-# significant trailing spaces. The configure files are also omitted from the
-# detrailing.
+# significant trailing spaces. Do not detrail RunTest.bat, because it has CRLF
+# line endings and the detrail script removes all trailing white space. The
+# configure files are also omitted from the detrailing.
 
 files="\
   Makefile.am \
@@ -178,7 +179,6 @@ files="\
   CMakeLists.txt \
   RunGrepTest \
   RunTest \
-  RunTest.bat \
   pcre-config.in \
   libpcre.pc.in \
   libpcreposix.pc.in \
