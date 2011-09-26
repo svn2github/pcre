@@ -65,6 +65,13 @@ Version 8.20 23-Sep-2011
     pattern contains any instances of (*THEN). If it does not, the old
     optimizations are restored. It would be nice to do this on a per-group
     basis, but at the moment that is not feasible.
+    
+12. In some environments, the output of pcretest -C is CRLF terminated. This
+    broke RunTest's code that checks for the link size. A single white space
+    after the value is now allowed for.
+    
+13. RunTest now checks for the "fr" locale as well as for "fr_FR" and "french".
+    For "fr", it uses the Windows-specific input and output files. 
 
 
 Version 8.13 16-Aug-2011

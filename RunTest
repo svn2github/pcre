@@ -88,12 +88,15 @@ else
   exit 1
 fi
 
-# Find which optional facilities are available
+# Find which optional facilities are available. In some Windows environments
+# the output of pcretest -C has CRLF at the end of each line, but the shell
+# strips only linefeeds from the output of a `backquoted` command. Hence the
+# alternative patterns.
 
 case `$sim ./pcretest -C | $sim ./pcregrep 'Internal link size'` in
-  *2) link_size=2;;
-  *3) link_size=3;;
-  *4) link_size=4;;
+  *2|*2[[:space:]]) link_size=2;;
+  *3|*3[[:space:]]) link_size=3;;
+  *4|*4[[:space:]]) link_size=4;;
    *) echo "Failed to find internal link size"; exit 1;;
 esac
 
@@ -294,8 +297,8 @@ if [ $do3 = yes ] ; then
       fi
     done
   else
-    echo "Cannot test locale-specific features - neither the 'fr_FR' nor the"
-    echo "'french' locale exists, or the \"locale\" command is not available"
+    echo "Cannot test locale-specific features - none of the 'fr_FR', 'fr' or"
+    echo "'french' locales exist, or the \"locale\" command is not available"
     echo "to check for them."
     echo " "
   fi
