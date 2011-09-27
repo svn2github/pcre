@@ -1615,7 +1615,7 @@ for (;;)
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
           }
         else if (rrc != MATCH_NOMATCH &&
-                (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+                (rrc != MATCH_THEN || md->start_match_ptr != callpat))
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)

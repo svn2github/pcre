@@ -11842,6 +11842,10 @@ No match
     aabc
  0: aabc
  1: ab
+    
+/^.*? (?1) c (?(DEFINE)(a(*THEN)b))/x
+    aabc
+ 0: aabc
 
 /^.*?(a(*THEN)b|z)c/
     aabc

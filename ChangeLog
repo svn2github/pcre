@@ -72,6 +72,9 @@ Version 8.20 23-Sep-2011
     
 13. RunTest now checks for the "fr" locale as well as for "fr_FR" and "french".
     For "fr", it uses the Windows-specific input and output files. 
+    
+14. If (*THEN) appeared in a group that was called recursively or as a 
+    subroutine, it did not work as intended. 
 
 
 Version 8.13 16-Aug-2011

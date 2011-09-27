@@ -3741,6 +3741,9 @@ with \Y. ---/
 
 /^.*?(a(*THEN)b)c/
     aabc
+    
+/^.*? (?1) c (?(DEFINE)(a(*THEN)b))/x
+    aabc
 
 /^.*?(a(*THEN)b|z)c/
     aabc
