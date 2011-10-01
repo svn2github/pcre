@@ -1246,7 +1246,7 @@ if (topbracket > 1)
 
   /* OVECTOR(0) is never equal to SLJIT_GENERAL_REG3. */
   loop = LABEL();
-  OP1(SLJIT_MOVU, SLJIT_TEMPORARY_REG3, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG1), -(2 * sizeof(sljit_w)));
+  OP1(SLJIT_MOVU, SLJIT_TEMPORARY_REG3, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG1), -(2 * (sljit_w)sizeof(sljit_w)));
   OP2(SLJIT_SUB, SLJIT_TEMPORARY_REG2, 0, SLJIT_TEMPORARY_REG2, 0, SLJIT_IMM, 1);
   CMPTO(SLJIT_C_EQUAL, SLJIT_TEMPORARY_REG3, 0, SLJIT_GENERAL_REG3, 0, loop);
   OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_TEMPORARY_REG2, 0);
@@ -2434,9 +2434,11 @@ uschar *ccbegin;
 #ifdef SUPPORT_UCP
 BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
-int typereg = TMP1, scriptreg = TMP1, typeoffset;
+int typereg = TMP1, scriptreg = TMP1;
+unsigned int typeoffset;
 #endif
-int charoffset, invertcmp, numberofcmps;
+int invertcmp, numberofcmps;
+unsigned int charoffset;
 
 /* Although SUPPORT_UTF8 must be defined, we are not necessary in utf8 mode. */
 check_input_end(common, fallbacks);
