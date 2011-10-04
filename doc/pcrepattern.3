@@ -1315,9 +1315,9 @@ or "defdef":
 .sp
   /(?|(abc)|(def))\e1/
 .sp
-In contrast, a recursive or "subroutine" call to a numbered subpattern always
-refers to the first one in the pattern with the given number. The following
-pattern matches "abcabc" or "defabc":
+In contrast, a subroutine call to a numbered subpattern always refers to the
+first one in the pattern with the given number. The following pattern matches
+"abcabc" or "defabc":
 .sp
   /(?|(abc)|(def))(?1)/
 .sp
@@ -1434,7 +1434,7 @@ items:
   a character class
   a back reference (see next section)
   a parenthesized subpattern (including assertions)
-  a recursive or "subroutine" call to a subpattern
+  a subroutine call to a subpattern (recursive or otherwise)
 .sp
 The general repetition quantifier specifies a minimum and maximum number of
 permitted matches, by giving the two numbers in curly brackets (braces),
@@ -2123,10 +2123,10 @@ If the condition is the string (DEFINE), and there is no subpattern with the
 name DEFINE, the condition is always false. In this case, there may be only one
 alternative in the subpattern. It is always skipped if control reaches this
 point in the pattern; the idea of DEFINE is that it can be used to define
-"subroutines" that can be referenced from elsewhere. (The use of
+subroutines that can be referenced from elsewhere. (The use of
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
-"subroutines"
+subroutines
 .\"
 is described below.) For example, a pattern to match an IPv4 address such as
 "192.168.23.245" could be written like this (ignore whitespace and line
@@ -2221,11 +2221,11 @@ individual subpattern recursion. After its introduction in PCRE and Python,
 this kind of recursion was subsequently introduced into Perl at release 5.10.
 .P
 A special item that consists of (? followed by a number greater than zero and a
-closing parenthesis is a recursive call of the subpattern of the given number,
-provided that it occurs inside that subpattern. (If not, it is a
+closing parenthesis is a recursive subroutine call of the subpattern of the
+given number, provided that it occurs inside that subpattern. (If not, it is a
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
-"subroutine"
+non-recursive subroutine
 .\"
 call, which is described in the next section.) The special item (?R) or (?0) is
 a recursive call of the entire regular expression.
@@ -2260,7 +2260,7 @@ references such as (?+2). However, these cannot be recursive because the
 reference is not inside the parentheses that are referenced. They are always
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
-"subroutine"
+non-recursive subroutine
 .\"
 calls, as described in the next section.
 .P
@@ -2393,9 +2393,9 @@ recursion to try other alternatives, so the entire match fails.
 .SH "SUBPATTERNS AS SUBROUTINES"
 .rs
 .sp
-If the syntax for a recursive subpattern reference (either by number or by
+If the syntax for a recursive subpattern call (either by number or by
 name) is used outside the parentheses to which it refers, it operates like a
-subroutine in a programming language. The "called" subpattern may be defined
+subroutine in a programming language. The called subpattern may be defined
 before or after the reference. A numbered reference can be absolute or
 relative, as in these examples:
 .sp
@@ -2415,15 +2415,15 @@ matches "sense and sensibility" and "response and responsibility", but not
 is used, it does match "sense and responsibility" as well as the other two
 strings. Another example is given in the discussion of DEFINE above.
 .P
-Like recursive subpatterns, a subroutine call is always treated as an atomic
-group. That is, once it has matched some of the subject string, it is never
-re-entered, even if it contains untried alternatives and there is a subsequent
-matching failure. Any capturing parentheses that are set during the subroutine
-call revert to their previous values afterwards.
+All subroutine calls, whether recursive or not, are always treated as atomic
+groups. That is, once a subroutine has matched some of the subject string, it
+is never re-entered, even if it contains untried alternatives and there is a
+subsequent matching failure. Any capturing parentheses that are set during the
+subroutine call revert to their previous values afterwards.
 .P
-When a subpattern is used as a subroutine, processing options such as
-case-independence are fixed when the subpattern is defined. They cannot be
-changed for different calls. For example, consider this pattern:
+Processing options such as case-independence are fixed when a subpattern is
+defined, so if it is used as a subroutine, such options cannot be changed for
+different calls. For example, consider this pattern:
 .sp
   (abc)(?i:(?-1))
 .sp
@@ -2504,20 +2504,22 @@ a backtracking algorithm. With the exception of (*FAIL), which behaves like a
 failing negative assertion, they cause an error if encountered by
 \fBpcre_dfa_exec()\fP.
 .P
-If any of these verbs are used in an assertion or subroutine subpattern
-(including recursive subpatterns), their effect is confined to that subpattern;
-it does not extend to the surrounding pattern, with one exception: a *MARK that
-is encountered in a positive assertion \fIis\fP passed back (compare capturing
-parentheses in assertions). Note that such subpatterns are processed as
-anchored at the point where they are tested.
+If any of these verbs are used in an assertion or in a subpattern that is
+called as a subroutine (whether or not recursively), their effect is confined
+to that subpattern; it does not extend to the surrounding pattern, with one
+exception: a *MARK that is encountered in a positive assertion \fIis\fP passed
+back (compare capturing parentheses in assertions). Note that such subpatterns
+are processed as anchored at the point where they are tested. Note also that
+Perl's treatment of subroutines is different in some cases.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
 (*VERB) or (*VERB:NAME). Some may take either form, with differing behaviour,
-depending on whether or not an argument is present. An name is a sequence of
-letters, digits, and underscores. If the name is empty, that is, if the closing
-parenthesis immediately follows the colon, the effect is as if the colon were
-not there. Any number of these verbs may occur in a pattern.
+depending on whether or not an argument is present. A name is any sequence of
+characters that does not include a closing parenthesis. If the name is empty,
+that is, if the closing parenthesis immediately follows the colon, the effect
+is as if the colon were not there. Any number of these verbs may occur in a
+pattern.
 .P
 PCRE contains some optimizations that are used to speed up matching by running
 some checks at the start of each match attempt. For example, it may know the
@@ -2538,9 +2540,10 @@ followed by a name.
    (*ACCEPT)
 .sp
 This verb causes the match to end successfully, skipping the remainder of the
-pattern. When inside a recursion, only the innermost pattern is ended
-immediately. If (*ACCEPT) is inside capturing parentheses, the data so far is
-captured. (This feature was added to PCRE at release 8.00.) For example:
+pattern. However, when it is inside a subpattern that is called as a
+subroutine, only that subpattern is ended successfully. Matching then continues
+at the outer level. If (*ACCEPT) is inside capturing parentheses, the data so
+far is captured. For example:
 .sp
   A((?:A|B(*ACCEPT)|C)D)
 .sp
@@ -2549,7 +2552,7 @@ the outer parentheses.
 .sp
   (*FAIL) or (*F)
 .sp
-This verb causes the match to fail, forcing backtracking to occur. It is
+This verb causes a matching failure, forcing backtracking to occur. It is
 equivalent to (?!) but easier to read. The Perl documentation notes that it is
 probably useful only when combined with (?{}) or (??{}). Those are, of course,
 Perl features that are not present in PCRE. The nearest equivalent is the
@@ -2602,7 +2605,7 @@ capturing parentheses.
 .P
 If (*MARK) is encountered in a positive assertion, its name is recorded and
 passed back if it is the last-encountered. This does not happen for negative
-assetions.
+assertions.
 .P
 A name may also be returned after a failed match if the final path through the
 pattern involves (*MARK). However, unless (*MARK) used in conjunction with
@@ -2716,41 +2719,77 @@ following pattern fails to match, the previous path through the pattern is
 searched for the most recent (*MARK) that has the same name. If one is found,
 the "bumpalong" advance is to the subject position that corresponds to that
 (*MARK) instead of to where (*SKIP) was encountered. If no (*MARK) with a
-matching name is found, normal "bumpalong" of one character happens (the
-(*SKIP) is ignored).
+matching name is found, normal "bumpalong" of one character happens (that is,
+the (*SKIP) is ignored).
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
-This verb causes a skip to the next alternation in the innermost enclosing
-group if the rest of the pattern does not match. That is, it cancels pending
-backtracking, but only within the current alternation. Its name comes from the
-observation that it can be used for a pattern-based if-then-else block:
+This verb causes a skip to the next innermost alternative if the rest of the
+pattern does not match. That is, it cancels pending backtracking, but only
+within the current alternative. Its name comes from the observation that it can
+be used for a pattern-based if-then-else block:
 .sp
   ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 .sp
 If the COND1 pattern matches, FOO is tried (and possibly further items after
-the end of the group if FOO succeeds); on failure the matcher skips to the
+the end of the group if FOO succeeds); on failure, the matcher skips to the
 second alternative and tries COND2, without backtracking into COND1. The
 behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN) if the
-overall match fails. If (*THEN) is not directly inside an alternation, it acts
-like (*PRUNE).
-.
+overall match fails. If (*THEN) is not inside an alternation, it acts like
+(*PRUNE).
 .P
-The above verbs provide four different "strengths" of control when subsequent
-matching fails. (*THEN) is the weakest, carrying on the match at the next
-alternation. (*PRUNE) comes next, failing the match at the current starting
-position, but allowing an advance to the next character (for an unanchored
-pattern). (*SKIP) is similar, except that the advance may be more than one
-character. (*COMMIT) is the strongest, causing the entire match to fail.
+Note that a subpattern that does not contain a | character is just a part of
+the enclosing alternative; it is not a nested alternation with only one
+alternative. The effect of (*THEN) extends beyond such a subpattern to the
+enclosing alternative. Consider this pattern, where A, B, etc. are complex
+pattern fragments that do not contain any | characters at this level:
+.sp
+  A (B(*THEN)C) | D
+.sp
+If A and B are matched, but there is a failure in C, matching does not 
+backtrack into A; instead it moves to the next alternative, that is, D.
+However, if the subpattern containing (*THEN) is given an alternative, it
+behaves differently:
+.sp
+  A (B(*THEN)C | (*FAIL)) | D
+.sp
+The effect of (*THEN) is now confined to the inner subpattern. After a failure
+in C, matching moves to (*FAIL), which causes the whole subpattern to fail 
+because there are no more alternatives to try. In this case, matching does now 
+backtrack into A.
 .P
-If more than one is present in a pattern, the "stongest" one wins. For example,
-consider this pattern, where A, B, etc. are complex pattern fragments:
+Note also that a conditional subpattern is not considered as having two 
+alternatives, because only one is ever used. In other words, the | character in 
+a conditional subpattern has a different meaning. Ignoring white space,
+consider:
+.sp
+  ^.*? (?(?=a) a | b(*THEN)c )
+.sp
+If the subject is "ba", this pattern does not match. Because .*? is ungreedy, 
+it initially matches zero characters. The condition (?=a) then fails, the 
+character "b" is matched, but "c" is not. At this point, matching does not
+backtrack to .*? as might perhaps be expected from the presence of the |
+character. The conditional subpattern is part of the single alternative that
+comprises the whole pattern, and so the match fails. (If there was a backtrack 
+into .*?, allowing it to match "b", the match would succeed.)
+.P
+The verbs just described provide four different "strengths" of control when
+subsequent matching fails. (*THEN) is the weakest, carrying on the match at the
+next alternative. (*PRUNE) comes next, failing the match at the current
+starting position, but allowing an advance to the next character (for an
+unanchored pattern). (*SKIP) is similar, except that the advance may be more
+than one character. (*COMMIT) is the strongest, causing the entire match to
+fail.
+.P
+If more than one such verb is present in a pattern, the "strongest" one wins.
+For example, consider this pattern, where A, B, etc. are complex pattern
+fragments:
 .sp
   (A(*COMMIT)B(*THEN)C|D)
 .sp
 Once A has matched, PCRE is committed to this match, at the current starting
 position. If subsequently B matches, but C does not, the normal (*THEN) action
-of trying the next alternation (that is, D) does not happen because (*COMMIT)
+of trying the next alternative (that is, D) does not happen because (*COMMIT)
 overrides.
 .
 .
@@ -2775,6 +2814,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 24 August 2011
+Last updated: 04 October 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

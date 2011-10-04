@@ -52,7 +52,7 @@ Version 8.20 23-Sep-2011
     so that no minimum is registered for a pattern that contains *ACCEPT.
 
 8.  If (*THEN) was present in the first (true) branch of a conditional group,
-    it was not handled as intended.
+    it was not handled as intended. [But see 16 below.]
 
 9.  Replaced RunTest.bat with the much improved version provided by Sheri
     Pierce.
@@ -74,7 +74,23 @@ Version 8.20 23-Sep-2011
     For "fr", it uses the Windows-specific input and output files. 
     
 14. If (*THEN) appeared in a group that was called recursively or as a 
-    subroutine, it did not work as intended. 
+    subroutine, it did not work as intended. [But see next item.]
+    
+15. Consider the pattern /A (B(*THEN)C) | D/ where A, B, C, and D are complex
+    pattern fragments (but not containing any | characters). If A and B are
+    matched, but there is a failure in C so that it backtracks to (*THEN), PCRE 
+    was behaving differently to Perl. PCRE backtracked into A, but Perl goes to 
+    D. In other words, Perl considers parentheses that do not contain any | 
+    characters to be part of a surrounding alternative, whereas PCRE was 
+    treading (B(*THEN)C) the same as (B(*THEN)C|(*FAIL)) -- which Perl handles 
+    differently. PCRE now behaves in the same way as Perl, except in the case 
+    of subroutine/recursion calls such as (?1) which have in any case always 
+    been different (but PCRE had them first :-).
+    
+16. Related to 15 above: Perl does not treat the | in a conditional group as 
+    creating alternatives. Such a group is treated in the same way as an 
+    ordinary group without any | characters when processing (*THEN). PCRE has 
+    been changed to match Perl's behaviour.
 
 
 Version 8.13 16-Aug-2011

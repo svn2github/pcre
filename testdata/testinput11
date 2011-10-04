@@ -495,9 +495,6 @@ however, we need the complication for Perl. ---/
 /(?>(*COMMIT)(yes|no)(*THEN)(*F))?/
   yes
 
-/^((yes|no)(*THEN)(*F))?/
-  yes
-
 /b?(*SKIP)c/
     bc
     abc
@@ -674,5 +671,100 @@ name)/K
     a
     ba
     bba 
+    
+/--- Checking revised (*THEN) handling ---/ 
+
+/--- Capture ---/
+
+/^.*? (a(*THEN)b) c/x
+    aabc
+
+/^.*? (a(*THEN)b|(*F)) c/x
+    aabc
+
+/^.*? ( (a(*THEN)b) | (*F) ) c/x
+    aabc
+
+/^.*? ( (a(*THEN)b) ) c/x
+    aabc
+
+/--- Non-capture ---/
+
+/^.*? (?:a(*THEN)b) c/x
+    aabc
+
+/^.*? (?:a(*THEN)b|(*F)) c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b) | (*F) ) c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b) ) c/x
+    aabc
+
+/--- Atomic ---/
+
+/^.*? (?>a(*THEN)b) c/x
+    aabc
+
+/^.*? (?>a(*THEN)b|(*F)) c/x
+    aabc
+
+/^.*? (?> (?>a(*THEN)b) | (*F) ) c/x
+    aabc
+
+/^.*? (?> (?>a(*THEN)b) ) c/x
+    aabc
+
+/--- Possessive capture ---/
+
+/^.*? (a(*THEN)b)++ c/x
+    aabc
+
+/^.*? (a(*THEN)b|(*F))++ c/x
+    aabc
+
+/^.*? ( (a(*THEN)b)++ | (*F) )++ c/x
+    aabc
+
+/^.*? ( (a(*THEN)b)++ )++ c/x
+    aabc
+
+/--- Possessive non-capture ---/
+
+/^.*? (?:a(*THEN)b)++ c/x
+    aabc
+
+/^.*? (?:a(*THEN)b|(*F))++ c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b)++ | (*F) )++ c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b)++ )++ c/x
+    aabc
+    
+/--- Condition assertion ---/
+
+/^(?(?=a(*THEN)b)ab|ac)/
+    ac
+ 
+/--- Condition ---/
+
+/^.*?(?(?=a)a|b(*THEN)c)/
+    ba
+
+/^.*?(?:(?(?=a)a|b(*THEN)c)|d)/
+    ba
+
+/^.*?(?(?=a)a(*THEN)b|c)/
+    ac
+
+/--- Assertion ---/
+
+/^.*(?=a(*THEN)b)/ 
+    aabc
+
+/------------------------------/
 
 /-- End of testinput11 --/

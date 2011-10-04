@@ -959,10 +959,6 @@ No match
   yes
 No match
 
-/^((yes|no)(*THEN)(*F))?/
-  yes
- 0: 
-
 /b?(*SKIP)c/
     bc
  0: bc
@@ -1266,5 +1262,131 @@ name
  0: a
     bba 
  0: a
+    
+/--- Checking revised (*THEN) handling ---/ 
+
+/--- Capture ---/
+
+/^.*? (a(*THEN)b) c/x
+    aabc
+No match
+
+/^.*? (a(*THEN)b|(*F)) c/x
+    aabc
+ 0: aabc
+ 1: ab
+
+/^.*? ( (a(*THEN)b) | (*F) ) c/x
+    aabc
+ 0: aabc
+ 1: ab
+ 2: ab
+
+/^.*? ( (a(*THEN)b) ) c/x
+    aabc
+No match
+
+/--- Non-capture ---/
+
+/^.*? (?:a(*THEN)b) c/x
+    aabc
+No match
+
+/^.*? (?:a(*THEN)b|(*F)) c/x
+    aabc
+ 0: aabc
+
+/^.*? (?: (?:a(*THEN)b) | (*F) ) c/x
+    aabc
+ 0: aabc
+
+/^.*? (?: (?:a(*THEN)b) ) c/x
+    aabc
+No match
+
+/--- Atomic ---/
+
+/^.*? (?>a(*THEN)b) c/x
+    aabc
+No match
+
+/^.*? (?>a(*THEN)b|(*F)) c/x
+    aabc
+ 0: aabc
+
+/^.*? (?> (?>a(*THEN)b) | (*F) ) c/x
+    aabc
+ 0: aabc
+
+/^.*? (?> (?>a(*THEN)b) ) c/x
+    aabc
+No match
+
+/--- Possessive capture ---/
+
+/^.*? (a(*THEN)b)++ c/x
+    aabc
+No match
+
+/^.*? (a(*THEN)b|(*F))++ c/x
+    aabc
+ 0: aabc
+ 1: ab
+
+/^.*? ( (a(*THEN)b)++ | (*F) )++ c/x
+    aabc
+ 0: aabc
+ 1: ab
+ 2: ab
+
+/^.*? ( (a(*THEN)b)++ )++ c/x
+    aabc
+No match
+
+/--- Possessive non-capture ---/
+
+/^.*? (?:a(*THEN)b)++ c/x
+    aabc
+No match
+
+/^.*? (?:a(*THEN)b|(*F))++ c/x
+    aabc
+ 0: aabc
+
+/^.*? (?: (?:a(*THEN)b)++ | (*F) )++ c/x
+    aabc
+ 0: aabc
+
+/^.*? (?: (?:a(*THEN)b)++ )++ c/x
+    aabc
+No match
+    
+/--- Condition assertion ---/
+
+/^(?(?=a(*THEN)b)ab|ac)/
+    ac
+ 0: ac
+ 
+/--- Condition ---/
+
+/^.*?(?(?=a)a|b(*THEN)c)/
+    ba
+No match
+
+/^.*?(?:(?(?=a)a|b(*THEN)c)|d)/
+    ba
+ 0: ba
+
+/^.*?(?(?=a)a(*THEN)b|c)/
+    ac
+No match
+
+/--- Assertion ---/
+
+/^.*(?=a(*THEN)b)/ 
+    aabc
+ 0: a
+
+/------------------------------/
 
 /-- End of testinput11 --/

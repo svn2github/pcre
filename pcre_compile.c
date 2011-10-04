@@ -1761,7 +1761,7 @@ for (;;)
       break;
 
       case OP_THEN_ARG:
-      code += code[1+LINK_SIZE];
+      code += code[1];
       break;
       }
 
@@ -1880,7 +1880,7 @@ for (;;)
       break;
 
       case OP_THEN_ARG:
-      code += code[1+LINK_SIZE];
+      code += code[1];
       break;
       }
 
@@ -2217,7 +2217,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], TRUE);
     break;
 
     case OP_THEN_ARG:
-    code += code[1+LINK_SIZE];
+    code += code[1];
     break;
 
     /* None of the remaining opcodes are required to match a character. */
@@ -5060,12 +5060,7 @@ for (;; ptr++)
               goto FAILED;
               }
             *code = verbs[i].op;
-            if (*code++ == OP_THEN)
-              {
-              PUT(code, 0, code - bcptr->current_branch - 1);
-              code += LINK_SIZE;
-              cd->external_flags |= PCRE_HASTHEN;
-              }
+            if (*code++ == OP_THEN) cd->external_flags |= PCRE_HASTHEN;
             }
 
           else
@@ -5076,11 +5071,7 @@ for (;; ptr++)
               goto FAILED;
               }
             *code = verbs[i].op_arg;
-            if (*code++ == OP_THEN_ARG)
-              {
-              PUT(code, 0, code - bcptr->current_branch - 1);
-              code += LINK_SIZE;
-              }
+            if (*code++ == OP_THEN_ARG) cd->external_flags |= PCRE_HASTHEN;
             *code++ = arglen;
             memcpy(code, arg, arglen);
             code += arglen;

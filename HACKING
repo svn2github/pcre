@@ -178,17 +178,14 @@ These items are all just one byte long
   OP_SKIP                ) indicating which parentheses must be closed.
   
 
-Backtracking control verbs with data
-------------------------------------
- 
-OP_THEN is followed by a LINK_SIZE offset, which is the distance back to the
-start of the current branch.
+Backtracking control verbs with (optional) data
+-----------------------------------------------
 
-OP_MARK is followed by the mark name, preceded by a one-byte length, and 
-followed by a binary zero. For (*PRUNE), (*SKIP), and (*THEN) with arguments, 
-the opcodes OP_PRUNE_ARG, OP_SKIP_ARG, and OP_THEN_ARG are used. For the first 
-two, the name follows immediately; for OP_THEN_ARG, it follows the LINK_SIZE 
-offset value.
+(*THEN) without an argument generates the opcode OP_THEN and no following data.
+OP_MARK is followed by the mark name, preceded by a one-byte length, and
+followed by a binary zero. For (*PRUNE), (*SKIP), and (*THEN) with arguments,
+the opcodes OP_PRUNE_ARG, OP_SKIP_ARG, and OP_THEN_ARG are used, with the name
+following in the same format.
   
 
 Matching literal characters
@@ -453,4 +450,4 @@ next item.
 
 
 Philip Hazel
-August 2011
+October 2011

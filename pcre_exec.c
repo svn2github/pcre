@@ -775,24 +775,23 @@ for (;;)
     md->start_match_ptr = ecode + 2;
     RRETURN(MATCH_SKIP_ARG);
 
-    /* For THEN (and THEN_ARG) we pass back the address of the bracket or
-    the alt that is at the start of the current branch. This makes it possible
-    to skip back past alternatives that precede the THEN within the current
-    branch. */
+    /* For THEN (and THEN_ARG) we pass back the address of the opcode, so that
+    the branch in which it occurs can be determined. Overload the start of
+    match pointer to do this. */
 
     case OP_THEN:
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
       eptrb, RM54);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    md->start_match_ptr = ecode - GET(ecode, 1);
+    md->start_match_ptr = ecode;
     MRRETURN(MATCH_THEN);
 
     case OP_THEN_ARG:
-    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1+LINK_SIZE],
-      offset_top, md, eptrb, RM58);
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, 
+      md, eptrb, RM58);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    md->start_match_ptr = ecode - GET(ecode, 1);
-    md->mark = ecode + LINK_SIZE + 2;
+    md->start_match_ptr = ecode;     
+    md->mark = ecode + 2;
     RRETURN(MATCH_THEN);
 
     /* Handle a capturing bracket, other than those that are possessive with an
@@ -838,9 +837,29 @@ for (;;)
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
           eptrb, RM1);
         if (rrc == MATCH_ONCE) break;  /* Backing up through an atomic group */
-        if (rrc != MATCH_NOMATCH &&
-            (rrc != MATCH_THEN || md->start_match_ptr != ecode))
-          RRETURN(rrc);
+     
+        /* If we backed up to a THEN, check whether it is within the current 
+        branch by comparing the address of the THEN that is passed back with 
+        the end of the branch. If it is within the current branch, and the
+        branch is one of two or more alternatives (it either starts or ends
+        with OP_ALT), we have reached the limit of THEN's action, so convert 
+        the return code to NOMATCH, which will cause normal backtracking to 
+        happen from now on. Otherwise, THEN is passed back to an outer
+        alternative. This implements Perl's treatment of parenthesized groups, 
+        where a group not containing | does not affect the current alternative, 
+        that is, (X) is NOT the same as (X|(*F)). */
+
+        if (rrc == MATCH_THEN)
+          {
+          next = ecode + GET(ecode,1);
+          if (md->start_match_ptr < next && 
+              (*ecode == OP_ALT || *next == OP_ALT))
+            rrc = MATCH_NOMATCH;
+          }  
+          
+        /* Anything other than NOMATCH is passed back. */
+
+        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         if (*ecode != OP_ALT) break;
@@ -851,11 +870,10 @@ for (;;)
       md->offset_vector[offset+1] = save_offset2;
       md->offset_vector[md->offset_end - number] = save_offset3;
 
-      /* At this point, rrc will be one of MATCH_ONCE, MATCH_NOMATCH, or
-      MATCH_THEN. */
+      /* At this point, rrc will be one of MATCH_ONCE or MATCH_NOMATCH. */
 
-      if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
-      RRETURN(((rrc == MATCH_ONCE)? MATCH_ONCE:MATCH_NOMATCH));
+      if (md->mark == NULL) md->mark = markptr;
+      RRETURN(rrc);
       }
 
     /* FALL THROUGH ... Insufficient room for saving captured contents. Treat
@@ -912,8 +930,19 @@ for (;;)
 
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb,
         RM2);
-      if (rrc != MATCH_NOMATCH &&
-          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+        
+      /* See comment in the code for capturing groups above about handling
+      THEN. */
+
+      if (rrc == MATCH_THEN)
+        {
+        next = ecode + GET(ecode,1);
+        if (md->start_match_ptr < next && 
+            (*ecode == OP_ALT || *next == OP_ALT))
+          rrc = MATCH_NOMATCH;
+        }  
+         
+      if (rrc != MATCH_NOMATCH)          
         {
         if (rrc == MATCH_ONCE)
           {
@@ -930,7 +959,8 @@ for (;;)
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break;
       }
-    if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
+      
+    if (md->mark == NULL) md->mark = markptr;
     RRETURN(MATCH_NOMATCH);
 
     /* Handle possessive capturing brackets with an unlimited repeat. We come
@@ -993,9 +1023,19 @@ for (;;)
           matched_once = TRUE;
           continue;
           }
-        if (rrc != MATCH_NOMATCH &&
-            (rrc != MATCH_THEN || md->start_match_ptr != ecode))
-          RRETURN(rrc);
+          
+        /* See comment in the code for capturing groups above about handling
+        THEN. */
+
+        if (rrc == MATCH_THEN)
+          {
+          next = ecode + GET(ecode,1);
+          if (md->start_match_ptr < next && 
+              (*ecode == OP_ALT || *next == OP_ALT))
+            rrc = MATCH_NOMATCH;
+          }  
+
+        if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
         if (*ecode != OP_ALT) break;
@@ -1008,7 +1048,7 @@ for (;;)
         md->offset_vector[md->offset_end - number] = save_offset3;
         }
 
-      if (rrc != MATCH_THEN && md->mark == NULL) md->mark = markptr;
+      if (md->mark == NULL) md->mark = markptr;
       if (allow_zero || matched_once)
         {
         ecode += 1 + LINK_SIZE;
@@ -1055,9 +1095,19 @@ for (;;)
         matched_once = TRUE;
         continue;
         }
-      if (rrc != MATCH_NOMATCH &&
-          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
-        RRETURN(rrc);
+        
+      /* See comment in the code for capturing groups above about handling
+      THEN. */
+
+      if (rrc == MATCH_THEN)
+        {
+        next = ecode + GET(ecode,1);
+        if (md->start_match_ptr < next && 
+            (*ecode == OP_ALT || *next == OP_ALT))
+          rrc = MATCH_NOMATCH;
+        }  
+
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break;
       }
@@ -1269,8 +1319,11 @@ for (;;)
         ecode += 1 + LINK_SIZE + GET(ecode, LINK_SIZE + 2);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
         }
-      else if (rrc != MATCH_NOMATCH &&
-              (rrc != MATCH_THEN || md->start_match_ptr != ecode))
+ 
+      /* PCRE doesn't allow the effect of (*THEN) to escape beyond an
+      assertion; it is therefore treated as NOMATCH. */ 
+
+      else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)              
         {
         RRETURN(rrc);         /* Need braces because of following else */
         }
@@ -1281,42 +1334,26 @@ for (;;)
         }
       }
 
-    /* We are now at the branch that is to be obeyed. As there is only one,
-    we used always to use tail recursion to avoid using another stack frame,
-    except when there was unlimited repeat of a possibly empty group. However,
-    that strategy no longer works because of the possibilty of (*THEN) being
-    encountered in the branch. However, we can still use tail recursion if
-    there are no (*THEN)s in the pattern. Otherwise, a recursive call to
-    match() is always required, unless the second alternative doesn't exist, in
-    which case we can just plough on. */
+    /* We are now at the branch that is to be obeyed. As there is only one, can
+    use tail recursion to avoid using another stack frame, except when there is
+    unlimited repeat of a possibly empty group. In the latter case, a recursive
+    call to match() is always required, unless the second alternative doesn't
+    exist, in which case we can just plough on. Note that, for compatibility
+    with Perl, the | in a conditional group is NOT treated as creating two
+    alternatives. If a THEN is encountered in the branch, it propagates out to
+    the enclosing alternative (unless nested in a deeper set of alternatives,
+    of course). */
 
     if (condition || *ecode == OP_ALT)
       {
-      if (op == OP_SCOND) md->match_function_type = MATCH_CBEGROUP;
-      else if (!md->hasthen)
+      if (op != OP_SCOND)
         {
         ecode += 1 + LINK_SIZE;
         goto TAIL_RECURSE;
         }
-
-      /* A call to match() is required. */
-
+ 
+      md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM49);
-
-      /* If the result is THEN from within the "true" branch of the condition,
-      md->start_match_ptr will point to the original OP_COND, not to the start
-      of the branch, so we have do work to see if it matches. If THEN comes
-      from the "false" branch, md->start_match_ptr does point to OP_ALT. */
-
-      if (rrc == MATCH_THEN)
-        {
-        if (*ecode != OP_ALT)
-          {
-          do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
-          ecode -= GET(ecode, 1);
-          }
-        if (md->start_match_ptr == ecode) rrc = MATCH_NOMATCH;
-        }
       RRETURN(rrc);
       }
 
@@ -1412,9 +1449,11 @@ for (;;)
         markptr = md->mark;
         break;
         }
-      if (rrc != MATCH_NOMATCH &&
-          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
-        RRETURN(rrc);
+     
+      /* PCRE does not allow THEN to escape beyond an assertion; it is treated 
+      as NOMATCH. */
+   
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
@@ -1455,9 +1494,11 @@ for (;;)
         do ecode += GET(ecode,1); while (*ecode == OP_ALT);
         break;
         }
-      if (rrc != MATCH_NOMATCH &&
-          (rrc != MATCH_THEN || md->start_match_ptr != ecode))
-        RRETURN(rrc);
+
+      /* PCRE does not allow THEN to escape beyond an assertion; it is treated 
+      as NOMATCH. */
+
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
@@ -1614,8 +1655,11 @@ for (;;)
           mstart = md->start_match_ptr;
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
           }
-        else if (rrc != MATCH_NOMATCH &&
-                (rrc != MATCH_THEN || md->start_match_ptr != callpat))
+
+        /* PCRE does not allow THEN to escape beyond a recursion; it is treated
+        as NOMATCH. */
+
+        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)     
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)

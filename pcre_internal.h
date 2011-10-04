@@ -1643,7 +1643,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1, 1, 1,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */ \
   3, 1, 3,                       /* MARK, PRUNE, PRUNE_ARG                 */ \
   1, 3,                          /* SKIP, SKIP_ARG                         */ \
-  1+LINK_SIZE, 3+LINK_SIZE,      /* THEN, THEN_ARG                         */ \
+  1, 3,                          /* THEN, THEN_ARG                         */ \
   1, 1, 1, 1,                    /* COMMIT, FAIL, ACCEPT, ASSERT_ACCEPT    */ \
   3, 1                           /* CLOSE, SKIPZERO  */
 
