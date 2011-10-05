@@ -28,9 +28,11 @@ JIT. The support is limited to the following hardware platforms:
   ARM v5, v7, and Thumb2
   Intel x86 32-bit and 64-bit
   MIPS 32-bit
-  Power PC 32-bit and 64-bit
+  Power PC 32-bit and 64-bit (experimental)
 .sp
-If --enable-jit is set on an unsupported platform, compilation fails.
+The Power PC support is designated as experimental because it has not been 
+fully tested. If --enable-jit is set on an unsupported platform, compilation
+fails.
 .P
 A program can tell if JIT support is available by calling \fBpcre_config()\fP
 with the PCRE_CONFIG_JIT option. The result is 1 when JIT is available, and 0
@@ -265,6 +267,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 23 September 2011
+Last updated: 05 October 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
