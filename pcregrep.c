@@ -1397,7 +1397,7 @@ while (ptr < endptr)
         for (;;)
           {
           startoffset = offsets[1];
-          if (startoffset >= linelength + endlinelength ||
+          if (startoffset >= (int)linelength + endlinelength ||
               !match_patterns(matchptr, length, startoffset, offsets, &mrc))
             break;
           FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
@@ -1460,7 +1460,7 @@ while (ptr < endptr)
   /* If input is line buffered, and the buffer is not yet full, read another
   line and add it into the buffer. */
 
-  if (input_line_buffered && bufflength < bufsize)
+  if (input_line_buffered && bufflength < (size_t)bufsize)
     {
     int add = read_one_line(ptr, bufsize - (ptr - main_buffer), in);
     bufflength += add;
@@ -1472,7 +1472,7 @@ while (ptr < endptr)
   1/3 and refill it. Before we do this, if some unprinted "after" lines are
   about to be lost, print them. */
 
-  if (bufflength >= bufsize && ptr > main_buffer + 2*bufthird)
+  if (bufflength >= (size_t)bufsize && ptr > main_buffer + 2*bufthird)
     {
     if (after_context > 0 &&
         lastmatchnumber > 0 &&
