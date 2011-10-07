@@ -5932,11 +5932,10 @@ for (;; ptr++)
       cd->assert_depth -= 1;
 
     /* At the end of compiling, code is still pointing to the start of the
-    group, while tempcode has been updated to point past the end of the group
-    and any option resetting that may follow it. The pattern pointer (ptr)
-    is on the bracket. */
+    group, while tempcode has been updated to point past the end of the group.
+    The pattern pointer (ptr) is on the bracket.
 
-    /* If this is a conditional bracket, check that there are no more than
+    If this is a conditional bracket, check that there are no more than
     two branches in the group, or just one if it's a DEFINE group. We do this
     in the real compile phase, not in the pre-pass, where the whole group may
     not be available. */

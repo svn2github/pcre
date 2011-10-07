@@ -1750,8 +1750,7 @@ for (;;)
     assertions. We also need to record the match start in case it was changed
     by \K. */
 
-    if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT ||
-        *prev == OP_ASSERTBACK || *prev == OP_ASSERTBACK_NOT)
+    if (*prev >= OP_ASSERT && *prev <= OP_ASSERTBACK_NOT)
       {
       md->end_match_ptr = eptr;      /* For ONCE */
       md->end_offset_top = offset_top;
