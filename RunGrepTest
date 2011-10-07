@@ -5,8 +5,15 @@
 # supported by pcregrep.
 
 # Set the C locale, so that sort(1) behaves predictably.
+
 LC_ALL=C
 export LC_ALL
+
+# Remove any non-default colouring that the caller may have set.
+
+unset PCREGREP_COLOUR PCREGREP_COLOR
+
+# Set the program to be tested, and valgrind settings when requested.
 
 pcregrep=`pwd`/pcregrep
 
@@ -28,12 +35,11 @@ fi
 
 $pcregrep -V
 
-cf="diff -ub"
-
 # Set up a suitable "diff" command for comparison. Some systems have a diff
 # that lacks a -u option. Try to deal with this; better do the test for the -b
 # option as well.
 
+cf="diff -ub"
 if diff -u /dev/null /dev/null; then
   if diff -ub /dev/null /dev/null; then cf="diff -ub"; else cf="diff -u"; fi
 else

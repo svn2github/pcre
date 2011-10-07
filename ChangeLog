@@ -91,6 +91,9 @@ Version 8.20 23-Sep-2011
     creating alternatives. Such a group is treated in the same way as an 
     ordinary group without any | characters when processing (*THEN). PCRE has 
     been changed to match Perl's behaviour.
+    
+17. If a user had set PCREGREP_COLO(U)R to something other than 1:31, the
+    RunGrepTest script failed. 
 
 
 Version 8.13 16-Aug-2011
