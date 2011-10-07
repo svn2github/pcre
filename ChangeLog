@@ -54,8 +54,8 @@ Version 8.20 23-Sep-2011
 8.  If (*THEN) was present in the first (true) branch of a conditional group,
     it was not handled as intended. [But see 16 below.]
 
-9.  Replaced RunTest.bat with the much improved version provided by Sheri
-    Pierce.
+9.  Replaced RunTest.bat and CMakeLists.txt with improved versions provided by
+    Sheri Pierce.
 
 10. A pathological pattern such as /(*ACCEPT)a/ was miscompiled, thinking that
     the first byte in a match must be "a".

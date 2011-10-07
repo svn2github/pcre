@@ -1,7 +1,7 @@
 @echo off
 @rem This file must use CRLF linebreaks to function properly
-@rem and user must have external findstr command
-@rem  This file was contributed by Ralf Junker, and touched up by
+@rem and requires both pcretest and pcregrep
+@rem  This file was originally contributed by Ralf Junker, and touched up by
 @rem  Daniel Richard G. Tests 10-12 added by Philip H.
 @rem  Philip H also changed test 3 to use "wintest" files.
 @rem
@@ -17,33 +17,51 @@
 @rem 10 requires ucp and link size 2
 @rem 14 requires presense of jit support
 @rem 15 requires absence of jit support
-
 @rem Sheri P also added override tests for study and jit testing
-@rem Output is written to newly created subfolders named testout testoutstudy and testoutjit.
-@rem Current dir should be the build dir. The testdata folder should exist in the current dir or in ..
-@rem Copy RunTest.bat to the build dir manually if necessary.
-@rem
 
 setlocal enabledelayedexpansion
-
-if exist testdata set srcdir=.
-if [%srcdir%]==[]   set srcdir=..
-if NOT exist %srcdir%\testdata (
-echo distribution testdata folder not found.
+if [%srcdir%]==[] (
+if exist testdata\ set srcdir=.)
+if [%srcdir%]==[] (
+if exist ..\testdata\ set srcdir=..)
+if [%srcdir%]==[] (
+if exist ..\..\testdata\ set srcdir=..\..)
+if NOT exist "%srcdir%\testdata\" (
+Error: echo distribution testdata folder not found.
+call :conferror
 exit /b 1
 goto :eof
 )
-if [%pcretest%]==[] set pcretest=pcretest
 
-%pcretest% -C |findstr /C:"No UTF-8 support" >NUL
+if "%pcregrep%"=="" set pcregrep=.\pcregrep.exe
+if "%pcretest%"=="" set pcretest=.\pcretest.exe
+
+echo source dir is %srcdir%
+echo pcretest=%pcretest%
+echo pcregrep=%pcregrep%
+
+if NOT exist "%pcregrep%" (
+echo Error: "%pcregrep%" not found.
+echo.
+call :conferror
+exit /b 1
+)
+
+if NOT exist "%pcretest%" (
+echo Error: "%pcretest%" not found.
+echo.
+call :conferror
+exit /b 1
+)
+
+"%pcretest%" -C|"%pcregrep%" --no-jit "No UTF-8 support">NUL
 set utf8=%ERRORLEVEL%
-%pcretest% -C |findstr /C:"No Unicode properties support" >NUL
+"%pcretest%" -C|"%pcregrep%" --no-jit "No Unicode properties support">NUL
 set ucp=%ERRORLEVEL%
-%pcretest% -C |findstr /C:"No just-in-time compiler support" >NUL
+"%pcretest%" -C|"%pcregrep%" --no-jit "No just-in-time compiler support">NUL
 set jit=%ERRORLEVEL%
-%pcretest% -C |findstr /C:"Internal link size = 2" >NUL
+"%pcretest%" -C|"%pcregrep%" --no-jit "Internal link size = 2">NUL
 set link2=%ERRORLEVEL%
-
 set ucpandlink2=0
 if %ucp% EQU 1 (
  if %link2% EQU 0 set ucpandlink2=1
@@ -83,6 +101,8 @@ for %%a in (%*) do (
         exit /b 1
 )
 )
+set failed="no"
+
 if "%all%" == "yes" (
   set do1=yes
   set do2=yes
@@ -101,6 +121,9 @@ if "%all%" == "yes" (
   set do15=yes
 )
 
+@echo RunTest.bat's pcretest output is written to newly created subfolders named
+@echo testout, testoutstudy and testoutjit.
+@echo.
 if "%do1%" == "yes" call :do1
 if "%do2%" == "yes" call :do2
 if "%do3%" == "yes" call :do3
@@ -116,6 +139,11 @@ if "%do12%" == "yes" call :do12
 if "%do13%" == "yes" call :do13
 if "%do14%" == "yes" call :do14
 if "%do15%" == "yes" call :do15
+if %failed% == "yes" (
+echo In above output, one or more of the various tests failed!
+exit /b 1
+)
+echo All OK
 goto :eof
 
 :runsub
@@ -149,22 +177,39 @@ if exist %srcdir%\testdata\win%testinput% (
   set testoutput=wintestoutput%1
 )
 
-echo.
 echo Test %1: %3
-%pcretest% %4 %5 %6 %7 %8 %9 %srcdir%\testdata\%testinput%>%2\%testoutput%
+"%pcretest%" %4 %5 %6 %7 %8 %9 "%srcdir%\testdata\%testinput%">%2\%testoutput%
 if errorlevel 1 (
-  echo Test %1: pcretest failed!
+  echo.          failed executing command-line:
+  echo.            "%pcretest%" %4 %5 %6 %7 %8 %9 "%srcdir%\testdata\%testinput%"^>%2\%testoutput%
+  set failed="yes"
   goto :eof
 )
 
-fc /n %srcdir%\testdata\%testoutput% %2\%testoutput%
+fc /n "%srcdir%\testdata\%testoutput%" "%2\%testoutput%">NUL
 if errorlevel 1 (
-  echo Test %1: file compare failed!
+  echo.          failed comparison: fc /n "%srcdir%\testdata\%testoutput%" "%2\%testoutput%"
+  set failed="yes"
+  if [%1]==[2] (
+    echo.
+    echo ** Test 2 requires a lot of stack. PCRE can be configured to
+    echo ** use heap for recursion. Otherwise, to pass Test 2
+    echo ** you generally need to allocate 8 mb stack to PCRE.
+    echo ** See the 'pcrestack' page for a discussion of PCRE's
+    echo ** stack usage.
+    echo.
+)
+  if [%1]==[3] (
+    echo.
+    echo ** Test 3 failure usually means french locale is not
+    echo ** available on the system, rather than a bug or problem with PCRE.
+    echo.
+)
+
   goto :eof
 )
 
-echo Test %1: Passed.
-echo.
+echo.          Passed.
 goto :eof
 
 :do1
@@ -294,4 +339,26 @@ goto :eof
 )
   call :runsub 15 testout "JIT-specific features - no JIT" -q
   call :runsub 15 testoutstudy "Test with Study Override" -q -s
+goto :eof
+
+:conferror
+@echo Configuration error.
+@echo.
+@echo If configured with cmake and executed via "make test" or the MSVC "RUN_TESTS"
+@echo project, pcre_test.bat defines variables and automatically calls RunTest.bat.
+@echo For manual testing of all available features, after configuring with cmake
+@echo and building, you can run the built pcre_test.bat. For best results with
+@echo cmake builds and tests avoid directories with full path names that include
+@echo spaces for source or build.
+@echo.
+@echo Otherwise, if the build dir is in a subdir of the source dir, testdata needed
+@echo for input and verification should be found automatically when (from the
+@echo location of the the built exes) you call RunTest.bat. By default RunTest.bat
+@echo runs all tests compatible with the linked pcre library but it can be given
+@echo a test number as an argument.
+@echo.
+@echo If the build dir is not under the source dir you can either copy your exes
+@echo to the source folder or copy RunTest.bat and the testdata folder to the
+@echo location of your built exes and then run RunTest.bat.
+@echo.
 goto :eof

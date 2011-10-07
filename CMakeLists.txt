@@ -41,10 +41,22 @@
 # 2011-08-22 PH added PCRE_SUPPORT_JIT
 # 2011-09-06 PH modified WIN32 ADD_TEST line as suggested by Sergey Cherepanov
 # 2011-09-06 PH added PCRE_SUPPORT_PCREGREP_JIT
+# 2011-10-04 Sheri added support for including coff data in windows shared libraries
+#            compiled with MINGW if pcre.rc and/or pcreposix.rc are placed in
+#            the source dir by the user prior to building
+# 2011-10-04 Sheri changed various add_test's to use exes' location built instead
+#            of DEBUG location only (likely only matters in MSVC)
+# 2011-10-04 Sheri added scripts to provide needed variables to RunTest and
+#            RunGrepTest (used for UNIX and Msys)
+# 2011-10-04 Sheri added scripts to provide needed variables and to execute
+#            RunTest.bat in Win32 (for effortless testing with "make test")
+# 2011-10-04 Sheri Increased minimum required cmake version
 
 PROJECT(PCRE C CXX)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
+# Increased minimum to 2.8.0 to support newer add_test features
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake) # for FindReadline.cmake
 
@@ -344,9 +356,33 @@ SET(PCRE_SOURCES
   pcre_xclass.c
 )
 
+
 SET(PCREPOSIX_HEADERS pcreposix.h)
 
 SET(PCREPOSIX_SOURCES pcreposix.c)
+
+IF(MINGW AND NOT PCRE_STATIC)
+IF (EXISTS ${PROJECT_SOURCE_DIR}/pcre.rc)
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_SOURCE_DIR}/pcre.o
+PRE-LINK
+COMMAND windres ARGS pcre.rc pcre.o
+WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+COMMENT Using pcre coff info in mingw build)
+SET(PCRE_SOURCES
+  ${PCRE_SOURCES} ${PROJECT_SOURCE_DIR}/pcre.o
+)
+ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/pcre.rc)
+IF (EXISTS ${PROJECT_SOURCE_DIR}/pcreposix.rc)
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_SOURCE_DIR}/pcreposix.o
+PRE-LINK
+COMMAND windres ARGS pcreposix.rc pcreposix.o
+WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+COMMENT Using pcreposix coff info in mingw build)
+SET(PCREPOSIX_SOURCES
+  ${PCREPOSIX_SOURCES} ${PROJECT_SOURCE_DIR}/pcreposix.o
+)
+ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/pcreposix.rc)
+ENDIF(MINGW AND NOT PCRE_STATIC)
 
 SET(PCRECPP_HEADERS
   pcrecpp.h
@@ -433,12 +469,11 @@ ENDIF(PCRE_BUILD_PCRECPP)
 #         SET_TARGET_PROPERTIES(pcredemo PROPERTIES COMPILE_FLAGS "-DPCRE_STATIC")
 # ENDIF(NOT BUILD_SHARED_LIBS)
 
-IF(PCRE_BUILD_PCREGREP)
+IF(PCRE_BUILD_PCREGREP OR PCRE_BUILD_TESTS)
   ADD_EXECUTABLE(pcregrep pcregrep.c)
   SET(targets ${targets} pcregrep)
   TARGET_LINK_LIBRARIES(pcregrep pcreposix ${PCREGREP_LIBS})
-ENDIF(PCRE_BUILD_PCREGREP)
-
+ENDIF(PCRE_BUILD_PCREGREP OR PCRE_BUILD_TESTS)
 
 # Testing
 IF(PCRE_BUILD_TESTS)
@@ -473,59 +508,109 @@ IF(PCRE_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(pcre_stringpiece_unittest pcrecpp)
   ENDIF(PCRE_BUILD_PCRECPP)
 
+  # exes in Debug location tested by the RunTest shell script
+  # via "make test"
   GET_TARGET_PROPERTY(PCREGREP_EXE pcregrep DEBUG_LOCATION)
   GET_TARGET_PROPERTY(PCRETEST_EXE pcretest DEBUG_LOCATION)
 
-  # Write out a CTest configuration file that sets some needed environment
-  # variables for the test scripts.
+# =================================================
+  # Write out a CTest configuration file
   #
   FILE(WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
   "# This is a generated file.
-  SET(ENV{srcdir} ${PROJECT_SOURCE_DIR})
-  SET(ENV{pcregrep} ${PCREGREP_EXE})
-  SET(ENV{pcretest} ${PCRETEST_EXE})
-  ")
+MESSAGE(\"When testing is complete, review test output in the
+${PROJECT_BINARY_DIR}/Testing/Temporary folder.\")
+MESSAGE(\"\")
+")
+
+      FILE(WRITE ${PROJECT_BINARY_DIR}/pcre_test.sh
+      "#! /bin/sh
+# This is a generated file.
+srcdir=${PROJECT_SOURCE_DIR}
+pcregrep=${PCREGREP_EXE}
+pcretest=${PCRETEST_EXE}
+source ${PROJECT_SOURCE_DIR}/RunTest
+if test \"$?\" != \"0\"; then exit 1; fi
+# End
+")
+
+      FILE(WRITE ${PROJECT_BINARY_DIR}/pcre_grep_test.sh
+      "#! /bin/sh
+# This is a generated file.
+srcdir=${PROJECT_SOURCE_DIR}
+pcregrep=${PCREGREP_EXE}
+pcretest=${PCRETEST_EXE}
+source ${PROJECT_SOURCE_DIR}/RunGrepTest
+if test \"$?\" != \"0\"; then exit 1; fi
+# End
+")
 
   IF(UNIX)
-    ADD_TEST(pcre_test      ${PROJECT_SOURCE_DIR}/RunTest)
-    ADD_TEST(pcre_grep_test ${PROJECT_SOURCE_DIR}/RunGrepTest)
+    ADD_TEST(pcre_test      ${PROJECT_BINARY_DIR}/pcre_test.sh)
+    ADD_TEST(pcre_grep_test ${PROJECT_BINARY_DIR}/pcre_grep_test.sh)
   ENDIF(UNIX)
 
   IF(WIN32)
+    # Provide environment for executing the bat file version of RunTest
+    string(REPLACE "/" "\\" winsrc "${PROJECT_SOURCE_DIR}")
+
+    FILE(WRITE ${PROJECT_BINARY_DIR}/pcre_test.txt
+    "\@REM This is a generated file.
+\@Echo off
+setlocal
+SET\ srcdir=\${srcdir}
+SET\ pcretest=\${pcretest}
+SET\ pcregrep=\${pcregrep}
+call \"\${srcdir}\\RunTest.Bat\"
+if errorlevel 1 exit /b 1
+echo RunTest.bat tests successfully completed
+")
+
+  FILE(WRITE ${PROJECT_BINARY_DIR}/BatDriver.cmake
+  "# This is a generated file.
+# this script is run with arguments via the cmake command in add_test(NAME pcre_test_bat)
+# BatDriver feeds the actual location of pcretest.exe and pcregrep.exe
+FILE(TO_NATIVE_PATH \${pcretestx} pcretest)
+FILE(TO_NATIVE_PATH \${pcregrepx} pcregrep)
+FILE(TO_NATIVE_PATH \${srcdirx} srcdir)
+configure_file(\"\${bindirx}/pcre_test.txt\" \"\${bindirx}/pcre_test.bat\")
+# MESSAGE(\"cmake\ variable\ pcretest\ is\ \${pcretest}\")
+# MESSAGE(\"cmake\ variable\ pcregrep\ is\ \${pcregrep}\")
+# STRING(REPLACE \" \" \"\\ \" bindir \${bindirx})
+MESSAGE(\"COMMAND pcre_test.bat \")
+EXECUTE_PROCESS(COMMAND pcre_test.bat
+WORKING_DIRECTORY .
+OUTPUT_VARIABLE batoutput)
+MESSAGE(\"OUTPUT: \${batoutput}\")
+")
+
+  ADD_TEST(NAME pcre_test_bat
+  COMMAND ${CMAKE_COMMAND} -D bindirx=${PROJECT_BINARY_DIR} -D srcdirx=${PROJECT_SOURCE_DIR} -D pcretestx=$<TARGET_FILE:pcretest> -D pcregrepx=$<TARGET_FILE:pcregrep> -P "${PROJECT_BINARY_DIR}/BatDriver.cmake")
+  SET_TESTS_PROPERTIES(pcre_test_bat PROPERTIES
+  PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
+
     IF("$ENV{OSTYPE}" STREQUAL "msys")
-      ADD_TEST(pcre_test      sh ${PROJECT_SOURCE_DIR}/RunTest)
-      ADD_TEST(pcre_grep_test sh ${PROJECT_SOURCE_DIR}/RunGrepTest)
-    ELSE("$ENV{OSTYPE}" STREQUAL "msys")
-      # ADD_TEST(pcre_test cmd /C ${PROJECT_SOURCE_DIR}/RunTest.bat)
-      ADD_TEST(pcre_test ${PROJECT_SOURCE_DIR}/RunTest.bat)
+    # Both the sh and bat file versions of RunTest are run if make test is used
+    # in msys
+
+      ADD_TEST(pcre_test_sh    sh.exe ${PROJECT_BINARY_DIR}/pcre_test.sh)
+      ADD_TEST(pcre_grep_test sh.exe ${PROJECT_BINARY_DIR}/pcre_grep_test.sh)
+
     ENDIF("$ENV{OSTYPE}" STREQUAL "msys")
   ENDIF(WIN32)
 
-  IF(PCRE_SUPPORT_JIT)
-  GET_TARGET_PROPERTY(PCRE_JIT_TEST_EXE
-                      pcre_jit_test
-                      DEBUG_LOCATION)
-  ENDIF(PCRE_SUPPORT_JIT)
-
-  GET_TARGET_PROPERTY(PCRECPP_UNITTEST_EXE
-                      pcrecpp_unittest
-                      DEBUG_LOCATION)
-
-  GET_TARGET_PROPERTY(PCRE_SCANNER_UNITTEST_EXE
-                      pcre_scanner_unittest
-                      DEBUG_LOCATION)
-
-  GET_TARGET_PROPERTY(PCRE_STRINGPIECE_UNITTEST_EXE
-                      pcre_stringpiece_unittest
-                      DEBUG_LOCATION)
+  # Changed to accommodate testing whichever location was just built
 
   IF(PCRE_SUPPORT_JIT)
-    ADD_TEST(pcre_jit_test       ${PCRE_JIT_TEST_EXE})
+  ADD_TEST(pcre_jit_test       pcre_jit_test)
   ENDIF(PCRE_SUPPORT_JIT)
 
-  ADD_TEST(pcrecpp_test          ${PCRECPP_UNITTEST_EXE})
-  ADD_TEST(pcre_scanner_test     ${PCRE_SCANNER_UNITTEST_EXE})
-  ADD_TEST(pcre_stringpiece_test ${PCRE_STRINGPIECE_UNITTEST_EXE})
+  IF(PCRE_BUILD_PCRECPP)
+    ADD_TEST(pcrecpp_test          pcrecpp_unittest)
+    ADD_TEST(pcre_scanner_test     pcre_scanner_unittest)
+    ADD_TEST(pcre_stringpiece_test pcre_stringpiece_unittest)
+
+  ENDIF(PCRE_BUILD_PCRECPP)
 ENDIF(PCRE_BUILD_TESTS)
 
 # Installation
@@ -554,7 +639,6 @@ ELSE(PCRE_BUILD_PCRECPP)
         ENDFOREACH(man ${man3})
         SET(man3 ${man3_new})
 ENDIF(PCRE_BUILD_PCRECPP)
-
 
 INSTALL(FILES ${man1} DESTINATION man/man1)
 INSTALL(FILES ${man3} DESTINATION man/man3)
@@ -603,7 +687,8 @@ IF(PCRE_SHOW_REPORT)
   MESSAGE(STATUS "  Build pcregrep .................. : ${PCRE_BUILD_PCREGREP}")
   MESSAGE(STATUS "  Enable JIT in pcregrep .......... : ${PCRE_SUPPORT_PCREGREP_JIT}")
   MESSAGE(STATUS "  Buffer size for pcregrep ........ : ${PCREGREP_BUFSIZE}")
-  MESSAGE(STATUS "  Build tests (implies pcretest) .. : ${PCRE_BUILD_TESTS}")
+  MESSAGE(STATUS "  Build tests (implies pcretest  .. : ${PCRE_BUILD_TESTS}")
+  MESSAGE(STATUS "               and pcregrep)")
   IF(ZLIB_FOUND)
     MESSAGE(STATUS "  Link pcregrep with libz ......... : ${PCRE_SUPPORT_LIBZ}")
   ELSE(ZLIB_FOUND)
