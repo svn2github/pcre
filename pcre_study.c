@@ -127,6 +127,7 @@ for (;;)
     case OP_BRAPOS:
     case OP_SBRAPOS:
     case OP_ONCE:
+    case OP_ONCE_NC:
     d = find_minlength(cc, startcode, options, recurse_depth);
     if (d < 0) return d;
     branchlength += d;
@@ -810,6 +811,7 @@ do
       case OP_CBRAPOS:
       case OP_SCBRAPOS:
       case OP_ONCE:
+      case OP_ONCE_NC:
       case OP_ASSERT:
       rc = set_start_bits(tcode, start_bits, utf8, cd);
       if (rc == SSB_FAIL || rc == SSB_UNKNOWN) return rc;

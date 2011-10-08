@@ -94,6 +94,11 @@ Version 8.20 23-Sep-2011
     
 17. If a user had set PCREGREP_COLO(U)R to something other than 1:31, the
     RunGrepTest script failed. 
+    
+18. Change 22 for version 13 caused atomic groups to use more stack. This is
+    inevitable for groups that contain captures, but it can lead to a lot of 
+    stack use in large patterns. The old behaviour has been restored for atomic 
+    groups that do not contain any capturing parentheses.  
 
 
 Version 8.13 16-Aug-2011

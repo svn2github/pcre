@@ -164,7 +164,8 @@ static const uschar coptable[] = {
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
-  0, 0, 0, 0, 0, 0,              /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, COND */
+  0, 0,                          /* ONCE, ONCE_NC                          */
+  0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, NCREF                            */
   0, 0,                          /* RREF, NRREF                            */
@@ -232,7 +233,8 @@ static const uschar poptable[] = {
   0,                             /* Assert not                             */
   0,                             /* Assert behind                          */
   0,                             /* Assert behind not                      */
-  0, 0, 0, 0, 0, 0,              /* ONCE, BRA, BRAPOS, CBRA, CBRAPOS, COND */
+  0, 0,                          /* ONCE, ONCE_NC                          */
+  0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
   0, 0,                          /* CREF, NCREF                            */
   0, 0,                          /* RREF, NRREF                            */
@@ -2789,6 +2791,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_ONCE:
+      case OP_ONCE_NC: 
         {
         int local_offsets[2];
         int local_workspace[1000];

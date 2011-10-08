@@ -1506,6 +1506,7 @@ for (;;)
     case OP_CBRA:
     case OP_BRA:
     case OP_ONCE:
+    case OP_ONCE_NC: 
     case OP_COND:
     d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), utf8, atend, cd);
     if (d < 0) return d;
@@ -2045,7 +2046,8 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], TRUE);
 
   if (c == OP_BRA  || c == OP_BRAPOS ||
       c == OP_CBRA || c == OP_CBRAPOS ||
-      c == OP_ONCE || c == OP_COND)
+      c == OP_ONCE || c == OP_ONCE_NC ||
+      c == OP_COND)
     {
     BOOL empty_branch;
     if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */
@@ -3142,6 +3144,7 @@ for (;; ptr++)
   int subfirstbyte;
   int terminator;
   int mclength;
+  int tempbracount; 
   uschar mcbuffer[8];
 
   /* Get next byte in the pattern */
@@ -4840,8 +4843,10 @@ for (;; ptr++)
         uschar *ketcode = code - 1 - LINK_SIZE;
         uschar *bracode = ketcode - GET(ketcode, 1);
 
-        if (*bracode == OP_ONCE && possessive_quantifier) *bracode = OP_BRA;
-        if (*bracode == OP_ONCE)
+        if ((*bracode == OP_ONCE || *bracode == OP_ONCE_NC) && 
+            possessive_quantifier) *bracode = OP_BRA;
+             
+        if (*bracode == OP_ONCE || *bracode == OP_ONCE_NC)
           *ketcode = OP_KETRMAX + repeat_type;
         else
           {
@@ -5906,6 +5911,7 @@ for (;; ptr++)
     *code = bravalue;
     tempcode = code;
     tempreqvary = cd->req_varyopt;        /* Save value before bracket */
+    tempbracount = cd->bracount;          /* Save value before bracket */
     length_prevgroup = 0;                 /* Initialize for pre-compile phase */
 
     if (!compile_regex(
@@ -5927,6 +5933,12 @@ for (;; ptr++)
            &length_prevgroup              /* Pre-compile phase */
          ))
       goto FAILED;
+      
+    /* If this was an atomic group and there are no capturing groups within it, 
+    generate OP_ONCE_NC instead of OP_ONCE. */ 
+      
+    if (bravalue == OP_ONCE && cd->bracount <= tempbracount) 
+      *code = OP_ONCE_NC;
 
     if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT)
       cd->assert_depth -= 1;
@@ -6726,7 +6738,8 @@ do {
 
    /* Other brackets */
 
-   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_COND)
+   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_ONCE_NC ||
+            op == OP_COND)
      {
      if (!is_anchored(scode, bracket_map, backref_map)) return FALSE;
      }
@@ -6830,7 +6843,7 @@ do {
 
    /* Other brackets */
 
-   else if (op == OP_ASSERT || op == OP_ONCE)
+   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_ONCE_NC)
      {
      if (!is_startline(scode, bracket_map, backref_map)) return FALSE;
      }
@@ -6900,6 +6913,7 @@ do {
      case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
+     case OP_ONCE_NC: 
      case OP_COND:
      if ((d = find_firstassertedchar(scode, op == OP_ASSERT)) < 0)
        return -1;

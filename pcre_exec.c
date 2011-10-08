@@ -277,7 +277,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
        RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
-       RM61,  RM62, RM63 };
+       RM61,  RM62, RM63, RM64, RM65, RM66 };
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -793,6 +793,87 @@ for (;;)
     md->start_match_ptr = ecode;     
     md->mark = ecode + 2;
     RRETURN(MATCH_THEN);
+    
+    /* Handle an atomic group that does not contain any capturing parentheses.
+    This can be handled like an assertion. Prior to 8.13, all atomic groups 
+    were handled this way. In 8.13, the code was changed as below for ONCE, so 
+    that backups pass through the group and thereby reset captured values. 
+    However, this uses a lot more stack, so in 8.20, atomic groups that do not 
+    contain any captures generate OP_ONCE_NC, which can be handled in the old, 
+    less stack intensive way.
+
+    Check the alternative branches in turn - the matching won't pass the KET
+    for this kind of subpattern. If any one branch matches, we carry on as at
+    the end of a normal bracket, leaving the subject pointer, but resetting
+    the start-of-match value in case it was changed by \K. */
+
+    case OP_ONCE_NC:
+    prev = ecode;
+    saved_eptr = eptr;
+    do
+      {
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM64);
+      if (rrc == MATCH_MATCH)  /* Note: _not_ MATCH_ACCEPT */
+        {
+        mstart = md->start_match_ptr;
+        break;
+        }
+      if (rrc == MATCH_THEN)
+        {
+        next = ecode + GET(ecode,1);
+        if (md->start_match_ptr < next && 
+            (*ecode == OP_ALT || *next == OP_ALT))
+          rrc = MATCH_NOMATCH;
+        }    
+ 
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode += GET(ecode,1);
+      }
+    while (*ecode == OP_ALT);
+
+    /* If hit the end of the group (which could be repeated), fail */
+
+    if (*ecode != OP_ONCE_NC && *ecode != OP_ALT) RRETURN(MATCH_NOMATCH);
+
+    /* Continue as from after the group, updating the offsets high water
+    mark, since extracts may have been taken. */
+
+    do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
+
+    offset_top = md->end_offset_top;
+    eptr = md->end_match_ptr;
+
+    /* For a non-repeating ket, just continue at this level. This also
+    happens for a repeating ket if no characters were matched in the group.
+    This is the forcible breaking of infinite loops as implemented in Perl
+    5.005. */
+
+    if (*ecode == OP_KET || eptr == saved_eptr)
+      {
+      ecode += 1+LINK_SIZE;
+      break;
+      }
+
+    /* The repeating kets try the rest of the pattern or restart from the
+    preceding bracket, in the appropriate order. The second "call" of match()
+    uses tail recursion, to avoid using another stack frame. */
+
+    if (*ecode == OP_KETRMIN)
+      {
+      RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM65);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode = prev;
+      goto TAIL_RECURSE;
+      }
+    else  /* OP_KETRMAX */
+      {
+      md->match_function_type = MATCH_CBEGROUP; 
+      RMATCH(eptr, prev, offset_top, md, eptrb, RM66);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      ecode += 1 + LINK_SIZE;
+      goto TAIL_RECURSE;
+      }
+    /* Control never gets here */
 
     /* Handle a capturing bracket, other than those that are possessive with an
     unlimited repeat. If there is space in the offset vector, save the current
@@ -888,7 +969,7 @@ for (;;)
     /* VVVVVVVVVVVVVVVVVVVVVVVVV */
 
     /* Non-capturing or atomic group, except for possessive with unlimited
-    repeat. Loop for all the alternatives.
+    repeat and ONCE group with no captures. Loop for all the alternatives.
 
     When we get to the final alternative within the brackets, we used to return
     the result of a recursive call to match() whatever happened so it was
@@ -1745,14 +1826,15 @@ for (;;)
       }
     else saved_eptr = NULL;
 
-    /* If we are at the end of an assertion group, stop matching and return
-    MATCH_MATCH, but record the current high water mark for use by positive
-    assertions. We also need to record the match start in case it was changed
-    by \K. */
+    /* If we are at the end of an assertion group or a non-capturing atomic 
+    group, stop matching and return MATCH_MATCH, but record the current high
+    water mark for use by positive assertions. We also need to record the match
+    start in case it was changed by \K. */
 
-    if (*prev >= OP_ASSERT && *prev <= OP_ASSERTBACK_NOT)
+    if ((*prev >= OP_ASSERT && *prev <= OP_ASSERTBACK_NOT) ||
+         *prev == OP_ONCE_NC) 
       {
-      md->end_match_ptr = eptr;      /* For ONCE */
+      md->end_match_ptr = eptr;      /* For ONCE_NC */
       md->end_offset_top = offset_top;
       md->start_match_ptr = mstart;
       MRRETURN(MATCH_MATCH);         /* Sets md->mark */
@@ -1820,11 +1902,11 @@ for (;;)
     /* For an ordinary non-repeating ket, just continue at this level. This
     also happens for a repeating ket if no characters were matched in the
     group. This is the forcible breaking of infinite loops as implemented in
-    Perl 5.005. For a non-repeating atomic group, establish a backup point by
-    processing the rest of the pattern at a lower level. If this results in a
-    NOMATCH return, pass MATCH_ONCE back to the original OP_ONCE level, thereby
-    bypassing intermediate backup points, but resetting any captures that
-    happened along the way. */
+    Perl 5.005. For a non-repeating atomic group that includes captures,
+    establish a backup point by processing the rest of the pattern at a lower
+    level. If this results in a NOMATCH return, pass MATCH_ONCE back to the
+    original OP_ONCE level, thereby bypassing intermediate backup points, but
+    resetting any captures that happened along the way. */
 
     if (*ecode == OP_KET || eptr == saved_eptr)
       {
@@ -5745,7 +5827,8 @@ switch (frame->Xwhere)
   LBL( 9) LBL(10) LBL(11) LBL(12) LBL(13) LBL(14) LBL(15) LBL(17)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
-  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63)
+  LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
+  LBL(65) LBL(66) 
 #ifdef SUPPORT_UTF8
   LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
