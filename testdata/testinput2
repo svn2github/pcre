@@ -3938,4 +3938,31 @@ AbcdCBefgBhiBqz
 
 /-----------------------------------------------/  
 
+/^(?>a+)(?>(z+))\w/BZ
+    aaaazzzzb
+    ** Failers
+    aazz  
+
+/(.)(\1|a(?2))/
+    bab
+    
+/\1|(.)(?R)\1/
+    cbbbc
+    
+/(.)((?(1)c|a)|a(?2))/
+    baa  
+
+/(?P<abn>(?P=abn)xxx)/BZ
+
+/(a\1z)/BZ
+
+/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
+     \Maabbccddee
+
+/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
+     \Maabbccddee
+
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
+     \Maabbccddee
+
 /-- End of testinput2 --/

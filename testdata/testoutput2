@@ -12402,4 +12402,96 @@ No match
 
 /-----------------------------------------------/  
 
+/^(?>a+)(?>(z+))\w/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        Once_NC
+        a+
+        Ket
+        Once
+        CBra 1
+        z+
+        Ket
+        Ket
+        \w
+        Ket
+        End
+------------------------------------------------------------------
+    aaaazzzzb
+ 0: aaaazzzzb
+ 1: zzzz
+    ** Failers
+No match
+    aazz  
+No match
+
+/(.)(\1|a(?2))/
+    bab
+ 0: bab
+ 1: b
+ 2: ab
+    
+/\1|(.)(?R)\1/
+    cbbbc
+ 0: cbbbc
+ 1: c
+    
+/(.)((?(1)c|a)|a(?2))/
+    baa  
+No match
+
+/(?P<abn>(?P=abn)xxx)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        \1
+        xxx
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(a\1z)/BZ
+------------------------------------------------------------------
+        Bra
+        Once
+        CBra 1
+        a
+        \1
+        z
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
+     \Maabbccddee
+Minimum match() limit = 12
+Minimum match() recursion limit = 3
+ 0: aabbccddee
+
+/^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
+     \Maabbccddee
+Minimum match() limit = 22
+Minimum match() recursion limit = 21
+ 0: aabbccddee
+ 1: aa
+ 2: bb
+ 3: cc
+ 4: dd
+ 5: ee
+
+/^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
+     \Maabbccddee
+Minimum match() limit = 18
+Minimum match() recursion limit = 13
+ 0: aabbccddee
+ 1: aa
+ 2: cc
+ 3: ee
+
 /-- End of testinput2 --/
