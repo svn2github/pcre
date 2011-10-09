@@ -352,21 +352,19 @@ enum {
 /* Two local variables for possessive quantifiers (char1 cannot use them). */
 #define POSSESSIVE0      (2 * sizeof(sljit_w))
 #define POSSESSIVE1      (3 * sizeof(sljit_w))
-/* Head of the saved local variables */
-#define LOCALS_HEAD      (4 * sizeof(sljit_w))
 /* Head of the last recursion. */
-#define RECURSIVE_HEAD   (5 * sizeof(sljit_w))
+#define RECURSIVE_HEAD   (4 * sizeof(sljit_w))
 /* Max limit of recursions. */
-#define CALL_LIMIT       (7 * sizeof(sljit_w))
+#define CALL_LIMIT       (5 * sizeof(sljit_w))
 /* Last known position of the requested byte. */
-#define REQ_BYTE_PTR     (8 * sizeof(sljit_w))
+#define REQ_BYTE_PTR     (6 * sizeof(sljit_w))
 /* End pointer of the first line. */
-#define FIRSTLINE_END    (9 * sizeof(sljit_w))
+#define FIRSTLINE_END    (7 * sizeof(sljit_w))
 /* The output vector is stored on the stack, and contains pointers
 to characters. The vector data is divided into two groups: the first
 group contains the start / end character pointers, and the second is
 the start pointers when the end of the capturing group has not yet reached. */
-#define OVECTOR_START    (10 * sizeof(sljit_w))
+#define OVECTOR_START    (8 * sizeof(sljit_w))
 #define OVECTOR(i)       (OVECTOR_START + (i) * sizeof(sljit_w))
 #define OVECTOR_PRIV(i)  (common->cbraptr + (i) * sizeof(sljit_w))
 #define PRIV(cc)         (common->localptrs[(cc) - common->start])
@@ -571,6 +569,7 @@ switch(*cc)
   case OP_ASSERTBACK_NOT:
   case OP_REVERSE:
   case OP_ONCE:
+  case OP_ONCE_NC:
   case OP_BRA:
   case OP_BRAPOS:
   case OP_COND:
@@ -609,6 +608,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_ONCE_NC:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -654,6 +654,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_ONCE_NC:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -693,10 +694,8 @@ while (cc < ccend)
 static int get_framesize(compiler_common *common, uschar *cc, BOOL recursive)
 {
 uschar *ccend = bracketend(cc);
-uschar *end;
 int length = 0;
 BOOL possessive = FALSE;
-BOOL needs_frame = FALSE;
 BOOL setsom_found = FALSE;
 
 if (!recursive && (*cc == OP_CBRAPOS || *cc == OP_SCBRAPOS))
@@ -720,28 +719,6 @@ while (cc < ccend)
     cc += (*cc == OP_SET_SOM) ? 1 : 1 + LINK_SIZE;
     break;
 
-    case OP_ASSERT:
-    case OP_ASSERT_NOT:
-    case OP_ASSERTBACK:
-    case OP_ASSERTBACK_NOT:
-    case OP_ONCE:
-    if (needs_frame || length > 0)
-      {
-      cc = bracketend(cc);
-      break;
-      }
-    /* Check whether a frame must be created. */
-    end = bracketend(cc);
-    while (cc < end)
-      {
-      if (*cc == OP_SET_SOM || *cc == OP_CBRA || *cc == OP_CBRAPOS
-          || *cc == OP_SCBRA || *cc == OP_SCBRAPOS || *cc == OP_RECURSE)
-	needs_frame = TRUE;
-      cc = next_opcode(common, cc);
-      SLJIT_ASSERT(cc != NULL);
-      }
-    break;
-
     case OP_CBRA:
     case OP_CBRAPOS:
     case OP_SCBRA:
@@ -757,33 +734,25 @@ while (cc < ccend)
     }
 
 /* Possessive quantifiers can use a special case. */
-if (SLJIT_UNLIKELY(possessive) && !needs_frame && length == 3 + 2)
+if (SLJIT_UNLIKELY(possessive) && length == 3)
   return -1;
 
 if (length > 0)
-  return length + 2;
-return needs_frame ? 0 : -1;
+  return length + 1;
+return -1;
 }
 
 static void init_frame(compiler_common *common, uschar *cc, int stackpos, int stacktop, BOOL recursive)
 {
-/* TMP2 must contain STACK_TOP - (-STACK(stackpos)) */
 DEFINE_COMPILER;
 uschar *ccend = bracketend(cc);
 BOOL setsom_found = FALSE;
 int offset;
 
-if (stackpos < stacktop)
-  {
-  SLJIT_ASSERT(stackpos + 1 == stacktop);
-  return;
-  }
+/* >= 1 + shortest item size (2) */
+SLJIT_ASSERT(stackpos >= stacktop + 2);
 
 stackpos = STACK(stackpos);
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, TMP2, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacktop), TMP1, 0);
-
 if (recursive || (*cc != OP_CBRAPOS && *cc != OP_SCBRAPOS))
   cc = next_opcode(common, cc);
 SLJIT_ASSERT(cc != NULL);
@@ -802,14 +771,6 @@ while (cc < ccend)
       setsom_found = TRUE;
       }
     cc += (*cc == OP_SET_SOM) ? 1 : 1 + LINK_SIZE;
-    break;
-
-    case OP_ASSERT:
-    case OP_ASSERT_NOT:
-    case OP_ASSERTBACK:
-    case OP_ASSERTBACK_NOT:
-    case OP_ONCE:
-    cc = bracketend(cc);
     break;
 
     case OP_CBRA:
@@ -836,7 +797,7 @@ while (cc < ccend)
     }
 
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), stackpos, SLJIT_IMM, frame_end);
-SLJIT_ASSERT(stackpos == STACK(stacktop + 1));
+SLJIT_ASSERT(stackpos == STACK(stacktop));
 }
 
 static SLJIT_INLINE int get_localsize(compiler_common *common, uschar *cc, uschar *ccend)
@@ -853,6 +814,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
+    case OP_ONCE_NC:
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
@@ -955,6 +917,7 @@ while (status != end)
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ONCE:
+      case OP_ONCE_NC:
       case OP_BRAPOS:
       case OP_SBRA:
       case OP_SBRAPOS:
@@ -1966,15 +1929,13 @@ return notfound;
 static void do_revertframes(compiler_common *common)
 {
 DEFINE_COMPILER;
-struct sljit_jump *earlyexit;
 struct sljit_jump *jump;
 struct sljit_label *mainloop;
 
 sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD);
+OP1(SLJIT_MOV, TMP1, 0, STACK_TOP, 0);
 
 /* Drop frames until we reach STACK_TOP. */
-earlyexit = CMP(SLJIT_C_LESS, TMP1, 0, STACK_TOP, 0);
 mainloop = LABEL();
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), 0);
 jump = CMP(SLJIT_C_SIG_LESS_EQUAL, TMP2, 0, SLJIT_IMM, frame_end);
@@ -1987,10 +1948,6 @@ JUMPTO(SLJIT_JUMP, mainloop);
 JUMPHERE(jump);
 jump = CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, frame_end);
 /* End of dropping frames. */
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), sizeof(sljit_w));
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, TMP1, 0);
-CMPTO(SLJIT_C_GREATER_EQUAL, TMP1, 0, STACK_TOP, 0, mainloop);
-JUMPHERE(earlyexit);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 JUMPHERE(jump);
@@ -3632,30 +3589,33 @@ while (1)
   if (common->accept != NULL)
     set_jumps(common->accept, common->acceptlabel);
 
+  /* Reset stack. */
   if (framesize < 0)
     OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
+  else {
+    if ((opcode != OP_ASSERT_NOT && opcode != OP_ASSERTBACK_NOT) || conditional)
+      {
+      /* We don't need to keep the STR_PTR, only the previous localptr. */
+      OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_IMM, (framesize + 1) * sizeof(sljit_w));
+      }
+    else
+      {
+      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
+      add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
+      }
+  }
 
   if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
     {
     /* We know that STR_PTR was stored on the top of the stack. */
     if (conditional)
-      {
-      if (framesize < 0)
-        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), 0);
-      else
-        {
-        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(TMP1), (framesize + 1) * sizeof(sljit_w));
-        }
-      }
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), 0);
     else if (bra == OP_BRAZERO)
       {
       if (framesize < 0)
         OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), 0);
       else
         {
-        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-        add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
         OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), framesize * sizeof(sljit_w));
         OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), (framesize + 1) * sizeof(sljit_w));
         OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, TMP1, 0);
@@ -3663,14 +3623,10 @@ while (1)
       OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, sizeof(sljit_w));
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       }
-    else if (bra == OP_BRAMINZERO)
+    else if (framesize >= 0)
       {
-      if (framesize >= 0)
-        {
-        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-        add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_MEM1(STACK_TOP), framesize * sizeof(sljit_w));
-        }
+      /* For OP_BRA and OP_BRAMINZERO. */
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_MEM1(STACK_TOP), framesize * sizeof(sljit_w));
       }
     }
   add_jump(compiler, found, JUMP(SLJIT_JUMP));
@@ -3697,6 +3653,7 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
   /* Assert is failed. */
   if (conditional || bra == OP_BRAZERO)
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+
   if (framesize < 0)
     {
     /* The topmost item should be 0. */
@@ -3708,8 +3665,6 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
   else
     {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-    if (framesize > 0)
-      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(2));
     /* The topmost item should be 0. */
     if (bra == OP_BRAZERO)
       {
@@ -3719,8 +3674,6 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
     else
       free_stack(common, framesize + 2);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, TMP1, 0);
-    if (framesize > 0)
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, TMP2, 0);
     }
   jump = JUMP(SLJIT_JUMP);
   if (bra != OP_BRAZERO)
@@ -3743,17 +3696,18 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
     }
   else
     {
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(TMP1), (framesize + 1) * sizeof(sljit_w));
-    if (bra == OP_BRAZERO)
+    if (bra == OP_BRA)
       {
-      allocate_stack(common, 1);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+      /* We don't need to keep the STR_PTR, only the previous localptr. */
+      OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_IMM, (framesize + 1) * sizeof(sljit_w));
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), 0);
       }
-    else if (bra == OP_BRAMINZERO)
+    else
       {
-      allocate_stack(common, 1);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
+      /* We don't need to keep the STR_PTR, only the previous localptr. */
+      OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_IMM, (framesize + 2) * sizeof(sljit_w));
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), bra == OP_BRAZERO ? STR_PTR : SLJIT_IMM, 0);
       }
     }
 
@@ -3790,8 +3744,6 @@ else
     {
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-    if (framesize > 0)
-      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(2));
     /* The topmost item should be 0. */
     if (bra != OP_BRA)
       {
@@ -3801,8 +3753,6 @@ else
     else
       free_stack(common, framesize + 2);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, TMP1, 0);
-    if (framesize > 0)
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, TMP2, 0);
     }
 
   if (bra == OP_BRAZERO)
@@ -3873,10 +3823,11 @@ return cc + 1 + LINK_SIZE;
     M - Any values pushed by the current alternative. Can be empty, or anything.
 
   The next list shows the possible content of a bracket:
-  (|)     OP_*BRA  | OP_ALT ...         M A
-  (?()|)  OP_*COND | OP_ALT             M A
-  (?>|)   OP_ONCE  | OP_ALT ...         [stack trace] M A
-                                        Or nothing, if trace is unnecessary
+  (|)     OP_*BRA    | OP_ALT ...         M A
+  (?()|)  OP_*COND   | OP_ALT             M A
+  (?>|)   OP_ONCE    | OP_ALT ...         [stack trace] M A
+  (?>|)   OP_ONCE_NC | OP_ALT ...         [stack trace] M A
+                                          Or nothing, if trace is unnecessary
 */
 
 static uschar *compile_bracket_hotpath(compiler_common *common, uschar *cc, fallback_common *parent)
@@ -3923,6 +3874,8 @@ cc += GET(cc, 1);
 has_alternatives = *cc == OP_ALT || opcode == OP_COND || opcode == OP_SCOND;
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
+if (SLJIT_UNLIKELY(opcode == OP_ONCE_NC))
+  opcode = OP_ONCE;
 
 if (opcode == OP_CBRA || opcode == OP_SCBRA)
   {
@@ -4130,11 +4083,15 @@ if (opcode == OP_ONCE)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_MEM1(STACK_TOP), 0);
       }
     }
-  else if (ket == OP_KETRMAX)
+  else
     {
-    /* TMP2 which is set here used by OP_KETRMAX below. */
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), (FALLBACK_AS(bracket_fallback)->u.framesize + 1) * sizeof(sljit_w));
+    stacksize = (ket == OP_KETRMIN || ket == OP_KETRMAX || has_alternatives) ? 2 : 1;
+    OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_IMM, (FALLBACK_AS(bracket_fallback)->u.framesize + stacksize) * sizeof(sljit_w));
+    if (ket == OP_KETRMAX)
+      {
+      /* TMP2 which is set here used by OP_KETRMAX below. */
+      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+      }
     }
   }
 
@@ -4368,9 +4325,8 @@ while (*cc != OP_KETRPOS)
     {
     if (opcode == OP_CBRAPOS || opcode == OP_SCBRAPOS)
       {
+      OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_IMM, stacksize * sizeof(sljit_w));
       OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), cbraprivptr);
-      if (!zero)
-        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), STR_PTR, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), cbraprivptr, STR_PTR, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
@@ -4378,6 +4334,7 @@ while (*cc != OP_KETRPOS)
     else
       {
       OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
+      OP2(SLJIT_ADD, STACK_TOP, 0, TMP2, 0, SLJIT_IMM, stacksize * sizeof(sljit_w));
       if (opcode == OP_SBRAPOS)
         OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), (framesize + 1) * sizeof(sljit_w));
       OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), (framesize + 1) * sizeof(sljit_w), STR_PTR, 0);
@@ -4386,13 +4343,12 @@ while (*cc != OP_KETRPOS)
     if (opcode == OP_SBRAPOS || opcode == OP_SCBRAPOS)
       add_jump(compiler, &emptymatch, CMP(SLJIT_C_EQUAL, TMP1, 0, STR_PTR, 0));
 
-    /* TMP2 must be set above. */
     if (!zero)
       {
       if (framesize < 0)
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize - 1), SLJIT_IMM, 0);
       else
-        OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), (stacksize - 1) * sizeof(sljit_w), SLJIT_IMM, 0);
+        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       }
     }
   JUMPTO(SLJIT_JUMP, loop);
@@ -4414,6 +4370,7 @@ while (*cc != OP_KETRPOS)
     {
     if (opcode == OP_CBRAPOS || opcode == OP_SCBRAPOS)
       {
+      /* Last alternative. */
       if (*cc == OP_KETRPOS)
         OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
       OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), cbraprivptr);
@@ -4946,6 +4903,7 @@ while (cc < ccend)
     break;
 
     case OP_ONCE:
+    case OP_ONCE_NC:
     case OP_BRA:
     case OP_CBRA:
     case OP_COND:
@@ -5176,7 +5134,6 @@ static void compile_assert_fallbackpath(compiler_common *common, struct fallback
 DEFINE_COMPILER;
 uschar *cc = current->cc;
 uschar bra = OP_BRA;
-struct sljit_jump *jump;
 struct sljit_jump *brajump = NULL;
 
 SLJIT_ASSERT(*cc != OP_BRAMINZERO);
@@ -5222,19 +5179,12 @@ if (*cc == OP_ASSERT || *cc == OP_ASSERTBACK)
   {
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(assert_fallback)->localptr);
   add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(assert_fallback)->localptr, SLJIT_MEM1(STACK_TOP), CURRENT_AS(assert_fallback)->framesize * sizeof(sljit_w));
 
   set_jumps(current->topfallbacks, LABEL());
   }
 else
-  {
-  jump = JUMP(SLJIT_JUMP);
-
   set_jumps(current->topfallbacks, LABEL());
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(assert_fallback)->localptr);
-  add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
-  JUMPHERE(jump);
-  }
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(assert_fallback)->localptr, SLJIT_MEM1(STACK_TOP), CURRENT_AS(assert_fallback)->framesize * sizeof(sljit_w));
 
 if (bra == OP_BRAZERO)
   {
@@ -5281,6 +5231,8 @@ if (opcode == OP_CBRA || opcode == OP_SCBRA)
   offset = (GET2(ccbegin, 1 + LINK_SIZE)) << 1;
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
+if (SLJIT_UNLIKELY(opcode == OP_ONCE_NC))
+  opcode = OP_ONCE;
 
 if (ket == OP_KETRMAX)
   {
@@ -5431,22 +5383,26 @@ if (*cc == OP_ALT || opcode == OP_COND || opcode == OP_SCOND)
     /* There is a similar code in compile_bracket_hotpath. */
     if (opcode == OP_ONCE)
       {
-      if (CURRENT_AS(bracket_fallback)->u.framesize >= 0)
+      if (CURRENT_AS(bracket_fallback)->u.framesize < 0)
         {
+        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
+        /* TMP2 which is set here used by OP_KETRMAX below. */
         if (ket == OP_KETRMAX)
+          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), 0);
+        else if (ket == OP_KETRMIN)
           {
-          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), (CURRENT_AS(bracket_fallback)->u.framesize + 1) * sizeof(sljit_w));
+          /* Move the STR_PTR to the localptr. */
+          OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_MEM1(STACK_TOP), 0);
           }
         }
       else
         {
-        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-        /* The register which is set here used by OP_KETRMAX below. */
+        OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_IMM, (CURRENT_AS(bracket_fallback)->u.framesize + 2) * sizeof(sljit_w));
         if (ket == OP_KETRMAX)
-          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), 0);
-        else if (ket == OP_KETRMIN)
-          OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, SLJIT_MEM1(STACK_TOP), 0);
+          {
+          /* TMP2 which is set here used by OP_KETRMAX below. */
+          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+          }
         }
       }
 
@@ -5544,11 +5500,7 @@ else if (opcode == OP_ONCE)
     {
     /* Reset head and drop saved frame. */
     stacksize = (ket == OP_KETRMAX || ket == OP_KETRMIN || *cc == OP_ALT) ? 2 : 1;
-    if (CURRENT_AS(bracket_fallback)->u.framesize > 0)
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
     free_stack(common, CURRENT_AS(bracket_fallback)->u.framesize + stacksize);
-    if (CURRENT_AS(bracket_fallback)->u.framesize > 0)
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, TMP1, 0);
     }
   else if (ket == OP_KETRMAX || (*cc == OP_ALT && ket != OP_KETRMIN))
     {
@@ -5632,10 +5584,8 @@ if (current->topfallbacks)
   {
   jump = JUMP(SLJIT_JUMP);
   set_jumps(current->topfallbacks, LABEL());
-  /* Drop the stack frame and restore LOCALS_HEAD. */
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(CURRENT_AS(bracketpos_fallback)->stacksize - CURRENT_AS(bracketpos_fallback)->framesize));
+  /* Drop the stack frame. */
   free_stack(common, CURRENT_AS(bracketpos_fallback)->stacksize);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, TMP1, 0);
   JUMPHERE(jump);
   }
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(bracketpos_fallback)->localptr, SLJIT_MEM1(STACK_TOP), CURRENT_AS(bracketpos_fallback)->framesize * sizeof(sljit_w));
@@ -5769,6 +5719,7 @@ while (current)
     break;
 
     case OP_ONCE:
+    case OP_ONCE_NC:
     case OP_BRA:
     case OP_CBRA:
     case OP_COND:
@@ -5840,10 +5791,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(localsize + framesize + alternatives
 copy_locals(common, ccbegin, ccend, TRUE, localsize + framesize + alternativesize, framesize + alternativesize);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), RECURSIVE_HEAD, STACK_TOP, 0);
 if (needsframe)
-  {
-  OP2(SLJIT_SUB, TMP2, 0, STACK_TOP, 0, SLJIT_IMM, -STACK(framesize + alternativesize - 1));
   init_frame(common, cc, framesize + alternativesize - 1, alternativesize, FALSE);
-  }
 
 if (alternativesize > 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
@@ -5880,8 +5828,6 @@ while (1)
   }
 /* None of them matched. */
 OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
-if (needsframe)
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, SLJIT_MEM1(STACK_TOP), STACK(alternativesize));
 jump = JUMP(SLJIT_JUMP);
 
 set_jumps(common->accept, LABEL());
@@ -5889,9 +5835,9 @@ OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), RECURSIVE_HEAD);
 if (needsframe)
   {
   OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0));
-  OP2(SLJIT_SUB, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (localsize + framesize + alternativesize) * sizeof(sljit_w));
+  OP2(SLJIT_SUB, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (framesize + alternativesize) * sizeof(sljit_w));
   add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
-  OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (localsize + framesize + alternativesize) * sizeof(sljit_w));
+  OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, (framesize + alternativesize) * sizeof(sljit_w));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0), TMP3, 0);
   }
 OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 1);
@@ -6031,7 +5977,6 @@ sljit_emit_enter(compiler, 1, 5, 5, common->localsize);
 reset_ovector(common, (re->top_bracket + 1) * 2);
 if ((re->flags & PCRE_REQCHSET) != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), REQ_BYTE_PTR, SLJIT_TEMPORARY_REG1, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS_HEAD, SLJIT_IMM, 0);
 
 OP1(SLJIT_MOV, ARGUMENTS, 0, SLJIT_GENERAL_REG1, 0);
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_GENERAL_REG1, 0);
