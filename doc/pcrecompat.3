@@ -81,7 +81,9 @@ documentation for details.
 .P
 10. Subpatterns that are called as subroutines (whether or not recursively) are
 always treated as atomic groups in PCRE. This is like Python, but unlike Perl.
-There is a discussion of an example that explains this in more detail in the
+Captured values that are set outside a subroutine call can be reference from
+inside in PCRE, but not in Perl. There is a discussion that explains these
+differences in more detail in the
 .\" HTML <a href="pcrepattern.html#recursiondifference">
 .\" </a>
 section on recursion differences from Perl
@@ -172,6 +174,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 04 October 2011
+Last updated: 09 October 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

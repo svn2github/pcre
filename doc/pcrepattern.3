@@ -2297,8 +2297,8 @@ documentation). If the pattern above is matched against
 .sp
 the value for the inner capturing parentheses (numbered 2) is "ef", which is
 the last value taken on at the top level. If a capturing subpattern is not
-matched at the top level, its final value is unset, even if it is (temporarily)
-set at a deeper level.
+matched at the top level, its final captured value is unset, even if it was
+(temporarily) set at a deeper level during the matching process.
 .P
 If there are more than 15 capturing parentheses in a pattern, PCRE has to
 obtain extra memory to store data during a recursion, which it does by using
@@ -2318,15 +2318,16 @@ is the actual recursive call.
 .
 .
 .\" HTML <a name="recursiondifference"></a>
-.SS "Recursion difference from Perl"
+.SS "Differences in recursion processing between PCRE and Perl"
 .rs
 .sp
-In PCRE (like Python, but unlike Perl), a recursive subpattern call is always
-treated as an atomic group. That is, once it has matched some of the subject
-string, it is never re-entered, even if it contains untried alternatives and
-there is a subsequent matching failure. This can be illustrated by the
-following pattern, which purports to match a palindromic string that contains
-an odd number of characters (for example, "a", "aba", "abcba", "abcdcba"):
+Recursion processing in PCRE differs from Perl in two important ways. In PCRE
+(like Python, but unlike Perl), a recursive subpattern call is always treated
+as an atomic group. That is, once it has matched some of the subject string, it
+is never re-entered, even if it contains untried alternatives and there is a
+subsequent matching failure. This can be illustrated by the following pattern,
+which purports to match a palindromic string that contains an odd number of
+characters (for example, "a", "aba", "abcba", "abcdcba"):
 .sp
   ^(.|(.)(?1)\e2)$
 .sp
@@ -2387,6 +2388,21 @@ For example, although "abcba" is correctly matched, if the subject is "ababa",
 PCRE finds the palindrome "aba" at the start, then fails at top level because
 the end of the string does not follow. Once again, it cannot jump back into the
 recursion to try other alternatives, so the entire match fails.
+.P
+The second way in which PCRE and Perl differ in their recursion processing is 
+in the handling of captured values. In Perl, when a subpattern is called 
+recursively or as a subpattern (see the next section), it has no access to any 
+values that were captured outside the recursion, whereas in PCRE these values 
+can be referenced. Consider this pattern:
+.sp
+  ^(.)(\e1|a(?2))
+.sp
+In PCRE, this pattern matches "bab". The first capturing parentheses match "b", 
+then in the second group, when the back reference \e1 fails to match "b", the
+second alternative matches "a" and then recurses. In the recursion, \e1 does
+now match "b" and so the whole match succeeds. In Perl, the pattern fails to
+match because inside the recursive call \e1 cannot access the externally set
+value.
 .
 .
 .\" HTML <a name="subpatternsassubroutines"></a>
@@ -2814,6 +2830,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 04 October 2011
+Last updated: 09 October 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
