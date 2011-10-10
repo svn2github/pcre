@@ -37,8 +37,8 @@ wrapper functions are a separate issue (see below).
 
 The PCRE distribution includes a "configure" file for use by the Configure/Make
 build system, as found in many Unix-like environments. There is also support
-for CMake, which some users prefer, especially in Windows environments. There
-are some instructions for CMake under Windows in the section entitled "Building
+for CMake, which some users prefer, especially in Windows environments. See
+the instructions for CMake under Windows in the section entitled "Building
 PCRE with CMake" below. CMake can also be used to build PCRE in Unix-like
 systems.
 
@@ -229,8 +229,7 @@ There are two ways of building PCRE using the "configure, make, make install"
 paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
 the same thing; they are completely different from each other. There is also
 support for building using CMake, which some users find a more straightforward
-way of building PCRE under Windows. However, the tests are not run
-automatically when CMake is used.
+way of building PCRE under Windows.
 
 The MinGW home page (http://www.mingw.org/) says this:
 
@@ -294,31 +293,37 @@ gcc and MinGW's gcc). So, a user can:
 . Build binaries that depend on cygwin1.dll by using Cygwin with the normal
   compiler flags.
 
-The test files that are supplied with PCRE are in Unix format, with LF
-characters as line terminators. It may be necessary to change the line
-terminators in order to get some of the tests to work.
-
+The test files that are supplied with PCRE are in UNIX format, with LF
+characters as line terminators. Unless your PCRE library uses a default newline
+option that includes LF as a valid newline, it may be necessary to change the
+line terminators in the test files to get some of the tests to work.
 
 BUILDING PCRE ON WINDOWS WITH CMAKE
 
 CMake is an alternative configuration facility that can be used instead of the
 traditional Unix "configure". CMake creates project files (make files, solution
 files, etc.) tailored to numerous development environments, including Visual
-Studio, Borland, Msys, MinGW, NMake, and Unix. The following instructions
-were contributed by a PCRE user.
+Studio, Borland, Msys, MinGW, NMake, and Unix.  If possible, use short paths
+with no spaces in the names for your CMake installation and your pcre
+source and build directories.
+
+The following instructions were contributed by a PCRE user.
 
 1.  Install the latest CMake version available from http://www.cmake.org/, and
     ensure that cmake\bin is on your path.
 
 2.  Unzip (retaining folder structure) the PCRE source tree into a source
-    directory such as C:\pcre.
+    directory such as C:\pcre. You should ensure your local date and time
+    is not earlier than the file dates in your source dir if the release is
+    very new.
 
-3.  Create a new, empty build directory, for example C:\pcre\build\
+3.  Create a new, empty build directory, preferably a subdirectory of the
+    source dir. For example, C:\pcre\pcre-xx\build.
 
 4.  Run cmake-gui from the Shell envirornment of your build tool, for example,
     Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++.
 
-5.  Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
+5.  Enter C:\pcre\pcre-xx and C:\pcre\pcre-xx\build for the source and build
     directories, respectively.
 
 6.  Hit the "Configure" button.
@@ -337,7 +342,16 @@ were contributed by a PCRE user.
 11. The build directory should now contain a usable build system, be it a
     solution file for Visual Studio, makefiles for MinGW, etc. Exit from
     cmake-gui and use the generated build system with your compiler or IDE.
+    E.g., for MinGW you can run "make", or for Visual Studio, open the PCRE
+    solution, select the desired configuration (Debug, or Release, etc.) and
+    build the ALL_BUILD project.
 
+12. If during configuration with cmake-gui you've elected to build the test
+    programs, you can execute them by building the test project. E.g., for
+    MinGW: "make test"; for Visual Studio build the RUN_TESTS project. The
+    most recent build configuration is targeted by the tests. A summary of
+    test results is presented. Complete test output is subsequently
+    available for review in Testing\Temporary under your build dir.
 
 USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
 
@@ -369,20 +383,37 @@ RelativePath="pcre_chartables.c.rule">
 
 TESTING WITH RUNTEST.BAT
 
-1. Copy RunTest.bat into the directory where pcretest.exe has been created.
+If configured with CMake, building the test project ("make test" or building
+ALL_TESTS in Visual Studio) creates (and runs) pcre_test.bat (and depending
+on your configuration options, possibly other test programs) in the build
+directory. Pcre_test.bat runs RunTest.Bat with correct source and exe paths.
 
-2. Edit RunTest.bat and insert a line that indentifies the relative location of
-   the pcre source, e.g.:
+For manual testing with RunTest.bat, provided the build dir is a subdirectory
+of the source directory: Open command shell window. Chdir to the location
+of your pcretest.exe and pcregrep.exe programs. Call RunTest.bat with
+"..\RunTest.Bat" or "..\..\RunTest.bat" as appropriate.
 
-   set srcdir=..\pcre-7.4-RC3
+To run only a particular test with RunTest.Bat provide a test number argument.
 
-3. Run RunTest.bat from a command shell environment. Test outputs will
-   automatically be compared to expected results, and discrepancies will
-   identified in the console output.
+Otherwise:
 
-4. To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
-   pcre_scanner_unittest.exe.
+1. Copy RunTest.bat into the directory where pcretest.exe and pcregrep.exe
+   have been created.
 
+2. Edit RunTest.bat to indentify the full or relative location of
+   the pcre source (wherein which the testdata folder resides), e.g.:
+
+   set srcdir=C:\pcre\pcre-8.20
+
+3. In a Windows command environment, chdir to the location of your bat and
+exe programs.
+
+4. Run RunTest.bat. Test outputs will automatically be compared to expected
+results, and discrepancies will be identified in the console output.
+
+To independently test the just-in-time compiler, run pcre_jit_test.exe.
+To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
+pcre_scanner_unittest.exe.
 
 BUILDING UNDER WINDOWS WITH BCC5.5
 
@@ -509,12 +540,12 @@ optional component I chose to disable it.
 
 5. Known Problems
 
-I ran a the test suite, but you will have to be your own judge of whether this
+I ran the test suite, but you will have to be your own judge of whether this
 command, and this port, suits your purposes. If you find any problems that
 appear to be related to the port itself, please let me know. Please see the
 build.log file in the root of the package also.
 
 
 =========================
-Last Updated: 23 August 2011
+Last Updated: 9 October 2011
 ****
