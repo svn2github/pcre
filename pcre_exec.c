@@ -6365,7 +6365,7 @@ for(;;)
   /* The following two optimizations are disabled for partial matching or if
   disabling is explicitly requested. */
 
-  if ((options & PCRE_NO_START_OPTIMIZE) == 0 && !md->partial)
+  if (((options | re->options) & PCRE_NO_START_OPTIMIZE) == 0 && !md->partial)
     {
     /* If the pattern was studied, a minimum subject length may be set. This is
     a lower bound; no actual string of that length may actually match the

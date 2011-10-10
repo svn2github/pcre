@@ -3330,7 +3330,7 @@ for (;;)
     disabling is explicitly requested (and of course, by the test above, this
     code is not obeyed when restarting after a partial match). */
 
-    if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
+    if (((options | re->options) & PCRE_NO_START_OPTIMIZE) == 0 &&
         (options & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) == 0)
       {
       /* If the pattern was studied, a minimum subject length may be set. This
