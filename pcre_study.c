@@ -423,7 +423,6 @@ for (;;)
 
     case OP_RECURSE:
     cs = ce = (uschar *)startcode + GET(cc, 1);
-    if (cs == NULL) return -2;
     do ce += GET(ce, 1); while (*ce == OP_ALT);
     if ((cc > cs && cc < ce) || recurse_depth > 10)
       had_recurse = TRUE;
