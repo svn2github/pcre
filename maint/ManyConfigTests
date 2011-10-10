@@ -67,11 +67,11 @@ function runtest()
   conf=`./pcretest -C`
   nl=`expr match "$conf" ".*Newline sequence is \([A-Z]*\)"`
   jit=`expr match "$conf" ".*[^o] Just-in-time"`
-  utf8=`expr match "$conf" ".*[^o] UTF-8 support"` 
+  utf8=`expr match "$conf" ".*[^o] UTF-8 support"`
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
-    echo "Running C library tests"
-    $srcdir/RunTest >teststdout
+    echo "Running C library tests $withvalgrind"
+    $srcdir/RunTest $valgrind >teststdout
     if [ $? -ne 0 ]; then
       echo " "
       echo "**** Test failed ****"
@@ -83,8 +83,8 @@ function runtest()
   fi
 
   if [ "$nl" = "LF" ]; then
-    echo "Running pcregrep tests"
-    $srcdir/RunGrepTest >teststdout 2>teststderr
+    echo "Running pcregrep tests $withvalgrind"
+    $srcdir/RunGrepTest $valgrind >teststdout 2>teststderr
     if [ $? -ne 0 ]; then
       echo " "
       echo "**** Test failed ****"
@@ -97,8 +97,8 @@ function runtest()
   fi
 
   if [ "$jit" -gt 0 -a $utf8 -gt 0 ]; then
-    echo "Running JIT regression tests"
-    $srcdir/pcre_jit_test >teststdout 2>teststderr
+    echo "Running JIT regression tests $withvalgrind"
+    $cvalgrind $srcdir/pcre_jit_test >teststdout 2>teststderr
     if [ $? -ne 0 ]; then
       echo " "
       echo "**** Test failed ****"
@@ -116,8 +116,8 @@ function runtest()
                    pcre_scanner_unittest \
                    pcre_stringpiece_unittest
       do
-        echo "Running $utest"
-        $utest >teststdout
+        echo "Running $utest $withvalgrind"
+        $cvalgrind $utest >teststdout
         if [ $? -ne 0 ]; then
           echo " "
           echo "**** Test failed ****"
@@ -164,6 +164,20 @@ do
   runtest
 done
 
+# Now re-run some of the tests under valgrind.
+
+echo "Tests in the current directory using valgrind"
+valgrind=valgrind
+cvalgrind="valgrind -q --smc-check=all"
+withvalgrind="with valgrind"
+
+for opts in \
+  "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
+  "--enable-unicode-properties --with-link-size=3 --disable-shared" \
+  "--enable-jit --enable-unicode-properties --disable-shared"
+do
+  runtest
+done
 
 # Clean up the distribution and then do at least one build and test in a
 # directory other than the source directory. It doesn't work unless the
