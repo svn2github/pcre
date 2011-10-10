@@ -11066,6 +11066,14 @@ No match, mark = B
  1: C
 MK: A
     D 
+No match
+
+/(*MARK:A)(*THEN:B)(C|X)/KSY
+    C
+ 0: C
+ 1: C
+MK: A
+    D 
 No match, mark = B
 
 /(*MARK:A)(*THEN:B)(C|X)/KSS
@@ -11231,7 +11239,7 @@ No match
  1: C
 MK: A
     D 
-No match, mark = B
+No match
 
 /A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
     AAAC

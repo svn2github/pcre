@@ -3370,6 +3370,10 @@ name were given. ---/
     C
     D 
 
+/(*MARK:A)(*THEN:B)(C|X)/KSY
+    C
+    D 
+
 /(*MARK:A)(*THEN:B)(C|X)/KSS
     C
     D 

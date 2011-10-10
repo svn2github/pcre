@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.20 23-Sep-2011
+Version 8.20 10-Oct-2011
 ------------------------
 
 1.  Change 37 of 8.13 broke patterns like [:a]...[b:] because it thought it had
@@ -99,6 +99,10 @@ Version 8.20 23-Sep-2011
     inevitable for groups that contain captures, but it can lead to a lot of 
     stack use in large patterns. The old behaviour has been restored for atomic 
     groups that do not contain any capturing parentheses.  
+    
+19. If the PCRE_NO_START_OPTIMIZE option was set for pcre_compile(), it did not 
+    suppress the check for a minimum subject length at run time. (If it was 
+    given to pcre_exec() or pcre_dfa_exec() it did work.) 
 
 
 Version 8.13 16-Aug-2011

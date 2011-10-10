@@ -492,11 +492,8 @@ for (;;)
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
-    cc += _pcre_OP_lengths[op] + cc[1];
-    break;
-
     case OP_THEN_ARG:
-    cc += _pcre_OP_lengths[op] + cc[1+LINK_SIZE];
+    cc += _pcre_OP_lengths[op] + cc[1];
     break;
 
     /* The remaining opcodes are just skipped over. */
