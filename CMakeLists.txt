@@ -546,8 +546,8 @@ if test \"$?\" != \"0\"; then exit 1; fi
 ")
 
   IF(UNIX)
-    ADD_TEST(pcre_test      ${PROJECT_BINARY_DIR}/pcre_test.sh)
-    ADD_TEST(pcre_grep_test ${PROJECT_BINARY_DIR}/pcre_grep_test.sh)
+    ADD_TEST(pcre_test      sh ${PROJECT_BINARY_DIR}/pcre_test.sh)
+    ADD_TEST(pcre_grep_test sh ${PROJECT_BINARY_DIR}/pcre_grep_test.sh)
   ENDIF(UNIX)
 
   IF(WIN32)
