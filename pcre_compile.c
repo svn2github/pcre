@@ -1506,7 +1506,7 @@ for (;;)
     case OP_CBRA:
     case OP_BRA:
     case OP_ONCE:
-    case OP_ONCE_NC: 
+    case OP_ONCE_NC:
     case OP_COND:
     d = find_fixedlength(cc + ((op == OP_CBRA)? 2:0), utf8, atend, cd);
     if (d < 0) return d;
@@ -3144,7 +3144,7 @@ for (;; ptr++)
   int subfirstbyte;
   int terminator;
   int mclength;
-  int tempbracount; 
+  int tempbracount;
   uschar mcbuffer[8];
 
   /* Get next byte in the pattern */
@@ -4843,9 +4843,9 @@ for (;; ptr++)
         uschar *ketcode = code - 1 - LINK_SIZE;
         uschar *bracode = ketcode - GET(ketcode, 1);
 
-        if ((*bracode == OP_ONCE || *bracode == OP_ONCE_NC) && 
+        if ((*bracode == OP_ONCE || *bracode == OP_ONCE_NC) &&
             possessive_quantifier) *bracode = OP_BRA;
-             
+
         if (*bracode == OP_ONCE || *bracode == OP_ONCE_NC)
           *ketcode = OP_KETRMAX + repeat_type;
         else
@@ -5933,11 +5933,11 @@ for (;; ptr++)
            &length_prevgroup              /* Pre-compile phase */
          ))
       goto FAILED;
-      
-    /* If this was an atomic group and there are no capturing groups within it, 
-    generate OP_ONCE_NC instead of OP_ONCE. */ 
-      
-    if (bravalue == OP_ONCE && cd->bracount <= tempbracount) 
+
+    /* If this was an atomic group and there are no capturing groups within it,
+    generate OP_ONCE_NC instead of OP_ONCE. */
+
+    if (bravalue == OP_ONCE && cd->bracount <= tempbracount)
       *code = OP_ONCE_NC;
 
     if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT)
@@ -6913,7 +6913,7 @@ do {
      case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
-     case OP_ONCE_NC: 
+     case OP_ONCE_NC:
      case OP_COND:
      if ((d = find_firstassertedchar(scode, op == OP_ASSERT)) < 0)
        return -1;

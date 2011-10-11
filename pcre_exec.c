@@ -787,19 +787,19 @@ for (;;)
     MRRETURN(MATCH_THEN);
 
     case OP_THEN_ARG:
-    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, 
+    RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top,
       md, eptrb, RM58);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-    md->start_match_ptr = ecode;     
+    md->start_match_ptr = ecode;
     md->mark = ecode + 2;
     RRETURN(MATCH_THEN);
-    
+
     /* Handle an atomic group that does not contain any capturing parentheses.
-    This can be handled like an assertion. Prior to 8.13, all atomic groups 
-    were handled this way. In 8.13, the code was changed as below for ONCE, so 
-    that backups pass through the group and thereby reset captured values. 
-    However, this uses a lot more stack, so in 8.20, atomic groups that do not 
-    contain any captures generate OP_ONCE_NC, which can be handled in the old, 
+    This can be handled like an assertion. Prior to 8.13, all atomic groups
+    were handled this way. In 8.13, the code was changed as below for ONCE, so
+    that backups pass through the group and thereby reset captured values.
+    However, this uses a lot more stack, so in 8.20, atomic groups that do not
+    contain any captures generate OP_ONCE_NC, which can be handled in the old,
     less stack intensive way.
 
     Check the alternative branches in turn - the matching won't pass the KET
@@ -821,11 +821,11 @@ for (;;)
       if (rrc == MATCH_THEN)
         {
         next = ecode + GET(ecode,1);
-        if (md->start_match_ptr < next && 
+        if (md->start_match_ptr < next &&
             (*ecode == OP_ALT || *next == OP_ALT))
           rrc = MATCH_NOMATCH;
-        }    
- 
+        }
+
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
@@ -867,7 +867,7 @@ for (;;)
       }
     else  /* OP_KETRMAX */
       {
-      md->match_function_type = MATCH_CBEGROUP; 
+      md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, prev, offset_top, md, eptrb, RM66);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
@@ -918,26 +918,26 @@ for (;;)
         RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md,
           eptrb, RM1);
         if (rrc == MATCH_ONCE) break;  /* Backing up through an atomic group */
-     
-        /* If we backed up to a THEN, check whether it is within the current 
-        branch by comparing the address of the THEN that is passed back with 
+
+        /* If we backed up to a THEN, check whether it is within the current
+        branch by comparing the address of the THEN that is passed back with
         the end of the branch. If it is within the current branch, and the
         branch is one of two or more alternatives (it either starts or ends
-        with OP_ALT), we have reached the limit of THEN's action, so convert 
-        the return code to NOMATCH, which will cause normal backtracking to 
+        with OP_ALT), we have reached the limit of THEN's action, so convert
+        the return code to NOMATCH, which will cause normal backtracking to
         happen from now on. Otherwise, THEN is passed back to an outer
-        alternative. This implements Perl's treatment of parenthesized groups, 
-        where a group not containing | does not affect the current alternative, 
+        alternative. This implements Perl's treatment of parenthesized groups,
+        where a group not containing | does not affect the current alternative,
         that is, (X) is NOT the same as (X|(*F)). */
 
         if (rrc == MATCH_THEN)
           {
           next = ecode + GET(ecode,1);
-          if (md->start_match_ptr < next && 
+          if (md->start_match_ptr < next &&
               (*ecode == OP_ALT || *next == OP_ALT))
             rrc = MATCH_NOMATCH;
-          }  
-          
+          }
+
         /* Anything other than NOMATCH is passed back. */
 
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -1011,19 +1011,19 @@ for (;;)
 
       RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode], offset_top, md, eptrb,
         RM2);
-        
+
       /* See comment in the code for capturing groups above about handling
       THEN. */
 
       if (rrc == MATCH_THEN)
         {
         next = ecode + GET(ecode,1);
-        if (md->start_match_ptr < next && 
+        if (md->start_match_ptr < next &&
             (*ecode == OP_ALT || *next == OP_ALT))
           rrc = MATCH_NOMATCH;
-        }  
-         
-      if (rrc != MATCH_NOMATCH)          
+        }
+
+      if (rrc != MATCH_NOMATCH)
         {
         if (rrc == MATCH_ONCE)
           {
@@ -1040,7 +1040,7 @@ for (;;)
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break;
       }
-      
+
     if (md->mark == NULL) md->mark = markptr;
     RRETURN(MATCH_NOMATCH);
 
@@ -1104,17 +1104,17 @@ for (;;)
           matched_once = TRUE;
           continue;
           }
-          
+
         /* See comment in the code for capturing groups above about handling
         THEN. */
 
         if (rrc == MATCH_THEN)
           {
           next = ecode + GET(ecode,1);
-          if (md->start_match_ptr < next && 
+          if (md->start_match_ptr < next &&
               (*ecode == OP_ALT || *next == OP_ALT))
             rrc = MATCH_NOMATCH;
-          }  
+          }
 
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->capture_last = save_capture_last;
@@ -1176,17 +1176,17 @@ for (;;)
         matched_once = TRUE;
         continue;
         }
-        
+
       /* See comment in the code for capturing groups above about handling
       THEN. */
 
       if (rrc == MATCH_THEN)
         {
         next = ecode + GET(ecode,1);
-        if (md->start_match_ptr < next && 
+        if (md->start_match_ptr < next &&
             (*ecode == OP_ALT || *next == OP_ALT))
           rrc = MATCH_NOMATCH;
-        }  
+        }
 
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode, 1);
@@ -1400,11 +1400,11 @@ for (;;)
         ecode += 1 + LINK_SIZE + GET(ecode, LINK_SIZE + 2);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
         }
- 
-      /* PCRE doesn't allow the effect of (*THEN) to escape beyond an
-      assertion; it is therefore treated as NOMATCH. */ 
 
-      else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)              
+      /* PCRE doesn't allow the effect of (*THEN) to escape beyond an
+      assertion; it is therefore treated as NOMATCH. */
+
+      else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
         {
         RRETURN(rrc);         /* Need braces because of following else */
         }
@@ -1432,7 +1432,7 @@ for (;;)
         ecode += 1 + LINK_SIZE;
         goto TAIL_RECURSE;
         }
- 
+
       md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM49);
       RRETURN(rrc);
@@ -1530,10 +1530,10 @@ for (;;)
         markptr = md->mark;
         break;
         }
-     
-      /* PCRE does not allow THEN to escape beyond an assertion; it is treated 
+
+      /* PCRE does not allow THEN to escape beyond an assertion; it is treated
       as NOMATCH. */
-   
+
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
@@ -1576,7 +1576,7 @@ for (;;)
         break;
         }
 
-      /* PCRE does not allow THEN to escape beyond an assertion; it is treated 
+      /* PCRE does not allow THEN to escape beyond an assertion; it is treated
       as NOMATCH. */
 
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
@@ -1740,7 +1740,7 @@ for (;;)
         /* PCRE does not allow THEN to escape beyond a recursion; it is treated
         as NOMATCH. */
 
-        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)     
+        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)
@@ -1826,13 +1826,13 @@ for (;;)
       }
     else saved_eptr = NULL;
 
-    /* If we are at the end of an assertion group or a non-capturing atomic 
+    /* If we are at the end of an assertion group or a non-capturing atomic
     group, stop matching and return MATCH_MATCH, but record the current high
     water mark for use by positive assertions. We also need to record the match
     start in case it was changed by \K. */
 
     if ((*prev >= OP_ASSERT && *prev <= OP_ASSERTBACK_NOT) ||
-         *prev == OP_ONCE_NC) 
+         *prev == OP_ONCE_NC)
       {
       md->end_match_ptr = eptr;      /* For ONCE_NC */
       md->end_offset_top = offset_top;
@@ -5828,7 +5828,7 @@ switch (frame->Xwhere)
   LBL(19) LBL(24) LBL(25) LBL(26) LBL(27) LBL(29) LBL(31) LBL(33)
   LBL(35) LBL(43) LBL(47) LBL(48) LBL(49) LBL(50) LBL(51) LBL(52)
   LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
-  LBL(65) LBL(66) 
+  LBL(65) LBL(66)
 #ifdef SUPPORT_UTF8
   LBL(16) LBL(18) LBL(20) LBL(21) LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)

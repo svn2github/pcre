@@ -50,9 +50,11 @@ JIT. The support is limited to the following hardware platforms:
   ARM v5, v7, and Thumb2
   Intel x86 32-bit and 64-bit
   MIPS 32-bit
-  Power PC 32-bit and 64-bit
+  Power PC 32-bit and 64-bit (experimental)
 </pre>
-If --enable-jit is set on an unsupported platform, compilation fails.
+The Power PC support is designated as experimental because it has not been
+fully tested. If --enable-jit is set on an unsupported platform, compilation
+fails.
 </P>
 <P>
 A program can tell if JIT support is available by calling <b>pcre_config()</b>
@@ -273,7 +275,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC11" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 September 2011
+Last updated: 05 October 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

@@ -65,44 +65,44 @@ Version 8.20 10-Oct-2011
     pattern contains any instances of (*THEN). If it does not, the old
     optimizations are restored. It would be nice to do this on a per-group
     basis, but at the moment that is not feasible.
-    
+
 12. In some environments, the output of pcretest -C is CRLF terminated. This
     broke RunTest's code that checks for the link size. A single white space
     after the value is now allowed for.
-    
+
 13. RunTest now checks for the "fr" locale as well as for "fr_FR" and "french".
-    For "fr", it uses the Windows-specific input and output files. 
-    
-14. If (*THEN) appeared in a group that was called recursively or as a 
+    For "fr", it uses the Windows-specific input and output files.
+
+14. If (*THEN) appeared in a group that was called recursively or as a
     subroutine, it did not work as intended. [But see next item.]
-    
+
 15. Consider the pattern /A (B(*THEN)C) | D/ where A, B, C, and D are complex
     pattern fragments (but not containing any | characters). If A and B are
-    matched, but there is a failure in C so that it backtracks to (*THEN), PCRE 
-    was behaving differently to Perl. PCRE backtracked into A, but Perl goes to 
-    D. In other words, Perl considers parentheses that do not contain any | 
-    characters to be part of a surrounding alternative, whereas PCRE was 
-    treading (B(*THEN)C) the same as (B(*THEN)C|(*FAIL)) -- which Perl handles 
-    differently. PCRE now behaves in the same way as Perl, except in the case 
-    of subroutine/recursion calls such as (?1) which have in any case always 
+    matched, but there is a failure in C so that it backtracks to (*THEN), PCRE
+    was behaving differently to Perl. PCRE backtracked into A, but Perl goes to
+    D. In other words, Perl considers parentheses that do not contain any |
+    characters to be part of a surrounding alternative, whereas PCRE was
+    treading (B(*THEN)C) the same as (B(*THEN)C|(*FAIL)) -- which Perl handles
+    differently. PCRE now behaves in the same way as Perl, except in the case
+    of subroutine/recursion calls such as (?1) which have in any case always
     been different (but PCRE had them first :-).
-    
-16. Related to 15 above: Perl does not treat the | in a conditional group as 
-    creating alternatives. Such a group is treated in the same way as an 
-    ordinary group without any | characters when processing (*THEN). PCRE has 
+
+16. Related to 15 above: Perl does not treat the | in a conditional group as
+    creating alternatives. Such a group is treated in the same way as an
+    ordinary group without any | characters when processing (*THEN). PCRE has
     been changed to match Perl's behaviour.
-    
+
 17. If a user had set PCREGREP_COLO(U)R to something other than 1:31, the
-    RunGrepTest script failed. 
-    
+    RunGrepTest script failed.
+
 18. Change 22 for version 13 caused atomic groups to use more stack. This is
-    inevitable for groups that contain captures, but it can lead to a lot of 
-    stack use in large patterns. The old behaviour has been restored for atomic 
-    groups that do not contain any capturing parentheses.  
-    
-19. If the PCRE_NO_START_OPTIMIZE option was set for pcre_compile(), it did not 
-    suppress the check for a minimum subject length at run time. (If it was 
-    given to pcre_exec() or pcre_dfa_exec() it did work.) 
+    inevitable for groups that contain captures, but it can lead to a lot of
+    stack use in large patterns. The old behaviour has been restored for atomic
+    groups that do not contain any capturing parentheses.
+
+19. If the PCRE_NO_START_OPTIMIZE option was set for pcre_compile(), it did not
+    suppress the check for a minimum subject length at run time. (If it was
+    given to pcre_exec() or pcre_dfa_exec() it did work.)
 
 
 Version 8.13 16-Aug-2011

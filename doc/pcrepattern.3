@@ -2389,15 +2389,15 @@ PCRE finds the palindrome "aba" at the start, then fails at top level because
 the end of the string does not follow. Once again, it cannot jump back into the
 recursion to try other alternatives, so the entire match fails.
 .P
-The second way in which PCRE and Perl differ in their recursion processing is 
-in the handling of captured values. In Perl, when a subpattern is called 
-recursively or as a subpattern (see the next section), it has no access to any 
-values that were captured outside the recursion, whereas in PCRE these values 
+The second way in which PCRE and Perl differ in their recursion processing is
+in the handling of captured values. In Perl, when a subpattern is called
+recursively or as a subpattern (see the next section), it has no access to any
+values that were captured outside the recursion, whereas in PCRE these values
 can be referenced. Consider this pattern:
 .sp
   ^(.)(\e1|a(?2))
 .sp
-In PCRE, this pattern matches "bab". The first capturing parentheses match "b", 
+In PCRE, this pattern matches "bab". The first capturing parentheses match "b",
 then in the second group, when the back reference \e1 fails to match "b", the
 second alternative matches "a" and then recurses. In the recursion, \e1 does
 now match "b" and so the whole match succeeds. In Perl, the pattern fails to
@@ -2762,7 +2762,7 @@ pattern fragments that do not contain any | characters at this level:
 .sp
   A (B(*THEN)C) | D
 .sp
-If A and B are matched, but there is a failure in C, matching does not 
+If A and B are matched, but there is a failure in C, matching does not
 backtrack into A; instead it moves to the next alternative, that is, D.
 However, if the subpattern containing (*THEN) is given an alternative, it
 behaves differently:
@@ -2770,23 +2770,23 @@ behaves differently:
   A (B(*THEN)C | (*FAIL)) | D
 .sp
 The effect of (*THEN) is now confined to the inner subpattern. After a failure
-in C, matching moves to (*FAIL), which causes the whole subpattern to fail 
-because there are no more alternatives to try. In this case, matching does now 
+in C, matching moves to (*FAIL), which causes the whole subpattern to fail
+because there are no more alternatives to try. In this case, matching does now
 backtrack into A.
 .P
-Note also that a conditional subpattern is not considered as having two 
-alternatives, because only one is ever used. In other words, the | character in 
+Note also that a conditional subpattern is not considered as having two
+alternatives, because only one is ever used. In other words, the | character in
 a conditional subpattern has a different meaning. Ignoring white space,
 consider:
 .sp
   ^.*? (?(?=a) a | b(*THEN)c )
 .sp
-If the subject is "ba", this pattern does not match. Because .*? is ungreedy, 
-it initially matches zero characters. The condition (?=a) then fails, the 
+If the subject is "ba", this pattern does not match. Because .*? is ungreedy,
+it initially matches zero characters. The condition (?=a) then fails, the
 character "b" is matched, but "c" is not. At this point, matching does not
 backtrack to .*? as might perhaps be expected from the presence of the |
 character. The conditional subpattern is part of the single alternative that
-comprises the whole pattern, and so the match fails. (If there was a backtrack 
+comprises the whole pattern, and so the match fails. (If there was a backtrack
 into .*?, allowing it to match "b", the match would succeed.)
 .P
 The verbs just described provide four different "strengths" of control when

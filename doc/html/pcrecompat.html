@@ -95,21 +95,27 @@ the
 documentation for details.
 </P>
 <P>
-10. Subpatterns that are called recursively or as "subroutines" are always
-treated as atomic groups in PCRE. This is like Python, but unlike Perl. There
-is a discussion of an example that explains this in more detail in the
+10. Subpatterns that are called as subroutines (whether or not recursively) are
+always treated as atomic groups in PCRE. This is like Python, but unlike Perl.
+Captured values that are set outside a subroutine call can be reference from
+inside in PCRE, but not in Perl. There is a discussion that explains these
+differences in more detail in the
 <a href="pcrepattern.html#recursiondifference">section on recursion differences from Perl</a>
 in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
 page.
 </P>
 <P>
-11. There are some differences that are concerned with the settings of captured
+11. If (*THEN) is present in a group that is called as a subroutine, its action
+is limited to that group, even if the group does not contain any | characters.
+</P>
+<P>
+12. There are some differences that are concerned with the settings of captured
 strings when part of a pattern is repeated. For example, matching "aba" against
 the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 </P>
 <P>
-12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
+13. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
 names is not as general as Perl's. This is a consequence of the fact the PCRE
 works internally just with numbers, using an external table to translate
 between numbers and names. In particular, a pattern such as (?|(?&#60;a&#62;A)|(?&#60;b)B),
@@ -120,13 +126,13 @@ names map to capturing subpattern number 1. To avoid this confusing situation,
 an error is given at compile time.
 </P>
 <P>
-13. Perl recognizes comments in some places that PCRE does not, for example,
+14. Perl recognizes comments in some places that PCRE does not, for example,
 between the ( and ? at the start of a subpattern. If the /x modifier is set,
 Perl allows whitespace between ( and ? but PCRE never does, even if the
 PCRE_EXTENDED option is set.
 </P>
 <P>
-14. PCRE provides some extensions to the Perl regular expression facilities.
+15. PCRE provides some extensions to the Perl regular expression facilities.
 Perl 5.10 includes new features that are not in earlier versions of Perl, some
 of which (such as named parentheses) have been in PCRE for some time. This list
 is with respect to Perl 5.10:
@@ -170,7 +176,8 @@ by the PCRE_BSR_ANYCRLF option.
 <br>
 <br>
 (j) Patterns compiled by PCRE can be saved and re-used at a later time, even on
-different hosts that have the other endianness.
+different hosts that have the other endianness. However, this does not apply to
+optimized data created by the just-in-time compiler.
 <br>
 <br>
 (k) The alternative matching function (<b>pcre_dfa_exec()</b>) matches in a
@@ -195,7 +202,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 24 August 2011
+Last updated: 09 October 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

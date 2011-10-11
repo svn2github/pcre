@@ -109,15 +109,16 @@ distribution for a new release.
 . Run ./autogen.sh to ensure everything is up-to-date.
 
 . Compile and test with many different config options, and combinations of
-  options. The maint/ManyConfigTests script now encapsulates this testing.
+  options. Also, test with valgrind by running "RunTest valgrind" and
+  "RunGrepTest valgrind" (which takes quite a long time). The script
+  maint/ManyConfigTests now encapsulates this testing. It runs tests with
+  different configurations, and it also runs some of them with valgrind, all of
+  which can take quite some time.
 
 . Run perltest.pl on the test data for tests 1, 4, 6, 11, and 12. The output 
   should match the PCRE test output, apart from the version identification at
   the start of each test. The other tests are not Perl-compatible (they use
   various PCRE-specific features or options).
-
-. Test with valgrind by running "RunTest valgrind". There is also "RunGrepTest
-  valgrind", though that takes quite a long time.
 
 . It is possible to test with the emulated memmove() function by undefining
   HAVE_MEMMOVE and HAVE_BCOPY in config.h, though I do not do this often. You
@@ -323,4 +324,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 02 August 2011
+Last updated: 11 October 2011

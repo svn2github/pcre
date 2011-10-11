@@ -2791,7 +2791,7 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_ONCE:
-      case OP_ONCE_NC: 
+      case OP_ONCE_NC:
         {
         int local_offsets[2];
         int local_workspace[1000];

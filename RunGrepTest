@@ -61,7 +61,7 @@ if [ -z "$srcdir" -o ! -d "$srcdir/testdata" ] ; then
   else
     echo "Cannot find the testdata directory"
     exit 1
-  fi   
+  fi
 fi
 
 # Check for the availability of UTF-8 support

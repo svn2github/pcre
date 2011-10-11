@@ -1462,7 +1462,7 @@ enum {
   the non-POS versions in each case. */
 
   OP_ONCE,           /* 123 Atomic group, contains captures */
-  OP_ONCE_NC,        /* 124 Atomic group containing no captures */ 
+  OP_ONCE_NC,        /* 124 Atomic group containing no captures */
   OP_BRA,            /* 125 Start of non-capturing bracket */
   OP_BRAPOS,         /* 126 Ditto, with unlimited, possessive repeat */
   OP_CBRA,           /* 127 Start of capturing bracket */
