@@ -2347,7 +2347,7 @@ while (!done)
           unsigned char *pt = p;
           c = 0;
           while (isxdigit(*(++pt)))
-            c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'W');
+            c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10);
           if (*pt == '}')
             {
             unsigned char buff8[8];
@@ -2377,7 +2377,7 @@ while (!done)
         c = 0;
         while (i++ < 2 && isxdigit(*p))
           {
-          c = c * 16 + tolower(*p) - ((isdigit(*p))? '0' : 'W');
+          c = c * 16 + tolower(*p) - ((isdigit(*p))? '0' : 'a' - 10);
           p++;
           }
         break;

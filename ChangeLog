@@ -103,6 +103,10 @@ Version 8.20 10-Oct-2011
 19. If the PCRE_NO_START_OPTIMIZE option was set for pcre_compile(), it did not
     suppress the check for a minimum subject length at run time. (If it was
     given to pcre_exec() or pcre_dfa_exec() it did work.)
+    
+20. Fixed an ASCII-dependent infelicity in pcretest that would have made it
+    fail to work when decoding hex characters in data strings in EBCDIC 
+    environments. 
 
 
 Version 8.13 16-Aug-2011
