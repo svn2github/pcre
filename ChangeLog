@@ -107,6 +107,13 @@ Version 8.20 10-Oct-2011
 20. Fixed an ASCII-dependent infelicity in pcretest that would have made it
     fail to work when decoding hex characters in data strings in EBCDIC 
     environments. 
+    
+21. It appears that in at least one Mac OS environment, the isxdigit() function 
+    is implemented as a macro that evaluates to its argument more than once,
+    contravening the C 90 Standard (I haven't checked a later standard). There
+    was an instance in pcretest which caused it to go wrong when processing
+    \x{...} escapes in subject strings. The has been rewritten to avoid using 
+    things like p++ in the argument of isxdigit().
 
 
 Version 8.13 16-Aug-2011
