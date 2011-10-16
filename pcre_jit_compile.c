@@ -467,6 +467,12 @@ switch(*cc)
   case OP_SKIPZERO:
   return cc + 1;
 
+  case OP_ANYBYTE:
+#ifdef SUPPORT_UTF8
+  if (common->utf8) return NULL;
+#endif
+  return cc + 1;
+
   case OP_CHAR:
   case OP_CHARI:
   case OP_NOT:
@@ -1336,8 +1342,7 @@ OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 #ifdef SUPPORT_UTF8
 if (common->utf8)
   {
-  /* Should not found a value between 128 and 192 here. */
-  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 192);
+  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
   add_jump(compiler, &common->utf8readchar, JUMP(SLJIT_FAST_CALL));
   JUMPHERE(jump);
   }
@@ -1358,8 +1363,7 @@ OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 #ifdef SUPPORT_UTF8
 if (common->utf8)
   {
-  /* Should not found a value between 128 and 192 here. */
-  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 192);
+  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
   add_jump(compiler, &common->utf8readchar, JUMP(SLJIT_FAST_CALL));
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
   JUMPHERE(jump);
@@ -1383,8 +1387,7 @@ if (common->utf8)
   /* This can be an extra read in some situations, but hopefully
   it is a clever early read in most cases. */
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), common->ctypes);
-  /* Should not found a value between 128 and 192 here. */
-  jump = CMP(SLJIT_C_LESS, TMP2, 0, SLJIT_IMM, 192);
+  jump = CMP(SLJIT_C_LESS, TMP2, 0, SLJIT_IMM, 0xc0);
   add_jump(compiler, &common->utf8readtype8, JUMP(SLJIT_FAST_CALL));
   JUMPHERE(jump);
   return;
@@ -1444,7 +1447,7 @@ else
 static void do_utf8readchar(compiler_common *common)
 {
 /* Fast decoding an utf8 character. TMP1 contains the first byte
-of the character (>= 192). Return char value in TMP1, length - 1 in TMP2. */
+of the character (>= 0xc0). Return char value in TMP1, length - 1 in TMP2. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 
@@ -1527,7 +1530,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 static void do_utf8readtype8(compiler_common *common)
 {
 /* Fast decoding an utf8 character type. TMP2 contains the first byte
-of the character (>= 192) and TMP1 is destroyed. Return value in TMP1. */
+of the character (>= 0xc0) and TMP1 is destroyed. Return value in TMP1. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_jump *compare;
@@ -1553,8 +1556,7 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 JUMPHERE(jump);
 
 /* We only have types for characters less than 256. */
-OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_w)_pcre_utf8_char_sizes);
-OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
+OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), (sljit_w)_pcre_utf8_char_sizes - 0xc0);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
@@ -1598,6 +1600,9 @@ struct sljit_label *newlinelabel = NULL;
 struct sljit_jump *start;
 struct sljit_jump *end = NULL;
 struct sljit_jump *nl = NULL;
+#ifdef SUPPORT_UTF8
+struct sljit_jump *singlebyte;
+#endif
 jump_list *newline = NULL;
 BOOL newlinecheck = FALSE;
 BOOL readbyte = FALSE;
@@ -1668,16 +1673,15 @@ if (readbyte)
 if (newlinecheck)
   CMPTO(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff, newlinelabel);
 
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
 #ifdef SUPPORT_UTF8
 if (common->utf8)
   {
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes);
+  singlebyte = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes - 0xc0);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+  JUMPHERE(singlebyte);
   }
-else
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
-#else
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
 #endif
 JUMPHERE(start);
 
@@ -1730,16 +1734,14 @@ else
     }
   }
 
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
 #ifdef SUPPORT_UTF8
 if (common->utf8)
   {
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes);
+  CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0, start);
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes - 0xc0);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   }
-else
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
-#else
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
 #endif
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
@@ -1846,7 +1848,7 @@ leave = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 #ifdef SUPPORT_UTF8
 if (common->utf8)
-  OP1(SLJIT_MOV_UB, TMP3, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes);
+  OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
 #endif
 OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
 OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
@@ -1857,11 +1859,16 @@ found = JUMP(SLJIT_C_NOT_ZERO);
 
 #ifdef SUPPORT_UTF8
 if (common->utf8)
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP3, 0);
-else
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
-#else
+  OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
+#endif
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
+#ifdef SUPPORT_UTF8
+if (common->utf8)
+  {
+  CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0, start);
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes - 0xc0);
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+  }
 #endif
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
@@ -2788,11 +2795,19 @@ switch(type)
   if (common->utf8)
     {
     OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-    OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
+    jump[0] = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
+    OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes - 0xc0);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+    JUMPHERE(jump[0]);
     return cc;
     }
 #endif
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
+  return cc;
+
+  case OP_ANYBYTE:
+  check_input_end(common, fallbacks);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
   return cc;
 
@@ -3042,17 +3057,20 @@ switch(type)
     if (c <= 127)
       {
       OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-      OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes);
       if (type == OP_NOT || !char_has_othercase(common, cc))
         add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, c));
       else
         {
         /* Since UTF8 code page is fixed, we know that c is in [a-z] or [A-Z] range. */
-        OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x20);
-        add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, c | 0x20));
+        OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x20);
+        add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, c | 0x20));
         }
       /* Skip the variable-length character. */
-      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, 1);
+      jump[0] = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
+      OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)_pcre_utf8_char_sizes - 0xc0);
+      OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+      JUMPHERE(jump[0]);
       return cc + length;
       }
     else
@@ -4744,6 +4762,7 @@ while (cc < ccend)
     case OP_WORDCHAR:
     case OP_ANY:
     case OP_ALLANY:
+    case OP_ANYBYTE:
     case OP_NOTPROP:
     case OP_PROP:
     case OP_ANYNL:

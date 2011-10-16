@@ -135,6 +135,10 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE_CASELESS, 0, "\xff#a", "\xff#\xff\xfe##\xff#A" },
 	{ PCRE_CASELESS, 0, "\xfe", "\xff\xfc#\xfe\xfe" },
 	{ PCRE_CASELESS, 0, "a1", "Aa1" },
+	{ MA, 0, "\\Ca", "cda" },
+	{ CMA, 0, "\\Ca", "CDA" },
+	{ MA, 0, "\\Cx", "cda" },
+	{ CMA, 0, "\\Cx", "CDA" },
 
 	/* Assertions. */
 	{ MUA, 0, "\\b[^A]", "A_B#" },
