@@ -989,23 +989,23 @@ because in UTF-8 mode this would make it impossible to calculate the length of
 the lookbehind.
 .P
 In general, the \eC escape sequence is best avoided in UTF-8 mode. However, one
-way of using it that avoids the problem of malformed UTF-8 characters is to 
-use a lookahead to check the length of the next character, as in this pattern 
+way of using it that avoids the problem of malformed UTF-8 characters is to
+use a lookahead to check the length of the next character, as in this pattern
 (ignore white space and line breaks):
 .sp
   (?| (?=[\ex00-\ex7f])(\eC) |
-      (?=[\ex80-\ex{7ff}])(\eC)(\eC) |  
-      (?=[\ex{800}-\ex{ffff}])(\eC)(\eC)(\eC) |  
+      (?=[\ex80-\ex{7ff}])(\eC)(\eC) |
+      (?=[\ex{800}-\ex{ffff}])(\eC)(\eC)(\eC) |
       (?=[\ex{10000}-\ex{1fffff}])(\eC)(\eC)(\eC)(\eC))
 .sp
-A group that starts with (?| resets the capturing parentheses numbers in each 
-alternative (see 
+A group that starts with (?| resets the capturing parentheses numbers in each
+alternative (see
 .\" HTML <a href="#dupsubpatternnumber">
 .\" </a>
 "Duplicate Subpattern Numbers"
 .\"
-below). The assertions at the start of each branch check the next UTF-8 
-character for values whose encoding uses 1, 2, 3, or 4 bytes, respectively. The 
+below). The assertions at the start of each branch check the next UTF-8
+character for values whose encoding uses 1, 2, 3, or 4 bytes, respectively. The
 character's individual bytes are then captured by the appropriate number of
 groups.
 .

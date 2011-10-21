@@ -118,11 +118,14 @@ bytes, for example: \x{100}{3}.
 </P>
 <P>
 5. The escape sequence \C can be used to match a single byte in UTF-8 mode,
-but its use can lead to some strange effects. This facility is not available in
-the alternative matching function, <b>pcre_dfa_exec()</b>, nor is it supported
-by the JIT optimization of <b>pcre_exec()</b>. If JIT optimization is requested
-for a pattern that contains \C, it will not succeed, and so the matching will
-be carried out by the normal interpretive function.
+but its use can lead to some strange effects because it breaks up multibyte
+characters (see the description of \C in the
+<a href="pcrepattern.html"><b>pcrepattern</b></a>
+documentation). The use of \C is not supported in the alternative matching
+function <b>pcre_dfa_exec()</b>, nor is it supported in UTF-8 mode by the JIT
+optimization of <b>pcre_exec()</b>. If JIT optimization is requested for a UTF-8
+pattern that contains \C, it will not succeed, and so the matching will be
+carried out by the normal interpretive function.
 </P>
 <P>
 6. The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly
@@ -175,7 +178,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 06 September 2011
+Last updated: 19 October 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

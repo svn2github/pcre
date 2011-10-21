@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.20 10-Oct-2011
+Version 8.20 21-Oct-2011
 ------------------------
 
 1.  Change 37 of 8.13 broke patterns like [:a]...[b:] because it thought it had
@@ -68,7 +68,7 @@ Version 8.20 10-Oct-2011
 
 12. In some environments, the output of pcretest -C is CRLF terminated. This
     broke RunTest's code that checks for the link size. A single white space
-    after the value is now allowed for.
+    character after the value is now allowed for.
 
 13. RunTest now checks for the "fr" locale as well as for "fr_FR" and "french".
     For "fr", it uses the Windows-specific input and output files.
@@ -103,16 +103,16 @@ Version 8.20 10-Oct-2011
 19. If the PCRE_NO_START_OPTIMIZE option was set for pcre_compile(), it did not
     suppress the check for a minimum subject length at run time. (If it was
     given to pcre_exec() or pcre_dfa_exec() it did work.)
-    
+
 20. Fixed an ASCII-dependent infelicity in pcretest that would have made it
-    fail to work when decoding hex characters in data strings in EBCDIC 
-    environments. 
-    
-21. It appears that in at least one Mac OS environment, the isxdigit() function 
+    fail to work when decoding hex characters in data strings in EBCDIC
+    environments.
+
+21. It appears that in at least one Mac OS environment, the isxdigit() function
     is implemented as a macro that evaluates to its argument more than once,
     contravening the C 90 Standard (I haven't checked a later standard). There
     was an instance in pcretest which caused it to go wrong when processing
-    \x{...} escapes in subject strings. The has been rewritten to avoid using 
+    \x{...} escapes in subject strings. The has been rewritten to avoid using
     things like p++ in the argument of isxdigit().
 
 

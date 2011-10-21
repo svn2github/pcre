@@ -968,17 +968,39 @@ that signifies the end of a line.
 <br><a name="SEC7" href="#TOC1">MATCHING A SINGLE BYTE</a><br>
 <P>
 Outside a character class, the escape sequence \C matches any one byte, both
-in and out of UTF-8 mode. Unlike a dot, it always matches any line-ending
+in and out of UTF-8 mode. Unlike a dot, it always matches line-ending
 characters. The feature is provided in Perl in order to match individual bytes
-in UTF-8 mode. Because it breaks up UTF-8 characters into individual bytes, the
-rest of the string may start with a malformed UTF-8 character. For this reason,
-the \C escape sequence is best avoided.
+in UTF-8 mode, but it is unclear how it can usefully be used. Because \C
+breaks up characters into individual bytes, matching one byte with \C in UTF-8
+mode means that the rest of the string may start with a malformed UTF-8
+character. This has undefined results, because PCRE assumes that it is dealing
+with valid UTF-8 strings (and by default it checks this at the start of
+processing unless the PCRE_NO_UTF8_CHECK option is used).
 </P>
 <P>
 PCRE does not allow \C to appear in lookbehind assertions
 <a href="#lookbehind">(described below),</a>
 because in UTF-8 mode this would make it impossible to calculate the length of
 the lookbehind.
+</P>
+<P>
+In general, the \C escape sequence is best avoided in UTF-8 mode. However, one
+way of using it that avoids the problem of malformed UTF-8 characters is to
+use a lookahead to check the length of the next character, as in this pattern
+(ignore white space and line breaks):
+<pre>
+  (?| (?=[\x00-\x7f])(\C) |
+      (?=[\x80-\x{7ff}])(\C)(\C) |
+      (?=[\x{800}-\x{ffff}])(\C)(\C)(\C) |
+      (?=[\x{10000}-\x{1fffff}])(\C)(\C)(\C)(\C))
+</pre>
+A group that starts with (?| resets the capturing parentheses numbers in each
+alternative (see
+<a href="#dupsubpatternnumber">"Duplicate Subpattern Numbers"</a>
+below). The assertions at the start of each branch check the next UTF-8
+character for values whose encoding uses 1, 2, 3, or 4 bytes, respectively. The
+character's individual bytes are then captured by the appropriate number of
+groups.
 <a name="characterclass"></a></P>
 <br><a name="SEC8" href="#TOC1">SQUARE BRACKETS AND CHARACTER CLASSES</a><br>
 <P>
@@ -2797,7 +2819,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 09 October 2011
+Last updated: 19 October 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

@@ -2346,12 +2346,12 @@ while (!done)
           {
           unsigned char *pt = p;
           c = 0;
-          
+
           /* We used to have "while (isxdigit(*(++pt)))" here, but it fails
           when isxdigit() is a macro that refers to its argument more than
           once. This is banned by the C Standard, but apparently happens in at
           least one MacOS environment. */
-          
+
           for (pt++; isxdigit(*pt); pt++)
             c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10);
           if (*pt == '}')

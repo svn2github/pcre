@@ -1,14 +1,14 @@
 News about PCRE releases
 ------------------------
 
-Release 8.20
-------------
+Release 8.20 21-Oct-2011
+------------------------
 
 The main change in this release is the inclusion of Zoltan Herczeg's
 just-in-time compiler support, which can be accessed by building PCRE with
 --enable-jit. Large performance benefits can be had in many situations. 8.20
 also fixes an unfortunate bug that was introduced in 8.13 as well as tidying up
-a couple of infelicities.
+a number of infelicities and differences from Perl.
 
 
 Release 8.13 16-Aug-2011
