@@ -12195,11 +12195,11 @@ Matched, but too many substrings
     abc
 Error -26 (nested recursion at the same subject position)
 
-/((?(R2)a+|(?1)b))/
+/((?(R2)a+|(?1)b))/SS
     aaaabcde
 Error -26 (nested recursion at the same subject position)
 
-/(?(R)a*(?1)|((?R))b)/
+/(?(R)a*(?1)|((?R))b)/SS
     aaaabcde
 Error -26 (nested recursion at the same subject position)
 

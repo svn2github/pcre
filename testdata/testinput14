@@ -13,4 +13,7 @@ and a couple of things that are different with JIT. --/
 
 /a*/SI
 
+/(?(R)a*(?1)|((?R))b)/S+
+    aaaabcde
+
 /-- End of testinput14 --/

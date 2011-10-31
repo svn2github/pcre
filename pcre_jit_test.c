@@ -529,6 +529,9 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?(?!(b))a*)+aak", "aaaaab aaaaak" },
 	{ MUA, 0, "(?(?!b)a*)+aak", "aaaaab aaaaak" },
 	{ MUA, 0, "(?(?=(?=(?!(x))a)aa)aaa|(?(?=(?!y)bb)bbb))*k", "abaabbaaabbbaaabbb abaabbaaabbbaaabbbk" },
+	{ MUA, 0, "(?P<Name>a)?(?P<Name2>b)?(?(Name)c|d)*l", "bc ddd abccabccl" },
+	{ MUA, 0, "(?P<Name>a)?(?P<Name2>b)?(?(Name)c|d)+?dd", "bcabcacdb bdddd" },
+	{ MUA, 0, "(?P<Name>a)?(?P<Name2>b)?(?(Name)c|d)+l", "ababccddabdbccd abcccl" },
 
 	/* Set start of match. */
 	{ MUA, 0, "(?:\\Ka)*aaaab", "aaaaaaaa aaaaaaabb" },
@@ -576,6 +579,12 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "b|<(?R)*>", "<<b>" },
 	{ MUA, 0, "(a\\K){0}(?:(?1)b|ac)", "ac" },
 	{ MUA, 0, "(?(DEFINE)(a(?2)|b)(b(?1)|(a)))(?:(?1)|(?2))m", "ababababnababababaam" },
+	{ MUA, 0, "(a)((?(R)a|b))(?2)", "aabbabaa" },
+	{ MUA, 0, "(a)((?(R2)a|b))(?2)", "aabbabaa" },
+	{ MUA, 0, "(a)((?(R1)a|b))(?2)", "ababba" },
+	{ MUA, 0, "(?(R0)aa|bb(?R))", "abba aabb bbaa" },
+	{ MUA, 0, "((?(R)(?:aaaa|a)|(?:(aaaa)|(a)))+)(?1)$", "aaaaaaaaaa aaaa" },
+	{ MUA, 0, "(?P<Name>a(?(R&Name)a|b))(?1)", "aab abb abaa" },
 
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },

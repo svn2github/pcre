@@ -6,6 +6,9 @@ Version 8.21
 
 1.  Updating the JIT compiler.
 
+2.  JIT compiler now supports OP_NCREF, OP_RREF and OP_NRREF. New test cases
+    are added as well.
+
 
 Version 8.20 21-Oct-2011
 ------------------------
