@@ -1,6 +1,12 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.21
+------------
+
+1.  Updating the JIT compiler.
+
+
 Version 8.20 21-Oct-2011
 ------------------------
 
