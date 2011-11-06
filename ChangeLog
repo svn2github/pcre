@@ -9,6 +9,10 @@ Version 8.21
 2.  JIT compiler now supports OP_NCREF, OP_RREF and OP_NRREF. New test cases
     are added as well.
 
+3.  Fix cache-flush issue on PowerPC (It is still an experimental JIT port).
+    PCRE_EXTRA_TABLES is not suported by JIT, and should be checked before
+    calling _pcre_jit_exec. Some extra comments are added.
+
 
 Version 8.20 21-Oct-2011
 ------------------------

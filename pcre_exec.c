@@ -6011,6 +6011,7 @@ matching. */
 if (extra_data != NULL
     && (extra_data->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0
     && extra_data->executable_jit != NULL
+    && (extra_data->flags & PCRE_EXTRA_TABLES) == 0
     && (options & ~(PCRE_NO_UTF8_CHECK | PCRE_NOTBOL | PCRE_NOTEOL |
                     PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART)) == 0)
   return _pcre_jit_exec(re, extra_data->executable_jit, subject, length,
