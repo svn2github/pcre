@@ -816,6 +816,7 @@ for (;;)
       if (rrc == MATCH_MATCH)  /* Note: _not_ MATCH_ACCEPT */
         {
         mstart = md->start_match_ptr;
+        markptr = md->mark;
         break;
         }
       if (rrc == MATCH_THEN)

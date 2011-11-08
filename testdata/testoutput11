@@ -1389,4 +1389,15 @@ No match
 
 /------------------------------/
 
+/(?>a(*:m))/imsxSK 
+    a
+ 0: a
+MK: m
+
+/(?>(a)(*:m))/imsxSK 
+    a
+ 0: a
+ 1: a
+MK: m
+
 /-- End of testinput11 --/
