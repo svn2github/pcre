@@ -12502,4 +12502,56 @@ Minimum match() recursion limit = 13
  2: cc
  3: ee
 
+/^a\x41z/<JS>
+    aAz
+ 0: aAz
+    *** Failers
+No match
+    ax41z
+No match
+
+/^a[m\x41]z/<JS>
+    aAz
+ 0: aAz
+
+/^a\x1z/<JS>
+    ax1z
+ 0: ax1z
+
+/^a\X41z/<JS>
+    aX41z
+ 0: aX41z
+    *** Failers
+No match
+    aAz
+No match
+
+/^a\u0041z/<JS>
+    aAz
+ 0: aAz
+    *** Failers
+No match
+    au0041z
+No match
+
+/^a[m\u0041]z/<JS>
+    aAz
+ 0: aAz
+
+/^a\u041z/<JS>
+    au041z
+ 0: au041z
+    *** Failers
+No match
+    aAz
+No match
+
+/^a\U0041z/<JS>
+    aU0041z
+ 0: aU0041z
+    *** Failers
+No match
+    aAz
+No match
+
 /-- End of testinput2 --/

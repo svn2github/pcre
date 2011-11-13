@@ -676,9 +676,39 @@ else
 
     case CHAR_l:
     case CHAR_L:
-    case CHAR_u:
-    case CHAR_U:
     *errorcodeptr = ERR37;
+    break;
+
+    case CHAR_u:
+    if ((options & PCRE_JAVASCRIPT_COMPAT) != 0)
+      {
+      /* In JavaScript, \u must be followed by four hexadecimal numbers.
+      Otherwise it is a lowercase u letter. */
+      if ((digitab[ptr[1]] & ctype_xdigit) != 0 && (digitab[ptr[2]] & ctype_xdigit) != 0
+           && (digitab[ptr[3]] & ctype_xdigit) != 0 && (digitab[ptr[4]] & ctype_xdigit) != 0)
+        {
+        int i;
+        c = 0;
+        for (i = 0; i < 4; ++i)
+          {
+          register int cc = *(++ptr);
+#ifndef EBCDIC  /* ASCII/UTF-8 coding */
+          if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
+          c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
+#else           /* EBCDIC coding */
+          if (cc >= CHAR_a && cc <= CHAR_z) cc += 64;  /* Convert to upper case */
+          c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
+#endif
+          }
+        }
+      }
+    else
+      *errorcodeptr = ERR37;
+    break;
+
+    case CHAR_U:
+    /* In JavaScript, \U is an uppercase U letter. */
+    if ((options & PCRE_JAVASCRIPT_COMPAT) == 0) *errorcodeptr = ERR37;
     break;
 
     /* In a character class, \g is just a literal "g". Outside a character
@@ -828,6 +858,29 @@ else
     treated as a data character. */
 
     case CHAR_x:
+    if ((options & PCRE_JAVASCRIPT_COMPAT) != 0)
+      {
+      /* In JavaScript, \x must be followed by two hexadecimal numbers.
+      Otherwise it is a lowercase x letter. */
+      if ((digitab[ptr[1]] & ctype_xdigit) != 0 && (digitab[ptr[2]] & ctype_xdigit) != 0)
+        {
+        int i;
+        c = 0;
+        for (i = 0; i < 2; ++i)
+          {
+          register int cc = *(++ptr);
+#ifndef EBCDIC  /* ASCII/UTF-8 coding */
+          if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
+          c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
+#else           /* EBCDIC coding */
+          if (cc >= CHAR_a && cc <= CHAR_z) cc += 64;  /* Convert to upper case */
+          c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
+#endif
+          }
+        }
+      break;
+      }
+
     if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
       {
       const uschar *pt = ptr + 2;

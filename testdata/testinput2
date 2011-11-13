@@ -3969,4 +3969,38 @@ AbcdCBefgBhiBqz
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      \Maabbccddee
 
+/^a\x41z/<JS>
+    aAz
+    *** Failers
+    ax41z
+
+/^a[m\x41]z/<JS>
+    aAz
+
+/^a\x1z/<JS>
+    ax1z
+
+/^a\X41z/<JS>
+    aX41z
+    *** Failers
+    aAz
+
+/^a\u0041z/<JS>
+    aAz
+    *** Failers
+    au0041z
+
+/^a[m\u0041]z/<JS>
+    aAz
+
+/^a\u041z/<JS>
+    au041z
+    *** Failers
+    aAz
+
+/^a\U0041z/<JS>
+    aU0041z
+    *** Failers
+    aAz
+
 /-- End of testinput2 --/
