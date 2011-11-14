@@ -241,7 +241,8 @@ one of the following escape sequences than the binary character it represents:
   \et        tab (hex 09)
   \eddd      character with octal code ddd, or back reference
   \exhh      character with hex code hh
-  \ex{hhh..} character with hex code hhh..
+  \ex{hhh..} character with hex code hhh.. (non-JavaScript mode)
+  \euhhhh    character with hex code hhhh (JavaScript mode only) 
 .sp
 The precise effect of \ecx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
@@ -252,21 +253,28 @@ both byte mode and UTF-8 mode. (When PCRE is compiled in EBCDIC mode, all byte
 values are valid. A lower case letter is converted to upper case, and then the
 0xc0 bits are flipped.)
 .P
-After \ex, from zero to two hexadecimal digits are read (letters can be in
-upper or lower case). Any number of hexadecimal digits may appear between \ex{
-and }, but the value of the character code must be less than 256 in non-UTF-8
-mode, and less than 2**31 in UTF-8 mode. That is, the maximum value in
-hexadecimal is 7FFFFFFF. Note that this is bigger than the largest Unicode code
-point, which is 10FFFF.
+By default, after \ex, from zero to two hexadecimal digits are read (letters
+can be in upper or lower case). Any number of hexadecimal digits may appear
+between \ex{ and }, but the value of the character code must be less than 256
+in non-UTF-8 mode, and less than 2**31 in UTF-8 mode. That is, the maximum
+value in hexadecimal is 7FFFFFFF. Note that this is bigger than the largest
+Unicode code point, which is 10FFFF.
 .P
 If characters other than hexadecimal digits appear between \ex{ and }, or if
 there is no terminating }, this form of escape is not recognized. Instead, the
 initial \ex will be interpreted as a basic hexadecimal escape, with no
 following digits, giving a character whose value is zero.
 .P
+If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \ex is 
+as just described only when it is followed by two hexadecimal digits. 
+Otherwise, it matches a literal "x" character. In JavaScript mode, support for
+code points greater than 256 is provided by \eu, which must be followed by 
+four hexadecimal digits; otherwise it matches a literal "u" character.
+.P
 Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \ex. There is no difference in the way they are handled. For
-example, \exdc is exactly the same as \ex{dc}.
+syntaxes for \ex (or by \eu in JavaScript mode). There is no difference in the
+way they are handled. For example, \exdc is exactly the same as \ex{dc} (or 
+\eu00dc in JavaScript mode).
 .P
 After \e0 up to two further octal digits are read. If there are fewer than two
 digits, just those that are present are used. Thus the sequence \e0\ex\e07
@@ -328,6 +336,16 @@ unrecognized escape sequences, they are treated as the literal characters "B",
 set. Outside a character class, these sequences have different meanings.
 .
 .
+.SS "Unsupported escape sequences"
+.rs
+.sp
+In Perl, the sequences \el, \eL, \eu, and \eU are recognized by its string
+handler and used to modify the case of following characters. By default, PCRE
+does not support these escape sequences. However, if the PCRE_JAVASCRIPT_COMPAT
+option is set, \eU matches a "U" character, and \eu can be used to define a
+character by code point, as described in the previous section.
+.
+.
 .SS "Absolute and relative back references"
 .rs
 .sp
@@ -387,7 +405,8 @@ This is the same as
 .\" </a>
 the "." metacharacter
 .\"
-when PCRE_DOTALL is not set.
+when PCRE_DOTALL is not set. Perl also uses \eN to match characters by name; 
+PCRE does not support this.
 .P
 Each pair of lower and upper case escape sequences partitions the complete set
 of characters into two disjoint sets. Any given character matches one, and only
@@ -964,7 +983,8 @@ special meaning in a character class.
 .P
 The escape sequence \eN behaves like a dot, except that it is not affected by
 the PCRE_DOTALL option. In other words, it matches any character except one
-that signifies the end of a line.
+that signifies the end of a line. Perl also uses \eN to match characters by
+name; PCRE does not support this.
 .
 .
 .SH "MATCHING A SINGLE BYTE"
@@ -2854,6 +2874,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 October 2011
+Last updated: 14 November 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

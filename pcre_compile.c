@@ -687,7 +687,6 @@ else
       if ((digitab[ptr[1]] & ctype_xdigit) != 0 && (digitab[ptr[2]] & ctype_xdigit) != 0
            && (digitab[ptr[3]] & ctype_xdigit) != 0 && (digitab[ptr[4]] & ctype_xdigit) != 0)
         {
-        int i;
         c = 0;
         for (i = 0; i < 4; ++i)
           {
@@ -864,7 +863,6 @@ else
       Otherwise it is a lowercase x letter. */
       if ((digitab[ptr[1]] & ctype_xdigit) != 0 && (digitab[ptr[2]] & ctype_xdigit) != 0)
         {
-        int i;
         c = 0;
         for (i = 0; i < 2; ++i)
           {
