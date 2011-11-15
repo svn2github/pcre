@@ -1665,7 +1665,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
-       ERRCOUNT };
+       ERR70, ERRCOUNT };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit

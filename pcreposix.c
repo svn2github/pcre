@@ -153,6 +153,8 @@ static const int eint[] = {
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UCP support */
   REG_BADPAT,  /* \c must be followed by an ASCII character */
   REG_BADPAT,  /* \k is not followed by a braced, angle-bracketed, or quoted name */
+  /* 70 */
+  REG_BADPAT,  /* internal error: unknown opcode in find_fixedlength() */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */

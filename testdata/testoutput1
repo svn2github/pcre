@@ -6968,4 +6968,40 @@ No match
     xaabc  
 No match
 
+/(?<=a\h)c/
+    xa c
+ 0: c
+    
+/(?<=[^a]{2})b/
+    axxbc
+ 0: b
+    aAAbc 
+ 0: b
+    ** Failers
+No match
+    xaabc    
+No match
+
+/(?<=[^a]{2})b/i
+    axxbc  
+ 0: b
+    ** Failers
+No match
+    aAAbc 
+No match
+    xaabc    
+No match
+
+/(?<=a\H)c/
+    abc
+ 0: c
+
+/(?<=a\V)c/
+    abc
+ 0: c
+    
+/(?<=a\v)c/
+    a\nc
+ 0: c
+
 /-- End of testinput1 --/

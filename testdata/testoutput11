@@ -1400,4 +1400,45 @@ MK: m
  1: a
 MK: m
 
+/(?<=a(*ACCEPT)b)c/
+    xacd
+ 0: c
+
+/(?<=(a(*ACCEPT)b))c/
+    xacd
+ 0: c
+ 1: a
+
+/(?<=(a(*COMMIT)b))c/
+    xabcd
+ 0: c
+ 1: ab
+    ** Failers 
+No match
+    xacd
+No match
+    
+/(?<!a(*FAIL)b)c/
+    xcd
+ 0: c
+    acd 
+ 0: c
+
+/(?<=a(*:N)b)c/K
+    xabcd
+ 0: c
+MK: N
+    
+/(?<=a(*PRUNE)b)c/
+    xabcd 
+ 0: c
+
+/(?<=a(*SKIP)b)c/
+    xabcd 
+ 0: c
+
+/(?<=a(*THEN)b)c/
+    xabcd 
+ 0: c
+
 /-- End of testinput11 --/

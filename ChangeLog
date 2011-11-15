@@ -23,6 +23,16 @@ Version 8.21
 6.  Lookbehinds such as (?<=a{2}b) that contained a fixed repetition were
     erroneously being rejected as "not fixed length" if PCRE_CASELESS was set.
     This bug was probably introduced by change 9 of 8.13. 
+    
+7.  While fixing 6 above, I noticed that a number of other items were being
+    incorrectly rejected as "not fixed length". This arose partly because newer 
+    opcodes had not been added to the fixed-length checking code. I have (a)
+    corrected the bug and added tests for these items, and (b) arranged for an
+    error to occur if an unknown opcode is encountered while checking for fixed
+    length instead of just assuming "not fixed length". The items that were 
+    rejected were: (*ACCEPT), (*COMMIT), (*FAIL), (*MARK), (*PRUNE), (*SKIP), 
+    (*THEN), \h, \H, \v, \V, and single character negative classes with fixed 
+    repetitions, e.g. [^a]{3}, with and without PCRE_CASELESS.
 
 
 Version 8.20 21-Oct-2011

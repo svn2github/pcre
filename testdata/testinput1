@@ -4261,4 +4261,28 @@
     ** Failers
     xaabc  
 
+/(?<=a\h)c/
+    xa c
+    
+/(?<=[^a]{2})b/
+    axxbc
+    aAAbc 
+    ** Failers
+    xaabc    
+
+/(?<=[^a]{2})b/i
+    axxbc  
+    ** Failers
+    aAAbc 
+    xaabc    
+
+/(?<=a\H)c/
+    abc
+
+/(?<=a\V)c/
+    abc
+    
+/(?<=a\v)c/
+    a\nc
+
 /-- End of testinput1 --/

@@ -410,6 +410,8 @@ static const char error_texts[] =
   "this version of PCRE is not compiled with PCRE_UCP support\0"
   "\\c must be followed by an ASCII character\0"
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
+  /* 70 */
+  "internal error: unknown opcode in find_fixedlength()\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1528,6 +1530,7 @@ Returns:   the fixed length,
              or -1 if there is no fixed length,
              or -2 if \C was encountered
              or -3 if an OP_RECURSE item was encountered and atend is FALSE
+             or -4 if an unknown opcode was encountered (internal error)
 */
 
 static int
@@ -1551,8 +1554,7 @@ for (;;)
     /* We only need to continue for OP_CBRA (normal capturing bracket) and
     OP_BRA (normal non-capturing bracket) because the other variants of these
     opcodes are all concerned with unlimited repeated groups, which of course
-    are not of fixed length. They will cause a -1 response from the default
-    case of this switch. */
+    are not of fixed length. */
 
     case OP_CBRA:
     case OP_BRA:
@@ -1566,15 +1568,17 @@ for (;;)
     cc += 1 + LINK_SIZE;
     break;
 
-    /* Reached end of a branch; if it's a ket it is the end of a nested
-    call. If it's ALT it is an alternation in a nested call. If it is
-    END it's the end of the outer call. All can be handled by the same code.
-    Note that we must not include the OP_KETRxxx opcodes here, because they
-    all imply an unlimited repeat. */
+    /* Reached end of a branch; if it's a ket it is the end of a nested call.
+    If it's ALT it is an alternation in a nested call. An ACCEPT is effectively
+    an ALT. If it is END it's the end of the outer call. All can be handled by
+    the same code. Note that we must not include the OP_KETRxxx opcodes here,
+    because they all imply an unlimited repeat. */
 
     case OP_ALT:
     case OP_KET:
     case OP_END:
+    case OP_ACCEPT:
+    case OP_ASSERT_ACCEPT:
     if (length < 0) length = branchlength;
       else if (length != branchlength) return -1;
     if (*cc != OP_ALT) return length;
@@ -1608,23 +1612,36 @@ for (;;)
 
     /* Skip over things that don't match chars */
 
-    case OP_REVERSE:
-    case OP_CREF:
-    case OP_NCREF:
-    case OP_RREF:
-    case OP_NRREF:
-    case OP_DEF:
+    case OP_MARK:
+    case OP_PRUNE_ARG:
+    case OP_SKIP_ARG:
+    case OP_THEN_ARG:
+    cc += cc[1] + _pcre_OP_lengths[*cc];
+    break;
+
     case OP_CALLOUT:
-    case OP_SOD:
-    case OP_SOM:
-    case OP_SET_SOM:
-    case OP_EOD:
-    case OP_EODN:
     case OP_CIRC:
     case OP_CIRCM:
+    case OP_CLOSE:
+    case OP_COMMIT:
+    case OP_CREF:
+    case OP_DEF:
     case OP_DOLL:
     case OP_DOLLM:
+    case OP_EOD:
+    case OP_EODN:
+    case OP_FAIL:
+    case OP_NCREF:
+    case OP_NRREF:
     case OP_NOT_WORD_BOUNDARY:
+    case OP_PRUNE:
+    case OP_REVERSE:
+    case OP_RREF:
+    case OP_SET_SOM:
+    case OP_SKIP:
+    case OP_SOD:
+    case OP_SOM:
+    case OP_THEN:
     case OP_WORD_BOUNDARY:
     cc += _pcre_OP_lengths[*cc];
     break;
@@ -1646,7 +1663,9 @@ for (;;)
     need to skip over a multibyte character in UTF8 mode.  */
 
     case OP_EXACT:
-    case OP_EXACTI: 
+    case OP_EXACTI:
+    case OP_NOTEXACT:
+    case OP_NOTEXACTI:
     branchlength += GET2(cc,1);
     cc += 4;
 #ifdef SUPPORT_UTF8
@@ -1667,6 +1686,10 @@ for (;;)
     cc += 2;
     /* Fall through */
 
+    case OP_HSPACE:
+    case OP_VSPACE:
+    case OP_NOT_HSPACE:
+    case OP_NOT_VSPACE:
     case OP_NOT_DIGIT:
     case OP_DIGIT:
     case OP_NOT_WHITESPACE:
@@ -1698,6 +1721,8 @@ for (;;)
 
     switch (*cc)
       {
+      case OP_CRPLUS:
+      case OP_CRMINPLUS:
       case OP_CRSTAR:
       case OP_CRMINSTAR:
       case OP_CRQUERY:
@@ -1718,8 +1743,91 @@ for (;;)
 
     /* Anything else is variable length */
 
-    default:
+    case OP_ANYNL:
+    case OP_BRAMINZERO:
+    case OP_BRAPOS:
+    case OP_BRAPOSZERO:
+    case OP_BRAZERO:
+    case OP_CBRAPOS:
+    case OP_EXTUNI:
+    case OP_KETRMAX:
+    case OP_KETRMIN:
+    case OP_KETRPOS:
+    case OP_MINPLUS:
+    case OP_MINPLUSI:
+    case OP_MINQUERY:
+    case OP_MINQUERYI:
+    case OP_MINSTAR:
+    case OP_MINSTARI:
+    case OP_MINUPTO:
+    case OP_MINUPTOI:
+    case OP_NOTMINPLUS:
+    case OP_NOTMINPLUSI:
+    case OP_NOTMINQUERY:
+    case OP_NOTMINQUERYI:
+    case OP_NOTMINSTAR:
+    case OP_NOTMINSTARI:
+    case OP_NOTMINUPTO:
+    case OP_NOTMINUPTOI:
+    case OP_NOTPLUS:
+    case OP_NOTPLUSI:
+    case OP_NOTPOSPLUS:
+    case OP_NOTPOSPLUSI:
+    case OP_NOTPOSQUERY:
+    case OP_NOTPOSQUERYI:
+    case OP_NOTPOSSTAR:
+    case OP_NOTPOSSTARI:
+    case OP_NOTPOSUPTO:
+    case OP_NOTPOSUPTOI:
+    case OP_NOTQUERY:
+    case OP_NOTQUERYI:
+    case OP_NOTSTAR:
+    case OP_NOTSTARI:
+    case OP_NOTUPTO:
+    case OP_NOTUPTOI:
+    case OP_PLUS:
+    case OP_PLUSI:
+    case OP_POSPLUS:
+    case OP_POSPLUSI:
+    case OP_POSQUERY:
+    case OP_POSQUERYI:
+    case OP_POSSTAR:
+    case OP_POSSTARI:
+    case OP_POSUPTO:
+    case OP_POSUPTOI:
+    case OP_QUERY:
+    case OP_QUERYI:
+    case OP_REF:
+    case OP_REFI:
+    case OP_SBRA:
+    case OP_SBRAPOS:
+    case OP_SCBRA:
+    case OP_SCBRAPOS:
+    case OP_SCOND:
+    case OP_SKIPZERO:
+    case OP_STAR:
+    case OP_STARI:
+    case OP_TYPEMINPLUS:
+    case OP_TYPEMINQUERY:
+    case OP_TYPEMINSTAR:
+    case OP_TYPEMINUPTO:
+    case OP_TYPEPLUS:
+    case OP_TYPEPOSPLUS:
+    case OP_TYPEPOSQUERY:
+    case OP_TYPEPOSSTAR:
+    case OP_TYPEPOSUPTO:
+    case OP_TYPEQUERY:
+    case OP_TYPESTAR:
+    case OP_TYPEUPTO:
+    case OP_UPTO:
+    case OP_UPTOI:
     return -1;
+
+    /* Catch unrecognized opcodes so that when new ones are added they
+    are not forgotten, as has happened in the past. */
+
+    default:
+    return -4;
     }
   }
 /* Control never gets here */
@@ -6615,7 +6723,8 @@ for (;;)
         }
       else if (fixed_length < 0)
         {
-        *errorcodeptr = (fixed_length == -2)? ERR36 : ERR25;
+        *errorcodeptr = (fixed_length == -2)? ERR36 :
+                        (fixed_length == -4)? ERR70: ERR25;
         *ptrptr = ptr;
         return FALSE;
         }
@@ -7414,7 +7523,8 @@ if (cd->check_lookbehind)
       DPRINTF(("fixed length = %d\n", fixed_length));
       if (fixed_length < 0)
         {
-        errorcode = (fixed_length == -2)? ERR36 : ERR25;
+        errorcode = (fixed_length == -2)? ERR36 :
+                    (fixed_length == -4)? ERR70 : ERR25;
         break;
         }
       PUT(cc, 1, fixed_length);

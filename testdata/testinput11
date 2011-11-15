@@ -773,4 +773,31 @@ name)/K
 /(?>(a)(*:m))/imsxSK 
     a
 
+/(?<=a(*ACCEPT)b)c/
+    xacd
+
+/(?<=(a(*ACCEPT)b))c/
+    xacd
+
+/(?<=(a(*COMMIT)b))c/
+    xabcd
+    ** Failers 
+    xacd
+    
+/(?<!a(*FAIL)b)c/
+    xcd
+    acd 
+
+/(?<=a(*:N)b)c/K
+    xabcd
+    
+/(?<=a(*PRUNE)b)c/
+    xabcd 
+
+/(?<=a(*SKIP)b)c/
+    xabcd 
+
+/(?<=a(*THEN)b)c/
+    xabcd 
+
 /-- End of testinput11 --/
