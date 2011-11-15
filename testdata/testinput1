@@ -4251,4 +4251,14 @@
 /[:a]xxx[b:]/
      :xxx:
      
+/(?<=a{2})b/i
+    xaabc
+    ** Failers
+    xabc  
+
+/(?<!a{2})b/i
+    xabc
+    ** Failers
+    xaabc  
+
 /-- End of testinput1 --/

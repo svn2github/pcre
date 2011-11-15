@@ -20,6 +20,10 @@ Version 8.21
 5.  Supporting of \x, \U and \u in JavaScript compatibility mode based on the
     ECMA-262 standard.
 
+6.  Lookbehinds such as (?<=a{2}b) that contained a fixed repetition were
+    erroneously being rejected as "not fixed length" if PCRE_CASELESS was set.
+    This bug was probably introduced by change 9 of 8.13. 
+
 
 Version 8.20 21-Oct-2011
 ------------------------

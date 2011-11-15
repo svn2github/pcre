@@ -1646,6 +1646,7 @@ for (;;)
     need to skip over a multibyte character in UTF8 mode.  */
 
     case OP_EXACT:
+    case OP_EXACTI: 
     branchlength += GET2(cc,1);
     cc += 4;
 #ifdef SUPPORT_UTF8

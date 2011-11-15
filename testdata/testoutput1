@@ -6952,4 +6952,20 @@ No match
      :xxx:
  0: :xxx:
      
+/(?<=a{2})b/i
+    xaabc
+ 0: b
+    ** Failers
+No match
+    xabc  
+No match
+
+/(?<!a{2})b/i
+    xabc
+ 0: b
+    ** Failers
+No match
+    xaabc  
+No match
+
 /-- End of testinput1 --/
