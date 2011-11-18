@@ -1253,14 +1253,14 @@ for (;;)
       else
         {
         int recno = GET2(ecode, LINK_SIZE + 2);   /* Recursion group number*/
-        condition =  (recno == RREF_ANY || recno == md->recursive->group_num);
+        condition = (recno == RREF_ANY || recno == md->recursive->group_num);
 
         /* If the test is for recursion into a specific subpattern, and it is
         false, but the test was set up by name, scan the table to see if the
         name refers to any other numbers, and test them. The condition is true
         if any one is set. */
 
-        if (!condition && condcode == OP_NRREF && recno != RREF_ANY)
+        if (!condition && condcode == OP_NRREF)
           {
           uschar *slotA = md->name_table;
           for (i = 0; i < md->name_count; i++)

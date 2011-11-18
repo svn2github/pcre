@@ -3352,7 +3352,8 @@ for (;; ptr++)
       }
 
     *lengthptr += (int)(code - last_code);
-    DPRINTF(("length=%d added %d c=%c\n", *lengthptr, code - last_code, c));
+    DPRINTF(("length=%d added %d c=%c\n", *lengthptr, (int)(code - last_code),
+      c));
 
     /* If "previous" is set and it is not at the start of the work space, move
     it back to there, in order to avoid filling up the work space. Otherwise,

@@ -41,6 +41,8 @@ Version 8.21
     one behaved incorrectly. For example, (A){2,}+ behaved as if it was
     (A)(A)++ which meant that, after a subsequent mismatch, backtracking into 
     the first (A) could occur when it should not. 
+    
+10. Add a cast and remove a redundant test from the code. 
 
 
 Version 8.20 21-Oct-2011
