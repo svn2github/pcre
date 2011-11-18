@@ -4994,9 +4994,13 @@ for (;; ptr++)
       KETRPOS. (It turns out to be convenient at runtime to detect this kind of
       subpattern at both the start and at the end.) The use of special opcodes
       makes it possible to reduce greatly the stack usage in pcre_exec(). If
-      the group is preceded by OP_BRAZERO, convert this to OP_BRAPOSZERO. Then
-      cancel the possessive flag so that the default action below, of wrapping
-      everything inside atomic brackets, does not happen. */
+      the group is preceded by OP_BRAZERO, convert this to OP_BRAPOSZERO. 
+       
+      Then, if the minimum number of matches is 1 or 0, cancel the possessive
+      flag so that the default action below, of wrapping everything inside
+      atomic brackets, does not happen. When the minimum is greater than 1,
+      there will be earlier copies of the group, and so we still have to wrap 
+      the whole thing. */
 
       else
         {
@@ -5068,10 +5072,10 @@ for (;; ptr++)
               }
             
             /* If the minimum is zero, mark it as possessive, then unset the 
-            possessive flag. */
+            possessive flag when the minimum is 0 or 1. */
              
             if (brazeroptr != NULL) *brazeroptr = OP_BRAPOSZERO;
-            possessive_quantifier = FALSE;
+            if (repeat_min < 2) possessive_quantifier = FALSE;
             }
             
           /* Non-possessive quantifier */
@@ -5103,9 +5107,9 @@ for (;; ptr++)
     notation is just syntactic sugar, taken from Sun's Java package, but the
     special opcodes can optimize it.
 
-    Possessively repeated subpatterns have already been handled in the code
-    just above, so possessive_quantifier is always FALSE for them at this
-    stage.
+    Some (but not all) possessively repeated subpatterns have already been
+    completely handled in the code just above. For them, possessive_quantifier
+    is always FALSE at this stage.
 
     Note that the repeated item starts at tempcode, not at previous, which
     might be the first part of a string whose (former) last char we repeated.

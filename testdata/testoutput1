@@ -7012,4 +7012,27 @@ No match
     XcccddYX
  0: cccddY
 
+/^(a{2,3}){2,}+a/
+    aaaaaaa
+ 0: aaaaaaa
+ 1: aaa
+    ** Failers
+No match
+    aaaaaa
+No match
+    aaaaaaaaa 
+No match
+
+/^(a{2,3})++a/
+    ** Failers
+No match
+    aaaaaa
+No match
+
+/^(a{2,3})*+a/
+    ** Failers
+No match
+    aaaaaa
+No match
+
 /-- End of testinput1 --/

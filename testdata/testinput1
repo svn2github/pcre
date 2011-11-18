@@ -4291,4 +4291,18 @@
 /(?(?=c)c|d)*+Y/
     XcccddYX
 
+/^(a{2,3}){2,}+a/
+    aaaaaaa
+    ** Failers
+    aaaaaa
+    aaaaaaaaa 
+
+/^(a{2,3})++a/
+    ** Failers
+    aaaaaa
+
+/^(a{2,3})*+a/
+    ** Failers
+    aaaaaa
+
 /-- End of testinput1 --/

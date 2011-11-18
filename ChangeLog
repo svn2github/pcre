@@ -36,6 +36,11 @@ Version 8.21
     
 8.  A possessively repeated conditional subpattern such as (?(?=c)c|d)++ was
     being incorrectly compiled and would have given unpredicatble results. 
+    
+9.  A possessively repeated subpattern with minimum repeat count greater than 
+    one behaved incorrectly. For example, (A){2,}+ behaved as if it was
+    (A)(A)++ which meant that, after a subsequent mismatch, backtracking into 
+    the first (A) could occur when it should not. 
 
 
 Version 8.20 21-Oct-2011
