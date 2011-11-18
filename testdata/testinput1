@@ -4285,4 +4285,10 @@
 /(?<=a\v)c/
     a\nc
 
+/(?(?=c)c|d)++Y/
+    XcccddYX
+
+/(?(?=c)c|d)*+Y/
+    XcccddYX
+
 /-- End of testinput1 --/

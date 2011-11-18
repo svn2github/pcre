@@ -33,6 +33,9 @@ Version 8.21
     rejected were: (*ACCEPT), (*COMMIT), (*FAIL), (*MARK), (*PRUNE), (*SKIP), 
     (*THEN), \h, \H, \v, \V, and single character negative classes with fixed 
     repetitions, e.g. [^a]{3}, with and without PCRE_CASELESS.
+    
+8.  A possessively repeated conditional subpattern such as (?(?=c)c|d)++ was
+    being incorrectly compiled and would have given unpredicatble results. 
 
 
 Version 8.20 21-Oct-2011

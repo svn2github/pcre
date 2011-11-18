@@ -4424,7 +4424,7 @@ for (;; ptr++)
     past, but it no longer happens for non-repeated recursions. In fact, the
     repeated ones could be re-implemented independently so as not to need this,
     but for the moment we rely on the code for repeating groups. */
-
+    
     if (*previous == OP_RECURSE)
       {
       memmove(previous + 1 + LINK_SIZE, previous, 1 + LINK_SIZE);
@@ -4982,43 +4982,45 @@ for (;; ptr++)
       ONCE brackets can be converted into non-capturing brackets, as the
       behaviour of (?:xx)++ is the same as (?>xx)++ and this saves having to
       deal with possessive ONCEs specially.
+      
+      Otherwise, when we are doing the actual compile phase, check to see
+      whether this group is one that could match an empty string. If so,
+      convert the initial operator to the S form (e.g. OP_BRA -> OP_SBRA) so
+      that runtime checking can be done. [This check is also applied to ONCE
+      groups at runtime, but in a different way.]
 
-      Otherwise, if the quantifier was possessive, we convert the BRA code to
-      the POS form, and the KET code to KETRPOS. (It turns out to be convenient
-      at runtime to detect this kind of subpattern at both the start and at the
-      end.) The use of special opcodes makes it possible to reduce greatly the
-      stack usage in pcre_exec(). If the group is preceded by OP_BRAZERO,
-      convert this to OP_BRAPOSZERO. Then cancel the possessive flag so that
-      the default action below, of wrapping everything inside atomic brackets,
-      does not happen.
-
-      Then, when we are doing the actual compile phase, check to see whether
-      this group is one that could match an empty string. If so, convert the
-      initial operator to the S form (e.g. OP_BRA -> OP_SBRA) so that runtime
-      checking can be done. [This check is also applied to ONCE groups at
-      runtime, but in a different way.] */
+      Then, if the quantifier was possessive and the bracket is not a 
+      conditional, we convert the BRA code to the POS form, and the KET code to
+      KETRPOS. (It turns out to be convenient at runtime to detect this kind of
+      subpattern at both the start and at the end.) The use of special opcodes
+      makes it possible to reduce greatly the stack usage in pcre_exec(). If
+      the group is preceded by OP_BRAZERO, convert this to OP_BRAPOSZERO. Then
+      cancel the possessive flag so that the default action below, of wrapping
+      everything inside atomic brackets, does not happen. */
 
       else
         {
         uschar *ketcode = code - 1 - LINK_SIZE;
         uschar *bracode = ketcode - GET(ketcode, 1);
 
+        /* Convert possessive ONCE brackets to non-capturing */
+         
         if ((*bracode == OP_ONCE || *bracode == OP_ONCE_NC) &&
             possessive_quantifier) *bracode = OP_BRA;
 
+        /* For non-possessive ONCE brackets, all we need to do is to
+        set the KET. */
+          
         if (*bracode == OP_ONCE || *bracode == OP_ONCE_NC)
           *ketcode = OP_KETRMAX + repeat_type;
+        
+        /* Handle non-ONCE brackets and possessive ONCEs (which have been
+        converted to non-capturing above). */ 
+   
         else
           {
-          if (possessive_quantifier)
-            {
-            *bracode += 1;                   /* Switch to xxxPOS opcodes */
-            *ketcode = OP_KETRPOS;
-            if (brazeroptr != NULL) *brazeroptr = OP_BRAPOSZERO;
-            possessive_quantifier = FALSE;
-            }
-          else *ketcode = OP_KETRMAX + repeat_type;
-
+          /* In the compile phase, check for empty string matching. */
+             
           if (lengthptr == NULL)
             {
             uschar *scode = bracode;
@@ -5033,6 +5035,48 @@ for (;; ptr++)
               }
             while (*scode == OP_ALT);
             }
+          
+          /* Handle possessive quantifiers. */
+
+          if (possessive_quantifier)
+            {
+            /* For COND brackets, we wrap the whole thing in a possessively
+            repeated non-capturing bracket, because we have not invented POS
+            versions of the COND opcodes. Because we are moving code along, we
+            must ensure that any pending recursive references are updated. */
+   
+            if (*bracode == OP_COND || *bracode == OP_SCOND)
+              {
+              int nlen = (int)(code - bracode);
+              *code = OP_END;
+              adjust_recurse(bracode, 1 + LINK_SIZE, utf8, cd, save_hwm);
+              memmove(bracode + 1+LINK_SIZE, bracode, nlen);
+              code += 1 + LINK_SIZE;
+              nlen += 1 + LINK_SIZE;
+              *bracode = OP_BRAPOS;
+              *code++ = OP_KETRPOS;
+              PUTINC(code, 0, nlen);
+              PUT(bracode, 1, nlen);
+              }  
+ 
+            /* For non-COND brackets, we modify the BRA code and use KETRPOS. */
+             
+            else 
+              {
+              *bracode += 1;              /* Switch to xxxPOS opcodes */
+              *ketcode = OP_KETRPOS;
+              }
+            
+            /* If the minimum is zero, mark it as possessive, then unset the 
+            possessive flag. */
+             
+            if (brazeroptr != NULL) *brazeroptr = OP_BRAPOSZERO;
+            possessive_quantifier = FALSE;
+            }
+            
+          /* Non-possessive quantifier */
+           
+          else *ketcode = OP_KETRMAX + repeat_type;
           }
         }
       }

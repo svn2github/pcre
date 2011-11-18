@@ -7004,4 +7004,12 @@ No match
     a\nc
  0: c
 
+/(?(?=c)c|d)++Y/
+    XcccddYX
+ 0: cccddY
+
+/(?(?=c)c|d)*+Y/
+    XcccddYX
+ 0: cccddY
+
 /-- End of testinput1 --/

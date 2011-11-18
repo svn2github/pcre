@@ -4003,4 +4003,8 @@ AbcdCBefgBhiBqz
     *** Failers
     aAz
 
+/(?(?=c)c|d)++Y/BZ
+
+/(?(?=c)c|d)*+Y/BZ
+
 /-- End of testinput2 --/
