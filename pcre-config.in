@@ -25,6 +25,11 @@ case `uname -s` in
   ;;
 esac
 
+libS=
+if test @libdir@ != /usr/lib ; then
+  libS=-L@libdir@
+fi
+
 while test $# -gt 0; do
   case "$1" in
   -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
@@ -58,10 +63,10 @@ while test $# -gt 0; do
       echo $includes @PCRE_STATIC_CFLAG@
       ;;
     --libs-posix)
-      echo -L@libdir@$libR -lpcreposix -lpcre
+      echo $libS$libR -lpcreposix -lpcre
       ;;
     --libs)
-      echo -L@libdir@$libR -lpcre
+      echo $libS$libR -lpcre
       ;;
     --libs-cpp)
       if test @enable_cpp@ = yes ; then

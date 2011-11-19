@@ -46,6 +46,10 @@ Version 8.21
 
 11. JIT should use pcre_malloc/pcre_free for allocation.
 
+12. Updated pcre-config so that it no longer shows -L/usr/lib, which seems
+    best practice nowadays, and helps with cross-compiling. (If the exec_prefix 
+    is anything other than /usr, -L is still shown). 
+
 
 Version 8.20 21-Oct-2011
 ------------------------
