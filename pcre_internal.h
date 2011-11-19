@@ -1252,8 +1252,8 @@ value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
 definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
 corresponds to "." in DOTALL mode rather than an escape sequence. It is also
-used for [^] in JavaScript compatibility mode. In non-DOTALL mode, "." behaves
-like \N.
+used for [^] in JavaScript compatibility mode, and for \C in non-utf8 mode. In
+non-DOTALL mode, "." behaves like \N.
 
 The special values ESC_DU, ESC_du, etc. are used instead of ESC_D, ESC_d, etc.
 when PCRE_UCP is set, when replacement of \d etc by \p sequences is required.

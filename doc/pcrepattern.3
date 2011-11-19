@@ -1003,9 +1003,9 @@ processing unless the PCRE_NO_UTF8_CHECK option is used).
 PCRE does not allow \eC to appear in lookbehind assertions
 .\" HTML <a href="#lookbehind">
 .\" </a>
-(described below),
+(described below)
 .\"
-because in UTF-8 mode this would make it impossible to calculate the length of
+in UTF-8 mode, because this would make it impossible to calculate the length of
 the lookbehind.
 .P
 In general, the \eC escape sequence is best avoided in UTF-8 mode. However, one
@@ -1970,10 +1970,10 @@ temporarily move the current position back by the fixed length and then try to
 match. If there are insufficient characters before the current position, the
 assertion fails.
 .P
-PCRE does not allow the \eC escape (which matches a single byte in UTF-8 mode)
-to appear in lookbehind assertions, because it makes it impossible to calculate
-the length of the lookbehind. The \eX and \eR escapes, which can match
-different numbers of bytes, are also not permitted.
+In UTF-8 mode, PCRE does not allow the \eC escape (which matches a single byte,
+even in UTF-8 mode) to appear in lookbehind assertions, because it makes it
+impossible to calculate the length of the lookbehind. The \eX and \eR escapes,
+which can match different numbers of bytes, are also not permitted.
 .P
 .\" HTML <a href="#subpatternsassubroutines">
 .\" </a>
@@ -2874,6 +2874,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 November 2011
+Last updated: 19 November 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

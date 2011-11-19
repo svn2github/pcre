@@ -650,4 +650,7 @@
 /(abc)\1/8
    abc
 
+/ab\Cde/8
+    abXde
+
 /-- End of testinput4 --/

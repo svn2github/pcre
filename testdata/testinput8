@@ -700,4 +700,9 @@
     a\x{123}aa\>5
     a\x{123}aa\>6
 
+/ab\Cde/8
+    abXde
+
+/(?<=ab\Cde)X/8
+
 /-- End of testinput8 --/ 

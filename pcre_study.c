@@ -286,7 +286,9 @@ for (;;)
     cc++;
     break;
 
-    /* The single-byte matcher means we can't proceed in UTF-8 mode */
+    /* The single-byte matcher means we can't proceed in UTF-8 mode. (In 
+    non-UTF-8 mode \C will actually be turned into OP_ALLANY, so won't ever 
+    appear, but leave the code, just in case.) */
 
     case OP_ANYBYTE:
 #ifdef SUPPORT_UTF8

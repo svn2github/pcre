@@ -4703,4 +4703,10 @@
     \O6aaaa
     \O8aaaa
 
+/ab\Cde/
+    abXde
+    
+/(?<=ab\Cde)X/
+    abZdeX
+
 /-- End of testinput7 --/

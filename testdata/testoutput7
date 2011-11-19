@@ -7858,4 +7858,12 @@ Matched, but too many subsidiary matches
  2: aa
  3: a
 
+/ab\Cde/
+    abXde
+ 0: abXde
+    
+/(?<=ab\Cde)X/
+    abZdeX
+ 0: X
+
 /-- End of testinput7 --/

@@ -7035,4 +7035,22 @@ No match
     aaaaaa
 No match
 
+/ab\Cde/
+    abXde
+ 0: abXde
+    
+/(?<=ab\Cde)X/
+    abZdeX
+ 0: X
+
+/a[\CD]b/
+    aCb
+ 0: aCb
+    aDb 
+ 0: aDb
+
+/a[\C-X]b/
+    aJb
+ 0: aJb
+
 /-- End of testinput1 --/

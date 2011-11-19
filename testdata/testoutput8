@@ -1348,4 +1348,11 @@ No match
     a\x{123}aa\>6
 Error -24 (bad offset value)
 
+/ab\Cde/8
+    abXde
+Error -16 (item unsupported for DFA matching)
+
+/(?<=ab\Cde)X/8
+Failed: \C not allowed in lookbehind assertion at offset 10
+
 /-- End of testinput8 --/ 

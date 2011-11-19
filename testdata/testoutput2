@@ -12591,4 +12591,7 @@ No match
         End
 ------------------------------------------------------------------
 
+/(?<=ab\Cde)X/8
+Failed: \C not allowed in lookbehind assertion at offset 10
+
 /-- End of testinput2 --/

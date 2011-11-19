@@ -1136,4 +1136,8 @@ No match
    abc
 No match
 
+/ab\Cde/8
+    abXde
+ 0: abXde
+
 /-- End of testinput4 --/

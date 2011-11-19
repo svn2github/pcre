@@ -4305,4 +4305,17 @@
     ** Failers
     aaaaaa
 
+/ab\Cde/
+    abXde
+    
+/(?<=ab\Cde)X/
+    abZdeX
+
+/a[\CD]b/
+    aCb
+    aDb 
+
+/a[\C-X]b/
+    aJb
+
 /-- End of testinput1 --/

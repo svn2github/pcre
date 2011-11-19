@@ -4007,4 +4007,6 @@ AbcdCBefgBhiBqz
 
 /(?(?=c)c|d)*+Y/BZ
 
+/(?<=ab\Cde)X/8
+
 /-- End of testinput2 --/

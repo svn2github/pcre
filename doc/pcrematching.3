@@ -132,9 +132,9 @@ and not on others), is not supported. It causes an error if encountered.
 always 1, and the value of the \fIcapture_last\fP field is always -1.
 .P
 7. The \eC escape sequence, which (in the standard algorithm) matches a single
-byte, even in UTF-8 mode, is not supported because the alternative algorithm
-moves through the subject string one character at a time, for all active paths
-through the tree.
+byte, even in UTF-8 mode, is not supported in UTF-8 mode, because the
+alternative algorithm moves through the subject string one character at a time,
+for all active paths through the tree.
 .P
 8. Except for (*FAIL), the backtracking control verbs such as (*PRUNE) are not
 supported. (*FAIL) is supported, and behaves like a failing negative assertion.
@@ -191,6 +191,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 November 2010
+Last updated: 19 November 2011
 Copyright (c) 1997-2010 University of Cambridge.
 .fi

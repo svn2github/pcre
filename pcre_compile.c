@@ -1528,7 +1528,7 @@ Arguments:
 
 Returns:   the fixed length,
              or -1 if there is no fixed length,
-             or -2 if \C was encountered
+             or -2 if \C was encountered (in UTF-8 mode only)
              or -3 if an OP_RECURSE item was encountered and atend is FALSE
              or -4 if an unknown opcode was encountered (internal error)
 */
@@ -1702,7 +1702,8 @@ for (;;)
     cc++;
     break;
 
-    /* The single-byte matcher isn't allowed */
+    /* The single-byte matcher isn't allowed. This only happens in UTF-8 mode; 
+    otherwise \C is coded as OP_ALLANY. */
 
     case OP_ANYBYTE:
     return -2;
@@ -5600,8 +5601,8 @@ for (;; ptr++)
 
         /* ------------------------------------------------------------ */
         case CHAR_C:                 /* Callout - may be followed by digits; */
-        previous_callout = code;  /* Save for later completion */
-        after_manual_callout = 1; /* Skip one item before completing */
+        previous_callout = code;     /* Save for later completion */
+        after_manual_callout = 1;    /* Skip one item before completing */
         *code++ = OP_CALLOUT;
           {
           int n = 0;
@@ -6478,9 +6479,12 @@ for (;; ptr++)
           }
         else
 #endif
-          {
+        /* In non-UTF-8 mode, we turn \C into OP_ALLANY instead of OP_ANYBYTE
+        so that it works in DFA mode and in lookbehinds. */
+         
+          {  
           previous = (-c > ESC_b && -c < ESC_Z)? code : NULL;
-          *code++ = -c;
+          *code++ = (!utf8 && c == -ESC_C)? OP_ALLANY : -c;
           }
         }
       continue;
