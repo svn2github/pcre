@@ -44,6 +44,8 @@ Version 8.21
     
 10. Add a cast and remove a redundant test from the code. 
 
+11. JIT should use pcre_malloc/pcre_free for allocation.
+
 
 Version 8.20 21-Oct-2011
 ------------------------

@@ -52,6 +52,8 @@ POSSIBILITY OF SUCH DAMAGE.
 we just include it. This way we don't need to touch the build
 system files. */
 
+#define SLJIT_MALLOC(size) (pcre_malloc)(size)
+#define SLJIT_FREE(ptr) (pcre_free)(ptr)
 #define SLJIT_CONFIG_AUTO 1
 #define SLJIT_CONFIG_STATIC 1
 #define SLJIT_VERBOSE 0
