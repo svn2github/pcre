@@ -412,6 +412,7 @@ static const char error_texts[] =
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"
+  "\\N is not supported in a class\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -3770,6 +3771,11 @@ for (;; ptr++)
         if (*errorcodeptr != 0) goto FAILED;
 
         if (-c == ESC_b) c = CHAR_BS;    /* \b is backspace in a class */
+        else if (-c == ESC_N)            /* \N is not supported in a class */
+          {
+          *errorcodeptr = ERR71;
+          goto FAILED;  
+          }   
         else if (-c == ESC_Q)            /* Handle start of quoted string */
           {
           if (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)

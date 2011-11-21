@@ -52,6 +52,9 @@ Version 8.21
     
 13. In non-UTF-8 mode, \C is now supported in lookbehinds and DFA matching.
 
+14. Perl does not support \N without a following name in a [] class; PCRE now
+    also gives an error.
+
 
 Version 8.20 21-Oct-2011
 ------------------------

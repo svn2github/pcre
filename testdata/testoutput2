@@ -12594,4 +12594,10 @@ No match
 /(?<=ab\Cde)X/8
 Failed: \C not allowed in lookbehind assertion at offset 10
 
+/a[\NB]c/
+Failed: \N is not supported in a class at offset 3
+
+/a[B-\Nc]/ 
+Failed: \N is not supported in a class at offset 5
+
 /-- End of testinput2 --/

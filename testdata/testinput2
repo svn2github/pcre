@@ -4009,4 +4009,9 @@ AbcdCBefgBhiBqz
 
 /(?<=ab\Cde)X/8
 
+/a[\NB]c/
+    aNc
+    
+/a[B-\Nc]/ 
+
 /-- End of testinput2 --/
