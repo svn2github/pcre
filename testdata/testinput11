@@ -800,4 +800,7 @@ name)/K
 /(?<=a(*THEN)b)c/
     xabcd 
 
+/(a)(?2){2}(.)/
+    abcd
+
 /-- End of testinput11 --/

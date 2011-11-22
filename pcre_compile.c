@@ -4884,7 +4884,8 @@ for (;; ptr++)
             *lengthptr += delta;
             }
 
-          /* This is compiling for real */
+          /* This is compiling for real. If there is a set first byte for
+          the group, and we have not yet set a "required byte", set it. */
 
           else
             {
@@ -6015,11 +6016,14 @@ for (;; ptr++)
               }
             }
 
-          /* Insert the recursion/subroutine item. */
+          /* Insert the recursion/subroutine item. It does not have a set first
+          byte (relevant if it is repeated, because it will then be wrapped 
+          with ONCE brackets). */
 
           *code = OP_RECURSE;
           PUT(code, 1, (int)(called - cd->start_code));
           code += 1 + LINK_SIZE;
+          groupsetfirstbyte = FALSE; 
           }
 
         /* Can't determine a first byte now */

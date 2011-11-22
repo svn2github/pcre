@@ -1441,4 +1441,10 @@ MK: N
     xabcd 
  0: c
 
+/(a)(?2){2}(.)/
+    abcd
+ 0: abcd
+ 1: a
+ 2: d
+
 /-- End of testinput11 --/
