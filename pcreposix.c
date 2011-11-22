@@ -156,6 +156,7 @@ static const int eint[] = {
   /* 70 */
   REG_BADPAT,  /* internal error: unknown opcode in find_fixedlength() */ 
   REG_BADPAT,  /* \N is not supported in a class */ 
+  REG_BADPAT,  /* too many forward references */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */

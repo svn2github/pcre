@@ -54,6 +54,10 @@ Version 8.21
 
 14. Perl does not support \N without a following name in a [] class; PCRE now
     also gives an error.
+    
+15. If a forward reference was repeated with an upper limit of around 2000,
+    it caused the error "internal error: overran compiling workspace". This
+    is now checked, and causes "too many forward references" instead.  
 
 
 Version 8.20 21-Oct-2011

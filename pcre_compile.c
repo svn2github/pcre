@@ -413,6 +413,7 @@ static const char error_texts[] =
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"
   "\\N is not supported in a class\0" 
+  "too many forward references\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4895,6 +4896,11 @@ for (;; ptr++)
               memcpy(code, previous, len);
               for (hc = save_hwm; hc < this_hwm; hc += LINK_SIZE)
                 {
+                if (cd->hwm >= cd->start_workspace + WORK_SIZE_CHECK)
+                  {
+                  *errorcodeptr = ERR72;
+                  goto FAILED;  
+                  }   
                 PUT(cd->hwm, 0, GET(hc, 0) + len);
                 cd->hwm += LINK_SIZE;
                 }
@@ -4922,7 +4928,7 @@ for (;; ptr++)
         add 2 + 2*LINKSIZE to allow for the nesting that occurs. Do some
         paranoid checks to avoid integer overflow. The INT64_OR_DOUBLE type is
         a 64-bit integer type when available, otherwise double. */
-
+        
         if (lengthptr != NULL && repeat_max > 0)
           {
           int delta = repeat_max * (length_prevgroup + 1 + 2 + 2*LINK_SIZE) -
@@ -4962,6 +4968,11 @@ for (;; ptr++)
           memcpy(code, previous, len);
           for (hc = save_hwm; hc < this_hwm; hc += LINK_SIZE)
             {
+            if (cd->hwm >= cd->start_workspace + WORK_SIZE_CHECK)
+              {
+              *errorcodeptr = ERR72;
+              goto FAILED;  
+              }   
             PUT(cd->hwm, 0, GET(hc, 0) + len + ((i != 0)? 2+LINK_SIZE : 1));
             cd->hwm += LINK_SIZE;
             }
@@ -5977,8 +5988,13 @@ for (;; ptr++)
               /* Fudge the value of "called" so that when it is inserted as an
               offset below, what it actually inserted is the reference number
               of the group. Then remember the forward reference. */
-
+              
               called = cd->start_code + recno;
+              if (cd->hwm >= cd->start_workspace + WORK_SIZE_CHECK)
+                {
+                *errorcodeptr = ERR72;
+                goto FAILED;  
+                }   
               PUTINC(cd->hwm, 0, (int)(code + 1 - cd->start_code));
               }
 

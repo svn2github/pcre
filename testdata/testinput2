@@ -4014,4 +4014,8 @@ AbcdCBefgBhiBqz
     
 /a[B-\Nc]/ 
 
+/(a)(?2){0,1999}?(b)/
+
+/(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
+
 /-- End of testinput2 --/

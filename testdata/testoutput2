@@ -12600,4 +12600,9 @@ Failed: \N is not supported in a class at offset 3
 /a[B-\Nc]/ 
 Failed: \N is not supported in a class at offset 5
 
+/(a)(?2){0,1999}?(b)/
+Failed: too many forward references at offset 15
+
+/(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
+
 /-- End of testinput2 --/
