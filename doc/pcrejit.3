@@ -153,7 +153,13 @@ When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32K on the machine stack. However, some large or
 complicated patterns need more than this. The error PCRE_ERROR_JIT_STACKLIMIT
 is given when there is not enough stack. Three functions are provided for
-managing blocks of memory for use as JIT stacks.
+managing blocks of memory for use as JIT stacks. There is further discussion
+about the use of JIT stacks in the section entitled
+.\" HTML <a href="#stackcontrol">
+.\" </a>
+"JIT stack FAQ"
+.\"
+below. 
 .P
 The \fBpcre_jit_stack_alloc()\fP function creates a JIT stack. Its arguments
 are a starting size and a maximum size, and it returns a pointer to an opaque
@@ -217,6 +223,74 @@ is non-NULL and points to a \fBpcre_extra\fP block that is the result of a
 successful study with PCRE_STUDY_JIT_COMPILE.
 .
 .
+.\" HTML <a name="stackfaq"></a>
+.SH "JIT STACK FAQ"
+.rs
+.sp
+(1) Why do we need JIT stacks?
+.sp
+PCRE (and JIT) is a recursive, depth-first engine, so it needs a stack where
+the local data of the current node is pushed before checking its child nodes.
+Allocating real machine stack on some platforms is difficult. For example, the
+stack chain needs to be updated every time if we extend the stack on PowerPC.
+Although it is possible, its updating time overhead decreases performance. So
+we do the recursion in memory.
+.P
+(2) Why don't we simply allocate blocks of memory with \fBmalloc()\fP? 
+.sp
+Modern operating systems have a nice feature: they can reserve an address space
+instead of allocating memory. We can safely allocate memory pages inside this
+address space, so the stack could grow without moving memory data (this is
+important because of pointers). Thus we can allocate 1M address space, and use
+only a single memory page (usually 4K) if that is enough. However, we can still
+grow up to 1M anytime if needed.
+.P
+(3) Who "owns" a JIT stack? 
+.sp
+The owner of the stack is the user program, not the JIT studied pattern or
+anything else. The user program must ensure that if a stack is used by
+\fBpcre_exec()\fP, (that is, it is assigned to the pattern currently running),
+that stack must not be used by any other threads (to avoid overwriting the same
+memory area). The best practice for multithreaded programs is to allocate a
+stack for each thread, and return this stack through the JIT callback function.
+.P
+(4) When should a JIT stack be freed?
+.sp
+You can free a JIT stack at any time, as long as it will not be used by
+\fBpcre_exec()\fP again. When you assign the stack to a pattern, only a pointer
+is set. There is no reference counting or any other magic. You can free the
+patterns and stacks in any order, anytime. Just \fIdo not\fP call
+\fBpcre_exec()\fP with a pattern pointing to an already freed stack, as that
+will cause SEGFAULT. (Also, do not free a stack currently used by
+\fBpcre_exec()\fP in another thread). You can also replace the stack for a
+pattern at any time. You can even free the previous stack before assigning a
+replacement.
+.P
+(5) Should I allocate/free a stack every time before/after calling
+\fBpcre_exec()\fP?
+.sp
+No, because this is too costly in terms of resources. However, you could
+implement some clever idea which release the stack if it is not used in let's
+say two minutes. The JIT callback can help to achive this without keeping a
+list of the currently JIT studied patterns.
+.P
+(6) OK, the stack is for long term memory allocation. But what happens if a
+pattern causes stack overflow with a stack of 1M? Is that 1M kept until the
+stack is freed? 
+.sp
+Especially on embedded sytems, it might be a good idea to release
+memory sometimes without freeing the stack. There is no API for this at the
+moment. Probably a function call which returns with the currently allocated
+memory for any stack and another which allows releasing memory (shrinking the
+stack) would be a good idea if someone needs this.
+.P
+(7) This is too much of a headache. Isn't there any better solution for JIT
+stack handling? 
+.sp
+No, thanks to Windows. If POSIX threads were used everywhere, we could throw
+out this complicated API.
+.
+.
 .SH "EXAMPLE CODE"
 .rs
 .sp
@@ -253,7 +327,7 @@ callback.
 .rs
 .sp
 .nf
-Philip Hazel
+Philip Hazel (FAQ by Zoltan Herczeg)
 University Computing Service
 Cambridge CB2 3QH, England.
 .fi
@@ -263,6 +337,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 15 November 2011
+Last updated: 22 November 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
