@@ -3,7 +3,10 @@
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
     either because PCRE can't be compatible, or there is a possible Perl 
-    bug. --/  
+    bug.
+    
+    NOTE: This is a non-UTF-8 set of tests. When UTF-8 is needed, use test
+    5, and if Unicode Property Support is needed, use test 13. --/  
   
 /-- Originally, the Perl >= 5.10 things were in here too, but now I have 
     separated many (most?) of them out into test 11. However, there may still 
@@ -3980,11 +3983,6 @@ AbcdCBefgBhiBqz
 /^a\x1z/<JS>
     ax1z
 
-/^a\X41z/<JS>
-    aX41z
-    *** Failers
-    aAz
-
 /^a\u0041z/<JS>
     aAz
     *** Failers
@@ -4006,8 +4004,6 @@ AbcdCBefgBhiBqz
 /(?(?=c)c|d)++Y/BZ
 
 /(?(?=c)c|d)*+Y/BZ
-
-/(?<=ab\Cde)X/8
 
 /a[\NB]c/
     aNc

@@ -222,7 +222,7 @@ fi
 # PCRE tests that are not JIT or Perl-compatible: API, errors, internals
 
 if [ $do2 = yes ] ; then
-  echo "Test 2: API, errors, internals, and non-Perl stuff"
+  echo "Test 2: API, errors, internals, and non-Perl stuff (not UTF-8)"
   for opt in "" "-s" $jitopt; do
     $sim $valgrind ./pcretest -q $opt $testdata/testinput2 testtry
     if [ $? = 0 ] ; then

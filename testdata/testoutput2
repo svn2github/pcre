@@ -3,7 +3,10 @@
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
     either because PCRE can't be compatible, or there is a possible Perl 
-    bug. --/  
+    bug.
+    
+    NOTE: This is a non-UTF-8 set of tests. When UTF-8 is needed, use test
+    5, and if Unicode Property Support is needed, use test 13. --/  
   
 /-- Originally, the Perl >= 5.10 things were in here too, but now I have 
     separated many (most?) of them out into test 11. However, there may still 
@@ -12518,14 +12521,6 @@ No match
     ax1z
  0: ax1z
 
-/^a\X41z/<JS>
-    aX41z
- 0: aX41z
-    *** Failers
-No match
-    aAz
-No match
-
 /^a\u0041z/<JS>
     aAz
  0: aAz
@@ -12590,9 +12585,6 @@ No match
         Ket
         End
 ------------------------------------------------------------------
-
-/(?<=ab\Cde)X/8
-Failed: \C not allowed in lookbehind assertion at offset 10
 
 /a[\NB]c/
 Failed: \N is not supported in a class at offset 3

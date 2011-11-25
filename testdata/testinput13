@@ -573,4 +573,11 @@ of case for anything other than the ASCII letters. --/
 /^\X/8 
     ́réo
 
+/^a\X41z/<JS>
+    aX41z
+    *** Failers
+    aAz
+
+/(?<=ab\Cde)X/8
+
 /-- End of testinput13 --/
