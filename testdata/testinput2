@@ -3325,115 +3325,18 @@ a random value. /Ix
 /A(*PRUNE)B|A(*PRUNE)C/K
     AC
     
-/--- A whole lot of tests of verbs with arguments are here rather than in test
-     11 because Perl doesn't seem to follow its specification entirely 
-     correctly. ---/
-
-/--- Perl 5.11 sets $REGERROR on the AC failure case here; PCRE does not. It is
-     not clear how Perl defines "involved in the failure of the match". ---/ 
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/K
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-    
-/--- Check the use of names for success and failure. PCRE doesn't show these 
-names for success, though Perl does, contrary to its spec. ---/
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-    
-/--- An empty name does not pass back an empty string. It is the same as if no
-name were given. ---/ 
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
-    AB
-    CD 
-
-/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
-    
-/A(*PRUNE:A)B/K
-    ACAB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KSS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KSY
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KSS
-    C
-    D 
-
-/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-
-/--- Same --/
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
-    AAAC
-
 /--- This should fail; the SKIP advances by one, but when we get to AC, the
-     PRUNE kills it. ---/ 
+     PRUNE kills it. Perl behaves differently. ---/ 
     
 /A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
     AAAC
 
-/A(*:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
+/--- Mark names can be duplicated. Perl doesn't give a mark for this one,
+though PCRE does. ---/
 
-/--- This should fail, as a null name is the same as no name ---/
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
-    AAAC
-
-/--- This fails in PCRE, and I think that is in accordance with Perl's 
-     documentation, though in Perl it succeeds. ---/
-    
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
-    AAAC
-
-/--- Mark names can be duplicated ---/
-
-/A(*:A)B|X(*:A)Y/K
-    AABC
-    XXYZ 
-    
 /^A(*:A)B|^X(*:A)Y/K
     ** Failers
     XAQQ
-    
-/--- A check on what happens after hitting a mark and them bumping along to
-something that does not even start. Perl reports tags after the failures here, 
-though it does not when the individual letters are made into something 
-more complicated. ---/
-
-/A(*:A)B|XX(*:B)Y/K
-    AABC
-    XXYZ 
-    ** Failers
-    XAQQ  
-    XAQQXZZ  
-    AXQQQ 
-    AXXQQQ 
     
 /--- COMMIT at the start of a pattern should be the same as an anchor. Perl 
 optimizations defeat this. So does the PCRE optimization unless we disable it 
@@ -3444,78 +3347,6 @@ with \Y. ---/
     ** Failers
     DEFGABC\Y  
     
-/--- Repeat some tests with added studying. ---/
-
-/A(*COMMIT)B/+KS
-    ACABX
- 
-/A(*THEN)B|A(*THEN)C/KS
-    AC
-
-/A(*PRUNE)B|A(*PRUNE)C/KS
-    AC
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/KS
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/KS
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/KS
-    AB
-    CD 
-
-/A(*PRUNE:A)B/KS
-    ACAB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
-    D 
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xKS
-    AAAC
-    
-/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xKS
-    AAAC
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xKS
-    AAAC
-
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xKS
-    AAAC
-
-/A(*:A)B|XX(*:B)Y/KS
-    AABC
-    XXYZ 
-    ** Failers
-    XAQQ  
-    XAQQXZZ  
-    AXQQQ 
-    AXXQQQ 
-    
-/(*COMMIT)ABC/
-    ABCDEFG
-    ** Failers
-    DEFGABC\Y  
-
 /^(ab (c+(*THEN)cd) | xyz)/x
     abcccd  
 
@@ -4013,5 +3844,36 @@ AbcdCBefgBhiBqz
 /(a)(?2){0,1999}?(b)/
 
 /(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
+
+/--- This test, with something more complicated than individual letters, causes
+different behaviour in Perl. Perhaps it disables some optimization; no tag is
+passed back for the failures, whereas in PCRE there is a tag. ---/
+    
+/(A|P)(*:A)(B|P) | (X|P)(X|P)(*:B)(Y|P)/xK
+    AABC
+    XXYZ 
+    ** Failers
+    XAQQ  
+    XAQQXZZ  
+    AXQQQ 
+    AXXQQQ 
+
+/-- Perl doesn't give marks for these, though it does if the alternatives are
+replaced by single letters. --/
+    
+/(b|q)(*:m)f|a(*:n)w/K
+    aw 
+    ** Failers 
+    abc
+
+/(q|b)(*:m)f|a(*:n)w/K
+    aw 
+    ** Failers 
+    abc
+
+/-- After a partial match, the behaviour is as for a failure. --/
+
+/^a(*:X)bcde/K
+   abc\P
 
 /-- End of testinput2 --/

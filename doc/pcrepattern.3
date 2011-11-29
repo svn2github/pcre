@@ -2569,10 +2569,11 @@ failing negative assertion, they cause an error if encountered by
 If any of these verbs are used in an assertion or in a subpattern that is
 called as a subroutine (whether or not recursively), their effect is confined
 to that subpattern; it does not extend to the surrounding pattern, with one
-exception: a *MARK that is encountered in a positive assertion \fIis\fP passed
-back (compare capturing parentheses in assertions). Note that such subpatterns
-are processed as anchored at the point where they are tested. Note also that
-Perl's treatment of subroutines is different in some cases.
+exception: the name from a *(MARK), (*PRUNE), or (*THEN) that is encountered in
+a successful positive assertion \fIis\fP passed back when a match succeeds
+(compare capturing parentheses in assertions). Note that such subpatterns are
+processed as anchored at the point where they are tested. Note also that Perl's
+treatment of subroutines is different in some cases.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
@@ -2591,6 +2592,9 @@ included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
 when calling \fBpcre_compile()\fP or \fBpcre_exec()\fP, or by starting the
 pattern with (*NO_START_OPT).
+.P
+Experiments with Perl suggest that it too has similar optimizations, sometimes 
+leading to anomalous results.
 .
 .
 .SS "Verbs that act immediately"
@@ -2638,8 +2642,9 @@ starting point (see (*SKIP) below).
 A name is always required with this verb. There may be as many instances of
 (*MARK) as you like in a pattern, and their names do not have to be unique.
 .P
-When a match succeeds, the name of the last-encountered (*MARK) is passed back
-to the caller via the \fIpcre_extra\fP data structure, as described in the
+When a match succeeds, the name of the last-encountered (*MARK) on the matching 
+path is passed back to the caller via the \fIpcre_extra\fP data structure, as
+described in the
 .\" HTML <a href="pcreapi.html#extradata">
 .\" </a>
 section on \fIpcre_extra\fP
@@ -2648,12 +2653,11 @@ in the
 .\" HREF
 \fBpcreapi\fP
 .\"
-documentation. No data is returned for a partial match. Here is an example of
-\fBpcretest\fP output, where the /K modifier requests the retrieval and
-outputting of (*MARK) data:
+documentation. Here is an example of \fBpcretest\fP output, where the /K
+modifier requests the retrieval and outputting of (*MARK) data:
 .sp
-  /X(*MARK:A)Y|X(*MARK:B)Z/K
-  XY
+    re> /X(*MARK:A)Y|X(*MARK:B)Z/K
+  data> XY
    0: XY
   MK: A
   XZ
@@ -2669,31 +2673,17 @@ If (*MARK) is encountered in a positive assertion, its name is recorded and
 passed back if it is the last-encountered. This does not happen for negative
 assertions.
 .P
-A name may also be returned after a failed match if the final path through the
-pattern involves (*MARK). However, unless (*MARK) used in conjunction with
-(*COMMIT), this is unlikely to happen for an unanchored pattern because, as the
-starting point for matching is advanced, the final check is often with an empty
-string, causing a failure before (*MARK) is reached. For example:
+After a partial match or a failed match, the name of the last encountered
+(*MARK) in the entire match process is returned. For example:
 .sp
-  /X(*MARK:A)Y|X(*MARK:B)Z/K
-  XP
-  No match
-.sp
-There are three potential starting points for this match (starting with X,
-starting with P, and with an empty string). If the pattern is anchored, the
-result is different:
-.sp
-  /^X(*MARK:A)Y|^X(*MARK:B)Z/K
-  XP
+    re> /X(*MARK:A)Y|X(*MARK:B)Z/K
+  data> XP
   No match, mark = B
 .sp
-PCRE's start-of-match optimizations can also interfere with this. For example,
-if, as a result of a call to \fBpcre_study()\fP, it knows the minimum
-subject length for a match, a shorter subject will not be scanned at all.
-.P
-Note that similar anomalies (though different in detail) exist in Perl, no
-doubt for the same reasons. The use of (*MARK) data after a failed match of an
-unanchored pattern is not recommended, unless (*COMMIT) is involved.
+Note that in this unanchored example the mark is retained from the match
+attempt that started at the letter "X". Subsequent match attempts starting at 
+"P" and then with an empty string do not get as far as the (*MARK) item, but 
+nevertheless do not reset it.
 .
 .
 .SS "Verbs that act after backtracking"
@@ -2730,8 +2720,8 @@ Note that (*COMMIT) at the start of a pattern is not the same as an anchor,
 unless PCRE's start-of-match optimizations are turned off, as shown in this
 \fBpcretest\fP example:
 .sp
-  /(*COMMIT)abc/
-  xyzabc
+    re> /(*COMMIT)abc/
+  data> xyzabc
    0: abc
   xyzabc\eY
   No match
@@ -2752,10 +2742,8 @@ reached, or when matching to the right of (*PRUNE), but if there is no match to
 the right, backtracking cannot cross (*PRUNE). In simple cases, the use of
 (*PRUNE) is just an alternative to an atomic group or possessive quantifier,
 but there are some uses of (*PRUNE) that cannot be expressed in any other way.
-The behaviour of (*PRUNE:NAME) is the same as (*MARK:NAME)(*PRUNE) when the
-match fails completely; the name is passed back if this is the final attempt.
-(*PRUNE:NAME) does not pass back a name if the match succeeds. In an anchored
-pattern (*PRUNE) has the same effect as (*COMMIT).
+The behaviour of (*PRUNE:NAME) is the same as (*MARK:NAME)(*PRUNE). In an
+anchored pattern (*PRUNE) has the same effect as (*COMMIT).
 .sp
   (*SKIP)
 .sp
@@ -2781,8 +2769,7 @@ following pattern fails to match, the previous path through the pattern is
 searched for the most recent (*MARK) that has the same name. If one is found,
 the "bumpalong" advance is to the subject position that corresponds to that
 (*MARK) instead of to where (*SKIP) was encountered. If no (*MARK) with a
-matching name is found, normal "bumpalong" of one character happens (that is,
-the (*SKIP) is ignored).
+matching name is found, the (*SKIP) is ignored.
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
@@ -2796,9 +2783,8 @@ be used for a pattern-based if-then-else block:
 If the COND1 pattern matches, FOO is tried (and possibly further items after
 the end of the group if FOO succeeds); on failure, the matcher skips to the
 second alternative and tries COND2, without backtracking into COND1. The
-behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN) if the
-overall match fails. If (*THEN) is not inside an alternation, it acts like
-(*PRUNE).
+behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN).
+If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 .P
 Note that a subpattern that does not contain a | character is just a part of
 the enclosing alternative; it is not a nested alternation with only one
@@ -2876,6 +2862,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 November 2011
+Last updated: 29 November 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

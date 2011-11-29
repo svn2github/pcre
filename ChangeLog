@@ -61,6 +61,23 @@ Version 8.21
     
 16. A repeated forward reference in a pattern such as (a)(?2){2}(.) was
     incorrectly expecting the subject to contain another "a" after the start.
+    
+17. When (*SKIP:name) is activated without a corresponding (*MARK:name) earlier 
+    in the match, the SKIP should be ignored. This was not happening; instead 
+    the SKIP was being treated as NOMATCH. For patterns such as 
+    /A(*MARK:A)A+(*SKIP:B)Z|AAC/ this meant that the AAC branch was never 
+    tested. 
+    
+18. The behaviour of (*MARK), (*PRUNE), and (*THEN) has been reworked and is
+    now much more compatible with Perl, in particular in cases where the result
+    is a non-match for a non-anchored pattern. For example, if
+    /b(*:m)f|a(*:n)w/ is matched against "abc", the non-match returns the name
+    "m", where previously it did not return a name. A side effect of this 
+    change is that for partial matches, the last encountered mark name is 
+    returned, as for non matches. A number of tests that were previously not
+    Perl-compatible have been moved into the Perl-compatible test files. The
+    refactoring has had the pleasing side effect of removing one argument from
+    the match() function, thus reducing its stack requirements.
 
 
 Version 8.20 21-Oct-2011
