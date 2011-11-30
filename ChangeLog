@@ -56,8 +56,13 @@ Version 8.21
     also gives an error.
     
 15. If a forward reference was repeated with an upper limit of around 2000,
-    it caused the error "internal error: overran compiling workspace". This
-    is now checked, and causes "too many forward references" instead.  
+    it caused the error "internal error: overran compiling workspace". The 
+    maximum number of forward references (including repeats) was limited by the
+    internal workspace, and dependent on the LINK_SIZE. The code has been 
+    rewritten so that the workspace expands (via pcre_malloc) if necessary, and 
+    the default depends on LINK_SIZE. There is a new upper limit (for safety) 
+    of around 200,000 forward references. While doing this, I also speeded up 
+    the filling in of repeated forward references. 
     
 16. A repeated forward reference in a pattern such as (a)(?2){2}(.) was
     incorrectly expecting the subject to contain another "a" after the start.
@@ -78,7 +83,7 @@ Version 8.21
     Perl-compatible have been moved into the Perl-compatible test files. The
     refactoring has had the pleasing side effect of removing one argument from
     the match() function, thus reducing its stack requirements.
-
+    
 
 Version 8.20 21-Oct-2011
 ------------------------

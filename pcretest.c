@@ -191,6 +191,7 @@ static int locale_set = 0;
 static int show_malloc;
 static int use_utf8;
 static size_t gotten_store;
+static size_t first_gotten_store = 0;
 static const unsigned char *last_callout_mark = NULL;
 
 /* The buffers grow automatically if very long input lines are encountered. */
@@ -999,12 +1000,14 @@ return (cb->callout_number != callout_fail_id)? 0 :
 *************************************************/
 
 /* Alternative malloc function, to test functionality and save the size of a
-compiled re. The show_malloc variable is set only during matching. */
+compiled re, which is the first store request that pcre_compile() makes. The
+show_malloc variable is set only during matching. */
 
 static void *new_malloc(size_t size)
 {
 void *block = malloc(size);
 gotten_store = size;
+if (first_gotten_store == 0) first_gotten_store = size;
 if (show_malloc)
   fprintf(outfile, "malloc       %3d %p\n", (int)size, block);
 return block;
@@ -1520,7 +1523,7 @@ while (!done)
       (sbuf[4] << 24) | (sbuf[5] << 16) | (sbuf[6] << 8) | sbuf[7];
 
     re = (real_pcre *)new_malloc(true_size);
-    regex_gotten_store = gotten_store;
+    regex_gotten_store = first_gotten_store;
 
     if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
 
@@ -1777,6 +1780,7 @@ while (!done)
     if ((options & PCRE_UCP) != 0) cflags |= REG_UCP;
     if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
+    first_gotten_store = 0;
     rc = regcomp(&preg, (char *)p, cflags);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -1814,6 +1818,7 @@ while (!done)
           (double)CLOCKS_PER_SEC);
       }
 
+    first_gotten_store = 0;
     re = pcre_compile((char *)p, options, &error, &erroroffset, tables);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -1854,7 +1859,7 @@ while (!done)
 
     if (log_store)
       fprintf(outfile, "Memory allocation (code space): %d\n",
-        (int)(gotten_store -
+        (int)(first_gotten_store -
               sizeof(real_pcre) -
               ((real_pcre *)re)->name_count * ((real_pcre *)re)->name_entry_size));
 
@@ -1862,7 +1867,7 @@ while (!done)
     and remember the store that was got. */
 
     true_size = ((real_pcre *)re)->size;
-    regex_gotten_store = gotten_store;
+    regex_gotten_store = first_gotten_store;
 
     /* If -s or /S was present, study the regex to generate additional info to
     help with the matching, unless the pattern has the SS option, which

@@ -88,14 +88,21 @@ so this number is very generous.
 The same workspace is used during the second, actual compile phase for
 remembering forward references to groups so that they can be filled in at the
 end. Each entry in this list occupies LINK_SIZE bytes, so even when LINK_SIZE
-is 4 there is plenty of room. */
+is 4 there is plenty of room for most patterns. However, the memory can get 
+filled up by repetitions of forward references, for example patterns like
+/(?1){0,1999}(b)/, and one user did hit the limit. The code has been changed so 
+that the workspace is expanded using malloc() in this situation. The value
+below is therefore a minimum, and we put a maximum on it for safety. The
+minimum is now also defined in terms of LINK_SIZE so that the use of malloc() 
+kicks in at the same number of forward references in all cases. */
 
-#define COMPILE_WORK_SIZE (4096)
+#define COMPILE_WORK_SIZE (2048*LINK_SIZE)
+#define COMPILE_WORK_SIZE_MAX (100*COMPILE_WORK_SIZE)
 
 /* The overrun tests check for a slightly smaller size so that they detect the
 overrun before it actually does run off the end of the data block. */
 
-#define WORK_SIZE_CHECK (COMPILE_WORK_SIZE - 100)
+#define WORK_SIZE_SAFETY_MARGIN (100)
 
 
 /* Table for handling escaped characters in the range '0'-'z'. Positive returns
@@ -579,6 +586,44 @@ for (; n > 0; n--)
   }
 return s;
 }
+
+
+/*************************************************
+*           Expand the workspace                 *
+*************************************************/
+
+/* This function is called during the second compiling phase, if the number of 
+forward references fills the existing workspace, which is originally a block on 
+the stack. A larger block is obtained from malloc() unless the ultimate limit 
+has been reached or the increase will be rather small.
+
+Argument: pointer to the compile data block
+Returns:  0 if all went well, else an error number
+*/
+
+static int
+expand_workspace(compile_data *cd)
+{
+uschar *newspace;
+int newsize = cd->workspace_size * 2;
+
+if (newsize > COMPILE_WORK_SIZE_MAX) newsize = COMPILE_WORK_SIZE_MAX;
+if (cd->workspace_size >= COMPILE_WORK_SIZE_MAX ||
+    newsize - cd->workspace_size < WORK_SIZE_SAFETY_MARGIN)
+ return ERR72;
+
+newspace = (pcre_malloc)(newsize);
+if (newspace == NULL) return ERR21;
+
+memcpy(newspace, cd->start_workspace, cd->workspace_size);
+cd->hwm = (uschar *)newspace + (cd->hwm - cd->start_workspace);
+if (cd->workspace_size > COMPILE_WORK_SIZE) 
+  (pcre_free)((void *)cd->start_workspace);
+cd->start_workspace = newspace;
+cd->workspace_size = newsize;
+return 0;
+}
+
 
 
 /*************************************************
@@ -3332,7 +3377,8 @@ for (;; ptr++)
 #ifdef PCRE_DEBUG
     if (code > cd->hwm) cd->hwm = code;                 /* High water info */
 #endif
-    if (code > cd->start_workspace + WORK_SIZE_CHECK)   /* Check for overrun */
+    if (code > cd->start_workspace + cd->workspace_size - 
+        WORK_SIZE_SAFETY_MARGIN)                       /* Check for overrun */
       {
       *errorcodeptr = ERR52;
       goto FAILED;
@@ -3382,7 +3428,8 @@ for (;; ptr++)
   /* In the real compile phase, just check the workspace used by the forward
   reference list. */
 
-  else if (cd->hwm > cd->start_workspace + WORK_SIZE_CHECK)
+  else if (cd->hwm > cd->start_workspace + cd->workspace_size - 
+           WORK_SIZE_SAFETY_MARGIN)
     {
     *errorcodeptr = ERR52;
     goto FAILED;
@@ -4885,23 +4932,33 @@ for (;; ptr++)
             }
 
           /* This is compiling for real. If there is a set first byte for
-          the group, and we have not yet set a "required byte", set it. */
+          the group, and we have not yet set a "required byte", set it. Make 
+          sure there is enough workspace for copying forward references before 
+          doing the copy. */
 
           else
             {
             if (groupsetfirstbyte && reqbyte < 0) reqbyte = firstbyte;
+
             for (i = 1; i < repeat_min; i++)
               {
               uschar *hc;
               uschar *this_hwm = cd->hwm;
               memcpy(code, previous, len);
+              
+              while (cd->hwm > cd->start_workspace + cd->workspace_size -
+                     WORK_SIZE_SAFETY_MARGIN - (this_hwm - save_hwm))
+                {
+                int save_offset = save_hwm - cd->start_workspace;
+                int this_offset = this_hwm - cd->start_workspace;
+                *errorcodeptr = expand_workspace(cd);
+                if (*errorcodeptr != 0) goto FAILED;
+                save_hwm = (uschar *)cd->start_workspace + save_offset;
+                this_hwm = (uschar *)cd->start_workspace + this_offset;     
+                }    
+ 
               for (hc = save_hwm; hc < this_hwm; hc += LINK_SIZE)
                 {
-                if (cd->hwm >= cd->start_workspace + WORK_SIZE_CHECK)
-                  {
-                  *errorcodeptr = ERR72;
-                  goto FAILED;  
-                  }   
                 PUT(cd->hwm, 0, GET(hc, 0) + len);
                 cd->hwm += LINK_SIZE;
                 }
@@ -4967,13 +5024,23 @@ for (;; ptr++)
             }
 
           memcpy(code, previous, len);
+          
+          /* Ensure there is enough workspace for forward references before 
+          copying them. */
+          
+          while (cd->hwm > cd->start_workspace + cd->workspace_size -
+                 WORK_SIZE_SAFETY_MARGIN - (this_hwm - save_hwm))
+            {
+            int save_offset = save_hwm - cd->start_workspace;
+            int this_offset = this_hwm - cd->start_workspace;
+            *errorcodeptr = expand_workspace(cd);
+            if (*errorcodeptr != 0) goto FAILED;
+            save_hwm = (uschar *)cd->start_workspace + save_offset;
+            this_hwm = (uschar *)cd->start_workspace + this_offset;     
+            }    
+ 
           for (hc = save_hwm; hc < this_hwm; hc += LINK_SIZE)
             {
-            if (cd->hwm >= cd->start_workspace + WORK_SIZE_CHECK)
-              {
-              *errorcodeptr = ERR72;
-              goto FAILED;  
-              }   
             PUT(cd->hwm, 0, GET(hc, 0) + len + ((i != 0)? 2+LINK_SIZE : 1));
             cd->hwm += LINK_SIZE;
             }
@@ -5991,10 +6058,11 @@ for (;; ptr++)
               of the group. Then remember the forward reference. */
               
               called = cd->start_code + recno;
-              if (cd->hwm >= cd->start_workspace + WORK_SIZE_CHECK)
+              if (cd->hwm >= cd->start_workspace + cd->workspace_size -
+                  WORK_SIZE_SAFETY_MARGIN)
                 {
-                *errorcodeptr = ERR72;
-                goto FAILED;  
+                *errorcodeptr = expand_workspace(cd);
+                if (*errorcodeptr != 0) goto FAILED;  
                 }   
               PUTINC(cd->hwm, 0, (int)(code + 1 - cd->start_code));
               }
@@ -7246,7 +7314,8 @@ compile_data *cd = &compile_block;
 computing the amount of memory that is needed. Compiled items are thrown away
 as soon as possible, so that a fairly large buffer should be sufficient for
 this purpose. The same space is used in the second phase for remembering where
-to fill in forward references to subpatterns. */
+to fill in forward references to subpatterns. That may overflow, in which case 
+new memory is obtained from malloc(). */
 
 uschar cworkspace[COMPILE_WORK_SIZE];
 
@@ -7436,9 +7505,10 @@ cd->bracount = cd->final_bracount = 0;
 cd->names_found = 0;
 cd->name_entry_size = 0;
 cd->name_table = NULL;
-cd->start_workspace = cworkspace;
 cd->start_code = cworkspace;
 cd->hwm = cworkspace;
+cd->start_workspace = cworkspace;
+cd->workspace_size = COMPILE_WORK_SIZE;
 cd->start_pattern = (const uschar *)pattern;
 cd->end_pattern = (const uschar *)(pattern + strlen(pattern));
 cd->req_varyopt = 0;
@@ -7516,7 +7586,7 @@ cd->names_found = 0;
 cd->name_table = (uschar *)re + re->name_table_offset;
 codestart = cd->name_table + re->name_entry_size * re->name_count;
 cd->start_code = codestart;
-cd->hwm = cworkspace;
+cd->hwm = (uschar *)(cd->start_workspace);
 cd->req_varyopt = 0;
 cd->had_accept = FALSE;
 cd->check_lookbehind = FALSE;
@@ -7550,19 +7620,33 @@ if debugging, leave the test till after things are printed out. */
 if (code - codestart > length) errorcode = ERR23;
 #endif
 
-/* Fill in any forward references that are required. */
+/* Fill in any forward references that are required. There may be repeated 
+references; optimize for them, as searching a large regex takes time. */
 
-while (errorcode == 0 && cd->hwm > cworkspace)
+if (cd->hwm > cd->start_workspace)
   {
-  int offset, recno;
-  const uschar *groupptr;
-  cd->hwm -= LINK_SIZE;
-  offset = GET(cd->hwm, 0);
-  recno = GET(codestart, offset);
-  groupptr = _pcre_find_bracket(codestart, utf8, recno);
-  if (groupptr == NULL) errorcode = ERR53;
-    else PUT(((uschar *)codestart), offset, (int)(groupptr - codestart));
-  }
+  int prev_recno = -1; 
+  const uschar *groupptr = NULL;
+  while (errorcode == 0 && cd->hwm > cd->start_workspace)
+    {
+    int offset, recno;
+    cd->hwm -= LINK_SIZE;
+    offset = GET(cd->hwm, 0);
+    recno = GET(codestart, offset);
+    if (recno != prev_recno)
+      { 
+      groupptr = _pcre_find_bracket(codestart, utf8, recno);
+      prev_recno = recno;
+      }  
+    if (groupptr == NULL) errorcode = ERR53;
+      else PUT(((uschar *)codestart), offset, (int)(groupptr - codestart));
+    }
+  }   
+  
+/* If the workspace had to be expanded, free the new memory. */
+
+if (cd->workspace_size > COMPILE_WORK_SIZE) 
+  (pcre_free)((void *)cd->start_workspace); 
 
 /* Give an error if there's back reference to a non-existent capturing
 subpattern. */

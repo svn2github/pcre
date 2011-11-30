@@ -12318,7 +12318,6 @@ Failed: \N is not supported in a class at offset 3
 Failed: \N is not supported in a class at offset 5
 
 /(a)(?2){0,1999}?(b)/
-Failed: too many forward references at offset 15
 
 /(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
 
