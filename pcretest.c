@@ -1632,6 +1632,7 @@ while (!done)
   /* Look for options after final delimiter */
 
   options = 0;
+  study_options = 0; 
   log_store = showstore;  /* default from command line */
 
   while (*pp != 0)
