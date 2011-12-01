@@ -89,6 +89,10 @@ Version 8.21
     
 21. Retrieve executable code size support for the JIT compiler and fixing
     some warnings.
+    
+22. A caseless match of a UTF-8 character whose other case uses fewer bytes did 
+    not work when the shorter character appeared right at the end of the 
+    subject string.
 
 
 Version 8.20 21-Oct-2011

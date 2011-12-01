@@ -417,7 +417,7 @@ returns a negative (error) response, the outer incarnation must also return the
 same response. */
 
 /* These macros pack up tests that are used for partial matching, and which
-appears several times in the code. We set the "hit end" flag if the pointer is
+appear several times in the code. We set the "hit end" flag if the pointer is
 at the end of the subject and also past the start of the subject (i.e.
 something has been matched). For hard partial matching, we then return
 immediately. The second one is used when we already know we are past the end of
@@ -3037,31 +3037,36 @@ for (;;)
       }
     break;
 
-    /* Match a single character, caselessly */
+    /* Match a single character, caselessly. If we are at the end of the 
+    subject, give up immediately. */
 
     case OP_CHARI:
+    if (eptr >= md->end_subject)
+      {
+      SCHECK_PARTIAL(); 
+      RRETURN(MATCH_NOMATCH); 
+      }   
+ 
 #ifdef SUPPORT_UTF8
     if (utf8)
       {
       length = 1;
       ecode++;
       GETCHARLEN(fc, ecode, length);
-
-      if (length > md->end_subject - eptr)
-        {
-        CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
-        RRETURN(MATCH_NOMATCH);
-        }
-
+ 
       /* If the pattern character's value is < 128, we have only one byte, and
-      can use the fast lookup table. */
+      we know that its other case must also be one byte long, so we can use the
+      fast lookup table. We know that there is at least one byte left in the 
+      subject. */
 
       if (fc < 128)
         {
         if (md->lcc[*ecode++] != md->lcc[*eptr++]) RRETURN(MATCH_NOMATCH);
         }
 
-      /* Otherwise we must pick up the subject character */
+      /* Otherwise we must pick up the subject character. Note that we cannot
+      use the value of "length" to check for sufficient bytes left, because the
+      other case of the character may have more or fewer bytes.  */
 
       else
         {
@@ -3086,11 +3091,6 @@ for (;;)
 
     /* Non-UTF-8 mode */
       {
-      if (md->end_subject - eptr < 1)
-        {
-        SCHECK_PARTIAL();            /* This one can use SCHECK_PARTIAL() */
-        RRETURN(MATCH_NOMATCH);
-        }
       if (md->lcc[ecode[1]] != md->lcc[*eptr++]) RRETURN(MATCH_NOMATCH);
       ecode += 2;
       }
