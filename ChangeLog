@@ -87,6 +87,9 @@ Version 8.21
 19. If the /S+ option was used in pcretest to study a pattern using JIT, 
     subsequent uses of /S (without +) incorrectly behaved like /S+.
     
+21. Retrieve executable code size support for the JIT compiler and fixing
+    some warnings.
+
 
 Version 8.20 21-Oct-2011
 ------------------------
