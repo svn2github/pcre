@@ -216,6 +216,7 @@ compiling). */
 #define PCRE_INFO_HASCRORLF         14
 #define PCRE_INFO_MINLENGTH         15
 #define PCRE_INFO_JIT               16
+#define PCRE_INFO_JITSIZE           17
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */

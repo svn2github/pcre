@@ -1854,21 +1854,19 @@ while (!done)
     new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
     if ((get_options & PCRE_UTF8) != 0) use_utf8 = 1;
 
-    /* Print information if required. There are now two info-returning
-    functions. The old one has a limited interface and returns only limited
-    data. Check that it agrees with the newer one. */
+    /* Extract the size for possible writing before possibly flipping it,
+    and remember the store that was got. */
+
+    true_size = ((real_pcre *)re)->size;
+    regex_gotten_store = first_gotten_store;
+
+    /* Output code size information if requested */
 
     if (log_store)
       fprintf(outfile, "Memory allocation (code space): %d\n",
         (int)(first_gotten_store -
               sizeof(real_pcre) -
               ((real_pcre *)re)->name_count * ((real_pcre *)re)->name_entry_size));
-
-    /* Extract the size for possible writing before possibly flipping it,
-    and remember the store that was got. */
-
-    true_size = ((real_pcre *)re)->size;
-    regex_gotten_store = first_gotten_store;
 
     /* If -s or /S was present, study the regex to generate additional info to
     help with the matching, unless the pattern has the SS option, which
@@ -1894,9 +1892,18 @@ while (!done)
       if (error != NULL)
         fprintf(outfile, "Failed to study: %s\n", error);
       else if (extra != NULL)
+        { 
         true_study_size = ((pcre_study_data *)(extra->study_data))->size;
+        if (log_store)
+          {
+          size_t jitsize; 
+          new_info(re, extra, PCRE_INFO_JITSIZE, &jitsize);
+          if (jitsize != 0)
+            fprintf(outfile, "Memory allocation (JIT code): %d\n", jitsize); 
+          }    
+        }
       }
-
+      
     /* If /K was present, we set up for handling MARK data. */
 
     if (do_mark)
@@ -1947,7 +1954,9 @@ while (!done)
         }
       }
 
-    /* Extract information from the compiled data if required */
+    /* Extract information from the compiled data if required. There are now
+    two info-returning functions. The old one has a limited interface and
+    returns only limited data. Check that it agrees with the newer one. */
 
     SHOW_INFO:
 

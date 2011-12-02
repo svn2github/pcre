@@ -166,6 +166,7 @@ typedef struct executable_function {
   void *executable_func;
   pcre_jit_callback callback;
   void *userdata;
+  sljit_uw executable_size; 
 } executable_function;
 
 typedef struct jump_list {
@@ -6099,6 +6100,7 @@ pcre_study_data *study;
 uschar *ccend;
 executable_function *function;
 void *executable_func;
+sljit_uw executable_size;
 struct sljit_label *leave;
 struct sljit_label *mainloop = NULL;
 struct sljit_label *empty_match_found;
@@ -6428,6 +6430,7 @@ if (common->getucd != NULL)
 
 SLJIT_FREE(common->localptrs);
 executable_func = sljit_generate_code(compiler);
+executable_size = sljit_get_generated_code_size(compiler);             
 sljit_free_compiler(compiler);
 if (executable_func == NULL)
   return;
@@ -6442,6 +6445,7 @@ if (function == NULL)
   }
 
 function->executable_func = executable_func;
+function->executable_size = executable_size;
 function->callback = NULL;
 function->userdata = NULL;
 extra->executable_jit = function;
@@ -6528,6 +6532,12 @@ _pcre_jit_free(void *executable_func)
 executable_function *function = (executable_function*)executable_func;
 sljit_free_code(function->executable_func);
 SLJIT_FREE(function);
+}
+
+int
+_pcre_jit_get_size(void *executable_func)
+{
+return ((executable_function*)executable_func)->executable_size;
 }
 
 PCRE_EXP_DECL pcre_jit_stack *

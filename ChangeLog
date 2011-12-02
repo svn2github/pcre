@@ -96,6 +96,9 @@ Version 8.21
     
 23. Added some (int) casts to non-JIT modules to reduce warnings on 64-bit 
     systems. 
+    
+24. Added PCRE_INFO_JITSIZE to pass on the value from (21) above, and also 
+    output it when the /M option is used in pcretest. 
 
 
 Version 8.20 21-Oct-2011

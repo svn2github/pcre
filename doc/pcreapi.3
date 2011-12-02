@@ -1147,6 +1147,12 @@ particular pattern. See the
 .\"
 documentation for details of what can and cannot be handled.
 .sp
+  PCRE_INFO_JITSIZE
+.sp
+If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
+return the size of the JIT compiled code, otherwise return zero. The fourth
+argument should point to a \fBsize_t\fP variable.
+.sp
   PCRE_INFO_LASTLITERAL
 .sp
 Return the value of the rightmost literal byte that must exist in any matched
@@ -2547,6 +2553,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 December 2011
+Last updated: 02 December 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi
