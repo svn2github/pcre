@@ -3683,7 +3683,7 @@ for (;; ptr++)
 
       if (lengthptr != NULL)
         {
-        *lengthptr += class_utf8data - class_utf8data_base;
+        *lengthptr += (int)(class_utf8data - class_utf8data_base);
         class_utf8data = class_utf8data_base;
         }
 
@@ -4382,7 +4382,7 @@ for (;; ptr++)
 
       /* Now fill in the complete length of the item */
 
-      PUT(previous, 1, code - previous);
+      PUT(previous, 1, (int)(code - previous));
       break;   /* End of class handling */
       }
 #endif
@@ -4524,7 +4524,7 @@ for (;; ptr++)
         {
         uschar *lastchar = code - 1;
         while((*lastchar & 0xc0) == 0x80) lastchar--;
-        c = code - lastchar;            /* Length of UTF-8 character */
+        c = (int)(code - lastchar);     /* Length of UTF-8 character */
         memcpy(utf8_char, lastchar, c); /* Save the char */
         c |= 0x80;                      /* Flag c as a length */
         }

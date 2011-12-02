@@ -217,7 +217,7 @@ else
   while (length-- > 0) if (*p++ != *eptr++) return -1;
   }
 
-return eptr - eptr_start;
+return (int)(eptr - eptr_start);
 }
 
 
@@ -1070,7 +1070,7 @@ for (;;)
     if (offset < md->offset_max)
       {
       matched_once = FALSE;
-      code_offset = ecode - md->start_code;
+      code_offset = (int)(ecode - md->start_code);
 
       save_offset1 = md->offset_vector[offset];
       save_offset2 = md->offset_vector[offset+1];
@@ -1160,7 +1160,7 @@ for (;;)
 
     POSSESSIVE_NON_CAPTURE:
     matched_once = FALSE;
-    code_offset = ecode - md->start_code;
+    code_offset = (int)(ecode - md->start_code);
 
     for (;;)
       {
