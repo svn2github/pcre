@@ -268,7 +268,8 @@ one of the following escape sequences than the binary character it represents:
   \t        tab (hex 09)
   \ddd      character with octal code ddd, or back reference
   \xhh      character with hex code hh
-  \x{hhh..} character with hex code hhh..
+  \x{hhh..} character with hex code hhh.. (non-JavaScript mode)
+  \uhhhh    character with hex code hhhh (JavaScript mode only) 
 </pre>
 The precise effect of \cx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
@@ -280,12 +281,12 @@ values are valid. A lower case letter is converted to upper case, and then the
 0xc0 bits are flipped.)
 </P>
 <P>
-After \x, from zero to two hexadecimal digits are read (letters can be in
-upper or lower case). Any number of hexadecimal digits may appear between \x{
-and }, but the value of the character code must be less than 256 in non-UTF-8
-mode, and less than 2**31 in UTF-8 mode. That is, the maximum value in
-hexadecimal is 7FFFFFFF. Note that this is bigger than the largest Unicode code
-point, which is 10FFFF.
+By default, after \x, from zero to two hexadecimal digits are read (letters
+can be in upper or lower case). Any number of hexadecimal digits may appear
+between \x{ and }, but the value of the character code must be less than 256
+in non-UTF-8 mode, and less than 2**31 in UTF-8 mode. That is, the maximum
+value in hexadecimal is 7FFFFFFF. Note that this is bigger than the largest
+Unicode code point, which is 10FFFF.
 </P>
 <P>
 If characters other than hexadecimal digits appear between \x{ and }, or if
@@ -294,9 +295,17 @@ initial \x will be interpreted as a basic hexadecimal escape, with no
 following digits, giving a character whose value is zero.
 </P>
 <P>
+If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \x is 
+as just described only when it is followed by two hexadecimal digits. 
+Otherwise, it matches a literal "x" character. In JavaScript mode, support for
+code points greater than 256 is provided by \u, which must be followed by 
+four hexadecimal digits; otherwise it matches a literal "u" character.
+</P>
+<P>
 Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \x. There is no difference in the way they are handled. For
-example, \xdc is exactly the same as \x{dc}.
+syntaxes for \x (or by \u in JavaScript mode). There is no difference in the
+way they are handled. For example, \xdc is exactly the same as \x{dc} (or 
+\u00dc in JavaScript mode).
 </P>
 <P>
 After \0 up to two further octal digits are read. If there are fewer than two
@@ -338,12 +347,25 @@ zero, because no more than three octal digits are ever read.
 </P>
 <P>
 All the sequences that define a single character value can be used both inside
-and outside character classes. In addition, inside a character class, the
-sequence \b is interpreted as the backspace character (hex 08). The sequences
-\B, \N, \R, and \X are not special inside a character class. Like any other
-unrecognized escape sequences, they are treated as the literal characters "B",
-"N", "R", and "X" by default, but cause an error if the PCRE_EXTRA option is
-set. Outside a character class, these sequences have different meanings.
+and outside character classes. In addition, inside a character class, \b is
+interpreted as the backspace character (hex 08).
+</P>
+<P>
+\N is not allowed in a character class. \B, \R, and \X are not special
+inside a character class. Like other unrecognized escape sequences, they are
+treated as the literal characters "B", "R", and "X" by default, but cause an
+error if the PCRE_EXTRA option is set. Outside a character class, these
+sequences have different meanings.
+</P>
+<br><b>
+Unsupported escape sequences
+</b><br>
+<P>
+In Perl, the sequences \l, \L, \u, and \U are recognized by its string
+handler and used to modify the case of following characters. By default, PCRE
+does not support these escape sequences. However, if the PCRE_JAVASCRIPT_COMPAT
+option is set, \U matches a "U" character, and \u can be used to define a
+character by code point, as described in the previous section.
 </P>
 <br><b>
 Absolute and relative back references
@@ -389,7 +411,8 @@ Another use of backslash is for specifying generic character types:
 There is also the single sequence \N, which matches a non-newline character.
 This is the same as
 <a href="#fullstopdot">the "." metacharacter</a>
-when PCRE_DOTALL is not set.
+when PCRE_DOTALL is not set. Perl also uses \N to match characters by name; 
+PCRE does not support this.
 </P>
 <P>
 Each pair of lower and upper case escape sequences partitions the complete set
@@ -963,7 +986,8 @@ special meaning in a character class.
 <P>
 The escape sequence \N behaves like a dot, except that it is not affected by
 the PCRE_DOTALL option. In other words, it matches any character except one
-that signifies the end of a line.
+that signifies the end of a line. Perl also uses \N to match characters by
+name; PCRE does not support this.
 </P>
 <br><a name="SEC7" href="#TOC1">MATCHING A SINGLE BYTE</a><br>
 <P>
@@ -979,8 +1003,8 @@ processing unless the PCRE_NO_UTF8_CHECK option is used).
 </P>
 <P>
 PCRE does not allow \C to appear in lookbehind assertions
-<a href="#lookbehind">(described below),</a>
-because in UTF-8 mode this would make it impossible to calculate the length of
+<a href="#lookbehind">(described below)</a>
+in UTF-8 mode, because this would make it impossible to calculate the length of
 the lookbehind.
 </P>
 <P>
@@ -1926,10 +1950,10 @@ match. If there are insufficient characters before the current position, the
 assertion fails.
 </P>
 <P>
-PCRE does not allow the \C escape (which matches a single byte in UTF-8 mode)
-to appear in lookbehind assertions, because it makes it impossible to calculate
-the length of the lookbehind. The \X and \R escapes, which can match
-different numbers of bytes, are also not permitted.
+In UTF-8 mode, PCRE does not allow the \C escape (which matches a single byte,
+even in UTF-8 mode) to appear in lookbehind assertions, because it makes it
+impossible to calculate the length of the lookbehind. The \X and \R escapes,
+which can match different numbers of bytes, are also not permitted.
 </P>
 <P>
 <a href="#subpatternsassubroutines">"Subroutine"</a>
@@ -2511,10 +2535,11 @@ failing negative assertion, they cause an error if encountered by
 If any of these verbs are used in an assertion or in a subpattern that is
 called as a subroutine (whether or not recursively), their effect is confined
 to that subpattern; it does not extend to the surrounding pattern, with one
-exception: a *MARK that is encountered in a positive assertion <i>is</i> passed
-back (compare capturing parentheses in assertions). Note that such subpatterns
-are processed as anchored at the point where they are tested. Note also that
-Perl's treatment of subroutines is different in some cases.
+exception: the name from a *(MARK), (*PRUNE), or (*THEN) that is encountered in
+a successful positive assertion <i>is</i> passed back when a match succeeds
+(compare capturing parentheses in assertions). Note that such subpatterns are
+processed as anchored at the point where they are tested. Note also that Perl's
+treatment of subroutines is different in some cases.
 </P>
 <P>
 The new verbs make use of what was previously invalid syntax: an opening
@@ -2535,6 +2560,10 @@ included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
 when calling <b>pcre_compile()</b> or <b>pcre_exec()</b>, or by starting the
 pattern with (*NO_START_OPT).
+</P>
+<P>
+Experiments with Perl suggest that it too has similar optimizations, sometimes 
+leading to anomalous results.
 </P>
 <br><b>
 Verbs that act immediately
@@ -2583,17 +2612,17 @@ A name is always required with this verb. There may be as many instances of
 (*MARK) as you like in a pattern, and their names do not have to be unique.
 </P>
 <P>
-When a match succeeds, the name of the last-encountered (*MARK) is passed back
-to the caller via the <i>pcre_extra</i> data structure, as described in the
+When a match succeeds, the name of the last-encountered (*MARK) on the matching 
+path is passed back to the caller via the <i>pcre_extra</i> data structure, as
+described in the
 <a href="pcreapi.html#extradata">section on <i>pcre_extra</i></a>
 in the
 <a href="pcreapi.html"><b>pcreapi</b></a>
-documentation. No data is returned for a partial match. Here is an example of
-<b>pcretest</b> output, where the /K modifier requests the retrieval and
-outputting of (*MARK) data:
+documentation. Here is an example of <b>pcretest</b> output, where the /K
+modifier requests the retrieval and outputting of (*MARK) data:
 <pre>
-  /X(*MARK:A)Y|X(*MARK:B)Z/K
-  XY
+    re&#62; /X(*MARK:A)Y|X(*MARK:B)Z/K
+  data&#62; XY
    0: XY
   MK: A
   XZ
@@ -2611,32 +2640,17 @@ passed back if it is the last-encountered. This does not happen for negative
 assertions.
 </P>
 <P>
-A name may also be returned after a failed match if the final path through the
-pattern involves (*MARK). However, unless (*MARK) used in conjunction with
-(*COMMIT), this is unlikely to happen for an unanchored pattern because, as the
-starting point for matching is advanced, the final check is often with an empty
-string, causing a failure before (*MARK) is reached. For example:
+After a partial match or a failed match, the name of the last encountered
+(*MARK) in the entire match process is returned. For example:
 <pre>
-  /X(*MARK:A)Y|X(*MARK:B)Z/K
-  XP
-  No match
-</pre>
-There are three potential starting points for this match (starting with X,
-starting with P, and with an empty string). If the pattern is anchored, the
-result is different:
-<pre>
-  /^X(*MARK:A)Y|^X(*MARK:B)Z/K
-  XP
+    re&#62; /X(*MARK:A)Y|X(*MARK:B)Z/K
+  data&#62; XP
   No match, mark = B
 </pre>
-PCRE's start-of-match optimizations can also interfere with this. For example,
-if, as a result of a call to <b>pcre_study()</b>, it knows the minimum
-subject length for a match, a shorter subject will not be scanned at all.
-</P>
-<P>
-Note that similar anomalies (though different in detail) exist in Perl, no
-doubt for the same reasons. The use of (*MARK) data after a failed match of an
-unanchored pattern is not recommended, unless (*COMMIT) is involved.
+Note that in this unanchored example the mark is retained from the match
+attempt that started at the letter "X". Subsequent match attempts starting at 
+"P" and then with an empty string do not get as far as the (*MARK) item, but 
+nevertheless do not reset it.
 </P>
 <br><b>
 Verbs that act after backtracking
@@ -2675,8 +2689,8 @@ Note that (*COMMIT) at the start of a pattern is not the same as an anchor,
 unless PCRE's start-of-match optimizations are turned off, as shown in this
 <b>pcretest</b> example:
 <pre>
-  /(*COMMIT)abc/
-  xyzabc
+    re&#62; /(*COMMIT)abc/
+  data&#62; xyzabc
    0: abc
   xyzabc\Y
   No match
@@ -2697,10 +2711,8 @@ reached, or when matching to the right of (*PRUNE), but if there is no match to
 the right, backtracking cannot cross (*PRUNE). In simple cases, the use of
 (*PRUNE) is just an alternative to an atomic group or possessive quantifier,
 but there are some uses of (*PRUNE) that cannot be expressed in any other way.
-The behaviour of (*PRUNE:NAME) is the same as (*MARK:NAME)(*PRUNE) when the
-match fails completely; the name is passed back if this is the final attempt.
-(*PRUNE:NAME) does not pass back a name if the match succeeds. In an anchored
-pattern (*PRUNE) has the same effect as (*COMMIT).
+The behaviour of (*PRUNE:NAME) is the same as (*MARK:NAME)(*PRUNE). In an
+anchored pattern (*PRUNE) has the same effect as (*COMMIT).
 <pre>
   (*SKIP)
 </pre>
@@ -2726,8 +2738,7 @@ following pattern fails to match, the previous path through the pattern is
 searched for the most recent (*MARK) that has the same name. If one is found,
 the "bumpalong" advance is to the subject position that corresponds to that
 (*MARK) instead of to where (*SKIP) was encountered. If no (*MARK) with a
-matching name is found, normal "bumpalong" of one character happens (that is,
-the (*SKIP) is ignored).
+matching name is found, the (*SKIP) is ignored.
 <pre>
   (*THEN) or (*THEN:NAME)
 </pre>
@@ -2741,9 +2752,8 @@ be used for a pattern-based if-then-else block:
 If the COND1 pattern matches, FOO is tried (and possibly further items after
 the end of the group if FOO succeeds); on failure, the matcher skips to the
 second alternative and tries COND2, without backtracking into COND1. The
-behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN) if the
-overall match fails. If (*THEN) is not inside an alternation, it acts like
-(*PRUNE).
+behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN).
+If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 </P>
 <P>
 Note that a subpattern that does not contain a | character is just a part of
@@ -2819,7 +2829,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 19 October 2011
+Last updated: 29 November 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

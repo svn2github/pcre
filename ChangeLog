@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.21
-------------
+Version 8.21 05-Dec-2011
+------------------------
 
 1.  Updating the JIT compiler.
 
@@ -13,7 +13,7 @@ Version 8.21
     PCRE_EXTRA_TABLES is not suported by JIT, and should be checked before
     calling _pcre_jit_exec. Some extra comments are added.
 
-4.  Mark settings inside atomic groups that do not contain any capturing
+4.  (*MARK) settings inside atomic groups that do not contain any capturing
     parentheses, for example, (?>a(*:m)), were not being passed out. This bug
     was introduced by change 18 for 8.20.
 
@@ -99,6 +99,10 @@ Version 8.21
     
 24. Added PCRE_INFO_JITSIZE to pass on the value from (21) above, and also 
     output it when the /M option is used in pcretest. 
+    
+25. The CheckMan script was not being included in the distribution. Also, added
+    an explicit "perl" to run Perl scripts from the PrepareRelease script 
+    because this is reportedly needed in Windows. 
 
 
 Version 8.20 21-Oct-2011
