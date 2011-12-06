@@ -166,7 +166,7 @@ typedef struct executable_function {
   void *executable_func;
   pcre_jit_callback callback;
   void *userdata;
-  sljit_uw executable_size; 
+  sljit_uw executable_size;
 } executable_function;
 
 typedef struct jump_list {
@@ -6430,7 +6430,7 @@ if (common->getucd != NULL)
 
 SLJIT_FREE(common->localptrs);
 executable_func = sljit_generate_code(compiler);
-executable_size = sljit_get_generated_code_size(compiler);             
+executable_size = sljit_get_generated_code_size(compiler);
 sljit_free_compiler(compiler);
 if (executable_func == NULL)
   return;

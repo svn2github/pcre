@@ -4,7 +4,7 @@ News about PCRE releases
 Release 8.21 05-Dec-2011
 ------------------------
 
-This is mostly a bug-fix release. The only new feature is the ability to obtain 
+This is mostly a bug-fix release. The only new feature is the ability to obtain
 the memory used by the JIT compiler.
 
 

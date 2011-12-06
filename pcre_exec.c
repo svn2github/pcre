@@ -752,15 +752,15 @@ for (;;)
     RRETURN(MATCH_SKIP);
 
     /* Note that, for Perl compatibility, SKIP with an argument does NOT set
-    nomatch_mark. There is a flag that disables this opcode when re-matching a 
+    nomatch_mark. There is a flag that disables this opcode when re-matching a
     pattern that ended with a SKIP for which there was not a matching MARK. */
-     
+
     case OP_SKIP_ARG:
-    if (md->ignore_skip_arg) 
+    if (md->ignore_skip_arg)
       {
-      ecode += _pcre_OP_lengths[*ecode] + ecode[1]; 
+      ecode += _pcre_OP_lengths[*ecode] + ecode[1];
       break;
-      } 
+      }
     RMATCH(eptr, ecode + _pcre_OP_lengths[*ecode] + ecode[1], offset_top, md,
       eptrb, RM57);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
@@ -768,7 +768,7 @@ for (;;)
 
     /* Pass back the current skip name by overloading md->start_match_ptr and
     returning the special MATCH_SKIP_ARG return code. This will either be
-    caught by a matching MARK, or get to the top, where it causes a rematch 
+    caught by a matching MARK, or get to the top, where it causes a rematch
     with the md->ignore_skip_arg flag set. */
 
     md->start_match_ptr = ecode + 2;
@@ -3037,26 +3037,26 @@ for (;;)
       }
     break;
 
-    /* Match a single character, caselessly. If we are at the end of the 
+    /* Match a single character, caselessly. If we are at the end of the
     subject, give up immediately. */
 
     case OP_CHARI:
     if (eptr >= md->end_subject)
       {
-      SCHECK_PARTIAL(); 
-      RRETURN(MATCH_NOMATCH); 
-      }   
- 
+      SCHECK_PARTIAL();
+      RRETURN(MATCH_NOMATCH);
+      }
+
 #ifdef SUPPORT_UTF8
     if (utf8)
       {
       length = 1;
       ecode++;
       GETCHARLEN(fc, ecode, length);
- 
+
       /* If the pattern character's value is < 128, we have only one byte, and
       we know that its other case must also be one byte long, so we can use the
-      fast lookup table. We know that there is at least one byte left in the 
+      fast lookup table. We know that there is at least one byte left in the
       subject. */
 
       if (fc < 128)
@@ -6456,16 +6456,16 @@ for(;;)
   switch(rc)
     {
     /* If MATCH_SKIP_ARG reaches this level it means that a MARK that matched
-    the SKIP's arg was not found. In this circumstance, Perl ignores the SKIP 
-    entirely. The only way we can do that is to re-do the match at the same 
-    point, with a flag to force SKIP with an argument to be ignored. Just 
-    treating this case as NOMATCH does not work because it does not check other 
+    the SKIP's arg was not found. In this circumstance, Perl ignores the SKIP
+    entirely. The only way we can do that is to re-do the match at the same
+    point, with a flag to force SKIP with an argument to be ignored. Just
+    treating this case as NOMATCH does not work because it does not check other
     alternatives in patterns such as A(*SKIP:A)B|AC when the subject is AC. */
 
     case MATCH_SKIP_ARG:
     new_start_match = start_match;
     md->ignore_skip_arg = TRUE;
-    break; 
+    break;
 
     /* SKIP passes back the next starting point explicitly, but if it is the
     same as the match we have just done, treat it as NOMATCH. */
@@ -6614,7 +6614,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     }
 
   /* Return MARK data if requested */
-   
+
   if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_MARK) != 0)
     *(extra_data->mark) = (unsigned char *)(md->mark);
   DPRINTF((">>>> returning %d\n", rc));

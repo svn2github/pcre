@@ -1632,7 +1632,7 @@ while (!done)
   /* Look for options after final delimiter */
 
   options = 0;
-  study_options = 0; 
+  study_options = 0;
   log_store = showstore;  /* default from command line */
 
   while (*pp != 0)
@@ -1892,18 +1892,18 @@ while (!done)
       if (error != NULL)
         fprintf(outfile, "Failed to study: %s\n", error);
       else if (extra != NULL)
-        { 
+        {
         true_study_size = ((pcre_study_data *)(extra->study_data))->size;
         if (log_store)
           {
-          size_t jitsize; 
+          size_t jitsize;
           new_info(re, extra, PCRE_INFO_JITSIZE, &jitsize);
           if (jitsize != 0)
-            fprintf(outfile, "Memory allocation (JIT code): %d\n", jitsize); 
-          }    
+            fprintf(outfile, "Memory allocation (JIT code): %d\n", jitsize);
+          }
         }
       }
-      
+
     /* If /K was present, we set up for handling MARK data. */
 
     if (do_mark)

@@ -1741,7 +1741,7 @@ typedef struct compile_data {
   uschar *name_table;           /* The name/number table */
   int  names_found;             /* Number of entries so far */
   int  name_entry_size;         /* Size of each entry */
-  int  workspace_size;          /* Size of workspace */ 
+  int  workspace_size;          /* Size of workspace */
   int  bracount;                /* Count of capturing parens as we compile */
   int  final_bracount;          /* Saved value after first pass */
   int  top_backref;             /* Maximum back reference */
@@ -1825,7 +1825,7 @@ typedef struct match_data {
   BOOL   hitend;                /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
   BOOL   hasthen;               /* Pattern contains (*THEN) */
-  BOOL   ignore_skip_arg;       /* For re-run when SKIP name not found */ 
+  BOOL   ignore_skip_arg;       /* For re-run when SKIP name not found */
   const  uschar *start_code;    /* For use when recursing */
   USPTR  start_subject;         /* Start of the subject string */
   USPTR  end_subject;           /* End of the subject string */
@@ -1842,7 +1842,7 @@ typedef struct match_data {
   recursion_info *recursive;    /* Linked list of recursion data */
   void  *callout_data;          /* To pass back to callouts */
   const  uschar *mark;          /* Mark pointer to pass back on success */
-  const  uschar *nomatch_mark;  /* Mark pointer to pass back on failure */ 
+  const  uschar *nomatch_mark;  /* Mark pointer to pass back on failure */
   const  uschar *once_target;   /* Where to back up to for atomic groups */
 } match_data;
 

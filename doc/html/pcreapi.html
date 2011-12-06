@@ -651,20 +651,20 @@ pattern such as (\1)(a) succeeds when this option is set (assuming it can find
 an "a" in the subject), whereas it fails by default, for Perl compatibility.
 </P>
 <P>
-(3) \U matches an upper case "U" character; by default \U causes a compile 
+(3) \U matches an upper case "U" character; by default \U causes a compile
 time error (Perl uses \U to upper case subsequent characters).
 </P>
 <P>
-(4) \u matches a lower case "u" character unless it is followed by four 
-hexadecimal digits, in which case the hexadecimal number defines the code point 
-to match. By default, \u causes a compile time error (Perl uses it to upper 
+(4) \u matches a lower case "u" character unless it is followed by four
+hexadecimal digits, in which case the hexadecimal number defines the code point
+to match. By default, \u causes a compile time error (Perl uses it to upper
 case the following character).
 </P>
 <P>
-(5) \x matches a lower case "x" character unless it is followed by two 
-hexadecimal digits, in which case the hexadecimal number defines the code point 
-to match. By default, as in Perl, a hexadecimal number is always expected after 
-\x, but it may have zero, one, or two digits (so, for example, \xz matches a 
+(5) \x matches a lower case "x" character unless it is followed by two
+hexadecimal digits, in which case the hexadecimal number defines the code point
+to match. By default, as in Perl, a hexadecimal number is always expected after
+\x, but it may have zero, one, or two digits (so, for example, \xz matches a
 binary zero character followed by z).
 <pre>
   PCRE_MULTILINE

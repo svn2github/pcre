@@ -161,7 +161,7 @@ same callout number. However, they are set for all callouts.
 The \fImark\fP field is present from version 2 of the \fIpcre_callout\fP
 structure. In callouts from \fBpcre_exec()\fP it contains a pointer to the
 zero-terminated name of the most recently passed (*MARK), (*PRUNE), or (*THEN)
-item in the match, or NULL if no such items have been passed. Instances of 
+item in the match, or NULL if no such items have been passed. Instances of
 (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
 callouts from \fBpcre_dfa_exec()\fP this field always contains NULL.
 .

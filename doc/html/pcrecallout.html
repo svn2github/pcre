@@ -190,7 +190,7 @@ same callout number. However, they are set for all callouts.
 The <i>mark</i> field is present from version 2 of the <i>pcre_callout</i>
 structure. In callouts from <b>pcre_exec()</b> it contains a pointer to the
 zero-terminated name of the most recently passed (*MARK), (*PRUNE), or (*THEN)
-item in the match, or NULL if no such items have been passed. Instances of 
+item in the match, or NULL if no such items have been passed. Instances of
 (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
 callouts from <b>pcre_dfa_exec()</b> this field always contains NULL.
 </P>

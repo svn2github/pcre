@@ -43,7 +43,7 @@ way that falls back to the ordinary PCRE code if JIT is not available.
 If your program may sometimes be linked with versions of PCRE that are older
 than 8.20, but you want to use JIT when it is available, you can test
 the values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT macro such
-as PCRE_CONFIG_JIT, for compile-time control of your code. 
+as PCRE_CONFIG_JIT, for compile-time control of your code.
 .
 .
 .SH "SIMPLE USE OF JIT"
@@ -65,7 +65,7 @@ For a program that may be linked with pre-8.20 versions of PCRE, you can insert
   #define PCRE_STUDY_JIT_COMPILE 0
   #endif
 .sp
-so that no option is passed to \fBpcre_study()\fP, and then use something like 
+so that no option is passed to \fBpcre_study()\fP, and then use something like
 this to free the study data:
 .sp
   #ifdef PCRE_CONFIG_JIT
@@ -179,7 +179,7 @@ about the use of JIT stacks in the section entitled
 .\" </a>
 "JIT stack FAQ"
 .\"
-below. 
+below.
 .P
 The \fBpcre_jit_stack_alloc()\fP function creates a JIT stack. Its arguments
 are a starting size and a maximum size, and it returns a pointer to an opaque
@@ -256,7 +256,7 @@ stack chain needs to be updated every time if we extend the stack on PowerPC.
 Although it is possible, its updating time overhead decreases performance. So
 we do the recursion in memory.
 .P
-(2) Why don't we simply allocate blocks of memory with \fBmalloc()\fP? 
+(2) Why don't we simply allocate blocks of memory with \fBmalloc()\fP?
 .sp
 Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
@@ -265,7 +265,7 @@ important because of pointers). Thus we can allocate 1M address space, and use
 only a single memory page (usually 4K) if that is enough. However, we can still
 grow up to 1M anytime if needed.
 .P
-(3) Who "owns" a JIT stack? 
+(3) Who "owns" a JIT stack?
 .sp
 The owner of the stack is the user program, not the JIT studied pattern or
 anything else. The user program must ensure that if a stack is used by
@@ -296,7 +296,7 @@ list of the currently JIT studied patterns.
 .P
 (6) OK, the stack is for long term memory allocation. But what happens if a
 pattern causes stack overflow with a stack of 1M? Is that 1M kept until the
-stack is freed? 
+stack is freed?
 .sp
 Especially on embedded sytems, it might be a good idea to release
 memory sometimes without freeing the stack. There is no API for this at the
@@ -305,7 +305,7 @@ memory for any stack and another which allows releasing memory (shrinking the
 stack) would be a good idea if someone needs this.
 .P
 (7) This is too much of a headache. Isn't there any better solution for JIT
-stack handling? 
+stack handling?
 .sp
 No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.

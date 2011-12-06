@@ -98,9 +98,9 @@ extern "C" {
 /* Options. Some are compile-time only, some are run-time only, and some are
 both, so we keep them all distinct. However, almost all the bits in the options
 word are now used. In the long run, we may have to re-use some of the
-compile-time only bits for runtime options, or vice versa. In the comments 
-below, "compile", "exec", and "DFA exec" mean that the option is permitted to 
-be set for those functions; "used in" means that an option may be set only for 
+compile-time only bits for runtime options, or vice versa. In the comments
+below, "compile", "exec", and "DFA exec" mean that the option is permitted to
+be set for those functions; "used in" means that an option may be set only for
 compile, but is subsequently referenced in exec and/or DFA exec. Any of the
 compile-time options may be inspected during studying (and therefore JIT
 compiling). */

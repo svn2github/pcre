@@ -242,7 +242,7 @@ one of the following escape sequences than the binary character it represents:
   \eddd      character with octal code ddd, or back reference
   \exhh      character with hex code hh
   \ex{hhh..} character with hex code hhh.. (non-JavaScript mode)
-  \euhhhh    character with hex code hhhh (JavaScript mode only) 
+  \euhhhh    character with hex code hhhh (JavaScript mode only)
 .sp
 The precise effect of \ecx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
@@ -265,15 +265,15 @@ there is no terminating }, this form of escape is not recognized. Instead, the
 initial \ex will be interpreted as a basic hexadecimal escape, with no
 following digits, giving a character whose value is zero.
 .P
-If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \ex is 
-as just described only when it is followed by two hexadecimal digits. 
+If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \ex is
+as just described only when it is followed by two hexadecimal digits.
 Otherwise, it matches a literal "x" character. In JavaScript mode, support for
-code points greater than 256 is provided by \eu, which must be followed by 
+code points greater than 256 is provided by \eu, which must be followed by
 four hexadecimal digits; otherwise it matches a literal "u" character.
 .P
 Characters whose value is less than 256 can be defined by either of the two
 syntaxes for \ex (or by \eu in JavaScript mode). There is no difference in the
-way they are handled. For example, \exdc is exactly the same as \ex{dc} (or 
+way they are handled. For example, \exdc is exactly the same as \ex{dc} (or
 \eu00dc in JavaScript mode).
 .P
 After \e0 up to two further octal digits are read. If there are fewer than two
@@ -407,7 +407,7 @@ This is the same as
 .\" </a>
 the "." metacharacter
 .\"
-when PCRE_DOTALL is not set. Perl also uses \eN to match characters by name; 
+when PCRE_DOTALL is not set. Perl also uses \eN to match characters by name;
 PCRE does not support this.
 .P
 Each pair of lower and upper case escape sequences partitions the complete set
@@ -2593,7 +2593,7 @@ the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
 when calling \fBpcre_compile()\fP or \fBpcre_exec()\fP, or by starting the
 pattern with (*NO_START_OPT).
 .P
-Experiments with Perl suggest that it too has similar optimizations, sometimes 
+Experiments with Perl suggest that it too has similar optimizations, sometimes
 leading to anomalous results.
 .
 .
@@ -2642,7 +2642,7 @@ starting point (see (*SKIP) below).
 A name is always required with this verb. There may be as many instances of
 (*MARK) as you like in a pattern, and their names do not have to be unique.
 .P
-When a match succeeds, the name of the last-encountered (*MARK) on the matching 
+When a match succeeds, the name of the last-encountered (*MARK) on the matching
 path is passed back to the caller via the \fIpcre_extra\fP data structure, as
 described in the
 .\" HTML <a href="pcreapi.html#extradata">
@@ -2681,8 +2681,8 @@ After a partial match or a failed match, the name of the last encountered
   No match, mark = B
 .sp
 Note that in this unanchored example the mark is retained from the match
-attempt that started at the letter "X". Subsequent match attempts starting at 
-"P" and then with an empty string do not get as far as the (*MARK) item, but 
+attempt that started at the letter "X". Subsequent match attempts starting at
+"P" and then with an empty string do not get as far as the (*MARK) item, but
 nevertheless do not reset it.
 .
 .

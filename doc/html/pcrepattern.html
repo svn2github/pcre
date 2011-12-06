@@ -269,7 +269,7 @@ one of the following escape sequences than the binary character it represents:
   \ddd      character with octal code ddd, or back reference
   \xhh      character with hex code hh
   \x{hhh..} character with hex code hhh.. (non-JavaScript mode)
-  \uhhhh    character with hex code hhhh (JavaScript mode only) 
+  \uhhhh    character with hex code hhhh (JavaScript mode only)
 </pre>
 The precise effect of \cx is as follows: if x is a lower case letter, it
 is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
@@ -295,16 +295,16 @@ initial \x will be interpreted as a basic hexadecimal escape, with no
 following digits, giving a character whose value is zero.
 </P>
 <P>
-If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \x is 
-as just described only when it is followed by two hexadecimal digits. 
+If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \x is
+as just described only when it is followed by two hexadecimal digits.
 Otherwise, it matches a literal "x" character. In JavaScript mode, support for
-code points greater than 256 is provided by \u, which must be followed by 
+code points greater than 256 is provided by \u, which must be followed by
 four hexadecimal digits; otherwise it matches a literal "u" character.
 </P>
 <P>
 Characters whose value is less than 256 can be defined by either of the two
 syntaxes for \x (or by \u in JavaScript mode). There is no difference in the
-way they are handled. For example, \xdc is exactly the same as \x{dc} (or 
+way they are handled. For example, \xdc is exactly the same as \x{dc} (or
 \u00dc in JavaScript mode).
 </P>
 <P>
@@ -411,7 +411,7 @@ Another use of backslash is for specifying generic character types:
 There is also the single sequence \N, which matches a non-newline character.
 This is the same as
 <a href="#fullstopdot">the "." metacharacter</a>
-when PCRE_DOTALL is not set. Perl also uses \N to match characters by name; 
+when PCRE_DOTALL is not set. Perl also uses \N to match characters by name;
 PCRE does not support this.
 </P>
 <P>
@@ -2562,7 +2562,7 @@ when calling <b>pcre_compile()</b> or <b>pcre_exec()</b>, or by starting the
 pattern with (*NO_START_OPT).
 </P>
 <P>
-Experiments with Perl suggest that it too has similar optimizations, sometimes 
+Experiments with Perl suggest that it too has similar optimizations, sometimes
 leading to anomalous results.
 </P>
 <br><b>
@@ -2612,7 +2612,7 @@ A name is always required with this verb. There may be as many instances of
 (*MARK) as you like in a pattern, and their names do not have to be unique.
 </P>
 <P>
-When a match succeeds, the name of the last-encountered (*MARK) on the matching 
+When a match succeeds, the name of the last-encountered (*MARK) on the matching
 path is passed back to the caller via the <i>pcre_extra</i> data structure, as
 described in the
 <a href="pcreapi.html#extradata">section on <i>pcre_extra</i></a>
@@ -2648,8 +2648,8 @@ After a partial match or a failed match, the name of the last encountered
   No match, mark = B
 </pre>
 Note that in this unanchored example the mark is retained from the match
-attempt that started at the letter "X". Subsequent match attempts starting at 
-"P" and then with an empty string do not get as far as the (*MARK) item, but 
+attempt that started at the letter "X". Subsequent match attempts starting at
+"P" and then with an empty string do not get as far as the (*MARK) item, but
 nevertheless do not reset it.
 </P>
 <br><b>
