@@ -5698,7 +5698,8 @@ if (has_alternatives)
     {
     SLJIT_ASSERT(opcode == OP_COND || opcode == OP_SCOND);
     assert = CURRENT_AS(bracket_fallback)->u.assert;
-    if (assert->framesize >= 0 && (ccbegin[1 + LINK_SIZE] == OP_ASSERT_NOT || ccbegin[1 + LINK_SIZE] == OP_ASSERTBACK_NOT))
+    if ((ccbegin[1 + LINK_SIZE] == OP_ASSERT_NOT || ccbegin[1 + LINK_SIZE] == OP_ASSERTBACK_NOT) && assert->framesize >= 0)
+
       {
       OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), assert->localptr);
       add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));

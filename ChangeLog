@@ -111,6 +111,8 @@ Version 8.21 05-Dec-2011
     
 27. Updated RunTest.bat as provided by Sheri Pierce. 
 
+28. Fixed a possible uninitialized memory bug in pcre_jit_compile.c.
+
 
 Version 8.20 21-Oct-2011
 ------------------------
