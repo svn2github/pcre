@@ -108,6 +108,8 @@ Version 8.21 05-Dec-2011
     "starts with" bytes for the pattern, the data written to the file (though 
     never used) was taken from uninitialized memory and so caused valgrind to
     complain.  
+    
+27. Updated RunTest.bat as provided by Sheri Pierce. 
 
 
 Version 8.20 21-Oct-2011
