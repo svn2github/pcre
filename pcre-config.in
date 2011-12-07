@@ -70,7 +70,7 @@ while test $# -gt 0; do
       ;;
     --libs-cpp)
       if test @enable_cpp@ = yes ; then
-        echo -L@libdir@$libR -lpcrecpp -lpcre
+        echo $libS$libR -lpcrecpp -lpcre
       else
         echo "${usage}" 1>&2
       fi
