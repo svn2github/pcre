@@ -113,6 +113,9 @@ Version 8.21 05-Dec-2011
 
 28. Fixed a possible uninitialized memory bug in pcre_jit_compile.c.
 
+29. Computation of memory usage for the table of capturing group names was
+    giving an unnecessarily large value.
+
 
 Version 8.20 21-Oct-2011
 ------------------------

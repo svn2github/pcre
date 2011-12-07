@@ -194,7 +194,7 @@ Memory allocation (code space): 28
 ------------------------------------------------------------------
 
 /a(?P<name1>b|c)d(?P<longername2>e)/BM
-Memory allocation (code space): 42
+Memory allocation (code space): 36
 ------------------------------------------------------------------
   0  32 Bra
   3     a
@@ -212,7 +212,7 @@ Memory allocation (code space): 42
 ------------------------------------------------------------------
 
 /(?:a(?P<c>c(?P<d>d)))(?P<a>a)/BM
-Memory allocation (code space): 54
+Memory allocation (code space): 45
 ------------------------------------------------------------------
   0  41 Bra
   3  25 Bra
@@ -232,7 +232,7 @@ Memory allocation (code space): 54
 ------------------------------------------------------------------
 
 /(?P<a>a)...(?P=a)bbb(?P>a)d/BM
-Memory allocation (code space): 37
+Memory allocation (code space): 34
 ------------------------------------------------------------------
   0  30 Bra
   3   7 CBra 1
