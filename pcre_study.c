@@ -1321,12 +1321,12 @@ if (bits_set || min > 0
 
   study->size = sizeof(pcre_study_data);
   study->flags = 0;
-  
+
   /* Set the start bits always, to avoid unset memory errors if the
   study data is written to a file, but set the flag only if any of the bits
-  are set, to save time looking when none are. */  
+  are set, to save time looking when none are. */
 
-  if (bits_set) 
+  if (bits_set)
     {
     study->flags |= PCRE_STUDY_MAPPED;
     memcpy(study->start_bits, start_bits, sizeof(start_bits));

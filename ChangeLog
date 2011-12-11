@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.21 05-Dec-2011
+Version 8.21 12-Dec-2011
 ------------------------
 
 1.  Updating the JIT compiler.
@@ -103,13 +103,13 @@ Version 8.21 05-Dec-2011
 25. The CheckMan script was not being included in the distribution. Also, added
     an explicit "perl" to run Perl scripts from the PrepareRelease script
     because this is reportedly needed in Windows.
-    
+
 26. If study data was being save in a file and studying had not found a set of
-    "starts with" bytes for the pattern, the data written to the file (though 
+    "starts with" bytes for the pattern, the data written to the file (though
     never used) was taken from uninitialized memory and so caused valgrind to
-    complain.  
-    
-27. Updated RunTest.bat as provided by Sheri Pierce. 
+    complain.
+
+27. Updated RunTest.bat as provided by Sheri Pierce.
 
 28. Fixed a possible uninitialized memory bug in pcre_jit_compile.c.
 
