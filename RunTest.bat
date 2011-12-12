@@ -19,6 +19,7 @@
 @rem 15 requires absence of jit support
 @rem Sheri P also added override tests for study and jit testing
 @rem JIT testing n/a for tests 7-10, removed JIT override test for them
+@rem removed override tests for 14-15
 
 setlocal enabledelayedexpansion
 if [%srcdir%]==[] (
@@ -325,8 +326,6 @@ if %jit% EQU 0 (
   goto :eof
 )
   call :runsub 14 testout "JIT-specific features - have JIT" -q
-  call :runsub 14 testoutstudy "Test with Study Override" -q -s
-  call :runsub 14 testoutjit "Test with JIT Override" -q -s+
 goto :eof
 
 :do15
@@ -335,7 +334,6 @@ goto :eof
   goto :eof
 )
   call :runsub 15 testout "JIT-specific features - no JIT" -q
-  call :runsub 15 testoutstudy "Test with Study Override" -q -s
 goto :eof
 
 :conferror
