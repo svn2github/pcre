@@ -1,6 +1,16 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.22
+------------
+
+1.  Renamed "isnumber" as "is_a_number" because in some Mac environments this
+    name is defined in ctype.h.
+    
+2.  Fixed a bug in the code for calculating the fixed length of lookbehind
+    assertions.
+      
+
 Version 8.21 12-Dec-2011
 ------------------------
 
