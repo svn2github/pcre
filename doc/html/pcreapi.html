@@ -649,6 +649,23 @@ character). Thus, the pattern AB]CD becomes illegal when this option is set.
 string (by default this causes the current matching alternative to fail). A
 pattern such as (\1)(a) succeeds when this option is set (assuming it can find
 an "a" in the subject), whereas it fails by default, for Perl compatibility.
+</P>
+<P>
+(3) \U matches an upper case "U" character; by default \U causes a compile
+time error (Perl uses \U to upper case subsequent characters).
+</P>
+<P>
+(4) \u matches a lower case "u" character unless it is followed by four
+hexadecimal digits, in which case the hexadecimal number defines the code point
+to match. By default, \u causes a compile time error (Perl uses it to upper
+case the following character).
+</P>
+<P>
+(5) \x matches a lower case "x" character unless it is followed by two
+hexadecimal digits, in which case the hexadecimal number defines the code point
+to match. By default, as in Perl, a hexadecimal number is always expected after
+\x, but it may have zero, one, or two digits (so, for example, \xz matches a
+binary zero character followed by z).
 <pre>
   PCRE_MULTILINE
 </pre>
@@ -1127,6 +1144,12 @@ particular pattern. See the
 <a href="pcrejit.html"><b>pcrejit</b></a>
 documentation for details of what can and cannot be handled.
 <pre>
+  PCRE_INFO_JITSIZE
+</pre>
+If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
+return the size of the JIT compiled code, otherwise return zero. The fourth
+argument should point to a <b>size_t</b> variable.
+<pre>
   PCRE_INFO_LASTLITERAL
 </pre>
 Return the value of the rightmost literal byte that must exist in any matched
@@ -1235,10 +1258,13 @@ For such patterns, the PCRE_ANCHORED bit is set in the options returned by
 <pre>
   PCRE_INFO_SIZE
 </pre>
-Return the size of the compiled pattern, that is, the value that was passed as
-the argument to <b>pcre_malloc()</b> when PCRE was getting memory in which to
-place the compiled data. The fourth argument should point to a <b>size_t</b>
-variable.
+Return the size of the compiled pattern. The fourth argument should point to a
+<b>size_t</b> variable. This value does not include the size of the <b>pcre</b>
+structure that is returned by <b>pcre_compile()</b>. The value that is passed as
+the argument to <b>pcre_malloc()</b> when <b>pcre_compile()</b> is getting memory
+in which to place the compiled data is the value returned by this option plus
+the size of the <b>pcre</b> structure. Studying a compiled pattern, with or
+without JIT, does not alter the value returned by this option.
 <pre>
   PCRE_INFO_STUDYSIZE
 </pre>
@@ -2486,7 +2512,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC24" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 23 September 2011
+Last updated: 02 December 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

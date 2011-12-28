@@ -6,7 +6,7 @@
 its pattern matching. On a Unix or Win32 system it can recurse into
 directories.
 
-           Copyright (c) 1997-2011 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -1410,7 +1410,7 @@ while (ptr < endptr)
         and its line-ending characters (if they matched the pattern), so there
         may be no more to print. */
 
-        plength = (linelength + endlinelength) - startoffset;
+        plength = (int)((linelength + endlinelength) - startoffset);
         if (plength > 0) FWRITE(ptr + startoffset, 1, plength, stdout);
         }
 
@@ -1462,7 +1462,7 @@ while (ptr < endptr)
 
   if (input_line_buffered && bufflength < (size_t)bufsize)
     {
-    int add = read_one_line(ptr, bufsize - (ptr - main_buffer), in);
+    int add = read_one_line(ptr, bufsize - (int)(ptr - main_buffer), in);
     bufflength += add;
     endptr += add;
     }

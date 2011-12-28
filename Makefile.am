@@ -35,7 +35,6 @@ dist_html_DATA = \
   doc/html/pcre_get_stringtable_entries.html \
   doc/html/pcre_get_substring.html \
   doc/html/pcre_get_substring_list.html \
-  doc/html/pcre_info.html \
   doc/html/pcre_jit_stack_alloc.html \
   doc/html/pcre_jit_stack_free.html \
   doc/html/pcre_maketables.html \
@@ -79,7 +78,7 @@ check_SCRIPTS =
 dist_noinst_SCRIPTS =
 
 # Some of the binaries we make are to be installed, and others are
-# (non-user-visible) helper programs needed to build libpcre.
+# (non-user-visible) helper programs needed to build libpcre or libpcre16.
 bin_PROGRAMS =
 noinst_PROGRAMS =
 
@@ -100,6 +99,7 @@ EXTRA_DIST += \
 # These files are used in the preparation of a release
 EXTRA_DIST += \
   PrepareRelease \
+  CheckMan \
   CleanTxt \
   Detrail \
   132html \
@@ -168,10 +168,15 @@ pcre_chartables.c: $(srcdir)/pcre_chartables.c.dist
 
 endif # WITH_REBUILD_CHARTABLES
 
+BUILT_SOURCES = pcre_chartables.c
 
 ## The main pcre library
+
+# Build the 8 bit library if it is enabled.
+if WITH_PCRE8
 lib_LTLIBRARIES += libpcre.la
 libpcre_la_SOURCES = \
+  pcre_byte_order.c \
   pcre_compile.c \
   pcre_config.c \
   pcre_dfa_exec.c \
@@ -179,16 +184,15 @@ libpcre_la_SOURCES = \
   pcre_fullinfo.c \
   pcre_get.c \
   pcre_globals.c \
-  pcre_info.c \
   pcre_internal.h \
   pcre_jit_compile.c \
   pcre_maketables.c \
   pcre_newline.c \
   pcre_ord2utf8.c \
   pcre_refcount.c \
+  pcre_string_utils.c \
   pcre_study.c \
   pcre_tables.c \
-  pcre_try_flipped.c \
   pcre_ucd.c \
   pcre_valid_utf8.c \
   pcre_version.c \
@@ -199,10 +203,44 @@ libpcre_la_SOURCES = \
 nodist_libpcre_la_SOURCES = \
   pcre_chartables.c
 
-# The pcre_printint.src file is #included by some source files, so it must be
-# distributed. The pcre_chartables.c.dist file is the default version of
-# pcre_chartables.c, used unless --enable-rebuild-chartables is specified.
-EXTRA_DIST += pcre_printint.src pcre_chartables.c.dist
+endif # WITH_PCRE8
+
+# Build the 16 bit library if it is enabled.
+if WITH_PCRE16
+lib_LTLIBRARIES += libpcre16.la
+libpcre16_la_SOURCES = \
+  pcre16_byte_order.c \
+  pcre16_chartables.c \
+  pcre16_compile.c \
+  pcre16_config.c \
+  pcre16_dfa_exec.c \
+  pcre16_exec.c \
+  pcre16_fullinfo.c \
+  pcre16_get.c \
+  pcre16_globals.c \
+  pcre16_jit_compile.c \
+  pcre16_maketables.c \
+  pcre16_newline.c \
+  pcre16_ord2utf16.c \
+  pcre16_refcount.c \
+  pcre16_string_utils.c \
+  pcre16_study.c \
+  pcre16_tables.c \
+  pcre16_ucd.c \
+  pcre16_utf16_utils.c \
+  pcre16_valid_utf16.c \
+  pcre16_version.c \
+  pcre16_xclass.c
+
+## This file is generated as part of the building process, so don't distribute.
+nodist_libpcre16_la_SOURCES = \
+  pcre_chartables.c
+
+endif # WITH_PCRE16
+
+# The pcre_chartables.c.dist file is the default version of pcre_chartables.c,
+# used unless --enable-rebuild-chartables is specified.
+EXTRA_DIST += pcre_chartables.c.dist
 
 # The JIT compiler lives in a separate directory, but its files are #included
 # when pcre_jit_compile.c is processed, so they must be distributed.
@@ -224,7 +262,12 @@ EXTRA_DIST += \
   sljit/sljitNativeX86_common.c \
   sljit/sljitUtils.c
 
+if WITH_PCRE8
 libpcre_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
+endif # WITH_PCRE8
+if WITH_PCRE16
+libpcre16_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
+endif # WITH_PCRE16
 
 CLEANFILES += pcre_chartables.c
 
@@ -233,15 +276,23 @@ if WITH_JIT
 TESTS += pcre_jit_test
 noinst_PROGRAMS += pcre_jit_test
 pcre_jit_test_SOURCES = pcre_jit_test.c
-pcre_jit_test_LDADD = libpcre.la
+pcre_jit_test_LDADD =
+if WITH_PCRE8
+pcre_jit_test_LDADD += libpcre.la
+endif # WITH_PCRE8
+if WITH_PCRE16
+pcre_jit_test_LDADD += libpcre16.la
+endif # WITH_PCRE16
 endif # WITH_JIT
 
 ## A version of the main pcre library that has a posix re API.
+if WITH_PCRE8
 lib_LTLIBRARIES += libpcreposix.la
 libpcreposix_la_SOURCES = \
   pcreposix.c
 libpcreposix_la_LDFLAGS = $(EXTRA_LIBPCREPOSIX_LDFLAGS)
 libpcreposix_la_LIBADD = libpcre.la
+endif # WITH_PCRE8
 
 ## There's a C++ library as well.
 if WITH_PCRE_CPP
@@ -282,13 +333,24 @@ dist_noinst_SCRIPTS += RunTest
 EXTRA_DIST += RunTest.bat
 bin_PROGRAMS += pcretest
 pcretest_SOURCES = pcretest.c
-pcretest_LDADD = libpcreposix.la $(LIBREADLINE)
+pcretest_LDADD = $(LIBREADLINE)
+if WITH_PCRE8
+pcretest_SOURCES += pcre_printint.c
+pcretest_LDADD += libpcreposix.la
+endif # WITH_PCRE8
+if WITH_PCRE16
+pcretest_SOURCES += pcre16_printint.c
+pcretest_LDADD += libpcre16.la
+endif # WITH_PCRE16
 
+if WITH_PCRE8
 TESTS += RunGrepTest
 dist_noinst_SCRIPTS += RunGrepTest
 bin_PROGRAMS += pcregrep
 pcregrep_SOURCES = pcregrep.c
-pcregrep_LDADD = libpcreposix.la $(LIBZ) $(LIBBZ2)
+pcregrep_LDADD = $(LIBZ) $(LIBBZ2)
+pcregrep_LDADD += libpcreposix.la
+endif # WITH_PCRE8
 
 EXTRA_DIST += \
   testdata/grepinput \
@@ -315,6 +377,10 @@ EXTRA_DIST += \
   testdata/testinput13 \
   testdata/testinput14 \
   testdata/testinput15 \
+  testdata/testinput16 \
+  testdata/testinput17 \
+  testdata/testinput18 \
+  testdata/testinput19 \
   testdata/testoutput1 \
   testdata/testoutput2 \
   testdata/testoutput3 \
@@ -325,11 +391,16 @@ EXTRA_DIST += \
   testdata/testoutput8 \
   testdata/testoutput9 \
   testdata/testoutput10 \
-  testdata/testoutput11 \
+  testdata/testoutput11-8 \
+  testdata/testoutput11-16 \
   testdata/testoutput12 \
   testdata/testoutput13 \
   testdata/testoutput14 \
   testdata/testoutput15 \
+  testdata/testoutput16 \
+  testdata/testoutput17 \
+  testdata/testoutput18 \
+  testdata/testoutput19 \
   testdata/wintestinput3 \
   testdata/wintestoutput3 \
   perltest.pl
@@ -359,13 +430,12 @@ test: check ;
 # A PCRE user submitted the following addition, saying that it "will allow
 # anyone using the 'mingw32' compiler to simply type 'make pcre.dll' and get a
 # nice DLL for Windows use". (It is used by the pcre.dll target.)
-DLL_OBJS= pcre_compile.o pcre_config.o \
+DLL_OBJS= pcre_byte_order.o pcre_compile.o pcre_config.o \
 	pcre_dfa_exec.o pcre_exec.o pcre_fullinfo.o pcre_get.o \
-	pcre_globals.o pcre_info.o pcre_jit_compile.o pcre_maketables.o \
+	pcre_globals.o pcre_jit_compile.o pcre_maketables.o \
 	pcre_newline.o pcre_ord2utf8.o pcre_refcount.o \
-	pcre_study.o pcre_tables.o pcre_try_flipped.o \
-	pcre_ucd.o pcre_valid_utf8.o pcre_version.o \
-	pcre_chartables.o \
+	pcre_study.o pcre_tables.o pcre_ucd.o \
+	pcre_valid_utf8.o pcre_version.o pcre_chartables.o \
 	pcre_xclass.o
 
 # A PCRE user submitted the following addition, saying that it "will allow
@@ -378,6 +448,9 @@ pcre.dll: $(DLL_OBJS)
 # We have .pc files for pkg-config users.
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libpcre.pc libpcreposix.pc
+if WITH_PCRE16
+pkgconfig_DATA += libpcre16.pc
+endif
 if WITH_PCRE_CPP
 pkgconfig_DATA += libpcrecpp.pc
 endif
@@ -402,7 +475,6 @@ dist_man_MANS = \
   doc/pcre_get_stringtable_entries.3 \
   doc/pcre_get_substring.3 \
   doc/pcre_get_substring_list.3 \
-  doc/pcre_info.3 \
   doc/pcre_jit_stack_alloc.3 \
   doc/pcre_jit_stack_free.3 \
   doc/pcre_maketables.3 \

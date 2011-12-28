@@ -333,7 +333,8 @@ ENDIF(PCRE_REBUILD_CHARTABLES)
 SET(PCRE_HEADERS ${PROJECT_BINARY_DIR}/pcre.h)
 
 SET(PCRE_SOURCES
-  ${PROJECT_BINARY_DIR}/pcre_chartables.c
+  ${PROJECT_BINARY_DIR}/pcre_byte_order.c
+  pcre_chartables.c
   pcre_compile.c
   pcre_config.c
   pcre_dfa_exec.c
@@ -349,7 +350,6 @@ SET(PCRE_SOURCES
   pcre_refcount.c
   pcre_study.c
   pcre_tables.c
-  pcre_try_flipped.c
   pcre_ucd.c
   pcre_valid_utf8.c
   pcre_version.c

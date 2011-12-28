@@ -160,9 +160,10 @@ same callout number. However, they are set for all callouts.
 .P
 The \fImark\fP field is present from version 2 of the \fIpcre_callout\fP
 structure. In callouts from \fBpcre_exec()\fP it contains a pointer to the
-zero-terminated name of the most recently passed (*MARK) item in the match, or
-NULL if there are no (*MARK)s in the current matching path. In callouts from
-\fBpcre_dfa_exec()\fP this field always contains NULL.
+zero-terminated name of the most recently passed (*MARK), (*PRUNE), or (*THEN)
+item in the match, or NULL if no such items have been passed. Instances of
+(*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
+callouts from \fBpcre_dfa_exec()\fP this field always contains NULL.
 .
 .
 .SH "RETURN VALUES"
@@ -195,6 +196,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 August 2011
+Last updated: 30 November 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

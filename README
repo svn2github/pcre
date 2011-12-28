@@ -713,6 +713,7 @@ The distribution should contain the following files:
                             specified, by copying to pcre_chartables.c
 
   pcreposix.c             )
+  pcre_byte_order.c       )
   pcre_compile.c          )
   pcre_config.c           )
   pcre_dfa_exec.c         )
@@ -728,7 +729,6 @@ The distribution should contain the following files:
   pcre_refcount.c         )
   pcre_study.c            )
   pcre_tables.c           )
-  pcre_try_flipped.c      )
   pcre_ucd.c              )
   pcre_valid_utf8.c       )
   pcre_version.c          )

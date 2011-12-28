@@ -190,7 +190,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit17]
-FileName=pcre_try_flipped.c
+FileName=pcre_byte_order.c
 CompileCpp=0
 Folder=libpcre.a
 Compile=1

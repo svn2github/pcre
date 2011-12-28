@@ -3,12 +3,11 @@
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
     either because PCRE can't be compatible, or there is a possible Perl 
-    bug. --/  
+    bug.
+    
+    NOTE: This is a non-UTF set of tests. When UTF support is needed, use
+    test 5, and if Unicode Property Support is needed, use test 7. --/
   
-/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
-    separated many (most?) of them out into test 11. However, there may still 
-    be some that were overlooked. --/   
-
 /(a)b|/I
 
 /abc/I
@@ -143,40 +142,6 @@
 /.*((abc)$|(def))/I
     defabc
     \Zdefabc
-
-/abc/P
-    abc
-    *** Failers
-
-/^abc|def/P
-    abcdef
-    abcdef\B
-
-/.*((abc)$|(def))/P
-    defabc
-    \Zdefabc
-
-/the quick brown fox/P
-    the quick brown fox
-    *** Failers
-    The Quick Brown Fox
-
-/the quick brown fox/Pi
-    the quick brown fox
-    The Quick Brown Fox
-
-/abc.def/P
-    *** Failers
-    abc\ndef
-
-/abc$/P
-    abc
-    abc\n
-
-/(abc)\2/P
-
-/(abc\1)/P
-    abc
 
 /)/
 
@@ -442,8 +407,6 @@
 
 /abc/\
 
-/abc/\P
-
 /abc/\i
 
 /(a)bc(d)/I
@@ -489,9 +452,6 @@
 /(?s:.*X|^B)/IDZ
 
 /\Biss\B/I+
-    Mississippi
-
-/\Biss\B/I+P
     Mississippi
 
 /iss/IG+
@@ -628,15 +588,6 @@
     \Nab-c
     *** Failers
     \Nabc
-
-/a*(b+)(z)(z)/P
-    aaaabbbbzzzz
-    aaaabbbbzzzz\O0
-    aaaabbbbzzzz\O1
-    aaaabbbbzzzz\O2
-    aaaabbbbzzzz\O3
-    aaaabbbbzzzz\O4
-    aaaabbbbzzzz\O5
 
 /^.?abcd/IS
 
@@ -1491,17 +1442,6 @@
     ** Failers
     line one\nthis is a line\nbreak in the second line
 
-/ab.cd/P
-    ab-cd
-    ab=cd
-    ** Failers
-    ab\ncd
-
-/ab.cd/Ps
-    ab-cd
-    ab=cd
-    ab\ncd
-
 /(?i)(?-i)AbCd/I
     AbCd
     ** Failers
@@ -1551,14 +1491,6 @@
     (this(and)that)
     (this)
     ((this))
-
-/a(b)c/PN
-    abc
-
-/a(?P<name>b)c/PN
-    abc
-
-/\x{100}/I
 
 /\x{0000ff}/I
 
@@ -2241,22 +2173,6 @@ a random value. /Ix
     xabcpqrx
     xxyzx 
 
-/[\h]/BZ
-    >\x09<
-
-/[\h]+/BZ
-    >\x09\x20\xa0<
-
-/[\v]/BZ
-
-/[\H]/BZ
-
-/[^\h]/BZ
-
-/[\V]/BZ
-
-/[\x0a\V]/BZ
-
 /\H++X/BZ
     ** Failers
     XXXX
@@ -2616,11 +2532,6 @@ a random value. /Ix
 
 /(?(?=.*b).*b|^d)/I
 
-/a?|b?/P
-    abc
-    ** Failers
-    ddd\N   
-
 /xyz/C
   xyz 
   abcxyz 
@@ -2812,12 +2723,6 @@ a random value. /Ix
    abc\P
    abc\P\P
    
-/\w+A/P
-   CDAAAAB 
-
-/\w+A/PU
-   CDAAAAB 
-
 /abc\K123/
     xyzabc123pqr
     xyzabc12\P
@@ -2960,201 +2865,6 @@ a random value. /Ix
 /(a|bbbb\1){2}/SI
 
 /^From +([^ ]+) +[a-zA-Z][a-zA-Z][a-zA-Z] +[a-zA-Z][a-zA-Z][a-zA-Z] +[0-9]?[0-9] +[0-9][0-9]:[0-9][0-9]/SI
-
-/  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                          # optional leading comment
-(?:    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)                    # initial word
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)  )* # further okay, if led by a period
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-# address
-|                     #  or
-(?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)             # one word, optionally followed by....
-(?:
-[^()<>@,;:".\\\[\]\x80-\xff\000-\010\012-\037]  |  # atom and space parts, or...
-\(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)       |  # comments, or...
-
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-# quoted strings
-)*
-<  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                     # leading <
-(?:  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  ,  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-)* # further okay, if led by comma
-:                                # closing colon
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  )? #       optional route
-(?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)                    # initial word
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)  )* # further okay, if led by a period
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-#       address spec
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  > #                  trailing >
-# name and address
-)  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                       # optional trailing comment
-/xSI
 
 /<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/isIS
 
@@ -3322,115 +3032,18 @@ a random value. /Ix
 /A(*PRUNE)B|A(*PRUNE)C/K
     AC
     
-/--- A whole lot of tests of verbs with arguments are here rather than in test
-     11 because Perl doesn't seem to follow its specification entirely 
-     correctly. ---/
-
-/--- Perl 5.11 sets $REGERROR on the AC failure case here; PCRE does not. It is
-     not clear how Perl defines "involved in the failure of the match". ---/ 
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/K
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-    
-/--- Check the use of names for success and failure. PCRE doesn't show these 
-names for success, though Perl does, contrary to its spec. ---/
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-    
-/--- An empty name does not pass back an empty string. It is the same as if no
-name were given. ---/ 
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
-    AB
-    CD 
-
-/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
-    
-/A(*PRUNE:A)B/K
-    ACAB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KSS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KSY
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KSS
-    C
-    D 
-
-/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-
-/--- Same --/
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
-    AAAC
-
 /--- This should fail; the SKIP advances by one, but when we get to AC, the
-     PRUNE kills it. ---/ 
+     PRUNE kills it. Perl behaves differently. ---/ 
     
 /A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
     AAAC
 
-/A(*:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
+/--- Mark names can be duplicated. Perl doesn't give a mark for this one,
+though PCRE does. ---/
 
-/--- This should fail, as a null name is the same as no name ---/
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
-    AAAC
-
-/--- This fails in PCRE, and I think that is in accordance with Perl's 
-     documentation, though in Perl it succeeds. ---/
-    
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
-    AAAC
-
-/--- Mark names can be duplicated ---/
-
-/A(*:A)B|X(*:A)Y/K
-    AABC
-    XXYZ 
-    
 /^A(*:A)B|^X(*:A)Y/K
     ** Failers
     XAQQ
-    
-/--- A check on what happens after hitting a mark and them bumping along to
-something that does not even start. Perl reports tags after the failures here, 
-though it does not when the individual letters are made into something 
-more complicated. ---/
-
-/A(*:A)B|XX(*:B)Y/K
-    AABC
-    XXYZ 
-    ** Failers
-    XAQQ  
-    XAQQXZZ  
-    AXQQQ 
-    AXXQQQ 
     
 /--- COMMIT at the start of a pattern should be the same as an anchor. Perl 
 optimizations defeat this. So does the PCRE optimization unless we disable it 
@@ -3441,78 +3054,6 @@ with \Y. ---/
     ** Failers
     DEFGABC\Y  
     
-/--- Repeat some tests with added studying. ---/
-
-/A(*COMMIT)B/+KS
-    ACABX
- 
-/A(*THEN)B|A(*THEN)C/KS
-    AC
-
-/A(*PRUNE)B|A(*PRUNE)C/KS
-    AC
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/KS
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/KS
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/KS
-    AB
-    CD 
-
-/A(*PRUNE:A)B/KS
-    ACAB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
-    D 
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xKS
-    AAAC
-    
-/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xKS
-    AAAC
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xKS
-    AAAC
-
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xKS
-    AAAC
-
-/A(*:A)B|XX(*:B)Y/KS
-    AABC
-    XXYZ 
-    ** Failers
-    XAQQ  
-    XAQQXZZ  
-    AXQQQ 
-    AXXQQQ 
-    
-/(*COMMIT)ABC/
-    ABCDEFG
-    ** Failers
-    DEFGABC\Y  
-
 /^(ab (c+(*THEN)cd) | xyz)/x
     abcccd  
 
@@ -3980,11 +3521,6 @@ AbcdCBefgBhiBqz
 /^a\x1z/<JS>
     ax1z
 
-/^a\X41z/<JS>
-    aX41z
-    *** Failers
-    aAz
-
 /^a\u0041z/<JS>
     aAz
     *** Failers
@@ -4007,6 +3543,44 @@ AbcdCBefgBhiBqz
 
 /(?(?=c)c|d)*+Y/BZ
 
-/(?<=ab\Cde)X/8
+/a[\NB]c/
+    aNc
+    
+/a[B-\Nc]/ 
+
+/(a)(?2){0,1999}?(b)/
+
+/(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
+
+/--- This test, with something more complicated than individual letters, causes
+different behaviour in Perl. Perhaps it disables some optimization; no tag is
+passed back for the failures, whereas in PCRE there is a tag. ---/
+    
+/(A|P)(*:A)(B|P) | (X|P)(X|P)(*:B)(Y|P)/xK
+    AABC
+    XXYZ 
+    ** Failers
+    XAQQ  
+    XAQQXZZ  
+    AXQQQ 
+    AXXQQQ 
+
+/-- Perl doesn't give marks for these, though it does if the alternatives are
+replaced by single letters. --/
+    
+/(b|q)(*:m)f|a(*:n)w/K
+    aw 
+    ** Failers 
+    abc
+
+/(q|b)(*:m)f|a(*:n)w/K
+    aw 
+    ** Failers 
+    abc
+
+/-- After a partial match, the behaviour is as for a failure. --/
+
+/^a(*:X)bcde/K
+   abc\P
 
 /-- End of testinput2 --/

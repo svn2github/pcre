@@ -3,12 +3,11 @@
     It also checks the non-Perl syntax the PCRE supports (Python, .NET, 
     Oniguruma). Finally, there are some tests where PCRE and Perl differ, 
     either because PCRE can't be compatible, or there is a possible Perl 
-    bug. --/  
+    bug.
+    
+    NOTE: This is a non-UTF set of tests. When UTF support is needed, use
+    test 5, and if Unicode Property Support is needed, use test 7. --/
   
-/-- Originally, the Perl >= 5.10 things were in here too, but now I have 
-    separated many (most?) of them out into test 11. However, there may still 
-    be some that were overlooked. --/   
-
 /(a)b|/I
 Capturing subpattern count = 1
 No options
@@ -376,61 +375,6 @@ No need char
  1: def
  2: <unset>
  3: def
-
-/abc/P
-    abc
- 0: abc
-    *** Failers
-No match: POSIX code 17: match failed
-
-/^abc|def/P
-    abcdef
- 0: abc
-    abcdef\B
- 0: def
-
-/.*((abc)$|(def))/P
-    defabc
- 0: defabc
- 1: abc
- 2: abc
-    \Zdefabc
- 0: def
- 1: def
- 3: def
-
-/the quick brown fox/P
-    the quick brown fox
- 0: the quick brown fox
-    *** Failers
-No match: POSIX code 17: match failed
-    The Quick Brown Fox
-No match: POSIX code 17: match failed
-
-/the quick brown fox/Pi
-    the quick brown fox
- 0: the quick brown fox
-    The Quick Brown Fox
- 0: The Quick Brown Fox
-
-/abc.def/P
-    *** Failers
-No match: POSIX code 17: match failed
-    abc\ndef
-No match: POSIX code 17: match failed
-
-/abc$/P
-    abc
- 0: abc
-    abc\n
- 0: abc
-
-/(abc)\2/P
-Failed: POSIX code 15: bad back reference at offset 7     
-
-/(abc\1)/P
-    abc
-No match: POSIX code 17: match failed
 
 /)/
 Failed: unmatched parentheses at offset 0
@@ -1031,9 +975,6 @@ Failed: numbers out of order in {} quantifier at offset 7
 /abc/\
 Failed: \ at end of pattern at offset 4
 
-/abc/\P
-Failed: POSIX code 9: bad escape sequence at offset 4     
-
 /abc/\i
 Failed: \ at end of pattern at offset 4
 
@@ -1149,7 +1090,7 @@ No first char
 No need char
     abc\00def\L\C0
  0: abc\x00def
- 0C abc (7)
+ 0C abc\x00def (7)
  0L abc
 
 /word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
@@ -1264,11 +1205,6 @@ Capturing subpattern count = 0
 No options
 First char = 'i'
 Need char = 's'
-    Mississippi
- 0: iss
- 0+ issippi
-
-/\Biss\B/I+P
     Mississippi
  0: iss
  0+ issippi
@@ -1402,7 +1338,7 @@ Capturing subpattern count = 0
 Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
-Need char = 10
+Need char = \x0a
     ab\nab\ncd
  0: ab\x0a
  0+ ab\x0acd
@@ -1688,33 +1624,6 @@ No need char
  0: 
     \Nabc
 No match
-
-/a*(b+)(z)(z)/P
-    aaaabbbbzzzz
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
- 3: z
-    aaaabbbbzzzz\O0
-    aaaabbbbzzzz\O1
- 0: aaaabbbbzz
-    aaaabbbbzzzz\O2
- 0: aaaabbbbzz
- 1: bbbb
-    aaaabbbbzzzz\O3
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
-    aaaabbbbzzzz\O4
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
- 3: z
-    aaaabbbbzzzz\O5
- 0: aaaabbbbzz
- 1: bbbb
- 2: z
- 3: z
 
 /^.?abcd/IS
 Capturing subpattern count = 0
@@ -5851,24 +5760,6 @@ No match
     line one\nthis is a line\nbreak in the second line
 No match
 
-/ab.cd/P
-    ab-cd
- 0: ab-cd
-    ab=cd
- 0: ab=cd
-    ** Failers
-No match: POSIX code 17: match failed
-    ab\ncd
-No match: POSIX code 17: match failed
-
-/ab.cd/Ps
-    ab-cd
- 0: ab-cd
-    ab=cd
- 0: ab=cd
-    ab\ncd
- 0: ab\x0acd
-
 /(?i)(?-i)AbCd/I
 Capturing subpattern count = 0
 No options
@@ -6161,21 +6052,10 @@ No need char
     ((this))
  0: ((this))
 
-/a(b)c/PN
-    abc
-Matched with REG_NOSUB
-
-/a(?P<name>b)c/PN
-    abc
-Matched with REG_NOSUB
-
-/\x{100}/I
-Failed: character value in \x{...} sequence is too large at offset 6
-
 /\x{0000ff}/I
 Capturing subpattern count = 0
 No options
-First char = 255
+First char = \xff
 No need char
 
 /^((?P<A>a1)|(?P<A>a2)b)/I
@@ -6285,7 +6165,7 @@ no parentheses with name "Z"
  0: a1
  1: a1
  2: a1
-copy substring Z failed -7
+get substring Z failed -7
   G a1 (2) A
 
 /^(?P<A>a)(?P<A>b)/IJ
@@ -6317,7 +6197,7 @@ No need char
   G a (1) A
     cd\GA
  0: cd
-copy substring A failed -7
+get substring A failed -7
 
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/IJ
 Capturing subpattern count = 4
@@ -7548,7 +7428,7 @@ Matched, but too many substrings
 /[^a]+a/BZi
 ------------------------------------------------------------------
         Bra
-     /i [^A]++
+     /i [^a]++
      /i a
         Ket
         End
@@ -7557,7 +7437,7 @@ Matched, but too many substrings
 /[^a]+A/BZi
 ------------------------------------------------------------------
         Bra
-     /i [^A]++
+     /i [^a]++
      /i A
         Ket
         End
@@ -8503,66 +8383,6 @@ Failed: syntax error in subpattern name (missing terminator) at offset 4
  3: <unset>
  4: x
 
-/[\h]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x09 \xa0]
-        Ket
-        End
-------------------------------------------------------------------
-    >\x09<
- 0: \x09
-
-/[\h]+/BZ
-------------------------------------------------------------------
-        Bra
-        [\x09 \xa0]+
-        Ket
-        End
-------------------------------------------------------------------
-    >\x09\x20\xa0<
- 0: \x09 \xa0
-
-/[\v]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x0a-\x0d\x85]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\H]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[^\h]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff] (neg)
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\V]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x09\x0e-\x84\x86-\xff]
-        Ket
-        End
-------------------------------------------------------------------
-
-/[\x0a\V]/BZ
-------------------------------------------------------------------
-        Bra
-        [\x00-\x0a\x0e-\x84\x86-\xff]
-        Ket
-        End
-------------------------------------------------------------------
-
 /\H++X/BZ
 ------------------------------------------------------------------
         Bra
@@ -9475,14 +9295,6 @@ No options
 First char at start or follows newline
 No need char
 
-/a?|b?/P
-    abc
- 0: a
-    ** Failers
- 0: 
-    ddd\N   
-No match: POSIX code 17: match failed
-
 /xyz/C
   xyz 
 --->xyz
@@ -9877,14 +9689,6 @@ Partial match: the cat
    abc\P\P
  0: abc
    
-/\w+A/P
-   CDAAAAB 
- 0: CDAAAA
-
-/\w+A/PU
-   CDAAAAB 
- 0: CDA
-
 /abc\K123/
     xyzabc123pqr
  0: 123
@@ -10276,210 +10080,6 @@ No first char
 Need char = ':'
 Subject length lower bound = 22
 No set of starting bytes
-
-/  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                          # optional leading comment
-(?:    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)                    # initial word
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)  )* # further okay, if led by a period
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-# address
-|                     #  or
-(?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)             # one word, optionally followed by....
-(?:
-[^()<>@,;:".\\\[\]\x80-\xff\000-\010\012-\037]  |  # atom and space parts, or...
-\(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)       |  # comments, or...
-
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-# quoted strings
-)*
-<  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                     # leading <
-(?:  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  ,  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-)* # further okay, if led by comma
-:                                # closing colon
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  )? #       optional route
-(?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)                    # initial word
-(?:  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|
-" (?:                      # opening quote...
-[^\\\x80-\xff\n\015"]                #   Anything except backslash and quote
-|                     #    or
-\\ [^\x80-\xff]           #   Escaped something (something != CR)
-)* "  # closing quote
-)  )* # further okay, if led by a period
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  @  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*    (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                           # initial subdomain
-(?:                                  #
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  \.                        # if led by a period...
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*   (?:
-[^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]+    # some number of atom characters...
-(?![^(\040)<>@,;:".\\\[\]\000-\037\x80-\xff]) # ..not followed by something that could be part of an atom
-|   \[                         # [
-(?: [^\\\x80-\xff\n\015\[\]] |  \\ [^\x80-\xff]  )*    #    stuff
-\]                        #           ]
-)                     #   ...further okay
-)*
-#       address spec
-(?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*  > #                  trailing >
-# name and address
-)  (?: [\040\t] |  \(
-(?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*
-\)  )*                       # optional trailing comment
-/xSI
-Capturing subpattern count = 0
-Contains explicit CR or LF match
-Options: extended
-No first char
-No need char
-Subject length lower bound = 3
-Starting byte set: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
-  9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
-  f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f 
 
 /<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/isIS
 Capturing subpattern count = 11
@@ -10989,175 +10589,21 @@ No match
     AC
 No match
     
-/--- A whole lot of tests of verbs with arguments are here rather than in test
-     11 because Perl doesn't seem to follow its specification entirely 
-     correctly. ---/
-
-/--- Perl 5.11 sets $REGERROR on the AC failure case here; PCRE does not. It is
-     not clear how Perl defines "involved in the failure of the match". ---/ 
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match
-    CB    
-No match, mark = B
-    
-/--- Check the use of names for success and failure. PCRE doesn't show these 
-names for success, though Perl does, contrary to its spec. ---/
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match, mark = A
-    CB    
-No match, mark = B
-    
-/--- An empty name does not pass back an empty string. It is the same as if no
-name were given. ---/ 
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD 
- 0: CD
- 1: CD
-
-/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
-    
-/A(*PRUNE:A)B/K
-    ACAB
- 0: AB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KSS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match, mark = B
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match
-
-/(*MARK:A)(*THEN:B)(C|X)/KSY
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match, mark = B
-
-/(*MARK:A)(*THEN:B)(C|X)/KSS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match, mark = B
-
-/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-No match
-
-/--- Same --/
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
-    AAAC
-No match
-
 /--- This should fail; the SKIP advances by one, but when we get to AC, the
-     PRUNE kills it. ---/ 
+     PRUNE kills it. Perl behaves differently. ---/ 
     
 /A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
     AAAC
-No match
+No match, mark = A
 
-/A(*:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-No match
+/--- Mark names can be duplicated. Perl doesn't give a mark for this one,
+though PCRE does. ---/
 
-/--- This should fail, as a null name is the same as no name ---/
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
-    AAAC
-No match
-
-/--- This fails in PCRE, and I think that is in accordance with Perl's 
-     documentation, though in Perl it succeeds. ---/
-    
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
-    AAAC
-No match
-
-/--- Mark names can be duplicated ---/
-
-/A(*:A)B|X(*:A)Y/K
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XY
-MK: A
-    
 /^A(*:A)B|^X(*:A)Y/K
     ** Failers
 No match
     XAQQ
 No match, mark = A
-    
-/--- A check on what happens after hitting a mark and them bumping along to
-something that does not even start. Perl reports tags after the failures here, 
-though it does not when the individual letters are made into something 
-more complicated. ---/
-
-/A(*:A)B|XX(*:B)Y/K
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XXY
-MK: B
-    ** Failers
-No match
-    XAQQ  
-No match
-    XAQQXZZ  
-No match
-    AXQQQ 
-No match
-    AXXQQQ 
-No match
     
 /--- COMMIT at the start of a pattern should be the same as an anchor. Perl 
 optimizations defeat this. So does the PCRE optimization unless we disable it 
@@ -11171,126 +10617,6 @@ No match
     DEFGABC\Y  
 No match
     
-/--- Repeat some tests with added studying. ---/
-
-/A(*COMMIT)B/+KS
-    ACABX
-No match
- 
-/A(*THEN)B|A(*THEN)C/KS
-    AC
- 0: AC
-
-/A(*PRUNE)B|A(*PRUNE)C/KS
-    AC
-No match
-
-/^(A(*THEN:A)B|C(*THEN:B)D)/KS
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match
-    CB    
-No match, mark = B
-
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/KS
-    AB
- 0: AB
- 1: AB
-    CD
- 0: CD
- 1: CD
-    ** Failers
-No match
-    AC
-No match, mark = A
-    CB    
-No match, mark = B
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/KS
-    AB
- 0: AB
- 1: AB
-    CD 
- 0: CD
- 1: CD
-
-/A(*PRUNE:A)B/KS
-    ACAB
- 0: AB
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: A
-    D 
-No match
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xKS
-    AAAC
-No match
-    
-/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xKS
-    AAAC
-No match
-
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xKS
-    AAAC
-No match
-
-/A(*:A)B|XX(*:B)Y/KS
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XXY
-MK: B
-    ** Failers
-No match
-    XAQQ  
-No match
-    XAQQXZZ  
-No match
-    AXQQQ 
-No match
-    AXXQQQ 
-No match
-    
-/(*COMMIT)ABC/
-    ABCDEFG
- 0: ABC
-    ** Failers
-No match
-    DEFGABC\Y  
-No match
-
 /^(ab (c+(*THEN)cd) | xyz)/x
     abcccd  
 No match
@@ -11875,11 +11201,11 @@ No match
  1: C
 MK: A
     D
-No match
+No match, mark = A
      
 /(*:A)A+(*SKIP:A)(B|Z)/KS
     AAAC
-No match
+No match, mark = A
 
 /-- --/
 
@@ -12257,7 +11583,6 @@ Latest Mark: A
 Latest Mark: B
 +18 ^ ^          z
 +20 ^            a
-Latest Mark: <unset>
 +21 ^^           e
 +22 ^ ^          q
 +23 ^  ^         )
@@ -12518,14 +11843,6 @@ No match
     ax1z
  0: ax1z
 
-/^a\X41z/<JS>
-    aX41z
- 0: aX41z
-    *** Failers
-No match
-    aAz
-No match
-
 /^a\u0041z/<JS>
     aAz
  0: aAz
@@ -12591,7 +11908,70 @@ No match
         End
 ------------------------------------------------------------------
 
-/(?<=ab\Cde)X/8
-Failed: \C not allowed in lookbehind assertion at offset 10
+/a[\NB]c/
+Failed: \N is not supported in a class at offset 3
+
+/a[B-\Nc]/ 
+Failed: \N is not supported in a class at offset 5
+
+/(a)(?2){0,1999}?(b)/
+
+/(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
+
+/--- This test, with something more complicated than individual letters, causes
+different behaviour in Perl. Perhaps it disables some optimization; no tag is
+passed back for the failures, whereas in PCRE there is a tag. ---/
+    
+/(A|P)(*:A)(B|P) | (X|P)(X|P)(*:B)(Y|P)/xK
+    AABC
+ 0: AB
+ 1: A
+ 2: B
+MK: A
+    XXYZ 
+ 0: XXY
+ 1: <unset>
+ 2: <unset>
+ 3: X
+ 4: X
+ 5: Y
+MK: B
+    ** Failers
+No match
+    XAQQ  
+No match, mark = A
+    XAQQXZZ  
+No match, mark = A
+    AXQQQ 
+No match, mark = A
+    AXXQQQ 
+No match, mark = B
+
+/-- Perl doesn't give marks for these, though it does if the alternatives are
+replaced by single letters. --/
+    
+/(b|q)(*:m)f|a(*:n)w/K
+    aw 
+ 0: aw
+MK: n
+    ** Failers 
+No match, mark = n
+    abc
+No match, mark = m
+
+/(q|b)(*:m)f|a(*:n)w/K
+    aw 
+ 0: aw
+MK: n
+    ** Failers 
+No match, mark = n
+    abc
+No match, mark = m
+
+/-- After a partial match, the behaviour is as for a failure. --/
+
+/^a(*:X)bcde/K
+   abc\P
+Partial match, mark=X: abc
 
 /-- End of testinput2 --/

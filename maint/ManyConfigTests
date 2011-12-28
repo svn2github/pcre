@@ -141,6 +141,10 @@ function runtest()
 # builds both) to save a bit of time by building only one version of the
 # library for the subsequent tests.
 
+valgrind=
+cvalgrind=
+withvalgrind=
+
 echo "Tests in the current directory"
 srcdir=.
 for opts in \
@@ -159,7 +163,14 @@ for opts in \
   "--enable-utf8 --enable-newline-is-any --enable-unicode-properties --disable-stack-for-recursion --disable-static --disable-cpp" \
   "--enable-jit --disable-shared" \
   "--enable-jit --enable-unicode-properties --disable-shared" \
-  "--enable-jit --enable-unicode-properties --with-link-size=3 --disable-shared"
+  "--enable-jit --enable-unicode-properties --with-link-size=3 --disable-shared" \
+  "--enable-pcre16" \
+  "--enable-pcre16 --enable-jit --enable-utf --disable-shared" \
+  "--enable-pcre16 --enable-jit --enable-unicode-properties --disable-shared" \
+  "--enable-pcre16 --enable-jit --disable-pcre8 --disable-shared" \
+  "--enable-pcre16 --enable-jit --disable-pcre8 --enable-utf --disable-shared" \
+  "--enable-pcre16 --disable-stack-for-recursion --disable-shared" \
+  "--enable-pcre16 --enable-unicode-properties --disable-stack-for-recursion --disable-shared"
 do
   runtest
 done
@@ -174,15 +185,19 @@ withvalgrind="with valgrind"
 for opts in \
   "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-unicode-properties --with-link-size=3 --disable-shared" \
-  "--enable-jit --enable-unicode-properties --disable-shared"
+  "--enable-jit --enable-unicode-properties --disable-shared" \
+  "--enable-pcre16 --enable-jit --enable-unicode-properties --disable-shared" 
 do
   runtest
 done
 
+valgrind=
+cvalgrind=
+withvalgrind=
+
 # Clean up the distribution and then do at least one build and test in a
 # directory other than the source directory. It doesn't work unless the
-# source directory is cleaned up first - and anyway, it's best to leave it
-# in a clean state after all this reconfiguring.
+# source directory is cleaned up first.
 
 if [ -f Makefile ]; then
   echo "Running 'make distclean'"

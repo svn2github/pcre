@@ -97,6 +97,7 @@ hand":
      option if you have set up config.h with your configuration, or else use
      other -D settings to change the configuration as required.
 
+       pcre_byte_order.c
        pcre_chartables.c
        pcre_compile.c
        pcre_config.c
@@ -112,7 +113,6 @@ hand":
        pcre_refcount.c
        pcre_study.c
        pcre_tables.c
-       pcre_try_flipped.c
        pcre_ucd.c
        pcre_valid_utf8.c
        pcre_version.c

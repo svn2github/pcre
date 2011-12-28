@@ -1,7 +1,7 @@
 /*
  *    Stack-less Just-In-Time compiler
  *
- *    Copyright 2009-2010 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
+ *    Copyright 2009-2012 Zoltan Herczeg (hzmester@freemail.hu). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -397,6 +397,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	}
 
 	compiler->error = SLJIT_ERR_COMPILED;
+	compiler->executable_size = compiler->size * sizeof(sljit_ins);
 #ifndef __GNUC__
 	SLJIT_CACHE_FLUSH(code, code_ptr);
 #else

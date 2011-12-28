@@ -37,6 +37,12 @@ There is no limit to the number of parenthesized subpatterns, but there can be
 no more than 65535 capturing subpatterns.
 </P>
 <P>
+There is a limit to the number of forward references to subsequent subpatterns
+of around 200,000. Repeated forward references with fixed upper limits, for
+example, (?2){0,100} when subpattern number 2 is to the right, are included in
+the count. There is no limit to the number of backward references.
+</P>
+<P>
 The maximum length of name for a named subpattern is 32 characters, and the
 maximum number of named subpatterns is 10000.
 </P>
@@ -65,7 +71,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 24 August 2011
+Last updated: 30 November 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>
