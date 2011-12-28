@@ -644,18 +644,18 @@ string (by default this causes the current matching alternative to fail). A
 pattern such as (\e1)(a) succeeds when this option is set (assuming it can find
 an "a" in the subject), whereas it fails by default, for Perl compatibility.
 .P
-(3) \eU matches an upper case "U" character; by default \eU causes a compile
+(3) \eU matches an upper case "U" character; by default \eU causes a compile 
 time error (Perl uses \eU to upper case subsequent characters).
 .P
-(4) \eu matches a lower case "u" character unless it is followed by four
-hexadecimal digits, in which case the hexadecimal number defines the code point
-to match. By default, \eu causes a compile time error (Perl uses it to upper
+(4) \eu matches a lower case "u" character unless it is followed by four 
+hexadecimal digits, in which case the hexadecimal number defines the code point 
+to match. By default, \eu causes a compile time error (Perl uses it to upper 
 case the following character).
 .P
-(5) \ex matches a lower case "x" character unless it is followed by two
-hexadecimal digits, in which case the hexadecimal number defines the code point
-to match. By default, as in Perl, a hexadecimal number is always expected after
-\ex, but it may have zero, one, or two digits (so, for example, \exz matches a
+(5) \ex matches a lower case "x" character unless it is followed by two 
+hexadecimal digits, in which case the hexadecimal number defines the code point 
+to match. By default, as in Perl, a hexadecimal number is always expected after 
+\ex, but it may have zero, one, or two digits (so, for example, \exz matches a 
 binary zero character followed by z).
 .sp
   PCRE_MULTILINE
@@ -1147,12 +1147,6 @@ particular pattern. See the
 .\"
 documentation for details of what can and cannot be handled.
 .sp
-  PCRE_INFO_JITSIZE
-.sp
-If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
-return the size of the JIT compiled code, otherwise return zero. The fourth
-argument should point to a \fBsize_t\fP variable.
-.sp
   PCRE_INFO_LASTLITERAL
 .sp
 Return the value of the rightmost literal byte that must exist in any matched
@@ -1268,13 +1262,10 @@ For such patterns, the PCRE_ANCHORED bit is set in the options returned by
 .sp
   PCRE_INFO_SIZE
 .sp
-Return the size of the compiled pattern. The fourth argument should point to a
-\fBsize_t\fP variable. This value does not include the size of the \fBpcre\fP
-structure that is returned by \fBpcre_compile()\fP. The value that is passed as
-the argument to \fBpcre_malloc()\fP when \fBpcre_compile()\fP is getting memory
-in which to place the compiled data is the value returned by this option plus
-the size of the \fBpcre\fP structure. Studying a compiled pattern, with or
-without JIT, does not alter the value returned by this option.
+Return the size of the compiled pattern, that is, the value that was passed as
+the argument to \fBpcre_malloc()\fP when PCRE was getting memory in which to
+place the compiled data. The fourth argument should point to a \fBsize_t\fP
+variable.
 .sp
   PCRE_INFO_STUDYSIZE
 .sp
@@ -2553,6 +2544,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 02 December 2011
+Last updated: 14 November 2011
 Copyright (c) 1997-2011 University of Cambridge.
 .fi

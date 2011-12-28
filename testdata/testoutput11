@@ -888,6 +888,36 @@ No match, mark = A
  0: AC
 MK: B
 
+/--- We use something more complicated than individual letters here, because
+that causes different behaviour in Perl. Perhaps it disables some optimization;
+anyway, the result now matches PCRE in that no tag is passed back for the 
+failures. ---/
+    
+/(A|P)(*:A)(B|P) | (X|P)(X|P)(*:B)(Y|P)/xK
+    AABC
+ 0: AB
+ 1: A
+ 2: B
+MK: A
+    XXYZ 
+ 0: XXY
+ 1: <unset>
+ 2: <unset>
+ 3: X
+ 4: X
+ 5: Y
+MK: B
+    ** Failers
+No match
+    XAQQ  
+No match
+    XAQQXZZ  
+No match
+    AXQQQ 
+No match
+    AXXQQQ 
+No match
+    
 /--- COMMIT at the start of a pattern should act like an anchor. Again, 
 however, we need the complication for Perl. ---/
 
@@ -1410,246 +1440,5 @@ MK: N
 /(?<=a(*THEN)b)c/
     xabcd 
  0: c
-
-/(a)(?2){2}(.)/
-    abcd
- 0: abcd
- 1: a
- 2: d
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: B
-    D 
-No match, mark = B
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KSS
-    C
- 0: C
- 1: C
-MK: B
-    D 
-No match, mark = B
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
- 0: C
- 1: C
-MK: B
-    D 
-No match, mark = B
-
-/(*MARK:A)(*THEN:B)(C|X)/KSY
-    C
- 0: C
- 1: C
-MK: B
-    D 
-No match, mark = B
-
-/(*MARK:A)(*THEN:B)(C|X)/KSS
-    C
- 0: C
- 1: C
-MK: B
-    D 
-No match, mark = B
-
-/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-No match, mark = A
-
-/--- Same --/
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
-    AAAC
-No match, mark = B
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-No match, mark = A
-
-/--- This should fail, as a null name is the same as no name ---/
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
-    AAAC
-No match, mark = A
-
-/--- A check on what happens after hitting a mark and them bumping along to
-something that does not even start. Perl reports tags after the failures here, 
-though it does not when the individual letters are made into something 
-more complicated. ---/
-
-/A(*:A)B|XX(*:B)Y/K
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XXY
-MK: B
-    ** Failers
-No match
-    XAQQ  
-No match, mark = A
-    XAQQXZZ  
-No match, mark = A
-    AXQQQ 
-No match, mark = A
-    AXXQQQ 
-No match, mark = B
-    
-/^(A(*THEN:A)B|C(*THEN:B)D)/K
-    AB
- 0: AB
- 1: AB
-MK: A
-    CD
- 0: CD
- 1: CD
-MK: B
-    ** Failers
-No match
-    AC
-No match, mark = A
-    CB    
-No match, mark = B
-    
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
-    AB
- 0: AB
- 1: AB
-MK: A
-    CD
- 0: CD
- 1: CD
-MK: B
-    ** Failers
-No match
-    AC
-No match, mark = A
-    CB    
-No match, mark = B
-    
-/--- An empty name does not pass back an empty string. It is the same as if no
-name were given. ---/ 
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
-    AB
- 0: AB
- 1: AB
-    CD 
- 0: CD
- 1: CD
-MK: B
-
-/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
-    
-/A(*PRUNE:A)B/K
-    ACAB
- 0: AB
-MK: A
-
-/--- Mark names can be duplicated ---/
-
-/A(*:A)B|X(*:A)Y/K
-    AABC
- 0: AB
-MK: A
-    XXYZ 
- 0: XY
-MK: A
-    
-/b(*:m)f|a(*:n)w/K
-    aw 
- 0: aw
-MK: n
-    ** Failers 
-No match, mark = n
-    abc
-No match, mark = m
-
-/b(*:m)f|aw/K
-    abaw
- 0: aw
-    ** Failers 
-No match
-    abc
-No match, mark = m
-    abax 
-No match, mark = m
-
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
-    AAAC
- 0: AAC
-
-/a(*PRUNE:X)bc|qq/KY
-    ** Failers
-No match, mark = X
-    axy
-No match, mark = X
-
-/a(*THEN:X)bc|qq/KY
-    ** Failers
-No match, mark = X
-    axy
-No match, mark = X
-
-/(?=a(*MARK:A)b)..x/K
-    abxy
- 0: abx
-MK: A
-    ** Failers
-No match
-    abpq  
-No match
-
-/(?=a(*MARK:A)b)..(*:Y)x/K
-    abxy
- 0: abx
-MK: Y
-    ** Failers
-No match
-    abpq  
-No match
-
-/(?=a(*PRUNE:A)b)..x/K
-    abxy
- 0: abx
-MK: A
-    ** Failers
-No match
-    abpq  
-No match
-
-/(?=a(*PRUNE:A)b)..(*:Y)x/K
-    abxy
- 0: abx
-MK: Y
-    ** Failers
-No match
-    abpq  
-No match
-
-/(?=a(*THEN:A)b)..x/K
-    abxy
- 0: abx
-MK: A
-    ** Failers
-No match
-    abpq  
-No match
-
-/(?=a(*THEN:A)b)..(*:Y)x/K
-    abxy
- 0: abx
-MK: Y
-    ** Failers
-No match
-    abpq  
-No match
 
 /-- End of testinput11 --/

@@ -17,5 +17,6 @@ No options
 No first char
 No need char
 Study returned NULL
+JIT support is not available in this version of PCRE
 
 /-- End of testinput15 --/

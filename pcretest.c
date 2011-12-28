@@ -191,7 +191,6 @@ static int locale_set = 0;
 static int show_malloc;
 static int use_utf8;
 static size_t gotten_store;
-static size_t first_gotten_store = 0;
 static const unsigned char *last_callout_mark = NULL;
 
 /* The buffers grow automatically if very long input lines are encountered. */
@@ -1000,14 +999,12 @@ return (cb->callout_number != callout_fail_id)? 0 :
 *************************************************/
 
 /* Alternative malloc function, to test functionality and save the size of a
-compiled re, which is the first store request that pcre_compile() makes. The
-show_malloc variable is set only during matching. */
+compiled re. The show_malloc variable is set only during matching. */
 
 static void *new_malloc(size_t size)
 {
 void *block = malloc(size);
 gotten_store = size;
-if (first_gotten_store == 0) first_gotten_store = size;
 if (show_malloc)
   fprintf(outfile, "malloc       %3d %p\n", (int)size, block);
 return block;
@@ -1523,7 +1520,7 @@ while (!done)
       (sbuf[4] << 24) | (sbuf[5] << 16) | (sbuf[6] << 8) | sbuf[7];
 
     re = (real_pcre *)new_malloc(true_size);
-    regex_gotten_store = first_gotten_store;
+    regex_gotten_store = gotten_store;
 
     if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
 
@@ -1632,7 +1629,6 @@ while (!done)
   /* Look for options after final delimiter */
 
   options = 0;
-  study_options = 0;
   log_store = showstore;  /* default from command line */
 
   while (*pp != 0)
@@ -1781,7 +1777,6 @@ while (!done)
     if ((options & PCRE_UCP) != 0) cflags |= REG_UCP;
     if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
-    first_gotten_store = 0;
     rc = regcomp(&preg, (char *)p, cflags);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -1819,7 +1814,6 @@ while (!done)
           (double)CLOCKS_PER_SEC);
       }
 
-    first_gotten_store = 0;
     re = pcre_compile((char *)p, options, &error, &erroroffset, tables);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -1854,19 +1848,21 @@ while (!done)
     new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
     if ((get_options & PCRE_UTF8) != 0) use_utf8 = 1;
 
+    /* Print information if required. There are now two info-returning
+    functions. The old one has a limited interface and returns only limited
+    data. Check that it agrees with the newer one. */
+
+    if (log_store)
+      fprintf(outfile, "Memory allocation (code space): %d\n",
+        (int)(gotten_store -
+              sizeof(real_pcre) -
+              ((real_pcre *)re)->name_count * ((real_pcre *)re)->name_entry_size));
+
     /* Extract the size for possible writing before possibly flipping it,
     and remember the store that was got. */
 
     true_size = ((real_pcre *)re)->size;
-    regex_gotten_store = first_gotten_store;
-
-    /* Output code size information if requested */
-
-    if (log_store)
-      fprintf(outfile, "Memory allocation (code space): %d\n",
-        (int)(first_gotten_store -
-              sizeof(real_pcre) -
-              ((real_pcre *)re)->name_count * ((real_pcre *)re)->name_entry_size));
+    regex_gotten_store = gotten_store;
 
     /* If -s or /S was present, study the regex to generate additional info to
     help with the matching, unless the pattern has the SS option, which
@@ -1892,16 +1888,7 @@ while (!done)
       if (error != NULL)
         fprintf(outfile, "Failed to study: %s\n", error);
       else if (extra != NULL)
-        {
         true_study_size = ((pcre_study_data *)(extra->study_data))->size;
-        if (log_store)
-          {
-          size_t jitsize;
-          new_info(re, extra, PCRE_INFO_JITSIZE, &jitsize);
-          if (jitsize != 0)
-            fprintf(outfile, "Memory allocation (JIT code): %d\n", jitsize);
-          }
-        }
       }
 
     /* If /K was present, we set up for handling MARK data. */
@@ -1954,9 +1941,7 @@ while (!done)
         }
       }
 
-    /* Extract information from the compiled data if required. There are now
-    two info-returning functions. The old one has a limited interface and
-    returns only limited data. Check that it agrees with the newer one. */
+    /* Extract information from the compiled data if required */
 
     SHOW_INFO:
 

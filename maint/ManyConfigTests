@@ -141,10 +141,6 @@ function runtest()
 # builds both) to save a bit of time by building only one version of the
 # library for the subsequent tests.
 
-valgrind=
-cvalgrind=
-withvalgrind=
-
 echo "Tests in the current directory"
 srcdir=.
 for opts in \
@@ -183,13 +179,10 @@ do
   runtest
 done
 
-valgrind=
-cvalgrind=
-withvalgrind=
-
 # Clean up the distribution and then do at least one build and test in a
 # directory other than the source directory. It doesn't work unless the
-# source directory is cleaned up first.
+# source directory is cleaned up first - and anyway, it's best to leave it
+# in a clean state after all this reconfiguring.
 
 if [ -f Makefile ]; then
   echo "Running 'make distclean'"

@@ -100,7 +100,6 @@ EXTRA_DIST += \
 # These files are used in the preparation of a release
 EXTRA_DIST += \
   PrepareRelease \
-  CheckMan \
   CleanTxt \
   Detrail \
   132html \

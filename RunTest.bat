@@ -18,8 +18,6 @@
 @rem 14 requires presense of jit support
 @rem 15 requires absence of jit support
 @rem Sheri P also added override tests for study and jit testing
-@rem JIT testing n/a for tests 7-10, removed JIT override test for them
-@rem removed override tests for 14-15
 
 setlocal enabledelayedexpansion
 if [%srcdir%]==[] (
@@ -29,7 +27,7 @@ if exist ..\testdata\ set srcdir=..)
 if [%srcdir%]==[] (
 if exist ..\..\testdata\ set srcdir=..\..)
 if NOT exist "%srcdir%\testdata\" (
-Error: echo distribution testdata folder not found!
+Error: echo distribution testdata folder not found.
 call :conferror
 exit /b 1
 goto :eof
@@ -43,14 +41,14 @@ echo pcretest=%pcretest%
 echo pcregrep=%pcregrep%
 
 if NOT exist "%pcregrep%" (
-echo Error: "%pcregrep%" not found!
+echo Error: "%pcregrep%" not found.
 echo.
 call :conferror
 exit /b 1
 )
 
 if NOT exist "%pcretest%" (
-echo Error: "%pcretest%" not found!
+echo Error: "%pcretest%" not found.
 echo.
 call :conferror
 exit /b 1
@@ -221,7 +219,7 @@ if %jit% EQU 1 call :runsub 1 testoutjit "Test with JIT Override" -q -s+
 goto :eof
 
 :do2
-  call :runsub 2 testout "API, errors, internals, and non-Perl stuff (not UTF-8)" -q
+  call :runsub 2 testout "API, errors, internals, and non-Perl stuff" -q
   call :runsub 2 testoutstudy "Test with Study Override" -q -s
   if %jit% EQU 1 call :runsub 2 testoutjit "Test with JIT Override" -q -s+
 goto :eof
@@ -265,6 +263,7 @@ goto :eof
 :do7
   call :runsub 7 testout "DFA matching" -q -dfa
   call :runsub 7 testoutstudy "Test with Study Override" -q -dfa -s
+  if %jit% EQU 1 call :runsub 7 testoutjit "Test with JIT Override" -q -dfa -s+
 goto :eof
 
 :do8
@@ -274,6 +273,7 @@ goto :eof
 )
   call :runsub 8 testout "DFA matching with UTF-8" -q -dfa
   call :runsub 8 testoutstudy "Test with Study Override" -q -dfa -s
+  if %jit% EQU 1 call :runsub 8 testoutjit "Test with JIT Override" -q -dfa -s+
   goto :eof
 
 :do9
@@ -283,6 +283,7 @@ goto :eof
 )
   call :runsub 9 testout "DFA matching with Unicode properties" -q -dfa
   call :runsub 9 testoutstudy "Test with Study Override" -q -dfa -s
+  if %jit% EQU 1 call :runsub 9 testoutjit "Test with JIT Override" -q -dfa -s+
 goto :eof
 
 :do10
@@ -292,6 +293,7 @@ goto :eof
 )
   call :runsub 10 testout "Internal offsets and code size tests" -q
   call :runsub 10 testoutstudy "Test with Study Override" -q -s
+  if %jit% EQU 1 call :runsub 10 testoutjit "Test with JIT Override" -q -s+
 goto :eof
 
 :do11
@@ -326,6 +328,8 @@ if %jit% EQU 0 (
   goto :eof
 )
   call :runsub 14 testout "JIT-specific features - have JIT" -q
+  call :runsub 14 testoutstudy "Test with Study Override" -q -s
+  call :runsub 14 testoutjit "Test with JIT Override" -q -s+
 goto :eof
 
 :do15
@@ -334,11 +338,11 @@ goto :eof
   goto :eof
 )
   call :runsub 15 testout "JIT-specific features - no JIT" -q
+  call :runsub 15 testoutstudy "Test with Study Override" -q -s
 goto :eof
 
 :conferror
-@echo.
-@echo Either your build is incomplete or you have a configuration error.
+@echo Configuration error.
 @echo.
 @echo If configured with cmake and executed via "make test" or the MSVC "RUN_TESTS"
 @echo project, pcre_test.bat defines variables and automatically calls RunTest.bat.

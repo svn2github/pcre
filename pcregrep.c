@@ -1410,7 +1410,7 @@ while (ptr < endptr)
         and its line-ending characters (if they matched the pattern), so there
         may be no more to print. */
 
-        plength = (int)((linelength + endlinelength) - startoffset);
+        plength = (linelength + endlinelength) - startoffset;
         if (plength > 0) FWRITE(ptr + startoffset, 1, plength, stdout);
         }
 
@@ -1462,7 +1462,7 @@ while (ptr < endptr)
 
   if (input_line_buffered && bufflength < (size_t)bufsize)
     {
-    int add = read_one_line(ptr, bufsize - (int)(ptr - main_buffer), in);
+    int add = read_one_line(ptr, bufsize - (ptr - main_buffer), in);
     bufflength += add;
     endptr += add;
     }

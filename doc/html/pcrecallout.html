@@ -189,10 +189,9 @@ same callout number. However, they are set for all callouts.
 <P>
 The <i>mark</i> field is present from version 2 of the <i>pcre_callout</i>
 structure. In callouts from <b>pcre_exec()</b> it contains a pointer to the
-zero-terminated name of the most recently passed (*MARK), (*PRUNE), or (*THEN)
-item in the match, or NULL if no such items have been passed. Instances of
-(*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
-callouts from <b>pcre_dfa_exec()</b> this field always contains NULL.
+zero-terminated name of the most recently passed (*MARK) item in the match, or
+NULL if there are no (*MARK)s in the current matching path. In callouts from
+<b>pcre_dfa_exec()</b> this field always contains NULL.
 </P>
 <br><a name="SEC4" href="#TOC1">RETURN VALUES</a><br>
 <P>
@@ -220,7 +219,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC6" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 30 November 2011
+Last updated: 26 August 2011
 <br>
 Copyright &copy; 1997-2011 University of Cambridge.
 <br>

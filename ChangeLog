@@ -1,18 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.22
+Version 8.21
 ------------
-
-1.  Renamed "isnumber" as "is_a_number" because in some Mac environments this
-    name is defined in ctype.h.
-    
-2.  Fixed a bug in the code for calculating the fixed length of lookbehind
-    assertions.
-      
-
-Version 8.21 12-Dec-2011
-------------------------
 
 1.  Updating the JIT compiler.
 
@@ -23,7 +13,7 @@ Version 8.21 12-Dec-2011
     PCRE_EXTRA_TABLES is not suported by JIT, and should be checked before
     calling _pcre_jit_exec. Some extra comments are added.
 
-4.  (*MARK) settings inside atomic groups that do not contain any capturing
+4.  Mark settings inside atomic groups that do not contain any capturing
     parentheses, for example, (?>a(*:m)), were not being passed out. This bug
     was introduced by change 18 for 8.20.
 
@@ -32,99 +22,35 @@ Version 8.21 12-Dec-2011
 
 6.  Lookbehinds such as (?<=a{2}b) that contained a fixed repetition were
     erroneously being rejected as "not fixed length" if PCRE_CASELESS was set.
-    This bug was probably introduced by change 9 of 8.13.
-
+    This bug was probably introduced by change 9 of 8.13. 
+    
 7.  While fixing 6 above, I noticed that a number of other items were being
-    incorrectly rejected as "not fixed length". This arose partly because newer
+    incorrectly rejected as "not fixed length". This arose partly because newer 
     opcodes had not been added to the fixed-length checking code. I have (a)
     corrected the bug and added tests for these items, and (b) arranged for an
     error to occur if an unknown opcode is encountered while checking for fixed
-    length instead of just assuming "not fixed length". The items that were
-    rejected were: (*ACCEPT), (*COMMIT), (*FAIL), (*MARK), (*PRUNE), (*SKIP),
-    (*THEN), \h, \H, \v, \V, and single character negative classes with fixed
+    length instead of just assuming "not fixed length". The items that were 
+    rejected were: (*ACCEPT), (*COMMIT), (*FAIL), (*MARK), (*PRUNE), (*SKIP), 
+    (*THEN), \h, \H, \v, \V, and single character negative classes with fixed 
     repetitions, e.g. [^a]{3}, with and without PCRE_CASELESS.
-
+    
 8.  A possessively repeated conditional subpattern such as (?(?=c)c|d)++ was
-    being incorrectly compiled and would have given unpredicatble results.
-
-9.  A possessively repeated subpattern with minimum repeat count greater than
+    being incorrectly compiled and would have given unpredicatble results. 
+    
+9.  A possessively repeated subpattern with minimum repeat count greater than 
     one behaved incorrectly. For example, (A){2,}+ behaved as if it was
-    (A)(A)++ which meant that, after a subsequent mismatch, backtracking into
-    the first (A) could occur when it should not.
-
-10. Add a cast and remove a redundant test from the code.
+    (A)(A)++ which meant that, after a subsequent mismatch, backtracking into 
+    the first (A) could occur when it should not. 
+    
+10. Add a cast and remove a redundant test from the code. 
 
 11. JIT should use pcre_malloc/pcre_free for allocation.
 
 12. Updated pcre-config so that it no longer shows -L/usr/lib, which seems
-    best practice nowadays, and helps with cross-compiling. (If the exec_prefix
-    is anything other than /usr, -L is still shown).
-
+    best practice nowadays, and helps with cross-compiling. (If the exec_prefix 
+    is anything other than /usr, -L is still shown). 
+    
 13. In non-UTF-8 mode, \C is now supported in lookbehinds and DFA matching.
-
-14. Perl does not support \N without a following name in a [] class; PCRE now
-    also gives an error.
-
-15. If a forward reference was repeated with an upper limit of around 2000,
-    it caused the error "internal error: overran compiling workspace". The
-    maximum number of forward references (including repeats) was limited by the
-    internal workspace, and dependent on the LINK_SIZE. The code has been
-    rewritten so that the workspace expands (via pcre_malloc) if necessary, and
-    the default depends on LINK_SIZE. There is a new upper limit (for safety)
-    of around 200,000 forward references. While doing this, I also speeded up
-    the filling in of repeated forward references.
-
-16. A repeated forward reference in a pattern such as (a)(?2){2}(.) was
-    incorrectly expecting the subject to contain another "a" after the start.
-
-17. When (*SKIP:name) is activated without a corresponding (*MARK:name) earlier
-    in the match, the SKIP should be ignored. This was not happening; instead
-    the SKIP was being treated as NOMATCH. For patterns such as
-    /A(*MARK:A)A+(*SKIP:B)Z|AAC/ this meant that the AAC branch was never
-    tested.
-
-18. The behaviour of (*MARK), (*PRUNE), and (*THEN) has been reworked and is
-    now much more compatible with Perl, in particular in cases where the result
-    is a non-match for a non-anchored pattern. For example, if
-    /b(*:m)f|a(*:n)w/ is matched against "abc", the non-match returns the name
-    "m", where previously it did not return a name. A side effect of this
-    change is that for partial matches, the last encountered mark name is
-    returned, as for non matches. A number of tests that were previously not
-    Perl-compatible have been moved into the Perl-compatible test files. The
-    refactoring has had the pleasing side effect of removing one argument from
-    the match() function, thus reducing its stack requirements.
-
-19. If the /S+ option was used in pcretest to study a pattern using JIT,
-    subsequent uses of /S (without +) incorrectly behaved like /S+.
-
-21. Retrieve executable code size support for the JIT compiler and fixing
-    some warnings.
-
-22. A caseless match of a UTF-8 character whose other case uses fewer bytes did
-    not work when the shorter character appeared right at the end of the
-    subject string.
-
-23. Added some (int) casts to non-JIT modules to reduce warnings on 64-bit
-    systems.
-
-24. Added PCRE_INFO_JITSIZE to pass on the value from (21) above, and also
-    output it when the /M option is used in pcretest.
-
-25. The CheckMan script was not being included in the distribution. Also, added
-    an explicit "perl" to run Perl scripts from the PrepareRelease script
-    because this is reportedly needed in Windows.
-
-26. If study data was being save in a file and studying had not found a set of
-    "starts with" bytes for the pattern, the data written to the file (though
-    never used) was taken from uninitialized memory and so caused valgrind to
-    complain.
-
-27. Updated RunTest.bat as provided by Sheri Pierce.
-
-28. Fixed a possible uninitialized memory bug in pcre_jit_compile.c.
-
-29. Computation of memory usage for the table of capturing group names was
-    giving an unnecessarily large value.
 
 
 Version 8.20 21-Oct-2011

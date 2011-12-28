@@ -452,6 +452,20 @@ with the handling of backtracking verbs. ---/
 /A(*MARK:A)A+(*SKIP:B)(B|Z) | AC(*:B)/xK
     AAAC
 
+/--- We use something more complicated than individual letters here, because
+that causes different behaviour in Perl. Perhaps it disables some optimization;
+anyway, the result now matches PCRE in that no tag is passed back for the 
+failures. ---/
+    
+/(A|P)(*:A)(B|P) | (X|P)(X|P)(*:B)(Y|P)/xK
+    AABC
+    XXYZ 
+    ** Failers
+    XAQQ  
+    XAQQXZZ  
+    AXQQQ 
+    AXXQQQ 
+    
 /--- COMMIT at the start of a pattern should act like an anchor. Again, 
 however, we need the complication for Perl. ---/
 
@@ -785,144 +799,5 @@ name)/K
 
 /(?<=a(*THEN)b)c/
     xabcd 
-
-/(a)(?2){2}(.)/
-    abcd
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*PRUNE:B)(C|X)/KSS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KS
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KSY
-    C
-    D 
-
-/(*MARK:A)(*THEN:B)(C|X)/KSS
-    C
-    D 
-
-/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
-
-/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-
-/--- Same --/
-
-/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
-    AAAC
-
-/A(*:A)A+(*SKIP)(B|Z) | AC/xK
-    AAAC
-
-/--- This should fail, as a null name is the same as no name ---/
-
-/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
-    AAAC
-
-/--- A check on what happens after hitting a mark and them bumping along to
-something that does not even start. Perl reports tags after the failures here, 
-though it does not when the individual letters are made into something 
-more complicated. ---/
-
-/A(*:A)B|XX(*:B)Y/K
-    AABC
-    XXYZ 
-    ** Failers
-    XAQQ  
-    XAQQXZZ  
-    AXQQQ 
-    AXXQQQ 
-    
-/^(A(*THEN:A)B|C(*THEN:B)D)/K
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-    
-/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
-    AB
-    CD
-    ** Failers
-    AC
-    CB    
-    
-/--- An empty name does not pass back an empty string. It is the same as if no
-name were given. ---/ 
-
-/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
-    AB
-    CD 
-
-/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
-    
-/A(*PRUNE:A)B/K
-    ACAB
-
-/--- Mark names can be duplicated ---/
-
-/A(*:A)B|X(*:A)Y/K
-    AABC
-    XXYZ 
-    
-/b(*:m)f|a(*:n)w/K
-    aw 
-    ** Failers 
-    abc
-
-/b(*:m)f|aw/K
-    abaw
-    ** Failers 
-    abc
-    abax 
-
-/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
-    AAAC
-
-/a(*PRUNE:X)bc|qq/KY
-    ** Failers
-    axy
-
-/a(*THEN:X)bc|qq/KY
-    ** Failers
-    axy
-
-/(?=a(*MARK:A)b)..x/K
-    abxy
-    ** Failers
-    abpq  
-
-/(?=a(*MARK:A)b)..(*:Y)x/K
-    abxy
-    ** Failers
-    abpq  
-
-/(?=a(*PRUNE:A)b)..x/K
-    abxy
-    ** Failers
-    abpq  
-
-/(?=a(*PRUNE:A)b)..(*:Y)x/K
-    abxy
-    ** Failers
-    abpq  
-
-/(?=a(*THEN:A)b)..x/K
-    abxy
-    ** Failers
-    abpq  
-
-/(?=a(*THEN:A)b)..(*:Y)x/K
-    abxy
-    ** Failers
-    abpq  
 
 /-- End of testinput11 --/
