@@ -2331,7 +2331,18 @@ while (argc > 1 && argv[op][0] == '-')
         yield = rc;
         goto EXIT;
         }
-      printf("Unknown option: %s\n", argv[op + 1]);
+      if (strcmp(argv[op + 1], "newline") == 0)
+        {   
+        (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
+        /* Note that these values are always the ASCII values, even
+        in EBCDIC environments. CR is 13 and NL is 10. */
+        printf("%s\n", (rc == 13)? "CR" :
+          (rc == 10)? "LF" : (rc == (13<<8 | 10))? "CRLF" :
+          (rc == -2)? "ANYCRLF" :
+          (rc == -1)? "ANY" : "???");
+        goto EXIT;
+        } 
+      printf("Unknown -C option: %s\n", argv[op + 1]);
       goto EXIT;
       }
 

@@ -64,10 +64,11 @@ function runtest()
     ./pcretest -C
   fi
 
-  conf=`./pcretest -C`
-  nl=`expr match "$conf" ".*Newline sequence is \([A-Z]*\)"`
-  jit=`expr match "$conf" ".*[^o] Just-in-time"`
-  utf8=`expr match "$conf" ".*[^o] UTF-8 support"`
+  nl=`./pcretest -C newline`
+  ./pcretest -C jit >/dev/null
+  jit=$?
+  ./pcretest -C utf >/dev/null
+  utf=$?
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
     echo "Running C library tests $withvalgrind"
@@ -96,7 +97,7 @@ function runtest()
     echo "Skipping pcregrep tests: newline is $nl"
   fi
 
-  if [ "$jit" -gt 0 -a $utf8 -gt 0 ]; then
+  if [ "$jit" -gt 0 -a $utf -gt 0 ]; then
     echo "Running JIT regression tests $withvalgrind"
     $cvalgrind $srcdir/pcre_jit_test >teststdout 2>teststderr
     if [ $? -ne 0 ]; then
@@ -107,7 +108,7 @@ function runtest()
       exit 1
     fi
   else
-    echo "Skipping JIT regression tests: JIT or UTF-8 not enabled"
+    echo "Skipping JIT regression tests: JIT or UTF not enabled"
   fi
 
   if [ "$nl" = "LF" -o "$nl" = "ANY" ]; then
@@ -170,7 +171,9 @@ for opts in \
   "--enable-pcre16 --enable-jit --disable-pcre8 --disable-shared" \
   "--enable-pcre16 --enable-jit --disable-pcre8 --enable-utf --disable-shared" \
   "--enable-pcre16 --disable-stack-for-recursion --disable-shared" \
-  "--enable-pcre16 --enable-unicode-properties --disable-stack-for-recursion --disable-shared"
+  "--enable-pcre16 --enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
+  "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=3 --disable-shared" \
+  "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared"
 do
   runtest
 done
@@ -186,7 +189,7 @@ for opts in \
   "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-unicode-properties --with-link-size=3 --disable-shared" \
   "--enable-jit --enable-unicode-properties --disable-shared" \
-  "--enable-pcre16 --enable-jit --enable-unicode-properties --disable-shared" 
+  "--enable-pcre16 --enable-jit --enable-unicode-properties --disable-shared"
 do
   runtest
 done
