@@ -26,6 +26,10 @@ Version 8.30
 6.  Add support for 16-bit character strings (a large amount of work involving 
     many changes and refactorings). 
     
+7.  RunGrepTest failed on msys because \r\n was replaced by whitespace when the
+    command "pattern=`printf 'xxx\r\njkl'`" was run. The pattern is now taken 
+    from a file.
+    
 
 Version 8.21 12-Dec-2011
 ------------------------

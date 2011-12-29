@@ -454,8 +454,7 @@ pattern=`printf 'def\rjkl'`
 $valgrind $pcregrep -n --newline=cr -F "$pattern" testNinput >>testtry
 
 printf "%c--------------------------- Test N4 ------------------------------\r\n" - >>testtry
-pattern=`printf 'xxx\r\njkl'`
-$valgrind $pcregrep -n --newline=crlf -F "$pattern" testNinput >>testtry
+$valgrind $pcregrep -n --newline=crlf -F -f testdata/greppatN4 testNinput >>testtry
 
 printf "%c--------------------------- Test N5 ------------------------------\r\n" - >>testtry
 $valgrind $pcregrep -n --newline=any "^(abc|def|ghi|jkl)" testNinput >>testtry
