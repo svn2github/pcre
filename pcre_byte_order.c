@@ -139,7 +139,7 @@ re->name_count = swap_uint16(re->name_count);
 re->ref_count = swap_uint16(re->ref_count);
 re->tables = tables;
 
-if (extra_data != NULL && (re->flags & PCRE_EXTRA_STUDY_DATA) != 0)
+if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_STUDY_DATA) != 0)
   {
   study = (pcre_study_data *)extra_data->study_data;
   study->size = swap_uint32(study->size);

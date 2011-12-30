@@ -259,8 +259,8 @@ argument, the casting might be incorrectly applied. */
 #define PCRE_GET_SUBSTRING_LIST8(rc, bptr, offsets, count, listptr) \
   rc = pcre_get_substring_list((const char *)bptr, offsets, count, listptr)
 
-#define PCRE_PATTERN_TO_HOST_BYTE_ORDER8(re, extra, tables) \
-  pcre_pattern_to_host_byte_order(re, extra, tables)
+#define PCRE_PATTERN_TO_HOST_BYTE_ORDER8(rc, re, extra, tables) \
+  rc = pcre_pattern_to_host_byte_order(re, extra, tables)
 
 #define PCRE_PRINTINT8(re, outfile, debug_lengths) \
   pcre_printint(re, outfile, debug_lengths)
@@ -336,8 +336,8 @@ argument, the casting might be incorrectly applied. */
   rc = pcre16_get_substring_list((PCRE_SPTR16)bptr, offsets, count, \
     (PCRE_SPTR16 **)(void*)listptr)
 
-#define PCRE_PATTERN_TO_HOST_BYTE_ORDER16(re, extra, tables) \
-  pcre16_pattern_to_host_byte_order(re, extra, tables)
+#define PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables) \
+  rc = pcre16_pattern_to_host_byte_order(re, extra, tables)
 
 #define PCRE_PRINTINT16(re, outfile, debug_lengths) \
   pcre16_printint(re, outfile, debug_lengths)
@@ -476,11 +476,11 @@ version is called. ----- */
 #define PCRE_MAKETABLES \
   (use_pcre16? pcre16_maketables() : pcre_maketables())
 
-#define PCRE_PATTERN_TO_HOST_BYTE_ORDER(re, extra, tables) \
+#define PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, tables) \
   if (use_pcre16) \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER16(re, extra, tables); \
+    PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables); \
   else \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER8(re, extra, tables)
+    PCRE_PATTERN_TO_HOST_BYTE_ORDER8(rc, re, extra, tables)
 
 #define PCRE_PRINTINT(re, outfile, debug_lengths) \
   if (use_pcre16) \
@@ -624,6 +624,9 @@ COMPILE_PCRE16 is *not* set. */
 #else
 #error LINK_SIZE must be either 2, 3, or 4
 #endif
+
+#undef IMM2_SIZE
+#define IMM2_SIZE 1
 
 #endif /* SUPPORT_PCRE8 */
 
@@ -1913,25 +1916,25 @@ while(TRUE)
     break;
 
     case OP_XCLASS:
+    /* LINK_SIZE can be 1 or 2 in 16 bit mode. */
+    if (LINK_SIZE > 1)
+      length = (int)((((unsigned int)(ptr[0]) << 16) | (unsigned int)(ptr[1]))
+        - (1 + LINK_SIZE + 1));
+    else
+      length = (int)((unsigned int)(ptr[0]) - (1 + LINK_SIZE + 1));
+
     /* Reverse the size of the XCLASS instance. */
-    ptr++;
     *ptr = swap_uint16(*ptr);
+    ptr++;
     if (LINK_SIZE > 1)
       {
-      /* LINK_SIZE can be 1 or 2 in 16 bit mode. */
-      ptr++;
       *ptr = swap_uint16(*ptr);
+      ptr++;
       }
-    ptr++;
-
-    if (LINK_SIZE > 1)
-      length = ((ptr[-LINK_SIZE] << 16) | ptr[-LINK_SIZE + 1]) -
-        (1 + LINK_SIZE + 1);
-    else
-      length = ptr[-LINK_SIZE] - (1 + LINK_SIZE + 1);
 
     op = *ptr;
     *ptr = swap_uint16(op);
+    ptr++;
     if ((op & XCL_MAP) != 0)
       {
       /* Skip the character bit map. */
@@ -2082,6 +2085,7 @@ printf("     pcre16       16 bit library support enabled [0, 1]\n");
 printf("     utf          Unicode Transformation Format supported [0, 1]\n");
 printf("     ucp          Unicode Properties supported [0, 1]\n");
 printf("     jit          Just-in-time compiler supported [0, 1]\n");
+printf("     newline      Newline type [CR, LF, CRLF, ANYCRLF, ANY, ???]\n");
 printf("  -d       debug: show compiled code and information (-b and -i)\n");
 #if !defined NODFA
 printf("  -dfa     force DFA matching for all subjects\n");
@@ -2523,6 +2527,13 @@ while (!done)
     FILE *f;
 
     p++;
+    if (*p == '!')
+      {
+      do_debug = TRUE;
+      do_showinfo = TRUE;
+      p++;
+      }
+
     pp = p + (int)strlen((char *)p);
     while (isspace(pp[-1])) pp--;
     *pp = 0;
@@ -2534,6 +2545,7 @@ while (!done)
       continue;
       }
 
+    first_gotten_store = 0;
     if (fread(sbuf, 1, 8, f) != 8) goto FAIL_READ;
 
     true_size =
@@ -2561,8 +2573,9 @@ while (!done)
         }
       }
 
+    /* We hide the byte-invert info for little and big endian tests. */
     fprintf(outfile, "Compiled pattern%s loaded from %s\n",
-      do_flip? " (byte-inverted)" : "", p);
+      do_flip && (p[-1] == '<') ? " (byte-inverted)" : "", p);
 
     /* Now see if there is any following study data. */
 
@@ -2596,7 +2609,17 @@ while (!done)
     /* Flip the necessary bytes. */
     if (do_flip)
       {
-      PCRE_PATTERN_TO_HOST_BYTE_ORDER(re, extra, NULL);
+      int rc;
+      PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, NULL);
+      if (rc == PCRE_ERROR_BADMODE)
+        {
+        /* Simulate the result of the function call below. */
+        fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
+          use_pcre16? "16" : "", PCRE_INFO_OPTIONS);
+        fprintf(outfile, "Running in %s-bit mode but pattern was compiled in "
+          "%s-bit mode\n", use_pcre16? "16":"8", use_pcre16? "8":"16");
+        continue;
+        }
       }
 
     /* Need to know if UTF-8 for printing data strings. */
