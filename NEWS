@@ -1,6 +1,15 @@
 News about PCRE releases
 ------------------------
 
+Release 8.30
+------------
+
+Release 8.30 introduces a major new feature: support for 16-bit character 
+strings, compiled as a separate library. There are no new features in the 8-bit 
+library, but some bugs have been mended. However, note that the pcre_info() 
+function, which has been obsolete for over 10 years, has been removed.
+
+
 Release 8.21 12-Dec-2011
 ------------------------
 
