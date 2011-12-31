@@ -55,7 +55,7 @@ supporting internal functions that are not used by other modules. */
 
 /* When PCRE_DEBUG is defined, we need the pcre(16)_printint() function, which
 is also used by pcretest. PCRE_DEBUG is not defined when building a production
-library. We do not need to select pcre16_printint.c specially, because the 
+library. We do not need to select pcre16_printint.c specially, because the
 COMPILE_PCREx macro will already be appropriately set. */
 
 #ifdef PCRE_DEBUG
@@ -1708,7 +1708,7 @@ for (;;)
   int d;
   pcre_uchar *ce, *cs;
   register int op = *cc;
-  
+
   switch (op)
     {
     /* We only need to continue for OP_CBRA (normal capturing bracket) and
@@ -1769,7 +1769,7 @@ for (;;)
     case OP_ASSERTBACK_NOT:
     do cc += GET(cc, 1); while (*cc == OP_ALT);
     cc += PRIV(OP_lengths)[*cc];
-    break; 
+    break;
 
     /* Skip over things that don't match chars */
 
@@ -3526,7 +3526,7 @@ for (;; ptr++)
     *lengthptr += (int)(code - last_code);
     DPRINTF(("length=%d added %d c=%c (0x%x)\n", *lengthptr,
       (int)(code - last_code), c, c));
-      
+
     /* If "previous" is set and it is not at the start of the work space, move
     it back to there, in order to avoid filling up the work space. Otherwise,
     if "previous" is NULL, reset the current code pointer to the start. */
@@ -4550,7 +4550,7 @@ for (;; ptr++)
 #ifdef SUPPORT_UTF
 #ifndef COMPILE_PCRE8
         /* In non 8 bit mode, we can get here even if we are not in UTF mode. */
-        if (!utf) 
+        if (!utf)
           *class_uchardata++ = c;
         else
 #endif

@@ -1126,8 +1126,7 @@ for (j = i; j > 0; j--)
 *utf8bytes = utf8_table2[i] | cvalue;
 return i + 1;
 }
-#endif /* NOUTF || SUPPORT_PCRE16 */
-
+#endif
 
 
 #ifdef SUPPORT_PCRE16
@@ -1145,7 +1144,7 @@ Note that this function does not object to surrogate values. This is
 deliberate; it makes it possible to construct UTF-16 strings that are invalid,
 for the purpose of testing that they are correctly faulted.
 
-Patterns to be converted are either plain ASCII or UTF-8; data lines are always 
+Patterns to be converted are either plain ASCII or UTF-8; data lines are always
 in UTF-8 so that values greater than 255 can be handled.
 
 Arguments:
@@ -1157,7 +1156,7 @@ Arguments:
 Returns:     number of 16-bit data items used (excluding trailing zero)
              OR -1 if a UTF-8 string is malformed
              OR -2 if a value > 0x10ffff is encountered
-             OR -3 if a value > 0xffff is encountered when not in UTF mode 
+             OR -3 if a value > 0xffff is encountered when not in UTF mode
 */
 
 static int
@@ -2336,7 +2335,7 @@ while (argc > 1 && argv[op][0] == '-')
         goto EXIT;
         }
       if (strcmp(argv[op + 1], "newline") == 0)
-        {   
+        {
         (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
         /* Note that these values are always the ASCII values, even
         in EBCDIC environments. CR is 13 and NL is 10. */
@@ -2345,7 +2344,7 @@ while (argc > 1 && argv[op][0] == '-')
           (rc == -2)? "ANYCRLF" :
           (rc == -1)? "ANY" : "???");
         goto EXIT;
-        } 
+        }
       printf("Unknown -C option: %s\n", argv[op + 1]);
       goto EXIT;
       }
@@ -2869,11 +2868,11 @@ while (!done)
         fprintf(outfile, "**Failed: character value greater than 0x10ffff "
           "cannot be converted to UTF-16\n");
         goto SKIP_DATA;
-        
+
         case -3: /* "Impossible error" when to16 is called arg1 FALSE */
         fprintf(outfile, "**Failed: character value greater than 0xffff "
           "cannot be converted to 16-bit in non-UTF mode\n");
-        goto SKIP_DATA;   
+        goto SKIP_DATA;
 
         default:
         break;
@@ -3386,23 +3385,23 @@ while (!done)
       {
       int i = 0;
       int n = 0;
-      
+
       /* In UTF mode, input can be UTF-8, so just copy all non-backslash bytes.
       In non-UTF mode, allow the value of the byte to fall through to later,
       where values greater than 127 are turned into UTF-8 when running in
       16-bit mode. */
-      
+
       if (c != '\\')
         {
         if (use_utf)
           {
           *q++ = c;
           continue;
-          }    
-        }  
- 
+          }
+        }
+
       /* Handle backslash escapes */
-       
+
       else switch ((c = *p++))
         {
         case 'a': c =    7; break;
@@ -3442,10 +3441,10 @@ while (!done)
           /* Not correct form for \x{...}; fall through */
           }
 
-        /* \x without {} always defines just one byte in 8-bit mode. This 
-        allows UTF-8 characters to be constructed byte by byte, and also allows 
-        invalid UTF-8 sequences to be made. Just copy the byte in UTF mode. 
-        Otherwise, pass it down to later code so that it can be turned into 
+        /* \x without {} always defines just one byte in 8-bit mode. This
+        allows UTF-8 characters to be constructed byte by byte, and also allows
+        invalid UTF-8 sequences to be made. Just copy the byte in UTF mode.
+        Otherwise, pass it down to later code so that it can be turned into
         UTF-8 when running in 16-bit mode. */
 
         c = 0;
@@ -3455,10 +3454,10 @@ while (!done)
           p++;
           }
         if (use_utf)
-          { 
+          {
           *q++ = c;
-          continue;    
-          } 
+          continue;
+          }
         break;
 
         case 0:   /* \ followed by EOF allows for an empty line */
@@ -3663,13 +3662,14 @@ while (!done)
         continue;
         }
 
-      /* We now have a character value in c that may be greater than 255. In 
-      16-bit mode, we always convert characters to UTF-8 so that values greater 
+      /* We now have a character value in c that may be greater than 255. In
+      16-bit mode, we always convert characters to UTF-8 so that values greater
       than 255 can be passed to non-UTF 16-bit strings. In 8-bit mode we
-      convert to UTF-8 if we are in UTF mode. Values greater than 127 in UTF 
+      convert to UTF-8 if we are in UTF mode. Values greater than 127 in UTF
       mode must have come from \x{...} or octal constructs because values from
       \x.. get this far only in non-UTF mode. */
 
+#if !defined NOUTF || defined SUPPORT_PCRE16
       if (use_pcre16 || use_utf)
         {
         pcre_uint8 buff8[8];
@@ -3678,6 +3678,7 @@ while (!done)
         for (ii = 0; ii < utn; ii++) *q++ = buff8[ii];
         }
       else
+#endif
         {
         if (c > 255)
           {
@@ -3689,9 +3690,9 @@ while (!done)
         *q++ = c;
         }
       }
-      
+
     /* Reached end of subject string */
-       
+
     *q = 0;
     len = (int)(q - dbuffer);
 
@@ -3793,7 +3794,7 @@ while (!done)
         case -3:
         fprintf(outfile, "**Failed: character value greater than 0xffff "
           "cannot be converted to 16-bit in non-UTF mode\n");
-        goto NEXT_DATA;   
+        goto NEXT_DATA;
 
         default:
         break;

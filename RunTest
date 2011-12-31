@@ -18,7 +18,7 @@
 # two tests for JIT-specific features, one to be run when JIT support is
 # available, and one when it is not.
 
-# Whichever of the 8-bit and 16-bit libraries exist are tested. It is also 
+# Whichever of the 8-bit and 16-bit libraries exist are tested. It is also
 # possible to select which to test by the arguments -8 or -16.
 
 # Other arguments for this script can be individual test numbers, or the word
@@ -31,6 +31,9 @@ valgrind=
 sim=
 arg8=
 arg16=
+
+# This is in case the caller has set aliases (as I do - PH)
+unset cp ls mv rm
 
 # Select which tests to run; for those that are explicitly requested, check
 # that the necessary optional facilities are available.
@@ -77,7 +80,7 @@ while [ $# -gt 0 ] ; do
    17) do17=yes;;
    18) do18=yes;;
    19) do19=yes;;
-   20) do20=yes;; 
+   20) do20=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
    valgrind) valgrind="valgrind -q --smc-check=all";;
@@ -190,7 +193,7 @@ if [ $utf -eq 0 ] ; then
   fi
   if [ $do18 = yes ] ; then
     echo "Can't run test 18 because UTF support is not configured"
-  fi     
+  fi
 fi
 
 if [ $ucp -eq 0 ] ; then
@@ -262,7 +265,7 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do17=yes
   do18=yes
   do19=yes
-  do20=yes 
+  do20=yes
 fi
 
 # Show which release and which test data
@@ -277,8 +280,8 @@ for bmode in "$test8" "$test16"; do
     -16)  if [ "$test8" != "skip" ] ; then echo ""; fi
           bits=16; echo "---- Testing 16-bit library ----"; echo "";;
     *)    bits=8; echo "---- Testing 8-bit library ----"; echo "";;
-  esac      
-   
+  esac
+
 # Primary test, compatible with JIT and all versions of Perl >= 5.8
 
 if [ $do1 = yes ] ; then
@@ -581,9 +584,8 @@ if [ "$do14" = yes ] ; then
   echo "Test 14: specials for the basic 8-bit library"
   if [ "$bits" = "16" ] ; then
     echo "  Skipped when running 16-bit tests"
-  elif [ $utf -eq 0 ] ; then
-    echo "  Skipped because UTF-$bits support is not available"
-  else   
+  else
+    cp -f $testdata/saved16 testsaved16
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput14 testtry
       if [ $? = 0 ] ; then
@@ -607,7 +609,7 @@ if [ "$do15" = yes ] ; then
     echo "  Skipped when running 16-bit tests"
   elif [ $utf -eq 0 ] ; then
     echo "  Skipped because UTF-$bits support is not available"
-  else   
+  else
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput15 testtry
       if [ $? = 0 ] ; then
@@ -631,7 +633,7 @@ if [ $do16 = yes ] ; then
     echo "  Skipped when running 16-bit tests"
   elif [ $ucp -eq 0 ] ; then
     echo "  Skipped because Unicode property support is not available"
-  else   
+  else
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput16 testtry
       if [ $? = 0 ] ; then
@@ -653,7 +655,10 @@ if [ $do17 = yes ] ; then
   echo "Test 17: specials for the basic 16-bit library"
   if [ "$bits" = "8" ] ; then
     echo "  Skipped when running 8-bit tests"
-  else   
+  else
+    cp -f $testdata/saved8 testsaved8
+    cp -f $testdata/saved16LE-1 testsaved16LE-1
+    cp -f $testdata/saved16BE-1 testsaved16BE-1
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput17 testtry
       if [ $? = 0 ] ; then
@@ -677,7 +682,9 @@ if [ $do18 = yes ] ; then
     echo "  Skipped when running 8-bit tests"
   elif [ $utf -eq 0 ] ; then
     echo "  Skipped because UTF-$bits support is not available"
-  else   
+  else
+    cp -f $testdata/saved16LE-2 testsaved16LE-2
+    cp -f $testdata/saved16BE-2 testsaved16BE-2
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput18 testtry
       if [ $? = 0 ] ; then
@@ -701,7 +708,7 @@ if [ $do19 = yes ] ; then
     echo "  Skipped when running 8-bit tests"
   elif [ $ucp -eq 0 ] ; then
     echo "  Skipped because Unicode property support is not available"
-  else   
+  else
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput19 testtry
       if [ $? = 0 ] ; then
@@ -723,7 +730,7 @@ if [ $do20 = yes ] ; then
   echo "Test 20: DFA specials for the basic 16-bit library"
   if [ "$bits" = "8" ] ; then
     echo "  Skipped when running 8-bit tests"
-  else   
+  else
     for opt in "" "-s"; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput20 testtry
       if [ $? = 0 ] ; then
@@ -740,5 +747,8 @@ fi
 
 # End of loop for 8-bit/16-bit tests
 done
+
+# Clean up local working files
+rm -f test3input test3output testNinput testsaved* teststderr teststdout testtry
 
 # End

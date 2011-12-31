@@ -106,7 +106,7 @@ hand":
        pcre_newline.c
        pcre_ord2utf8.c
        pcre_refcount.c
-       pcre_string_utils.c 
+       pcre_string_utils.c
        pcre_study.c
        pcre_tables.c
        pcre_ucd.c
@@ -118,7 +118,7 @@ hand":
      an unusual compiler) so that all included PCRE header files are first
      sought in the current directory. Otherwise you run the risk of picking up
      a previously-installed file from somewhere else.
-     
+
  (6) If you have defined SUPPORT_JIT in config.h, you must also compile
 
        pcre_jit_compile.c
@@ -130,8 +130,8 @@ hand":
      your system keeps such libraries. This is the basic PCRE C 8-bit library.
      If your system has static and shared libraries, you may have to do this
      once for each type.
-     
- (8) If you want to build a 16-bit library (as well as, or instead of the 8-bit 
+
+ (8) If you want to build a 16-bit library (as well as, or instead of the 8-bit
      library) repeat steps 5-7 with the following files:
 
        pcre16_byte_order.c
@@ -148,16 +148,16 @@ hand":
        pcre16_newline.c
        pcre16_ord2utf16.c
        pcre16_refcount.c
-       pcre16_string_utils.c 
+       pcre16_string_utils.c
        pcre16_study.c
        pcre16_tables.c
        pcre16_ucd.c
-       pcre16_utf16_utils.c 
+       pcre16_utf16_utils.c
        pcre16_valid_utf16.c
        pcre16_version.c
        pcre16_xclass.c
 
- (9) If you want to build the POSIX wrapper functions (which apply only to the 
+ (9) If you want to build the POSIX wrapper functions (which apply only to the
      8-bit library), ensure that you have the pcreposix.h file and then compile
      pcreposix.c (remembering -DHAVE_CONFIG_H if necessary). Link the result
      (on its own) as the pcreposix library.
@@ -170,10 +170,10 @@ hand":
      you compiled it with -DNOPOSIX.
 
 (11) Run pcretest on the testinput files in the testdata directory, and check
-     that the output matches the corresponding testoutput files. If you 
-     compiled both an 8-bit and a 16-bit library, you need to run pcretest with 
+     that the output matches the corresponding testoutput files. If you
+     compiled both an 8-bit and a 16-bit library, you need to run pcretest with
      the -16 option to do 16-bit tests.
-       
+
      Some tests are relevant only when certain build-time options are selected.
      For example, test 4 is for UTF-8 or UTF-16 support, and will not run if
      you have built PCRE without it. See the comments at the start of each
@@ -199,7 +199,7 @@ hand":
 
 THE C++ WRAPPER FUNCTIONS
 
-The PCRE distribution also contains some C++ wrapper functions and tests, 
+The PCRE distribution also contains some C++ wrapper functions and tests,
 applicable to the 8-bit library, which were contributed by Google Inc. On a
 system that can use "configure" and "make", the functions are automatically
 built into a library called pcrecpp. It should be straightforward to compile

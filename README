@@ -34,14 +34,14 @@ The contents of this README file are:
 The PCRE APIs
 -------------
 
-PCRE is written in C, and it has its own API. There are two sets of functions, 
+PCRE is written in C, and it has its own API. There are two sets of functions,
 one for the 8-bit library, which processes strings of bytes, and one for the
 16-bit library, which processes strings of 16-bit values. The distribution also
 includes a set of C++ wrapper functions (see the pcrecpp man page for details),
 courtesy of Google Inc., which can be used to call the 8-bit PCRE library from
 C++.
 
-In addition, there is a set of C wrapper functions (again, just for the 8-bit 
+In addition, there is a set of C wrapper functions (again, just for the 8-bit
 library) that are based on the POSIX regular expression API (see the pcreposix
 man page). These end up in the library called libpcreposix. Note that this just
 provides a POSIX calling interface to PCRE; the regular expressions themselves
@@ -171,12 +171,12 @@ library. They are also documented in the pcrebuild man page.
   --disable-static
 
   (See also "Shared libraries on Unix-like systems" below.)
-  
-. By default, only the 8-bit library is built. If you add --enable-pcre16 to 
-  the "configure" command, the 16-bit library is also built. If you want only 
+
+. By default, only the 8-bit library is built. If you add --enable-pcre16 to
+  the "configure" command, the 16-bit library is also built. If you want only
   the 16-bit library, use "./configure --enable-pcre16 --disable-pcre8".
 
-. If you are building the 8-bit library and want to suppress the building of 
+. If you are building the 8-bit library and want to suppress the building of
   the C++ wrapper library, you can add --disable-cpp to the "configure"
   command. Otherwise, when "configure" is run without --disable-pcre8, it will
   try to find a C++ compiler and C++ header files, and if it succeeds, it will
@@ -200,13 +200,13 @@ library. They are also documented in the pcrebuild man page.
   can only either be ASCII or UTF-8/16, even when running on EBCDIC platforms.
   It is not possible to use both --enable-utf and --enable-ebcdic at the same
   time.
-  
-. The option --enable-utf8 is retained for backwards compatibility with earlier 
-  releases that did not support 16-bit character strings. It is synonymous with 
-  --enable-utf. It is not possible to configure one library with UTF support 
-  and the other without in the same configuration. 
 
-. If, in addition to support for UTF-8/16 character strings, you want to 
+. The option --enable-utf8 is retained for backwards compatibility with earlier
+  releases that did not support 16-bit character strings. It is synonymous with
+  --enable-utf. It is not possible to configure one library with UTF support
+  and the other without in the same configuration.
+
+. If, in addition to support for UTF-8/16 character strings, you want to
   include support for the \P, \p, and \X sequences that recognize Unicode
   character properties, you must add --enable-unicode-properties to the
   "configure" command. This adds about 30K to the size of the library (in the
@@ -264,10 +264,10 @@ library. They are also documented in the pcrebuild man page.
   sizes in the pcrestack man page.
 
 . The default maximum compiled pattern size is around 64K. You can increase
-  this by adding --with-link-size=3 to the "configure" command. In the 8-bit 
-  library, PCRE then uses three bytes instead of two for offsets to different 
+  this by adding --with-link-size=3 to the "configure" command. In the 8-bit
+  library, PCRE then uses three bytes instead of two for offsets to different
   parts of the compiled pattern. In the 16-bit library, --with-link-size=3 is
-  the same as --with-link-size=4, which (in both libraries) uses four-byte 
+  the same as --with-link-size=4, which (in both libraries) uses four-byte
   offsets. Increasing the internal link size reduces performance.
 
 . You can build PCRE so that its internal match() function that is called from
@@ -305,7 +305,7 @@ library. They are also documented in the pcrebuild man page.
   when PCRE is built this way, it always operates in EBCDIC. It cannot support
   both EBCDIC and UTF-8/16.
 
-. The pcregrep program currently supports only 8-bit data files, and so 
+. The pcregrep program currently supports only 8-bit data files, and so
   requires the 8-bit PCRE library. It is possible to compile pcregrep to use
   libz and/or libbz2, in order to read .gz and .bz2 files (respectively), by
   specifying one or both of
@@ -397,13 +397,13 @@ system. The following are installed (file names are all relative to the
     pcre-config
 
   Libraries (lib):
-    libpcre16     (if 16-bit support is enabled) 
+    libpcre16     (if 16-bit support is enabled)
     libpcre       (if 8-bit support is enabled)
     libpcreposix  (if 8-bit support is enabled)
     libpcrecpp    (if 8-bit and C++ support is enabled)
 
   Configuration information (lib/pkgconfig):
-    libpcre16.pc 
+    libpcre16.pc
     libpcre.pc
     libpcreposix.pc
     libpcrecpp.pc (if C++ support is enabled)
@@ -592,17 +592,17 @@ tests that are marked "never study" (see the pcretest program for how this is
 done). If JIT support is available, the non-DFA tests are run a third time,
 this time with a forced pcre_study() with the PCRE_STUDY_JIT_COMPILE option.
 
-When both 8-bit and 16-bit support is enabled, the entire set of tests is run 
-twice, once for each library. If you want to run just one set of tests, call 
+When both 8-bit and 16-bit support is enabled, the entire set of tests is run
+twice, once for each library. If you want to run just one set of tests, call
 RunTest with either the -8 or -16 option.
 
-RunTest uses a file called testtry to hold the main output from pcretest
-(testsavedregex is also used as a working file). To run pcretest on just one or
-more specific test files, give their numbers as arguments to RunTest, for
-example:
+RunTest uses a file called testtry to hold the main output from pcretest.
+Other files whose names begin with "test" are used as working files in some
+tests. To run pcretest on just one or more specific test files, give their
+numbers as arguments to RunTest, for example:
 
   RunTest 2 7 11
-  
+
 The first test file can be fed directly into the perltest.pl script to check
 that Perl gives the same results. The only difference you should see is in the
 first few lines, where the Perl version is given instead of the PCRE version.
@@ -658,12 +658,12 @@ The twelfth test is run only when JIT support is available, and the thirteenth
 test is run only when JIT support is not available. They test some JIT-specific
 features such as information output from pcretest about JIT compilation.
 
-The fourteenth, fifteenth, and sixteenth tests are run only in 8-bit mode, and 
-the seventeenth, eighteenth, and nineteenth tests are run only in 16-bit mode. 
-These are tests that generate different output in the two modes. They are for 
+The fourteenth, fifteenth, and sixteenth tests are run only in 8-bit mode, and
+the seventeenth, eighteenth, and nineteenth tests are run only in 16-bit mode.
+These are tests that generate different output in the two modes. They are for
 general cases, UTF-8/16 support, and Unicode property support, respectively.
 
-The twentieth test is run only in 16-bit mode. It tests some specific 16-bit 
+The twentieth test is run only in 16-bit mode. It tests some specific 16-bit
 features of the DFA matching engine.
 
 
@@ -724,8 +724,8 @@ will cause PCRE to malfunction.
 File manifest
 -------------
 
-The distribution should contain the files listed below. Where a file name is 
-given as pcre[16]_xxx it means that there are two files, one with the name 
+The distribution should contain the files listed below. Where a file name is
+given as pcre[16]_xxx it means that there are two files, one with the name
 pcre_xxx and the other with the name pcre16_xxx.
 
 (A) Source files of the PCRE library functions and their headers:
@@ -761,10 +761,10 @@ pcre_xxx and the other with the name pcre16_xxx.
   pcre16_ord2utf16.c      )
   pcre16_utf16_utils.c    )
   pcre16_valid_utf16.c    )
-   
+
   pcre[16]_printint.c     ) debugging function that is used by pcretest,
                           )   and can also be #included in pcre_compile()
-                           
+
   pcre.h.in               template for pcre.h when built by "configure"
   pcreposix.h             header for the external POSIX wrapper API
   pcre_internal.h         header for internal use
@@ -843,7 +843,7 @@ pcre_xxx and the other with the name pcre16_xxx.
   testdata/testinput*     test data for main library tests
   testdata/testoutput*    expected test results
   testdata/grep*          input and output for pcregrep tests
-  testdata/*              other supporting test files 
+  testdata/*              other supporting test files
 
 (D) Auxiliary files for cmake support
 

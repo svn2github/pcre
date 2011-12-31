@@ -209,10 +209,10 @@ files="\
   pcre_maketables.c \
   pcre_newline.c \
   pcre_ord2utf8.c \
-  pcre_ord2utf16.c \
+  pcre16_ord2utf16.c \
   pcre_printint.c \
   pcre_refcount.c \
-  pcre_stringutils.c \
+  pcre_string_utils.c \
   pcre_study.c \
   pcre_tables.c \
   pcre_ucp_searchfuncs.c \
@@ -220,7 +220,7 @@ files="\
   pcre_version.c \
   pcre_xclass.c \
   pcre16_utf16_utils.c \
-  pcre16_valid_utf16.c \  
+  pcre16_valid_utf16.c \
   pcre_scanner.cc \
   pcre_scanner.h \
   pcre_scanner_unittest.cc \

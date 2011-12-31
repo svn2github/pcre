@@ -741,7 +741,7 @@ AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 
 # When we run 'make distcheck', use these arguments.
-DISTCHECK_CONFIGURE_FLAGS="--enable-jit --enable-cpp --enable-unicode-properties"
+DISTCHECK_CONFIGURE_FLAGS="--enable-pcre16 --enable-jit --enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 # Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is

@@ -213,7 +213,7 @@
 \)  )*                       # optional trailing comment
 /xSI
 
-<!testdata/saved8
+<!testsaved8
 
 /[\h]/BZ
     >\x09<
@@ -276,8 +276,8 @@
 
 /-- Generated from: ^[aL](?P<name>(?:[AaLl]+)[^xX-]*?)(?P<other>[\x{150}-\x{250}\x{300}]|[^\x{800}aAs-uS-U\x{d800}-\x{dfff}])++[^#\b\x{500}\x{1000}]{3,5}$ --/
 
-<!testdata/saved16LE-1
+<!testsaved16LE-1
 
-<!testdata/saved16BE-1
+<!testsaved16BE-1
 
 /-- End of testinput17 --/

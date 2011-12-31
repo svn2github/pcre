@@ -9,9 +9,10 @@
 LC_ALL=C
 export LC_ALL
 
-# Remove any non-default colouring that the caller may have set.
+# Remove any non-default colouring and aliases that the caller may have set.
 
 unset PCREGREP_COLOUR PCREGREP_COLOR
+unset cp ls mv rm
 
 # Set the program to be tested, and valgrind settings when requested.
 
@@ -454,7 +455,7 @@ pattern=`printf 'def\rjkl'`
 $valgrind $pcregrep -n --newline=cr -F "$pattern" testNinput >>testtry
 
 printf "%c--------------------------- Test N4 ------------------------------\r\n" - >>testtry
-$valgrind $pcregrep -n --newline=crlf -F -f testdata/greppatN4 testNinput >>testtry
+$valgrind $pcregrep -n --newline=crlf -F -f $srcdir/testdata/greppatN4 testNinput >>testtry
 
 printf "%c--------------------------- Test N5 ------------------------------\r\n" - >>testtry
 $valgrind $pcregrep -n --newline=any "^(abc|def|ghi|jkl)" testNinput >>testtry

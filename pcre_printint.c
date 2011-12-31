@@ -478,7 +478,7 @@ for(;;)
     if (PRINTABLE(c)) fprintf(f, " %s [^%c]", flag, c);
     else if (utf || c > 0xff)
       fprintf(f, " %s [^\\x{%02x}]", flag, c);
-    else   
+    else
       fprintf(f, " %s [^\\x%02x]", flag, c);
     break;
 

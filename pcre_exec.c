@@ -468,7 +468,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 
 static int
 match(REGISTER PCRE_PUCHAR eptr, REGISTER const pcre_uchar *ecode,
-  PCRE_PUCHAR mstart, int offset_top, match_data *md, eptrblock *eptrb, 
+  PCRE_PUCHAR mstart, int offset_top, match_data *md, eptrblock *eptrb,
   unsigned int rdepth)
 {
 /* These variables do not need to be preserved over recursion in this function,
@@ -2631,8 +2631,8 @@ for (;;)
 
     /* Handle repeated back references. If the length of the reference is
     zero, just continue with the main loop. If the length is negative, it
-    means the reference is unset in non-Java-compatible mode. If the minimum is 
-    zero, we can continue at the same level without recursion. For any other 
+    means the reference is unset in non-Java-compatible mode. If the minimum is
+    zero, we can continue at the same level without recursion. For any other
     minimum, carrying on will result in NOMATCH. */
 
     if (length == 0) continue;
@@ -6030,10 +6030,10 @@ switch (frame->Xwhere)
   LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
   LBL(65) LBL(66)
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-  LBL(21) 
+  LBL(21)
 #endif
-#ifdef SUPPORT_UTF   
-  LBL(16) LBL(18) LBL(20) 
+#ifdef SUPPORT_UTF
+  LBL(16) LBL(18) LBL(20)
   LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
 #ifdef SUPPORT_UCP
@@ -6043,7 +6043,7 @@ switch (frame->Xwhere)
 #endif  /* SUPPORT_UTF */
   default:
   DPRINTF(("jump error in pcre match: label %d non-existent\n", frame->Xwhere));
-  
+
 printf("+++jump error in pcre match: label %d non-existent\n", frame->Xwhere);
 
   return PCRE_ERROR_INTERNAL;
@@ -6209,7 +6209,7 @@ if (utf && (options & PCRE_NO_UTF8_CHECK) == 0)
 #else
     return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
-#endif       
+#endif
     }
 
   /* Check that a start_offset points to the start of a UTF character. */
@@ -6765,9 +6765,9 @@ for(;;)
 
   /* If we have just passed a CR and we are now at a LF, and the pattern does
   not contain any explicit matches for \r or \n, and the newline option is CRLF
-  or ANY or ANYCRLF, advance the match position by one more character. In 
-  normal matching start_match will aways be greater than the first position at 
-  this stage, but a failed *SKIP can cause a return at the same point, which is 
+  or ANY or ANYCRLF, advance the match position by one more character. In
+  normal matching start_match will aways be greater than the first position at
+  this stage, but a failed *SKIP can cause a return at the same point, which is
   why the first test exists. */
 
   if (start_match > (PCRE_PUCHAR)subject + start_offset &&

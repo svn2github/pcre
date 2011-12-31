@@ -6,30 +6,30 @@ Version 8.30
 
 1.  Renamed "isnumber" as "is_a_number" because in some Mac environments this
     name is defined in ctype.h.
-    
+
 2.  Fixed a bug in the code for calculating the fixed length of lookbehind
     assertions.
-    
+
 3.  Removed the function pcre_info(), which has been obsolete and deprecated
-    since it was replaced by pcre_fullinfo() in February 2000. 
-    
+    since it was replaced by pcre_fullinfo() in February 2000.
+
 4.  For a non-anchored pattern, if (*SKIP) was given with a name that did not
-    match a (*MARK), and the match failed at the start of the subject, a 
-    reference to memory before the start of the subject could occur. This bug 
+    match a (*MARK), and the match failed at the start of the subject, a
+    reference to memory before the start of the subject could occur. This bug
     was introduced by fix 17 of release 8.21.
-    
+
 5.  A reference to an unset group with zero minimum repetition was giving
     totally wrong answers (in non-JavaScript-compatibility mode). For example,
-    /(another)?(\1?)test/ matched against "hello world test". This bug was 
+    /(another)?(\1?)test/ matched against "hello world test". This bug was
     introduced in release 8.13.
-    
-6.  Add support for 16-bit character strings (a large amount of work involving 
-    many changes and refactorings). 
-    
+
+6.  Add support for 16-bit character strings (a large amount of work involving
+    many changes and refactorings).
+
 7.  RunGrepTest failed on msys because \r\n was replaced by whitespace when the
-    command "pattern=`printf 'xxx\r\njkl'`" was run. The pattern is now taken 
+    command "pattern=`printf 'xxx\r\njkl'`" was run. The pattern is now taken
     from a file.
-    
+
 
 Version 8.21 12-Dec-2011
 ------------------------

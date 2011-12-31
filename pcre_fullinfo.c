@@ -91,9 +91,9 @@ means that the pattern is likely compiled with different endianness. */
 if (re->magic_number != MAGIC_NUMBER)
   return re->magic_number == REVERSED_MAGIC_NUMBER?
     PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
-    
+
 /* Check that this pattern was compiled in the correct bit mode */
- 
+
 if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 
 switch (what)
