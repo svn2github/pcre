@@ -2492,6 +2492,7 @@ while (!done)
   pcre_uint8 *p, *pp, *ppp;
   pcre_uint8 *to_file = NULL;
   const pcre_uint8 *tables = NULL;
+  pcre_uint32 get_options;
   unsigned long int true_size, true_study_size = 0;
   size_t size, regex_gotten_store;
   int do_allcaps = 0;
@@ -2522,7 +2523,7 @@ while (!done)
 
   if (*p == '<' && strchr((char *)(p+1), '<') == NULL)
     {
-    unsigned long int magic, get_options;
+    pcre_uint32 magic;
     pcre_uint8 sbuf[8];
     FILE *f;
 
@@ -2852,8 +2853,6 @@ while (!done)
 #endif  /* !defined NOPOSIX */
 
     {
-    unsigned long int get_options;
-
     /* In 16-bit mode, convert the input. */
 
 #ifdef SUPPORT_PCRE16
