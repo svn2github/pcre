@@ -73,7 +73,7 @@ PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_refcount(pcre *argument_re, int adjust)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_refcount(pcre *argument_re, int adjust)
+pcre16_refcount(pcre *argument_re, int adjust)
 #endif
 {
 real_pcre *re = (real_pcre *)argument_re;
