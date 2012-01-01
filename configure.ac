@@ -109,12 +109,14 @@ AC_ARG_ENABLE(pcre8,
               AS_HELP_STRING([--disable-pcre8],
                              [enable 8 bit character support]),
               , enable_pcre8=unset)
+AC_SUBST(enable_pcre8)
 
 # Handle --enable-pcre16 (disabled by default)
 AC_ARG_ENABLE(pcre16,
               AS_HELP_STRING([--enable-pcre16],
                              [enable 16 bit character support]),
               , enable_pcre16=unset)
+AC_SUBST(enable_pcre16)
 
 # Handle --disable-cpp. The substitution of enable_cpp is needed for use in
 # pcre-config.
