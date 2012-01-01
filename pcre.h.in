@@ -423,8 +423,6 @@ PCRE_EXP_DECL int  pcre_get_substring_list(const char *, int *, int,
                   const char ***);
 PCRE_EXP_DECL int  pcre16_get_substring_list(PCRE_SPTR16, int *, int,
                   PCRE_SPTR16 **);
-PCRE_EXP_DECL int  pcre_info(const pcre *, int *, int *);
-PCRE_EXP_DECL int  pcre16_info(const pcre *, int *, int *);
 PCRE_EXP_DECL const unsigned char *pcre_maketables(void);
 PCRE_EXP_DECL const unsigned char *pcre16_maketables(void);
 PCRE_EXP_DECL int  pcre_refcount(pcre *, int);
