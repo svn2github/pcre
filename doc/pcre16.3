@@ -1,0 +1,222 @@
+.TH PCRE 3
+.SH NAME
+PCRE - Perl-compatible regular expressions
+.SH "THE PCRE 16-BIT LIBRARY"
+.rs
+.sp
+Starting with release 8.30, it is possible to compile a PCRE library that
+supports 16-bit character strings, including UTF-16 strings, as well as or
+instead of the original 8-bit library. The majority of the work to make this
+possible was done by Zoltan Herczeg. The two libraries contain identical sets
+of functions, used in exactly the same way. Only the names of the functions and
+the data types of their string arguments are different. To avoid
+over-complication and reduce the documentation maintenance load, most of the
+documentation describes the 8-bit library, with only occasional references to 
+the 16-bit library. This page describes what is different when you use the
+16-bit library.
+.P
+WARNING: A single application can be linked with both libraries, but you must 
+take care when processing any particular pattern to use functions from just one 
+library. For example, if you want to study a pattern that was compiled with
+\fBpcre16_compile()\fP, you must do so with \fBpcre16_study()\fP, not
+\fBpcre_study()\fP, and you must free the study data with
+\fBpcre16_free_study()\fP.
+.
+.
+.SH "THE HEADER FILE"
+.rs
+.sp
+There is only one header file, \fBpcre.h\fP. It contains prototypes for all the 
+functions in both libraries, as well as definitions of flags, error codes, etc.
+.
+.
+.SH "STRING TYPES"
+.rs
+.sp
+In the 8-bit library, strings are passed to PCRE library functions as vectors 
+of bytes with the C type "char *". In the 16-bit library, strings are passed as 
+vectors of unsigned 16-bit quantities. The macro PCRE_SCHAR16 specifies an 
+appropriate data type, and PCRE_SPTR16 is defined as "const PCRE_SCHAR16 *". In 
+very many environments, "short int" is a 16-bit data type. When PCRE is built, 
+it defines PCRE_SCHAR16 as "short int", but checks that it really is a 16-bit 
+data type. If it is not, the build fails with an error message telling the 
+maintainer to modify the definition appropriately.
+.
+.
+.SH "16-BIT FUNCTIONS WITH DIFFERING ARGUMENT TYPES"
+.rs
+.sp
+For every function in the 8-bit library there is a corresponding function in
+the 16-bit library with a name that starts with \fBpcre16_\fP instead of 
+\fBpcre_\fP. All of these functions have the same number of arguments, and
+yield the same results. Many of them also have exactly the same argument types.
+Those that differ are as follows:
+
+\fBpcre16_compile()\fP and \fBpcre16_compile2()\fP: the type of the first 
+argument must be PCRE_SPTR16 instead of "const char *".
+
+\fBpcre16_exec()\fP and \fBpcre16_dfa_exec()\fP: the type of the third argument 
+must be PCRE_SPTR16 instead of "const char *".
+
+\fBpcre16_copy_named_substring()\fP: the type of the second and fifth agruments
+must be PCRE_SPTR16 instead of "const char *" and the type of the sixth
+argument must be "PCRE_SCHAR16 *" instead of "char *".
+
+\fBpcre16_copy_substring()\fP: the type of the first argument must be 
+PCRE_SPTR16 instead of "const char *" and the type of the fifth argument must 
+be "PCRE_SCHAR16 *" instead of "char *".
+
+\fBpcre16_get_named_substring()\fP: the type of the second and fifth agruments
+must be PCRE_SPTR16 instead of "const char *" and the type of the sixth
+argument must be "PCRE_SPTR16 *" instead of "const char **".
+
+\fBpcre16_get_substring()\fP: the type of the first argument must be 
+PCRE_SPTR16 instead of "const char *" and the type of the fifth argument must 
+be "PCRE_SPTR16 *" intead of "const char **".
+
+\fBpcre16_free_substring()\fP: the type of the argument must be PCRE_SPTR16 
+instead of "const char *".
+
+\fBpcre16_get_substring_list()\fP: the type of the first argument must be 
+PCRE_SPTR16 intead of "const char *", and the type of the fourth argument must 
+be "PCRE_SPTR16 **" intead of "const char ***".
+
+\fBpcre16_free_substring_list()\fP: the type of the argument must be
+"PCRE_SPTR16 *" instead of "const char **".
+
+\fBpcre16_get_stringnumber()\fP: the type of the second argument must be 
+PCRE_SPTR16 instead of "const char *".
+
+\fBpcre16_get_stringtable_entries()\fP: the types of the second, third, and 
+fourth arguments must be PCRE_SPTR16, "PCRE_SCHAR16 **", and "PCRE_SCHAR16 **" 
+intead of "const char *", "char **", and "char **".
+.
+.
+.SH "SUBJECT STRING OFFSETS"
+.rs
+.sp
+The offsets within subject strings that are returned by the matching functions 
+are in 16-bit units rather than bytes.
+.
+.
+.SH "NAMED SUBPATTERNS"
+.rs
+.sp
+The name-to-number translation table that is maintained for named subpatterns 
+uses 16-bit characters. The \fBpcre16_get_stringtable_entries()\fP function 
+returns the length of each entry in the table as the number of 16-bit data 
+items.
+.
+.
+.SH "OPTION NAMES"
+.rs
+.sp
+There are two new general option names, PCRE_UTF16 and PCRE_NO_UTF16_CHECK,
+which correspond to PCRE_UTF8 and PCRE_NO_UTF8_CHECK in the 8-bit library. In
+fact, these new options define the same bits in the options word.
+.P
+For the \fBpcre16_config()\fP function there is an option PCRE_CONFIG_UTF16 
+that returns 1 if UTF-16 support is configured, otherwise 0. If this option is
+given to \fBpcre_config()\fP, or if the PCRE_CONFIG_UTF8 option is given to
+\fBpcre16_config()\fP, the result is the PCRE_ERROR_BADOPTION error.
+.
+.
+.SH "CHARACTER CODES"
+.rs
+.sp
+In 16-bit mode, when PCRE_UTF16 is not set, character values are treated in the 
+same way as in 8-bit, non UTF-8 mode, except, of course, that they can range 
+from 0 to 0xFFFF instead of 0 to 0xFF. Character types for characters less than 
+0xFF can therefore be influenced by the locale in the same way as before. 
+Characters greater than 0xFF have only one case, and no "type" (such as letter 
+or digit).
+.P
+In UTF-16 mode, the character code is Unicode, in the range 0 to 0x10FFFF, with 
+the exception of values in the range 0xD800 to 0xDFFF because those are 
+"surrogate" values that are used in pairs to encode values greater than 0xFFFF.
+.P
+A UTF-16 string can indicate its endianness by special code knows as BOM at its 
+start. The PCRE functions do not handle this. However a function called 
+\fBpcre16_utf16_to_host_byte_order()\fP is provided. It checks the byte order
+of a UTF-16 string and converts it if necessary, optionally removing the BOM 
+data. It is documented with all the other functions in the
+.\" HREF
+\fBpcreapi\fP
+.\"
+page.
+.
+.
+.SH "ERROR NAMES"
+.rs
+.sp
+The errors PCRE_ERROR_BADUTF16_OFFSET and PCRE_ERROR_SHORTUTF16 correspond to 
+their 8-bit counterparts. The error PCRE_ERROR_BADMODE is given when a compiled
+pattern is passed to a function that processes patterns in the other
+mode, for example, if a pattern compiled with \fBpcre_compile()\fP is passed to 
+\fBpcre16_exec()\fP.
+.P
+There are new error codes whose names begin with PCRE_UTF16_ERR for invalid
+UTF-16 strings, corresponding to the PCRE_UTF8_ERR codes for UTF-8 strings. 
+They are documented in the 
+.\" HREF
+\fBpcreapi\fP
+.\"
+page.
+.
+.
+.SH "ERROR TEXTS"
+.rs
+.sp
+If there is an error while compiling a pattern, the error text that is passed 
+back by \fBpcre16_compile()\fP or \fBpcre16_compile2()\fP is still an 8-bit 
+character string, zero-terminated.
+.
+.
+.SH "CALLOUTS"
+.rs
+.sp
+The \fIsubject\fP and \fImark\fP fields in the callout block that is passed to
+a callout function point to 16-bit vectors.
+.
+.
+.SH "TESTING"
+.rs
+.sp
+The \fBpcretest\fP program continues to operate with 8-bit input and output 
+files, but it can be used for testing the 16-bit library. If it is run with the 
+command line option \fB-16\fP, patterns and subject strings are converted from 
+8-bit to 16-bit before being passed to PCRE, and the 16-bit library functions 
+are used instead of the 8-bit ones. Returned 16-bit strings are converted to 
+8-bit for output. If the 8-bit library was not compiled, \fBpcretest\fP
+defaults to 16-bit and the \fB-16\fP option is ignored.
+.P
+When PCRE is being built, the \fBRunTest\fP script that is called by "make 
+check" uses the \fBpcretest\fP \fB-C\fP option to discover which of the 8-bit
+and 16-bit libraries has been built, and runs the tests appropriately.
+.
+.
+.SH "NOT SUPPORTED IN 16-BIT MODE"
+.rs
+.sp
+Not all the features of the 8-bit library are available with the 16-bit 
+library. The C++ and POSIX wrapper functions support only the 8-bit library, 
+and the \fBpcregrep\fP program is at present 8-bit only.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 03 January 2012
+Copyright (c) 1997-2012 University of Cambridge.
+.fi

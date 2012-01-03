@@ -18,6 +18,9 @@ The HTML documentation for PCRE comprises the following pages:
 <tr><td><a href="pcre.html">pcre</a></td>
     <td>&nbsp;&nbsp;Introductory page</td></tr>
 
+<tr><td><a href="pcre16.html">pcre16</a></td>
+    <td>&nbsp;&nbsp;Discussion of the 16-bit PCRE library</td></tr>
+
 <tr><td><a href="pcre-config.html">pcre-config</a></td>
     <td>&nbsp;&nbsp;Information about the installation configuration</td></tr>
 
