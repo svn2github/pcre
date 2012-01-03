@@ -322,7 +322,7 @@ typedef struct compare_context {
   int ucharptr;
   union {
     sljit_i asint;
-    sljit_h asshort;
+    sljit_uh asushort;
 #ifdef COMPILE_PCRE8
     sljit_ub asbyte;
     sljit_ub asuchars[4];
@@ -334,7 +334,7 @@ typedef struct compare_context {
   } c;
   union {
     sljit_i asint;
-    sljit_h asshort;
+    sljit_uh asushort;
 #ifdef COMPILE_PCRE8
     sljit_ub asbyte;
     sljit_ub asuchars[4];
@@ -2493,7 +2493,7 @@ if (context->sourcereg == -1)
   if (context->length >= 4)
     OP1(SLJIT_MOV_SI, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
   else if (context->length >= 2)
-    OP1(SLJIT_MOV_SH, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
+    OP1(SLJIT_MOV_UH, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
   else
 #endif
     OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
@@ -2504,7 +2504,7 @@ if (context->sourcereg == -1)
     OP1(SLJIT_MOV_SI, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
   else
 #endif
-    OP1(SLJIT_MOV_SH, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
+    OP1(SLJIT_MOV_UH, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
 #endif
 #endif /* COMPILE_PCRE8 */
   context->sourcereg = TMP2;
@@ -2545,12 +2545,12 @@ do
       OP1(SLJIT_MOV_SI, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
 #ifdef COMPILE_PCRE8
     else if (context->length >= 2)
-      OP1(SLJIT_MOV_SH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
+      OP1(SLJIT_MOV_UH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
     else if (context->length >= 1)
       OP1(SLJIT_MOV_UB, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
 #else
     else if (context->length >= 2)
-      OP1(SLJIT_MOV_SH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
+      OP1(SLJIT_MOV_UH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
 #endif
     context->sourcereg = context->sourcereg == TMP1 ? TMP2 : TMP1;
 
@@ -2563,9 +2563,9 @@ do
       break;
 
       case 2 / sizeof(pcre_uchar):
-      if (context->oc.asshort != 0)
-        OP2(SLJIT_OR, context->sourcereg, 0, context->sourcereg, 0, SLJIT_IMM, context->oc.asshort);
-      add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, context->sourcereg, 0, SLJIT_IMM, context->c.asshort | context->oc.asshort));
+      if (context->oc.asushort != 0)
+        OP2(SLJIT_OR, context->sourcereg, 0, context->sourcereg, 0, SLJIT_IMM, context->oc.asushort);
+      add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, context->sourcereg, 0, SLJIT_IMM, context->c.asushort | context->oc.asushort));
       break;
 
 #ifdef COMPILE_PCRE8

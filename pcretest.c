@@ -2491,7 +2491,7 @@ while (!done)
   pcre_uint8 *p, *pp, *ppp;
   pcre_uint8 *to_file = NULL;
   const pcre_uint8 *tables = NULL;
-  pcre_uint32 get_options;
+  unsigned long int get_options;
   unsigned long int true_size, true_study_size = 0;
   size_t size, regex_gotten_store;
   int do_allcaps = 0;
