@@ -898,4 +898,16 @@ No need char
 Subject length lower bound = 1
 Starting byte set: \x0a \x0b \x0c \x0d \xc2 \xe2 
 
+/\777/8DZ
+------------------------------------------------------------------
+        Bra
+        \x{1ff}
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf
+First char = \x{c7}
+Need char = \x{bf}
+
 /-- End of testinput15 --/

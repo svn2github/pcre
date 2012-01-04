@@ -307,4 +307,6 @@
 
 /[\x0a\V]/BZ
 
+/\777/I
+
 /-- End of testinput14 --/

@@ -6365,9 +6365,6 @@ No need char
  9: 
 10: Y
 
-/\777/I
-Failed: octal value is greater than \377 in 8-bit non-UTF-8 mode at offset 3
-
 /\s*,\s*/IS
 Capturing subpattern count = 0
 No options

@@ -275,4 +275,6 @@ correctly, but that messes up comparisons). --/
 
 /\R/SI8
 
+/\777/8DZ
+
 /-- End of testinput15 --/

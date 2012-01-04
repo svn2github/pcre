@@ -482,9 +482,6 @@ Options: anchored utf
 No first char
 No need char
 
-/\777/I
-Failed: octal value is greater than \377 in 8-bit non-UTF-8 mode at offset 3
-
 /\x{100}*\d/8DZ
 ------------------------------------------------------------------
         Bra

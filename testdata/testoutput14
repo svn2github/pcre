@@ -445,4 +445,7 @@ Starting byte set: \x0a \x0b \x0c \x0d \x85
         End
 ------------------------------------------------------------------
 
+/\777/I
+Failed: octal value is greater than \377 in 8-bit non-UTF-8 mode at offset 3
+
 /-- End of testinput14 --/

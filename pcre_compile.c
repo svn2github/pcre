@@ -991,14 +991,16 @@ else
     /* \0 always starts an octal number, but we may drop through to here with a
     larger first octal digit. The original code used just to take the least
     significant 8 bits of octal numbers (I think this is what early Perls used
-    to do). Nowadays we allow for larger numbers in UTF-8 mode, but no more
-    than 3 octal digits. */
+    to do). Nowadays we allow for larger numbers in UTF-8 mode and 16-bit mode,
+    but no more than 3 octal digits. */
 
     case CHAR_0:
     c -= CHAR_0;
     while(i++ < 2 && ptr[1] >= CHAR_0 && ptr[1] <= CHAR_7)
         c = c * 8 + *(++ptr) - CHAR_0;
+#ifdef COMPILE_PCRE8         
     if (!utf && c > 0xff) *errorcodeptr = ERR51;
+#endif     
     break;
 
     /* \x is complicated. \x{ddd} is a character number which can be greater

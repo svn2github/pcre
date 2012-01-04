@@ -1569,8 +1569,6 @@ a random value. /Ix
 /()()()()()()()()()(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/I
     bXXaYYaY
 
-/\777/I
-
 /\s*,\s*/IS
     \x0b,\x0b
     \x0c,\x0d
