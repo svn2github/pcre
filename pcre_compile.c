@@ -438,7 +438,7 @@ static const char error_texts[] =
   /* 30 */
   "unknown POSIX class name\0"
   "POSIX collating elements are not supported\0"
-  "this version of PCRE is not compiled with PCRE_UTF8 support\0"
+  "this version of PCRE is compiled without UTF support\0"
   "spare error\0"  /** DEAD **/
   "character value in \\x{...} sequence is too large\0"
   /* 35 */
@@ -461,7 +461,7 @@ static const char error_texts[] =
   "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")\0"
   /* 50 */
   "repeated subpattern is too long\0"    /** DEAD **/
-  "octal value is greater than \\377 (not in UTF-8 mode)\0"
+  "octal value is greater than \\377 in 8-bit non-UTF-8 mode\0"
   "internal error: overran compiling workspace\0"
   "internal error: previously-checked referenced subpattern not found\0"
   "DEFINE group contains more than one branch\0"
@@ -480,14 +480,15 @@ static const char error_texts[] =
   /* 65 */
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
-  "this version of PCRE is not compiled with PCRE_UCP support\0"
+  "this version of PCRE is not compiled with Unicode property support\0"
   "\\c must be followed by an ASCII character\0"
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"
   "\\N is not supported in a class\0"
   "too many forward references\0"
-  "disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff)\0"
+  "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
+  "invalid UTF-16 string\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -7706,7 +7707,11 @@ not used here. */
 if (utf && (options & PCRE_NO_UTF8_CHECK) == 0 &&
      (errorcode = PRIV(valid_utf)((PCRE_PUCHAR)pattern, -1, erroroffset)) != 0)
   {
+#ifdef COMPILE_PCRE8   
   errorcode = ERR44;
+#else   
+  errorcode = ERR74;
+#endif   
   goto PCRE_EARLY_ERROR_RETURN2;
   }
 #else

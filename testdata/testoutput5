@@ -12,10 +12,10 @@ Failed: character value in \x{...} sequence is too large at offset 11
 Failed: character value in \x{...} sequence is too large at offset 12
 
 /\x{d800}/8
-Failed: disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) at offset 7
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
 /\x{dfff}/8
-Failed: disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) at offset 7
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
 /\x{d7ff}/8
 
@@ -483,7 +483,7 @@ No first char
 No need char
 
 /\777/I
-Failed: octal value is greater than \377 (not in UTF-8 mode) at offset 3
+Failed: octal value is greater than \377 in 8-bit non-UTF-8 mode at offset 3
 
 /\x{100}*\d/8DZ
 ------------------------------------------------------------------
@@ -1561,10 +1561,10 @@ Partial match: for
 /\x{d7ff}\x{e000}/8
 
 /\x{d800}/8
-Failed: disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) at offset 7
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
 /\x{dfff}/8 
-Failed: disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) at offset 7
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
 /\h+/8
     \x{1681}\x{200b}\x{1680}\x{2000}\x{202f}\x{3000}
