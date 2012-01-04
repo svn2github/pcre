@@ -6354,7 +6354,7 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(STACK_TOP), 0);
 #undef CURRENT_AS
 
 void
-PRIV(jit_compile)(const real_pcre *re, pcre_extra *extra)
+PRIV(jit_compile)(const real_pcre *re, PUBL(extra) *extra)
 {
 struct sljit_compiler *compiler;
 fallback_common rootfallback;
@@ -6843,7 +6843,7 @@ PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 #else
 PCRE_EXP_DECL void
-pcre16_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
+pcre16_assign_jit_stack(pcre16_extra *extra, pcre_jit_callback callback, void *userdata)
 #endif
 {
 executable_function *function;
@@ -6891,7 +6891,7 @@ PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 #else
 PCRE_EXP_DECL void
-pcre16_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
+pcre16_assign_jit_stack(pcre16_extra *extra, pcre_jit_callback callback, void *userdata)
 #endif
 {
 (void)extra;

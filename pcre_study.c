@@ -1298,7 +1298,7 @@ return yield;
 *************************************************/
 
 /* This function is handed a compiled expression that it must study to produce
-information that will speed up the matching. It returns a pcre_extra block
+information that will speed up the matching. It returns a pcre[16]_extra block
 which then gets handed back to pcre_exec().
 
 Arguments:
@@ -1307,8 +1307,8 @@ Arguments:
   errorptr  points to where to place error messages;
             set NULL unless error
 
-Returns:    pointer to a pcre_extra block, with study_data filled in and the
-              appropriate flags set;
+Returns:    pointer to a pcre[16]_extra block, with study_data filled in and
+              the appropriate flags set;
             NULL on error or if no optimization possible
 */
 
@@ -1316,14 +1316,14 @@ Returns:    pointer to a pcre_extra block, with study_data filled in and the
 PCRE_EXP_DEFN pcre_extra * PCRE_CALL_CONVENTION
 pcre_study(const pcre *external_re, int options, const char **errorptr)
 #else
-PCRE_EXP_DEFN pcre_extra * PCRE_CALL_CONVENTION
+PCRE_EXP_DEFN pcre16_extra * PCRE_CALL_CONVENTION
 pcre16_study(const pcre *external_re, int options, const char **errorptr)
 #endif
 {
 int min;
 BOOL bits_set = FALSE;
 pcre_uint8 start_bits[32];
-pcre_extra *extra = NULL;
+PUBL(extra) *extra = NULL;
 pcre_study_data *study;
 const pcre_uint8 *tables;
 pcre_uchar *code;
@@ -1408,13 +1408,13 @@ switch(min = find_minlength(code, code, re->options, 0))
   }
 
 /* If a set of starting bytes has been identified, or if the minimum length is
-greater than zero, or if JIT optimization has been requested, get a pcre_extra
-block and a pcre_study_data block. The study data is put in the latter, which
-is pointed to by the former, which may also get additional data set later by
-the calling program. At the moment, the size of pcre_study_data is fixed. We
-nevertheless save it in a field for returning via the pcre_fullinfo() function
-so that if it becomes variable in the future, we don't have to change that
-code. */
+greater than zero, or if JIT optimization has been requested, get a
+pcre[16]_extra block and a pcre_study_data block. The study data is put in the
+latter, which is pointed to by the former, which may also get additional data
+set later by the calling program. At the moment, the size of pcre_study_data
+is fixed. We nevertheless save it in a field for returning via the
+pcre_fullinfo() function so that if it becomes variable in the future,
+we don't have to change that code. */
 
 if (bits_set || min > 0
 #ifdef SUPPORT_JIT
@@ -1422,15 +1422,15 @@ if (bits_set || min > 0
 #endif
   )
   {
-  extra = (pcre_extra *)(PUBL(malloc))
-    (sizeof(pcre_extra) + sizeof(pcre_study_data));
+  extra = (PUBL(extra) *)(PUBL(malloc))
+    (sizeof(PUBL(extra)) + sizeof(pcre_study_data));
   if (extra == NULL)
     {
     *errorptr = "failed to get memory";
     return NULL;
     }
 
-  study = (pcre_study_data *)((char *)extra + sizeof(pcre_extra));
+  study = (pcre_study_data *)((char *)extra + sizeof(PUBL(extra)));
   extra->flags = PCRE_EXTRA_STUDY_DATA;
   extra->study_data = study;
 
@@ -1502,7 +1502,7 @@ return extra;
 
 /* This function frees the memory that was obtained by pcre_study().
 
-Argument:   a pointer to the pcre_extra block
+Argument:   a pointer to the pcre[16]_extra block
 Returns:    nothing
 */
 
@@ -1511,7 +1511,7 @@ PCRE_EXP_DEFN void
 pcre_free_study(pcre_extra *extra)
 #else
 PCRE_EXP_DEFN void
-pcre16_free_study(pcre_extra *extra)
+pcre16_free_study(pcre16_extra *extra)
 #endif
 {
 if (extra == NULL)

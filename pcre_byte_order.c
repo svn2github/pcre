@@ -100,7 +100,7 @@ PCRE_EXP_DECL int pcre_pattern_to_host_byte_order(pcre *argument_re,
   pcre_extra *extra_data, const unsigned char *tables)
 #else
 PCRE_EXP_DECL int pcre16_pattern_to_host_byte_order(pcre *argument_re,
-  pcre_extra *extra_data, const unsigned char *tables)
+  pcre16_extra *extra_data, const unsigned char *tables)
 #endif
 {
 real_pcre *re = (real_pcre *)argument_re;

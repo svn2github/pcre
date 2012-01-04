@@ -1223,7 +1223,7 @@ for (;;)
       {
       if (PUBL(callout) != NULL)
         {
-        pcre_callout_block cb;
+        PUBL(callout_block) cb;
         cb.version          = 2;   /* Version 1 of the callout block */
         cb.callout_number   = ecode[LINK_SIZE+2];
         cb.offset_vector    = md->offset_vector;
@@ -1633,7 +1633,7 @@ for (;;)
     case OP_CALLOUT:
     if (PUBL(callout) != NULL)
       {
-      pcre_callout_block cb;
+      PUBL(callout_block) cb;
       cb.version          = 2;   /* Version 1 of the callout block */
       cb.callout_number   = ecode[1];
       cb.offset_vector    = md->offset_vector;
@@ -6139,7 +6139,7 @@ pcre_exec(const pcre *argument_re, const pcre_extra *extra_data,
   int offsetcount)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_exec(const pcre *argument_re, const pcre_extra *extra_data,
+pcre16_exec(const pcre *argument_re, const pcre16_extra *extra_data,
   PCRE_SPTR16 subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
 #endif
@@ -6858,7 +6858,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   /* Return MARK data if requested */
 
   if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_MARK) != 0)
-    *(extra_data->mark) = (unsigned char *)(md->mark);
+    *(extra_data->mark) = (pcre_uchar *)md->mark;
   DPRINTF((">>>> returning %d\n", rc));
   return rc;
   }
@@ -6905,7 +6905,7 @@ else
 /* Return the MARK data if it has been requested. */
 
 if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_MARK) != 0)
-  *(extra_data->mark) = (unsigned char *)(md->nomatch_mark);
+  *(extra_data->mark) = (pcre_uchar *)md->nomatch_mark;
 return rc;
 }
 

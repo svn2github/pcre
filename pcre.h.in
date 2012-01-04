@@ -255,7 +255,7 @@ compatible. */
 
 #define PCRE_STUDY_JIT_COMPILE            0x0001
 
-/* Bit flags for the pcre_extra structure. Do not re-arrange or redefine
+/* Bit flags for the pcre[16]_extra structure. Do not re-arrange or redefine
 these bits, just add new ones on the end, in order to remain compatible. */
 
 #define PCRE_EXTRA_STUDY_DATA             0x0001
@@ -308,6 +308,19 @@ typedef struct pcre_extra {
   void *executable_jit;           /* Contains a pointer to a compiled jit code */
 } pcre_extra;
 
+/* Same structure as above, but with 16 bit char pointers. */
+
+typedef struct pcre16_extra {
+  unsigned long int flags;        /* Bits for which fields are set */
+  void *study_data;               /* Opaque data from pcre_study() */
+  unsigned long int match_limit;  /* Maximum number of calls to match() */
+  void *callout_data;             /* Data passed back in callouts */
+  const unsigned char *tables;    /* Pointer to character tables */
+  unsigned long int match_limit_recursion; /* Max recursive calls to match() */
+  PCRE_SCHAR16 **mark;            /* For passing back a mark pointer */
+  void *executable_jit;           /* Contains a pointer to a compiled jit code */
+} pcre16_extra;
+
 /* The structure for passing out data via the pcre_callout_function. We use a
 structure so that new fields can be added on the end in future versions,
 without changing the API of the function, thereby allowing old clients to work
@@ -329,9 +342,31 @@ typedef struct pcre_callout_block {
   int          pattern_position;  /* Offset to next item in the pattern */
   int          next_item_length;  /* Length of next item in the pattern */
   /* ------------------- Added for Version 2 -------------------------- */
-  const void  *mark;              /* Pointer to current mark or NULL    */
+  const unsigned char *mark;      /* Pointer to current mark or NULL    */
   /* ------------------------------------------------------------------ */
 } pcre_callout_block;
+
+/* Same structure as above, but with 16 bit char pointers. */
+
+typedef struct pcre16_callout_block {
+  int          version;           /* Identifies version of block */
+  /* ------------------------ Version 0 ------------------------------- */
+  int          callout_number;    /* Number compiled into pattern */
+  int         *offset_vector;     /* The offset vector */
+  PCRE_SPTR    subject;           /* The subject being matched */
+  int          subject_length;    /* The length of the subject */
+  int          start_match;       /* Offset to start of this match attempt */
+  int          current_position;  /* Where we currently are in the subject */
+  int          capture_top;       /* Max current capture */
+  int          capture_last;      /* Most recently closed capture */
+  void        *callout_data;      /* Data passed in with the call */
+  /* ------------------- Added for Version 1 -------------------------- */
+  int          pattern_position;  /* Offset to next item in the pattern */
+  int          next_item_length;  /* Length of next item in the pattern */
+  /* ------------------- Added for Version 2 -------------------------- */
+  const PCRE_SCHAR16 *mark;       /* Pointer to current mark or NULL    */
+  /* ------------------------------------------------------------------ */
+} pcre16_callout_block;
 
 /* Indirection for store get and free functions. These can be set to
 alternative malloc/free functions if required. Special ones are used in the
@@ -350,7 +385,7 @@ PCRE_EXP_DECL void *(*pcre16_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre16_free)(void *);
 PCRE_EXP_DECL void *(*pcre16_stack_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre16_stack_free)(void *);
-PCRE_EXP_DECL int   (*pcre16_callout)(pcre_callout_block *);
+PCRE_EXP_DECL int   (*pcre16_callout)(pcre16_callout_block *);
 #else   /* VPCOMPAT */
 PCRE_EXP_DECL void *pcre_malloc(size_t);
 PCRE_EXP_DECL void  pcre_free(void *);
@@ -362,7 +397,7 @@ PCRE_EXP_DECL void *pcre16_malloc(size_t);
 PCRE_EXP_DECL void  pcre16_free(void *);
 PCRE_EXP_DECL void *pcre16_stack_malloc(size_t);
 PCRE_EXP_DECL void  pcre16_stack_free(void *);
-PCRE_EXP_DECL int   pcre16_callout(pcre_callout_block *);
+PCRE_EXP_DECL int   pcre16_callout(pcre16_callout_block *);
 #endif  /* VPCOMPAT */
 
 /* User defined callback which provides a stack just before the match starts. */
@@ -391,11 +426,11 @@ PCRE_EXP_DECL int  pcre16_copy_substring(PCRE_SPTR16, int *, int, int,
                   PCRE_SCHAR16 *, int);
 PCRE_EXP_DECL int  pcre_dfa_exec(const pcre *, const pcre_extra *,
                   const char *, int, int, int, int *, int , int *, int);
-PCRE_EXP_DECL int  pcre16_dfa_exec(const pcre *, const pcre_extra *,
+PCRE_EXP_DECL int  pcre16_dfa_exec(const pcre *, const pcre16_extra *,
                   PCRE_SPTR16, int, int, int, int *, int , int *, int);
 PCRE_EXP_DECL int  pcre_exec(const pcre *, const pcre_extra *, PCRE_SPTR,
                    int, int, int, int *, int);
-PCRE_EXP_DECL int  pcre16_exec(const pcre *, const pcre_extra *, PCRE_SPTR16,
+PCRE_EXP_DECL int  pcre16_exec(const pcre *, const pcre16_extra *, PCRE_SPTR16,
                    int, int, int, int *, int);
 PCRE_EXP_DECL void pcre_free_substring(const char *);
 PCRE_EXP_DECL void pcre16_free_substring(PCRE_SPTR16);
@@ -403,7 +438,7 @@ PCRE_EXP_DECL void pcre_free_substring_list(const char **);
 PCRE_EXP_DECL void pcre16_free_substring_list(PCRE_SPTR16 *);
 PCRE_EXP_DECL int  pcre_fullinfo(const pcre *, const pcre_extra *, int,
                   void *);
-PCRE_EXP_DECL int  pcre16_fullinfo(const pcre *, const pcre_extra *, int,
+PCRE_EXP_DECL int  pcre16_fullinfo(const pcre *, const pcre16_extra *, int,
                   void *);
 PCRE_EXP_DECL int  pcre_get_named_substring(const pcre *, const char *,
                   int *, int, const char *, const char **);
@@ -428,16 +463,16 @@ PCRE_EXP_DECL const unsigned char *pcre16_maketables(void);
 PCRE_EXP_DECL int  pcre_refcount(pcre *, int);
 PCRE_EXP_DECL int  pcre16_refcount(pcre *, int);
 PCRE_EXP_DECL pcre_extra *pcre_study(const pcre *, int, const char **);
-PCRE_EXP_DECL pcre_extra *pcre16_study(const pcre *, int, const char **);
+PCRE_EXP_DECL pcre16_extra *pcre16_study(const pcre *, int, const char **);
 PCRE_EXP_DECL void pcre_free_study(pcre_extra *);
-PCRE_EXP_DECL void pcre16_free_study(pcre_extra *);
+PCRE_EXP_DECL void pcre16_free_study(pcre16_extra *);
 PCRE_EXP_DECL const char *pcre_version(void);
 PCRE_EXP_DECL const char *pcre16_version(void);
 
 /* Utility functions for byte order swaps. */
 PCRE_EXP_DECL int  pcre_pattern_to_host_byte_order(pcre *, pcre_extra *,
                   const unsigned char *);
-PCRE_EXP_DECL int  pcre16_pattern_to_host_byte_order(pcre *, pcre_extra *,
+PCRE_EXP_DECL int  pcre16_pattern_to_host_byte_order(pcre *, pcre16_extra *,
                   const unsigned char *);
 PCRE_EXP_DECL int  pcre16_utf16_to_host_byte_order(PCRE_SCHAR16 *,
                   PCRE_SPTR16, int, int *, int);
@@ -450,7 +485,7 @@ PCRE_EXP_DECL void pcre_jit_stack_free(pcre_jit_stack *);
 PCRE_EXP_DECL void pcre16_jit_stack_free(pcre_jit_stack *);
 PCRE_EXP_DECL void pcre_assign_jit_stack(pcre_extra *,
                   pcre_jit_callback, void *);
-PCRE_EXP_DECL void pcre16_assign_jit_stack(pcre_extra *,
+PCRE_EXP_DECL void pcre16_assign_jit_stack(pcre16_extra *,
                   pcre_jit_callback, void *);
 
 #ifdef __cplusplus

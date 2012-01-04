@@ -745,7 +745,7 @@ static void setstack8(pcre_extra *extra)
 #endif /* SUPPORT_PCRE8 */
 
 #ifdef SUPPORT_PCRE16
-static void setstack16(pcre_extra *extra)
+static void setstack16(pcre16_extra *extra)
 {
 	static pcre_jit_stack *stack;
 
@@ -866,7 +866,7 @@ static int regression_tests(void)
 #endif
 #ifdef SUPPORT_PCRE16
 	pcre *re16;
-	pcre_extra *extra16;
+	pcre16_extra *extra16;
 	int ovector16_1[32];
 	int ovector16_2[32];
 	int return_value16_1, return_value16_2;

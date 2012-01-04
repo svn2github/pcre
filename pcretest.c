@@ -286,7 +286,7 @@ argument, the casting might be incorrectly applied. */
 #define STRLEN16(p) ((int)strlen16((PCRE_SPTR16)p))
 
 #define SET_PCRE_CALLOUT16(callout) \
-  pcre16_callout = callout
+  pcre16_callout = (int (*)(pcre16_callout_block *))callout
 
 
 #define PCRE_COMPILE16(re, pat, options, error, erroffset, tables) \
@@ -303,16 +303,16 @@ argument, the casting might be incorrectly applied. */
 
 #define PCRE_DFA_EXEC16(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets, workspace, size_workspace) \
-  count = pcre16_dfa_exec(re, extra, (PCRE_SPTR16)bptr, len, start_offset, \
-    options, offsets, size_offsets, workspace, size_workspace)
+  count = pcre16_dfa_exec(re, (pcre16_extra *)extra, (PCRE_SPTR16)bptr, len, \
+    start_offset, options, offsets, size_offsets, workspace, size_workspace)
 
 #define PCRE_EXEC16(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets) \
-  count = pcre16_exec(re, extra, (PCRE_SPTR16)bptr, len, start_offset, \
-    options, offsets, size_offsets)
+  count = pcre16_exec(re, (pcre16_extra *)extra, (PCRE_SPTR16)bptr, len, \
+    start_offset, options, offsets, size_offsets)
 
 #define PCRE_FREE_STUDY16(extra) \
-  pcre16_free_study(extra)
+  pcre16_free_study((pcre16_extra *)extra)
 
 #define PCRE_FREE_SUBSTRING16(substring) \
   pcre16_free_substring((PCRE_SPTR16)substring)
@@ -337,13 +337,13 @@ argument, the casting might be incorrectly applied. */
     (PCRE_SPTR16 **)(void*)listptr)
 
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables) \
-  rc = pcre16_pattern_to_host_byte_order(re, extra, tables)
+  rc = pcre16_pattern_to_host_byte_order(re, (pcre16_extra *)extra, tables)
 
 #define PCRE_PRINTINT16(re, outfile, debug_lengths) \
   pcre16_printint(re, outfile, debug_lengths)
 
 #define PCRE_STUDY16(extra, re, options, error) \
-  extra = pcre16_study(re, options, error)
+  extra = (pcre_extra *)pcre16_study(re, options, error)
 
 #endif /* SUPPORT_PCRE16 */
 
@@ -1702,7 +1702,7 @@ int rc;
 
 if (use_pcre16)
 #ifdef SUPPORT_PCRE16
-  rc = pcre16_fullinfo(re, study, option, ptr);
+  rc = pcre16_fullinfo(re, (pcre16_extra *)study, option, ptr);
 #else
   rc = PCRE_ERROR_BADMODE;
 #endif

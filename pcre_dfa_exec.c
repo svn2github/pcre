@@ -2553,7 +2553,7 @@ for (;;)
           rrc = 0;
           if (PUBL(callout) != NULL)
             {
-            pcre_callout_block cb;
+            PUBL(callout_block) cb;
             cb.version          = 1;   /* Version 1 of the callout block */
             cb.callout_number   = code[LINK_SIZE+2];
             cb.offset_vector    = offsets;
@@ -2892,7 +2892,7 @@ for (;;)
       rrc = 0;
       if (PUBL(callout) != NULL)
         {
-        pcre_callout_block cb;
+        PUBL(callout_block) cb;
         cb.version          = 1;   /* Version 1 of the callout block */
         cb.callout_number   = code[1];
         cb.offset_vector    = offsets;
@@ -3013,7 +3013,7 @@ pcre_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
   int offsetcount, int *workspace, int wscount)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
+pcre16_dfa_exec(const pcre *argument_re, const pcre16_extra *extra_data,
   PCRE_SPTR16 subject, int length, int start_offset, int options, int *offsets,
   int offsetcount, int *workspace, int wscount)
 #endif
