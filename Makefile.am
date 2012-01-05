@@ -17,6 +17,7 @@ dist_doc_DATA = \
 dist_html_DATA = \
   doc/html/index.html \
   doc/html/pcre.html \
+  doc/html/pcre16.html \
   doc/html/pcre-config.html \
   doc/html/pcre_assign_jit_stack.html \
   doc/html/pcre_compile.html \
@@ -266,7 +267,7 @@ if WITH_PCRE8
 libpcre_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
 endif # WITH_PCRE8
 if WITH_PCRE16
-libpcre16_la_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
+libpcre16_la_LDFLAGS = $(EXTRA_LIBPCRE16_LDFLAGS)
 endif # WITH_PCRE16
 
 CLEANFILES += pcre_chartables.c
@@ -466,6 +467,7 @@ endif
 
 dist_man_MANS = \
   doc/pcre.3 \
+  doc/pcre16.3 \
   doc/pcre-config.1 \
   doc/pcre_assign_jit_stack.3 \
   doc/pcre_compile.3 \

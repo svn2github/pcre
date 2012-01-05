@@ -14,7 +14,8 @@ m4_define(pcre_prerelease, [-PT1])
 m4_define(pcre_date, [2012-01-01])
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre_version, [0:1:0])
+m4_define(libpcre_version, [1:0:0])
+m4_define(libpcre16_version, [0:0:0])
 m4_define(libpcreposix_version, [0:0:0])
 m4_define(libpcrecpp_version, [0:0:0])
 
@@ -731,6 +732,9 @@ esac
 EXTRA_LIBPCRE_LDFLAGS="$EXTRA_LIBPCRE_LDFLAGS \
                        $NO_UNDEFINED -version-info libpcre_version"
 
+EXTRA_LIBPCRE16_LDFLAGS="$EXTRA_LIBPCRE16_LDFLAGS \
+                       $NO_UNDEFINED -version-info libpcre16_version"
+
 EXTRA_LIBPCREPOSIX_LDFLAGS="$EXTRA_LIBPCREPOSIX_LDFLAGS \
                             $NO_UNDEFINED -version-info libpcreposix_version"
 
@@ -739,6 +743,7 @@ EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS \
                           $EXPORT_ALL_SYMBOLS"
 
 AC_SUBST(EXTRA_LIBPCRE_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRE16_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 
