@@ -164,7 +164,7 @@ typedef struct jit_arguments {
 
 typedef struct executable_function {
   void *executable_func;
-  pcre_jit_callback callback;
+  PUBL(jit_callback) callback;
   void *userdata;
   sljit_uw executable_size;
 } executable_function;
@@ -6354,7 +6354,7 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(STACK_TOP), 0);
 #undef CURRENT_AS
 
 void
-PRIV(jit_compile)(const real_pcre *re, PUBL(extra) *extra)
+PRIV(jit_compile)(const REAL_PCRE *re, PUBL(extra) *extra)
 {
 struct sljit_compiler *compiler;
 fallback_common rootfallback;
@@ -6741,7 +6741,7 @@ return convert_executable_func.call_executable_func(arguments);
 }
 
 int
-PRIV(jit_exec)(const real_pcre *re, void *executable_func,
+PRIV(jit_exec)(const REAL_PCRE *re, void *executable_func,
   const pcre_uchar *subject, int length, int start_offset, int options,
   int match_limit, int *offsets, int offsetcount)
 {
@@ -6814,7 +6814,7 @@ return ((executable_function*)executable_func)->executable_size;
 PCRE_EXP_DECL pcre_jit_stack *
 pcre_jit_stack_alloc(int startsize, int maxsize)
 #else
-PCRE_EXP_DECL pcre_jit_stack *
+PCRE_EXP_DECL pcre16_jit_stack *
 pcre16_jit_stack_alloc(int startsize, int maxsize)
 #endif
 {
@@ -6824,7 +6824,7 @@ if (startsize > maxsize)
   startsize = maxsize;
 startsize = (startsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
 maxsize = (maxsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
-return (pcre_jit_stack*)sljit_allocate_stack(startsize, maxsize);
+return (PUBL(jit_stack)*)sljit_allocate_stack(startsize, maxsize);
 }
 
 #ifdef COMPILE_PCRE8
@@ -6832,7 +6832,7 @@ PCRE_EXP_DECL void
 pcre_jit_stack_free(pcre_jit_stack *stack)
 #else
 PCRE_EXP_DECL void
-pcre16_jit_stack_free(pcre_jit_stack *stack)
+pcre16_jit_stack_free(pcre16_jit_stack *stack)
 #endif
 {
 sljit_free_stack((struct sljit_stack*)stack);
@@ -6843,7 +6843,7 @@ PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 #else
 PCRE_EXP_DECL void
-pcre16_assign_jit_stack(pcre16_extra *extra, pcre_jit_callback callback, void *userdata)
+pcre16_assign_jit_stack(pcre16_extra *extra, pcre16_jit_callback callback, void *userdata)
 #endif
 {
 executable_function *function;
@@ -6866,7 +6866,7 @@ being compiled. */
 PCRE_EXP_DECL pcre_jit_stack *
 pcre_jit_stack_alloc(int startsize, int maxsize)
 #else
-PCRE_EXP_DECL pcre_jit_stack *
+PCRE_EXP_DECL pcre16_jit_stack *
 pcre16_jit_stack_alloc(int startsize, int maxsize)
 #endif
 {
@@ -6880,7 +6880,7 @@ PCRE_EXP_DECL void
 pcre_jit_stack_free(pcre_jit_stack *stack)
 #else
 PCRE_EXP_DECL void
-pcre16_jit_stack_free(pcre_jit_stack *stack)
+pcre16_jit_stack_free(pcre16_jit_stack *stack)
 #endif
 {
 (void)stack;
@@ -6891,7 +6891,7 @@ PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
 #else
 PCRE_EXP_DECL void
-pcre16_assign_jit_stack(pcre16_extra *extra, pcre_jit_callback callback, void *userdata)
+pcre16_assign_jit_stack(pcre16_extra *extra, pcre16_jit_callback callback, void *userdata)
 #endif
 {
 (void)extra;

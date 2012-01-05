@@ -672,13 +672,14 @@ static const unsigned char *tables(int mode)
 	/* The purpose of this function to allow valgrind
 	for reporting invalid reads and writes. */
 	static unsigned char *tables_copy;
-	pcre *regex;
 	const char *errorptr;
 	int erroroffset;
 	const unsigned char *default_tables;
 #ifdef SUPPORT_PCRE8
+	pcre *regex;
 	char null_str[1] = { 0 };
 #else
+	pcre16 *regex;
 	PCRE_SCHAR16 null_str[1] = { 0 };
 #endif
 
@@ -720,9 +721,14 @@ static const unsigned char *tables(int mode)
 	return tables_copy;
 }
 
-static pcre_jit_stack* callback(void *arg)
+static pcre_jit_stack* callback8(void *arg)
 {
 	return (pcre_jit_stack *)arg;
+}
+
+static pcre16_jit_stack* callback16(void *arg)
+{
+	return (pcre16_jit_stack *)arg;
 }
 
 #ifdef SUPPORT_PCRE8
@@ -740,14 +746,14 @@ static void setstack8(pcre_extra *extra)
 	if (!stack)
 		stack = pcre_jit_stack_alloc(1, 1024 * 1024);
 	/* Extra can be NULL. */
-	pcre_assign_jit_stack(extra, callback, stack);
+	pcre_assign_jit_stack(extra, callback8, stack);
 }
 #endif /* SUPPORT_PCRE8 */
 
 #ifdef SUPPORT_PCRE16
 static void setstack16(pcre16_extra *extra)
 {
-	static pcre_jit_stack *stack;
+	static pcre16_jit_stack *stack;
 
 	if (!extra) {
 		if (stack)
@@ -759,7 +765,7 @@ static void setstack16(pcre16_extra *extra)
 	if (!stack)
 		stack = pcre16_jit_stack_alloc(1, 1024 * 1024);
 	/* Extra can be NULL. */
-	pcre16_assign_jit_stack(extra, callback, stack);
+	pcre16_assign_jit_stack(extra, callback16, stack);
 }
 #endif /* SUPPORT_PCRE8 */
 
@@ -865,7 +871,7 @@ static int regression_tests(void)
 	int disabled_flags8 = 0;
 #endif
 #ifdef SUPPORT_PCRE16
-	pcre *re16;
+	pcre16 *re16;
 	pcre16_extra *extra16;
 	int ovector16_1[32];
 	int ovector16_2[32];

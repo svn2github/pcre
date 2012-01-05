@@ -1317,7 +1317,7 @@ PCRE_EXP_DEFN pcre_extra * PCRE_CALL_CONVENTION
 pcre_study(const pcre *external_re, int options, const char **errorptr)
 #else
 PCRE_EXP_DEFN pcre16_extra * PCRE_CALL_CONVENTION
-pcre16_study(const pcre *external_re, int options, const char **errorptr)
+pcre16_study(const pcre16 *external_re, int options, const char **errorptr)
 #endif
 {
 int min;
@@ -1328,7 +1328,7 @@ pcre_study_data *study;
 const pcre_uint8 *tables;
 pcre_uchar *code;
 compile_data compile_block;
-const real_pcre *re = (const real_pcre *)external_re;
+const REAL_PCRE *re = (const REAL_PCRE *)external_re;
 
 *errorptr = NULL;
 

@@ -1227,7 +1227,11 @@ for (;;)
         cb.version          = 2;   /* Version 1 of the callout block */
         cb.callout_number   = ecode[LINK_SIZE+2];
         cb.offset_vector    = md->offset_vector;
+#ifdef COMPILE_PCRE8
         cb.subject          = (PCRE_SPTR)md->start_subject;
+#else
+        cb.subject          = (PCRE_SPTR16)md->start_subject;
+#endif
         cb.subject_length   = (int)(md->end_subject - md->start_subject);
         cb.start_match      = (int)(mstart - md->start_subject);
         cb.current_position = (int)(eptr - md->start_subject);
@@ -1637,7 +1641,11 @@ for (;;)
       cb.version          = 2;   /* Version 1 of the callout block */
       cb.callout_number   = ecode[1];
       cb.offset_vector    = md->offset_vector;
+#ifdef COMPILE_PCRE8
       cb.subject          = (PCRE_SPTR)md->start_subject;
+#else
+      cb.subject          = (PCRE_SPTR16)md->start_subject;
+#endif
       cb.subject_length   = (int)(md->end_subject - md->start_subject);
       cb.start_match      = (int)(mstart - md->start_subject);
       cb.current_position = (int)(eptr - md->start_subject);
@@ -6139,7 +6147,7 @@ pcre_exec(const pcre *argument_re, const pcre_extra *extra_data,
   int offsetcount)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_exec(const pcre *argument_re, const pcre16_extra *extra_data,
+pcre16_exec(const pcre16 *argument_re, const pcre16_extra *extra_data,
   PCRE_SPTR16 subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
 #endif
@@ -6167,8 +6175,7 @@ PCRE_PUCHAR start_partial = NULL;
 PCRE_PUCHAR req_char_ptr = start_match - 1;
 
 const pcre_study_data *study;
-const real_pcre *external_re = (const real_pcre *)argument_re;
-const real_pcre *re = external_re;
+const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 
 /* Plausibility checks */
 
@@ -6255,7 +6262,7 @@ md->callout_data = NULL;
 
 /* The table pointer is always in native byte order. */
 
-tables = external_re->tables;
+tables = re->tables;
 
 if (extra_data != NULL)
   {
@@ -6295,7 +6302,7 @@ firstline = (re->options & PCRE_FIRSTLINE) != 0;
 
 /* The code starts after the real_pcre block and the capture name table. */
 
-md->start_code = (const pcre_uchar *)external_re + re->name_table_offset +
+md->start_code = (const pcre_uchar *)re + re->name_table_offset +
   re->name_count * re->name_entry_size;
 
 md->start_subject = (PCRE_PUCHAR)subject;

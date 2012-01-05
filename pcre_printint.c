@@ -250,7 +250,7 @@ void
 pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths)
 #endif
 {
-real_pcre *re = (real_pcre *)external_re;
+REAL_PCRE *re = (REAL_PCRE *)external_re;
 pcre_uchar *codestart, *code;
 BOOL utf;
 

@@ -70,7 +70,7 @@ PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_get_stringnumber(const pcre *code, const char *stringname)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_get_stringnumber(const pcre *code, PCRE_SPTR16 stringname)
+pcre16_get_stringnumber(const pcre16 *code, PCRE_SPTR16 stringname)
 #endif
 {
 int rc;
@@ -138,7 +138,7 @@ pcre_get_stringtable_entries(const pcre *code, const char *stringname,
   char **firstptr, char **lastptr)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_get_stringtable_entries(const pcre *code, PCRE_SPTR16 stringname,
+pcre16_get_stringtable_entries(const pcre16 *code, PCRE_SPTR16 stringname,
   PCRE_SCHAR16 **firstptr, PCRE_SCHAR16 **lastptr)
 #endif
 {
@@ -231,10 +231,10 @@ static int
 get_first_set(const pcre *code, const char *stringname, int *ovector)
 #else
 static int
-get_first_set(const pcre *code, PCRE_SPTR16 stringname, int *ovector)
+get_first_set(const pcre16 *code, PCRE_SPTR16 stringname, int *ovector)
 #endif
 {
-const real_pcre *re = (const real_pcre *)code;
+const REAL_PCRE *re = (const REAL_PCRE *)code;
 int entrysize;
 pcre_uchar *first, *last;
 pcre_uchar *entry;
@@ -341,12 +341,14 @@ Returns:         if successful:
 
 #ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_copy_named_substring(const pcre *code, const char *subject, int *ovector,
-  int stringcount, const char *stringname, char *buffer, int size)
+pcre_copy_named_substring(const pcre *code, const char *subject,
+  int *ovector, int stringcount, const char *stringname,
+  char *buffer, int size)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_copy_named_substring(const pcre *code, PCRE_SPTR16 subject, int *ovector,
-  int stringcount, PCRE_SPTR16 stringname, PCRE_SCHAR16 *buffer, int size)
+pcre16_copy_named_substring(const pcre16 *code, PCRE_SPTR16 subject,
+  int *ovector, int stringcount, PCRE_SPTR16 stringname,
+  PCRE_SCHAR16 *buffer, int size)
 #endif
 {
 int n = get_first_set(code, stringname, ovector);
@@ -534,12 +536,14 @@ Returns:         if successful:
 
 #ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_get_named_substring(const pcre *code, const char *subject, int *ovector,
-  int stringcount, const char *stringname, const char **stringptr)
+pcre_get_named_substring(const pcre *code, const char *subject,
+  int *ovector, int stringcount, const char *stringname,
+  const char **stringptr)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_get_named_substring(const pcre *code, PCRE_SPTR16 subject, int *ovector,
-  int stringcount, PCRE_SPTR16 stringname, PCRE_SPTR16 *stringptr)
+pcre16_get_named_substring(const pcre16 *code, PCRE_SPTR16 subject,
+  int *ovector, int stringcount, PCRE_SPTR16 stringname,
+  PCRE_SPTR16 *stringptr)
 #endif
 {
 int n = get_first_set(code, stringname, ovector);

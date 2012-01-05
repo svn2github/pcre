@@ -67,15 +67,15 @@ Returns:           0 if data returned, negative on error
 
 #ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data, int what,
-  void *where)
+pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data,
+  int what, void *where)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_fullinfo(const pcre *argument_re, const pcre16_extra *extra_data, int what,
-  void *where)
+pcre16_fullinfo(const pcre16 *argument_re, const pcre16_extra *extra_data,
+  int what, void *where)
 #endif
 {
-const real_pcre *re = (const real_pcre *)argument_re;
+const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 const pcre_study_data *study = NULL;
 
 if (re == NULL || where == NULL) return PCRE_ERROR_NULL;

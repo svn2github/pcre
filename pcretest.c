@@ -209,11 +209,13 @@ argument, the casting might be incorrectly applied. */
 #define READ_CAPTURE_NAME8(p, cn8, cn16, re) \
   p = read_capture_name8(p, cn8, re)
 
+#define STRLEN8(p) ((int)strlen((char *)p))
+
 #define SET_PCRE_CALLOUT8(callout) \
   pcre_callout = callout
 
-#define STRLEN8(p) ((int)strlen((char *)p))
-
+#define PCRE_ASSIGN_JIT_STACK8(extra, callback, userdata) \
+   pcre_assign_jit_stack(extra, callback, userdata)
 
 #define PCRE_COMPILE8(re, pat, options, error, erroffset, tables) \
   re = pcre_compile((char *)pat, options, error, erroffset, tables)
@@ -268,6 +270,12 @@ argument, the casting might be incorrectly applied. */
 #define PCRE_STUDY8(extra, re, options, error) \
   extra = pcre_study(re, options, error)
 
+#define PCRE_JIT_STACK_ALLOC8(startsize, maxsize) \
+  pcre_jit_stack_alloc(startsize, maxsize)
+
+#define PCRE_JIT_STACK_FREE8(stack) \
+  pcre_jit_stack_free(stack)
+
 #endif /* SUPPORT_PCRE8 */
 
 /* -----------------------------------------------------------*/
@@ -288,14 +296,18 @@ argument, the casting might be incorrectly applied. */
 #define SET_PCRE_CALLOUT16(callout) \
   pcre16_callout = (int (*)(pcre16_callout_block *))callout
 
+#define PCRE_ASSIGN_JIT_STACK16(extra, callback, userdata) \
+  pcre16_assign_jit_stack((pcre16_extra *)extra, \
+    (pcre16_jit_callback)callback, userdata)
 
 #define PCRE_COMPILE16(re, pat, options, error, erroffset, tables) \
-  re = pcre16_compile((PCRE_SPTR16)pat, options, error, erroffset, tables)
+  re = (pcre *)pcre16_compile((PCRE_SPTR16)pat, options, error, erroffset, \
+    tables)
 
 #define PCRE_COPY_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
     namesptr, cbuffer, size) \
-  rc = pcre16_copy_named_substring(re, (PCRE_SPTR16)bptr, offsets, count, \
-    (PCRE_SPTR16)namesptr, (PCRE_SCHAR16 *)cbuffer, size/2)
+  rc = pcre16_copy_named_substring((pcre16 *)re, (PCRE_SPTR16)bptr, offsets, \
+    count, (PCRE_SPTR16)namesptr, (PCRE_SCHAR16 *)cbuffer, size/2)
 
 #define PCRE_COPY_SUBSTRING16(rc, bptr, offsets, count, i, cbuffer, size) \
   rc = pcre16_copy_substring((PCRE_SPTR16)bptr, offsets, count, i, \
@@ -303,13 +315,14 @@ argument, the casting might be incorrectly applied. */
 
 #define PCRE_DFA_EXEC16(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets, workspace, size_workspace) \
-  count = pcre16_dfa_exec(re, (pcre16_extra *)extra, (PCRE_SPTR16)bptr, len, \
-    start_offset, options, offsets, size_offsets, workspace, size_workspace)
+  count = pcre16_dfa_exec((pcre16 *)re, (pcre16_extra *)extra, \
+    (PCRE_SPTR16)bptr, len, start_offset, options, offsets, size_offsets, \
+    workspace, size_workspace)
 
 #define PCRE_EXEC16(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets) \
-  count = pcre16_exec(re, (pcre16_extra *)extra, (PCRE_SPTR16)bptr, len, \
-    start_offset, options, offsets, size_offsets)
+  count = pcre16_exec((pcre16 *)re, (pcre16_extra *)extra, (PCRE_SPTR16)bptr, \
+    len, start_offset, options, offsets, size_offsets)
 
 #define PCRE_FREE_STUDY16(extra) \
   pcre16_free_study((pcre16_extra *)extra)
@@ -322,8 +335,8 @@ argument, the casting might be incorrectly applied. */
 
 #define PCRE_GET_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
     getnamesptr, subsptr) \
-  rc = pcre16_get_named_substring(re, (PCRE_SPTR16)bptr, offsets, count, \
-    (PCRE_SPTR16)getnamesptr, (PCRE_SPTR16 *)(void*)subsptr)
+  rc = pcre16_get_named_substring((pcre16 *)re, (PCRE_SPTR16)bptr, offsets, \
+    count, (PCRE_SPTR16)getnamesptr, (PCRE_SPTR16 *)(void*)subsptr)
 
 #define PCRE_GET_STRINGNUMBER16(n, rc, ptr) \
   n = pcre16_get_stringnumber(re, (PCRE_SPTR16)ptr)
@@ -337,13 +350,20 @@ argument, the casting might be incorrectly applied. */
     (PCRE_SPTR16 **)(void*)listptr)
 
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables) \
-  rc = pcre16_pattern_to_host_byte_order(re, (pcre16_extra *)extra, tables)
+  rc = pcre16_pattern_to_host_byte_order((pcre16 *)re, (pcre16_extra *)extra, \
+    tables)
 
 #define PCRE_PRINTINT16(re, outfile, debug_lengths) \
   pcre16_printint(re, outfile, debug_lengths)
 
 #define PCRE_STUDY16(extra, re, options, error) \
-  extra = (pcre_extra *)pcre16_study(re, options, error)
+  extra = (pcre_extra *)pcre16_study((pcre16 *)re, options, error)
+
+#define PCRE_JIT_STACK_ALLOC16(startsize, maxsize) \
+  (pcre_jit_stack *)pcre16_jit_stack_alloc(startsize, maxsize)
+
+#define PCRE_JIT_STACK_FREE16(stack) \
+  pcre16_jit_stack_free((pcre16_jit_stack *)stack)
 
 #endif /* SUPPORT_PCRE16 */
 
@@ -382,7 +402,11 @@ version is called. ----- */
 
 #define STRLEN(p) (use_pcre16? STRLEN16(p) : STRLEN8(p))
 
-#define PCRE_ASSIGN_JIT_STACK pcre_assign_jit_stack
+#define PCRE_ASSIGN_JIT_STACK(extra, callback, userdata) \
+  if (use_pcre16) \
+    PCRE_ASSIGN_JIT_STACK16(extra, callback, userdata); \
+  else \
+    PCRE_ASSIGN_JIT_STACK8(extra, callback, userdata)
 
 #define PCRE_COMPILE(re, pat, options, error, erroffset, tables) \
   if (use_pcre16) \
@@ -470,8 +494,16 @@ version is called. ----- */
   else \
     PCRE_GET_SUBSTRING_LIST8(rc, bptr, offsets, count, listptr)
 
-#define PCRE_JIT_STACK_ALLOC pcre_jit_stack_alloc
-#define PCRE_JIT_STACK_FREE pcre_jit_stack_free
+#define PCRE_JIT_STACK_ALLOC(startsize, maxsize) \
+  (use_pcre16 ? \
+     PCRE_JIT_STACK_ALLOC16(startsize, maxsize) \
+    :PCRE_JIT_STACK_ALLOC8(startsize, maxsize))
+
+#define PCRE_JIT_STACK_FREE(stack) \
+  if (use_pcre16) \
+    PCRE_JIT_STACK_FREE16(stack); \
+  else \
+    PCRE_JIT_STACK_FREE8(stack)
 
 #define PCRE_MAKETABLES \
   (use_pcre16? pcre16_maketables() : pcre_maketables())
@@ -503,7 +535,7 @@ version is called. ----- */
 #define READ_CAPTURE_NAME         READ_CAPTURE_NAME8
 #define SET_PCRE_CALLOUT          SET_PCRE_CALLOUT8
 #define STRLEN                    STRLEN8
-#define PCRE_ASSIGN_JIT_STACK     pcre_assign_jit_stack
+#define PCRE_ASSIGN_JIT_STACK     PCRE_ASSIGN_JIT_STACK8
 #define PCRE_COMPILE              PCRE_COMPILE8
 #define PCRE_CONFIG               pcre_config
 #define PCRE_COPY_NAMED_SUBSTRING PCRE_COPY_NAMED_SUBSTRING8
@@ -517,8 +549,8 @@ version is called. ----- */
 #define PCRE_GET_STRINGNUMBER     PCRE_GET_STRINGNUMBER8
 #define PCRE_GET_SUBSTRING        PCRE_GET_SUBSTRING8
 #define PCRE_GET_SUBSTRING_LIST   PCRE_GET_SUBSTRING_LIST8
-#define PCRE_JIT_STACK_ALLOC      pcre_jit_stack_alloc
-#define PCRE_JIT_STACK_FREE       pcre_jit_stack_free
+#define PCRE_JIT_STACK_ALLOC      PCRE_JIT_STACK_ALLOC8
+#define PCRE_JIT_STACK_FREE       PCRE_JIT_STACK_FREE8
 #define PCRE_MAKETABLES           pcre_maketables()
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER PCRE_PATTERN_TO_HOST_BYTE_ORDER8
 #define PCRE_PRINTINT             PCRE_PRINTINT8
@@ -533,7 +565,7 @@ version is called. ----- */
 #define READ_CAPTURE_NAME         READ_CAPTURE_NAME16
 #define SET_PCRE_CALLOUT          SET_PCRE_CALLOUT16
 #define STRLEN                    STRLEN16
-#define PCRE_ASSIGN_JIT_STACK     pcre16_assign_jit_stack
+#define PCRE_ASSIGN_JIT_STACK     PCRE_ASSIGN_JIT_STACK16
 #define PCRE_COMPILE              PCRE_COMPILE16
 #define PCRE_CONFIG               pcre16_config
 #define PCRE_COPY_NAMED_SUBSTRING PCRE_COPY_NAMED_SUBSTRING16
@@ -547,8 +579,8 @@ version is called. ----- */
 #define PCRE_GET_STRINGNUMBER     PCRE_GET_STRINGNUMBER16
 #define PCRE_GET_SUBSTRING        PCRE_GET_SUBSTRING16
 #define PCRE_GET_SUBSTRING_LIST   PCRE_GET_SUBSTRING_LIST16
-#define PCRE_JIT_STACK_ALLOC      pcre16_jit_stack_alloc
-#define PCRE_JIT_STACK_FREE       pcre16_jit_stack_free
+#define PCRE_JIT_STACK_ALLOC      PCRE_JIT_STACK_ALLOC16
+#define PCRE_JIT_STACK_FREE       PCRE_JIT_STACK_FREE16
 #define PCRE_MAKETABLES           pcre16_maketables()
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER PCRE_PATTERN_TO_HOST_BYTE_ORDER16
 #define PCRE_PRINTINT             PCRE_PRINTINT16
@@ -1513,7 +1545,7 @@ pcre_uint16 *npp = *pp;
 while (isalnum(*p)) *npp++ = *p++;
 *npp++ = 0;
 *npp = 0;
-if (pcre16_get_stringnumber(re, (PCRE_SPTR16)(*pp)) < 0)
+if (pcre16_get_stringnumber((pcre16 *)re, (PCRE_SPTR16)(*pp)) < 0)
   {
   fprintf(outfile, "no parentheses with name \"");
   PCHARSV(*pp, 0, -1, outfile);
@@ -1702,7 +1734,7 @@ int rc;
 
 if (use_pcre16)
 #ifdef SUPPORT_PCRE16
-  rc = pcre16_fullinfo(re, (pcre16_extra *)study, option, ptr);
+  rc = pcre16_fullinfo((pcre16 *)re, (pcre16_extra *)study, option, ptr);
 #else
   rc = PCRE_ERROR_BADMODE;
 #endif
@@ -1771,7 +1803,7 @@ architecture. */
 static void
 regexflip(pcre *ere, pcre_extra *extra)
 {
-real_pcre *re = (real_pcre *)ere;
+REAL_PCRE *re = (REAL_PCRE *)ere;
 #ifdef SUPPORT_PCRE16
 int op;
 pcre_uint16 *ptr = (pcre_uint16 *)re + re->name_table_offset;
@@ -2553,12 +2585,12 @@ while (!done)
     true_study_size =
       (sbuf[4] << 24) | (sbuf[5] << 16) | (sbuf[6] << 8) | sbuf[7];
 
-    re = (real_pcre *)new_malloc(true_size);
+    re = (pcre *)new_malloc(true_size);
     regex_gotten_store = first_gotten_store;
 
     if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
 
-    magic = ((real_pcre *)re)->magic_number;
+    magic = ((REAL_PCRE *)re)->magic_number;
     if (magic != MAGIC_NUMBER)
       {
       if (swap_uint32(magic) == MAGIC_NUMBER)
@@ -2938,7 +2970,7 @@ while (!done)
     /* Extract the size for possible writing before possibly flipping it,
     and remember the store that was got. */
 
-    true_size = ((real_pcre *)re)->size;
+    true_size = ((REAL_PCRE *)re)->size;
     regex_gotten_store = first_gotten_store;
 
     /* Output code size information if requested */
@@ -2946,8 +2978,8 @@ while (!done)
     if (log_store)
       fprintf(outfile, "Memory allocation (code space): %d\n",
         (int)(first_gotten_store -
-              sizeof(real_pcre) -
-              ((real_pcre *)re)->name_count * ((real_pcre *)re)->name_entry_size));
+              sizeof(REAL_PCRE) -
+              ((REAL_PCRE *)re)->name_count * ((REAL_PCRE *)re)->name_entry_size));
 
     /* If -s or /S was present, study the regex to generate additional info to
     help with the matching, unless the pattern has the SS option, which
@@ -3078,7 +3110,7 @@ while (!done)
       if (!okpartial) fprintf(outfile, "Partial matching not supported\n");
       if (hascrorlf) fprintf(outfile, "Contains explicit CR or LF match\n");
 
-      all_options = ((real_pcre *)re)->options;
+      all_options = ((REAL_PCRE *)re)->options;
       if (do_flip) all_options = swap_uint32(all_options);
 
       if (get_options == 0) fprintf(outfile, "No options\n");
@@ -3140,7 +3172,7 @@ while (!done)
       else
         {
         const char *caseless =
-          ((((real_pcre *)re)->flags & PCRE_FCH_CASELESS) == 0)?
+          ((((REAL_PCRE *)re)->flags & PCRE_FCH_CASELESS) == 0)?
           "" : " (caseless)";
 
         if (PRINTOK(first_char))
@@ -3160,7 +3192,7 @@ while (!done)
       else
         {
         const char *caseless =
-          ((((real_pcre *)re)->flags & PCRE_RCH_CASELESS) == 0)?
+          ((((REAL_PCRE *)re)->flags & PCRE_RCH_CASELESS) == 0)?
           "" : " (caseless)";
 
         if (PRINTOK(need_char))
@@ -3563,7 +3595,7 @@ while (!done)
             && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0
             && extra->executable_jit != NULL)
           {
-          if (jit_stack != NULL) PCRE_JIT_STACK_FREE(jit_stack);
+          if (jit_stack != NULL) { PCRE_JIT_STACK_FREE(jit_stack); }
           jit_stack = PCRE_JIT_STACK_ALLOC(1, n * 1024);
           PCRE_ASSIGN_JIT_STACK(extra, jit_callback, jit_stack);
           }
@@ -3778,7 +3810,7 @@ while (!done)
 #ifdef SUPPORT_PCRE16
     if (use_pcre16)
       {
-      len = to16(TRUE, bptr, (((real_pcre *)re)->options) & PCRE_UTF8, len);
+      len = to16(TRUE, bptr, (((REAL_PCRE *)re)->options) & PCRE_UTF8, len);
       switch(len)
         {
         case -1:
@@ -4158,7 +4190,7 @@ while (!done)
         if (g_notempty != 0)
           {
           int onechar = 1;
-          unsigned int obits = ((real_pcre *)re)->options;
+          unsigned int obits = ((REAL_PCRE *)re)->options;
           use_offsets[0] = start_offset;
           if ((obits & PCRE_NEWLINE_BITS) == 0)
             {

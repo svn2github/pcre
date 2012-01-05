@@ -271,8 +271,14 @@ these bits, just add new ones on the end, in order to remain compatible. */
 struct real_pcre;                 /* declaration; the definition is private  */
 typedef struct real_pcre pcre;
 
+struct real_pcre16;               /* declaration; the definition is private  */
+typedef struct real_pcre16 pcre16;
+
 struct real_pcre_jit_stack;       /* declaration; the definition is private  */
 typedef struct real_pcre_jit_stack pcre_jit_stack;
+
+struct real_pcre16_jit_stack;     /* declaration; the definition is private  */
+typedef struct real_pcre16_jit_stack pcre16_jit_stack;
 
 /* If PCRE is compiled with 16 bit character support, PCRE_SCHAR16 must contain
 a 16 bit wide signed data type. Otherwise it can be a dummy data type since
@@ -353,7 +359,7 @@ typedef struct pcre16_callout_block {
   /* ------------------------ Version 0 ------------------------------- */
   int          callout_number;    /* Number compiled into pattern */
   int         *offset_vector;     /* The offset vector */
-  PCRE_SPTR    subject;           /* The subject being matched */
+  PCRE_SPTR16  subject;           /* The subject being matched */
   int          subject_length;    /* The length of the subject */
   int          start_match;       /* Offset to start of this match attempt */
   int          current_position;  /* Where we currently are in the subject */
@@ -403,22 +409,23 @@ PCRE_EXP_DECL int   pcre16_callout(pcre16_callout_block *);
 /* User defined callback which provides a stack just before the match starts. */
 
 typedef pcre_jit_stack *(*pcre_jit_callback)(void *);
+typedef pcre16_jit_stack *(*pcre16_jit_callback)(void *);
 
 /* Exported PCRE functions */
 
 PCRE_EXP_DECL pcre *pcre_compile(const char *, int, const char **, int *,
                   const unsigned char *);
-PCRE_EXP_DECL pcre *pcre16_compile(PCRE_SPTR16, int, const char **, int *,
+PCRE_EXP_DECL pcre16 *pcre16_compile(PCRE_SPTR16, int, const char **, int *,
                   const unsigned char *);
 PCRE_EXP_DECL pcre *pcre_compile2(const char *, int, int *, const char **,
                   int *, const unsigned char *);
-PCRE_EXP_DECL pcre *pcre16_compile2(PCRE_SPTR16, int, int *, const char **,
+PCRE_EXP_DECL pcre16 *pcre16_compile2(PCRE_SPTR16, int, int *, const char **,
                   int *, const unsigned char *);
 PCRE_EXP_DECL int  pcre_config(int, void *);
 PCRE_EXP_DECL int  pcre16_config(int, void *);
 PCRE_EXP_DECL int  pcre_copy_named_substring(const pcre *, const char *,
                   int *, int, const char *, char *, int);
-PCRE_EXP_DECL int  pcre16_copy_named_substring(const pcre *, PCRE_SPTR16,
+PCRE_EXP_DECL int  pcre16_copy_named_substring(const pcre16 *, PCRE_SPTR16,
                   int *, int, PCRE_SPTR16, PCRE_SCHAR16 *, int);
 PCRE_EXP_DECL int  pcre_copy_substring(const char *, int *, int, int,
                   char *, int);
@@ -426,29 +433,29 @@ PCRE_EXP_DECL int  pcre16_copy_substring(PCRE_SPTR16, int *, int, int,
                   PCRE_SCHAR16 *, int);
 PCRE_EXP_DECL int  pcre_dfa_exec(const pcre *, const pcre_extra *,
                   const char *, int, int, int, int *, int , int *, int);
-PCRE_EXP_DECL int  pcre16_dfa_exec(const pcre *, const pcre16_extra *,
+PCRE_EXP_DECL int  pcre16_dfa_exec(const pcre16 *, const pcre16_extra *,
                   PCRE_SPTR16, int, int, int, int *, int , int *, int);
 PCRE_EXP_DECL int  pcre_exec(const pcre *, const pcre_extra *, PCRE_SPTR,
                    int, int, int, int *, int);
-PCRE_EXP_DECL int  pcre16_exec(const pcre *, const pcre16_extra *, PCRE_SPTR16,
-                   int, int, int, int *, int);
+PCRE_EXP_DECL int  pcre16_exec(const pcre16 *, const pcre16_extra *,
+                   PCRE_SPTR16, int, int, int, int *, int);
 PCRE_EXP_DECL void pcre_free_substring(const char *);
 PCRE_EXP_DECL void pcre16_free_substring(PCRE_SPTR16);
 PCRE_EXP_DECL void pcre_free_substring_list(const char **);
 PCRE_EXP_DECL void pcre16_free_substring_list(PCRE_SPTR16 *);
 PCRE_EXP_DECL int  pcre_fullinfo(const pcre *, const pcre_extra *, int,
                   void *);
-PCRE_EXP_DECL int  pcre16_fullinfo(const pcre *, const pcre16_extra *, int,
+PCRE_EXP_DECL int  pcre16_fullinfo(const pcre16 *, const pcre16_extra *, int,
                   void *);
 PCRE_EXP_DECL int  pcre_get_named_substring(const pcre *, const char *,
                   int *, int, const char *, const char **);
-PCRE_EXP_DECL int  pcre16_get_named_substring(const pcre *, PCRE_SPTR16,
+PCRE_EXP_DECL int  pcre16_get_named_substring(const pcre16 *, PCRE_SPTR16,
                   int *, int, PCRE_SPTR16, PCRE_SPTR16 *);
 PCRE_EXP_DECL int  pcre_get_stringnumber(const pcre *, const char *);
-PCRE_EXP_DECL int  pcre16_get_stringnumber(const pcre *, PCRE_SPTR16);
+PCRE_EXP_DECL int  pcre16_get_stringnumber(const pcre16 *, PCRE_SPTR16);
 PCRE_EXP_DECL int  pcre_get_stringtable_entries(const pcre *, const char *,
                   char **, char **);
-PCRE_EXP_DECL int  pcre16_get_stringtable_entries(const pcre *, PCRE_SPTR16,
+PCRE_EXP_DECL int  pcre16_get_stringtable_entries(const pcre16 *, PCRE_SPTR16,
                   PCRE_SCHAR16 **, PCRE_SCHAR16 **);
 PCRE_EXP_DECL int  pcre_get_substring(const char *, int *, int, int,
                   const char **);
@@ -461,9 +468,9 @@ PCRE_EXP_DECL int  pcre16_get_substring_list(PCRE_SPTR16, int *, int,
 PCRE_EXP_DECL const unsigned char *pcre_maketables(void);
 PCRE_EXP_DECL const unsigned char *pcre16_maketables(void);
 PCRE_EXP_DECL int  pcre_refcount(pcre *, int);
-PCRE_EXP_DECL int  pcre16_refcount(pcre *, int);
+PCRE_EXP_DECL int  pcre16_refcount(pcre16 *, int);
 PCRE_EXP_DECL pcre_extra *pcre_study(const pcre *, int, const char **);
-PCRE_EXP_DECL pcre16_extra *pcre16_study(const pcre *, int, const char **);
+PCRE_EXP_DECL pcre16_extra *pcre16_study(const pcre16 *, int, const char **);
 PCRE_EXP_DECL void pcre_free_study(pcre_extra *);
 PCRE_EXP_DECL void pcre16_free_study(pcre16_extra *);
 PCRE_EXP_DECL const char *pcre_version(void);
@@ -472,7 +479,7 @@ PCRE_EXP_DECL const char *pcre16_version(void);
 /* Utility functions for byte order swaps. */
 PCRE_EXP_DECL int  pcre_pattern_to_host_byte_order(pcre *, pcre_extra *,
                   const unsigned char *);
-PCRE_EXP_DECL int  pcre16_pattern_to_host_byte_order(pcre *, pcre16_extra *,
+PCRE_EXP_DECL int  pcre16_pattern_to_host_byte_order(pcre16 *, pcre16_extra *,
                   const unsigned char *);
 PCRE_EXP_DECL int  pcre16_utf16_to_host_byte_order(PCRE_SCHAR16 *,
                   PCRE_SPTR16, int, int *, int);
@@ -480,13 +487,13 @@ PCRE_EXP_DECL int  pcre16_utf16_to_host_byte_order(PCRE_SCHAR16 *,
 /* JIT compiler related functions. */
 
 PCRE_EXP_DECL pcre_jit_stack *pcre_jit_stack_alloc(int, int);
-PCRE_EXP_DECL pcre_jit_stack *pcre16_jit_stack_alloc(int, int);
+PCRE_EXP_DECL pcre16_jit_stack *pcre16_jit_stack_alloc(int, int);
 PCRE_EXP_DECL void pcre_jit_stack_free(pcre_jit_stack *);
-PCRE_EXP_DECL void pcre16_jit_stack_free(pcre_jit_stack *);
+PCRE_EXP_DECL void pcre16_jit_stack_free(pcre16_jit_stack *);
 PCRE_EXP_DECL void pcre_assign_jit_stack(pcre_extra *,
                   pcre_jit_callback, void *);
 PCRE_EXP_DECL void pcre16_assign_jit_stack(pcre16_extra *,
-                  pcre_jit_callback, void *);
+                  pcre16_jit_callback, void *);
 
 #ifdef __cplusplus
 }  /* extern "C" */

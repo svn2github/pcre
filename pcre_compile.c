@@ -7563,7 +7563,7 @@ PCRE_EXP_DEFN pcre * PCRE_CALL_CONVENTION
 pcre_compile(const char *pattern, int options, const char **errorptr,
   int *erroroffset, const unsigned char *tables)
 #else
-PCRE_EXP_DEFN pcre * PCRE_CALL_CONVENTION
+PCRE_EXP_DEFN pcre16 * PCRE_CALL_CONVENTION
 pcre16_compile(PCRE_SPTR16 pattern, int options, const char **errorptr,
   int *erroroffset, const unsigned char *tables)
 #endif
@@ -7581,12 +7581,12 @@ PCRE_EXP_DEFN pcre * PCRE_CALL_CONVENTION
 pcre_compile2(const char *pattern, int options, int *errorcodeptr,
   const char **errorptr, int *erroroffset, const unsigned char *tables)
 #else
-PCRE_EXP_DEFN pcre * PCRE_CALL_CONVENTION
+PCRE_EXP_DEFN pcre16 * PCRE_CALL_CONVENTION
 pcre16_compile2(PCRE_SPTR16 pattern, int options, int *errorcodeptr,
   const char **errorptr, int *erroroffset, const unsigned char *tables)
 #endif
 {
-real_pcre *re;
+REAL_PCRE *re;
 int length = 1;  /* For final END opcode */
 pcre_int32 firstchar, reqchar;
 int newline;
@@ -7848,8 +7848,8 @@ externally provided function. Integer overflow should no longer be possible
 because nowadays we limit the maximum value of cd->names_found and
 cd->name_entry_size. */
 
-size = sizeof(real_pcre) + (length + cd->names_found * cd->name_entry_size) * sizeof(pcre_uchar);
-re = (real_pcre *)(PUBL(malloc))(size);
+size = sizeof(REAL_PCRE) + (length + cd->names_found * cd->name_entry_size) * sizeof(pcre_uchar);
+re = (REAL_PCRE *)(PUBL(malloc))(size);
 
 if (re == NULL)
   {
@@ -7870,7 +7870,7 @@ re->flags = cd->external_flags;
 re->dummy1 = 0;
 re->first_char = 0;
 re->req_char = 0;
-re->name_table_offset = sizeof(real_pcre) / sizeof(pcre_uchar);
+re->name_table_offset = sizeof(REAL_PCRE) / sizeof(pcre_uchar);
 re->name_entry_size = cd->name_entry_size;
 re->name_count = cd->names_found;
 re->ref_count = 0;
@@ -8152,7 +8152,11 @@ if (code - codestart > length)
   }
 #endif   /* PCRE_DEBUG */
 
+#ifdef COMPILE_PCRE8
 return (pcre *)re;
+#else
+return (pcre16 *)re;
+#endif
 }
 
 /* End of pcre_compile.c */

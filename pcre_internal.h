@@ -1958,7 +1958,13 @@ fields are present. Currently PCRE always sets the dummy fields to zero.
 NOTE NOTE NOTE
 */
 
-typedef struct real_pcre {
+#ifdef COMPILE_PCRE8
+#define REAL_PCRE real_pcre
+#else
+#define REAL_PCRE real_pcre16
+#endif
+
+typedef struct REAL_PCRE {
   pcre_uint32 magic_number;
   pcre_uint32 size;               /* Total that was malloced */
   pcre_uint32 options;            /* Public options */
@@ -1975,7 +1981,7 @@ typedef struct real_pcre {
 
   const pcre_uint8 *tables;       /* Pointer to tables or NULL for std */
   const pcre_uint8 *nullpad;      /* NULL padding */
-} real_pcre;
+} REAL_PCRE;
 
 /* The format of the block used to store data from pcre_study(). The same
 remark (see NOTE above) about extending this structure applies. */
@@ -2274,8 +2280,8 @@ extern BOOL              PRIV(was_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,
 extern BOOL              PRIV(xclass)(int, const pcre_uchar *, BOOL);
 
 #ifdef SUPPORT_JIT
-extern void              PRIV(jit_compile)(const real_pcre *, PUBL(extra) *);
-extern int               PRIV(jit_exec)(const real_pcre *, void *,
+extern void              PRIV(jit_compile)(const REAL_PCRE *, PUBL(extra) *);
+extern int               PRIV(jit_exec)(const REAL_PCRE *, void *,
                            const pcre_uchar *, int, int, int, int, int *, int);
 extern void              PRIV(jit_free)(void *);
 extern int               PRIV(jit_get_size)(void *);

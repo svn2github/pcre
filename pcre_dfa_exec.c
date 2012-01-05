@@ -2557,7 +2557,11 @@ for (;;)
             cb.version          = 1;   /* Version 1 of the callout block */
             cb.callout_number   = code[LINK_SIZE+2];
             cb.offset_vector    = offsets;
+#ifdef COMPILE_PCRE8
             cb.subject          = (PCRE_SPTR)start_subject;
+#else
+            cb.subject          = (PCRE_SPTR16)start_subject;
+#endif
             cb.subject_length   = (int)(end_subject - start_subject);
             cb.start_match      = (int)(current_subject - start_subject);
             cb.current_position = (int)(ptr - start_subject);
@@ -2896,7 +2900,11 @@ for (;;)
         cb.version          = 1;   /* Version 1 of the callout block */
         cb.callout_number   = code[1];
         cb.offset_vector    = offsets;
+#ifdef COMPILE_PCRE8
         cb.subject          = (PCRE_SPTR)start_subject;
+#else
+        cb.subject          = (PCRE_SPTR16)start_subject;
+#endif
         cb.subject_length   = (int)(end_subject - start_subject);
         cb.start_match      = (int)(current_subject - start_subject);
         cb.current_position = (int)(ptr - start_subject);
@@ -3013,12 +3021,12 @@ pcre_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
   int offsetcount, int *workspace, int wscount)
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre16_dfa_exec(const pcre *argument_re, const pcre16_extra *extra_data,
+pcre16_dfa_exec(const pcre16 *argument_re, const pcre16_extra *extra_data,
   PCRE_SPTR16 subject, int length, int start_offset, int options, int *offsets,
   int offsetcount, int *workspace, int wscount)
 #endif
 {
-real_pcre *re = (real_pcre *)argument_re;
+REAL_PCRE *re = (REAL_PCRE *)argument_re;
 dfa_match_data match_block;
 dfa_match_data *md = &match_block;
 BOOL utf, anchored, startline, firstline;

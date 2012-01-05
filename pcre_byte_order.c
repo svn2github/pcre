@@ -99,11 +99,11 @@ Returns:          0 if the swap is successful, negative on error
 PCRE_EXP_DECL int pcre_pattern_to_host_byte_order(pcre *argument_re,
   pcre_extra *extra_data, const unsigned char *tables)
 #else
-PCRE_EXP_DECL int pcre16_pattern_to_host_byte_order(pcre *argument_re,
+PCRE_EXP_DECL int pcre16_pattern_to_host_byte_order(pcre16 *argument_re,
   pcre16_extra *extra_data, const unsigned char *tables)
 #endif
 {
-real_pcre *re = (real_pcre *)argument_re;
+REAL_PCRE *re = (REAL_PCRE *)argument_re;
 pcre_study_data *study;
 #ifndef COMPILE_PCRE8
 pcre_uchar *ptr;
