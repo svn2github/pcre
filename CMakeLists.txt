@@ -51,6 +51,7 @@
 # 2011-10-04 Sheri added scripts to provide needed variables and to execute
 #            RunTest.bat in Win32 (for effortless testing with "make test")
 # 2011-10-04 Sheri Increased minimum required cmake version
+# 2012-01-06 PH removed pcre_info.c and added pcre_string_utils.c
 
 PROJECT(PCRE C CXX)
 
@@ -342,12 +343,12 @@ SET(PCRE_SOURCES
   pcre_fullinfo.c
   pcre_get.c
   pcre_globals.c
-  pcre_info.c
   pcre_jit_compile.c
-  pcre_newline.c
   pcre_maketables.c
+  pcre_newline.c
   pcre_ord2utf8.c
   pcre_refcount.c
+  pcre_string_utils.c 
   pcre_study.c
   pcre_tables.c
   pcre_ucd.c
