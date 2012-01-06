@@ -57,7 +57,7 @@ strings to host byte order. */
 
 /* This function takes an UTF-16 string and converts
 it to host byte order. The length can be explicitly set,
-or autmatically detected for zero terminated strings.
+or automatically detected for zero terminated strings.
 BOMs can be kept or discarded during the conversion.
 Conversion can be done in place (output == input).
 
@@ -65,7 +65,7 @@ Arguments:
   output     the output buffer, its size must be greater
              or equal than the input string
   input      any UTF-16 string
-  length     the number of characters in the input string
+  length     the number of 16-bit units in the input string
              can be less than zero for zero terminated strings
   host_byte_order
              A non-zero value means the input is in host byte
@@ -77,7 +77,7 @@ Arguments:
   keep_boms  for a non-zero value, the BOM (0xfeff) characters
              are copied as well
 
-Returns:     the number of characters placed into the output buffer,
+Returns:     the number of 16-bit units placed into the output buffer,
              including the zero-terminator
 */
 
