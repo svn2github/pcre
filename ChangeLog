@@ -7,8 +7,8 @@ Version 8.30
 1.  Renamed "isnumber" as "is_a_number" because in some Mac environments this
     name is defined in ctype.h.
 
-2.  Fixed a bug in the code for calculating the fixed length of lookbehind
-    assertions.
+2.  Fixed a bug in fixed-length calculation for lookbehinds that would show up
+    only in quite long subpatterns.
 
 3.  Removed the function pcre_info(), which has been obsolete and deprecated
     since it was replaced by pcre_fullinfo() in February 2000.

@@ -58,7 +58,7 @@ pcretest commands.
 End
 
 echo "Making pcre.txt"
-for file in pcre pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
+for file in pcre pcre16 pcrebuild pcrematching pcreapi pcrecallout pcrecompat \
             pcrepattern pcresyntax pcreunicode pcrejit pcrepartial \
             pcreprecompile pcreperform pcreposix pcrecpp pcresample \
             pcrelimits pcrestack ; do

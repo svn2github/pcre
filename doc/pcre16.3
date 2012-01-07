@@ -1,11 +1,13 @@
 .TH PCRE 3
 .SH NAME
 PCRE - Perl-compatible regular expressions
+.sp
+.B #include <pcre.h>
+.
+.
 .SH "PCRE 16-BIT API BASIC FUNCTIONS"
 .rs
 .sp
-.B #include <pcre16.h>
-.PP
 .SM
 .B pcre16 *pcre16_compile(PCRE_SPTR16 \fIpattern\fP, int \fIoptions\fP,
 .ti +5n
@@ -32,18 +34,6 @@ PCRE - Perl-compatible regular expressions
 .B "PCRE_SPTR16 \fIsubject\fP," int \fIlength\fP, int \fIstartoffset\fP,
 .ti +5n
 .B int \fIoptions\fP, int *\fIovector\fP, int \fIovecsize\fP);
-.
-.
-.SH "PCRE 16-BIT API AUXILIARY FUNCTIONS"
-.rs
-.sp
-.B pcre16_jit_stack *pcre16_jit_stack_alloc(int \fIstartsize\fP, int \fImaxsize\fP);
-.PP
-.B void pcre16_jit_stack_free(pcre16_jit_stack *\fIstack\fP);
-.PP
-.B void pcre16_assign_jit_stack(pcre16_extra *\fIextra\fP,
-.ti +5n
-.B pcre16_jit_callback \fIcallback\fP, void *\fIdata\fP);
 .PP
 .B int pcre16_dfa_exec(const pcre16 *\fIcode\fP, "const pcre16_extra *\fIextra\fP,"
 .ti +5n
@@ -52,7 +42,11 @@ PCRE - Perl-compatible regular expressions
 .B int \fIoptions\fP, int *\fIovector\fP, int \fIovecsize\fP,
 .ti +5n
 .B int *\fIworkspace\fP, int \fIwscount\fP);
-.PP
+.
+.
+.SH "PCRE 16-BIT API STRING EXTRACTION FUNCTIONS"
+.rs
+.sp
 .B int pcre16_copy_named_substring(const pcre16 *\fIcode\fP,
 .ti +5n
 .B PCRE_SPTR16 \fIsubject\fP, int *\fIovector\fP,
@@ -96,6 +90,18 @@ PCRE - Perl-compatible regular expressions
 .B void pcre16_free_substring(PCRE_SPTR16 \fIstringptr\fP);
 .PP
 .B void pcre16_free_substring_list(PCRE_SPTR16 *\fIstringptr\fP);
+.
+.
+.SH "PCRE 16-BIT API AUXILIARY FUNCTIONS"
+.rs
+.sp
+.B pcre16_jit_stack *pcre16_jit_stack_alloc(int \fIstartsize\fP, int \fImaxsize\fP);
+.PP
+.B void pcre16_jit_stack_free(pcre16_jit_stack *\fIstack\fP);
+.PP
+.B void pcre16_assign_jit_stack(pcre16_extra *\fIextra\fP,
+.ti +5n
+.B pcre16_jit_callback \fIcallback\fP, void *\fIdata\fP);
 .PP
 .B const unsigned char *pcre16_maketables(void);
 .PP
@@ -108,6 +114,10 @@ PCRE - Perl-compatible regular expressions
 .B int pcre16_config(int \fIwhat\fP, void *\fIwhere\fP);
 .PP
 .B const char *pcre16_version(void);
+.PP
+.B int pcre16_pattern_to_host_byte_order(pcre16 *\fIcode\fP,
+.ti +5n
+.B pcre16_extra *\fIextra\fP, const unsigned char *\fItables\fP);
 .
 .
 .SH "PCRE 16-BIT API INDIRECTED FUNCTIONS"
@@ -209,8 +219,9 @@ that converts a UTF-16 character string to host byte order if necessary. The
 other 16-bit functions expect the strings they are passed to be in host byte 
 order. 
 .P
-The \fIlength\fP argument specifies the number of 16-bit data units in the
-input string; a negative value specifies a zero-terminated string.
+The \fIlength\fP argument of \fBpcre16_utf16_to_host_byte_order()\fP specifies
+the number of 16-bit data units in the input string; a negative value specifies
+a zero-terminated string.
 .P
 If \fIbyte_order\fP is NULL, it is assumed that the string starts off in host 
 byte order. This may be changed by byte-order marks (BOMs) anywhere in the
@@ -359,6 +370,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 January 2012
+Last updated: 07 January 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
