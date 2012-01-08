@@ -219,9 +219,13 @@ that converts a UTF-16 character string to host byte order if necessary. The
 other 16-bit functions expect the strings they are passed to be in host byte 
 order. 
 .P
-The \fIlength\fP argument of \fBpcre16_utf16_to_host_byte_order()\fP specifies
-the number of 16-bit data units in the input string; a negative value specifies
-a zero-terminated string.
+The \fIinput\fP and \fIoutput\fP arguments of
+\fBpcre16_utf16_to_host_byte_order()\fP may point to the same address, that is, 
+conversion in place is supported. The output buffer must be at least as long as 
+the input.
+.P
+The \fIlength\fP argument of specifies the number of 16-bit data units in the
+input string; a negative value specifies a zero-terminated string.
 .P
 If \fIbyte_order\fP is NULL, it is assumed that the string starts off in host 
 byte order. This may be changed by byte-order marks (BOMs) anywhere in the
@@ -230,9 +234,9 @@ string (commonly as the first character).
 If \fIbyte_order\fP is not NULL, a non-zero value of the integer to which it 
 points means that the input starts off in host byte order, otherwise the 
 opposite order is assumed. Again, BOMs in the string can change this. The final 
-byte order is passed back at the end of processing.
+byte order is passed back at the end of processing. 
 .P
-If \fIkeep_boms\fP is non zero, byte-order mark characters (0xfeff) are copied 
+If \fIkeep_boms\fP is not zero, byte-order mark characters (0xfeff) are copied 
 into the output string. Otherwise they are discarded.
 .P
 The result of the function is the number of 16-bit units placed into the output
@@ -370,6 +374,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 January 2012
+Last updated: 08 January 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

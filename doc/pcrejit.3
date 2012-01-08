@@ -7,15 +7,25 @@ PCRE - Perl-compatible regular expressions
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
 match is performed. Therefore, it is of most benefit when the same pattern is
-going to be matched many times. This does not necessarily mean many calls of
-\fPpcre_exec()\fP; if the pattern is not anchored, matching attempts may take
-place many times at various positions in the subject, even for a single call to
-\fBpcre_exec()\fP. If the subject string is very long, it may still pay to use
-JIT for one-off matches.
+going to be matched many times. This does not necessarily mean many calls of a
+matching function; if the pattern is not anchored, matching attempts may take
+place many times at various positions in the subject, even for a single call.
+Therefore, if the subject string is very long, it may still pay to use JIT for
+one-off matches.
 .P
-JIT support applies only to the traditional matching function,
-\fBpcre_exec()\fP. It does not apply when \fBpcre_dfa_exec()\fP is being used.
-The code for this support was written by Zoltan Herczeg.
+JIT support applies only to the traditional Perl-compatible matching function.
+It does not apply when the DFA matching function is being used. The code for
+this support was written by Zoltan Herczeg.
+.
+.
+.SH "8-BIT and 16-BIT SUPPORT"
+.rs
+.sp
+JIT support is available for both the 8-bit and 16-bit PCRE libraries. To keep 
+this documentation simple, only the 8-bit interface is described in what 
+follows. If you are using the 16-bit library, substitute the 16-bit functions 
+and 16-bit structures (for example, \fIpcre16_jit_stack\fP instead of 
+\fIpcre_jit_stack\fP).
 .
 .
 .SH "AVAILABILITY OF JIT SUPPORT"
@@ -357,6 +367,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 November 2011
-Copyright (c) 1997-2011 University of Cambridge.
+Last updated: 08 January 2012
+Copyright (c) 1997-2012 University of Cambridge.
 .fi
