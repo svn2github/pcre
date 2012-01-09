@@ -53,11 +53,11 @@ PCRE - Perl-compatible regular expressions
 .ti +5n
 .B int \fIstringcount\fP, PCRE_SPTR16 \fIstringname\fP,
 .ti +5n
-.B PCRE_SCHAR16 *\fIbuffer\fP, int \fIbuffersize\fP);
+.B PCRE_UCHAR16 *\fIbuffer\fP, int \fIbuffersize\fP);
 .PP
 .B int pcre16_copy_substring(PCRE_SPTR16 \fIsubject\fP, int *\fIovector\fP,
 .ti +5n
-.B int \fIstringcount\fP, int \fIstringnumber\fP, PCRE_SCHAR16 *\fIbuffer\fP,
+.B int \fIstringcount\fP, int \fIstringnumber\fP, PCRE_UCHAR16 *\fIbuffer\fP,
 .ti +5n
 .B int \fIbuffersize\fP);
 .PP
@@ -75,7 +75,7 @@ PCRE - Perl-compatible regular expressions
 .PP
 .B int pcre16_get_stringtable_entries(const pcre16 *\fIcode\fP,
 .ti +5n
-.B PCRE_SPTR16 \fIname\fP, PCRE_SCHAR16 **\fIfirst\fP, PCRE_SCHAR16 **\fIlast\fP);
+.B PCRE_SPTR16 \fIname\fP, PCRE_UCHAR16 **\fIfirst\fP, PCRE_UCHAR16 **\fIlast\fP);
 .PP
 .B int pcre16_get_substring(PCRE_SPTR16 \fIsubject\fP, int *\fIovector\fP,
 .ti +5n
@@ -137,7 +137,7 @@ PCRE - Perl-compatible regular expressions
 .SH "PCRE 16-BIT API 16-BIT-ONLY FUNCTION"
 .rs
 .sp
-.B int pcre16_utf16_to_host_byte_order(PCRE_SCHAR16 *\fIoutput\fP,
+.B int pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *\fIoutput\fP,
 .ti +5n
 .B PCRE_SPTR16 \fIinput\fP, int \fIlength\fP, int *\fIbyte_order\fP, 
 .ti +5n
@@ -187,10 +187,10 @@ application that uses PCRE.
 .sp
 In the 8-bit library, strings are passed to PCRE library functions as vectors 
 of bytes with the C type "char *". In the 16-bit library, strings are passed as 
-vectors of unsigned 16-bit quantities. The macro PCRE_SCHAR16 specifies an 
-appropriate data type, and PCRE_SPTR16 is defined as "const PCRE_SCHAR16 *". In 
+vectors of unsigned 16-bit quantities. The macro PCRE_UCHAR16 specifies an 
+appropriate data type, and PCRE_SPTR16 is defined as "const PCRE_UCHAR16 *". In 
 very many environments, "short int" is a 16-bit data type. When PCRE is built, 
-it defines PCRE_SCHAR16 as "short int", but checks that it really is a 16-bit 
+it defines PCRE_UCHAR16 as "short int", but checks that it really is a 16-bit 
 data type. If it is not, the build fails with an error message telling the 
 maintainer to modify the definition appropriately.
 .
@@ -224,7 +224,7 @@ The \fIinput\fP and \fIoutput\fP arguments of
 conversion in place is supported. The output buffer must be at least as long as 
 the input.
 .P
-The \fIlength\fP argument of specifies the number of 16-bit data units in the
+The \fIlength\fP argument specifies the number of 16-bit data units in the
 input string; a negative value specifies a zero-terminated string.
 .P
 If \fIbyte_order\fP is NULL, it is assumed that the string starts off in host 
