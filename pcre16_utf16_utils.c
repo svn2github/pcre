@@ -82,7 +82,7 @@ Returns:     the number of 16-bit units placed into the output buffer,
 */
 
 int
-pcre16_utf16_to_host_byte_order(PCRE_SCHAR16 *output, PCRE_SPTR16 input,
+pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *output, PCRE_SPTR16 input,
   int length, int *host_byte_order, int keep_boms)
 {
 #ifdef SUPPORT_UTF

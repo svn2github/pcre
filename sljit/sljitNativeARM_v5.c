@@ -871,12 +871,12 @@ SLJIT_API_FUNC_ATTRIBUTE int sljit_emit_enter(struct sljit_compiler *compiler, i
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_fake_enter(struct sljit_compiler *compiler, int args, int temporaries, int generals, int local_size)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler, int args, int temporaries, int generals, int local_size)
 {
 	int size;
 
 	CHECK_ERROR_VOID();
-	check_sljit_fake_enter(compiler, args, temporaries, generals, local_size);
+	check_sljit_set_context(compiler, args, temporaries, generals, local_size);
 
 	compiler->temporaries = temporaries;
 	compiler->generals = generals;
@@ -993,7 +993,9 @@ static sljit_w data_transfer_insts[16] = {
 	if (compiler->shift_imm != 0x20) { \
 		SLJIT_ASSERT(src1 == TMP_REG1); \
 		SLJIT_ASSERT(!(flags & ARGS_SWAPPED)); \
-		return push_inst(compiler, EMIT_DATA_PROCESS_INS(MOV_DP, flags & SET_FLAGS, dst, SLJIT_UNUSED, (compiler->shift_imm << 7) | (opcode << 5) | reg_map[src2])); \
+		if (compiler->shift_imm != 0) \
+			return push_inst(compiler, EMIT_DATA_PROCESS_INS(MOV_DP, flags & SET_FLAGS, dst, SLJIT_UNUSED, (compiler->shift_imm << 7) | (opcode << 5) | reg_map[src2])); \
+		return push_inst(compiler, EMIT_DATA_PROCESS_INS(MOV_DP, flags & SET_FLAGS, dst, SLJIT_UNUSED, reg_map[src2])); \
 	} \
 	return push_inst(compiler, EMIT_DATA_PROCESS_INS(MOV_DP, flags & SET_FLAGS, dst, SLJIT_UNUSED, (reg_map[(flags & ARGS_SWAPPED) ? src1 : src2] << 8) | (opcode << 5) | 0x10 | ((flags & ARGS_SWAPPED) ? reg_map[src2] : reg_map[src1])));
 

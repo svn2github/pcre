@@ -254,9 +254,9 @@ typedef unsigned char pcre_uchar;
 
 #ifdef COMPILE_PCRE16
 #if USHRT_MAX != 65535
-/* This is a warning message. Change PCRE_SCHAR16 to a 16 bit data type in
+/* This is a warning message. Change PCRE_UCHAR16 to a 16 bit data type in
 pcre.h(.in) and disable (comment out) this message. */
-#error Warning: PCRE_SCHAR16 is not a 16 bit data type.
+#error Warning: PCRE_UCHAR16 is not a 16 bit data type.
 #endif
 
 typedef pcre_uint16 pcre_uchar;

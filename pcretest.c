@@ -307,11 +307,11 @@ argument, the casting might be incorrectly applied. */
 #define PCRE_COPY_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
     namesptr, cbuffer, size) \
   rc = pcre16_copy_named_substring((pcre16 *)re, (PCRE_SPTR16)bptr, offsets, \
-    count, (PCRE_SPTR16)namesptr, (PCRE_SCHAR16 *)cbuffer, size/2)
+    count, (PCRE_SPTR16)namesptr, (PCRE_UCHAR16 *)cbuffer, size/2)
 
 #define PCRE_COPY_SUBSTRING16(rc, bptr, offsets, count, i, cbuffer, size) \
   rc = pcre16_copy_substring((PCRE_SPTR16)bptr, offsets, count, i, \
-    (PCRE_SCHAR16 *)cbuffer, size/2)
+    (PCRE_UCHAR16 *)cbuffer, size/2)
 
 #define PCRE_DFA_EXEC16(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets, workspace, size_workspace) \

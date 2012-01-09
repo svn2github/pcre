@@ -30,6 +30,9 @@ Version 8.30
     command "pattern=`printf 'xxx\r\njkl'`" was run. The pattern is now taken
     from a file.
 
+8.  Ovector size of 2 is also supported by JIT based pcre_exec (the ovector size
+    rounding is not applied in this particular case).
+
 
 Version 8.21 12-Dec-2011
 ------------------------

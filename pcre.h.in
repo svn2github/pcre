@@ -280,15 +280,15 @@ typedef struct real_pcre_jit_stack pcre_jit_stack;
 struct real_pcre16_jit_stack;     /* declaration; the definition is private  */
 typedef struct real_pcre16_jit_stack pcre16_jit_stack;
 
-/* If PCRE is compiled with 16 bit character support, PCRE_SCHAR16 must contain
+/* If PCRE is compiled with 16 bit character support, PCRE_UCHAR16 must contain
 a 16 bit wide signed data type. Otherwise it can be a dummy data type since
 pcre16 functions are not implemented. There is a check for this in pcre_internal.h. */
-#ifndef PCRE_SCHAR16
-#define PCRE_SCHAR16 unsigned short
+#ifndef PCRE_UCHAR16
+#define PCRE_UCHAR16 unsigned short
 #endif
 
 #ifndef PCRE_SPTR16
-#define PCRE_SPTR16 const PCRE_SCHAR16 *
+#define PCRE_SPTR16 const PCRE_UCHAR16 *
 #endif
 
 /* When PCRE is compiled as a C++ library, the subject pointer type can be
@@ -323,7 +323,7 @@ typedef struct pcre16_extra {
   void *callout_data;             /* Data passed back in callouts */
   const unsigned char *tables;    /* Pointer to character tables */
   unsigned long int match_limit_recursion; /* Max recursive calls to match() */
-  PCRE_SCHAR16 **mark;            /* For passing back a mark pointer */
+  PCRE_UCHAR16 **mark;            /* For passing back a mark pointer */
   void *executable_jit;           /* Contains a pointer to a compiled jit code */
 } pcre16_extra;
 
@@ -370,7 +370,7 @@ typedef struct pcre16_callout_block {
   int          pattern_position;  /* Offset to next item in the pattern */
   int          next_item_length;  /* Length of next item in the pattern */
   /* ------------------- Added for Version 2 -------------------------- */
-  const PCRE_SCHAR16 *mark;       /* Pointer to current mark or NULL    */
+  const PCRE_UCHAR16 *mark;       /* Pointer to current mark or NULL    */
   /* ------------------------------------------------------------------ */
 } pcre16_callout_block;
 
@@ -426,11 +426,11 @@ PCRE_EXP_DECL int  pcre16_config(int, void *);
 PCRE_EXP_DECL int  pcre_copy_named_substring(const pcre *, const char *,
                   int *, int, const char *, char *, int);
 PCRE_EXP_DECL int  pcre16_copy_named_substring(const pcre16 *, PCRE_SPTR16,
-                  int *, int, PCRE_SPTR16, PCRE_SCHAR16 *, int);
+                  int *, int, PCRE_SPTR16, PCRE_UCHAR16 *, int);
 PCRE_EXP_DECL int  pcre_copy_substring(const char *, int *, int, int,
                   char *, int);
 PCRE_EXP_DECL int  pcre16_copy_substring(PCRE_SPTR16, int *, int, int,
-                  PCRE_SCHAR16 *, int);
+                  PCRE_UCHAR16 *, int);
 PCRE_EXP_DECL int  pcre_dfa_exec(const pcre *, const pcre_extra *,
                   const char *, int, int, int, int *, int , int *, int);
 PCRE_EXP_DECL int  pcre16_dfa_exec(const pcre16 *, const pcre16_extra *,
@@ -456,7 +456,7 @@ PCRE_EXP_DECL int  pcre16_get_stringnumber(const pcre16 *, PCRE_SPTR16);
 PCRE_EXP_DECL int  pcre_get_stringtable_entries(const pcre *, const char *,
                   char **, char **);
 PCRE_EXP_DECL int  pcre16_get_stringtable_entries(const pcre16 *, PCRE_SPTR16,
-                  PCRE_SCHAR16 **, PCRE_SCHAR16 **);
+                  PCRE_UCHAR16 **, PCRE_UCHAR16 **);
 PCRE_EXP_DECL int  pcre_get_substring(const char *, int *, int, int,
                   const char **);
 PCRE_EXP_DECL int  pcre16_get_substring(PCRE_SPTR16, int *, int, int,
@@ -481,7 +481,7 @@ PCRE_EXP_DECL int  pcre_pattern_to_host_byte_order(pcre *, pcre_extra *,
                   const unsigned char *);
 PCRE_EXP_DECL int  pcre16_pattern_to_host_byte_order(pcre16 *, pcre16_extra *,
                   const unsigned char *);
-PCRE_EXP_DECL int  pcre16_utf16_to_host_byte_order(PCRE_SCHAR16 *,
+PCRE_EXP_DECL int  pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *,
                   PCRE_SPTR16, int, int *, int);
 
 /* JIT compiler related functions. */

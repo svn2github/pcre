@@ -139,7 +139,7 @@ pcre_get_stringtable_entries(const pcre *code, const char *stringname,
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_get_stringtable_entries(const pcre16 *code, PCRE_SPTR16 stringname,
-  PCRE_SCHAR16 **firstptr, PCRE_SCHAR16 **lastptr)
+  PCRE_UCHAR16 **firstptr, PCRE_UCHAR16 **lastptr)
 #endif
 {
 int rc;
@@ -196,8 +196,8 @@ while (top > bot)
     *firstptr = (char *)first;
     *lastptr = (char *)last;
 #else
-    *firstptr = (PCRE_SCHAR16 *)first;
-    *lastptr = (PCRE_SCHAR16 *)last;
+    *firstptr = (PCRE_UCHAR16 *)first;
+    *lastptr = (PCRE_UCHAR16 *)last;
 #endif
     return entrysize;
     }
@@ -247,7 +247,7 @@ entrysize = pcre_get_stringtable_entries(code, stringname,
 if ((re->options & PCRE_DUPNAMES) == 0 && (re->flags & PCRE_JCHANGED) == 0)
   return pcre16_get_stringnumber(code, stringname);
 entrysize = pcre16_get_stringtable_entries(code, stringname,
-  (PCRE_SCHAR16 **)&first, (PCRE_SCHAR16 **)&last);
+  (PCRE_UCHAR16 **)&first, (PCRE_UCHAR16 **)&last);
 #endif
 if (entrysize <= 0) return entrysize;
 for (entry = (pcre_uchar *)first; entry <= (pcre_uchar *)last; entry += entrysize)
@@ -295,7 +295,7 @@ pcre_copy_substring(const char *subject, int *ovector, int stringcount,
 #else
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_copy_substring(PCRE_SPTR16 subject, int *ovector, int stringcount,
-  int stringnumber, PCRE_SCHAR16 *buffer, int size)
+  int stringnumber, PCRE_UCHAR16 *buffer, int size)
 #endif
 {
 int yield;
@@ -348,7 +348,7 @@ pcre_copy_named_substring(const pcre *code, const char *subject,
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_copy_named_substring(const pcre16 *code, PCRE_SPTR16 subject,
   int *ovector, int stringcount, PCRE_SPTR16 stringname,
-  PCRE_SCHAR16 *buffer, int size)
+  PCRE_UCHAR16 *buffer, int size)
 #endif
 {
 int n = get_first_set(code, stringname, ovector);

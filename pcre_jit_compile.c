@@ -6772,7 +6772,8 @@ workspace. We don't need the workspace here. For compatibility, we limit the
 number of captured strings in the same way as pcre_exec(), so that the user
 gets the same result with and without JIT. */
 
-offsetcount = ((offsetcount - (offsetcount % 3)) * 2)/3;
+if (offsetcount != 2)
+  offsetcount = ((offsetcount - (offsetcount % 3)) * 2) / 3;
 maxoffsetcount = (re->top_bracket + 1) * 2;
 if (offsetcount > maxoffsetcount)
   offsetcount = maxoffsetcount;

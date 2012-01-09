@@ -680,7 +680,7 @@ static const unsigned char *tables(int mode)
 	char null_str[1] = { 0 };
 #else
 	pcre16 *regex;
-	PCRE_SCHAR16 null_str[1] = { 0 };
+	PCRE_UCHAR16 null_str[1] = { 0 };
 #endif
 
 	if (mode) {
@@ -771,7 +771,7 @@ static void setstack16(pcre16_extra *extra)
 
 #ifdef SUPPORT_PCRE16
 
-static int convert_utf8_to_utf16(const char *input, PCRE_SCHAR16 *output, int *offsetmap, int max_length)
+static int convert_utf8_to_utf16(const char *input, PCRE_UCHAR16 *output, int *offsetmap, int max_length)
 {
 	unsigned char *iptr = (unsigned char*)input;
 	unsigned short *optr = (unsigned short *)output;
@@ -819,7 +819,7 @@ static int convert_utf8_to_utf16(const char *input, PCRE_SCHAR16 *output, int *o
 	return (int)(optr - (unsigned short *)output);
 }
 
-static int copy_char8_to_char16(const char *input, PCRE_SCHAR16 *output, int max_length)
+static int copy_char8_to_char16(const char *input, PCRE_UCHAR16 *output, int max_length)
 {
 	unsigned char *iptr = (unsigned char*)input;
 	unsigned short *optr = (unsigned short *)output;
@@ -836,7 +836,7 @@ static int copy_char8_to_char16(const char *input, PCRE_SCHAR16 *output, int max
 }
 
 #define REGTEST_MAX_LENGTH 4096
-static PCRE_SCHAR16 regtest_buf[REGTEST_MAX_LENGTH];
+static PCRE_UCHAR16 regtest_buf[REGTEST_MAX_LENGTH];
 static int regtest_offsetmap[REGTEST_MAX_LENGTH];
 
 #endif /* SUPPORT_PCRE16 */
