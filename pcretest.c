@@ -2104,9 +2104,9 @@ printf("This version of pcretest is not linked with readline().\n");
 #endif
 printf("\nOptions:\n");
 #ifdef SUPPORT_PCRE16
-printf("  -16      use 16-bit interface\n");
+printf("  -16      use the 16-bit library\n");
 #endif
-printf("  -b       show compiled code (bytecode)\n");
+printf("  -b       show compiled code\n");
 printf("  -C       show PCRE compile-time options and exit\n");
 printf("  -C arg   show a specific compile-time option\n");
 printf("           and exit with its value. The arg can be:\n");
@@ -3464,7 +3464,12 @@ while (!done)
           least one MacOS environment. */
 
           for (pt++; isxdigit(*pt); pt++)
-            c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10);
+            {
+            if (++i == 9)
+              fprintf(outfile, "** Too many hex digits in \\x{...} item; "
+                               "using only the first eight.\n");  
+            else c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10);
+            } 
           if (*pt == '}')
             {
             p = pt + 1;
