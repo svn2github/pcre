@@ -53,6 +53,7 @@
 # 2011-10-04 Sheri Increased minimum required cmake version
 # 2012-01-06 PH removed pcre_info.c and added pcre_string_utils.c
 # 2012-01-10 Zoltan Herczeg added libpcre16 support
+# 2012-01-13 Stephen Kelly added out of source build support
 
 PROJECT(PCRE C CXX)
 
@@ -359,7 +360,7 @@ SET(PCRE_HEADERS ${PROJECT_BINARY_DIR}/pcre.h)
 
 IF(PCRE_BUILD_PCRE8)
 SET(PCRE_SOURCES
-  ${PROJECT_BINARY_DIR}/pcre_byte_order.c
+  pcre_byte_order.c
   pcre_chartables.c
   pcre_compile.c
   pcre_config.c
@@ -390,7 +391,6 @@ ENDIF(PCRE_BUILD_PCRE8)
 
 IF(PCRE_BUILD_PCRE16)
 SET(PCRE16_SOURCES
-  ${PROJECT_BINARY_DIR}/pcre16_byte_order.c
   pcre16_byte_order.c
   pcre16_chartables.c
   pcre16_compile.c
