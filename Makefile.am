@@ -39,8 +39,10 @@ dist_html_DATA = \
   doc/html/pcre_jit_stack_alloc.html \
   doc/html/pcre_jit_stack_free.html \
   doc/html/pcre_maketables.html \
+  doc/html/pcre_pattern_to_host_byte_order.html \
   doc/html/pcre_refcount.html \
   doc/html/pcre_study.html \
+  doc/html/pcre_utf16_to_host_byte_order.html \
   doc/html/pcre_version.html \
   doc/html/pcreapi.html \
   doc/html/pcrebuild.html \
@@ -489,8 +491,10 @@ dist_man_MANS = \
   doc/pcre_jit_stack_alloc.3 \
   doc/pcre_jit_stack_free.3 \
   doc/pcre_maketables.3 \
+  doc/pcre_pattern_to_host_byte_order.3 \
   doc/pcre_refcount.3 \
   doc/pcre_study.3 \
+  doc/pcre_utf16_to_host_byte_order.3 \
   doc/pcre_version.3 \
   doc/pcreapi.3 \
   doc/pcrebuild.3 \

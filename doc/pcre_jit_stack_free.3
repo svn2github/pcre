@@ -8,13 +8,15 @@ PCRE - Perl-compatible regular expressions
 .PP
 .SM
 .B void pcre_jit_stack_free(pcre_jit_stack *\fIstack\fP);
+.PP
+.B void pcre16_jit_stack_free(pcre16_jit_stack *\fIstack\fP);
 .
 .SH DESCRIPTION
 .rs
 .sp
 This function is used to free a JIT stack that was created by
-\fBpcre_jit_stack_alloc()\fP when it is no longer needed. For more details, see
-the
+\fBpcre[16]_jit_stack_alloc()\fP when it is no longer needed. For more details,
+see the
 .\" HREF
 \fBpcrejit\fP
 .\"
