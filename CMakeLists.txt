@@ -141,13 +141,10 @@ SET(PCRE_SUPPORT_PCREGREP_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcregrep.")
 
 SET(PCRE_SUPPORT_UTF OFF CACHE BOOL
-    "Enable support for the Unicode Transformation Format (UTF) encoding.")
+    "Enable support for Unicode Transformation Format (UTF-8 and/or UTF-16) encoding.")
 
 SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
-    "Enable support for Unicode properties. (If set, UTF-8 support will be enabled as well)")
-
-SET(PCRE_SUPPORT_UTF8 OFF CACHE BOOL
-    "Enable support for the Unicode UTF-8 encoding.")
+    "Enable support for Unicode properties (if set, UTF support will be enabled as well).")
 
 SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
@@ -244,10 +241,10 @@ IF(PCRE_SUPPORT_BSR_ANYCRLF)
         SET(BSR_ANYCRLF 1)
 ENDIF(PCRE_SUPPORT_BSR_ANYCRLF)
 
-IF(PCRE_SUPPORT_UTF OR PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
+IF(PCRE_SUPPORT_UTF OR PCRE_SUPPORT_UNICODE_PROPERTIES)
         SET(SUPPORT_UTF 1)
         SET(PCRE_SUPPORT_UTF ON)
-ENDIF(PCRE_SUPPORT_UTF OR PCRE_SUPPORT_UTF8 OR PCRE_SUPPORT_UNICODE_PROPERTIES)
+ENDIF(PCRE_SUPPORT_UTF OR PCRE_SUPPORT_UNICODE_PROPERTIES)
 
 IF(PCRE_SUPPORT_UNICODE_PROPERTIES)
         SET(SUPPORT_UCP 1)
