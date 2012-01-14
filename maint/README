@@ -115,7 +115,7 @@ distribution for a new release.
   different configurations, and it also runs some of them with valgrind, all of
   which can take quite some time.
 
-. Run perltest.pl on the test data for tests 1, 4, 6, 11, and 12. The output 
+. Run perltest.pl on the test data for tests 1, 4, and 6. The output 
   should match the PCRE test output, apart from the version identification at
   the start of each test. The other tests are not Perl-compatible (they use
   various PCRE-specific features or options).
@@ -180,13 +180,13 @@ others are relatively new.
 
   * "Ends with literal string" - note that a single character doesn't gain much
     over the existing "required byte" (reqbyte) feature that just remembers one
-    byte.
+    data unit.
 
   * These probably need to go in pcre_study():
 
     o Remember an initial string rather than just 1 char?
 
-    o A required byte from alternatives - not just the last char, but an
+    o A required data unit from alternatives - not just the last unit, but an
       earlier one if common to all alternatives.
 
     o Friedl contains other ideas.
@@ -205,25 +205,6 @@ others are relatively new.
   because I think it needs much more state to be remembered.
 
 . Perl 6 will be a revolution. Is it a revolution too far for PCRE?
-
-. Unicode
-
-  * There has been a request for direct support of 16-bit characters and
-    UTF-16 (Bugzilla #1049). However, since Unicode is moving beyond purely
-    16-bit characters, is this worth it at all? One possible way of handling
-    16-bit characters would be to "load" them in the same way that UTF-8
-    characters are loaded. Another possibility is to provide a set of
-    translation functions, and build an index during translation so that the
-    returned offsets can automatically be translated (using the index) after a
-    match.
-
-  * A different approach to Unicode might be to use a typedef to do everything
-    in unsigned shorts instead of unsigned chars. Actually, we'd have to have a
-    new typedef to distinguish data from bits of compiled pattern that are in
-    bytes, I think. There would need to be conversion functions in and out. I
-    don't think this is particularly trivial - and anyway, Unicode now has
-    characters that need more than 16 bits, so is this at all sensible? I
-    suspect not.
 
 . Allow errorptr and erroroffset to be NULL. I don't like this idea.
 
@@ -250,6 +231,7 @@ others are relatively new.
   support --outputfile=name.
 
 . Consider making UTF-8 and UCP the default for PCRE n.0 for some n > 8.
+  (And now presumably UTF-16 and UCP for the 16-bit library.)
 
 . Add a user pointer to pcre_malloc/free functions -- some option would be
   needed to retain backward compatibility.
@@ -264,6 +246,7 @@ others are relatively new.
 . Wild thought: the ability to compile from PCRE's internal byte code to a real
   FSM and a very fast (third) matcher to process the result. There would be
   even more restrictions than for pcre_dfa_exec(), however. This is not easy.
+  This is probably obsolete now that we have the JIT support.
 
 . Should pcretest have some private locale data, to avoid relying on the
   available locales for the test data, since different OS have different ideas?
@@ -287,13 +270,16 @@ others are relatively new.
 
 . A user is going to supply a patch to generalize the API for user-specific
   memory allocation so that it is more flexible in threaded environments. This
-  was promised a long time ago, and never appeared...
-
-. Write a function that generates random matching strings for a compiled regex.
+  was promised a long time ago, and never appeared. However, this is a live 
+  issue not only for threaded environments, but for libraries that use PCRE and 
+  want not to be beholden to their caller's memory allocation. 
 
 . Write a wrapper to maintain a structure with specified runtime parameters,
   such as recurse limit, and pass these to PCRE each time it is called. Also
-  maybe malloc and free. A user sent a prototype.
+  maybe malloc and free. A user sent a prototype. This relates the the previous 
+  item. 
+
+. Write a function that generates random matching strings for a compiled regex.
 
 . Pcregrep: an option to specify the output line separator, either as a string
   or select from a fixed list. This is not dead easy, because at the moment it
@@ -324,4 +310,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 11 October 2011
+Last updated: 14 January 2012
