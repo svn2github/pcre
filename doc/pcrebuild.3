@@ -85,11 +85,14 @@ To build PCRE with support for UTF Unicode character strings, add
 .sp
   --enable-utf
 .sp
-to the \fBconfigure\fP command. This setting applies to both libraries, adding 
+to the \fBconfigure\fP command. This setting applies to both libraries, adding
 support for UTF-8 to the 8-bit library and support for UTF-16 to the 16-bit
-library. It is not possible to build one library with UTF support and the other 
-without in the same configuration. (For backwards compatibility, --enable-utf8 
-is a synonym of --enable-utf.)
+library. There are no separate options for enabling UTF-8 and UTF-16
+independently because that would allow ridiculous settings such as requesting
+UTF-16 support while building only the 8-bit library. It is not possible to
+build one library with UTF support and the other without in the same
+configuration. (For backwards compatibility, --enable-utf8 is a synonym of
+--enable-utf.)
 .P
 Of itself, this setting does not make PCRE treat strings as UTF-8 or UTF-16. As
 well as compiling PCRE with this option, you also have have to set the

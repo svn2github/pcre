@@ -549,12 +549,12 @@ The use of \ex{hh...} is not dependent on the use of the \fB/8\fP modifier on
 the pattern. It is recognized always. There may be any number of hexadecimal
 digits inside the braces; invalid values provoke error messages.
 .P
-Note that \exhh specifies one byte in UTF-8 mode; this makes it possible to
-construct invalid UTF-8 sequences for testing purposes. On the other hand,
-\ex{hh} is interpreted as a UTF-8 character in UTF-8 mode, generating more than
-one byte if the value is greater than 127. When testing the 8-bit library not
-in UTF-8 mode, \ex{hh} generates one byte for values less than 256, and causes
-an error for greater values.
+Note that \exhh specifies one byte rather than one character in UTF-8 mode;
+this makes it possible to construct invalid UTF-8 sequences for testing
+purposes. On the other hand, \ex{hh} is interpreted as a UTF-8 character in
+UTF-8 mode, generating more than one byte if the value is greater than 127.
+When testing the 8-bit library not in UTF-8 mode, \ex{hh} generates one byte
+for values less than 256, and causes an error for greater values.
 .P
 In UTF-16 mode, all 4-digit \ex{hhhh} values are accepted. This makes it
 possible to construct invalid UTF-16 sequences for testing purposes.
@@ -936,6 +936,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 January 2012
+Last updated: 14 January 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

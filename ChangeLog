@@ -32,6 +32,9 @@ Version 8.30
 
 8.  Ovector size of 2 is also supported by JIT based pcre_exec (the ovector size
     rounding is not applied in this particular case).
+  
+9.  The invalid Unicode surrogate codepoints U+D800 to U+DFFF are now rejected
+    if they appear, or are escaped, in patterns.
 
 
 Version 8.21 12-Dec-2011

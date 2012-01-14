@@ -195,14 +195,17 @@ library. They are also documented in the pcrebuild man page.
   the 8-bit library, or UTF-16 Unicode character strings in the 16-bit library,
   you must add --enable-utf to the "configure" command. Without it, the code
   for handling UTF-8 and UTF-16 is not included in the relevant library. Even
-  when --enable-utf included, the use of UTF encoding still has to be enabled
-  by an option at run time. When PCRE is compiled with this option, its input
-  can only either be ASCII or UTF-8/16, even when running on EBCDIC platforms.
-  It is not possible to use both --enable-utf and --enable-ebcdic at the same
-  time.
+  when --enable-utf is included, the use of a UTF encoding still has to be
+  enabled by an option at run time. When PCRE is compiled with this option, its
+  input can only either be ASCII or UTF-8/16, even when running on EBCDIC
+  platforms. It is not possible to use both --enable-utf and --enable-ebcdic at
+  the same time.
 
-. The option --enable-utf8 is retained for backwards compatibility with earlier
-  releases that did not support 16-bit character strings. It is synonymous with
+. There are no separate options for enabling UTF-8 and UTF-16 independently 
+  because that would allow ridiculous settings such as requesting UTF-16
+  support while building only the 8-bit library. However, the option
+  --enable-utf8 is retained for backwards compatibility with earlier releases
+  that did not support 16-bit character strings. It is synonymous with
   --enable-utf. It is not possible to configure one library with UTF support
   and the other without in the same configuration.
 
