@@ -6532,7 +6532,7 @@ if (common->accept != NULL)
 /* This means we have a match. Update the ovector. */
 copy_ovector(common, re->top_bracket + 1);
 leave = LABEL();
-sljit_emit_return(compiler, SLJIT_UNUSED, 0);
+sljit_emit_return(compiler, SLJIT_MOV, SLJIT_RETURN_REG, 0);
 
 empty_match_fallback = LABEL();
 compile_fallbackpath(common, rootfallback.top);
