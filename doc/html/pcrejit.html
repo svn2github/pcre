@@ -14,35 +14,44 @@ man page, in case the conversion went wrong.
 <br>
 <ul>
 <li><a name="TOC1" href="#SEC1">PCRE JUST-IN-TIME COMPILER SUPPORT</a>
-<li><a name="TOC2" href="#SEC2">AVAILABILITY OF JIT SUPPORT</a>
-<li><a name="TOC3" href="#SEC3">SIMPLE USE OF JIT</a>
-<li><a name="TOC4" href="#SEC4">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a>
-<li><a name="TOC5" href="#SEC5">RETURN VALUES FROM JIT EXECUTION</a>
-<li><a name="TOC6" href="#SEC6">SAVING AND RESTORING COMPILED PATTERNS</a>
-<li><a name="TOC7" href="#SEC7">CONTROLLING THE JIT STACK</a>
-<li><a name="TOC8" href="#SEC8">JIT STACK FAQ</a>
-<li><a name="TOC9" href="#SEC9">EXAMPLE CODE</a>
-<li><a name="TOC10" href="#SEC10">SEE ALSO</a>
-<li><a name="TOC11" href="#SEC11">AUTHOR</a>
-<li><a name="TOC12" href="#SEC12">REVISION</a>
+<li><a name="TOC2" href="#SEC2">8-BIT and 16-BIT SUPPORT</a>
+<li><a name="TOC3" href="#SEC3">AVAILABILITY OF JIT SUPPORT</a>
+<li><a name="TOC4" href="#SEC4">SIMPLE USE OF JIT</a>
+<li><a name="TOC5" href="#SEC5">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a>
+<li><a name="TOC6" href="#SEC6">RETURN VALUES FROM JIT EXECUTION</a>
+<li><a name="TOC7" href="#SEC7">SAVING AND RESTORING COMPILED PATTERNS</a>
+<li><a name="TOC8" href="#SEC8">CONTROLLING THE JIT STACK</a>
+<li><a name="TOC9" href="#SEC9">JIT STACK FAQ</a>
+<li><a name="TOC10" href="#SEC10">EXAMPLE CODE</a>
+<li><a name="TOC11" href="#SEC11">SEE ALSO</a>
+<li><a name="TOC12" href="#SEC12">AUTHOR</a>
+<li><a name="TOC13" href="#SEC13">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE JUST-IN-TIME COMPILER SUPPORT</a><br>
 <P>
 Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
 match is performed. Therefore, it is of most benefit when the same pattern is
-going to be matched many times. This does not necessarily mean many calls of
-\fPpcre_exec()\fP; if the pattern is not anchored, matching attempts may take
-place many times at various positions in the subject, even for a single call to
-<b>pcre_exec()</b>. If the subject string is very long, it may still pay to use
-JIT for one-off matches.
+going to be matched many times. This does not necessarily mean many calls of a
+matching function; if the pattern is not anchored, matching attempts may take
+place many times at various positions in the subject, even for a single call.
+Therefore, if the subject string is very long, it may still pay to use JIT for
+one-off matches.
 </P>
 <P>
-JIT support applies only to the traditional matching function,
-<b>pcre_exec()</b>. It does not apply when <b>pcre_dfa_exec()</b> is being used.
-The code for this support was written by Zoltan Herczeg.
+JIT support applies only to the traditional Perl-compatible matching function.
+It does not apply when the DFA matching function is being used. The code for
+this support was written by Zoltan Herczeg.
 </P>
-<br><a name="SEC2" href="#TOC1">AVAILABILITY OF JIT SUPPORT</a><br>
+<br><a name="SEC2" href="#TOC1">8-BIT and 16-BIT SUPPORT</a><br>
+<P>
+JIT support is available for both the 8-bit and 16-bit PCRE libraries. To keep 
+this documentation simple, only the 8-bit interface is described in what 
+follows. If you are using the 16-bit library, substitute the 16-bit functions 
+and 16-bit structures (for example, <i>pcre16_jit_stack</i> instead of 
+<i>pcre_jit_stack</i>).
+</P>
+<br><a name="SEC3" href="#TOC1">AVAILABILITY OF JIT SUPPORT</a><br>
 <P>
 JIT support is an optional feature of PCRE. The "configure" option --enable-jit
 (or equivalent CMake option) must be set when PCRE is built if you want to use
@@ -51,7 +60,7 @@ JIT. The support is limited to the following hardware platforms:
   ARM v5, v7, and Thumb2
   Intel x86 32-bit and 64-bit
   MIPS 32-bit
-  Power PC 32-bit and 64-bit (experimental)
+  Power PC 32-bit and 64-bit
 </pre>
 The Power PC support is designated as experimental because it has not been
 fully tested. If --enable-jit is set on an unsupported platform, compilation
@@ -70,7 +79,7 @@ than 8.20, but you want to use JIT when it is available, you can test
 the values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT macro such
 as PCRE_CONFIG_JIT, for compile-time control of your code.
 </P>
-<br><a name="SEC3" href="#TOC1">SIMPLE USE OF JIT</a><br>
+<br><a name="SEC4" href="#TOC1">SIMPLE USE OF JIT</a><br>
 <P>
 You have to do two things to make use of the JIT support in the simplest way:
 <pre>
@@ -128,7 +137,7 @@ JIT compiler was not able to handle the pattern.
 Once a pattern has been studied, with or without JIT, it can be used as many
 times as you like for matching different subject strings.
 </P>
-<br><a name="SEC4" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
+<br><a name="SEC5" href="#TOC1">UNSUPPORTED OPTIONS AND PATTERN ITEMS</a><br>
 <P>
 The only <b>pcre_exec()</b> options that are supported for JIT execution are
 PCRE_NO_UTF8_CHECK, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and
@@ -148,7 +157,7 @@ The unsupported pattern items are:
 </pre>
 Support for some of these may be added in future.
 </P>
-<br><a name="SEC5" href="#TOC1">RETURN VALUES FROM JIT EXECUTION</a><br>
+<br><a name="SEC6" href="#TOC1">RETURN VALUES FROM JIT EXECUTION</a><br>
 <P>
 When a pattern is matched using JIT execution, the return values are the same
 as those given by the interpretive <b>pcre_exec()</b> code, with the addition of
@@ -166,7 +175,7 @@ when JIT is not used, but the details of exactly what is counted are not the
 same. The PCRE_ERROR_RECURSIONLIMIT error code is never returned by JIT
 execution.
 </P>
-<br><a name="SEC6" href="#TOC1">SAVING AND RESTORING COMPILED PATTERNS</a><br>
+<br><a name="SEC7" href="#TOC1">SAVING AND RESTORING COMPILED PATTERNS</a><br>
 <P>
 The code that is generated by the JIT compiler is architecture-specific, and is
 also position dependent. For those reasons it cannot be saved (in a file or
@@ -179,7 +188,7 @@ restored pattern, and thereby recreate the JIT data, but because JIT
 compilation uses significant resources, it is probably not worth doing this;
 you might as well recompile the original pattern.
 <a name="stackcontrol"></a></P>
-<br><a name="SEC7" href="#TOC1">CONTROLLING THE JIT STACK</a><br>
+<br><a name="SEC8" href="#TOC1">CONTROLLING THE JIT STACK</a><br>
 <P>
 When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32K on the machine stack. However, some large or
@@ -256,7 +265,7 @@ and <b>pcre_assign_jit_stack()</b> does nothing unless the <b>extra</b> argument
 is non-NULL and points to a <b>pcre_extra</b> block that is the result of a
 successful study with PCRE_STUDY_JIT_COMPILE.
 <a name="stackfaq"></a></P>
-<br><a name="SEC8" href="#TOC1">JIT STACK FAQ</a><br>
+<br><a name="SEC9" href="#TOC1">JIT STACK FAQ</a><br>
 <P>
 (1) Why do we need JIT stacks?
 <br>
@@ -334,7 +343,7 @@ stack handling?
 No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.
 </P>
-<br><a name="SEC9" href="#TOC1">EXAMPLE CODE</a><br>
+<br><a name="SEC10" href="#TOC1">EXAMPLE CODE</a><br>
 <P>
 This is a single-threaded example that specifies a JIT stack without using a
 callback.
@@ -359,11 +368,11 @@ callback.
 
 </PRE>
 </P>
-<br><a name="SEC10" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC11" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3)
 </P>
-<br><a name="SEC11" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC12" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel (FAQ by Zoltan Herczeg)
 <br>
@@ -372,11 +381,11 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC12" href="#TOC1">REVISION</a><br>
+<br><a name="SEC13" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 November 2011
+Last updated: 08 January 2012
 <br>
-Copyright &copy; 1997-2011 University of Cambridge.
+Copyright &copy; 1997-2012 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

@@ -21,8 +21,8 @@ regular expressions. The differences described here are with respect to Perl
 versions 5.10 and above.
 </P>
 <P>
-1. PCRE has only a subset of Perl's UTF-8 and Unicode support. Details of what
-it does have are given in the
+1. PCRE has only a subset of Perl's Unicode support. Details of what it does
+have are given in the
 <a href="pcreunicode.html"><b>pcreunicode</b></a>
 page.
 </P>
@@ -181,8 +181,8 @@ different hosts that have the other endianness. However, this does not apply to
 optimized data created by the just-in-time compiler.
 <br>
 <br>
-(k) The alternative matching function (<b>pcre_dfa_exec()</b>) matches in a
-different way and is not Perl-compatible.
+(k) The alternative matching functions (<b>pcre_dfa_exec()</b> and
+<b>pcre16_dfa_exec()</b>) match in a different way and are not Perl-compatible.
 <br>
 <br>
 (l) PCRE recognizes some special sequences such as (*CR) at the start of
@@ -203,9 +203,9 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 14 November 2011
+Last updated: 08 Januray 2012
 <br>
-Copyright &copy; 1997-2011 University of Cambridge.
+Copyright &copy; 1997-2012 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
