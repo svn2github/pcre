@@ -77,6 +77,7 @@ switch (what)
   {
   case PCRE_CONFIG_UTF8:
 #if defined COMPILE_PCRE16
+  *((int *)where) = 0;
   return PCRE_ERROR_BADOPTION;
 #else
 #if defined SUPPORT_UTF
@@ -89,6 +90,7 @@ switch (what)
 
   case PCRE_CONFIG_UTF16:
 #if defined COMPILE_PCRE8
+  *((int *)where) = 0;
   return PCRE_ERROR_BADOPTION;
 #else
 #if defined SUPPORT_UTF
