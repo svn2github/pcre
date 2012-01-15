@@ -2182,20 +2182,22 @@ pcre_jit_stack *jit_stack = NULL;
 substring names, each list itself being terminated by an empty name. Assume
 that 1024 is plenty long enough for the few names we'll be testing. It is
 easiest to keep separate 8-bit and 16-bit versions, using the 16-bit version
-for the actual memory, to ensure alignment. By defining these variables always
-(whether or not 8-bit or 16-bit is supported), we avoid too much mess with
-#ifdefs in the code. */
+for the actual memory, to ensure alignment. */
 
 pcre_uint16 copynames[1024];
 pcre_uint16 getnames[1024];
 
+#ifdef SUPPORT_PCRE16
 pcre_uint16 *cn16ptr;
 pcre_uint16 *gn16ptr;
+#endif
 
+#ifdef SUPPORT_PCRE8
 pcre_uint8 *copynames8 = (pcre_uint8 *)copynames;
 pcre_uint8 *getnames8 = (pcre_uint8 *)getnames;
 pcre_uint8 *cn8ptr;
 pcre_uint8 *gn8ptr;
+#endif
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-bit
@@ -3369,10 +3371,14 @@ while (!done)
     *copynames = 0;
     *getnames = 0;
 
+#ifdef SUPPORT_PCRE16
     cn16ptr = copynames;
     gn16ptr = getnames;
+#endif
+#ifdef SUPPORT_PCRE8     
     cn8ptr = copynames8;
     gn8ptr = getnames8;
+#endif     
 
     SET_PCRE_CALLOUT(callout);
     first_callout = 1;

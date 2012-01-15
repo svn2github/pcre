@@ -3031,8 +3031,6 @@ dfa_match_data match_block;
 dfa_match_data *md = &match_block;
 BOOL utf, anchored, startline, firstline;
 const pcre_uchar *current_subject, *end_subject;
-const pcre_uint8 *lcc;
-
 const pcre_study_data *study = NULL;
 
 const pcre_uchar *req_char_ptr;
@@ -3194,10 +3192,9 @@ in other programs later. */
 
 if (md->tables == NULL) md->tables = PRIV(default_tables);
 
-/* The lower casing table and the "must be at the start of a line" flag are
-used in a loop when finding where to start. */
+/* The "must be at the start of a line" flags are used in a loop when finding
+where to start. */
 
-lcc = md->tables + lcc_offset;
 startline = (re->flags & PCRE_STARTLINE) != 0;
 firstline = (re->options & PCRE_FIRSTLINE) != 0;
 

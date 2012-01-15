@@ -721,15 +721,19 @@ static const unsigned char *tables(int mode)
 	return tables_copy;
 }
 
+#ifdef SUPPORT_PCRE8
 static pcre_jit_stack* callback8(void *arg)
 {
 	return (pcre_jit_stack *)arg;
 }
+#endif
 
+#ifdef SUPPORT_PCRE16
 static pcre16_jit_stack* callback16(void *arg)
 {
 	return (pcre16_jit_stack *)arg;
 }
+#endif
 
 #ifdef SUPPORT_PCRE8
 static void setstack8(pcre_extra *extra)
