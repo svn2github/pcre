@@ -515,6 +515,36 @@ dist_man_MANS = \
   doc/pcretest.1 \
   doc/pcreunicode.3
 
+# Arrange for the per-function man pages to have 16-bit names as well.
+install-exec-hook:
+	pushd $(DESTDIR)($man3dir)
+	ln -s pcre_assign_jit_stack.3            pcre16_assign_jit_stack.3
+	ln -s pcre_compile.3                     pcre16_compile.3
+	ln -s pcre_compile2.3                    pcre16_compile2.3
+	ln -s pcre_config.3                      pcre16_config.3
+	ln -s pcre_copy_named_substring.3        pcre16_copy_named_substring.3
+	ln -s pcre_copy_substring.3              pcre16_copy_substring.3
+	ln -s pcre_dfa_exec.3                    pcre16_dfa_exec.3
+	ln -s pcre_exec.3                        pcre16_exec.3
+	ln -s pcre_free_study.3                  pcre16_free_study.3
+	ln -s pcre_free_substring.3              pcre16_free_substring.3
+	ln -s pcre_free_substring_list.3         pcre16_free_substring_list.3
+	ln -s pcre_fullinfo.3                    pcre16_fullinfo.3
+	ln -s pcre_get_named_substring.3         pcre16_get_named_substring.3
+	ln -s pcre_get_stringnumber.3            pcre16_get_stringnumber.3
+	ln -s pcre_get_stringtable_entries.3     pcre16_get_stringtable_entries.3
+	ln -s pcre_get_substring.3               pcre16_get_substring.3
+	ln -s pcre_get_substring_list.3          pcre16_get_substring_list.3
+	ln -s pcre_jit_stack_alloc.3             pcre16_jit_stack_alloc.3
+	ln -s pcre_jit_stack_free.3              pcre16_jit_stack_free.3
+	ln -s pcre_maketables.3                  pcre16_maketables.3
+	ln -s pcre_pattern_to_host_byte_order.3  pcre16_pattern_to_host_byte_order.3
+	ln -s pcre_refcount.3                    pcre16_refcount.3
+	ln -s pcre_study.3                       pcre16_study.3
+	ln -s pcre_utf16_to_host_byte_order.3    pcre16_utf16_to_host_byte_order.3
+	ln -s pcre_version.3                     pcre16_version.3
+	popd 
+
 pcrecpp_man = doc/pcrecpp.3
 EXTRA_DIST += $(pcrecpp_man)
 

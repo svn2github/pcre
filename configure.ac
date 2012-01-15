@@ -23,6 +23,7 @@ AC_PREREQ(2.57)
 AC_INIT(PCRE, pcre_major.pcre_minor[]pcre_prerelease, , pcre)
 AC_CONFIG_SRCDIR([pcre.h.in])
 AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
+AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS(config.h)
 
 # This was added at the suggestion of libtoolize (03-Jan-10)
