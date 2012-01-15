@@ -1573,7 +1573,6 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 int rc = 1;
 int sep;
 int frtype;
-int pathlen;
 void *handle;
 FILE *in = NULL;           /* Ensure initialized */
 
@@ -1583,6 +1582,10 @@ gzFile ingz = NULL;
 
 #ifdef SUPPORT_LIBBZ2
 BZFILE *inbz2 = NULL;
+#endif
+
+#if defined SUPPORT_LIBZ || defined SUPPORT_LIBZ2
+int pathlen;
 #endif
 
 /* If the file name is "-" we scan stdin */
@@ -1664,7 +1667,9 @@ skipping was not requested. The scan proceeds. If this is the first and only
 argument at top level, we don't show the file name, unless we are only showing
 the file name, or the filename was forced (-H). */
 
+#if defined SUPPORT_LIBZ || defined SUPPORT_LIBZ2
 pathlen = (int)(strlen(pathname));
+#endif
 
 /* Open using zlib if it is supported and the file name ends with .gz. */
 
