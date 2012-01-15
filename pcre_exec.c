@@ -626,6 +626,7 @@ the alternative names that are used. */
 #define condassert    condition
 #define matched_once  prev_is_word
 #define foc           number
+#define save_mark     data
 
 /* These statements are here to stop the compiler complaining about unitialized
 variables. */
@@ -818,6 +819,7 @@ for (;;)
     case OP_ONCE_NC:
     prev = ecode;
     saved_eptr = eptr;
+    save_mark = md->mark; 
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, eptrb, RM64);
@@ -836,6 +838,7 @@ for (;;)
 
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode,1);
+      md->mark = save_mark; 
       }
     while (*ecode == OP_ALT);
 
@@ -915,6 +918,7 @@ for (;;)
       save_offset2 = md->offset_vector[offset+1];
       save_offset3 = md->offset_vector[md->offset_end - number];
       save_capture_last = md->capture_last;
+      save_mark = md->mark; 
 
       DPRINTF(("saving %d %d %d\n", save_offset1, save_offset2, save_offset3));
       md->offset_vector[md->offset_end - number] =
@@ -951,6 +955,7 @@ for (;;)
         if (rrc != MATCH_NOMATCH) RRETURN(rrc);
         md->capture_last = save_capture_last;
         ecode += GET(ecode, 1);
+        md->mark = save_mark;
         if (*ecode != OP_ALT) break;
         }
 
@@ -1016,9 +1021,10 @@ for (;;)
 
       /* In all other cases, we have to make another call to match(). */
 
+      save_mark = md->mark;
       RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, md, eptrb,
         RM2);
-
+         
       /* See comment in the code for capturing groups above about handling
       THEN. */
 
@@ -1045,6 +1051,7 @@ for (;;)
         RRETURN(rrc);
         }
       ecode += GET(ecode, 1);
+      md->mark = save_mark; 
       if (*ecode != OP_ALT) break;
       }
 

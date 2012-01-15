@@ -11970,5 +11970,33 @@ No match, mark = m
 /^a(*:X)bcde/K
    abc\P
 Partial match, mark=X: abc
+   
+/-- These are here because Perl doesn't return a mark, except for the first --/
+
+/(?=(*:x))(q|)/K+
+    abc
+ 0: 
+ 0+ abc
+ 1: 
+MK: x
+
+/(?=(*:x))((*:y)q|)/K+
+    abc
+ 0: 
+ 0+ abc
+ 1: 
+MK: x
+
+/(?=(*:x))(?:(*:y)q|)/K+
+    abc
+ 0: 
+ 0+ abc
+MK: x
+
+/(?=(*:x))(?>(*:y)q|)/K+
+    abc
+ 0: 
+ 0+ abc
+MK: x
 
 /-- End of testinput2 --/

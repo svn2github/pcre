@@ -3580,5 +3580,19 @@ replaced by single letters. --/
 
 /^a(*:X)bcde/K
    abc\P
+   
+/-- These are here because Perl doesn't return a mark, except for the first --/
+
+/(?=(*:x))(q|)/K+
+    abc
+
+/(?=(*:x))((*:y)q|)/K+
+    abc
+
+/(?=(*:x))(?:(*:y)q|)/K+
+    abc
+
+/(?=(*:x))(?>(*:y)q|)/K+
+    abc
 
 /-- End of testinput2 --/
