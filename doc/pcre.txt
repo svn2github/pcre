@@ -554,37 +554,40 @@ UTF-8 and UTF-16 SUPPORT
 
        to the configure command.  This  setting  applies  to  both  libraries,
        adding support for UTF-8 to the 8-bit library and support for UTF-16 to
-       the 16-bit library. It is not possible to build one  library  with  UTF
-       support and the other without in the same configuration. (For backwards
-       compatibility, --enable-utf8 is a synonym of --enable-utf.)
+       the 16-bit library. There are no separate options  for  enabling  UTF-8
+       and  UTF-16  independently because that would allow ridiculous settings
+       such as  requesting  UTF-16  support  while  building  only  the  8-bit
+       library.  It  is not possible to build one library with UTF support and
+       the other without in the same configuration. (For backwards compatibil-
+       ity, --enable-utf8 is a synonym of --enable-utf.)
 
-       Of itself, this setting does not make PCRE treat strings  as  UTF-8  or
-       UTF-16.  As well as compiling PCRE with this option, you also have have
+       Of  itself,  this  setting does not make PCRE treat strings as UTF-8 or
+       UTF-16. As well as compiling PCRE with this option, you also have  have
        to set the PCRE_UTF8 or PCRE_UTF16 option when you call one of the pat-
        tern compiling functions.
 
-       If  you  set --enable-utf when compiling in an EBCDIC environment, PCRE
+       If you set --enable-utf when compiling in an EBCDIC  environment,  PCRE
        expects its input to be either ASCII or UTF-8 (depending on the runtime
-       option).  It  is not possible to support both EBCDIC and UTF-8 codes in
+       option). It is not possible to support both EBCDIC and UTF-8  codes  in
        the  same  version  of  the  library.  Consequently,  --enable-utf  and
        --enable-ebcdic are mutually exclusive.
 
 
 UNICODE CHARACTER PROPERTY SUPPORT
 
-       UTF  support allows the libraries to process character codepoints up to
-       0x10ffff in the strings that they handle. On its own, however, it  does
+       UTF support allows the libraries to process character codepoints up  to
+       0x10ffff  in the strings that they handle. On its own, however, it does
        not provide any facilities for accessing the properties of such charac-
        ters. If you want to be able to use the pattern escapes \P, \p, and \X,
        which refer to Unicode character properties, you must add
 
          --enable-unicode-properties
 
-       to  the  configure  command. This implies UTF support, even if you have
+       to the configure command. This implies UTF support, even  if  you  have
        not explicitly requested it.
 
-       Including Unicode property support adds around 30K  of  tables  to  the
-       PCRE  library.  Only  the general category properties such as Lu and Nd
+       Including  Unicode  property  support  adds around 30K of tables to the
+       PCRE library. Only the general category properties such as  Lu  and  Nd
        are supported. Details are given in the pcrepattern documentation.
 
 
@@ -594,9 +597,9 @@ JUST-IN-TIME COMPILER SUPPORT
 
          --enable-jit
 
-       This support is available only for certain hardware  architectures.  If
-       this  option  is  set  for  an unsupported architecture, a compile time
-       error occurs.  See the pcrejit documentation for a  discussion  of  JIT
+       This  support  is available only for certain hardware architectures. If
+       this option is set for an  unsupported  architecture,  a  compile  time
+       error  occurs.   See  the pcrejit documentation for a discussion of JIT
        usage. When JIT support is enabled, pcregrep automatically makes use of
        it, unless you add
 
@@ -607,14 +610,14 @@ JUST-IN-TIME COMPILER SUPPORT
 
 CODE VALUE OF NEWLINE
 
-       By default, PCRE interprets the linefeed (LF) character  as  indicating
-       the  end  of  a line. This is the normal newline character on Unix-like
-       systems. You can compile PCRE to use carriage return (CR)  instead,  by
+       By  default,  PCRE interprets the linefeed (LF) character as indicating
+       the end of a line. This is the normal newline  character  on  Unix-like
+       systems.  You  can compile PCRE to use carriage return (CR) instead, by
        adding
 
          --enable-newline-is-cr
 
-       to  the  configure  command.  There  is  also  a --enable-newline-is-lf
+       to the  configure  command.  There  is  also  a  --enable-newline-is-lf
        option, which explicitly specifies linefeed as the newline character.
 
        Alternatively, you can specify that line endings are to be indicated by
@@ -626,40 +629,40 @@ CODE VALUE OF NEWLINE
 
          --enable-newline-is-anycrlf
 
-       which  causes  PCRE  to recognize any of the three sequences CR, LF, or
+       which causes PCRE to recognize any of the three sequences  CR,  LF,  or
        CRLF as indicating a line ending. Finally, a fifth option, specified by
 
          --enable-newline-is-any
 
        causes PCRE to recognize any Unicode newline sequence.
 
-       Whatever line ending convention is selected when PCRE is built  can  be
-       overridden  when  the library functions are called. At build time it is
+       Whatever  line  ending convention is selected when PCRE is built can be
+       overridden when the library functions are called. At build time  it  is
        conventional to use the standard for your operating system.
 
 
 WHAT \R MATCHES
 
-       By default, the sequence \R in a pattern matches  any  Unicode  newline
-       sequence,  whatever  has  been selected as the line ending sequence. If
+       By  default,  the  sequence \R in a pattern matches any Unicode newline
+       sequence, whatever has been selected as the line  ending  sequence.  If
        you specify
 
          --enable-bsr-anycrlf
 
-       the default is changed so that \R matches only CR, LF, or  CRLF.  What-
-       ever  is selected when PCRE is built can be overridden when the library
+       the  default  is changed so that \R matches only CR, LF, or CRLF. What-
+       ever is selected when PCRE is built can be overridden when the  library
        functions are called.
 
 
 POSIX MALLOC USAGE
 
-       When the 8-bit library is called through the POSIX interface  (see  the
-       pcreposix  documentation),  additional  working storage is required for
-       holding the pointers to capturing  substrings,  because  PCRE  requires
+       When  the  8-bit library is called through the POSIX interface (see the
+       pcreposix documentation), additional working storage  is  required  for
+       holding  the  pointers  to  capturing substrings, because PCRE requires
        three integers per substring, whereas the POSIX interface provides only
-       two. If the number of expected substrings is small, the  wrapper  func-
-       tion  uses  space  on the stack, because this is faster than using mal-
-       loc() for each call. The default threshold above which the stack is  no
+       two.  If  the number of expected substrings is small, the wrapper func-
+       tion uses space on the stack, because this is faster  than  using  mal-
+       loc()  for each call. The default threshold above which the stack is no
        longer used is 10; it can be changed by adding a setting such as
 
          --with-posix-malloc-threshold=20
@@ -669,19 +672,19 @@ POSIX MALLOC USAGE
 
 HANDLING VERY LARGE PATTERNS
 
-       Within  a  compiled  pattern,  offset values are used to point from one
-       part to another (for example, from an opening parenthesis to an  alter-
-       nation  metacharacter).  By default, two-byte values are used for these
-       offsets, leading to a maximum size for a  compiled  pattern  of  around
-       64K.  This  is sufficient to handle all but the most gigantic patterns.
-       Nevertheless, some people do want to process truly  enormous  patterns,
-       so  it  is possible to compile PCRE to use three-byte or four-byte off-
+       Within a compiled pattern, offset values are used  to  point  from  one
+       part  to another (for example, from an opening parenthesis to an alter-
+       nation metacharacter). By default, two-byte values are used  for  these
+       offsets,  leading  to  a  maximum size for a compiled pattern of around
+       64K. This is sufficient to handle all but the most  gigantic  patterns.
+       Nevertheless,  some  people do want to process truly enormous patterns,
+       so it is possible to compile PCRE to use three-byte or  four-byte  off-
        sets by adding a setting such as
 
          --with-link-size=3
 
-       to the configure command. The value given must be 2, 3, or 4.  For  the
-       16-bit  library,  a value of 3 is rounded up to 4. Using longer offsets
+       to  the  configure command. The value given must be 2, 3, or 4. For the
+       16-bit library, a value of 3 is rounded up to 4. Using  longer  offsets
        slows down the operation of PCRE because it has to load additional data
        when handling them.
 
@@ -689,92 +692,92 @@ HANDLING VERY LARGE PATTERNS
 AVOIDING EXCESSIVE STACK USAGE
 
        When matching with the pcre_exec() function, PCRE implements backtrack-
-       ing by making recursive calls to an internal function  called  match().
-       In  environments  where  the size of the stack is limited, this can se-
-       verely limit PCRE's operation. (The Unix environment does  not  usually
+       ing  by  making recursive calls to an internal function called match().
+       In environments where the size of the stack is limited,  this  can  se-
+       verely  limit  PCRE's operation. (The Unix environment does not usually
        suffer from this problem, but it may sometimes be necessary to increase
-       the maximum stack size.  There is a discussion in the  pcrestack  docu-
-       mentation.)  An alternative approach to recursion that uses memory from
-       the heap to remember data, instead of using recursive  function  calls,
-       has  been  implemented to work round the problem of limited stack size.
+       the  maximum  stack size.  There is a discussion in the pcrestack docu-
+       mentation.) An alternative approach to recursion that uses memory  from
+       the  heap  to remember data, instead of using recursive function calls,
+       has been implemented to work round the problem of limited  stack  size.
        If you want to build a version of PCRE that works this way, add
 
          --disable-stack-for-recursion
 
-       to the configure command. With this configuration, PCRE  will  use  the
-       pcre_stack_malloc  and pcre_stack_free variables to call memory manage-
-       ment functions. By default these point to malloc() and free(), but  you
+       to  the  configure  command. With this configuration, PCRE will use the
+       pcre_stack_malloc and pcre_stack_free variables to call memory  manage-
+       ment  functions. By default these point to malloc() and free(), but you
        can replace the pointers so that your own functions are used instead.
 
-       Separate  functions  are  provided  rather  than  using pcre_malloc and
-       pcre_free because the  usage  is  very  predictable:  the  block  sizes
-       requested  are  always  the  same,  and  the blocks are always freed in
-       reverse order. A calling program might be able to  implement  optimized
-       functions  that  perform  better  than  malloc()  and free(). PCRE runs
+       Separate functions are  provided  rather  than  using  pcre_malloc  and
+       pcre_free  because  the  usage  is  very  predictable:  the block sizes
+       requested are always the same, and  the  blocks  are  always  freed  in
+       reverse  order.  A calling program might be able to implement optimized
+       functions that perform better  than  malloc()  and  free().  PCRE  runs
        noticeably more slowly when built in this way. This option affects only
        the pcre_exec() function; it is not relevant for pcre_dfa_exec().
 
 
 LIMITING PCRE RESOURCE USAGE
 
-       Internally,  PCRE has a function called match(), which it calls repeat-
-       edly  (sometimes  recursively)  when  matching  a  pattern   with   the
-       pcre_exec()  function.  By controlling the maximum number of times this
-       function may be called during a single matching operation, a limit  can
-       be  placed  on  the resources used by a single call to pcre_exec(). The
-       limit can be changed at run time, as described in the pcreapi  documen-
-       tation.  The default is 10 million, but this can be changed by adding a
+       Internally, PCRE has a function called match(), which it calls  repeat-
+       edly   (sometimes   recursively)  when  matching  a  pattern  with  the
+       pcre_exec() function. By controlling the maximum number of  times  this
+       function  may be called during a single matching operation, a limit can
+       be placed on the resources used by a single call  to  pcre_exec().  The
+       limit  can be changed at run time, as described in the pcreapi documen-
+       tation. The default is 10 million, but this can be changed by adding  a
        setting such as
 
          --with-match-limit=500000
 
-       to  the  configure  command.  This  setting  has  no  effect   on   the
+       to   the   configure  command.  This  setting  has  no  effect  on  the
        pcre_dfa_exec() matching function.
 
-       In  some  environments  it is desirable to limit the depth of recursive
+       In some environments it is desirable to limit the  depth  of  recursive
        calls of match() more strictly than the total number of calls, in order
-       to  restrict  the maximum amount of stack (or heap, if --disable-stack-
+       to restrict the maximum amount of stack (or heap,  if  --disable-stack-
        for-recursion is specified) that is used. A second limit controls this;
-       it  defaults  to  the  value  that is set for --with-match-limit, which
-       imposes no additional constraints. However, you can set a  lower  limit
+       it defaults to the value that  is  set  for  --with-match-limit,  which
+       imposes  no  additional constraints. However, you can set a lower limit
        by adding, for example,
 
          --with-match-limit-recursion=10000
 
-       to  the  configure  command.  This  value can also be overridden at run
+       to the configure command. This value can  also  be  overridden  at  run
        time.
 
 
 CREATING CHARACTER TABLES AT BUILD TIME
 
-       PCRE uses fixed tables for processing characters whose code values  are
-       less  than 256. By default, PCRE is built with a set of tables that are
-       distributed in the file pcre_chartables.c.dist. These  tables  are  for
+       PCRE  uses fixed tables for processing characters whose code values are
+       less than 256. By default, PCRE is built with a set of tables that  are
+       distributed  in  the  file pcre_chartables.c.dist. These tables are for
        ASCII codes only. If you add
 
          --enable-rebuild-chartables
 
-       to  the  configure  command, the distributed tables are no longer used.
-       Instead, a program called dftables is compiled and  run.  This  outputs
+       to the configure command, the distributed tables are  no  longer  used.
+       Instead,  a  program  called dftables is compiled and run. This outputs
        the source for new set of tables, created in the default locale of your
        C runtime system. (This method of replacing the tables does not work if
-       you  are cross compiling, because dftables is run on the local host. If
-       you need to create alternative tables when cross  compiling,  you  will
+       you are cross compiling, because dftables is run on the local host.  If
+       you  need  to  create alternative tables when cross compiling, you will
        have to do so "by hand".)
 
 
 USING EBCDIC CODE
 
-       PCRE  assumes  by  default that it will run in an environment where the
-       character code is ASCII (or Unicode, which is  a  superset  of  ASCII).
-       This  is  the  case for most computer operating systems. PCRE can, how-
+       PCRE assumes by default that it will run in an  environment  where  the
+       character  code  is  ASCII  (or Unicode, which is a superset of ASCII).
+       This is the case for most computer operating systems.  PCRE  can,  how-
        ever, be compiled to run in an EBCDIC environment by adding
 
          --enable-ebcdic
 
        to the configure command. This setting implies --enable-rebuild-charta-
-       bles.  You  should  only  use  it if you know that you are in an EBCDIC
-       environment (for example,  an  IBM  mainframe  operating  system).  The
+       bles. You should only use it if you know that  you  are  in  an  EBCDIC
+       environment  (for  example,  an  IBM  mainframe  operating system). The
        --enable-ebcdic option is incompatible with --enable-utf.
 
 
@@ -788,18 +791,18 @@ PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT
          --enable-pcregrep-libbz2
 
        to the configure command. These options naturally require that the rel-
-       evant libraries are installed on your system. Configuration  will  fail
+       evant  libraries  are installed on your system. Configuration will fail
        if they are not.
 
 
 PCREGREP BUFFER SIZE
 
-       pcregrep  uses  an internal buffer to hold a "window" on the file it is
+       pcregrep uses an internal buffer to hold a "window" on the file  it  is
        scanning, in order to be able to output "before" and "after" lines when
-       it  finds  a match. The size of the buffer is controlled by a parameter
+       it finds a match. The size of the buffer is controlled by  a  parameter
        whose default value is 20K. The buffer itself is three times this size,
        but because of the way it is used for holding "before" lines, the long-
-       est line that is guaranteed to be processable is  the  parameter  size.
+       est  line  that  is guaranteed to be processable is the parameter size.
        You can change the default parameter value by adding, for example,
 
          --with-pcregrep-bufsize=50K
@@ -814,24 +817,24 @@ PCRETEST OPTION FOR LIBREADLINE SUPPORT
 
          --enable-pcretest-libreadline
 
-       to the configure command,  pcretest  is  linked  with  the  libreadline
-       library,  and  when its input is from a terminal, it reads it using the
+       to  the  configure  command,  pcretest  is  linked with the libreadline
+       library, and when its input is from a terminal, it reads it  using  the
        readline() function. This provides line-editing and history facilities.
        Note that libreadline is GPL-licensed, so if you distribute a binary of
        pcretest linked in this way, there may be licensing issues.
 
-       Setting this option causes the -lreadline option to  be  added  to  the
-       pcretest  build.  In many operating environments with a sytem-installed
+       Setting  this  option  causes  the -lreadline option to be added to the
+       pcretest build. In many operating environments with  a  sytem-installed
        libreadline this is sufficient. However, in some environments (e.g.  if
-       an  unmodified  distribution version of readline is in use), some extra
-       configuration may be necessary. The INSTALL file for  libreadline  says
+       an unmodified distribution version of readline is in use),  some  extra
+       configuration  may  be necessary. The INSTALL file for libreadline says
        this:
 
          "Readline uses the termcap functions, but does not link with the
          termcap or curses library itself, allowing applications which link
          with readline the to choose an appropriate library."
 
-       If  your environment has not been set up so that an appropriate library
+       If your environment has not been set up so that an appropriate  library
        is automatically included, you may need to add something like
 
          LIBS="-ncurses"

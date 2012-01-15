@@ -20,7 +20,7 @@ SYNOPSIS
 </P>
 <P>
 <b>int pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *<i>output</i>,</b>
-<b>PCRE_SPTR16 <i>input</i>, int <i>length</i>, int *<i>byte_order</i>, </b>
+<b>PCRE_SPTR16 <i>input</i>, int <i>length</i>, int *<i>host_byte_order</i>, </b>
 <b>int <i>keep_boms</i>);</b>
 </P>
 <br><b>
@@ -31,20 +31,20 @@ This function, which exists only in the 16-bit library, converts a UTF-16
 string to the correct order for the current host, taking account of any byte 
 order marks (BOMs) within the string. Its arguments are:
 <pre>
-  <i>output</i>      pointer to output buffer, may be the same as <i>input</i>
-  <i>input</i>       pointer to input buffer
-  <i>length</i>      number of 16-bit units in the input, or negative for
-                a zero-terminated string
-  <i>byte_order</i>  a NULL value or a value of 0 pointed to means start
-                in host byte order
-  <i>keep_boms</i>   if non-zero, BOMs are copied to the output string
+  <i>output</i>           pointer to output buffer, may be the same as <i>input</i>
+  <i>input</i>            pointer to input buffer
+  <i>length</i>           number of 16-bit units in the input, or negative for
+                     a zero-terminated string
+  <i>host_byte_order</i>  a NULL value or a non-zero value pointed to means
+                     start in host byte order
+  <i>keep_boms</i>        if non-zero, BOMs are copied to the output string
 </pre>
 The result of the function is the number of 16-bit units placed into the output
 buffer, including the zero terminator if the string was zero-terminated.
 </P>
 <P>
-If <i>byte_order</i> is not NULL, it is set to indicate the byte order that is
-current at the end of the string.
+If <i>host_byte_order</i> is not NULL, it is set to indicate the byte order that
+is current at the end of the string.
 </P>
 <P>
 There is a complete description of the PCRE native API in the

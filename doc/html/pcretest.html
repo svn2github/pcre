@@ -543,12 +543,12 @@ the pattern. It is recognized always. There may be any number of hexadecimal
 digits inside the braces; invalid values provoke error messages.
 </P>
 <P>
-Note that \xhh specifies one byte in UTF-8 mode; this makes it possible to
-construct invalid UTF-8 sequences for testing purposes. On the other hand,
-\x{hh} is interpreted as a UTF-8 character in UTF-8 mode, generating more than
-one byte if the value is greater than 127. When testing the 8-bit library not
-in UTF-8 mode, \x{hh} generates one byte for values less than 256, and causes
-an error for greater values.
+Note that \xhh specifies one byte rather than one character in UTF-8 mode;
+this makes it possible to construct invalid UTF-8 sequences for testing
+purposes. On the other hand, \x{hh} is interpreted as a UTF-8 character in
+UTF-8 mode, generating more than one byte if the value is greater than 127.
+When testing the 8-bit library not in UTF-8 mode, \x{hh} generates one byte
+for values less than 256, and causes an error for greater values.
 </P>
 <P>
 In UTF-16 mode, all 4-digit \x{hhhh} values are accepted. This makes it
@@ -923,7 +923,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 13 January 2012
+Last updated: 14 January 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>
