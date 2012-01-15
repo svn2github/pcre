@@ -108,7 +108,7 @@ fi
 # Handle --disable-pcre8 (enabled by default)
 AC_ARG_ENABLE(pcre8,
               AS_HELP_STRING([--disable-pcre8],
-                             [enable 8 bit character support]),
+                             [disable 8 bit character support]),
               , enable_pcre8=unset)
 AC_SUBST(enable_pcre8)
 
