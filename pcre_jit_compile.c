@@ -352,6 +352,9 @@ enum {
   frame_setstrbegin = -1
 };
 
+/* Undefine sljit macros. */
+#undef CMP
+
 /* Used for accessing the elements of the stack. */
 #define STACK(i)      ((-(i) - 1) * (int)sizeof(sljit_w))
 

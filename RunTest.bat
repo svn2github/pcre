@@ -231,7 +231,6 @@ if [%1]==[11] (
 )
 if errorlevel 1 (
   echo.          failed comparison: fc /n "%srcdir%\testdata\%testoutput%" "%2%bits%\%testoutput%"
-  set failed="yes"
   if [%1]==[2] (
     echo.
     echo ** Test 2 requires a lot of stack. PCRE can be configured to
@@ -242,13 +241,14 @@ if errorlevel 1 (
     echo.
 )
   if [%1]==[3] (
-    set failed="no"
     echo.
     echo ** Test 3 failure usually means french locale is not
     echo ** available on the system, rather than a bug or problem with PCRE.
     echo.
+    goto :eof
 )
 
+  set failed="yes"
   goto :eof
 )
 
@@ -370,6 +370,7 @@ goto :eof
   echo Test 14 Skipped when running 16-bit tests.
   goto :eof
 )
+  copy /Y "%srcdir%\testdata\saved16" testsaved16
   call :runsub 14 testout "Specials for the basic 8-bit library" -q
   call :runsub 14 testoutstudy "Test with Study Override" -q -s
   if %jit% EQU 1 call :runsub 14 testoutjit "Test with JIT Override" -q -s+
