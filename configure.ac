@@ -536,7 +536,30 @@ LIBS="$OLD_LIBS"
 
 AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
 AC_CHECK_HEADERS([readline/history.h], [HAVE_HISTORY_H=1])
-AC_CHECK_LIB([readline], [readline], [HAVE_LIB_READLINE=1])
+AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lreadline"],
+  [unset ac_cv_lib_readline_readline;
+   AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltinfo"],
+    [unset ac_cv_lib_readline_readline;
+     AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lcurses"],
+      [unset ac_cv_lib_readline_readline;
+       AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncurses"],
+        [unset ac_cv_lib_readline_readline;
+	 AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncursesw"],
+          [unset ac_cv_lib_readline_readline;
+	   AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltermcap"],
+            [LIBREADLINE=""],
+            [-ltermcap])],
+          [-lncursesw])],
+        [-lncurses])],
+      [-lcurses])],
+    [-ltinfo])])
+AC_SUBST(LIBREADLINE)
+if test -n "$LIBREADLINE"; then
+  if test "$LIBREADLINE" != "-lreadline"; then
+    echo "-lreadline needs $LIBREADLINE"
+    LIBREADLINE="-lreadline $LIBREADLINE"
+  fi
+fi
 
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
@@ -795,9 +818,11 @@ if test "$enable_pcretest_libreadline" = "yes"; then
     echo "** Cannot --enable-pcretest-readline because readline/history.h was not found."
     exit 1
   fi
-  LIBREADLINE="-lreadline"
+  if test -z "$LIBREADLINE"; then
+    echo "** Cannot --enable-pcretest-readline because readline library was not found."
+    exit 1
+  fi
 fi
-AC_SUBST(LIBREADLINE)
 
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(

@@ -48,6 +48,9 @@ Version 8.30
 12. Stephen Kelly's patch to CMakeLists.txt allows it to parse the version 
     information out of configure.ac instead of relying on pcre.h.generic, which 
     is not stored in the repository.  
+    
+13. Applied Dmitry V. Levin's patch for a more portable method for linking with
+    -lreadline.
 
 
 Version 8.21 12-Dec-2011
