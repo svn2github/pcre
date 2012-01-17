@@ -42,7 +42,8 @@ Version 8.30
     "x". The similar pattern /(?=(*:x))((*:y)q|)/ did not return a mark at all. 
     Oddly, Perl behaves the same way. PCRE has been fixed so that this pattern 
     also returns the mark "x". This bug applied to capturing parentheses, 
-    non-capturing parentheses, and atomic parentheses. 
+    non-capturing parentheses, and atomic parentheses. It also applied to some 
+    assertions.
     
 12. Stephen Kelly's patch to CMakeLists.txt allows it to parse the version 
     information out of configure.ac instead of relying on pcre.h.generic, which 

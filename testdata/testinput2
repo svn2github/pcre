@@ -3595,4 +3595,10 @@ replaced by single letters. --/
 /(?=(*:x))(?>(*:y)q|)/K+
     abc
 
+/(?=a(*:x))(?!a(*:y)c)/K+
+    ab
+
+/(?=a(*:x))(?=a(*:y)c|)/K+
+    ab
+
 /-- End of testinput2 --/

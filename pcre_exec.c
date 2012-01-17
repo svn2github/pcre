@@ -1530,6 +1530,7 @@ for (;;)
 
     case OP_ASSERT:
     case OP_ASSERTBACK:
+    save_mark = md->mark; 
     if (md->match_function_type == MATCH_CONDASSERT)
       {
       condassert = TRUE;
@@ -1551,6 +1552,7 @@ for (;;)
 
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode, 1);
+      md->mark = save_mark; 
       }
     while (*ecode == OP_ALT);
 
@@ -1574,6 +1576,7 @@ for (;;)
 
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
+    save_mark = md->mark; 
     if (md->match_function_type == MATCH_CONDASSERT)
       {
       condassert = TRUE;
@@ -1584,6 +1587,7 @@ for (;;)
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM5);
+      md->mark = save_mark; 
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) RRETURN(MATCH_NOMATCH);
       if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
         {

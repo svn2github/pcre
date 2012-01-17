@@ -11999,4 +11999,16 @@ MK: x
  0+ abc
 MK: x
 
+/(?=a(*:x))(?!a(*:y)c)/K+
+    ab
+ 0: 
+ 0+ ab
+MK: x
+
+/(?=a(*:x))(?=a(*:y)c|)/K+
+    ab
+ 0: 
+ 0+ ab
+MK: x
+
 /-- End of testinput2 --/
