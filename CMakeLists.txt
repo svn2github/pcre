@@ -54,6 +54,8 @@
 # 2012-01-06 PH removed pcre_info.c and added pcre_string_utils.c
 # 2012-01-10 Zoltan Herczeg added libpcre16 support
 # 2012-01-13 Stephen Kelly added out of source build support
+# 2012-01-17 PH applied Stephen Kelly's patch to parse the version data out
+#            of the configure.ac file
 
 PROJECT(PCRE C CXX)
 
@@ -314,9 +316,29 @@ CONFIGURE_FILE(config-cmake.h.in
                ${PROJECT_BINARY_DIR}/config.h
                @ONLY)
 
-CONFIGURE_FILE(pcre.h.generic
+# Parse version numbers and date out of configure.ac
+
+file(STRINGS ${PROJECT_SOURCE_DIR}/configure.ac
+  configure_lines
+  LIMIT_COUNT 50 # Read only the first 50 lines of the file
+)
+
+set(SEARCHED_VARIABLES "pcre_major" "pcre_minor" "pcre_prerelease" "pcre_date")
+foreach(configure_line ${configure_lines})
+    foreach(_substitution_variable ${SEARCHED_VARIABLES})
+        string(TOUPPER ${_substitution_variable} _substitution_variable_upper)
+        if (NOT ${_substitution_variable_upper})
+            string(REGEX MATCH "m4_define\\(${_substitution_variable}, \\[(.*)\\]" MACTHED_STRING ${configure_line})
+            if (CMAKE_MATCH_1)
+                set(${_substitution_variable_upper} ${CMAKE_MATCH_1})
+            endif()
+        endif()
+    endforeach()
+endforeach()
+
+CONFIGURE_FILE(pcre.h.in
                ${PROJECT_BINARY_DIR}/pcre.h
-               COPYONLY)
+               @ONLY)
 
 # What about pcre-config and libpcre.pc?
 

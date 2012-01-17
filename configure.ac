@@ -13,6 +13,9 @@ m4_define(pcre_minor, [30])
 m4_define(pcre_prerelease, [-PT1])
 m4_define(pcre_date, [2012-01-01])
 
+# NOTE: The CMakeLists.txt file searches for the above variables in the first
+# 50 lines of this file. Please update that if the variables above are moved.
+
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [1:0:0])
 m4_define(libpcre16_version, [0:0:0])

@@ -43,6 +43,10 @@ Version 8.30
     Oddly, Perl behaves the same way. PCRE has been fixed so that this pattern 
     also returns the mark "x". This bug applied to capturing parentheses, 
     non-capturing parentheses, and atomic parentheses. 
+    
+12. Stephen Kelly's patch to CMakeLists.txt allows it to parse the version 
+    information out of configure.ac instead of relying on pcre.h.generic, which 
+    is not stored in the repository.  
 
 
 Version 8.21 12-Dec-2011
