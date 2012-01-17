@@ -860,6 +860,7 @@ static int regression_tests(void)
 {
 	struct regression_test_case *current = regression_test_cases;
 	const char *error;
+	const char *cpu_info;
 	int i, err_offs;
 	int is_successful, is_ascii_pattern, is_ascii_input;
 	int total = 0;
@@ -889,7 +890,14 @@ static int regression_tests(void)
 	utf or ucp may make tests fail, if the pcre_exec result is the SAME, it is
 	still considered successful from pcre_jit_test point of view. */
 
-	printf("Running JIT regression\n");
+#ifdef SUPPORT_PCRE8
+	pcre_config(PCRE_CONFIG_JITTARGET, &cpu_info);
+#else
+	pcre16_config(PCRE_CONFIG_JITTARGET, &cpu_info);
+#endif
+
+	printf("Running JIT regression tests\n");
+	printf("  target CPU of SLJIT compiler: %s\n", cpu_info);
 
 #ifdef SUPPORT_PCRE8
 	pcre_config(PCRE_CONFIG_UTF8, &utf8);
@@ -898,7 +906,7 @@ static int regression_tests(void)
 		disabled_flags8 |= PCRE_UTF8;
 	if (!ucp8)
 		disabled_flags8 |= PCRE_UCP;
-	printf(" in  8 bit mode with utf8  %s and ucp %s:\n", utf8 ? "enabled" : "disabled", ucp8 ? "enabled" : "disabled");
+	printf("  in  8 bit mode with utf8  %s and ucp %s:\n", utf8 ? "enabled" : "disabled", ucp8 ? "enabled" : "disabled");
 #endif
 #ifdef SUPPORT_PCRE16
 	pcre16_config(PCRE_CONFIG_UTF16, &utf16);
@@ -907,7 +915,7 @@ static int regression_tests(void)
 		disabled_flags16 |= PCRE_UTF8;
 	if (!ucp16)
 		disabled_flags16 |= PCRE_UCP;
-	printf(" in 16 bit mode with utf16 %s and ucp %s:\n", utf16 ? "enabled" : "disabled", ucp16 ? "enabled" : "disabled");
+	printf("  in 16 bit mode with utf16 %s and ucp %s:\n", utf16 ? "enabled" : "disabled", ucp16 ? "enabled" : "disabled");
 #endif
 
 	while (current->pattern) {

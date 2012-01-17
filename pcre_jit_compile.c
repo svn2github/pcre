@@ -6814,6 +6814,12 @@ PRIV(jit_get_size)(void *executable_func)
 return ((executable_function*)executable_func)->executable_size;
 }
 
+const char*
+PRIV(jit_get_target)(void)
+{
+return sljit_get_platform_name();
+}
+
 #ifdef COMPILE_PCRE8
 PCRE_EXP_DECL pcre_jit_stack *
 pcre_jit_stack_alloc(int startsize, int maxsize)

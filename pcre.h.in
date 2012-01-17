@@ -249,6 +249,7 @@ compatible. */
 #define PCRE_CONFIG_BSR                     8
 #define PCRE_CONFIG_JIT                     9
 #define PCRE_CONFIG_UTF16                  10
+#define PCRE_CONFIG_JITTARGET              11
 
 /* Request types for pcre_study(). Do not re-arrange, in order to remain
 compatible. */

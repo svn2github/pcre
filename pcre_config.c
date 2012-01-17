@@ -117,6 +117,14 @@ switch (what)
 #endif
   break;
 
+  case PCRE_CONFIG_JITTARGET:
+#ifdef SUPPORT_JIT
+  *((const char **)where) = PRIV(jit_get_target)();
+#else
+  *((const char **)where) = NULL;
+#endif
+  break;
+
   case PCRE_CONFIG_NEWLINE:
   *((int *)where) = NEWLINE;
   break;
