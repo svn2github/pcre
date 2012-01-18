@@ -51,6 +51,8 @@ Version 8.30
     
 13. Applied Dmitry V. Levin's patch for a more portable method for linking with
     -lreadline.
+    
+14. ZH added PCRE_CONFIG_JITTARGET; added it's output to pcretest -C. 
 
 
 Version 8.21 12-Dec-2011

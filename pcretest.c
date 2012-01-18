@@ -2410,7 +2410,11 @@ are set, either both UTFs are supported or both are not supported. */
     printf("  %sUnicode properties support\n", rc? "" : "No ");
     (void)PCRE_CONFIG(PCRE_CONFIG_JIT, &rc);
     if (rc)
-      printf("  Just-in-time compiler support\n");
+      {
+      const char *arch;
+      (void)PCRE_CONFIG(PCRE_CONFIG_JITTARGET, &arch);   
+      printf("  Just-in-time compiler support: %s\n", arch);
+      } 
     else
       printf("  No just-in-time compiler support\n");
     (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
