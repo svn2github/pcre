@@ -332,7 +332,7 @@ argument of match(), which never changes. */
   {\
   heapframe *oldframe = frame;\
   frame = oldframe->Xprevframe;\
-  (PUBL(stack_free))(oldframe);\
+  if (oldframe != &frame_zero) (PUBL(stack_free))(oldframe);\
   if (frame != NULL)\
     {\
     rrc = ra;\
@@ -485,13 +485,15 @@ BOOL caseless;
 int condcode;
 
 /* When recursion is not being used, all "local" variables that have to be
-preserved over calls to RMATCH() are part of a "frame" which is obtained from
-heap storage. Set up the top-level frame here; others are obtained from the
-heap whenever RMATCH() does a "recursion". See the macro definitions above. */
+preserved over calls to RMATCH() are part of a "frame". We set up the top-level
+frame on the stack here; subsequent instantiations are obtained from the heap
+whenever RMATCH() does a "recursion". See the macro definitions above. Putting 
+the top-level on the stack rather than malloc-ing them all gives a performance 
+boost in many cases where there is not much "recursion". */
 
 #ifdef NO_RECURSE
-heapframe *frame = (heapframe *)(PUBL(stack_malloc))(sizeof(heapframe));
-if (frame == NULL) RRETURN(PCRE_ERROR_NOMEMORY);
+heapframe frame_zero;                                                          
+heapframe *frame = &frame_zero;  
 frame->Xprevframe = NULL;            /* Marks the top level */
 
 /* Copy in the original argument variables */
