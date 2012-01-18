@@ -3719,8 +3719,8 @@ for (;;)
             if (fc == d || foc == d) break;
             eptr += len;
             }
-        if (possessive) continue;
-        for(;;)
+          if (possessive) continue;
+          for(;;)
             {
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM30);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
