@@ -615,6 +615,28 @@ int save_offset1, save_offset2, save_offset3;
 int stacksave[REC_STACK_SAVE_MAX];
 
 eptrblock newptrb;
+
+/* There is a special fudge for calling match() in a way that causes it to 
+measure the size of its basic stack frame when the stack is being used for
+recursion. The first argument (eptr) points to a pointer that is used 
+"statically" for doing the calculation. The second argument (ecode) being NULL 
+triggers this behaviour. It cannot normally every be NULL. The return is the 
+negated value of the frame size. */
+
+if (ecode == NULL)
+  {
+  char **aptr = (char **)eptr;
+  if (rdepth == 0)
+    {
+    *aptr = (char *)&rdepth;
+    return match(eptr, NULL, NULL, 0, NULL, NULL, 1);
+    }
+  else
+    {
+    int len = (char *)&rdepth - *aptr;
+    return (len > 0)? -len : len;
+    }
+  } 
 #endif     /* NO_RECURSE */
 
 /* To save space on the stack and in the heap frame, I have doubled up on some
@@ -6190,13 +6212,33 @@ PCRE_PUCHAR req_char_ptr = start_match - 1;
 const pcre_study_data *study;
 const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 
+/* Check for the special magic call that measures the size of the stack used 
+per recursive call of match(). */
+
+if (re == NULL && extra_data == NULL && subject == NULL && length == -1)
+#ifdef NO_RECURSE
+  return -sizeof(heapframe);
+#else  
+  return match((PCRE_PUCHAR)&start_partial, NULL, NULL, 0, NULL, NULL, 0);
+#endif   
+
 /* Plausibility checks */
 
 if ((options & ~PUBLIC_EXEC_OPTIONS) != 0) return PCRE_ERROR_BADOPTION;
-if (re == NULL || subject == NULL ||
-   (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
+if (re == NULL || subject == NULL || (offsets == NULL && offsetcount > 0)) 
+  return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
 if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
+
+/* Check that the first field in the block is the magic number. If it is not,
+return with PCRE_ERROR_BADMAGIC. However, if the magic number is equal to
+REVERSED_MAGIC_NUMBER we return with PCRE_ERROR_BADENDIANNESS, which
+means that the pattern is likely compiled with different endianness. */
+
+if (re->magic_number != MAGIC_NUMBER)
+  return re->magic_number == REVERSED_MAGIC_NUMBER?
+    PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
+if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 
 /* These two settings are used in the code for checking a UTF-8 string that
 follows immediately afterwards. Other values in the md block are used only
@@ -6296,16 +6338,6 @@ is a feature that makes it possible to save compiled regex and re-use them
 in other programs later. */
 
 if (tables == NULL) tables = PRIV(default_tables);
-
-/* Check that the first field in the block is the magic number. If it is not,
-return with PCRE_ERROR_BADMAGIC. However, if the magic number is equal to
-REVERSED_MAGIC_NUMBER we return with PCRE_ERROR_BADENDIANNESS, which
-means that the pattern is likely compiled with different endianness. */
-
-if (re->magic_number != MAGIC_NUMBER)
-  return re->magic_number == REVERSED_MAGIC_NUMBER?
-    PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
-if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 
 /* Set up other data */
 

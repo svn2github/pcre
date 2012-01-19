@@ -57,6 +57,8 @@ Version 8.30
 15. Applied Graycode's patch to put the top-level frame on the stack rather 
     than the heap when not using the stack for recursion. This gives a 
     performance improvement in many cases when recursion is not deep.
+    
+16. Experimental code added to "pcretest -C" to output the stack frame size. 
 
 
 Version 8.21 12-Dec-2011
