@@ -669,6 +669,9 @@ general cases, UTF-8/16 support, and Unicode property support, respectively.
 The twentieth test is run only in 16-bit mode. It tests some specific 16-bit
 features of the DFA matching engine.
 
+The twenty-first and twenty-second tests are run only in 16-bit mode, when the 
+link size is set to 2. They test reloading pre-compiled patterns.
+
 
 Character tables
 ----------------
@@ -877,4 +880,4 @@ pcre_xxx and the other with the name pcre16_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 30 December 2011
+Last updated: 20 January 2012
