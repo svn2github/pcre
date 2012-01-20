@@ -618,22 +618,17 @@ eptrblock newptrb;
 
 /* There is a special fudge for calling match() in a way that causes it to 
 measure the size of its basic stack frame when the stack is being used for
-recursion. The first argument (eptr) points to a pointer that is used 
-"statically" for doing the calculation. The second argument (ecode) being NULL 
-triggers this behaviour. It cannot normally every be NULL. The return is the 
-negated value of the frame size. */
+recursion. The second argument (ecode) being NULL triggers this behaviour. It
+cannot normally every be NULL. The return is the negated value of the frame
+size. */
 
 if (ecode == NULL)
   {
-  char **aptr = (char **)eptr;
   if (rdepth == 0)
-    {
-    *aptr = (char *)&rdepth;
-    return match(eptr, NULL, NULL, 0, NULL, NULL, 1);
-    }
+    return match((PCRE_PUCHAR)&rdepth, NULL, NULL, 0, NULL, NULL, 1);
   else
     {
-    int len = (char *)&rdepth - *aptr;
+    int len = (char *)&rdepth - (char *)eptr;
     return (len > 0)? -len : len;
     }
   } 
@@ -6219,7 +6214,7 @@ if (re == NULL && extra_data == NULL && subject == NULL && length == -1)
 #ifdef NO_RECURSE
   return -sizeof(heapframe);
 #else  
-  return match((PCRE_PUCHAR)&start_partial, NULL, NULL, 0, NULL, NULL, 0);
+  return match(NULL, NULL, NULL, 0, NULL, NULL, 0);
 #endif   
 
 /* Plausibility checks */

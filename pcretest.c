@@ -2436,9 +2436,13 @@ are set, either both UTFs are supported or both are not supported. */
     (void)PCRE_CONFIG(PCRE_CONFIG_MATCH_LIMIT_RECURSION, &lrc);
     printf("  Default recursion depth limit = %ld\n", lrc);
     (void)PCRE_CONFIG(PCRE_CONFIG_STACKRECURSE, &rc);
-    printf("  Match recursion uses %s: ", rc? "stack" : "heap");
-    PCRE_EXEC(rc, NULL, NULL, NULL, -1, -1, 0, NULL, 0);
-    printf("frame size = %d bytes\n", -rc); 
+    printf("  Match recursion uses %s", rc? "stack" : "heap");
+    if (showstore)
+      { 
+      PCRE_EXEC(stack_size, NULL, NULL, NULL, -1, -1, 0, NULL, 0);
+      printf(": %sframe size = %d bytes", rc? "approximate " : "", -stack_size); 
+      }
+    printf("\n");   
     goto EXIT;
     }
   else if (strcmp(argv[op], "-help") == 0 ||
