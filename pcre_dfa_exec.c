@@ -2690,10 +2690,10 @@ for (;;)
           {
           for (rc = rc*2 - 2; rc >= 0; rc -= 2)
             {
-            const pcre_uchar *p = start_subject + local_offsets[rc];
-            const pcre_uchar *pp = start_subject + local_offsets[rc+1];
             int charcount = local_offsets[rc+1] - local_offsets[rc];
 #ifdef SUPPORT_UTF
+            const pcre_uchar *p = start_subject + local_offsets[rc];
+            const pcre_uchar *pp = start_subject + local_offsets[rc+1];
             while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
 #endif
             if (charcount > 0)
