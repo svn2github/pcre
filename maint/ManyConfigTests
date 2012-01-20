@@ -34,12 +34,8 @@ function runtest()
   if [ "$opts" = "" ] ; then
     echo "Configuring with: default settings"
   else
-    olen=`expr length "$opts"`
-    if [ $olen -gt 53 ] ; then
-      echo "Configuring with:"
-      echo "  $opts"
-    else
-      echo "Configuring with: $opts"
+    echo "Configuring with:"
+    echo "  $opts"
     fi
   fi
 
