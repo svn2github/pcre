@@ -36,7 +36,6 @@ function runtest()
   else
     echo "Configuring with:"
     echo "  $opts"
-    fi
   fi
 
   $srcdir/configure $opts >/dev/null 2>teststderr
