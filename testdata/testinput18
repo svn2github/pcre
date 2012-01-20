@@ -238,12 +238,6 @@ correctly, but that messes up comparisons). --/
     \x{10000}ab\>4
     \x{10000}ab\>5
 
-/-- Generated from: (?P<cbra1>[aZ\x{400}-\x{10ffff}]{4,}[\x{f123}\x{10039}\x{20000}-\x{21234}]?|[A-Cx-z\x{100000}-\x{1000a7}\x{101234}])(?<cb2>[^az]) --/
-
-<!testsaved16LE-2
-
-<!testsaved16BE-2
-
 /í¼€/8
 
 /-- End of testinput18 --/

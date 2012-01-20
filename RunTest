@@ -58,6 +58,8 @@ do17=no
 do18=no
 do19=no
 do20=no
+do21=no
+do22=no
 
 while [ $# -gt 0 ] ; do
   case $1 in
@@ -81,6 +83,8 @@ while [ $# -gt 0 ] ; do
    18) do18=yes;;
    19) do19=yes;;
    20) do20=yes;;
+   21) do21=yes;;
+   22) do22=yes;;
    -8) arg8=yes;;
   -16) arg16=yes;;
    valgrind) valgrind="valgrind -q --smc-check=all";;
@@ -194,6 +198,9 @@ if [ $utf -eq 0 ] ; then
   if [ $do18 = yes ] ; then
     echo "Can't run test 18 because UTF support is not configured"
   fi
+  if [ $do22 = yes ] ; then
+    echo "Can't run test 22 because UTF support is not configured"
+  fi
 fi
 
 if [ $ucp -eq 0 ] ; then
@@ -245,7 +252,8 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
      $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
      $do9  = no -a $do10 = no -a $do11 = no -a $do12 = no -a \
      $do13 = no -a $do14 = no -a $do15 = no -a $do16 = no -a \
-     $do17 = no -a $do18 = no -a $do19 = no -a $do20 = no ] ; then
+     $do17 = no -a $do18 = no -a $do19 = no -a $do20 = no -a \
+     $do21 = no -a $do22 = no ] ; then
   do1=yes
   do2=yes
   do3=yes
@@ -266,6 +274,8 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do18=yes
   do19=yes
   do20=yes
+  do21=yes
+  do22=yes  
 fi
 
 # Show which release and which test data
@@ -656,9 +666,6 @@ if [ $do17 = yes ] ; then
   if [ "$bits" = "8" ] ; then
     echo "  Skipped when running 8-bit tests"
   else
-    cp -f $testdata/saved8 testsaved8
-    cp -f $testdata/saved16LE-1 testsaved16LE-1
-    cp -f $testdata/saved16BE-1 testsaved16BE-1
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput17 testtry
       if [ $? = 0 ] ; then
@@ -683,8 +690,6 @@ if [ $do18 = yes ] ; then
   elif [ $utf -eq 0 ] ; then
     echo "  Skipped because UTF-$bits support is not available"
   else
-    cp -f $testdata/saved16LE-2 testsaved16LE-2
-    cp -f $testdata/saved16BE-2 testsaved16BE-2
     for opt in "" "-s" $jitopt; do
       $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput18 testtry
       if [ $? = 0 ] ; then
@@ -742,6 +747,51 @@ if [ $do20 = yes ] ; then
       else echo "  OK"
       fi
     done
+  fi
+fi
+
+# Tests for reloads with 16-bit library
+
+if [ $do21 = yes ] ; then
+  echo "Test 21: reloads for the basic 16-bit library"
+  if [ "$bits" = "8" ] ; then
+    echo "  Skipped when running 8-bit tests"
+  elif [ $link_size -ne 2 ] ; then
+    echo "  Skipped because link size is not 2"
+  else
+    cp -f $testdata/saved8 testsaved8
+    cp -f $testdata/saved16LE-1 testsaved16LE-1
+    cp -f $testdata/saved16BE-1 testsaved16BE-1
+    $sim $valgrind ./pcretest -q $bmode $testdata/testinput21 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput21 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
+  fi
+fi
+
+# Tests for reloads with 16-bit library (UTF-16 support)
+
+if [ $do22 = yes ] ; then
+  echo "Test 22: reloads for the 16-bit library with UTF-16 support"
+  if [ "$bits" = "8" ] ; then
+    echo "  Skipped when running 8-bit tests"
+  elif [ $utf -eq 0 ] ; then
+    echo "  Skipped because UTF-$bits support is not available"
+  elif [ $link_size -ne 2 ] ; then
+    echo "  Skipped because link size is not 2"
+  else
+    cp -f $testdata/saved16LE-2 testsaved16LE-2
+    cp -f $testdata/saved16BE-2 testsaved16BE-2
+    $sim $valgrind ./pcretest -q $bmode $testdata/testinput22 testtry
+    if [ $? = 0 ] ; then
+      $cf $testdata/testoutput22 testtry
+      if [ $? != 0 ] ; then exit 1; fi
+    else exit 1
+    fi
+    echo "  OK"
   fi
 fi
 

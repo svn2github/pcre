@@ -283,6 +283,11 @@
 \)  )*                       # optional trailing comment
 /xSI
 
+/-- Although this saved pattern was compiled with link-size=2, it does no harm
+to run this test with other link sizes because it is going to generated a
+"compiled in wrong mode" error as soon as it is loaded, so the link size does 
+not matter. --/
+
 <!testsaved16
 
 /\h/SI
