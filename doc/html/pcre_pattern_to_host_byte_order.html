@@ -20,7 +20,7 @@ SYNOPSIS
 </P>
 <P>
 <b>int pcre_pattern_to_host_byte_order(pcre *<i>code</i>,</b>
-<b>pcre_extra *<i>extra</i>, const unsigned char *<i>tables</i>);   </b>
+<b>pcre_extra *<i>extra</i>, const unsigned char *<i>tables</i>);</b>
 </P>
 <P>
 <b>int pcre16_pattern_to_host_byte_order(pcre16 *<i>code</i>,</b>
@@ -31,8 +31,8 @@ DESCRIPTION
 </b><br>
 <P>
 This function ensures that the bytes in 2-byte and 4-byte values in a compiled
-pattern are in the correct order for the current host. It is useful when a 
-pattern that has been compiled on one host is transferred to another that might 
+pattern are in the correct order for the current host. It is useful when a
+pattern that has been compiled on one host is transferred to another that might
 have different endianness. The arguments are:
 <pre>
   <i>code</i>         A compiled regular expression

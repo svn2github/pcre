@@ -130,9 +130,9 @@ documentation.
 </P>
 <P>
 As a very rough rule of thumb, you should reckon on about 500 bytes per
-recursion. Thus, if you want to limit your stack usage to 8Mb, you
-should set the limit at 16000 recursions. A 64Mb stack, on the other hand, can
-support around 128000 recursions.
+recursion. Thus, if you want to limit your stack usage to 8Mb, you should set
+the limit at 16000 recursions. A 64Mb stack, on the other hand, can support
+around 128000 recursions.
 </P>
 <P>
 In Unix-like environments, the <b>pcretest</b> test program has a command line
@@ -141,6 +141,32 @@ as the stack is large enough, another option (<b>-M</b>) can be used to find the
 smallest limits that allow a particular pattern to match a given subject
 string. This is done by calling <b>pcre[16]_exec()</b> repeatedly with different
 limits.
+</P>
+<br><b>
+Obtaining an estimate of stack usage
+</b><br>
+<P>
+The actual amount of stack used per recursion can vary quite a lot, depending
+on the compiler that was used to build PCRE and the optimization or debugging
+options that were set for it. The rule of thumb value of 500 bytes mentioned
+above may be larger or smaller than what is actually needed. A better
+approximation can be obtained by running this command:
+<pre>
+  pcretest -m -C
+</pre>
+The <b>-C</b> option causes <b>pcretest</b> to output information about the
+options with which PCRE was compiled. When <b>-m</b> is also given (before
+<b>-C</b>), information about stack use is given in a line like this:
+<pre>
+  Match recursion uses stack: approximate frame size = 640 bytes
+</pre>
+The value is approximate because some recursions need a bit more (up to perhaps
+16 more bytes).
+</P>
+<P>
+If the above command is given when PCRE is compiled to use the heap instead of
+the stack for recursion, the value that is output is the size of each block
+that is obtained from the heap.
 </P>
 <br><b>
 Changing stack size in Unix-like systems
@@ -190,7 +216,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 10 January 2012
+Last updated: 21 January 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

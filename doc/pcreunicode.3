@@ -5,7 +5,7 @@ PCRE - Perl-compatible regular expressions
 .rs
 .sp
 From Release 8.30, in addition to its previous UTF-8 support, PCRE also
-supports UTF-16 by means of a separate 16-bit library. This can be built as 
+supports UTF-16 by means of a separate 16-bit library. This can be built as
 well as, or instead of, the 8-bit library.
 .
 .
@@ -77,7 +77,7 @@ releases of PCRE followed the rules of RFC 2279, which allows the full range of
 range U+0 to U+10FFFF, excluding U+D800 to U+DFFF.
 .P
 The excluded code points are the "Surrogate Area" of Unicode. They are reserved
-for use by UTF-16, where they are used in pairs to encode codepoints with 
+for use by UTF-16, where they are used in pairs to encode codepoints with
 values greater than 0xFFFF. The code points that are encoded by UTF-16 pairs
 are available independently in the UTF-8 encoding. (In other words, the whole
 surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8.)
@@ -148,7 +148,7 @@ two-byte characters for values greater than \e177.
 3. Repeat quantifiers apply to complete UTF characters, not to individual
 data units, for example: \ex{100}{3}.
 .P
-4. The dot metacharacter matches one UTF character instead of a single data 
+4. The dot metacharacter matches one UTF character instead of a single data
 unit.
 .P
 5. The escape sequence \eC can be used to match a single byte in UTF-8 mode, or
@@ -166,7 +166,7 @@ be carried out by the normal interpretive function.
 .P
 6. The character escapes \eb, \eB, \ed, \eD, \es, \eS, \ew, and \eW correctly
 test characters of any code value, but, by default, the characters that PCRE
-recognizes as digits, spaces, or word characters remain the same set as in 
+recognizes as digits, spaces, or word characters remain the same set as in
 non-UTF mode, all with values less than 256. This remains true even when PCRE
 is built to include Unicode property support, because to do otherwise would
 slow down PCRE in many common cases. Note in particular that this applies to

@@ -31,17 +31,17 @@ options and exactly what is output.
 .SH "PCRE's 8-BIT and 16-BIT LIBRARIES"
 .rs
 .sp
-From release 8.30, two separate PCRE libraries can be built. The original one 
-supports 8-bit character strings, whereas the newer 16-bit library supports 
-character strings encoded in 16-bit units. The \fBpcretest\fP program can be 
+From release 8.30, two separate PCRE libraries can be built. The original one
+supports 8-bit character strings, whereas the newer 16-bit library supports
+character strings encoded in 16-bit units. The \fBpcretest\fP program can be
 used to test both libraries. However, it is itself still an 8-bit program,
 reading 8-bit input and writing 8-bit output. When testing the 16-bit library,
 the patterns and data strings are converted to 16-bit format before being
-passed to the PCRE library functions. Results are converted to 8-bit for 
+passed to the PCRE library functions. Results are converted to 8-bit for
 output.
 .P
-References to functions and structures of the form \fBpcre[16]_xx\fP below 
-mean "\fBpcre_xx\fP when using the 8-bit library or \fBpcre16_xx\fP when using 
+References to functions and structures of the form \fBpcre[16]_xx\fP below
+mean "\fBpcre_xx\fP when using the 8-bit library or \fBpcre16_xx\fP when using
 the 16-bit library".
 .
 .
@@ -49,9 +49,9 @@ the 16-bit library".
 .rs
 .TP 10
 \fB-16\fP
-If both the 8-bit and the 16-bit libraries have been built, this option causes 
-the 16-bit library to be used. If only the 16-bit library has been built, this 
-is the default (so has no effect). If only the 8-bit library has been built, 
+If both the 8-bit and the 16-bit libraries have been built, this option causes
+the 16-bit library to be used. If only the 16-bit library has been built, this
+is the default (so has no effect). If only the 8-bit library has been built,
 this option causes an error.
 .TP 10
 \fB-b\fP
@@ -60,24 +60,24 @@ internal form is output after compilation.
 .TP 10
 \fB-C\fP
 Output the version number of the PCRE library, and all available information
-about the optional features that are included, and then exit. All other options 
+about the optional features that are included, and then exit. All other options
 are ignored.
 .TP 10
 \fB-C\fP \fIoption\fP
-Output information about a specific build-time option, then exit. This 
-functionality is intended for use in scripts such as \fBRunTest\fP. The 
+Output information about a specific build-time option, then exit. This
+functionality is intended for use in scripts such as \fBRunTest\fP. The
 following options output the value indicated:
 .sp
   linksize   the internal link size (2, 3, or 4)
-  newline    the default newline setting: 
-               CR, LF, CRLF, ANYCRLF, or ANY  
+  newline    the default newline setting:
+               CR, LF, CRLF, ANYCRLF, or ANY
 .sp
 The following options output 1 for true or zero for false:
-.sp   
+.sp
   jit        just-in-time support is available
   pcre16     the 16-bit library was built
   pcre8      the 8-bit library was built
-  ucp        Unicode property support is available    
+  ucp        Unicode property support is available
   utf        UTF-8 and/or UTF-16 support is available
 .TP 10
 \fB-d\fP
@@ -104,7 +104,7 @@ calling \fBpcre[16]_exec()\fP repeatedly with different limits.
 .TP 10
 \fB-m\fP
 Output the size of each compiled pattern after it has been compiled. This is
-equivalent to adding \fB/M\fP to each regular expression. The size is given in 
+equivalent to adding \fB/M\fP to each regular expression. The size is given in
 bytes for both libraries.
 .TP 10
 \fB-o\fP \fIosize\fP
@@ -137,7 +137,7 @@ result of studying is not included when studying is caused only by \fB-s\fP and
 neither \fB-i\fP nor \fB-d\fP is present on the command line. This behaviour
 means that the output from tests that are run with and without \fB-s\fP should
 be identical, except when options that output information about the actual
-running of a match are set. 
+running of a match are set.
 .sp
 The \fB-M\fP, \fB-t\fP, and \fB-tm\fP options, which give information about
 resources used, are likely to produce different output with and without
@@ -237,12 +237,12 @@ effect as they do in Perl. For example:
 The following table shows additional modifiers for setting PCRE compile-time
 options that do not correspond to anything in Perl:
 .sp
-  \fB/8\fP              PCRE_UTF8           ) when using the 8-bit 
+  \fB/8\fP              PCRE_UTF8           ) when using the 8-bit
   \fB/?\fP              PCRE_NO_UTF8_CHECK  )   library
-.sp   
+.sp
   \fB/8\fP              PCRE_UTF16          ) when using the 16-bit
   \fB/?\fP              PCRE_NO_UTF16_CHECK )   library
-.sp   
+.sp
   \fB/A\fP              PCRE_ANCHORED
   \fB/C\fP              PCRE_AUTO_CALLOUT
   \fB/E\fP              PCRE_DOLLAR_ENDONLY
@@ -270,7 +270,7 @@ This example sets multiline matching with CRLF as the line ending sequence:
 .sp
 As well as turning on the PCRE_UTF8/16 option, the \fB/8\fP modifier causes
 all non-printing characters in output strings to be printed using the
-\ex{hh...} notation. Otherwise, those less than 0x100 are output in hex without 
+\ex{hh...} notation. Otherwise, those less than 0x100 are output in hex without
 the curly brackets.
 .P
 Full details of the PCRE options are given in the
@@ -663,7 +663,7 @@ substring is shown as "<unset>", as for the second data line.
    2: b
 .sp
 If the strings contain any non-printing characters, they are output as \exhh
-escapes if the value is less than 256 and UTF mode is not set. Otherwise they 
+escapes if the value is less than 256 and UTF mode is not set. Otherwise they
 are output as \ex{hh...} escapes. See below for the definition of non-printing
 characters. If the pattern has the \fB/+\fP modifier, the output for substring
 0 is followed by the the rest of the subject string, identified by "0+" like
@@ -890,15 +890,15 @@ been loaded, \fBpcretest\fP proceeds to read data lines in the usual way.
 You can copy a file written by \fBpcretest\fP to a different host and reload it
 there, even if the new host has opposite endianness to the one on which the
 pattern was compiled. For example, you can compile on an i86 machine and run on
-a SPARC machine. When a pattern is reloaded on a host with different 
+a SPARC machine. When a pattern is reloaded on a host with different
 endianness, the confirmation message is changed to:
 .sp
   Compiled pattern (byte-inverted) loaded from /some/file
 .sp
-The test suite contains some saved pre-compiled patterns with different 
-endianness. These are reloaded using "<!" instead of just "<". This suppresses 
-the "(byte-inverted)" text so that the output is the same on all hosts. It also 
-forces debugging output once the pattern has been reloaded.   
+The test suite contains some saved pre-compiled patterns with different
+endianness. These are reloaded using "<!" instead of just "<". This suppresses
+the "(byte-inverted)" text so that the output is the same on all hosts. It also
+forces debugging output once the pattern has been reloaded.
 .P
 File names for saving and reloading can be absolute or relative, but note that
 the shell facility of expanding a file name that starts with a tilde (~) is not

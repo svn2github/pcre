@@ -275,7 +275,7 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do19=yes
   do20=yes
   do21=yes
-  do22=yes  
+  do22=yes
 fi
 
 # Show which release and which test data

@@ -9,7 +9,7 @@ PCRE - Perl-compatible regular expressions
 .SM
 .B int pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *\fIoutput\fP,
 .ti +5n
-.B PCRE_SPTR16 \fIinput\fP, int \fIlength\fP, int *\fIhost_byte_order\fP, 
+.B PCRE_SPTR16 \fIinput\fP, int \fIlength\fP, int *\fIhost_byte_order\fP,
 .ti +5n
 .B int \fIkeep_boms\fP);
 .
@@ -17,8 +17,8 @@ PCRE - Perl-compatible regular expressions
 .SH DESCRIPTION
 .rs
 .sp
-This function, which exists only in the 16-bit library, converts a UTF-16 
-string to the correct order for the current host, taking account of any byte 
+This function, which exists only in the 16-bit library, converts a UTF-16
+string to the correct order for the current host, taking account of any byte
 order marks (BOMs) within the string. Its arguments are:
 .sp
   \fIoutput\fP           pointer to output buffer, may be the same as \fIinput\fP

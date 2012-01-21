@@ -2412,9 +2412,9 @@ are set, either both UTFs are supported or both are not supported. */
     if (rc)
       {
       const char *arch;
-      (void)PCRE_CONFIG(PCRE_CONFIG_JITTARGET, &arch);   
+      (void)PCRE_CONFIG(PCRE_CONFIG_JITTARGET, &arch);
       printf("  Just-in-time compiler support: %s\n", arch);
-      } 
+      }
     else
       printf("  No just-in-time compiler support\n");
     (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
@@ -2438,11 +2438,11 @@ are set, either both UTFs are supported or both are not supported. */
     (void)PCRE_CONFIG(PCRE_CONFIG_STACKRECURSE, &rc);
     printf("  Match recursion uses %s", rc? "stack" : "heap");
     if (showstore)
-      { 
+      {
       PCRE_EXEC(stack_size, NULL, NULL, NULL, -999, -999, 0, NULL, 0);
-      printf(": %sframe size = %d bytes", rc? "approximate " : "", -stack_size); 
+      printf(": %sframe size = %d bytes", rc? "approximate " : "", -stack_size);
       }
-    printf("\n");   
+    printf("\n");
     goto EXIT;
     }
   else if (strcmp(argv[op], "-help") == 0 ||
@@ -3385,10 +3385,10 @@ while (!done)
     cn16ptr = copynames;
     gn16ptr = getnames;
 #endif
-#ifdef SUPPORT_PCRE8     
+#ifdef SUPPORT_PCRE8
     cn8ptr = copynames8;
     gn8ptr = getnames8;
-#endif     
+#endif
 
     SET_PCRE_CALLOUT(callout);
     first_callout = 1;
@@ -3483,9 +3483,9 @@ while (!done)
             {
             if (++i == 9)
               fprintf(outfile, "** Too many hex digits in \\x{...} item; "
-                               "using only the first eight.\n");  
+                               "using only the first eight.\n");
             else c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'a' - 10);
-            } 
+            }
           if (*pt == '}')
             {
             p = pt + 1;

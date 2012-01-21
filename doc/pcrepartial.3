@@ -25,7 +25,7 @@ entered. Partial matching can also be useful when the subject string is very
 long and is not all available at once.
 .P
 PCRE supports partial matching by means of the PCRE_PARTIAL_SOFT and
-PCRE_PARTIAL_HARD options, which can be set when calling any of the matching 
+PCRE_PARTIAL_HARD options, which can be set when calling any of the matching
 functions. For backwards compatibility, PCRE_PARTIAL is a synonym for
 PCRE_PARTIAL_SOFT. The essential difference between the two options is whether
 or not a partial match is preferred to an alternative complete match, though
@@ -46,7 +46,7 @@ strings. This optimization is also disabled for partial matching.
 .SH "PARTIAL MATCHING USING pcre_exec() OR pcre16_exec()"
 .rs
 .sp
-A partial match occurs during a call to \fBpcre_exec()\fP or 
+A partial match occurs during a call to \fBpcre_exec()\fP or
 \fBpcre16_exec()\fP when the end of the subject string is reached successfully,
 but matching cannot continue because more characters are needed. However, at
 least one character in the subject must have been inspected. This character
@@ -115,7 +115,7 @@ because it prefers an earlier partial match over a later complete match. For
 this reason, the assumption is made that the end of the supplied subject string
 may not be the true end of the available data, and so, if \ez, \eZ, \eb, \eB,
 or $ are encountered at the end of the subject, the result is
-PCRE_ERROR_PARTIAL, provided that at least one character in the subject has 
+PCRE_ERROR_PARTIAL, provided that at least one character in the subject has
 been inspected.
 .P
 Setting PCRE_PARTIAL_HARD also affects the way UTF-8 and UTF-16
@@ -270,7 +270,7 @@ program to do that if it needs to.
 .P
 You can set the PCRE_PARTIAL_SOFT or PCRE_PARTIAL_HARD options with
 PCRE_DFA_RESTART to continue partial matching over multiple segments. This
-facility can be used to pass very long subject strings to the DFA matching 
+facility can be used to pass very long subject strings to the DFA matching
 functions.
 .
 .

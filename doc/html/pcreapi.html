@@ -34,10 +34,11 @@ man page, in case the conversion went wrong.
 <li><a name="TOC19" href="#SEC19">EXTRACTING CAPTURED SUBSTRINGS BY NAME</a>
 <li><a name="TOC20" href="#SEC20">DUPLICATE SUBPATTERN NAMES</a>
 <li><a name="TOC21" href="#SEC21">FINDING ALL POSSIBLE MATCHES</a>
-<li><a name="TOC22" href="#SEC22">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
-<li><a name="TOC23" href="#SEC23">SEE ALSO</a>
-<li><a name="TOC24" href="#SEC24">AUTHOR</a>
-<li><a name="TOC25" href="#SEC25">REVISION</a>
+<li><a name="TOC22" href="#SEC22">OBTAINING AN ESTIMATE OF STACK USAGE</a>
+<li><a name="TOC23" href="#SEC23">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a>
+<li><a name="TOC24" href="#SEC24">SEE ALSO</a>
+<li><a name="TOC25" href="#SEC25">AUTHOR</a>
+<li><a name="TOC26" href="#SEC26">REVISION</a>
 </ul>
 <P>
 <b>#include &#60;pcre.h&#62;</b>
@@ -174,7 +175,7 @@ just use different data types for their arguments and results, and their names
 start with <b>pcre16_</b> instead of <b>pcre_</b>. For every option that has UTF8
 in its name (for example, PCRE_UTF8), there is a corresponding 16-bit name with
 UTF8 replaced by UTF16. This facility is in fact just cosmetic; the 16-bit
-option names define the same bit values. 
+option names define the same bit values.
 </P>
 <P>
 References to bytes and UTF-8 in this document should be read as references to
@@ -182,7 +183,7 @@ References to bytes and UTF-8 in this document should be read as references to
 specified otherwise. More details of the specific differences for the 16-bit
 library are given in the
 <a href="pcre16.html"><b>pcre16</b></a>
-page. 
+page.
 </P>
 <br><a name="SEC6" href="#TOC1">PCRE API OVERVIEW</a><br>
 <P>
@@ -397,7 +398,7 @@ not recognized. The following information is available:
   PCRE_CONFIG_UTF8
 </pre>
 The output is an integer that is set to one if UTF-8 support is available;
-otherwise it is set to zero. If this option is given to the 16-bit version of 
+otherwise it is set to zero. If this option is given to the 16-bit version of
 this function, <b>pcre16_config()</b>, the result is PCRE_ERROR_BADOPTION.
 <pre>
   PCRE_CONFIG_UTF16
@@ -416,6 +417,13 @@ properties is available; otherwise it is set to zero.
 </pre>
 The output is an integer that is set to one if support for just-in-time
 compiling is available; otherwise it is set to zero.
+<pre>
+  PCRE_CONFIG_JITTARGET
+</pre>
+The output is a pointer to a zero-terminated "const char *" string. If JIT
+support is available, the string contains the name of the architecture for
+which the JIT compiler is configured, for example "x86 32bit (little endian +
+unaligned)". If JIT support is not available, the result is NULL.
 <pre>
   PCRE_CONFIG_NEWLINE
 </pre>
@@ -738,7 +746,7 @@ preceding sequences should be recognized. Setting PCRE_NEWLINE_ANY specifies
 that any Unicode newline sequence should be recognized. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
 tab, U+000B), FF (formfeed, U+000C), NEL (next line, U+0085), LS (line
-separator, U+2028), and PS (paragraph separator, U+2029). For the 8-bit 
+separator, U+2028), and PS (paragraph separator, U+2029). For the 8-bit
 library, the last two are recognized only in UTF-8 mode.
 </P>
 <P>
@@ -808,7 +816,7 @@ page.
 <pre>
   PCRE_NO_UTF8_CHECK
 </pre>
-When PCRE_UTF8 is set, the validity of the pattern as a UTF-8 
+When PCRE_UTF8 is set, the validity of the pattern as a UTF-8
 string is automatically checked. There is a discussion about the
 <a href="pcreunicode.html#utf8strings">validity of UTF-8 strings</a>
 in the
@@ -825,7 +833,7 @@ validity checking of subject strings.
 <P>
 The following table lists the error codes than may be returned by
 <b>pcre_compile2()</b>, along with the error messages that may be returned by
-both compiling functions. Note that error messages are always 8-bit ASCII 
+both compiling functions. Note that error messages are always 8-bit ASCII
 strings, even in 16-bit mode. As PCRE has developed, some error codes have
 fallen out of use. To avoid confusion, they have not been re-used.
 <pre>
@@ -899,14 +907,14 @@ fallen out of use. To avoid confusion, they have not been re-used.
   65  different names for subpatterns of the same number are
         not allowed
   66  (*MARK) must have an argument
-  67  this version of PCRE is not compiled with Unicode property 
+  67  this version of PCRE is not compiled with Unicode property
         support
   68  \c must be followed by an ASCII character
   69  \k is not followed by a braced, angle-bracketed, or quoted name
   70  internal error: unknown opcode in find_fixedlength()
   71  \N is not supported in a class
   72  too many forward references
-  73  disallowed Unicode code point (&#62;= 0xd800 && &#60;= 0xdfff)    
+  73  disallowed Unicode code point (&#62;= 0xd800 && &#60;= 0xdfff)
   74  invalid UTF-16 string (specifically UTF-16)
 </pre>
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
@@ -1101,12 +1109,12 @@ the following negative numbers:
   PCRE_ERROR_NULL           the argument <i>code</i> was NULL
                             the argument <i>where</i> was NULL
   PCRE_ERROR_BADMAGIC       the "magic number" was not found
-  PCRE_ERROR_BADENDIANNESS  the pattern was compiled with different 
+  PCRE_ERROR_BADENDIANNESS  the pattern was compiled with different
                             endianness
   PCRE_ERROR_BADOPTION      the value of <i>what</i> was invalid
 </pre>
 The "magic number" is placed at the start of each compiled pattern as an simple
-check against passing an arbitrary memory pointer. The endianness error can 
+check against passing an arbitrary memory pointer. The endianness error can
 occur if a compiled pattern is saved and reloaded on a different host. Here is
 a typical call of <b>pcre_fullinfo()</b>, to obtain the length of the compiled
 pattern:
@@ -1150,8 +1158,8 @@ variable.
 </P>
 <P>
 If there is a fixed first value, for example, the letter "c" from a pattern
-such as (cat|cow|coyote), its value is returned. In the 8-bit library, the 
-value is always less than 256; in the 16-bit library the value can be up to 
+such as (cat|cow|coyote), its value is returned. In the 8-bit library, the
+value is always less than 256; in the 16-bit library the value can be up to
 0xffff.
 </P>
 <P>
@@ -1427,7 +1435,7 @@ fields (not necessarily in this order):
   const unsigned char *<i>tables</i>;
   unsigned char **<i>mark</i>;
 </pre>
-In the 16-bit version of this structure, the <i>mark</i> field has type 
+In the 16-bit version of this structure, the <i>mark</i> field has type
 "PCRE_UCHAR16 **".
 </P>
 <P>
@@ -2067,14 +2075,14 @@ documentation for more details.
 <pre>
   PCRE_ERROR_BADMODE (-28)
 </pre>
-This error is given if a pattern that was compiled by the 8-bit library is 
+This error is given if a pattern that was compiled by the 8-bit library is
 passed to a 16-bit library function, or vice versa.
 <pre>
   PCRE_ERROR_BADENDIANNESS (-29)
 </pre>
-This error is given if a pattern that was compiled and saved is reloaded on a 
-host with different endianness. The utility function 
-<b>pcre_pattern_to_host_byte_order()</b> can be used to convert such a pattern 
+This error is given if a pattern that was compiled and saved is reloaded on a
+host with different endianness. The utility function
+<b>pcre_pattern_to_host_byte_order()</b> can be used to convert such a pattern
 so that it runs on the new host.
 </P>
 <P>
@@ -2084,7 +2092,7 @@ Error numbers -16 to -20 and -22 are not used by <b>pcre_exec()</b>.
 Reason codes for invalid UTF-8 strings
 </b><br>
 <P>
-This section applies only to the 8-bit library. The corresponding information 
+This section applies only to the 8-bit library. The corresponding information
 for the 16-bit library is given in the
 <a href="pcre16.html"><b>pcre16</b></a>
 page.
@@ -2374,8 +2382,32 @@ When your callout function is called, extract and save the current matched
 substring. Then return 1, which forces <b>pcre_exec()</b> to backtrack and try
 other alternatives. Ultimately, when it runs out of matches, <b>pcre_exec()</b>
 will yield PCRE_ERROR_NOMATCH.
+</P>
+<br><a name="SEC22" href="#TOC1">OBTAINING AN ESTIMATE OF STACK USAGE</a><br>
+<P>
+Matching certain patterns using <b>pcre_exec()</b> can use a lot of process
+stack, which in certain environments can be rather limited in size. Some users
+find it helpful to have an estimate of the amount of stack that is used by
+<b>pcre_exec()</b>, to help them set recursion limits, as described in the
+<a href="pcrestack.html"><b>pcrestack</b></a>
+documentation. The estimate that is output by <b>pcretest</b> when called with
+the <b>-m</b> and <b>-C</b> options is obtained by calling <b>pcre_exec</b> with
+the values NULL, NULL, NULL, -999, and -999 for its first five arguments.
+</P>
+<P>
+Normally, if its first argument is NULL, <b>pcre_exec()</b> immediately returns
+the negative error code PCRE_ERROR_NULL, but with this special combination of
+arguments, it returns instead a negative number whose absolute value is the
+approximate stack frame size in bytes. (A negative number is used so that it is
+clear that no match has happened.) The value is approximate because in some
+cases, recursive calls to <b>pcre_exec()</b> occur when there are one or two
+additional variables on the stack.
+</P>
+<P>
+If PCRE has been compiled to use the heap instead of the stack for recursion,
+the value returned is the size of each block that is obtained from the heap.
 <a name="dfamatch"></a></P>
-<br><a name="SEC22" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a><br>
+<br><a name="SEC23" href="#TOC1">MATCHING A PATTERN: THE ALTERNATIVE FUNCTION</a><br>
 <P>
 <b>int pcre_dfa_exec(const pcre *<i>code</i>, const pcre_extra *<i>extra</i>,</b>
 <b>const char *<i>subject</i>, int <i>length</i>, int <i>startoffset</i>,</b>
@@ -2550,13 +2582,13 @@ recursively, using private vectors for <i>ovector</i> and <i>workspace</i>. This
 error is given if the output vector is not large enough. This should be
 extremely rare, as a vector of size 1000 is used.
 </P>
-<br><a name="SEC23" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC24" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcre16</b>(3), <b>pcrebuild</b>(3), <b>pcrecallout</b>(3), <b>pcrecpp(3)</b>(3),
 <b>pcrematching</b>(3), <b>pcrepartial</b>(3), <b>pcreposix</b>(3),
 <b>pcreprecompile</b>(3), <b>pcresample</b>(3), <b>pcrestack</b>(3).
 </P>
-<br><a name="SEC24" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC25" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -2565,9 +2597,9 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC25" href="#TOC1">REVISION</a><br>
+<br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 07 January 2012
+Last updated: 21 January 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

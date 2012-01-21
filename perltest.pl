@@ -23,7 +23,7 @@ if ($utf8)
   foreach $c (@p)
     {
     if ($c >= 32 && $c < 127) { $t .= chr $c; }
-      else { $t .= sprintf("\\x{%02x}", $c); 
+      else { $t .= sprintf("\\x{%02x}", $c);
       }
     }
   }
@@ -216,16 +216,16 @@ for (;;)
           }
         splice(@subs, 0, 18);
         }
-        
+
       # It seems that $REGMARK is not marked as UTF-8 even when use utf8 is
       # set and the input pattern was a UTF-8 string. We can, however, force
-      # it to be so marked.  
-       
+      # it to be so marked.
+
       if (defined $REGMARK && $REGMARK != 1)
         {
-        $xx = $REGMARK;  
-        $xx = Encode::decode_utf8($xx) if $utf8; 
-        printf $outfile ("MK: %s\n", &pchars($xx)); 
+        $xx = $REGMARK;
+        $xx = Encode::decode_utf8($xx) if $utf8;
+        printf $outfile ("MK: %s\n", &pchars($xx));
         }
       }
     }

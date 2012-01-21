@@ -35,11 +35,11 @@ exists as well, but as it specifies the default, it is not described.
 .SH "BUILDING 8-BIT and 16-BIT LIBRARIES"
 .rs
 .sp
-By default, a library called \fBlibpcre\fP is built, containing functions that 
-take string arguments contained in vectors of bytes, either as single-byte 
+By default, a library called \fBlibpcre\fP is built, containing functions that
+take string arguments contained in vectors of bytes, either as single-byte
 characters, or interpreted as UTF-8 strings. You can also build a separate
-library, called \fBlibpcre16\fP, in which strings are contained in vectors of 
-16-bit data units and interpreted either as single-unit characters or UTF-16 
+library, called \fBlibpcre16\fP, in which strings are contained in vectors of
+16-bit data units and interpreted either as single-unit characters or UTF-16
 strings, by adding
 .sp
   --enable-pcre16
@@ -70,7 +70,7 @@ to the \fBconfigure\fP command, as required.
 .sp
 By default, if the 8-bit library is being built, the \fBconfigure\fP script
 will search for a C++ compiler and C++ header files. If it finds them, it
-automatically builds the C++ wrapper library (which supports only 8-bit 
+automatically builds the C++ wrapper library (which supports only 8-bit
 strings). You can disable this by adding
 .sp
   --disable-cpp
@@ -96,7 +96,7 @@ configuration. (For backwards compatibility, --enable-utf8 is a synonym of
 .P
 Of itself, this setting does not make PCRE treat strings as UTF-8 or UTF-16. As
 well as compiling PCRE with this option, you also have have to set the
-PCRE_UTF8 or PCRE_UTF16 option when you call one of the pattern compiling 
+PCRE_UTF8 or PCRE_UTF16 option when you call one of the pattern compiling
 functions.
 .P
 If you set --enable-utf when compiling in an EBCDIC environment, PCRE expects

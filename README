@@ -201,7 +201,7 @@ library. They are also documented in the pcrebuild man page.
   platforms. It is not possible to use both --enable-utf and --enable-ebcdic at
   the same time.
 
-. There are no separate options for enabling UTF-8 and UTF-16 independently 
+. There are no separate options for enabling UTF-8 and UTF-16 independently
   because that would allow ridiculous settings such as requesting UTF-16
   support while building only the 8-bit library. However, the option
   --enable-utf8 is retained for backwards compatibility with earlier releases
@@ -669,7 +669,7 @@ general cases, UTF-8/16 support, and Unicode property support, respectively.
 The twentieth test is run only in 16-bit mode. It tests some specific 16-bit
 features of the DFA matching engine.
 
-The twenty-first and twenty-second tests are run only in 16-bit mode, when the 
+The twenty-first and twenty-second tests are run only in 16-bit mode, when the
 link size is set to 2. They test reloading pre-compiled patterns.
 
 

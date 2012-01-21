@@ -50,7 +50,7 @@ long and is not all available at once.
 </P>
 <P>
 PCRE supports partial matching by means of the PCRE_PARTIAL_SOFT and
-PCRE_PARTIAL_HARD options, which can be set when calling any of the matching 
+PCRE_PARTIAL_HARD options, which can be set when calling any of the matching
 functions. For backwards compatibility, PCRE_PARTIAL is a synonym for
 PCRE_PARTIAL_SOFT. The essential difference between the two options is whether
 or not a partial match is preferred to an alternative complete match, though
@@ -70,7 +70,7 @@ strings. This optimization is also disabled for partial matching.
 </P>
 <br><a name="SEC2" href="#TOC1">PARTIAL MATCHING USING pcre_exec() OR pcre16_exec()</a><br>
 <P>
-A partial match occurs during a call to <b>pcre_exec()</b> or 
+A partial match occurs during a call to <b>pcre_exec()</b> or
 <b>pcre16_exec()</b> when the end of the subject string is reached successfully,
 but matching cannot continue because more characters are needed. However, at
 least one character in the subject must have been inspected. This character
@@ -144,7 +144,8 @@ because it prefers an earlier partial match over a later complete match. For
 this reason, the assumption is made that the end of the supplied subject string
 may not be the true end of the available data, and so, if \z, \Z, \b, \B,
 or $ are encountered at the end of the subject, the result is
-PCRE_ERROR_PARTIAL.
+PCRE_ERROR_PARTIAL, provided that at least one character in the subject has
+been inspected.
 </P>
 <P>
 Setting PCRE_PARTIAL_HARD also affects the way UTF-8 and UTF-16
@@ -294,7 +295,7 @@ program to do that if it needs to.
 <P>
 You can set the PCRE_PARTIAL_SOFT or PCRE_PARTIAL_HARD options with
 PCRE_DFA_RESTART to continue partial matching over multiple segments. This
-facility can be used to pass very long subject strings to the DFA matching 
+facility can be used to pass very long subject strings to the DFA matching
 functions.
 </P>
 <br><a name="SEC8" href="#TOC1">MULTI-SEGMENT MATCHING WITH pcre_exec() OR pcre16_exec()</a><br>
@@ -434,7 +435,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC11" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 January 2012
+Last updated: 21 January 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

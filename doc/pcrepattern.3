@@ -25,11 +25,11 @@ there is now also support for UTF-8 strings in the original library, and a
 second library that supports 16-bit and UTF-16 character strings. To use these
 features, PCRE must be built to include appropriate support. When using UTF
 strings you must either call the compiling function with the PCRE_UTF8 or
-PCRE_UTF16 option, or the pattern must start with one of these special 
+PCRE_UTF16 option, or the pattern must start with one of these special
 sequences:
 .sp
   (*UTF8)
-  (*UTF16) 
+  (*UTF16)
 .sp
 Starting a pattern with such a sequence is equivalent to setting the relevant
 option. This feature is not Perl-compatible. How setting a UTF mode affects
@@ -263,8 +263,8 @@ between \ex{ and }, but the character code is constrained as follows:
   8-bit UTF-8 mode      less than 0x10ffff and a valid codepoint
   16-bit non-UTF mode   less than 0x10000
   16-bit UTF-16 mode    less than 0x10ffff and a valid codepoint
-.sp     
-Invalid Unicode codepoints are the range 0xd800 to 0xdfff (the so-called 
+.sp
+Invalid Unicode codepoints are the range 0xd800 to 0xdfff (the so-called
 "surrogate" codepoints).
 .P
 If characters other than hexadecimal digits appear between \ex{ and }, or if
@@ -307,7 +307,7 @@ parenthesized subpatterns.
 Inside a character class, or if the decimal number is greater than 9 and there
 have not been that many capturing subpatterns, PCRE re-reads up to three octal
 digits following the backslash, and uses them to generate a data character. Any
-subsequent digits stand for themselves. The value of the character is 
+subsequent digits stand for themselves. The value of the character is
 constrained in the same way as characters specified in hexadecimal.
 For example:
 .sp
@@ -499,8 +499,8 @@ The vertical space characters are:
   U+2028     Line separator
   U+2029     Paragraph separator
 .sp
-In 8-bit, non-UTF-8 mode, only the characters with codepoints less than 256 are 
-relevant.   
+In 8-bit, non-UTF-8 mode, only the characters with codepoints less than 256 are
+relevant.
 .
 .
 .\" HTML <a name="newlineseq"></a>
@@ -974,7 +974,7 @@ end of the subject in both modes, and if all branches of a pattern start with
 .sp
 Outside a character class, a dot in the pattern matches any one character in
 the subject string except (by default) a character that signifies the end of a
-line. 
+line.
 .P
 When a line ending is defined as a single character, dot never matches that
 character; when the two-character sequence CRLF is used, dot does not match CR
@@ -1104,7 +1104,7 @@ followed by two other characters. The octal or hexadecimal representation of
 "]" can also be used to end a range.
 .P
 Ranges operate in the collating sequence of character values. They can also be
-used for characters specified numerically, for example [\e000-\e037]. Ranges 
+used for characters specified numerically, for example [\e000-\e037]. Ranges
 can include any characters that are valid for the current mode.
 .P
 If a range that includes letters is used when caseless matching is set, it
@@ -1305,8 +1305,8 @@ match "cataract", "erpillar" or an empty string.
 .sp
 2. It sets up the subpattern as a capturing subpattern. This means that, when
 the whole pattern matches, that portion of the subject string that matched the
-subpattern is passed back to the caller via the \fIovector\fP argument of the 
-matching function. (This applies only to the traditional matching functions; 
+subpattern is passed back to the caller via the \fIovector\fP argument of the
+matching function. (This applies only to the traditional matching functions;
 the DFA matching functions do not support capturing.)
 .P
 Opening parentheses are counted from left to right (starting from 1) to obtain
@@ -2538,7 +2538,7 @@ same pair of parentheses when there is a repetition.
 .P
 PCRE provides a similar feature, but of course it cannot obey arbitrary Perl
 code. The feature is called "callout". The caller of PCRE provides an external
-function by putting its entry point in the global variable \fIpcre_callout\fP 
+function by putting its entry point in the global variable \fIpcre_callout\fP
 (8-bit library) or \fIpcre16_callout\fP (16-bit library). By default, this
 variable contains NULL, which disables all calling out.
 .P

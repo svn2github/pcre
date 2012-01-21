@@ -138,8 +138,8 @@ REVISION
        Last updated: 10 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE(3)                                                                PCRE(3)
 
 
@@ -463,8 +463,8 @@ REVISION
        Last updated: 08 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREBUILD(3)                                                      PCREBUILD(3)
 
 
@@ -859,8 +859,8 @@ REVISION
        Last updated: 07 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
@@ -1066,8 +1066,8 @@ REVISION
        Last updated: 08 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREAPI(3)                                                          PCREAPI(3)
 
 
@@ -1404,6 +1404,14 @@ CHECKING BUILD-TIME OPTIONS
 
        The output is an integer that is set to one if support for just-in-time
        compiling is available; otherwise it is set to zero.
+
+         PCRE_CONFIG_JITTARGET
+
+       The  output is a pointer to a zero-terminated "const char *" string. If
+       JIT support is available, the string contains the name of the architec-
+       ture  for  which the JIT compiler is configured, for example "x86 32bit
+       (little endian + unaligned)". If JIT  support  is  not  available,  the
+       result is NULL.
 
          PCRE_CONFIG_NEWLINE
 
@@ -3255,6 +3263,31 @@ FINDING ALL POSSIBLE MATCHES
        matches, pcre_exec() will yield PCRE_ERROR_NOMATCH.
 
 
+OBTAINING AN ESTIMATE OF STACK USAGE
+
+       Matching  certain  patterns  using pcre_exec() can use a lot of process
+       stack, which in certain environments can be  rather  limited  in  size.
+       Some  users  find it helpful to have an estimate of the amount of stack
+       that is used by pcre_exec(), to help  them  set  recursion  limits,  as
+       described  in  the pcrestack documentation. The estimate that is output
+       by pcretest when called with the -m and -C options is obtained by call-
+       ing  pcre_exec with the values NULL, NULL, NULL, -999, and -999 for its
+       first five arguments.
+
+       Normally, if  its  first  argument  is  NULL,  pcre_exec()  immediately
+       returns  the negative error code PCRE_ERROR_NULL, but with this special
+       combination of arguments, it returns instead a  negative  number  whose
+       absolute  value  is the approximate stack frame size in bytes. (A nega-
+       tive number is used so that it is clear that no  match  has  happened.)
+       The  value  is  approximate  because  in some cases, recursive calls to
+       pcre_exec() occur when there are one or two additional variables on the
+       stack.
+
+       If  PCRE  has  been  compiled  to use the heap instead of the stack for
+       recursion, the value returned  is  the  size  of  each  block  that  is
+       obtained from the heap.
+
+
 MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
 
        int pcre_dfa_exec(const pcre *code, const pcre_extra *extra,
@@ -3436,11 +3469,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 07 January 2012
+       Last updated: 21 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
@@ -3638,8 +3671,8 @@ REVISION
        Last updated: 08 Janurary 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
@@ -3813,8 +3846,8 @@ REVISION
        Last updated: 08 Januray 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
@@ -6418,8 +6451,8 @@ REVISION
        Last updated: 09 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESYNTAX(3)                                                    PCRESYNTAX(3)
 
 
@@ -6794,8 +6827,8 @@ REVISION
        Last updated: 10 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREUNICODE(3)                                                  PCREUNICODE(3)
 
 
@@ -6992,8 +7025,8 @@ REVISION
        Last updated: 13 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREJIT(3)                                                          PCREJIT(3)
 
 
@@ -7348,8 +7381,8 @@ REVISION
        Last updated: 08 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
@@ -7469,111 +7502,112 @@ PARTIAL MATCHING USING pcre_exec() OR pcre16_exec()
        plete  match.  For  this reason, the assumption is made that the end of
        the supplied subject string may not be the true end  of  the  available
        data, and so, if \z, \Z, \b, \B, or $ are encountered at the end of the
-       subject, the result is PCRE_ERROR_PARTIAL.
+       subject, the result is PCRE_ERROR_PARTIAL, provided that at  least  one
+       character in the subject has been inspected.
 
        Setting PCRE_PARTIAL_HARD also affects the way UTF-8 and UTF-16 subject
-       strings  are checked for validity. Normally, an invalid sequence causes
-       the error PCRE_ERROR_BADUTF8 or PCRE_ERROR_BADUTF16.  However,  in  the
-       special  case  of  a  truncated  character  at  the end of the subject,
-       PCRE_ERROR_SHORTUTF8  or   PCRE_ERROR_SHORTUTF16   is   returned   when
+       strings are checked for validity. Normally, an invalid sequence  causes
+       the  error  PCRE_ERROR_BADUTF8  or PCRE_ERROR_BADUTF16. However, in the
+       special case of a truncated  character  at  the  end  of  the  subject,
+       PCRE_ERROR_SHORTUTF8   or   PCRE_ERROR_SHORTUTF16   is   returned  when
        PCRE_PARTIAL_HARD is set.
 
    Comparing hard and soft partial matching
 
-       The  difference  between the two partial matching options can be illus-
+       The difference between the two partial matching options can  be  illus-
        trated by a pattern such as:
 
          /dog(sbody)?/
 
-       This matches either "dog" or "dogsbody", greedily (that is, it  prefers
-       the  longer  string  if  possible). If it is matched against the string
-       "dog" with PCRE_PARTIAL_SOFT, it yields a  complete  match  for  "dog".
+       This  matches either "dog" or "dogsbody", greedily (that is, it prefers
+       the longer string if possible). If it is  matched  against  the  string
+       "dog"  with  PCRE_PARTIAL_SOFT,  it  yields a complete match for "dog".
        However, if PCRE_PARTIAL_HARD is set, the result is PCRE_ERROR_PARTIAL.
-       On the other hand, if the pattern is made ungreedy the result  is  dif-
+       On  the  other hand, if the pattern is made ungreedy the result is dif-
        ferent:
 
          /dog(sbody)??/
 
-       In  this  case  the  result  is always a complete match because that is
-       found first, and matching never  continues  after  finding  a  complete
+       In this case the result is always a  complete  match  because  that  is
+       found  first,  and  matching  never  continues after finding a complete
        match. It might be easier to follow this explanation by thinking of the
        two patterns like this:
 
          /dog(sbody)?/    is the same as  /dogsbody|dog/
          /dog(sbody)??/   is the same as  /dog|dogsbody/
 
-       The second pattern will never match "dogsbody", because it will  always
+       The  second pattern will never match "dogsbody", because it will always
        find the shorter match first.
 
 
 PARTIAL MATCHING USING pcre_dfa_exec() OR pcre16_dfa_exec()
 
        The DFA functions move along the subject string character by character,
-       without backtracking, searching for  all  possible  matches  simultane-
-       ously.  If the end of the subject is reached before the end of the pat-
-       tern, there is the possibility of a partial match, again provided  that
+       without  backtracking,  searching  for  all possible matches simultane-
+       ously. If the end of the subject is reached before the end of the  pat-
+       tern,  there is the possibility of a partial match, again provided that
        at least one character has been inspected.
 
-       When  PCRE_PARTIAL_SOFT  is set, PCRE_ERROR_PARTIAL is returned only if
-       there have been no complete matches. Otherwise,  the  complete  matches
-       are  returned.   However,  if PCRE_PARTIAL_HARD is set, a partial match
-       takes precedence over any complete matches. The portion of  the  string
-       that  was  inspected when the longest partial match was found is set as
+       When PCRE_PARTIAL_SOFT is set, PCRE_ERROR_PARTIAL is returned  only  if
+       there  have  been  no complete matches. Otherwise, the complete matches
+       are returned.  However, if PCRE_PARTIAL_HARD is set,  a  partial  match
+       takes  precedence  over any complete matches. The portion of the string
+       that was inspected when the longest partial match was found is  set  as
        the first matching string, provided there are at least two slots in the
        offsets vector.
 
-       Because  the  DFA functions always search for all possible matches, and
-       there is no difference between greedy and  ungreedy  repetition,  their
-       behaviour  is  different  from  the  standard  functions when PCRE_PAR-
-       TIAL_HARD is  set.  Consider  the  string  "dog"  matched  against  the
+       Because the DFA functions always search for all possible  matches,  and
+       there  is  no  difference between greedy and ungreedy repetition, their
+       behaviour is different  from  the  standard  functions  when  PCRE_PAR-
+       TIAL_HARD  is  set.  Consider  the  string  "dog"  matched  against the
        ungreedy pattern shown above:
 
          /dog(sbody)??/
 
-       Whereas  the  standard functions stop as soon as they find the complete
-       match for "dog", the DFA functions also  find  the  partial  match  for
+       Whereas the standard functions stop as soon as they find  the  complete
+       match  for  "dog",  the  DFA  functions also find the partial match for
        "dogsbody", and so return that when PCRE_PARTIAL_HARD is set.
 
 
 PARTIAL MATCHING AND WORD BOUNDARIES
 
-       If  a  pattern ends with one of sequences \b or \B, which test for word
-       boundaries, partial matching with PCRE_PARTIAL_SOFT can  give  counter-
+       If a pattern ends with one of sequences \b or \B, which test  for  word
+       boundaries,  partial  matching with PCRE_PARTIAL_SOFT can give counter-
        intuitive results. Consider this pattern:
 
          /\bcat\b/
 
        This matches "cat", provided there is a word boundary at either end. If
        the subject string is "the cat", the comparison of the final "t" with a
-       following  character  cannot  take  place, so a partial match is found.
-       However, normal matching carries on, and \b matches at the end  of  the
-       subject  when  the  last  character is a letter, so a complete match is
-       found.  The  result,  therefore,  is  not   PCRE_ERROR_PARTIAL.   Using
-       PCRE_PARTIAL_HARD  in  this case does yield PCRE_ERROR_PARTIAL, because
+       following character cannot take place, so a  partial  match  is  found.
+       However,  normal  matching carries on, and \b matches at the end of the
+       subject when the last character is a letter, so  a  complete  match  is
+       found.   The   result,  therefore,  is  not  PCRE_ERROR_PARTIAL.  Using
+       PCRE_PARTIAL_HARD in this case does yield  PCRE_ERROR_PARTIAL,  because
        then the partial match takes precedence.
 
 
 FORMERLY RESTRICTED PATTERNS
 
        For releases of PCRE prior to 8.00, because of the way certain internal
-       optimizations   were  implemented  in  the  pcre_exec()  function,  the
-       PCRE_PARTIAL option (predecessor of  PCRE_PARTIAL_SOFT)  could  not  be
-       used  with all patterns. From release 8.00 onwards, the restrictions no
-       longer apply, and partial matching with can be requested for  any  pat-
+       optimizations  were  implemented  in  the  pcre_exec()  function,   the
+       PCRE_PARTIAL  option  (predecessor  of  PCRE_PARTIAL_SOFT) could not be
+       used with all patterns. From release 8.00 onwards, the restrictions  no
+       longer  apply,  and partial matching with can be requested for any pat-
        tern.
 
        Items that were formerly restricted were repeated single characters and
-       repeated metasequences. If PCRE_PARTIAL was set for a pattern that  did
-       not  conform  to  the restrictions, pcre_exec() returned the error code
-       PCRE_ERROR_BADPARTIAL (-13). This error code is no longer in  use.  The
-       PCRE_INFO_OKPARTIAL  call  to pcre_fullinfo() to find out if a compiled
+       repeated  metasequences. If PCRE_PARTIAL was set for a pattern that did
+       not conform to the restrictions, pcre_exec() returned  the  error  code
+       PCRE_ERROR_BADPARTIAL  (-13).  This error code is no longer in use. The
+       PCRE_INFO_OKPARTIAL call to pcre_fullinfo() to find out if  a  compiled
        pattern can be used for partial matching now always returns 1.
 
 
 EXAMPLE OF PARTIAL MATCHING USING PCRETEST
 
-       If the escape sequence \P is present  in  a  pcretest  data  line,  the
-       PCRE_PARTIAL_SOFT  option  is  used  for  the  match.  Here is a run of
+       If  the  escape  sequence  \P  is  present in a pcretest data line, the
+       PCRE_PARTIAL_SOFT option is used for  the  match.  Here  is  a  run  of
        pcretest that uses the date example quoted above:
 
            re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
@@ -7589,24 +7623,24 @@ EXAMPLE OF PARTIAL MATCHING USING PCRETEST
          data> j\P
          No match
 
-       The first data string is matched  completely,  so  pcretest  shows  the
-       matched  substrings.  The  remaining four strings do not match the com-
+       The  first  data  string  is  matched completely, so pcretest shows the
+       matched substrings. The remaining four strings do not  match  the  com-
        plete pattern, but the first two are partial matches. Similar output is
        obtained if DFA matching is used.
 
-       If  the escape sequence \P is present more than once in a pcretest data
+       If the escape sequence \P is present more than once in a pcretest  data
        line, the PCRE_PARTIAL_HARD option is set for the match.
 
 
 MULTI-SEGMENT MATCHING WITH pcre_dfa_exec() OR pcre16_dfa_exec()
 
-       When a partial match has been found using a DFA matching  function,  it
-       is  possible to continue the match by providing additional subject data
-       and calling the function again with the same compiled  regular  expres-
-       sion,  this time setting the PCRE_DFA_RESTART option. You must pass the
+       When  a  partial match has been found using a DFA matching function, it
+       is possible to continue the match by providing additional subject  data
+       and  calling  the function again with the same compiled regular expres-
+       sion, this time setting the PCRE_DFA_RESTART option. You must pass  the
        same working space as before, because this is where details of the pre-
-       vious  partial  match  are  stored.  Here is an example using pcretest,
-       using the \R escape sequence to set  the  PCRE_DFA_RESTART  option  (\D
+       vious partial match are stored. Here  is  an  example  using  pcretest,
+       using  the  \R  escape  sequence to set the PCRE_DFA_RESTART option (\D
        specifies the use of the DFA matching function):
 
            re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
@@ -7615,47 +7649,47 @@ MULTI-SEGMENT MATCHING WITH pcre_dfa_exec() OR pcre16_dfa_exec()
          data> n05\R\D
           0: n05
 
-       The  first  call has "23ja" as the subject, and requests partial match-
-       ing; the second call  has  "n05"  as  the  subject  for  the  continued
-       (restarted)  match.   Notice  that when the match is complete, only the
-       last part is shown; PCRE does  not  retain  the  previously  partially-
-       matched  string. It is up to the calling program to do that if it needs
+       The first call has "23ja" as the subject, and requests  partial  match-
+       ing;  the  second  call  has  "n05"  as  the  subject for the continued
+       (restarted) match.  Notice that when the match is  complete,  only  the
+       last  part  is  shown;  PCRE  does not retain the previously partially-
+       matched string. It is up to the calling program to do that if it  needs
        to.
 
-       You can set the PCRE_PARTIAL_SOFT  or  PCRE_PARTIAL_HARD  options  with
-       PCRE_DFA_RESTART  to  continue partial matching over multiple segments.
-       This facility can be used to pass very long subject strings to the  DFA
+       You  can  set  the  PCRE_PARTIAL_SOFT or PCRE_PARTIAL_HARD options with
+       PCRE_DFA_RESTART to continue partial matching over  multiple  segments.
+       This  facility can be used to pass very long subject strings to the DFA
        matching functions.
 
 
 MULTI-SEGMENT MATCHING WITH pcre_exec() OR pcre16_exec()
 
-       From  release 8.00, the standard matching functions can also be used to
+       From release 8.00, the standard matching functions can also be used  to
        do multi-segment matching. Unlike the DFA functions, it is not possible
-       to  restart the previous match with a new segment of data. Instead, new
+       to restart the previous match with a new segment of data. Instead,  new
        data must be added to the previous subject string, and the entire match
-       re-run,  starting from the point where the partial match occurred. Ear-
+       re-run, starting from the point where the partial match occurred.  Ear-
        lier data can be discarded.
 
-       It is best to use PCRE_PARTIAL_HARD in this situation, because it  does
-       not  treat the end of a segment as the end of the subject when matching
-       \z, \Z, \b, \B, and $. Consider  an  unanchored  pattern  that  matches
+       It  is best to use PCRE_PARTIAL_HARD in this situation, because it does
+       not treat the end of a segment as the end of the subject when  matching
+       \z,  \Z,  \b,  \B,  and  $. Consider an unanchored pattern that matches
        dates:
 
            re> /\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d/
          data> The date is 23ja\P\P
          Partial match: 23ja
 
-       At  this stage, an application could discard the text preceding "23ja",
-       add on text from the next  segment,  and  call  the  matching  function
-       again.  Unlike  the  DFA  matching functions the entire matching string
-       must always be available, and the complete matching process occurs  for
+       At this stage, an application could discard the text preceding  "23ja",
+       add  on  text  from  the  next  segment, and call the matching function
+       again. Unlike the DFA matching functions  the  entire  matching  string
+       must  always be available, and the complete matching process occurs for
        each call, so more memory and more processing time is needed.
 
-       Note:  If  the pattern contains lookbehind assertions, or \K, or starts
+       Note: If the pattern contains lookbehind assertions, or \K,  or  starts
        with \b or \B, the string that is returned for a partial match includes
-       characters  that  precede  the partially matched string itself, because
-       these must be retained when adding on more characters for a  subsequent
+       characters that precede the partially matched  string  itself,  because
+       these  must be retained when adding on more characters for a subsequent
        matching attempt.
 
 
@@ -7665,28 +7699,28 @@ ISSUES WITH MULTI-SEGMENT MATCHING
        whichever matching function is used.
 
        1. If the pattern contains a test for the beginning of a line, you need
-       to  pass  the  PCRE_NOTBOL  option when the subject string for any call
-       does start at the beginning of a line.  There  is  also  a  PCRE_NOTEOL
+       to pass the PCRE_NOTBOL option when the subject  string  for  any  call
+       does  start  at  the  beginning  of a line. There is also a PCRE_NOTEOL
        option, but in practice when doing multi-segment matching you should be
        using PCRE_PARTIAL_HARD, which includes the effect of PCRE_NOTEOL.
 
-       2. Lookbehind assertions at the start of a pattern are catered  for  in
-       the  offsets that are returned for a partial match. However, in theory,
-       a lookbehind assertion later in the pattern could require even  earlier
-       characters  to  be inspected, and it might not have been reached when a
-       partial match occurs. This is probably an extremely unlikely case;  you
-       could  guard  against  it to a certain extent by always including extra
+       2.  Lookbehind  assertions at the start of a pattern are catered for in
+       the offsets that are returned for a partial match. However, in  theory,
+       a  lookbehind assertion later in the pattern could require even earlier
+       characters to be inspected, and it might not have been reached  when  a
+       partial  match occurs. This is probably an extremely unlikely case; you
+       could guard against it to a certain extent by  always  including  extra
        characters at the start.
 
-       3. Matching a subject string that is split into multiple  segments  may
-       not  always produce exactly the same result as matching over one single
-       long string, especially when PCRE_PARTIAL_SOFT  is  used.  The  section
-       "Partial  Matching  and  Word Boundaries" above describes an issue that
-       arises if the pattern ends with \b or \B. Another  kind  of  difference
-       may  occur when there are multiple matching possibilities, because (for
-       PCRE_PARTIAL_SOFT) a partial match result is given only when there  are
+       3.  Matching  a subject string that is split into multiple segments may
+       not always produce exactly the same result as matching over one  single
+       long  string,  especially  when  PCRE_PARTIAL_SOFT is used. The section
+       "Partial Matching and Word Boundaries" above describes  an  issue  that
+       arises  if  the  pattern ends with \b or \B. Another kind of difference
+       may occur when there are multiple matching possibilities, because  (for
+       PCRE_PARTIAL_SOFT)  a partial match result is given only when there are
        no completed matches. This means that as soon as the shortest match has
-       been found, continuation to a new subject segment is no  longer  possi-
+       been  found,  continuation to a new subject segment is no longer possi-
        ble. Consider again this pcretest example:
 
            re> /dog(sbody)?/
@@ -7700,18 +7734,18 @@ ISSUES WITH MULTI-SEGMENT MATCHING
           0: dogsbody
           1: dog
 
-       The  first  data  line passes the string "dogsb" to a standard matching
-       function, setting the PCRE_PARTIAL_SOFT option. Although the string  is
-       a  partial  match for "dogsbody", the result is not PCRE_ERROR_PARTIAL,
-       because the shorter string "dog" is a complete match.  Similarly,  when
-       the  subject  is  presented to a DFA matching function in several parts
-       ("do" and "gsb" being the first two) the match  stops  when  "dog"  has
-       been  found, and it is not possible to continue.  On the other hand, if
-       "dogsbody" is presented as a single string,  a  DFA  matching  function
+       The first data line passes the string "dogsb" to  a  standard  matching
+       function,  setting the PCRE_PARTIAL_SOFT option. Although the string is
+       a partial match for "dogsbody", the result is  not  PCRE_ERROR_PARTIAL,
+       because  the  shorter string "dog" is a complete match. Similarly, when
+       the subject is presented to a DFA matching function  in  several  parts
+       ("do"  and  "gsb"  being  the first two) the match stops when "dog" has
+       been found, and it is not possible to continue.  On the other hand,  if
+       "dogsbody"  is  presented  as  a single string, a DFA matching function
        finds both matches.
 
-       Because  of  these  problems,  it is best to use PCRE_PARTIAL_HARD when
-       matching multi-segment data. The example  above  then  behaves  differ-
+       Because of these problems, it is best  to  use  PCRE_PARTIAL_HARD  when
+       matching  multi-segment  data.  The  example above then behaves differ-
        ently:
 
            re> /dog(sbody)?/
@@ -7723,25 +7757,25 @@ ISSUES WITH MULTI-SEGMENT MATCHING
          Partial match: gsb
 
        4. Patterns that contain alternatives at the top level which do not all
-       start with the  same  pattern  item  may  not  work  as  expected  when
+       start  with  the  same  pattern  item  may  not  work  as expected when
        PCRE_DFA_RESTART is used. For example, consider this pattern:
 
          1234|3789
 
-       If  the  first  part of the subject is "ABC123", a partial match of the
-       first alternative is found at offset 3. There is no partial  match  for
+       If the first part of the subject is "ABC123", a partial  match  of  the
+       first  alternative  is found at offset 3. There is no partial match for
        the second alternative, because such a match does not start at the same
-       point in the subject string. Attempting to  continue  with  the  string
-       "7890"  does  not  yield  a  match because only those alternatives that
-       match at one point in the subject are remembered.  The  problem  arises
-       because  the  start  of the second alternative matches within the first
-       alternative. There is no problem with  anchored  patterns  or  patterns
+       point  in  the  subject  string. Attempting to continue with the string
+       "7890" does not yield a match  because  only  those  alternatives  that
+       match  at  one  point in the subject are remembered. The problem arises
+       because the start of the second alternative matches  within  the  first
+       alternative.  There  is  no  problem with anchored patterns or patterns
        such as:
 
          1234|ABCD
 
-       where  no  string can be a partial match for both alternatives. This is
-       not a problem if a standard matching  function  is  used,  because  the
+       where no string can be a partial match for both alternatives.  This  is
+       not  a  problem  if  a  standard matching function is used, because the
        entire match has to be rerun each time:
 
            re> /1234|3789/
@@ -7751,10 +7785,10 @@ ISSUES WITH MULTI-SEGMENT MATCHING
           0: 3789
 
        Of course, instead of using PCRE_DFA_RESTART, the same technique of re-
-       running the entire match can also be used with the DFA  matching  func-
-       tions.  Another  possibility  is to work with two buffers. If a partial
-       match at offset n in the first buffer is followed by  "no  match"  when
-       PCRE_DFA_RESTART  is  used on the second buffer, you can then try a new
+       running  the  entire match can also be used with the DFA matching func-
+       tions. Another possibility is to work with two buffers.  If  a  partial
+       match  at  offset  n in the first buffer is followed by "no match" when
+       PCRE_DFA_RESTART is used on the second buffer, you can then try  a  new
        match starting at offset n+1 in the first buffer.
 
 
@@ -7767,11 +7801,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 08 January 2012
+       Last updated: 21 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
@@ -7905,8 +7939,8 @@ REVISION
        Last updated: 10 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
@@ -8075,8 +8109,8 @@ REVISION
        Last updated: 09 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
@@ -8339,8 +8373,8 @@ REVISION
        Last updated: 09 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECPP(3)                                                          PCRECPP(3)
 
 
@@ -8681,8 +8715,8 @@ REVISION
 
        Last updated: 08 January 2012
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
@@ -8825,8 +8859,8 @@ REVISION
        Last updated: 08 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESTACK(3)                                                      PCRESTACK(3)
 
 
@@ -8944,6 +8978,30 @@ PCRE DISCUSSION OF STACK USAGE
        subject string. This is done by calling pcre[16]_exec() repeatedly with
        different limits.
 
+   Obtaining an estimate of stack usage
+
+       The  actual  amount  of  stack used per recursion can vary quite a lot,
+       depending on the compiler that was used to build PCRE and the optimiza-
+       tion or debugging options that were set for it. The rule of thumb value
+       of 500 bytes mentioned above may be larger  or  smaller  than  what  is
+       actually needed. A better approximation can be obtained by running this
+       command:
+
+         pcretest -m -C
+
+       The -C option causes pcretest to output information about  the  options
+       with which PCRE was compiled. When -m is also given (before -C), infor-
+       mation about stack use is given in a line like this:
+
+         Match recursion uses stack: approximate frame size = 640 bytes
+
+       The value is approximate because some recursions need a bit more (up to
+       perhaps 16 more bytes).
+
+       If  the  above  command  is given when PCRE is compiled to use the heap
+       instead of the stack for recursion, the value that  is  output  is  the
+       size of each block that is obtained from the heap.
+
    Changing stack size in Unix-like systems
 
        In  Unix-like environments, there is not often a problem with the stack
@@ -8983,8 +9041,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 10 January 2012
+       Last updated: 21 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+

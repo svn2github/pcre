@@ -52,26 +52,26 @@ options and exactly what is output.
 </P>
 <br><a name="SEC2" href="#TOC1">PCRE's 8-BIT and 16-BIT LIBRARIES</a><br>
 <P>
-From release 8.30, two separate PCRE libraries can be built. The original one 
-supports 8-bit character strings, whereas the newer 16-bit library supports 
-character strings encoded in 16-bit units. The <b>pcretest</b> program can be 
+From release 8.30, two separate PCRE libraries can be built. The original one
+supports 8-bit character strings, whereas the newer 16-bit library supports
+character strings encoded in 16-bit units. The <b>pcretest</b> program can be
 used to test both libraries. However, it is itself still an 8-bit program,
 reading 8-bit input and writing 8-bit output. When testing the 16-bit library,
 the patterns and data strings are converted to 16-bit format before being
-passed to the PCRE library functions. Results are converted to 8-bit for 
+passed to the PCRE library functions. Results are converted to 8-bit for
 output.
 </P>
 <P>
-References to functions and structures of the form <b>pcre[16]_xx</b> below 
-mean "<b>pcre_xx</b> when using the 8-bit library or <b>pcre16_xx</b> when using 
+References to functions and structures of the form <b>pcre[16]_xx</b> below
+mean "<b>pcre_xx</b> when using the 8-bit library or <b>pcre16_xx</b> when using
 the 16-bit library".
 </P>
 <br><a name="SEC3" href="#TOC1">COMMAND LINE OPTIONS</a><br>
 <P>
 <b>-16</b>
-If both the 8-bit and the 16-bit libraries have been built, this option causes 
-the 16-bit library to be used. If only the 16-bit library has been built, this 
-is the default (so has no effect). If only the 8-bit library has been built, 
+If both the 8-bit and the 16-bit libraries have been built, this option causes
+the 16-bit library to be used. If only the 16-bit library has been built, this
+is the default (so has no effect). If only the 8-bit library has been built,
 this option causes an error.
 </P>
 <P>
@@ -82,25 +82,25 @@ internal form is output after compilation.
 <P>
 <b>-C</b>
 Output the version number of the PCRE library, and all available information
-about the optional features that are included, and then exit. All other options 
+about the optional features that are included, and then exit. All other options
 are ignored.
 </P>
 <P>
 <b>-C</b> <i>option</i>
-Output information about a specific build-time option, then exit. This 
-functionality is intended for use in scripts such as <b>RunTest</b>. The 
+Output information about a specific build-time option, then exit. This
+functionality is intended for use in scripts such as <b>RunTest</b>. The
 following options output the value indicated:
 <pre>
   linksize   the internal link size (2, 3, or 4)
-  newline    the default newline setting: 
-               CR, LF, CRLF, ANYCRLF, or ANY  
+  newline    the default newline setting:
+               CR, LF, CRLF, ANYCRLF, or ANY
 </pre>
 The following options output 1 for true or zero for false:
 <pre>
   jit        just-in-time support is available
   pcre16     the 16-bit library was built
   pcre8      the 8-bit library was built
-  ucp        Unicode property support is available    
+  ucp        Unicode property support is available
   utf        UTF-8 and/or UTF-16 support is available
 </PRE>
 </P>
@@ -134,7 +134,7 @@ calling <b>pcre[16]_exec()</b> repeatedly with different limits.
 <P>
 <b>-m</b>
 Output the size of each compiled pattern after it has been compiled. This is
-equivalent to adding <b>/M</b> to each regular expression. The size is given in 
+equivalent to adding <b>/M</b> to each regular expression. The size is given in
 bytes for both libraries.
 </P>
 <P>
@@ -172,7 +172,7 @@ result of studying is not included when studying is caused only by <b>-s</b> and
 neither <b>-i</b> nor <b>-d</b> is present on the command line. This behaviour
 means that the output from tests that are run with and without <b>-s</b> should
 be identical, except when options that output information about the actual
-running of a match are set. 
+running of a match are set.
 <br>
 <br>
 The <b>-M</b>, <b>-t</b>, and <b>-tm</b> options, which give information about
@@ -276,7 +276,7 @@ effect as they do in Perl. For example:
 The following table shows additional modifiers for setting PCRE compile-time
 options that do not correspond to anything in Perl:
 <pre>
-  <b>/8</b>              PCRE_UTF8           ) when using the 8-bit 
+  <b>/8</b>              PCRE_UTF8           ) when using the 8-bit
   <b>/?</b>              PCRE_NO_UTF8_CHECK  )   library
 
   <b>/8</b>              PCRE_UTF16          ) when using the 16-bit
@@ -309,7 +309,7 @@ This example sets multiline matching with CRLF as the line ending sequence:
 </pre>
 As well as turning on the PCRE_UTF8/16 option, the <b>/8</b> modifier causes
 all non-printing characters in output strings to be printed using the
-\x{hh...} notation. Otherwise, those less than 0x100 are output in hex without 
+\x{hh...} notation. Otherwise, those less than 0x100 are output in hex without
 the curly brackets.
 </P>
 <P>
@@ -661,7 +661,7 @@ substring is shown as "&#60;unset&#62;", as for the second data line.
    2: b
 </pre>
 If the strings contain any non-printing characters, they are output as \xhh
-escapes if the value is less than 256 and UTF mode is not set. Otherwise they 
+escapes if the value is less than 256 and UTF mode is not set. Otherwise they
 are output as \x{hh...} escapes. See below for the definition of non-printing
 characters. If the pattern has the <b>/+</b> modifier, the output for substring
 0 is followed by the the rest of the subject string, identified by "0+" like
@@ -881,15 +881,15 @@ been loaded, <b>pcretest</b> proceeds to read data lines in the usual way.
 You can copy a file written by <b>pcretest</b> to a different host and reload it
 there, even if the new host has opposite endianness to the one on which the
 pattern was compiled. For example, you can compile on an i86 machine and run on
-a SPARC machine. When a pattern is reloaded on a host with different 
+a SPARC machine. When a pattern is reloaded on a host with different
 endianness, the confirmation message is changed to:
 <pre>
   Compiled pattern (byte-inverted) loaded from /some/file
 </pre>
-The test suite contains some saved pre-compiled patterns with different 
-endianness. These are reloaded using "&#60;!" instead of just "&#60;". This suppresses 
-the "(byte-inverted)" text so that the output is the same on all hosts. It also 
-forces debugging output once the pattern has been reloaded.   
+The test suite contains some saved pre-compiled patterns with different
+endianness. These are reloaded using "&#60;!" instead of just "&#60;". This suppresses
+the "(byte-inverted)" text so that the output is the same on all hosts. It also
+forces debugging output once the pattern has been reloaded.
 </P>
 <P>
 File names for saving and reloading can be absolute or relative, but note that

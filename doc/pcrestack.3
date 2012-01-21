@@ -140,24 +140,24 @@ limits.
 .sp
 The actual amount of stack used per recursion can vary quite a lot, depending
 on the compiler that was used to build PCRE and the optimization or debugging
-options that were set for it. The rule of thumb value of 500 bytes mentioned 
-above may be larger or smaller than what is actually needed. A better 
+options that were set for it. The rule of thumb value of 500 bytes mentioned
+above may be larger or smaller than what is actually needed. A better
 approximation can be obtained by running this command:
 .sp
   pcretest -m -C
 .sp
-The \fB-C\fP option causes \fBpcretest\fP to output information about the 
-options with which PCRE was compiled. When \fB-m\fP is also given (before 
+The \fB-C\fP option causes \fBpcretest\fP to output information about the
+options with which PCRE was compiled. When \fB-m\fP is also given (before
 \fB-C\fP), information about stack use is given in a line like this:
 .sp
   Match recursion uses stack: approximate frame size = 640 bytes
-.sp      
-The value is approximate because some recursions need a bit more (up to perhaps 
+.sp
+The value is approximate because some recursions need a bit more (up to perhaps
 16 more bytes).
 .P
-If the above command is given when PCRE is compiled to use the heap instead of 
-the stack for recursion, the value that is output is the size of each block 
-that is obtained from the heap. 
+If the above command is given when PCRE is compiled to use the heap instead of
+the stack for recursion, the value that is output is the size of each block
+that is obtained from the heap.
 .
 .
 .SS "Changing stack size in Unix-like systems"

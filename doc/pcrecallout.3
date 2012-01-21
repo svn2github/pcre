@@ -11,7 +11,7 @@ PCRE - Perl-compatible regular expressions
 PCRE provides a feature called "callout", which is a means of temporarily
 passing control to the caller of PCRE in the middle of pattern matching. The
 caller of PCRE provides an external function by putting its entry point in the
-global variable \fIpcre_callout\fP (\fIpcre16_callout\fP for the 16-bit 
+global variable \fIpcre_callout\fP (\fIpcre16_callout\fP for the 16-bit
 library). By default, this variable contains NULL, which disables all calling
 out.
 .P
@@ -85,7 +85,7 @@ These structures contains the following fields:
   int           \fIcallout_number\fP;
   int          *\fIoffset_vector\fP;
   const char   *\fIsubject\fP;           (8-bit version)
-  PCRE_SPTR16   \fIsubject\fP;           (16-bit version) 
+  PCRE_SPTR16   \fIsubject\fP;           (16-bit version)
   int           \fIsubject_length\fP;
   int           \fIstart_match\fP;
   int           \fIcurrent_position\fP;
@@ -107,7 +107,7 @@ into the pattern (that is, the number after ?C for manual callouts, and 255 for
 automatically generated callouts).
 .P
 The \fIoffset_vector\fP field is a pointer to the vector of offsets that was
-passed by the caller to the matching function. When \fBpcre_exec()\fP or 
+passed by the caller to the matching function. When \fBpcre_exec()\fP or
 \fBpcre16_exec()\fP is used, the contents can be inspected, in order to extract
 substrings that have been matched so far, in the same way as for extracting
 substrings after a match has completed. For the DFA matching functions, this

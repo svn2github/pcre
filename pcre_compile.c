@@ -488,7 +488,7 @@ static const char error_texts[] =
   "\\N is not supported in a class\0"
   "too many forward references\0"
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
-  "invalid UTF-16 string\0" 
+  "invalid UTF-16 string\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -998,9 +998,9 @@ else
     c -= CHAR_0;
     while(i++ < 2 && ptr[1] >= CHAR_0 && ptr[1] <= CHAR_7)
         c = c * 8 + *(++ptr) - CHAR_0;
-#ifdef COMPILE_PCRE8         
+#ifdef COMPILE_PCRE8
     if (!utf && c > 0xff) *errorcodeptr = ERR51;
-#endif     
+#endif
     break;
 
     /* \x is complicated. \x{ddd} is a character number which can be greater
@@ -7709,11 +7709,11 @@ not used here. */
 if (utf && (options & PCRE_NO_UTF8_CHECK) == 0 &&
      (errorcode = PRIV(valid_utf)((PCRE_PUCHAR)pattern, -1, erroroffset)) != 0)
   {
-#ifdef COMPILE_PCRE8   
+#ifdef COMPILE_PCRE8
   errorcode = ERR44;
-#else   
+#else
   errorcode = ERR74;
-#endif   
+#endif
   goto PCRE_EARLY_ERROR_RETURN2;
   }
 #else

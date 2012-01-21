@@ -41,6 +41,9 @@ point to an unsigned long integer. The available codes are:
 <pre>
   PCRE_CONFIG_JIT           Availability of just-in-time compiler
                               support (1=yes 0=no)
+  PCRE_CONFIG_JITTARGET     String containing information about the
+                              target architecture for the JIT compiler,
+                              or NULL if there is no JIT support
   PCRE_CONFIG_LINK_SIZE     Internal link size: 2, 3, or 4
   PCRE_CONFIG_MATCH_LIMIT   Internal resource limit
   PCRE_CONFIG_MATCH_LIMIT_RECURSION
@@ -66,7 +69,7 @@ point to an unsigned long integer. The available codes are:
                             Availability of Unicode property support
                               (1=yes 0=no)
 </pre>
-The function yields 0 on success or PCRE_ERROR_BADOPTION otherwise. That error 
+The function yields 0 on success or PCRE_ERROR_BADOPTION otherwise. That error
 is also given if PCRE_CONFIG_UTF16 is passed to <b>pcre_config()</b> or if
 PCRE_CONFIG_UTF8 is passed to <b>pcre16_config()</b>.
 </P>

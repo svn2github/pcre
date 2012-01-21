@@ -393,7 +393,7 @@ SET(PCRE_SOURCES
   pcre_newline.c
   pcre_ord2utf8.c
   pcre_refcount.c
-  pcre_string_utils.c 
+  pcre_string_utils.c
   pcre_study.c
   pcre_tables.c
   pcre_ucd.c

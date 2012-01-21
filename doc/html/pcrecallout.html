@@ -31,7 +31,7 @@ man page, in case the conversion went wrong.
 PCRE provides a feature called "callout", which is a means of temporarily
 passing control to the caller of PCRE in the middle of pattern matching. The
 caller of PCRE provides an external function by putting its entry point in the
-global variable <i>pcre_callout</i> (<i>pcre16_callout</i> for the 16-bit 
+global variable <i>pcre_callout</i> (<i>pcre16_callout</i> for the 16-bit
 library). By default, this variable contains NULL, which disables all calling
 out.
 </P>
@@ -105,7 +105,7 @@ These structures contains the following fields:
   int           <i>callout_number</i>;
   int          *<i>offset_vector</i>;
   const char   *<i>subject</i>;           (8-bit version)
-  PCRE_SPTR16   <i>subject</i>;           (16-bit version) 
+  PCRE_SPTR16   <i>subject</i>;           (16-bit version)
   int           <i>subject_length</i>;
   int           <i>start_match</i>;
   int           <i>current_position</i>;
@@ -129,7 +129,7 @@ automatically generated callouts).
 </P>
 <P>
 The <i>offset_vector</i> field is a pointer to the vector of offsets that was
-passed by the caller to the matching function. When <b>pcre_exec()</b> or 
+passed by the caller to the matching function. When <b>pcre_exec()</b> or
 <b>pcre16_exec()</b> is used, the contents can be inspected, in order to extract
 substrings that have been matched so far, in the same way as for extracting
 substrings after a match has completed. For the DFA matching functions, this

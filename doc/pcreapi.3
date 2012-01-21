@@ -148,7 +148,7 @@ just use different data types for their arguments and results, and their names
 start with \fBpcre16_\fP instead of \fBpcre_\fP. For every option that has UTF8
 in its name (for example, PCRE_UTF8), there is a corresponding 16-bit name with
 UTF8 replaced by UTF16. This facility is in fact just cosmetic; the 16-bit
-option names define the same bit values. 
+option names define the same bit values.
 .P
 References to bytes and UTF-8 in this document should be read as references to
 16-bit data quantities and UTF-16 when using the 16-bit library, unless
@@ -157,7 +157,7 @@ library are given in the
 .\" HREF
 \fBpcre16\fP
 .\"
-page. 
+page.
 .
 .
 .SH "PCRE API OVERVIEW"
@@ -392,7 +392,7 @@ not recognized. The following information is available:
   PCRE_CONFIG_UTF8
 .sp
 The output is an integer that is set to one if UTF-8 support is available;
-otherwise it is set to zero. If this option is given to the 16-bit version of 
+otherwise it is set to zero. If this option is given to the 16-bit version of
 this function, \fBpcre16_config()\fP, the result is PCRE_ERROR_BADOPTION.
 .sp
   PCRE_CONFIG_UTF16
@@ -415,8 +415,8 @@ compiling is available; otherwise it is set to zero.
   PCRE_CONFIG_JITTARGET
 .sp
 The output is a pointer to a zero-terminated "const char *" string. If JIT
-support is available, the string contains the name of the architecture for 
-which the JIT compiler is configured, for example "x86 32bit (little endian + 
+support is available, the string contains the name of the architecture for
+which the JIT compiler is configured, for example "x86 32bit (little endian +
 unaligned)". If JIT support is not available, the result is NULL.
 .sp
   PCRE_CONFIG_NEWLINE
@@ -742,7 +742,7 @@ preceding sequences should be recognized. Setting PCRE_NEWLINE_ANY specifies
 that any Unicode newline sequence should be recognized. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
 tab, U+000B), FF (formfeed, U+000C), NEL (next line, U+0085), LS (line
-separator, U+2028), and PS (paragraph separator, U+2029). For the 8-bit 
+separator, U+2028), and PS (paragraph separator, U+2029). For the 8-bit
 library, the last two are recognized only in UTF-8 mode.
 .P
 The newline setting in the options word uses three bits that are treated
@@ -819,11 +819,11 @@ page.
 .sp
   PCRE_NO_UTF8_CHECK
 .sp
-When PCRE_UTF8 is set, the validity of the pattern as a UTF-8 
+When PCRE_UTF8 is set, the validity of the pattern as a UTF-8
 string is automatically checked. There is a discussion about the
 .\" HTML <a href="pcreunicode.html#utf8strings">
 .\" </a>
-validity of UTF-8 strings 
+validity of UTF-8 strings
 .\"
 in the
 .\" HREF
@@ -843,7 +843,7 @@ validity checking of subject strings.
 .sp
 The following table lists the error codes than may be returned by
 \fBpcre_compile2()\fP, along with the error messages that may be returned by
-both compiling functions. Note that error messages are always 8-bit ASCII 
+both compiling functions. Note that error messages are always 8-bit ASCII
 strings, even in 16-bit mode. As PCRE has developed, some error codes have
 fallen out of use. To avoid confusion, they have not been re-used.
 .sp
@@ -917,14 +917,14 @@ fallen out of use. To avoid confusion, they have not been re-used.
   65  different names for subpatterns of the same number are
         not allowed
   66  (*MARK) must have an argument
-  67  this version of PCRE is not compiled with Unicode property 
+  67  this version of PCRE is not compiled with Unicode property
         support
   68  \ec must be followed by an ASCII character
   69  \ek is not followed by a braced, angle-bracketed, or quoted name
   70  internal error: unknown opcode in find_fixedlength()
   71  \eN is not supported in a class
   72  too many forward references
-  73  disallowed Unicode code point (>= 0xd800 && <= 0xdfff)    
+  73  disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
   74  invalid UTF-16 string (specifically UTF-16)
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
@@ -1120,12 +1120,12 @@ the following negative numbers:
   PCRE_ERROR_NULL           the argument \fIcode\fP was NULL
                             the argument \fIwhere\fP was NULL
   PCRE_ERROR_BADMAGIC       the "magic number" was not found
-  PCRE_ERROR_BADENDIANNESS  the pattern was compiled with different 
+  PCRE_ERROR_BADENDIANNESS  the pattern was compiled with different
                             endianness
   PCRE_ERROR_BADOPTION      the value of \fIwhat\fP was invalid
 .sp
 The "magic number" is placed at the start of each compiled pattern as an simple
-check against passing an arbitrary memory pointer. The endianness error can 
+check against passing an arbitrary memory pointer. The endianness error can
 occur if a compiled pattern is saved and reloaded on a different host. Here is
 a typical call of \fBpcre_fullinfo()\fP, to obtain the length of the compiled
 pattern:
@@ -1168,8 +1168,8 @@ where data units are bytes.) The fourth argument should point to an \fBint\fP
 variable.
 .P
 If there is a fixed first value, for example, the letter "c" from a pattern
-such as (cat|cow|coyote), its value is returned. In the 8-bit library, the 
-value is always less than 256; in the 16-bit library the value can be up to 
+such as (cat|cow|coyote), its value is returned. In the 8-bit library, the
+value is always less than 256; in the 16-bit library the value can be up to
 0xffff.
 .P
 If there is no fixed first value, and if either
@@ -1459,7 +1459,7 @@ fields (not necessarily in this order):
   const unsigned char *\fItables\fP;
   unsigned char **\fImark\fP;
 .sp
-In the 16-bit version of this structure, the \fImark\fP field has type 
+In the 16-bit version of this structure, the \fImark\fP field has type
 "PCRE_UCHAR16 **".
 .P
 The \fIflags\fP field is a bitmap that specifies which of the other fields
@@ -2092,14 +2092,14 @@ documentation for more details.
 .sp
   PCRE_ERROR_BADMODE (-28)
 .sp
-This error is given if a pattern that was compiled by the 8-bit library is 
+This error is given if a pattern that was compiled by the 8-bit library is
 passed to a 16-bit library function, or vice versa.
 .sp
   PCRE_ERROR_BADENDIANNESS (-29)
-.sp      
-This error is given if a pattern that was compiled and saved is reloaded on a 
-host with different endianness. The utility function 
-\fBpcre_pattern_to_host_byte_order()\fP can be used to convert such a pattern 
+.sp
+This error is given if a pattern that was compiled and saved is reloaded on a
+host with different endianness. The utility function
+\fBpcre_pattern_to_host_byte_order()\fP can be used to convert such a pattern
 so that it runs on the new host.
 .P
 Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
@@ -2109,7 +2109,7 @@ Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
 .SS "Reason codes for invalid UTF-8 strings"
 .rs
 .sp
-This section applies only to the 8-bit library. The corresponding information 
+This section applies only to the 8-bit library. The corresponding information
 for the 16-bit library is given in the
 .\" HREF
 \fBpcre16\fP
@@ -2417,14 +2417,14 @@ will yield PCRE_ERROR_NOMATCH.
 .rs
 .sp
 Matching certain patterns using \fBpcre_exec()\fP can use a lot of process
-stack, which in certain environments can be rather limited in size. Some users 
-find it helpful to have an estimate of the amount of stack that is used by 
+stack, which in certain environments can be rather limited in size. Some users
+find it helpful to have an estimate of the amount of stack that is used by
 \fBpcre_exec()\fP, to help them set recursion limits, as described in the
 .\" HREF
 \fBpcrestack\fP
 .\"
-documentation. The estimate that is output by \fBpcretest\fP when called with 
-the \fB-m\fP and \fB-C\fP options is obtained by calling \fBpcre_exec\fP with 
+documentation. The estimate that is output by \fBpcretest\fP when called with
+the \fB-m\fP and \fB-C\fP options is obtained by calling \fBpcre_exec\fP with
 the values NULL, NULL, NULL, -999, and -999 for its first five arguments.
 .P
 Normally, if its first argument is NULL, \fBpcre_exec()\fP immediately returns
@@ -2432,10 +2432,10 @@ the negative error code PCRE_ERROR_NULL, but with this special combination of
 arguments, it returns instead a negative number whose absolute value is the
 approximate stack frame size in bytes. (A negative number is used so that it is
 clear that no match has happened.) The value is approximate because in some
-cases, recursive calls to \fBpcre_exec()\fP occur when there are one or two 
+cases, recursive calls to \fBpcre_exec()\fP occur when there are one or two
 additional variables on the stack.
 .P
-If PCRE has been compiled to use the heap instead of the stack for recursion, 
+If PCRE has been compiled to use the heap instead of the stack for recursion,
 the value returned is the size of each block that is obtained from the heap.
 .
 .

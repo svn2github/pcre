@@ -20,15 +20,15 @@ SYNOPSIS
 </P>
 <P>
 <b>int pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *<i>output</i>,</b>
-<b>PCRE_SPTR16 <i>input</i>, int <i>length</i>, int *<i>host_byte_order</i>, </b>
+<b>PCRE_SPTR16 <i>input</i>, int <i>length</i>, int *<i>host_byte_order</i>,</b>
 <b>int <i>keep_boms</i>);</b>
 </P>
 <br><b>
 DESCRIPTION
 </b><br>
 <P>
-This function, which exists only in the 16-bit library, converts a UTF-16 
-string to the correct order for the current host, taking account of any byte 
+This function, which exists only in the 16-bit library, converts a UTF-16
+string to the correct order for the current host, taking account of any byte
 order marks (BOMs) within the string. Its arguments are:
 <pre>
   <i>output</i>           pointer to output buffer, may be the same as <i>input</i>

@@ -11,7 +11,7 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [30])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2012-01-20])
+m4_define(pcre_date, [2012-01-21])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
@@ -774,8 +774,9 @@ AC_SUBST(EXTRA_LIBPCRE16_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 
-# When we run 'make distcheck', use these arguments.
-DISTCHECK_CONFIGURE_FLAGS="--enable-pcre16 --enable-jit --enable-cpp --enable-unicode-properties"
+# When we run 'make distcheck', use these arguments. Turning off compiler
+# optimization makes it run faster.
+DISTCHECK_CONFIGURE_FLAGS="CFLAGS='' CXXFLAGS='' --enable-pcre16 --enable-jit --enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 # Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is

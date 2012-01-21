@@ -14,7 +14,7 @@ other pcretest modifiers that are either handled or ignored:
   /W   ignored
   /S   ignored
   /SS  ignored
-  /Y   ignored 
+  /Y   ignored
 
 The pcretest \Y escape in data lines is removed before matching. The data lines
 are processed as Perl double-quoted strings, so if they contain " $ or @
@@ -29,7 +29,7 @@ The perltest.pl script can also test UTF-8 features. It recognizes the special
 modifier /8 that pcretest uses to invoke UTF-8 functionality. The testinput4
 and testinput6 files can be fed to perltest to run compatible UTF-8 tests.
 However, it is necessary to add "use utf8; require Encode" to the script to
-make this work correctly. I have not managed to find a way to handle this 
+make this work correctly. I have not managed to find a way to handle this
 automatically.
 
 The other testinput files are not suitable for feeding to perltest.pl, since

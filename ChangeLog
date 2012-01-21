@@ -32,33 +32,33 @@ Version 8.30
 
 8.  Ovector size of 2 is also supported by JIT based pcre_exec (the ovector size
     rounding is not applied in this particular case).
-  
+
 9.  The invalid Unicode surrogate codepoints U+D800 to U+DFFF are now rejected
     if they appear, or are escaped, in patterns.
-    
-10. Get rid of a number of -Wunused-but-set-variable warnings. 
 
-11. The pattern /(?=(*:x))(q|)/ matches an empty string, and returns the mark 
-    "x". The similar pattern /(?=(*:x))((*:y)q|)/ did not return a mark at all. 
-    Oddly, Perl behaves the same way. PCRE has been fixed so that this pattern 
-    also returns the mark "x". This bug applied to capturing parentheses, 
-    non-capturing parentheses, and atomic parentheses. It also applied to some 
+10. Get rid of a number of -Wunused-but-set-variable warnings.
+
+11. The pattern /(?=(*:x))(q|)/ matches an empty string, and returns the mark
+    "x". The similar pattern /(?=(*:x))((*:y)q|)/ did not return a mark at all.
+    Oddly, Perl behaves the same way. PCRE has been fixed so that this pattern
+    also returns the mark "x". This bug applied to capturing parentheses,
+    non-capturing parentheses, and atomic parentheses. It also applied to some
     assertions.
-    
-12. Stephen Kelly's patch to CMakeLists.txt allows it to parse the version 
-    information out of configure.ac instead of relying on pcre.h.generic, which 
-    is not stored in the repository.  
-    
+
+12. Stephen Kelly's patch to CMakeLists.txt allows it to parse the version
+    information out of configure.ac instead of relying on pcre.h.generic, which
+    is not stored in the repository.
+
 13. Applied Dmitry V. Levin's patch for a more portable method for linking with
     -lreadline.
-    
-14. ZH added PCRE_CONFIG_JITTARGET; added its output to pcretest -C. 
 
-15. Applied Graycode's patch to put the top-level frame on the stack rather 
-    than the heap when not using the stack for recursion. This gives a 
+14. ZH added PCRE_CONFIG_JITTARGET; added its output to pcretest -C.
+
+15. Applied Graycode's patch to put the top-level frame on the stack rather
+    than the heap when not using the stack for recursion. This gives a
     performance improvement in many cases when recursion is not deep.
-    
-16. Experimental code added to "pcretest -C" to output the stack frame size. 
+
+16. Experimental code added to "pcretest -C" to output the stack frame size.
 
 
 Version 8.21 12-Dec-2011

@@ -11,11 +11,11 @@ appeared in Perl are also available using the Python syntax, there is some
 support for one or two .NET and Oniguruma syntax items, and there is an option
 for requesting some minor changes that give better JavaScript compatibility.
 .P
-Starting with release 8.30, it is possible to compile two separate PCRE 
+Starting with release 8.30, it is possible to compile two separate PCRE
 libraries: the original, which supports 8-bit character strings (including
 UTF-8 strings), and a second library that supports 16-bit character strings
 (including UTF-16 strings). The build process allows either one or both to be
-built. The majority of the work to make this possible was done by Zoltan 
+built. The majority of the work to make this possible was done by Zoltan
 Herczeg.
 .P
 The two libraries contain identical sets of functions, except that the names in
@@ -26,8 +26,8 @@ library described separately in the
 .\" HREF
 \fBpcre16\fP
 .\"
-page. References to functions or structures of the form \fIpcre[16]_xxx\fP 
-should be read as meaning "\fIpcre_xxx\fP when using the 8-bit library and 
+page. References to functions or structures of the form \fIpcre[16]_xxx\fP
+should be read as meaning "\fIpcre_xxx\fP when using the 8-bit library and
 \fIpcre16_xxx\fP when using the 16-bit library".
 .P
 The current implementation of PCRE corresponds approximately with Perl 5.12,
@@ -106,7 +106,7 @@ all the sections, except the \fBpcredemo\fP section, are concatenated, for ease
 of searching. The sections are as follows:
 .sp
   pcre              this document
-  pcre16            details of the 16-bit library 
+  pcre16            details of the 16-bit library
   pcre-config       show PCRE installation configuration information
   pcreapi           details of PCRE's native C API
   pcrebuild         options for building PCRE
