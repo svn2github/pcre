@@ -619,7 +619,7 @@ eptrblock newptrb;
 /* There is a special fudge for calling match() in a way that causes it to 
 measure the size of its basic stack frame when the stack is being used for
 recursion. The second argument (ecode) being NULL triggers this behaviour. It
-cannot normally every be NULL. The return is the negated value of the frame
+cannot normally ever be NULL. The return is the negated value of the frame
 size. */
 
 if (ecode == NULL)
@@ -6210,7 +6210,8 @@ const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 /* Check for the special magic call that measures the size of the stack used 
 per recursive call of match(). */
 
-if (re == NULL && extra_data == NULL && subject == NULL && length == -1)
+if (re == NULL && extra_data == NULL && subject == NULL && length == -999 &&
+    start_offset == -999)
 #ifdef NO_RECURSE
   return -sizeof(heapframe);
 #else  

@@ -2439,7 +2439,7 @@ are set, either both UTFs are supported or both are not supported. */
     printf("  Match recursion uses %s", rc? "stack" : "heap");
     if (showstore)
       { 
-      PCRE_EXEC(stack_size, NULL, NULL, NULL, -1, -1, 0, NULL, 0);
+      PCRE_EXEC(stack_size, NULL, NULL, NULL, -999, -999, 0, NULL, 0);
       printf(": %sframe size = %d bytes", rc? "approximate " : "", -stack_size); 
       }
     printf("\n");   

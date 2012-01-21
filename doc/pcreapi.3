@@ -2413,6 +2413,32 @@ other alternatives. Ultimately, when it runs out of matches, \fBpcre_exec()\fP
 will yield PCRE_ERROR_NOMATCH.
 .
 .
+.SH "OBTAINING AN ESTIMATE OF STACK USAGE"
+.rs
+.sp
+Matching certain patterns using \fBpcre_exec()\fP can use a lot of process
+stack, which in certain environments can be rather limited in size. Some users 
+find it helpful to have an estimate of the amount of stack that is used by 
+\fBpcre_exec()\fP, to help them set recursion limits, as described in the
+.\" HREF
+\fBpcrestack\fP
+.\"
+documentation. The estimate that is output by \fBpcretest\fP when called with 
+the \fB-m\fP and \fB-C\fP options is obtained by calling \fBpcre_exec\fP with 
+the values NULL, NULL, NULL, -999, and -999 for its first five arguments.
+.P
+Normally, if its first argument is NULL, \fBpcre_exec()\fP immediately returns
+the negative error code PCRE_ERROR_NULL, but with this special combination of
+arguments, it returns instead a negative number whose absolute value is the
+approximate stack frame size in bytes. (A negative number is used so that it is
+clear that no match has happened.) The value is approximate because in some
+cases, recursive calls to \fBpcre_exec()\fP occur when there are one or two 
+additional variables on the stack.
+.P
+If PCRE has been compiled to use the heap instead of the stack for recursion, 
+the value returned is the size of each block that is obtained from the heap.
+.
+.
 .\" HTML <a name="dfamatch"></a>
 .SH "MATCHING A PATTERN: THE ALTERNATIVE FUNCTION"
 .rs
@@ -2618,6 +2644,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 January 2012
+Last updated: 21 January 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

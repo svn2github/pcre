@@ -123,9 +123,9 @@ in the
 documentation.
 .P
 As a very rough rule of thumb, you should reckon on about 500 bytes per
-recursion. Thus, if you want to limit your stack usage to 8Mb, you
-should set the limit at 16000 recursions. A 64Mb stack, on the other hand, can
-support around 128000 recursions.
+recursion. Thus, if you want to limit your stack usage to 8Mb, you should set
+the limit at 16000 recursions. A 64Mb stack, on the other hand, can support
+around 128000 recursions.
 .P
 In Unix-like environments, the \fBpcretest\fP test program has a command line
 option (\fB-S\fP) that can be used to increase the size of its stack. As long
@@ -133,6 +133,31 @@ as the stack is large enough, another option (\fB-M\fP) can be used to find the
 smallest limits that allow a particular pattern to match a given subject
 string. This is done by calling \fBpcre[16]_exec()\fP repeatedly with different
 limits.
+.
+.
+.SS "Obtaining an estimate of stack usage"
+.rs
+.sp
+The actual amount of stack used per recursion can vary quite a lot, depending
+on the compiler that was used to build PCRE and the optimization or debugging
+options that were set for it. The rule of thumb value of 500 bytes mentioned 
+above may be larger or smaller than what is actually needed. A better 
+approximation can be obtained by running this command:
+.sp
+  pcretest -m -C
+.sp
+The \fB-C\fP option causes \fBpcretest\fP to output information about the 
+options with which PCRE was compiled. When \fB-m\fP is also given (before 
+\fB-C\fP), information about stack use is given in a line like this:
+.sp
+  Match recursion uses stack: approximate frame size = 640 bytes
+.sp      
+The value is approximate because some recursions need a bit more (up to perhaps 
+16 more bytes).
+.P
+If the above command is given when PCRE is compiled to use the heap instead of 
+the stack for recursion, the value that is output is the size of each block 
+that is obtained from the heap. 
 .
 .
 .SS "Changing stack size in Unix-like systems"
@@ -185,6 +210,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 January 2012
+Last updated: 21 January 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
