@@ -115,7 +115,8 @@ because it prefers an earlier partial match over a later complete match. For
 this reason, the assumption is made that the end of the supplied subject string
 may not be the true end of the available data, and so, if \ez, \eZ, \eb, \eB,
 or $ are encountered at the end of the subject, the result is
-PCRE_ERROR_PARTIAL.
+PCRE_ERROR_PARTIAL, provided that at least one character in the subject has 
+been inspected.
 .P
 Setting PCRE_PARTIAL_HARD also affects the way UTF-8 and UTF-16
 subject strings are checked for validity. Normally, an invalid sequence
@@ -411,6 +412,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 January 2012
+Last updated: 21 January 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
