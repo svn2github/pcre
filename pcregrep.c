@@ -625,7 +625,7 @@ Arguments:
 Returns:     the number of characters read, zero at end of file
 */
 
-static int
+static unsigned int
 read_one_line(char *buffer, int length, FILE *f)
 {
 int c;

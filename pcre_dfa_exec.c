@@ -3209,7 +3209,7 @@ if (!anchored)
   if ((re->flags & PCRE_FIRSTSET) != 0)
     {
     has_first_char = TRUE;
-    first_char = first_char2 = re->first_char;
+    first_char = first_char2 = (pcre_uchar)(re->first_char);
     if ((re->flags & PCRE_FCH_CASELESS) != 0)
       {
       first_char2 = TABLE_GET(first_char, md->tables + fcc_offset, first_char);
@@ -3233,7 +3233,7 @@ character" set. */
 if ((re->flags & PCRE_REQCHSET) != 0)
   {
   has_req_char = TRUE;
-  req_char = req_char2 = re->req_char;
+  req_char = req_char2 = (pcre_uchar)(re->req_char);
   if ((re->flags & PCRE_RCH_CASELESS) != 0)
     {
     req_char2 = TABLE_GET(req_char, md->tables + fcc_offset, req_char);

@@ -274,7 +274,7 @@ should not happen, but we all make mistakes), return REG_BADPAT. */
 
 if (preg->re_pcre == NULL)
   {
-  return (errorcode < sizeof(eint)/sizeof(const int))?
+  return (errorcode < (int)(sizeof(eint)/sizeof(const int)))?
     eint[errorcode] : REG_BADPAT;
   }
 

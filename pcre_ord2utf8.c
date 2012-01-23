@@ -75,7 +75,7 @@ if ((cvalue & 0xf800) == 0xd800 || cvalue >= 0x110000)
   cvalue = 0xfffe;
 
 for (i = 0; i < PRIV(utf8_table1_size); i++)
-  if (cvalue <= PRIV(utf8_table1)[i]) break;
+  if ((int)cvalue <= PRIV(utf8_table1)[i]) break;
 buffer += i;
 for (j = i; j > 0; j--)
  {

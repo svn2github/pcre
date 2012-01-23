@@ -1271,7 +1271,7 @@ pcre_uint8 *here = start;
 
 for (;;)
   {
-  int rlen = (int)(buffer_size - (here - buffer));
+  size_t rlen = (size_t)(buffer_size - (here - buffer));
 
   if (rlen > 1000)
     {
@@ -4293,7 +4293,8 @@ while (!done)
             break;
 
             default:
-            if (count < 0 && (-count) < sizeof(errtexts)/sizeof(const char *))
+            if (count < 0 && 
+                (-count) < (int)(sizeof(errtexts)/sizeof(const char *)))
               fprintf(outfile, "Error %d (%s)\n", count, errtexts[-count]);
             else
               fprintf(outfile, "Error %d (Unexpected value)\n", count);
