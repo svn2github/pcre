@@ -55,6 +55,9 @@ asked to print out a compiled regex for debugging purposes. */
 #include "config.h"
 #endif
 
+/* For pcretest program. */
+#define PRIV(name) name
+
 /* We have to include pcre_internal.h because we need the internal info for
 displaying the results of pcre_study() and we also need to know about the
 internal macros, structures, and other internal data values; pcretest has
@@ -100,7 +103,7 @@ static const char *OP_names[] = { OP_NAME_LIST };
 but its size is needed for a check that ensures it is the correct size for the
 number of opcodes (thus catching update omissions). */
 
-static const pcre_uint8 OP_lengths[] = { OP_LENGTHS };
+static const pcre_uint8 OP_lengths_size[] = { OP_LENGTHS };
 
 
 
@@ -298,7 +301,7 @@ for(;;)
       case OP_TABLE_LENGTH:
       case OP_TABLE_LENGTH +
         ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
-        (sizeof(OP_lengths) == OP_TABLE_LENGTH)):
+        (sizeof(OP_lengths_size) == OP_TABLE_LENGTH)):
       break;
 /* ========================================================================== */
 

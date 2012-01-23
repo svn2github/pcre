@@ -1451,7 +1451,7 @@ if (bits_set || min > 0
 #ifdef PCRE_DEBUG
   if (bits_set)
     {
-    pcre_uint8 *ptr = (pcre_uint32 *)start_bits;
+    pcre_uint8 *ptr = start_bits;
     int i;
 
     printf("Start bits:\n");

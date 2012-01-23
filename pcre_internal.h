@@ -2182,12 +2182,20 @@ total length. */
 /* Internal function prefix */
 
 #ifdef COMPILE_PCRE8
+#ifndef PUBL
 #define PUBL(name) pcre_##name
+#endif
+#ifndef PRIV
 #define PRIV(name) _pcre_##name
-#else
+#endif
+#else /* COMPILE_PCRE8 */
 #ifdef COMPILE_PCRE16
+#ifndef PUBL
 #define PUBL(name) pcre16_##name
+#endif
+#ifndef PRIV
 #define PRIV(name) _pcre16_##name
+#endif
 #else
 #error Unsupported compiling mode
 #endif /* COMPILE_PCRE16 */

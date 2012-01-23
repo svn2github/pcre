@@ -8134,9 +8134,9 @@ if ((re->flags & PCRE_REQCHSET) != 0)
   }
 
 #ifdef COMPILE_PCRE8
-pcre_printint(re, stdout, TRUE);
+pcre_printint((pcre *)re, stdout, TRUE);
 #else
-pcre16_printint(re, stdout, TRUE);
+pcre16_printint((pcre *)re, stdout, TRUE);
 #endif
 
 /* This check is done here in the debugging case so that the code that

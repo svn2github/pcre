@@ -105,6 +105,7 @@ input mode under Windows. */
 #define OUTPUT_MODE  "wb"
 #endif
 
+#define PRIV(name) name
 
 /* We have to include pcre_internal.h because we need the internal info for
 displaying the results of pcre_study() and we also need to know about the
@@ -141,8 +142,6 @@ to keep two copies, we include the source file here, changing the names of the
 external symbols to prevent clashes. */
 
 #define PCRE_INCLUDED
-#undef PRIV
-#define PRIV(name) name
 
 #include "pcre_tables.c"
 
