@@ -97,13 +97,13 @@ for testing purposes. */
 
 /* The table of operator names. */
 
-static const char *OP_names[] = { OP_NAME_LIST };
+static const char *priv_OP_names[] = { OP_NAME_LIST };
 
 /* This table of operator lengths is not actually used by the working code,
 but its size is needed for a check that ensures it is the correct size for the
 number of opcodes (thus catching update omissions). */
 
-static const pcre_uint8 OP_lengths_size[] = { OP_LENGTHS };
+static const pcre_uint8 priv_OP_lengths[] = { OP_LENGTHS };
 
 
 
@@ -300,13 +300,13 @@ for(;;)
 
       case OP_TABLE_LENGTH:
       case OP_TABLE_LENGTH +
-        ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
-        (sizeof(OP_lengths_size) == OP_TABLE_LENGTH)):
+        ((sizeof(priv_OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
+        (sizeof(priv_OP_lengths) == OP_TABLE_LENGTH)):
       break;
 /* ========================================================================== */
 
     case OP_END:
-    fprintf(f, "    %s\n", OP_names[*code]);
+    fprintf(f, "    %s\n", priv_OP_names[*code]);
     fprintf(f, "------------------------------------------------------------------\n");
     return;
 
@@ -338,7 +338,7 @@ for(;;)
     case OP_SCBRAPOS:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
-    fprintf(f, "%s %d", OP_names[*code], GET2(code, 1+LINK_SIZE));
+    fprintf(f, "%s %d", priv_OP_names[*code], GET2(code, 1+LINK_SIZE));
     break;
 
     case OP_BRA:
@@ -361,16 +361,16 @@ for(;;)
     case OP_REVERSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
     case OP_CLOSE:
-    fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
+    fprintf(f, "    %s %d", priv_OP_names[*code], GET2(code, 1));
     break;
 
     case OP_CREF:
     case OP_NCREF:
-    fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
+    fprintf(f, "%3d %s", GET2(code,1), priv_OP_names[*code]);
     break;
 
     case OP_RREF:
@@ -425,7 +425,7 @@ for(;;)
     fprintf(f, " %s ", flag);
     if (*code >= OP_TYPESTAR)
       {
-      fprintf(f, "%s", OP_names[code[1]]);
+      fprintf(f, "%s", priv_OP_names[code[1]]);
       if (code[1] == OP_PROP || code[1] == OP_NOTPROP)
         {
         fprintf(f, " %s ", get_ucpname(code[2], code[3]));
@@ -433,7 +433,7 @@ for(;;)
         }
       }
     else extra = print_char(f, code+1, utf);
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
     case OP_EXACTI:
@@ -459,7 +459,7 @@ for(;;)
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
     case OP_TYPEPOSUPTO:
-    fprintf(f, "    %s", OP_names[code[1 + IMM2_SIZE]]);
+    fprintf(f, "    %s", priv_OP_names[code[1 + IMM2_SIZE]]);
     if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP)
       {
       fprintf(f, " %s ", get_ucpname(code[1 + IMM2_SIZE + 1],
@@ -509,7 +509,7 @@ for(;;)
     c = code[1];
     if (PRINTABLE(c)) fprintf(f, " %s [^%c]", flag, c);
       else fprintf(f, " %s [^\\x%02x]", flag, c);
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
     case OP_NOTEXACTI:
@@ -536,7 +536,7 @@ for(;;)
     case OP_RECURSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
-    fprintf(f, "%s", OP_names[*code]);
+    fprintf(f, "%s", priv_OP_names[*code]);
     break;
 
     case OP_REFI:
@@ -544,17 +544,17 @@ for(;;)
     /* Fall through */
     case OP_REF:
     fprintf(f, " %s \\%d", flag, GET2(code,1));
-    ccode = code + PRIV(OP_lengths)[*code];
+    ccode = code + priv_OP_lengths[*code];
     goto CLASS_REF_REPEAT;
 
     case OP_CALLOUT:
-    fprintf(f, "    %s %d %d %d", OP_names[*code], code[1], GET(code,2),
+    fprintf(f, "    %s %d %d %d", priv_OP_names[*code], code[1], GET(code,2),
       GET(code, 2 + LINK_SIZE));
     break;
 
     case OP_PROP:
     case OP_NOTPROP:
-    fprintf(f, "    %s %s", OP_names[*code], get_ucpname(code[1], code[2]));
+    fprintf(f, "    %s %s", priv_OP_names[*code], get_ucpname(code[1], code[2]));
     break;
 
     /* OP_XCLASS can only occur in UTF or PCRE16 modes. However, there's no
@@ -658,8 +658,8 @@ for(;;)
         case OP_CRMINPLUS:
         case OP_CRQUERY:
         case OP_CRMINQUERY:
-        fprintf(f, "%s", OP_names[*ccode]);
-        extra += PRIV(OP_lengths)[*ccode];
+        fprintf(f, "%s", priv_OP_names[*ccode]);
+        extra += priv_OP_lengths[*ccode];
         break;
 
         case OP_CRRANGE:
@@ -669,7 +669,7 @@ for(;;)
         if (max == 0) fprintf(f, "{%d,}", min);
         else fprintf(f, "{%d,%d}", min, max);
         if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
-        extra += PRIV(OP_lengths)[*ccode];
+        extra += priv_OP_lengths[*ccode];
         break;
 
         /* Do nothing if it's not a repeat; this code stops picky compilers
@@ -685,13 +685,13 @@ for(;;)
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
     case OP_THEN_ARG:
-    fprintf(f, "    %s ", OP_names[*code]);
+    fprintf(f, "    %s ", priv_OP_names[*code]);
     print_puchar(f, code + 2);
     extra += code[1];
     break;
 
     case OP_THEN:
-    fprintf(f, "    %s", OP_names[*code]);
+    fprintf(f, "    %s", priv_OP_names[*code]);
     break;
 
     case OP_CIRCM:
@@ -702,11 +702,11 @@ for(;;)
     /* Anything else is just an item with no data, but possibly a flag. */
 
     default:
-    fprintf(f, " %s %s", flag, OP_names[*code]);
+    fprintf(f, " %s %s", flag, priv_OP_names[*code]);
     break;
     }
 
-  code += PRIV(OP_lengths)[*code] + extra;
+  code += priv_OP_lengths[*code] + extra;
   fprintf(f, "\n");
   }
 }

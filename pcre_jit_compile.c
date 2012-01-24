@@ -796,6 +796,7 @@ BOOL setsom_found = FALSE;
 int offset;
 
 /* >= 1 + shortest item size (2) */
+SLJIT_UNUSED_ARG(stacktop);
 SLJIT_ASSERT(stackpos >= stacktop + 2);
 
 stackpos = STACK(stackpos);
@@ -4928,7 +4929,7 @@ else
   SLJIT_ASSERT(*opcode >= OP_CLASS || *opcode <= OP_XCLASS);
   *type = *opcode;
   cc++;
-  class_len = (*type < OP_XCLASS) ? (1 + (32 / sizeof(pcre_uchar))) : GET(cc, 0);
+  class_len = (*type < OP_XCLASS) ? (int)(1 + (32 / sizeof(pcre_uchar))) : GET(cc, 0);
   *opcode = cc[class_len - 1];
   if (*opcode >= OP_CRSTAR && *opcode <= OP_CRMINQUERY)
     {
