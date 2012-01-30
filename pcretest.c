@@ -2411,7 +2411,7 @@ are set, either both UTFs are supported or both are not supported. */
     if (rc)
       {
       const char *arch;
-      (void)PCRE_CONFIG(PCRE_CONFIG_JITTARGET, &arch);
+      (void)PCRE_CONFIG(PCRE_CONFIG_JITTARGET, (void *)(&arch));
       printf("  Just-in-time compiler support: %s\n", arch);
       }
     else
