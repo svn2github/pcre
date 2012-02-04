@@ -4292,7 +4292,7 @@ while (!done)
             break;
 
             default:
-            if (count < 0 && 
+            if (count < 0 &&
                 (-count) < (int)(sizeof(errtexts)/sizeof(const char *)))
               fprintf(outfile, "Error %d (%s)\n", count, errtexts[-count]);
             else

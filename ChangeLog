@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.30
-------------
+Version 8.30 04-February-2012
+-----------------------------
 
 1.  Renamed "isnumber" as "is_a_number" because in some Mac environments this
     name is defined in ctype.h.

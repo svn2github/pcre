@@ -1,8 +1,8 @@
 News about PCRE releases
 ------------------------
 
-Release 8.30
-------------
+Release 8.30 04-February-2012
+-----------------------------
 
 Release 8.30 introduces a major new feature: support for 16-bit character
 strings, compiled as a separate library. There are a few changes to the
