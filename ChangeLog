@@ -1,6 +1,11 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.31
+-----------------------------
+1.  Fixing a wrong JIT test case and some compiler warnings.
+
+
 Version 8.30 04-February-2012
 -----------------------------
 

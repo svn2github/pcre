@@ -188,7 +188,8 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_ANY, 0, "^-", "a--\xe2\x80\xa8--" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_ANY, 0, "^-", "a--\xc2\x85--" },
 	{ 0, 0, "ab$", "ab" },
-	{ 0, 0 | F_NOMATCH, "ab$", "ab\r\n" },
+	{ 0, 0 | F_NOMATCH, "ab$", "abab\n\n" },
+	{ PCRE_DOLLAR_ENDONLY, 0 | F_NOMATCH, "ab$", "abab\r\n" },
 	{ PCRE_MULTILINE | PCRE_NEWLINE_CRLF, 0, "a$", "\r\raa\n\naa\r\naa" },
 	{ PCRE_MULTILINE | PCRE_NEWLINE_ANY, 0, "a$", "aaa" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_ANYCRLF, 0, "#$", "#\xc2\x85###\r#" },
@@ -674,7 +675,7 @@ static const unsigned char *tables(int mode)
 	static unsigned char *tables_copy;
 	const char *errorptr;
 	int erroroffset;
-	const unsigned char *default_tables;
+	unsigned char *default_tables;
 #ifdef SUPPORT_PCRE8
 	pcre *regex;
 	char null_str[1] = { 0 };
@@ -860,7 +861,7 @@ static int regression_tests(void)
 {
 	struct regression_test_case *current = regression_test_cases;
 	const char *error;
-	const char *cpu_info;
+	char *cpu_info;
 	int i, err_offs;
 	int is_successful, is_ascii_pattern, is_ascii_input;
 	int total = 0;
