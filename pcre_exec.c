@@ -6208,12 +6208,14 @@ const pcre_study_data *study;
 const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 
 /* Check for the special magic call that measures the size of the stack used
-per recursive call of match(). */
+per recursive call of match(). Without the funny casting for sizeof, a Windows 
+compiler gave this error: "unary minus operator applied to unsigned type,
+result still unsigned". Hopefully the cast fixes that. */
 
 if (re == NULL && extra_data == NULL && subject == NULL && length == -999 &&
     start_offset == -999)
 #ifdef NO_RECURSE
-  return -sizeof(heapframe);
+  return -((int)sizeof(heapframe));
 #else
   return match(NULL, NULL, NULL, 0, NULL, NULL, 0);
 #endif

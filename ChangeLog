@@ -8,6 +8,10 @@ Version 8.31
 
 2.  Removed a bashism from the RunTest script.
 
+3.  Add a cast to pcre_exec.c to fix the warning "unary minus operator applied
+    to unsigned type, result still unsigned" that was given by an MS compiler 
+    on encountering the code "-sizeof(xxx)".
+
 
 Version 8.30 04-February-2012
 -----------------------------
