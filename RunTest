@@ -135,7 +135,7 @@ $sim ./pcretest -C pcre8 >/dev/null
 support8=$?
 $sim ./pcretest -C pcre16 >/dev/null
 support16=$?
-if [ $(( $support8 + $support16 )) -eq 2 ] ; then
+if [ `expr $support8 + $support16` -eq 2 ] ; then
   test8=
   test16=-16
   if [ "$arg8" = yes -a "$arg16" != yes ] ; then
