@@ -6287,15 +6287,22 @@ matching. */
 
 #ifdef SUPPORT_JIT
 if (extra_data != NULL
-    && (extra_data->flags & PCRE_EXTRA_EXECUTABLE_JIT) != 0
+    && (extra_data->flags & (PCRE_EXTRA_EXECUTABLE_JIT |
+                             PCRE_EXTRA_TABLES)) == PCRE_EXTRA_EXECUTABLE_JIT
     && extra_data->executable_jit != NULL
-    && (extra_data->flags & PCRE_EXTRA_TABLES) == 0
     && (options & ~(PCRE_NO_UTF8_CHECK | PCRE_NOTBOL | PCRE_NOTEOL |
-                    PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART)) == 0)
-  return PRIV(jit_exec)(re, extra_data->executable_jit,
+                    PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART |
+                    PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD)) == 0)
+  {
+  rc = PRIV(jit_exec)(re, extra_data->executable_jit,
     (const pcre_uchar *)subject, length, start_offset, options,
     ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0)
     ? MATCH_LIMIT : extra_data->match_limit, offsets, offsetcount);
+  /* PCRE_ERROR_NULL means that the selected normal or partial matching
+  mode is not compiled. In this case we simply fallback to interpreter. */
+  if (rc != PCRE_ERROR_NULL)
+    return rc;
+  }
 #endif
 
 /* Carry on with non-JIT matching. This information is for finding all the

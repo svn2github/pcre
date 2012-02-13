@@ -887,7 +887,8 @@ time, run time, or study time, respectively. */
    PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_STUDY_OPTIONS \
-   PCRE_STUDY_JIT_COMPILE
+   (PCRE_STUDY_JIT_COMPILE|PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE| \
+    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE)
 
 /* Magic number to provide a small check against being handed junk. */
 
@@ -1941,6 +1942,10 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
        ERR70, ERR71, ERR72, ERR73, ERR74, ERRCOUNT };
 
+/* JIT compiling modes. The function list is indexed by them. */
+enum { JIT_COMPILE, JIT_PARTIAL_SOFT_COMPILE, JIT_PARTIAL_HARD_COMPILE,
+       JIT_NUMBER_OF_COMPILE_TYPES };
+
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit
 offset to the name table so that if a regex is compiled on one host, saved, and
@@ -2179,7 +2184,7 @@ total length. */
 #define ctypes_offset (cbits_offset + cbit_length)
 #define tables_length (ctypes_offset + 256)
 
-/* Internal function prefix */
+/* Internal function and data prefixes. */
 
 #ifdef COMPILE_PCRE8
 #ifndef PUBL
@@ -2288,7 +2293,7 @@ extern BOOL              PRIV(was_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,
 extern BOOL              PRIV(xclass)(int, const pcre_uchar *, BOOL);
 
 #ifdef SUPPORT_JIT
-extern void              PRIV(jit_compile)(const REAL_PCRE *, PUBL(extra) *);
+extern void              PRIV(jit_compile)(const REAL_PCRE *, PUBL(extra) *, int);
 extern int               PRIV(jit_exec)(const REAL_PCRE *, void *,
                            const pcre_uchar *, int, int, int, int, int *, int);
 extern void              PRIV(jit_free)(void *);

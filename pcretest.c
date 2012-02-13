@@ -2239,7 +2239,9 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-s+") == 0)
     {
     force_study = 1;
-    force_study_options = PCRE_STUDY_JIT_COMPILE;
+    force_study_options = PCRE_STUDY_JIT_COMPILE
+                        | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
+                        | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
     }
   else if (strcmp(argv[op], "-16") == 0)
     {
@@ -2768,7 +2770,9 @@ while (!done)
         do_study = 1;
         if (*pp == '+')
           {
-          study_options |= PCRE_STUDY_JIT_COMPILE;
+          study_options |= PCRE_STUDY_JIT_COMPILE
+                        | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
+                        | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
           pp++;
           }
         }

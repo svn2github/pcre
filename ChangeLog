@@ -12,6 +12,8 @@ Version 8.31
     to unsigned type, result still unsigned" that was given by an MS compiler 
     on encountering the code "-sizeof(xxx)".
 
+4.  Partial matching support is added to the JIT compiler.
+
 
 Version 8.30 04-February-2012
 -----------------------------

@@ -653,6 +653,16 @@ static struct regression_test_case regression_test_cases[] = {
 	{ 0, 0 | F_NO8 | F_FORCECONV, "\\v+?\\V+?#", "\xe2\x80\xa9\xe2\x80\xa9\xef\xbf\xbf\xef\xbf\xbf#" },
 	{ 0, 0 | F_NO8 | F_FORCECONV, "\\h+?\\H+?#", "\xe1\xa0\x8e\xe1\xa0\x8e\xef\xbf\xbf\xef\xbf\xbf#" },
 
+	/* Partial matching. */
+	{ MUA | PCRE_PARTIAL_SOFT, 0, "ab", "a" },
+	{ MUA | PCRE_PARTIAL_SOFT, 0, "ab|a", "a" },
+	{ MUA | PCRE_PARTIAL_HARD, 0, "ab|a", "a" },
+	{ MUA | PCRE_PARTIAL_SOFT, 0, "\\b#", "a" },
+	{ MUA | PCRE_PARTIAL_SOFT, 0, "(?<=a)b", "a" },
+	{ MUA | PCRE_PARTIAL_SOFT, 0, "abc|(?<=xxa)bc", "xxab" },
+	{ MUA | PCRE_PARTIAL_SOFT, 0, "a\\B", "a" },
+	{ MUA | PCRE_PARTIAL_HARD, 0, "a\\b", "a" },
+
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
 	{ MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
@@ -867,6 +877,7 @@ static int regression_tests(void)
 	int total = 0;
 	int successful = 0;
 	int counter = 0;
+	int study_mode;
 #ifdef SUPPORT_PCRE8
 	pcre *re8;
 	pcre_extra *extra8;
@@ -930,18 +941,24 @@ static int regression_tests(void)
 			is_ascii_input = check_ascii(current->input);
 		}
 
+		if (current->flags & PCRE_PARTIAL_SOFT)
+			study_mode = PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE;
+		else if (current->flags & PCRE_PARTIAL_HARD)
+			study_mode = PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
+		else
+			study_mode = PCRE_STUDY_JIT_COMPILE;
 		error = NULL;
 #ifdef SUPPORT_PCRE8
 		re8 = NULL;
 		if (!(current->start_offset & F_NO8))
 			re8 = pcre_compile(current->pattern,
-				current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | disabled_flags8),
+				current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | disabled_flags8),
 				&error, &err_offs, tables(0));
 
 		extra8 = NULL;
 		if (re8) {
 			error = NULL;
-			extra8 = pcre_study(re8, PCRE_STUDY_JIT_COMPILE, &error);
+			extra8 = pcre_study(re8, study_mode, &error);
 			if (!extra8) {
 				printf("\n8 bit: Cannot study pattern: %s\n", current->pattern);
 				pcre_free(re8);
@@ -965,13 +982,13 @@ static int regression_tests(void)
 		re16 = NULL;
 		if (!(current->start_offset & F_NO16))
 			re16 = pcre16_compile(regtest_buf,
-				current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | disabled_flags16),
+				current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | disabled_flags16),
 				&error, &err_offs, tables(0));
 
 		extra16 = NULL;
 		if (re16) {
 			error = NULL;
-			extra16 = pcre16_study(re16, PCRE_STUDY_JIT_COMPILE, &error);
+			extra16 = pcre16_study(re16, study_mode, &error);
 			if (!extra16) {
 				printf("\n16 bit: Cannot study pattern: %s\n", current->pattern);
 				pcre16_free(re16);
@@ -1007,9 +1024,9 @@ static int regression_tests(void)
 		if (re8) {
 			setstack8(extra8);
 			return_value8_1 = pcre_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART), ovector8_1, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32);
 			return_value8_2 = pcre_exec(re8, NULL, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART), ovector8_2, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_2, 32);
 		}
 #endif
 
@@ -1027,11 +1044,13 @@ static int regression_tests(void)
 			else
 				length16 = copy_char8_to_char16(current->input, regtest_buf, REGTEST_MAX_LENGTH);
 			return_value16_1 = pcre16_exec(re16, extra16, regtest_buf, length16, current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART), ovector16_1, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32);
 			return_value16_2 = pcre16_exec(re16, NULL, regtest_buf, length16, current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART), ovector16_2, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_2, 32);
 		}
 #endif
+
+		/* printf("[%d-%d|%d-%d|%d-%d]%s", return_value8_1, return_value16_1, ovector8_1[0], ovector8_1[1], ovector16_1[0], ovector16_1[1], (current->flags & PCRE_CASELESS) ? "C" : ""); */
 
 		/* If F_DIFF is set, just run the test, but do not compare the results.
 		Segfaults can still be captured. */
@@ -1046,8 +1065,15 @@ static int regression_tests(void)
 						return_value8_1, return_value8_2, return_value16_1, return_value16_2,
 						total, current->pattern, current->input);
 					is_successful = 0;
-				} else if (return_value8_1 >= 0) {
-					return_value8_1 *= 2;
+				} else if (return_value8_1 >= 0 || return_value8_1 == PCRE_ERROR_PARTIAL) {
+					if (return_value8_1 == PCRE_ERROR_PARTIAL) {
+						return_value8_1 = 2;
+						return_value16_1 = 2;
+					} else {
+						return_value8_1 *= 2;
+						return_value16_1 *= 2;
+					}
+
 					/* Transform back the results. */
 					if (current->flags & PCRE_UTF8) {
 						for (i = 0; i < return_value8_1; ++i) {
@@ -1074,8 +1100,12 @@ static int regression_tests(void)
 					printf("\n8 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
 						return_value8_1, return_value8_2, total, current->pattern, current->input);
 					is_successful = 0;
-				} else if (return_value8_1 >= 0) {
-					return_value8_1 *= 2;
+				} else if (return_value8_1 >= 0 || return_value8_1 == PCRE_ERROR_PARTIAL) {
+					if (return_value8_1 == PCRE_ERROR_PARTIAL)
+						return_value8_1 = 2;
+					else
+						return_value8_1 *= 2;
+
 					for (i = 0; i < return_value8_1; ++i)
 						if (ovector8_1[i] != ovector8_2[i]) {
 							printf("\n8 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
@@ -1090,8 +1120,12 @@ static int regression_tests(void)
 					printf("\n16 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
 						return_value16_1, return_value16_2, total, current->pattern, current->input);
 					is_successful = 0;
-				} else if (return_value16_1 >= 0) {
-					return_value16_1 *= 2;
+				} else if (return_value16_1 >= 0 || return_value16_1 == PCRE_ERROR_PARTIAL) {
+					if (return_value16_1 == PCRE_ERROR_PARTIAL)
+						return_value16_1 = 2;
+					else
+						return_value16_1 *= 2;
+
 					for (i = 0; i < return_value16_1; ++i)
 						if (ovector16_1[i] != ovector16_2[i]) {
 							printf("\n16 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
@@ -1155,7 +1189,6 @@ static int regression_tests(void)
 		}
 #endif
 
-		/* printf("[%d-%d|%d-%d]%s", ovector8_1[0], ovector8_1[1], ovector16_1[0], ovector16_1[1], (current->flags & PCRE_CASELESS) ? "C" : ""); */
 		printf(".");
 		fflush(stdout);
 		current++;
