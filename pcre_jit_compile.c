@@ -163,10 +163,10 @@ typedef struct jit_arguments {
 } jit_arguments;
 
 typedef struct executable_functions {
-  void *executable_funcs[JIT_NUMBER_OF_COMPILE_TYPES];
+  void *executable_funcs[JIT_NUMBER_OF_COMPILE_MODES];
   PUBL(jit_callback) callback;
   void *userdata;
-  sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_TYPES];
+  sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
 } executable_functions;
 
 typedef struct jump_list {
@@ -2590,10 +2590,10 @@ const pcre_uchar *end2 = args->end;
 while (src1 < end1)
   {
   if (src2 >= end2)
-    return 0;
+    return (pcre_uchar*)1;
   GETCHARINC(c1, src1);
   GETCHARINC(c2, src2);
-  if (c1 != c2 && c1 != UCD_OTHERCASE(c2)) return 0;
+  if (c1 != c2 && c1 != UCD_OTHERCASE(c2)) return NULL;
   }
 return src2;
 }
@@ -3288,6 +3288,12 @@ switch(type)
 
   OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
   JUMPHERE(jump[0]);
+  if (common->mode == JIT_PARTIAL_HARD_COMPILE)
+    {
+    jump[0] = CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0);
+    check_partial(common);
+    JUMPHERE(jump[0]);
+    }
   return cc;
 #endif
 
@@ -3727,6 +3733,8 @@ static pcre_uchar *compile_ref_hotpath(compiler_common *common, pcre_uchar *cc, 
 DEFINE_COMPILER;
 int offset = GET2(cc, 1) << 1;
 struct sljit_jump *jump = NULL;
+struct sljit_jump *partial;
+struct sljit_jump *nopartial;
 
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset));
 /* OVECTOR(1) contains the "string begin - 1" constant. */
@@ -3741,16 +3749,22 @@ if (common->utf && *cc == OP_REFI)
   if (withchecks)
     jump = CMP(SLJIT_C_EQUAL, TMP1, 0, TMP2, 0);
 
-  if (common->mode != JIT_COMPILE)
-    fallback_at_str_end(common, fallbacks);
-
   /* Needed to save important temporary registers. */
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
   OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG2, 0, ARGUMENTS, 0);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), SLJIT_OFFSETOF(jit_arguments, ptr), STR_PTR, 0);
   sljit_emit_ijump(compiler, SLJIT_CALL3, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_utf_caselesscmp));
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
-  add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+  if (common->mode == JIT_COMPILE)
+    add_jump(compiler, fallbacks, CMP(SLJIT_C_LESS_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1));
+  else
+    {
+    add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
+    nopartial = CMP(SLJIT_C_NOT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1);
+    check_partial(common);
+    add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
+    JUMPHERE(nopartial);
+    }
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
   }
 else
@@ -3760,14 +3774,30 @@ else
   if (withchecks)
     jump = JUMP(SLJIT_C_ZERO);
 
-  if (common->mode != JIT_COMPILE)
-    fallback_at_str_end(common, fallbacks);
-
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+  partial = CMP(SLJIT_C_GREATER, STR_PTR, 0, STR_END, 0);
+  if (common->mode == JIT_COMPILE)
+    add_jump(compiler, fallbacks, partial);
 
-  add_jump(compiler, fallbacks, CMP(SLJIT_C_GREATER, STR_PTR, 0, STR_END, 0));
   add_jump(compiler, *cc == OP_REF ? &common->casefulcmp : &common->caselesscmp, JUMP(SLJIT_FAST_CALL));
   add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+
+  if (common->mode != JIT_COMPILE)
+    {
+    nopartial = JUMP(SLJIT_JUMP);
+    JUMPHERE(partial);
+    /* TMP2 -= STR_END - STR_PTR */
+    OP2(SLJIT_SUB, TMP2, 0, TMP2, 0, STR_PTR, 0);
+    OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, STR_END, 0);
+    partial = CMP(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, STR_END, 0);
+    add_jump(compiler, *cc == OP_REF ? &common->casefulcmp : &common->caselesscmp, JUMP(SLJIT_FAST_CALL));
+    add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+    JUMPHERE(partial);
+    check_partial(common);
+    add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
+    JUMPHERE(nopartial);
+    }
   }
 
 if (jump != NULL)
@@ -7027,7 +7057,7 @@ PRIV(jit_free)(void *executable_funcs)
 {
 int i;
 executable_functions *functions = (executable_functions *)executable_funcs;
-for (i = 0; i < JIT_NUMBER_OF_COMPILE_TYPES; i++)
+for (i = 0; i < JIT_NUMBER_OF_COMPILE_MODES; i++)
   {
   if (functions->executable_funcs[i] != NULL)
     sljit_free_code(functions->executable_funcs[i]);

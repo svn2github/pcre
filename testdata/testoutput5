@@ -1649,4 +1649,79 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
     \x09\x0e\x{84}\x{86}\x{85}\x0a\x0b\x0c\x0d
  0: \x{85}\x{0a}\x{0b}\x{0c}\x{0d}
 
+/(..)\1/8
+    ab\P
+Partial match: ab
+    aba\P
+Partial match: aba
+    abab\P
+ 0: abab
+ 1: ab
+
+/(..)\1/8i
+    ab\P
+Partial match: ab
+    abA\P
+Partial match: abA
+    aBAb\P
+ 0: aBAb
+ 1: aB
+
+/(..)\1{2,}/8
+    ab\P
+Partial match: ab
+    aba\P
+Partial match: aba
+    abab\P
+Partial match: abab
+    ababa\P
+Partial match: ababa
+    ababab\P
+ 0: ababab
+ 1: ab
+    ababab\P\P
+Partial match: ababab
+    abababa\P
+ 0: ababab
+ 1: ab
+    abababa\P\P
+Partial match: abababa
+
+/(..)\1{2,}/8i
+    ab\P
+Partial match: ab
+    aBa\P
+Partial match: aBa
+    aBAb\P
+Partial match: aBAb
+    AbaBA\P
+Partial match: AbaBA
+    abABAb\P
+ 0: abABAb
+ 1: ab
+    aBAbaB\P\P
+Partial match: aBAbaB
+    abABabA\P
+ 0: abABab
+ 1: ab
+    abaBABa\P\P
+Partial match: abaBABa
+
+/(..)\1{2,}?x/8i
+    ab\P
+Partial match: ab
+    abA\P
+Partial match: abA
+    aBAb\P
+Partial match: aBAb
+    abaBA\P
+Partial match: abaBA
+    abAbaB\P
+Partial match: abAbaB
+    abaBabA\P
+Partial match: abaBabA
+    abAbABaBx\P
+ 0: abAbABaBx
+ 1: ab
+
 /-- End of testinput5 --/

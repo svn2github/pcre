@@ -147,7 +147,7 @@ static int
 match_ref(int offset, register PCRE_PUCHAR eptr, int length, match_data *md,
   BOOL caseless)
 {
-PCRE_PUCHAR eptr_start = eptr;
+int matched_length = length;
 register PCRE_PUCHAR p = md->start_subject + md->offset_vector[offset];
 
 #ifdef PCRE_DEBUG
@@ -186,14 +186,16 @@ if (caseless)
     reference, not along the subject (earlier code did this wrong). */
 
     PCRE_PUCHAR endptr = p + length;
+    PCRE_PUCHAR eptr_start = eptr;
     while (p < endptr)
       {
       int c, d;
-      if (eptr >= md->end_subject) return -1;
+      if (eptr >= md->end_subject) return -((int)(eptr - eptr_start) + 1);
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
       if (c != d && c != UCD_OTHERCASE(d)) return -1;
       }
+    matched_length = (int)(eptr - eptr_start);
     }
   else
 #endif
@@ -202,7 +204,13 @@ if (caseless)
   /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
   is no UCP support. */
     {
-    if (eptr + length > md->end_subject) return -1;
+    if (eptr + length > md->end_subject)
+      {
+      if (md->partial == 0)
+        return -1;
+      length = (int)(md->end_subject - eptr);
+      matched_length = -(length + 1);
+      }
     while (length-- > 0)
       {
       if (TABLE_GET(*p, md->lcc, *p) != TABLE_GET(*eptr, md->lcc, *eptr)) return -1;
@@ -217,11 +225,17 @@ are in UTF-8 mode. */
 
 else
   {
-  if (eptr + length > md->end_subject) return -1;
+  if (eptr + length > md->end_subject)
+    {
+    if (md->partial == 0)
+      return -1;
+    length = (int)(md->end_subject - eptr);
+    matched_length = -(length + 1);
+    }
   while (length-- > 0) if (*p++ != *eptr++) return -1;
   }
 
-return (int)(eptr - eptr_start);
+return matched_length;
 }
 
 
@@ -2595,6 +2609,10 @@ for (;;)
       if (UCD_CATEGORY(c) != ucp_M) break;
       eptr += len;
       }
+    if (md->partial != 0 && eptr >= md->end_subject)
+      {
+      SCHECK_PARTIAL();
+      }
     ecode++;
     break;
 #endif
@@ -2660,6 +2678,7 @@ for (;;)
       default:               /* No repeat follows */
       if ((length = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
+        eptr += -(length + 1);
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2685,6 +2704,7 @@ for (;;)
       int slength;
       if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
+        eptr += -(slength + 1);
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2708,6 +2728,7 @@ for (;;)
         if (fi >= max) RRETURN(MATCH_NOMATCH);
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
+          eptr += -(slength + 1);
           CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
@@ -2726,7 +2747,10 @@ for (;;)
         int slength;
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
+          /* Restore the eptr after the check. */
+          eptr += -(slength + 1);
           CHECK_PARTIAL();
+          eptr -= -(slength + 1);
           break;
           }
         eptr += slength;
@@ -4165,6 +4189,10 @@ for (;;)
             eptr += len;
             }
           }
+        if (md->partial != 0 && eptr >= md->end_subject)
+          {
+          SCHECK_PARTIAL();
+          }
         }
 
       else
@@ -4948,6 +4976,10 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
+          if (md->partial != 0 && eptr >= md->end_subject)
+            {
+            SCHECK_PARTIAL();
+            }
           }
         }
       else
@@ -5490,6 +5522,10 @@ for (;;)
             if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
+            }
+          if (eptr >= md->end_subject)
+            {
+            SCHECK_PARTIAL();
             }
           }
 

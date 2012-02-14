@@ -3601,4 +3601,43 @@ replaced by single letters. --/
 /(?=a(*:x))(?=a(*:y)c|)/K+
     ab
 
+/(..)\1/
+    ab\P
+    aba\P
+    abab\P
+
+/(..)\1/i
+    ab\P
+    abA\P
+    aBAb\P
+
+/(..)\1{2,}/
+    ab\P
+    aba\P
+    abab\P
+    ababa\P
+    ababab\P
+    ababab\P\P
+    abababa\P
+    abababa\P\P
+
+/(..)\1{2,}/i
+    ab\P
+    aBa\P
+    aBAb\P
+    AbaBA\P
+    abABAb\P
+    aBAbaB\P\P
+    abABabA\P
+    abaBABa\P\P
+
+/(..)\1{2,}?x/i
+    ab\P
+    abA\P
+    aBAb\P
+    abaBA\P
+    abAbaB\P
+    abaBabA\P
+    abAbABaBx\P
+
 /-- End of testinput2 --/

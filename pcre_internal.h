@@ -1944,7 +1944,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
 
 /* JIT compiling modes. The function list is indexed by them. */
 enum { JIT_COMPILE, JIT_PARTIAL_SOFT_COMPILE, JIT_PARTIAL_HARD_COMPILE,
-       JIT_NUMBER_OF_COMPILE_TYPES };
+       JIT_NUMBER_OF_COMPILE_MODES };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit

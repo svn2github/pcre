@@ -816,4 +816,28 @@
     Ⱥ
     ⱥ
 
+/\X/
+    a\P
+    a\P\P
+
+/\Xa/
+    aa\P
+    aa\P\P
+
+/\X{2}/
+    aa\P
+    aa\P\P
+
+/\X+a/
+    a\P
+    aa\P
+    aa\P\P
+
+/\X+?a/
+    a\P
+    ab\P
+    aa\P
+    aa\P\P
+    aba\P
+
 /-- End of testinput6 --/

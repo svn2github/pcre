@@ -691,4 +691,43 @@
     \x{2027}\x{2030}\x{2028}\x{2029}
     \x09\x0e\x{84}\x{86}\x{85}\x0a\x0b\x0c\x0d
 
+/(..)\1/8
+    ab\P
+    aba\P
+    abab\P
+
+/(..)\1/8i
+    ab\P
+    abA\P
+    aBAb\P
+
+/(..)\1{2,}/8
+    ab\P
+    aba\P
+    abab\P
+    ababa\P
+    ababab\P
+    ababab\P\P
+    abababa\P
+    abababa\P\P
+
+/(..)\1{2,}/8i
+    ab\P
+    aBa\P
+    aBAb\P
+    AbaBA\P
+    abABAb\P
+    aBAbaB\P\P
+    abABabA\P
+    abaBABa\P\P
+
+/(..)\1{2,}?x/8i
+    ab\P
+    abA\P
+    aBAb\P
+    abaBA\P
+    abAbaB\P
+    abaBabA\P
+    abAbABaBx\P
+
 /-- End of testinput5 --/
