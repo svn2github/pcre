@@ -4709,4 +4709,57 @@
 /(?<=ab\Cde)X/
     abZdeX
 
+/^\R/
+    \r\P
+    \r\P\P
+    
+/^\R{2,3}x/
+    \r\P
+    \r\P\P
+    \r\r\P 
+    \r\r\P\P
+    \r\r\r\P  
+    \r\r\r\P\P
+    \r\rx
+    \r\r\rx    
+
+/^\R{2,3}?x/
+    \r\P
+    \r\P\P
+    \r\r\P 
+    \r\r\P\P
+    \r\r\r\P  
+    \r\r\r\P\P
+    \r\rx
+    \r\r\rx    
+    
+/^\R?x/
+    \r\P
+    \r\P\P 
+    x
+    \rx  
+
+/^\R+x/
+    \r\P
+    \r\P\P 
+    \r\n\P
+    \r\n\P\P  
+    \rx  
+
+/^a$/<CRLF>
+    a\r\P
+    a\r\P\P 
+
+/^a$/m<CRLF>
+    a\r\P
+    a\r\P\P 
+
+/^(a$|a\r)/<CRLF>
+    a\r\P
+    a\r\P\P 
+
+/^(a$|a\r)/m<CRLF>
+    a\r\P
+    a\r\P\P 
+
 /-- End of testinput8 --/
