@@ -424,6 +424,8 @@ BOOL utf = (md->poptions & PCRE_UTF8) != 0;
 BOOL utf = FALSE;
 #endif
 
+BOOL reset_could_continue = FALSE;
+
 rlevel++;
 offsetcount &= (-2);
 
@@ -571,8 +573,10 @@ for (;;)
   int clen, dlen;
   unsigned int c, d;
   int forced_fail = 0;
-  BOOL could_continue = FALSE;
-
+  BOOL partial_newline = FALSE; 
+  BOOL could_continue = reset_could_continue;
+  reset_could_continue = FALSE; 
+  
   /* Make the new state list into the active state list and empty the
   new state list. */
 
@@ -641,7 +645,8 @@ for (;;)
 
     /* A negative offset is a special case meaning "hold off going to this
     (negated) state until the number of characters in the data field have
-    been skipped". */
+    been skipped". If the could_continue flag was passed over from a previous 
+    state, arrange for it to passed on. */
 
     if (state_offset < 0)
       {
@@ -650,6 +655,7 @@ for (;;)
         DPRINTF(("%.*sSkipping this character\n", rlevel*2-2, SP));
         ADD_NEW_DATA(state_offset, current_state->count,
           current_state->data - 1);
+        if (could_continue) reset_could_continue = TRUE;
         continue;
         }
       else
@@ -916,6 +922,19 @@ for (;;)
                (ptr == end_subject - md->nllen)
             ))
           { ADD_ACTIVE(state_offset + 1, 0); }
+        else if (ptr + 1 >= md->end_subject &&
+                 (md->moptions & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) != 0 &&
+                 NLBLOCK->nltype == NLTYPE_FIXED &&
+                 NLBLOCK->nllen == 2 && 
+                 c == NLBLOCK->nl[0])
+          {
+          if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
+            {
+            reset_could_continue = TRUE;
+            ADD_NEW_DATA(-(state_offset + 1), 0, 1);  
+            }  
+          else could_continue = partial_newline = TRUE; 
+          } 
         }
       break;
 
@@ -928,6 +947,19 @@ for (;;)
         else if (clen == 0 ||
             ((md->poptions & PCRE_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr)))
           { ADD_ACTIVE(state_offset + 1, 0); }
+        else if (ptr + 1 >= md->end_subject &&
+                 (md->moptions & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) != 0 &&
+                 NLBLOCK->nltype == NLTYPE_FIXED &&
+                 NLBLOCK->nllen == 2 && 
+                 c == NLBLOCK->nl[0])
+          {
+          if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
+            {
+            reset_could_continue = TRUE;
+            ADD_NEW_DATA(-(state_offset + 1), 0, 1);  
+            }  
+          else could_continue = partial_newline = TRUE; 
+          } 
         }
       else if (IS_NEWLINE(ptr))
         { ADD_ACTIVE(state_offset + 1, 0); }
@@ -1824,6 +1856,8 @@ for (;;)
           ncount++;
           nptr += ndlen;
           }
+        if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0) 
+            reset_could_continue = TRUE; 
         if (++count >= GET2(code, 1))
           { ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount); }
         else
@@ -2037,6 +2071,8 @@ for (;;)
           ncount++;
           nptr += nclen;
           }
+        if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0) 
+            reset_could_continue = TRUE; 
         ADD_NEW_DATA(-(state_offset + 1), 0, ncount);
         }
       break;
@@ -2062,14 +2098,20 @@ for (;;)
         break;
 
         case 0x000d:
-        if (ptr + 1 < end_subject && ptr[1] == 0x0a)
+        if (ptr + 1 >= end_subject) 
+          {
+          ADD_NEW(state_offset + 1, 0); 
+          if ((md->moptions & PCRE_PARTIAL_HARD) != 0) 
+            reset_could_continue = TRUE; 
+          }  
+        else if (ptr[1] == 0x0a)
           {
           ADD_NEW_DATA(-(state_offset + 1), 0, 1);
           }
         else
-          {
+          { 
           ADD_NEW(state_offset + 1, 0);
-          }
+          } 
         break;
         }
       break;
@@ -2942,7 +2984,7 @@ for (;;)
 
   The "could_continue" variable is true if a state could have continued but
   for the fact that the end of the subject was reached. */
-
+  
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
@@ -2954,7 +2996,10 @@ for (;;)
         ((md->moptions & PCRE_PARTIAL_SOFT) != 0 &&  /* Soft partial and */
          match_count < 0)                            /* no matches */
         ) &&                                         /* And... */
-        ptr >= end_subject &&                  /* Reached end of subject */
+        (
+        ptr >= end_subject ||                  /* Reached end of subject or */
+        partial_newline                        /* a partial newline */
+        ) && 
         ptr > md->start_used_ptr)              /* Inspected non-empty string */
       {
       if (offsetcount >= 2)

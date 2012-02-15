@@ -12086,4 +12086,42 @@ Partial match: abaBabA
  0: abAbABaBx
  1: ab
 
+/^(..)\1/
+    aba\P
+Partial match: aba
+
+/^(..)\1{2,3}x/
+    aba\P
+Partial match: aba
+    ababa\P
+Partial match: ababa
+    ababa\P\P
+Partial match: ababa
+    abababx
+ 0: abababx
+ 1: ab
+    ababababx  
+ 0: ababababx
+ 1: ab
+
+/^(..)\1{2,3}?x/
+    aba\P
+Partial match: aba
+    ababa\P
+Partial match: ababa
+    ababa\P\P
+Partial match: ababa
+    abababx
+ 0: abababx
+ 1: ab
+    ababababx  
+ 0: ababababx
+ 1: ab
+    
+/^(..)(\1{2,3})ab/
+    abababab
+ 0: abababab
+ 1: ab
+ 2: abab
+
 /-- End of testinput2 --/

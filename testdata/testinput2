@@ -3640,4 +3640,24 @@ replaced by single letters. --/
     abaBabA\P
     abAbABaBx\P
 
+/^(..)\1/
+    aba\P
+
+/^(..)\1{2,3}x/
+    aba\P
+    ababa\P
+    ababa\P\P
+    abababx
+    ababababx  
+
+/^(..)\1{2,3}?x/
+    aba\P
+    ababa\P
+    ababa\P\P
+    abababx
+    ababababx  
+    
+/^(..)(\1{2,3})ab/
+    abababab
+
 /-- End of testinput2 --/

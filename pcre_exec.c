@@ -140,14 +140,16 @@ Arguments:
   md          points to match data block
   caseless    TRUE if caseless
 
-Returns:      < 0 if not matched, otherwise the number of subject bytes matched
+Returns:      >= 0 the number of subject bytes matched
+              -1 no match
+              -2 partial match; always given if at end subject 
 */
 
 static int
 match_ref(int offset, register PCRE_PUCHAR eptr, int length, match_data *md,
   BOOL caseless)
 {
-int matched_length = length;
+PCRE_PUCHAR eptr_start = eptr;
 register PCRE_PUCHAR p = md->start_subject + md->offset_vector[offset];
 
 #ifdef PCRE_DEBUG
@@ -163,7 +165,8 @@ pchars(p, length, FALSE, md);
 printf("\n");
 #endif
 
-/* Always fail if reference not set (and not JavaScript compatible). */
+/* Always fail if reference not set (and not JavaScript compatible - in that 
+case the length is passed as zero). */
 
 if (length < 0) return -1;
 
@@ -186,16 +189,14 @@ if (caseless)
     reference, not along the subject (earlier code did this wrong). */
 
     PCRE_PUCHAR endptr = p + length;
-    PCRE_PUCHAR eptr_start = eptr;
     while (p < endptr)
       {
       int c, d;
-      if (eptr >= md->end_subject) return -((int)(eptr - eptr_start) + 1);
+      if (eptr >= md->end_subject) return -2;   /* Partial match */
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
       if (c != d && c != UCD_OTHERCASE(d)) return -1;
       }
-    matched_length = (int)(eptr - eptr_start);
     }
   else
 #endif
@@ -204,15 +205,9 @@ if (caseless)
   /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
   is no UCP support. */
     {
-    if (eptr + length > md->end_subject)
-      {
-      if (md->partial == 0)
-        return -1;
-      length = (int)(md->end_subject - eptr);
-      matched_length = -(length + 1);
-      }
     while (length-- > 0)
       {
+      if (eptr >= md->end_subject) return -2;   /* Partial match */
       if (TABLE_GET(*p, md->lcc, *p) != TABLE_GET(*eptr, md->lcc, *eptr)) return -1;
       p++;
       eptr++;
@@ -225,17 +220,14 @@ are in UTF-8 mode. */
 
 else
   {
-  if (eptr + length > md->end_subject)
+  while (length-- > 0) 
     {
-    if (md->partial == 0)
-      return -1;
-    length = (int)(md->end_subject - eptr);
-    matched_length = -(length + 1);
-    }
-  while (length-- > 0) if (*p++ != *eptr++) return -1;
+    if (eptr >= md->end_subject) return -2;   /* Partial match */
+    if (*p++ != *eptr++) return -1;
+    } 
   }
 
-return matched_length;
+return (int)(eptr - eptr_start);
 }
 
 
@@ -2073,7 +2065,21 @@ for (;;)
 
     case OP_DOLLM:
     if (eptr < md->end_subject)
-      { if (!IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH); }
+      { 
+      if (!IS_NEWLINE(eptr)) 
+        {
+        if (eptr + 1 >= md->end_subject &&
+            md->partial != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            *eptr == NLBLOCK->nl[0])
+          {  
+          md->hitend = TRUE;
+          if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+          }
+        RRETURN(MATCH_NOMATCH); 
+        } 
+      }
     else
       {
       if (md->noteol) RRETURN(MATCH_NOMATCH);
@@ -2105,7 +2111,18 @@ for (;;)
     ASSERT_NL_OR_EOS:
     if (eptr < md->end_subject &&
         (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
+      {
+      if (eptr + 1 >= md->end_subject &&
+          md->partial != 0 &&
+          NLBLOCK->nltype == NLTYPE_FIXED &&
+          NLBLOCK->nllen == 2 && 
+          *eptr == NLBLOCK->nl[0])
+        {  
+        md->hitend = TRUE;
+        if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+        }
       RRETURN(MATCH_NOMATCH);
+      } 
 
     /* Either at end of string or \n before end. */
 
@@ -2379,7 +2396,11 @@ for (;;)
       default: RRETURN(MATCH_NOMATCH);
 
       case 0x000d:
-      if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
+      if (eptr >= md->end_subject)
+        {
+        SCHECK_PARTIAL();
+        }    
+      else if (*eptr == 0x0a) eptr++;
       break;
 
       case 0x000a:
@@ -2609,10 +2630,7 @@ for (;;)
       if (UCD_CATEGORY(c) != ucp_M) break;
       eptr += len;
       }
-    if (md->partial != 0 && eptr >= md->end_subject)
-      {
-      SCHECK_PARTIAL();
-      }
+    CHECK_PARTIAL();   
     ecode++;
     break;
 #endif
@@ -2678,7 +2696,7 @@ for (;;)
       default:               /* No repeat follows */
       if ((length = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
-        eptr += -(length + 1);
+        if (length == -2) eptr = md->end_subject;   /* Partial match */ 
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2704,7 +2722,7 @@ for (;;)
       int slength;
       if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
-        eptr += -(slength + 1);
+        if (slength == -2) eptr = md->end_subject;   /* Partial match */ 
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2728,7 +2746,7 @@ for (;;)
         if (fi >= max) RRETURN(MATCH_NOMATCH);
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
-          eptr += -(slength + 1);
+          if (slength == -2) eptr = md->end_subject;   /* Partial match */ 
           CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
@@ -2747,14 +2765,20 @@ for (;;)
         int slength;
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
-          /* Restore the eptr after the check. */
-          eptr += -(slength + 1);
-          CHECK_PARTIAL();
-          eptr -= -(slength + 1);
+          /* Can't use CHECK_PARTIAL because we don't want to update eptr in 
+          the soft partial matching case. */ 
+           
+          if (slength == -2 && md->partial != 0 && 
+              md->end_subject > md->start_used_ptr)
+            {  
+            md->hitend = TRUE;
+            if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+            }
           break;
           }
         eptr += slength;
         }
+         
       while (eptr >= pp)
         {
         RMATCH(eptr, ecode, offset_top, md, eptrb, RM15);
@@ -4188,10 +4212,7 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
-          }
-        if (md->partial != 0 && eptr >= md->end_subject)
-          {
-          SCHECK_PARTIAL();
+          CHECK_PARTIAL();   
           }
         }
 
@@ -4976,10 +4997,7 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
-          if (md->partial != 0 && eptr >= md->end_subject)
-            {
-            SCHECK_PARTIAL();
-            }
+          CHECK_PARTIAL();   
           }
         }
       else
@@ -5523,10 +5541,7 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
-          if (eptr >= md->end_subject)
-            {
-            SCHECK_PARTIAL();
-            }
+          CHECK_PARTIAL();   
           }
 
         /* eptr is now past the end of the maximum run */
@@ -6318,8 +6333,7 @@ if (utf && (options & PCRE_NO_UTF8_CHECK) == 0)
 /* If the pattern was successfully studied with JIT support, run the JIT
 executable instead of the rest of this function. Most options must be set at
 compile time for the JIT code to be usable. Fallback to the normal code path if
-an unsupported flag is set. In particular, JIT does not support partial
-matching. */
+an unsupported flag is set. */
 
 #ifdef SUPPORT_JIT
 if (extra_data != NULL
@@ -6334,10 +6348,11 @@ if (extra_data != NULL
     (const pcre_uchar *)subject, length, start_offset, options,
     ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0)
     ? MATCH_LIMIT : extra_data->match_limit, offsets, offsetcount);
+     
   /* PCRE_ERROR_NULL means that the selected normal or partial matching
   mode is not compiled. In this case we simply fallback to interpreter. */
-  if (rc != PCRE_ERROR_NULL)
-    return rc;
+   
+  if (rc != PCRE_ERROR_NULL) return rc;
   }
 #endif
 

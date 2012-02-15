@@ -14,7 +14,21 @@ Version 8.31
 
 4.  Partial matching support is added to the JIT compiler.
 
-5.  Improved \X and back reference partial matching.
+5.  Fixed several bugs concerned with partial matching of items that consist
+    of more than one character:
+    
+    (a) /^(..)\1/ did not partially match "aba" because checking references was
+        done on an "all or nothing" basis. This also applied to repeated 
+        references.
+        
+    (b) \R did not give a hard partial match if \r was found at the end of the
+        subject.
+        
+    (c) \X did not give a hard partial match after matching one or more 
+        characters at the end of the subject.
+        
+    (d) When newline was set to CRLF, a pattern such as /a$/ did not give a 
+        partial match for the string "\r".
 
 
 Version 8.30 04-February-2012
