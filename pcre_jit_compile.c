@@ -1452,15 +1452,20 @@ return (bit < 256) ? ((0 << 8) | bit) : ((1 << 8) | (bit >> 8));
 #endif /* COMPILE_PCRE8 */
 }
 
-static void check_partial(compiler_common *common)
+static void check_partial(compiler_common *common, BOOL force)
 {
+/* Checks whether a partial matching is occured. Does not modify registers. */
 DEFINE_COMPILER;
-struct sljit_jump *jump;
+struct sljit_jump *jump = NULL;
+
+SLJIT_ASSERT(!force || common->mode != JIT_COMPILE);
 
 if (common->mode == JIT_COMPILE)
   return;
 
-jump = CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), START_USED_PTR, STR_PTR, 0);
+if (!force || common->mode == JIT_PARTIAL_SOFT_COMPILE)
+  jump = CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), START_USED_PTR, STR_PTR, 0);
+
 if (common->mode == JIT_PARTIAL_SOFT_COMPILE)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), HIT_START, SLJIT_IMM, -1);
 else
@@ -1470,7 +1475,9 @@ else
   else
     add_jump(compiler, &common->partialmatch, JUMP(SLJIT_JUMP));
   }
-JUMPHERE(jump);
+
+if (jump != NULL)
+  JUMPHERE(jump);
 }
 
 static struct sljit_jump *check_str_end(compiler_common *common)
@@ -3181,10 +3188,22 @@ switch(type)
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     jump[0] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
-    jump[1] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+    if (common->mode == JIT_COMPILE)
+      jump[1] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+    else
+      {
+      jump[1] = CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0);
+      /* Since we successfully read a char above, partial matching must occure. */
+      check_partial(common, TRUE);
+      add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
+      JUMPHERE(jump[1]);
+      jump[1] = NULL;
+      }
+
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
     add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, common->newline & 0xff));
-    JUMPHERE(jump[1]);
+    if (jump[1] != NULL)
+      JUMPHERE(jump[1]);
     JUMPHERE(jump[0]);
     }
   else
@@ -3242,7 +3261,11 @@ switch(type)
   fallback_at_str_end(common, fallbacks);
   read_char(common);
   jump[0] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
-  jump[1] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+  /* We don't need to handle soft partial matching case. */
+  if (common->mode != JIT_PARTIAL_HARD_COMPILE)
+    jump[1] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+  else
+    jump[1] = check_str_end(common);
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
   jump[2] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
@@ -3291,19 +3314,34 @@ switch(type)
   if (common->mode == JIT_PARTIAL_HARD_COMPILE)
     {
     jump[0] = CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0);
-    check_partial(common);
+    /* Since we successfully read a char above, partial matching must occure. */
+    check_partial(common, TRUE);
     JUMPHERE(jump[0]);
     }
   return cc;
 #endif
 
   case OP_EODN:
+  /* Requires rather complex checks. */
   jump[0] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-    add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_END, 0));
+    if (common->mode == JIT_COMPILE)
+      add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_END, 0));
+    else
+      {
+      jump[1] = CMP(SLJIT_C_EQUAL, TMP2, 0, STR_END, 0);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP2, 0, STR_END, 0);
+      COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_LESS);
+      OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
+      COND_VALUE(SLJIT_OR | SLJIT_SET_E, TMP2, 0, SLJIT_C_NOT_EQUAL);
+      add_jump(compiler, fallbacks, JUMP(SLJIT_C_NOT_EQUAL));
+      check_partial(common, TRUE);
+      add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
+      JUMPHERE(jump[1]);
+      }
     OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
     add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
     add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff));
@@ -3348,12 +3386,12 @@ switch(type)
     JUMPHERE(jump[3]);
     }
   JUMPHERE(jump[0]);
-  check_partial(common);
+  check_partial(common, FALSE);
   return cc;
 
   case OP_EOD:
-  add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, STR_PTR, 0, STR_END, 0));
-  check_partial(common);
+  add_jump(compiler, fallbacks, CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0));
+  check_partial(common, FALSE);
   return cc;
 
   case OP_CIRC:
@@ -3402,7 +3440,7 @@ switch(type)
   else
     {
     add_jump(compiler, fallbacks, CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0));
-    check_partial(common);
+    check_partial(common, FALSE);
     }
   return cc;
 
@@ -3411,15 +3449,26 @@ switch(type)
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
   OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, noteol));
   add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
-  check_partial(common);
+  check_partial(common, FALSE);
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
 
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
-    add_jump(compiler, fallbacks, CMP(SLJIT_C_GREATER, TMP2, 0, STR_END, 0));
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
+    if (common->mode == JIT_COMPILE)
+      add_jump(compiler, fallbacks, CMP(SLJIT_C_GREATER, TMP2, 0, STR_END, 0));
+    else
+      {
+      jump[1] = CMP(SLJIT_C_LESS_EQUAL, TMP2, 0, STR_END, 0);
+      /* STR_PTR = STR_END - IN_UCHARS(1) */
+      add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
+      check_partial(common, TRUE);
+      add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
+      JUMPHERE(jump[1]);
+      }
+
     OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
     add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
     add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff));
@@ -3761,7 +3810,7 @@ if (common->utf && *cc == OP_REFI)
     {
     add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0));
     nopartial = CMP(SLJIT_C_NOT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1);
-    check_partial(common);
+    check_partial(common, FALSE);
     add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
     JUMPHERE(nopartial);
     }
@@ -3794,7 +3843,7 @@ else
     add_jump(compiler, *cc == OP_REF ? &common->casefulcmp : &common->caselesscmp, JUMP(SLJIT_FAST_CALL));
     add_jump(compiler, fallbacks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
     JUMPHERE(partial);
-    check_partial(common);
+    check_partial(common, FALSE);
     add_jump(compiler, fallbacks, JUMP(SLJIT_JUMP));
     JUMPHERE(nopartial);
     }
