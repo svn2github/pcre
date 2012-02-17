@@ -27,8 +27,11 @@ Version 8.31
     (c) \X did not give a hard partial match after matching one or more 
         characters at the end of the subject.
         
-    (d) When newline was set to CRLF, a pattern such as /a$/ did not give a 
-        partial match for the string "\r".
+    (d) When newline was set to CRLF, a pattern such as /a$/ did not recognize
+        a partial match for the string "\r".
+        
+    (e) When newline was set to CRLF, the metacharacter "." did not recognize
+        a partial match for a CR character at the end of the subject string.
 
 
 Version 8.30 04-February-2012

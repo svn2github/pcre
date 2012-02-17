@@ -12124,4 +12124,128 @@ Partial match: ababa
  1: ab
  2: abab
 
+/^\R/
+    \r\P
+ 0: \x0d
+    \r\P\P
+Partial match: \x0d
+    
+/^\R{2,3}x/
+    \r\P
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P 
+Partial match: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P  
+Partial match: \x0d\x0d\x0d
+    \r\r\r\P\P
+Partial match: \x0d\x0d\x0d
+    \r\rx
+ 0: \x0d\x0dx
+    \r\r\rx    
+ 0: \x0d\x0d\x0dx
+
+/^\R{2,3}?x/
+    \r\P
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P 
+Partial match: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P  
+Partial match: \x0d\x0d\x0d
+    \r\r\r\P\P
+Partial match: \x0d\x0d\x0d
+    \r\rx
+ 0: \x0d\x0dx
+    \r\r\rx    
+ 0: \x0d\x0d\x0dx
+    
+/^\R?x/
+    \r\P
+Partial match: \x0d
+    \r\P\P 
+Partial match: \x0d
+    x
+ 0: x
+    \rx  
+ 0: \x0dx
+
+/^\R+x/
+    \r\P
+Partial match: \x0d
+    \r\P\P 
+Partial match: \x0d
+    \r\n\P
+Partial match: \x0d\x0a
+    \r\n\P\P  
+Partial match: \x0d\x0a
+    \rx  
+ 0: \x0dx
+
+/^a$/<CRLF>
+    a\r\P
+Partial match: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/^a$/m<CRLF>
+    a\r\P
+Partial match: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/^(a$|a\r)/<CRLF>
+    a\r\P
+ 0: a\x0d
+ 1: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/^(a$|a\r)/m<CRLF>
+    a\r\P
+ 0: a\x0d
+ 1: a\x0d
+    a\r\P\P 
+Partial match: a\x0d
+
+/./<CRLF>
+    \r\P
+ 0: \x0d
+    \r\P\P 
+Partial match: \x0d
+  
+/.{2,3}/<CRLF>
+    \r\P 
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P
+ 0: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P
+ 0: \x0d\x0d\x0d
+    \r\r\r\P\P     
+Partial match: \x0d\x0d\x0d
+
+/.{2,3}?/<CRLF>
+    \r\P 
+Partial match: \x0d
+    \r\P\P
+Partial match: \x0d
+    \r\r\P
+ 0: \x0d\x0d
+    \r\r\P\P
+Partial match: \x0d\x0d
+    \r\r\r\P
+ 0: \x0d\x0d
+    \r\r\r\P\P     
+ 0: \x0d\x0d
+
 /-- End of testinput2 --/

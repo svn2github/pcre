@@ -1778,4 +1778,39 @@ Partial match: AA
     AA\P\P 
 Partial match: AA
 
+
+/./8<CRLF>
+    \r\P
+ 0: \x{0d}
+    \r\P\P 
+Partial match: \x{0d}
+  
+/.{2,3}/8<CRLF>
+    \r\P 
+Partial match: \x{0d}
+    \r\P\P
+Partial match: \x{0d}
+    \r\r\P
+ 0: \x{0d}\x{0d}
+    \r\r\P\P
+Partial match: \x{0d}\x{0d}
+    \r\r\r\P
+ 0: \x{0d}\x{0d}\x{0d}
+    \r\r\r\P\P     
+Partial match: \x{0d}\x{0d}\x{0d}
+
+/.{2,3}?/8<CRLF>
+    \r\P 
+Partial match: \x{0d}
+    \r\P\P
+Partial match: \x{0d}
+    \r\r\P
+ 0: \x{0d}\x{0d}
+    \r\r\P\P
+Partial match: \x{0d}\x{0d}
+    \r\r\r\P
+ 0: \x{0d}\x{0d}
+    \r\r\r\P\P     
+ 0: \x{0d}\x{0d}
+
 /-- End of testinput5 --/

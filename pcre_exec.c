@@ -2068,8 +2068,8 @@ for (;;)
       { 
       if (!IS_NEWLINE(eptr)) 
         {
-        if (eptr + 1 >= md->end_subject &&
-            md->partial != 0 &&
+        if (md->partial != 0 &&
+            eptr + 1 >= md->end_subject &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
             NLBLOCK->nllen == 2 && 
             *eptr == NLBLOCK->nl[0])
@@ -2112,8 +2112,8 @@ for (;;)
     if (eptr < md->end_subject &&
         (!IS_NEWLINE(eptr) || eptr != md->end_subject - md->nllen))
       {
-      if (eptr + 1 >= md->end_subject &&
-          md->partial != 0 &&
+      if (md->partial != 0 &&
+          eptr + 1 >= md->end_subject &&
           NLBLOCK->nltype == NLTYPE_FIXED &&
           NLBLOCK->nllen == 2 && 
           *eptr == NLBLOCK->nl[0])
@@ -2250,12 +2250,25 @@ for (;;)
       }
     break;
 
-    /* Match a single character type; inline for speed */
+    /* Match any single character type except newline; have to take care with
+    CRLF newlines and partial matching. */
 
     case OP_ANY:
     if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
+    if (md->partial != 0 &&
+        eptr + 1 >= md->end_subject &&
+        NLBLOCK->nltype == NLTYPE_FIXED &&
+        NLBLOCK->nllen == 2 && 
+        *eptr == NLBLOCK->nl[0])
+      {  
+      md->hitend = TRUE;
+      if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+      }
+ 
     /* Fall through */
 
+    /* Match any single character whatsoever. */
+     
     case OP_ALLANY:
     if (eptr >= md->end_subject)   /* DO NOT merge the eptr++ here; it must */
       {                            /* not be updated before SCHECK_PARTIAL. */
@@ -4233,6 +4246,15 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
+          if (md->partial != 0 &&
+              eptr + 1 >= md->end_subject &&
+              NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && 
+              *eptr == NLBLOCK->nl[0])
+            {  
+            md->hitend = TRUE;
+            if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+            }
           eptr++;
           ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
           }
@@ -4517,6 +4539,15 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
+          if (md->partial != 0 &&
+              eptr + 1 >= md->end_subject &&
+              NLBLOCK->nltype == NLTYPE_FIXED &&
+              NLBLOCK->nllen == 2 && 
+              *eptr == NLBLOCK->nl[0])
+            {  
+            md->hitend = TRUE;
+            if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+            }
           eptr++;
           }
         break;
@@ -5021,7 +5052,18 @@ for (;;)
           GETCHARINC(c, eptr);
           switch(ctype)
             {
-            case OP_ANY:        /* This is the non-NL case */
+            case OP_ANY:               /* This is the non-NL case */
+            if (md->partial != 0 &&    /* Take care with CRLF partial */
+                eptr >= md->end_subject &&
+                NLBLOCK->nltype == NLTYPE_FIXED &&
+                NLBLOCK->nllen == 2 && 
+                c == NLBLOCK->nl[0])
+              {  
+              md->hitend = TRUE;
+              if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+              }
+            break;
+ 
             case OP_ALLANY:
             case OP_ANYBYTE:
             break;
@@ -5184,7 +5226,18 @@ for (;;)
           c = *eptr++;
           switch(ctype)
             {
-            case OP_ANY:     /* This is the non-NL case */
+            case OP_ANY:               /* This is the non-NL case */
+            if (md->partial != 0 &&    /* Take care with CRLF partial */
+                eptr >= md->end_subject &&
+                NLBLOCK->nltype == NLTYPE_FIXED &&
+                NLBLOCK->nllen == 2 && 
+                c == NLBLOCK->nl[0])
+              {  
+              md->hitend = TRUE;
+              if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+              }
+            break;
+ 
             case OP_ALLANY:
             case OP_ANYBYTE:
             break;
@@ -5585,6 +5638,15 @@ for (;;)
                 break;
                 }
               if (IS_NEWLINE(eptr)) break;
+              if (md->partial != 0 &&    /* Take care with CRLF partial */
+                  eptr + 1 >= md->end_subject &&
+                  NLBLOCK->nltype == NLTYPE_FIXED &&
+                  NLBLOCK->nllen == 2 && 
+                  *eptr == NLBLOCK->nl[0])
+                {  
+                md->hitend = TRUE;
+                if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+                }
               eptr++;
               ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
               }
@@ -5602,6 +5664,15 @@ for (;;)
                 break;
                 }
               if (IS_NEWLINE(eptr)) break;
+              if (md->partial != 0 &&    /* Take care with CRLF partial */
+                  eptr + 1 >= md->end_subject &&
+                  NLBLOCK->nltype == NLTYPE_FIXED &&
+                  NLBLOCK->nllen == 2 && 
+                  *eptr == NLBLOCK->nl[0])
+                {  
+                md->hitend = TRUE;
+                if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+                }
               eptr++;
               ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
               }
@@ -5866,6 +5937,15 @@ for (;;)
               break;
               }
             if (IS_NEWLINE(eptr)) break;
+            if (md->partial != 0 &&    /* Take care with CRLF partial */
+                eptr + 1 >= md->end_subject &&
+                NLBLOCK->nltype == NLTYPE_FIXED &&
+                NLBLOCK->nllen == 2 && 
+                *eptr == NLBLOCK->nl[0])
+              {  
+              md->hitend = TRUE;
+              if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
+              }
             eptr++;
             }
           break;

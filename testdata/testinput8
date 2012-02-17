@@ -4762,4 +4762,24 @@
     a\r\P
     a\r\P\P 
 
+/./<CRLF>
+    \r\P
+    \r\P\P 
+  
+/.{2,3}/<CRLF>
+    \r\P 
+    \r\P\P
+    \r\r\P
+    \r\r\P\P
+    \r\r\r\P
+    \r\r\r\P\P     
+
+/.{2,3}?/<CRLF>
+    \r\P 
+    \r\P\P
+    \r\r\P
+    \r\r\P\P
+    \r\r\r\P
+    \r\r\r\P\P     
+
 /-- End of testinput8 --/

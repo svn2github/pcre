@@ -894,7 +894,20 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_ANY:
       if (clen > 0 && !IS_NEWLINE(ptr))
-        { ADD_NEW(state_offset + 1, 0); }
+        { 
+        if (ptr + 1 >= md->end_subject &&
+            (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            c == NLBLOCK->nl[0])
+          {
+          could_continue = partial_newline = TRUE;          
+          } 
+        else
+          { 
+          ADD_NEW(state_offset + 1, 0); 
+          } 
+        }
       break;
 
       /*-----------------------------------------------------------------*/
@@ -1122,7 +1135,15 @@ for (;;)
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
       if (clen > 0)
         {
-        if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
+        if (d == OP_ANY && ptr + 1 >= md->end_subject &&
+            (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            c == NLBLOCK->nl[0])
+          {
+          could_continue = partial_newline = TRUE;          
+          } 
+        else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
@@ -1145,7 +1166,15 @@ for (;;)
       ADD_ACTIVE(state_offset + 2, 0);
       if (clen > 0)
         {
-        if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
+        if (d == OP_ANY && ptr + 1 >= md->end_subject &&
+            (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            c == NLBLOCK->nl[0])
+          {
+          could_continue = partial_newline = TRUE;          
+          } 
+        else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
@@ -1167,7 +1196,15 @@ for (;;)
       ADD_ACTIVE(state_offset + 2, 0);
       if (clen > 0)
         {
-        if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
+        if (d == OP_ANY && ptr + 1 >= md->end_subject &&
+            (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            c == NLBLOCK->nl[0])
+          {
+          could_continue = partial_newline = TRUE;          
+          } 
+        else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
@@ -1187,7 +1224,15 @@ for (;;)
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
+        if (d == OP_ANY && ptr + 1 >= md->end_subject &&
+            (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            c == NLBLOCK->nl[0])
+          {
+          could_continue = partial_newline = TRUE;          
+          } 
+        else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
@@ -1208,7 +1253,15 @@ for (;;)
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
+        if (d == OP_ANY && ptr + 1 >= md->end_subject &&
+            (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
+            NLBLOCK->nltype == NLTYPE_FIXED &&
+            NLBLOCK->nllen == 2 && 
+            c == NLBLOCK->nl[0])
+          {
+          could_continue = partial_newline = TRUE;          
+          } 
+        else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
@@ -2988,7 +3041,7 @@ for (;;)
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
-        could_continue &&                            /* Some could go on */
+        could_continue &&                            /* Some could go on, and */
         forced_fail != workspace[1] &&               /* Not all forced fail & */
         (                                            /* either... */
         (md->moptions & PCRE_PARTIAL_HARD) != 0      /* Hard partial */
@@ -2997,10 +3050,12 @@ for (;;)
          match_count < 0)                            /* no matches */
         ) &&                                         /* And... */
         (
-        ptr >= end_subject ||                  /* Reached end of subject or */
-        partial_newline                        /* a partial newline */
-        ) && 
-        ptr > md->start_used_ptr)              /* Inspected non-empty string */
+        partial_newline ||                           /* Either partial NL */
+          (                                          /* or ... */
+          ptr >= end_subject &&                /* End of subject and */
+          ptr > md->start_used_ptr)            /* Inspected non-empty string */
+          ) 
+        )   
       {
       if (offsetcount >= 2)
         {
