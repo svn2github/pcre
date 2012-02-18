@@ -962,12 +962,18 @@ If studying the pattern does not produce any useful information,
 wants to pass any of the other fields to \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
 .P
-The second argument of \fBpcre_study()\fP contains option bits. There is only
-one option: PCRE_STUDY_JIT_COMPILE. If this is set, and the just-in-time
-compiler is available, the pattern is further compiled into machine code that
-executes much faster than the \fBpcre_exec()\fP matching function. If
-the just-in-time compiler is not available, this option is ignored. All other
-bits in the \fIoptions\fP argument must be zero.
+The second argument of \fBpcre_study()\fP contains option bits. There are three
+options: 
+.sp
+  PCRE_STUDY_JIT_COMPILE
+  PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE
+  PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
+.sp  
+If any of these are set, and the just-in-time compiler is available, the
+pattern is further compiled into machine code that executes much faster than
+the \fBpcre_exec()\fP interpretive matching function. If the just-in-time
+compiler is not available, these options are ignored. All other bits in the
+\fIoptions\fP argument must be zero.
 .P
 JIT compilation is a heavyweight optimization. It can take some time for
 patterns to be analyzed, and for one-off matches and simple patterns the
@@ -991,8 +997,8 @@ When you are finished with a pattern, you can free the memory used for the
 study data by calling \fBpcre_free_study()\fP. This function was added to the
 API for release 8.20. For earlier versions, the memory could be freed with
 \fBpcre_free()\fP, just like the pattern itself. This will still work in cases
-where PCRE_STUDY_JIT_COMPILE is not used, but it is advisable to change to the
-new function when convenient.
+where JIT optimization is not used, but it is advisable to change to the new
+function when convenient.
 .P
 This is a typical way in which \fBpcre_study\fP() is used (except that in a
 real application there should be tests for errors):
@@ -1025,14 +1031,12 @@ created. This speeds up finding a position in the subject at which to start
 matching. (In 16-bit mode, the bitmap is used for 16-bit values less than 256.)
 .P
 These two optimizations apply to both \fBpcre_exec()\fP and
-\fBpcre_dfa_exec()\fP. However, they are not used by \fBpcre_exec()\fP if
-\fBpcre_study()\fP is called with the PCRE_STUDY_JIT_COMPILE option, and
-just-in-time compiling is successful. The optimizations can be disabled by
-setting the PCRE_NO_START_OPTIMIZE option when calling \fBpcre_exec()\fP or
-\fBpcre_dfa_exec()\fP. You might want to do this if your pattern contains
-callouts or (*MARK) (which cannot be handled by the JIT compiler), and you want
-to make use of these facilities in cases where matching fails. See the
-discussion of PCRE_NO_START_OPTIMIZE
+\fBpcre_dfa_exec()\fP, and the information is also used by the JIT compiler.
+The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option
+when calling \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP, but if this is done,
+JIT execution is also disabled. You might want to do this if your pattern
+contains callouts or (*MARK) and you want to make use of these facilities in
+cases where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
 .\" HTML <a href="#execoptions">
 .\" </a>
 below.
@@ -1205,12 +1209,11 @@ Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
 .sp
   PCRE_INFO_JIT
 .sp
-Return 1 if the pattern was studied with the PCRE_STUDY_JIT_COMPILE option, and
+Return 1 if the pattern was studied with one of the JIT options, and
 just-in-time compiling was successful. The fourth argument should point to an
 \fBint\fP variable. A return value of 0 means that JIT support is not available
-in this version of PCRE, or that the pattern was not studied with the
-PCRE_STUDY_JIT_COMPILE option, or that the JIT compiler could not handle this
-particular pattern. See the
+in this version of PCRE, or that the pattern was not studied with a JIT option,
+or that the JIT compiler could not handle this particular pattern. See the
 .\" HREF
 \fBpcrejit\fP
 .\"
@@ -1218,9 +1221,9 @@ documentation for details of what can and cannot be handled.
 .sp
   PCRE_INFO_JITSIZE
 .sp
-If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
-return the size of the JIT compiled code, otherwise return zero. The fourth
-argument should point to a \fBsize_t\fP variable.
+If the pattern was successfully studied with a JIT option, return the size of
+the JIT compiled code, otherwise return zero. The fourth argument should point
+to a \fBsize_t\fP variable.
 .sp
   PCRE_INFO_LASTLITERAL
 .sp
@@ -1492,11 +1495,10 @@ patterns that are not anchored, the count restarts from zero for each position
 in the subject string.
 .P
 When \fBpcre_exec()\fP is called with a pattern that was successfully studied
-with the PCRE_STUDY_JIT_COMPILE option, the way that the matching is executed
-is entirely different. However, there is still the possibility of runaway
-matching that goes on for a very long time, and so the \fImatch_limit\fP value
-is also used in this case (but in a different way) to limit how long the
-matching can continue.
+with a JIT option, the way that the matching is executed is entirely different.
+However, there is still the possibility of runaway matching that goes on for a
+very long time, and so the \fImatch_limit\fP value is also used in this case
+(but in a different way) to limit how long the matching can continue.
 .P
 The default value for the limit can be set when PCRE is built; the default
 default is 10 million, which handles all but the most extreme cases. You can
@@ -1514,8 +1516,7 @@ This limit is of use only if it is set smaller than \fImatch_limit\fP.
 Limiting the recursion depth limits the amount of machine stack that can be
 used, or, when PCRE has been compiled to use memory on the heap instead of the
 stack, the amount of heap memory that can be used. This limit is not relevant,
-and is ignored, if the pattern was successfully studied with
-PCRE_STUDY_JIT_COMPILE.
+and is ignored, when matching is done using JIT compiled code. 
 .P
 The default value for \fImatch_limit_recursion\fP can be set when PCRE is
 built; the default default is the same value as the default for
@@ -1572,15 +1573,15 @@ documentation.
 The unused bits of the \fIoptions\fP argument for \fBpcre_exec()\fP must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_\fIxxx\fP,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
-PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and
-PCRE_PARTIAL_HARD.
+PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, and
+PCRE_PARTIAL_SOFT.
 .P
-If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
-the only supported options for JIT execution are PCRE_NO_UTF8_CHECK,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NOTEMPTY_ATSTART. Note in
-particular that partial matching is not supported. If an unsupported option is
-used, JIT execution is disabled and the normal interpretive code in
-\fBpcre_exec()\fP is run.
+If the pattern was successfully studied with one of the just-in-time (JIT)
+compile options, the only supported options for JIT execution are
+PCRE_NO_UTF8_CHECK, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY,
+PCRE_NOTEMPTY_ATSTART, PCRE_PARTIAL_HARD, and PCRE_PARTIAL_SOFT. If an
+unsupported option is used, JIT execution is disabled and the normal
+interpretive code in \fBpcre_exec()\fP is run.
 .sp
   PCRE_ANCHORED
 .sp
@@ -1699,7 +1700,8 @@ causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
 are considered at every possible starting position in the subject string. If
 PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
-time.
+time. The use of PCRE_NO_START_OPTIMIZE disables JIT execution; when it is set, 
+matching is always done using interpretively.
 .P
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
 Consider the pattern
@@ -2644,6 +2646,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 January 2012
+Last updated: 18 February 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
