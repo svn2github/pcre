@@ -6432,7 +6432,11 @@ if (extra_data != NULL
   /* PCRE_ERROR_NULL means that the selected normal or partial matching
   mode is not compiled. In this case we simply fallback to interpreter. */
    
-  if (rc != PCRE_ERROR_NULL) return rc;
+  if (rc != PCRE_ERROR_NULL)     /* JIT was used */
+    {
+    ((pcre_extra *)extra_data)->flags |= PCRE_EXTRA_USED_JIT;
+    return rc;
+    } 
   }
 #endif
 
@@ -6467,6 +6471,7 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_CALLOUT_DATA) != 0)
     md->callout_data = extra_data->callout_data;
   if ((flags & PCRE_EXTRA_TABLES) != 0) tables = extra_data->tables;
+  ((pcre_extra *)extra_data)->flags &= ~PCRE_EXTRA_USED_JIT;   /* JIT not used */
   }
 
 /* If the exec call supplied NULL for tables, use the inbuilt ones. This

@@ -1465,22 +1465,28 @@ fields (not necessarily in this order):
 In the 16-bit version of this structure, the \fImark\fP field has type
 "PCRE_UCHAR16 **".
 .P
-The \fIflags\fP field is a bitmap that specifies which of the other fields
-are set. The flag bits are:
+The \fIflags\fP field is mostly used to specify which of the other fields are
+set. The flag bits are:
 .sp
-  PCRE_EXTRA_STUDY_DATA
+  PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_EXECUTABLE_JIT
+  PCRE_EXTRA_MARK
   PCRE_EXTRA_MATCH_LIMIT
   PCRE_EXTRA_MATCH_LIMIT_RECURSION
-  PCRE_EXTRA_CALLOUT_DATA
+  PCRE_EXTRA_STUDY_DATA
   PCRE_EXTRA_TABLES
-  PCRE_EXTRA_MARK
+  PCRE_EXTRA_USED_JIT 
 .sp
 Other flag bits should be set to zero. The \fIstudy_data\fP field and sometimes
 the \fIexecutable_jit\fP field are set in the \fBpcre_extra\fP block that is
 returned by \fBpcre_study()\fP, together with the appropriate flag bits. You
-should not set these yourself, but you may add to the block by setting the
-other fields and their corresponding flag bits.
+should not set these yourself, but you may add to the block by setting other
+fields and their corresponding flag bits.
+.P
+The PCRE_EXTRA_USED_JIT flag bit is different to the other bits. It does not 
+indicate the presence of data in another field. Instead, it is set by
+\fBpcre_exec()\fP if matching was done using JIT-compiled code, and cleared if 
+the interpreter was used. You can inspect this bit after a match.
 .P
 The \fImatch_limit\fP field provides a means of preventing PCRE from using up a
 vast amount of resources when running patterns that are not going to match,
@@ -2084,9 +2090,9 @@ time.
 .sp
   PCRE_ERROR_JIT_STACKLIMIT (-27)
 .sp
-This error is returned when a pattern that was successfully studied using the
-PCRE_STUDY_JIT_COMPILE option is being matched, but the memory available for
-the just-in-time processing stack is not large enough. See the
+This error is returned when a pattern that was successfully studied using a
+JIT compile option is being matched, but the memory available for the
+just-in-time processing stack is not large enough. See the
 .\" HREF
 \fBpcrejit\fP
 .\"
@@ -2646,6 +2652,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 18 February 2012
+Last updated: 20 February 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

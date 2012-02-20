@@ -15,5 +15,9 @@ and a couple of things that are different with JIT. --/
 
 /(?(R)a*(?1)|((?R))b)/S+
     aaaabcde
+    
+/abcd/S++
+    abcd
+    xyz  
 
 /-- End of testinput12 --/

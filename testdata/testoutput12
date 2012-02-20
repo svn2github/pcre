@@ -47,5 +47,11 @@ Study returned NULL
 /(?(R)a*(?1)|((?R))b)/S+
     aaaabcde
 Error -27 (JIT stack limit reached)
+    
+/abcd/S++
+    abcd
+ 0: abcd (JIT)
+    xyz  
+No match (JIT)
 
 /-- End of testinput12 --/

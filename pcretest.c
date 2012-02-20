@@ -1,4 +1,4 @@
-/*************************************************
+/*.************************************************
 *             PCRE testing program               *
 *************************************************/
 
@@ -2132,6 +2132,7 @@ printf("  -q       quiet: do not output PCRE version number at start\n");
 printf("  -S <n>   set stack size to <n> megabytes\n");
 printf("  -s       force each pattern to be studied at basic level\n"
        "  -s+      force each pattern to be studied, using JIT if available\n"
+       "  -s++     ditto, verifying when JIT was actually used\n" 
        "  -t       time compilation and execution\n");
 printf("  -t <n>   time compilation and execution, repeating <n> times\n");
 printf("  -tm      time execution (matching) only\n");
@@ -2172,6 +2173,7 @@ int posix = 0;
 int debug = 0;
 int done = 0;
 int all_use_dfa = 0;
+int verify_jit = 0;
 int yield = 0;
 int stack_size;
 
@@ -2233,17 +2235,24 @@ version = pcre16_version();
 while (argc > 1 && argv[op][0] == '-')
   {
   pcre_uint8 *endptr;
+  char *arg = argv[op]; 
 
-  if (strcmp(argv[op], "-m") == 0) showstore = 1;
-  else if (strcmp(argv[op], "-s") == 0) force_study = 0;
-  else if (strcmp(argv[op], "-s+") == 0)
+  if (strcmp(arg, "-m") == 0) showstore = 1;
+  else if (strcmp(arg, "-s") == 0) force_study = 0;
+   
+  else if (strncmp(arg, "-s+", 3) == 0)
     {
+    arg += 3;
+    if (*arg == '+') { arg++; verify_jit = TRUE; }
+
+    if (*arg != 0) goto BAD_ARG;
+ 
     force_study = 1;
     force_study_options = PCRE_STUDY_JIT_COMPILE
                         | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
                         | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
     }
-  else if (strcmp(argv[op], "-16") == 0)
+  else if (strcmp(arg, "-16") == 0)
     {
 #ifdef SUPPORT_PCRE16
     use_pcre16 = 1;
@@ -2252,24 +2261,24 @@ while (argc > 1 && argv[op][0] == '-')
     exit(1);
 #endif
     }
-  else if (strcmp(argv[op], "-q") == 0) quiet = 1;
-  else if (strcmp(argv[op], "-b") == 0) debug = 1;
-  else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
-  else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
-  else if (strcmp(argv[op], "-M") == 0) default_find_match_limit = TRUE;
+  else if (strcmp(arg, "-q") == 0) quiet = 1;
+  else if (strcmp(arg, "-b") == 0) debug = 1;
+  else if (strcmp(arg, "-i") == 0) showinfo = 1;
+  else if (strcmp(arg, "-d") == 0) showinfo = debug = 1;
+  else if (strcmp(arg, "-M") == 0) default_find_match_limit = TRUE;
 #if !defined NODFA
-  else if (strcmp(argv[op], "-dfa") == 0) all_use_dfa = 1;
+  else if (strcmp(arg, "-dfa") == 0) all_use_dfa = 1;
 #endif
-  else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
+  else if (strcmp(arg, "-o") == 0 && argc > 2 &&
       ((size_offsets = get_value((pcre_uint8 *)argv[op+1], &endptr)),
         *endptr == 0))
     {
     op++;
     argc--;
     }
-  else if (strcmp(argv[op], "-t") == 0 || strcmp(argv[op], "-tm") == 0)
+  else if (strcmp(arg, "-t") == 0 || strcmp(arg, "-tm") == 0)
     {
-    int both = argv[op][2] == 0;
+    int both = arg[2] == 0;
     int temp;
     if (argc > 2 && (temp = get_value((pcre_uint8 *)argv[op+1], &endptr),
                      *endptr == 0))
@@ -2281,7 +2290,7 @@ while (argc > 1 && argv[op][0] == '-')
     else timeitm = LOOPREPEAT;
     if (both) timeit = timeitm;
     }
-  else if (strcmp(argv[op], "-S") == 0 && argc > 2 &&
+  else if (strcmp(arg, "-S") == 0 && argc > 2 &&
       ((stack_size = get_value((pcre_uint8 *)argv[op+1], &endptr)),
         *endptr == 0))
     {
@@ -2304,9 +2313,9 @@ while (argc > 1 && argv[op][0] == '-')
 #endif
     }
 #if !defined NOPOSIX
-  else if (strcmp(argv[op], "-p") == 0) posix = 1;
+  else if (strcmp(arg, "-p") == 0) posix = 1;
 #endif
-  else if (strcmp(argv[op], "-C") == 0)
+  else if (strcmp(arg, "-C") == 0)
     {
     int rc;
     unsigned long int lrc;
@@ -2446,15 +2455,16 @@ are set, either both UTFs are supported or both are not supported. */
     printf("\n");
     goto EXIT;
     }
-  else if (strcmp(argv[op], "-help") == 0 ||
-           strcmp(argv[op], "--help") == 0)
+  else if (strcmp(arg, "-help") == 0 ||
+           strcmp(arg, "--help") == 0)
     {
     usage();
     goto EXIT;
     }
   else
     {
-    printf("** Unknown or malformed option %s\n", argv[op]);
+    BAD_ARG: 
+    printf("** Unknown or malformed option %s\n", arg);
     usage();
     yield = 1;
     goto EXIT;
@@ -2770,10 +2780,14 @@ while (!done)
         do_study = 1;
         if (*pp == '+')
           {
+          if (*(++pp) == '+')
+            {
+            verify_jit = TRUE;
+            pp++;  
+            }  
           study_options |= PCRE_STUDY_JIT_COMPILE
                         | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
                         | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
-          pp++;
           }
         }
       else
@@ -3380,6 +3394,7 @@ while (!done)
     int start_offset_sign = 1;
     int g_notempty = 0;
     int use_dfa = 0;
+    int jit_was_used = 0; 
 
     *copynames = 0;
     *getnames = 0;
@@ -3965,6 +3980,9 @@ while (!done)
           count = use_size_offsets/3;
           }
         }
+        
+      if (extra != NULL && (extra->flags & PCRE_EXTRA_USED_JIT) != 0)
+        jit_was_used = TRUE; 
 
       /* Matched */
 
@@ -4023,6 +4041,7 @@ while (!done)
             fprintf(outfile, "%2d: ", i/2);
             PCHARSV(bptr, use_offsets[i],
               use_offsets[i+1] - use_offsets[i], outfile);
+            if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");  
             fprintf(outfile, "\n");
             if (do_showcaprest || (i == 0 && do_showrest))
               {
@@ -4268,14 +4287,15 @@ while (!done)
               {
               if (markptr == NULL)
                 {
-                fprintf(outfile, "No match\n");
+                fprintf(outfile, "No match");
                 }
               else
                 {
                 fprintf(outfile, "No match, mark = ");
                 PCHARSV(markptr, 0, -1, outfile);
-                putc('\n', outfile);
                 }
+              if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");  
+              putc('\n', outfile);
               }
             break;
 
