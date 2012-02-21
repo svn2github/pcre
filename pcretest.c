@@ -674,6 +674,20 @@ static int use_pcre16 = 0;
 static int use_pcre16 = 1;
 #endif
 
+/* JIT study options for -s+n and /S+n where '1' <= n <= '7'. */
+
+static int jit_study_bits[] =
+  { 
+  PCRE_STUDY_JIT_COMPILE, 
+  PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE,
+  PCRE_STUDY_JIT_COMPILE + PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE,
+  PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE, 
+  PCRE_STUDY_JIT_COMPILE + PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE, 
+  PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE + PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE, 
+  PCRE_STUDY_JIT_COMPILE + PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE + 
+    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE 
+};   
+
 /* Textual explanations for runtime error codes */
 
 static const char *errtexts[] = {
@@ -2133,6 +2147,9 @@ printf("  -S <n>   set stack size to <n> megabytes\n");
 printf("  -s       force each pattern to be studied at basic level\n"
        "  -s+      force each pattern to be studied, using JIT if available\n"
        "  -s++     ditto, verifying when JIT was actually used\n" 
+       "  -s+n     force each pattern to be studied, using JIT if available,\n"
+       "             where 1 <= n <= 7 selects JIT options\n"  
+       "  -s++n    ditto, verifying when JIT was actually used\n" 
        "  -t       time compilation and execution\n");
 printf("  -t <n>   time compilation and execution, repeating <n> times\n");
 printf("  -tm      time execution (matching) only\n");
@@ -2244,13 +2261,12 @@ while (argc > 1 && argv[op][0] == '-')
     {
     arg += 3;
     if (*arg == '+') { arg++; verify_jit = TRUE; }
-
-    if (*arg != 0) goto BAD_ARG;
- 
     force_study = 1;
-    force_study_options = PCRE_STUDY_JIT_COMPILE
-                        | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
-                        | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
+    if (*arg == 0)
+      force_study_options = jit_study_bits[6]; 
+    else if (*arg >= '1' && *arg <= '7')
+      force_study_options = jit_study_bits[*arg - '1']; 
+    else goto BAD_ARG;
     }
   else if (strcmp(arg, "-16") == 0)
     {
@@ -2785,9 +2801,10 @@ while (!done)
             verify_jit = TRUE;
             pp++;  
             }  
-          study_options |= PCRE_STUDY_JIT_COMPILE
-                        | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
-                        | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE;
+          if (*pp >= '1' && *pp <= '7')
+            study_options |= jit_study_bits[*pp++ - '1'];
+          else 
+            study_options |= jit_study_bits[6];     
           }
         }
       else
@@ -4208,6 +4225,7 @@ while (!done)
           PCHARSV(bptr, use_offsets[0], use_offsets[1] - use_offsets[0],
             outfile);
           }
+        if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");  
         fprintf(outfile, "\n");
         break;  /* Out of the /g loop */
         }

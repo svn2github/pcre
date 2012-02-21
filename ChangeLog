@@ -38,6 +38,9 @@ Version 8.31
     caller. This bit is checked by pcretest if JIT is requested by /S++ or -s++ 
     (instead of just /S+ or -s+) and the text "(JIT)" added to the output if 
     the bit is set.   
+    
+7.  Individual JIT compile options can be set in pcretest by following -s+[+] 
+    or /S+[+] with a digit between 1 and 7.
 
 
 Version 8.30 04-February-2012
