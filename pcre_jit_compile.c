@@ -3602,7 +3602,7 @@ switch(type)
       add_jump(compiler, fallbacks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, oc));
       }
     }
-  return cc + 1;
+  return cc + length;
 
   case OP_CLASS:
   case OP_NCLASS:
@@ -6652,9 +6652,9 @@ if (!tables)
   tables = PRIV(default_tables);
 
 memset(&rootfallback, 0, sizeof(fallback_common));
+memset(common, 0, sizeof(compiler_common));
 rootfallback.cc = (pcre_uchar *)re + re->name_table_offset + re->name_count * re->name_entry_size;
 
-common->compiler = NULL;
 common->start = rootfallback.cc;
 common->fcc = tables + fcc_offset;
 common->lcc = (sljit_w)(tables + lcc_offset);
@@ -6696,22 +6696,6 @@ common->ctypes = (sljit_w)(tables + ctypes_offset);
 common->name_table = (sljit_w)((pcre_uchar *)re + re->name_table_offset);
 common->name_count = re->name_count;
 common->name_entry_size = re->name_entry_size;
-common->partialmatchlabel = NULL;
-common->acceptlabel = NULL;
-common->stubs = NULL;
-common->entries = NULL;
-common->currententry = NULL;
-common->partialmatch = NULL;
-common->accept = NULL;
-common->calllimit = NULL;
-common->stackalloc = NULL;
-common->revertframes = NULL;
-common->wordboundary = NULL;
-common->anynewline = NULL;
-common->hspace = NULL;
-common->vspace = NULL;
-common->casefulcmp = NULL;
-common->caselesscmp = NULL;
 common->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 #ifdef SUPPORT_UTF
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
@@ -6719,23 +6703,11 @@ common->utf = (re->options & PCRE_UTF8) != 0;
 #ifdef SUPPORT_UCP
 common->use_ucp = (re->options & PCRE_UCP) != 0;
 #endif
-common->utfreadchar = NULL;
-#ifdef COMPILE_PCRE8
-common->utfreadtype8 = NULL;
-#endif
 #endif /* SUPPORT_UTF */
-#ifdef SUPPORT_UCP
-common->getucd = NULL;
-#endif
 ccend = bracketend(rootfallback.cc);
 
 /* Calculate the local space size on the stack. */
 common->ovector_start = CALL_LIMIT + sizeof(sljit_w);
-common->req_char_ptr = 0;
-common->recursive_head = 0;
-common->start_used_ptr = 0;
-common->hit_start = 0;
-common->first_line_end = 0;
 
 SLJIT_ASSERT(*rootfallback.cc == OP_BRA && ccend[-(1 + LINK_SIZE)] == OP_KET);
 common->localsize = get_localspace(common, rootfallback.cc, ccend);
@@ -6768,6 +6740,7 @@ if ((re->options & PCRE_FIRSTLINE) != 0)
 if ((common->ovector_start & sizeof(sljit_w)) != 0)
   common->ovector_start += sizeof(sljit_w);
 
+SLJIT_ASSERT(!(common->req_char_ptr != 0 && common->start_used_ptr != 0));
 common->cbraptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_w);
 common->localsize += common->cbraptr + (re->top_bracket + 1) * sizeof(sljit_w);
 if (common->localsize > SLJIT_MAX_LOCAL_SIZE)
@@ -7170,7 +7143,12 @@ SLJIT_FREE(functions);
 int
 PRIV(jit_get_size)(void *executable_funcs)
 {
-return ((executable_functions *)executable_funcs)->executable_sizes[PCRE_STUDY_JIT_COMPILE];
+int i;
+sljit_uw size = 0;
+sljit_uw *executable_sizes = ((executable_functions *)executable_funcs)->executable_sizes;
+for (i = 0; i < JIT_NUMBER_OF_COMPILE_MODES; i++)
+  size += executable_sizes[i];
+return (int)size;
 }
 
 const char*

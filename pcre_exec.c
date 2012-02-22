@@ -3565,33 +3565,41 @@ for (;;)
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
-    ecode++;
-    GETCHARINCTEST(c, eptr);
-    if (op == OP_NOTI)         /* The caseless case */
+#ifdef SUPPORT_UTF
+    if (utf)
       {
       register unsigned int ch, och;
-      ch = *ecode++;
-#ifdef COMPILE_PCRE8
-      /* ch must be < 128 if UTF is enabled. */
-      och = md->fcc[ch];
-#else
-#ifdef SUPPORT_UTF
-#ifdef SUPPORT_UCP
-      if (utf && ch > 127)
-        och = UCD_OTHERCASE(ch);
-#else
-      if (utf && ch > 127)
-        och = ch;
-#endif /* SUPPORT_UCP */
+
+      ecode++;
+      GETCHARINC(ch, ecode);
+      GETCHARINC(c, eptr);
+
+      if (op == OP_NOT)
+        {
+        if (ch == c) RRETURN(MATCH_NOMATCH);
+        }
       else
-#endif /* SUPPORT_UTF */
-        och = TABLE_GET(ch, md->fcc, ch);
-#endif /* COMPILE_PCRE8 */
-      if (ch == c || och == c) RRETURN(MATCH_NOMATCH);
+        {
+#ifdef SUPPORT_UCP
+        if (ch > 127)
+          och = UCD_OTHERCASE(ch);
+#else
+        if (ch > 127)
+          och = ch;
+#endif /* SUPPORT_UCP */
+        else
+          och = TABLE_GET(ch, md->fcc, ch);
+        if (ch == c || och == c) RRETURN(MATCH_NOMATCH);
+        }
       }
-    else    /* Caseful */
+    else
+#endif
       {
-      if (*ecode++ == c) RRETURN(MATCH_NOMATCH);
+      register unsigned int ch = ecode[1];
+      c = *eptr++;
+      if (ch == c || (op == OP_NOTI && TABLE_GET(ch, md->fcc, ch) == c))
+        RRETURN(MATCH_NOMATCH);
+      ecode += 2;
       }
     break;
 
@@ -3671,7 +3679,7 @@ for (;;)
     /* Common code for all repeated single-byte matches. */
 
     REPEATNOTCHAR:
-    fc = *ecode++;
+    GETCHARINCTEST(fc, ecode);
 
     /* The code is duplicated for the caseless and caseful cases, for speed,
     since matching characters is likely to be quite common. First, ensure the
@@ -3686,10 +3694,6 @@ for (;;)
 
     if (op >= OP_NOTSTARI)     /* Caseless */
       {
-#ifdef COMPILE_PCRE8
-      /* fc must be < 128 if UTF is enabled. */
-      foc = md->fcc[fc];
-#else
 #ifdef SUPPORT_UTF
 #ifdef SUPPORT_UCP
       if (utf && fc > 127)
@@ -3701,7 +3705,6 @@ for (;;)
       else
 #endif /* SUPPORT_UTF */
         foc = TABLE_GET(fc, md->fcc, fc);
-#endif /* COMPILE_PCRE8 */
 
 #ifdef SUPPORT_UTF
       if (utf)
@@ -3715,7 +3718,7 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           GETCHARINC(d, eptr);
-          if (fc == d || (unsigned int) foc == d) RRETURN(MATCH_NOMATCH);
+          if (fc == d || (unsigned int)foc == d) RRETURN(MATCH_NOMATCH);
           }
         }
       else
