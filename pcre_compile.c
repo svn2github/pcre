@@ -4516,11 +4516,12 @@ for (;; ptr++)
       LONE_SINGLE_CHARACTER:
 
       /* Only the value of 1 matters for class_single_char. */
+       
       if (class_single_char < 2) class_single_char++;
 
       /* If class_charcount is 1, we saw precisely one character. As long as
-      there was no use of \p or \P, in other words, no use of any XCLASS features,
-      we can optimize.
+      there was no use of \p or \P, in other words, no use of any XCLASS
+      features, we can optimize.
 
       The optimization throws away the bit map. We turn the item into a
       1-character OP_CHAR[I] if it's positive, or OP_NOT[I] if it's negative.
@@ -4532,8 +4533,6 @@ for (;; ptr++)
         {
         ptr++;
         zeroreqchar = reqchar;
-
-        /* The OP_NOT[I] opcodes work on single characters only. */
 
         if (negate_class)
           {
@@ -4804,21 +4803,22 @@ for (;; ptr++)
     /* Now handle repetition for the different types of item. */
 
     /* If previous was a character or negated character match, abolish the item
-    and generate a repeat item instead. If a char item has a minumum of more
-    than one, ensure  that it is set in reqchar - it might not be if a sequence
-    such as x{3} is  the first thing in a branch because the x will have gone
+    and generate a repeat item instead. If a char item has a minimum of more
+    than one, ensure that it is set in reqchar - it might not be if a sequence
+    such as x{3} is the first thing in a branch because the x will have gone
     into firstchar instead.  */
 
     if (*previous == OP_CHAR || *previous == OP_CHARI
         || *previous == OP_NOT || *previous == OP_NOTI)
       {
-      switch (*previous) {
-      default: /* Make compiler happy. */
-      case OP_CHAR:  op_type = OP_STAR - OP_STAR; break;
-      case OP_CHARI: op_type = OP_STARI - OP_STAR; break;
-      case OP_NOT:   op_type = OP_NOTSTAR - OP_STAR; break;
-      case OP_NOTI:  op_type = OP_NOTSTARI - OP_STAR; break;
-      }
+      switch (*previous) 
+        {
+        default: /* Make compiler happy. */
+        case OP_CHAR:  op_type = OP_STAR - OP_STAR; break;
+        case OP_CHARI: op_type = OP_STARI - OP_STAR; break;
+        case OP_NOT:   op_type = OP_NOTSTAR - OP_STAR; break;
+        case OP_NOTI:  op_type = OP_NOTSTARI - OP_STAR; break;
+        }
 
       /* Deal with UTF characters that take up more than one character. It's
       easier to write this out separately than try to macrify it. Use c to
