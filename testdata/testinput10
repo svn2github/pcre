@@ -985,5 +985,13 @@
     abc_
     !\x{c0}++\x{c1}\x{c2} 
     !\x{c0}+++++ 
+    
+/-- Caseless single negated characters > 127 need UCP support --/
+
+/[^\x{100}]/8i
+    \x{100}\x{101}X
+
+/[^\x{100}]+/8i
+    \x{100}\x{101}XX
 
 /-- End of testinput10 --/ 

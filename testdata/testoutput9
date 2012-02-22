@@ -1414,4 +1414,13 @@ Partial match: \x{0d}\x{0d}
     \r\r\r\P\P     
 Partial match: \x{0d}\x{0d}\x{0d}
 
+/[^\x{100}]/8
+    \x{100}\x{101}X
+ 0: \x{101}
+
+/[^\x{100}]+/8
+    \x{100}\x{101}X
+ 0: \x{101}X
+ 1: \x{101}
+
 /-- End of testinput9 --/ 

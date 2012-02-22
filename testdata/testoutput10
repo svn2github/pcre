@@ -2033,5 +2033,16 @@ No match
  0: ++\xc1
     !\x{c0}+++++ 
  0: \xc0++
+    
+/-- Caseless single negated characters > 127 need UCP support --/
+
+/[^\x{100}]/8i
+    \x{100}\x{101}X
+ 0: X
+
+/[^\x{100}]+/8i
+    \x{100}\x{101}XX
+ 0: XX
+ 1: X
 
 /-- End of testinput10 --/ 

@@ -695,10 +695,10 @@ for (;;)
     permitted.
 
     We also use this mechanism for opcodes such as OP_TYPEPLUS that take an
-    argument that is not a data character - but is always one byte long. We
-    have to take special action to deal with  \P, \p, \H, \h, \V, \v and \X in
-    this case. To keep the other cases fast, convert these ones to new opcodes.
-    */
+    argument that is not a data character - but is always one byte long because 
+    the values are small. We have to take special action to deal with  \P, \p,
+    \H, \h, \V, \v and \X in this case. To keep the other cases fast, convert
+    these ones to new opcodes. */
 
     if (coptable[codevalue] > 0)
       {
@@ -2266,22 +2266,32 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
-      /* Match a negated single character casefully. This is only used for
-      one-byte characters, that is, we know that d < 256. The character we are
-      checking (c) can be multibyte. */
+      /* Match a negated single character casefully. */
 
       case OP_NOT:
       if (clen > 0 && c != d) { ADD_NEW(state_offset + dlen + 1, 0); }
       break;
 
       /*-----------------------------------------------------------------*/
-      /* Match a negated single character caselessly. This is only used for
-      one-byte characters, that is, we know that d < 256. The character we are
-      checking (c) can be multibyte. */
+      /* Match a negated single character caselessly. */
 
       case OP_NOTI:
-      if (clen > 0 && c != d && c != fcc[d])
-        { ADD_NEW(state_offset + dlen + 1, 0); }
+      if (clen > 0)
+        { 
+        unsigned int otherd;
+#ifdef SUPPORT_UTF
+        if (utf && d >= 128)
+          {
+#ifdef SUPPORT_UCP
+          otherd = UCD_OTHERCASE(d);
+#endif  /* SUPPORT_UCP */
+          }
+        else
+#endif  /* SUPPORT_UTF */
+        otherd = TABLE_GET(d, fcc, d);
+        if (c != d && c != otherd)
+          { ADD_NEW(state_offset + dlen + 1, 0); }
+        }   
       break;
 
       /*-----------------------------------------------------------------*/

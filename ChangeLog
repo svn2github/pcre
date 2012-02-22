@@ -42,7 +42,7 @@ Version 8.31
 7.  Individual JIT compile options can be set in pcretest by following -s+[+] 
     or /S+[+] with a digit between 1 and 7.
 
-8.  OP_NOT now supports any UTF character not just single character ones.
+8.  OP_NOT now supports any UTF character not just single-byte ones.
 
 
 Version 8.30 04-February-2012
