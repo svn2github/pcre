@@ -115,7 +115,17 @@ result is identical, but the compiled JIT code runs much faster.
 There are some \fBpcre_exec()\fP options that are not supported for JIT
 execution. There are also some pattern items that JIT cannot handle. Details
 are given below. In both cases, execution automatically falls back to the
-interpretive code.
+interpretive code. If you want to know whether JIT was actually used for a
+particular match, you should arrange for a JIT callback function to be set up
+as described in the section entitled
+.\" HTML <a href="#stackcontrol">
+.\" </a>
+"Controlling the JIT stack"
+.\"
+below, even if you do not need to supply a non-default JIT stack. Such a
+callback function is called whenever JIT code is about to be obeyed. If the
+execution options are not right for JIT execution, the callback function is not
+obeyed.
 .P
 If the JIT compiler finds an unsupported item, no JIT data is generated. You
 can find out if JIT execution is available after studying a pattern by calling
@@ -231,12 +241,18 @@ two options:
   (2) If \fIcallback\fP is NULL and \fIdata\fP is not NULL, \fIdata\fP must be
       a valid JIT stack, the result of calling \fBpcre_jit_stack_alloc()\fP.
 .sp
-  (3) If \fIcallback\fP not NULL, it must point to a function that is called
-      with \fIdata\fP as an argument at the start of matching, in order to
-      set up a JIT stack. If the result is NULL, the internal 32K stack
-      is used; otherwise the return value must be a valid JIT stack,
-      the result of calling \fBpcre_jit_stack_alloc()\fP.
+  (3) If \fIcallback\fP is not NULL, it must point to a function that is 
+      called with \fIdata\fP as an argument at the start of matching, in 
+      order to set up a JIT stack. If the return from the callback 
+      function is NULL, the internal 32K stack is used; otherwise the 
+      return value must be a valid JIT stack, the result of calling 
+      \fBpcre_jit_stack_alloc()\fP.
 .sp
+A callback function is obeyed whenever JIT code is about to be run; it is not 
+obeyed when \fBpcre_exec()\fP is called with options that are incompatible for 
+JIT execution. A callback function can therefore be used to determine whether a
+match operation was executed by JIT or by the interpreter.
+.P
 You may safely assign the same JIT stack to more than one pattern, as long as
 they are all matched sequentially in the same thread. In a multithread
 application, each thread must use its own JIT stack.
@@ -379,6 +395,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 18 February 2012
+Last updated: 22 February 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

@@ -613,6 +613,7 @@ static int callout_fail_count;
 static int callout_fail_id;
 static int debug_lengths;
 static int first_callout;
+static int jit_was_used; 
 static int locale_set = 0;
 static int show_malloc;
 static int use_utf;
@@ -1077,6 +1078,7 @@ return sys_errlist[n];
 
 static pcre_jit_stack* jit_callback(void *arg)
 {
+jit_was_used = TRUE;
 return (pcre_jit_stack *)arg;
 }
 
@@ -3411,7 +3413,6 @@ while (!done)
     int start_offset_sign = 1;
     int g_notempty = 0;
     int use_dfa = 0;
-    int jit_was_used = 0; 
 
     *copynames = 0;
     *getnames = 0;
@@ -3891,9 +3892,16 @@ while (!done)
       }
 #endif
 
+    /* Ensure that there is a JIT callback if we want to verify that JIT was 
+    actually used. If jit_stack == NULL, no stack has yet been assigned. */
+
+    if (verify_jit && jit_stack == NULL && extra != NULL)
+       { PCRE_ASSIGN_JIT_STACK(extra, jit_callback, jit_stack); }
+
     for (;; gmatched++)    /* Loop for /g or /G */
       {
       markptr = NULL;
+      jit_was_used = FALSE; 
 
       if (timeitm > 0)
         {
@@ -3998,9 +4006,6 @@ while (!done)
           }
         }
         
-      if (extra != NULL && (extra->flags & PCRE_EXTRA_USED_JIT) != 0)
-        jit_was_used = TRUE; 
-
       /* Matched */
 
       if (count >= 0)

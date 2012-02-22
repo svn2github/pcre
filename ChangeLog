@@ -33,11 +33,9 @@ Version 8.31
     (e) When newline was set to CRLF, the metacharacter "." did not recognize
         a partial match for a CR character at the end of the subject string.
         
-6.  When matching is performed using JIT-compiled code, the flag bit 
-    PCRE_EXTRA_USED_JIT is set in the pcre_extra block and can be tested by the 
-    caller. This bit is checked by pcretest if JIT is requested by /S++ or -s++ 
-    (instead of just /S+ or -s+) and the text "(JIT)" added to the output if 
-    the bit is set.   
+6.  If JIT is requested using /S++ or -s++ (instead of just /S+ or -s+) when 
+    running pcretest, the text "(JIT)" added to the output whenever JIT is 
+    actually used to run the match.
     
 7.  Individual JIT compile options can be set in pcretest by following -s+[+] 
     or /S+[+] with a digit between 1 and 7.

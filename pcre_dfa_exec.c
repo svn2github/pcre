@@ -3182,7 +3182,6 @@ if (extra_data != NULL)
     md->callout_data = extra_data->callout_data;
   if ((flags & PCRE_EXTRA_TABLES) != 0)
     md->tables = extra_data->tables;
-  ((pcre_extra *)extra_data)->flags &= ~PCRE_EXTRA_USED_JIT;  /* No JIT support here */   
   }
 
 /* Check that the first field in the block is the magic number. If it is not,
