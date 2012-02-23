@@ -253,18 +253,23 @@ obeyed when \fBpcre_exec()\fP is called with options that are incompatible for
 JIT execution. A callback function can therefore be used to determine whether a
 match operation was executed by JIT or by the interpreter.
 .P
-You may safely assign the same JIT stack to more than one pattern, as long as
-they are all matched sequentially in the same thread. In a multithread
-application, each thread must use its own JIT stack.
+You may safely use the same JIT stack for more than one pattern (either by
+assigning directly or by callback), as long as the patterns are all matched
+sequentially in the same thread. In a multithread application, if you do not
+specify a JIT stack, or if you assign or pass back NULL from a callback, that 
+is thread-safe, because each thread has its own machine stack. However, if you 
+assign or pass back a non-NULL JIT stack, this must be a different stack for 
+each thread so that the application is thread-safe.
 .P
-Strictly speaking, even more is allowed. You can assign the same stack to any
-number of patterns as long as they are not used for matching by multiple
+Strictly speaking, even more is allowed. You can assign the same non-NULL stack
+to any number of patterns as long as they are not used for matching by multiple
 threads at the same time. For example, you can assign the same stack to all
 compiled patterns, and use a global mutex in the callback to wait until the
-stack is available for use. However, this is an inefficient solution, and
-not recommended.
+stack is available for use. However, this is an inefficient solution, and not
+recommended.
 .P
-This is a suggestion for how a typical multithreaded program might operate:
+This is a suggestion for how a multithreaded program that needs to set up
+non-default JIT stacks might operate:
 .sp
   During thread initalization
     thread_local_var = pcre_jit_stack_alloc(...)
@@ -336,11 +341,11 @@ list of the currently JIT studied patterns.
 pattern causes stack overflow with a stack of 1M? Is that 1M kept until the
 stack is freed?
 .sp
-Especially on embedded sytems, it might be a good idea to release
-memory sometimes without freeing the stack. There is no API for this at the
-moment. Probably a function call which returns with the currently allocated
-memory for any stack and another which allows releasing memory (shrinking the
-stack) would be a good idea if someone needs this.
+Especially on embedded sytems, it might be a good idea to release memory
+sometimes without freeing the stack. There is no API for this at the moment.
+Probably a function call which returns with the currently allocated memory for
+any stack and another which allows releasing memory (shrinking the stack) would
+be a good idea if someone needs this.
 .P
 (7) This is too much of a headache. Isn't there any better solution for JIT
 stack handling?
@@ -395,6 +400,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 February 2012
+Last updated: 23 February 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
