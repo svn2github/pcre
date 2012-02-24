@@ -44,6 +44,9 @@ Version 8.31
 
 9.  (*MARK) control verb is now supported by the JIT compiler.
 
+10. The command "./RunTest list" lists the available tests without actually
+    running any of them. (Because I keep forgetting what they all are.)
+
 
 Version 8.30 04-February-2012
 -----------------------------
