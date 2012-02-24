@@ -663,6 +663,22 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA | PCRE_PARTIAL_SOFT, 0, "a\\B", "a" },
 	{ MUA | PCRE_PARTIAL_HARD, 0, "a\\b", "a" },
 
+	/* (*MARK) verb. */
+	{ MUA, 0, "a(*MARK:aa)a", "ababaa" },
+	{ MUA, 0 | F_NOMATCH, "a(*:aa)a", "abab" },
+	{ MUA, 0, "a(*:aa)(b(*:bb)b|bc)", "abc" },
+	{ MUA, 0 | F_NOMATCH, "a(*:1)x|b(*:2)y", "abc" },
+	{ MUA, 0, "(?>a(*:aa))b|ac", "ac" },
+	{ MUA, 0, "(?(DEFINE)(a(*:aa)))(?1)", "a" },
+	{ MUA, 0 | F_NOMATCH, "(?(DEFINE)((a)(*:aa)))(?1)b", "aa" },
+	{ MUA, 0, "(?(DEFINE)(a(*:aa)))a(?1)b|aac", "aac" },
+	{ MUA, 0, "(a(*:aa)){0}(?:b(?1)b|c)+c", "babbab cc" },
+	{ MUA, 0, "(a(*:aa)){0}(?:b(?1)b)+", "babba" },
+	{ MUA, 0 | F_NOMATCH, "(a(*:aa)){0}(?:b(?1)b)+", "ba" },
+	{ MUA, 0, "(a\\K(*:aa)){0}(?:b(?1)b|c)+c", "babbab cc" },
+	{ MUA, 0, "(a\\K(*:aa)){0}(?:b(?1)b)+", "babba" },
+	{ MUA, 0 | F_NOMATCH, "(a\\K(*:aa)){0}(?:b(?1)b)+", "ba" },
+
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
 	{ MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
@@ -876,23 +892,28 @@ static int regression_tests(void)
 	int is_successful, is_ascii_pattern, is_ascii_input;
 	int total = 0;
 	int successful = 0;
+	int successful_row = 0;
 	int counter = 0;
 	int study_mode;
 #ifdef SUPPORT_PCRE8
 	pcre *re8;
 	pcre_extra *extra8;
+	pcre_extra dummy_extra8;
 	int ovector8_1[32];
 	int ovector8_2[32];
 	int return_value8_1, return_value8_2;
+	unsigned char *mark8_1, *mark8_2;
 	int utf8 = 0, ucp8 = 0;
 	int disabled_flags8 = 0;
 #endif
 #ifdef SUPPORT_PCRE16
 	pcre16 *re16;
 	pcre16_extra *extra16;
+	pcre16_extra dummy_extra16;
 	int ovector16_1[32];
 	int ovector16_2[32];
 	int return_value16_1, return_value16_2;
+	PCRE_UCHAR16 *mark16_1, *mark16_2;
 	int utf16 = 0, ucp16 = 0;
 	int disabled_flags16 = 0;
 	int length16;
@@ -970,6 +991,7 @@ static int regression_tests(void)
 				pcre_free(re8);
 				re8 = NULL;
 			}
+			extra8->flags |= PCRE_EXTRA_MARK;
 		} else if (((utf8 && ucp8) || is_ascii_pattern) && !(current->start_offset & F_NO8))
 			printf("\n8 bit: Cannot compile pattern: %s\n", current->pattern);
 #endif
@@ -1000,6 +1022,7 @@ static int regression_tests(void)
 				pcre16_free(re16);
 				re16 = NULL;
 			}
+			extra16->flags |= PCRE_EXTRA_MARK;
 		} else if (((utf16 && ucp16) || is_ascii_pattern) && !(current->start_offset & F_NO16))
 			printf("\n16 bit: Cannot compile pattern: %s\n", current->pattern);
 #endif
@@ -1022,10 +1045,16 @@ static int regression_tests(void)
 		for (i = 0; i < 32; ++i)
 			ovector8_2[i] = -2;
 		if (re8) {
+			mark8_1 = NULL;
+			mark8_2 = NULL;
 			setstack8(extra8);
+			extra8->mark = &mark8_1;
 			return_value8_1 = pcre_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
 				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32);
-			return_value8_2 = pcre_exec(re8, NULL, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
+			memset(&dummy_extra8, 0, sizeof(pcre_extra));
+			dummy_extra8.flags = PCRE_EXTRA_MARK;
+			dummy_extra8.mark = &mark8_2;
+			return_value8_2 = pcre_exec(re8, &dummy_extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
 				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_2, 32);
 		}
 #endif
@@ -1038,14 +1067,20 @@ static int regression_tests(void)
 		for (i = 0; i < 32; ++i)
 			ovector16_2[i] = -2;
 		if (re16) {
+			mark16_1 = NULL;
+			mark16_2 = NULL;
 			setstack16(extra16);
 			if ((current->flags & PCRE_UTF8) || (current->start_offset & F_FORCECONV))
 				length16 = convert_utf8_to_utf16(current->input, regtest_buf, regtest_offsetmap, REGTEST_MAX_LENGTH);
 			else
 				length16 = copy_char8_to_char16(current->input, regtest_buf, REGTEST_MAX_LENGTH);
+			extra16->mark = &mark16_1;
 			return_value16_1 = pcre16_exec(re16, extra16, regtest_buf, length16, current->start_offset & OFFSET_MASK,
 				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32);
-			return_value16_2 = pcre16_exec(re16, NULL, regtest_buf, length16, current->start_offset & OFFSET_MASK,
+			memset(&dummy_extra16, 0, sizeof(pcre16_extra));
+			dummy_extra16.flags = PCRE_EXTRA_MARK;
+			dummy_extra16.mark = &mark16_2;
+			return_value16_2 = pcre16_exec(re16, &dummy_extra16, regtest_buf, length16, current->start_offset & OFFSET_MASK,
 				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_2, 32);
 		}
 #endif
@@ -1173,8 +1208,22 @@ static int regression_tests(void)
 #endif
 		}
 
-		if (is_successful)
-			successful++;
+		if (is_successful) {
+#ifdef SUPPORT_PCRE8
+			if (mark8_1 != mark8_2) {
+				printf("8 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
+					total, current->pattern, current->input);
+				is_successful = 0;
+			}
+#endif
+#ifdef SUPPORT_PCRE16
+			if (mark16_1 != mark16_2) {
+				printf("16 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
+					total, current->pattern, current->input);
+				is_successful = 0;
+			}
+#endif
+		}
 
 #ifdef SUPPORT_PCRE8
 		if (re8) {
@@ -1189,7 +1238,17 @@ static int regression_tests(void)
 		}
 #endif
 
-		printf(".");
+		if (is_successful) {
+			successful++;
+			successful_row++;
+			printf(".");
+			if (successful_row >= 60) {
+				successful_row = 0;
+				printf("\n");
+			}
+		} else
+			successful_row = 0;
+
 		fflush(stdout);
 		current++;
 	}
