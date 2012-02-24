@@ -524,7 +524,7 @@ documentation). For those options that can be different in different parts of
 the pattern, the contents of the <i>options</i> argument specifies their
 settings at the start of compilation and execution. The PCRE_ANCHORED,
 PCRE_BSR_<i>xxx</i>, PCRE_NEWLINE_<i>xxx</i>, PCRE_NO_UTF8_CHECK, and
-PCRE_NO_START_OPT options can be set at the time of matching as well as at
+PCRE_NO_START_OPTIMIZE options can be set at the time of matching as well as at
 compile time.
 </P>
 <P>
@@ -949,12 +949,18 @@ wants to pass any of the other fields to <b>pcre_exec()</b> or
 <b>pcre_dfa_exec()</b>, it must set up its own <b>pcre_extra</b> block.
 </P>
 <P>
-The second argument of <b>pcre_study()</b> contains option bits. There is only
-one option: PCRE_STUDY_JIT_COMPILE. If this is set, and the just-in-time
-compiler is available, the pattern is further compiled into machine code that
-executes much faster than the <b>pcre_exec()</b> matching function. If
-the just-in-time compiler is not available, this option is ignored. All other
-bits in the <i>options</i> argument must be zero.
+The second argument of <b>pcre_study()</b> contains option bits. There are three
+options: 
+<pre>
+  PCRE_STUDY_JIT_COMPILE
+  PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE
+  PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
+</pre>
+If any of these are set, and the just-in-time compiler is available, the
+pattern is further compiled into machine code that executes much faster than
+the <b>pcre_exec()</b> interpretive matching function. If the just-in-time
+compiler is not available, these options are ignored. All other bits in the
+<i>options</i> argument must be zero.
 </P>
 <P>
 JIT compilation is a heavyweight optimization. It can take some time for
@@ -979,8 +985,8 @@ When you are finished with a pattern, you can free the memory used for the
 study data by calling <b>pcre_free_study()</b>. This function was added to the
 API for release 8.20. For earlier versions, the memory could be freed with
 <b>pcre_free()</b>, just like the pattern itself. This will still work in cases
-where PCRE_STUDY_JIT_COMPILE is not used, but it is advisable to change to the
-new function when convenient.
+where JIT optimization is not used, but it is advisable to change to the new
+function when convenient.
 </P>
 <P>
 This is a typical way in which <b>pcre_study</b>() is used (except that in a
@@ -1016,14 +1022,12 @@ matching. (In 16-bit mode, the bitmap is used for 16-bit values less than 256.)
 </P>
 <P>
 These two optimizations apply to both <b>pcre_exec()</b> and
-<b>pcre_dfa_exec()</b>. However, they are not used by <b>pcre_exec()</b> if
-<b>pcre_study()</b> is called with the PCRE_STUDY_JIT_COMPILE option, and
-just-in-time compiling is successful. The optimizations can be disabled by
-setting the PCRE_NO_START_OPTIMIZE option when calling <b>pcre_exec()</b> or
-<b>pcre_dfa_exec()</b>. You might want to do this if your pattern contains
-callouts or (*MARK) (which cannot be handled by the JIT compiler), and you want
-to make use of these facilities in cases where matching fails. See the
-discussion of PCRE_NO_START_OPTIMIZE
+<b>pcre_dfa_exec()</b>, and the information is also used by the JIT compiler.
+The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option
+when calling <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>, but if this is done,
+JIT execution is also disabled. You might want to do this if your pattern
+contains callouts or (*MARK) and you want to make use of these facilities in
+cases where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
 <a href="#execoptions">below.</a>
 <a name="localesupport"></a></P>
 <br><a name="SEC14" href="#TOC1">LOCALE SUPPORT</a><br>
@@ -1199,20 +1203,19 @@ Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
 <pre>
   PCRE_INFO_JIT
 </pre>
-Return 1 if the pattern was studied with the PCRE_STUDY_JIT_COMPILE option, and
+Return 1 if the pattern was studied with one of the JIT options, and
 just-in-time compiling was successful. The fourth argument should point to an
 <b>int</b> variable. A return value of 0 means that JIT support is not available
-in this version of PCRE, or that the pattern was not studied with the
-PCRE_STUDY_JIT_COMPILE option, or that the JIT compiler could not handle this
-particular pattern. See the
+in this version of PCRE, or that the pattern was not studied with a JIT option,
+or that the JIT compiler could not handle this particular pattern. See the
 <a href="pcrejit.html"><b>pcrejit</b></a>
 documentation for details of what can and cannot be handled.
 <pre>
   PCRE_INFO_JITSIZE
 </pre>
-If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
-return the size of the JIT compiled code, otherwise return zero. The fourth
-argument should point to a <b>size_t</b> variable.
+If the pattern was successfully studied with a JIT option, return the size of
+the JIT compiled code, otherwise return zero. The fourth argument should point
+to a <b>size_t</b> variable.
 <pre>
   PCRE_INFO_LASTLITERAL
 </pre>
@@ -1439,22 +1442,22 @@ In the 16-bit version of this structure, the <i>mark</i> field has type
 "PCRE_UCHAR16 **".
 </P>
 <P>
-The <i>flags</i> field is a bitmap that specifies which of the other fields
-are set. The flag bits are:
+The <i>flags</i> field is used to specify which of the other fields are set. The
+flag bits are:
 <pre>
-  PCRE_EXTRA_STUDY_DATA
+  PCRE_EXTRA_CALLOUT_DATA
   PCRE_EXTRA_EXECUTABLE_JIT
+  PCRE_EXTRA_MARK
   PCRE_EXTRA_MATCH_LIMIT
   PCRE_EXTRA_MATCH_LIMIT_RECURSION
-  PCRE_EXTRA_CALLOUT_DATA
+  PCRE_EXTRA_STUDY_DATA
   PCRE_EXTRA_TABLES
-  PCRE_EXTRA_MARK
 </pre>
 Other flag bits should be set to zero. The <i>study_data</i> field and sometimes
 the <i>executable_jit</i> field are set in the <b>pcre_extra</b> block that is
 returned by <b>pcre_study()</b>, together with the appropriate flag bits. You
-should not set these yourself, but you may add to the block by setting the
-other fields and their corresponding flag bits.
+should not set these yourself, but you may add to the block by setting other
+fields and their corresponding flag bits.
 </P>
 <P>
 The <i>match_limit</i> field provides a means of preventing PCRE from using up a
@@ -1472,11 +1475,10 @@ in the subject string.
 </P>
 <P>
 When <b>pcre_exec()</b> is called with a pattern that was successfully studied
-with the PCRE_STUDY_JIT_COMPILE option, the way that the matching is executed
-is entirely different. However, there is still the possibility of runaway
-matching that goes on for a very long time, and so the <i>match_limit</i> value
-is also used in this case (but in a different way) to limit how long the
-matching can continue.
+with a JIT option, the way that the matching is executed is entirely different.
+However, there is still the possibility of runaway matching that goes on for a
+very long time, and so the <i>match_limit</i> value is also used in this case
+(but in a different way) to limit how long the matching can continue.
 </P>
 <P>
 The default value for the limit can be set when PCRE is built; the default
@@ -1497,8 +1499,7 @@ This limit is of use only if it is set smaller than <i>match_limit</i>.
 Limiting the recursion depth limits the amount of machine stack that can be
 used, or, when PCRE has been compiled to use memory on the heap instead of the
 stack, the amount of heap memory that can be used. This limit is not relevant,
-and is ignored, if the pattern was successfully studied with
-PCRE_STUDY_JIT_COMPILE.
+and is ignored, when matching is done using JIT compiled code. 
 </P>
 <P>
 The default value for <i>match_limit_recursion</i> can be set when PCRE is
@@ -1549,16 +1550,16 @@ Option bits for <b>pcre_exec()</b>
 The unused bits of the <i>options</i> argument for <b>pcre_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
 PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART,
-PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_SOFT, and
-PCRE_PARTIAL_HARD.
+PCRE_NO_START_OPTIMIZE, PCRE_NO_UTF8_CHECK, PCRE_PARTIAL_HARD, and
+PCRE_PARTIAL_SOFT.
 </P>
 <P>
-If the pattern was successfully studied with the PCRE_STUDY_JIT_COMPILE option,
-the only supported options for JIT execution are PCRE_NO_UTF8_CHECK,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, and PCRE_NOTEMPTY_ATSTART. Note in
-particular that partial matching is not supported. If an unsupported option is
-used, JIT execution is disabled and the normal interpretive code in
-<b>pcre_exec()</b> is run.
+If the pattern was successfully studied with one of the just-in-time (JIT)
+compile options, the only supported options for JIT execution are
+PCRE_NO_UTF8_CHECK, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY,
+PCRE_NOTEMPTY_ATSTART, PCRE_PARTIAL_HARD, and PCRE_PARTIAL_SOFT. If an
+unsupported option is used, JIT execution is disabled and the normal
+interpretive code in <b>pcre_exec()</b> is run.
 <pre>
   PCRE_ANCHORED
 </pre>
@@ -1681,7 +1682,8 @@ causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
 are considered at every possible starting position in the subject string. If
 PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
-time.
+time. The use of PCRE_NO_START_OPTIMIZE disables JIT execution; when it is set, 
+matching is always done using interpretively.
 </P>
 <P>
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
@@ -2067,9 +2069,9 @@ time.
 <pre>
   PCRE_ERROR_JIT_STACKLIMIT (-27)
 </pre>
-This error is returned when a pattern that was successfully studied using the
-PCRE_STUDY_JIT_COMPILE option is being matched, but the memory available for
-the just-in-time processing stack is not large enough. See the
+This error is returned when a pattern that was successfully studied using a
+JIT compile option is being matched, but the memory available for the
+just-in-time processing stack is not large enough. See the
 <a href="pcrejit.html"><b>pcrejit</b></a>
 documentation for more details.
 <pre>
@@ -2599,7 +2601,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 January 2012
+Last updated: 22 February 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

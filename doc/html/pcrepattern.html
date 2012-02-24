@@ -2565,7 +2565,10 @@ characters that does not include a closing parenthesis. If the name is empty,
 that is, if the closing parenthesis immediately follows the colon, the effect
 is as if the colon were not there. Any number of these verbs may occur in a
 pattern.
-</P>
+<a name="nooptimize"></a></P>
+<br><b>
+Optimizations that affect backtracking verbs
+</b><br>
 <P>
 PCRE contains some optimizations that are used to speed up matching by running
 some checks at the start of each match attempt. For example, it may know the
@@ -2574,7 +2577,12 @@ present. When one of these optimizations suppresses the running of a match, any
 included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
 when calling <b>pcre_compile()</b> or <b>pcre_exec()</b>, or by starting the
-pattern with (*NO_START_OPT).
+pattern with (*NO_START_OPT). There is more discussion of this option in the
+section entitled
+<a href="pcreapi.html#execoptions">"Option bits for <b>pcre_exec()</b>"</a>
+in the
+<a href="pcreapi.html"><b>pcreapi</b></a>
+documentation. 
 </P>
 <P>
 Experiments with Perl suggest that it too has similar optimizations, sometimes
@@ -2662,9 +2670,15 @@ After a partial match or a failed match, the name of the last encountered
   No match, mark = B
 </pre>
 Note that in this unanchored example the mark is retained from the match
-attempt that started at the letter "X". Subsequent match attempts starting at
-"P" and then with an empty string do not get as far as the (*MARK) item, but
-nevertheless do not reset it.
+attempt that started at the letter "X" in the subject. Subsequent match
+attempts starting at "P" and then with an empty string do not get as far as the
+(*MARK) item, but nevertheless do not reset it.
+</P>
+<P>
+If you are interested in (*MARK) values after failed matches, you should
+probably set the PCRE_NO_START_OPTIMIZE option 
+<a href="#nooptimize">(see above)</a>
+to ensure that the match is always attempted.
 </P>
 <br><b>
 Verbs that act after backtracking
@@ -2843,7 +2857,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 09 January 2012
+Last updated: 24 February 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

@@ -2598,7 +2598,12 @@ characters that does not include a closing parenthesis. If the name is empty,
 that is, if the closing parenthesis immediately follows the colon, the effect
 is as if the colon were not there. Any number of these verbs may occur in a
 pattern.
-.P
+.
+.
+.\" HTML <a name="nooptimize"></a>
+.SS "Optimizations that affect backtracking verbs"
+.rs
+.sp
 PCRE contains some optimizations that are used to speed up matching by running
 some checks at the start of each match attempt. For example, it may know the
 minimum length of matching subject, or that a particular character must be
@@ -2606,7 +2611,17 @@ present. When one of these optimizations suppresses the running of a match, any
 included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
 when calling \fBpcre_compile()\fP or \fBpcre_exec()\fP, or by starting the
-pattern with (*NO_START_OPT).
+pattern with (*NO_START_OPT). There is more discussion of this option in the
+section entitled
+.\" HTML <a href="pcreapi.html#execoptions">
+.\" </a>
+"Option bits for \fBpcre_exec()\fP"
+.\"
+in the
+.\" HREF
+\fBpcreapi\fP
+.\"
+documentation. 
 .P
 Experiments with Perl suggest that it too has similar optimizations, sometimes
 leading to anomalous results.
@@ -2695,9 +2710,17 @@ After a partial match or a failed match, the name of the last encountered
   No match, mark = B
 .sp
 Note that in this unanchored example the mark is retained from the match
-attempt that started at the letter "X". Subsequent match attempts starting at
-"P" and then with an empty string do not get as far as the (*MARK) item, but
-nevertheless do not reset it.
+attempt that started at the letter "X" in the subject. Subsequent match
+attempts starting at "P" and then with an empty string do not get as far as the
+(*MARK) item, but nevertheless do not reset it.
+.P
+If you are interested in (*MARK) values after failed matches, you should
+probably set the PCRE_NO_START_OPTIMIZE option 
+.\" HTML <a href="#nooptimize">
+.\" </a>
+(see above) 
+.\"
+to ensure that the match is always attempted.
 .
 .
 .SS "Verbs that act after backtracking"
@@ -2876,6 +2899,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 January 2012
+Last updated: 24 February 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
