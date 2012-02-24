@@ -1235,6 +1235,13 @@ only if it follows something of variable length. For example, for the pattern
 /^a\ed+z\ed+/ the returned value is "z", but for /^a\edz\ed/ the returned value
 is -1.
 .sp
+  PCRE_INFO_MAXLOOKBEHIND
+.sp
+Return the number of characters (NB not bytes) in the longest lookbehind
+assertion in the pattern. Note that the simple assertions \eb and \eB require a
+one-character lookbehind. This information is useful when doing multi-segment 
+matching using the partial matching facilities.
+.sp
   PCRE_INFO_MINLENGTH
 .sp
 If the pattern was studied and a minimum length for matching subject strings
@@ -2646,6 +2653,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 February 2012
+Last updated: 24 February 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

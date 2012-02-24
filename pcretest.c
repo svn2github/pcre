@@ -3099,7 +3099,7 @@ while (!done)
       {
       unsigned long int all_options;
       int count, backrefmax, first_char, need_char, okpartial, jchanged,
-        hascrorlf;
+        hascrorlf, maxlookbehind;
       int nameentrysize, namecount;
       const pcre_uint8 *nametable;
 
@@ -3113,7 +3113,8 @@ while (!done)
           new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable) +
           new_info(re, NULL, PCRE_INFO_OKPARTIAL, &okpartial) +
           new_info(re, NULL, PCRE_INFO_JCHANGED, &jchanged) +
-          new_info(re, NULL, PCRE_INFO_HASCRORLF, &hascrorlf)
+          new_info(re, NULL, PCRE_INFO_HASCRORLF, &hascrorlf) +
+          new_info(re, NULL, PCRE_INFO_MAXLOOKBEHIND, &maxlookbehind) 
           != 0)
         goto SKIP_DATA;
 
@@ -3252,6 +3253,9 @@ while (!done)
           fprintf(outfile, "%s\n", caseless);
           }
         }
+        
+      if (maxlookbehind > 0) 
+        fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind); 
 
       /* Don't output study size; at present it is in any case a fixed
       value, but it varies, depending on the computer architecture, and

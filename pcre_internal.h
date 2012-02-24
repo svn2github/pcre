@@ -1974,16 +1974,15 @@ typedef struct REAL_PCRE {
   pcre_uint32 size;               /* Total that was malloced */
   pcre_uint32 options;            /* Public options */
   pcre_uint16 flags;              /* Private flags */
-  pcre_uint16 dummy1;             /* For future use */
-  pcre_uint16 top_bracket;
-  pcre_uint16 top_backref;
+  pcre_uint16 max_lookbehind;     /* Longest lookbehind (characters) */
+  pcre_uint16 top_bracket;        /* Highest numbered group */
+  pcre_uint16 top_backref;        /* Highest numbered back reference */
   pcre_uint16 first_char;         /* Starting character */
   pcre_uint16 req_char;           /* This character must be seen */
   pcre_uint16 name_table_offset;  /* Offset to name table that follows */
   pcre_uint16 name_entry_size;    /* Size of any name items */
   pcre_uint16 name_count;         /* Number of name items */
   pcre_uint16 ref_count;          /* Reference count */
-
   const pcre_uint8 *tables;       /* Pointer to tables or NULL for std */
   const pcre_uint8 *nullpad;      /* NULL padding */
 } REAL_PCRE;
@@ -2029,6 +2028,7 @@ typedef struct compile_data {
   int  workspace_size;              /* Size of workspace */
   int  bracount;                    /* Count of capturing parens as we compile */
   int  final_bracount;              /* Saved value after first pass */
+  int  max_lookbehind;              /* Maximum lookbehind (characters) */
   int  top_backref;                 /* Maximum back reference */
   unsigned int backref_map;         /* Bitmap of low back refs */
   int  assert_depth;                /* Depth of nested assertions */

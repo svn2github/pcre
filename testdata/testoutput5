@@ -1871,4 +1871,11 @@ Partial match: \x{0d}\x{0d}
         End
 ------------------------------------------------------------------
 
+/(?<=\x{1234}\x{1234})\bxy/I8
+Capturing subpattern count = 0
+Options: utf
+First char = 'x'
+Need char = 'y'
+Max lookbehind = 2
+
 /-- End of testinput5 --/

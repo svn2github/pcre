@@ -6852,10 +6852,13 @@ for (;; ptr++)
       /* For the rest (including \X when Unicode properties are supported), we
       can obtain the OP value by negating the escape value in the default
       situation when PCRE_UCP is not set. When it *is* set, we substitute
-      Unicode property tests. */
+      Unicode property tests. Note that \b and \B do a one-character 
+      lookbehind. */
 
       else
         {
+        if ((-c == ESC_b || -c == ESC_B) && cd->max_lookbehind == 0)
+          cd->max_lookbehind = 1; 
 #ifdef SUPPORT_UCP
         if (-c >= ESC_DU && -c <= ESC_wu)
           {
@@ -7163,7 +7166,12 @@ for (;;)
         *ptrptr = ptr;
         return FALSE;
         }
-      else { PUT(reverse_count, 0, fixed_length); }
+      else 
+        { 
+        if (fixed_length > cd->max_lookbehind) 
+          cd->max_lookbehind = fixed_length; 
+        PUT(reverse_count, 0, fixed_length); 
+        }
       }
     }
 
@@ -7833,6 +7841,7 @@ cd->start_pattern = (const pcre_uchar *)pattern;
 cd->end_pattern = (const pcre_uchar *)(pattern + STRLEN_UC((const pcre_uchar *)pattern));
 cd->req_varyopt = 0;
 cd->assert_depth = 0;
+cd->max_lookbehind = 0;
 cd->external_options = options;
 cd->external_flags = 0;
 cd->open_caps = NULL;
@@ -7883,7 +7892,6 @@ re->magic_number = MAGIC_NUMBER;
 re->size = (int)size;
 re->options = cd->external_options;
 re->flags = cd->external_flags;
-re->dummy1 = 0;
 re->first_char = 0;
 re->req_char = 0;
 re->name_table_offset = sizeof(REAL_PCRE) / sizeof(pcre_uchar);
@@ -7903,6 +7911,7 @@ field; this time it's used for remembering forward references to subpatterns.
 cd->final_bracount = cd->bracount;  /* Save for checking forward references */
 cd->assert_depth = 0;
 cd->bracount = 0;
+cd->max_lookbehind = 0;
 cd->names_found = 0;
 cd->name_table = (pcre_uchar *)re + re->name_table_offset;
 codestart = cd->name_table + re->name_entry_size * re->name_count;
@@ -7924,6 +7933,7 @@ code = (pcre_uchar *)codestart;
   &firstchar, &reqchar, NULL, cd, NULL);
 re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
+re->max_lookbehind = cd->max_lookbehind;
 re->flags = cd->external_flags | PCRE_MODE;
 
 if (cd->had_accept) reqchar = REQ_NONE;   /* Must disable after (*ACCEPT) */
@@ -8011,6 +8021,7 @@ if (cd->check_lookbehind)
                     (fixed_length == -4)? ERR70 : ERR25;
         break;
         }
+      if (fixed_length > cd->max_lookbehind) cd->max_lookbehind = fixed_length;
       PUT(cc, 1, fixed_length);
       }
     cc += 1 + LINK_SIZE;

@@ -46,6 +46,8 @@ Version 8.31
 
 10. The command "./RunTest list" lists the available tests without actually
     running any of them. (Because I keep forgetting what they all are.)
+    
+11. Add PCRE_INFO_MAXLOOKBEHIND. 
 
 
 Version 8.30 04-February-2012
