@@ -1375,42 +1375,4 @@ No match
     ⱥ
  0: \x{2c65}
 
-/\X/
-    a\P
- 0: a
-    a\P\P
-Partial match: a
-
-/\Xa/
-    aa\P
- 0: aa
-    aa\P\P
- 0: aa
-
-/\X{2}/
-    aa\P
- 0: aa
-    aa\P\P
-Partial match: aa
-
-/\X+a/
-    a\P
-Partial match: a
-    aa\P
- 0: aa
-    aa\P\P
-Partial match: aa
-
-/\X+?a/
-    a\P
-Partial match: a
-    ab\P
-Partial match: ab
-    aa\P
- 0: aa
-    aa\P\P
- 0: aa
-    aba\P
- 0: aba
-
 /-- End of testinput6 --/
