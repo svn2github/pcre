@@ -49,6 +49,12 @@ Version 8.31
     
 11. Add PCRE_INFO_MAXLOOKBEHIND. 
 
+12. Applied a (slightly modified) user-supplied patch that improves performance
+    when the heap is used for recursion (compiled with --disable-stack-for-
+    recursion). Instead of malloc and free for each heap frame each time a 
+    logical recursion happens, frames are retained on a chain and re-used where 
+    possible. This sometimes gives as much as 30% improvement.  
+
 
 Version 8.30 04-February-2012
 -----------------------------

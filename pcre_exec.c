@@ -142,7 +142,7 @@ Arguments:
 
 Returns:      >= 0 the number of subject bytes matched
               -1 no match
-              -2 partial match; always given if at end subject 
+              -2 partial match; always given if at end subject
 */
 
 static int
@@ -165,7 +165,7 @@ pchars(p, length, FALSE, md);
 printf("\n");
 #endif
 
-/* Always fail if reference not set (and not JavaScript compatible - in that 
+/* Always fail if reference not set (and not JavaScript compatible - in that
 case the length is passed as zero). */
 
 if (length < 0) return -1;
@@ -220,11 +220,11 @@ are in UTF-8 mode. */
 
 else
   {
-  while (length-- > 0) 
+  while (length-- > 0)
     {
     if (eptr >= md->end_subject) return -2;   /* Partial match */
     if (*p++ != *eptr++) return -1;
-    } 
+    }
   }
 
 return (int)(eptr - eptr_start);
@@ -317,9 +317,15 @@ argument of match(), which never changes. */
 
 #define RMATCH(ra,rb,rc,rd,re,rw)\
   {\
-  heapframe *newframe = (heapframe *)(PUBL(stack_malloc))(sizeof(heapframe));\
-  if (newframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
-  frame->Xwhere = rw; \
+  heapframe *newframe = frame->Xnextframe;\
+  if (newframe == NULL)\
+    {\
+    newframe = (heapframe *)(PUBL(stack_malloc))(sizeof(heapframe));\
+    if (newframe == NULL) RRETURN(PCRE_ERROR_NOMEMORY);\
+    newframe->Xnextframe = NULL;\
+    frame->Xnextframe = newframe;\
+    }\
+  frame->Xwhere = rw;\
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
   newframe->Xmstart = mstart;\
@@ -338,7 +344,6 @@ argument of match(), which never changes. */
   {\
   heapframe *oldframe = frame;\
   frame = oldframe->Xprevframe;\
-  if (oldframe != &frame_zero) (PUBL(stack_free))(oldframe);\
   if (frame != NULL)\
     {\
     rrc = ra;\
@@ -352,6 +357,7 @@ argument of match(), which never changes. */
 
 typedef struct heapframe {
   struct heapframe *Xprevframe;
+  struct heapframe *Xnextframe;
 
   /* Function arguments that may change */
 
@@ -498,9 +504,7 @@ the top-level on the stack rather than malloc-ing them all gives a performance
 boost in many cases where there is not much "recursion". */
 
 #ifdef NO_RECURSE
-heapframe frame_zero;
-heapframe *frame = &frame_zero;
-frame->Xprevframe = NULL;            /* Marks the top level */
+heapframe *frame = (heapframe *)md->match_frames_base;
 
 /* Copy in the original argument variables */
 
@@ -2065,20 +2069,20 @@ for (;;)
 
     case OP_DOLLM:
     if (eptr < md->end_subject)
-      { 
-      if (!IS_NEWLINE(eptr)) 
+      {
+      if (!IS_NEWLINE(eptr))
         {
         if (md->partial != 0 &&
             eptr + 1 >= md->end_subject &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             *eptr == NLBLOCK->nl[0])
-          {  
+          {
           md->hitend = TRUE;
           if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
           }
-        RRETURN(MATCH_NOMATCH); 
-        } 
+        RRETURN(MATCH_NOMATCH);
+        }
       }
     else
       {
@@ -2115,14 +2119,14 @@ for (;;)
       if (md->partial != 0 &&
           eptr + 1 >= md->end_subject &&
           NLBLOCK->nltype == NLTYPE_FIXED &&
-          NLBLOCK->nllen == 2 && 
+          NLBLOCK->nllen == 2 &&
           *eptr == NLBLOCK->nl[0])
-        {  
+        {
         md->hitend = TRUE;
         if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
         }
       RRETURN(MATCH_NOMATCH);
-      } 
+      }
 
     /* Either at end of string or \n before end. */
 
@@ -2258,17 +2262,17 @@ for (;;)
     if (md->partial != 0 &&
         eptr + 1 >= md->end_subject &&
         NLBLOCK->nltype == NLTYPE_FIXED &&
-        NLBLOCK->nllen == 2 && 
+        NLBLOCK->nllen == 2 &&
         *eptr == NLBLOCK->nl[0])
-      {  
+      {
       md->hitend = TRUE;
       if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
       }
- 
+
     /* Fall through */
 
     /* Match any single character whatsoever. */
-     
+
     case OP_ALLANY:
     if (eptr >= md->end_subject)   /* DO NOT merge the eptr++ here; it must */
       {                            /* not be updated before SCHECK_PARTIAL. */
@@ -2412,7 +2416,7 @@ for (;;)
       if (eptr >= md->end_subject)
         {
         SCHECK_PARTIAL();
-        }    
+        }
       else if (*eptr == 0x0a) eptr++;
       break;
 
@@ -2643,7 +2647,7 @@ for (;;)
       if (UCD_CATEGORY(c) != ucp_M) break;
       eptr += len;
       }
-    CHECK_PARTIAL();   
+    CHECK_PARTIAL();
     ecode++;
     break;
 #endif
@@ -2709,7 +2713,7 @@ for (;;)
       default:               /* No repeat follows */
       if ((length = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
-        if (length == -2) eptr = md->end_subject;   /* Partial match */ 
+        if (length == -2) eptr = md->end_subject;   /* Partial match */
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2735,7 +2739,7 @@ for (;;)
       int slength;
       if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
         {
-        if (slength == -2) eptr = md->end_subject;   /* Partial match */ 
+        if (slength == -2) eptr = md->end_subject;   /* Partial match */
         CHECK_PARTIAL();
         RRETURN(MATCH_NOMATCH);
         }
@@ -2759,7 +2763,7 @@ for (;;)
         if (fi >= max) RRETURN(MATCH_NOMATCH);
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
-          if (slength == -2) eptr = md->end_subject;   /* Partial match */ 
+          if (slength == -2) eptr = md->end_subject;   /* Partial match */
           CHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
@@ -2778,12 +2782,12 @@ for (;;)
         int slength;
         if ((slength = match_ref(offset, eptr, length, md, caseless)) < 0)
           {
-          /* Can't use CHECK_PARTIAL because we don't want to update eptr in 
-          the soft partial matching case. */ 
-           
-          if (slength == -2 && md->partial != 0 && 
+          /* Can't use CHECK_PARTIAL because we don't want to update eptr in
+          the soft partial matching case. */
+
+          if (slength == -2 && md->partial != 0 &&
               md->end_subject > md->start_used_ptr)
-            {  
+            {
             md->hitend = TRUE;
             if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
             }
@@ -2791,7 +2795,7 @@ for (;;)
           }
         eptr += slength;
         }
-         
+
       while (eptr >= pp)
         {
         RMATCH(eptr, ecode, offset_top, md, eptrb, RM15);
@@ -4228,7 +4232,7 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           }
         }
 
@@ -4252,9 +4256,9 @@ for (;;)
           if (md->partial != 0 &&
               eptr + 1 >= md->end_subject &&
               NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 && 
+              NLBLOCK->nllen == 2 &&
               *eptr == NLBLOCK->nl[0])
-            {  
+            {
             md->hitend = TRUE;
             if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
             }
@@ -4545,9 +4549,9 @@ for (;;)
           if (md->partial != 0 &&
               eptr + 1 >= md->end_subject &&
               NLBLOCK->nltype == NLTYPE_FIXED &&
-              NLBLOCK->nllen == 2 && 
+              NLBLOCK->nllen == 2 &&
               *eptr == NLBLOCK->nl[0])
-            {  
+            {
             md->hitend = TRUE;
             if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
             }
@@ -5031,7 +5035,7 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           }
         }
       else
@@ -5059,14 +5063,14 @@ for (;;)
             if (md->partial != 0 &&    /* Take care with CRLF partial */
                 eptr >= md->end_subject &&
                 NLBLOCK->nltype == NLTYPE_FIXED &&
-                NLBLOCK->nllen == 2 && 
+                NLBLOCK->nllen == 2 &&
                 c == NLBLOCK->nl[0])
-              {  
+              {
               md->hitend = TRUE;
               if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
               }
             break;
- 
+
             case OP_ALLANY:
             case OP_ANYBYTE:
             break;
@@ -5233,14 +5237,14 @@ for (;;)
             if (md->partial != 0 &&    /* Take care with CRLF partial */
                 eptr >= md->end_subject &&
                 NLBLOCK->nltype == NLTYPE_FIXED &&
-                NLBLOCK->nllen == 2 && 
+                NLBLOCK->nllen == 2 &&
                 c == NLBLOCK->nl[0])
-              {  
+              {
               md->hitend = TRUE;
               if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
               }
             break;
- 
+
             case OP_ALLANY:
             case OP_ANYBYTE:
             break;
@@ -5597,7 +5601,7 @@ for (;;)
             if (UCD_CATEGORY(c) != ucp_M) break;
             eptr += len;
             }
-          CHECK_PARTIAL();   
+          CHECK_PARTIAL();
           }
 
         /* eptr is now past the end of the maximum run */
@@ -5644,9 +5648,9 @@ for (;;)
               if (md->partial != 0 &&    /* Take care with CRLF partial */
                   eptr + 1 >= md->end_subject &&
                   NLBLOCK->nltype == NLTYPE_FIXED &&
-                  NLBLOCK->nllen == 2 && 
+                  NLBLOCK->nllen == 2 &&
                   *eptr == NLBLOCK->nl[0])
-                {  
+                {
                 md->hitend = TRUE;
                 if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
                 }
@@ -5670,9 +5674,9 @@ for (;;)
               if (md->partial != 0 &&    /* Take care with CRLF partial */
                   eptr + 1 >= md->end_subject &&
                   NLBLOCK->nltype == NLTYPE_FIXED &&
-                  NLBLOCK->nllen == 2 && 
+                  NLBLOCK->nllen == 2 &&
                   *eptr == NLBLOCK->nl[0])
-                {  
+                {
                 md->hitend = TRUE;
                 if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
                 }
@@ -5943,9 +5947,9 @@ for (;;)
             if (md->partial != 0 &&    /* Take care with CRLF partial */
                 eptr + 1 >= md->end_subject &&
                 NLBLOCK->nltype == NLTYPE_FIXED &&
-                NLBLOCK->nllen == 2 && 
+                NLBLOCK->nllen == 2 &&
                 *eptr == NLBLOCK->nl[0])
-              {  
+              {
               md->hitend = TRUE;
               if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
               }
@@ -6279,6 +6283,31 @@ Undefine all the macros that were defined above to handle this. */
 ***************************************************************************/
 
 
+#ifdef NO_RECURSE
+/*************************************************
+*          Release allocated heap frames         *
+*************************************************/
+
+/* This function releases all the allocated frames. The base frame is on the
+machine stack, and so must not be freed.
+
+Argument: the address of the base frame
+Returns:  nothing
+*/
+
+static void
+release_match_heapframes (heapframe *frame_base)
+{
+heapframe *nextframe = frame_base->Xnextframe;
+while (nextframe != NULL)
+  {
+  heapframe *oldframe = nextframe;
+  nextframe = nextframe->Xnextframe;
+  (PUBL(stack_free))(oldframe);
+  }
+}
+#endif
+
 
 /*************************************************
 *         Execute a Regular Expression           *
@@ -6341,8 +6370,15 @@ PCRE_PUCHAR req_char_ptr = start_match - 1;
 const pcre_study_data *study;
 const REAL_PCRE *re = (const REAL_PCRE *)argument_re;
 
+#ifdef NO_RECURSE
+heapframe frame_zero;
+frame_zero.Xprevframe = NULL;            /* Marks the top level */
+frame_zero.Xnextframe = NULL;            /* None are allocated yet */
+md->match_frames_base = &frame_zero;
+#endif
+
 /* Check for the special magic call that measures the size of the stack used
-per recursive call of match(). Without the funny casting for sizeof, a Windows 
+per recursive call of match(). Without the funny casting for sizeof, a Windows
 compiler gave this error: "unary minus operator applied to unsigned type,
 result still unsigned". Hopefully the cast fixes that. */
 
@@ -7052,6 +7088,9 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_MARK) != 0)
     *(extra_data->mark) = (pcre_uchar *)md->mark;
   DPRINTF((">>>> returning %d\n", rc));
+#ifdef NO_RECURSE
+  release_match_heapframes(&frame_zero);
+#endif
   return rc;
   }
 
@@ -7069,6 +7108,9 @@ if (using_temporary_offsets)
 if (rc != MATCH_NOMATCH && rc != PCRE_ERROR_PARTIAL)
   {
   DPRINTF((">>>> error: returning %d\n", rc));
+#ifdef NO_RECURSE
+  release_match_heapframes(&frame_zero);
+#endif
   return rc;
   }
 
@@ -7098,6 +7140,9 @@ else
 
 if (extra_data != NULL && (extra_data->flags & PCRE_EXTRA_MARK) != 0)
   *(extra_data->mark) = (pcre_uchar *)md->nomatch_mark;
+#ifdef NO_RECURSE
+  release_match_heapframes(&frame_zero);
+#endif
 return rc;
 }
 

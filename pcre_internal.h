@@ -2130,6 +2130,9 @@ typedef struct match_data {
   const  pcre_uchar *mark;        /* Mark pointer to pass back on success */
   const  pcre_uchar *nomatch_mark;/* Mark pointer to pass back on failure */
   const  pcre_uchar *once_target; /* Where to back up to for atomic groups */
+#ifdef NO_RECURSE
+  void  *match_frames_base;       /* For remembering malloc'd frames */
+#endif      
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching
