@@ -326,16 +326,17 @@ library. They are also documented in the pcrebuild man page.
   The default value is 20K.
 
 . It is possible to compile pcretest so that it links with the libreadline
-  library, by specifying
+  or libedit libraries, by specifying, respectively,
 
-  --enable-pcretest-libreadline
+  --enable-pcretest-libreadline or --enable-pcretest-libedit
 
   If this is done, when pcretest's input is from a terminal, it reads it using
   the readline() function. This provides line-editing and history facilities.
   Note that libreadline is GPL-licenced, so if you distribute a binary of
-  pcretest linked in this way, there may be licensing issues.
+  pcretest linked in this way, there may be licensing issues. These can be
+  avoided by linking with libedit instead. 
 
-  Setting this option causes the -lreadline option to be added to the pcretest
+  Enabling libreadline causes the -lreadline option to be added to the pcretest
   build. In many operating environments with a sytem-installed readline
   library this is sufficient. However, in some environments (e.g. if an
   unmodified distribution version of readline is in use), it may be necessary
@@ -880,4 +881,4 @@ pcre_xxx and the other with the name pcre16_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 January 2012
+Last updated: 25 February 2012

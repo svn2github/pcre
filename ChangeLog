@@ -57,6 +57,9 @@ Version 8.31
     
 13. (*COMMIT) is now correctly confined to within a recursive subpattern call.
 
+14. It is now possible to link pcretest with libedit as an alternative to 
+    libreadline.
+
 
 Version 8.30 04-February-2012
 -----------------------------

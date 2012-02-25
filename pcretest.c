@@ -59,14 +59,26 @@ only supported library functions. */
 #include <locale.h>
 #include <errno.h>
 
-#ifdef SUPPORT_LIBREADLINE
+/* Both libreadline and libedit are optionally supported. The user-supplied
+original patch uses readline/readline.h for libedit, but in at least one system 
+it is installed as editline/readline.h, so the configuration code now looks for 
+that first, falling back to readline/readline.h. */
+
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if defined(SUPPORT_LIBREADLINE)
 #include <readline/readline.h>
 #include <readline/history.h>
+#else
+#if defined(HAVE_EDITLINE_READLINE_H)
+#include <editline/readline.h>
+#else
+#include <readline/readline.h>
 #endif
-
+#endif
+#endif
 
 /* A number of things vary for Windows builds. Originally, pcretest opened its
 input and output without "b"; then I was told that "b" was needed in some
@@ -1292,11 +1304,11 @@ for (;;)
     {
     int dlen;
 
-    /* If libreadline support is required, use readline() to read a line if the
-    input is a terminal. Note that readline() removes the trailing newline, so
-    we must put it back again, to be compatible with fgets(). */
+    /* If libreadline or libedit support is required, use readline() to read a
+    line if the input is a terminal. Note that readline() removes the trailing
+    newline, so we must put it back again, to be compatible with fgets(). */
 
-#ifdef SUPPORT_LIBREADLINE
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
     if (isatty(fileno(f)))
       {
       size_t len;
@@ -2112,7 +2124,7 @@ usage(void)
 {
 printf("Usage:     pcretest [options] [<input file> [<output file>]]\n\n");
 printf("Input and output default to stdin and stdout.\n");
-#ifdef SUPPORT_LIBREADLINE
+#if defined(SUPPORT_LIBREADLINE) || defined(SUPPORT_LIBEDIT)
 printf("If input is a terminal, readline() is used to read from it.\n");
 #else
 printf("This version of pcretest is not linked with readline().\n");

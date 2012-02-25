@@ -233,6 +233,12 @@ AC_ARG_WITH(pcregrep-bufsize,
                              [pcregrep buffer size (default=20480)]),
               , with_pcregrep_bufsize=20480)
 
+# Handle --enable-pcretest-libedit
+AC_ARG_ENABLE(pcretest-libedit,
+              AS_HELP_STRING([--enable-pcretest-libedit],
+                             [link pcretest with libedit]),
+              , enable_pcretest_libedit=no)
+
 # Handle --enable-pcretest-libreadline
 AC_ARG_ENABLE(pcretest-libreadline,
               AS_HELP_STRING([--enable-pcretest-libreadline],
@@ -534,32 +540,43 @@ LIBS="$OLD_LIBS"
 
 # Check for the availabiity of libreadline
 
-AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
-AC_CHECK_HEADERS([readline/history.h], [HAVE_HISTORY_H=1])
-AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lreadline"],
-  [unset ac_cv_lib_readline_readline;
-   AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltinfo"],
-    [unset ac_cv_lib_readline_readline;
-     AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lcurses"],
-      [unset ac_cv_lib_readline_readline;
-       AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncurses"],
-        [unset ac_cv_lib_readline_readline;
-	 AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncursesw"],
-          [unset ac_cv_lib_readline_readline;
-	   AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltermcap"],
-            [LIBREADLINE=""],
-            [-ltermcap])],
-          [-lncursesw])],
-        [-lncurses])],
-      [-lcurses])],
-    [-ltinfo])])
-AC_SUBST(LIBREADLINE)
-if test -n "$LIBREADLINE"; then
-  if test "$LIBREADLINE" != "-lreadline"; then
-    echo "-lreadline needs $LIBREADLINE"
-    LIBREADLINE="-lreadline $LIBREADLINE"
-  fi
+if test "$enable_pcretest_libreadline" = "yes"; then
+ AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
+ AC_CHECK_HEADERS([readline/history.h], [HAVE_HISTORY_H=1])
+ AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lreadline"],
+   [unset ac_cv_lib_readline_readline;
+    AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltinfo"],
+     [unset ac_cv_lib_readline_readline;
+      AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lcurses"],
+       [unset ac_cv_lib_readline_readline;
+        AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncurses"],
+         [unset ac_cv_lib_readline_readline;
+	  AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-lncursesw"],
+           [unset ac_cv_lib_readline_readline;
+	    AC_CHECK_LIB([readline], [readline], [LIBREADLINE="-ltermcap"],
+             [LIBREADLINE=""],
+             [-ltermcap])],
+           [-lncursesw])],
+         [-lncurses])],
+       [-lcurses])],
+     [-ltinfo])])
+ AC_SUBST(LIBREADLINE)
+ if test -n "$LIBREADLINE"; then
+   if test "$LIBREADLINE" != "-lreadline"; then
+     echo "-lreadline needs $LIBREADLINE"
+     LIBREADLINE="-lreadline $LIBREADLINE"
+   fi
+ fi
 fi
+  
+
+# Check for the availability of libedit
+
+if test "$enable_pcretest_libedit" = "yes"; then
+  AC_CHECK_HEADERS([editline/readline.h], [HAVE_EDITLINE_READLINE_H=1],
+    [AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_READLINE_H=1])]) 
+  AC_CHECK_LIB([edit], [readline], [LIBEDIT="-ledit"])
+fi   
 
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
@@ -646,7 +663,11 @@ AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
   pcregrep is three times this number, because it allows for the buffering of
   "before" and "after" lines.])
 
-if test "$enable_pcretest_libreadline" = "yes"; then
+if test "$enable_pcretest_libedit" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBEDIT], [], [
+    Define to allow pcretest to be linked with libedit.])
+  LIBREADLINE="$LIBEDIT"
+elif test "$enable_pcretest_libreadline" = "yes"; then
   AC_DEFINE([SUPPORT_LIBREADLINE], [], [
     Define to allow pcretest to be linked with libreadline.])
 fi
@@ -810,6 +831,23 @@ AC_SUBST(LIBBZ2)
 
 # Similarly for --enable-pcretest-readline
 
+if test "$enable_pcretest_libedit" = "yes"; then
+  if test "$enable_pcretest_libreadline" = "yes"; then
+    echo "** Cannot use both --enable-pcretest-libedit and --enable-pcretest-readline"
+    exit 1
+  fi
+  if test "$HAVE_EDITLINE_READLINE_H" != "1" -a \
+          "$HAVE_READLINE_READLINE_H" != "1"; then
+    echo "** Cannot --enable-pcretest-libedit because neither editline/readline.h"
+    echo "** nor readline/readline.h was found."
+    exit 1
+  fi
+  if test -z "$LIBEDIT"; then
+    echo "** Cannot --enable-pcretest-libedit because libedit library was not found."
+    exit 1
+  fi
+fi
+
 if test "$enable_pcretest_libreadline" = "yes"; then
   if test "$HAVE_READLINE_H" != "1"; then
     echo "** Cannot --enable-pcretest-readline because readline/readline.h was not found."
@@ -887,6 +925,7 @@ $PACKAGE-$VERSION configuration summary:
     Buffer size for pcregrep ........ : ${with_pcregrep_bufsize}
     Link pcregrep with libz ......... : ${enable_pcregrep_libz}
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
+    Link pcretest with libedit ...... : ${enable_pcretest_libedit}
     Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
 
 EOF
