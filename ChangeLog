@@ -54,6 +54,8 @@ Version 8.31
     recursion). Instead of malloc and free for each heap frame each time a 
     logical recursion happens, frames are retained on a chain and re-used where 
     possible. This sometimes gives as much as 30% improvement.  
+    
+13. (*COMMIT) is now correctly confined to within a recursive subpattern call.
 
 
 Version 8.30 04-February-2012

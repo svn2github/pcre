@@ -1789,10 +1789,11 @@ for (;;)
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
           }
 
-        /* PCRE does not allow THEN to escape beyond a recursion; it is treated
-        as NOMATCH. */
+        /* PCRE does not allow THEN or COMMIT to escape beyond a recursion; it
+        is treated as NOMATCH. */
 
-        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
+        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN &&
+                 rrc != MATCH_COMMIT)
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)

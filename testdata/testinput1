@@ -5250,4 +5250,7 @@ name were given. ---/
 /(another)?(\1+)test/
     hello world test
 
+/(a(*COMMIT)b){0}a(?1)|aac/
+    aac
+
 /-- End of testinput1 --/
