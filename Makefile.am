@@ -560,6 +560,7 @@ EXTRA_DIST += \
   cmake/COPYING-CMAKE-SCRIPTS \
   cmake/FindPackageHandleStandardArgs.cmake \
   cmake/FindReadline.cmake \
+  cmake/FindEditline.cmake \
   CMakeLists.txt \
   config-cmake.h.in
 
