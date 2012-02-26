@@ -570,11 +570,13 @@ if test "$enable_pcretest_libreadline" = "yes"; then
 fi
   
 
-# Check for the availability of libedit
+# Check for the availability of libedit. Different distributions put its
+# headers in different places. Try to cover the most common ones.
 
 if test "$enable_pcretest_libedit" = "yes"; then
   AC_CHECK_HEADERS([editline/readline.h], [HAVE_EDITLINE_READLINE_H=1],
-    [AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_READLINE_H=1])]) 
+    [AC_CHECK_HEADERS([edit/readline/readline.h], [HAVE_READLINE_READLINE_H=1],
+      [AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_READLINE_H=1])])]) 
   AC_CHECK_LIB([edit], [readline], [LIBEDIT="-ledit"])
 fi   
 
