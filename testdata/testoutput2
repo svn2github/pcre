@@ -12271,4 +12271,11 @@ Partial match: \x0d\x0d
     \r\r\r\P\P     
  0: \x0d\x0d
 
+/-- This one is here because Perl does not match: it seems to allow the COMMIT
+to escape from the assertion. --/
+
+/(?=a(*COMMIT)b|ac)ac|ac/
+    ac
+ 0: ac
+
 /-- End of testinput2 --/

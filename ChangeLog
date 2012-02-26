@@ -55,9 +55,12 @@ Version 8.31
     logical recursion happens, frames are retained on a chain and re-used where 
     possible. This sometimes gives as much as 30% improvement.  
     
-13. (*COMMIT) is now correctly confined to within a recursive subpattern call.
+13. As documented, (*COMMIT) is now confined to within a recursive subpattern
+    call.
 
-14. It is now possible to link pcretest with libedit as an alternative to 
+14. As documented, (*COMMIT) is now confined to within a positive assertion.
+
+15. It is now possible to link pcretest with libedit as an alternative to 
     libreadline.
 
 

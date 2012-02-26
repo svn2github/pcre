@@ -1576,10 +1576,12 @@ for (;;)
         break;
         }
 
-      /* PCRE does not allow THEN to escape beyond an assertion; it is treated
-      as NOMATCH. */
+      /* PCRE does not allow THEN or COMMIT to escape beyond an assertion; it
+      is treated as NOMATCH. */
 
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN &&
+          rrc != MATCH_COMMIT) RRETURN(rrc);
+           
       ecode += GET(ecode, 1);
       md->mark = save_mark;
       }

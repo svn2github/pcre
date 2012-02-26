@@ -5253,4 +5253,10 @@ name were given. ---/
 /(a(*COMMIT)b){0}a(?1)|aac/
     aac
 
+/(?!a(*COMMIT)b)ac|cd/
+    ac
+    
+/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
+    ac 
+
 /-- End of testinput1 --/
