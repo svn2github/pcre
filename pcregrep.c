@@ -147,6 +147,7 @@ static int  pattern_count = 0;
 static pcre **pattern_list = NULL;
 static pcre_extra **hints_list = NULL;
 
+static char *file_list = NULL;
 static char *include_pattern = NULL;
 static char *exclude_pattern = NULL;
 static char *include_dir_pattern = NULL;
@@ -225,6 +226,7 @@ used to identify them. */
 #define N_M_LIMIT_REC  (-14)
 #define N_BUFSIZE      (-15)
 #define N_NOJIT        (-16)
+#define N_FILE_LIST    (-17)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "  terminate options" },
@@ -241,6 +243,7 @@ static option_item optionlist[] = {
   { OP_PATLIST,    'e',      NULL,              "regex(p)=pattern", "specify pattern (may be used more than once)" },
   { OP_NODATA,     'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,     'f',      &pattern_filename, "file=path",     "read patterns from file" },
+  { OP_STRING,     N_FILE_LIST, &file_list,     "file-list=path","read files to search from file" }, 
   { OP_NODATA,     N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,     'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
@@ -1851,8 +1854,8 @@ for (op = optionlist; op->one_char != 0; op++)
 
 printf("\nNumbers may be followed by K or M, e.g. --buffer-size=100K.\n");
 printf("The default value for --buffer-size is %d.\n", PCREGREP_BUFSIZE);
-printf("When reading patterns from a file instead of using a command line option,\n");
-printf("trailing white space is removed and blank lines are ignored.\n");
+printf("When reading patterns or file names from a file, trailing white\n");
+printf("space is removed and blank lines are ignored.\n");
 printf("There is a maximum of %d patterns, each of maximum size %d bytes.\n",
   MAX_PATTERN_COUNT, PATBUFSIZE);
 
@@ -2694,22 +2697,56 @@ if (include_dir_pattern != NULL)
     goto EXIT2;
     }
   }
+  
+/* If a file that contains a list of files to search has been specified, read
+it line by line and search the given files. Otherwise, if there are no further
+arguments, do the business on stdin and exit. */
 
-/* If there are no further arguments, do the business on stdin and exit. */
+if (file_list != NULL)
+  {
+  char buffer[PATBUFSIZE];
+  FILE *fl;
+  if (strcmp(file_list, "-") == 0) fl = stdin; else
+    { 
+    fl = fopen(file_list, "rb");
+    if (fl == NULL)
+      {
+      fprintf(stderr, "pcregrep: Failed to open %s: %s\n", file_list, 
+        strerror(errno));
+      goto EXIT2;
+      } 
+    }   
+  while (fgets(buffer, PATBUFSIZE, fl) != NULL)
+    {
+    int frc;
+    char *end = buffer + (int)strlen(buffer);
+    while (end > buffer && isspace(end[-1])) end--;
+    *end = 0;  
+    if (*buffer != 0) 
+      { 
+      frc = grep_or_recurse(buffer, dee_action == dee_RECURSE, FALSE); 
+      if (frc > 1) rc = frc;
+        else if (frc == 0 && rc == 1) rc = 0;  
+      }   
+    }  
+  if (fl != stdin) fclose (fl);  
+  } 
 
-if (i >= argc)
+/* Do this only if there was no file list (and no file arguments). */
+
+else if (i >= argc)
   {
   rc = pcregrep(stdin, FR_PLAIN, stdin_name,
     (filenames > FN_DEFAULT)? stdin_name : NULL);
   goto EXIT;
   }
 
-/* Otherwise, work through the remaining arguments as files or directories.
-Pass in the fact that there is only one argument at top level - this suppresses
-the file name if the argument is not a directory and filenames are not
-otherwise forced. */
+/* After handling file-list or if there are remaining arguments, work through
+them as files or directories. Pass in the fact that there is only one argument
+at top level - this suppresses the file name if the argument is not a directory
+and filenames are not otherwise forced. */
 
-only_one_at_top = i == argc - 1;   /* Catch initial value of i */
+only_one_at_top = i == argc - 1 && file_list == NULL; 
 
 for (; i < argc; i++)
   {
