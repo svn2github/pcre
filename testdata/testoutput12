@@ -11,7 +11,7 @@ Subject length lower bound = 3
 No set of starting bytes
 JIT study was successful
 
-/ab(*COMMIT)/S+I
+/ab(*THEN)/S+I
 Capturing subpattern count = 0
 No options
 First char = 'a'

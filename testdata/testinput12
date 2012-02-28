@@ -4,7 +4,7 @@ and a couple of things that are different with JIT. --/
 
 /abc/S+I
 
-/ab(*COMMIT)/S+I
+/ab(*THEN)/S+I
 
 /abc/S+I>testsavedregex
 

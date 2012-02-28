@@ -63,6 +63,8 @@ Version 8.31
 15. It is now possible to link pcretest with libedit as an alternative to 
     libreadline.
 
+16. (*COMMIT) control verb is now supported by the JIT compiler.
+
 
 Version 8.30 04-February-2012
 -----------------------------

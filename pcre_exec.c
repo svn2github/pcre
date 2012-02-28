@@ -6469,11 +6469,8 @@ if (extra_data != NULL
                     PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART |
                     PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD)) == 0)
   {
-  rc = PRIV(jit_exec)(re, extra_data->executable_jit,
-    (const pcre_uchar *)subject, length, start_offset, options,
-    ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0)
-    ? MATCH_LIMIT : extra_data->match_limit, offsets, offsetcount,
-    ((extra_data->flags & PCRE_EXTRA_MARK) != 0) ? extra_data->mark : NULL);
+  rc = PRIV(jit_exec)(re, extra_data, (const pcre_uchar *)subject, length,
+       start_offset, options, offsets, offsetcount);
 
   /* PCRE_ERROR_NULL means that the selected normal or partial matching
   mode is not compiled. In this case we simply fallback to interpreter. */

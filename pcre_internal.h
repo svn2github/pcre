@@ -2296,10 +2296,10 @@ extern BOOL              PRIV(was_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,
 extern BOOL              PRIV(xclass)(int, const pcre_uchar *, BOOL);
 
 #ifdef SUPPORT_JIT
-extern void              PRIV(jit_compile)(const REAL_PCRE *, PUBL(extra) *, int);
-extern int               PRIV(jit_exec)(const REAL_PCRE *, void *,
-                           const pcre_uchar *, int, int, int, int, int *, int,
-                           pcre_uchar **);
+extern void              PRIV(jit_compile)(const REAL_PCRE *,
+                           PUBL(extra) *, int);
+extern int               PRIV(jit_exec)(const REAL_PCRE *, const PUBL(extra) *,
+                           const pcre_uchar *, int, int, int, int *, int);
 extern void              PRIV(jit_free)(void *);
 extern int               PRIV(jit_get_size)(void *);
 extern const char*       PRIV(jit_get_target)(void);

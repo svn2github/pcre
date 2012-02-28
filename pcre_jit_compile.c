@@ -307,11 +307,13 @@ typedef struct compiler_common {
 
   /* Labels and jump lists. */
   struct sljit_label *partialmatchlabel;
+  struct sljit_label *leavelabel;
   struct sljit_label *acceptlabel;
   stub_list *stubs;
   recurse_entry *entries;
   recurse_entry *currententry;
   jump_list *partialmatch;
+  jump_list *leave;
   jump_list *accept;
   jump_list *calllimit;
   jump_list *stackalloc;
@@ -517,6 +519,7 @@ switch(*cc)
   case OP_BRAZERO:
   case OP_BRAMINZERO:
   case OP_BRAPOSZERO:
+  case OP_COMMIT:
   case OP_FAIL:
   case OP_ACCEPT:
   case OP_ASSERT_ACCEPT:
@@ -4159,7 +4162,7 @@ if (common->has_set_som && common->mark_ptr != 0)
   }
 else if (common->has_set_som || common->mark_ptr != 0)
   {
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->has_set_som ? (OVECTOR(0)) : common->mark_ptr);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->has_set_som ? (int)(OVECTOR(0)) : common->mark_ptr);
   allocate_stack(common, 1);
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
   }
@@ -4186,10 +4189,12 @@ jump_list *tmp = NULL;
 jump_list **target = (conditional) ? &fallback->condfailed : &fallback->common.topfallbacks;
 jump_list **found;
 /* Saving previous accept variables. */
+struct sljit_label *save_leavelabel = common->leavelabel;
 struct sljit_label *save_acceptlabel = common->acceptlabel;
+jump_list *save_leave = common->leave;
+jump_list *save_accept = common->accept;
 struct sljit_jump *jump;
 struct sljit_jump *brajump = NULL;
-jump_list *save_accept = common->accept;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -4234,6 +4239,8 @@ else
   }
 
 memset(&altfallback, 0, sizeof(fallback_common));
+common->leavelabel = NULL;
+common->leave = NULL;
 while (1)
   {
   common->acceptlabel = NULL;
@@ -4248,7 +4255,9 @@ while (1)
   compile_hotpath(common, ccbegin + 1 + LINK_SIZE, cc, &altfallback);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
+    common->leavelabel = save_leavelabel;
     common->acceptlabel = save_acceptlabel;
+    common->leave = save_leave;
     common->accept = save_accept;
     return NULL;
     }
@@ -4301,7 +4310,9 @@ while (1)
   compile_fallbackpath(common, altfallback.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
+    common->leavelabel = save_leavelabel;
     common->acceptlabel = save_acceptlabel;
+    common->leave = save_leave;
     common->accept = save_accept;
     return NULL;
     }
@@ -4314,6 +4325,8 @@ while (1)
   cc += GET(cc, 1);
   }
 /* None of them matched. */
+if (common->leave != NULL)
+  set_jumps(common->leave, LABEL());
 
 if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
   {
@@ -4438,7 +4451,9 @@ else
     }
   }
 
+common->leavelabel = save_leavelabel;
 common->acceptlabel = save_acceptlabel;
+common->leave = save_leave;
 common->accept = save_accept;
 return cc + 1 + LINK_SIZE;
 }
@@ -5810,6 +5825,11 @@ while (cc < ccend)
     cc += 1 + 2 + cc[1];
     break;
 
+    case OP_COMMIT:
+    PUSH_FALLBACK_NOVALUE(sizeof(fallback_common), cc);
+    cc += 1;
+    break;
+
     case OP_FAIL:
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
@@ -6016,7 +6036,7 @@ else if (common->has_set_som || common->mark_ptr != 0)
   {
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 1);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->has_set_som ? (OVECTOR(0)) : common->mark_ptr, TMP2, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->has_set_som ? (int)(OVECTOR(0)) : common->mark_ptr, TMP2, 0);
   }
 }
 
@@ -6659,6 +6679,14 @@ while (current)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, TMP1, 0);
     break;
 
+    case OP_COMMIT:
+    OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
+    if (common->leavelabel == NULL)
+      add_jump(compiler, &common->leave, JUMP(SLJIT_JUMP));
+    else
+      JUMPTO(SLJIT_JUMP, common->leavelabel);
+    break;
+
     case OP_FAIL:
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
@@ -6684,6 +6712,8 @@ int framesize = get_framesize(common, cc, TRUE);
 int alternativesize;
 BOOL needsframe;
 fallback_common altfallback;
+struct sljit_label *save_leavelabel = common->leavelabel;
+jump_list *save_leave = common->leave;
 struct sljit_jump *jump;
 
 SLJIT_ASSERT(*cc == OP_BRA || *cc == OP_CBRA || *cc == OP_CBRAPOS || *cc == OP_SCBRA || *cc == OP_SCBRAPOS);
@@ -6708,7 +6738,9 @@ if (alternativesize > 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
 
 memset(&altfallback, 0, sizeof(fallback_common));
+common->leavelabel = NULL;
 common->acceptlabel = NULL;
+common->leave = NULL;
 common->accept = NULL;
 altfallback.cc = ccbegin;
 cc += GET(cc, 1);
@@ -6722,13 +6754,21 @@ while (1)
 
   compile_hotpath(common, altfallback.cc, cc, &altfallback);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
+    {
+    common->leavelabel = save_leavelabel;
+    common->leave = save_leave;
     return;
+    }
 
   add_jump(compiler, &common->accept, JUMP(SLJIT_JUMP));
 
   compile_fallbackpath(common, altfallback.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
+    {
+    common->leavelabel = save_leavelabel;
+    common->leave = save_leave;
     return;
+    }
   set_jumps(altfallback.topfallbacks, LABEL());
 
   if (*cc != OP_ALT)
@@ -6738,6 +6778,9 @@ while (1)
   cc += GET(cc, 1);
   }
 /* None of them matched. */
+if (common->leave != NULL)
+  set_jumps(common->leave, LABEL());
+
 OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
 jump = JUMP(SLJIT_JUMP);
 
@@ -6758,6 +6801,9 @@ OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), sizeof(sljit_w));
 OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->recursive_head, TMP2, 0);
 sljit_emit_fast_return(compiler, SLJIT_MEM1(STACK_TOP), 0);
+
+common->leavelabel = save_leavelabel;
+common->leave = save_leave;
 }
 
 #undef COMPILE_FALLBACKPATH
@@ -6776,7 +6822,6 @@ pcre_uchar *ccend;
 executable_functions *functions;
 void *executable_func;
 sljit_uw executable_size;
-struct sljit_label *leave;
 struct sljit_label *mainloop = NULL;
 struct sljit_label *empty_match_found;
 struct sljit_label *empty_match_fallback;
@@ -6967,14 +7012,16 @@ if (common->accept != NULL)
 
 /* This means we have a match. Update the ovector. */
 copy_ovector(common, re->top_bracket + 1);
-leave = LABEL();
+common->leavelabel = LABEL();
+if (common->leave != NULL)
+  set_jumps(common->leave, common->leavelabel);
 sljit_emit_return(compiler, SLJIT_MOV, SLJIT_RETURN_REG, 0);
 
 if (mode != JIT_COMPILE)
   {
   common->partialmatchlabel = LABEL();
   set_jumps(common->partialmatch, common->partialmatchlabel);
-  return_with_partial_match(common, leave);
+  return_with_partial_match(common, common->leavelabel);
   }
 
 empty_match_fallback = LABEL();
@@ -7038,7 +7085,7 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
   CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0, common->partialmatchlabel);
 
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
-JUMPTO(SLJIT_JUMP, leave);
+JUMPTO(SLJIT_JUMP, common->leavelabel);
 
 flush_stubs(common);
 
@@ -7091,12 +7138,12 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 JUMPHERE(jump);
 /* We break the return address cache here, but this is a really rare case. */
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_JIT_STACKLIMIT);
-JUMPTO(SLJIT_JUMP, leave);
+JUMPTO(SLJIT_JUMP, common->leavelabel);
 
 /* Call limit reached. */
 set_jumps(common->calllimit, LABEL());
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_MATCHLIMIT);
-JUMPTO(SLJIT_JUMP, leave);
+JUMPTO(SLJIT_JUMP, common->leavelabel);
 
 if (common->revertframes != NULL)
   {
@@ -7203,11 +7250,10 @@ return convert_executable_func.call_executable_func(arguments);
 }
 
 int
-PRIV(jit_exec)(const REAL_PCRE *re, void *executable_funcs,
-  const pcre_uchar *subject, int length, int start_offset, int options,
-  int match_limit, int *offsets, int offsetcount, pcre_uchar **mark_ptr)
+PRIV(jit_exec)(const REAL_PCRE *re, const PUBL(extra) *extra_data, const pcre_uchar *subject,
+  int length, int start_offset, int options, int *offsets, int offsetcount)
 {
-executable_functions *functions = (executable_functions *)executable_funcs;
+executable_functions *functions = (executable_functions *)extra_data->executable_jit;
 union {
    void* executable_func;
    jit_function call_executable_func;
@@ -7232,7 +7278,7 @@ arguments.begin = subject;
 arguments.end = subject + length;
 arguments.mark_ptr = NULL;
 /* JIT decreases this value less frequently than the interpreter. */
-arguments.calllimit = match_limit;
+arguments.calllimit = ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0) ? MATCH_LIMIT : extra_data->match_limit;
 arguments.notbol = (options & PCRE_NOTBOL) != 0;
 arguments.noteol = (options & PCRE_NOTEOL) != 0;
 arguments.notempty = (options & PCRE_NOTEMPTY) != 0;
@@ -7267,8 +7313,8 @@ else
 
 if (retval * 2 > offsetcount)
   retval = 0;
-if (mark_ptr != NULL)
-  *mark_ptr = arguments.mark_ptr;
+if ((extra_data->flags & PCRE_EXTRA_MARK) != 0)
+  *(extra_data->mark) = arguments.mark_ptr;
 
 return retval;
 }
