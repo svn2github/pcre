@@ -34,7 +34,9 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
  'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet', \
  # New for Unicode 6.0.0
- 'Batak', 'Brahmi', 'Mandaic'  
+ 'Batak', 'Brahmi', 'Mandaic', \
+# New for Unicode 6.1.0
+ 'Chakma', 'Meroitic_Cursive', 'Meroitic_Hieroglyphs', 'Miao', 'Sharada', 'Sora_Sompeng', 'Takri'
  ]
 
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
@@ -79,7 +81,7 @@ for utt in utt_table:
 # Print the actual table, using the string names
 
 print ''
-print 'const char _pcre_utt_names[] = ';
+print 'const char PRIV(utt_names)[] =';
 last = ''
 for utt in utt_table:
 	if utt == utt_table[-1]:
@@ -88,7 +90,7 @@ for utt in utt_table:
 # This was how it was done before the EBCDIC-compatible modification.
 #        print '  "%s\\0"%s' % (utt[0], last)
 
-print '\nconst ucp_type_table _pcre_utt[] = { '
+print '\nconst ucp_type_table PRIV(utt)[] = {'
 offset = 0
 last = ','
 for utt in utt_table:

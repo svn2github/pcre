@@ -121,7 +121,7 @@ def read_table(file_name, get_value, default_value):
 
 # Get the smallest possible C language type for the values
 def get_type_size(table):
-        type_size = [("uschar", 1), ("pcre_uint16", 2), ("pcre_uint32", 4),
+        type_size = [("pcre_uint8", 1), ("pcre_uint16", 2), ("pcre_uint32", 4),
                                  ("signed char", 1), ("pcre_int16", 2), ("pcre_int32", 4)]
         limits = [(0, 255), (0, 65535), (0, 4294967295),
                           (-128, 127), (-32768, 32767), (-2147483648, 2147483647)]
@@ -233,7 +233,7 @@ def test_record_size():
             #print struct
 
 def print_records(records, record_size):
-        print 'const ucd_record _pcre_ucd_records[] = { ' + \
+        print 'const ucd_record PRIV(ucd_records)[] = { ' + \
               '/* %d bytes, record size %d */' % (len(records) * record_size, record_size)
         records = zip(records.keys(), records.values())
         records.sort(None, lambda x: x[1])
@@ -258,7 +258,9 @@ script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Bugines
  'Javanese', 'Kaithi', 'Lisu', 'Meetei_Mayek', \
  'Old_South_Arabian', 'Old_Turkic', 'Samaritan', 'Tai_Tham', 'Tai_Viet', \
 # New for Unicode 6.0.0
- 'Batak', 'Brahmi', 'Mandaic'  
+ 'Batak', 'Brahmi', 'Mandaic', \
+# New for Unicode 6.1.0
+ 'Chakma', 'Meroitic_Cursive', 'Meroitic_Hieroglyphs', 'Miao', 'Sharada', 'Sora_Sompeng', 'Takri'
  ]
  
 category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
@@ -307,15 +309,15 @@ print "/* a totally empty module because some compilers barf at that. */"
 print "/* Instead, just supply small dummy tables. */"
 print
 print "#ifndef SUPPORT_UCP"
-print "const ucd_record _pcre_ucd_records[] = {{0,0,0 }};"
-print "const uschar _pcre_ucd_stage1[] = {0};"
-print "const pcre_uint16 _pcre_ucd_stage2[] = {0};"
+print "const ucd_record PRIV(ucd_records)[] = {{0,0,0 }};"
+print "const pcre_uint8 PRIV(ucd_stage1)[] = {0};"
+print "const pcre_uint16 PRIV(ucd_stage2)[] = {0};"
 print "#else"
 print
 print record_struct
 print_records(records, record_size)
-print_table(min_stage1, '_pcre_ucd_stage1')
-print_table(min_stage2, '_pcre_ucd_stage2', min_block_size)
+print_table(min_stage1, 'PRIV(ucd_stage1)')
+print_table(min_stage2, 'PRIV(ucd_stage2)', min_block_size)
 print "#if UCD_BLOCK_SIZE != %d" % min_block_size
 print "#error Please correct UCD_BLOCK_SIZE in pcre_internal.h"
 print "#endif"

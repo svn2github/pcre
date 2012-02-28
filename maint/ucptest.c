@@ -197,6 +197,20 @@ switch(script)
   case ucp_Samaritan:   scriptname = US"Samaritan"; break;
   case ucp_Tai_Tham:    scriptname = US"Tai_Tham"; break;
   case ucp_Tai_Viet:    scriptname = US"Tai_Viet"; break;
+  /* New for Unicode 6.0.0 */
+  case ucp_Batak:       scriptname = US"Batak"; break;
+  case ucp_Brahmi:      scriptname = US"Brahmi"; break;
+  case ucp_Mandaic:     scriptname = US"Mandaic"; break;
+
+  /* New for Unicode 6.1.0 */
+  case ucp_Chakma:               scriptname = US"Chakma"; break;
+  case ucp_Meroitic_Cursive:     scriptname = US"Meroitic_Cursive"; break;
+  case ucp_Meroitic_Hieroglyphs: scriptname = US"Meroitic_Hieroglyphs"; break;
+  case ucp_Miao:                 scriptname = US"Miao"; break;
+  case ucp_Sharada:              scriptname = US"Sharada"; break;
+  case ucp_Sora_Sompeng:         scriptname = US"Sora Sompent"; break;
+  case ucp_Takri:                scriptname = US"Takri"; break;
+
   }
 
 printf("%04x %s: %s %s", c, typename, fulltypename, scriptname);

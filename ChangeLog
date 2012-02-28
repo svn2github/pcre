@@ -65,6 +65,8 @@ Version 8.31
 
 16. (*COMMIT) control verb is now supported by the JIT compiler.
 
+6.  The Unicode data tables have been updated to Unicode 6.1.0.
+
 
 Version 8.30 04-February-2012
 -----------------------------

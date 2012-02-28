@@ -581,5 +581,13 @@ of case for anything other than the ASCII letters. --/
     aa\P
     aa\P\P
     aba\P
+    
+/-- These Unicode 6.1.0 scripts are not known to Perl. --/ 
+
+/\p{Chakma}\d/8W
+    \x{11100}\x{1113c}
+
+/\p{Takri}\d/8W
+    \x{11680}\x{116c0}
 
 /-- End of testinput7 --/

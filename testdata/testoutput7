@@ -1248,5 +1248,15 @@ Partial match: ab
  0: aa
     aba\P
  0: aba
+    
+/-- These Unicode 6.1.0 scripts are not known to Perl. --/ 
+
+/\p{Chakma}\d/8W
+    \x{11100}\x{1113c}
+ 0: \x{11100}\x{1113c}
+
+/\p{Takri}\d/8W
+    \x{11680}\x{116c0}
+ 0: \x{11680}\x{116c0}
 
 /-- End of testinput7 --/
