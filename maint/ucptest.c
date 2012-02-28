@@ -18,6 +18,10 @@ one. */
 #include "../config.h"
 #endif
 
+#ifndef SUPPORT_UCP
+#define SUPPORT_UCP
+#endif
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,9 +56,9 @@ int fulltype = UCD_CHARTYPE(c);
 int script = UCD_SCRIPT(c);
 int othercase = UCD_OTHERCASE(c);
 
-uschar *fulltypename = US"??";
-uschar *typename = US"??";
-uschar *scriptname = US"??";
+unsigned char *fulltypename = US"??";
+unsigned char *typename = US"??";
+unsigned char *scriptname = US"??";
 
 switch (type)
   {
@@ -227,11 +231,11 @@ printf("\n");
 int
 main(void)
 {
-uschar buffer[1024];
+unsigned char buffer[1024];
 while (fgets(CS buffer, sizeof(buffer), stdin) != NULL)
   {
-  uschar name[24];
-  uschar *s, *t;
+  unsigned char name[24];
+  unsigned char *s, *t;
 
   printf("%s", buffer);
   s = buffer;
@@ -246,7 +250,7 @@ while (fgets(CS buffer, sizeof(buffer), stdin) != NULL)
     {
     while (*s != 0)
       {
-      uschar *endptr;
+      unsigned char *endptr;
       int c = strtoul(CS s, CSS(&endptr), 16);
       print_prop(c);
       s = endptr;

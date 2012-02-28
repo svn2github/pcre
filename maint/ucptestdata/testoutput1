@@ -177,10 +177,10 @@ findprop a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af
 00a4 Symbol: Currency symbol Common
 00a5 Symbol: Currency symbol Common
 00a6 Symbol: Other symbol Common
-00a7 Symbol: Other symbol Common
+00a7 Punctuation: Other punctuation Common
 00a8 Symbol: Modifier symbol Common
 00a9 Symbol: Other symbol Common
-00aa Letter: Lower case letter Latin
+00aa Letter: Other letter Latin
 00ab Punctuation: Initial punctuation Common
 00ac Symbol: Mathematical symbol Common
 00ad Control: Format Common
@@ -193,11 +193,11 @@ findprop b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf
 00b3 Number: Other number Common
 00b4 Symbol: Modifier symbol Common
 00b5 Letter: Lower case letter Common 039c
-00b6 Symbol: Other symbol Common
+00b6 Punctuation: Other punctuation Common
 00b7 Punctuation: Other punctuation Common
 00b8 Symbol: Modifier symbol Common
 00b9 Number: Other number Common
-00ba Letter: Lower case letter Latin
+00ba Letter: Other letter Latin
 00bb Punctuation: Final punctuation Common
 00bc Number: Other number Common
 00bd Number: Other number Common
@@ -339,3 +339,9 @@ findprop 10b00 10b35 13000 1342e 10840 10855
 1342e Letter: Other letter Egyptian_Hieroglyphs
 10840 Letter: Other letter Imperial_Aramaic
 10855 Letter: Other letter Imperial_Aramaic
+
+findprop 11100 1113c 11680 116c0
+11100 Mark: Non-spacing mark Chakma
+1113c Number: Decimal number Chakma
+11680 Letter: Other letter Takri
+116c0 Number: Decimal number Takri
