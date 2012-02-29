@@ -1,4 +1,29 @@
-/* A program for converting characters to UTF-8 and vice versa */
+/* A test program for converting characters to UTF-8 and vice versa. Note that
+this program conforms to the original definition of UTF-8, which allows
+codepoints up to 7fffffff. The more recent definition limits the validity of
+UTF-8 codepoints to a maximum of 10ffffff.
+
+The arguments are either single codepoint values, written as 0xhhhh, for 
+conversion to UTF-8, or sequences of hex values, written without 0x and 
+optionally including spaces (but such arguments must be quoted), for conversion 
+from UTF-8 to codepoints. For example:
+
+./utf8 0x1234
+0x00001234 => e1 88 b4
+
+./utf8 "e1 88 b4"
+0x00001234 <= e1 88 b4
+
+In the second case, a number of characters can be present in one argument:
+
+./utf8 "65 e188b4 77"
+0x00000065 <= 65 
+0x00001234 <= e1 88 b4 
+0x00000077 <= 77 
+
+If the option -s is given, the sequence of UTF-bytes is written out between 
+angle brackets at the end of the line. On a UTF-8 terminal, this will show the
+appropriate graphic for the codepoint. */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -137,9 +162,9 @@ main(int argc, char **argv)
 {
 int i = 1;
 int show = 0;
-unsigned char buffer[8];
+unsigned char buffer[64];
 
-if (strcmp(argv[1], "-s") == 0)
+if (argc > 1 && strcmp(argv[1], "-s") == 0)
   {
   show = 1;
   i = 2;
@@ -171,7 +196,9 @@ for (; i < argc; i++)
     int d, rc; 
     int j = 0;
     int y = 0; 
-    int z = 0; 
+    int z = 0;
+    unsigned char *bptr;
+       
     for (;;) 
       { 
       while (*x == ' ') x++; 
@@ -191,11 +218,33 @@ for (; i < argc; i++)
         }
       z ^= 1;     
       } 
-    if (j < 0) continue;     
-    buffer[j] = 0;   
-    rc = utf82ord(buffer, &d);
-    if (rc > 0) printf("0x%08x <= %s\n", d, argv[i]); 
-      else printf("Error %d <= %s\n", rc, argv[i]); 
+    buffer[j] = 0;
+    bptr = buffer;
+
+    while (*bptr != 0)
+      { 
+      rc = utf82ord(bptr, &d);
+      if (rc > 0) 
+        {
+        printf("0x%08x <= ", d);
+        for (j = 0; j < rc; j++) printf("%02x ", bptr[j]);
+        if (show)
+          {
+          printf(">");
+          for (j = 0; j < rc; j++) printf("%c", bptr[j]);
+          printf("<"); 
+          }  
+        printf("\n");
+        bptr += rc; 
+        } 
+      else 
+        {
+        printf("Malformed UTF-8 at offset %d <= ", -rc);
+        while (*bptr != 0) printf("%02x ", *bptr++);
+        printf("\n"); 
+        break;  
+        } 
+      }   
     }       
   } 
 return 0;
