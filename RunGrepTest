@@ -415,6 +415,38 @@ echo "---------------------------- Test 85 -----------------------------" >>test
 (cd $srcdir; $valgrind $pcregrep --file-list=./testdata/grepfilelist "dolor" ./testdata/grepinput3) >>testtry 2>&1
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 86 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 87 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep "cat" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 88 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -v "cat" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 89 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -I "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 90 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --binary-files=without-match "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 91 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -a "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 92 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --binary-files=text "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 93 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --text "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

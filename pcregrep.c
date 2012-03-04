@@ -104,6 +104,10 @@ enum { DEE_READ, DEE_SKIP };
 
 enum { EL_LF, EL_CR, EL_CRLF, EL_ANY, EL_ANYCRLF };
 
+/* Binary file options */
+
+enum { BIN_BINARY, BIN_NOMATCH, BIN_TEXT };
+
 /* In newer versions of gcc, with FORTIFY_SOURCE set (the default in some
 environments), a warning is issued if the value of fwrite() is ignored.
 Unfortunately, casting to (void) does not suppress the warning. To get round
@@ -160,6 +164,7 @@ static pcre *exclude_dir_compiled = NULL;
 
 static int after_context = 0;
 static int before_context = 0;
+static int binary_files = BIN_BINARY;
 static int both_context = 0;
 static int bufthird = PCREGREP_BUFSIZE;
 static int bufsize = 3*PCREGREP_BUFSIZE;
@@ -197,7 +202,7 @@ static BOOL utf8 = FALSE;
 /* Structure for options and list of them */
 
 enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_LONGNUMBER,
-       OP_OP_NUMBER, OP_PATLIST };
+       OP_OP_NUMBER, OP_PATLIST, OP_BINFILES };
 
 typedef struct option_item {
   int type;
@@ -227,12 +232,15 @@ used to identify them. */
 #define N_BUFSIZE      (-15)
 #define N_NOJIT        (-16)
 #define N_FILE_LIST    (-17)
+#define N_BINARY_FILES (-18)
 
 static option_item optionlist[] = {
-  { OP_NODATA,     N_NULL,   NULL,              "",              "  terminate options" },
+  { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
   { OP_NODATA,     N_HELP,   NULL,              "help",          "display this help and exit" },
   { OP_NUMBER,     'A',      &after_context,    "after-context=number", "set number of following context lines" },
+  { OP_NODATA,     'a',      NULL,              "text",          "treat binary files as text" },
   { OP_NUMBER,     'B',      &before_context,   "before-context=number", "set number of prior context lines" },
+  { OP_BINFILES,   N_BINARY_FILES, NULL,        "binary-files=word", "set treatment of binary files" },
   { OP_NUMBER,     N_BUFSIZE,&bufthird,         "buffer-size=number", "set processing buffer size parameter" },
   { OP_OP_STRING,  N_COLOUR, &colour_option,    "color=option",  "matched text color option" },
   { OP_OP_STRING,  N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
@@ -247,6 +255,7 @@ static option_item optionlist[] = {
   { OP_NODATA,     N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,     'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
+  { OP_NODATA,     'I',      NULL,              "",              "treat binary files as not matching (ignore)" },
   { OP_NODATA,     'i',      NULL,              "ignore-case",   "ignore case distinctions" },
 #ifdef SUPPORT_PCREGREP_JIT
   { OP_NODATA,     N_NOJIT,  NULL,              "no-jit",        "do not use just-in-time compiler optimization" },
@@ -1047,6 +1056,7 @@ char *lastmatchrestart = NULL;
 char *ptr = main_buffer;
 char *endptr;
 size_t bufflength;
+BOOL binary = FALSE;
 BOOL endhyphenpending = FALSE;
 BOOL input_line_buffered = line_buffered;
 FILE *in = NULL;                    /* Ensure initialized */
@@ -1093,6 +1103,17 @@ else
   }
 
 endptr = main_buffer + bufflength;
+
+/* Unless binary-files=text, see if we have a binary file. This uses the same
+rule as GNU grep, namely, a search for a binary zero byte near the start of the 
+file. */
+
+if (binary_files != BIN_TEXT)
+  {
+  binary = 
+    memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength) != NULL;
+  if (binary && binary_files == BIN_NOMATCH) return 1;
+  } 
 
 /* Loop while the current pointer is not at the end of the file. For large
 files, endptr will be at the end of the buffer when we are in the middle of the
@@ -1209,6 +1230,16 @@ while (ptr < endptr)
     /* Just count if just counting is wanted. */
 
     if (count_only) count++;
+    
+    /* When handling a binary file and binary-files==binary, the "binary" 
+    variable will be set true (it's false in all other cases). In this 
+    situation we just want to output the file name. No need to scan further. */
+    
+    else if (binary)
+      {
+      fprintf(stdout, "Binary file %s matches\n", filename);
+      return 0;  
+      }   
 
     /* If all we want is a file name, there is no need to scan any more lines
     in the file. */
@@ -1845,11 +1876,18 @@ for (op = optionlist; op->one_char != 0; op++)
   contains an underscore. */
 
   if (strchr(op->long_name, '_') != NULL) continue;
+  
+  if (op->one_char > 0 && (op->long_name)[0] == 0)
+    n = 31 - printf("  -%c", op->one_char);
+  else    
+    {
+    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); 
+      else strcpy(s, "   ");
+    n = 31 - printf("  %s --%s", s, op->long_name);
+    } 
 
-  if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); else strcpy(s, "   ");
-  n = 31 - printf("  %s --%s", s, op->long_name);
   if (n < 1) n = 1;
-  printf("%.*s%s\n", n, "                     ", op->help_text);
+  printf("%.*s%s\n", n, "                           ", op->help_text);
   }
 
 printf("\nNumbers may be followed by K or M, e.g. --buffer-size=100K.\n");
@@ -1880,9 +1918,11 @@ switch(letter)
   case N_LBUFFER: line_buffered = TRUE; break;
   case N_LOFFSETS: line_offsets = number = TRUE; break;
   case N_NOJIT: study_options &= ~PCRE_STUDY_JIT_COMPILE; break;
+  case 'a': binary_files = BIN_TEXT; break;
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
+  case 'I': binary_files = BIN_NOMATCH; break;
   case 'h': filenames = FN_NONE; break;
   case 'i': options |= PCRE_CASELESS; break;
   case 'l': omit_zero_count = TRUE; filenames = FN_MATCH_ONLY; break;
@@ -2316,7 +2356,7 @@ for (i = 1; i < argc; i++)
 
   /* If the option type is OP_PATLIST, it's the -e option, which can be called
   multiple times to create a list of patterns. */
-
+  
   if (op->type == OP_PATLIST)
     {
     if (cmd_pattern_count >= MAX_PATTERN_COUNT)
@@ -2327,6 +2367,24 @@ for (i = 1; i < argc; i++)
       }
     patterns[cmd_pattern_count++] = option_data;
     }
+    
+  /* Handle OP_BINARY_FILES */
+  
+  else if (op->type == OP_BINFILES)
+    {
+    if (strcmp(option_data, "binary") == 0)
+      binary_files = BIN_BINARY;
+    else if (strcmp(option_data, "without-match") == 0)
+      binary_files = BIN_NOMATCH;
+    else if (strcmp(option_data, "text") == 0)
+      binary_files = BIN_TEXT;
+    else
+      {
+      fprintf(stderr, "pcregrep: unknown value \"%s\" for binary-files\n", 
+        option_data);  
+      pcregrep_exit(usage(2));
+      }    
+    }   
 
   /* Otherwise, deal with single string or numeric data values. */
 

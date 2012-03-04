@@ -69,6 +69,9 @@ Version 8.31
 
 18. Added --file-list option to pcregrep.
 
+19. Added binary file support to pcregrep, including the -a, --binary-files,
+    -I, and --text options.
+
 
 Version 8.30 04-February-2012
 -----------------------------
