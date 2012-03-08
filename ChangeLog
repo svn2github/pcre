@@ -72,6 +72,9 @@ Version 8.31
 19. Added binary file support to pcregrep, including the -a, --binary-files,
     -I, and --text options.
 
+20. The madvise function is renamed for posix_madvise for QNX compatibility
+    reasons. Fixed by Giuseppe D'Angelo.
+
 
 Version 8.30 04-February-2012
 -----------------------------
