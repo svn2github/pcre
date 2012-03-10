@@ -1891,7 +1891,7 @@ string that it matched that is returned.
 .P
 If the vector is too small to hold all the captured substring offsets, it is
 used as far as possible (up to two-thirds of its length), and the function
-returns a value of zero. If neither the actual string matched not any captured
+returns a value of zero. If neither the actual string matched nor any captured
 substrings are of interest, \fBpcre_exec()\fP may be called with \fIovector\fP
 passed as NULL and \fIovecsize\fP as zero. However, if the pattern contains
 back references and the \fIovector\fP is not big enough to remember the related
