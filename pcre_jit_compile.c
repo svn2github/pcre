@@ -3746,7 +3746,8 @@ switch(type)
 
   case OP_REVERSE:
   length = GET(cc, 0);
-  SLJIT_ASSERT(length > 0);
+  if (length == 0)
+    return cc + LINK_SIZE;
   OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
 #ifdef SUPPORT_UTF
   if (common->utf)

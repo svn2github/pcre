@@ -1878,4 +1878,8 @@ First char = 'x'
 Need char = 'y'
 Max lookbehind = 2
 
+/(?<!^)ETA/8
+    ETA
+No match
+
 /-- End of testinput5 --/
