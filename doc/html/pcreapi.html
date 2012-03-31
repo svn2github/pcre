@@ -1227,6 +1227,13 @@ only if it follows something of variable length. For example, for the pattern
 /^a\d+z\d+/ the returned value is "z", but for /^a\dz\d/ the returned value
 is -1.
 <pre>
+  PCRE_INFO_MAXLOOKBEHIND
+</pre>
+Return the number of characters (NB not bytes) in the longest lookbehind
+assertion in the pattern. Note that the simple assertions \b and \B require a
+one-character lookbehind. This information is useful when doing multi-segment 
+matching using the partial matching facilities.
+<pre>
   PCRE_INFO_MINLENGTH
 </pre>
 If the pattern was studied and a minimum length for matching subject strings
@@ -1870,7 +1877,7 @@ string that it matched that is returned.
 <P>
 If the vector is too small to hold all the captured substring offsets, it is
 used as far as possible (up to two-thirds of its length), and the function
-returns a value of zero. If neither the actual string matched not any captured
+returns a value of zero. If neither the actual string matched nor any captured
 substrings are of interest, <b>pcre_exec()</b> may be called with <i>ovector</i>
 passed as NULL and <i>ovecsize</i> as zero. However, if the pattern contains
 back references and the <i>ovector</i> is not big enough to remember the related
@@ -2601,7 +2608,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 22 February 2012
+Last updated: 24 February 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>
