@@ -272,8 +272,7 @@ typedef struct compiler_common {
   struct sljit_compiler *compiler;
   pcre_uchar *start;
 
-  /* Local stack area size and variable pointers. */
-  int localsize;
+  /* Opcode local area direct map. */
   int *localptrs;
   int cbraptr;
   /* OVector starting point. Must be divisible by 2. */
@@ -448,6 +447,8 @@ the start pointers when the end of the capturing group has not yet reached. */
   sljit_set_label(sljit_emit_cmp(compiler, (type), (src1), (src1w), (src2), (src2w)), (label))
 #define COND_VALUE(op, dst, dstw, type) \
   sljit_emit_cond_value(compiler, (op), (dst), (dstw), (type))
+#define GET_LOCAL_BASE(dst, dstw, offset) \
+  sljit_get_local_base(compiler, (dst), (dstw), (offset))
 
 static pcre_uchar* bracketend(pcre_uchar* cc)
 {
@@ -1325,7 +1326,7 @@ if (length < 8)
   }
 else
   {
-  OP2(SLJIT_ADD, SLJIT_TEMPORARY_REG2, 0, SLJIT_LOCALS_REG, 0, SLJIT_IMM, OVECTOR_START - sizeof(sljit_w));
+  GET_LOCAL_BASE(SLJIT_TEMPORARY_REG2, 0, OVECTOR_START - sizeof(sljit_w));
   OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, length);
   loop = LABEL();
   OP1(SLJIT_MOVU, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), sizeof(sljit_w), SLJIT_TEMPORARY_REG1, 0);
@@ -1352,7 +1353,7 @@ if (common->mark_ptr != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_TEMPORARY_REG1), SLJIT_OFFSETOF(jit_arguments, mark_ptr), SLJIT_TEMPORARY_REG3, 0);
 OP2(SLJIT_SUB, SLJIT_TEMPORARY_REG3, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG1), SLJIT_OFFSETOF(jit_arguments, offsets), SLJIT_IMM, sizeof(int));
 OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG1, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG1), SLJIT_OFFSETOF(jit_arguments, begin));
-OP2(SLJIT_ADD, SLJIT_SAVED_REG1, 0, SLJIT_LOCALS_REG, 0, SLJIT_IMM, OVECTOR_START);
+GET_LOCAL_BASE(SLJIT_SAVED_REG1, 0, OVECTOR_START);
 /* Unlikely, but possible */
 earlyexit = CMP(SLJIT_C_EQUAL, SLJIT_TEMPORARY_REG2, 0, SLJIT_IMM, 0);
 loop = LABEL();
@@ -1370,7 +1371,7 @@ JUMPHERE(earlyexit);
 /* Calculate the return value, which is the maximum ovector value. */
 if (topbracket > 1)
   {
-  OP2(SLJIT_ADD, SLJIT_TEMPORARY_REG1, 0, SLJIT_LOCALS_REG, 0, SLJIT_IMM, OVECTOR_START + topbracket * 2 * sizeof(sljit_w));
+  GET_LOCAL_BASE(SLJIT_TEMPORARY_REG1, 0, OVECTOR_START + topbracket * 2 * sizeof(sljit_w));
   OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG2, 0, SLJIT_IMM, topbracket + 1);
 
   /* OVECTOR(0) is never equal to SLJIT_SAVED_REG3. */
@@ -1823,7 +1824,7 @@ of the character (>= 0xc0). Return char value in TMP1, length - 1 in TMP2. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 /* Searching for the first zero. */
 OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x20);
 jump = JUMP(SLJIT_C_NOT_ZERO);
@@ -1882,7 +1883,7 @@ DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_jump *compare;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 
 OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, 0x20);
 jump = JUMP(SLJIT_C_NOT_ZERO);
@@ -1919,7 +1920,7 @@ of the character (>= 0xd800). Return char value in TMP1, length - 1 in TMP2. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xdc00);
 /* Do nothing, only return. */
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
@@ -1956,7 +1957,7 @@ DEFINE_COMPILER;
 
 SLJIT_ASSERT(UCD_BLOCK_SIZE == 128 && sizeof(ucd_record) == 8);
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 OP2(SLJIT_LSHR, TMP2, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
 OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_w)PRIV(ucd_stage1));
 OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_MASK);
@@ -2384,14 +2385,15 @@ DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_label *mainloop;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 OP1(SLJIT_MOV, TMP1, 0, STACK_TOP, 0);
+GET_LOCAL_BASE(TMP3, 0, 0);
 
 /* Drop frames until we reach STACK_TOP. */
 mainloop = LABEL();
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), 0);
 jump = CMP(SLJIT_C_SIG_LESS_EQUAL, TMP2, 0, SLJIT_IMM, frame_end);
-OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_LOCALS_REG, 0);
+OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP3, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), 0, SLJIT_MEM1(TMP1), sizeof(sljit_w));
 OP1(SLJIT_MOV, SLJIT_MEM1(TMP2), sizeof(sljit_w), SLJIT_MEM1(TMP1), 2 * sizeof(sljit_w));
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 3 * sizeof(sljit_w));
@@ -2437,7 +2439,7 @@ struct sljit_jump *jump;
 
 SLJIT_COMPILE_ASSERT(ctype_word == 0x10, ctype_word_must_be_16);
 
-sljit_emit_fast_enter(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 /* Get type of the previous char, and put it to LOCALS1. */
 OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
@@ -2540,7 +2542,7 @@ static void check_anynewline(compiler_common *common)
 /* Check whether TMP1 contains a newline character. TMP2 destroyed. */
 DEFINE_COMPILER;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 
 OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0a);
 OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x0d - 0x0a);
@@ -2567,7 +2569,7 @@ static void check_hspace(compiler_common *common)
 /* Check whether TMP1 contains a newline character. TMP2 destroyed. */
 DEFINE_COMPILER;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x09);
 COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
@@ -2606,7 +2608,7 @@ static void check_vspace(compiler_common *common)
 /* Check whether TMP1 contains a newline character. TMP2 destroyed. */
 DEFINE_COMPILER;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 
 OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0a);
 OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x0d - 0x0a);
@@ -2638,7 +2640,7 @@ DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_label *label;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 OP1(SLJIT_MOV, TMP3, 0, CHAR1, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, CHAR2, 0);
@@ -2667,7 +2669,7 @@ DEFINE_COMPILER;
 struct sljit_jump *jump;
 struct sljit_label *label;
 
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
 OP1(SLJIT_MOV, TMP3, 0, LCC_TABLE, 0);
@@ -4871,7 +4873,7 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, SLJIT_IMM, common->name_count);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, SLJIT_IMM, common->name_entry_size);
     OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG1, 0, SLJIT_IMM, (stacksize << 8) | (common->ovector_start / sizeof(sljit_w)));
-    OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG2, 0, SLJIT_LOCALS_REG, 0);
+    GET_LOCAL_BASE(SLJIT_TEMPORARY_REG2, 0, 0);
     OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, common->name_table);
     sljit_emit_ijump(compiler, SLJIT_CALL3, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_searchovector));
     OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1);
@@ -4921,7 +4923,7 @@ if (opcode == OP_COND || opcode == OP_SCOND)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, SLJIT_IMM, common->name_entry_size);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0, SLJIT_IMM, GET2(common->start, common->currententry->start + 1 + LINK_SIZE));
       OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG1, 0, SLJIT_IMM, stacksize);
-      OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG2, 0, SLJIT_LOCALS_REG, 0);
+      GET_LOCAL_BASE(SLJIT_TEMPORARY_REG2, 0, 0);
       OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, common->name_table);
       sljit_emit_ijump(compiler, SLJIT_CALL3, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_searchgroups));
       OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1);
@@ -6727,7 +6729,7 @@ SLJIT_ASSERT(common->currententry->entry == NULL && common->recursive_head != 0)
 common->currententry->entry = LABEL();
 set_jumps(common->currententry->calls, common->currententry->entry);
 
-sljit_emit_fast_enter(compiler, TMP2, 0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, TMP2, 0);
 allocate_stack(common, localsize + framesize + alternativesize);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(localsize + framesize + alternativesize - 1), TMP2, 0);
 copy_locals(common, ccbegin, ccend, TRUE, localsize + framesize + alternativesize, framesize + alternativesize);
@@ -6819,6 +6821,7 @@ compiler_common common_data;
 compiler_common *common = &common_data;
 const pcre_uint8 *tables = re->tables;
 pcre_study_data *study;
+int localsize;
 pcre_uchar *ccend;
 executable_functions *functions;
 void *executable_func;
@@ -6895,8 +6898,8 @@ ccend = bracketend(rootfallback.cc);
 common->ovector_start = CALL_LIMIT + sizeof(sljit_w);
 
 SLJIT_ASSERT(*rootfallback.cc == OP_BRA && ccend[-(1 + LINK_SIZE)] == OP_KET);
-common->localsize = get_localspace(common, rootfallback.cc, ccend);
-if (common->localsize < 0)
+localsize = get_localspace(common, rootfallback.cc, ccend);
+if (localsize < 0)
   return;
 
 /* Checking flags and updating ovector_start. */
@@ -6927,8 +6930,8 @@ if ((common->ovector_start & sizeof(sljit_w)) != 0)
 
 SLJIT_ASSERT(!(common->req_char_ptr != 0 && common->start_used_ptr != 0));
 common->cbraptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_w);
-common->localsize += common->cbraptr + (re->top_bracket + 1) * sizeof(sljit_w);
-if (common->localsize > SLJIT_MAX_LOCAL_SIZE)
+localsize += common->cbraptr + (re->top_bracket + 1) * sizeof(sljit_w);
+if (localsize > SLJIT_MAX_LOCAL_SIZE)
   return;
 common->localptrs = (int *)SLJIT_MALLOC((ccend - rootfallback.cc) * sizeof(int));
 if (!common->localptrs)
@@ -6945,7 +6948,7 @@ if (!compiler)
 common->compiler = compiler;
 
 /* Main pcre_jit_exec entry. */
-sljit_emit_enter(compiler, 1, 5, 5, common->localsize);
+sljit_emit_enter(compiler, 1, 5, 5, localsize);
 
 /* Register init. */
 reset_ovector(common, (re->top_bracket + 1) * 2);
@@ -7119,7 +7122,7 @@ while (common->currententry != NULL)
 /* This is a (really) rare case. */
 set_jumps(common->stackalloc, LABEL());
 /* RETURN_ADDR is not a saved register. */
-sljit_emit_fast_enter(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, 1, 5, 5, common->localsize);
+sljit_emit_fast_enter(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, TMP2, 0);
 OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
