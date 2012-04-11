@@ -80,6 +80,8 @@ Version 8.31
 22. Changed the option for creating symbolic links for 16-bit man pages from
     -s to -sf so that re-installing does not cause issues.
 
+23. Support PCRE_NO_START_OPTIMIZE in JIT as (*MARK) support requires it.
+
 
 Version 8.30 04-February-2012
 -----------------------------

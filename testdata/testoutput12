@@ -148,4 +148,8 @@ Partial match: ab (JIT)
     xyz
 No match (JIT)
 
+/(*NO_START_OPT)a(*:m)b/KS++
+    a
+No match, mark = m (JIT)
+
 /-- End of testinput12 --/

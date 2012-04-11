@@ -77,4 +77,7 @@ and a couple of things that are different with JIT. --/
     ab\P\P
     xyz
 
+/(*NO_START_OPT)a(*:m)b/KS++
+    a
+
 /-- End of testinput12 --/
