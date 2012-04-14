@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "24 February 2012" "PCRE 8.31"
+.TH PCREPATTERN 3 "14 April 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1020,7 +1020,8 @@ used. Because \eC breaks up characters into individual data units, matching one
 unit with \eC in a UTF mode means that the rest of the string may start with a
 malformed UTF character. This has undefined results, because PCRE assumes that
 it is dealing with valid UTF strings (and by default it checks this at the
-start of processing unless the PCRE_NO_UTF8_CHECK option is used).
+start of processing unless the PCRE_NO_UTF8_CHECK or PCRE_NO_UTF16_CHECK option
+is used).
 .P
 PCRE does not allow \eC to appear in lookbehind assertions
 .\" HTML <a href="#lookbehind">
@@ -2909,6 +2910,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 24 February 2012
+Last updated: 14 April 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

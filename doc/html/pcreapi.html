@@ -1724,9 +1724,11 @@ returned.
 </pre>
 When PCRE_UTF8 is set at compile time, the validity of the subject as a UTF-8
 string is automatically checked when <b>pcre_exec()</b> is subsequently called.
-The value of <i>startoffset</i> is also checked to ensure that it points to the
-start of a UTF-8 character. There is a discussion about the validity of UTF-8
-strings in the
+The entire string is checked before any other processing takes place. The value
+of <i>startoffset</i> is also checked to ensure that it points to the start of a
+UTF-8 character. There is a discussion about the
+<a href="pcreunicode.html#utf8strings">validity of UTF-8 strings</a>
+in the
 <a href="pcreunicode.html"><b>pcreunicode</b></a>
 page. If an invalid sequence of bytes is found, <b>pcre_exec()</b> returns the
 error PCRE_ERROR_BADUTF8 or, if PCRE_PARTIAL_HARD is set and the problem is a
@@ -2608,7 +2610,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 February 2012
+Last updated: 14 April 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

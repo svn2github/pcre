@@ -1,4 +1,4 @@
-.TH PCREJIT 3 "23 February 2012" "PCRE 8.31"
+.TH PCREJIT 3 "14 April 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE JUST-IN-TIME COMPILER SUPPORT"
@@ -142,8 +142,8 @@ times as you like for matching different subject strings.
 .rs
 .sp
 The only \fBpcre_exec()\fP options that are supported for JIT execution are
-PCRE_NO_UTF8_CHECK, PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY,
-PCRE_NOTEMPTY_ATSTART, PCRE_PARTIAL_HARD, and PCRE_PARTIAL_SOFT.
+PCRE_NO_UTF8_CHECK, PCRE_NO_UTF16_CHECK, PCRE_NOTBOL, PCRE_NOTEOL,
+PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART, PCRE_PARTIAL_HARD, and PCRE_PARTIAL_SOFT.
 .P
 The unsupported pattern items are:
 .sp
@@ -400,6 +400,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 23 February 2012
+Last updated: 14 April 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

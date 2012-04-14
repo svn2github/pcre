@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "24 February 2012" "PCRE 8.31"
+.TH PCREAPI 3 "14 April 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -1741,9 +1741,14 @@ returned.
 .sp
 When PCRE_UTF8 is set at compile time, the validity of the subject as a UTF-8
 string is automatically checked when \fBpcre_exec()\fP is subsequently called.
-The value of \fIstartoffset\fP is also checked to ensure that it points to the
-start of a UTF-8 character. There is a discussion about the validity of UTF-8
-strings in the
+The entire string is checked before any other processing takes place. The value
+of \fIstartoffset\fP is also checked to ensure that it points to the start of a
+UTF-8 character. There is a discussion about the
+.\" HTML <a href="pcreunicode.html#utf8strings">
+.\" </a>
+validity of UTF-8 strings
+.\"
+in the
 .\" HREF
 \fBpcreunicode\fP
 .\"
@@ -2653,6 +2658,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 24 February 2012
+Last updated: 14 April 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

@@ -1018,7 +1018,8 @@ used. Because \C breaks up characters into individual data units, matching one
 unit with \C in a UTF mode means that the rest of the string may start with a
 malformed UTF character. This has undefined results, because PCRE assumes that
 it is dealing with valid UTF strings (and by default it checks this at the
-start of processing unless the PCRE_NO_UTF8_CHECK option is used).
+start of processing unless the PCRE_NO_UTF8_CHECK or PCRE_NO_UTF16_CHECK option
+is used).
 </P>
 <P>
 PCRE does not allow \C to appear in lookbehind assertions
@@ -2867,7 +2868,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 February 2012
+Last updated: 14 April 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>
