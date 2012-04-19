@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "14 April 2012" "PCRE 8.31"
+.TH PCREAPI 3 "19 April 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -2104,19 +2104,19 @@ just-in-time processing stack is not large enough. See the
 .\"
 documentation for more details.
 .sp
-  PCRE_ERROR_BADMODE (-28)
+  PCRE_ERROR_BADMODE        (-28)
 .sp
 This error is given if a pattern that was compiled by the 8-bit library is
 passed to a 16-bit library function, or vice versa.
 .sp
-  PCRE_ERROR_BADENDIANNESS (-29)
+  PCRE_ERROR_BADENDIANNESS  (-29)
 .sp
 This error is given if a pattern that was compiled and saved is reloaded on a
 host with different endianness. The utility function
 \fBpcre_pattern_to_host_byte_order()\fP can be used to convert such a pattern
 so that it runs on the new host.
 .P
-Error numbers -16 to -20 and -22 are not used by \fBpcre_exec()\fP.
+Error numbers -16 to -20, -22, and -30 are not used by \fBpcre_exec()\fP.
 .
 .
 .\" HTML <a name="badutf8reasons"></a>
@@ -2634,6 +2634,13 @@ When a recursive subpattern is processed, the matching function calls itself
 recursively, using private vectors for \fIovector\fP and \fIworkspace\fP. This
 error is given if the output vector is not large enough. This should be
 extremely rare, as a vector of size 1000 is used.
+.sp
+  PCRE_ERROR_DFA_BADRESTART (-30)
+.sp
+When \fBpcre_dfa_exec()\fP is called with the \fBPCRE_DFA_RESTART\fP option,
+some plausibility checks are made on the contents of the workspace, which 
+should contain data about the previous partial match. If any of these checks 
+fail, this error is given.   
 .
 .
 .SH "SEE ALSO"
@@ -2658,6 +2665,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 April 2012
+Last updated: 19 April 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

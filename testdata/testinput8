@@ -4782,4 +4782,9 @@
     \r\r\r\P
     \r\r\r\P\P     
 
+/-- Test simple validity check for restarts --/
+
+/abcdef/
+   abc\R
+
 /-- End of testinput8 --/

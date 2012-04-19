@@ -179,6 +179,7 @@ compiling). */
 #define PCRE_ERROR_JIT_STACKLIMIT  (-27)
 #define PCRE_ERROR_BADMODE         (-28)
 #define PCRE_ERROR_BADENDIANNESS   (-29)
+#define PCRE_ERROR_DFA_BADRESTART  (-30)
 
 /* Specific error codes for UTF-8 validity checks */
 

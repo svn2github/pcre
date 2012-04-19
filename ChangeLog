@@ -82,6 +82,11 @@ Version 8.31
 
 23. Support PCRE_NO_START_OPTIMIZE in JIT as (*MARK) support requires it.
 
+24. Fixed a very old bug in pcretest that caused errors with restarted DFA
+    matches in certain environments (the workspace was not being correctly
+    retained). Also added to pcre_dfa_exec() a simple plausibility check on
+    some of the workspace data at the beginning of a restart.
+
 
 Version 8.30 04-February-2012
 -----------------------------

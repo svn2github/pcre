@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This module contains the external function pcre_dfa_exec(), which is an
 alternative matching function that uses a sort of DFA algorithm (not a true
-FSM). This is NOT Perl- compatible, but it has advantages in certain
+FSM). This is NOT Perl-compatible, but it has advantages in certain
 applications. */
 
 
@@ -282,7 +282,7 @@ typedef struct stateblock {
   int data;                       /* Some use extra data */
 } stateblock;
 
-#define INTS_PER_STATEBLOCK  (sizeof(stateblock)/sizeof(int))
+#define INTS_PER_STATEBLOCK  (int)(sizeof(stateblock)/sizeof(int))
 
 
 #ifdef PCRE_DEBUG
@@ -3162,10 +3162,27 @@ if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
 if (wscount < 20) return PCRE_ERROR_DFA_WSSIZE;
 if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
 
-/* We need to find the pointer to any study data before we test for byte
-flipping, so we scan the extra_data block first. This may set two fields in the
-match block, so we must initialize them beforehand. However, the other fields
-in the match block must not be set until after the byte flipping. */
+/* Check that the first field in the block is the magic number. If it is not,
+return with PCRE_ERROR_BADMAGIC. However, if the magic number is equal to
+REVERSED_MAGIC_NUMBER we return with PCRE_ERROR_BADENDIANNESS, which
+means that the pattern is likely compiled with different endianness. */
+
+if (re->magic_number != MAGIC_NUMBER)
+  return re->magic_number == REVERSED_MAGIC_NUMBER?
+    PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
+if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
+
+/* If restarting after a partial match, do some sanity checks on the contents 
+of the workspace. */
+
+if ((options & PCRE_DFA_RESTART) != 0)
+  {
+  if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 || 
+    workspace[1] > (wscount - 2)/INTS_PER_STATEBLOCK)
+      return PCRE_ERROR_DFA_BADRESTART; 
+  } 
+
+/* Set up study, callout, and table data */
 
 md->tables = re->tables;
 md->callout_data = NULL;
@@ -3183,16 +3200,6 @@ if (extra_data != NULL)
   if ((flags & PCRE_EXTRA_TABLES) != 0)
     md->tables = extra_data->tables;
   }
-
-/* Check that the first field in the block is the magic number. If it is not,
-return with PCRE_ERROR_BADMAGIC. However, if the magic number is equal to
-REVERSED_MAGIC_NUMBER we return with PCRE_ERROR_BADENDIANNESS, which
-means that the pattern is likely compiled with different endianness. */
-
-if (re->magic_number != MAGIC_NUMBER)
-  return re->magic_number == REVERSED_MAGIC_NUMBER?
-    PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
-if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 
 /* Set some local values */
 

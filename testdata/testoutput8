@@ -7990,4 +7990,10 @@ Partial match: \x0d\x0d
     \r\r\r\P\P     
 Partial match: \x0d\x0d\x0d
 
+/-- Test simple validity check for restarts --/
+
+/abcdef/
+   abc\R
+Error -30 (invalid data in workspace for DFA restart)
+
 /-- End of testinput8 --/
