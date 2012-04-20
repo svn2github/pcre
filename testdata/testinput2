@@ -3102,6 +3102,24 @@ with \Y. ---/
 /\d*\R/BZ
 
 /\s*\R/BZ
+    \x20\x0a
+    \x20\x0d
+    \x20\x0d\x0a
+
+/\S*\R/BZ
+    a\x0a
+
+/X\h*\R/BZ
+    X\x20\x0a
+
+/X\H*\R/BZ
+    X\x0d\x0a
+
+/X\H+\R/BZ
+    X\x0d\x0a
+
+/X\H++\R/BZ
+    X\x0d\x0a
 
 /-- Perl treats this one differently, not failing the second string. I believe
     that is a bug in Perl. --/

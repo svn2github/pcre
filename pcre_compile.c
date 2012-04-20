@@ -3349,10 +3349,10 @@ switch(op_code)
   return next == -ESC_d;
 
   case OP_WHITESPACE:
-  return next == -ESC_S || next == -ESC_d || next == -ESC_w || next == -ESC_R;
+  return next == -ESC_S || next == -ESC_d || next == -ESC_w;
 
   case OP_NOT_WHITESPACE:
-  return next == -ESC_s || next == -ESC_h || next == -ESC_v;
+  return next == -ESC_s || next == -ESC_h || next == -ESC_v || next == -ESC_R;
 
   case OP_HSPACE:
   return next == -ESC_S || next == -ESC_H || next == -ESC_d ||

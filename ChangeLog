@@ -86,6 +86,10 @@ Version 8.31
     matches in certain environments (the workspace was not being correctly
     retained). Also added to pcre_dfa_exec() a simple plausibility check on
     some of the workspace data at the beginning of a restart.
+    
+25. \s*\R was auto-possessifying the \s* when it should not, whereas \S*\R
+    was not doing so when it should - probably a typo introduced by SVN 528
+    (change 8.10/14). 
 
 
 Version 8.30 04-February-2012
