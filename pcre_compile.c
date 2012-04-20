@@ -3132,22 +3132,22 @@ if (next >= 0) switch(op_code)
   When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
 
   case OP_DIGIT:
-  return next > 127 || (cd->ctypes[next] & ctype_digit) == 0;
+  return next > 255 || (cd->ctypes[next] & ctype_digit) == 0;
 
   case OP_NOT_DIGIT:
-  return next <= 127 && (cd->ctypes[next] & ctype_digit) != 0;
+  return next <= 255 && (cd->ctypes[next] & ctype_digit) != 0;
 
   case OP_WHITESPACE:
-  return next > 127 || (cd->ctypes[next] & ctype_space) == 0;
+  return next > 255 || (cd->ctypes[next] & ctype_space) == 0;
 
   case OP_NOT_WHITESPACE:
-  return next <= 127 && (cd->ctypes[next] & ctype_space) != 0;
+  return next <= 255 && (cd->ctypes[next] & ctype_space) != 0;
 
   case OP_WORDCHAR:
-  return next > 127 || (cd->ctypes[next] & ctype_word) == 0;
+  return next > 255 || (cd->ctypes[next] & ctype_word) == 0;
 
   case OP_NOT_WORDCHAR:
-  return next <= 127 && (cd->ctypes[next] & ctype_word) != 0;
+  return next <= 255 && (cd->ctypes[next] & ctype_word) != 0;
 
   case OP_HSPACE:
   case OP_NOT_HSPACE:
@@ -3225,22 +3225,22 @@ switch(op_code)
   switch(-next)
     {
     case ESC_d:
-    return c > 127 || (cd->ctypes[c] & ctype_digit) == 0;
+    return c > 255 || (cd->ctypes[c] & ctype_digit) == 0;
 
     case ESC_D:
-    return c <= 127 && (cd->ctypes[c] & ctype_digit) != 0;
+    return c <= 255 && (cd->ctypes[c] & ctype_digit) != 0;
 
     case ESC_s:
-    return c > 127 || (cd->ctypes[c] & ctype_space) == 0;
+    return c > 255 || (cd->ctypes[c] & ctype_space) == 0;
 
     case ESC_S:
-    return c <= 127 && (cd->ctypes[c] & ctype_space) != 0;
+    return c <= 255 && (cd->ctypes[c] & ctype_space) != 0;
 
     case ESC_w:
-    return c > 127 || (cd->ctypes[c] & ctype_word) == 0;
+    return c > 255 || (cd->ctypes[c] & ctype_word) == 0;
 
     case ESC_W:
-    return c <= 127 && (cd->ctypes[c] & ctype_word) != 0;
+    return c <= 255 && (cd->ctypes[c] & ctype_word) != 0;
 
     case ESC_h:
     case ESC_H:

@@ -9,7 +9,7 @@ Version 8.31
 2.  Removed a bashism from the RunTest script.
 
 3.  Add a cast to pcre_exec.c to fix the warning "unary minus operator applied
-    to unsigned type, result still unsigned" that was given by an MS compiler 
+    to unsigned type, result still unsigned" that was given by an MS compiler
     on encountering the code "-sizeof(xxx)".
 
 4.  Partial matching support is added to the JIT compiler.
@@ -18,13 +18,13 @@ Version 8.31
     of more than one character:
 
     (a) /^(..)\1/ did not partially match "aba" because checking references was
-        done on an "all or nothing" basis. This also applied to repeated 
+        done on an "all or nothing" basis. This also applied to repeated
         references.
 
     (b) \R did not give a hard partial match if \r was found at the end of the
         subject.
 
-    (c) \X did not give a hard partial match after matching one or more 
+    (c) \X did not give a hard partial match after matching one or more
         characters at the end of the subject.
 
     (d) When newline was set to CRLF, a pattern such as /a$/ did not recognize
@@ -33,11 +33,11 @@ Version 8.31
     (e) When newline was set to CRLF, the metacharacter "." did not recognize
         a partial match for a CR character at the end of the subject string.
 
-6.  If JIT is requested using /S++ or -s++ (instead of just /S+ or -s+) when 
-    running pcretest, the text "(JIT)" added to the output whenever JIT is 
+6.  If JIT is requested using /S++ or -s++ (instead of just /S+ or -s+) when
+    running pcretest, the text "(JIT)" added to the output whenever JIT is
     actually used to run the match.
 
-7.  Individual JIT compile options can be set in pcretest by following -s+[+] 
+7.  Individual JIT compile options can be set in pcretest by following -s+[+]
     or /S+[+] with a digit between 1 and 7.
 
 8.  OP_NOT now supports any UTF character not just single-byte ones.
@@ -46,21 +46,21 @@ Version 8.31
 
 10. The command "./RunTest list" lists the available tests without actually
     running any of them. (Because I keep forgetting what they all are.)
-    
-11. Add PCRE_INFO_MAXLOOKBEHIND. 
+
+11. Add PCRE_INFO_MAXLOOKBEHIND.
 
 12. Applied a (slightly modified) user-supplied patch that improves performance
     when the heap is used for recursion (compiled with --disable-stack-for-
-    recursion). Instead of malloc and free for each heap frame each time a 
-    logical recursion happens, frames are retained on a chain and re-used where 
-    possible. This sometimes gives as much as 30% improvement.  
-    
+    recursion). Instead of malloc and free for each heap frame each time a
+    logical recursion happens, frames are retained on a chain and re-used where
+    possible. This sometimes gives as much as 30% improvement.
+
 13. As documented, (*COMMIT) is now confined to within a recursive subpattern
     call.
 
 14. As documented, (*COMMIT) is now confined to within a positive assertion.
 
-15. It is now possible to link pcretest with libedit as an alternative to 
+15. It is now possible to link pcretest with libedit as an alternative to
     libreadline.
 
 16. (*COMMIT) control verb is now supported by the JIT compiler.
@@ -86,10 +86,15 @@ Version 8.31
     matches in certain environments (the workspace was not being correctly
     retained). Also added to pcre_dfa_exec() a simple plausibility check on
     some of the workspace data at the beginning of a restart.
-    
+
 25. \s*\R was auto-possessifying the \s* when it should not, whereas \S*\R
     was not doing so when it should - probably a typo introduced by SVN 528
-    (change 8.10/14). 
+    (change 8.10/14).
+
+26. When PCRE_UCP was not set, \w+\x{c4} was incorrectly auto-possessifying the
+    \w+ when the character tables indicated that \x{c4} was a word character.
+    There were several related cases, all because the tests for doing a table
+    lookup were testing for characters less than 127 instead of 255.
 
 
 Version 8.30 04-February-2012
