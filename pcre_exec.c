@@ -7070,7 +7070,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
     {
     register int *iptr, *iend;
     int resetcount = 2 + re->top_bracket * 2;
-    if (resetcount > offsetcount) resetcount = ocount;
+    if (resetcount > offsetcount) resetcount = offsetcount;
     iptr = offsets + md->end_offset_top;
     iend = offsets + resetcount;
     while (iptr < iend) *iptr++ = -1;

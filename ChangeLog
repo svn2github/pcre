@@ -95,6 +95,18 @@ Version 8.31
     \w+ when the character tables indicated that \x{c4} was a word character.
     There were several related cases, all because the tests for doing a table
     lookup were testing for characters less than 127 instead of 255.
+    
+27. If a pattern contains capturing parentheses that are not used in a match,
+    their slots in the ovector are set to -1. For those that are higher than 
+    any matched groups, this happens at the end of processing. In the case when 
+    there were back references that the ovector was too small to contain 
+    (causing temporary malloc'd memory to be used during matching), and the 
+    highest capturing number was not used, memory off the end of the ovector 
+    was incorrectly being set to -1. (It was using the size of the temporary 
+    memory instead of the true size.)
+    
+28. To catch bugs like 27 using valgrind, when pcretest is asked to specify an
+    ovector size, it uses memory at the end of the block that it has got.
 
 
 Version 8.30 04-February-2012

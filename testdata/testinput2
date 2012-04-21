@@ -3760,4 +3760,7 @@ COMMIT to escape from the assertion. --/
 /(?=a(*COMMIT)b|(ac)) ac | (a)c/x
     ac
 
+"AB(C(D))(E(F))?(?(?=\2)(?=\4))"
+    ABCDGHI\O03
+
 /-- End of testinput2 --/

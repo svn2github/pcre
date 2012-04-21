@@ -12349,4 +12349,9 @@ COMMIT to escape from the assertion. --/
  1: <unset>
  2: a
 
+"AB(C(D))(E(F))?(?(?=\2)(?=\4))"
+    ABCDGHI\O03
+Matched, but too many substrings
+ 0: ABCD
+
 /-- End of testinput2 --/

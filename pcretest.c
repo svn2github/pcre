@@ -3719,6 +3719,7 @@ while (!done)
           }
         use_size_offsets = n;
         if (n == 0) use_offsets = NULL;   /* Ensures it can't write to it */
+          else use_offsets = offsets + size_offsets_max - n;  /* To catch overruns */
         continue;
 
         case 'P':
