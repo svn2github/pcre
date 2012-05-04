@@ -1,4 +1,4 @@
-.TH PCREJIT 3 "14 April 2012" "PCRE 8.31"
+.TH PCREJIT 3 "04 May 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE JUST-IN-TIME COMPILER SUPPORT"
@@ -149,10 +149,8 @@ The unsupported pattern items are:
 .sp
   \eC             match a single byte; not supported in UTF-8 mode
   (?Cn)          callouts
-  (*COMMIT)      )
-  (*MARK)        )
-  (*PRUNE)       ) the backtracking control verbs
-  (*SKIP)        )
+  (*PRUNE)       ) 
+  (*SKIP)        ) backtracking control verbs
   (*THEN)        )
 .sp
 Support for some of these may be added in future.
@@ -400,6 +398,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 April 2012
+Last updated: 04 May 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
