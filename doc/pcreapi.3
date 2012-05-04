@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "19 April 2012" "PCRE 8.31"
+.TH PCREAPI 3 "04 May 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -926,6 +926,7 @@ fallen out of use. To avoid confusion, they have not been re-used.
   72  too many forward references
   73  disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
   74  invalid UTF-16 string (specifically UTF-16)
+  75  name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN) 
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -2665,6 +2666,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 April 2012
+Last updated: 04 May 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

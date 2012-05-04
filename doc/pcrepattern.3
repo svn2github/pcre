@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "14 April 2012" "PCRE 8.31"
+.TH PCREPATTERN 3 "04 May 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2605,10 +2605,11 @@ The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
 (*VERB) or (*VERB:NAME). Some may take either form, with differing behaviour,
 depending on whether or not an argument is present. A name is any sequence of
-characters that does not include a closing parenthesis. If the name is empty,
-that is, if the closing parenthesis immediately follows the colon, the effect
-is as if the colon were not there. Any number of these verbs may occur in a
-pattern.
+characters that does not include a closing parenthesis. The maximum length of
+name is 255 in the 8-bit library and 65535 in the 16-bit library. If the name
+is empty, that is, if the closing parenthesis immediately follows the colon,
+the effect is as if the colon were not there. Any number of these verbs may
+occur in a pattern.
 .
 .
 .\" HTML <a name="nooptimize"></a>
@@ -2910,6 +2911,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 April 2012
+Last updated: 04 May 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

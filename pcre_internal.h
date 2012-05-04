@@ -523,6 +523,11 @@ capturing parenthesis numbers in back references. */
 
 #define PUT2INC(a,n,d)  PUT2(a,n,d), a += IMM2_SIZE
 
+/* The maximum length of a MARK name is currently one data unit; it may be
+changed in future to be a fixed number of bytes or to depend on LINK_SIZE. */
+
+#define MAX_MARK ((1 << (sizeof(pcre_uchar)*8)) - 1)
+
 /* When UTF encoding is being used, a character is no longer just a single
 character. The macros for character handling generate simple sequences when
 used in character-mode, and more complicated ones for UTF characters.
@@ -1940,7 +1945,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
-       ERR70, ERR71, ERR72, ERR73, ERR74, ERRCOUNT };
+       ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERRCOUNT };
 
 /* JIT compiling modes. The function list is indexed by them. */
 enum { JIT_COMPILE, JIT_PARTIAL_SOFT_COMPILE, JIT_PARTIAL_HARD_COMPILE,

@@ -107,6 +107,9 @@ Version 8.31
     
 28. To catch bugs like 27 using valgrind, when pcretest is asked to specify an
     ovector size, it uses memory at the end of the block that it has got.
+    
+29. Check for an overlong MARK name and give an error at compile time. The 
+    limit is 255 for the 8-bit library and 65535 for the 16-bit library.
 
 
 Version 8.30 04-February-2012

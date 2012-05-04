@@ -489,6 +489,8 @@ static const char error_texts[] =
   "too many forward references\0"
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
   "invalid UTF-16 string\0"
+  /* 75 */
+  "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"  
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -5591,7 +5593,7 @@ for (;; ptr++)
       ptr++;
       while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_letter) != 0) ptr++;
       namelen = (int)(ptr - name);
-
+      
       /* It appears that Perl allows any characters whatsoever, other than
       a closing parenthesis, to appear in arguments, so we no longer insist on
       letters, digits, and underscores. */
@@ -5601,6 +5603,11 @@ for (;; ptr++)
         arg = ++ptr;
         while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
         arglen = (int)(ptr - arg);
+        if (arglen > (int)MAX_MARK)
+          {
+          *errorcodeptr = ERR75;
+          goto FAILED;
+          }     
         }
 
       if (*ptr != CHAR_RIGHT_PARENTHESIS)
