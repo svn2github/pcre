@@ -113,6 +113,9 @@ Version 8.31
 
 30. JIT compiler update.
 
+31. JIT is now supported on jailbroken iOS devices. Thanks for Ruiger
+    Rill for the patch.
+
 
 Version 8.30 04-February-2012
 -----------------------------
