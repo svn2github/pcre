@@ -198,10 +198,10 @@ In a UTF mode, only ASCII numbers and letters have any special meaning after a
 backslash. All other characters (in particular, those whose codepoints are
 greater than 127) are treated as literals.
 .P
-If a pattern is compiled with the PCRE_EXTENDED option, whitespace in the
+If a pattern is compiled with the PCRE_EXTENDED option, white space in the
 pattern (other than in a character class) and characters between a # outside
 a character class and the next newline are ignored. An escaping backslash can
-be used to include a whitespace or # character as part of the pattern.
+be used to include a white space or # character as part of the pattern.
 .P
 If you want to remove the special meaning from a sequence of characters, you
 can do so by putting them between \eQ and \eE. This is different from Perl in
@@ -237,7 +237,7 @@ one of the following escape sequences than the binary character it represents:
   \ea        alarm, that is, the BEL character (hex 07)
   \ecx       "control-x", where x is any ASCII character
   \ee        escape (hex 1B)
-  \ef        formfeed (hex 0C)
+  \ef        form feed (hex 0C)
   \en        linefeed (hex 0A)
   \er        carriage return (hex 0D)
   \et        tab (hex 09)
@@ -399,12 +399,12 @@ Another use of backslash is for specifying generic character types:
 .sp
   \ed     any decimal digit
   \eD     any character that is not a decimal digit
-  \eh     any horizontal whitespace character
-  \eH     any character that is not a horizontal whitespace character
-  \es     any whitespace character
-  \eS     any character that is not a whitespace character
-  \ev     any vertical whitespace character
-  \eV     any character that is not a vertical whitespace character
+  \eh     any horizontal white space character
+  \eH     any character that is not a horizontal white space character
+  \es     any white space character
+  \eS     any character that is not a white space character
+  \ev     any vertical white space character
+  \eV     any character that is not a vertical white space character
   \ew     any "word" character
   \eW     any "non-word" character
 .sp
@@ -493,7 +493,7 @@ The vertical space characters are:
 .sp
   U+000A     Linefeed
   U+000B     Vertical tab
-  U+000C     Formfeed
+  U+000C     Form feed
   U+000D     Carriage return
   U+0085     Next line
   U+2028     Line separator
@@ -520,7 +520,7 @@ below.
 .\"
 This particular group matches either the two-character sequence CR followed by
 LF, or one of the single characters LF (linefeed, U+000A), VT (vertical tab,
-U+000B), FF (formfeed, U+000C), CR (carriage return, U+000D), or NEL (next
+U+000B), FF (form feed, U+000C), CR (carriage return, U+000D), or NEL (next
 line, U+0085). The two-character sequence is treated as a single unit that
 cannot be split.
 .P
@@ -819,7 +819,7 @@ PCRE_UCP is set. They are:
   Xwd   Any Perl "word" character
 .sp
 Xan matches characters that have either the L (letter) or the N (number)
-property. Xps matches the characters tab, linefeed, vertical tab, formfeed, or
+property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the
 same characters as Xan, plus underscore.
@@ -1843,7 +1843,7 @@ Because there may be many capturing parentheses in a pattern, all digits
 following a backslash are taken as part of a potential back reference number.
 If the pattern continues with a digit character, some delimiter must be used to
 terminate the back reference. If the PCRE_EXTENDED option is set, this can be
-whitespace. Otherwise, the \eg{ syntax or an empty comment (see
+white space. Otherwise, the \eg{ syntax or an empty comment (see
 .\" HTML <a href="#comments">
 .\" </a>
 "Comments"
@@ -2200,7 +2200,7 @@ subroutines that can be referenced from elsewhere. (The use of
 subroutines
 .\"
 is described below.) For example, a pattern to match an IPv4 address such as
-"192.168.23.245" could be written like this (ignore whitespace and line
+"192.168.23.245" could be written like this (ignore white space and line
 breaks):
 .sp
   (?(DEFINE) (?<byte> 2[0-4]\ed | 25[0-5] | 1\ed\ed | [1-9]?\ed) )
