@@ -118,6 +118,8 @@ Version 8.31
 
 32. Put spaces around SLJIT_PRINT_D in the JIT compiler. Required by CXX11.
 
+33. Variable renamings in the PCRE-JIT compiler. No functionality change.
+
 
 Version 8.30 04-February-2012
 -----------------------------
