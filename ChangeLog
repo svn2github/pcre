@@ -116,6 +116,8 @@ Version 8.31
 31. JIT is now supported on jailbroken iOS devices. Thanks for Ruiger
     Rill for the patch.
 
+32. Put spaces around SLJIT_PRINT_D in the JIT compiler. Required by CXX11.
+
 
 Version 8.30 04-February-2012
 -----------------------------
