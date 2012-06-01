@@ -3762,5 +3762,11 @@ COMMIT to escape from the assertion. --/
 
 "AB(C(D))(E(F))?(?(?=\2)(?=\4))"
     ABCDGHI\O03
+    
+/-- This one is here because Perl does not confine the *COMMIT to the 
+assertion, and therefore fails the entire subroutine call. --/ 
+    
+/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
+    ac 
 
 /-- End of testinput2 --/

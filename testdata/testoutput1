@@ -8722,9 +8722,5 @@ No match
 /(?!a(*COMMIT)b)ac|cd/
     ac
  0: ac
-    
-/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
-    ac 
- 0: ac
 
 /-- End of testinput1 --/
