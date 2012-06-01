@@ -1618,7 +1618,7 @@ gzFile ingz = NULL;
 BZFILE *inbz2 = NULL;
 #endif
 
-#if defined SUPPORT_LIBZ || defined SUPPORT_LIBZ2
+#if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
 int pathlen;
 #endif
 
@@ -1701,7 +1701,7 @@ skipping was not requested. The scan proceeds. If this is the first and only
 argument at top level, we don't show the file name, unless we are only showing
 the file name, or the filename was forced (-H). */
 
-#if defined SUPPORT_LIBZ || defined SUPPORT_LIBZ2
+#if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
 pathlen = (int)(strlen(pathname));
 #endif
 

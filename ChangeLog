@@ -120,6 +120,10 @@ Version 8.31
 
 33. Variable renamings in the PCRE-JIT compiler. No functionality change.
 
+34. Fixed typos in pcregrep: in two places there was SUPPORT_LIBZ2 instead of 
+    SUPPORT_LIBBZ2. This caused a build problem when bzip2 but not gzip (zlib)
+    was enabled.
+
 
 Version 8.30 04-February-2012
 -----------------------------
