@@ -5020,7 +5020,12 @@ if (ket == OP_KETRMAX)
       BACKTRACK_AS(bracket_backtrack)->alttrypath = LABEL();
     /* Checking zero-length iteration. */
     if (opcode != OP_ONCE)
+      {
       CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, STR_PTR, 0, rmaxlabel);
+      /* Drop STR_PTR for greedy plus quantifier. */
+      if (bra != OP_BRAZERO)
+        free_stack(common, 1);
+      }
     else
       /* TMP2 must contain the starting STR_PTR. */
       CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_PTR, 0, rmaxlabel);
@@ -6154,9 +6159,7 @@ if (SLJIT_UNLIKELY(opcode == OP_ONCE_NC))
 
 if (ket == OP_KETRMAX)
   {
-  if (bra != OP_BRAZERO)
-    free_stack(common, 1);
-  else
+  if (bra == OP_BRAZERO)
     {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     free_stack(common, 1);
@@ -6450,14 +6453,16 @@ else if (opcode == OP_ONCE)
 if (ket == OP_KETRMAX)
   {
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+  if (bra != OP_BRAZERO)
+    free_stack(common, 1);
   CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(bracket_backtrack)->recursivetrypath);
   if (bra == OP_BRAZERO)
     {
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
     JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->zerotrypath);
     JUMPHERE(brazero);
+    free_stack(common, 1);
     }
-  free_stack(common, 1);
   }
 else if (ket == OP_KETRMIN)
   {

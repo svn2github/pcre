@@ -124,6 +124,8 @@ Version 8.31
     SUPPORT_LIBBZ2. This caused a build problem when bzip2 but not gzip (zlib)
     was enabled.
 
+35. Improve JIT code generation for greedy plus quantifier.
+
 
 Version 8.30 04-February-2012
 -----------------------------
