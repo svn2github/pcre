@@ -160,7 +160,7 @@ static const int eint[] = {
   REG_BADPAT,  /* disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) */
   REG_BADPAT,  /* invalid UTF-16 string (should not occur) */
   /* 75 */
-  REG_BADPAT   /* overlong MARK name */  
+  REG_BADPAT   /* overlong MARK name */
 };
 
 /* Table of texts corresponding to POSIX error codes */

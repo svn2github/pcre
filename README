@@ -334,7 +334,7 @@ library. They are also documented in the pcrebuild man page.
   the readline() function. This provides line-editing and history facilities.
   Note that libreadline is GPL-licenced, so if you distribute a binary of
   pcretest linked in this way, there may be licensing issues. These can be
-  avoided by linking with libedit (which has a BSD licence) instead. 
+  avoided by linking with libedit (which has a BSD licence) instead.
 
   Enabling libreadline causes the -lreadline option to be added to the pcretest
   build. In many operating environments with a sytem-installed readline

@@ -737,7 +737,7 @@ static const char *errtexts[] = {
   "JIT stack limit reached",
   "pattern compiled in wrong mode: 8-bit/16-bit error",
   "pattern compiled with other endianness",
-  "invalid data in workspace for DFA restart" 
+  "invalid data in workspace for DFA restart"
 };
 
 
@@ -2600,10 +2600,10 @@ while (!done)
   int do_showcaprest = 0;
   int do_flip = 0;
   int erroroffset, len, delimiter, poffset;
-  
-#if !defined NODFA 
+
+#if !defined NODFA
   int dfa_matched = 0;
-#endif   
+#endif
 
   use_utf = 0;
   debug_lengths = 1;
@@ -3946,9 +3946,9 @@ while (!done)
             {
             fprintf(outfile, "Timing DFA restarts is not supported\n");
             break;
-            }    
-          if (dfa_workspace == NULL) 
-            dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));  
+            }
+          if (dfa_workspace == NULL)
+            dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
           for (i = 0; i < timeitm; i++)
             {
             PCRE_DFA_EXEC(count, re, extra, bptr, len, start_offset,
@@ -4019,9 +4019,9 @@ while (!done)
 #if !defined NODFA
       else if (all_use_dfa || use_dfa)
         {
-        if (dfa_workspace == NULL) 
-          dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));  
-        if (dfa_matched++ == 0)  
+        if (dfa_workspace == NULL)
+          dfa_workspace = (int *)malloc(DFA_WS_DIMENSION*sizeof(int));
+        if (dfa_matched++ == 0)
           dfa_workspace[0] = -1;  /* To catch bad restart */
         PCRE_DFA_EXEC(count, re, extra, bptr, len, start_offset,
           (options | g_notempty), use_offsets, use_size_offsets, dfa_workspace,

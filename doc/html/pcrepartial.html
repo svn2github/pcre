@@ -58,14 +58,14 @@ the details differ between the two types of matching function. If both options
 are set, PCRE_PARTIAL_HARD takes precedence.
 </P>
 <P>
-If you want to use partial matching with just-in-time optimized code, you must 
+If you want to use partial matching with just-in-time optimized code, you must
 call <b>pcre_study()</b> or <b>pcre16_study()</b> with one or both of these
 options:
 <pre>
   PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
   PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE
 </pre>
-PCRE_STUDY_JIT_COMPILE should also be set if you are going to run non-partial 
+PCRE_STUDY_JIT_COMPILE should also be set if you are going to run non-partial
 matches on the same pattern. If the appropriate JIT study mode has not been set
 for a match, the interpretive matching code is used.
 </P>
@@ -354,8 +354,8 @@ includes the effect of PCRE_NOTEOL.
 <P>
 2. Lookbehind assertions that have already been obeyed are catered for in the
 offsets that are returned for a partial match. However a lookbehind assertion
-later in the pattern could require even earlier characters to be inspected. You 
-can handle this case by using the PCRE_INFO_MAXLOOKBEHIND option of the 
+later in the pattern could require even earlier characters to be inspected. You
+can handle this case by using the PCRE_INFO_MAXLOOKBEHIND option of the
 <b>pcre_fullinfo()</b> or <b>pcre16_fullinfo()</b> functions to obtain the length
 of the largest lookbehind in the pattern. This length is given in characters,
 not bytes. If you always retain at least that many characters before the
@@ -372,7 +372,7 @@ match" result. For example:
   data&#62; ab\P
   No match
 </pre>
-If the next segment begins "cx", a match should be found, but this will only 
+If the next segment begins "cx", a match should be found, but this will only
 happen if characters from the previous segment are retained. For this reason, a
 "no match" result should be interpreted as "partial match of an empty string"
 when the pattern contains lookbehinds.

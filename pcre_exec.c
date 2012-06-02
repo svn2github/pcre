@@ -1577,9 +1577,9 @@ for (;;)
         }
       md->mark = save_mark;
 
-      /* A COMMIT failure must fail the entire assertion, without trying any 
+      /* A COMMIT failure must fail the entire assertion, without trying any
       subsequent branches. */
-    
+
       if (rrc == MATCH_COMMIT) RRETURN(MATCH_NOMATCH);
 
       /* PCRE does not allow THEN to escape beyond an assertion; it

@@ -490,7 +490,7 @@ static const char error_texts[] =
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
   "invalid UTF-16 string\0"
   /* 75 */
-  "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"  
+  "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4518,7 +4518,7 @@ for (;; ptr++)
       LONE_SINGLE_CHARACTER:
 
       /* Only the value of 1 matters for class_single_char. */
-       
+
       if (class_single_char < 2) class_single_char++;
 
       /* If class_charcount is 1, we saw precisely one character. As long as
@@ -4813,7 +4813,7 @@ for (;; ptr++)
     if (*previous == OP_CHAR || *previous == OP_CHARI
         || *previous == OP_NOT || *previous == OP_NOTI)
       {
-      switch (*previous) 
+      switch (*previous)
         {
         default: /* Make compiler happy. */
         case OP_CHAR:  op_type = OP_STAR - OP_STAR; break;
@@ -5593,7 +5593,7 @@ for (;; ptr++)
       ptr++;
       while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_letter) != 0) ptr++;
       namelen = (int)(ptr - name);
-      
+
       /* It appears that Perl allows any characters whatsoever, other than
       a closing parenthesis, to appear in arguments, so we no longer insist on
       letters, digits, and underscores. */
@@ -5607,7 +5607,7 @@ for (;; ptr++)
           {
           *errorcodeptr = ERR75;
           goto FAILED;
-          }     
+          }
         }
 
       if (*ptr != CHAR_RIGHT_PARENTHESIS)
@@ -6859,13 +6859,13 @@ for (;; ptr++)
       /* For the rest (including \X when Unicode properties are supported), we
       can obtain the OP value by negating the escape value in the default
       situation when PCRE_UCP is not set. When it *is* set, we substitute
-      Unicode property tests. Note that \b and \B do a one-character 
+      Unicode property tests. Note that \b and \B do a one-character
       lookbehind. */
 
       else
         {
         if ((-c == ESC_b || -c == ESC_B) && cd->max_lookbehind == 0)
-          cd->max_lookbehind = 1; 
+          cd->max_lookbehind = 1;
 #ifdef SUPPORT_UCP
         if (-c >= ESC_DU && -c <= ESC_wu)
           {
@@ -7173,11 +7173,11 @@ for (;;)
         *ptrptr = ptr;
         return FALSE;
         }
-      else 
-        { 
-        if (fixed_length > cd->max_lookbehind) 
-          cd->max_lookbehind = fixed_length; 
-        PUT(reverse_count, 0, fixed_length); 
+      else
+        {
+        if (fixed_length > cd->max_lookbehind)
+          cd->max_lookbehind = fixed_length;
+        PUT(reverse_count, 0, fixed_length);
         }
       }
     }

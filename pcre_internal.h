@@ -2137,7 +2137,7 @@ typedef struct match_data {
   const  pcre_uchar *once_target; /* Where to back up to for atomic groups */
 #ifdef NO_RECURSE
   void  *match_frames_base;       /* For remembering malloc'd frames */
-#endif      
+#endif
 } match_data;
 
 /* A similar structure is used for the same purpose by the DFA matching

@@ -573,10 +573,10 @@ for (;;)
   int clen, dlen;
   unsigned int c, d;
   int forced_fail = 0;
-  BOOL partial_newline = FALSE; 
+  BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
-  reset_could_continue = FALSE; 
-  
+  reset_could_continue = FALSE;
+
   /* Make the new state list into the active state list and empty the
   new state list. */
 
@@ -645,7 +645,7 @@ for (;;)
 
     /* A negative offset is a special case meaning "hold off going to this
     (negated) state until the number of characters in the data field have
-    been skipped". If the could_continue flag was passed over from a previous 
+    been skipped". If the could_continue flag was passed over from a previous
     state, arrange for it to passed on. */
 
     if (state_offset < 0)
@@ -695,7 +695,7 @@ for (;;)
     permitted.
 
     We also use this mechanism for opcodes such as OP_TYPEPLUS that take an
-    argument that is not a data character - but is always one byte long because 
+    argument that is not a data character - but is always one byte long because
     the values are small. We have to take special action to deal with  \P, \p,
     \H, \h, \V, \v and \X in this case. To keep the other cases fast, convert
     these ones to new opcodes. */
@@ -894,19 +894,19 @@ for (;;)
       /*-----------------------------------------------------------------*/
       case OP_ANY:
       if (clen > 0 && !IS_NEWLINE(ptr))
-        { 
+        {
         if (ptr + 1 >= md->end_subject &&
             (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             c == NLBLOCK->nl[0])
           {
-          could_continue = partial_newline = TRUE;          
-          } 
+          could_continue = partial_newline = TRUE;
+          }
         else
-          { 
-          ADD_NEW(state_offset + 1, 0); 
-          } 
+          {
+          ADD_NEW(state_offset + 1, 0);
+          }
         }
       break;
 
@@ -938,16 +938,16 @@ for (;;)
         else if (ptr + 1 >= md->end_subject &&
                  (md->moptions & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) != 0 &&
                  NLBLOCK->nltype == NLTYPE_FIXED &&
-                 NLBLOCK->nllen == 2 && 
+                 NLBLOCK->nllen == 2 &&
                  c == NLBLOCK->nl[0])
           {
           if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
             {
             reset_could_continue = TRUE;
-            ADD_NEW_DATA(-(state_offset + 1), 0, 1);  
-            }  
-          else could_continue = partial_newline = TRUE; 
-          } 
+            ADD_NEW_DATA(-(state_offset + 1), 0, 1);
+            }
+          else could_continue = partial_newline = TRUE;
+          }
         }
       break;
 
@@ -963,16 +963,16 @@ for (;;)
         else if (ptr + 1 >= md->end_subject &&
                  (md->moptions & (PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT)) != 0 &&
                  NLBLOCK->nltype == NLTYPE_FIXED &&
-                 NLBLOCK->nllen == 2 && 
+                 NLBLOCK->nllen == 2 &&
                  c == NLBLOCK->nl[0])
           {
           if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
             {
             reset_could_continue = TRUE;
-            ADD_NEW_DATA(-(state_offset + 1), 0, 1);  
-            }  
-          else could_continue = partial_newline = TRUE; 
-          } 
+            ADD_NEW_DATA(-(state_offset + 1), 0, 1);
+            }
+          else could_continue = partial_newline = TRUE;
+          }
         }
       else if (IS_NEWLINE(ptr))
         { ADD_ACTIVE(state_offset + 1, 0); }
@@ -1138,11 +1138,11 @@ for (;;)
         if (d == OP_ANY && ptr + 1 >= md->end_subject &&
             (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             c == NLBLOCK->nl[0])
           {
-          could_continue = partial_newline = TRUE;          
-          } 
+          could_continue = partial_newline = TRUE;
+          }
         else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
@@ -1169,11 +1169,11 @@ for (;;)
         if (d == OP_ANY && ptr + 1 >= md->end_subject &&
             (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             c == NLBLOCK->nl[0])
           {
-          could_continue = partial_newline = TRUE;          
-          } 
+          could_continue = partial_newline = TRUE;
+          }
         else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
@@ -1199,11 +1199,11 @@ for (;;)
         if (d == OP_ANY && ptr + 1 >= md->end_subject &&
             (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             c == NLBLOCK->nl[0])
           {
-          could_continue = partial_newline = TRUE;          
-          } 
+          could_continue = partial_newline = TRUE;
+          }
         else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
@@ -1227,11 +1227,11 @@ for (;;)
         if (d == OP_ANY && ptr + 1 >= md->end_subject &&
             (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             c == NLBLOCK->nl[0])
           {
-          could_continue = partial_newline = TRUE;          
-          } 
+          could_continue = partial_newline = TRUE;
+          }
         else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
@@ -1256,11 +1256,11 @@ for (;;)
         if (d == OP_ANY && ptr + 1 >= md->end_subject &&
             (md->moptions & (PCRE_PARTIAL_HARD)) != 0 &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
-            NLBLOCK->nllen == 2 && 
+            NLBLOCK->nllen == 2 &&
             c == NLBLOCK->nl[0])
           {
-          could_continue = partial_newline = TRUE;          
-          } 
+          could_continue = partial_newline = TRUE;
+          }
         else if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
@@ -1909,8 +1909,8 @@ for (;;)
           ncount++;
           nptr += ndlen;
           }
-        if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0) 
-            reset_could_continue = TRUE; 
+        if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
+            reset_could_continue = TRUE;
         if (++count >= GET2(code, 1))
           { ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount); }
         else
@@ -2124,8 +2124,8 @@ for (;;)
           ncount++;
           nptr += nclen;
           }
-        if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0) 
-            reset_could_continue = TRUE; 
+        if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
+            reset_could_continue = TRUE;
         ADD_NEW_DATA(-(state_offset + 1), 0, ncount);
         }
       break;
@@ -2151,20 +2151,20 @@ for (;;)
         break;
 
         case 0x000d:
-        if (ptr + 1 >= end_subject) 
+        if (ptr + 1 >= end_subject)
           {
-          ADD_NEW(state_offset + 1, 0); 
-          if ((md->moptions & PCRE_PARTIAL_HARD) != 0) 
-            reset_could_continue = TRUE; 
-          }  
+          ADD_NEW(state_offset + 1, 0);
+          if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
+            reset_could_continue = TRUE;
+          }
         else if (ptr[1] == 0x0a)
           {
           ADD_NEW_DATA(-(state_offset + 1), 0, 1);
           }
         else
-          { 
+          {
           ADD_NEW(state_offset + 1, 0);
-          } 
+          }
         break;
         }
       break;
@@ -2277,7 +2277,7 @@ for (;;)
 
       case OP_NOTI:
       if (clen > 0)
-        { 
+        {
         unsigned int otherd;
 #ifdef SUPPORT_UTF
         if (utf && d >= 128)
@@ -2291,7 +2291,7 @@ for (;;)
         otherd = TABLE_GET(d, fcc, d);
         if (c != d && c != otherd)
           { ADD_NEW(state_offset + dlen + 1, 0); }
-        }   
+        }
       break;
 
       /*-----------------------------------------------------------------*/
@@ -3047,7 +3047,7 @@ for (;;)
 
   The "could_continue" variable is true if a state could have continued but
   for the fact that the end of the subject was reached. */
-  
+
   if (new_count <= 0)
     {
     if (rlevel == 1 &&                               /* Top level, and */
@@ -3064,8 +3064,8 @@ for (;;)
           (                                          /* or ... */
           ptr >= end_subject &&                /* End of subject and */
           ptr > md->start_used_ptr)            /* Inspected non-empty string */
-          ) 
-        )   
+          )
+        )
       {
       if (offsetcount >= 2)
         {
@@ -3172,15 +3172,15 @@ if (re->magic_number != MAGIC_NUMBER)
     PCRE_ERROR_BADENDIANNESS:PCRE_ERROR_BADMAGIC;
 if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 
-/* If restarting after a partial match, do some sanity checks on the contents 
+/* If restarting after a partial match, do some sanity checks on the contents
 of the workspace. */
 
 if ((options & PCRE_DFA_RESTART) != 0)
   {
-  if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 || 
+  if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 ||
     workspace[1] > (wscount - 2)/INTS_PER_STATEBLOCK)
-      return PCRE_ERROR_DFA_BADRESTART; 
-  } 
+      return PCRE_ERROR_DFA_BADRESTART;
+  }
 
 /* Set up study, callout, and table data */
 

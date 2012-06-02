@@ -926,7 +926,7 @@ fallen out of use. To avoid confusion, they have not been re-used.
   72  too many forward references
   73  disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
   74  invalid UTF-16 string (specifically UTF-16)
-  75  name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN) 
+  75  name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -964,12 +964,12 @@ wants to pass any of the other fields to \fBpcre_exec()\fP or
 \fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
 .P
 The second argument of \fBpcre_study()\fP contains option bits. There are three
-options: 
+options:
 .sp
   PCRE_STUDY_JIT_COMPILE
   PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE
   PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
-.sp  
+.sp
 If any of these are set, and the just-in-time compiler is available, the
 pattern is further compiled into machine code that executes much faster than
 the \fBpcre_exec()\fP interpretive matching function. If the just-in-time
@@ -1240,7 +1240,7 @@ is -1.
 .sp
 Return the number of characters (NB not bytes) in the longest lookbehind
 assertion in the pattern. Note that the simple assertions \eb and \eB require a
-one-character lookbehind. This information is useful when doing multi-segment 
+one-character lookbehind. This information is useful when doing multi-segment
 matching using the partial matching facilities.
 .sp
   PCRE_INFO_MINLENGTH
@@ -1524,7 +1524,7 @@ This limit is of use only if it is set smaller than \fImatch_limit\fP.
 Limiting the recursion depth limits the amount of machine stack that can be
 used, or, when PCRE has been compiled to use memory on the heap instead of the
 stack, the amount of heap memory that can be used. This limit is not relevant,
-and is ignored, when matching is done using JIT compiled code. 
+and is ignored, when matching is done using JIT compiled code.
 .P
 The default value for \fImatch_limit_recursion\fP can be set when PCRE is
 built; the default default is the same value as the default for
@@ -1708,7 +1708,7 @@ causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
 are considered at every possible starting position in the subject string. If
 PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
-time. The use of PCRE_NO_START_OPTIMIZE disables JIT execution; when it is set, 
+time. The use of PCRE_NO_START_OPTIMIZE disables JIT execution; when it is set,
 matching is always done using interpretively.
 .P
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
@@ -2639,9 +2639,9 @@ extremely rare, as a vector of size 1000 is used.
   PCRE_ERROR_DFA_BADRESTART (-30)
 .sp
 When \fBpcre_dfa_exec()\fP is called with the \fBPCRE_DFA_RESTART\fP option,
-some plausibility checks are made on the contents of the workspace, which 
-should contain data about the previous partial match. If any of these checks 
-fail, this error is given.   
+some plausibility checks are made on the contents of the workspace, which
+should contain data about the previous partial match. If any of these checks
+fail, this error is given.
 .
 .
 .SH "SEE ALSO"

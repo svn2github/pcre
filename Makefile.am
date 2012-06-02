@@ -356,6 +356,8 @@ pcregrep_LDADD += libpcreposix.la
 endif # WITH_PCRE8
 
 EXTRA_DIST += \
+  testdata/grepbinary \
+  testdata/grepfilelist \
   testdata/grepinput \
   testdata/grepinput3 \
   testdata/grepinput8 \

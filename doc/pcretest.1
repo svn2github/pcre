@@ -131,8 +131,8 @@ megabytes.
 Behave as if each pattern has the \fB/S\fP modifier; in other words, force each
 pattern to be studied. If \fB-s+\fP is used, all the JIT compile options are
 passed to \fBpcre[16]_study()\fP, causing just-in-time optimization to be set
-up if it is available, for both full and partial matching. Specific JIT compile 
-options can be selected by following \fB-s+\fP with a digit in the range 1 to 
+up if it is available, for both full and partial matching. Specific JIT compile
+options can be selected by following \fB-s+\fP with a digit in the range 1 to
 7, which selects the JIT compile modes as follows:
 .sp
   1  normal match only
@@ -141,7 +141,7 @@ options can be selected by following \fB-s+\fP with a digit in the range 1 to
   4  hard partial match only
   6  soft and hard partial match
   7  all three modes (default)
-.sp        
+.sp
 If \fB-s++\fP is used instead of \fB-s+\fP (with or without a following digit),
 the text "(JIT)" is added to the first output line after a match or no match
 when JIT-compiled code was actually used.
@@ -402,7 +402,7 @@ files in a few cases where the output is different when the pattern is studied.
 If the \fB/S\fP modifier is immediately followed by a + character, the call to
 \fBpcre[16]_study()\fP is made with all the JIT study options, requesting
 just-in-time optimization support if it is available, for both normal and
-partial matching. If you want to restrict the JIT compiling modes, you can 
+partial matching. If you want to restrict the JIT compiling modes, you can
 follow \fB/S+\fP with a digit in the range 1 to 7:
 .sp
   1  normal match only
@@ -411,13 +411,13 @@ follow \fB/S+\fP with a digit in the range 1 to 7:
   4  hard partial match only
   6  soft and hard partial match
   7  all three modes (default)
-.sp        
+.sp
 If \fB/S++\fP is used instead of \fB/S+\fP (with or without a following digit),
 the text "(JIT)" is added to the first output line after a match or no match
 when JIT-compiled code was actually used.
 .P
 Note that there is also an independent \fB/+\fP modifier; it must not be given
-immediately after \fB/S\fP or \fB/S+\fP because this will be misinterpreted. 
+immediately after \fB/S\fP or \fB/S+\fP because this will be misinterpreted.
 .P
 If JIT studying is successful, the compiled JIT code will automatically be used
 when \fBpcre[16]_exec()\fP is run, except when incompatible run-time options

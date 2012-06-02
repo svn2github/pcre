@@ -138,8 +138,8 @@ REVISION
        Last updated: 10 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRE(3)                                                                PCRE(3)
 
 
@@ -464,8 +464,8 @@ REVISION
        Last updated: 14 April 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREBUILD(3)                                                      PCREBUILD(3)
 
 
@@ -568,9 +568,9 @@ UTF-8 and UTF-16 SUPPORT
        tern compiling functions.
 
        If you set --enable-utf when compiling in an EBCDIC  environment,  PCRE
-       expects its input to be either ASCII or UTF-8 (depending on the runtime
-       option). It is not possible to support both EBCDIC and UTF-8  codes  in
-       the  same  version  of  the  library.  Consequently,  --enable-utf  and
+       expects  its  input  to be either ASCII or UTF-8 (depending on the run-
+       time option). It is not possible to support both EBCDIC and UTF-8 codes
+       in  the  same  version  of  the library. Consequently, --enable-utf and
        --enable-ebcdic are mutually exclusive.
 
 
@@ -761,9 +761,9 @@ CREATING CHARACTER TABLES AT BUILD TIME
        to the configure command, the distributed tables are  no  longer  used.
        Instead,  a  program  called dftables is compiled and run. This outputs
        the source for new set of tables, created in the default locale of your
-       C runtime system. (This method of replacing the tables does not work if
-       you are cross compiling, because dftables is run on the local host.  If
-       you  need  to  create alternative tables when cross compiling, you will
+       C  run-time  system. (This method of replacing the tables does not work
+       if you are cross compiling, because dftables is run on the local  host.
+       If you need to create alternative tables when cross compiling, you will
        have to do so "by hand".)
 
 
@@ -860,8 +860,8 @@ REVISION
        Last updated: 07 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREMATCHING(3)                                                PCREMATCHING(3)
 
 
@@ -1067,8 +1067,8 @@ REVISION
        Last updated: 08 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREAPI(3)                                                          PCREAPI(3)
 
 
@@ -1311,7 +1311,7 @@ NEWLINES
        feed) character, the two-character sequence CRLF, any of the three pre-
        ceding,  or any Unicode newline sequence. The Unicode newline sequences
        are the three just mentioned, plus the single characters  VT  (vertical
-       tab,  U+000B), FF (formfeed, U+000C), NEL (next line, U+0085), LS (line
+       tab, U+000B), FF (form feed, U+000C), NEL (next line, U+0085), LS (line
        separator, U+2028), and PS (paragraph separator, U+2029).
 
        Each of the first three conventions is used by at least  one  operating
@@ -1625,8 +1625,8 @@ COMPILING A PATTERN
 
          PCRE_EXTENDED
 
-       If  this  bit  is  set,  whitespace  data characters in the pattern are
-       totally ignored except when escaped or inside a character class. White-
+       If  this  bit  is  set,  white space data characters in the pattern are
+       totally ignored except when escaped or inside a character class.  White
        space does not include the VT character (code 11). In addition, charac-
        ters between an unescaped # outside a character class and the next new-
        line,  inclusive,  are  also  ignored.  This is equivalent to Perl's /x
@@ -1642,7 +1642,7 @@ COMPILING A PATTERN
 
        This option makes it possible to include  comments  inside  complicated
        patterns.   Note,  however,  that this applies only to data characters.
-       Whitespace  characters  may  never  appear  within  special   character
+       White space  characters  may  never  appear  within  special  character
        sequences in a pattern, for example within the sequence (?( that intro-
        duces a conditional subpattern.
 
@@ -1727,7 +1727,7 @@ COMPILING A PATTERN
        that any of the three preceding sequences should be recognized. Setting
        PCRE_NEWLINE_ANY  specifies that any Unicode newline sequence should be
        recognized. The Unicode newline sequences are the three just mentioned,
-       plus  the  single  characters  VT (vertical tab, U+000B), FF (formfeed,
+       plus  the  single  characters VT (vertical tab, U+000B), FF (form feed,
        U+000C), NEL (next line, U+0085), LS (line separator, U+2028),  and  PS
        (paragraph  separator, U+2029). For the 8-bit library, the last two are
        recognized only in UTF-8 mode.
@@ -1741,7 +1741,7 @@ COMPILING A PATTERN
        cause an error.
 
        The only time that a line break in a pattern  is  specially  recognized
-       when  compiling  is when PCRE_EXTENDED is set. CR and LF are whitespace
+       when  compiling is when PCRE_EXTENDED is set. CR and LF are white space
        characters, and so are ignored in this mode. Also, an unescaped #  out-
        side  a  character class indicates a comment that lasts until after the
        next line break sequence. In other circumstances, line break  sequences
@@ -1894,6 +1894,7 @@ COMPILATION ERROR CODES
          72  too many forward references
          73  disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
          74  invalid UTF-16 string (specifically UTF-16)
+         75  name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
 
        The numbers 32 and 10000 in errors 48 and 49  are  defaults;  different
        values may be used if the limits were changed when PCRE was built.
@@ -2993,19 +2994,19 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
        for the just-in-time processing stack is  not  large  enough.  See  the
        pcrejit documentation for more details.
 
-         PCRE_ERROR_BADMODE (-28)
+         PCRE_ERROR_BADMODE        (-28)
 
        This error is given if a pattern that was compiled by the 8-bit library
        is passed to a 16-bit library function, or vice versa.
 
-         PCRE_ERROR_BADENDIANNESS (-29)
+         PCRE_ERROR_BADENDIANNESS  (-29)
 
        This error is given if  a  pattern  that  was  compiled  and  saved  is
        reloaded  on  a  host  with  different endianness. The utility function
        pcre_pattern_to_host_byte_order() can be used to convert such a pattern
        so that it runs on the new host.
 
-       Error numbers -16 to -20 and -22 are not used by pcre_exec().
+       Error numbers -16 to -20, -22, and -30 are not used by pcre_exec().
 
    Reason codes for invalid UTF-8 strings
 
@@ -3468,10 +3469,17 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
        This error is given if the output vector  is  not  large  enough.  This
        should be extremely rare, as a vector of size 1000 is used.
 
+         PCRE_ERROR_DFA_BADRESTART (-30)
+
+       When  pcre_dfa_exec()  is called with the PCRE_DFA_RESTART option, some
+       plausibility checks are made on the contents of  the  workspace,  which
+       should  contain  data about the previous partial match. If any of these
+       checks fail, this error is given.
+
 
 SEE ALSO
 
-       pcre16(3),   pcrebuild(3),  pcrecallout(3),  pcrecpp(3)(3),  pcrematch-
+       pcre16(3),  pcrebuild(3),  pcrecallout(3),  pcrecpp(3)(3),   pcrematch-
        ing(3), pcrepartial(3), pcreposix(3), pcreprecompile(3), pcresample(3),
        pcrestack(3).
 
@@ -3485,11 +3493,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 April 2012
+       Last updated: 04 May 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECALLOUT(3)                                                  PCRECALLOUT(3)
 
 
@@ -3687,8 +3695,8 @@ REVISION
        Last updated: 08 Janurary 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECOMPAT(3)                                                    PCRECOMPAT(3)
 
 
@@ -3777,9 +3785,17 @@ DIFFERENCES BETWEEN PCRE AND PERL
        There is a discussion that explains these differences in more detail in
        the section on recursion differences from Perl in the pcrepattern page.
 
-       11.  If  (*THEN)  is present in a group that is called as a subroutine,
-       its action is limited to that group, even if the group does not contain
-       any | characters.
+       11.  If  any of the backtracking control verbs are used in an assertion
+       or in a subpattern that is called  as  a  subroutine  (whether  or  not
+       recursively),  their effect is confined to that subpattern; it does not
+       extend to the surrounding pattern. This is not always the case in Perl.
+       In  particular,  if  (*THEN)  is present in a group that is called as a
+       subroutine, its action is limited to that group, even if the group does
+       not  contain any | characters. There is one exception to this: the name
+       from a *(MARK), (*PRUNE), or (*THEN) that is encountered in a  success-
+       ful  positive  assertion  is passed back when a match succeeds (compare
+       capturing parentheses in assertions). Note that  such  subpatterns  are
+       processed as anchored at the point where they are tested.
 
        12.  There are some differences that are concerned with the settings of
        captured strings when part of  a  pattern  is  repeated.  For  example,
@@ -3799,7 +3815,7 @@ DIFFERENCES BETWEEN PCRE AND PERL
 
        14.  Perl  recognizes  comments  in some places that PCRE does not, for
        example, between the ( and ? at the start of a subpattern.  If  the  /x
-       modifier  is set, Perl allows whitespace between ( and ? but PCRE never
+       modifier is set, Perl allows white space between ( and ? but PCRE never
        does, even if the PCRE_EXTENDED option is set.
 
        15. PCRE provides some extensions to the Perl regular expression facil-
@@ -3859,11 +3875,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 08 Januray 2012
+       Last updated: 01 June 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPATTERN(3)                                                  PCREPATTERN(3)
 
 
@@ -4045,10 +4061,10 @@ BACKSLASH
        after  a  backslash.  All  other characters (in particular, those whose
        codepoints are greater than 127) are treated as literals.
 
-       If a pattern is compiled with the PCRE_EXTENDED option,  whitespace  in
+       If a pattern is compiled with the PCRE_EXTENDED option, white space  in
        the  pattern (other than in a character class) and characters between a
        # outside a character class and the next newline are ignored. An escap-
-       ing  backslash  can  be  used to include a whitespace or # character as
+       ing  backslash  can  be used to include a white space or # character as
        part of the pattern.
 
        If you want to remove the special meaning from a  sequence  of  charac-
@@ -4083,7 +4099,7 @@ BACKSLASH
          \a        alarm, that is, the BEL character (hex 07)
          \cx       "control-x", where x is any ASCII character
          \e        escape (hex 1B)
-         \f        formfeed (hex 0C)
+         \f        form feed (hex 0C)
          \n        linefeed (hex 0A)
          \r        carriage return (hex 0D)
          \t        tab (hex 09)
@@ -4212,12 +4228,12 @@ BACKSLASH
 
          \d     any decimal digit
          \D     any character that is not a decimal digit
-         \h     any horizontal whitespace character
-         \H     any character that is not a horizontal whitespace character
-         \s     any whitespace character
-         \S     any character that is not a whitespace character
-         \v     any vertical whitespace character
-         \V     any character that is not a vertical whitespace character
+         \h     any horizontal white space character
+         \H     any character that is not a horizontal white space character
+         \s     any white space character
+         \S     any character that is not a white space character
+         \v     any vertical white space character
+         \V     any character that is not a vertical white space character
          \w     any "word" character
          \W     any "non-word" character
 
@@ -4297,7 +4313,7 @@ BACKSLASH
 
          U+000A     Linefeed
          U+000B     Vertical tab
-         U+000C     Formfeed
+         U+000C     Form feed
          U+000D     Carriage return
          U+0085     Next line
          U+2028     Line separator
@@ -4317,9 +4333,9 @@ BACKSLASH
        This  is  an  example  of an "atomic group", details of which are given
        below.  This particular group matches either the two-character sequence
        CR  followed  by  LF,  or  one  of  the single characters LF (linefeed,
-       U+000A), VT (vertical tab, U+000B), FF (formfeed, U+000C), CR (carriage
-       return, U+000D), or NEL (next line, U+0085). The two-character sequence
-       is treated as a single unit that cannot be split.
+       U+000A), VT (vertical tab, U+000B), FF (form feed,  U+000C),  CR  (car-
+       riage  return,  U+000D),  or NEL (next line, U+0085). The two-character
+       sequence is treated as a single unit that cannot be split.
 
        In other modes, two additional characters whose codepoints are  greater
        than 255 are added: LS (line separator, U+2028) and PS (paragraph sepa-
@@ -4519,7 +4535,7 @@ BACKSLASH
 
        Xan matches characters that have either the L (letter) or the  N  (num-
        ber)  property. Xps matches the characters tab, linefeed, vertical tab,
-       formfeed, or carriage return, and any other character that  has  the  Z
+       form feed, or carriage return, and any other character that has  the  Z
        (separator) property.  Xsp is the same as Xps, except that vertical tab
        is excluded. Xwd matches the same characters as Xan, plus underscore.
 
@@ -5484,8 +5500,8 @@ BACK REFERENCES
        its following a backslash are taken as part of a potential back  refer-
        ence  number.   If  the  pattern continues with a digit character, some
        delimiter must  be  used  to  terminate  the  back  reference.  If  the
-       PCRE_EXTENDED option is set, this can be whitespace. Otherwise, the \g{
-       syntax or an empty comment (see "Comments" below) can be used.
+       PCRE_EXTENDED  option  is  set, this can be white space. Otherwise, the
+       \g{ syntax or an empty comment (see "Comments" below) can be used.
 
    Recursive back references
 
@@ -5797,7 +5813,7 @@ CONDITIONAL SUBPATTERNS
        DEFINE  is that it can be used to define subroutines that can be refer-
        enced from elsewhere. (The use of subroutines is described below.)  For
        example,  a  pattern  to match an IPv4 address such as "192.168.23.245"
-       could be written like this (ignore whitespace and line breaks):
+       could be written like this (ignore white space and line breaks):
 
          (?(DEFINE) (?<byte> 2[0-4]\d | 25[0-5] | 1\d\d | [1-9]?\d) )
          \b (?&byte) (\.(?&byte)){3} \b
@@ -6188,82 +6204,83 @@ BACKTRACKING CONTROL
        that  is  encountered in a successful positive assertion is passed back
        when a match succeeds (compare capturing  parentheses  in  assertions).
        Note that such subpatterns are processed as anchored at the point where
-       they are tested. Note also that Perl's treatment of subroutines is dif-
-       ferent in some cases.
+       they are tested. Note also that Perl's  treatment  of  subroutines  and
+       assertions is different in some cases.
 
        The  new verbs make use of what was previously invalid syntax: an open-
        ing parenthesis followed by an asterisk. They are generally of the form
        (*VERB)  or (*VERB:NAME). Some may take either form, with differing be-
        haviour, depending on whether or not an argument is present. A name  is
        any sequence of characters that does not include a closing parenthesis.
-       If the name is empty, that is, if the closing  parenthesis  immediately
-       follows  the  colon,  the effect is as if the colon were not there. Any
-       number of these verbs may occur in a pattern.
+       The maximum length of name is 255 in the 8-bit library and 65535 in the
+       16-bit library. If the name is empty, that is, if the closing parenthe-
+       sis immediately follows the colon, the effect is as if the  colon  were
+       not there. Any number of these verbs may occur in a pattern.
 
    Optimizations that affect backtracking verbs
 
-       PCRE contains some optimizations that are used to speed up matching  by
+       PCRE  contains some optimizations that are used to speed up matching by
        running some checks at the start of each match attempt. For example, it
-       may know the minimum length of matching subject, or that  a  particular
-       character  must  be present. When one of these optimizations suppresses
-       the running of a match, any included backtracking verbs  will  not,  of
+       may  know  the minimum length of matching subject, or that a particular
+       character must be present. When one of these  optimizations  suppresses
+       the  running  of  a match, any included backtracking verbs will not, of
        course, be processed. You can suppress the start-of-match optimizations
-       by setting the PCRE_NO_START_OPTIMIZE  option  when  calling  pcre_com-
+       by  setting  the  PCRE_NO_START_OPTIMIZE  option when calling pcre_com-
        pile() or pcre_exec(), or by starting the pattern with (*NO_START_OPT).
        There is more discussion of this option in the section entitled "Option
        bits for pcre_exec()" in the pcreapi documentation.
 
-       Experiments  with  Perl  suggest that it too has similar optimizations,
+       Experiments with Perl suggest that it too  has  similar  optimizations,
        sometimes leading to anomalous results.
 
    Verbs that act immediately
 
-       The following verbs act as soon as they are encountered. They  may  not
+       The  following  verbs act as soon as they are encountered. They may not
        be followed by a name.
 
           (*ACCEPT)
 
-       This  verb causes the match to end successfully, skipping the remainder
-       of the pattern. However, when it is inside a subpattern that is  called
-       as  a  subroutine, only that subpattern is ended successfully. Matching
-       then continues at the outer level. If  (*ACCEPT)  is  inside  capturing
+       This verb causes the match to end successfully, skipping the  remainder
+       of  the pattern. However, when it is inside a subpattern that is called
+       as a subroutine, only that subpattern is ended  successfully.  Matching
+       then  continues  at  the  outer level. If (*ACCEPT) is inside capturing
        parentheses, the data so far is captured. For example:
 
          A((?:A|B(*ACCEPT)|C)D)
 
-       This  matches  "AB", "AAD", or "ACD"; when it matches "AB", "B" is cap-
+       This matches "AB", "AAD", or "ACD"; when it matches "AB", "B"  is  cap-
        tured by the outer parentheses.
 
          (*FAIL) or (*F)
 
-       This verb causes a matching failure, forcing backtracking to occur.  It
-       is  equivalent to (?!) but easier to read. The Perl documentation notes
-       that it is probably useful only when combined  with  (?{})  or  (??{}).
-       Those  are,  of course, Perl features that are not present in PCRE. The
-       nearest equivalent is the callout feature, as for example in this  pat-
+       This  verb causes a matching failure, forcing backtracking to occur. It
+       is equivalent to (?!) but easier to read. The Perl documentation  notes
+       that  it  is  probably  useful only when combined with (?{}) or (??{}).
+       Those are, of course, Perl features that are not present in  PCRE.  The
+       nearest  equivalent is the callout feature, as for example in this pat-
        tern:
 
          a+(?C)(*FAIL)
 
-       A  match  with the string "aaaa" always fails, but the callout is taken
+       A match with the string "aaaa" always fails, but the callout  is  taken
        before each backtrack happens (in this example, 10 times).
 
    Recording which path was taken
 
-       There is one verb whose main purpose  is  to  track  how  a  match  was
-       arrived  at,  though  it  also  has a secondary use in conjunction with
+       There  is  one  verb  whose  main  purpose  is to track how a match was
+       arrived at, though it also has a  secondary  use  in  conjunction  with
        advancing the match starting point (see (*SKIP) below).
 
          (*MARK:NAME) or (*:NAME)
 
-       A name is always  required  with  this  verb.  There  may  be  as  many
-       instances  of  (*MARK) as you like in a pattern, and their names do not
+       A  name  is  always  required  with  this  verb.  There  may be as many
+       instances of (*MARK) as you like in a pattern, and their names  do  not
        have to be unique.
 
-       When a match succeeds, the name of the last-encountered (*MARK) on  the
-       matching  path is passed back to the caller as described in the section
-       entitled "Extra data for pcre_exec()"  in  the  pcreapi  documentation.
-       Here  is  an example of pcretest output, where the /K modifier requests
+       When  a match succeeds, the name of the last-encountered (*MARK) on the
+       matching path is passed back to the caller as described in the  section
+       entitled  "Extra  data  for  pcre_exec()" in the pcreapi documentation.
+       Here is an example of pcretest output, where the /K  modifier  requests
        the retrieval and outputting of (*MARK) data:
 
            re> /X(*MARK:A)Y|X(*MARK:B)Z/K
@@ -6275,63 +6292,63 @@ BACKTRACKING CONTROL
          MK: B
 
        The (*MARK) name is tagged with "MK:" in this output, and in this exam-
-       ple  it indicates which of the two alternatives matched. This is a more
-       efficient way of obtaining this information than putting each  alterna-
+       ple it indicates which of the two alternatives matched. This is a  more
+       efficient  way of obtaining this information than putting each alterna-
        tive in its own capturing parentheses.
 
        If (*MARK) is encountered in a positive assertion, its name is recorded
        and passed back if it is the last-encountered. This does not happen for
        negative assertions.
 
-       After  a  partial match or a failed match, the name of the last encoun-
+       After a partial match or a failed match, the name of the  last  encoun-
        tered (*MARK) in the entire match process is returned. For example:
 
            re> /X(*MARK:A)Y|X(*MARK:B)Z/K
          data> XP
          No match, mark = B
 
-       Note that in this unanchored example the  mark  is  retained  from  the
+       Note  that  in  this  unanchored  example the mark is retained from the
        match attempt that started at the letter "X" in the subject. Subsequent
        match attempts starting at "P" and then with an empty string do not get
        as far as the (*MARK) item, but nevertheless do not reset it.
 
-       If  you  are  interested  in  (*MARK)  values after failed matches, you
-       should probably set the PCRE_NO_START_OPTIMIZE option  (see  above)  to
+       If you are interested in  (*MARK)  values  after  failed  matches,  you
+       should  probably  set  the PCRE_NO_START_OPTIMIZE option (see above) to
        ensure that the match is always attempted.
 
    Verbs that act after backtracking
 
        The following verbs do nothing when they are encountered. Matching con-
-       tinues with what follows, but if there is no subsequent match,  causing
-       a  backtrack  to  the  verb, a failure is forced. That is, backtracking
-       cannot pass to the left of the verb. However, when one of  these  verbs
-       appears  inside  an atomic group, its effect is confined to that group,
-       because once the group has been matched, there is never any  backtrack-
-       ing  into  it.  In  this situation, backtracking can "jump back" to the
-       left of the entire atomic group. (Remember also, as stated above,  that
+       tinues  with what follows, but if there is no subsequent match, causing
+       a backtrack to the verb, a failure is  forced.  That  is,  backtracking
+       cannot  pass  to the left of the verb. However, when one of these verbs
+       appears inside an atomic group, its effect is confined to  that  group,
+       because  once the group has been matched, there is never any backtrack-
+       ing into it. In this situation, backtracking can  "jump  back"  to  the
+       left  of the entire atomic group. (Remember also, as stated above, that
        this localization also applies in subroutine calls and assertions.)
 
-       These  verbs  differ  in exactly what kind of failure occurs when back-
+       These verbs differ in exactly what kind of failure  occurs  when  back-
        tracking reaches them.
 
          (*COMMIT)
 
-       This verb, which may not be followed by a name, causes the whole  match
+       This  verb, which may not be followed by a name, causes the whole match
        to fail outright if the rest of the pattern does not match. Even if the
        pattern is unanchored, no further attempts to find a match by advancing
        the  starting  point  take  place.  Once  (*COMMIT)  has  been  passed,
-       pcre_exec() is committed to finding a match  at  the  current  starting
+       pcre_exec()  is  committed  to  finding a match at the current starting
        point, or not at all. For example:
 
          a+(*COMMIT)b
 
-       This  matches  "xxaab" but not "aacaab". It can be thought of as a kind
+       This matches "xxaab" but not "aacaab". It can be thought of as  a  kind
        of dynamic anchor, or "I've started, so I must finish." The name of the
-       most  recently passed (*MARK) in the path is passed back when (*COMMIT)
+       most recently passed (*MARK) in the path is passed back when  (*COMMIT)
        forces a match failure.
 
-       Note that (*COMMIT) at the start of a pattern is not  the  same  as  an
-       anchor,  unless  PCRE's start-of-match optimizations are turned off, as
+       Note  that  (*COMMIT)  at  the start of a pattern is not the same as an
+       anchor, unless PCRE's start-of-match optimizations are turned  off,  as
        shown in this pcretest example:
 
            re> /(*COMMIT)abc/
@@ -6340,111 +6357,111 @@ BACKTRACKING CONTROL
          xyzabc\Y
          No match
 
-       PCRE knows that any match must start  with  "a",  so  the  optimization
-       skips  along the subject to "a" before running the first match attempt,
-       which succeeds. When the optimization is disabled by the \Y  escape  in
+       PCRE  knows  that  any  match  must start with "a", so the optimization
+       skips along the subject to "a" before running the first match  attempt,
+       which  succeeds.  When the optimization is disabled by the \Y escape in
        the second subject, the match starts at "x" and so the (*COMMIT) causes
        it to fail without trying any other starting points.
 
          (*PRUNE) or (*PRUNE:NAME)
 
-       This verb causes the match to fail at the current starting position  in
-       the  subject  if the rest of the pattern does not match. If the pattern
-       is unanchored, the normal "bumpalong"  advance  to  the  next  starting
-       character  then happens. Backtracking can occur as usual to the left of
-       (*PRUNE), before it is reached,  or  when  matching  to  the  right  of
-       (*PRUNE),  but  if  there is no match to the right, backtracking cannot
-       cross (*PRUNE). In simple cases, the use of (*PRUNE) is just an  alter-
-       native  to an atomic group or possessive quantifier, but there are some
+       This  verb causes the match to fail at the current starting position in
+       the subject if the rest of the pattern does not match. If  the  pattern
+       is  unanchored,  the  normal  "bumpalong"  advance to the next starting
+       character then happens. Backtracking can occur as usual to the left  of
+       (*PRUNE),  before  it  is  reached,  or  when  matching to the right of
+       (*PRUNE), but if there is no match to the  right,  backtracking  cannot
+       cross  (*PRUNE). In simple cases, the use of (*PRUNE) is just an alter-
+       native to an atomic group or possessive quantifier, but there are  some
        uses of (*PRUNE) that cannot be expressed in any other way.  The behav-
-       iour  of  (*PRUNE:NAME)  is  the  same  as  (*MARK:NAME)(*PRUNE). In an
+       iour of (*PRUNE:NAME)  is  the  same  as  (*MARK:NAME)(*PRUNE).  In  an
        anchored pattern (*PRUNE) has the same effect as (*COMMIT).
 
          (*SKIP)
 
-       This verb, when given without a name, is like (*PRUNE), except that  if
-       the  pattern  is unanchored, the "bumpalong" advance is not to the next
+       This  verb, when given without a name, is like (*PRUNE), except that if
+       the pattern is unanchored, the "bumpalong" advance is not to  the  next
        character, but to the position in the subject where (*SKIP) was encoun-
-       tered.  (*SKIP)  signifies that whatever text was matched leading up to
+       tered. (*SKIP) signifies that whatever text was matched leading  up  to
        it cannot be part of a successful match. Consider:
 
          a+(*SKIP)b
 
-       If the subject is "aaaac...",  after  the  first  match  attempt  fails
-       (starting  at  the  first  character in the string), the starting point
+       If  the  subject  is  "aaaac...",  after  the first match attempt fails
+       (starting at the first character in the  string),  the  starting  point
        skips on to start the next attempt at "c". Note that a possessive quan-
-       tifer  does not have the same effect as this example; although it would
-       suppress backtracking  during  the  first  match  attempt,  the  second
-       attempt  would  start at the second character instead of skipping on to
+       tifer does not have the same effect as this example; although it  would
+       suppress  backtracking  during  the  first  match  attempt,  the second
+       attempt would start at the second character instead of skipping  on  to
        "c".
 
          (*SKIP:NAME)
 
-       When (*SKIP) has an associated name, its behaviour is modified. If  the
+       When  (*SKIP) has an associated name, its behaviour is modified. If the
        following pattern fails to match, the previous path through the pattern
-       is searched for the most recent (*MARK) that has the same name. If  one
-       is  found, the "bumpalong" advance is to the subject position that cor-
-       responds to that (*MARK) instead of to where (*SKIP)  was  encountered.
+       is  searched for the most recent (*MARK) that has the same name. If one
+       is found, the "bumpalong" advance is to the subject position that  cor-
+       responds  to  that (*MARK) instead of to where (*SKIP) was encountered.
        If no (*MARK) with a matching name is found, the (*SKIP) is ignored.
 
          (*THEN) or (*THEN:NAME)
 
-       This  verb  causes a skip to the next innermost alternative if the rest
-       of the pattern does not match. That is, it cancels  pending  backtrack-
-       ing,  but  only within the current alternative. Its name comes from the
+       This verb causes a skip to the next innermost alternative if  the  rest
+       of  the  pattern does not match. That is, it cancels pending backtrack-
+       ing, but only within the current alternative. Its name comes  from  the
        observation that it can be used for a pattern-based if-then-else block:
 
          ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 
-       If the COND1 pattern matches, FOO is tried (and possibly further  items
-       after  the  end  of the group if FOO succeeds); on failure, the matcher
-       skips to the second alternative and tries COND2,  without  backtracking
-       into  COND1.  The  behaviour  of  (*THEN:NAME)  is  exactly the same as
-       (*MARK:NAME)(*THEN).  If (*THEN) is not inside an alternation, it  acts
+       If  the COND1 pattern matches, FOO is tried (and possibly further items
+       after the end of the group if FOO succeeds); on  failure,  the  matcher
+       skips  to  the second alternative and tries COND2, without backtracking
+       into COND1. The behaviour  of  (*THEN:NAME)  is  exactly  the  same  as
+       (*MARK:NAME)(*THEN).   If (*THEN) is not inside an alternation, it acts
        like (*PRUNE).
 
-       Note  that  a  subpattern that does not contain a | character is just a
-       part of the enclosing alternative; it is not a nested alternation  with
-       only  one alternative. The effect of (*THEN) extends beyond such a sub-
-       pattern to the enclosing alternative. Consider this pattern,  where  A,
+       Note that a subpattern that does not contain a | character  is  just  a
+       part  of the enclosing alternative; it is not a nested alternation with
+       only one alternative. The effect of (*THEN) extends beyond such a  sub-
+       pattern  to  the enclosing alternative. Consider this pattern, where A,
        B, etc. are complex pattern fragments that do not contain any | charac-
        ters at this level:
 
          A (B(*THEN)C) | D
 
-       If A and B are matched, but there is a failure in C, matching does  not
+       If  A and B are matched, but there is a failure in C, matching does not
        backtrack into A; instead it moves to the next alternative, that is, D.
-       However, if the subpattern containing (*THEN) is given an  alternative,
+       However,  if the subpattern containing (*THEN) is given an alternative,
        it behaves differently:
 
          A (B(*THEN)C | (*FAIL)) | D
 
-       The  effect of (*THEN) is now confined to the inner subpattern. After a
+       The effect of (*THEN) is now confined to the inner subpattern. After  a
        failure in C, matching moves to (*FAIL), which causes the whole subpat-
-       tern  to  fail  because  there are no more alternatives to try. In this
+       tern to fail because there are no more alternatives  to  try.  In  this
        case, matching does now backtrack into A.
 
        Note also that a conditional subpattern is not considered as having two
-       alternatives,  because  only  one  is  ever used. In other words, the |
+       alternatives, because only one is ever used.  In  other  words,  the  |
        character in a conditional subpattern has a different meaning. Ignoring
        white space, consider:
 
          ^.*? (?(?=a) a | b(*THEN)c )
 
-       If  the  subject  is  "ba", this pattern does not match. Because .*? is
-       ungreedy, it initially matches zero  characters.  The  condition  (?=a)
-       then  fails,  the  character  "b"  is  matched, but "c" is not. At this
-       point, matching does not backtrack to .*? as might perhaps be  expected
-       from  the  presence  of  the | character. The conditional subpattern is
+       If the subject is "ba", this pattern does not  match.  Because  .*?  is
+       ungreedy,  it  initially  matches  zero characters. The condition (?=a)
+       then fails, the character "b" is matched,  but  "c"  is  not.  At  this
+       point,  matching does not backtrack to .*? as might perhaps be expected
+       from the presence of the | character.  The  conditional  subpattern  is
        part of the single alternative that comprises the whole pattern, and so
-       the  match  fails.  (If  there was a backtrack into .*?, allowing it to
+       the match fails. (If there was a backtrack into  .*?,  allowing  it  to
        match "b", the match would succeed.)
 
-       The verbs just described provide four different "strengths" of  control
+       The  verbs just described provide four different "strengths" of control
        when subsequent matching fails. (*THEN) is the weakest, carrying on the
-       match at the next alternative. (*PRUNE) comes next, failing  the  match
-       at  the  current starting position, but allowing an advance to the next
-       character (for an unanchored pattern). (*SKIP) is similar, except  that
+       match  at  the next alternative. (*PRUNE) comes next, failing the match
+       at the current starting position, but allowing an advance to  the  next
+       character  (for an unanchored pattern). (*SKIP) is similar, except that
        the advance may be more than one character. (*COMMIT) is the strongest,
        causing the entire match to fail.
 
@@ -6454,15 +6471,15 @@ BACKTRACKING CONTROL
 
          (A(*COMMIT)B(*THEN)C|D)
 
-       Once A has matched, PCRE is committed to this  match,  at  the  current
-       starting  position. If subsequently B matches, but C does not, the nor-
+       Once  A  has  matched,  PCRE is committed to this match, at the current
+       starting position. If subsequently B matches, but C does not, the  nor-
        mal (*THEN) action of trying the next alternative (that is, D) does not
        happen because (*COMMIT) overrides.
 
 
 SEE ALSO
 
-       pcreapi(3),  pcrecallout(3),  pcrematching(3),  pcresyntax(3), pcre(3),
+       pcreapi(3), pcrecallout(3),  pcrematching(3),  pcresyntax(3),  pcre(3),
        pcre16(3).
 
 
@@ -6475,11 +6492,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 April 2012
+       Last updated: 01 June 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESYNTAX(3)                                                    PCRESYNTAX(3)
 
 
@@ -6505,7 +6522,7 @@ CHARACTERS
          \a         alarm, that is, the BEL character (hex 07)
          \cx        "control-x", where x is any ASCII character
          \e         escape (hex 1B)
-         \f         formfeed (hex 0C)
+         \f         form feed (hex 0C)
          \n         newline (hex 0A)
          \r         carriage return (hex 0D)
          \t         tab (hex 09)
@@ -6521,16 +6538,16 @@ CHARACTER TYPES
          \C         one data unit, even in UTF mode (best avoided)
          \d         a decimal digit
          \D         a character that is not a decimal digit
-         \h         a horizontal whitespace character
-         \H         a character that is not a horizontal whitespace character
+         \h         a horizontal white space character
+         \H         a character that is not a horizontal white space character
          \N         a character that is not a newline
          \p{xx}     a character with the xx property
          \P{xx}     a character without the xx property
          \R         a newline sequence
-         \s         a whitespace character
-         \S         a character that is not a whitespace character
-         \v         a vertical whitespace character
-         \V         a character that is not a vertical whitespace character
+         \s         a white space character
+         \S         a character that is not a white space character
+         \v         a vertical white space character
+         \V         a character that is not a vertical white space character
          \w         a "word" character
          \W         a "non-word" character
          \X         an extended Unicode sequence
@@ -6634,7 +6651,7 @@ CHARACTER CLASSES
          lower       lower case letter
          print       printing, including space
          punct       printing, excluding alphanumeric
-         space       whitespace
+         space       white space
          upper       upper case letter
          word        same as \w
          xdigit      hexadecimal digit
@@ -6856,8 +6873,8 @@ REVISION
        Last updated: 10 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREUNICODE(3)                                                  PCREUNICODE(3)
 
 
@@ -6935,7 +6952,7 @@ UNICODE PROPERTY SUPPORT
 
        If an invalid UTF-8 string is passed to PCRE, an error return is given.
        At compile time, the only additional information is the offset  to  the
-       first  byte of the failing character. The runtime functions pcre_exec()
+       first byte of the failing character. The run-time functions pcre_exec()
        and pcre_dfa_exec() also pass back this information, as well as a  more
        detailed  reason  code if the caller has provided memory in which to do
        this.
@@ -6976,7 +6993,7 @@ UNICODE PROPERTY SUPPORT
 
        If an invalid UTF-16 string is passed  to  PCRE,  an  error  return  is
        given.  At  compile time, the only additional information is the offset
-       to the first data unit of the failing character. The runtime  functions
+       to the first data unit of the failing character. The run-time functions
        pcre16_exec() and pcre16_dfa_exec() also pass back this information, as
        well as a more detailed reason code if the caller has  provided  memory
        in which to do this.
@@ -7030,7 +7047,7 @@ UNICODE PROPERTY SUPPORT
        7.  Similarly,  characters that match the POSIX named character classes
        are all low-valued characters, unless the PCRE_UCP option is set.
 
-       8. However, the horizontal and  vertical  whitespace  matching  escapes
+       8. However, the horizontal and vertical white  space  matching  escapes
        (\h,  \H,  \v, and \V) do match all the appropriate Unicode characters,
        whether or not PCRE_UCP is set.
 
@@ -7057,8 +7074,8 @@ REVISION
        Last updated: 14 April 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREJIT(3)                                                          PCREJIT(3)
 
 
@@ -7209,10 +7226,8 @@ UNSUPPORTED OPTIONS AND PATTERN ITEMS
 
          \C             match a single byte; not supported in UTF-8 mode
          (?Cn)          callouts
-         (*COMMIT)      )
-         (*MARK)        )
-         (*PRUNE)       ) the backtracking control verbs
-         (*SKIP)        )
+         (*PRUNE)       )
+         (*SKIP)        ) backtracking control verbs
          (*THEN)        )
 
        Support for some of these may be added in future.
@@ -7441,11 +7456,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 14 April 2012
+       Last updated: 04 May 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPARTIAL(3)                                                  PCREPARTIAL(3)
 
 
@@ -7894,8 +7909,8 @@ REVISION
        Last updated: 24 February 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPRECOMPILE(3)                                            PCREPRECOMPILE(3)
 
 
@@ -8029,8 +8044,8 @@ REVISION
        Last updated: 10 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPERFORM(3)                                                  PCREPERFORM(3)
 
 
@@ -8199,8 +8214,8 @@ REVISION
        Last updated: 09 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCREPOSIX(3)                                                      PCREPOSIX(3)
 
 
@@ -8463,8 +8478,8 @@ REVISION
        Last updated: 09 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRECPP(3)                                                          PCRECPP(3)
 
 
@@ -8641,7 +8656,7 @@ PASSING MODIFIERS TO THE REGULAR EXPRESSION ENGINE
           PCRE_DOTALL           dot matches newlines        /s
           PCRE_DOLLAR_ENDONLY   $ matches only at end       N/A
           PCRE_EXTRA            strict escape parsing       N/A
-          PCRE_EXTENDED         ignore whitespaces          /x
+          PCRE_EXTENDED         ignore white spaces         /x
           PCRE_UTF8             handles UTF8 chars          built-in
           PCRE_UNGREEDY         reverses * and *?           N/A
           PCRE_NO_AUTO_CAPTURE  disables capturing parens   N/A (*)
@@ -8805,8 +8820,8 @@ REVISION
 
        Last updated: 08 January 2012
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESAMPLE(3)                                                    PCRESAMPLE(3)
 
 
@@ -8929,6 +8944,10 @@ SIZE AND OTHER LIMITATIONS
        The maximum length of name for a named subpattern is 32 characters, and
        the maximum number of named subpatterns is 10000.
 
+       The maximum length of a  name  in  a  (*MARK),  (*PRUNE),  (*SKIP),  or
+       (*THEN)  verb  is  255  for  the 8-bit library and 65535 for the 16-bit
+       library.
+
        The maximum length of a subject string is the largest  positive  number
        that  an integer variable can hold. However, when using the traditional
        matching function, PCRE uses recursion to handle subpatterns and indef-
@@ -8946,11 +8965,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 08 January 2012
+       Last updated: 04 May 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+
 PCRESTACK(3)                                                      PCRESTACK(3)
 
 
@@ -9134,5 +9153,5 @@ REVISION
        Last updated: 21 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
- 
- 
+
+

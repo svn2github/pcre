@@ -166,8 +166,8 @@ megabytes.
 Behave as if each pattern has the <b>/S</b> modifier; in other words, force each
 pattern to be studied. If <b>-s+</b> is used, all the JIT compile options are
 passed to <b>pcre[16]_study()</b>, causing just-in-time optimization to be set
-up if it is available, for both full and partial matching. Specific JIT compile 
-options can be selected by following <b>-s+</b> with a digit in the range 1 to 
+up if it is available, for both full and partial matching. Specific JIT compile
+options can be selected by following <b>-s+</b> with a digit in the range 1 to
 7, which selects the JIT compile modes as follows:
 <pre>
   1  normal match only
@@ -453,7 +453,7 @@ files in a few cases where the output is different when the pattern is studied.
 If the <b>/S</b> modifier is immediately followed by a + character, the call to
 <b>pcre[16]_study()</b> is made with all the JIT study options, requesting
 just-in-time optimization support if it is available, for both normal and
-partial matching. If you want to restrict the JIT compiling modes, you can 
+partial matching. If you want to restrict the JIT compiling modes, you can
 follow <b>/S+</b> with a digit in the range 1 to 7:
 <pre>
   1  normal match only
@@ -469,7 +469,7 @@ when JIT-compiled code was actually used.
 </P>
 <P>
 Note that there is also an independent <b>/+</b> modifier; it must not be given
-immediately after <b>/S</b> or <b>/S+</b> because this will be misinterpreted. 
+immediately after <b>/S</b> or <b>/S+</b> because this will be misinterpreted.
 </P>
 <P>
 If JIT studying is successful, the compiled JIT code will automatically be used

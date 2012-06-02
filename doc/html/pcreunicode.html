@@ -91,7 +91,7 @@ surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8.)
 <P>
 If an invalid UTF-8 string is passed to PCRE, an error return is given. At
 compile time, the only additional information is the offset to the first byte
-of the failing character. The runtime functions <b>pcre_exec()</b> and
+of the failing character. The run-time functions <b>pcre_exec()</b> and
 <b>pcre_dfa_exec()</b> also pass back this information, as well as a more
 detailed reason code if the caller has provided memory in which to do this.
 </P>
@@ -136,7 +136,7 @@ must be used in pairs in the correct manner.
 <P>
 If an invalid UTF-16 string is passed to PCRE, an error return is given. At
 compile time, the only additional information is the offset to the first data
-unit of the failing character. The runtime functions <b>pcre16_exec()</b> and
+unit of the failing character. The run-time functions <b>pcre16_exec()</b> and
 <b>pcre16_dfa_exec()</b> also pass back this information, as well as a more
 detailed reason code if the caller has provided memory in which to do this.
 </P>
@@ -202,7 +202,7 @@ documentation.
 low-valued characters, unless the PCRE_UCP option is set.
 </P>
 <P>
-8. However, the horizontal and vertical whitespace matching escapes (\h, \H,
+8. However, the horizontal and vertical white space matching escapes (\h, \H,
 \v, and \V) do match all the appropriate Unicode characters, whether or not
 PCRE_UCP is set.
 </P>

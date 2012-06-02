@@ -251,7 +251,7 @@ static option_item optionlist[] = {
   { OP_PATLIST,    'e',      NULL,              "regex(p)=pattern", "specify pattern (may be used more than once)" },
   { OP_NODATA,     'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,     'f',      &pattern_filename, "file=path",     "read patterns from file" },
-  { OP_STRING,     N_FILE_LIST, &file_list,     "file-list=path","read files to search from file" }, 
+  { OP_STRING,     N_FILE_LIST, &file_list,     "file-list=path","read files to search from file" },
   { OP_NODATA,     N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,     'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,     'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
@@ -1105,15 +1105,15 @@ else
 endptr = main_buffer + bufflength;
 
 /* Unless binary-files=text, see if we have a binary file. This uses the same
-rule as GNU grep, namely, a search for a binary zero byte near the start of the 
+rule as GNU grep, namely, a search for a binary zero byte near the start of the
 file. */
 
 if (binary_files != BIN_TEXT)
   {
-  binary = 
+  binary =
     memchr(main_buffer, 0, (bufflength > 1024)? 1024 : bufflength) != NULL;
   if (binary && binary_files == BIN_NOMATCH) return 1;
-  } 
+  }
 
 /* Loop while the current pointer is not at the end of the file. For large
 files, endptr will be at the end of the buffer when we are in the middle of the
@@ -1230,16 +1230,16 @@ while (ptr < endptr)
     /* Just count if just counting is wanted. */
 
     if (count_only) count++;
-    
-    /* When handling a binary file and binary-files==binary, the "binary" 
-    variable will be set true (it's false in all other cases). In this 
+
+    /* When handling a binary file and binary-files==binary, the "binary"
+    variable will be set true (it's false in all other cases). In this
     situation we just want to output the file name. No need to scan further. */
-    
+
     else if (binary)
       {
       fprintf(stdout, "Binary file %s matches\n", filename);
-      return 0;  
-      }   
+      return 0;
+      }
 
     /* If all we want is a file name, there is no need to scan any more lines
     in the file. */
@@ -1876,15 +1876,15 @@ for (op = optionlist; op->one_char != 0; op++)
   contains an underscore. */
 
   if (strchr(op->long_name, '_') != NULL) continue;
-  
+
   if (op->one_char > 0 && (op->long_name)[0] == 0)
     n = 31 - printf("  -%c", op->one_char);
-  else    
+  else
     {
-    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); 
+    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char);
       else strcpy(s, "   ");
     n = 31 - printf("  %s --%s", s, op->long_name);
-    } 
+    }
 
   if (n < 1) n = 1;
   printf("%.*s%s\n", n, "                           ", op->help_text);
@@ -2356,7 +2356,7 @@ for (i = 1; i < argc; i++)
 
   /* If the option type is OP_PATLIST, it's the -e option, which can be called
   multiple times to create a list of patterns. */
-  
+
   if (op->type == OP_PATLIST)
     {
     if (cmd_pattern_count >= MAX_PATTERN_COUNT)
@@ -2367,9 +2367,9 @@ for (i = 1; i < argc; i++)
       }
     patterns[cmd_pattern_count++] = option_data;
     }
-    
+
   /* Handle OP_BINARY_FILES */
-  
+
   else if (op->type == OP_BINFILES)
     {
     if (strcmp(option_data, "binary") == 0)
@@ -2380,11 +2380,11 @@ for (i = 1; i < argc; i++)
       binary_files = BIN_TEXT;
     else
       {
-      fprintf(stderr, "pcregrep: unknown value \"%s\" for binary-files\n", 
-        option_data);  
+      fprintf(stderr, "pcregrep: unknown value \"%s\" for binary-files\n",
+        option_data);
       pcregrep_exit(usage(2));
-      }    
-    }   
+      }
+    }
 
   /* Otherwise, deal with single string or numeric data values. */
 
@@ -2755,7 +2755,7 @@ if (include_dir_pattern != NULL)
     goto EXIT2;
     }
   }
-  
+
 /* If a file that contains a list of files to search has been specified, read
 it line by line and search the given files. Otherwise, if there are no further
 arguments, do the business on stdin and exit. */
@@ -2765,30 +2765,30 @@ if (file_list != NULL)
   char buffer[PATBUFSIZE];
   FILE *fl;
   if (strcmp(file_list, "-") == 0) fl = stdin; else
-    { 
+    {
     fl = fopen(file_list, "rb");
     if (fl == NULL)
       {
-      fprintf(stderr, "pcregrep: Failed to open %s: %s\n", file_list, 
+      fprintf(stderr, "pcregrep: Failed to open %s: %s\n", file_list,
         strerror(errno));
       goto EXIT2;
-      } 
-    }   
+      }
+    }
   while (fgets(buffer, PATBUFSIZE, fl) != NULL)
     {
     int frc;
     char *end = buffer + (int)strlen(buffer);
     while (end > buffer && isspace(end[-1])) end--;
-    *end = 0;  
-    if (*buffer != 0) 
-      { 
-      frc = grep_or_recurse(buffer, dee_action == dee_RECURSE, FALSE); 
+    *end = 0;
+    if (*buffer != 0)
+      {
+      frc = grep_or_recurse(buffer, dee_action == dee_RECURSE, FALSE);
       if (frc > 1) rc = frc;
-        else if (frc == 0 && rc == 1) rc = 0;  
-      }   
-    }  
-  if (fl != stdin) fclose (fl);  
-  } 
+        else if (frc == 0 && rc == 1) rc = 0;
+      }
+    }
+  if (fl != stdin) fclose (fl);
+  }
 
 /* Do this only if there was no file list (and no file arguments). */
 
@@ -2804,7 +2804,7 @@ them as files or directories. Pass in the fact that there is only one argument
 at top level - this suppresses the file name if the argument is not a directory
 and filenames are not otherwise forced. */
 
-only_one_at_top = i == argc - 1 && file_list == NULL; 
+only_one_at_top = i == argc - 1 && file_list == NULL;
 
 for (; i < argc; i++)
   {

@@ -82,7 +82,7 @@ this to free the study data:
       pcre_free(study_ptr);
   #endif
 .sp
-PCRE_STUDY_JIT_COMPILE requests the JIT compiler to generate code for complete 
+PCRE_STUDY_JIT_COMPILE requests the JIT compiler to generate code for complete
 matches. If you want to run partial matches using the PCRE_PARTIAL_HARD or
 PCRE_PARTIAL_SOFT options of \fBpcre_exec()\fP, you should set one or both of
 the following options in addition to, or instead of, PCRE_STUDY_JIT_COMPILE
@@ -108,7 +108,7 @@ If JIT support is not available, PCRE_STUDY_JIT_COMPILE etc. are ignored, and
 no JIT data is created. Otherwise, the compiled pattern is passed to the JIT
 compiler, which turns it into machine code that executes much faster than the
 normal interpretive code. When \fBpcre_exec()\fP is passed a \fBpcre_extra\fP
-block containing a pointer to JIT code of the appropriate mode (normal or 
+block containing a pointer to JIT code of the appropriate mode (normal or
 hard/soft partial), it obeys that code instead of running the interpreter. The
 result is identical, but the compiled JIT code runs much faster.
 .P
@@ -149,7 +149,7 @@ The unsupported pattern items are:
 .sp
   \eC             match a single byte; not supported in UTF-8 mode
   (?Cn)          callouts
-  (*PRUNE)       ) 
+  (*PRUNE)       )
   (*SKIP)        ) backtracking control verbs
   (*THEN)        )
 .sp
@@ -239,24 +239,24 @@ two options:
   (2) If \fIcallback\fP is NULL and \fIdata\fP is not NULL, \fIdata\fP must be
       a valid JIT stack, the result of calling \fBpcre_jit_stack_alloc()\fP.
 .sp
-  (3) If \fIcallback\fP is not NULL, it must point to a function that is 
-      called with \fIdata\fP as an argument at the start of matching, in 
-      order to set up a JIT stack. If the return from the callback 
-      function is NULL, the internal 32K stack is used; otherwise the 
-      return value must be a valid JIT stack, the result of calling 
+  (3) If \fIcallback\fP is not NULL, it must point to a function that is
+      called with \fIdata\fP as an argument at the start of matching, in
+      order to set up a JIT stack. If the return from the callback
+      function is NULL, the internal 32K stack is used; otherwise the
+      return value must be a valid JIT stack, the result of calling
       \fBpcre_jit_stack_alloc()\fP.
 .sp
-A callback function is obeyed whenever JIT code is about to be run; it is not 
-obeyed when \fBpcre_exec()\fP is called with options that are incompatible for 
+A callback function is obeyed whenever JIT code is about to be run; it is not
+obeyed when \fBpcre_exec()\fP is called with options that are incompatible for
 JIT execution. A callback function can therefore be used to determine whether a
 match operation was executed by JIT or by the interpreter.
 .P
 You may safely use the same JIT stack for more than one pattern (either by
 assigning directly or by callback), as long as the patterns are all matched
 sequentially in the same thread. In a multithread application, if you do not
-specify a JIT stack, or if you assign or pass back NULL from a callback, that 
-is thread-safe, because each thread has its own machine stack. However, if you 
-assign or pass back a non-NULL JIT stack, this must be a different stack for 
+specify a JIT stack, or if you assign or pass back NULL from a callback, that
+is thread-safe, because each thread has its own machine stack. However, if you
+assign or pass back a non-NULL JIT stack, this must be a different stack for
 each thread so that the application is thread-safe.
 .P
 Strictly speaking, even more is allowed. You can assign the same non-NULL stack

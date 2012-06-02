@@ -98,7 +98,7 @@ standard input is always so treated.
 .SH "BINARY FILES"
 .rs
 .sp
-By default, a file that contains a binary zero byte within the first 1024 bytes 
+By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. (GNU grep also
 identifies binary files in this manner.) See the \fB--binary-files\fP option
 for a means of changing the way binary files are handled.
@@ -139,7 +139,7 @@ of \fInumber\fP is expected to be relatively small. However, \fBpcregrep\fP
 guarantees to have up to 8K of preceding text available for context output.
 .TP
 \fB--binary-files=\fP\fIword\fP
-Specify how binary files are to be processed. If the word is "binary" (the 
+Specify how binary files are to be processed. If the word is "binary" (the
 default), pattern matching is performed on binary files, but the only output is
 "Binary file <name> matches" when a match succeeds. If the word is "text",
 which is equivalent to the \fB-a\fP or \fB--text\fP option, binary files are
