@@ -8723,4 +8723,14 @@ No match
     ac
  0: ac
 
+/((?:a?)*)*c/
+  aac   
+ 0: aac
+ 1: 
+
+/((?>a?)*)*c/
+  aac   
+ 0: aac
+ 1: 
+
 /-- End of testinput1 --/

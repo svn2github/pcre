@@ -37,7 +37,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-
 /* This module contains pcre_exec(), the externally visible function that does
 pattern matching using an NFA algorithm, trying to mimic Perl as closely as
 possible. There are also some static supporting functions. */
@@ -907,7 +906,6 @@ for (;;)
       }
     else  /* OP_KETRMAX */
       {
-      md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, prev, offset_top, md, eptrb, RM66);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += 1 + LINK_SIZE;
@@ -1036,7 +1034,8 @@ for (;;)
 
     for (;;)
       {
-      if (op >= OP_SBRA || op == OP_ONCE) md->match_function_type = MATCH_CBEGROUP;
+      if (op >= OP_SBRA || op == OP_ONCE)
+        md->match_function_type = MATCH_CBEGROUP;
 
       /* If this is not a possibly empty group, and there are no (*THEN)s in
       the pattern, and this is the final alternative, optimize as described
@@ -2009,7 +2008,6 @@ for (;;)
         }
       if (*prev >= OP_SBRA)    /* Could match an empty string */
         {
-        md->match_function_type = MATCH_CBEGROUP;
         RMATCH(eptr, prev, offset_top, md, eptrb, RM50);
         RRETURN(rrc);
         }
@@ -2018,7 +2016,6 @@ for (;;)
       }
     else  /* OP_KETRMAX */
       {
-      if (*prev >= OP_SBRA) md->match_function_type = MATCH_CBEGROUP;
       RMATCH(eptr, prev, offset_top, md, eptrb, RM13);
       if (rrc == MATCH_ONCE && md->once_target == prev) rrc = MATCH_NOMATCH;
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -3431,7 +3428,7 @@ for (;;)
     maximizing, find the maximum number of characters and work backwards. */
 
     DPRINTF(("matching %c{%d,%d} against subject %.*s\n", fc, min, max,
-      max, eptr));
+      max, (char *)eptr));
 
     if (op >= OP_STARI)  /* Caseless */
       {
@@ -3700,7 +3697,7 @@ for (;;)
     characters and work backwards. */
 
     DPRINTF(("negative matching %c{%d,%d} against subject %.*s\n", fc, min, max,
-      max, eptr));
+      max, (char *)eptr));
 
     if (op >= OP_NOTSTARI)     /* Caseless */
       {

@@ -126,6 +126,10 @@ Version 8.31 02-June-2012
 
 35. Improve JIT code generation for greedy plus quantifier.
 
+36. When /((?:a?)*)*c/ or /((?>a?)*)*c/ was matched against "aac", it set group
+    1 to "aa" instead of to an empty string. The bug affected repeated groups
+    that could potentially match an empty string.
+
 
 Version 8.30 04-February-2012
 -----------------------------

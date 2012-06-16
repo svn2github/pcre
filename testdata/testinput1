@@ -5256,4 +5256,10 @@ name were given. ---/
 /(?!a(*COMMIT)b)ac|cd/
     ac
 
+/((?:a?)*)*c/
+  aac   
+
+/((?>a?)*)*c/
+  aac   
+
 /-- End of testinput1 --/
