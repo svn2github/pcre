@@ -7996,4 +7996,24 @@ Partial match: \x0d\x0d\x0d
    abc\R
 Error -30 (invalid data in workspace for DFA restart)
 
+/<H((?(?!<H|F>)(.)|(?R))++)*F>/
+    text <H more text <H texting more  hexA0-"\xA0"    hex above 7F-"\xBC" F> text xxxxx <H text F> text F> text2 <H text sample F> more text.
+ 0: <H more text <H texting more  hexA0-"\xa0"    hex above 7F-"\xbc" F> text xxxxx <H text F> text F>
+
+/^(?>.{4})abc|^\w\w.xabcd/
+    xxxxabcd
+ 0: xxxxabcd
+ 1: xxxxabc
+    xx\xa0xabcd 
+ 0: xx\xa0xabcd
+ 1: xx\xa0xabc
+
+/^(.{4}){2}+abc|^\w\w.x\w\w\w\wabcd/
+    xxxxxxxxabcd
+ 0: xxxxxxxxabcd
+ 1: xxxxxxxxabc
+    xx\xa0xxxxxabcd 
+ 0: xx\xa0xxxxxabcd
+ 1: xx\xa0xxxxxabc
+
 /-- End of testinput8 --/

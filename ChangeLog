@@ -136,6 +136,15 @@ Version 8.31 02-June-2012
     the same checks as \x{...} characters in non-JavaScript mode. Specifically, 
     codepoints that are too big for the mode are faulted, and in a UTF mode, 
     disallowed codepoints are also faulted. 
+    
+39. If PCRE was compiled with UTF support, in three places in the DFA
+    matcher there was code that should only have been obeyed in UTF mode, but
+    was being obeyed unconditionally. In 8-bit mode this could cause incorrect
+    processing when bytes with values greater than 127 were present. In 16-bit
+    mode the bug would be provoked by values in the range 0xfc00 to 0xdc00. In
+    both cases the values are those that cannot be the first data item in a UTF
+    character. The three items that might have provoked this were recursions,
+    possessively repeated groups, and atomic groups.
 
 
 Version 8.30 04-February-2012

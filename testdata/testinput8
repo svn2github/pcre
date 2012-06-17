@@ -4787,4 +4787,15 @@
 /abcdef/
    abc\R
 
+/<H((?(?!<H|F>)(.)|(?R))++)*F>/
+    text <H more text <H texting more  hexA0-"\xA0"    hex above 7F-"\xBC" F> text xxxxx <H text F> text F> text2 <H text sample F> more text.
+
+/^(?>.{4})abc|^\w\w.xabcd/
+    xxxxabcd
+    xx\xa0xabcd 
+
+/^(.{4}){2}+abc|^\w\w.x\w\w\w\wabcd/
+    xxxxxxxxabcd
+    xx\xa0xxxxxabcd 
+
 /-- End of testinput8 --/

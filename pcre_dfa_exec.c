@@ -38,7 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-
 /* This module contains the external function pcre_dfa_exec(), which is an
 alternative matching function that uses a sort of DFA algorithm (not a true
 FSM). This is NOT Perl-compatible, but it has advantages in certain
@@ -382,7 +381,8 @@ for the current character, one for the following character). */
     next_new_state->count  = (y); \
     next_new_state->data   = (z); \
     next_new_state++; \
-    DPRINTF(("%.*sADD_NEW_DATA(%d,%d,%d)\n", rlevel*2-2, SP, (x), (y), (z))); \
+    DPRINTF(("%.*sADD_NEW_DATA(%d,%d,%d) line %d\n", rlevel*2-2, SP, \
+      (x), (y), (z), __LINE__)); \
     } \
   else return PCRE_ERROR_DFA_WSSIZE
 
@@ -611,7 +611,7 @@ for (;;)
 
   if (ptr < end_subject)
     {
-    clen = 1;        /* Number of bytes in the character */
+    clen = 1;        /* Number of data items in the character */
 #ifdef SUPPORT_UTF
     if (utf) { GETCHARLEN(c, ptr, clen); } else
 #endif  /* SUPPORT_UTF */
@@ -789,7 +789,7 @@ for (;;)
             offsets[0] = (int)(current_subject - start_subject);
             offsets[1] = (int)(ptr - start_subject);
             DPRINTF(("%.*sSet matched string = \"%.*s\"\n", rlevel*2-2, SP,
-              offsets[1] - offsets[0], current_subject));
+              offsets[1] - offsets[0], (char *)current_subject));
             }
           if ((md->moptions & PCRE_DFA_SHORTEST) != 0)
             {
@@ -2797,9 +2797,12 @@ for (;;)
             {
             int charcount = local_offsets[rc+1] - local_offsets[rc];
 #ifdef SUPPORT_UTF
-            const pcre_uchar *p = start_subject + local_offsets[rc];
-            const pcre_uchar *pp = start_subject + local_offsets[rc+1];
-            while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+            if (utf)
+              { 
+              const pcre_uchar *p = start_subject + local_offsets[rc];
+              const pcre_uchar *pp = start_subject + local_offsets[rc+1];
+              while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+              } 
 #endif
             if (charcount > 0)
               {
@@ -2898,7 +2901,7 @@ for (;;)
             const pcre_uchar *pp = local_ptr;
             charcount = (int)(pp - p);
 #ifdef SUPPORT_UTF
-            while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+            if (utf) while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
 #endif
             ADD_NEW_DATA(-next_state_offset, 0, (charcount - 1));
             }
@@ -2980,9 +2983,12 @@ for (;;)
           else
             {
 #ifdef SUPPORT_UTF
-            const pcre_uchar *p = start_subject + local_offsets[0];
-            const pcre_uchar *pp = start_subject + local_offsets[1];
-            while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+            if (utf)
+              { 
+              const pcre_uchar *p = start_subject + local_offsets[0];
+              const pcre_uchar *pp = start_subject + local_offsets[1];
+              while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
+              } 
 #endif
             ADD_NEW_DATA(-next_state_offset, 0, (charcount - 1));
             if (repeat_state_offset >= 0)
