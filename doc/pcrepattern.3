@@ -277,6 +277,8 @@ as just described only when it is followed by two hexadecimal digits.
 Otherwise, it matches a literal "x" character. In JavaScript mode, support for
 code points greater than 256 is provided by \eu, which must be followed by
 four hexadecimal digits; otherwise it matches a literal "u" character.
+Character codes specified by \eu in JavaScript mode are constrained in the same 
+was as those specified by \ex in non-JavaScript mode.
 .P
 Characters whose value is less than 256 can be defined by either of the two
 syntaxes for \ex (or by \eu in JavaScript mode). There is no difference in the
@@ -2911,6 +2913,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 June 2012
+Last updated: 17 June 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

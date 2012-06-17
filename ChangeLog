@@ -132,6 +132,11 @@ Version 8.31 02-June-2012
 
 37. Optimizing single character iterators in JIT.
 
+38. Wide characters specified with \uxxxx in JavaScript mode are now subject to
+    the same checks as \x{...} characters in non-JavaScript mode. Specifically, 
+    codepoints that are too big for the mode are faulted, and in a UTF mode, 
+    disallowed codepoints are also faulted. 
+
 
 Version 8.30 04-February-2012
 -----------------------------

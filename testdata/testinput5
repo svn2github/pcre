@@ -763,4 +763,10 @@
 /(?<!^)ETA/8
     ETA
 
+/\u0100/<JS>8BZ
+
+/[\u0100-\u0200]/<JS>8BZ
+
+/\ud800/<JS>8
+
 /-- End of testinput5 --/

@@ -491,6 +491,7 @@ static const char error_texts[] =
   "invalid UTF-16 string\0"
   /* 75 */
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
+  "character value in \\u.... sequence is too large\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -831,6 +832,18 @@ else
           c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
 #endif
           }
+          
+#ifdef COMPILE_PCRE8
+        if (c > (utf ? 0x10ffff : 0xff))
+#else
+#ifdef COMPILE_PCRE16
+        if (c > (utf ? 0x10ffff : 0xffff))
+#endif
+#endif
+          {
+          *errorcodeptr = ERR76; 
+          }
+        else if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
         }
       }
     else
