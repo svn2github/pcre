@@ -5438,6 +5438,8 @@ switch(opcode)
     }
   else
     {
+    if (opcode == OP_PLUS)
+      compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
     allocate_stack(common, 2);
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, 1);
@@ -5457,9 +5459,8 @@ switch(opcode)
       CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg1 + 1, label);
       }
     set_jumps(nomatch, LABEL());
-    if (opcode == OP_PLUS || opcode == OP_CRRANGE)
-      add_jump(compiler, &backtrack->topbacktracks,
-        CMP(SLJIT_C_LESS, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, opcode == OP_PLUS ? 2 : arg2 + 1));
+    if (opcode == OP_CRRANGE)
+      add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_C_LESS, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, arg2 + 1));
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     }
   BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
@@ -5467,10 +5468,10 @@ switch(opcode)
 
   case OP_MINSTAR:
   case OP_MINPLUS:
+  if (opcode == OP_MINPLUS)
+    compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
   allocate_stack(common, 1);
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
-  if (opcode == OP_MINPLUS)
-    add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_JUMP));
   BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
   break;
 
@@ -5886,6 +5887,7 @@ pcre_uchar type;
 int arg1 = -1, arg2 = -1;
 struct sljit_label *label = NULL;
 struct sljit_jump *jump = NULL;
+jump_list *jumplist = NULL;
 
 cc = get_iterator_parameters(common, cc, &opcode, &type, &arg1, &arg2, NULL);
 
@@ -5904,48 +5906,45 @@ switch(opcode)
     }
   else
     {
-    if (opcode == OP_STAR || opcode == OP_UPTO)
+    if (opcode <= OP_PLUS || opcode == OP_UPTO)
       arg2 = 0;
-    else if (opcode == OP_PLUS)
-      arg2 = 1;
-    jump = CMP(SLJIT_C_LESS_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, arg2 + 1);
-    OP2(SLJIT_SUB, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, 1);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+    jump = CMP(SLJIT_C_LESS_EQUAL, TMP1, 0, SLJIT_IMM, arg2 + 1);
+    OP2(SLJIT_SUB, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0, SLJIT_IMM, 1);
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     skip_char_back(common);
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
     JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
-    if (opcode == OP_PLUS || opcode == OP_CRRANGE)
+    if (opcode == OP_CRRANGE)
       set_jumps(current->topbacktracks, LABEL());
     JUMPHERE(jump);
     free_stack(common, 2);
+    if (opcode == OP_PLUS)
+      set_jumps(current->topbacktracks, LABEL());
     }
   break;
 
   case OP_MINSTAR:
   case OP_MINPLUS:
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  if (opcode == OP_MINPLUS)
-    {
-    set_jumps(current->topbacktracks, LABEL());
-    current->topbacktracks = NULL;
-    }
-  compile_char1_trypath(common, type, cc, &current->topbacktracks);
+  compile_char1_trypath(common, type, cc, &jumplist);
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
-  set_jumps(current->topbacktracks, LABEL());
+  set_jumps(jumplist, LABEL());
   free_stack(common, 1);
+  if (opcode == OP_MINPLUS)
+    set_jumps(current->topbacktracks, LABEL());
   break;
 
   case OP_MINUPTO:
   case OP_CRMINRANGE:
   if (opcode == OP_CRMINRANGE)
     {
-    set_jumps(current->topbacktracks, LABEL());
-    current->topbacktracks = NULL;
     label = LABEL();
+    set_jumps(current->topbacktracks, label);
     }
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  compile_char1_trypath(common, type, cc, &current->topbacktracks);
+  compile_char1_trypath(common, type, cc, &jumplist);
 
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
@@ -5960,7 +5959,7 @@ switch(opcode)
   else
     CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg1 + 2, CURRENT_AS(iterator_backtrack)->trypath);
 
-  set_jumps(current->topbacktracks, LABEL());
+  set_jumps(jumplist, LABEL());
   free_stack(common, 2);
   break;
 
@@ -5981,9 +5980,9 @@ switch(opcode)
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
   jump = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
-  compile_char1_trypath(common, type, cc, &current->topbacktracks);
+  compile_char1_trypath(common, type, cc, &jumplist);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
-  set_jumps(current->topbacktracks, LABEL());
+  set_jumps(jumplist, LABEL());
   JUMPHERE(jump);
   free_stack(common, 1);
   break;

@@ -689,7 +689,7 @@ static struct regression_test_case regression_test_cases[] = {
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
 	{ MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },
-	{ MUA, 0, "((a?)+)+b", "aaaaaaaaaaaaa b" },
+	{ MUA, 0, "((a?)+)+b", "aaaaaaaaaaaa b" },
 
 	/* Deep recursion: Stack limit reached. */
 	{ MA, 0 | F_NOMATCH, "a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaa" },

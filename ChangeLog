@@ -130,6 +130,8 @@ Version 8.31 02-June-2012
     1 to "aa" instead of to an empty string. The bug affected repeated groups
     that could potentially match an empty string.
 
+37. Optimizing single character iterators in JIT.
+
 
 Version 8.30 04-February-2012
 -----------------------------
