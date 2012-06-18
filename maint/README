@@ -101,6 +101,9 @@ distribution for a new release.
 
 . Ensure that the version number and version date are correct in configure.ac.
 
+. Update the library version numbers in configure.ac according to the rules 
+  given below.
+
 . If new build options have been added, ensure that they are added to the CMake
   files as well as to the autoconf files. The relevant files are CMakeLists.txt
   and config-cmake.h.in. After making a release tarball, test it out with CMake 
@@ -126,8 +129,9 @@ distribution for a new release.
   modules in which there is no call to memmove(). These can be ignored.
 
 . Documentation: check AUTHORS, COPYING, ChangeLog (check version and date),
-  INSTALL, LICENCE, NEWS (check version and date), NON-UNIX-USE, and README.
-  Many of these won't need changing, but over the long term things do change.
+  INSTALL, LICENCE, NEWS (check version and date), NON-AUTOTOOLS-BUILD, and
+  README. Many of these won't need changing, but over the long term things do
+  change.
 
 . I used to test new releases myself on a number of different operating
   systems, using different compilers as well. For example, on Solaris it is
@@ -136,6 +140,50 @@ distribution for a new release.
   pcretest to increase the stack size for test 2. Since I retired I can no
   longer do this, but instead I rely on putting out release candidates for
   folks on the pcre-dev list to test.
+  
+
+Updating version info for libtool
+=================================
+
+This set of rules for updating library version information came from a web page 
+whose URL I have forgotten. The version information consists of three parts:
+(current, revision, age).
+
+1. Start with version information of 0:0:0 for each libtool library.
+
+2. Update the version information only immediately before a public release of
+   your software. More frequent updates are unnecessary, and only guarantee
+   that the current interface number gets larger faster.
+
+3. If the library source code has changed at all since the last update, then
+   increment revision; c:r:a becomes c:r+1:a.
+
+4. If any interfaces have been added, removed, or changed since the last
+   update, increment current, and set revision to 0.
+
+5. If any interfaces have been added since the last public release, then
+   increment age.
+
+6. If any interfaces have been removed or changed since the last public
+   release, then set age to 0.
+
+The following explanation may help in understanding the above rules a bit
+better. Consider that there are three possible kinds of reaction from users to
+changes in a shared library:
+
+1. Programs using the previous version may use the new version as a drop-in
+   replacement, and programs using the new version can also work with the
+   previous one. In other words, no recompiling nor relinking is needed. In
+   this case, increment revision only, don't touch current or age.
+
+2. Programs using the previous version may use the new version as a drop-in
+   replacement, but programs using the new version may use APIs not present in
+   the previous one. In other words, a program linking against the new version
+   may fail if linked against the old version at run time. In this case, set
+   revision to 0, increment current and age.
+
+3. Programs may need to be changed, recompiled, relinked in order to use the
+   new version. Increment current, set revision and age to 0.
 
 
 Making a PCRE release
@@ -310,4 +358,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 14 January 2012
+Last updated: 18 June 2012
