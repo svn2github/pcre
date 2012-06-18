@@ -339,7 +339,7 @@ pcretest_SOURCES = pcretest.c
 pcretest_LDADD = $(LIBREADLINE)
 if WITH_PCRE8
 pcretest_SOURCES += pcre_printint.c
-pcretest_LDADD += libpcreposix.la
+pcretest_LDADD += libpcre.la libpcreposix.la
 endif # WITH_PCRE8
 if WITH_PCRE16
 pcretest_SOURCES += pcre16_printint.c
@@ -352,7 +352,7 @@ dist_noinst_SCRIPTS += RunGrepTest
 bin_PROGRAMS += pcregrep
 pcregrep_SOURCES = pcregrep.c
 pcregrep_LDADD = $(LIBZ) $(LIBBZ2)
-pcregrep_LDADD += libpcreposix.la
+pcregrep_LDADD += libpcre.la libpcreposix.la
 endif # WITH_PCRE8
 
 EXTRA_DIST += \
