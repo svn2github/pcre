@@ -1895,6 +1895,7 @@ COMPILATION ERROR CODES
          73  disallowed Unicode code point (>= 0xd800 && <= 0xdfff)
          74  invalid UTF-16 string (specifically UTF-16)
          75  name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
+         76  character value in \u.... sequence is too large
 
        The numbers 32 and 10000 in errors 48 and 49  are  defaults;  different
        values may be used if the limits were changed when PCRE was built.
@@ -3493,7 +3494,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 04 May 2012
+       Last updated: 17 June 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -4141,7 +4142,9 @@ BACKSLASH
        its.   Otherwise,  it  matches  a  literal "x" character. In JavaScript
        mode, support for code points greater than 256 is provided by \u, which
        must  be  followed  by  four hexadecimal digits; otherwise it matches a
-       literal "u" character.
+       literal "u" character.  Character codes specified by \u  in  JavaScript
+       mode  are  constrained in the same was as those specified by \x in non-
+       JavaScript mode.
 
        Characters whose value is less than 256 can be defined by either of the
        two  syntaxes for \x (or by \u in JavaScript mode). There is no differ-
@@ -6492,7 +6495,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 01 June 2012
+       Last updated: 17 June 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
 

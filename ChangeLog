@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.31 02-June-2012
+Version 8.31 20-June-2012
 -------------------------
 
 1.  Fixing a wrong JIT test case and some compiler warnings.
@@ -133,10 +133,10 @@ Version 8.31 02-June-2012
 37. Optimizing single character iterators in JIT.
 
 38. Wide characters specified with \uxxxx in JavaScript mode are now subject to
-    the same checks as \x{...} characters in non-JavaScript mode. Specifically, 
-    codepoints that are too big for the mode are faulted, and in a UTF mode, 
-    disallowed codepoints are also faulted. 
-    
+    the same checks as \x{...} characters in non-JavaScript mode. Specifically,
+    codepoints that are too big for the mode are faulted, and in a UTF mode,
+    disallowed codepoints are also faulted.
+
 39. If PCRE was compiled with UTF support, in three places in the DFA
     matcher there was code that should only have been obeyed in UTF mode, but
     was being obeyed unconditionally. In 8-bit mode this could cause incorrect
@@ -145,9 +145,9 @@ Version 8.31 02-June-2012
     both cases the values are those that cannot be the first data item in a UTF
     character. The three items that might have provoked this were recursions,
     possessively repeated groups, and atomic groups.
-    
-40. Ensure that libpcre is explicitly listed in the link commands for pcretest 
-    and pcregrep, because some OS require shared objects to be explicitly 
+
+40. Ensure that libpcre is explicitly listed in the link commands for pcretest
+    and pcregrep, because some OS require shared objects to be explicitly
     passed to ld, causing the link step to fail if they are not.
 
 

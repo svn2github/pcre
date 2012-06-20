@@ -97,7 +97,7 @@ EXTRA_DIST =
 EXTRA_DIST += \
   doc/perltest.txt \
   NON-UNIX-USE \
-  NON-AUTOTOOLS-BUILD \ 
+  NON-AUTOTOOLS-BUILD \
   HACKING
 
 # These files are used in the preparation of a release

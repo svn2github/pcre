@@ -832,7 +832,7 @@ else
           c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
 #endif
           }
-          
+
 #ifdef COMPILE_PCRE8
         if (c > (utf ? 0x10ffff : 0xff))
 #else
@@ -841,7 +841,7 @@ else
 #endif
 #endif
           {
-          *errorcodeptr = ERR76; 
+          *errorcodeptr = ERR76;
           }
         else if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
         }

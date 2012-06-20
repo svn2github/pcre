@@ -34,7 +34,7 @@ should compile successfully on any system that has a Standard C compiler and
 library. The C++ wrapper functions are a separate issue (see below).
 
 The PCRE distribution includes a "configure" file for use by the configure/make
-(autotools) build system, as found in many Unix-like environments. The README 
+(autotools) build system, as found in many Unix-like environments. The README
 file contains information about the options for "configure".
 
 There is also support for CMake, which some users prefer, especially in Windows

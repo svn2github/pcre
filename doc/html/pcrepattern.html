@@ -307,6 +307,8 @@ as just described only when it is followed by two hexadecimal digits.
 Otherwise, it matches a literal "x" character. In JavaScript mode, support for
 code points greater than 256 is provided by \u, which must be followed by
 four hexadecimal digits; otherwise it matches a literal "u" character.
+Character codes specified by \u in JavaScript mode are constrained in the same
+was as those specified by \x in non-JavaScript mode.
 </P>
 <P>
 Characters whose value is less than 256 can be defined by either of the two
@@ -2869,7 +2871,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 01 June 2012
+Last updated: 17 June 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

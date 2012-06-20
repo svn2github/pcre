@@ -161,7 +161,7 @@ static const int eint[] = {
   REG_BADPAT,  /* invalid UTF-16 string (should not occur) */
   /* 75 */
   REG_BADPAT,  /* overlong MARK name */
-  REG_BADPAT   /* character value in \u.... sequence is too large */ 
+  REG_BADPAT   /* character value in \u.... sequence is too large */
 };
 
 /* Table of texts corresponding to POSIX error codes */

@@ -116,7 +116,7 @@ Building PCRE on non-Unix-like systems
 For a non-Unix-like system, please read the comments in the file
 NON-AUTOTOOLS-BUILD, though if your system supports the use of "configure" and
 "make" you may be able to build PCRE using autotools in the same way as for
-many Unix-like systems. 
+many Unix-like systems.
 
 PCRE can also be configured using the GUI facility provided by CMake's
 cmake-gui command. This creates Makefiles, solution files, etc. The file
@@ -615,9 +615,9 @@ tests. To run pcretest on just one or more specific test files, give their
 numbers as arguments to RunTest, for example:
 
   RunTest 2 7 11
-  
-You can also call RunTest with the single argument "list" to cause it to output 
-a list of tests. 
+
+You can also call RunTest with the single argument "list" to cause it to output
+a list of tests.
 
 The first test file can be fed directly into the perltest.pl script to check
 that Perl gives the same results. The only difference you should see is in the
@@ -825,7 +825,7 @@ pcre_xxx and the other with the name pcre16_xxx.
                           )   Makefile.in
   NEWS                    important changes in this release
   NON-UNIX-USE            the previous name for NON-AUTOTOOLS-BUILD
-  NON-AUTOTOOLS-BUILD     notes on building PCRE without using autotools 
+  NON-AUTOTOOLS-BUILD     notes on building PCRE without using autotools
   PrepareRelease          script to make preparations for "make dist"
   README                  this file
   RunTest                 a Unix shell script for running tests
