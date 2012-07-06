@@ -128,10 +128,9 @@ distribution for a new release.
   may see a number of "pcre_memmove defined but not used" warnings for the
   modules in which there is no call to memmove(). These can be ignored.
 
-. Documentation: check AUTHORS, COPYING, ChangeLog (check version and date),
-  INSTALL, LICENCE, NEWS (check version and date), NON-AUTOTOOLS-BUILD, and
-  README. Many of these won't need changing, but over the long term things do
-  change.
+. Documentation: check AUTHORS, ChangeLog (check version and date), LICENCE, 
+  NEWS (check version and date), NON-AUTOTOOLS-BUILD, and README. Many of these
+  won't need changing, but over the long term things do change.
 
 . I used to test new releases myself on a number of different operating
   systems, using different compilers as well. For example, on Solaris it is
