@@ -194,6 +194,11 @@ correctly, but that messes up comparisons). --/
 
 /\h*A/SI8
     CDBABC
+    \x{2000}ABC 
+
+/\R*A/SI8
+    CDBABC
+    \x{2028}A  
 
 /\v+A/SI8
 

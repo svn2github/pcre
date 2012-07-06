@@ -692,9 +692,23 @@ Options: utf
 No first char
 Need char = 'A'
 Subject length lower bound = 1
-Starting byte set: \x09 \x20 A \xa0 
+Starting byte set: \x09 \x20 A \xa0 \xff 
     CDBABC
  0: A
+    \x{2000}ABC 
+ 0: \x{2000}A
+
+/\R*A/SI8
+Capturing subpattern count = 0
+Options: utf
+No first char
+Need char = 'A'
+Subject length lower bound = 1
+Starting byte set: \x0a \x0b \x0c \x0d A \x85 \xff 
+    CDBABC
+ 0: A
+    \x{2028}A  
+ 0: \x{2028}A
 
 /\v+A/SI8
 Capturing subpattern count = 0

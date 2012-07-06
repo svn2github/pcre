@@ -1123,7 +1123,7 @@ do
         case OP_HSPACE:
         SET_BIT(0x09);
         SET_BIT(0x20);
-#ifdef COMPILE_PCRE8
+#ifdef SUPPORT_UTF
         if (utf)
           {
 #ifdef COMPILE_PCRE8
@@ -1148,7 +1148,7 @@ do
         SET_BIT(0x0B);
         SET_BIT(0x0C);
         SET_BIT(0x0D);
-#ifdef COMPILE_PCRE8
+#ifdef SUPPORT_UTF
         if (utf)
           {
 #ifdef COMPILE_PCRE8

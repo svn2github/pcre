@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.31 20-June-2012
+Version 8.31 06-July-2012
 -------------------------
 
 1.  Fixing a wrong JIT test case and some compiler warnings.
@@ -149,6 +149,9 @@ Version 8.31 20-June-2012
 40. Ensure that libpcre is explicitly listed in the link commands for pcretest
     and pcregrep, because some OS require shared objects to be explicitly
     passed to ld, causing the link step to fail if they are not.
+
+41. There were two incorrect #ifdefs in pcre_study.c, meaning that, in 16-bit
+    mode, patterns that started with \h* or \R* might be incorrectly matched.
 
 
 Version 8.30 04-February-2012
