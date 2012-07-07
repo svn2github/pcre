@@ -667,13 +667,96 @@ switch(*cc)
   }
 }
 
+#define CASE_ITERATOR_LOCAL1 \
+    case OP_MINSTAR: \
+    case OP_MINPLUS: \
+    case OP_QUERY: \
+    case OP_MINQUERY: \
+    case OP_MINSTARI: \
+    case OP_MINPLUSI: \
+    case OP_QUERYI: \
+    case OP_MINQUERYI: \
+    case OP_NOTMINSTAR: \
+    case OP_NOTMINPLUS: \
+    case OP_NOTQUERY: \
+    case OP_NOTMINQUERY: \
+    case OP_NOTMINSTARI: \
+    case OP_NOTMINPLUSI: \
+    case OP_NOTQUERYI: \
+    case OP_NOTMINQUERYI:
+
+#define CASE_ITERATOR_LOCAL2A \
+    case OP_STAR: \
+    case OP_PLUS: \
+    case OP_STARI: \
+    case OP_PLUSI: \
+    case OP_NOTSTAR: \
+    case OP_NOTPLUS: \
+    case OP_NOTSTARI: \
+    case OP_NOTPLUSI:
+
+#define CASE_ITERATOR_LOCAL2B \
+    case OP_UPTO: \
+    case OP_MINUPTO: \
+    case OP_UPTOI: \
+    case OP_MINUPTOI: \
+    case OP_NOTUPTO: \
+    case OP_NOTMINUPTO: \
+    case OP_NOTUPTOI: \
+    case OP_NOTMINUPTOI:
+
+#define CASE_ITERATOR_TYPE_LOCAL1 \
+    case OP_TYPEMINSTAR: \
+    case OP_TYPEMINPLUS: \
+    case OP_TYPEQUERY: \
+    case OP_TYPEMINQUERY:
+
+#define CASE_ITERATOR_TYPE_LOCAL2A \
+    case OP_TYPESTAR: \
+    case OP_TYPEPLUS:
+
+#define CASE_ITERATOR_TYPE_LOCAL2B \
+    case OP_TYPEUPTO: \
+    case OP_TYPEMINUPTO:
+
+static int get_class_iterator_size(pcre_uchar *cc)
+{
+switch(*cc)
+  {
+  case OP_CRSTAR:
+  case OP_CRPLUS:
+  return 2;
+
+  case OP_CRMINSTAR:
+  case OP_CRMINPLUS:
+  case OP_CRQUERY:
+  case OP_CRMINQUERY:
+  return 1;
+
+  case OP_CRRANGE:
+  case OP_CRMINRANGE:
+  if (GET2(cc, 1) == GET2(cc, 1 + IMM2_SIZE))
+    return 0;
+  return 2;
+
+  default:
+  return 0;
+  }
+}
+
 static int get_localspace(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend)
 {
 int localspace = 0;
 pcre_uchar *alternative;
+pcre_uchar *end = NULL;
+int space, size, bracketlen;
+
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
   {
+  space = 0;
+  size = 0;
+  bracketlen = 0;
   switch(*cc)
     {
     case OP_SET_SOM:
@@ -692,13 +775,13 @@ while (cc < ccend)
     case OP_SBRAPOS:
     case OP_SCOND:
     localspace += sizeof(sljit_w);
-    cc += 1 + LINK_SIZE;
+    bracketlen = 1 + LINK_SIZE;
     break;
 
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
     localspace += sizeof(sljit_w);
-    cc += 1 + LINK_SIZE + IMM2_SIZE;
+    bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
     case OP_COND:
@@ -706,8 +789,62 @@ while (cc < ccend)
     alternative = cc + GET(cc, 1);
     if (*alternative == OP_KETRMAX || *alternative == OP_KETRMIN)
       localspace += sizeof(sljit_w);
-    cc += 1 + LINK_SIZE;
+    bracketlen = 1 + LINK_SIZE;
     break;
+
+    case OP_BRA:
+    bracketlen = 1 + LINK_SIZE;
+    break;
+
+    case OP_CBRA:
+    case OP_SCBRA:
+    bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
+    break;
+
+    CASE_ITERATOR_LOCAL1
+    space = 1;
+    size = -2;
+    break;
+
+    CASE_ITERATOR_LOCAL2A
+    space = 2;
+    size = -2;
+    break;
+
+    CASE_ITERATOR_LOCAL2B
+    space = 2;
+    size = -(2 + IMM2_SIZE);
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL1
+    space = 1;
+    size = 1;
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL2A
+    if (cc[1] != OP_ANYNL && cc[1] != OP_EXTUNI)
+      space = 2;
+    size = 1;
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL2B
+    if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
+      space = 2;
+    size = 1 + IMM2_SIZE;
+    break;
+
+    case OP_CLASS:
+    case OP_NCLASS:
+    size += 1 + 32 / sizeof(pcre_uchar);
+    space = get_class_iterator_size(cc + size);
+    break;
+
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    case OP_XCLASS:
+    size = GET(cc, 1);
+    space = get_class_iterator_size(cc + size);
+    break;
+#endif
 
     case OP_RECURSE:
     /* Set its value only once. */
@@ -734,6 +871,33 @@ while (cc < ccend)
       return -1;
     break;
     }
+
+  if (space > 0 && cc >= end)
+    localspace += sizeof(sljit_w) * space;
+
+  if (size != 0)
+    {
+    if (size < 0)
+      {
+      cc += -size;
+#ifdef SUPPORT_UTF
+      if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+      }
+    else
+      cc += size;
+    }
+
+  if (bracketlen > 0)
+    {
+    if (cc >= end)
+      {
+      end = bracketend(cc);
+      if (end[-1 - LINK_SIZE] == OP_KET)
+        end = NULL;
+      }
+    cc += bracketlen;
+    }
   }
 return localspace;
 }
@@ -742,8 +906,14 @@ static void set_localptrs(compiler_common *common, int localptr, pcre_uchar *cce
 {
 pcre_uchar *cc = common->start;
 pcre_uchar *alternative;
+pcre_uchar *end = NULL;
+int space, size, bracketlen;
+
 while (cc < ccend)
   {
+  space = 0;
+  size = 0;
+  bracketlen = 0;
   switch(*cc)
     {
     case OP_ASSERT:
@@ -758,14 +928,14 @@ while (cc < ccend)
     case OP_SCOND:
     common->localptrs[cc - common->start] = localptr;
     localptr += sizeof(sljit_w);
-    cc += 1 + LINK_SIZE;
+    bracketlen = 1 + LINK_SIZE;
     break;
 
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
     common->localptrs[cc - common->start] = localptr;
     localptr += sizeof(sljit_w);
-    cc += 1 + LINK_SIZE + IMM2_SIZE;
+    bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
     case OP_COND:
@@ -776,13 +946,97 @@ while (cc < ccend)
       common->localptrs[cc - common->start] = localptr;
       localptr += sizeof(sljit_w);
       }
-    cc += 1 + LINK_SIZE;
+    bracketlen = 1 + LINK_SIZE;
     break;
+
+    case OP_BRA:
+    bracketlen = 1 + LINK_SIZE;
+    break;
+
+    case OP_CBRA:
+    case OP_SCBRA:
+    bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
+    break;
+
+    CASE_ITERATOR_LOCAL1
+    space = 1;
+    size = -2;
+    break;
+
+    CASE_ITERATOR_LOCAL2A
+    space = 2;
+    size = -2;
+    break;
+
+    CASE_ITERATOR_LOCAL2B
+    space = 2;
+    size = -(2 + IMM2_SIZE);
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL1
+    space = 1;
+    size = 1;
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL2A
+    if (cc[1] != OP_ANYNL && cc[1] != OP_EXTUNI)
+      space = 2;
+    size = 1;
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL2B
+    if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
+      space = 2;
+    size = 1 + IMM2_SIZE;
+    break;
+
+    case OP_CLASS:
+    case OP_NCLASS:
+    size += 1 + 32 / sizeof(pcre_uchar);
+    space = get_class_iterator_size(cc + size);
+    break;
+
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    case OP_XCLASS:
+    size = GET(cc, 1);
+    space = get_class_iterator_size(cc + size);
+    break;
+#endif
 
     default:
     cc = next_opcode(common, cc);
     SLJIT_ASSERT(cc != NULL);
     break;
+    }
+
+  if (space > 0 && cc >= end)
+    {
+    common->localptrs[cc - common->start] = localptr;
+    localptr += sizeof(sljit_w) * space;
+    }
+
+  if (size != 0)
+    {
+    if (size < 0)
+      {
+      cc += -size;
+#ifdef SUPPORT_UTF
+      if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+      }
+    else
+      cc += size;
+    }
+
+  if (bracketlen > 0)
+    {
+    if (cc >= end)
+      {
+      end = bracketend(cc);
+      if (end[-1 - LINK_SIZE] == OP_KET)
+        end = NULL;
+      }
+    cc += bracketlen;
     }
   }
 }
@@ -963,10 +1217,12 @@ SLJIT_ASSERT(stackpos == STACK(stacktop));
 static SLJIT_INLINE int get_localsize(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend)
 {
 int localsize = 2;
+int size;
 pcre_uchar *alternative;
 /* Calculate the sum of the local variables. */
 while (cc < ccend)
   {
+  size = 0;
   switch(*cc)
     {
     case OP_ASSERT:
@@ -1003,6 +1259,64 @@ while (cc < ccend)
     cc += 1 + LINK_SIZE;
     break;
 
+    CASE_ITERATOR_LOCAL1
+    if (PRIV_DATA(cc))
+      localsize++;
+    cc += 2;
+#ifdef SUPPORT_UTF
+    if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+    break;
+
+    CASE_ITERATOR_LOCAL2A
+    if (PRIV_DATA(cc))
+      localsize += 2;
+    cc += 2;
+#ifdef SUPPORT_UTF
+    if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+    break;
+
+    CASE_ITERATOR_LOCAL2B
+    if (PRIV_DATA(cc))
+      localsize += 2;
+    cc += 2 + IMM2_SIZE;
+#ifdef SUPPORT_UTF
+    if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL1
+    if (PRIV_DATA(cc))
+      localsize++;
+    cc += 1;
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL2A
+    if (PRIV_DATA(cc))
+      localsize += 2;
+    cc += 1;
+    break;
+
+    CASE_ITERATOR_TYPE_LOCAL2B
+    if (PRIV_DATA(cc))
+      localsize += 2;
+    cc += 1 + IMM2_SIZE;
+    break;
+
+    case OP_CLASS:
+    case OP_NCLASS:
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    case OP_XCLASS:
+    size = (*cc == OP_XCLASS) ? GET(cc, 1) : 1 + 32 / sizeof(pcre_uchar);
+#else
+    size = 1 + 32 / sizeof(pcre_uchar);
+#endif
+    if (PRIV_DATA(cc))
+      localsize += get_class_iterator_size(cc + size);
+    cc += size;
+    break;
+
     default:
     cc = next_opcode(common, cc);
     SLJIT_ASSERT(cc != NULL);
@@ -1018,7 +1332,7 @@ static void copy_locals(compiler_common *common, pcre_uchar *cc, pcre_uchar *cce
 {
 DEFINE_COMPILER;
 int srcw[2];
-int count;
+int count, size;
 BOOL tmp1next = TRUE;
 BOOL tmp1empty = TRUE;
 BOOL tmp2empty = TRUE;
@@ -1098,8 +1412,8 @@ while (status != end)
       case OP_CBRAPOS:
       case OP_SCBRAPOS:
       count = 2;
-      srcw[1] = OVECTOR_PRIV(GET2(cc, 1 + LINK_SIZE));
-      srcw[0] = PRIV_DATA(cc);
+      srcw[0] = OVECTOR_PRIV(GET2(cc, 1 + LINK_SIZE));
+      srcw[1] = PRIV_DATA(cc);
       SLJIT_ASSERT(srcw[0] != 0);
       cc += 1 + LINK_SIZE + IMM2_SIZE;
       break;
@@ -1114,6 +1428,102 @@ while (status != end)
         SLJIT_ASSERT(srcw[0] != 0);
         }
       cc += 1 + LINK_SIZE;
+      break;
+
+      CASE_ITERATOR_LOCAL1
+      if (PRIV_DATA(cc))
+        {
+        count = 1;
+        srcw[0] = PRIV_DATA(cc);
+        }
+      cc += 2;
+#ifdef SUPPORT_UTF
+      if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+      break;
+
+      CASE_ITERATOR_LOCAL2A
+      if (PRIV_DATA(cc))
+        {
+        count = 2;
+        srcw[0] = PRIV_DATA(cc);
+        srcw[1] = PRIV_DATA(cc) + sizeof(sljit_w);
+        }
+      cc += 2;
+#ifdef SUPPORT_UTF
+      if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+      break;
+
+      CASE_ITERATOR_LOCAL2B
+      if (PRIV_DATA(cc))
+        {
+        count = 2;
+        srcw[0] = PRIV_DATA(cc);
+        srcw[1] = PRIV_DATA(cc) + sizeof(sljit_w);
+        }
+      cc += 2 + IMM2_SIZE;
+#ifdef SUPPORT_UTF
+      if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
+#endif
+      break;
+
+      CASE_ITERATOR_TYPE_LOCAL1
+      if (PRIV_DATA(cc))
+        {
+        count = 1;
+        srcw[0] = PRIV_DATA(cc);
+        }
+      cc += 1;
+      break;
+
+      CASE_ITERATOR_TYPE_LOCAL2A
+      if (PRIV_DATA(cc))
+        {
+        count = 2;
+        srcw[0] = PRIV_DATA(cc);
+        srcw[1] = srcw[0] + sizeof(sljit_w);
+        }
+      cc += 1;
+      break;
+
+      CASE_ITERATOR_TYPE_LOCAL2B
+      if (PRIV_DATA(cc))
+        {
+        count = 2;
+        srcw[0] = PRIV_DATA(cc);
+        srcw[1] = srcw[0] + sizeof(sljit_w);
+        }
+      cc += 1 + IMM2_SIZE;
+      break;
+
+      case OP_CLASS:
+      case OP_NCLASS:
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+      case OP_XCLASS:
+      size = (*cc == OP_XCLASS) ? GET(cc, 1) : 1 + 32 / sizeof(pcre_uchar);
+#else
+      size = 1 + 32 / sizeof(pcre_uchar);
+#endif
+      if (PRIV_DATA(cc))
+        switch(get_class_iterator_size(cc + size))
+          {
+          case 1:
+          count = 1;
+          srcw[0] = PRIV_DATA(cc);
+          break;
+
+          case 2:
+          count = 2;
+          srcw[0] = PRIV_DATA(cc);
+          srcw[1] = srcw[0] + sizeof(sljit_w);
+          break;
+
+          default:
+          SLJIT_ASSERT_STOP();
+          break;
+          }
+      cc += size;
       break;
 
       default:
@@ -1217,6 +1627,13 @@ if (save)
   }
 SLJIT_ASSERT(cc == ccend && stackptr == stacktop && (save || (tmp1empty && tmp2empty)));
 }
+
+#undef CASE_ITERATOR_LOCAL1
+#undef CASE_ITERATOR_LOCAL2A
+#undef CASE_ITERATOR_LOCAL2B
+#undef CASE_ITERATOR_TYPE_LOCAL1
+#undef CASE_ITERATOR_TYPE_LOCAL2A
+#undef CASE_ITERATOR_TYPE_LOCAL2B
 
 static SLJIT_INLINE BOOL ispowerof2(unsigned int value)
 {
@@ -2089,6 +2506,196 @@ if (newlinecheck)
 return mainloop;
 }
 
+static SLJIT_INLINE BOOL fast_forward_first_two_chars(compiler_common *common, BOOL firstline)
+{
+DEFINE_COMPILER;
+struct sljit_label *start;
+struct sljit_jump *leave;
+struct sljit_jump *found;
+pcre_int32 chars[4];
+pcre_uchar *cc = common->start + 1 + IMM2_SIZE;
+int index = 0;
+pcre_int32 len, c, bit;
+unsigned int caseless;
+BOOL must_end;
+
+#ifdef COMPILE_PCRE8
+union {
+    sljit_uh ascombined;
+    sljit_ub asuchars[2];
+} pair;
+#else
+union {
+    sljit_ui ascombined;
+    sljit_uh asuchars[2];
+} pair;
+#endif
+
+if (*(common->start + GET(common->start, 1)) == OP_ALT)
+  return FALSE;
+
+while (TRUE)
+  {
+  caseless = 0;
+  must_end = TRUE;
+  switch(*cc)
+    {
+    case OP_CHAR:
+    must_end = FALSE;
+    cc++;
+    break;
+
+    case OP_CHARI:
+    caseless = 1;
+    must_end = FALSE;
+    cc++;
+    break;
+
+    case OP_SOD:
+    case OP_SOM:
+    case OP_SET_SOM:
+    case OP_NOT_WORD_BOUNDARY:
+    case OP_WORD_BOUNDARY:
+    case OP_EODN:
+    case OP_EOD:
+    case OP_CIRC:
+    case OP_CIRCM:
+    case OP_DOLL:
+    case OP_DOLLM:
+    /* Zero width assertions. */
+    cc++;
+    continue;
+
+    case OP_PLUS:
+    case OP_MINPLUS:
+    case OP_POSPLUS:
+    cc++;
+    break;
+
+    case OP_EXACT:
+    cc += 1 + IMM2_SIZE;
+    break;
+
+    case OP_PLUSI:
+    case OP_MINPLUSI:
+    case OP_POSPLUSI:
+    caseless = 1;
+    cc++;
+    break;
+
+    case OP_EXACTI:
+    caseless = 1;
+    cc += 1 + IMM2_SIZE;
+    break;
+
+    default:
+    return FALSE;
+    }
+
+  len = 1;
+#ifdef SUPPORT_UTF
+  if (common->utf && HAS_EXTRALEN(cc[0])) len += GET_EXTRALEN(cc[0]);
+#endif
+
+  if (caseless && char_has_othercase(common, cc))
+    {
+    caseless = char_get_othercase_bit(common, cc);
+    if (caseless == 0)
+      return FALSE;
+#ifdef COMPILE_PCRE8
+    caseless = ((caseless & 0xff) << 8) | (len - (caseless >> 8));
+#else
+    if ((caseless & 0x100) != 0)
+      caseless = ((caseless & 0xff) << 16) | (len - (caseless >> 9));
+    else
+      caseless = ((caseless & 0xff) << 8) | (len - (caseless >> 9));
+#endif
+    }
+  else
+    caseless = 0;
+
+  while (len > 0 && index < 2 * 2)
+    {
+    c = *cc;
+    bit = 0;
+    if (len == (caseless & 0xff))
+      {
+      bit = caseless >> 8;
+      c |= bit;
+      }
+
+    chars[index] = c;
+    chars[index + 1] = bit;
+
+    len--;
+    index += 2;
+    cc++;
+    }
+
+  if (index == 2 * 2)
+    break;
+  else if (must_end)
+    return FALSE;
+  }
+
+if (firstline)
+  {
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0, STR_END, 0);
+  OP2(SLJIT_SUB, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, SLJIT_IMM, 1);
+  }
+else
+  OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, 1);
+
+start = LABEL();
+leave = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+#if defined SLJIT_UNALIGNED && SLJIT_UNALIGNED
+#ifdef COMPILE_PCRE8
+OP1(SLJIT_MOV_UH, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+#else /* COMPILE_PCRE8 */
+OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+#endif
+
+#else /* SLJIT_UNALIGNED */
+
+#if defined SLJIT_BIG_ENDIAN && SLJIT_BIG_ENDIAN
+OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), 0);
+OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+#else /* SLJIT_BIG_ENDIAN */
+OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+#endif /* SLJIT_BIG_ENDIAN */
+
+#ifdef COMPILE_PCRE8
+OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 8);
+#else /* COMPILE_PCRE8 */
+OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 16);
+#endif
+OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+#endif
+
+if (chars[1] != 0 || chars[3] != 0)
+  {
+  pair.asuchars[0] = chars[1];
+  pair.asuchars[1] = chars[3];
+  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, pair.ascombined);
+  }
+
+pair.asuchars[0] = chars[0];
+pair.asuchars[1] = chars[2];
+found = CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, pair.ascombined);
+
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+JUMPTO(SLJIT_JUMP, start);
+JUMPHERE(found);
+JUMPHERE(leave);
+
+if (firstline)
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0);
+OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, 1);
+return TRUE;
+}
+
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_uchar first_char, BOOL caseless, BOOL firstline)
 {
 DEFINE_COMPILER;
@@ -2137,25 +2744,6 @@ else
   }
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-if (common->utf)
-  {
-  CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0, start);
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)PRIV(utf8_table4) - 0xc0);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  }
-#endif
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
-if (common->utf)
-  {
-  CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800, start);
-  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-  OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xd800);
-  COND_VALUE(SLJIT_MOV, TMP1, 0, SLJIT_C_EQUAL);
-  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  }
-#endif
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
 JUMPHERE(leave);
@@ -5390,6 +5978,10 @@ pcre_uchar* end;
 jump_list *nomatch = NULL;
 struct sljit_jump *jump = NULL;
 struct sljit_label *label;
+int localptr = PRIV_DATA(cc);
+int base = (localptr == 0) ? SLJIT_MEM1(STACK_TOP) : SLJIT_MEM1(SLJIT_LOCALS_REG);
+int offset0 = (localptr == 0) ? STACK(0) : localptr;
+int offset1 = (localptr == 0) ? STACK(1) : localptr + sizeof(sljit_w);
 
 PUSH_BACKTRACK(sizeof(iterator_backtrack), cc, NULL);
 
@@ -5403,6 +5995,7 @@ switch(opcode)
   case OP_CRRANGE:
   if (type == OP_ANYNL || type == OP_EXTUNI)
     {
+    SLJIT_ASSERT(localptr == 0);
     if (opcode == OP_STAR || opcode == OP_UPTO)
       {
       allocate_stack(common, 2);
@@ -5440,28 +6033,29 @@ switch(opcode)
     {
     if (opcode == OP_PLUS)
       compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
-    allocate_stack(common, 2);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, 1);
+    if (localptr == 0)
+      allocate_stack(common, 2);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+    OP1(SLJIT_MOV, base, offset1, SLJIT_IMM, 1);
     label = LABEL();
     compile_char1_trypath(common, type, cc, &nomatch);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
     if (opcode <= OP_PLUS || (opcode == OP_CRRANGE && arg1 == 0))
       {
-      OP2(SLJIT_ADD, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, 1);
+      OP2(SLJIT_ADD, base, offset1, base, offset1, SLJIT_IMM, 1);
       JUMPTO(SLJIT_JUMP, label);
       }
     else
       {
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+      OP1(SLJIT_MOV, TMP1, 0, base, offset1);
       OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
+      OP1(SLJIT_MOV, base, offset1, TMP1, 0);
       CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg1 + 1, label);
       }
     set_jumps(nomatch, LABEL());
     if (opcode == OP_CRRANGE)
-      add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_C_LESS, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, arg2 + 1));
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+      add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_C_LESS, base, offset1, SLJIT_IMM, arg2 + 1));
+    OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
     }
   BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
   break;
@@ -5470,16 +6064,18 @@ switch(opcode)
   case OP_MINPLUS:
   if (opcode == OP_MINPLUS)
     compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
-  allocate_stack(common, 1);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+  if (localptr == 0)
+    allocate_stack(common, 1);
+  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
   break;
 
   case OP_MINUPTO:
   case OP_CRMINRANGE:
-  allocate_stack(common, 2);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, 1);
+  if (localptr == 0)
+    allocate_stack(common, 2);
+  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
+  OP1(SLJIT_MOV, base, offset1, SLJIT_IMM, 1);
   if (opcode == OP_CRMINRANGE)
     add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_JUMP));
   BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
@@ -5487,8 +6083,9 @@ switch(opcode)
 
   case OP_QUERY:
   case OP_MINQUERY:
-  allocate_stack(common, 1);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+  if (localptr == 0)
+    allocate_stack(common, 1);
+  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   if (opcode == OP_QUERY)
     compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
   BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
@@ -5888,6 +6485,10 @@ int arg1 = -1, arg2 = -1;
 struct sljit_label *label = NULL;
 struct sljit_jump *jump = NULL;
 jump_list *jumplist = NULL;
+int localptr = PRIV_DATA(cc);
+int base = (localptr == 0) ? SLJIT_MEM1(STACK_TOP) : SLJIT_MEM1(SLJIT_LOCALS_REG);
+int offset0 = (localptr == 0) ? STACK(0) : localptr;
+int offset1 = (localptr == 0) ? STACK(1) : localptr + sizeof(sljit_w);
 
 cc = get_iterator_parameters(common, cc, &opcode, &type, &arg1, &arg2, NULL);
 
@@ -5899,6 +6500,7 @@ switch(opcode)
   case OP_CRRANGE:
   if (type == OP_ANYNL || type == OP_EXTUNI)
     {
+    SLJIT_ASSERT(localptr == 0);
     set_jumps(current->topbacktracks, LABEL());
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     free_stack(common, 1);
@@ -5908,17 +6510,18 @@ switch(opcode)
     {
     if (opcode <= OP_PLUS || opcode == OP_UPTO)
       arg2 = 0;
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+    OP1(SLJIT_MOV, TMP1, 0, base, offset1);
     jump = CMP(SLJIT_C_LESS_EQUAL, TMP1, 0, SLJIT_IMM, arg2 + 1);
-    OP2(SLJIT_SUB, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0, SLJIT_IMM, 1);
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    OP2(SLJIT_SUB, base, offset1, TMP1, 0, SLJIT_IMM, 1);
+    OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
     skip_char_back(common);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+    OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
     JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
     if (opcode == OP_CRRANGE)
       set_jumps(current->topbacktracks, LABEL());
     JUMPHERE(jump);
-    free_stack(common, 2);
+    if (localptr == 0)
+      free_stack(common, 2);
     if (opcode == OP_PLUS)
       set_jumps(current->topbacktracks, LABEL());
     }
@@ -5926,12 +6529,13 @@ switch(opcode)
 
   case OP_MINSTAR:
   case OP_MINPLUS:
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+  OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
   compile_char1_trypath(common, type, cc, &jumplist);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
   set_jumps(jumplist, LABEL());
-  free_stack(common, 1);
+  if (localptr == 0)
+    free_stack(common, 1);
   if (opcode == OP_MINPLUS)
     set_jumps(current->topbacktracks, LABEL());
   break;
@@ -5943,13 +6547,13 @@ switch(opcode)
     label = LABEL();
     set_jumps(current->topbacktracks, label);
     }
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+  OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
   compile_char1_trypath(common, type, cc, &jumplist);
 
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+  OP1(SLJIT_MOV, TMP1, 0, base, offset1);
+  OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
+  OP1(SLJIT_MOV, base, offset1, TMP1, 0);
 
   if (opcode == OP_CRMINRANGE)
     CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg2 + 1, label);
@@ -5960,31 +6564,34 @@ switch(opcode)
     CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg1 + 2, CURRENT_AS(iterator_backtrack)->trypath);
 
   set_jumps(jumplist, LABEL());
-  free_stack(common, 2);
+  if (localptr == 0)
+    free_stack(common, 2);
   break;
 
   case OP_QUERY:
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
+  OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
+  OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
   CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->trypath);
   jump = JUMP(SLJIT_JUMP);
   set_jumps(current->topbacktracks, LABEL());
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
+  OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
+  OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
   JUMPHERE(jump);
-  free_stack(common, 1);
+  if (localptr == 0)
+    free_stack(common, 1);
   break;
 
   case OP_MINQUERY:
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
+  OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
+  OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
   jump = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
   compile_char1_trypath(common, type, cc, &jumplist);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
   set_jumps(jumplist, LABEL());
   JUMPHERE(jump);
-  free_stack(common, 1);
+  if (localptr == 0)
+    free_stack(common, 1);
   break;
 
   case OP_EXACT:
@@ -6856,7 +7463,7 @@ switch(re->options & PCRE_NEWLINE_BITS)
   {
   case 0:
   /* Compile-time default */
-  switch (NEWLINE)
+  switch(NEWLINE)
     {
     case -1: common->newline = (CHAR_CR << 8) | CHAR_NL; common->nltype = NLTYPE_ANY; break;
     case -2: common->newline = (CHAR_CR << 8) | CHAR_NL; common->nltype = NLTYPE_ANYCRLF; break;
@@ -6979,6 +7586,8 @@ if ((re->options & PCRE_ANCHORED) == 0)
   /* Forward search if possible. */
   if ((re->options & PCRE_NO_START_OPTIMIZE) == 0)
     {
+    if (mode == JIT_COMPILE && fast_forward_first_two_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
+      /* Do nothing */;
     if ((re->flags & PCRE_FIRSTSET) != 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0, (re->options & PCRE_FIRSTLINE) != 0);
     else if ((re->flags & PCRE_STARTLINE) != 0)

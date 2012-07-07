@@ -1,6 +1,13 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.32
+------------
+
+1.  Improved JIT compiler optimizations for first character search and single
+    character iterators.
+
+
 Version 8.31 06-July-2012
 -------------------------
 
