@@ -10,6 +10,8 @@ Version 8.32
 2.  Supporting IBM XL C compilers for PPC architectures in the JIT compiler.
     Patch by Daniel Richard G.
 
+3.  Single character iterator optimizations in the JIT compiler.
+
 
 Version 8.31 06-July-2012
 -------------------------
