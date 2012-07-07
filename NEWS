@@ -9,7 +9,7 @@ This is mainly a bug-fixing release, with a small number of developments:
 . The JIT compiler now supports partial matching and the (*MARK) and
   (*COMMIT) verbs.
 
-. PCRE_INFO_MAXLOOKBEHIND can be used to find the longest lookbehing in a
+. PCRE_INFO_MAXLOOKBEHIND can be used to find the longest lookbehind in a
   pattern.
 
 . There should be a performance improvement when using the heap instead of the
