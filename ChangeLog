@@ -14,6 +14,9 @@ Version 8.32
 
 4.  Improved JIT compiler optimizations for character ranges.
 
+5.  Rename the "leave" variable names to "quit" to improve WinCE compatibility.
+    Reported by Giuseppe D'Angelo.
+
 
 Version 8.31 06-July-2012
 -------------------------

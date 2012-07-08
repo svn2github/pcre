@@ -181,7 +181,7 @@ typedef struct stub_list {
   enum stub_types type;
   int data;
   struct sljit_jump *start;
-  struct sljit_label *leave;
+  struct sljit_label *quit;
   struct stub_list *next;
 } stub_list;
 
@@ -314,13 +314,13 @@ typedef struct compiler_common {
 
   /* Labels and jump lists. */
   struct sljit_label *partialmatchlabel;
-  struct sljit_label *leavelabel;
+  struct sljit_label *quitlabel;
   struct sljit_label *acceptlabel;
   stub_list *stubs;
   recurse_entry *entries;
   recurse_entry *currententry;
   jump_list *partialmatch;
-  jump_list *leave;
+  jump_list *quit;
   jump_list *accept;
   jump_list *calllimit;
   jump_list *stackalloc;
@@ -1680,7 +1680,7 @@ if (list_item)
   list_item->type = type;
   list_item->data = data;
   list_item->start = start;
-  list_item->leave = LABEL();
+  list_item->quit = LABEL();
   list_item->next = common->stubs;
   common->stubs = list_item;
   }
@@ -1700,7 +1700,7 @@ while (list_item)
     add_jump(compiler, &common->stackalloc, JUMP(SLJIT_FAST_CALL));
     break;
     }
-  JUMPTO(SLJIT_JUMP, list_item->leave);
+  JUMPTO(SLJIT_JUMP, list_item->quit);
   list_item = list_item->next;
   }
 common->stubs = NULL;
@@ -1810,7 +1810,7 @@ else
   OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, 1);
 }
 
-static SLJIT_INLINE void return_with_partial_match(compiler_common *common, struct sljit_label *leave)
+static SLJIT_INLINE void return_with_partial_match(compiler_common *common, struct sljit_label *quit)
 {
 DEFINE_COMPILER;
 
@@ -1820,7 +1820,7 @@ SLJIT_ASSERT(common->start_used_ptr != 0 && (common->mode == JIT_PARTIAL_SOFT_CO
 OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG2, 0, ARGUMENTS, 0);
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_PARTIAL);
 OP1(SLJIT_MOV_SI, SLJIT_TEMPORARY_REG3, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), SLJIT_OFFSETOF(jit_arguments, offsetcount));
-CMPTO(SLJIT_C_LESS, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, 2, leave);
+CMPTO(SLJIT_C_LESS, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, 2, quit);
 
 /* Store match begin and end. */
 OP1(SLJIT_MOV, SLJIT_SAVED_REG1, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), SLJIT_OFFSETOF(jit_arguments, begin));
@@ -1838,7 +1838,7 @@ OP2(SLJIT_ASHR, SLJIT_TEMPORARY_REG3, 0, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, 1);
 #endif
 OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), 0, SLJIT_TEMPORARY_REG3, 0);
 
-JUMPTO(SLJIT_JUMP, leave);
+JUMPTO(SLJIT_JUMP, quit);
 }
 
 static SLJIT_INLINE void check_start_used_ptr(compiler_common *common)
@@ -2518,7 +2518,7 @@ static SLJIT_INLINE BOOL fast_forward_first_two_chars(compiler_common *common, B
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
-struct sljit_jump *leave;
+struct sljit_jump *quit;
 struct sljit_jump *found;
 pcre_int32 chars[4];
 pcre_uchar *cc = common->start + 1 + IMM2_SIZE;
@@ -2654,7 +2654,7 @@ else
   OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, 1);
 
 start = LABEL();
-leave = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 #if defined SLJIT_UNALIGNED && SLJIT_UNALIGNED
 #ifdef COMPILE_PCRE8
 OP1(SLJIT_MOV_UH, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
@@ -2695,7 +2695,7 @@ found = CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, pair.ascombined);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
-JUMPHERE(leave);
+JUMPHERE(quit);
 
 if (firstline)
   OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0);
@@ -2707,7 +2707,7 @@ static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_u
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
-struct sljit_jump *leave;
+struct sljit_jump *quit;
 struct sljit_jump *found;
 pcre_uchar oc, bit;
 
@@ -2718,7 +2718,7 @@ if (firstline)
   }
 
 start = LABEL();
-leave = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 
 oc = first_char;
@@ -2753,7 +2753,7 @@ else
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
-JUMPHERE(leave);
+JUMPHERE(quit);
 
 if (firstline)
   OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0);
@@ -2765,7 +2765,7 @@ DEFINE_COMPILER;
 struct sljit_label *loop;
 struct sljit_jump *lastchar;
 struct sljit_jump *firstchar;
-struct sljit_jump *leave;
+struct sljit_jump *quit;
 struct sljit_jump *foundcr = NULL;
 struct sljit_jump *notfoundnl;
 jump_list *newline = NULL;
@@ -2794,13 +2794,13 @@ if (common->nltype == NLTYPE_FIXED && common->newline > 255)
 
   loop = LABEL();
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  leave = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+  quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-2));
   OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
   CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff, loop);
   CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff, loop);
 
-  JUMPHERE(leave);
+  JUMPHERE(quit);
   JUMPHERE(firstchar);
   JUMPHERE(lastchar);
 
@@ -2824,7 +2824,7 @@ set_jumps(newline, loop);
 
 if (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF)
   {
-  leave = JUMP(SLJIT_JUMP);
+  quit = JUMP(SLJIT_JUMP);
   JUMPHERE(foundcr);
   notfoundnl = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
@@ -2835,7 +2835,7 @@ if (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF)
 #endif
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   JUMPHERE(notfoundnl);
-  JUMPHERE(leave);
+  JUMPHERE(quit);
   }
 JUMPHERE(lastchar);
 JUMPHERE(firstchar);
@@ -2848,7 +2848,7 @@ static SLJIT_INLINE void fast_forward_start_bits(compiler_common *common, sljit_
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
-struct sljit_jump *leave;
+struct sljit_jump *quit;
 struct sljit_jump *found;
 #ifndef COMPILE_PCRE8
 struct sljit_jump *jump;
@@ -2861,7 +2861,7 @@ if (firstline)
   }
 
 start = LABEL();
-leave = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 #ifdef SUPPORT_UTF
 if (common->utf)
@@ -2905,7 +2905,7 @@ if (common->utf)
 #endif
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
-JUMPHERE(leave);
+JUMPHERE(quit);
 
 if (firstline)
   OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0);
@@ -4940,9 +4940,9 @@ jump_list *tmp = NULL;
 jump_list **target = (conditional) ? &backtrack->condfailed : &backtrack->common.topbacktracks;
 jump_list **found;
 /* Saving previous accept variables. */
-struct sljit_label *save_leavelabel = common->leavelabel;
+struct sljit_label *save_quitlabel = common->quitlabel;
 struct sljit_label *save_acceptlabel = common->acceptlabel;
-jump_list *save_leave = common->leave;
+jump_list *save_quit = common->quit;
 jump_list *save_accept = common->accept;
 struct sljit_jump *jump;
 struct sljit_jump *brajump = NULL;
@@ -4990,8 +4990,8 @@ else
   }
 
 memset(&altbacktrack, 0, sizeof(backtrack_common));
-common->leavelabel = NULL;
-common->leave = NULL;
+common->quitlabel = NULL;
+common->quit = NULL;
 while (1)
   {
   common->acceptlabel = NULL;
@@ -5006,9 +5006,9 @@ while (1)
   compile_trypath(common, ccbegin + 1 + LINK_SIZE, cc, &altbacktrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    common->leavelabel = save_leavelabel;
+    common->quitlabel = save_quitlabel;
     common->acceptlabel = save_acceptlabel;
-    common->leave = save_leave;
+    common->quit = save_quit;
     common->accept = save_accept;
     return NULL;
     }
@@ -5061,9 +5061,9 @@ while (1)
   compile_backtrackpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    common->leavelabel = save_leavelabel;
+    common->quitlabel = save_quitlabel;
     common->acceptlabel = save_acceptlabel;
-    common->leave = save_leave;
+    common->quit = save_quit;
     common->accept = save_accept;
     return NULL;
     }
@@ -5076,8 +5076,8 @@ while (1)
   cc += GET(cc, 1);
   }
 /* None of them matched. */
-if (common->leave != NULL)
-  set_jumps(common->leave, LABEL());
+if (common->quit != NULL)
+  set_jumps(common->quit, LABEL());
 
 if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
   {
@@ -5202,9 +5202,9 @@ else
     }
   }
 
-common->leavelabel = save_leavelabel;
+common->quitlabel = save_quitlabel;
 common->acceptlabel = save_acceptlabel;
-common->leave = save_leave;
+common->quit = save_quit;
 common->accept = save_accept;
 return cc + 1 + LINK_SIZE;
 }
@@ -7502,10 +7502,10 @@ while (current)
 
     case OP_COMMIT:
     OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
-    if (common->leavelabel == NULL)
-      add_jump(compiler, &common->leave, JUMP(SLJIT_JUMP));
+    if (common->quitlabel == NULL)
+      add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
     else
-      JUMPTO(SLJIT_JUMP, common->leavelabel);
+      JUMPTO(SLJIT_JUMP, common->quitlabel);
     break;
 
     case OP_FAIL:
@@ -7533,8 +7533,8 @@ int framesize = get_framesize(common, cc, TRUE);
 int alternativesize;
 BOOL needsframe;
 backtrack_common altbacktrack;
-struct sljit_label *save_leavelabel = common->leavelabel;
-jump_list *save_leave = common->leave;
+struct sljit_label *save_quitlabel = common->quitlabel;
+jump_list *save_quit = common->quit;
 struct sljit_jump *jump;
 
 SLJIT_ASSERT(*cc == OP_BRA || *cc == OP_CBRA || *cc == OP_CBRAPOS || *cc == OP_SCBRA || *cc == OP_SCBRAPOS);
@@ -7559,9 +7559,9 @@ if (alternativesize > 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
 
 memset(&altbacktrack, 0, sizeof(backtrack_common));
-common->leavelabel = NULL;
+common->quitlabel = NULL;
 common->acceptlabel = NULL;
-common->leave = NULL;
+common->quit = NULL;
 common->accept = NULL;
 altbacktrack.cc = ccbegin;
 cc += GET(cc, 1);
@@ -7576,8 +7576,8 @@ while (1)
   compile_trypath(common, altbacktrack.cc, cc, &altbacktrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    common->leavelabel = save_leavelabel;
-    common->leave = save_leave;
+    common->quitlabel = save_quitlabel;
+    common->quit = save_quit;
     return;
     }
 
@@ -7586,8 +7586,8 @@ while (1)
   compile_backtrackpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    common->leavelabel = save_leavelabel;
-    common->leave = save_leave;
+    common->quitlabel = save_quitlabel;
+    common->quit = save_quit;
     return;
     }
   set_jumps(altbacktrack.topbacktracks, LABEL());
@@ -7599,8 +7599,8 @@ while (1)
   cc += GET(cc, 1);
   }
 /* None of them matched. */
-if (common->leave != NULL)
-  set_jumps(common->leave, LABEL());
+if (common->quit != NULL)
+  set_jumps(common->quit, LABEL());
 
 OP1(SLJIT_MOV, TMP3, 0, SLJIT_IMM, 0);
 jump = JUMP(SLJIT_JUMP);
@@ -7623,8 +7623,8 @@ OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->recursive_head, TMP2, 0);
 sljit_emit_fast_return(compiler, SLJIT_MEM1(STACK_TOP), 0);
 
-common->leavelabel = save_leavelabel;
-common->leave = save_leave;
+common->quitlabel = save_quitlabel;
+common->quit = save_quit;
 }
 
 #undef COMPILE_BACKTRACKPATH
@@ -7840,16 +7840,16 @@ if (common->accept != NULL)
 
 /* This means we have a match. Update the ovector. */
 copy_ovector(common, re->top_bracket + 1);
-common->leavelabel = LABEL();
-if (common->leave != NULL)
-  set_jumps(common->leave, common->leavelabel);
+common->quitlabel = LABEL();
+if (common->quit != NULL)
+  set_jumps(common->quit, common->quitlabel);
 sljit_emit_return(compiler, SLJIT_MOV, SLJIT_RETURN_REG, 0);
 
 if (mode != JIT_COMPILE)
   {
   common->partialmatchlabel = LABEL();
   set_jumps(common->partialmatch, common->partialmatchlabel);
-  return_with_partial_match(common, common->leavelabel);
+  return_with_partial_match(common, common->quitlabel);
   }
 
 empty_match_backtrack = LABEL();
@@ -7913,7 +7913,7 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
   CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0, common->partialmatchlabel);
 
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
-JUMPTO(SLJIT_JUMP, common->leavelabel);
+JUMPTO(SLJIT_JUMP, common->quitlabel);
 
 flush_stubs(common);
 
@@ -7966,12 +7966,12 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 JUMPHERE(jump);
 /* We break the return address cache here, but this is a really rare case. */
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_JIT_STACKLIMIT);
-JUMPTO(SLJIT_JUMP, common->leavelabel);
+JUMPTO(SLJIT_JUMP, common->quitlabel);
 
 /* Call limit reached. */
 set_jumps(common->calllimit, LABEL());
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_MATCHLIMIT);
-JUMPTO(SLJIT_JUMP, common->leavelabel);
+JUMPTO(SLJIT_JUMP, common->quitlabel);
 
 if (common->revertframes != NULL)
   {
