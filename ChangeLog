@@ -12,6 +12,8 @@ Version 8.32
 
 3.  Single character iterator optimizations in the JIT compiler.
 
+4.  Improved JIT compiler optimizations for character ranges.
+
 
 Version 8.31 06-July-2012
 -------------------------
