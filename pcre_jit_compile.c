@@ -3181,6 +3181,15 @@ switch(ranges[0])
       }
     return TRUE;
     }
+  if ((ranges[3] - ranges[2]) == (ranges[5] - ranges[4]) && ispowerof2(ranges[4] - ranges[2]))
+    {
+    if (readch)
+      read_char(common);
+    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4] - ranges[2]);
+    OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4]);
+    add_jump(compiler, backtracks, CMP(ranges[1] != 0 ? SLJIT_C_LESS : SLJIT_C_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, ranges[5] - ranges[4]));
+    return TRUE;
+    }
   return FALSE;
 
   default:
@@ -3194,6 +3203,7 @@ int i, bit, length;
 const pcre_uint8 *ctypes = (const pcre_uint8*)common->ctypes;
 
 bit = ctypes[0] & flag;
+ranges[0] = -1;
 ranges[1] = bit != 0 ? 1 : 0;
 length = 0;
 
@@ -3201,10 +3211,7 @@ for (i = 1; i < 256; i++)
   if ((ctypes[i] & flag) != bit)
     {
     if (length >= MAX_RANGE_SIZE)
-      {
-      ranges[0] = -1;
       return;
-      }
     ranges[2 + length] = i;
     length++;
     bit ^= flag;
@@ -3213,10 +3220,7 @@ for (i = 1; i < 256; i++)
 if (bit != 0)
   {
   if (length >= MAX_RANGE_SIZE)
-    {
-    ranges[0] = -1;
     return;
-    }
   ranges[2 + length] = 256;
   length++;
   }
