@@ -5636,6 +5636,8 @@ for (;; ptr++)
         if (namelen == verbs[i].len &&
             STRNCMP_UC_C8(name, vn, namelen) == 0)
           {
+          int setverb;
+
           /* Check for open captures before ACCEPT and convert it to
           ASSERT_ACCEPT if in an assertion. */
 
@@ -5653,7 +5655,8 @@ for (;; ptr++)
               *code++ = OP_CLOSE;
               PUT2INC(code, 0, oc->number);
               }
-            *code++ = (cd->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
+            setverb = *code++ =
+              (cd->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
 
             /* Do not set firstchar after *ACCEPT */
             if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
@@ -5668,8 +5671,7 @@ for (;; ptr++)
               *errorcodeptr = ERR66;
               goto FAILED;
               }
-            *code = verbs[i].op;
-            if (*code++ == OP_THEN) cd->external_flags |= PCRE_HASTHEN;
+            setverb = *code++ = verbs[i].op;
             }
 
           else
@@ -5679,12 +5681,26 @@ for (;; ptr++)
               *errorcodeptr = ERR59;
               goto FAILED;
               }
-            *code = verbs[i].op_arg;
-            if (*code++ == OP_THEN_ARG) cd->external_flags |= PCRE_HASTHEN;
+            setverb = *code++ = verbs[i].op_arg;
             *code++ = arglen;
             memcpy(code, arg, IN_UCHARS(arglen));
             code += arglen;
             *code++ = 0;
+            }
+
+          switch (setverb)
+            {
+            case OP_THEN:
+            case OP_THEN_ARG:
+            cd->external_flags |= PCRE_HASTHEN;
+            break;
+
+            case OP_PRUNE:
+            case OP_PRUNE_ARG:
+            case OP_SKIP:
+            case OP_SKIP_ARG:
+            cd->had_pruneorskip = TRUE;
+            break;
             }
 
           break;  /* Found verb, exit loop */
@@ -7323,19 +7339,23 @@ and the highest back reference was greater than or equal to that level.
 However, by keeping a bitmap of the first 31 back references, we can catch some
 of the more common cases more precisely.
 
+... A second exception is when the .* appears inside an atomic group, because
+this prevents the number of characters it matches from being adjusted.
+
 Arguments:
   code           points to start of expression (the bracket)
   bracket_map    a bitmap of which brackets we are inside while testing; this
                   handles up to substring 31; after that we just have to take
                   the less precise approach
-  backref_map    the back reference bitmap
+  cd             points to the compile data block
+  atomcount      atomic group level
 
 Returns:     TRUE or FALSE
 */
 
 static BOOL
 is_anchored(register const pcre_uchar *code, unsigned int bracket_map,
-  unsigned int backref_map)
+  compile_data *cd, int atomcount)
 {
 do {
    const pcre_uchar *scode = first_significant_code(
@@ -7347,7 +7367,7 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_anchored(scode, bracket_map, backref_map)) return FALSE;
+     if (!is_anchored(scode, bracket_map, cd, atomcount)) return FALSE;
      }
 
    /* Capturing brackets */
@@ -7357,30 +7377,40 @@ do {
      {
      int n = GET2(scode, 1+LINK_SIZE);
      int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
-     if (!is_anchored(scode, new_map, backref_map)) return FALSE;
+     if (!is_anchored(scode, new_map, cd, atomcount)) return FALSE;
      }
 
-   /* Other brackets */
+   /* Positive forward assertions and conditions */
 
-   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_ONCE_NC ||
-            op == OP_COND)
+   else if (op == OP_ASSERT || op == OP_COND)
      {
-     if (!is_anchored(scode, bracket_map, backref_map)) return FALSE;
+     if (!is_anchored(scode, bracket_map, cd, atomcount)) return FALSE;
+     }
+
+   /* Atomic groups */
+
+   else if (op == OP_ONCE || op == OP_ONCE_NC)
+     {
+     if (!is_anchored(scode, bracket_map, cd, atomcount + 1))
+       return FALSE;
      }
 
    /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
-   it isn't in brackets that are or may be referenced. */
+   it isn't in brackets that are or may be referenced or inside an atomic
+   group. */
 
    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
              op == OP_TYPEPOSSTAR))
      {
-     if (scode[1] != OP_ALLANY || (bracket_map & backref_map) != 0)
+     if (scode[1] != OP_ALLANY || (bracket_map & cd->backref_map) != 0 ||
+         atomcount > 0 || cd->had_pruneorskip)
        return FALSE;
      }
 
    /* Check for explicit anchoring */
 
    else if (op != OP_SOD && op != OP_SOM && op != OP_CIRC) return FALSE;
+
    code += GET(code, 1);
    }
 while (*code == OP_ALT);   /* Loop for each alternative */
@@ -7398,21 +7428,24 @@ return TRUE;
 matching and for non-DOTALL patterns that start with .* (which must start at
 the beginning or after \n). As in the case of is_anchored() (see above), we
 have to take account of back references to capturing brackets that contain .*
-because in that case we can't make the assumption.
+because in that case we can't make the assumption. Also, the appearance of .*
+inside atomic brackets or in a pattern that contains *PRUNE or *SKIP does not
+count, because once again the assumption no longer holds.
 
 Arguments:
   code           points to start of expression (the bracket)
   bracket_map    a bitmap of which brackets we are inside while testing; this
                   handles up to substring 31; after that we just have to take
                   the less precise approach
-  backref_map    the back reference bitmap
+  cd             points to the compile data
+  atomcount      atomic group level
 
 Returns:         TRUE or FALSE
 */
 
 static BOOL
 is_startline(const pcre_uchar *code, unsigned int bracket_map,
-  unsigned int backref_map)
+  compile_data *cd, int atomcount)
 {
 do {
    const pcre_uchar *scode = first_significant_code(
@@ -7438,7 +7471,7 @@ do {
        return FALSE;
 
        default:     /* Assertion */
-       if (!is_startline(scode, bracket_map, backref_map)) return FALSE;
+       if (!is_startline(scode, bracket_map, cd, atomcount)) return FALSE;
        do scode += GET(scode, 1); while (*scode == OP_ALT);
        scode += 1 + LINK_SIZE;
        break;
@@ -7452,7 +7485,7 @@ do {
    if (op == OP_BRA  || op == OP_BRAPOS ||
        op == OP_SBRA || op == OP_SBRAPOS)
      {
-     if (!is_startline(scode, bracket_map, backref_map)) return FALSE;
+     if (!is_startline(scode, bracket_map, cd, atomcount)) return FALSE;
      }
 
    /* Capturing brackets */
@@ -7462,25 +7495,40 @@ do {
      {
      int n = GET2(scode, 1+LINK_SIZE);
      int new_map = bracket_map | ((n < 32)? (1 << n) : 1);
-     if (!is_startline(scode, new_map, backref_map)) return FALSE;
+     if (!is_startline(scode, new_map, cd, atomcount)) return FALSE;
      }
 
-   /* Other brackets */
+   /* Positive forward assertions */
 
-   else if (op == OP_ASSERT || op == OP_ONCE || op == OP_ONCE_NC)
+   else if (op == OP_ASSERT)
      {
-     if (!is_startline(scode, bracket_map, backref_map)) return FALSE;
+     if (!is_startline(scode, bracket_map, cd, atomcount)) return FALSE;
+     }
+     
+   /* Atomic brackets */
+
+   else if (op == OP_ONCE || op == OP_ONCE_NC)
+     {
+     if (!is_startline(scode, bracket_map, cd, atomcount + 1)) return FALSE;
      }
 
-   /* .* means "start at start or after \n" if it isn't in brackets that
-   may be referenced. */
+   /* .* means "start at start or after \n" if it isn't in atomic brackets or
+   brackets that may be referenced, as long as the pattern does not contain
+   *PRUNE or *SKIP, because these break the feature. Consider, for example,
+   /.*?a(*PRUNE)b/ with the subject "aab", which matches "ab", i.e. not at the
+   start of a line. */
 
    else if (op == OP_TYPESTAR || op == OP_TYPEMINSTAR || op == OP_TYPEPOSSTAR)
      {
-     if (scode[1] != OP_ANY || (bracket_map & backref_map) != 0) return FALSE;
+     if (scode[1] != OP_ANY || (bracket_map & cd->backref_map) != 0 ||
+         atomcount > 0 || cd->had_pruneorskip)
+       return FALSE;
      }
 
-   /* Check for explicit circumflex */
+   /* Check for explicit circumflex; anything else gives a FALSE result. Note
+   in particular that this includes atomic brackets OP_ONCE and OP_ONCE_NC
+   because the number of characters matched by .* cannot be adjusted inside
+   them. */
 
    else if (op != OP_CIRC && op != OP_CIRCM) return FALSE;
 
@@ -7939,6 +7987,7 @@ cd->start_code = codestart;
 cd->hwm = (pcre_uchar *)(cd->start_workspace);
 cd->req_varyopt = 0;
 cd->had_accept = FALSE;
+cd->had_pruneorskip = FALSE;
 cd->check_lookbehind = FALSE;
 cd->open_caps = NULL;
 
@@ -8062,19 +8111,19 @@ if (errorcode != 0)
   }
 
 /* If the anchored option was not passed, set the flag if we can determine that
-the pattern is anchored by virtue of ^ characters or \A or anything else (such
-as starting with .* when DOTALL is set).
+the pattern is anchored by virtue of ^ characters or \A or anything else, such
+as starting with non-atomic .* when DOTALL is set and there are no occurrences
+of *PRUNE or *SKIP.
 
 Otherwise, if we know what the first byte has to be, save it, because that
 speeds up unanchored matches no end. If not, see if we can set the
 PCRE_STARTLINE flag. This is helpful for multiline matches when all branches
-start with ^. and also when all branches start with .* for non-DOTALL matches.
-*/
+start with ^. and also when all branches start with non-atomic .* for
+non-DOTALL matches when *PRUNE and SKIP are not present. */
 
 if ((re->options & PCRE_ANCHORED) == 0)
   {
-  if (is_anchored(codestart, 0, cd->backref_map))
-    re->options |= PCRE_ANCHORED;
+  if (is_anchored(codestart, 0, cd, 0)) re->options |= PCRE_ANCHORED;
   else
     {
     if (firstchar < 0)
@@ -8111,8 +8160,8 @@ if ((re->options & PCRE_ANCHORED) == 0)
 
       re->flags |= PCRE_FIRSTSET;
       }
-    else if (is_startline(codestart, 0, cd->backref_map))
-      re->flags |= PCRE_STARTLINE;
+
+    else if (is_startline(codestart, 0, cd, 0)) re->flags |= PCRE_STARTLINE;
     }
   }
 

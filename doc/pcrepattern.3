@@ -1621,7 +1621,7 @@ In cases where it is known that the subject string contains no newlines, it is
 worth setting PCRE_DOTALL in order to obtain this optimization, or
 alternatively using ^ to indicate anchoring explicitly.
 .P
-However, there is one situation where the optimization cannot be used. When .*
+However, there are some cases where the optimization cannot be used. When .*
 is inside capturing parentheses that are the subject of a back reference
 elsewhere in the pattern, a match at the start may fail where a later one
 succeeds. Consider, for example:
@@ -1630,6 +1630,15 @@ succeeds. Consider, for example:
 .sp
 If the subject is "xyz123abc123" the match point is the fourth character. For
 this reason, such a pattern is not implicitly anchored.
+.P
+Another case where implicit anchoring is not applied is when the leading .* is
+inside an atomic group. Once again, a match at the start may fail where a later
+one succeeds. Consider this pattern:
+.sp
+  (?>.*?a)b
+.sp
+It matches "ab" in the subject "aab". The use of the backtracking control verbs 
+(*PRUNE) and (*SKIP) also disable this optimization.
 .P
 When a capturing subpattern is repeated, the value captured is the substring
 that matched the final iteration. For example, after
@@ -2913,6 +2922,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 June 2012
+Last updated: 10 July 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

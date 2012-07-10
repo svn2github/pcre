@@ -16,6 +16,11 @@ Version 8.32
 
 5.  Rename the "leave" variable names to "quit" to improve WinCE compatibility.
     Reported by Giuseppe D'Angelo.
+    
+6.  The PCRE_STARTLINE bit, indicating that a match can occur only at the start 
+    of a line, was being set incorrectly in cases where .* appeared inside 
+    atomic brackets at the start of a pattern, or where there was a subsequent 
+    *PRUNE or *SKIP.
 
 
 Version 8.31 06-July-2012
