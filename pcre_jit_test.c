@@ -592,6 +592,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_CRLF | PCRE_FIRSTLINE, 0 | F_NOMATCH, "ba", "bbb\r\nba" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_CRLF | PCRE_FIRSTLINE, 0 | F_NOMATCH | F_PROPERTY, "\\p{Any}{4}|a", "\r\na" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_CRLF | PCRE_FIRSTLINE, 1, ".", "\r\n" },
+	{ PCRE_FIRSTLINE | PCRE_NEWLINE_LF | PCRE_DOTALL, 0 | F_NOMATCH, "ab.", "ab" },
 
 	/* Recurse. */
 	{ MUA, 0, "(a)(?1)", "aa" },
@@ -992,7 +993,7 @@ static int regression_tests(void)
 				pcre_free(re8);
 				re8 = NULL;
 			}
-			if (!(extra8->flags & PCRE_EXTRA_EXECUTABLE_JIT)) {
+			else if (!(extra8->flags & PCRE_EXTRA_EXECUTABLE_JIT)) {
 				printf("\n8 bit: JIT compiler does not support: %s\n", current->pattern);
 				pcre_free_study(extra8);
 				pcre_free(re8);
@@ -1023,7 +1024,7 @@ static int regression_tests(void)
 				pcre16_free(re16);
 				re16 = NULL;
 			}
-			if (!(extra16->flags & PCRE_EXTRA_EXECUTABLE_JIT)) {
+			else if (!(extra16->flags & PCRE_EXTRA_EXECUTABLE_JIT)) {
 				printf("\n16 bit: JIT compiler does not support: %s\n", current->pattern);
 				pcre16_free_study(extra16);
 				pcre16_free(re16);
