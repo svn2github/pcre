@@ -583,6 +583,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA | PCRE_FIRSTLINE, 0 | F_NOMATCH, "[abc]", "\na" },
 	{ MUA | PCRE_FIRSTLINE, 0 | F_NOMATCH, "^a", "\na" },
 	{ MUA | PCRE_FIRSTLINE, 0 | F_NOMATCH, "^(?<=\n)", "\na" },
+	{ MUA | PCRE_FIRSTLINE, 0, "\xf0\x90\x90\x80", "\xf0\x90\x90\x80" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_ANY | PCRE_FIRSTLINE, 0 | F_NOMATCH, "#", "\xc2\x85#" },
 	{ PCRE_MULTILINE | PCRE_NEWLINE_ANY | PCRE_FIRSTLINE, 0 | F_NOMATCH, "#", "\x85#" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_ANY | PCRE_FIRSTLINE, 0 | F_NOMATCH, "^#", "\xe2\x80\xa8#" },

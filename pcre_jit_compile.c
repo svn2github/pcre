@@ -2420,7 +2420,6 @@ if (firstline)
   /* Search for the end of the first line. */
   SLJIT_ASSERT(common->first_line_end != 0);
   OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, STR_END, 0);
 
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
@@ -2431,6 +2430,7 @@ if (firstline)
     OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
     CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff, mainloop);
     CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff, mainloop);
+    JUMPHERE(end);
     OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
     }
   else
@@ -2442,11 +2442,11 @@ if (firstline)
     read_char(common);
     check_newlinechar(common, common->nltype, &newline, TRUE);
     CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, mainloop);
+    JUMPHERE(end);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, STR_PTR, 0);
     set_jumps(newline, LABEL());
     }
 
-  JUMPHERE(end);
   OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
   }
 
@@ -2861,7 +2861,7 @@ struct sljit_jump *jump;
 if (firstline)
   {
   SLJIT_ASSERT(common->first_line_end != 0);
-  OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
+  OP1(SLJIT_MOV, RETURN_ADDR, 0, STR_END, 0);
   OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end);
   }
 
@@ -2913,7 +2913,7 @@ JUMPHERE(found);
 JUMPHERE(quit);
 
 if (firstline)
-  OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+  OP1(SLJIT_MOV, STR_END, 0, RETURN_ADDR, 0);
 }
 
 static SLJIT_INLINE struct sljit_jump *search_requested_char(compiler_common *common, pcre_uchar req_char, BOOL caseless, BOOL has_firstchar)
@@ -4396,7 +4396,7 @@ switch(type)
     }
   OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, c);
   COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
-  OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, char_othercase(common, c));
+  OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, oc);
   COND_VALUE(SLJIT_OR | SLJIT_SET_E, TMP2, 0, SLJIT_C_EQUAL);
   add_jump(compiler, backtracks, JUMP(SLJIT_C_ZERO));
   return cc + length;
