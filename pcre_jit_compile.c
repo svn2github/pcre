@@ -1653,7 +1653,7 @@ static SLJIT_INLINE void set_jumps(jump_list *list, struct sljit_label *label)
 while (list)
   {
   /* sljit_set_label is clever enough to do nothing
-  if either the jump or the label is NULL */
+  if either the jump or the label is NULL. */
   sljit_set_label(list->jump, label);
   list = list->next;
   }
@@ -7804,7 +7804,7 @@ if ((re->options & PCRE_ANCHORED) == 0)
   if ((re->options & PCRE_NO_START_OPTIMIZE) == 0)
     {
     if (mode == JIT_COMPILE && fast_forward_first_two_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
-      /* Do nothing */;
+      { /* Do nothing */ }
     else if ((re->flags & PCRE_FIRSTSET) != 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0, (re->options & PCRE_FIRSTLINE) != 0);
     else if ((re->flags & PCRE_STARTLINE) != 0)
