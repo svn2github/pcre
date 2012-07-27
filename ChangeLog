@@ -22,6 +22,9 @@ Version 8.32
     atomic brackets at the start of a pattern, or where there was a subsequent 
     *PRUNE or *SKIP.
 
+7.  Improved instruction cache flush for POWER/PowerPC.
+    Patch by Daniel Richard G.
+
 
 Version 8.31 06-July-2012
 -------------------------
