@@ -89,15 +89,15 @@ vertical (sub-expression) (See struct backtrack_common for more details).
 
 The condition checkers are boolean (true/false) checkers. Machine code is generated
 for the checker itself and for the actions depending on the result of the checker.
-The 'true' case is called as the try path (expected path), and the other is called as
+The 'true' case is called as the matching path (expected path), and the other is called as
 the 'backtrack' path. Branch instructions are expesive for all CPUs, so we avoid taken
-branches on the try path.
+branches on the matching path.
 
  Greedy star operator (*) :
-   Try path: match happens.
+   Matching path: match happens.
    Backtrack path: match failed.
  Non-greedy star operator (*?) :
-   Try path: no need to perform a match.
+   Matching path: no need to perform a match.
    Backtrack path: match is required.
 
 The following example shows how the code generated for a capturing bracket
@@ -108,18 +108,18 @@ we have the following regular expression:
 
 The generated code will be the following:
 
- A try path
- '(' try path (pushing arguments to the stack)
- B try path
- ')' try path (pushing arguments to the stack)
- D try path
+ A matching path
+ '(' matching path (pushing arguments to the stack)
+ B matching path
+ ')' matching path (pushing arguments to the stack)
+ D matching path
  return with successful match
 
  D backtrack path
  ')' backtrack path (If we arrived from "C" jump to the backtrack of "C")
  B backtrack path
  C expected path
- jump to D try path
+ jump to D matching path
  C backtrack path
  A backtrack path
 
@@ -127,7 +127,7 @@ The generated code will be the following:
  code paths. In this way the topmost value on the stack is always belong
  to the current backtrack code path. The backtrack path must check
  whether there is a next alternative. If so, it needs to jump back to
- the try path eventually. Otherwise it needs to clear out its own stack
+ the matching path eventually. Otherwise it needs to clear out its own stack
  frame and continue the execution on the backtrack code paths.
 */
 
@@ -188,8 +188,8 @@ typedef struct stub_list {
 typedef int (SLJIT_CALL *jit_function)(jit_arguments *args);
 
 /* The following structure is the key data type for the recursive
-code generator. It is allocated by compile_trypath, and contains
-the aguments for compile_backtrackpath. Must be the first member
+code generator. It is allocated by compile_matchingpath, and contains
+the aguments for compile_backtrackingpath. Must be the first member
 of its descendants. */
 typedef struct backtrack_common {
   /* Concatenation stack. */
@@ -210,17 +210,17 @@ typedef struct assert_backtrack {
   /* Points to our private memory word on the stack. */
   int localptr;
   /* For iterators. */
-  struct sljit_label *trypath;
+  struct sljit_label *matchingpath;
 } assert_backtrack;
 
 typedef struct bracket_backtrack {
   backtrack_common common;
   /* Where to coninue if an alternative is successfully matched. */
-  struct sljit_label *alttrypath;
+  struct sljit_label *alternative_matchingpath;
   /* For rmin and rmax iterators. */
-  struct sljit_label *recursivetrypath;
+  struct sljit_label *recursive_matchingpath;
   /* For greedy ? operator. */
-  struct sljit_label *zerotrypath;
+  struct sljit_label *zero_matchingpath;
   /* Contains the branches of a failed condition. */
   union {
     /* Both for OP_COND, OP_SCOND. */
@@ -245,13 +245,13 @@ typedef struct bracketpos_backtrack {
 
 typedef struct braminzero_backtrack {
   backtrack_common common;
-  struct sljit_label *trypath;
+  struct sljit_label *matchingpath;
 } braminzero_backtrack;
 
 typedef struct iterator_backtrack {
   backtrack_common common;
   /* Next iteration. */
-  struct sljit_label *trypath;
+  struct sljit_label *matchingpath;
 } iterator_backtrack;
 
 typedef struct recurse_entry {
@@ -475,8 +475,8 @@ return cc;
  init_frame
  get_localsize
  copy_locals
- compile_trypath
- compile_backtrackpath
+ compile_matchingpath
+ compile_backtrackingpath
 */
 
 static pcre_uchar *next_opcode(compiler_common *common, pcre_uchar *cc)
@@ -3651,7 +3651,7 @@ return cc;
     } \
   charoffset = (value);
 
-static void compile_xclass_trypath(compiler_common *common, pcre_uchar *cc, jump_list **backtracks)
+static void compile_xclass_matchingpath(compiler_common *common, pcre_uchar *cc, jump_list **backtracks)
 {
 DEFINE_COMPILER;
 jump_list *found = NULL;
@@ -3992,7 +3992,7 @@ if (found != NULL)
 
 #endif
 
-static pcre_uchar *compile_char1_trypath(compiler_common *common, pcre_uchar type, pcre_uchar *cc, jump_list **backtracks)
+static pcre_uchar *compile_char1_matchingpath(compiler_common *common, pcre_uchar type, pcre_uchar *cc, jump_list **backtracks)
 {
 DEFINE_COMPILER;
 int length;
@@ -4124,7 +4124,7 @@ switch(type)
   propdata[2] = cc[0];
   propdata[3] = cc[1];
   propdata[4] = XCL_END;
-  compile_xclass_trypath(common, propdata, backtracks);
+  compile_xclass_matchingpath(common, propdata, backtracks);
   return cc + 2;
 #endif
 #endif
@@ -4308,7 +4308,7 @@ switch(type)
   add_jump(compiler, backtracks, CMP(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
 
   if (!common->endonly)
-    compile_char1_trypath(common, OP_EODN, cc, backtracks);
+    compile_char1_matchingpath(common, OP_EODN, cc, backtracks);
   else
     {
     add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0));
@@ -4499,7 +4499,7 @@ switch(type)
 
 #if defined SUPPORT_UTF || defined COMPILE_PCRE16
   case OP_XCLASS:
-  compile_xclass_trypath(common, cc + LINK_SIZE, backtracks);
+  compile_xclass_matchingpath(common, cc + LINK_SIZE, backtracks);
   return cc + GET(cc, 0) - 1;
 #endif
 
@@ -4533,7 +4533,7 @@ SLJIT_ASSERT_STOP();
 return cc;
 }
 
-static SLJIT_INLINE pcre_uchar *compile_charn_trypath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, jump_list **backtracks)
+static SLJIT_INLINE pcre_uchar *compile_charn_matchingpath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, jump_list **backtracks)
 {
 /* This function consumes at least one input character. */
 /* To decrease the number of length checks, we try to concatenate the fixed length character sequences. */
@@ -4596,7 +4596,7 @@ if (context.length > 0)
   }
 
 /* A non-fixed length character will be checked if length == 0. */
-return compile_char1_trypath(common, *cc, cc + 1, backtracks);
+return compile_char1_matchingpath(common, *cc, cc + 1, backtracks);
 }
 
 static struct sljit_jump *compile_ref_checks(compiler_common *common, pcre_uchar *cc, jump_list **backtracks)
@@ -4622,8 +4622,8 @@ return CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset 
 }
 
 /* Forward definitions. */
-static void compile_trypath(compiler_common *, pcre_uchar *, pcre_uchar *, backtrack_common *);
-static void compile_backtrackpath(compiler_common *, struct backtrack_common *);
+static void compile_matchingpath(compiler_common *, pcre_uchar *, pcre_uchar *, backtrack_common *);
+static void compile_backtrackingpath(compiler_common *, struct backtrack_common *);
 
 #define PUSH_BACKTRACK(size, ccstart, error) \
   do \
@@ -4653,7 +4653,7 @@ static void compile_backtrackpath(compiler_common *, struct backtrack_common *);
 
 #define BACKTRACK_AS(type) ((type *)backtrack)
 
-static pcre_uchar *compile_ref_trypath(compiler_common *common, pcre_uchar *cc, jump_list **backtracks, BOOL withchecks, BOOL emptyfail)
+static pcre_uchar *compile_ref_matchingpath(compiler_common *common, pcre_uchar *cc, jump_list **backtracks, BOOL withchecks, BOOL emptyfail)
 {
 DEFINE_COMPILER;
 int offset = GET2(cc, 1) << 1;
@@ -4735,7 +4735,7 @@ if (jump != NULL)
 return cc + 1 + IMM2_SIZE;
 }
 
-static SLJIT_INLINE pcre_uchar *compile_ref_iterator_trypath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+static SLJIT_INLINE pcre_uchar *compile_ref_iterator_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -4806,7 +4806,7 @@ if (!minimize)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0, SLJIT_IMM, 0);
 
   label = LABEL();
-  compile_ref_trypath(common, ccbegin, &backtrack->topbacktracks, FALSE, FALSE);
+  compile_ref_matchingpath(common, ccbegin, &backtrack->topbacktracks, FALSE, FALSE);
 
   if (min > 1 || max > 1)
     {
@@ -4834,7 +4834,7 @@ if (!minimize)
     }
 
   JUMPHERE(zerolength);
-  BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
+  BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
 
   decrease_call_count(common);
   return cc;
@@ -4854,11 +4854,11 @@ if (min == 0)
 else
   zerolength = compile_ref_checks(common, ccbegin, &backtrack->topbacktracks);
 
-BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
+BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
 if (max > 0)
   add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, max));
 
-compile_ref_trypath(common, ccbegin, &backtrack->topbacktracks, TRUE, TRUE);
+compile_ref_matchingpath(common, ccbegin, &backtrack->topbacktracks, TRUE, TRUE);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
 
 if (min > 1)
@@ -4866,7 +4866,7 @@ if (min > 1)
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
-  CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, min, BACKTRACK_AS(iterator_backtrack)->trypath);
+  CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, min, BACKTRACK_AS(iterator_backtrack)->matchingpath);
   }
 else if (max > 0)
   OP2(SLJIT_ADD, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, 1);
@@ -4879,7 +4879,7 @@ decrease_call_count(common);
 return cc;
 }
 
-static SLJIT_INLINE pcre_uchar *compile_recurse_trypath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+static SLJIT_INLINE pcre_uchar *compile_recurse_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -4936,7 +4936,7 @@ add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_
 return cc + 1 + LINK_SIZE;
 }
 
-static pcre_uchar *compile_assert_trypath(compiler_common *common, pcre_uchar *cc, assert_backtrack *backtrack, BOOL conditional)
+static pcre_uchar *compile_assert_matchingpath(compiler_common *common, pcre_uchar *cc, assert_backtrack *backtrack, BOOL conditional)
 {
 DEFINE_COMPILER;
 int framesize;
@@ -5012,7 +5012,7 @@ while (1)
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
 
   altbacktrack.cc = ccbegin;
-  compile_trypath(common, ccbegin + 1 + LINK_SIZE, cc, &altbacktrack);
+  compile_matchingpath(common, ccbegin + 1 + LINK_SIZE, cc, &altbacktrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     common->quitlabel = save_quitlabel;
@@ -5067,7 +5067,7 @@ while (1)
     }
   add_jump(compiler, found, JUMP(SLJIT_JUMP));
 
-  compile_backtrackpath(common, altbacktrack.top);
+  compile_backtrackingpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     common->quitlabel = save_quitlabel;
@@ -5153,12 +5153,12 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
 
   if (bra == OP_BRAZERO)
     {
-    backtrack->trypath = LABEL();
-    sljit_set_label(jump, backtrack->trypath);
+    backtrack->matchingpath = LABEL();
+    sljit_set_label(jump, backtrack->matchingpath);
     }
   else if (bra == OP_BRAMINZERO)
     {
-    JUMPTO(SLJIT_JUMP, backtrack->trypath);
+    JUMPTO(SLJIT_JUMP, backtrack->matchingpath);
     JUMPHERE(brajump);
     if (framesize >= 0)
       {
@@ -5196,10 +5196,10 @@ else
     }
 
   if (bra == OP_BRAZERO)
-    backtrack->trypath = LABEL();
+    backtrack->matchingpath = LABEL();
   else if (bra == OP_BRAMINZERO)
     {
-    JUMPTO(SLJIT_JUMP, backtrack->trypath);
+    JUMPTO(SLJIT_JUMP, backtrack->matchingpath);
     JUMPHERE(brajump);
     }
 
@@ -5382,7 +5382,7 @@ return condition;
                                           Or nothing, if trace is unnecessary
 */
 
-static pcre_uchar *compile_bracket_trypath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+static pcre_uchar *compile_bracket_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -5391,7 +5391,7 @@ int localptr = 0;
 int offset = 0;
 int stacksize;
 pcre_uchar *ccbegin;
-pcre_uchar *trypath;
+pcre_uchar *matchingpath;
 pcre_uchar bra = OP_BRA;
 pcre_uchar ket;
 assert_backtrack *assert;
@@ -5412,7 +5412,7 @@ if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
 
 opcode = *cc;
 ccbegin = cc;
-trypath = ccbegin + 1 + LINK_SIZE;
+matchingpath = ccbegin + 1 + LINK_SIZE;
 
 if ((opcode == OP_COND || opcode == OP_SCOND) && cc[1 + LINK_SIZE] == OP_DEF)
   {
@@ -5429,10 +5429,10 @@ cc += GET(cc, 1);
 has_alternatives = *cc == OP_ALT;
 if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND))
   {
-  has_alternatives = (*trypath == OP_RREF) ? FALSE : TRUE;
-  if (*trypath == OP_NRREF)
+  has_alternatives = (*matchingpath == OP_RREF) ? FALSE : TRUE;
+  if (*matchingpath == OP_NRREF)
     {
-    stacksize = GET2(trypath, 1);
+    stacksize = GET2(matchingpath, 1);
     if (common->currententry == NULL || stacksize == RREF_ANY)
       has_alternatives = FALSE;
     else if (common->currententry->start == 0)
@@ -5454,7 +5454,7 @@ if (opcode == OP_CBRA || opcode == OP_SCBRA)
   localptr = OVECTOR_PRIV(offset);
   offset <<= 1;
   BACKTRACK_AS(bracket_backtrack)->localptr = localptr;
-  trypath += IMM2_SIZE;
+  matchingpath += IMM2_SIZE;
   }
 else if (opcode == OP_ONCE || opcode == OP_SBRA || opcode == OP_SCOND)
   {
@@ -5528,13 +5528,13 @@ if (bra == OP_BRAMINZERO)
   }
 
 if (ket == OP_KETRMIN)
-  BACKTRACK_AS(bracket_backtrack)->recursivetrypath = LABEL();
+  BACKTRACK_AS(bracket_backtrack)->recursive_matchingpath = LABEL();
 
 if (ket == OP_KETRMAX)
   {
   rmaxlabel = LABEL();
   if (has_alternatives && opcode != OP_ONCE && opcode < OP_SBRA)
-    BACKTRACK_AS(bracket_backtrack)->alttrypath = rmaxlabel;
+    BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = rmaxlabel;
   }
 
 /* Handling capturing brackets and alternatives. */
@@ -5613,17 +5613,17 @@ else if (has_alternatives)
 /* Generating code for the first alternative. */
 if (opcode == OP_COND || opcode == OP_SCOND)
   {
-  if (*trypath == OP_CREF)
+  if (*matchingpath == OP_CREF)
     {
     SLJIT_ASSERT(has_alternatives);
     add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed),
-      CMP(SLJIT_C_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(GET2(trypath, 1) << 1), SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(1)));
-    trypath += 1 + IMM2_SIZE;
+      CMP(SLJIT_C_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(GET2(matchingpath, 1) << 1), SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(1)));
+    matchingpath += 1 + IMM2_SIZE;
     }
-  else if (*trypath == OP_NCREF)
+  else if (*matchingpath == OP_NCREF)
     {
     SLJIT_ASSERT(has_alternatives);
-    stacksize = GET2(trypath, 1);
+    stacksize = GET2(matchingpath, 1);
     jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(stacksize << 1), SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(1));
 
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1, STACK_TOP, 0);
@@ -5637,14 +5637,14 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), CMP(SLJIT_C_EQUAL, SLJIT_TEMPORARY_REG1, 0, SLJIT_IMM, 0));
 
     JUMPHERE(jump);
-    trypath += 1 + IMM2_SIZE;
+    matchingpath += 1 + IMM2_SIZE;
     }
-  else if (*trypath == OP_RREF || *trypath == OP_NRREF)
+  else if (*matchingpath == OP_RREF || *matchingpath == OP_NRREF)
     {
     /* Never has other case. */
     BACKTRACK_AS(bracket_backtrack)->u.condfailed = NULL;
 
-    stacksize = GET2(trypath, 1);
+    stacksize = GET2(matchingpath, 1);
     if (common->currententry == NULL)
       stacksize = 0;
     else if (stacksize == RREF_ANY)
@@ -5654,27 +5654,27 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     else
       stacksize = stacksize == GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
 
-    if (*trypath == OP_RREF || stacksize || common->currententry == NULL)
+    if (*matchingpath == OP_RREF || stacksize || common->currententry == NULL)
       {
       SLJIT_ASSERT(!has_alternatives);
       if (stacksize != 0)
-        trypath += 1 + IMM2_SIZE;
+        matchingpath += 1 + IMM2_SIZE;
       else
         {
         if (*cc == OP_ALT)
           {
-          trypath = cc + 1 + LINK_SIZE;
+          matchingpath = cc + 1 + LINK_SIZE;
           cc += GET(cc, 1);
           }
         else
-          trypath = cc;
+          matchingpath = cc;
         }
       }
     else
       {
       SLJIT_ASSERT(has_alternatives);
 
-      stacksize = GET2(trypath, 1);
+      stacksize = GET2(matchingpath, 1);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1, STACK_TOP, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, SLJIT_IMM, common->name_count);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, SLJIT_IMM, common->name_entry_size);
@@ -5685,24 +5685,24 @@ if (opcode == OP_COND || opcode == OP_SCOND)
       sljit_emit_ijump(compiler, SLJIT_CALL3, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_searchgroups));
       OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1);
       add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), CMP(SLJIT_C_EQUAL, SLJIT_TEMPORARY_REG1, 0, SLJIT_IMM, 0));
-      trypath += 1 + IMM2_SIZE;
+      matchingpath += 1 + IMM2_SIZE;
       }
     }
   else
     {
-    SLJIT_ASSERT(has_alternatives && *trypath >= OP_ASSERT && *trypath <= OP_ASSERTBACK_NOT);
+    SLJIT_ASSERT(has_alternatives && *matchingpath >= OP_ASSERT && *matchingpath <= OP_ASSERTBACK_NOT);
     /* Similar code as PUSH_BACKTRACK macro. */
     assert = sljit_alloc_memory(compiler, sizeof(assert_backtrack));
     if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
       return NULL;
     memset(assert, 0, sizeof(assert_backtrack));
-    assert->common.cc = trypath;
+    assert->common.cc = matchingpath;
     BACKTRACK_AS(bracket_backtrack)->u.assert = assert;
-    trypath = compile_assert_trypath(common, trypath, assert, TRUE);
+    matchingpath = compile_assert_matchingpath(common, matchingpath, assert, TRUE);
     }
   }
 
-compile_trypath(common, trypath, cc, backtrack);
+compile_matchingpath(common, matchingpath, cc, backtrack);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   return NULL;
 
@@ -5758,10 +5758,10 @@ if (has_alternatives)
   if (opcode != OP_ONCE)
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
   if (ket != OP_KETRMAX)
-    BACKTRACK_AS(bracket_backtrack)->alttrypath = LABEL();
+    BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
   }
 
-/* Must be after the trypath label. */
+/* Must be after the matchingpath label. */
 if (offset != 0)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
@@ -5774,7 +5774,7 @@ if (ket == OP_KETRMAX)
   if (opcode == OP_ONCE || opcode >= OP_SBRA)
     {
     if (has_alternatives)
-      BACKTRACK_AS(bracket_backtrack)->alttrypath = LABEL();
+      BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
     /* Checking zero-length iteration. */
     if (opcode != OP_ONCE)
       {
@@ -5789,16 +5789,16 @@ if (ket == OP_KETRMAX)
     }
   else
     JUMPTO(SLJIT_JUMP, rmaxlabel);
-  BACKTRACK_AS(bracket_backtrack)->recursivetrypath = LABEL();
+  BACKTRACK_AS(bracket_backtrack)->recursive_matchingpath = LABEL();
   }
 
 if (bra == OP_BRAZERO)
-  BACKTRACK_AS(bracket_backtrack)->zerotrypath = LABEL();
+  BACKTRACK_AS(bracket_backtrack)->zero_matchingpath = LABEL();
 
 if (bra == OP_BRAMINZERO)
   {
   /* This is a backtrack path! (From the viewpoint of OP_BRAMINZERO) */
-  JUMPTO(SLJIT_JUMP, ((braminzero_backtrack *)parent)->trypath);
+  JUMPTO(SLJIT_JUMP, ((braminzero_backtrack *)parent)->matchingpath);
   if (braminzerojump != NULL)
     {
     JUMPHERE(braminzerojump);
@@ -5826,7 +5826,7 @@ cc += 1 + LINK_SIZE;
 return cc;
 }
 
-static pcre_uchar *compile_bracketpos_trypath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+static pcre_uchar *compile_bracketpos_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -5935,7 +5935,7 @@ while (*cc != OP_KETRPOS)
   backtrack->topbacktracks = NULL;
   cc += GET(cc, 1);
 
-  compile_trypath(common, ccbegin, cc, backtrack);
+  compile_matchingpath(common, ccbegin, cc, backtrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     return NULL;
 
@@ -5996,7 +5996,7 @@ while (*cc != OP_KETRPOS)
   JUMPTO(SLJIT_JUMP, loop);
   flush_stubs(common);
 
-  compile_backtrackpath(common, backtrack->top);
+  compile_backtrackingpath(common, backtrack->top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     return NULL;
   set_jumps(backtrack->topbacktracks, LABEL());
@@ -6136,7 +6136,7 @@ if (end != NULL)
 return cc;
 }
 
-static pcre_uchar *compile_iterator_trypath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+static pcre_uchar *compile_iterator_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -6221,7 +6221,7 @@ switch(opcode)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0, SLJIT_IMM, 0);
 
     label = LABEL();
-    compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
     if (opcode == OP_UPTO || opcode == OP_CRRANGE)
       {
       OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0);
@@ -6243,7 +6243,7 @@ switch(opcode)
   else
     {
     if (opcode == OP_PLUS)
-      compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
+      compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
     if (localptr == 0)
       allocate_stack(common, 2);
     OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
@@ -6252,7 +6252,7 @@ switch(opcode)
     else
       OP1(SLJIT_MOV, base, offset1, SLJIT_IMM, 1);
     label = LABEL();
-    compile_char1_trypath(common, type, cc, &nomatch);
+    compile_char1_matchingpath(common, type, cc, &nomatch);
     OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
     if (opcode <= OP_PLUS)
       JUMPTO(SLJIT_JUMP, label);
@@ -6273,17 +6273,17 @@ switch(opcode)
       add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_C_LESS, base, offset1, SLJIT_IMM, arg2 + 1));
     OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
     }
-  BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
+  BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
   break;
 
   case OP_MINSTAR:
   case OP_MINPLUS:
   if (opcode == OP_MINPLUS)
-    compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
   if (localptr == 0)
     allocate_stack(common, 1);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-  BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
+  BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
   break;
 
   case OP_MINUPTO:
@@ -6294,7 +6294,7 @@ switch(opcode)
   OP1(SLJIT_MOV, base, offset1, SLJIT_IMM, 1);
   if (opcode == OP_CRMINRANGE)
     add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_JUMP));
-  BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
+  BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
   break;
 
   case OP_QUERY:
@@ -6303,14 +6303,14 @@ switch(opcode)
     allocate_stack(common, 1);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   if (opcode == OP_QUERY)
-    compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
-  BACKTRACK_AS(iterator_backtrack)->trypath = LABEL();
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+  BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
   break;
 
   case OP_EXACT:
   OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, arg1);
   label = LABEL();
-  compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
+  compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
   OP2(SLJIT_SUB | SLJIT_SET_E, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
   JUMPTO(SLJIT_C_NOT_ZERO, label);
   break;
@@ -6319,12 +6319,12 @@ switch(opcode)
   case OP_POSPLUS:
   case OP_POSUPTO:
   if (opcode == OP_POSPLUS)
-    compile_char1_trypath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
   if (opcode == OP_POSUPTO)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1, SLJIT_IMM, arg1);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   label = LABEL();
-  compile_char1_trypath(common, type, cc, &nomatch);
+  compile_char1_matchingpath(common, type, cc, &nomatch);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   if (opcode != OP_POSUPTO)
     JUMPTO(SLJIT_JUMP, label);
@@ -6339,7 +6339,7 @@ switch(opcode)
 
   case OP_POSQUERY:
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
-  compile_char1_trypath(common, type, cc, &nomatch);
+  compile_char1_matchingpath(common, type, cc, &nomatch);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   set_jumps(nomatch, LABEL());
   OP1(SLJIT_MOV, STR_PTR, 0, tmp_base, tmp_offset);
@@ -6354,7 +6354,7 @@ decrease_call_count(common);
 return end;
 }
 
-static SLJIT_INLINE pcre_uchar *compile_fail_accept_trypath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+static SLJIT_INLINE pcre_uchar *compile_fail_accept_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -6398,7 +6398,7 @@ add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_JUMP));
 return cc + 1;
 }
 
-static SLJIT_INLINE pcre_uchar *compile_close_trypath(compiler_common *common, pcre_uchar *cc)
+static SLJIT_INLINE pcre_uchar *compile_close_matchingpath(compiler_common *common, pcre_uchar *cc)
 {
 DEFINE_COMPILER;
 int offset = GET2(cc, 1);
@@ -6414,7 +6414,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
 return cc + 1 + IMM2_SIZE;
 }
 
-static void compile_trypath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, backtrack_common *parent)
+static void compile_matchingpath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
@@ -6453,7 +6453,7 @@ while (cc < ccend)
     case OP_NOT:
     case OP_NOTI:
     case OP_REVERSE:
-    cc = compile_char1_trypath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+    cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
 
     case OP_SET_SOM:
@@ -6468,9 +6468,9 @@ while (cc < ccend)
     case OP_CHAR:
     case OP_CHARI:
     if (common->mode == JIT_COMPILE)
-      cc = compile_charn_trypath(common, cc, ccend, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_charn_matchingpath(common, cc, ccend, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     else
-      cc = compile_char1_trypath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
 
     case OP_STAR:
@@ -6538,36 +6538,36 @@ while (cc < ccend)
     case OP_TYPEPOSPLUS:
     case OP_TYPEPOSQUERY:
     case OP_TYPEPOSUPTO:
-    cc = compile_iterator_trypath(common, cc, parent);
+    cc = compile_iterator_matchingpath(common, cc, parent);
     break;
 
     case OP_CLASS:
     case OP_NCLASS:
     if (cc[1 + (32 / sizeof(pcre_uchar))] >= OP_CRSTAR && cc[1 + (32 / sizeof(pcre_uchar))] <= OP_CRMINRANGE)
-      cc = compile_iterator_trypath(common, cc, parent);
+      cc = compile_iterator_matchingpath(common, cc, parent);
     else
-      cc = compile_char1_trypath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
 
 #if defined SUPPORT_UTF || defined COMPILE_PCRE16
     case OP_XCLASS:
     if (*(cc + GET(cc, 1)) >= OP_CRSTAR && *(cc + GET(cc, 1)) <= OP_CRMINRANGE)
-      cc = compile_iterator_trypath(common, cc, parent);
+      cc = compile_iterator_matchingpath(common, cc, parent);
     else
-      cc = compile_char1_trypath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
 #endif
 
     case OP_REF:
     case OP_REFI:
     if (cc[1 + IMM2_SIZE] >= OP_CRSTAR && cc[1 + IMM2_SIZE] <= OP_CRMINRANGE)
-      cc = compile_ref_iterator_trypath(common, cc, parent);
+      cc = compile_ref_iterator_matchingpath(common, cc, parent);
     else
-      cc = compile_ref_trypath(common, cc, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, TRUE, FALSE);
+      cc = compile_ref_matchingpath(common, cc, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, TRUE, FALSE);
     break;
 
     case OP_RECURSE:
-    cc = compile_recurse_trypath(common, cc, parent);
+    cc = compile_recurse_matchingpath(common, cc, parent);
     break;
 
     case OP_ASSERT:
@@ -6575,7 +6575,7 @@ while (cc < ccend)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     PUSH_BACKTRACK_NOVALUE(sizeof(assert_backtrack), cc);
-    cc = compile_assert_trypath(common, cc, BACKTRACK_AS(assert_backtrack), FALSE);
+    cc = compile_assert_matchingpath(common, cc, BACKTRACK_AS(assert_backtrack), FALSE);
     break;
 
     case OP_BRAMINZERO:
@@ -6592,7 +6592,7 @@ while (cc < ccend)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), STR_PTR, 0);
       }
-    BACKTRACK_AS(braminzero_backtrack)->trypath = LABEL();
+    BACKTRACK_AS(braminzero_backtrack)->matchingpath = LABEL();
     if (cc[1] > OP_ASSERTBACK_NOT)
       decrease_call_count(common);
     break;
@@ -6605,16 +6605,16 @@ while (cc < ccend)
     case OP_SBRA:
     case OP_SCBRA:
     case OP_SCOND:
-    cc = compile_bracket_trypath(common, cc, parent);
+    cc = compile_bracket_matchingpath(common, cc, parent);
     break;
 
     case OP_BRAZERO:
     if (cc[1] > OP_ASSERTBACK_NOT)
-      cc = compile_bracket_trypath(common, cc, parent);
+      cc = compile_bracket_matchingpath(common, cc, parent);
     else
       {
       PUSH_BACKTRACK_NOVALUE(sizeof(assert_backtrack), cc);
-      cc = compile_assert_trypath(common, cc, BACKTRACK_AS(assert_backtrack), FALSE);
+      cc = compile_assert_matchingpath(common, cc, BACKTRACK_AS(assert_backtrack), FALSE);
       }
     break;
 
@@ -6623,7 +6623,7 @@ while (cc < ccend)
     case OP_SBRAPOS:
     case OP_SCBRAPOS:
     case OP_BRAPOSZERO:
-    cc = compile_bracketpos_trypath(common, cc, parent);
+    cc = compile_bracketpos_matchingpath(common, cc, parent);
     break;
 
     case OP_MARK:
@@ -6647,11 +6647,11 @@ while (cc < ccend)
     case OP_FAIL:
     case OP_ACCEPT:
     case OP_ASSERT_ACCEPT:
-    cc = compile_fail_accept_trypath(common, cc, parent);
+    cc = compile_fail_accept_matchingpath(common, cc, parent);
     break;
 
     case OP_CLOSE:
-    cc = compile_close_trypath(common, cc);
+    cc = compile_close_matchingpath(common, cc);
     break;
 
     case OP_SKIPZERO:
@@ -6672,10 +6672,10 @@ SLJIT_ASSERT(cc == ccend);
 #undef PUSH_BACKTRACK_NOVALUE
 #undef BACKTRACK_AS
 
-#define COMPILE_BACKTRACKPATH(current) \
+#define COMPILE_BACKTRACKINGPATH(current) \
   do \
     { \
-    compile_backtrackpath(common, (current)); \
+    compile_backtrackingpath(common, (current)); \
     if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler))) \
       return; \
     } \
@@ -6683,7 +6683,7 @@ SLJIT_ASSERT(cc == ccend);
 
 #define CURRENT_AS(type) ((type *)current)
 
-static void compile_iterator_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_iterator_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 pcre_uchar *cc = current->cc;
@@ -6712,7 +6712,7 @@ switch(opcode)
     set_jumps(current->topbacktracks, LABEL());
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
     free_stack(common, 1);
-    CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->trypath);
+    CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->matchingpath);
     }
   else
     {
@@ -6732,7 +6732,7 @@ switch(opcode)
       }
     skip_char_back(common);
     OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-    JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
+    JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
     if (opcode == OP_CRRANGE)
       set_jumps(current->topbacktracks, LABEL());
     JUMPHERE(jump);
@@ -6746,9 +6746,9 @@ switch(opcode)
   case OP_MINSTAR:
   case OP_MINPLUS:
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-  compile_char1_trypath(common, type, cc, &jumplist);
+  compile_char1_matchingpath(common, type, cc, &jumplist);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
-  JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
+  JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
   set_jumps(jumplist, LABEL());
   if (localptr == 0)
     free_stack(common, 1);
@@ -6764,7 +6764,7 @@ switch(opcode)
     set_jumps(current->topbacktracks, label);
     }
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-  compile_char1_trypath(common, type, cc, &jumplist);
+  compile_char1_matchingpath(common, type, cc, &jumplist);
 
   OP1(SLJIT_MOV, TMP1, 0, base, offset1);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
@@ -6775,9 +6775,9 @@ switch(opcode)
     CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg2 + 1, label);
 
   if (opcode == OP_CRMINRANGE && arg1 == 0)
-    JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
+    JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
   else
-    CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg1 + 2, CURRENT_AS(iterator_backtrack)->trypath);
+    CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, arg1 + 2, CURRENT_AS(iterator_backtrack)->matchingpath);
 
   set_jumps(jumplist, LABEL());
   if (localptr == 0)
@@ -6787,12 +6787,12 @@ switch(opcode)
   case OP_QUERY:
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
   OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
-  CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->trypath);
+  CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->matchingpath);
   jump = JUMP(SLJIT_JUMP);
   set_jumps(current->topbacktracks, LABEL());
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
   OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
-  JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
+  JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
   JUMPHERE(jump);
   if (localptr == 0)
     free_stack(common, 1);
@@ -6802,8 +6802,8 @@ switch(opcode)
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
   OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
   jump = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
-  compile_char1_trypath(common, type, cc, &jumplist);
-  JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->trypath);
+  compile_char1_matchingpath(common, type, cc, &jumplist);
+  JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
   set_jumps(jumplist, LABEL());
   JUMPHERE(jump);
   if (localptr == 0)
@@ -6826,7 +6826,7 @@ switch(opcode)
   }
 }
 
-static void compile_ref_iterator_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_ref_iterator_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 pcre_uchar *cc = current->cc;
@@ -6838,17 +6838,17 @@ if ((type & 0x1) == 0)
   set_jumps(current->topbacktracks, LABEL());
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 1);
-  CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->trypath);
+  CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->matchingpath);
   return;
   }
 
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->trypath);
+CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(iterator_backtrack)->matchingpath);
 set_jumps(current->topbacktracks, LABEL());
 free_stack(common, 2);
 }
 
-static void compile_recurse_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_recurse_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 
@@ -6870,7 +6870,7 @@ else if (common->has_set_som || common->mark_ptr != 0)
   }
 }
 
-static void compile_assert_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_assert_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 pcre_uchar *cc = current->cc;
@@ -6897,7 +6897,7 @@ if (CURRENT_AS(assert_backtrack)->framesize < 0)
   if (bra == OP_BRAZERO)
     {
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
-    CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(assert_backtrack)->trypath);
+    CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(assert_backtrack)->matchingpath);
     free_stack(common, 1);
     }
   return;
@@ -6908,7 +6908,7 @@ if (bra == OP_BRAZERO)
   if (*cc == OP_ASSERT_NOT || *cc == OP_ASSERTBACK_NOT)
     {
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
-    CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(assert_backtrack)->trypath);
+    CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(assert_backtrack)->matchingpath);
     free_stack(common, 1);
     return;
     }
@@ -6932,12 +6932,12 @@ if (bra == OP_BRAZERO)
   /* We know there is enough place on the stack. */
   OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, sizeof(sljit_w));
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
-  JUMPTO(SLJIT_JUMP, CURRENT_AS(assert_backtrack)->trypath);
+  JUMPTO(SLJIT_JUMP, CURRENT_AS(assert_backtrack)->matchingpath);
   JUMPHERE(brajump);
   }
 }
 
-static void compile_bracket_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 int opcode;
@@ -6997,17 +6997,17 @@ else if (ket == OP_KETRMIN)
       {
       /* Checking zero-length iteration. */
       if (opcode != OP_ONCE || CURRENT_AS(bracket_backtrack)->u.framesize < 0)
-        CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, CURRENT_AS(bracket_backtrack)->recursivetrypath);
+        CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
       else
         {
         OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), localptr);
-        CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), (CURRENT_AS(bracket_backtrack)->u.framesize + 1) * sizeof(sljit_w), CURRENT_AS(bracket_backtrack)->recursivetrypath);
+        CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), (CURRENT_AS(bracket_backtrack)->u.framesize + 1) * sizeof(sljit_w), CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
         }
       if (opcode != OP_ONCE)
         free_stack(common, 1);
       }
     else
-      JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->recursivetrypath);
+      JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
     }
   rminlabel = LABEL();
   }
@@ -7075,7 +7075,7 @@ else if (*cc == OP_ALT)
   cc = ccbegin + GET(ccbegin, 1);
   }
 
-COMPILE_BACKTRACKPATH(current->top);
+COMPILE_BACKTRACKINGPATH(current->top);
 if (current->topbacktracks)
   set_jumps(current->topbacktracks, LABEL());
 
@@ -7124,13 +7124,13 @@ if (has_alternatives)
         else
           OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
         }
-      compile_trypath(common, ccprev, cc, current);
+      compile_matchingpath(common, ccprev, cc, current);
       if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
         return;
       }
 
     /* Instructions after the current alternative is succesfully matched. */
-    /* There is a similar code in compile_bracket_trypath. */
+    /* There is a similar code in compile_bracket_matchingpath. */
     if (opcode == OP_ONCE)
       {
       if (CURRENT_AS(bracket_backtrack)->u.framesize < 0)
@@ -7193,7 +7193,7 @@ if (has_alternatives)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 0), TMP1, 0);
       }
 
-    JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->alttrypath);
+    JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->alternative_matchingpath);
 
     if (opcode != OP_ONCE)
       {
@@ -7202,7 +7202,7 @@ if (has_alternatives)
       jumplist = jumplist->next;
       }
 
-    COMPILE_BACKTRACKPATH(current->top);
+    COMPILE_BACKTRACKINGPATH(current->top);
     if (current->topbacktracks)
       set_jumps(current->topbacktracks, LABEL());
     SLJIT_ASSERT(!current->nextbacktracks);
@@ -7277,11 +7277,11 @@ if (ket == OP_KETRMAX)
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   if (bra != OP_BRAZERO)
     free_stack(common, 1);
-  CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(bracket_backtrack)->recursivetrypath);
+  CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
   if (bra == OP_BRAZERO)
     {
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-    JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->zerotrypath);
+    JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->zero_matchingpath);
     JUMPHERE(brazero);
     free_stack(common, 1);
     }
@@ -7304,12 +7304,12 @@ else if (ket == OP_KETRMIN)
 else if (bra == OP_BRAZERO)
   {
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->zerotrypath);
+  JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->zero_matchingpath);
   JUMPHERE(brazero);
   }
 }
 
-static void compile_bracketpos_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_bracketpos_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 int offset;
@@ -7344,7 +7344,7 @@ if (current->topbacktracks)
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(bracketpos_backtrack)->localptr, SLJIT_MEM1(STACK_TOP), CURRENT_AS(bracketpos_backtrack)->framesize * sizeof(sljit_w));
 }
 
-static void compile_braminzero_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_braminzero_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 assert_backtrack backtrack;
 
@@ -7353,22 +7353,22 @@ current->topbacktracks = NULL;
 current->nextbacktracks = NULL;
 if (current->cc[1] > OP_ASSERTBACK_NOT)
   {
-  /* Manual call of compile_bracket_trypath and compile_bracket_backtrackpath. */
-  compile_bracket_trypath(common, current->cc, current);
-  compile_bracket_backtrackpath(common, current->top);
+  /* Manual call of compile_bracket_matchingpath and compile_bracket_backtrackingpath. */
+  compile_bracket_matchingpath(common, current->cc, current);
+  compile_bracket_backtrackingpath(common, current->top);
   }
 else
   {
   memset(&backtrack, 0, sizeof(backtrack));
   backtrack.common.cc = current->cc;
-  backtrack.trypath = CURRENT_AS(braminzero_backtrack)->trypath;
-  /* Manual call of compile_assert_trypath. */
-  compile_assert_trypath(common, current->cc, &backtrack, FALSE);
+  backtrack.matchingpath = CURRENT_AS(braminzero_backtrack)->matchingpath;
+  /* Manual call of compile_assert_matchingpath. */
+  compile_assert_matchingpath(common, current->cc, &backtrack, FALSE);
   }
 SLJIT_ASSERT(!current->nextbacktracks && !current->topbacktracks);
 }
 
-static void compile_backtrackpath(compiler_common *common, struct backtrack_common *current)
+static void compile_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 
@@ -7454,23 +7454,23 @@ while (current)
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
     case OP_XCLASS:
 #endif
-    compile_iterator_backtrackpath(common, current);
+    compile_iterator_backtrackingpath(common, current);
     break;
 
     case OP_REF:
     case OP_REFI:
-    compile_ref_iterator_backtrackpath(common, current);
+    compile_ref_iterator_backtrackingpath(common, current);
     break;
 
     case OP_RECURSE:
-    compile_recurse_backtrackpath(common, current);
+    compile_recurse_backtrackingpath(common, current);
     break;
 
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
-    compile_assert_backtrackpath(common, current);
+    compile_assert_backtrackingpath(common, current);
     break;
 
     case OP_ONCE:
@@ -7481,14 +7481,14 @@ while (current)
     case OP_SBRA:
     case OP_SCBRA:
     case OP_SCOND:
-    compile_bracket_backtrackpath(common, current);
+    compile_bracket_backtrackingpath(common, current);
     break;
 
     case OP_BRAZERO:
     if (current->cc[1] > OP_ASSERTBACK_NOT)
-      compile_bracket_backtrackpath(common, current);
+      compile_bracket_backtrackingpath(common, current);
     else
-      compile_assert_backtrackpath(common, current);
+      compile_assert_backtrackingpath(common, current);
     break;
 
     case OP_BRAPOS:
@@ -7496,11 +7496,11 @@ while (current)
     case OP_SBRAPOS:
     case OP_SCBRAPOS:
     case OP_BRAPOSZERO:
-    compile_bracketpos_backtrackpath(common, current);
+    compile_bracketpos_backtrackingpath(common, current);
     break;
 
     case OP_BRAMINZERO:
-    compile_braminzero_backtrackpath(common, current);
+    compile_braminzero_backtrackingpath(common, current);
     break;
 
     case OP_MARK:
@@ -7582,7 +7582,7 @@ while (1)
   if (altbacktrack.cc != ccbegin)
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
 
-  compile_trypath(common, altbacktrack.cc, cc, &altbacktrack);
+  compile_matchingpath(common, altbacktrack.cc, cc, &altbacktrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     common->quitlabel = save_quitlabel;
@@ -7592,7 +7592,7 @@ while (1)
 
   add_jump(compiler, &common->accept, JUMP(SLJIT_JUMP));
 
-  compile_backtrackpath(common, altbacktrack.top);
+  compile_backtrackingpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     common->quitlabel = save_quitlabel;
@@ -7636,7 +7636,7 @@ common->quitlabel = save_quitlabel;
 common->quit = save_quit;
 }
 
-#undef COMPILE_BACKTRACKPATH
+#undef COMPILE_BACKTRACKINGPATH
 #undef CURRENT_AS
 
 void
@@ -7832,7 +7832,7 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
 else if (mode == JIT_PARTIAL_HARD_COMPILE)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0);
 
-compile_trypath(common, rootbacktrack.cc, ccend, &rootbacktrack);
+compile_matchingpath(common, rootbacktrack.cc, ccend, &rootbacktrack);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
   sljit_free_compiler(compiler);
@@ -7862,7 +7862,7 @@ if (mode != JIT_COMPILE)
   }
 
 empty_match_backtrack = LABEL();
-compile_backtrackpath(common, rootbacktrack.top);
+compile_backtrackingpath(common, rootbacktrack.top);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
   sljit_free_compiler(compiler);
