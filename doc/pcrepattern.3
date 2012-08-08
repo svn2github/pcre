@@ -246,14 +246,21 @@ one of the following escape sequences than the binary character it represents:
   \ex{hhh..} character with hex code hhh.. (non-JavaScript mode)
   \euhhhh    character with hex code hhhh (JavaScript mode only)
 .sp
-The precise effect of \ecx is as follows: if x is a lower case letter, it
-is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
-Thus \ecz becomes hex 1A (z is 7A), but \ec{ becomes hex 3B ({ is 7B), while
-\ec; becomes hex 7B (; is 3B). If the byte following \ec has a value greater
-than 127, a compile-time error occurs. This locks out non-ASCII characters in
-all modes. (When PCRE is compiled in EBCDIC mode, all byte values are valid. A
-lower case letter is converted to upper case, and then the 0xc0 bits are
-flipped.)
+The precise effect of \ecx on ASCII characters is as follows: if x is a lower
+case letter, it is converted to upper case. Then bit 6 of the character (hex
+40) is inverted. Thus \ecA to \ecZ become hex 01 to hex 1A (A is 41, Z is 5A),
+but \ec{ becomes hex 3B ({ is 7B), and \ec; becomes hex 7B (; is 3B). If the
+data item (byte or 16-bit value) following \ec has a value greater than 127, a
+compile-time error occurs. This locks out non-ASCII characters in all modes.
+.P
+The \ec facility was designed for use with ASCII characters, but with the
+extension to Unicode it is even less useful than it once was. It is, however,
+recognized when PCRE is compiled in EBCDIC mode, where data items are always
+bytes. In this mode, all values are valid after \ec. If the next character is a
+lower case letter, it is converted to upper case. Then the 0xc0 bits of the
+byte are inverted. Thus \ecA becomes hex 01, as in ASCII (A is C1), but because
+the EBCDIC letters are disjoint, \ecZ becomes hex 29 (Z is E9), and other 
+characters also generate different values.
 .P
 By default, after \ex, from zero to two hexadecimal digits are read (letters
 can be in upper or lower case). Any number of hexadecimal digits may appear
@@ -2922,6 +2929,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 July 2012
+Last updated: 08 August 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
