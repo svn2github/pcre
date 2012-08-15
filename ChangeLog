@@ -24,6 +24,29 @@ Version 8.32
 
 7.  Improved instruction cache flush for POWER/PowerPC.
     Patch by Daniel Richard G.
+    
+8.  Fixed a number of issues in pcregrep, making it more compatible with GNU
+    grep:
+    
+    (a) There is now no limit to the number of patterns to be matched.
+    
+    (b) An error is given if a pattern is too long.
+    
+    (c) Multiple uses of --exclude, --exclude-dir, --include, and --include-dir
+        are now supported.
+        
+    (d) --exclude-from and --include-from (multiple use) have been added.
+    
+    (e) Exclusions and inclusions now apply to all files and directories, not
+        just to those obtained from scanning a directory recursively.   
+        
+    (f) Multiple uses of -f and --file-list are now supported.
+    
+    (g) In a Windows environment, the default for -d has been changed from 
+        "read" (the GNU grep default) to "skip", because otherwise the presence 
+        of a directory in the file list provokes an error.
+        
+    (h) The documentation has been revised and clarified in places.   
 
 
 Version 8.31 06-July-2012

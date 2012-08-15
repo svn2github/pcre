@@ -1,6 +1,16 @@
 News about PCRE releases
 ------------------------
 
+Release 8.32 xx-xxxx-2012
+-------------------------
+
+.  A number of issues in pcregrep have been fixed, making it more compatible
+   with GNU grep. In particular, --exclude and --include (and variants) apply 
+   to all files now, not just those obtained from scanning a directory 
+   recursively. In Windows environments, the default action for directories is
+   now "skip" instead of "read" (which provokes an error).
+
+
 Release 8.31 06-July-2012
 -------------------------
 

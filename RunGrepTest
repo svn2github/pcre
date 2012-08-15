@@ -119,7 +119,8 @@ echo "---------------------------- Test 12 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 13 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -f./testdata/greplist ./testdata/grepinputx) >>testtry
+echo seventeen >testtemp1
+(cd $srcdir; $valgrind $pcregrep -f./testdata/greplist -f testtemp1 ./testdata/grepinputx) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 14 -----------------------------" >>testtry
@@ -207,11 +208,11 @@ echo "---------------------------- Test 34 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 35 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx --exclude-dir='^\.' 'fox' ./testdata) >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx --include grepinput8 --exclude-dir='^\.' 'fox' ./testdata) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 36 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinput --exclude 'grepinput$' --exclude_dir='^\.' 'fox' ./testdata | sort) >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinput --exclude 'grepinput$' --exclude=grepinput8 --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 37 -----------------------------" >>testtry
@@ -408,7 +409,8 @@ echo "---------------------------- Test 83 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 84 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep --file-list ./testdata/grepfilelist "fox|complete") >>testtry 2>&1
+echo testdata/grepinput3 >testtemp1
+(cd $srcdir; $valgrind $pcregrep --file-list ./testdata/grepfilelist --file-list testtemp1 "fox|complete|t7") >>testtry 2>&1
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 85 -----------------------------" >>testtry
@@ -445,6 +447,36 @@ echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 93 -----------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep --text "dog" ./testdata/grepbinary) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 94 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx --include grepinput8 'fox' ./testdata/grepinput*) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 95 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --file-list ./testdata/grepfilelist --exclude grepinputv "fox|complete") >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 96 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include-dir=testdata --exclude '^(?!grepinput)' 'fox' ./test*) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 97 -----------------------------" >>testtry
+echo "grepinput$" >testtemp1
+echo "grepinput8" >>testtemp1
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinput --exclude-from testtemp1 --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 98 -----------------------------" >>testtry
+echo "grepinput$" >testtemp1
+echo "grepinput8" >>testtemp1
+(cd $srcdir; $valgrind $pcregrep -L -r --exclude=grepinput3 --include=grepinput --exclude-from testtemp1 --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 99 -----------------------------" >>testtry
+echo "grepinput$" >testtemp1
+echo "grepinput8" >testtemp2
+(cd $srcdir; $valgrind $pcregrep -L -r --include grepinput --exclude-from testtemp1 --exclude-from=testtemp2 --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtry
 echo "RC=$?" >>testtry
 
 # Now compare the results.
