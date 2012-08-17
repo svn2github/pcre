@@ -586,7 +586,7 @@ dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
 PCRE_STATIC_CFLAG=""
 if test "x$enable_shared" = "xno" ; then
   AC_DEFINE([PCRE_STATIC], [1], [
-    Define if linking statically (TODO: make nice with Libtool)])
+    Define to any value if linking statically (TODO: make nice with Libtool)])
   PCRE_STATIC_CFLAG="-DPCRE_STATIC"
 fi
 AC_SUBST(PCRE_STATIC_CFLAG)
@@ -595,62 +595,62 @@ AC_SUBST(PCRE_STATIC_CFLAG)
 
 if test "$enable_pcre8" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE8], [], [
-    Define to enable the 8 bit PCRE library.])
+    Define to any value to enable the 8 bit PCRE library.])
 fi
 
 if test "$enable_pcre16" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE16], [], [
-    Define to enable the 16 bit PCRE library.])
+    Define to any value to enable the 16 bit PCRE library.])
 fi
 
 if test "$enable_jit" = "yes"; then
   AC_DEFINE([SUPPORT_JIT], [], [
-    Define to enable support for Just-In-Time compiling.])
+    Define to any value to enable support for Just-In-Time compiling.])
 else
   enable_pcregrep_jit="no"
 fi
 
 if test "$enable_pcregrep_jit" = "yes"; then
   AC_DEFINE([SUPPORT_PCREGREP_JIT], [], [
-    Define to enable JIT support in pcregrep.])
+    Define to any value to enable JIT support in pcregrep.])
 fi
 
 if test "$enable_utf" = "yes"; then
   AC_DEFINE([SUPPORT_UTF], [], [
-    Define to enable support for the UTF-8/16 Unicode encoding. This
-    will work even in an EBCDIC environment, but it is incompatible
+    Define to any value to enable support for the UTF-8/16 Unicode encoding. 
+    This will work even in an EBCDIC environment, but it is incompatible
     with the EBCDIC macro. That is, PCRE can support *either* EBCDIC
     code *or* ASCII/UTF-8/16, but not both at once.])
 fi
 
 if test "$enable_unicode_properties" = "yes"; then
   AC_DEFINE([SUPPORT_UCP], [], [
-    Define to enable support for Unicode properties.])
+    Define to any value to enable support for Unicode properties.])
 fi
 
 if test "$enable_stack_for_recursion" = "no"; then
   AC_DEFINE([NO_RECURSE], [], [
     PCRE uses recursive function calls to handle backtracking while
     matching. This can sometimes be a problem on systems that have
-    stacks of limited size. Define NO_RECURSE to get a version that
-    doesn't use recursion in the match() function; instead it creates
-    its own stack by steam using pcre_recurse_malloc() to obtain memory
-    from the heap. For more detail, see the comments and other stuff
-    just above the match() function. On systems that support it,
-    "configure" can be used to set this in the Makefile
-    (use --disable-stack-for-recursion).])
+    stacks of limited size. Define NO_RECURSE to any value to get a 
+    version that doesn't use recursion in the match() function; instead 
+    it creates its own stack by steam using pcre_recurse_malloc() to obtain
+    memory from the heap. For more detail, see the comments and other stuff
+    just above the match() function. On systems that support it, "configure"
+    can be used to set this in the Makefile (use
+    --disable-stack-for-recursion).])
 fi
 
 if test "$enable_pcregrep_libz" = "yes"; then
   AC_DEFINE([SUPPORT_LIBZ], [], [
-    Define to allow pcregrep to be linked with libz, so that it is
+    Define to any value to allow pcregrep to be linked with libz, so that it is
     able to handle .gz files.])
 fi
 
 if test "$enable_pcregrep_libbz2" = "yes"; then
   AC_DEFINE([SUPPORT_LIBBZ2], [], [
-    Define to allow pcregrep to be linked with libbz2, so that it is
-    able to handle .bz2 files.])
+    Define to any value to allow pcregrep to be linked with libbz2, so that it
+    is able to handle .bz2 files.])
 fi
 
 if test $with_pcregrep_bufsize -lt 8192 ; then
@@ -661,17 +661,17 @@ AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
   The value of PCREGREP_BUFSIZE determines the size of buffer used by
   pcregrep to hold parts of the file it is searching. On systems that
   support it, "configure" can be used to override the default, which is
-  8192. This is also the minimum value. The actual amount of memory used by
+  20K. This is also the minimum value. The actual amount of memory used by
   pcregrep is three times this number, because it allows for the buffering of
   "before" and "after" lines.])
 
 if test "$enable_pcretest_libedit" = "yes"; then
   AC_DEFINE([SUPPORT_LIBEDIT], [], [
-    Define to allow pcretest to be linked with libedit.])
+    Define to any value to allow pcretest to be linked with libedit.])
   LIBREADLINE="$LIBEDIT"
 elif test "$enable_pcretest_libreadline" = "yes"; then
   AC_DEFINE([SUPPORT_LIBREADLINE], [], [
-    Define to allow pcretest to be linked with libreadline.])
+    Define to any value to allow pcretest to be linked with libreadline.])
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
@@ -683,10 +683,10 @@ AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
 if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [
     By default, the \R escape sequence matches any Unicode line ending
-    character or sequence of characters. If BSR_ANYCRLF is defined, this is
-    changed so that backslash-R matches only CR, LF, or CRLF. The build-
-    time default can be overridden by the user of PCRE at runtime. On
-    systems that support it, "configure" can be used to override the
+    character or sequence of characters. If BSR_ANYCRLF is defined (to any
+    value), this is changed so that backslash-R matches only CR, LF, or CRLF. 
+    The build-time default can be overridden by the user of PCRE at runtime. 
+    On systems that support it, "configure" can be used to override the
     default.])
 fi
 
@@ -745,19 +745,19 @@ AH_VERBATIM([PCRE_EXP_DEFN], [
 /* If you are compiling for a system other than a Unix-like system or
    Win32, and it needs some magic to be inserted before the definition
    of a function that is exported by the library, define this macro to
-   contain the relevant magic. If you do not define this macro, it
-   defaults to "extern" for a C compiler and "extern C" for a C++
-   compiler on non-Win32 systems. This macro apears at the start of
-   every exported function that is part of the external API. It does
-   not appear on functions that are "external" in the C sense, but
-   which are internal to the library. */
+   contain the relevant magic. If you do not define this macro, a suitable
+    __declspec value is used for Windows systems; in other environments 
+   "extern" is used for a C compiler and "extern C" for a C++ compiler. 
+   This macro apears at the start of every exported function that is part 
+   of the external API. It does not appear on functions that are "external" 
+   in the C sense, but which are internal to the library. */
 #undef PCRE_EXP_DEFN])
 
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [
     If you are compiling for a system that uses EBCDIC instead of ASCII
-    character codes, define this macro as 1. On systems that can use
-    "configure", this can be done via --enable-ebcdic. PCRE will then
+    character codes, define this macro to any value. On systems that can 
+    use "configure", this can be done via --enable-ebcdic. PCRE will then
     assume that all input strings are in EBCDIC. If you do not define
     this macro, PCRE will assume input strings are ASCII or UTF-8/16
     Unicode. It is not possible to build a version of PCRE that
