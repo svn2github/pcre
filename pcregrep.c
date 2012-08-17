@@ -722,7 +722,7 @@ return FALSE;
 
 #else
 
-#define FILESEP 0;
+#define FILESEP 0
 typedef void directory_type;
 
 int isdirectory(char *filename) { return 0; }
