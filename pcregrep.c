@@ -616,7 +616,7 @@ BOOL first;
 WIN32_FIND_DATA data;
 } directory_type;
 
-#DEFINE FILESEP '/'
+#define FILESEP '/'
 
 int
 isdirectory(char *filename)
@@ -722,7 +722,7 @@ return FALSE;
 
 #else
 
-#DEFINE FILESEP 0;
+#define FILESEP 0;
 typedef void directory_type;
 
 int isdirectory(char *filename) { return 0; }
@@ -2874,7 +2874,7 @@ for (fn = pattern_files; fn != NULL; fn = fn->next)
   {
   if (!read_pattern_file(fn->name, &patterns, &patterns_last, process_options))
     goto EXIT2;
-  } 
+  }
 
 /* Study the regular expressions, as we will be running them many times. Unless
 JIT has been explicitly disabled, arrange a stack for it to use. */
