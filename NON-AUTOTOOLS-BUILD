@@ -50,7 +50,8 @@ the .generic versions are not used.
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
 
 The following are generic instructions for building the PCRE C library "by
-hand":
+hand". If you are going to use CMake, this section does not apply to you; you 
+can skip ahead to the CMake section.
 
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
      settings that it contains to whatever is appropriate for your environment.
@@ -106,6 +107,7 @@ hand":
        pcre_fullinfo.c
        pcre_get.c
        pcre_globals.c
+       pcre_jit_compile.c
        pcre_maketables.c
        pcre_newline.c
        pcre_ord2utf8.c
@@ -122,21 +124,20 @@ hand":
      an unusual compiler) so that all included PCRE header files are first
      sought in the current directory. Otherwise you run the risk of picking up
      a previously-installed file from somewhere else.
+     
+     Note that you must still compile pcre_jit_compile.c, even if you have not
+     defined SUPPORT_JIT in config.h, because when JIT support is not
+     configured, dummy functions are compiled. When JIT support IS configured,
+     pcre_jit_compile.c #includes sources from the sljit subdirectory, where
+     there should be 16 files, all of whose names begin with "sljit".
 
- (6) If you have defined SUPPORT_JIT in config.h, you must also compile
-
-       pcre_jit_compile.c
-
-     This file #includes sources from the sljit subdirectory, where there
-     should be 16 files, all of whose names begin with "sljit".
-
- (7) Now link all the compiled code into an object library in whichever form
+ (6) Now link all the compiled code into an object library in whichever form
      your system keeps such libraries. This is the basic PCRE C 8-bit library.
      If your system has static and shared libraries, you may have to do this
      once for each type.
 
- (8) If you want to build a 16-bit library (as well as, or instead of the 8-bit
-     library) repeat steps 5-7 with the following files:
+ (7) If you want to build a 16-bit library (as well as, or instead of the 8-bit
+     library) repeat steps 5-6 with the following files:
 
        pcre16_byte_order.c
        pcre16_chartables.c
@@ -147,7 +148,7 @@ hand":
        pcre16_fullinfo.c
        pcre16_get.c
        pcre16_globals.c
-       pcre16_jit_compile.c (if SUPPORT_JIT is defined)
+       pcre16_jit_compile.c
        pcre16_maketables.c
        pcre16_newline.c
        pcre16_ord2utf16.c
@@ -161,19 +162,19 @@ hand":
        pcre16_version.c
        pcre16_xclass.c
 
- (9) If you want to build the POSIX wrapper functions (which apply only to the
+ (8) If you want to build the POSIX wrapper functions (which apply only to the
      8-bit library), ensure that you have the pcreposix.h file and then compile
      pcreposix.c (remembering -DHAVE_CONFIG_H if necessary). Link the result
      (on its own) as the pcreposix library.
 
-(10) The pcretest program can be linked with either or both of the 8-bit and
+(9)  The pcretest program can be linked with either or both of the 8-bit and
      16-bit libraries (depending on what you selected in config.h). Compile
      pcretest.c and pcre_printint.c (again, don't forget -DHAVE_CONFIG_H) and
      link them together with the appropriate library/ies. If you compiled an
      8-bit library, pcretest also needs the pcreposix wrapper library unless
      you compiled it with -DNOPOSIX.
 
-(11) Run pcretest on the testinput files in the testdata directory, and check
+(10) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. There are
      comments about what each test does in the section entitled "Testing PCRE"
      in the README file. If you compiled both an 8-bit and a 16-bit library,
@@ -193,11 +194,11 @@ hand":
      locale to "french" rather than "fr_FR", and there some minor output
      differences.
 
-(12) If you have built PCRE with SUPPORT_JIT, the JIT features will be tested
+(11) If you have built PCRE with SUPPORT_JIT, the JIT features will be tested
      by the testdata files. However, you might also like to build and run
      the JIT test program, pcre_jit_test.c.
 
-(13) If you want to use the pcregrep command, compile and link pcregrep.c; it
+(12) If you want to use the pcregrep command, compile and link pcregrep.c; it
      uses only the basic 8-bit PCRE library (it does not need the pcreposix
      library).
 
@@ -582,4 +583,4 @@ build.log file in the root of the package also.
 
 
 ==========================
-Last Updated: 18 June 2012
+Last Updated: 17 August 2012
