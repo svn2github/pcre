@@ -196,7 +196,7 @@ files="\
   pcreposix.c \
   pcreposix.h \
   pcre.h.in \
-  pcre_internal.h
+  pcre_internal.h \
   pcre_byte_order.c \
   pcre_compile.c \
   pcre_config.c \
