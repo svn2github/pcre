@@ -279,6 +279,9 @@ typedef struct compiler_common {
 
   /* Maps private data offset to each opcode. */
   int *private_data_ptrs;
+  /* Tells whether the capturing bracket is optimized. */
+  pcre_uint8 *optimized_cbracket;
+  /* Starting offset of private data for capturing brackets. */
   int cbraptr;
   /* OVector starting point. Must be divisible by 2. */
   int ovector_start;
@@ -759,8 +762,9 @@ static int get_private_data_length(compiler_common *common, pcre_uchar *cc, pcre
 {
 int private_data_length = 0;
 pcre_uchar *alternative;
+pcre_uchar *name;
 pcre_uchar *end = NULL;
-int space, size, bracketlen;
+int space, size, bracketlen, i;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
@@ -775,6 +779,12 @@ while (cc < ccend)
     cc += 1;
     break;
 
+    case OP_REF:
+    case OP_REFI:
+    common->optimized_cbracket[GET2(cc, 1)] = 0;
+    cc += 1 + IMM2_SIZE;
+    break;
+
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
@@ -784,7 +794,6 @@ while (cc < ccend)
     case OP_BRAPOS:
     case OP_SBRA:
     case OP_SBRAPOS:
-    case OP_SCOND:
     private_data_length += sizeof(sljit_w);
     bracketlen = 1 + LINK_SIZE;
     break;
@@ -792,13 +801,46 @@ while (cc < ccend)
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
     private_data_length += sizeof(sljit_w);
+    common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] = 0;
     bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
     case OP_COND:
-    /* Might be a hidden SCOND. */
-    alternative = cc + GET(cc, 1);
-    if (*alternative == OP_KETRMAX || *alternative == OP_KETRMIN)
+    case OP_SCOND:
+    bracketlen = cc[1 + LINK_SIZE];
+    if (bracketlen == OP_CREF)
+      {
+      bracketlen = GET2(cc, 1 + LINK_SIZE + 1);
+      common->optimized_cbracket[bracketlen] = 0;
+      }
+    else if (bracketlen == OP_NCREF)
+      {
+      bracketlen = GET2(cc, 1 + LINK_SIZE + 1);
+      name = (pcre_uchar *)common->name_table;
+      alternative = name;
+      for (i = 0; i < common->name_count; i++)
+        {
+        if (GET2(name, 0) == bracketlen) break;
+        name += common->name_entry_size;
+        }
+      SLJIT_ASSERT(i != common->name_count);
+
+      for (i = 0; i < common->name_count; i++)
+        {
+        if (STRCMP_UC_UC(alternative + IMM2_SIZE, name + IMM2_SIZE) == 0)
+          common->optimized_cbracket[GET2(alternative, 0)] = 0;
+        alternative += common->name_entry_size;
+        }
+      }
+
+    if (*cc == OP_COND)
+      {
+      /* Might be a hidden SCOND. */
+      alternative = cc + GET(cc, 1);
+      if (*alternative == OP_KETRMAX || *alternative == OP_KETRMIN)
+        private_data_length += sizeof(sljit_w);
+      }
+    else
       private_data_length += sizeof(sljit_w);
     bracketlen = 1 + LINK_SIZE;
     break;
@@ -858,6 +900,9 @@ while (cc < ccend)
 #endif
 
     case OP_RECURSE:
+    alternative = common->start + GET(cc, 1);
+    if (alternative != common->start)
+      common->optimized_cbracket[GET2(alternative, 1 + LINK_SIZE)] = 0;
     /* Set its value only once. */
     if (common->recursive_head == 0)
       {
@@ -1252,12 +1297,14 @@ while (cc < ccend)
 
     case OP_CBRA:
     case OP_SCBRA:
-    private_data_length++;
+    if (common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0)
+      private_data_length++;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
+    SLJIT_ASSERT(common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0);
     private_data_length += 2;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
@@ -1415,17 +1462,20 @@ while (status != end)
 
       case OP_CBRA:
       case OP_SCBRA:
-      count = 1;
-      srcw[0] = OVECTOR_PRIV(GET2(cc, 1 + LINK_SIZE));
+      if (common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0)
+        {
+        count = 1;
+        srcw[0] = OVECTOR_PRIV(GET2(cc, 1 + LINK_SIZE));
+        }
       cc += 1 + LINK_SIZE + IMM2_SIZE;
       break;
 
       case OP_CBRAPOS:
       case OP_SCBRAPOS:
       count = 2;
-      srcw[0] = OVECTOR_PRIV(GET2(cc, 1 + LINK_SIZE));
-      srcw[1] = PRIVATE_DATA(cc);
-      SLJIT_ASSERT(srcw[0] != 0);
+      srcw[0] = PRIVATE_DATA(cc);
+      srcw[1] = OVECTOR_PRIV(GET2(cc, 1 + LINK_SIZE));
+      SLJIT_ASSERT(srcw[0] != 0 && srcw[1] != 0);
       cc += 1 + LINK_SIZE + IMM2_SIZE;
       break;
 
@@ -5454,8 +5504,16 @@ if (opcode == OP_CBRA || opcode == OP_SCBRA)
   {
   /* Capturing brackets has a pre-allocated space. */
   offset = GET2(ccbegin, 1 + LINK_SIZE);
-  private_data_ptr = OVECTOR_PRIV(offset);
-  offset <<= 1;
+  if (common->optimized_cbracket[offset] == 0)
+    {
+    private_data_ptr = OVECTOR_PRIV(offset);
+    offset <<= 1;
+    }
+  else
+    {
+    offset <<= 1;
+    private_data_ptr = OVECTOR(offset);
+    }
   BACKTRACK_AS(bracket_backtrack)->private_data_ptr = private_data_ptr;
   matchingpath += IMM2_SIZE;
   }
@@ -5589,14 +5647,27 @@ if (opcode == OP_ONCE)
 else if (opcode == OP_CBRA || opcode == OP_SCBRA)
   {
   /* Saving the previous values. */
-  allocate_stack(common, 3);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset));
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1));
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP1, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP2, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STR_PTR, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), TMP1, 0);
+  if (common->optimized_cbracket[offset >> 1] == 0)
+    {
+    allocate_stack(common, 3);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset));
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1));
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP1, 0);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP2, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STR_PTR, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), TMP1, 0);
+    }
+  else
+    {
+    SLJIT_ASSERT(private_data_ptr == OVECTOR(offset));
+    allocate_stack(common, 2);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr + sizeof(sljit_w));
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STR_PTR, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP1, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP2, 0);
+    }
   }
 else if (opcode == OP_SBRA || opcode == OP_SCOND)
   {
@@ -6405,15 +6476,18 @@ static SLJIT_INLINE pcre_uchar *compile_close_matchingpath(compiler_common *comm
 {
 DEFINE_COMPILER;
 int offset = GET2(cc, 1);
+BOOL optimized_cbracket = common->optimized_cbracket[offset] != 0;
 
 /* Data will be discarded anyway... */
 if (common->currententry != NULL)
   return cc + 1 + IMM2_SIZE;
 
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR_PRIV(offset));
+if (!optimized_cbracket)
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR_PRIV(offset));
 offset <<= 1;
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), STR_PTR, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
+if (!optimized_cbracket)
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
 return cc + 1 + IMM2_SIZE;
 }
 
@@ -7235,12 +7309,24 @@ if (has_alternatives)
 if (offset != 0)
   {
   /* Using both tmp register is better for instruction scheduling. */
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), TMP2, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_MEM1(STACK_TOP), STACK(2));
-  free_stack(common, 3);
+  if (common->optimized_cbracket[offset >> 1] == 0)
+    {
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(2));
+    free_stack(common, 3);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), TMP2, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, TMP1, 0);
+    }
+  else
+    {
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(1));
+    free_stack(common, 2);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), TMP2, 0);
+    }
   }
 else if (opcode == OP_SBRA || opcode == OP_SCOND)
   {
@@ -7727,11 +7813,18 @@ ccend = bracketend(rootbacktrack.cc);
 
 /* Calculate the local space size on the stack. */
 common->ovector_start = CALL_LIMIT + sizeof(sljit_w);
+common->optimized_cbracket = (pcre_uint8 *)SLJIT_MALLOC(re->top_bracket + 1);
+if (!common->optimized_cbracket)
+  return;
+memset(common->optimized_cbracket, 1, re->top_bracket + 1);
 
 SLJIT_ASSERT(*rootbacktrack.cc == OP_BRA && ccend[-(1 + LINK_SIZE)] == OP_KET);
 private_data_size = get_private_data_length(common, rootbacktrack.cc, ccend);
 if (private_data_size < 0)
+  {
+  SLJIT_FREE(common->optimized_cbracket);
   return;
+  }
 
 /* Checking flags and updating ovector_start. */
 if (mode == JIT_COMPILE && (re->flags & PCRE_REQCHSET) != 0 && (re->options & PCRE_NO_START_OPTIMIZE) == 0)
@@ -7763,16 +7856,23 @@ SLJIT_ASSERT(!(common->req_char_ptr != 0 && common->start_used_ptr != 0));
 common->cbraptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_w);
 private_data_size += common->cbraptr + (re->top_bracket + 1) * sizeof(sljit_w);
 if (private_data_size > SLJIT_MAX_LOCAL_SIZE)
+  {
+  SLJIT_FREE(common->optimized_cbracket);
   return;
+  }
 common->private_data_ptrs = (int *)SLJIT_MALLOC((ccend - rootbacktrack.cc) * sizeof(int));
 if (!common->private_data_ptrs)
+  {
+  SLJIT_FREE(common->optimized_cbracket);
   return;
+  }
 memset(common->private_data_ptrs, 0, (ccend - rootbacktrack.cc) * sizeof(int));
 set_private_data_ptrs(common, common->cbraptr + (re->top_bracket + 1) * sizeof(sljit_w), ccend);
 
 compiler = sljit_create_compiler();
 if (!compiler)
   {
+  SLJIT_FREE(common->optimized_cbracket);
   SLJIT_FREE(common->private_data_ptrs);
   return;
   }
@@ -7839,6 +7939,7 @@ compile_matchingpath(common, rootbacktrack.cc, ccend, &rootbacktrack);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
   sljit_free_compiler(compiler);
+  SLJIT_FREE(common->optimized_cbracket);
   SLJIT_FREE(common->private_data_ptrs);
   return;
   }
@@ -7869,6 +7970,7 @@ compile_backtrackingpath(common, rootbacktrack.top);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
   sljit_free_compiler(compiler);
+  SLJIT_FREE(common->optimized_cbracket);
   SLJIT_FREE(common->private_data_ptrs);
   return;
   }
@@ -7947,6 +8049,7 @@ while (common->currententry != NULL)
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     sljit_free_compiler(compiler);
+    SLJIT_FREE(common->optimized_cbracket);
     SLJIT_FREE(common->private_data_ptrs);
     return;
     }
@@ -8042,6 +8145,7 @@ if (common->getucd != NULL)
   }
 #endif
 
+SLJIT_FREE(common->optimized_cbracket);
 SLJIT_FREE(common->private_data_ptrs);
 executable_func = sljit_generate_code(compiler);
 executable_size = sljit_get_generated_code_size(compiler);

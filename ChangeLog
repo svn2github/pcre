@@ -48,6 +48,8 @@ Version 8.32
         
     (h) The documentation has been revised and clarified in places.   
 
+9.  Improve the matching speed of capturing brackets.
+
 
 Version 8.31 06-July-2012
 -------------------------
