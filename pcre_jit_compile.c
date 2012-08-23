@@ -900,9 +900,6 @@ while (cc < ccend)
 #endif
 
     case OP_RECURSE:
-    alternative = common->start + GET(cc, 1);
-    if (alternative != common->start)
-      common->optimized_cbracket[GET2(alternative, 1 + LINK_SIZE)] = 0;
     /* Set its value only once. */
     if (common->recursive_head == 0)
       {
@@ -1304,7 +1301,6 @@ while (cc < ccend)
 
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
-    SLJIT_ASSERT(common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0);
     private_data_length += 2;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
@@ -5937,6 +5933,9 @@ switch(opcode)
   case OP_CBRAPOS:
   case OP_SCBRAPOS:
   offset = GET2(cc, 1 + LINK_SIZE);
+  /* This case cannot be optimized in the same was as
+  normal capturing brackets. */
+  SLJIT_ASSERT(common->optimized_cbracket[offset] == 0);
   cbraprivptr = OVECTOR_PRIV(offset);
   offset <<= 1;
   ccbegin = cc + 1 + LINK_SIZE + IMM2_SIZE;
