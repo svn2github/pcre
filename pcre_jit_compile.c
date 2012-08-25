@@ -4219,18 +4219,24 @@ switch(type)
   detect_partial_match(common, backtracks);
   read_char(common);
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ucp_Mc);
-  add_jump(compiler, backtracks, CMP(SLJIT_C_LESS_EQUAL, TMP1, 0, SLJIT_IMM, ucp_Mn - ucp_Mc));
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_w)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
+  OP1(SLJIT_MOV_UB, TMP3, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 
   label = LABEL();
   jump[0] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STR_PTR, 0);
   read_char(common);
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ucp_Mc);
-  CMPTO(SLJIT_C_LESS_EQUAL, TMP1, 0, SLJIT_IMM, ucp_Mn - ucp_Mc, label);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_w)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 
-  OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+  OP2(SLJIT_MUL, TMP1, 0, TMP3, 0, SLJIT_IMM, ucp_gbCount);
+  OP1(SLJIT_MOV, TMP3, 0, TMP2, 0);
+  OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)PRIV(ucp_gbtable));
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, label);
+
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
   JUMPHERE(jump[0]);
   if (common->mode == JIT_PARTIAL_HARD_COMPILE)
     {

@@ -412,7 +412,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CMA, 0, "(?>((?>a{32}|b+|(a*))?(?>c+|d*)?\?)+e)+?f", "aaccebbdde bbdaaaccebbdee bbdaaaccebbdeef" },
 	{ MUA, 0, "(?>(?:(?>aa|a||x)+?b|(?>aa|a||(x))+?c)?(?>[ad]{0,2})*?d)+d", "aaacdbaabdcabdbaaacd aacaabdbdcdcaaaadaabcbaadd" },
 	{ MUA, 0, "(?>(?:(?>aa|a||(x))+?b|(?>aa|a||x)+?c)?(?>[ad]{0,2})*?d)+d", "aaacdbaabdcabdbaaacd aacaabdbdcdcaaaadaabcbaadd" },
-	{ MUA, 0 | F_NOMATCH | F_PROPERTY, "\\X", "\xcc\x8d\xcc\x8d" },
+	{ MUA, 0 | F_PROPERTY, "\\X", "\xcc\x8d\xcc\x8d" },
 	{ MUA, 0 | F_PROPERTY, "\\X", "\xcc\x8d\xcc\x8d#\xcc\x8d\xcc\x8d" },
 	{ MUA, 0 | F_PROPERTY, "\\X+..", "\xcc\x8d#\xcc\x8d#\xcc\x8d\xcc\x8d" },
 	{ MUA, 0 | F_PROPERTY, "\\X{2,4}", "abcdef" },
