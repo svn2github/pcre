@@ -423,20 +423,6 @@ of case for anything other than the ASCII letters. --/
     \x{e0} 
  0: \x{e0}
 
-/-- This should be Perl-compatible but Perl 5.11 gets \x{300} wrong. --/8
-    
-/^\X/8
-    A
- 0: A
-    A\x{300}BC 
- 0: A\x{300}
-    A\x{300}\x{301}\x{302}BC 
- 0: A\x{300}\x{301}\x{302}
-    *** Failers
- 0: *
-    \x{300}  
-No match
-    
 /-- These are PCRE's extra properties to help with Unicodizing \d etc. --/
 
 /^\p{Xan}/8
@@ -1194,11 +1180,13 @@ No match
 
 /^S(\X*)e(\X*)$/8
     Stéréo
-No match
+ 0: Ste\x{301}re\x{301}o
+ 1: te\x{301}r
+ 2: \x{301}o
     
 /^\X/8 
     ́réo
-No match
+ 0: \x{301}
 
 /^a\X41z/<JS>
     aX41z

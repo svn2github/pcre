@@ -406,7 +406,13 @@
     A\x{300}\x{301}B\x{300}C\x{300}\x{301}
     A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
     A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
-    
+
+/^\X/8
+    A
+    A\x{300}BC 
+    A\x{300}\x{301}\x{302}BC 
+    \x{300}  
+
 /^\p{Han}+/8
     \x{2e81}\x{3007}\x{2f804}\x{31a0}
     ** Failers
@@ -814,5 +820,69 @@
 /Ⱥ/8i
     Ⱥ
     ⱥ
+    
+/-- These are tests for extended grapheme clusters --/ 
+
+/^\X/8+
+    G\x{34e}\x{34e}X
+    \x{34e}\x{34e}X
+    \x04X
+    \x{1100}X
+    \x{1100}\x{34e}X
+    \x{1b04}\x{1b04}X 
+    *These match up to the roman letters
+    \x{1111}\x{1111}L,L
+    \x{1111}\x{1111}\x{1169}L,L,V
+    \x{1111}\x{ae4c}L, LV
+    \x{1111}\x{ad89}L, LVT
+    \x{1111}\x{ae4c}\x{1169}L, LV, V
+    \x{1111}\x{ae4c}\x{1169}\x{1169}L, LV, V, V
+    \x{1111}\x{ae4c}\x{1169}\x{11fe}L, LV, V, T
+    \x{1111}\x{ad89}\x{11fe}L, LVT, T
+    \x{1111}\x{ad89}\x{11fe}\x{11fe}L, LVT, T, T
+    \x{ad89}\x{11fe}\x{11fe}LVT, T, T
+    *These match just the first codepoint (invalid sequence)
+    \x{1111}\x{11fe}L, T
+    \x{ae4c}\x{1111}LV, L
+    \x{ae4c}\x{ae4c}LV, LV
+    \x{ae4c}\x{ad89}LV, LVT
+    \x{1169}\x{1111}V, L
+    \x{1169}\x{ae4c}V, LV
+    \x{1169}\x{ad89}V, LVT
+    \x{ad89}\x{1111}LVT, L
+    \x{ad89}\x{1169}LVT, V
+    \x{ad89}\x{ae4c}LVT, LV
+    \x{ad89}\x{ad89}LVT, LVT
+    \x{11fe}\x{1111}T, L
+    \x{11fe}\x{1169}T, V
+    \x{11fe}\x{ae4c}T, LV
+    \x{11fe}\x{ad89}T, LVT
+    *Test extend and spacing mark
+    \x{1111}\x{ae4c}\x{0711}L, LV, extend
+    \x{1111}\x{ae4c}\x{1b04}L, LV, spacing mark
+    \x{1111}\x{ae4c}\x{1b04}\x{0711}\x{1b04}L, LV, spacing mark, extend, spacing mark
+    *Test CR, LF, and control
+    \x0d\x{0711}CR, extend
+    \x0d\x{1b04}CR, spacingmark
+    \x0a\x{0711}LF, extend
+    \x0a\x{1b04}LF, spacingmark
+    \x0b\x{0711}Control, extend
+    \x09\x{1b04}Control, spacingmark
+    *There are no Prepend characters, so we can't test Prepend, CR
+    
+/^(?>\X{2})X/8+
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    
+/^\X{2,4}X/8+
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+
+/^\X{2,4}?X/8+
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+
+/-- --/
 
 /-- End of testinput6 --/

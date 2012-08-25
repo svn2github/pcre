@@ -47,8 +47,12 @@ Version 8.32
         of a directory in the file list provokes an error.
         
     (h) The documentation has been revised and clarified in places.   
-
+    
 9.  Improve the matching speed of capturing brackets.
+
+10. Changed the meaning of \X in the interpreters so that it now matches a
+    Unicode extended grapheme cluster. 
+
 
 
 Version 8.31 06-July-2012

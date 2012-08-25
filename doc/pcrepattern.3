@@ -576,7 +576,7 @@ The extra escape sequences are:
 .sp
   \ep{\fIxx\fP}   a character with the \fIxx\fP property
   \eP{\fIxx\fP}   a character without the \fIxx\fP property
-  \eX       an extended Unicode sequence
+  \eX       a Unicode extended grapheme cluster
 .sp
 The property names represented by \fIxx\fP above are limited to the Unicode
 script names, the general category properties, "Any", which matches any
@@ -786,41 +786,65 @@ Unicode table.
 Specifying caseless matching does not affect these escape sequences. For
 example, \ep{Lu} always matches only upper case letters.
 .P
-The \eX escape matches any number of Unicode characters that form an extended
-Unicode sequence. \eX is equivalent to
+Matching characters by Unicode property is not fast, because PCRE has to do a
+multistage table lookup in order to find a character's property. That is why
+the traditional escape sequences such as \ed and \ew do not use Unicode
+properties in PCRE by default, though you can make them do so by setting the
+PCRE_UCP option or by starting the pattern with (*UCP).
+.
+.
+.SS Extended grapheme clusters
+.rs
 .sp
-  (?>\ePM\epM*)
-.sp
-That is, it matches a character without the "mark" property, followed by zero
-or more characters with the "mark" property, and treats the sequence as an
-atomic group
+The \eX escape matches any number of Unicode characters that form an "extended
+grapheme cluster", and treats the sequence as an atomic group
 .\" HTML <a href="#atomicgroup">
 .\" </a>
 (see below).
 .\"
-Characters with the "mark" property are typically accents that affect the
-preceding character. None of them have codepoints less than 256, so in
-8-bit non-UTF-8 mode \eX matches any one character.
+Up to and including release 8.31, PCRE matched an earlier, simpler definition
+that was equivalent to
+.sp
+  (?>\ePM\epM*)
+.sp
+That is, it matched a character without the "mark" property, followed by zero
+or more characters with the "mark" property. Characters with the "mark"
+property are typically non-spacing accents that affect the preceding character.
 .P
-Note that recent versions of Perl have changed \eX to match what Unicode calls
-an "extended grapheme cluster", which has a more complicated definition.
+This simple definition was extended in Unicode to include more complicated
+kinds of composite character by giving each character a grapheme breaking
+property, and creating rules that use these properties to define the boundaries
+of extended grapheme clusters. In releases of PCRE later than 8.31, \eX matches
+one of these clusters.
 .P
-Matching characters by Unicode property is not fast, because PCRE has to search
-a structure that contains data for over fifteen thousand characters. That is
-why the traditional escape sequences such as \ed and \ew do not use Unicode
-properties in PCRE by default, though you can make them do so by setting the
-PCRE_UCP option or by starting the pattern with (*UCP).
+\eX always matches at least one character. Then it decides whether to add 
+additional characters according to the following rules for ending a cluster:
+.P
+1. End at the end of the subject string.
+.P
+2. Do not end between CR and LF; otherwise end after any control character.
+.P
+3. Do not break Hangul (a Korean script) syllable sequences. Hangul characters 
+are of five types: L, V, T, LV, and LVT. An L character may be followed by an
+L, V, LV, or LVT character; an LV or V character may be followed by a V or T 
+character; an LVT or T character may be follwed only by a T character.
+.P
+4. Do not end before extending characters or spacing marks. Characters with
+the "mark" property always have the "extend" grapheme breaking property.
+.P
+5. Do not end after prepend characters.
+.P
+6. Otherwise, end the cluster.
 .
 .
 .\" HTML <a name="extraprops"></a>
 .SS PCRE's additional properties
 .rs
 .sp
-As well as the standard Unicode properties described in the previous
-section, PCRE supports four more that make it possible to convert traditional
-escape sequences such as \ew and \es and POSIX character classes to use Unicode
-properties. PCRE uses these non-standard, non-Perl properties internally when
-PCRE_UCP is set. They are:
+As well as the standard Unicode properties described above, PCRE supports four
+more that make it possible to convert traditional escape sequences such as \ew
+and \es and POSIX character classes to use Unicode properties. PCRE uses these
+non-standard, non-Perl properties internally when PCRE_UCP is set. They are:
 .sp
   Xan   Any alphanumeric character
   Xps   Any POSIX space character
@@ -1541,8 +1565,8 @@ quantifier, but a literal string of four characters.
 In UTF modes, quantifiers apply to characters rather than to individual data
 units. Thus, for example, \ex{100}{2} matches two characters, each of
 which is represented by a two-byte sequence in a UTF-8 string. Similarly,
-\eX{3} matches three Unicode extended sequences, each of which may be several
-data units long (and they may be of different lengths).
+\eX{3} matches three Unicode extended grapheme clusters, each of which may be
+several data units long (and they may be of different lengths).
 .P
 The quantifier {0} is permitted, causing the expression to behave as if the
 previous item and the quantifier were not present. This may be useful for
@@ -2929,6 +2953,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 August 2012
+Last updated: 25 August 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

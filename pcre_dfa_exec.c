@@ -1368,8 +1368,9 @@ for (;;)
       case OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS:
       count = current_state->count;  /* Already matched */
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
-      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
+      if (clen > 0)
         {
+        int lgb, rgb; 
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
         if (count > 0 && codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS)
@@ -1377,14 +1378,16 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
+        lgb = UCD_GRAPHBREAK(c); 
         while (nptr < end_subject)
           {
-          int nd;
-          int ndlen = 1;
-          GETCHARLEN(nd, nptr, ndlen);
-          if (UCD_CATEGORY(nd) != ucp_M) break;
+          dlen = 1;
+          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
+          rgb = UCD_GRAPHBREAK(d); 
+          if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
           ncount++;
-          nptr += ndlen;
+          lgb = rgb; 
+          nptr += dlen;
           }
         count++;
         ADD_NEW_DATA(-state_offset, count, ncount);
@@ -1624,8 +1627,9 @@ for (;;)
       QS2:
 
       ADD_ACTIVE(state_offset + 2, 0);
-      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
+      if (clen > 0)
         {
+        int lgb, rgb; 
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
         if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSSTAR ||
@@ -1634,14 +1638,16 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
+        lgb = UCD_GRAPHBREAK(c); 
         while (nptr < end_subject)
           {
-          int nd;
-          int ndlen = 1;
-          GETCHARLEN(nd, nptr, ndlen);
-          if (UCD_CATEGORY(nd) != ucp_M) break;
+          dlen = 1;
+          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
+          rgb = UCD_GRAPHBREAK(d); 
+          if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
           ncount++;
-          nptr += ndlen;
+          lgb = rgb; 
+          nptr += dlen;
           }
         ADD_NEW_DATA(-(state_offset + count), 0, ncount);
         }
@@ -1891,8 +1897,9 @@ for (;;)
       if (codevalue != OP_EXTUNI_EXTRA + OP_TYPEEXACT)
         { ADD_ACTIVE(state_offset + 2 + IMM2_SIZE, 0); }
       count = current_state->count;  /* Number already matched */
-      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
+      if (clen > 0)
         {
+        int lgb, rgb; 
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
         if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSUPTO)
@@ -1900,14 +1907,16 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
+        lgb = UCD_GRAPHBREAK(c); 
         while (nptr < end_subject)
           {
-          int nd;
-          int ndlen = 1;
-          GETCHARLEN(nd, nptr, ndlen);
-          if (UCD_CATEGORY(nd) != ucp_M) break;
+          dlen = 1;
+          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
+          rgb = UCD_GRAPHBREAK(d); 
+          if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
           ncount++;
-          nptr += ndlen;
+          lgb = rgb; 
+          nptr += dlen;
           }
         if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
@@ -2112,17 +2121,21 @@ for (;;)
       to wait for them to pass before continuing. */
 
       case OP_EXTUNI:
-      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
+      if (clen > 0)
         {
+        int lgb, rgb; 
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
+        lgb = UCD_GRAPHBREAK(c); 
         while (nptr < end_subject)
           {
-          int nclen = 1;
-          GETCHARLEN(c, nptr, nclen);
-          if (UCD_CATEGORY(c) != ucp_M) break;
+          dlen = 1;
+          if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
+          rgb = UCD_GRAPHBREAK(d); 
+          if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
           ncount++;
-          nptr += nclen;
+          lgb = rgb; 
+          nptr += dlen;
           }
         if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;

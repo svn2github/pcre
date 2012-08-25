@@ -2641,14 +2641,20 @@ for (;;)
       SCHECK_PARTIAL();
       RRETURN(MATCH_NOMATCH);
       }
-    GETCHARINCTEST(c, eptr);
-    if (UCD_CATEGORY(c) == ucp_M) RRETURN(MATCH_NOMATCH);
-    while (eptr < md->end_subject)
-      {
-      int len = 1;
-      if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-      if (UCD_CATEGORY(c) != ucp_M) break;
-      eptr += len;
+    else
+      { 
+      int lgb, rgb; 
+      GETCHARINCTEST(c, eptr);
+      lgb = UCD_GRAPHBREAK(c); 
+      while (eptr < md->end_subject)
+        {
+        int len = 1;
+        if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+        rgb = UCD_GRAPHBREAK(c); 
+        if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+        lgb = rgb; 
+        eptr += len;
+        } 
       }
     CHECK_PARTIAL();
     ecode++;
@@ -4226,14 +4232,20 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          GETCHARINCTEST(c, eptr);
-          if (UCD_CATEGORY(c) == ucp_M) RRETURN(MATCH_NOMATCH);
-          while (eptr < md->end_subject)
-            {
-            int len = 1;
-            if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-            if (UCD_CATEGORY(c) != ucp_M) break;
-            eptr += len;
+          else
+            { 
+            int lgb, rgb; 
+            GETCHARINCTEST(c, eptr);
+            lgb = UCD_GRAPHBREAK(c); 
+           while (eptr < md->end_subject)
+              {
+              int len = 1;
+              if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+              rgb = UCD_GRAPHBREAK(c); 
+              if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+              lgb = rgb; 
+              eptr += len;
+              } 
             }
           CHECK_PARTIAL();
           }
@@ -5029,14 +5041,20 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          GETCHARINCTEST(c, eptr);
-          if (UCD_CATEGORY(c) == ucp_M) RRETURN(MATCH_NOMATCH);
-          while (eptr < md->end_subject)
-            {
-            int len = 1;
-            if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-            if (UCD_CATEGORY(c) != ucp_M) break;
-            eptr += len;
+          else
+            { 
+            int lgb, rgb; 
+            GETCHARINCTEST(c, eptr);
+            lgb = UCD_GRAPHBREAK(c); 
+            while (eptr < md->end_subject)
+              {
+              int len = 1;
+              if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+              rgb = UCD_GRAPHBREAK(c); 
+              if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+              lgb = rgb; 
+              eptr += len;
+              } 
             }
           CHECK_PARTIAL();
           }
@@ -5588,21 +5606,25 @@ for (;;)
         {
         for (i = min; i < max; i++)
           {
-          int len = 1;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             break;
             }
-          if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-          if (UCD_CATEGORY(c) == ucp_M) break;
-          eptr += len;
-          while (eptr < md->end_subject)
-            {
-            len = 1;
-            if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-            if (UCD_CATEGORY(c) != ucp_M) break;
-            eptr += len;
+          else
+            { 
+            int lgb, rgb; 
+            GETCHARINCTEST(c, eptr);
+            lgb = UCD_GRAPHBREAK(c); 
+            while (eptr < md->end_subject)
+              {
+              int len = 1;
+              if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
+              rgb = UCD_GRAPHBREAK(c); 
+              if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+              lgb = rgb; 
+              eptr += len;
+              } 
             }
           CHECK_PARTIAL();
           }

@@ -2314,15 +2314,17 @@ extern const char*       PRIV(jit_get_target)(void);
 /* Unicode character database (UCD) */
 
 typedef struct {
-  pcre_uint8 script;
-  pcre_uint8 chartype;
-  pcre_int32 other_case;
+  pcre_uint8 script;     /* ucp_Arabic, etc. */
+  pcre_uint8 chartype;   /* ucp_Cc, etc. (general categories) */
+  pcre_uint8 gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
+  pcre_int32 other_case; /* offset to other case, or zero if none */
 } ucd_record;
 
 extern const ucd_record  PRIV(ucd_records)[];
 extern const pcre_uint8  PRIV(ucd_stage1)[];
 extern const pcre_uint16 PRIV(ucd_stage2)[];
 extern const int         PRIV(ucp_gentype)[];
+extern const pcre_uint8  PRIV(ucp_gbtable)[];
 #ifdef SUPPORT_JIT
 extern const int         PRIV(ucp_typerange)[];
 #endif
@@ -2335,10 +2337,11 @@ extern const int         PRIV(ucp_typerange)[];
         PRIV(ucd_stage2)[PRIV(ucd_stage1)[(ch) / UCD_BLOCK_SIZE] * \
         UCD_BLOCK_SIZE + (ch) % UCD_BLOCK_SIZE])
 
-#define UCD_CHARTYPE(ch)  GET_UCD(ch)->chartype
-#define UCD_SCRIPT(ch)    GET_UCD(ch)->script
-#define UCD_CATEGORY(ch)  PRIV(ucp_gentype)[UCD_CHARTYPE(ch)]
-#define UCD_OTHERCASE(ch) (ch + GET_UCD(ch)->other_case)
+#define UCD_CHARTYPE(ch)    GET_UCD(ch)->chartype
+#define UCD_SCRIPT(ch)      GET_UCD(ch)->script
+#define UCD_CATEGORY(ch)    PRIV(ucp_gentype)[UCD_CHARTYPE(ch)]
+#define UCD_GRAPHBREAK(ch)  GET_UCD(ch)->gbprop
+#define UCD_OTHERCASE(ch)   (ch + GET_UCD(ch)->other_case)
 
 #endif /* SUPPORT_UCP */
 

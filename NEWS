@@ -9,6 +9,8 @@ Release 8.32 xx-xxxx-2012
    to all files now, not just those obtained from scanning a directory 
    recursively. In Windows environments, the default action for directories is
    now "skip" instead of "read" (which provokes an error).
+   
+.  \X now matches a Unicode extended grapheme cluster. 
 
 
 Release 8.31 06-July-2012

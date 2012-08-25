@@ -54,11 +54,13 @@ print_prop(int c)
 int type = UCD_CATEGORY(c);
 int fulltype = UCD_CHARTYPE(c);
 int script = UCD_SCRIPT(c);
+int gbprop = UCD_GRAPHBREAK(c);
 int othercase = UCD_OTHERCASE(c);
 
 unsigned char *fulltypename = US"??";
 unsigned char *typename = US"??";
 unsigned char *scriptname = US"??";
+unsigned char *graphbreak = US"??";
 
 switch (type)
   {
@@ -103,6 +105,22 @@ switch (fulltype)
   case ucp_Zl: fulltypename = US"Line separator"; break;
   case ucp_Zp: fulltypename = US"Paragraph separator"; break;
   case ucp_Zs: fulltypename = US"Space separator"; break;
+  }
+  
+switch(gbprop)
+  {
+  case ucp_gbCR:           graphbreak = US"CR"; break;
+  case ucp_gbLF:           graphbreak = US"LF"; break;
+  case ucp_gbControl:      graphbreak = US"Control"; break;
+  case ucp_gbExtend:       graphbreak = US"Extend"; break;
+  case ucp_gbPrepend:      graphbreak = US"Prepend"; break;
+  case ucp_gbSpacingMark:  graphbreak = US"SpacingMark"; break;
+  case ucp_gbL:            graphbreak = US"Hangul syllable type L"; break;
+  case ucp_gbV:            graphbreak = US"Hangul syllable type V"; break;
+  case ucp_gbT:            graphbreak = US"Hangul syllable type T"; break;
+  case ucp_gbLV:           graphbreak = US"Hangul syllable type LV"; break;
+  case ucp_gbLVT:          graphbreak = US"Hangul syllable type LVT"; break;
+  case ucp_gbOther:        graphbreak = US"Other"; break;
   }
 
 switch(script)
@@ -217,8 +235,8 @@ switch(script)
 
   }
 
-printf("%04x %s: %s %s", c, typename, fulltypename, scriptname);
-if (othercase != c) printf(" %04x", othercase);
+printf("%04x %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);
+if (othercase != c) printf(", %04x", othercase);
 printf("\n");
 }
 

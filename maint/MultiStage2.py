@@ -14,10 +14,11 @@
 #
 # ./MultiStage2.py >../pcre_ucd.c
 #
-# It requires three Unicode data tables, DerivedGeneralCategory.txt,
-# Scripts.txt, and UnicodeData.txt, to be in the Unicode.tables subdirectory.
-# The first of these is found in the "extracted" subdirectory of the Unicode
-# database (UCD) on the Unicode web site; the other two are directly in the
+# It requires four Unicode data tables, DerivedGeneralCategory.txt,
+# GraphemeBreakProperty.txt, Scripts.txt, and UnicodeData.txt, to be in the 
+# Unicode.tables subdirectory. The first of these is found in the "extracted" 
+# subdirectory of the Unicode database (UCD) on the Unicode web site; the 
+# second is in the "auxiliary" subdirectory; the other two are directly in the 
 # UCD directory.
 #
 # Minor modifications made to this script:
@@ -27,7 +28,8 @@
 #  Consequent code tidy
 #  Adjusted data file names to take from the Unicode.tables directory
 #  Adjusted global table names by prefixing _pcre_.
-#  Commented out stuff relating to the casefolding table, which isn't used.
+#  Commented out stuff relating to the casefolding table, which isn't used;
+#    removed completely in 2012.
 #  Corrected size calculation
 #  Add #ifndef SUPPORT_UCP to use dummy tables when no UCP support is needed.
 #
@@ -52,15 +54,23 @@
 #
 # Example: lowercase "a" (U+0061) is in block 0
 #          lookup 0 in stage1 table yields 0
-#          lookup 97 in the first table in stage2 yields 12
-#          record 12 is { 33, 5, -32 } (Latin, lowercase, upper is U+0041)
+#          lookup 97 in the first table in stage2 yields 14
+#          record 14 is { 33, 5, 11, -32 } 
+#            33 = ucp_Latin   => Latin script
+#             5 = ucp_Ll      => Lower case letter
+#            11 = ucp_gbOther => Grapheme break property "Other"
+#           -32               => Other case is U+0041
 #         
 # All lowercase latin characters resolve to the same record.
 #
 # Example: hiragana letter A (U+3042) is in block 96 (0x60)
-#          lookup 96 in stage1 table yields 83
-#          lookup 66 in the 83rd table in stage2 yields 348
-#          record 348 is { 26, 7, 0 } (Hiragana, other letter, no other case)
+#          lookup 96 in stage1 table yields 88
+#          lookup 66 in the 88th table in stage2 yields 428
+#          record 428 is { 26, 7, 11, 0 } 
+#            26 = ucp_Hiragana => Hiragana script
+#             7 = ucp_Lo       => Other letter
+#            11 = ucp_gbOther  => Grapheme break property "Other"
+#             0                => No other case 
 #
 # In these examples, no other blocks resolve to the same "virtual" block, as it
 # happens, but plenty of other blocks do share "virtual" blocks.
@@ -70,8 +80,13 @@
 #
 #  Philip Hazel, 03 July 2008
 #
-# 01-March-2010: Updated list of scripts for Unicode 5.2.0
-# 30-April-2011: Updated list of scripts for Unicode 6.0.0
+# 01-March-2010:  Updated list of scripts for Unicode 5.2.0
+# 30-April-2011:  Updated list of scripts for Unicode 6.0.0
+#     July-2012:  Updated list of scripts for Unicode 6.1.0
+# 20-August-2012: Added scan of GraphemeBreakProperty.txt and added a new 
+#                   field in the record to hold the value. Luckily, the 
+#                   structure had a hole in it, so the resulting table is
+#                   no bigger than before.
 ##############################################################################
 
 
@@ -82,15 +97,10 @@ import sys
 MAX_UNICODE = 0x110000
 NOTACHAR = 0xffffffff
 
-# Parse a line of CaseFolding.txt, Scripts.txt, and DerivedGeneralCategory.txt file
+# Parse a line of Scripts.txt, GraphemeBreakProperty.txt or DerivedGeneralCategory.txt
 def make_get_names(enum):
         return lambda chardata: enum.index(chardata[1])
 
-#def get_case_folding_value(chardata):
-#        if chardata[1] != 'C' and chardata[1] != 'S':
-#                return 0
-#        return int(chardata[2], 16) - int(chardata[0], 16)
-        
 def get_other_case(chardata):
         if chardata[12] != '':
                 return int(chardata[12], 16) - int(chardata[0], 16)
@@ -198,8 +208,9 @@ def combine_tables(*tables):
 
 def get_record_size_struct(records):
         size = 0
-        structure = '/* When recompiling tables with a new Unicode version,\n' + \
-        'please check types in the structure definition from pcre_internal.h:\ntypedef struct {\n'
+        structure = '/* When recompiling tables with a new Unicode version, please check the\n' + \
+        'types in this structure definition from pcre_internal.h (the actual\n' + \
+        'field names will be different):\n\ntypedef struct {\n'
         for i in range(len(records[0])):
                 record_slice = map(lambda record: record[i], records)
                 slice_type, slice_size = get_type_size(record_slice)
@@ -213,7 +224,7 @@ def get_record_size_struct(records):
         slice_type, slice_size = get_type_size(record_slice)
         size = (size + slice_size - 1) & -slice_size
         
-        structure += '} ucd_record; */\n\n'
+        structure += '} ucd_record;\n*/\n\n'
         return size, structure
         
 def test_record_size():
@@ -267,14 +278,17 @@ category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
   'Mc', 'Me', 'Mn', 'Nd', 'Nl', 'No', 'Pc', 'Pd', 'Pe', 'Pf', 'Pi', 'Po', 'Ps',
   'Sc', 'Sk', 'Sm', 'So', 'Zl', 'Zp', 'Zs' ]
 
+break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend', 
+  'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Other' ]
+
 test_record_size()
 
 script = read_table('Unicode.tables/Scripts.txt', make_get_names(script_names), script_names.index('Common'))
 category = read_table('Unicode.tables/DerivedGeneralCategory.txt', make_get_names(category_names), category_names.index('Cn'))
+break_props = read_table('Unicode.tables/GraphemeBreakProperty.txt', make_get_names(break_property_names), break_property_names.index('Other'))
 other_case = read_table('Unicode.tables/UnicodeData.txt', get_other_case, 0)
-# case_fold = read_table('CaseFolding.txt', get_case_folding_value, 0)
 
-table, records = combine_tables(script, category, other_case)
+table, records = combine_tables(script, category, break_props, other_case)
 record_size, record_struct = get_record_size_struct(records.keys())
 
 # Find the optimum block size for the two-stage table
@@ -299,14 +313,14 @@ print "/* Unicode character database. */"
 print "/* This file was autogenerated by the MultiStage2.py script. */"
 print "/* Total size: %d bytes, block size: %d. */" % (min_size, min_block_size)
 print
-print "/* The tables herein are needed only when UCP support is built */"
-print "/* into PCRE. This module should not be referenced otherwise, so */"
-print "/* it should not matter whether it is compiled or not. However */"
-print "/* a comment was received about space saving - maybe the guy linked */"
-print "/* all the modules rather than using a library - so we include a */"
-print "/* condition to cut out the tables when not needed. But don't leave */"
-print "/* a totally empty module because some compilers barf at that. */"
-print "/* Instead, just supply small dummy tables. */"
+print "/* The tables herein are needed only when UCP support is built"
+print "into PCRE. This module should not be referenced otherwise, so"
+print "it should not matter whether it is compiled or not. However"
+print "a comment was received about space saving - maybe the guy linked"
+print "all the modules rather than using a library - so we include a"
+print "condition to cut out the tables when not needed. But don't leave"
+print "a totally empty module because some compilers barf at that."
+print "Instead, just supply small dummy tables. */"
 print
 print "#ifndef SUPPORT_UCP"
 print "const ucd_record PRIV(ucd_records)[] = {{0,0,0 }};"
