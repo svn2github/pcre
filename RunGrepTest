@@ -450,7 +450,7 @@ echo "---------------------------- Test 93 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 94 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx --include grepinput8 'fox' ./testdata/grepinput*) >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx --include grepinput8 'fox' ./testdata/grepinput* | sort) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 95 -----------------------------" >>testtry
@@ -458,7 +458,7 @@ echo "---------------------------- Test 95 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 96 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -L -r --include-dir=testdata --exclude '^(?!grepinput)' 'fox' ./test*) >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include-dir=testdata --exclude '^(?!grepinput)' 'fox' ./test* | sort) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 97 -----------------------------" >>testtry
