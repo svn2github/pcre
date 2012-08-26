@@ -2651,7 +2651,7 @@ for (;;)
         int len = 1;
         if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
         rgb = UCD_GRAPHBREAK(c); 
-        if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+        if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
         lgb = rgb; 
         eptr += len;
         } 
@@ -4242,7 +4242,7 @@ for (;;)
               int len = 1;
               if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
               rgb = UCD_GRAPHBREAK(c); 
-              if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+              if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
               lgb = rgb; 
               eptr += len;
               } 
@@ -5051,7 +5051,7 @@ for (;;)
               int len = 1;
               if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
               rgb = UCD_GRAPHBREAK(c); 
-              if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+              if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
               lgb = rgb; 
               eptr += len;
               } 
@@ -5621,7 +5621,7 @@ for (;;)
               int len = 1;
               if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
               rgb = UCD_GRAPHBREAK(c); 
-              if (PRIV(ucp_gbtable)[lgb * ucp_gbCount + rgb] == 0) break;
+              if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
               lgb = rgb; 
               eptr += len;
               } 

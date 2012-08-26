@@ -109,61 +109,65 @@ const int PRIV(ucp_gentype)[] = {
   ucp_Z, ucp_Z, ucp_Z                 /* Zl, Zp, Zs */
 };
 
-/* This byte table encodes the rules for finding the end of an extended 
-grapheme cluster. It could be done with bits instead of bytes, but the saving 
-in memory would be small and there would be more computation at runtime.
+/* This table encodes the rules for finding the end of an extended grapheme
+cluster. Every code point has a grapheme break property which is one of the
+ucp_gbXX values defined in ucp.h. The 2-dimensional table is indexed by the
+properties of two adjacent code points. The left property selects a word from
+the table, and the right property selects a bit from that word like this:
 
-Every code point has a grapheme break property which is one of the ucp_gbXX
-values defined in ucp.h. The number of such properties is ucp_gbCount. The
-2-dimensional table is indexed by the properties of two adjacent code points.
+  ucp_gbtable[left-property] & (1 << right-property)
+
 The value is non-zero if a grapheme break is NOT permitted between the relevant
 two code points. The breaking rules are as follows:
 
 1. Break at the start and end of text (pretty obviously).
 
-2. Do not break between a CR and LF: (0,1) is set; otherwise, break before and
-   after controls: (x,0), (x,1), (x,2), (0,x), (1,x), and (2,x) are not set,
-   except for (0,1).
+2. Do not break between a CR and LF; otherwise, break before and   after
+   controls.
 
-3. Do not break Hangul syllable sequences: (6,6), (6,7), (6,9), (6,10),
-   (7,7), (7,8), (8,8), (9,7), (9,8), and (10,8) are set. The rules for Hangul 
-   sequences are:
+3. Do not break Hangul syllable sequences, the rules for which are:
    
     L may be followed by L, V, LV or LVT
     LV or V may be followed by V or T
     LVT or T may be followed by T  
 
-4. Do not break before extending characters: (x,3) is set except for (0,3),
-   (1,3), and (2,3).
+4. Do not break before extending characters.
 
 The next two rules are only for extended grapheme clusters (but that's what we
 are implementing).
    
-5. Do not break before SpacingMarks: (x,5) is set except for (0,5), (1,5),
-   and (2,5).
+5. Do not break before SpacingMarks.
    
-6. Do not break after Prepend characters: (4,x) is set except for (4,0), (4,1),
-   and (4,2).
+6. Do not break after Prepend characters.
  
-8. Otherwise, break everywhere.
+7. Otherwise, break everywhere.
 */
 
-const pcre_uint8 PRIV(ucp_gbtable[]) = {
-/* 0  1  2  3  4  5  6  7  8  9 10 11 */
-   0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,     /*  0 CR */
-   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,     /*  1 LF */
-   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,     /*  2 Control */
-   0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,     /*  3 Extend */
-   0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,     /*  4 Prepend */
-   0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,     /*  5 SpacingMark */
-   0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0,     /*  6 L */
-   0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0,     /*  7 V */
-   0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0,     /*  8 T */
-   0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0,     /*  9 LV */
-   0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0,     /* 10 LVT */
-   0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0      /* 11 Other */
-};
+const pcre_uint32 PRIV(ucp_gbtable[]) = {
+   (1<<ucp_gbLF),                                           /*  0 CR */        
+   0,                                                       /*  1 LF */        
+   0,                                                       /*  2 Control */   
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  3 Extend */    
+   (1<<ucp_gbExtend)|(1<<ucp_gbPrepend)|                    /*  4 Prepend */   
+     (1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|                   
+     (1<<ucp_gbV)|(1<<ucp_gbT)|(1<<ucp_gbLV)|               
+     (1<<ucp_gbLVT)|(1<<ucp_gbOther),                       
 
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  5 SpacingMark */  
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|   /*  6 L */            
+     (1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbLV)|(1<<ucp_gbLVT),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  7 V */
+     (1<<ucp_gbT),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /*  8 T */  
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  9 LV */ 
+     (1<<ucp_gbT),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /* 10 LVT */  
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)                 /* 11 Other */
+}; 
+    
 #ifdef SUPPORT_JIT
 /* This table reverses PRIV(ucp_gentype). We can save the cost
 of a memory load. */

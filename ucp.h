@@ -76,8 +76,7 @@ enum {
   ucp_gbT,              /*  8 Hangul syllable type T */
   ucp_gbLV,             /*  9 Hangul syllable type LV */
   ucp_gbLVT,            /* 10 Hangul syllable type LVT */
-  ucp_gbOther,          /* 11 */
-  ucp_gbCount           /* 12 The number of properties */ 
+  ucp_gbOther           /* 11 */
 };
 
 /* These are the script identifications. */

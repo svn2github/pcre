@@ -2324,7 +2324,7 @@ extern const ucd_record  PRIV(ucd_records)[];
 extern const pcre_uint8  PRIV(ucd_stage1)[];
 extern const pcre_uint16 PRIV(ucd_stage2)[];
 extern const int         PRIV(ucp_gentype)[];
-extern const pcre_uint8  PRIV(ucp_gbtable)[];
+extern const pcre_uint32 PRIV(ucp_gbtable)[];
 #ifdef SUPPORT_JIT
 extern const int         PRIV(ucp_typerange)[];
 #endif
