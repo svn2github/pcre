@@ -2652,6 +2652,13 @@ while (!done)
       (sbuf[4] << 24) | (sbuf[5] << 16) | (sbuf[6] << 8) | sbuf[7];
 
     re = (pcre *)new_malloc(true_size);
+    if (re == NULL)
+      {
+      printf("** Failed to get %d bytes of memory for pcre object\n",
+        (int)true_size);
+      yield = 1;
+      goto EXIT;
+      }
     regex_gotten_store = first_gotten_store;
 
     if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
@@ -2666,6 +2673,7 @@ while (!done)
       else
         {
         fprintf(outfile, "Data in %s is not a compiled PCRE regex\n", p);
+        new_free(re);
         fclose(f);
         continue;
         }
@@ -2695,7 +2703,7 @@ while (!done)
           {
           PCRE_FREE_STUDY(extra);
           }
-        if (re != NULL) new_free(re);
+        new_free(re);
         fclose(f);
         continue;
         }
@@ -2716,13 +2724,20 @@ while (!done)
           use_pcre16? "16" : "", PCRE_INFO_OPTIONS);
         fprintf(outfile, "Running in %s-bit mode but pattern was compiled in "
           "%s-bit mode\n", use_pcre16? "16":"8", use_pcre16? "8":"16");
+        new_free(re);
+        fclose(f);
         continue;
         }
       }
 
     /* Need to know if UTF-8 for printing data strings. */
 
-    if (new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options) < 0) continue;
+    if (new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options) < 0)
+      {
+      new_free(re);
+      fclose(f);
+      continue;
+      }
     use_utf = (get_options & PCRE_UTF8) != 0;
 
     fclose(f);
@@ -3979,12 +3994,9 @@ while (!done)
 
       if (find_match_limit)
         {
-        if (extra == NULL)
-          {
-          extra = (pcre_extra *)malloc(sizeof(pcre_extra));
-          extra->flags = 0;
-          }
-        else extra->flags &= ~PCRE_EXTRA_EXECUTABLE_JIT;
+        if (extra != NULL) { PCRE_FREE_STUDY(extra); }
+        extra = (pcre_extra *)malloc(sizeof(pcre_extra));
+        extra->flags = 0;
 
         (void)check_match_limit(re, extra, bptr, len, start_offset,
           options|g_notempty, use_offsets, use_size_offsets,
@@ -4463,6 +4475,11 @@ free(offsets);
 
 #ifdef SUPPORT_PCRE16
 if (buffer16 != NULL) free(buffer16);
+#endif
+
+#if !defined NODFA
+if (dfa_workspace != NULL)
+  free(dfa_workspace);
 #endif
 
 return yield;
