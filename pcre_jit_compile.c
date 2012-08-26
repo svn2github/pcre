@@ -4220,24 +4220,28 @@ switch(type)
   read_char(common);
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_w)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
-  OP1(SLJIT_MOV_UB, TMP3, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+  /* Optimize register allocation: use a real register. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
+  OP1(SLJIT_MOV_UB, STACK_TOP, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 
   label = LABEL();
   jump[0] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STR_PTR, 0);
+  OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
   read_char(common);
   add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_w)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
   OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 
-  OP2(SLJIT_MUL, TMP1, 0, TMP3, 0, SLJIT_IMM, ucp_gbCount);
-  OP1(SLJIT_MOV, TMP3, 0, TMP2, 0);
+  OP2(SLJIT_MUL, TMP1, 0, STACK_TOP, 0, SLJIT_IMM, ucp_gbCount);
+  OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP2, 0);
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)PRIV(ucp_gbtable));
   CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, label);
 
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
+  OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
   JUMPHERE(jump[0]);
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
+
   if (common->mode == JIT_PARTIAL_HARD_COMPILE)
     {
     jump[0] = CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0);
