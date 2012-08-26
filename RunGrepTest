@@ -40,12 +40,10 @@ $pcregrep -V
 # that lacks a -u option. Try to deal with this; better do the test for the -b
 # option as well.
 
-cf="diff -ub"
-if diff -u /dev/null /dev/null; then
-  if diff -ub /dev/null /dev/null; then cf="diff -ub"; else cf="diff -u"; fi
-else
-  if diff -b /dev/null /dev/null; then cf="diff -b"; else cf="diff"; fi
-fi
+cf="diff"
+diff -b  /dev/null /dev/null 2>/dev/null && cf="diff -b"
+diff -u  /dev/null /dev/null 2>/dev/null && cf="diff -u"
+diff -ub /dev/null /dev/null 2>/dev/null && cf="diff -ub"
 
 # If PCRE has been built in a directory other than the source directory, and
 # this test is being run from "make check" as usual, then $srcdir will be

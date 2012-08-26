@@ -155,7 +155,8 @@ done
 # Set up a suitable "diff" command for comparison. Some systems
 # have a diff that lacks a -u option. Try to deal with this.
 
-if diff -u /dev/null /dev/null; then cf="diff -u"; else cf="diff"; fi
+cf="diff"
+diff -u /dev/null /dev/null 2>/dev/null && cf="diff -u"
 
 # Find the test data
 
