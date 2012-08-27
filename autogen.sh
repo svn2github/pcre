@@ -2,7 +2,7 @@
 
 set -ex
 rm -rf autom4te.cache Makefile.in aclocal.m4
-aclocal --force
+aclocal --force -I m4
 
 # GNU libtool is named differently on some systems.  This code tries several
 # variants like glibtoolize (MacOSX) and libtoolize1x (FreeBSD)

@@ -50,8 +50,11 @@ Version 8.32
     
 9.  Improve the matching speed of capturing brackets.
 
-10. Changed the meaning of \X in the interpreters so that it now matches a
-    Unicode extended grapheme cluster. 
+10. Changed the meaning of \X so that it now matches a Unicode extended
+    grapheme cluster.
+    
+11. Patch by Daniel Richard G to the autoconf files to add a macro for sorting
+    out POSIX threads when JIT support is configured. 
 
 
 

@@ -604,6 +604,10 @@ if test "$enable_pcre16" = "yes"; then
 fi
 
 if test "$enable_jit" = "yes"; then
+  AX_PTHREAD([], [AC_MSG_ERROR([JIT support requires pthreads])])
+  CC="$PTHREAD_CC"
+  CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
+  LIBS="$PTHREAD_LIBS $LIBS"
   AC_DEFINE([SUPPORT_JIT], [], [
     Define to any value to enable support for Just-In-Time compiling.])
 else

@@ -93,6 +93,10 @@ MAINTAINERCLEANFILES =
 # the Autotools include by default.
 EXTRA_DIST =
 
+# These files contain additional m4 macros that are used by autoconf.
+EXTRA_DIST += \
+  m4/ax_pthread.m4
+
 # These files contain maintenance information
 EXTRA_DIST += \
   doc/perltest.txt \
