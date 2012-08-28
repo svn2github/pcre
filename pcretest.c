@@ -704,6 +704,9 @@ static int jit_study_bits[] =
     PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE
 };
 
+#define PCRE_STUDY_ALLJIT (PCRE_STUDY_JIT_COMPILE | \
+  PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE)
+
 /* Textual explanations for runtime error codes */
 
 static const char *errtexts[] = {
@@ -2796,7 +2799,7 @@ while (!done)
   /* Look for options after final delimiter */
 
   options = 0;
-  study_options = 0;
+  study_options = force_study_options;
   log_store = showstore;  /* default from command line */
 
   while (*pp != 0)
@@ -2833,12 +2836,22 @@ while (!done)
 #endif
 
       case 'S':
-      if (do_study == 0)
+      do_study = 1;
+      for (;;)
         {
-        do_study = 1;
-        if (*pp == '+')
+        switch (*pp++)
           {
-          if (*(++pp) == '+')
+          case 'S':
+          do_study = 0;
+          no_force_study = 1;
+          break;
+
+          case '!':
+          study_options |= PCRE_STUDY_EXTRA_NEEDED;
+          break;
+
+          case '+':
+          if (*pp == '+')
             {
             verify_jit = TRUE;
             pp++;
@@ -2847,13 +2860,18 @@ while (!done)
             study_options |= jit_study_bits[*pp++ - '1'];
           else
             study_options |= jit_study_bits[6];
+          break;
+
+          case '-':
+          study_options &= ~PCRE_STUDY_ALLJIT;
+          break;
+
+          default:
+          pp--;
+          goto ENDLOOP;
           }
         }
-      else
-        {
-        do_study = 0;
-        no_force_study = 1;
-        }
+      ENDLOOP:
       break;
 
       case 'U': options |= PCRE_UNGREEDY; break;
@@ -3083,7 +3101,7 @@ while (!done)
         clock_t start_time = clock();
         for (i = 0; i < timeit; i++)
           {
-          PCRE_STUDY(extra, re, study_options | force_study_options, &error);
+          PCRE_STUDY(extra, re, study_options, &error);
           }
         time_taken = clock() - start_time;
         if (extra != NULL)
@@ -3094,7 +3112,7 @@ while (!done)
           (((double)time_taken * 1000.0) / (double)timeit) /
             (double)CLOCKS_PER_SEC);
         }
-      PCRE_STUDY(extra, re, study_options | force_study_options, &error);
+      PCRE_STUDY(extra, re, study_options, &error);
       if (error != NULL)
         fprintf(outfile, "Failed to study: %s\n", error);
       else if (extra != NULL)
@@ -3354,7 +3372,8 @@ while (!done)
 
         /* Show this only if the JIT was set by /S, not by -s. */
 
-        if ((study_options & PCRE_STUDY_JIT_COMPILE) != 0)
+        if ((study_options & PCRE_STUDY_ALLJIT) != 0 &&
+            (force_study_options & PCRE_STUDY_ALLJIT) == 0)
           {
           int jit;
           if (new_info(re, extra, PCRE_INFO_JIT, &jit) == 0)

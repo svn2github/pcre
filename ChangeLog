@@ -55,6 +55,8 @@ Version 8.32
     
 11. Patch by Daniel Richard G to the autoconf files to add a macro for sorting
     out POSIX threads when JIT support is configured. 
+    
+12. Added support for PCRE_STUDY_EXTRA_NEEDED. 
 
 
 

@@ -3770,7 +3770,7 @@ assertion, and therefore fails the entire subroutine call. --/
     ac 
     
 /-- These are all run as real matches in test 1; here we are just checking the
-settings of the anchored and startline bits. */ 
+settings of the anchored and startline bits. --/ 
 
 /(?>.*?a)(?<=ba)/I
 
@@ -3803,5 +3803,11 @@ settings of the anchored and startline bits. */
 /(?>.*abc)/mI
 
 /(?:.*abc)/mI
+
+/-- Check PCRE_STUDY_EXTRA_NEEDED --/
+
+/.?/S-I
+
+/.?/S!I
 
 /-- End of testinput2 --/

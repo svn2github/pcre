@@ -259,6 +259,7 @@ compatible. */
 #define PCRE_STUDY_JIT_COMPILE                0x0001
 #define PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE   0x0002
 #define PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE   0x0004
+#define PCRE_STUDY_EXTRA_NEEDED               0x0008
 
 /* Bit flags for the pcre[16]_extra structure. Do not re-arrange or redefine
 these bits, just add new ones on the end, in order to remain compatible. */

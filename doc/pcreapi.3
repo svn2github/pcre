@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "04 May 2012" "PCRE 8.31"
+.TH PCREAPI 3 "28 August 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -960,12 +960,16 @@ below
 in the section on matching a pattern.
 .P
 If studying the pattern does not produce any useful information,
-\fBpcre_study()\fP returns NULL. In that circumstance, if the calling program
-wants to pass any of the other fields to \fBpcre_exec()\fP or
-\fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block.
+\fBpcre_study()\fP returns NULL by default. In that circumstance, if the
+calling program wants to pass any of the other fields to \fBpcre_exec()\fP or
+\fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block. However, 
+if \fBpcre_study()\fP is called with the PCRE_STUDY_EXTRA_NEEDED option, it
+returns a \fBpcre_extra\fP block even if studying did not find any additional
+information. It may still return NULL, however, if an error occurs in
+\fBpcre_study()\fP.
 .P
 The second argument of \fBpcre_study()\fP contains option bits. There are three
-options:
+further options in addition to PCRE_STUDY_EXTRA_NEEDED:
 .sp
   PCRE_STUDY_JIT_COMPILE
   PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE
@@ -974,7 +978,7 @@ options:
 If any of these are set, and the just-in-time compiler is available, the
 pattern is further compiled into machine code that executes much faster than
 the \fBpcre_exec()\fP interpretive matching function. If the just-in-time
-compiler is not available, these options are ignored. All other bits in the
+compiler is not available, these options are ignored. All undefined bits in the
 \fIoptions\fP argument must be zero.
 .P
 JIT compilation is a heavyweight optimization. It can take some time for
@@ -1022,10 +1026,9 @@ real application there should be tests for errors):
 Studying a pattern does two things: first, a lower bound for the length of
 subject string that is needed to match the pattern is computed. This does not
 mean that there are any strings of that length that match, but it does
-guarantee that no shorter strings match. The value is used by
-\fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP to avoid wasting time by trying to
-match strings that are shorter than the lower bound. You can find out the value
-in a calling program via the \fBpcre_fullinfo()\fP function.
+guarantee that no shorter strings match. The value is used to avoid wasting
+time by trying to match strings that are shorter than the lower bound. You can
+find out the value in a calling program via the \fBpcre_fullinfo()\fP function.
 .P
 Studying a pattern is also useful for non-anchored patterns that do not have a
 single fixed starting character. A bitmap of possible starting bytes is
@@ -2667,6 +2670,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 June 2012
+Last updated: 28 August 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

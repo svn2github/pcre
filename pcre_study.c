@@ -1408,20 +1408,20 @@ switch(min = find_minlength(code, code, re->options, 0))
   }
 
 /* If a set of starting bytes has been identified, or if the minimum length is
-greater than zero, or if JIT optimization has been requested, get a
-pcre[16]_extra block and a pcre_study_data block. The study data is put in the
-latter, which is pointed to by the former, which may also get additional data
-set later by the calling program. At the moment, the size of pcre_study_data
-is fixed. We nevertheless save it in a field for returning via the
-pcre_fullinfo() function so that if it becomes variable in the future,
-we don't have to change that code. */
+greater than zero, or if JIT optimization has been requested, or if 
+PCRE_STUDY_EXTRA_NEEDED is set, get a pcre[16]_extra block and a
+pcre_study_data block. The study data is put in the latter, which is pointed to
+by the former, which may also get additional data set later by the calling
+program. At the moment, the size of pcre_study_data is fixed. We nevertheless
+save it in a field for returning via the pcre_fullinfo() function so that if it
+becomes variable in the future, we don't have to change that code. */
 
-if (bits_set || min > 0
+if (bits_set || min > 0 || (options & (
 #ifdef SUPPORT_JIT
-    || (options & (PCRE_STUDY_JIT_COMPILE | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
-                 | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE)) != 0
+    PCRE_STUDY_JIT_COMPILE | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE |
+    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE | 
 #endif
-  )
+    PCRE_STUDY_EXTRA_NEEDED)) != 0)
   {
   extra = (PUBL(extra) *)(PUBL(malloc))
     (sizeof(PUBL(extra)) + sizeof(pcre_study_data));
@@ -1475,7 +1475,8 @@ if (bits_set || min > 0
 
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT
-  compilation fails, abandon the extra block and return NULL. */
+  compilation fails, abandon the extra block and return NULL, unless 
+  PCRE_STUDY_EXTRA_NEEDED is set. */
 
 #ifdef SUPPORT_JIT
   extra->executable_jit = NULL;
@@ -1486,7 +1487,8 @@ if (bits_set || min > 0
   if ((options & PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE) != 0)
     PRIV(jit_compile)(re, extra, JIT_PARTIAL_HARD_COMPILE);
 
-  if (study->flags == 0 && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) == 0)
+  if (study->flags == 0 && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) == 0 &&
+      (options & PCRE_STUDY_EXTRA_NEEDED) == 0)
     {
 #ifdef COMPILE_PCRE8
     pcre_free_study(extra);

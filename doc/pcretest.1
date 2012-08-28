@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "21 February 2012" "PCRE 8.31"
+.TH PCRETEST 1 "28 August 2012" "PCRE 8.32"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -22,10 +22,19 @@ and
 .\" HREF
 \fBpcre16\fP
 .\"
-documentation. The input for \fBpcretest\fP is a sequence of regular expression
-patterns and strings to be matched, as described below. The output shows the
-result of each match. Options on the command line and the patterns control PCRE
-options and exactly what is output.
+documentation. 
+.P
+The input for \fBpcretest\fP is a sequence of regular expression patterns and
+strings to be matched, as described below. The output shows the result of each
+match. Options on the command line and the patterns control PCRE options and
+exactly what is output.
+.P
+As PCRE has evolved, it has acquired many different features, and as a result,
+\fBpcretest\fP now has rather a lot of obscure options for testing every
+possible feature. Some of these options are specifically designed for use in
+conjunction with the test script and data files that are distributed as part of
+PCRE, and are unlikely to be of use otherwise. They are all documented here, 
+but without much justification.
 .
 .
 .SH "PCRE's 8-BIT and 16-BIT LIBRARIES"
@@ -145,7 +154,10 @@ options can be selected by following \fB-s+\fP with a digit in the range 1 to
 If \fB-s++\fP is used instead of \fB-s+\fP (with or without a following digit),
 the text "(JIT)" is added to the first output line after a match or no match
 when JIT-compiled code was actually used.
-.P
+.sp
+Note that there are pattern options that can override \fB-s\fP, either 
+specifying no studying at all, or suppressing JIT compilation.
+.sp
 If the \fB/I\fP or \fB/D\fP option is present on a pattern (requesting output
 about the compiled pattern), information about the result of studying is not
 included when studying is caused only by \fB-s\fP and neither \fB-i\fP nor
@@ -391,15 +403,22 @@ the compiled pattern to be output. This does not include the size of the
 successfully studied with the PCRE_STUDY_JIT_COMPILE option, the size of the
 JIT compiled code is also output.
 .P
-If the \fB/S\fP modifier appears once, it causes \fBpcre[16]_study()\fP to be
-called after the expression has been compiled, and the results used when the
-expression is matched. If \fB/S\fP appears twice, it suppresses studying, even
+The \fB/S\fP modifier causes \fBpcre[16]_study()\fP to be called after the
+expression has been compiled, and the results used when the expression is
+matched. There are a number of qualifying characters that may follow \fB/S\fP. 
+They may appear in any order.
+.P
+If \fBS\fP is followed by an exclamation mark, \fBpcre[16]_study()\fP is called 
+with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a 
+\fBpcre_extra\fP block, even when studying discovers no useful information.
+.P
+If \fB/S\fP is followed by a second S character, it suppresses studying, even
 if it was requested externally by the \fB-s\fP command line option. This makes
 it possible to specify that certain patterns are always studied, and others are
 never studied, independently of \fB-s\fP. This feature is used in the test
 files in a few cases where the output is different when the pattern is studied.
 .P
-If the \fB/S\fP modifier is immediately followed by a + character, the call to
+If the \fB/S\fP modifier is followed by a + character, the call to
 \fBpcre[16]_study()\fP is made with all the JIT study options, requesting
 just-in-time optimization support if it is available, for both normal and
 partial matching. If you want to restrict the JIT compiling modes, you can
@@ -427,6 +446,11 @@ are specified. For more details, see the
 .\"
 documentation. See also the \fB\eJ\fP escape sequence below for a way of
 setting the size of the JIT stack.
+.P
+Finally, if \fB/S\fP is followed by a minus character, JIT compilation is
+suppressed, even if it was requested externally by the \fB-s\fP command line
+option. This makes it possible to specify that JIT is never to be used for
+certain patterns.
 .P
 The \fB/T\fP modifier must be followed by a single digit. It causes a specific
 set of built-in character tables to be passed to \fBpcre[16]_compile()\fP. It
@@ -966,6 +990,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 February 2012
+Last updated: 28 August 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

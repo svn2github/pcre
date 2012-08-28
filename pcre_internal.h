@@ -893,7 +893,7 @@ time, run time, or study time, respectively. */
 
 #define PUBLIC_STUDY_OPTIONS \
    (PCRE_STUDY_JIT_COMPILE|PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE| \
-    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE)
+    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE|PCRE_STUDY_EXTRA_NEEDED)
 
 /* Magic number to provide a small check against being handed junk. */
 

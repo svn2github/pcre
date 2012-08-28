@@ -12362,7 +12362,7 @@ assertion, and therefore fails the entire subroutine call. --/
  0: ac
     
 /-- These are all run as real matches in test 1; here we are just checking the
-settings of the anchored and startline bits. */ 
+settings of the anchored and startline bits. --/ 
 
 /(?>.*?a)(?<=ba)/I
 Capturing subpattern count = 0
@@ -12463,5 +12463,22 @@ Capturing subpattern count = 0
 Options: multiline
 First char at start or follows newline
 Need char = 'c'
+
+/-- Check PCRE_STUDY_EXTRA_NEEDED --/
+
+/.?/S-I
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Study returned NULL
+
+/.?/S!I
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = -1
+No set of starting bytes
 
 /-- End of testinput2 --/
