@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "28 August 2012" "PCRE 8.32"
+.TH PCRETEST 1 "29 August 2012" "PCRE 8.32"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -248,18 +248,73 @@ pcretest to read the next line as a continuation of the regular expression.
 .rs
 .sp
 A pattern may be followed by any number of modifiers, which are mostly single
-characters. Following Perl usage, these are referred to below as, for example,
-"the \fB/i\fP modifier", even though the delimiter of the pattern need not
-always be a slash, and no slash is used when writing modifiers. White space may
-appear between the final pattern delimiter and the first modifier, and between
-the modifiers themselves.
-.P
+characters, though some of these can be qualified by further characters.
+Following Perl usage, these are referred to below as, for example, "the
+\fB/i\fP modifier", even though the delimiter of the pattern need not always be
+a slash, and no slash is used when writing modifiers. White space may appear
+between the final pattern delimiter and the first modifier, and between the
+modifiers themselves. For reference, here is a complete list of modifiers. They
+fall into several groups that are described in detail in the following
+sections.
+.sp
+  \fB/8\fP              set UTF mode
+  \fB/?\fP              disable UTF validity check
+  \fB/+\fP              show remainder of subject after match
+  \fB/=\fP              show all captures (not just those that are set)
+.sp
+  \fB/A\fP              set PCRE_ANCHORED
+  \fB/B\fP              show compiled code
+  \fB/C\fP              set PCRE_AUTO_CALLOUT
+  \fB/D\fP              same as \fB/B\fP plus \fB/I\fP
+  \fB/E\fP              set PCRE_DOLLAR_ENDONLY
+  \fB/F\fP              flip byte order in compiled pattern
+  \fB/f\fP              set PCRE_FIRSTLINE
+  \fB/G\fP              find all matches (shorten string)
+  \fB/g\fP              find all matches (use startoffset)
+  \fB/I\fP              show information about pattern
+  \fB/i\fP              set PCRE_CASELESS
+  \fB/J\fP              set PCRE_DUPNAMES
+  \fB/K\fP              show backtracking control names
+  \fB/L\fP              set locale
+  \fB/M\fP              show compiled memory size
+  \fB/m\fP              set PCRE_MULTILINE
+  \fB/N\fP              set PCRE_NO_AUTO_CAPTURE
+  \fB/P\fP              use the POSIX wrapper
+  \fB/S\fP              study the pattern after compilation
+  \fB/s\fP              set PCRE_DOTALL
+  \fB/T\fP              select character tables
+  \fB/U\fP              set PCRE_UNGREEDY
+  \fB/W\fP              set PCRE_UCP
+  \fB/X\fP              set PCRE_EXTRA
+  \fB/x\fP              set PCRE_EXTENDED
+  \fB/Y\fP              set PCRE_NO_START_OPTIMIZE
+  \fB/Z\fP              don't show lengths in \fB/B\fP output 
+.sp   
+  \fB/<any>\fP          set PCRE_NEWLINE_ANY
+  \fB/<anycrlf>\fP      set PCRE_NEWLINE_ANYCRLF
+  \fB/<cr>\fP           set PCRE_NEWLINE_CR
+  \fB/<crlf>\fP         set PCRE_NEWLINE_CRLF
+  \fB/<lf>\fP           set PCRE_NEWLINE_LF
+  \fB/<bsr_anycrlf>\fP  set PCRE_BSR_ANYCRLF
+  \fB/<bsr_unicode>\fP  set PCRE_BSR_UNICODE
+  \fB/<JS>\fP           set PCRE_JAVASCRIPT_COMPAT
+.sp
+.
+.
+.SS "Perl-compatible modifiers"
+.rs
+.sp
 The \fB/i\fP, \fB/m\fP, \fB/s\fP, and \fB/x\fP modifiers set the PCRE_CASELESS,
 PCRE_MULTILINE, PCRE_DOTALL, or PCRE_EXTENDED options, respectively, when
 \fBpcre[16]_compile()\fP is called. These four modifier letters have the same
 effect as they do in Perl. For example:
 .sp
   /caseless/i
+.sp
+.
+.
+.SS "Modifiers for other PCRE options"
+.rs
 .sp
 The following table shows additional modifiers for setting PCRE compile-time
 options that do not correspond to anything in Perl:
@@ -280,14 +335,14 @@ options that do not correspond to anything in Perl:
   \fB/W\fP              PCRE_UCP
   \fB/X\fP              PCRE_EXTRA
   \fB/Y\fP              PCRE_NO_START_OPTIMIZE
-  \fB/<JS>\fP           PCRE_JAVASCRIPT_COMPAT
-  \fB/<cr>\fP           PCRE_NEWLINE_CR
-  \fB/<lf>\fP           PCRE_NEWLINE_LF
-  \fB/<crlf>\fP         PCRE_NEWLINE_CRLF
-  \fB/<anycrlf>\fP      PCRE_NEWLINE_ANYCRLF
   \fB/<any>\fP          PCRE_NEWLINE_ANY
+  \fB/<anycrlf>\fP      PCRE_NEWLINE_ANYCRLF
+  \fB/<cr>\fP           PCRE_NEWLINE_CR
+  \fB/<crlf>\fP         PCRE_NEWLINE_CRLF
+  \fB/<lf>\fP           PCRE_NEWLINE_LF
   \fB/<bsr_anycrlf>\fP  PCRE_BSR_ANYCRLF
   \fB/<bsr_unicode>\fP  PCRE_BSR_UNICODE
+  \fB/<JS>\fP           PCRE_JAVASCRIPT_COMPAT
 .sp
 The modifiers that are enclosed in angle brackets are literal strings as shown,
 including the angle brackets, but the letters within can be in either case.
@@ -990,6 +1045,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 28 August 2012
+Last updated: 29 August 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
