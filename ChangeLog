@@ -58,6 +58,10 @@ Version 8.32
     
 12. Added support for PCRE_STUDY_EXTRA_NEEDED. 
 
+13. In the POSIX wrapper regcomp() function, setting re_nsub field in the preg 
+    structure could go wrong in environments where size_t is not the same size 
+    as int.
+
 
 
 Version 8.31 06-July-2012

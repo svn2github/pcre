@@ -259,6 +259,7 @@ const char *errorptr;
 int erroffset;
 int errorcode;
 int options = 0;
+int re_nsub = 0;
 
 if ((cflags & REG_ICASE) != 0)    options |= PCRE_CASELESS;
 if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
@@ -282,7 +283,8 @@ if (preg->re_pcre == NULL)
   }
 
 (void)pcre_fullinfo((const pcre *)preg->re_pcre, NULL, PCRE_INFO_CAPTURECOUNT,
-  &(preg->re_nsub));
+  &re_nsub);
+preg->re_nsub = (size_t)re_nsub; 
 return 0;
 }
 
