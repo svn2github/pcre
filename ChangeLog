@@ -61,6 +61,9 @@ Version 8.32
 13. In the POSIX wrapper regcomp() function, setting re_nsub field in the preg 
     structure could go wrong in environments where size_t is not the same size 
     as int.
+    
+14. Applied user-supplied patch to pcrecpp.cc to allow PCRE_NO_UTF8_CHECK to be 
+    set.
 
 
 
