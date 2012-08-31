@@ -50,7 +50,7 @@ the .generic versions are not used.
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
 
 The following are generic instructions for building the PCRE C library "by
-hand". If you are going to use CMake, this section does not apply to you; you 
+hand". If you are going to use CMake, this section does not apply to you; you
 can skip ahead to the CMake section.
 
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
@@ -124,7 +124,7 @@ can skip ahead to the CMake section.
      an unusual compiler) so that all included PCRE header files are first
      sought in the current directory. Otherwise you run the risk of picking up
      a previously-installed file from somewhere else.
-     
+
      Note that you must still compile pcre_jit_compile.c, even if you have not
      defined SUPPORT_JIT in config.h, because when JIT support is not
      configured, dummy functions are compiled. When JIT support IS configured,
@@ -337,11 +337,15 @@ BUILDING PCRE ON WINDOWS WITH CMAKE
 CMake is an alternative configuration facility that can be used instead of
 "configure". CMake creates project files (make files, solution files, etc.)
 tailored to numerous development environments, including Visual Studio,
-Borland, Msys, MinGW, NMake, and Unix.  If possible, use short paths with no
+Borland, Msys, MinGW, NMake, and Unix. If possible, use short paths with no
 spaces in the names for your CMake installation and your PCRE source and build
 directories.
 
-The following instructions were contributed by a PCRE user.
+The following instructions were contributed by a PCRE user. If they are not
+followed exactly, errors may occur. In the event that errors do occur, it is
+recommended that you delete the CMake cache before attempting to repeat the
+CMake build process. In the CMake GUI, the cache can be deleted by selecting
+"File > Delete Cache".
 
 1.  Install the latest CMake version available from http://www.cmake.org/, and
     ensure that cmake\bin is on your path.
@@ -355,7 +359,8 @@ The following instructions were contributed by a PCRE user.
     source dir. For example, C:\pcre\pcre-xx\build.
 
 4.  Run cmake-gui from the Shell envirornment of your build tool, for example,
-    Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++.
+    Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++. Do not try
+    to start Cmake from the Windows Start menu, as this can lead to errors. 
 
 5.  Enter C:\pcre\pcre-xx and C:\pcre\pcre-xx\build for the source and build
     directories, respectively.
@@ -583,4 +588,4 @@ build.log file in the root of the package also.
 
 
 ==========================
-Last Updated: 17 August 2012
+Last Updated: 31 August 2012
