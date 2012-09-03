@@ -112,8 +112,13 @@ input mode under Windows. */
 #else
 #include <sys/time.h>          /* These two includes are needed */
 #include <sys/resource.h>      /* for setrlimit(). */
+#if defined NATIVE_ZOS         /* z/OS uses non-binary I/O */
+#define INPUT_MODE   "r"
+#define OUTPUT_MODE  "w"
+#else
 #define INPUT_MODE   "rb"
 #define OUTPUT_MODE  "wb"
+#endif
 #endif
 
 #define PRIV(name) name
@@ -2336,7 +2341,7 @@ while (argc > 1 && argv[op][0] == '-')
       ((stack_size = get_value((pcre_uint8 *)argv[op+1], &endptr)),
         *endptr == 0))
     {
-#if defined(_WIN32) || defined(WIN32) || defined(__minix)
+#if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS)
     printf("PCRE: -S not supported on this OS\n");
     exit(1);
 #else
