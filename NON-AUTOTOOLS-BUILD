@@ -55,10 +55,15 @@ can skip ahead to the CMake section.
 
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
      settings that it contains to whatever is appropriate for your environment.
-     In particular, if you want to force a specific value for newline, you can
-     define the NEWLINE macro. When you compile any of the PCRE modules, you
-     must specify -DHAVE_CONFIG_H to your compiler so that config.h is included
-     in the sources.
+
+     In particular, you can alter the definition of the NEWLINE macro to 
+     specify what character(s) you want to be interpreted as line terminators.
+     In an EBCDIC environment, you MUST change NEWLINE, because its default
+     value is 10, an ASCII LF. The usual EBCDIC newline character is 21 (0x15,
+     NL), though in some cases it may be 37 (0x25).
+      
+     When you compile any of the PCRE modules, you must specify -DHAVE_CONFIG_H
+     to your compiler so that config.h is included in the sources.
 
      An alternative approach is not to edit config.h, but to use -D on the
      compiler command line to make any changes that you need to the
@@ -588,4 +593,4 @@ build.log file in the root of the package also.
 
 
 ==========================
-Last Updated: 31 August 2012
+Last Updated: 04 September 2012

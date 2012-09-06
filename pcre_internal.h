@@ -945,22 +945,69 @@ macros to give the functions distinct names. */
 #ifndef SUPPORT_UTF
 
 /* UTF-8 support is not enabled; use the platform-dependent character literals
-so that PCRE works on both ASCII and EBCDIC platforms, in non-UTF-mode only. */
+so that PCRE works in both ASCII and EBCDIC environments, but only in non-UTF
+mode. Newline characters are problematic in EBCDIC. Though it has CR and LF 
+characters, a common practice has been to use its NL (0x15) character as the
+line terminator in C-like processing environments. However, sometimes the LF 
+(0x25) character is used instead, according to this Unicode document:
+
+http://unicode.org/standard/reports/tr13/tr13-5.html
+
+PCRE defaults EBCDIC NL to 0x15, but has a build-time option to select 0x25 
+instead. Whichever is *not* chosen is defined as NEL. 
+
+In both ASCII and EBCDIC environments, CHAR_NL and CHAR_LF are synonyms for the
+same code point. */
+
+#ifdef EBCDIC
+
+#ifndef EBCDIC_NL25
+#define CHAR_NL                     '\x15'
+#define CHAR_NEL                    '\x25'
+#define STR_NL                      "\x15"
+#define STR_NEL                     "\x25"
+#else
+#define CHAR_NL                     '\x25'
+#define CHAR_NEL                    '\x15'
+#define STR_NL                      "\x25"
+#define STR_NEL                     "\x15"
+#endif
+
+#define CHAR_LF                     CHAR_NL
+#define STR_LF                      STR_NL
+
+#define CHAR_ESC                    '\047'
+#define CHAR_DEL                    '\007'
+#define STR_ESC                     "\047"
+#define STR_DEL                     "\007"
+
+#else  /* Not EBCDIC */
+
+/* In ASCII/Unicode, linefeed is '\n' and we equate this to NL for 
+compatibility. NEL is the Unicode newline character. */
+
+#define CHAR_LF                     '\n'
+#define CHAR_NL                     CHAR_LF
+#define CHAR_NEL                    '\x85'
+#define CHAR_ESC                    '\033'
+#define CHAR_DEL                    '\177'
+
+#define STR_LF                      "\n"
+#define STR_NL                      STR_LF
+#define STR_NEL                     "\x85"
+#define STR_ESC                     "\033"
+#define STR_DEL                     "\177"
+
+#endif  /* EBCDIC */
+
+/* The remaining definitions work in both environments. */
 
 #define CHAR_HT                     '\t'
 #define CHAR_VT                     '\v'
 #define CHAR_FF                     '\f'
 #define CHAR_CR                     '\r'
-#define CHAR_NL                     '\n'
 #define CHAR_BS                     '\b'
 #define CHAR_BEL                    '\a'
-#ifdef EBCDIC
-#define CHAR_ESC                    '\047'
-#define CHAR_DEL                    '\007'
-#else
-#define CHAR_ESC                    '\033'
-#define CHAR_DEL                    '\177'
-#endif
 
 #define CHAR_SPACE                  ' '
 #define CHAR_EXCLAMATION_MARK       '!'
@@ -1062,16 +1109,8 @@ so that PCRE works on both ASCII and EBCDIC platforms, in non-UTF-mode only. */
 #define STR_VT                      "\v"
 #define STR_FF                      "\f"
 #define STR_CR                      "\r"
-#define STR_NL                      "\n"
 #define STR_BS                      "\b"
 #define STR_BEL                     "\a"
-#ifdef EBCDIC
-#define STR_ESC                     "\047"
-#define STR_DEL                     "\007"
-#else
-#define STR_ESC                     "\033"
-#define STR_DEL                     "\177"
-#endif
 
 #define STR_SPACE                   " "
 #define STR_EXCLAMATION_MARK        "!"
@@ -1221,7 +1260,9 @@ only. */
 #define CHAR_VT                     '\013'
 #define CHAR_FF                     '\014'
 #define CHAR_CR                     '\015'
-#define CHAR_NL                     '\012'
+#define CHAR_LF                     '\012'
+#define CHAR_NL                     CHAR_LF
+#define CHAR_NEL                    '\x85'
 #define CHAR_BS                     '\010'
 #define CHAR_BEL                    '\007'
 #define CHAR_ESC                    '\033'
@@ -1484,7 +1525,7 @@ only. */
 #endif
 
 #ifndef ESC_n
-#define ESC_n CHAR_NL
+#define ESC_n CHAR_LF
 #endif
 
 #ifndef ESC_r

@@ -25,6 +25,7 @@
 #cmakedefine SUPPORT_UTF 1
 #cmakedefine SUPPORT_UCP 1
 #cmakedefine EBCDIC 1
+#cmakedefine EBCDIC_NL25 1
 #cmakedefine BSR_ANYCRLF 1
 #cmakedefine NO_RECURSE 1
 

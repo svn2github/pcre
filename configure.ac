@@ -209,6 +209,12 @@ AC_ARG_ENABLE(ebcdic,
                              [assume EBCDIC coding rather than ASCII; incompatible with --enable-utf; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
               , enable_ebcdic=no)
 
+# Handle --enable-ebcdic-nl25
+AC_ARG_ENABLE(ebcdic-nl25,
+              AS_HELP_STRING([--enable-ebcdic-nl25],
+                             [set EBCDIC code for NL to 0x25 instead of 0x15; it implies --enable-ebcdic]),
+              , enable_ebcdic_nl25=no)
+
 # Handle --disable-stack-for-recursion
 AC_ARG_ENABLE(stack-for-recursion,
               AS_HELP_STRING([--disable-stack-for-recursion],
@@ -335,21 +341,10 @@ then
   fi
 fi
 
-# Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
-# Also check that UTF support is not requested, because PCRE cannot handle
-# EBCDIC and UTF in the same build. To do so it would need to use different
-# character constants depending on the mode.
-#
-if test "x$enable_ebcdic" = "xyes"
-then
-  enable_rebuild_chartables=yes
-  if test "x$enable_utf" = "xyes"
-  then
-    AC_MSG_ERROR([support for EBCDIC and UTF-8/16 cannot be enabled at the same time])
-  fi
-fi
+# Convert the newline identifier into the appropriate integer value. The first 
+# three are ASCII values 0x0a, 0x0d, and 0x0d0a, but if EBCDIC is enabled, they
+# are changed below.
 
-# Convert the newline identifier into the appropriate integer value.
 case "$enable_newline" in
   lf)      ac_pcre_newline_value=10   ;;
   cr)      ac_pcre_newline_value=13   ;;
@@ -360,6 +355,37 @@ case "$enable_newline" in
   AC_MSG_ERROR([invalid argument \"$enable_newline\" to --enable-newline option])
   ;;
 esac
+
+# --enable-ebcdic-nl25 implies --enable-ebcdic
+if test "x$enable_ebcdic_nl25" = "xyes"; then
+  enable_ebcdic=yes
+fi   
+
+# Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled,
+# and the newline value is adjusted appropriately (CR is still 13, but LF is
+# 21 or 37). Also check that UTF support is not requested, because PCRE cannot
+# handle EBCDIC and UTF in the same build. To do so it would need to use
+# different character constants depending on the mode.
+#
+if test "x$enable_ebcdic" = "xyes"; then
+  enable_rebuild_chartables=yes
+
+  if test "x$enable_utf" = "xyes"; then
+    AC_MSG_ERROR([support for EBCDIC and UTF-8/16 cannot be enabled at the same time])
+  fi
+
+  if test "x$enable_ebcdic_nl25" = "xno"; then
+    case "$ac_pcre_newline_value" in
+      10)   ac_pcre_newline_value=21 ;;
+      3338) ac_pcre_newline_value=3349 ;;
+    esac    
+  else   
+    case "$ac_pcre_newline_value" in
+      10)   ac_pcre_newline_value=37 ;;
+      3338) ac_pcre_newline_value=3365 ;;
+    esac    
+  fi   
+fi
 
 # Check argument to --with-link-size
 case "$with_link_size" in
@@ -681,8 +707,12 @@ fi
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
   The value of NEWLINE determines the newline character sequence. On
   systems that support it, "configure" can be used to override the
-  default, which is 10. The possible values are 10 (LF), 13 (CR),
-  3338 (CRLF), -1 (ANY), or -2 (ANYCRLF).])
+  default, which is LF. In ASCII environments, the value can be 10 (LF), 
+  13 (CR), or 3338 (CRLF); in EBCDIC environments the value can be 21 or 37
+  (LF), 13 (CR), or 3349 or 3365 (CRLF) because there are two alternative
+  codepoints (0x15 and 0x25) that are used as the NL line terminator that is 
+  equivalent to ASCII LF. In both ASCII and EBCDIC environments the value can
+  also be -1 (ANY), or -2 (ANYCRLF).])
 
 if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [
@@ -767,6 +797,13 @@ if test "$enable_ebcdic" = "yes"; then
     Unicode. It is not possible to build a version of PCRE that
     supports both EBCDIC and UTF-8/16.])
 fi
+
+if test "$enable_ebcdic_nl25" = "yes"; then
+  AC_DEFINE_UNQUOTED([EBCDIC_NL25], [], [
+    In an EBCDIC environment, define this macro to any value to arrange for
+    the NL character to be 0x25 instead of the default 0x15. NL plays the role 
+    that LF does in an ASCII/Unicode environment.])
+fi       
 
 # Platform specific issues
 NO_UNDEFINED=
@@ -891,8 +928,15 @@ AC_CONFIG_COMMANDS([delete-old-chartables], [rm -f pcre_chartables.c])
 
 AC_OUTPUT
 
-# Print out a nice little message after configure is run displaying your
+# Print out a nice little message after configure is run displaying the
 # chosen options.
+
+ebcdic_nl_code=n/a
+if test "$enable_ebcdic_nl25" = "yes"; then
+  ebcdic_nl_code=0x25
+elif test "$enable_ebcdic" = "yes"; then
+  ebcdic_nl_code=0x15
+fi   
 
 cat <<EOF
 
@@ -919,6 +963,7 @@ $PACKAGE-$VERSION configuration summary:
     Newline char/sequence ........... : ${enable_newline}
     \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
     EBCDIC coding ................... : ${enable_ebcdic}
+    EBCDIC code for NL .............. : ${ebcdic_nl_code} 
     Rebuild char tables ............. : ${enable_rebuild_chartables}
     Use stack recursion ............. : ${enable_stack_for_recursion}
     POSIX mem threshold ............. : ${with_posix_malloc_threshold}

@@ -57,6 +57,7 @@
 # 2012-01-17 PH applied Stephen Kelly's patch to parse the version data out
 #            of the configure.ac file
 # 2012-02-26 PH added support for libedit
+# 2012-09-06 PH added support for PCRE_EBCDIC_NL25
 
 PROJECT(PCRE C CXX)
 
@@ -115,7 +116,10 @@ OPTION(PCRE_BUILD_PCRE16 "Build 16 bit PCRE library" OFF)
 OPTION(PCRE_BUILD_PCRECPP "Build the PCRE C++ library (pcrecpp)." ON)
 
 SET(PCRE_EBCDIC OFF CACHE BOOL
-    "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems)")
+    "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems.)")
+
+SET(PCRE_EBCDIC_NL25 OFF CACHE BOOL
+    "Use 0x25 as EBCDIC NL character instead of 0x15; implies EBCDIC.")
 
 SET(PCRE_LINK_SIZE "2" CACHE STRING
     "Internal link size (2, 3 or 4 allowed). See LINK_SIZE in config.h.in for details.")
@@ -326,7 +330,24 @@ ENDIF(NEWLINE STREQUAL "")
 
 IF(PCRE_EBCDIC)
         SET(EBCDIC 1)
+IF(PCRE_NEWLINE STREQUAL "LF")
+        SET(NEWLINE "21")
+ENDIF(PCRE_NEWLINE STREQUAL "LF")
+IF(PCRE_NEWLINE STREQUAL "CRLF")
+        SET(NEWLINE "3349")
+ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
 ENDIF(PCRE_EBCDIC)
+
+IF(PCRE_EBCDIC_NL25)
+        SET(EBCDIC 1)
+        SET(EBCDIC_NL25 1)
+IF(PCRE_NEWLINE STREQUAL "LF")
+        SET(NEWLINE "37")
+ENDIF(PCRE_NEWLINE STREQUAL "LF")
+IF(PCRE_NEWLINE STREQUAL "CRLF")
+        SET(NEWLINE "3365")
+ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
+ENDIF(PCRE_EBCDIC_NL25)          
 
 IF(PCRE_NO_RECURSE)
         SET(NO_RECURSE 1)
@@ -822,6 +843,7 @@ IF(PCRE_SHOW_REPORT)
   MESSAGE(STATUS "  Newline char/sequence ........... : ${PCRE_NEWLINE}")
   MESSAGE(STATUS "  \\R matches only ANYCRLF ......... : ${PCRE_SUPPORT_BSR_ANYCRLF}")
   MESSAGE(STATUS "  EBCDIC coding ................... : ${PCRE_EBCDIC}")
+  MESSAGE(STATUS "  EBCDIC coding with NL=0x25 ...... : ${PCRE_EBCDIC_NL25}")
   MESSAGE(STATUS "  Rebuild char tables ............. : ${PCRE_REBUILD_CHARTABLES}")
   MESSAGE(STATUS "  No stack recursion .............. : ${PCRE_NO_RECURSE}")
   MESSAGE(STATUS "  POSIX mem threshold ............. : ${PCRE_POSIX_MALLOC_THRESHOLD}")
