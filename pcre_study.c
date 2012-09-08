@@ -564,9 +564,11 @@ if (utf && c > 127)
     (void)PRIV(ord2utf)(c, buff);
     SET_BIT(buff[0]);
     }
-#endif
+#endif  /* Not SUPPORT_UCP */
   return p;
   }
+#else  /* Not SUPPORT_UTF */
+(void)(utf);   /* Stops warning for unused parameter */ 
 #endif
 
 /* Not UTF-8 mode, or character is less than 127. */

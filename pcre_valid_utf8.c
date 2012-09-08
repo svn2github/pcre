@@ -288,9 +288,10 @@ for (p = string; length-- > 0; p++)
     }
   }
 
-#else  /* SUPPORT_UTF */
+#else  /* Not SUPPORT_UTF */
 (void)(string);  /* Keep picky compilers happy */
 (void)(length);
+(void)(erroroffset);
 #endif
 
 return PCRE_UTF8_ERR0;   /* This indicates success */

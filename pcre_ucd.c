@@ -18,7 +18,7 @@ a totally empty module because some compilers barf at that.
 Instead, just supply small dummy tables. */
 
 #ifndef SUPPORT_UCP
-const ucd_record PRIV(ucd_records)[] = {{0,0,0 }};
+const ucd_record PRIV(ucd_records)[] = {{0,0,0,0 }};
 const pcre_uint8 PRIV(ucd_stage1)[] = {0};
 const pcre_uint16 PRIV(ucd_stage2)[] = {0};
 #else
