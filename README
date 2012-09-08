@@ -310,13 +310,15 @@ library. They are also documented in the pcrebuild man page.
   pcre_chartables.c.dist. See "Character tables" below for further information.
 
 . It is possible to compile PCRE for use on systems that use EBCDIC as their
-  character code (as opposed to ASCII) by specifying
+  character code (as opposed to ASCII/Unicode) by specifying
 
   --enable-ebcdic
 
   This automatically implies --enable-rebuild-chartables (see above). However,
   when PCRE is built this way, it always operates in EBCDIC. It cannot support
-  both EBCDIC and UTF-8/16.
+  both EBCDIC and UTF-8/16. There is a second option, --enable-ebcdic-nl25,
+  which specifies that the code value for the EBCDIC NL character is 0x25 
+  instead of the default 0x15. 
 
 . The pcregrep program currently supports only 8-bit data files, and so
   requires the 8-bit PCRE library. It is possible to compile pcregrep to use
@@ -895,4 +897,4 @@ pcre_xxx and the other with the name pcre16_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 18 June 2012
+Last updated: 07 September 2012

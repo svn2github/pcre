@@ -1,4 +1,4 @@
-.TH PCREBUILD 3 "07 January 2012" "PCRE 8.30"
+.TH PCREBUILD 3 "08 September 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .
@@ -14,8 +14,9 @@ options can be selected in both Unix-like and non-Unix-like environments using
 the GUI facility of \fBcmake-gui\fP if you are using \fBCMake\fP instead of
 \fBconfigure\fP to build PCRE.
 .P
-There is a lot more information about building PCRE in non-Unix-like
-environments in the file called \fINON_UNIX_USE\fP, which is part of the PCRE
+There is a lot more information about building PCRE without using 
+\fBconfigure\fP (including information about using \fBCMake\fP or building "by 
+hand") in the file called \fINON-AUTOTOOLS-BUILD\fP, which is part of the PCRE
 distribution. You should consult this file as well as the \fIREADME\fP file if
 you are building in a non-Unix-like environment.
 .P
@@ -334,6 +335,21 @@ to the \fBconfigure\fP command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
 an EBCDIC environment (for example, an IBM mainframe operating system). The
 --enable-ebcdic option is incompatible with --enable-utf.
+.P
+The EBCDIC character that corresponds to an ASCII LF is assumed to have the 
+value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In 
+such an environment you should use
+.sp
+  --enable-ebcdic-nl25
+.sp
+as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR has the 
+same value as in ASCII, namely, 0x0d. Whichever of 0x15 and 0x25 is \fInot\fP 
+chosen as LF is made to correspond to the Unicode NEL character (which, in 
+Unicode, is 0x85).
+.P
+The options that select newline behaviour, such as --enable-newline-is-cr, 
+and equivalent run-time options, refer to these character values in an EBCDIC
+environment.
 .
 .
 .SH "PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT"
@@ -420,6 +436,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 January 2012
+Last updated: 08 September 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

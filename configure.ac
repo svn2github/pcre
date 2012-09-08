@@ -167,13 +167,7 @@ AC_ARG_ENABLE(unicode-properties,
                              [enable Unicode properties support (implies --enable-utf)]),
               , enable_unicode_properties=no)
 
-# Handle --enable-newline=NL
-dnl AC_ARG_ENABLE(newline,
-dnl               AS_HELP_STRING([--enable-newline=NL],
-dnl                              [use NL as newline (lf, cr, crlf, anycrlf, any; default=lf)]),
-dnl               , enable_newline=lf)
-
-# Separate newline options
+# Handle newline options
 ac_pcre_newline=lf
 AC_ARG_ENABLE(newline-is-cr,
               AS_HELP_STRING([--enable-newline-is-cr],
@@ -396,16 +390,17 @@ case "$with_link_size" in
 esac
 
 AH_TOP([
-/* On Unix-like systems config.h.in is converted by "configure" into config.h.
-Some other environments also support the use of "configure". PCRE is written in
-Standard C, but there are a few non-standard things it can cope with, allowing
-it to run on SunOS4 and other "close to standard" systems.
+/* PCRE is written in Standard C, but there are a few non-standard things it
+can cope with, allowing it to run on SunOS4 and other "close to standard"
+systems.
 
-If you are going to build PCRE "by hand" on a system without "configure" you
-should copy the distributed config.h.generic to config.h, and then set up the
-macro definitions the way you need them. You must then add -DHAVE_CONFIG_H to
-all of your compile commands, so that config.h is included at the start of
-every source.
+In environments that support the facilities, config.h.in is converted by
+"configure", or config-cmake.h.in is converted by CMake, into config.h. If you
+are going to build PCRE "by hand" without using "configure" or CMake, you
+should copy the distributed config.h.generic to config.h, and then edit the
+macro definitions to be the way you need them. You must then add
+-DHAVE_CONFIG_H to all of your compile commands, so that config.h is included
+at the start of every source.
 
 Alternatively, you can avoid editing by using -D on the compiler command line
 to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H.
@@ -666,9 +661,7 @@ if test "$enable_stack_for_recursion" = "no"; then
     version that doesn't use recursion in the match() function; instead 
     it creates its own stack by steam using pcre_recurse_malloc() to obtain
     memory from the heap. For more detail, see the comments and other stuff
-    just above the match() function. On systems that support it, "configure"
-    can be used to set this in the Makefile (use
-    --disable-stack-for-recursion).])
+    just above the match() function.])
 fi
 
 if test "$enable_pcregrep_libz" = "yes"; then
@@ -688,12 +681,10 @@ if test $with_pcregrep_bufsize -lt 8192 ; then
 fi
 
 AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
-  The value of PCREGREP_BUFSIZE determines the size of buffer used by
-  pcregrep to hold parts of the file it is searching. On systems that
-  support it, "configure" can be used to override the default, which is
-  20K. This is also the minimum value. The actual amount of memory used by
-  pcregrep is three times this number, because it allows for the buffering of
-  "before" and "after" lines.])
+  The value of PCREGREP_BUFSIZE determines the size of buffer used by pcregrep
+  to hold parts of the file it is searching. This is also the minimum value.
+  The actual amount of memory used by pcregrep is three times this number,
+  because it allows for the buffering of "before" and "after" lines.])
 
 if test "$enable_pcretest_libedit" = "yes"; then
   AC_DEFINE([SUPPORT_LIBEDIT], [], [
@@ -705,23 +696,20 @@ elif test "$enable_pcretest_libreadline" = "yes"; then
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
-  The value of NEWLINE determines the newline character sequence. On
-  systems that support it, "configure" can be used to override the
-  default, which is LF. In ASCII environments, the value can be 10 (LF), 
-  13 (CR), or 3338 (CRLF); in EBCDIC environments the value can be 21 or 37
-  (LF), 13 (CR), or 3349 or 3365 (CRLF) because there are two alternative
-  codepoints (0x15 and 0x25) that are used as the NL line terminator that is 
-  equivalent to ASCII LF. In both ASCII and EBCDIC environments the value can
-  also be -1 (ANY), or -2 (ANYCRLF).])
+  The value of NEWLINE determines the default newline character sequence. PCRE
+  client programs can override this by selecting other values at run time. In
+  ASCII environments, the value can be 10 (LF), 13 (CR), or 3338 (CRLF); in
+  EBCDIC environments the value can be 21 or 37 (LF), 13 (CR), or 3349 or 3365
+  (CRLF) because there are two alternative codepoints (0x15 and 0x25) that are
+  used as the NL line terminator that is equivalent to ASCII LF. In both ASCII
+  and EBCDIC environments the value can also be -1 (ANY), or -2 (ANYCRLF).])
 
 if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [
     By default, the \R escape sequence matches any Unicode line ending
     character or sequence of characters. If BSR_ANYCRLF is defined (to any
     value), this is changed so that backslash-R matches only CR, LF, or CRLF. 
-    The build-time default can be overridden by the user of PCRE at runtime. 
-    On systems that support it, "configure" can be used to override the
-    default.])
+    The build-time default can be overridden by the user of PCRE at runtime.])
 fi
 
 AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
@@ -729,8 +717,7 @@ AC_DEFINE_UNQUOTED([LINK_SIZE], [$with_link_size], [
   links as offsets within the compiled regex. The default is 2, which
   allows for compiled patterns up to 64K long. This covers the vast
   majority of cases. However, PCRE can also be compiled to use 3 or 4
-  bytes instead. This allows for longer patterns in extreme cases. On
-  systems that support it, "configure" can be used to override this default.])
+  bytes instead. This allows for longer patterns in extreme cases.])
 
 AC_DEFINE_UNQUOTED([POSIX_MALLOC_THRESHOLD], [$with_posix_malloc_threshold], [
   When calling PCRE via the POSIX interface, additional working storage
@@ -739,9 +726,7 @@ AC_DEFINE_UNQUOTED([POSIX_MALLOC_THRESHOLD], [$with_posix_malloc_threshold], [
   interface provides only two. If the number of expected substrings is
   small, the wrapper function uses space on the stack, because this is
   faster than using malloc() for each call. The threshold above which
-  the stack is no longer used is defined by POSIX_MALLOC_THRESHOLD. On
-  systems that support it, "configure" can be used to override this
-  default.])
+  the stack is no longer used is defined by POSIX_MALLOC_THRESHOLD.])
 
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   The value of MATCH_LIMIT determines the default number of times the
@@ -750,8 +735,7 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   limit. The limit exists in order to catch runaway regular
   expressions that take for ever to determine that they do not match.
   The default is set very large so that it does not accidentally catch
-  legitimate cases. On systems that support it, "configure" can be
-  used to override this default default.])
+  legitimate cases.])
 
 AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
   The above limit applies to all calls of match(), whether or not they
@@ -762,8 +746,7 @@ AC_DEFINE_UNQUOTED([MATCH_LIMIT_RECURSION], [$with_match_limit_recursion], [
   MATCH_LIMIT_RECURSION applies only to recursive calls of match(). To
   have any useful effect, it must be less than the value of
   MATCH_LIMIT. The default is to use the same value as MATCH_LIMIT.
-  There is a runtime method for setting a different limit. On systems
-  that support it, "configure" can be used to override the default.])
+  There is a runtime method for setting a different limit.])
 
 AC_DEFINE([MAX_NAME_SIZE], [32], [
   This limit is parameterized just in case anybody ever wants to
@@ -790,19 +773,22 @@ AH_VERBATIM([PCRE_EXP_DEFN], [
 if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [
     If you are compiling for a system that uses EBCDIC instead of ASCII
-    character codes, define this macro to any value. On systems that can 
-    use "configure", this can be done via --enable-ebcdic. PCRE will then
-    assume that all input strings are in EBCDIC. If you do not define
-    this macro, PCRE will assume input strings are ASCII or UTF-8/16
-    Unicode. It is not possible to build a version of PCRE that
-    supports both EBCDIC and UTF-8/16.])
+    character codes, define this macro to any value. You must also edit the
+    NEWLINE macro below to set a suitable EBCDIC newline, commonly 21 (0x15).
+    On systems that can use "configure" or CMake to set EBCDIC, NEWLINE is
+    automatically adjusted. When EBCDIC is set, PCRE assumes that all input
+    strings are in EBCDIC. If you do not define this macro, PCRE will assume
+    input strings are ASCII or UTF-8/16 Unicode. It is not possible to build a
+    version of PCRE that supports both EBCDIC and UTF-8/16.])
 fi
 
 if test "$enable_ebcdic_nl25" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC_NL25], [], [
     In an EBCDIC environment, define this macro to any value to arrange for
-    the NL character to be 0x25 instead of the default 0x15. NL plays the role 
-    that LF does in an ASCII/Unicode environment.])
+    the NL character to be 0x25 instead of the default 0x15. NL plays the role
+    that LF does in an ASCII/Unicode environment. The value must also be set in
+    the NEWLINE macro below. On systems that can use "configure" or CMake to
+    set EBCDIC_NL25, the adjustment of NEWLINE is automatic.])
 fi       
 
 # Platform specific issues

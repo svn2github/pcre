@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "28 August 2012" "PCRE 8.32"
+.TH PCREAPI 3 "07 September 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -422,11 +422,13 @@ unaligned)". If JIT support is not available, the result is NULL.
   PCRE_CONFIG_NEWLINE
 .sp
 The output is an integer whose value specifies the default character sequence
-that is recognized as meaning "newline". The four values that are supported
-are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY.
-Though they are derived from ASCII, the same values are returned in EBCDIC
-environments. The default should normally correspond to the standard sequence
-for your operating system.
+that is recognized as meaning "newline". The values that are supported in 
+ASCII/Unicode environments are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for
+ANYCRLF, and -1 for ANY. In EBCDIC environments, CR, ANYCRLF, and ANY yield the
+same values. However, the value for LF is normally 21, though some EBCDIC
+environments use 37. The corresponding values for CRLF are 3349 and 3365. The
+default should normally correspond to the standard sequence for your operating
+system.
 .sp
   PCRE_CONFIG_BSR
 .sp
@@ -739,11 +741,23 @@ indicated by a single character (CR or LF, respectively). Setting
 PCRE_NEWLINE_CRLF specifies that a newline is indicated by the two-character
 CRLF sequence. Setting PCRE_NEWLINE_ANYCRLF specifies that any of the three
 preceding sequences should be recognized. Setting PCRE_NEWLINE_ANY specifies
-that any Unicode newline sequence should be recognized. The Unicode newline
-sequences are the three just mentioned, plus the single characters VT (vertical
-tab, U+000B), FF (form feed, U+000C), NEL (next line, U+0085), LS (line
-separator, U+2028), and PS (paragraph separator, U+2029). For the 8-bit
-library, the last two are recognized only in UTF-8 mode.
+that any Unicode newline sequence should be recognized. 
+.P
+In an ASCII/Unicode environment, the Unicode newline sequences are the three
+just mentioned, plus the single characters VT (vertical tab, U+000B), FF (form
+feed, U+000C), NEL (next line, U+0085), LS (line separator, U+2028), and PS
+(paragraph separator, U+2029). For the 8-bit library, the last two are
+recognized only in UTF-8 mode.
+.P
+When PCRE is compiled to run in an EBCDIC (mainframe) environment, the code for
+CR is 0x0d, the same as ASCII. However, the character code for LF is normally
+0x15, though in some EBCDIC environments 0x25 is used. Whichever of these is 
+not LF is made to correspond to Unicode's NEL character. EBCDIC codes are all 
+less than 256. For more details, see the
+.\" HREF
+\fBpcrebuild\fP
+.\"
+documentation.
 .P
 The newline setting in the options word uses three bits that are treated
 as a number, giving eight possibilities. Currently only six are used (default
@@ -2670,6 +2684,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 28 August 2012
+Last updated: 07 September 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
