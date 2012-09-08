@@ -1097,6 +1097,39 @@ return sys_errlist[n];
 #endif /* HAVE_STRERROR */
 
 
+
+/*************************************************
+*       Print newline configuration              *
+*************************************************/
+
+/* 
+Argument: the return code from PCRE_CONFIG_NEWLINE
+Returns:  nothing
+*/
+
+static void
+print_newline_config(int rc)
+{
+const char *s = NULL;
+printf("  Newline sequence is ");
+switch(rc)
+  {
+  case CHAR_CR: s = "CR"; break;
+  case CHAR_LF: s = "LF"; break;
+  case (CHAR_CR<<8 | CHAR_LF): s = "CRLF"; break;
+  case -1: s = "ANY"; break;
+  case -2: s = "ANYCRLF"; break;
+  
+  default:
+  printf("a non-standard value: 0x%04x\n", rc);    
+  return;
+  }  
+
+printf("%s\n", s);
+}
+
+
+
 /*************************************************
 *         JIT memory callback                    *
 *************************************************/
@@ -2428,12 +2461,7 @@ while (argc > 1 && argv[op][0] == '-')
       if (strcmp(argv[op + 1], "newline") == 0)
         {
         (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
-        /* Note that these values are always the ASCII values, even
-        in EBCDIC environments. CR is 13 and NL is 10. */
-        printf("%s\n", (rc == 13)? "CR" :
-          (rc == 10)? "LF" : (rc == (13<<8 | 10))? "CRLF" :
-          (rc == -2)? "ANYCRLF" :
-          (rc == -1)? "ANY" : "???");
+        print_newline_config(rc); 
         goto EXIT;
         }
       printf("Unknown -C option: %s\n", argv[op + 1]);
@@ -2442,6 +2470,10 @@ while (argc > 1 && argv[op][0] == '-')
 
     printf("PCRE version %s\n", version);
     printf("Compiled with\n");
+    
+#ifdef EBCDIC
+    printf("  EBCDIC code support: LF is 0x%02x\n", CHAR_LF);
+#endif 
 
 /* At least one of SUPPORT_PCRE8 and SUPPORT_PCRE16 will be set. If both
 are set, either both UTFs are supported or both are not supported. */
@@ -2475,12 +2507,7 @@ are set, either both UTFs are supported or both are not supported. */
     else
       printf("  No just-in-time compiler support\n");
     (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
-    /* Note that these values are always the ASCII values, even
-    in EBCDIC environments. CR is 13 and NL is 10. */
-    printf("  Newline sequence is %s\n", (rc == 13)? "CR" :
-      (rc == 10)? "LF" : (rc == (13<<8 | 10))? "CRLF" :
-      (rc == -2)? "ANYCRLF" :
-      (rc == -1)? "ANY" : "???");
+    print_newline_config(rc); 
     (void)PCRE_CONFIG(PCRE_CONFIG_BSR, &rc);
     printf("  \\R matches %s\n", rc? "CR, LF, or CRLF only" :
                                      "all Unicode newlines");
