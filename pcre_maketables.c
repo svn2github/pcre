@@ -127,7 +127,7 @@ within regexes. */
 for (i = 0; i < 256; i++)
   {
   int x = 0;
-  if (i != 0x0b && isspace(i)) x += ctype_space;
+  if (i != CHAR_VT && isspace(i)) x += ctype_space;
   if (isalpha(i)) x += ctype_letter;
   if (isdigit(i)) x += ctype_digit;
   if (isxdigit(i)) x += ctype_xdigit;

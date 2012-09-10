@@ -789,7 +789,7 @@ else if ((i = escapes[c - CHAR_0]) != 0) c = i;
 
 #else           /* EBCDIC coding */
 /* Not alphanumeric */
-else if (c < 'a' || (!MAX_255(c) || (ebcdic_chartab[c] & 0x0E) == 0)) {}
+else if (c < CHAR_a || (!MAX_255(c) || (ebcdic_chartab[c] & 0x0E) == 0)) {}
 else if ((i = escapes[c - 0x48]) != 0)  c = i;
 #endif
 
@@ -3168,8 +3168,9 @@ if (next >= 0) switch(op_code)
   case OP_NOT_HSPACE:
   switch(next)
     {
-    case 0x09:
-    case 0x20:
+    case CHAR_HT:
+    case CHAR_SPACE:
+#ifndef EBCDIC     
     case 0xa0:
     case 0x1680:
     case 0x180e:
@@ -3187,6 +3188,7 @@ if (next >= 0) switch(op_code)
     case 0x202f:
     case 0x205f:
     case 0x3000:
+#endif  /* Not EBCDIC */ 
     return op_code == OP_NOT_HSPACE;
     default:
     return op_code != OP_NOT_HSPACE;
@@ -3197,13 +3199,15 @@ if (next >= 0) switch(op_code)
   case OP_NOT_VSPACE:
   switch(next)
     {
-    case 0x0a:
-    case 0x0b:
-    case 0x0c:
-    case 0x0d:
-    case 0x85:
+    case CHAR_LF:
+    case CHAR_VT:
+    case CHAR_FF:
+    case CHAR_CR:
+    case CHAR_NEL:
+#ifndef EBCDIC 
     case 0x2028:
     case 0x2029:
+#endif 
     return op_code == OP_NOT_VSPACE;
     default:
     return op_code != OP_NOT_VSPACE;
@@ -3261,8 +3265,9 @@ switch(op_code)
     case ESC_H:
     switch(c)
       {
-      case 0x09:
-      case 0x20:
+      case CHAR_HT:
+      case CHAR_SPACE:
+#ifndef EBCDIC       
       case 0xa0:
       case 0x1680:
       case 0x180e:
@@ -3280,6 +3285,7 @@ switch(op_code)
       case 0x202f:
       case 0x205f:
       case 0x3000:
+#endif  /* Not EBCDIC */ 
       return -next != ESC_h;
       default:
       return -next == ESC_h;
@@ -3289,13 +3295,15 @@ switch(op_code)
     case ESC_V:
     switch(c)
       {
-      case 0x0a:
-      case 0x0b:
-      case 0x0c:
-      case 0x0d:
-      case 0x85:
+      case CHAR_LF:
+      case CHAR_VT:
+      case CHAR_FF:
+      case CHAR_CR:
+      case CHAR_NEL:
+#ifndef EBCDIC 
       case 0x2028:
       case 0x2029:
+#endif  /* Not EBCDIC */ 
       return -next != ESC_v;
       default:
       return -next == ESC_v;
@@ -4057,7 +4065,8 @@ for (;; ptr++)
 
             /* Perl 5.004 onwards omits VT from \s, but we must preserve it
             if it was previously set by something earlier in the character
-            class. */
+            class. Luckily, the value of CHAR_VT is 0x0b in both ASCII and
+            EBCDIC, so we lazily just adjust the appropriate bit. */
 
             case ESC_s:
             classbits[0] |= cbits[cbit_space];
@@ -4072,8 +4081,9 @@ for (;; ptr++)
             continue;
 
             case ESC_h:
-            SETBIT(classbits, 0x09); /* VT */
-            SETBIT(classbits, 0x20); /* SPACE */
+            SETBIT(classbits, CHAR_HT);
+            SETBIT(classbits, CHAR_SPACE);
+#ifndef EBCDIC             
             SETBIT(classbits, 0xa0); /* NSBP */
 #ifndef COMPILE_PCRE8
             xclass = TRUE;
@@ -4109,6 +4119,7 @@ for (;; ptr++)
               class_uchardata += PRIV(ord2utf)(0x3000, class_uchardata);
               }
 #endif
+#endif  /* Not EBCDIC */
             continue;
 
             case ESC_H:
@@ -4117,13 +4128,16 @@ for (;; ptr++)
               int x = 0xff;
               switch (c)
                 {
-                case 0x09/8: x ^= 1 << (0x09%8); break;
-                case 0x20/8: x ^= 1 << (0x20%8); break;
-                case 0xa0/8: x ^= 1 << (0xa0%8); break;
+                case CHAR_HT/8:    x ^= 1 << (CHAR_HT%8); break;
+                case CHAR_SPACE/8: x ^= 1 << (CHAR_SPACE%8); break;
+#ifndef EBCDIC  
+                case 0xa0/8: x ^= 1 << (0xa0%8); break;  /* NSBSP */
+#endif 
                 default: break;
                 }
               classbits[c] |= x;
               }
+#ifndef EBCDIC               
 #ifndef COMPILE_PCRE8
             xclass = TRUE;
             *class_uchardata++ = XCL_RANGE;
@@ -4150,7 +4164,7 @@ for (;; ptr++)
             if (utf)
               class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
             else
-#endif
+#endif   /* SUPPORT_UTF */
               *class_uchardata++ = 0xffff;
 #elif defined SUPPORT_UTF
             if (utf)
@@ -4179,14 +4193,16 @@ for (;; ptr++)
               class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
               }
 #endif
+#endif  /* Not EBCDIC */
             continue;
 
             case ESC_v:
-            SETBIT(classbits, 0x0a); /* LF */
-            SETBIT(classbits, 0x0b); /* VT */
-            SETBIT(classbits, 0x0c); /* FF */
-            SETBIT(classbits, 0x0d); /* CR */
-            SETBIT(classbits, 0x85); /* NEL */
+            SETBIT(classbits, CHAR_LF);
+            SETBIT(classbits, CHAR_VT);
+            SETBIT(classbits, CHAR_FF);
+            SETBIT(classbits, CHAR_CR);
+            SETBIT(classbits, CHAR_NEL);
+#ifndef EBCDIC             
 #ifndef COMPILE_PCRE8
             xclass = TRUE;
             *class_uchardata++ = XCL_RANGE;
@@ -4201,6 +4217,7 @@ for (;; ptr++)
               class_uchardata += PRIV(ord2utf)(0x2029, class_uchardata);
               }
 #endif
+#endif  /* Not EBCDIC */
             continue;
 
             case ESC_V:
@@ -4209,17 +4226,18 @@ for (;; ptr++)
               int x = 0xff;
               switch (c)
                 {
-                case 0x0a/8: x ^= 1 << (0x0a%8);
-                             x ^= 1 << (0x0b%8);
-                             x ^= 1 << (0x0c%8);
-                             x ^= 1 << (0x0d%8);
-                             break;
-                case 0x85/8: x ^= 1 << (0x85%8); break;
+                case CHAR_LF/8: x ^= 1 << (CHAR_LF%8);
+                                x ^= 1 << (CHAR_VT%8);
+                                x ^= 1 << (CHAR_FF%8);
+                                x ^= 1 << (CHAR_CR%8);
+                                break;
+                case CHAR_NEL/8: x ^= 1 << (CHAR_NEL%8); break;
                 default: break;
                 }
               classbits[c] |= x;
               }
 
+#ifndef EBCDIC
 #ifndef COMPILE_PCRE8
             xclass = TRUE;
             *class_uchardata++ = XCL_RANGE;
@@ -4245,6 +4263,7 @@ for (;; ptr++)
               class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
               }
 #endif
+#endif  /* Not EBCDIC */
             continue;
 
 #ifdef SUPPORT_UCP

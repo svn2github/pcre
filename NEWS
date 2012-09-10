@@ -12,6 +12,8 @@ Release 8.32 xx-xxxx-2012
    
 .  \X now matches a Unicode extended grapheme cluster. 
 
+.  The EBCDIC support, which had decayed, has had a spring clean.
+
 
 Release 8.31 06-July-2012
 -------------------------

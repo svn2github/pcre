@@ -567,15 +567,15 @@ if (utf && c > 127)
 #endif  /* Not SUPPORT_UCP */
   return p;
   }
-#else  /* Not SUPPORT_UTF */
+#else   /* Not SUPPORT_UTF */
 (void)(utf);   /* Stops warning for unused parameter */ 
-#endif
+#endif  /* SUPPORT_UTF */
 
 /* Not UTF-8 mode, or character is less than 127. */
 
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
 return p + 1;
-#endif
+#endif  /* COMPILE_PCRE8 */
 
 #ifdef COMPILE_PCRE16
 if (c > 0xff)
@@ -597,10 +597,12 @@ if (utf && c > 127)
       c = 0xff;
     SET_BIT(c);
     }
-#endif
+#endif  /* SUPPORT_UCP */
   return p;
   }
-#endif
+#else   /* Not SUPPORT_UTF */
+(void)(utf);   /* Stops warning for unused parameter */ 
+#endif  /* SUPPORT_UTF */
 
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
 return p + 1;
@@ -988,8 +990,8 @@ do
       identical. */
 
       case OP_HSPACE:
-      SET_BIT(0x09);
-      SET_BIT(0x20);
+      SET_BIT(CHAR_HT);
+      SET_BIT(CHAR_SPACE);
 #ifdef SUPPORT_UTF
       if (utf)
         {
@@ -998,45 +1000,47 @@ do
         SET_BIT(0xE1);  /* For U+1680, U+180E */
         SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
         SET_BIT(0xE3);  /* For U+3000 */
-#endif
+#endif  /* COMPILE_PCRE8 */
 #ifdef COMPILE_PCRE16
         SET_BIT(0xA0);
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE16 */
         }
       else
 #endif /* SUPPORT_UTF */
         {
+#ifndef EBCDIC         
         SET_BIT(0xA0);
+#endif  /* Not EBCDIC */         
 #ifdef COMPILE_PCRE16
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE16 */
         }
       try_next = FALSE;
       break;
 
       case OP_ANYNL:
       case OP_VSPACE:
-      SET_BIT(0x0A);
-      SET_BIT(0x0B);
-      SET_BIT(0x0C);
-      SET_BIT(0x0D);
+      SET_BIT(CHAR_LF);
+      SET_BIT(CHAR_VT);
+      SET_BIT(CHAR_FF);
+      SET_BIT(CHAR_CR);
 #ifdef SUPPORT_UTF
       if (utf)
         {
 #ifdef COMPILE_PCRE8
         SET_BIT(0xC2);  /* For U+0085 */
         SET_BIT(0xE2);  /* For U+2028, U+2029 */
-#endif
+#endif  /* COMPILE_PCRE8 */
 #ifdef COMPILE_PCRE16
-        SET_BIT(0x85);
+        SET_BIT(CHAR_NEL);
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE16 */
         }
       else
 #endif /* SUPPORT_UTF */
         {
-        SET_BIT(0x85);
+        SET_BIT(CHAR_NEL);
 #ifdef COMPILE_PCRE16
         SET_BIT(0xFF);  /* For characters > 255 */
 #endif
@@ -1060,7 +1064,8 @@ do
       break;
 
       /* The cbit_space table has vertical tab as whitespace; we have to
-      ensure it is set as not whitespace. */
+      ensure it is set as not whitespace. Luckily, the code value is the same 
+      (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate bit. */
 
       case OP_NOT_WHITESPACE:
       set_nottype_bits(start_bits, cbit_space, table_limit, cd);
@@ -1068,8 +1073,9 @@ do
       try_next = FALSE;
       break;
 
-      /* The cbit_space table has vertical tab as whitespace; we have to
-      not set it from the table. */
+      /* The cbit_space table has vertical tab as whitespace; we have to not
+      set it from the table. Luckily, the code value is the same (0x0b) in
+      ASCII and EBCDIC, so we can just adjust the appropriate bit. */
 
       case OP_WHITESPACE:
       c = start_bits[1];    /* Save in case it was already set */
@@ -1123,8 +1129,8 @@ do
         return SSB_FAIL;
 
         case OP_HSPACE:
-        SET_BIT(0x09);
-        SET_BIT(0x20);
+        SET_BIT(CHAR_HT);
+        SET_BIT(CHAR_SPACE);
 #ifdef SUPPORT_UTF
         if (utf)
           {
@@ -1133,38 +1139,40 @@ do
           SET_BIT(0xE1);  /* For U+1680, U+180E */
           SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
           SET_BIT(0xE3);  /* For U+3000 */
-#endif
+#endif  /* COMPILE_PCRE8 */
 #ifdef COMPILE_PCRE16
           SET_BIT(0xA0);
           SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE16 */
           }
         else
 #endif /* SUPPORT_UTF */
+#ifndef EBCDIC
           SET_BIT(0xA0);
+#endif  /* Not EBCDIC */ 
         break;
 
         case OP_ANYNL:
         case OP_VSPACE:
-        SET_BIT(0x0A);
-        SET_BIT(0x0B);
-        SET_BIT(0x0C);
-        SET_BIT(0x0D);
+        SET_BIT(CHAR_LF);
+        SET_BIT(CHAR_VT);
+        SET_BIT(CHAR_FF);
+        SET_BIT(CHAR_CR);
 #ifdef SUPPORT_UTF
         if (utf)
           {
 #ifdef COMPILE_PCRE8
           SET_BIT(0xC2);  /* For U+0085 */
           SET_BIT(0xE2);  /* For U+2028, U+2029 */
-#endif
+#endif  /* COMPILE_PCRE8 */
 #ifdef COMPILE_PCRE16
-          SET_BIT(0x85);
+          SET_BIT(CHAR_NEL);
           SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE16 */
           }
         else
 #endif /* SUPPORT_UTF */
-          SET_BIT(0x85);
+          SET_BIT(CHAR_NEL);
         break;
 
         case OP_NOT_DIGIT:
@@ -1176,7 +1184,9 @@ do
         break;
 
         /* The cbit_space table has vertical tab as whitespace; we have to
-        ensure it gets set as not whitespace. */
+        ensure it gets set as not whitespace. Luckily, the code value is the
+        same (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate
+        bit. */
 
         case OP_NOT_WHITESPACE:
         set_nottype_bits(start_bits, cbit_space, table_limit, cd);
@@ -1184,7 +1194,8 @@ do
         break;
 
         /* The cbit_space table has vertical tab as whitespace; we have to
-        avoid setting it. */
+        avoid setting it. Luckily, the code value is the same (0x0b) in ASCII
+        and EBCDIC, so we can just adjust the appropriate bit. */
 
         case OP_WHITESPACE:
         c = start_bits[1];    /* Save in case it was already set */

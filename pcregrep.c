@@ -933,12 +933,12 @@ switch(endlinetype)
 
     switch (c)
       {
-      case 0x0a:    /* LF */
+      case '\n':
       *lenptr = 1;
       return p;
 
-      case 0x0d:    /* CR */
-      if (p < endptr && *p == 0x0a)
+      case '\r':
+      if (p < endptr && *p == '\n')
         {
         *lenptr = 2;
         p++;
@@ -977,14 +977,14 @@ switch(endlinetype)
 
     switch (c)
       {
-      case 0x0a:    /* LF */
-      case 0x0b:    /* VT */
-      case 0x0c:    /* FF */
+      case '\n':    /* LF */
+      case '\v':    /* VT */
+      case '\f':    /* FF */
       *lenptr = 1;
       return p;
 
-      case 0x0d:    /* CR */
-      if (p < endptr && *p == 0x0a)
+      case '\r':    /* CR */
+      if (p < endptr && *p == '\n')
         {
         *lenptr = 2;
         p++;
@@ -992,14 +992,16 @@ switch(endlinetype)
       else *lenptr = 1;
       return p;
 
-      case 0x85:    /* NEL */
+#ifndef EBCDIC
+      case 0x85:    /* Unicode NEL */
       *lenptr = utf8? 2 : 1;
       return p;
 
-      case 0x2028:  /* LS */
-      case 0x2029:  /* PS */
+      case 0x2028:  /* Unicode LS */
+      case 0x2029:  /* Unicode PS */
       *lenptr = 3;
       return p;
+#endif  /* Not EBCDIC */       
 
       default:
       break;
@@ -1083,8 +1085,8 @@ switch(endlinetype)
 
     if (endlinetype == EL_ANYCRLF) switch (c)
       {
-      case 0x0a:    /* LF */
-      case 0x0d:    /* CR */
+      case '\n':    /* LF */
+      case '\r':    /* CR */
       return p;
 
       default:
@@ -1093,13 +1095,15 @@ switch(endlinetype)
 
     else switch (c)
       {
-      case 0x0a:    /* LF */
-      case 0x0b:    /* VT */
-      case 0x0c:    /* FF */
-      case 0x0d:    /* CR */
-      case 0x85:    /* NEL */
-      case 0x2028:  /* LS */
-      case 0x2029:  /* PS */
+      case '\n':    /* LF */
+      case '\v':    /* VT */
+      case '\f':    /* FF */
+      case '\r':    /* CR */
+#ifndef EBCDIE       
+      case 0x85:    /* Unicode NEL */
+      case 0x2028:  /* Unicode LS */
+      case 0x2029:  /* Unicode PS */
+#endif  /* Not EBCDIC */      
       return p;
 
       default:

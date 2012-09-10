@@ -984,11 +984,12 @@ same code point. */
 #else  /* Not EBCDIC */
 
 /* In ASCII/Unicode, linefeed is '\n' and we equate this to NL for 
-compatibility. NEL is the Unicode newline character. */
+compatibility. NEL is the Unicode newline character; make sure it is
+a positive value. */
 
 #define CHAR_LF                     '\n'
 #define CHAR_NL                     CHAR_LF
-#define CHAR_NEL                    '\x85'
+#define CHAR_NEL                    ((unsigned char)'\x85')
 #define CHAR_ESC                    '\033'
 #define CHAR_DEL                    '\177'
 
@@ -1262,7 +1263,7 @@ only. */
 #define CHAR_CR                     '\015'
 #define CHAR_LF                     '\012'
 #define CHAR_NL                     CHAR_LF
-#define CHAR_NEL                    '\x85'
+#define CHAR_NEL                    ((unsigned char)'\x85')
 #define CHAR_BS                     '\010'
 #define CHAR_BEL                    '\007'
 #define CHAR_ESC                    '\033'

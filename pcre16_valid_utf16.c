@@ -138,6 +138,7 @@ for (p = string; length-- > 0; p++)
 #else  /* SUPPORT_UTF */
 (void)(string);  /* Keep picky compilers happy */
 (void)(length);
+(void)(erroroffset);
 #endif /* SUPPORT_UTF */
 
 return PCRE_UTF16_ERR0;   /* This indicates success */

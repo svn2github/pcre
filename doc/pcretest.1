@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "29 August 2012" "PCRE 8.32"
+.TH PCRETEST 1 "10 September 2012" "PCRE 8.32"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -77,12 +77,16 @@ Output information about a specific build-time option, then exit. This
 functionality is intended for use in scripts such as \fBRunTest\fP. The
 following options output the value indicated:
 .sp
+  ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
+               0x15 or 0x25 
+               0 if used in an ASCII environment
   linksize   the internal link size (2, 3, or 4)
   newline    the default newline setting:
                CR, LF, CRLF, ANYCRLF, or ANY
 .sp
 The following options output 1 for true or zero for false:
 .sp
+  ebcdic     compiled for an EBCDIC environment
   jit        just-in-time support is available
   pcre16     the 16-bit library was built
   pcre8      the 8-bit library was built
@@ -1045,6 +1049,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 29 August 2012
+Last updated: 10 September 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

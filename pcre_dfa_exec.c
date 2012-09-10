@@ -1370,7 +1370,7 @@ for (;;)
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
       if (clen > 0)
         {
-        int lgb, rgb; 
+        int lgb, rgb;
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
         if (count > 0 && codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS)
@@ -1378,15 +1378,15 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
-        lgb = UCD_GRAPHBREAK(c); 
+        lgb = UCD_GRAPHBREAK(c);
         while (nptr < end_subject)
           {
           dlen = 1;
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d); 
+          rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
           ncount++;
-          lgb = rgb; 
+          lgb = rgb;
           nptr += dlen;
           }
         count++;
@@ -1406,20 +1406,22 @@ for (;;)
         int ncount = 0;
         switch (c)
           {
-          case 0x000b:
-          case 0x000c:
-          case 0x0085:
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_NEL:
+#ifndef EBCDIC
           case 0x2028:
           case 0x2029:
+#endif  /* Not EBCDIC */
           if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
           goto ANYNL01;
 
-          case 0x000d:
-          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
+          case CHAR_CR:
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL01:
-          case 0x000a:
+          case CHAR_LF:
           if (count > 0 && codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSPLUS)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1446,13 +1448,15 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case 0x000a:
-          case 0x000b:
-          case 0x000c:
-          case 0x000d:
-          case 0x0085:
+          case CHAR_LF:
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_CR:
+          case CHAR_NEL:
+#ifndef EBCDIC
           case 0x2028:
           case 0x2029:
+#endif  /* Not EBCDIC */
           OK = TRUE;
           break;
 
@@ -1485,8 +1489,9 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case 0x09:      /* HT */
-          case 0x20:      /* SPACE */
+          case CHAR_HT:
+          case CHAR_SPACE:
+#ifndef EBCDIC
           case 0xa0:      /* NBSP */
           case 0x1680:    /* OGHAM SPACE MARK */
           case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -1504,6 +1509,7 @@ for (;;)
           case 0x202f:    /* NARROW NO-BREAK SPACE */
           case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
           case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */
           OK = TRUE;
           break;
 
@@ -1629,7 +1635,7 @@ for (;;)
       ADD_ACTIVE(state_offset + 2, 0);
       if (clen > 0)
         {
-        int lgb, rgb; 
+        int lgb, rgb;
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
         if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSSTAR ||
@@ -1638,15 +1644,15 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
-        lgb = UCD_GRAPHBREAK(c); 
+        lgb = UCD_GRAPHBREAK(c);
         while (nptr < end_subject)
           {
           dlen = 1;
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d); 
+          rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
           ncount++;
-          lgb = rgb; 
+          lgb = rgb;
           nptr += dlen;
           }
         ADD_NEW_DATA(-(state_offset + count), 0, ncount);
@@ -1673,20 +1679,22 @@ for (;;)
         int ncount = 0;
         switch (c)
           {
-          case 0x000b:
-          case 0x000c:
-          case 0x0085:
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_NEL:
+#ifndef EBCDIC
           case 0x2028:
           case 0x2029:
+#endif  /* Not EBCDIC */
           if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
           goto ANYNL02;
 
-          case 0x000d:
-          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
+          case CHAR_CR:
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL02:
-          case 0x000a:
+          case CHAR_LF:
           if (codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSSTAR ||
               codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSQUERY)
             {
@@ -1721,13 +1729,15 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case 0x000a:
-          case 0x000b:
-          case 0x000c:
-          case 0x000d:
-          case 0x0085:
+          case CHAR_LF:
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_CR:
+          case CHAR_NEL:
+#ifndef EBCDIC
           case 0x2028:
           case 0x2029:
+#endif  /* Not EBCDIC */
           OK = TRUE;
           break;
 
@@ -1767,8 +1777,9 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case 0x09:      /* HT */
-          case 0x20:      /* SPACE */
+          case CHAR_HT:
+          case CHAR_SPACE:
+#ifndef EBCDIC 
           case 0xa0:      /* NBSP */
           case 0x1680:    /* OGHAM SPACE MARK */
           case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -1786,6 +1797,7 @@ for (;;)
           case 0x202f:    /* NARROW NO-BREAK SPACE */
           case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
           case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */           
           OK = TRUE;
           break;
 
@@ -1899,7 +1911,7 @@ for (;;)
       count = current_state->count;  /* Number already matched */
       if (clen > 0)
         {
-        int lgb, rgb; 
+        int lgb, rgb;
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
         if (codevalue == OP_EXTUNI_EXTRA + OP_TYPEPOSUPTO)
@@ -1907,15 +1919,15 @@ for (;;)
           active_count--;           /* Remove non-match possibility */
           next_active_state--;
           }
-        lgb = UCD_GRAPHBREAK(c); 
+        lgb = UCD_GRAPHBREAK(c);
         while (nptr < end_subject)
           {
           dlen = 1;
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d); 
+          rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
           ncount++;
-          lgb = rgb; 
+          lgb = rgb;
           nptr += dlen;
           }
         if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
@@ -1941,20 +1953,22 @@ for (;;)
         int ncount = 0;
         switch (c)
           {
-          case 0x000b:
-          case 0x000c:
-          case 0x0085:
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_NEL:
+#ifndef EBCDIC
           case 0x2028:
           case 0x2029:
+#endif  /* Not EBCDIC */
           if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
           goto ANYNL03;
 
-          case 0x000d:
-          if (ptr + 1 < end_subject && ptr[1] == 0x0a) ncount = 1;
+          case CHAR_CR:
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL03:
-          case 0x000a:
+          case CHAR_LF:
           if (codevalue == OP_ANYNL_EXTRA + OP_TYPEPOSUPTO)
             {
             active_count--;           /* Remove non-match possibility */
@@ -1985,13 +1999,15 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case 0x000a:
-          case 0x000b:
-          case 0x000c:
-          case 0x000d:
-          case 0x0085:
+          case CHAR_LF:
+          case CHAR_VT:
+          case CHAR_FF:
+          case CHAR_CR:
+          case CHAR_NEL:
+#ifndef EBCDIC
           case 0x2028:
           case 0x2029:
+#endif  /* Not EBCDIC */
           OK = TRUE;
           break;
 
@@ -2027,8 +2043,9 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case 0x09:      /* HT */
-          case 0x20:      /* SPACE */
+          case CHAR_HT:
+          case CHAR_SPACE:
+#ifndef EBCDIC 
           case 0xa0:      /* NBSP */
           case 0x1680:    /* OGHAM SPACE MARK */
           case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -2046,6 +2063,7 @@ for (;;)
           case 0x202f:    /* NARROW NO-BREAK SPACE */
           case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
           case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */           
           OK = TRUE;
           break;
 
@@ -2123,18 +2141,18 @@ for (;;)
       case OP_EXTUNI:
       if (clen > 0)
         {
-        int lgb, rgb; 
+        int lgb, rgb;
         const pcre_uchar *nptr = ptr + clen;
         int ncount = 0;
-        lgb = UCD_GRAPHBREAK(c); 
+        lgb = UCD_GRAPHBREAK(c);
         while (nptr < end_subject)
           {
           dlen = 1;
           if (!utf) d = *nptr; else { GETCHARLEN(d, nptr, dlen); }
-          rgb = UCD_GRAPHBREAK(d); 
+          rgb = UCD_GRAPHBREAK(d);
           if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
           ncount++;
-          lgb = rgb; 
+          lgb = rgb;
           nptr += dlen;
           }
         if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
@@ -2152,25 +2170,27 @@ for (;;)
       case OP_ANYNL:
       if (clen > 0) switch(c)
         {
-        case 0x000b:
-        case 0x000c:
-        case 0x0085:
+        case CHAR_VT:
+        case CHAR_FF:
+        case CHAR_NEL:
+#ifndef EBCDIC
         case 0x2028:
         case 0x2029:
+#endif  /* Not EBCDIC */
         if ((md->moptions & PCRE_BSR_ANYCRLF) != 0) break;
 
-        case 0x000a:
+        case CHAR_LF:
         ADD_NEW(state_offset + 1, 0);
         break;
 
-        case 0x000d:
+        case CHAR_CR:
         if (ptr + 1 >= end_subject)
           {
           ADD_NEW(state_offset + 1, 0);
           if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
           }
-        else if (ptr[1] == 0x0a)
+        else if (ptr[1] == CHAR_LF)
           {
           ADD_NEW_DATA(-(state_offset + 1), 0, 1);
           }
@@ -2186,13 +2206,15 @@ for (;;)
       case OP_NOT_VSPACE:
       if (clen > 0) switch(c)
         {
-        case 0x000a:
-        case 0x000b:
-        case 0x000c:
-        case 0x000d:
-        case 0x0085:
+        case CHAR_LF:
+        case CHAR_VT:
+        case CHAR_FF:
+        case CHAR_CR:
+        case CHAR_NEL:
+#ifndef EBCDIC
         case 0x2028:
         case 0x2029:
+#endif  /* Not EBCDIC */
         break;
 
         default:
@@ -2205,13 +2227,15 @@ for (;;)
       case OP_VSPACE:
       if (clen > 0) switch(c)
         {
-        case 0x000a:
-        case 0x000b:
-        case 0x000c:
-        case 0x000d:
-        case 0x0085:
+        case CHAR_LF:
+        case CHAR_VT:
+        case CHAR_FF:
+        case CHAR_CR:
+        case CHAR_NEL:
+#ifndef EBCDIC
         case 0x2028:
         case 0x2029:
+#endif  /* Not EBCDIC */
         ADD_NEW(state_offset + 1, 0);
         break;
 
@@ -2223,8 +2247,9 @@ for (;;)
       case OP_NOT_HSPACE:
       if (clen > 0) switch(c)
         {
-        case 0x09:      /* HT */
-        case 0x20:      /* SPACE */
+        case CHAR_HT:
+        case CHAR_SPACE:
+#ifndef EBCDIC 
         case 0xa0:      /* NBSP */
         case 0x1680:    /* OGHAM SPACE MARK */
         case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -2242,6 +2267,7 @@ for (;;)
         case 0x202f:    /* NARROW NO-BREAK SPACE */
         case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
         case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */           
         break;
 
         default:
@@ -2254,8 +2280,9 @@ for (;;)
       case OP_HSPACE:
       if (clen > 0) switch(c)
         {
-        case 0x09:      /* HT */
-        case 0x20:      /* SPACE */
+        case CHAR_HT:
+        case CHAR_SPACE:
+#ifndef EBCDIC 
         case 0xa0:      /* NBSP */
         case 0x1680:    /* OGHAM SPACE MARK */
         case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -2273,6 +2300,7 @@ for (;;)
         case 0x202f:    /* NARROW NO-BREAK SPACE */
         case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
         case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */           
         ADD_NEW(state_offset + 1, 0);
         break;
         }

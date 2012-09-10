@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "04 May 2012" "PCRE 8.31"
+.TH PCREPATTERN 3 "10 September 2012" "PCRE 8.31"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -67,6 +67,16 @@ functions, are discussed in the
 \fBpcrematching\fP
 .\"
 page.
+.
+.
+.SH "EBCDIC CHARACTER CODES"
+.rs
+.sp
+PCRE can be compiled to run in an environment that uses EBCDIC as its character 
+code rather than ASCII or Unicode (typically a mainframe system). In the 
+sections below, character code values are ASCII or Unicode; in an EBCDIC 
+environment these characters may have different code values, and there are no 
+code points greater than 255.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -320,7 +330,7 @@ subsequent digits stand for themselves. The value of the character is
 constrained in the same way as characters specified in hexadecimal.
 For example:
 .sp
-  \e040   is another way of writing a space
+  \e040   is another way of writing an ASCII space
 .\" JOIN
   \e40    is the same, provided there are fewer than 40
             previous capturing subpatterns
@@ -478,7 +488,7 @@ release 5.10. In contrast to the other sequences, which match only ASCII
 characters by default, these always match certain high-valued codepoints,
 whether or not PCRE_UCP is set. The horizontal space characters are:
 .sp
-  U+0009     Horizontal tab
+  U+0009     Horizontal tab (HT)
   U+0020     Space
   U+00A0     Non-break space
   U+1680     Ogham space mark
@@ -500,11 +510,11 @@ whether or not PCRE_UCP is set. The horizontal space characters are:
 .sp
 The vertical space characters are:
 .sp
-  U+000A     Linefeed
-  U+000B     Vertical tab
-  U+000C     Form feed
-  U+000D     Carriage return
-  U+0085     Next line
+  U+000A     Linefeed (LF)
+  U+000B     Vertical tab (VT)
+  U+000C     Form feed (FF)
+  U+000D     Carriage return (CR)
+  U+0085     Next line (NEL)
   U+2028     Line separator
   U+2029     Paragraph separator
 .sp
@@ -2953,6 +2963,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 25 August 2012
+Last updated: 10 September 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

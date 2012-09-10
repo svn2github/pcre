@@ -1103,15 +1103,17 @@ return sys_errlist[n];
 *************************************************/
 
 /* 
-Argument: the return code from PCRE_CONFIG_NEWLINE
-Returns:  nothing
+Arguments: 
+  rc         the return code from PCRE_CONFIG_NEWLINE
+  isc        TRUE if called from "-C newline" 
+Returns:     nothing
 */
 
 static void
-print_newline_config(int rc)
+print_newline_config(int rc, BOOL isc)
 {
 const char *s = NULL;
-printf("  Newline sequence is ");
+if (!isc) printf("  Newline sequence is ");
 switch(rc)
   {
   case CHAR_CR: s = "CR"; break;
@@ -2407,9 +2409,8 @@ while (argc > 1 && argv[op][0] == '-')
         (void)PCRE_CONFIG(PCRE_CONFIG_LINK_SIZE, &rc);
         printf("%d\n", rc);
         yield = rc;
-        goto EXIT;
         }
-      if (strcmp(argv[op + 1], "pcre8") == 0)
+      else if (strcmp(argv[op + 1], "pcre8") == 0)
         {
 #ifdef SUPPORT_PCRE8
         printf("1\n");
@@ -2418,9 +2419,8 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
-        goto EXIT;
         }
-      if (strcmp(argv[op + 1], "pcre16") == 0)
+      else if (strcmp(argv[op + 1], "pcre16") == 0)
         {
 #ifdef SUPPORT_PCRE16
         printf("1\n");
@@ -2429,9 +2429,8 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
-        goto EXIT;
         }
-      if (strcmp(argv[op + 1], "utf") == 0)
+      else if (strcmp(argv[op + 1], "utf") == 0)
         {
 #ifdef SUPPORT_PCRE8
         (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
@@ -2442,31 +2441,49 @@ while (argc > 1 && argv[op][0] == '-')
         printf("%d\n", rc);
         yield = rc;
 #endif
-        goto EXIT;
         }
-      if (strcmp(argv[op + 1], "ucp") == 0)
+      else if (strcmp(argv[op + 1], "ucp") == 0)
         {
         (void)PCRE_CONFIG(PCRE_CONFIG_UNICODE_PROPERTIES, &rc);
         printf("%d\n", rc);
         yield = rc;
-        goto EXIT;
         }
-      if (strcmp(argv[op + 1], "jit") == 0)
+      else if (strcmp(argv[op + 1], "jit") == 0)
         {
         (void)PCRE_CONFIG(PCRE_CONFIG_JIT, &rc);
         printf("%d\n", rc);
         yield = rc;
-        goto EXIT;
         }
-      if (strcmp(argv[op + 1], "newline") == 0)
+      else if (strcmp(argv[op + 1], "newline") == 0)
         {
         (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
-        print_newline_config(rc); 
-        goto EXIT;
+        print_newline_config(rc, TRUE); 
         }
-      printf("Unknown -C option: %s\n", argv[op + 1]);
+      else if (strcmp(argv[op + 1], "ebcdic") == 0)
+        {
+#ifdef EBCDIC
+        printf("1\n");
+        yield = 1; 
+#else
+        printf("0\n");           
+#endif 
+        }
+      else if (strcmp(argv[op + 1], "ebcdic-nl") == 0)
+        {
+#ifdef EBCDIC
+        printf("0x%02x\n", CHAR_LF);
+#else
+        printf("0\n");           
+#endif 
+        }
+      else
+        {    
+        printf("Unknown -C option: %s\n", argv[op + 1]);
+        } 
       goto EXIT;
       }
+      
+    /* No argument for -C: output all configuration information. */
 
     printf("PCRE version %s\n", version);
     printf("Compiled with\n");
@@ -2507,7 +2524,7 @@ are set, either both UTFs are supported or both are not supported. */
     else
       printf("  No just-in-time compiler support\n");
     (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
-    print_newline_config(rc); 
+    print_newline_config(rc, FALSE); 
     (void)PCRE_CONFIG(PCRE_CONFIG_BSR, &rc);
     printf("  \\R matches %s\n", rc? "CR, LF, or CRLF only" :
                                      "all Unicode newlines");

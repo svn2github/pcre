@@ -64,6 +64,12 @@ Version 8.32
     
 14. Applied user-supplied patch to pcrecpp.cc to allow PCRE_NO_UTF8_CHECK to be 
     set.
+    
+15. The EBCDIC support had decayed; later updates to the code had included 
+    explicit references to (e.g.) \x0a instead of CHAR_LF. There has been a
+    general tidy up of EBCDIC-related issues, and the documentation was also 
+    not quite right. There is now a test that can be run on ASCII systems to 
+    check some of the EBCDIC-related things (but is it not a full test). 
 
 
 

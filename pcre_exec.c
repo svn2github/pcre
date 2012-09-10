@@ -2415,22 +2415,24 @@ for (;;)
       {
       default: RRETURN(MATCH_NOMATCH);
 
-      case 0x000d:
+      case CHAR_CR:
       if (eptr >= md->end_subject)
         {
         SCHECK_PARTIAL();
         }
-      else if (*eptr == 0x0a) eptr++;
+      else if (*eptr == CHAR_LF) eptr++;
       break;
 
-      case 0x000a:
+      case CHAR_LF:
       break;
 
-      case 0x000b:
-      case 0x000c:
-      case 0x0085:
+      case CHAR_VT:
+      case CHAR_FF:
+      case CHAR_NEL:
+#ifndef EBCDIC       
       case 0x2028:
       case 0x2029:
+#endif  /* Not EBCDIC */       
       if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
       break;
       }
@@ -2447,8 +2449,9 @@ for (;;)
     switch(c)
       {
       default: break;
-      case 0x09:      /* HT */
-      case 0x20:      /* SPACE */
+      case CHAR_HT:
+      case CHAR_SPACE:
+#ifndef EBCDIC       
       case 0xa0:      /* NBSP */
       case 0x1680:    /* OGHAM SPACE MARK */
       case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -2466,6 +2469,7 @@ for (;;)
       case 0x202f:    /* NARROW NO-BREAK SPACE */
       case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
       case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */     
       RRETURN(MATCH_NOMATCH);
       }
     ecode++;
@@ -2481,8 +2485,9 @@ for (;;)
     switch(c)
       {
       default: RRETURN(MATCH_NOMATCH);
-      case 0x09:      /* HT */
-      case 0x20:      /* SPACE */
+      case CHAR_HT:
+      case CHAR_SPACE:
+#ifndef EBCDIC       
       case 0xa0:      /* NBSP */
       case 0x1680:    /* OGHAM SPACE MARK */
       case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -2500,6 +2505,7 @@ for (;;)
       case 0x202f:    /* NARROW NO-BREAK SPACE */
       case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
       case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */       
       break;
       }
     ecode++;
@@ -2515,13 +2521,15 @@ for (;;)
     switch(c)
       {
       default: break;
-      case 0x0a:      /* LF */
-      case 0x0b:      /* VT */
-      case 0x0c:      /* FF */
-      case 0x0d:      /* CR */
-      case 0x85:      /* NEL */
+      case CHAR_LF:
+      case CHAR_VT:
+      case CHAR_FF:
+      case CHAR_CR:
+      case CHAR_NEL:
+#ifndef EBCDIC       
       case 0x2028:    /* LINE SEPARATOR */
       case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif  /* Not EBCDIC */       
       RRETURN(MATCH_NOMATCH);
       }
     ecode++;
@@ -2537,13 +2545,15 @@ for (;;)
     switch(c)
       {
       default: RRETURN(MATCH_NOMATCH);
-      case 0x0a:      /* LF */
-      case 0x0b:      /* VT */
-      case 0x0c:      /* FF */
-      case 0x0d:      /* CR */
-      case 0x85:      /* NEL */
+      case CHAR_LF:
+      case CHAR_VT:
+      case CHAR_FF:
+      case CHAR_CR:
+      case CHAR_NEL:
+#ifndef EBCDIC
       case 0x2028:    /* LINE SEPARATOR */
       case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif  /* Not EBCDIC */
       break;
       }
     ecode++;
@@ -4313,18 +4323,20 @@ for (;;)
             {
             default: RRETURN(MATCH_NOMATCH);
 
-            case 0x000d:
-            if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
+            case CHAR_CR:
+            if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
             break;
 
-            case 0x000a:
+            case CHAR_LF:
             break;
 
-            case 0x000b:
-            case 0x000c:
-            case 0x0085:
+            case CHAR_VT:
+            case CHAR_FF:
+            case CHAR_NEL:
+#ifndef EBCDIC 
             case 0x2028:
             case 0x2029:
+#endif  /* Not EBCDIC */ 
             if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
             break;
             }
@@ -4343,8 +4355,9 @@ for (;;)
           switch(c)
             {
             default: break;
-            case 0x09:      /* HT */
-            case 0x20:      /* SPACE */
+            case CHAR_HT:
+            case CHAR_SPACE:
+#ifndef EBCDIC             
             case 0xa0:      /* NBSP */
             case 0x1680:    /* OGHAM SPACE MARK */
             case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -4362,6 +4375,7 @@ for (;;)
             case 0x202f:    /* NARROW NO-BREAK SPACE */
             case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
             case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */             
             RRETURN(MATCH_NOMATCH);
             }
           }
@@ -4379,8 +4393,9 @@ for (;;)
           switch(c)
             {
             default: RRETURN(MATCH_NOMATCH);
-            case 0x09:      /* HT */
-            case 0x20:      /* SPACE */
+            case CHAR_HT:
+            case CHAR_SPACE:
+#ifndef EBCDIC 
             case 0xa0:      /* NBSP */
             case 0x1680:    /* OGHAM SPACE MARK */
             case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -4398,6 +4413,7 @@ for (;;)
             case 0x202f:    /* NARROW NO-BREAK SPACE */
             case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
             case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif             
             break;
             }
           }
@@ -4415,13 +4431,15 @@ for (;;)
           switch(c)
             {
             default: break;
-            case 0x0a:      /* LF */
-            case 0x0b:      /* VT */
-            case 0x0c:      /* FF */
-            case 0x0d:      /* CR */
-            case 0x85:      /* NEL */
+            case CHAR_LF:
+            case CHAR_VT:
+            case CHAR_FF:
+            case CHAR_CR:
+            case CHAR_NEL:
+#ifndef EBCDIC 
             case 0x2028:    /* LINE SEPARATOR */
             case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif             
             RRETURN(MATCH_NOMATCH);
             }
           }
@@ -4439,13 +4457,15 @@ for (;;)
           switch(c)
             {
             default: RRETURN(MATCH_NOMATCH);
-            case 0x0a:      /* LF */
-            case 0x0b:      /* VT */
-            case 0x0c:      /* FF */
-            case 0x0d:      /* CR */
-            case 0x85:      /* NEL */
+            case CHAR_LF:
+            case CHAR_VT:
+            case CHAR_FF:
+            case CHAR_CR:
+            case CHAR_NEL:
+#ifndef EBCDIC             
             case 0x2028:    /* LINE SEPARATOR */
             case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif             
             break;
             }
           }
@@ -4604,16 +4624,16 @@ for (;;)
             {
             default: RRETURN(MATCH_NOMATCH);
 
-            case 0x000d:
-            if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
+            case CHAR_CR:
+            if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
             break;
 
-            case 0x000a:
+            case CHAR_LF:
             break;
 
-            case 0x000b:
-            case 0x000c:
-            case 0x0085:
+            case CHAR_VT:
+            case CHAR_FF:
+            case CHAR_NEL:
 #ifdef COMPILE_PCRE16
             case 0x2028:
             case 0x2029:
@@ -4635,8 +4655,9 @@ for (;;)
           switch(*eptr++)
             {
             default: break;
-            case 0x09:      /* HT */
-            case 0x20:      /* SPACE */
+            case CHAR_HT:
+            case CHAR_SPACE:
+#ifndef EBCDIC             
             case 0xa0:      /* NBSP */
 #ifdef COMPILE_PCRE16
             case 0x1680:    /* OGHAM SPACE MARK */
@@ -4655,7 +4676,8 @@ for (;;)
             case 0x202f:    /* NARROW NO-BREAK SPACE */
             case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
             case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif
+#endif  /* COMPILE_PCRE16 */
+#endif  /* Not EBCDIC */
             RRETURN(MATCH_NOMATCH);
             }
           }
@@ -4672,8 +4694,9 @@ for (;;)
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
-            case 0x09:      /* HT */
-            case 0x20:      /* SPACE */
+            case CHAR_HT:
+            case CHAR_SPACE:
+#ifndef EBCDIC             
             case 0xa0:      /* NBSP */
 #ifdef COMPILE_PCRE16
             case 0x1680:    /* OGHAM SPACE MARK */
@@ -4692,7 +4715,8 @@ for (;;)
             case 0x202f:    /* NARROW NO-BREAK SPACE */
             case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
             case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif
+#endif  /* COMPILE_PCRE16 */
+#endif  /* Not EBCDIC */
             break;
             }
           }
@@ -4709,11 +4733,11 @@ for (;;)
           switch(*eptr++)
             {
             default: break;
-            case 0x0a:      /* LF */
-            case 0x0b:      /* VT */
-            case 0x0c:      /* FF */
-            case 0x0d:      /* CR */
-            case 0x85:      /* NEL */
+            case CHAR_LF:
+            case CHAR_VT:
+            case CHAR_FF:
+            case CHAR_CR:
+            case CHAR_NEL:
 #ifdef COMPILE_PCRE16
             case 0x2028:    /* LINE SEPARATOR */
             case 0x2029:    /* PARAGRAPH SEPARATOR */
@@ -4734,11 +4758,11 @@ for (;;)
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
-            case 0x0a:      /* LF */
-            case 0x0b:      /* VT */
-            case 0x0c:      /* FF */
-            case 0x0d:      /* CR */
-            case 0x85:      /* NEL */
+            case CHAR_LF:
+            case CHAR_VT:
+            case CHAR_FF:
+            case CHAR_CR:
+            case CHAR_NEL:
 #ifdef COMPILE_PCRE16
             case 0x2028:    /* LINE SEPARATOR */
             case 0x2029:    /* PARAGRAPH SEPARATOR */
@@ -5100,17 +5124,20 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case 0x000d:
-              if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
+              case CHAR_CR:
+              if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
               break;
-              case 0x000a:
+               
+              case CHAR_LF:
               break;
 
-              case 0x000b:
-              case 0x000c:
-              case 0x0085:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_NEL:
+#ifndef EBCDIC               
               case 0x2028:
               case 0x2029:
+#endif  /* Not EBCDIC */ 
               if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
               break;
               }
@@ -5120,8 +5147,9 @@ for (;;)
             switch(c)
               {
               default: break;
-              case 0x09:      /* HT */
-              case 0x20:      /* SPACE */
+              case CHAR_HT:
+              case CHAR_SPACE:
+#ifndef EBCDIC 
               case 0xa0:      /* NBSP */
               case 0x1680:    /* OGHAM SPACE MARK */
               case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -5139,6 +5167,7 @@ for (;;)
               case 0x202f:    /* NARROW NO-BREAK SPACE */
               case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
               case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */ 
               RRETURN(MATCH_NOMATCH);
               }
             break;
@@ -5147,8 +5176,9 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case 0x09:      /* HT */
-              case 0x20:      /* SPACE */
+              case CHAR_HT:
+              case CHAR_SPACE:
+#ifndef EBCDIC 
               case 0xa0:      /* NBSP */
               case 0x1680:    /* OGHAM SPACE MARK */
               case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -5166,6 +5196,7 @@ for (;;)
               case 0x202f:    /* NARROW NO-BREAK SPACE */
               case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
               case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */ 
               break;
               }
             break;
@@ -5174,13 +5205,15 @@ for (;;)
             switch(c)
               {
               default: break;
-              case 0x0a:      /* LF */
-              case 0x0b:      /* VT */
-              case 0x0c:      /* FF */
-              case 0x0d:      /* CR */
-              case 0x85:      /* NEL */
+              case CHAR_LF:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_CR:
+              case CHAR_NEL:
+#ifndef EBCDIC               
               case 0x2028:    /* LINE SEPARATOR */
               case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif  /* Not EBCDIC */ 
               RRETURN(MATCH_NOMATCH);
               }
             break;
@@ -5189,13 +5222,15 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case 0x0a:      /* LF */
-              case 0x0b:      /* VT */
-              case 0x0c:      /* FF */
-              case 0x0d:      /* CR */
-              case 0x85:      /* NEL */
+              case CHAR_LF:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_CR:
+              case CHAR_NEL:
+#ifndef EBCDIC               
               case 0x2028:    /* LINE SEPARATOR */
               case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif  /* Not EBCDIC */               
               break;
               }
             break;
@@ -5274,16 +5309,16 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case 0x000d:
-              if (eptr < md->end_subject && *eptr == 0x0a) eptr++;
+              case CHAR_CR:
+              if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
               break;
 
-              case 0x000a:
+              case CHAR_LF:
               break;
 
-              case 0x000b:
-              case 0x000c:
-              case 0x0085:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_NEL:
 #ifdef COMPILE_PCRE16
               case 0x2028:
               case 0x2029:
@@ -5297,8 +5332,9 @@ for (;;)
             switch(c)
               {
               default: break;
-              case 0x09:      /* HT */
-              case 0x20:      /* SPACE */
+              case CHAR_HT:
+              case CHAR_SPACE:
+#ifndef EBCDIC 
               case 0xa0:      /* NBSP */
 #ifdef COMPILE_PCRE16
               case 0x1680:    /* OGHAM SPACE MARK */
@@ -5317,7 +5353,8 @@ for (;;)
               case 0x202f:    /* NARROW NO-BREAK SPACE */
               case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
               case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif
+#endif  /* COMPILE_PCRE16 */
+#endif  /* Not EBCDIC */
               RRETURN(MATCH_NOMATCH);
               }
             break;
@@ -5326,8 +5363,9 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case 0x09:      /* HT */
-              case 0x20:      /* SPACE */
+              case CHAR_HT:
+              case CHAR_SPACE:
+#ifndef EBCDIC               
               case 0xa0:      /* NBSP */
 #ifdef COMPILE_PCRE16
               case 0x1680:    /* OGHAM SPACE MARK */
@@ -5346,7 +5384,8 @@ for (;;)
               case 0x202f:    /* NARROW NO-BREAK SPACE */
               case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
               case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif
+#endif  /* COMPILE_PCRE16 */
+#endif  /* Not EBCDIC */
               break;
               }
             break;
@@ -5355,11 +5394,11 @@ for (;;)
             switch(c)
               {
               default: break;
-              case 0x0a:      /* LF */
-              case 0x0b:      /* VT */
-              case 0x0c:      /* FF */
-              case 0x0d:      /* CR */
-              case 0x85:      /* NEL */
+              case CHAR_LF:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_CR:
+              case CHAR_NEL:
 #ifdef COMPILE_PCRE16
               case 0x2028:    /* LINE SEPARATOR */
               case 0x2029:    /* PARAGRAPH SEPARATOR */
@@ -5372,11 +5411,11 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case 0x0a:      /* LF */
-              case 0x0b:      /* VT */
-              case 0x0c:      /* FF */
-              case 0x0d:      /* CR */
-              case 0x85:      /* NEL */
+              case CHAR_LF:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_CR:
+              case CHAR_NEL:
 #ifdef COMPILE_PCRE16
               case 0x2028:    /* LINE SEPARATOR */
               case 0x2029:    /* PARAGRAPH SEPARATOR */
@@ -5754,17 +5793,20 @@ for (;;)
               break;
               }
             GETCHARLEN(c, eptr, len);
-            if (c == 0x000d)
+            if (c == CHAR_CR)
               {
               if (++eptr >= md->end_subject) break;
-              if (*eptr == 0x000a) eptr++;
+              if (*eptr == CHAR_LF) eptr++;
               }
             else
               {
-              if (c != 0x000a &&
+              if (c != CHAR_LF &&
                   (md->bsr_anycrlf ||
-                   (c != 0x000b && c != 0x000c &&
-                    c != 0x0085 && c != 0x2028 && c != 0x2029)))
+                   (c != CHAR_VT && c != CHAR_FF && c != CHAR_NEL 
+#ifndef EBCDIC                    
+                    && c != 0x2028 && c != 0x2029
+#endif  /* Not EBCDIC */                      
+                    )))
                 break;
               eptr += len;
               }
@@ -5786,8 +5828,9 @@ for (;;)
             switch(c)
               {
               default: gotspace = FALSE; break;
-              case 0x09:      /* HT */
-              case 0x20:      /* SPACE */
+              case CHAR_HT:
+              case CHAR_SPACE:
+#ifndef EBCDIC               
               case 0xa0:      /* NBSP */
               case 0x1680:    /* OGHAM SPACE MARK */
               case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
@@ -5805,6 +5848,7 @@ for (;;)
               case 0x202f:    /* NARROW NO-BREAK SPACE */
               case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
               case 0x3000:    /* IDEOGRAPHIC SPACE */
+#endif  /* Not EBCDIC */
               gotspace = TRUE;
               break;
               }
@@ -5828,13 +5872,15 @@ for (;;)
             switch(c)
               {
               default: gotspace = FALSE; break;
-              case 0x0a:      /* LF */
-              case 0x0b:      /* VT */
-              case 0x0c:      /* FF */
-              case 0x0d:      /* CR */
-              case 0x85:      /* NEL */
+              case CHAR_LF:
+              case CHAR_VT:
+              case CHAR_FF:
+              case CHAR_CR:
+              case CHAR_NEL:
+#ifndef EBCDIC               
               case 0x2028:    /* LINE SEPARATOR */
               case 0x2029:    /* PARAGRAPH SEPARATOR */
+#endif  /* Not EBCDIC */ 
               gotspace = TRUE;
               break;
               }
@@ -5950,8 +5996,8 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr);
-          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' &&
-              eptr[-1] == '\r') eptr--;
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == CHAR_NL &&
+              eptr[-1] == CHAR_CR) eptr--;
           }
         }
       else
@@ -6002,19 +6048,19 @@ for (;;)
               break;
               }
             c = *eptr;
-            if (c == 0x000d)
+            if (c == CHAR_CR)
               {
               if (++eptr >= md->end_subject) break;
-              if (*eptr == 0x000a) eptr++;
+              if (*eptr == CHAR_LF) eptr++;
               }
             else
               {
-              if (c != 0x000a && (md->bsr_anycrlf ||
-                (c != 0x000b && c != 0x000c && c != 0x0085
+              if (c != CHAR_LF && (md->bsr_anycrlf ||
+                 (c != CHAR_VT && c != CHAR_FF && c != CHAR_NEL
 #ifdef COMPILE_PCRE16
-                && c != 0x2028 && c != 0x2029
+                 && c != 0x2028 && c != 0x2029
 #endif
-                ))) break;
+                 ))) break;
               eptr++;
               }
             }
@@ -6029,11 +6075,14 @@ for (;;)
               break;
               }
             c = *eptr;
-            if (c == 0x09 || c == 0x20 || c == 0xa0
+            if (c == CHAR_HT || c == CHAR_SPACE
+#ifndef EBCDIC             
+              || c == 0xa0
 #ifdef COMPILE_PCRE16
               || c == 0x1680 || c == 0x180e || (c >= 0x2000 && c <= 0x200A)
               || c == 0x202f || c == 0x205f || c == 0x3000
-#endif
+#endif  /* COMPILE_PCRE16 */
+#endif  /* Not EBCDIC */
               ) break;
             eptr++;
             }
@@ -6048,11 +6097,14 @@ for (;;)
               break;
               }
             c = *eptr;
-            if (c != 0x09 && c != 0x20 && c != 0xa0
+            if (c != CHAR_HT && c != CHAR_SPACE 
+#ifndef EBCDIC             
+              && c != 0xa0
 #ifdef COMPILE_PCRE16
               && c != 0x1680 && c != 0x180e && (c < 0x2000 || c > 0x200A)
               && c != 0x202f && c != 0x205f && c != 0x3000
-#endif
+#endif  /* COMPILE_PCRE16 */
+#endif  /* Not EBCDIC */
               ) break;
             eptr++;
             }
@@ -6067,7 +6119,8 @@ for (;;)
               break;
               }
             c = *eptr;
-            if (c == 0x0a || c == 0x0b || c == 0x0c || c == 0x0d || c == 0x85
+            if (c == CHAR_LF || c == CHAR_VT || c == CHAR_FF || 
+                c == CHAR_CR || c == CHAR_NEL
 #ifdef COMPILE_PCRE16
               || c == 0x2028 || c == 0x2029
 #endif
@@ -6085,7 +6138,8 @@ for (;;)
               break;
               }
             c = *eptr;
-            if (c != 0x0a && c != 0x0b && c != 0x0c && c != 0x0d && c != 0x85
+            if (c != CHAR_LF && c != CHAR_VT && c != CHAR_FF && 
+                c != CHAR_CR && c != CHAR_NEL
 #ifdef COMPILE_PCRE16
               && c != 0x2028 && c != 0x2029
 #endif
@@ -6188,8 +6242,8 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM47);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
-          if (ctype == OP_ANYNL && eptr > pp  && *eptr == '\n' &&
-              eptr[-1] == '\r') eptr--;
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == CHAR_LF &&
+              eptr[-1] == CHAR_CR) eptr--;
           }
         }
 
