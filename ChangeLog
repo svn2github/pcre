@@ -70,6 +70,9 @@ Version 8.32
     general tidy up of EBCDIC-related issues, and the documentation was also 
     not quite right. There is now a test that can be run on ASCII systems to 
     check some of the EBCDIC-related things (but is it not a full test). 
+    
+16. The new PCRE_STUDY_EXTRA_NEEDED option is now used by pcregrep, resulting 
+    in a small tidy to the code.
 
 
 

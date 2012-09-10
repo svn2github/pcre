@@ -2880,8 +2880,14 @@ for (fn = pattern_files; fn != NULL; fn = fn->next)
     goto EXIT2;
   }
 
-/* Study the regular expressions, as we will be running them many times. Unless
-JIT has been explicitly disabled, arrange a stack for it to use. */
+/* Study the regular expressions, as we will be running them many times. If an 
+extra block is needed for a limit, set PCRE_STUDY_EXTRA_NEEDED so that one is
+returned, even if studying produces no data. */
+
+if (match_limit > 0 || match_limit_recursion > 0)
+  study_options |= PCRE_STUDY_EXTRA_NEEDED;
+
+/* Unless JIT has been explicitly disabled, arrange a stack for it to use. */
 
 #ifdef SUPPORT_PCREGREP_JIT
 if ((study_options & PCRE_STUDY_JIT_COMPILE) != 0)
@@ -2905,31 +2911,21 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   }
 
 /* If --match-limit or --recursion-limit was set, put the value(s) into the
-pcre_extra block for each pattern. */
+pcre_extra block for each pattern. There will always be an extra block because 
+of the use of PCRE_STUDY_EXTRA_NEEDED above. */
 
-if (match_limit > 0 || match_limit_recursion > 0)
+for (cp = patterns; cp != NULL; cp = cp->next)
   {
-  for (cp = patterns; cp != NULL; cp = cp->next)
+  if (match_limit > 0)
     {
-    if (cp->hint == NULL)
-      {
-      cp->hint = (pcre_extra *)malloc(sizeof(pcre_extra));
-      if (cp->hint == NULL)
-        {
-        fprintf(stderr, "pcregrep: malloc failed\n");
-        pcregrep_exit(2);
-        }
-      }
-    if (match_limit > 0)
-      {
-      cp->hint->flags |= PCRE_EXTRA_MATCH_LIMIT;
-      cp->hint->match_limit = match_limit;
-      }
-    if (match_limit_recursion > 0)
-      {
-      cp->hint->flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-      cp->hint->match_limit_recursion = match_limit_recursion;
-      }
+    cp->hint->flags |= PCRE_EXTRA_MATCH_LIMIT;
+    cp->hint->match_limit = match_limit;
+    }
+     
+  if (match_limit_recursion > 0)
+    {
+    cp->hint->flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+    cp->hint->match_limit_recursion = match_limit_recursion;
     }
   }
 
