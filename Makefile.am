@@ -401,6 +401,7 @@ EXTRA_DIST += \
   testdata/testinput20 \
   testdata/testinput21 \
   testdata/testinput22 \
+  testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
   testdata/testoutput3 \
@@ -424,6 +425,7 @@ EXTRA_DIST += \
   testdata/testoutput20 \
   testdata/testoutput21 \
   testdata/testoutput22 \
+  testdata/testoutputEBC \
   testdata/wintestinput3 \
   testdata/wintestoutput3 \
   perltest.pl
