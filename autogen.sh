@@ -1,8 +1,14 @@
 #!/bin/sh
 
-set -ex
-rm -rf autom4te.cache Makefile.in aclocal.m4
-aclocal --force -I m4
+# Running aclocal here first (as happened for a while) caused the macros that
+# libtoolize puts in the m4 directory to be newer than the aclocal.m4 file that
+# aclocal creates. This meant that the next "make" cause aclocal to be run
+# again. Moving aclocal to after libtoolize does not seem to cause any
+# problems, and it fixes this issue.
+
+#set -ex
+#rm -rf autom4te.cache Makefile.in aclocal.m4
+#aclocal --force -I m4
 
 # GNU libtool is named differently on some systems.  This code tries several
 # variants like glibtoolize (MacOSX) and libtoolize1x (FreeBSD)
@@ -27,6 +33,8 @@ fi
 
 set -ex
 $libtoolize -c -f
+rm -rf autom4te.cache Makefile.in aclocal.m4
+aclocal --force -I m4
 autoconf -f -W all,no-obsolete
 autoheader -f -W all
 automake -a -c -f -W all
