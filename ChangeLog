@@ -74,6 +74,7 @@ Version 8.32
 16. The new PCRE_STUDY_EXTRA_NEEDED option is now used by pcregrep, resulting 
     in a small tidy to the code.
 
+17. Fix JIT tests when UTF is disabled and both 8 and 16 bit mode are enabled.
 
 
 Version 8.31 06-July-2012

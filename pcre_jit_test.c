@@ -1101,7 +1101,7 @@ static int regression_tests(void)
 
 		is_successful = 1;
 		if (!(current->start_offset & F_DIFF)) {
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
+#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16 && defined SUPPORT_UTF
 			if (utf8 == utf16 && !(current->start_offset & F_FORCECONV)) {
 				/* All results must be the same. */
 				if (return_value8_1 != return_value8_2 || return_value8_1 != return_value16_1 || return_value8_1 != return_value16_2) {
@@ -1179,7 +1179,7 @@ static int regression_tests(void)
 				}
 #endif
 
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
+#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16 && defined SUPPORT_UTF
 			}
 #endif /* SUPPORT_PCRE8 && SUPPORT_PCRE16 */
 		}
