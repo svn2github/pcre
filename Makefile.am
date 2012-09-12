@@ -433,6 +433,7 @@ EXTRA_DIST += \
 CLEANFILES += \
 	testsavedregex \
 	teststderr \
+        testtemp* \
 	testtry \
         testNinput
 
