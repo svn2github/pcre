@@ -76,6 +76,11 @@ Version 8.32
 
 17. Fix JIT tests when UTF is disabled and both 8 and 16 bit mode are enabled.
 
+18. If the --only-matching (-o) option in pcregrep is specified multiple
+    times, each one causes appropriate output. For example, -o1 -o2 outputs the 
+    substrings matched by the 1st and 2nd capturing parentheses. A separating 
+    string can be specified by --om-separator (default empty). 
+
 
 Version 8.31 06-July-2012
 -------------------------

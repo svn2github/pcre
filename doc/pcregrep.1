@@ -1,4 +1,4 @@
-.TH PCREGREP 1 "15 August 2012" "PCRE 8.32"
+.TH PCREGREP 1 "13 September 2012" "PCRE 8.32"
 .SH NAME
 pcregrep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -70,8 +70,8 @@ but patterns that follow the one that matched are not tried on the earlier part
 of the line.
 .P
 This behaviour means that the order in which multiple patterns are specified
-can affect the output when one of the above options is used. This is no longer 
-the same behaviour as GNU grep, which now manages to display earlier matches 
+can affect the output when one of the above options is used. This is no longer
+the same behaviour as GNU grep, which now manages to display earlier matches
 for later patterns (as long as there is no overlap).
 .P
 Patterns that can match an empty string are accepted, but empty string
@@ -209,7 +209,7 @@ order to specify several patterns. It can also be used as a way of specifying a
 single pattern that starts with a hyphen. When \fB-e\fP is used, no argument
 pattern is taken from the command line; all arguments are treated as file
 names. There is no limit to the number of patterns. They are applied to each
-line in the order in which they are defined until one matches. 
+line in the order in which they are defined until one matches.
 .sp
 If \fB-f\fP is used with \fB-e\fP, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
@@ -227,7 +227,7 @@ being processed. This applies to all files, whether listed on the command line,
 obtained from \fB--file-list\fP, or by scanning a directory. The pattern is a
 PCRE regular expression, and is matched against the final component of the file
 name, not the entire path. The \fB-F\fP, \fB-w\fP, and \fB-x\fP options do not
-apply to this pattern. The option may be given any number of times in order to 
+apply to this pattern. The option may be given any number of times in order to
 specify multiple patterns. If a file name matches both an \fB--include\fP
 and an \fB--exclude\fP pattern, it is excluded. There is no short form for this
 option.
@@ -337,7 +337,7 @@ There is no short form for this option.
 \fB--include-from=\fP\fIfilename\fP
 Treat each non-empty line of the file as the data for an \fB--include\fP
 option. What constitutes a newline for this purpose is the operating system's
-default. The \fB--newline\fP option has no effect on this option. This option 
+default. The \fB--newline\fP option has no effect on this option. This option
 may be given any number of times; all the files are read.
 .TP
 \fB--include-dir\fP=\fIpattern\fP
@@ -454,8 +454,8 @@ The possible values for this option are CR, LF, CRLF, ANYCRLF, or ANY. This
 makes it possible to use \fBpcregrep\fP to scan files that have come from other
 environments without having to modify their line endings. If the data that is
 being scanned does not agree with the convention set by this option,
-\fBpcregrep\fP may behave in strange ways. Note that this option does not 
-apply to files specified by the \fB-f\fP, \fB--exclude-from\fP, or 
+\fBpcregrep\fP may behave in strange ways. Note that this option does not
+apply to files specified by the \fB-f\fP, \fB--exclude-from\fP, or
 \fB--include-from\fP options, which are expected to use the operating system's
 standard newline sequence.
 .TP
@@ -485,13 +485,22 @@ exclusive with \fB--file-offsets\fP and \fB--line-offsets\fP.
 .TP
 \fB-o\fP\fInumber\fP, \fB--only-matching\fP=\fInumber\fP
 Show only the part of the line that matched the capturing parentheses of the
-given number. Up to 32 capturing parentheses are supported. Because these
-options can be given without an argument (see above), if an argument is
-present, it must be given in the same shell item, for example, -o3 or
---only-matching=2. The comments given for the non-argument case above also
-apply to this case. If the specified capturing parentheses do not exist in the
-pattern, or were not set in the match, nothing is output unless the file name
-or line number are being printed.
+given number. Up to 32 capturing parentheses are supported, and -o0 is
+equivalent to \fB-o\fP without a number. Because these options can be given
+without an argument (see above), if an argument is present, it must be given in
+the same shell item, for example, -o3 or --only-matching=2. The comments given
+for the non-argument case above also apply to this case. If the specified
+capturing parentheses do not exist in the pattern, or were not set in the
+match, nothing is output unless the file name or line number are being printed.
+.sp
+If this option is given multiple times, multiple substrings are output, in the
+order the options are given. For example, -o3 -o1 -o3 causes the substrings
+matched by capturing parentheses 3 and 1 and then 3 again to be output. By
+default, there is no separator (but see the next option).
+.TP
+\fB--om-separator\fP=\fItext\fP
+Specify a separating string for multiple occurrences of \fB-o\fP. The default
+is an empty string. Separating strings are never coloured.
 .TP
 \fB-q\fP, \fB--quiet\fP
 Work quietly, that is, display nothing except error messages. The exit
@@ -514,7 +523,7 @@ found in other files.
 .TP
 \fB-u\fP, \fB--utf-8\fP
 Operate in UTF-8 mode. This option is available only if PCRE has been compiled
-with UTF-8 support. All patterns (including those for any \fB--exclude\fP and 
+with UTF-8 support. All patterns (including those for any \fB--exclude\fP and
 \fB--include\fP options) and all subject lines that are scanned must be valid
 strings of UTF-8 characters.
 .TP
@@ -574,7 +583,7 @@ as in the GNU \fBgrep\fP program. Any long option of the form
 \fB--xxx-regexp\fP (GNU terminology) is also available as \fB--xxx-regex\fP
 (PCRE terminology). However, the \fB--file-list\fP, \fB--file-offsets\fP,
 \fB--include-dir\fP, \fB--line-offsets\fP, \fB--locale\fP, \fB--match-limit\fP,
-\fB-M\fP, \fB--multiline\fP, \fB-N\fP, \fB--newline\fP,
+\fB-M\fP, \fB--multiline\fP, \fB-N\fP, \fB--newline\fP, \fB--om-separator\fP,
 \fB--recursion-limit\fP, \fB-u\fP, and \fB--utf-8\fP options are specific to
 \fBpcregrep\fP, as is the use of the \fB--only-matching\fP option with a
 capturing parentheses number.
@@ -665,6 +674,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 15 August 2012
+Last updated: 13 September 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

@@ -695,3 +695,13 @@ RC=0
 ./testdata/grepinput3
 ./testdata/grepinputx
 RC=0
+---------------------------- Test 100 ------------------------------
+./testdata/grepinput:zerothe.
+./testdata/grepinput:zeroa
+./testdata/grepinput:zerothe.
+RC=0
+---------------------------- Test 101 ------------------------------
+./testdata/grepinput:[1;31m.[00m/[1;31mzero[00m/[1;31mthe[00m/[1;31m.[00m
+./testdata/grepinput:[1;31mzero[00m/[1;31ma[00m
+./testdata/grepinput:[1;31m.[00m/[1;31mzero[00m/[1;31mthe[00m/[1;31m.[00m
+RC=0

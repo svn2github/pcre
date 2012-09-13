@@ -478,6 +478,15 @@ echo "grepinput8" >testtemp2
 (cd $srcdir; $valgrind $pcregrep -L -r --include grepinput --exclude-from $builddir/testtemp1 --exclude-from=$builddir/testtemp2 --exclude-dir='^\.' 'fox' ./testdata | sort) >>testtry
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 100 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -Ho2 --only-matching=1 -o3 '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 101 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -o3 -Ho2 -o12 --only-matching=1 -o3 --colour=always --om-separator='/' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtry
+echo "RC=$?" >>testtry
+
+
 # Now compare the results.
 
 $cf $srcdir/testdata/grepoutput testtry

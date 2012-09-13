@@ -143,6 +143,7 @@ static char *DEE_option = NULL;
 static char *locale = NULL;
 static char *main_buffer = NULL;
 static char *newline = NULL;
+static char *om_separator = (char *)"";
 static char *stdin_name = (char *)"(standard input)";
 
 static const unsigned char *pcretables = NULL;
@@ -163,7 +164,6 @@ static int dee_action = dee_READ;
 static int DEE_action = DEE_READ;
 static int error_count = 0;
 static int filenames = FN_DEFAULT;
-static int only_matching = -1;
 static int pcre_options = 0;
 static int process_options = 0;
 
@@ -188,8 +188,28 @@ static BOOL number = FALSE;
 static BOOL omit_zero_count = FALSE;
 static BOOL resource_error = FALSE;
 static BOOL quiet = FALSE;
+static BOOL show_only_matching = FALSE;
 static BOOL silent = FALSE;
 static BOOL utf8 = FALSE;
+
+/* Structure for list of --only-matching capturing numbers. */
+
+typedef struct omstr {
+  struct omstr *next;
+  int groupnum;
+} omstr;
+
+static omstr *only_matching = NULL;
+static omstr *only_matching_last = NULL;
+
+/* Structure for holding the two variables that describe a number chain. */
+
+typedef struct omdatastr {
+  omstr **anchor;
+  omstr **lastptr;
+} omdatastr;
+
+static omdatastr only_matching_data = { &only_matching, &only_matching_last };
 
 /* Structure for list of file names (for -f and --{in,ex}clude-from) */
 
@@ -264,7 +284,7 @@ static const char *incexname[4] = { "--include", "--exclude",
 /* Structure for options and list of them */
 
 enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_LONGNUMBER,
-       OP_OP_NUMBER, OP_PATLIST, OP_FILELIST, OP_BINFILES };
+       OP_OP_NUMBER, OP_OP_NUMBERS, OP_PATLIST, OP_FILELIST, OP_BINFILES };
 
 typedef struct option_item {
   int type;
@@ -297,6 +317,7 @@ used to identify them. */
 #define N_BINARY_FILES (-18)
 #define N_EXCLUDE_FROM (-19)
 #define N_INCLUDE_FROM (-20)
+#define N_OM_SEPARATOR (-21)
 
 static option_item optionlist[] = {
   { OP_NODATA,     N_NULL,   NULL,              "",              "terminate options" },
@@ -337,7 +358,8 @@ static option_item optionlist[] = {
   { OP_NODATA,     'M',      NULL,              "multiline",     "run in multiline mode" },
   { OP_STRING,     'N',      &newline,          "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,     'n',      NULL,              "line-number",   "print line number with output lines" },
-  { OP_OP_NUMBER,  'o',      &only_matching,    "only-matching=n", "show only the part of the line that matched" },
+  { OP_OP_NUMBERS, 'o',      &only_matching_data, "only-matching=n", "show only the part of the line that matched" },
+  { OP_STRING,     N_OM_SEPARATOR, &om_separator, "om-separator=text", "set separator for multiple -o output" },
   { OP_NODATA,     'q',      NULL,              "quiet",         "suppress output, just set return code" },
   { OP_NODATA,     'r',      NULL,              "recursive",     "recursively scan sub-directories" },
   { OP_PATLIST,    N_EXCLUDE,&exclude_patdata,  "exclude=pattern","exclude matching files when recursing" },
@@ -393,6 +415,30 @@ const char utf8_table4[] = {
 
 
 /*************************************************
+*         Exit from the program                  *
+*************************************************/
+
+/* If there has been a resource error, give a suitable message.
+
+Argument:  the return code
+Returns:   does not return
+*/
+
+static void
+pcregrep_exit(int rc)
+{
+if (resource_error)
+  {
+  fprintf(stderr, "pcregrep: Error %d, %d or %d means that a resource limit "
+    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT,
+    PCRE_ERROR_JIT_STACKLIMIT);
+  fprintf(stderr, "pcregrep: Check your regex for nested unlimited loops.\n");
+  }
+exit(rc);
+}
+
+
+/*************************************************
 *          Add item to chain of patterns         *
 *************************************************/
 
@@ -403,7 +449,7 @@ Arguments:
   s          pattern string to add
   after      if not NULL points to item to insert after
 
-Returns:     new pattern block, or NULL after malloc failure
+Returns:     new pattern block
 */
 
 static patstr *
@@ -413,7 +459,7 @@ patstr *p = (patstr *)malloc(sizeof(patstr));
 if (p == NULL)
   {
   fprintf(stderr, "pcregrep: malloc failed\n");
-  return NULL;
+  pcregrep_exit(2);
   }
 if (strlen(s) > MAXPATLEN)
   {
@@ -477,31 +523,6 @@ while (fn != NULL)
   fn = f->next;
   free(f);
   }
-}
-
-
-/*************************************************
-*         Exit from the program                  *
-*************************************************/
-
-/* If there has been a resource error, give a suitable message.
-
-Argument:  the return code
-Returns:   does not return
-*/
-
-static void
-pcregrep_exit(int rc)
-{
-if (resource_error)
-  {
-  fprintf(stderr, "pcregrep: Error %d, %d or %d means that a resource limit "
-    "was exceeded.\n", PCRE_ERROR_MATCHLIMIT, PCRE_ERROR_RECURSIONLIMIT,
-    PCRE_ERROR_JIT_STACKLIMIT);
-  fprintf(stderr, "pcregrep: Check your regex for nested unlimited loops.\n");
-  }
-
-exit(rc);
 }
 
 
@@ -779,6 +800,98 @@ return sys_errlist[n];
 
 
 /*************************************************
+*                Usage function                  *
+*************************************************/
+
+static int
+usage(int rc)
+{
+option_item *op;
+fprintf(stderr, "Usage: pcregrep [-");
+for (op = optionlist; op->one_char != 0; op++)
+  {
+  if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
+  }
+fprintf(stderr, "] [long options] [pattern] [files]\n");
+fprintf(stderr, "Type `pcregrep --help' for more information and the long "
+  "options.\n");
+return rc;
+}
+
+
+
+/*************************************************
+*                Help function                   *
+*************************************************/
+
+static void
+help(void)
+{
+option_item *op;
+
+printf("Usage: pcregrep [OPTION]... [PATTERN] [FILE1 FILE2 ...]\n");
+printf("Search for PATTERN in each FILE or standard input.\n");
+printf("PATTERN must be present if neither -e nor -f is used.\n");
+printf("\"-\" can be used as a file name to mean STDIN.\n");
+
+#ifdef SUPPORT_LIBZ
+printf("Files whose names end in .gz are read using zlib.\n");
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+printf("Files whose names end in .bz2 are read using bzlib2.\n");
+#endif
+
+#if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
+printf("Other files and the standard input are read as plain files.\n\n");
+#else
+printf("All files are read as plain files, without any interpretation.\n\n");
+#endif
+
+printf("Example: pcregrep -i 'hello.*world' menu.h main.c\n\n");
+printf("Options:\n");
+
+for (op = optionlist; op->one_char != 0; op++)
+  {
+  int n;
+  char s[4];
+
+  /* Two options were accidentally implemented and documented with underscores
+  instead of hyphens in their names, something that was not noticed for quite a
+  few releases. When fixing this, I left the underscored versions in the list
+  in case people were using them. However, we don't want to display them in the
+  help data. There are no other options that contain underscores, and we do not
+  expect ever to implement such options. Therefore, just omit any option that
+  contains an underscore. */
+
+  if (strchr(op->long_name, '_') != NULL) continue;
+
+  if (op->one_char > 0 && (op->long_name)[0] == 0)
+    n = 31 - printf("  -%c", op->one_char);
+  else
+    {
+    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char);
+      else strcpy(s, "   ");
+    n = 31 - printf("  %s --%s", s, op->long_name);
+    }
+
+  if (n < 1) n = 1;
+  printf("%.*s%s\n", n, "                           ", op->help_text);
+  }
+
+printf("\nNumbers may be followed by K or M, e.g. --buffer-size=100K.\n");
+printf("The default value for --buffer-size is %d.\n", PCREGREP_BUFSIZE);
+printf("When reading patterns or file names from a file, trailing white\n");
+printf("space is removed and blank lines are ignored.\n");
+printf("The maximum size of any pattern is %d bytes.\n", MAXPATLEN);
+
+printf("\nWith no FILEs, read standard input. If fewer than two FILEs given, assume -h.\n");
+printf("Exit status is 0 if any matches, 1 if no matches, and 2 if trouble.\n");
+}
+
+
+
+/*************************************************
 *            Test exclude/includes               *
 *************************************************/
 
@@ -813,6 +926,99 @@ for (; ip != NULL; ip = ip->next)
   }
 
 return FALSE;
+}
+
+
+
+/*************************************************
+*         Decode integer argument value          *
+*************************************************/
+
+/* Integer arguments can be followed by K or M. Avoid the use of strtoul()
+because SunOS4 doesn't have it. This is used only for unpicking arguments, so
+just keep it simple.
+
+Arguments:
+  option_data   the option data string
+  op            the option item (for error messages)
+  longop        TRUE if option given in long form
+
+Returns:        a long integer
+*/
+
+static long int
+decode_number(char *option_data, option_item *op, BOOL longop)
+{
+unsigned long int n = 0;
+char *endptr = option_data;
+while (*endptr != 0 && isspace((unsigned char)(*endptr))) endptr++;
+while (isdigit((unsigned char)(*endptr)))
+  n = n * 10 + (int)(*endptr++ - '0');
+if (toupper(*endptr) == 'K')
+  {
+  n *= 1024;
+  endptr++;
+  }
+else if (toupper(*endptr) == 'M')
+  {
+  n *= 1024*1024;
+  endptr++;
+  }
+
+if (*endptr != 0)   /* Error */
+  {
+  if (longop)
+    {
+    char *equals = strchr(op->long_name, '=');
+    int nlen = (equals == NULL)? (int)strlen(op->long_name) :
+      (int)(equals - op->long_name);
+    fprintf(stderr, "pcregrep: Malformed number \"%s\" after --%.*s\n",
+      option_data, nlen, op->long_name);
+    }
+  else
+    fprintf(stderr, "pcregrep: Malformed number \"%s\" after -%c\n",
+      option_data, op->one_char);
+  pcregrep_exit(usage(2));
+  }
+
+return n;
+}
+
+
+
+/*************************************************
+*       Add item to a chain of numbers           *
+*************************************************/
+
+/* Used to add an item onto a chain, or just return an unconnected item if the
+"after" argument is NULL.
+
+Arguments:
+  n          the number to add
+  after      if not NULL points to item to insert after
+
+Returns:     new number block
+*/
+
+static omstr *
+add_number(int n, omstr *after)
+{
+omstr *om = (omstr *)malloc(sizeof(omstr));
+
+if (om == NULL)
+  {
+  fprintf(stderr, "pcregrep: malloc failed\n");
+  pcregrep_exit(2);
+  }
+om->next = NULL;
+om->groupnum = n;
+
+if (after != NULL)
+  {
+  om->next = after->next;
+  after->next = om;
+  }
+return om;
 }
 
 
@@ -1001,7 +1207,7 @@ switch(endlinetype)
       case 0x2029:  /* Unicode PS */
       *lenptr = 3;
       return p;
-#endif  /* Not EBCDIC */       
+#endif  /* Not EBCDIC */
 
       default:
       break;
@@ -1099,11 +1305,11 @@ switch(endlinetype)
       case '\v':    /* VT */
       case '\f':    /* FF */
       case '\r':    /* CR */
-#ifndef EBCDIE       
+#ifndef EBCDIE
       case 0x85:    /* Unicode NEL */
       case 0x2028:  /* Unicode LS */
       case 0x2029:  /* Unicode PS */
-#endif  /* Not EBCDIC */      
+#endif  /* Not EBCDIC */
       return p;
 
       default:
@@ -1412,8 +1618,9 @@ while (ptr < endptr)
   }
 #endif
 
-  /* We come back here after a match when the -o option (only_matching) is set,
-  in order to find any further matches in the same line. */
+  /* We come back here after a match when show_only_matching is set, in order
+  to find any further matches in the same line. This applies to
+  --only-matching, --file-offsets, and --line-offsets. */
 
   ONLY_MATCHING_RESTART:
 
@@ -1460,40 +1667,64 @@ while (ptr < endptr)
 
     else if (quiet) return 0;
 
-    /* The --only-matching option prints just the substring that matched, or a
-    captured portion of it, as long as this string is not empty, and the
-    --file-offsets and --line-offsets options output offsets for the matching
-    substring (they both force --only-matching = 0). None of these options
-    prints any context. Afterwards, adjust the start and then jump back to look
-    for further matches in the same line. If we are in invert mode, however,
-    nothing is printed and we do not restart - this could still be useful
-    because the return code is set. */
+    /* The --only-matching option prints just the substring that matched,
+    and/or one or more captured portions of it, as long as these strings are
+    not empty. The --file-offsets and --line-offsets options output offsets for
+    the matching substring (all three set show_only_matching). None of these
+    mutually exclusive options prints any context. Afterwards, adjust the start
+    and then jump back to look for further matches in the same line. If we are
+    in invert mode, however, nothing is printed and we do not restart - this
+    could still be useful because the return code is set. */
 
-    else if (only_matching >= 0)
+    else if (show_only_matching)
       {
       if (!invert)
         {
         if (printname != NULL) fprintf(stdout, "%s:", printname);
         if (number) fprintf(stdout, "%d:", linenumber);
+
+        /* Handle --line-offsets */
+
         if (line_offsets)
           fprintf(stdout, "%d,%d\n", (int)(matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
+
+        /* Handle --file-offsets */
+
         else if (file_offsets)
           fprintf(stdout, "%d,%d\n",
             (int)(filepos + matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
-        else if (only_matching < mrc)
+
+        /* Handle --only-matching, which may occur many times */
+
+        else
           {
-          int plen = offsets[2*only_matching + 1] - offsets[2*only_matching];
-          if (plen > 0)
+          BOOL printed = FALSE;
+          omstr *om;
+           
+          for (om = only_matching; om != NULL; om = om->next)
             {
-            if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
-            FWRITE(matchptr + offsets[only_matching*2], 1, plen, stdout);
-            if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
-            fprintf(stdout, "\n");
+            int n = om->groupnum;
+            if (n < mrc)
+              {
+              int plen = offsets[2*n + 1] - offsets[2*n];
+              if (plen > 0)
+                {
+                if (printed) fprintf(stdout, "%s", om_separator); 
+                if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+                FWRITE(matchptr + offsets[n*2], 1, plen, stdout);
+                if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+                printed = TRUE;
+                }
+              }
             }
+             
+          if (printed || printname != NULL || number) fprintf(stdout, "\n");
           }
-        else if (printname != NULL || number) fprintf(stdout, "\n");
+
+        /* Prepare to repeat to find the next match */
+
         match = FALSE;
         if (line_buffered) fflush(stdout);
         rc = 0;                      /* Had some success */
@@ -1756,7 +1987,7 @@ while (ptr < endptr)
 /* End of file; print final "after" lines if wanted; do_after_lines sets
 hyphenpending if it prints something. */
 
-if (only_matching < 0 && !count_only)
+if (!show_only_matching && !count_only)
   {
   do_after_lines(lastmatchnumber, lastmatchrestart, endptr, printname);
   hyphenpending |= endhyphenpending;
@@ -2003,101 +2234,6 @@ return rc;
 
 
 
-
-/*************************************************
-*                Usage function                  *
-*************************************************/
-
-static int
-usage(int rc)
-{
-option_item *op;
-fprintf(stderr, "Usage: pcregrep [-");
-for (op = optionlist; op->one_char != 0; op++)
-  {
-  if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
-  }
-fprintf(stderr, "] [long options] [pattern] [files]\n");
-fprintf(stderr, "Type `pcregrep --help' for more information and the long "
-  "options.\n");
-return rc;
-}
-
-
-
-
-/*************************************************
-*                Help function                   *
-*************************************************/
-
-static void
-help(void)
-{
-option_item *op;
-
-printf("Usage: pcregrep [OPTION]... [PATTERN] [FILE1 FILE2 ...]\n");
-printf("Search for PATTERN in each FILE or standard input.\n");
-printf("PATTERN must be present if neither -e nor -f is used.\n");
-printf("\"-\" can be used as a file name to mean STDIN.\n");
-
-#ifdef SUPPORT_LIBZ
-printf("Files whose names end in .gz are read using zlib.\n");
-#endif
-
-#ifdef SUPPORT_LIBBZ2
-printf("Files whose names end in .bz2 are read using bzlib2.\n");
-#endif
-
-#if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
-printf("Other files and the standard input are read as plain files.\n\n");
-#else
-printf("All files are read as plain files, without any interpretation.\n\n");
-#endif
-
-printf("Example: pcregrep -i 'hello.*world' menu.h main.c\n\n");
-printf("Options:\n");
-
-for (op = optionlist; op->one_char != 0; op++)
-  {
-  int n;
-  char s[4];
-
-  /* Two options were accidentally implemented and documented with underscores
-  instead of hyphens in their names, something that was not noticed for quite a
-  few releases. When fixing this, I left the underscored versions in the list
-  in case people were using them. However, we don't want to display them in the
-  help data. There are no other options that contain underscores, and we do not
-  expect ever to implement such options. Therefore, just omit any option that
-  contains an underscore. */
-
-  if (strchr(op->long_name, '_') != NULL) continue;
-
-  if (op->one_char > 0 && (op->long_name)[0] == 0)
-    n = 31 - printf("  -%c", op->one_char);
-  else
-    {
-    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char);
-      else strcpy(s, "   ");
-    n = 31 - printf("  %s --%s", s, op->long_name);
-    }
-
-  if (n < 1) n = 1;
-  printf("%.*s%s\n", n, "                           ", op->help_text);
-  }
-
-printf("\nNumbers may be followed by K or M, e.g. --buffer-size=100K.\n");
-printf("The default value for --buffer-size is %d.\n", PCREGREP_BUFSIZE);
-printf("When reading patterns or file names from a file, trailing white\n");
-printf("space is removed and blank lines are ignored.\n");
-printf("The maximum size of any pattern is %d bytes.\n", MAXPATLEN);
-
-printf("\nWith no FILEs, read standard input. If fewer than two FILEs given, assume -h.\n");
-printf("Exit status is 0 if any matches, 1 if no matches, and 2 if trouble.\n");
-}
-
-
-
-
 /*************************************************
 *    Handle a single-letter, no data option      *
 *************************************************/
@@ -2123,7 +2259,12 @@ switch(letter)
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
   case 'n': number = TRUE; break;
-  case 'o': only_matching = 0; break;
+   
+  case 'o':
+  only_matching_last = add_number(0, only_matching_last);
+  if (only_matching == NULL) only_matching = only_matching_last;
+  break;
+   
   case 'q': quiet = TRUE; break;
   case 'r': dee_action = dee_RECURSE; break;
   case 's': silent = TRUE; break;
@@ -2509,6 +2650,7 @@ for (i = 1; i < argc; i++)
     {
     char *s = argv[i] + 1;
     longop = FALSE;
+    
     while (*s != 0)
       {
       for (op = optionlist; op->one_char != 0; op++)
@@ -2521,29 +2663,35 @@ for (i = 1; i < argc; i++)
           *s, argv[i]);
         pcregrep_exit(usage(2));
         }
+         
+      option_data = s+1;
+      
+      /* Break out if this is the last character in the string; it's handled 
+      below like a single multi-char option. */
+      
+      if (*option_data == 0) break; 
 
-      /* Check for a single-character option that has data: OP_OP_NUMBER
-      is used for one that either has a numerical number or defaults, i.e. the
-      data is optional. If a digit follows, there is data; if not, carry on
+      /* Check for a single-character option that has data: OP_OP_NUMBER(S)
+      are used for ones that either have a numerical number or defaults, i.e.
+      the data is optional. If a digit follows, there is data; if not, carry on
       with other single-character options in the same string. */
 
-      option_data = s+1;
-      if (op->type == OP_OP_NUMBER)
+      if (op->type == OP_OP_NUMBER || op->type == OP_OP_NUMBERS)
         {
         if (isdigit((unsigned char)s[1])) break;
         }
-      else   /* Check for end or a dataless option */
+      else   /* Check for an option with data */
         {
-        if (op->type != OP_NODATA || s[1] == 0) break;
+        if (op->type != OP_NODATA) break;
         }
 
       /* Handle a single-character option with no data, then loop for the
       next character in the string. */
-
+      
       pcre_options = handle_option(*s++, pcre_options);
       }
     }
-
+    
   /* At this point we should have op pointing to a matched option. If the type
   is NO_DATA, it means that there is no data, and the option might set
   something in the PCRE options. */
@@ -2554,13 +2702,14 @@ for (i = 1; i < argc; i++)
     continue;
     }
 
-  /* If the option type is OP_OP_STRING or OP_OP_NUMBER, it's an option that
+  /* If the option type is OP_OP_STRING or OP_OP_NUMBER(S), it's an option that
   either has a value or defaults to something. It cannot have data in a
   separate item. At the moment, the only such options are "colo(u)r",
   "only-matching", and Jeffrey Friedl's special -S debugging option. */
-
+  
   if (*option_data == 0 &&
-      (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER))
+      (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER ||
+       op->type == OP_OP_NUMBERS))
     {
     switch (op->one_char)
       {
@@ -2569,7 +2718,8 @@ for (i = 1; i < argc; i++)
       break;
 
       case 'o':
-      only_matching = 0;
+      only_matching_last = add_number(0, only_matching_last);
+      if (only_matching == NULL) only_matching = only_matching_last;
       break;
 
 #ifdef JFRIEDL_DEBUG
@@ -2593,17 +2743,28 @@ for (i = 1; i < argc; i++)
     option_data = argv[++i];
     }
 
+  /* If the option type is OP_OP_NUMBERS, the value is a number that is to be
+  added to a chain of numbers. */
+
+  if (op->type == OP_OP_NUMBERS)
+    {
+    unsigned long int n = decode_number(option_data, op, longop);
+    omdatastr *omd = (omdatastr *)op->dataptr;
+    *(omd->lastptr) = add_number((int)n, *(omd->lastptr));
+    if (*(omd->anchor) == NULL) *(omd->anchor) = *(omd->lastptr);
+    }
+
   /* If the option type is OP_PATLIST, it's the -e option, or one of the
   include/exclude options, which can be called multiple times to create lists
   of patterns. */
 
-  if (op->type == OP_PATLIST)
-     {
-     patdatastr *pd = (patdatastr *)op->dataptr;
-     *(pd->lastptr) = add_pattern(option_data, *(pd->lastptr));
-     if (*(pd->lastptr) == NULL) goto EXIT2;
-     if (*(pd->anchor) == NULL) *(pd->anchor) = *(pd->lastptr);
-     }
+  else if (op->type == OP_PATLIST)
+    {
+    patdatastr *pd = (patdatastr *)op->dataptr;
+    *(pd->lastptr) = add_pattern(option_data, *(pd->lastptr));
+    if (*(pd->lastptr) == NULL) goto EXIT2;
+    if (*(pd->anchor) == NULL) *(pd->anchor) = *(pd->lastptr);
+    }
 
   /* If the option type is OP_FILELIST, it's one of the options that names a
   file. */
@@ -2644,53 +2805,18 @@ for (i = 1; i < argc; i++)
       }
     }
 
-  /* Otherwise, deal with single string or numeric data values. */
+  /* Otherwise, deal with a single string or numeric data value. */
 
   else if (op->type != OP_NUMBER && op->type != OP_LONGNUMBER &&
            op->type != OP_OP_NUMBER)
     {
     *((char **)op->dataptr) = option_data;
     }
-
-  /* Avoid the use of strtoul() because SunOS4 doesn't have it. This is used
-  only for unpicking arguments, so just keep it simple. */
-
   else
     {
-    unsigned long int n = 0;
-    char *endptr = option_data;
-    while (*endptr != 0 && isspace((unsigned char)(*endptr))) endptr++;
-    while (isdigit((unsigned char)(*endptr)))
-      n = n * 10 + (int)(*endptr++ - '0');
-    if (toupper(*endptr) == 'K')
-      {
-      n *= 1024;
-      endptr++;
-      }
-    else if (toupper(*endptr) == 'M')
-      {
-      n *= 1024*1024;
-      endptr++;
-      }
-    if (*endptr != 0)
-      {
-      if (longop)
-        {
-        char *equals = strchr(op->long_name, '=');
-        int nlen = (equals == NULL)? (int)strlen(op->long_name) :
-          (int)(equals - op->long_name);
-        fprintf(stderr, "pcregrep: Malformed number \"%s\" after --%.*s\n",
-          option_data, nlen, op->long_name);
-        }
-      else
-        fprintf(stderr, "pcregrep: Malformed number \"%s\" after -%c\n",
-          option_data, op->one_char);
-      pcregrep_exit(usage(2));
-      }
-    if (op->type == OP_LONGNUMBER)
-        *((unsigned long int *)op->dataptr) = n;
-    else
-        *((int *)op->dataptr) = n;
+    unsigned long int n = decode_number(option_data, op, longop);
+    if (op->type == OP_LONGNUMBER) *((unsigned long int *)op->dataptr) = n;
+      else *((int *)op->dataptr) = n;
     }
   }
 
@@ -2704,9 +2830,10 @@ if (both_context > 0)
   }
 
 /* Only one of --only-matching, --file-offsets, or --line-offsets is permitted.
-However, the latter two set only_matching. */
+However, all three set show_only_matching because they display, each in their
+own way, only the data that has matched. */
 
-if ((only_matching >= 0 && (file_offsets || line_offsets)) ||
+if ((only_matching != NULL && (file_offsets || line_offsets)) ||
     (file_offsets && line_offsets))
   {
   fprintf(stderr, "pcregrep: Cannot mix --only-matching, --file-offsets "
@@ -2714,7 +2841,8 @@ if ((only_matching >= 0 && (file_offsets || line_offsets)) ||
   pcregrep_exit(usage(2));
   }
 
-if (file_offsets || line_offsets) only_matching = 0;
+if (only_matching != NULL || file_offsets || line_offsets)
+  show_only_matching = TRUE;
 
 /* If a locale has not been provided as an option, see if the LC_CTYPE or
 LC_ALL environment variable is set, and if so, use it. */
@@ -2880,7 +3008,7 @@ for (fn = pattern_files; fn != NULL; fn = fn->next)
     goto EXIT2;
   }
 
-/* Study the regular expressions, as we will be running them many times. If an 
+/* Study the regular expressions, as we will be running them many times. If an
 extra block is needed for a limit, set PCRE_STUDY_EXTRA_NEEDED so that one is
 returned, even if studying produces no data. */
 
@@ -2911,7 +3039,7 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   }
 
 /* If --match-limit or --recursion-limit was set, put the value(s) into the
-pcre_extra block for each pattern. There will always be an extra block because 
+pcre_extra block for each pattern. There will always be an extra block because
 of the use of PCRE_STUDY_EXTRA_NEEDED above. */
 
 for (cp = patterns; cp != NULL; cp = cp->next)
@@ -2921,7 +3049,7 @@ for (cp = patterns; cp != NULL; cp = cp->next)
     cp->hint->flags |= PCRE_EXTRA_MATCH_LIMIT;
     cp->hint->match_limit = match_limit;
     }
-     
+
   if (match_limit_recursion > 0)
     {
     cp->hint->flags |= PCRE_EXTRA_MATCH_LIMIT_RECURSION;
@@ -3032,6 +3160,13 @@ free_file_chain(exclude_from);
 free_file_chain(include_from);
 free_file_chain(pattern_files);
 free_file_chain(file_lists);
+
+while (only_matching != NULL)
+  {
+  omstr *this = only_matching;
+  only_matching = this->next;
+  free(this);
+  }
 
 pcregrep_exit(rc);
 
