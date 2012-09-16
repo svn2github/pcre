@@ -842,6 +842,8 @@ NOTE: These values are also used explicitly in pcre_compile.c when processing
 \h, \H, \v and \V in a character class, so any changes here should be
 duplicated there as well. They also appear in pcre_jit_compile.c. */
 
+/* ------ ASCII/Unicode environments ------ */
+
 #ifndef EBCDIC
 #define HSPACE_MULTIBYTE_CASES \
       case 0x1680:    /* OGHAM SPACE MARK */ \
@@ -870,15 +872,6 @@ duplicated there as well. They also appear in pcre_jit_compile.c. */
       case 0x2028:    /* LINE SEPARATOR */ \
       case 0x2029     /* PARAGRAPH SEPARATOR */
 
-#else   /* EBCDIC */
-#define HSPACE_MULTIBYTE_CASES
-#define VSPACE_MULTIBYTE_CASES
-
-#define HSPACE_BYTE_CASES \
-      case CHAR_HT: \
-      case CHAR_SPACE
-#endif  /* EBCDIC */
-
 #define VSPACE_BYTE_CASES \
       case CHAR_LF: \
       case CHAR_VT: \
@@ -893,6 +886,27 @@ duplicated there as well. They also appear in pcre_jit_compile.c. */
 #define VSPACE_CASES \
         VSPACE_BYTE_CASES: \
         VSPACE_MULTIBYTE_CASES
+
+/* ------ EBCDIC environments ------ */
+
+#else
+#define HSPACE_BYTE_CASES \
+      case CHAR_HT: \
+      case CHAR_SPACE
+      
+#define VSPACE_BYTE_CASES \
+      case CHAR_LF: \
+      case CHAR_VT: \
+      case CHAR_FF: \
+      case CHAR_CR: \
+      case CHAR_NEL
+      
+#define HSPACE_CASES HSPACE_BYTE_CASES
+#define VSPACE_CASES VSPACE_BYTE_CASES
+#endif  /* EBCDIC */
+
+/* ------ End of whitespace case macros ------ */
+
 
 /* In case there is no definition of offsetof() provided - though any proper
 Standard C system should have one. */
