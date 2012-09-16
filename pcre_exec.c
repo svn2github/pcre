@@ -2429,10 +2429,10 @@ for (;;)
       case CHAR_VT:
       case CHAR_FF:
       case CHAR_NEL:
-#ifndef EBCDIC       
+#ifndef EBCDIC
       case 0x2028:
       case 0x2029:
-#endif  /* Not EBCDIC */       
+#endif  /* Not EBCDIC */
       if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
       break;
       }
@@ -2448,29 +2448,8 @@ for (;;)
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
+      HSPACE_CASES: RRETURN(MATCH_NOMATCH);  /* Byte and multibyte cases */
       default: break;
-      case CHAR_HT:
-      case CHAR_SPACE:
-#ifndef EBCDIC       
-      case 0xa0:      /* NBSP */
-      case 0x1680:    /* OGHAM SPACE MARK */
-      case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-      case 0x2000:    /* EN QUAD */
-      case 0x2001:    /* EM QUAD */
-      case 0x2002:    /* EN SPACE */
-      case 0x2003:    /* EM SPACE */
-      case 0x2004:    /* THREE-PER-EM SPACE */
-      case 0x2005:    /* FOUR-PER-EM SPACE */
-      case 0x2006:    /* SIX-PER-EM SPACE */
-      case 0x2007:    /* FIGURE SPACE */
-      case 0x2008:    /* PUNCTUATION SPACE */
-      case 0x2009:    /* THIN SPACE */
-      case 0x200A:    /* HAIR SPACE */
-      case 0x202f:    /* NARROW NO-BREAK SPACE */
-      case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-      case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */     
-      RRETURN(MATCH_NOMATCH);
       }
     ecode++;
     break;
@@ -2484,29 +2463,8 @@ for (;;)
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
+      HSPACE_CASES: break;  /* Byte and multibyte cases */
       default: RRETURN(MATCH_NOMATCH);
-      case CHAR_HT:
-      case CHAR_SPACE:
-#ifndef EBCDIC       
-      case 0xa0:      /* NBSP */
-      case 0x1680:    /* OGHAM SPACE MARK */
-      case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-      case 0x2000:    /* EN QUAD */
-      case 0x2001:    /* EM QUAD */
-      case 0x2002:    /* EN SPACE */
-      case 0x2003:    /* EM SPACE */
-      case 0x2004:    /* THREE-PER-EM SPACE */
-      case 0x2005:    /* FOUR-PER-EM SPACE */
-      case 0x2006:    /* SIX-PER-EM SPACE */
-      case 0x2007:    /* FIGURE SPACE */
-      case 0x2008:    /* PUNCTUATION SPACE */
-      case 0x2009:    /* THIN SPACE */
-      case 0x200A:    /* HAIR SPACE */
-      case 0x202f:    /* NARROW NO-BREAK SPACE */
-      case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-      case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */       
-      break;
       }
     ecode++;
     break;
@@ -2520,17 +2478,8 @@ for (;;)
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
+      VSPACE_CASES: RRETURN(MATCH_NOMATCH);
       default: break;
-      case CHAR_LF:
-      case CHAR_VT:
-      case CHAR_FF:
-      case CHAR_CR:
-      case CHAR_NEL:
-#ifndef EBCDIC       
-      case 0x2028:    /* LINE SEPARATOR */
-      case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif  /* Not EBCDIC */       
-      RRETURN(MATCH_NOMATCH);
       }
     ecode++;
     break;
@@ -2544,17 +2493,8 @@ for (;;)
     GETCHARINCTEST(c, eptr);
     switch(c)
       {
+      VSPACE_CASES: break;
       default: RRETURN(MATCH_NOMATCH);
-      case CHAR_LF:
-      case CHAR_VT:
-      case CHAR_FF:
-      case CHAR_CR:
-      case CHAR_NEL:
-#ifndef EBCDIC
-      case 0x2028:    /* LINE SEPARATOR */
-      case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif  /* Not EBCDIC */
-      break;
       }
     ecode++;
     break;
@@ -2652,19 +2592,19 @@ for (;;)
       RRETURN(MATCH_NOMATCH);
       }
     else
-      { 
-      int lgb, rgb; 
+      {
+      int lgb, rgb;
       GETCHARINCTEST(c, eptr);
-      lgb = UCD_GRAPHBREAK(c); 
+      lgb = UCD_GRAPHBREAK(c);
       while (eptr < md->end_subject)
         {
         int len = 1;
         if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-        rgb = UCD_GRAPHBREAK(c); 
+        rgb = UCD_GRAPHBREAK(c);
         if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
-        lgb = rgb; 
+        lgb = rgb;
         eptr += len;
-        } 
+        }
       }
     CHECK_PARTIAL();
     ecode++;
@@ -4243,19 +4183,19 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           else
-            { 
-            int lgb, rgb; 
+            {
+            int lgb, rgb;
             GETCHARINCTEST(c, eptr);
-            lgb = UCD_GRAPHBREAK(c); 
+            lgb = UCD_GRAPHBREAK(c);
            while (eptr < md->end_subject)
               {
               int len = 1;
               if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-              rgb = UCD_GRAPHBREAK(c); 
+              rgb = UCD_GRAPHBREAK(c);
               if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
-              lgb = rgb; 
+              lgb = rgb;
               eptr += len;
-              } 
+              }
             }
           CHECK_PARTIAL();
           }
@@ -4333,10 +4273,10 @@ for (;;)
             case CHAR_VT:
             case CHAR_FF:
             case CHAR_NEL:
-#ifndef EBCDIC 
+#ifndef EBCDIC
             case 0x2028:
             case 0x2029:
-#endif  /* Not EBCDIC */ 
+#endif  /* Not EBCDIC */
             if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
             break;
             }
@@ -4354,29 +4294,8 @@ for (;;)
           GETCHARINC(c, eptr);
           switch(c)
             {
+            HSPACE_CASES: RRETURN(MATCH_NOMATCH);  /* Byte and multibyte cases */
             default: break;
-            case CHAR_HT:
-            case CHAR_SPACE:
-#ifndef EBCDIC             
-            case 0xa0:      /* NBSP */
-            case 0x1680:    /* OGHAM SPACE MARK */
-            case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-            case 0x2000:    /* EN QUAD */
-            case 0x2001:    /* EM QUAD */
-            case 0x2002:    /* EN SPACE */
-            case 0x2003:    /* EM SPACE */
-            case 0x2004:    /* THREE-PER-EM SPACE */
-            case 0x2005:    /* FOUR-PER-EM SPACE */
-            case 0x2006:    /* SIX-PER-EM SPACE */
-            case 0x2007:    /* FIGURE SPACE */
-            case 0x2008:    /* PUNCTUATION SPACE */
-            case 0x2009:    /* THIN SPACE */
-            case 0x200A:    /* HAIR SPACE */
-            case 0x202f:    /* NARROW NO-BREAK SPACE */
-            case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-            case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */             
-            RRETURN(MATCH_NOMATCH);
             }
           }
         break;
@@ -4392,29 +4311,8 @@ for (;;)
           GETCHARINC(c, eptr);
           switch(c)
             {
+            HSPACE_CASES: break;  /* Byte and multibyte cases */
             default: RRETURN(MATCH_NOMATCH);
-            case CHAR_HT:
-            case CHAR_SPACE:
-#ifndef EBCDIC 
-            case 0xa0:      /* NBSP */
-            case 0x1680:    /* OGHAM SPACE MARK */
-            case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-            case 0x2000:    /* EN QUAD */
-            case 0x2001:    /* EM QUAD */
-            case 0x2002:    /* EN SPACE */
-            case 0x2003:    /* EM SPACE */
-            case 0x2004:    /* THREE-PER-EM SPACE */
-            case 0x2005:    /* FOUR-PER-EM SPACE */
-            case 0x2006:    /* SIX-PER-EM SPACE */
-            case 0x2007:    /* FIGURE SPACE */
-            case 0x2008:    /* PUNCTUATION SPACE */
-            case 0x2009:    /* THIN SPACE */
-            case 0x200A:    /* HAIR SPACE */
-            case 0x202f:    /* NARROW NO-BREAK SPACE */
-            case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-            case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif             
-            break;
             }
           }
         break;
@@ -4430,17 +4328,8 @@ for (;;)
           GETCHARINC(c, eptr);
           switch(c)
             {
+            VSPACE_CASES: RRETURN(MATCH_NOMATCH);
             default: break;
-            case CHAR_LF:
-            case CHAR_VT:
-            case CHAR_FF:
-            case CHAR_CR:
-            case CHAR_NEL:
-#ifndef EBCDIC 
-            case 0x2028:    /* LINE SEPARATOR */
-            case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif             
-            RRETURN(MATCH_NOMATCH);
             }
           }
         break;
@@ -4456,17 +4345,8 @@ for (;;)
           GETCHARINC(c, eptr);
           switch(c)
             {
+            VSPACE_CASES: break;
             default: RRETURN(MATCH_NOMATCH);
-            case CHAR_LF:
-            case CHAR_VT:
-            case CHAR_FF:
-            case CHAR_CR:
-            case CHAR_NEL:
-#ifndef EBCDIC             
-            case 0x2028:    /* LINE SEPARATOR */
-            case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif             
-            break;
             }
           }
         break;
@@ -4655,29 +4535,10 @@ for (;;)
           switch(*eptr++)
             {
             default: break;
-            case CHAR_HT:
-            case CHAR_SPACE:
-#ifndef EBCDIC             
-            case 0xa0:      /* NBSP */
+            HSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-            case 0x1680:    /* OGHAM SPACE MARK */
-            case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-            case 0x2000:    /* EN QUAD */
-            case 0x2001:    /* EM QUAD */
-            case 0x2002:    /* EN SPACE */
-            case 0x2003:    /* EM SPACE */
-            case 0x2004:    /* THREE-PER-EM SPACE */
-            case 0x2005:    /* FOUR-PER-EM SPACE */
-            case 0x2006:    /* SIX-PER-EM SPACE */
-            case 0x2007:    /* FIGURE SPACE */
-            case 0x2008:    /* PUNCTUATION SPACE */
-            case 0x2009:    /* THIN SPACE */
-            case 0x200A:    /* HAIR SPACE */
-            case 0x202f:    /* NARROW NO-BREAK SPACE */
-            case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-            case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* COMPILE_PCRE16 */
-#endif  /* Not EBCDIC */
+            HSPACE_MULTIBYTE_CASES:
+#endif
             RRETURN(MATCH_NOMATCH);
             }
           }
@@ -4694,29 +4555,10 @@ for (;;)
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
-            case CHAR_HT:
-            case CHAR_SPACE:
-#ifndef EBCDIC             
-            case 0xa0:      /* NBSP */
+            HSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-            case 0x1680:    /* OGHAM SPACE MARK */
-            case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-            case 0x2000:    /* EN QUAD */
-            case 0x2001:    /* EM QUAD */
-            case 0x2002:    /* EN SPACE */
-            case 0x2003:    /* EM SPACE */
-            case 0x2004:    /* THREE-PER-EM SPACE */
-            case 0x2005:    /* FOUR-PER-EM SPACE */
-            case 0x2006:    /* SIX-PER-EM SPACE */
-            case 0x2007:    /* FIGURE SPACE */
-            case 0x2008:    /* PUNCTUATION SPACE */
-            case 0x2009:    /* THIN SPACE */
-            case 0x200A:    /* HAIR SPACE */
-            case 0x202f:    /* NARROW NO-BREAK SPACE */
-            case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-            case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* COMPILE_PCRE16 */
-#endif  /* Not EBCDIC */
+            HSPACE_MULTIBYTE_CASES:
+#endif
             break;
             }
           }
@@ -4732,17 +4574,12 @@ for (;;)
             }
           switch(*eptr++)
             {
-            default: break;
-            case CHAR_LF:
-            case CHAR_VT:
-            case CHAR_FF:
-            case CHAR_CR:
-            case CHAR_NEL:
+            VSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-            case 0x2028:    /* LINE SEPARATOR */
-            case 0x2029:    /* PARAGRAPH SEPARATOR */
+            VSPACE_MULTIBYTE_CASES:
 #endif
             RRETURN(MATCH_NOMATCH);
+            default: break;
             }
           }
         break;
@@ -4758,14 +4595,9 @@ for (;;)
           switch(*eptr++)
             {
             default: RRETURN(MATCH_NOMATCH);
-            case CHAR_LF:
-            case CHAR_VT:
-            case CHAR_FF:
-            case CHAR_CR:
-            case CHAR_NEL:
+            VSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-            case 0x2028:    /* LINE SEPARATOR */
-            case 0x2029:    /* PARAGRAPH SEPARATOR */
+            VSPACE_MULTIBYTE_CASES:
 #endif
             break;
             }
@@ -5066,19 +4898,19 @@ for (;;)
             RRETURN(MATCH_NOMATCH);
             }
           else
-            { 
-            int lgb, rgb; 
+            {
+            int lgb, rgb;
             GETCHARINCTEST(c, eptr);
-            lgb = UCD_GRAPHBREAK(c); 
+            lgb = UCD_GRAPHBREAK(c);
             while (eptr < md->end_subject)
               {
               int len = 1;
               if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-              rgb = UCD_GRAPHBREAK(c); 
+              rgb = UCD_GRAPHBREAK(c);
               if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
-              lgb = rgb; 
+              lgb = rgb;
               eptr += len;
-              } 
+              }
             }
           CHECK_PARTIAL();
           }
@@ -5127,17 +4959,17 @@ for (;;)
               case CHAR_CR:
               if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
               break;
-               
+
               case CHAR_LF:
               break;
 
               case CHAR_VT:
               case CHAR_FF:
               case CHAR_NEL:
-#ifndef EBCDIC               
+#ifndef EBCDIC
               case 0x2028:
               case 0x2029:
-#endif  /* Not EBCDIC */ 
+#endif  /* Not EBCDIC */
               if (md->bsr_anycrlf) RRETURN(MATCH_NOMATCH);
               break;
               }
@@ -5146,92 +4978,32 @@ for (;;)
             case OP_NOT_HSPACE:
             switch(c)
               {
+              HSPACE_CASES: RRETURN(MATCH_NOMATCH);
               default: break;
-              case CHAR_HT:
-              case CHAR_SPACE:
-#ifndef EBCDIC 
-              case 0xa0:      /* NBSP */
-              case 0x1680:    /* OGHAM SPACE MARK */
-              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-              case 0x2000:    /* EN QUAD */
-              case 0x2001:    /* EM QUAD */
-              case 0x2002:    /* EN SPACE */
-              case 0x2003:    /* EM SPACE */
-              case 0x2004:    /* THREE-PER-EM SPACE */
-              case 0x2005:    /* FOUR-PER-EM SPACE */
-              case 0x2006:    /* SIX-PER-EM SPACE */
-              case 0x2007:    /* FIGURE SPACE */
-              case 0x2008:    /* PUNCTUATION SPACE */
-              case 0x2009:    /* THIN SPACE */
-              case 0x200A:    /* HAIR SPACE */
-              case 0x202f:    /* NARROW NO-BREAK SPACE */
-              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-              case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */ 
-              RRETURN(MATCH_NOMATCH);
               }
             break;
 
             case OP_HSPACE:
             switch(c)
               {
+              HSPACE_CASES: break;
               default: RRETURN(MATCH_NOMATCH);
-              case CHAR_HT:
-              case CHAR_SPACE:
-#ifndef EBCDIC 
-              case 0xa0:      /* NBSP */
-              case 0x1680:    /* OGHAM SPACE MARK */
-              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-              case 0x2000:    /* EN QUAD */
-              case 0x2001:    /* EM QUAD */
-              case 0x2002:    /* EN SPACE */
-              case 0x2003:    /* EM SPACE */
-              case 0x2004:    /* THREE-PER-EM SPACE */
-              case 0x2005:    /* FOUR-PER-EM SPACE */
-              case 0x2006:    /* SIX-PER-EM SPACE */
-              case 0x2007:    /* FIGURE SPACE */
-              case 0x2008:    /* PUNCTUATION SPACE */
-              case 0x2009:    /* THIN SPACE */
-              case 0x200A:    /* HAIR SPACE */
-              case 0x202f:    /* NARROW NO-BREAK SPACE */
-              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-              case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */ 
-              break;
               }
             break;
 
             case OP_NOT_VSPACE:
             switch(c)
               {
+              VSPACE_CASES: RRETURN(MATCH_NOMATCH);
               default: break;
-              case CHAR_LF:
-              case CHAR_VT:
-              case CHAR_FF:
-              case CHAR_CR:
-              case CHAR_NEL:
-#ifndef EBCDIC               
-              case 0x2028:    /* LINE SEPARATOR */
-              case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif  /* Not EBCDIC */ 
-              RRETURN(MATCH_NOMATCH);
               }
             break;
 
             case OP_VSPACE:
             switch(c)
               {
+              VSPACE_CASES: break;
               default: RRETURN(MATCH_NOMATCH);
-              case CHAR_LF:
-              case CHAR_VT:
-              case CHAR_FF:
-              case CHAR_CR:
-              case CHAR_NEL:
-#ifndef EBCDIC               
-              case 0x2028:    /* LINE SEPARATOR */
-              case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif  /* Not EBCDIC */               
-              break;
               }
             break;
 
@@ -5332,29 +5104,10 @@ for (;;)
             switch(c)
               {
               default: break;
-              case CHAR_HT:
-              case CHAR_SPACE:
-#ifndef EBCDIC 
-              case 0xa0:      /* NBSP */
+              HSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              case 0x1680:    /* OGHAM SPACE MARK */
-              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-              case 0x2000:    /* EN QUAD */
-              case 0x2001:    /* EM QUAD */
-              case 0x2002:    /* EN SPACE */
-              case 0x2003:    /* EM SPACE */
-              case 0x2004:    /* THREE-PER-EM SPACE */
-              case 0x2005:    /* FOUR-PER-EM SPACE */
-              case 0x2006:    /* SIX-PER-EM SPACE */
-              case 0x2007:    /* FIGURE SPACE */
-              case 0x2008:    /* PUNCTUATION SPACE */
-              case 0x2009:    /* THIN SPACE */
-              case 0x200A:    /* HAIR SPACE */
-              case 0x202f:    /* NARROW NO-BREAK SPACE */
-              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-              case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* COMPILE_PCRE16 */
-#endif  /* Not EBCDIC */
+              HSPACE_MULTIBYTE_CASES:
+#endif
               RRETURN(MATCH_NOMATCH);
               }
             break;
@@ -5363,29 +5116,10 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case CHAR_HT:
-              case CHAR_SPACE:
-#ifndef EBCDIC               
-              case 0xa0:      /* NBSP */
+              HSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              case 0x1680:    /* OGHAM SPACE MARK */
-              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-              case 0x2000:    /* EN QUAD */
-              case 0x2001:    /* EM QUAD */
-              case 0x2002:    /* EN SPACE */
-              case 0x2003:    /* EM SPACE */
-              case 0x2004:    /* THREE-PER-EM SPACE */
-              case 0x2005:    /* FOUR-PER-EM SPACE */
-              case 0x2006:    /* SIX-PER-EM SPACE */
-              case 0x2007:    /* FIGURE SPACE */
-              case 0x2008:    /* PUNCTUATION SPACE */
-              case 0x2009:    /* THIN SPACE */
-              case 0x200A:    /* HAIR SPACE */
-              case 0x202f:    /* NARROW NO-BREAK SPACE */
-              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-              case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* COMPILE_PCRE16 */
-#endif  /* Not EBCDIC */
+              HSPACE_MULTIBYTE_CASES:
+#endif
               break;
               }
             break;
@@ -5394,14 +5128,9 @@ for (;;)
             switch(c)
               {
               default: break;
-              case CHAR_LF:
-              case CHAR_VT:
-              case CHAR_FF:
-              case CHAR_CR:
-              case CHAR_NEL:
+              VSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              case 0x2028:    /* LINE SEPARATOR */
-              case 0x2029:    /* PARAGRAPH SEPARATOR */
+              VSPACE_MULTIBYTE_CASES:
 #endif
               RRETURN(MATCH_NOMATCH);
               }
@@ -5411,14 +5140,9 @@ for (;;)
             switch(c)
               {
               default: RRETURN(MATCH_NOMATCH);
-              case CHAR_LF:
-              case CHAR_VT:
-              case CHAR_FF:
-              case CHAR_CR:
-              case CHAR_NEL:
+              VSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              case 0x2028:    /* LINE SEPARATOR */
-              case 0x2029:    /* PARAGRAPH SEPARATOR */
+              VSPACE_MULTIBYTE_CASES:
 #endif
               break;
               }
@@ -5651,19 +5375,19 @@ for (;;)
             break;
             }
           else
-            { 
-            int lgb, rgb; 
+            {
+            int lgb, rgb;
             GETCHARINCTEST(c, eptr);
-            lgb = UCD_GRAPHBREAK(c); 
+            lgb = UCD_GRAPHBREAK(c);
             while (eptr < md->end_subject)
               {
               int len = 1;
               if (!utf) c = *eptr; else { GETCHARLEN(c, eptr, len); }
-              rgb = UCD_GRAPHBREAK(c); 
+              rgb = UCD_GRAPHBREAK(c);
               if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
-              lgb = rgb; 
+              lgb = rgb;
               eptr += len;
-              } 
+              }
             }
           CHECK_PARTIAL();
           }
@@ -5802,10 +5526,10 @@ for (;;)
               {
               if (c != CHAR_LF &&
                   (md->bsr_anycrlf ||
-                   (c != CHAR_VT && c != CHAR_FF && c != CHAR_NEL 
-#ifndef EBCDIC                    
+                   (c != CHAR_VT && c != CHAR_FF && c != CHAR_NEL
+#ifndef EBCDIC
                     && c != 0x2028 && c != 0x2029
-#endif  /* Not EBCDIC */                      
+#endif  /* Not EBCDIC */
                     )))
                 break;
               eptr += len;
@@ -5827,30 +5551,8 @@ for (;;)
             GETCHARLEN(c, eptr, len);
             switch(c)
               {
+              HSPACE_CASES: gotspace = TRUE; break;
               default: gotspace = FALSE; break;
-              case CHAR_HT:
-              case CHAR_SPACE:
-#ifndef EBCDIC               
-              case 0xa0:      /* NBSP */
-              case 0x1680:    /* OGHAM SPACE MARK */
-              case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-              case 0x2000:    /* EN QUAD */
-              case 0x2001:    /* EM QUAD */
-              case 0x2002:    /* EN SPACE */
-              case 0x2003:    /* EM SPACE */
-              case 0x2004:    /* THREE-PER-EM SPACE */
-              case 0x2005:    /* FOUR-PER-EM SPACE */
-              case 0x2006:    /* SIX-PER-EM SPACE */
-              case 0x2007:    /* FIGURE SPACE */
-              case 0x2008:    /* PUNCTUATION SPACE */
-              case 0x2009:    /* THIN SPACE */
-              case 0x200A:    /* HAIR SPACE */
-              case 0x202f:    /* NARROW NO-BREAK SPACE */
-              case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-              case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */
-              gotspace = TRUE;
-              break;
               }
             if (gotspace == (ctype == OP_NOT_HSPACE)) break;
             eptr += len;
@@ -5871,18 +5573,8 @@ for (;;)
             GETCHARLEN(c, eptr, len);
             switch(c)
               {
+              VSPACE_CASES: gotspace = TRUE; break;
               default: gotspace = FALSE; break;
-              case CHAR_LF:
-              case CHAR_VT:
-              case CHAR_FF:
-              case CHAR_CR:
-              case CHAR_NEL:
-#ifndef EBCDIC               
-              case 0x2028:    /* LINE SEPARATOR */
-              case 0x2029:    /* PARAGRAPH SEPARATOR */
-#endif  /* Not EBCDIC */ 
-              gotspace = TRUE;
-              break;
               }
             if (gotspace == (ctype == OP_NOT_VSPACE)) break;
             eptr += len;
@@ -6074,18 +5766,17 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            c = *eptr;
-            if (c == CHAR_HT || c == CHAR_SPACE
-#ifndef EBCDIC             
-              || c == 0xa0
+            switch(*eptr)
+              {
+              default: eptr++; break;
+              HSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              || c == 0x1680 || c == 0x180e || (c >= 0x2000 && c <= 0x200A)
-              || c == 0x202f || c == 0x205f || c == 0x3000
-#endif  /* COMPILE_PCRE16 */
-#endif  /* Not EBCDIC */
-              ) break;
-            eptr++;
+              HSPACE_MULTIBYTE_CASES:
+#endif
+              goto ENDLOOP00;
+              }
             }
+          ENDLOOP00:
           break;
 
           case OP_HSPACE:
@@ -6096,18 +5787,17 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            c = *eptr;
-            if (c != CHAR_HT && c != CHAR_SPACE 
-#ifndef EBCDIC             
-              && c != 0xa0
+            switch(*eptr)
+              {
+              default: goto ENDLOOP01;
+              HSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              && c != 0x1680 && c != 0x180e && (c < 0x2000 || c > 0x200A)
-              && c != 0x202f && c != 0x205f && c != 0x3000
-#endif  /* COMPILE_PCRE16 */
-#endif  /* Not EBCDIC */
-              ) break;
-            eptr++;
+              HSPACE_MULTIBYTE_CASES:
+#endif
+              eptr++; break;
+              }
             }
+          ENDLOOP01:
           break;
 
           case OP_NOT_VSPACE:
@@ -6118,15 +5808,17 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            c = *eptr;
-            if (c == CHAR_LF || c == CHAR_VT || c == CHAR_FF || 
-                c == CHAR_CR || c == CHAR_NEL
+            switch(*eptr)
+              {
+              default: eptr++; break;
+              VSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              || c == 0x2028 || c == 0x2029
+              VSPACE_MULTIBYTE_CASES:
 #endif
-              ) break;
-            eptr++;
+              goto ENDLOOP02;
+              }
             }
+          ENDLOOP02:
           break;
 
           case OP_VSPACE:
@@ -6137,15 +5829,17 @@ for (;;)
               SCHECK_PARTIAL();
               break;
               }
-            c = *eptr;
-            if (c != CHAR_LF && c != CHAR_VT && c != CHAR_FF && 
-                c != CHAR_CR && c != CHAR_NEL
+            switch(*eptr)
+              {
+              default: goto ENDLOOP03;
+              VSPACE_BYTE_CASES:
 #ifdef COMPILE_PCRE16
-              && c != 0x2028 && c != 0x2029
+              VSPACE_MULTIBYTE_CASES:
 #endif
-              ) break;
-            eptr++;
+              eptr++; break;
+              }
             }
+          ENDLOOP03:
           break;
 
           case OP_NOT_DIGIT:

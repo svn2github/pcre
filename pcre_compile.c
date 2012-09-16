@@ -3168,28 +3168,9 @@ if (next >= 0) switch(op_code)
   case OP_NOT_HSPACE:
   switch(next)
     {
-    case CHAR_HT:
-    case CHAR_SPACE:
-#ifndef EBCDIC     
-    case 0xa0:
-    case 0x1680:
-    case 0x180e:
-    case 0x2000:
-    case 0x2001:
-    case 0x2002:
-    case 0x2003:
-    case 0x2004:
-    case 0x2005:
-    case 0x2006:
-    case 0x2007:
-    case 0x2008:
-    case 0x2009:
-    case 0x200A:
-    case 0x202f:
-    case 0x205f:
-    case 0x3000:
-#endif  /* Not EBCDIC */ 
+    HSPACE_CASES: 
     return op_code == OP_NOT_HSPACE;
+     
     default:
     return op_code != OP_NOT_HSPACE;
     }
@@ -3199,16 +3180,9 @@ if (next >= 0) switch(op_code)
   case OP_NOT_VSPACE:
   switch(next)
     {
-    case CHAR_LF:
-    case CHAR_VT:
-    case CHAR_FF:
-    case CHAR_CR:
-    case CHAR_NEL:
-#ifndef EBCDIC 
-    case 0x2028:
-    case 0x2029:
-#endif 
+    VSPACE_CASES: 
     return op_code == OP_NOT_VSPACE;
+     
     default:
     return op_code != OP_NOT_VSPACE;
     }
@@ -3265,28 +3239,9 @@ switch(op_code)
     case ESC_H:
     switch(c)
       {
-      case CHAR_HT:
-      case CHAR_SPACE:
-#ifndef EBCDIC       
-      case 0xa0:
-      case 0x1680:
-      case 0x180e:
-      case 0x2000:
-      case 0x2001:
-      case 0x2002:
-      case 0x2003:
-      case 0x2004:
-      case 0x2005:
-      case 0x2006:
-      case 0x2007:
-      case 0x2008:
-      case 0x2009:
-      case 0x200A:
-      case 0x202f:
-      case 0x205f:
-      case 0x3000:
-#endif  /* Not EBCDIC */ 
+      HSPACE_CASES: 
       return -next != ESC_h;
+       
       default:
       return -next == ESC_h;
       }
@@ -3295,16 +3250,9 @@ switch(op_code)
     case ESC_V:
     switch(c)
       {
-      case CHAR_LF:
-      case CHAR_VT:
-      case CHAR_FF:
-      case CHAR_CR:
-      case CHAR_NEL:
-#ifndef EBCDIC 
-      case 0x2028:
-      case 0x2029:
-#endif  /* Not EBCDIC */ 
+      VSPACE_CASES: 
       return -next != ESC_v;
+       
       default:
       return -next == ESC_v;
       }

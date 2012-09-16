@@ -83,6 +83,9 @@ Version 8.32
 
 19. Improving the first n character searches.
 
+20. Turn case lists for horizontal and vertical white space into macros so that
+    they are defined only once.
+
 
 Version 8.31 06-July-2012
 -------------------------

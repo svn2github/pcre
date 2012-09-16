@@ -529,11 +529,11 @@ changed in future to be a fixed number of bytes or to depend on LINK_SIZE. */
 #define MAX_MARK ((1 << (sizeof(pcre_uchar)*8)) - 1)
 
 /* When UTF encoding is being used, a character is no longer just a single
-character. The macros for character handling generate simple sequences when
-used in character-mode, and more complicated ones for UTF characters.
-GETCHARLENTEST and other macros are not used when UTF is not supported,
-so they are not defined. To make sure they can never even appear when
-UTF support is omitted, we don't even define them. */
+byte. The macros for character handling generate simple sequences when used in
+character-mode, and more complicated ones for UTF characters. GETCHARLENTEST
+and other macros are not used when UTF is not supported, so they are not
+defined. To make sure they can never even appear when UTF support is omitted,
+we don't even define them. */
 
 #ifndef SUPPORT_UTF
 
@@ -832,6 +832,68 @@ code. */
 #endif  /* SUPPORT_UTF */
 
 
+/* Tests for Unicode horizontal and vertical whitespace characters must check a
+number of different values. Using a switch statement for this generates the
+fastest code (no loop, no memory access), and there are several places where
+this happens. In order to ensure that all the case lists remain in step, we use
+macros so that there is only one place where the lists are defined. 
+
+NOTE: These values are also used explicitly in pcre_compile.c when processing
+\h, \H, \v and \V in a character class, so any changes here should be
+duplicated there as well. They also appear in pcre_jit_compile.c. */
+
+#ifndef EBCDIC
+#define HSPACE_MULTIBYTE_CASES \
+      case 0x1680:    /* OGHAM SPACE MARK */ \
+      case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */ \
+      case 0x2000:    /* EN QUAD */ \
+      case 0x2001:    /* EM QUAD */ \
+      case 0x2002:    /* EN SPACE */ \
+      case 0x2003:    /* EM SPACE */ \
+      case 0x2004:    /* THREE-PER-EM SPACE */ \
+      case 0x2005:    /* FOUR-PER-EM SPACE */ \
+      case 0x2006:    /* SIX-PER-EM SPACE */ \
+      case 0x2007:    /* FIGURE SPACE */ \
+      case 0x2008:    /* PUNCTUATION SPACE */ \
+      case 0x2009:    /* THIN SPACE */ \
+      case 0x200A:    /* HAIR SPACE */ \
+      case 0x202f:    /* NARROW NO-BREAK SPACE */ \
+      case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */ \
+      case 0x3000     /* IDEOGRAPHIC SPACE */
+
+#define HSPACE_BYTE_CASES \
+      case CHAR_HT: \
+      case CHAR_SPACE: \
+      case 0xa0       /* NBSP */
+
+#define VSPACE_MULTIBYTE_CASES \
+      case 0x2028:    /* LINE SEPARATOR */ \
+      case 0x2029     /* PARAGRAPH SEPARATOR */
+
+#else   /* EBCDIC */
+#define HSPACE_MULTIBYTE_CASES
+#define VSPACE_MULTIBYTE_CASES
+
+#define HSPACE_BYTE_CASES \
+      case CHAR_HT: \
+      case CHAR_SPACE
+#endif  /* EBCDIC */
+
+#define VSPACE_BYTE_CASES \
+      case CHAR_LF: \
+      case CHAR_VT: \
+      case CHAR_FF: \
+      case CHAR_CR: \
+      case CHAR_NEL
+
+#define HSPACE_CASES \
+        HSPACE_BYTE_CASES: \
+        HSPACE_MULTIBYTE_CASES
+
+#define VSPACE_CASES \
+        VSPACE_BYTE_CASES: \
+        VSPACE_MULTIBYTE_CASES
+
 /* In case there is no definition of offsetof() provided - though any proper
 Standard C system should have one. */
 
@@ -946,15 +1008,15 @@ macros to give the functions distinct names. */
 
 /* UTF-8 support is not enabled; use the platform-dependent character literals
 so that PCRE works in both ASCII and EBCDIC environments, but only in non-UTF
-mode. Newline characters are problematic in EBCDIC. Though it has CR and LF 
+mode. Newline characters are problematic in EBCDIC. Though it has CR and LF
 characters, a common practice has been to use its NL (0x15) character as the
-line terminator in C-like processing environments. However, sometimes the LF 
+line terminator in C-like processing environments. However, sometimes the LF
 (0x25) character is used instead, according to this Unicode document:
 
 http://unicode.org/standard/reports/tr13/tr13-5.html
 
-PCRE defaults EBCDIC NL to 0x15, but has a build-time option to select 0x25 
-instead. Whichever is *not* chosen is defined as NEL. 
+PCRE defaults EBCDIC NL to 0x15, but has a build-time option to select 0x25
+instead. Whichever is *not* chosen is defined as NEL.
 
 In both ASCII and EBCDIC environments, CHAR_NL and CHAR_LF are synonyms for the
 same code point. */
@@ -983,7 +1045,7 @@ same code point. */
 
 #else  /* Not EBCDIC */
 
-/* In ASCII/Unicode, linefeed is '\n' and we equate this to NL for 
+/* In ASCII/Unicode, linefeed is '\n' and we equate this to NL for
 compatibility. NEL is the Unicode newline character; make sure it is
 a positive value. */
 
@@ -2083,7 +2145,7 @@ typedef struct compile_data {
   int  external_flags;              /* External flag bits to be set */
   int  req_varyopt;                 /* "After variable item" flag for reqbyte */
   BOOL had_accept;                  /* (*ACCEPT) encountered */
-  BOOL had_pruneorskip;             /* (*PRUNE) or (*SKIP) encountered */ 
+  BOOL had_pruneorskip;             /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;            /* Lookbehinds need later checking */
   int  nltype;                      /* Newline type */
   int  nllen;                       /* Newline string length */

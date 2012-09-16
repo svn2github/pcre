@@ -1448,15 +1448,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case CHAR_LF:
-          case CHAR_VT:
-          case CHAR_FF:
-          case CHAR_CR:
-          case CHAR_NEL:
-#ifndef EBCDIC
-          case 0x2028:
-          case 0x2029:
-#endif  /* Not EBCDIC */
+          VSPACE_CASES: 
           OK = TRUE;
           break;
 
@@ -1489,27 +1481,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case CHAR_HT:
-          case CHAR_SPACE:
-#ifndef EBCDIC
-          case 0xa0:      /* NBSP */
-          case 0x1680:    /* OGHAM SPACE MARK */
-          case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-          case 0x2000:    /* EN QUAD */
-          case 0x2001:    /* EM QUAD */
-          case 0x2002:    /* EN SPACE */
-          case 0x2003:    /* EM SPACE */
-          case 0x2004:    /* THREE-PER-EM SPACE */
-          case 0x2005:    /* FOUR-PER-EM SPACE */
-          case 0x2006:    /* SIX-PER-EM SPACE */
-          case 0x2007:    /* FIGURE SPACE */
-          case 0x2008:    /* PUNCTUATION SPACE */
-          case 0x2009:    /* THIN SPACE */
-          case 0x200A:    /* HAIR SPACE */
-          case 0x202f:    /* NARROW NO-BREAK SPACE */
-          case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-          case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */
+          HSPACE_CASES: 
           OK = TRUE;
           break;
 
@@ -1729,15 +1701,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case CHAR_LF:
-          case CHAR_VT:
-          case CHAR_FF:
-          case CHAR_CR:
-          case CHAR_NEL:
-#ifndef EBCDIC
-          case 0x2028:
-          case 0x2029:
-#endif  /* Not EBCDIC */
+          VSPACE_CASES: 
           OK = TRUE;
           break;
 
@@ -1777,27 +1741,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case CHAR_HT:
-          case CHAR_SPACE:
-#ifndef EBCDIC 
-          case 0xa0:      /* NBSP */
-          case 0x1680:    /* OGHAM SPACE MARK */
-          case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-          case 0x2000:    /* EN QUAD */
-          case 0x2001:    /* EM QUAD */
-          case 0x2002:    /* EN SPACE */
-          case 0x2003:    /* EM SPACE */
-          case 0x2004:    /* THREE-PER-EM SPACE */
-          case 0x2005:    /* FOUR-PER-EM SPACE */
-          case 0x2006:    /* SIX-PER-EM SPACE */
-          case 0x2007:    /* FIGURE SPACE */
-          case 0x2008:    /* PUNCTUATION SPACE */
-          case 0x2009:    /* THIN SPACE */
-          case 0x200A:    /* HAIR SPACE */
-          case 0x202f:    /* NARROW NO-BREAK SPACE */
-          case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-          case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */           
+          HSPACE_CASES: 
           OK = TRUE;
           break;
 
@@ -1999,15 +1943,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case CHAR_LF:
-          case CHAR_VT:
-          case CHAR_FF:
-          case CHAR_CR:
-          case CHAR_NEL:
-#ifndef EBCDIC
-          case 0x2028:
-          case 0x2029:
-#endif  /* Not EBCDIC */
+          VSPACE_CASES: 
           OK = TRUE;
           break;
 
@@ -2043,27 +1979,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          case CHAR_HT:
-          case CHAR_SPACE:
-#ifndef EBCDIC 
-          case 0xa0:      /* NBSP */
-          case 0x1680:    /* OGHAM SPACE MARK */
-          case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-          case 0x2000:    /* EN QUAD */
-          case 0x2001:    /* EM QUAD */
-          case 0x2002:    /* EN SPACE */
-          case 0x2003:    /* EM SPACE */
-          case 0x2004:    /* THREE-PER-EM SPACE */
-          case 0x2005:    /* FOUR-PER-EM SPACE */
-          case 0x2006:    /* SIX-PER-EM SPACE */
-          case 0x2007:    /* FIGURE SPACE */
-          case 0x2008:    /* PUNCTUATION SPACE */
-          case 0x2009:    /* THIN SPACE */
-          case 0x200A:    /* HAIR SPACE */
-          case 0x202f:    /* NARROW NO-BREAK SPACE */
-          case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-          case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */           
+          HSPACE_CASES: 
           OK = TRUE;
           break;
 
@@ -2206,15 +2122,7 @@ for (;;)
       case OP_NOT_VSPACE:
       if (clen > 0) switch(c)
         {
-        case CHAR_LF:
-        case CHAR_VT:
-        case CHAR_FF:
-        case CHAR_CR:
-        case CHAR_NEL:
-#ifndef EBCDIC
-        case 0x2028:
-        case 0x2029:
-#endif  /* Not EBCDIC */
+        VSPACE_CASES: 
         break;
 
         default:
@@ -2227,19 +2135,12 @@ for (;;)
       case OP_VSPACE:
       if (clen > 0) switch(c)
         {
-        case CHAR_LF:
-        case CHAR_VT:
-        case CHAR_FF:
-        case CHAR_CR:
-        case CHAR_NEL:
-#ifndef EBCDIC
-        case 0x2028:
-        case 0x2029:
-#endif  /* Not EBCDIC */
+        VSPACE_CASES: 
         ADD_NEW(state_offset + 1, 0);
         break;
 
-        default: break;
+        default: 
+        break;
         }
       break;
 
@@ -2247,27 +2148,7 @@ for (;;)
       case OP_NOT_HSPACE:
       if (clen > 0) switch(c)
         {
-        case CHAR_HT:
-        case CHAR_SPACE:
-#ifndef EBCDIC 
-        case 0xa0:      /* NBSP */
-        case 0x1680:    /* OGHAM SPACE MARK */
-        case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-        case 0x2000:    /* EN QUAD */
-        case 0x2001:    /* EM QUAD */
-        case 0x2002:    /* EN SPACE */
-        case 0x2003:    /* EM SPACE */
-        case 0x2004:    /* THREE-PER-EM SPACE */
-        case 0x2005:    /* FOUR-PER-EM SPACE */
-        case 0x2006:    /* SIX-PER-EM SPACE */
-        case 0x2007:    /* FIGURE SPACE */
-        case 0x2008:    /* PUNCTUATION SPACE */
-        case 0x2009:    /* THIN SPACE */
-        case 0x200A:    /* HAIR SPACE */
-        case 0x202f:    /* NARROW NO-BREAK SPACE */
-        case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-        case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */           
+        HSPACE_CASES: 
         break;
 
         default:
@@ -2280,29 +2161,12 @@ for (;;)
       case OP_HSPACE:
       if (clen > 0) switch(c)
         {
-        case CHAR_HT:
-        case CHAR_SPACE:
-#ifndef EBCDIC 
-        case 0xa0:      /* NBSP */
-        case 0x1680:    /* OGHAM SPACE MARK */
-        case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */
-        case 0x2000:    /* EN QUAD */
-        case 0x2001:    /* EM QUAD */
-        case 0x2002:    /* EN SPACE */
-        case 0x2003:    /* EM SPACE */
-        case 0x2004:    /* THREE-PER-EM SPACE */
-        case 0x2005:    /* FOUR-PER-EM SPACE */
-        case 0x2006:    /* SIX-PER-EM SPACE */
-        case 0x2007:    /* FIGURE SPACE */
-        case 0x2008:    /* PUNCTUATION SPACE */
-        case 0x2009:    /* THIN SPACE */
-        case 0x200A:    /* HAIR SPACE */
-        case 0x202f:    /* NARROW NO-BREAK SPACE */
-        case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */
-        case 0x3000:    /* IDEOGRAPHIC SPACE */
-#endif  /* Not EBCDIC */           
+        HSPACE_CASES: 
         ADD_NEW(state_offset + 1, 0);
         break;
+        
+        default:
+        break;  
         }
       break;
 
