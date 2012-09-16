@@ -81,6 +81,8 @@ Version 8.32
     substrings matched by the 1st and 2nd capturing parentheses. A separating 
     string can be specified by --om-separator (default empty). 
 
+19. Improving the first n character searches.
+
 
 Version 8.31 06-July-2012
 -------------------------

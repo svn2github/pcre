@@ -2563,47 +2563,37 @@ if (newlinecheck)
 return mainloop;
 }
 
-static SLJIT_INLINE BOOL fast_forward_first_two_chars(compiler_common *common, BOOL firstline)
+#define MAX_N_CHARS 3
+
+static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOOL firstline)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
-struct sljit_jump *found;
-pcre_int32 chars[4];
+pcre_int32 chars[MAX_N_CHARS * 2];
 pcre_uchar *cc = common->start + 1 + IMM2_SIZE;
 int location = 0;
 pcre_int32 len, c, bit, caseless;
-BOOL must_end;
+int must_stop;
 
-#ifdef COMPILE_PCRE8
-union {
-    sljit_uh ascombined;
-    sljit_ub asuchars[2];
-} pair;
-#else
-union {
-    sljit_ui ascombined;
-    sljit_uh asuchars[2];
-} pair;
-#endif
-
+/* We do not support alternatives now. */
 if (*(common->start + GET(common->start, 1)) == OP_ALT)
   return FALSE;
 
 while (TRUE)
   {
   caseless = 0;
-  must_end = TRUE;
+  must_stop = 1;
   switch(*cc)
     {
     case OP_CHAR:
-    must_end = FALSE;
+    must_stop = 0;
     cc++;
     break;
 
     case OP_CHARI:
     caseless = 1;
-    must_end = FALSE;
+    must_stop = 0;
     cc++;
     break;
 
@@ -2645,8 +2635,12 @@ while (TRUE)
     break;
 
     default:
-    return FALSE;
+    must_stop = 2;
+    break;
     }
+
+  if (must_stop == 2)
+      break;
 
   len = 1;
 #ifdef SUPPORT_UTF
@@ -2670,7 +2664,7 @@ while (TRUE)
   else
     caseless = 0;
 
-  while (len > 0 && location < 2 * 2)
+  while (len > 0 && location < MAX_N_CHARS * 2)
     {
     c = *cc;
     bit = 0;
@@ -2688,71 +2682,55 @@ while (TRUE)
     cc++;
     }
 
-  if (location == 2 * 2)
+  if (location >= MAX_N_CHARS * 2 || must_stop != 0)
     break;
-  else if (must_end)
-    return FALSE;
   }
+
+/* At least two characters are required. */
+if (location < 2 * 2)
+    return FALSE;
 
 if (firstline)
   {
   SLJIT_ASSERT(common->first_line_end != 0);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
-  OP2(SLJIT_SUB, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, SLJIT_IMM, 1);
+  OP2(SLJIT_SUB, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, SLJIT_IMM, (location >> 1) - 1);
   }
 else
-  OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, 1);
+  OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, (location >> 1) - 1);
 
 start = LABEL();
 quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-#if defined SLJIT_UNALIGNED && SLJIT_UNALIGNED
-#ifdef COMPILE_PCRE8
-OP1(SLJIT_MOV_UH, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-#else /* COMPILE_PCRE8 */
-OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-#endif
 
-#else /* SLJIT_UNALIGNED */
-
-#if defined SLJIT_BIG_ENDIAN && SLJIT_BIG_ENDIAN
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), 0);
-OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
-#else /* SLJIT_BIG_ENDIAN */
+OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
 OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
-OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-#endif /* SLJIT_BIG_ENDIAN */
-
-#ifdef COMPILE_PCRE8
-OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 8);
-#else /* COMPILE_PCRE8 */
-OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 16);
-#endif
-OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-
-#endif
-
-if (chars[1] != 0 || chars[3] != 0)
-  {
-  pair.asuchars[0] = chars[1];
-  pair.asuchars[1] = chars[3];
-  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, pair.ascombined);
-  }
-
-pair.asuchars[0] = chars[0];
-pair.asuchars[1] = chars[2];
-found = CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, pair.ascombined);
-
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-JUMPTO(SLJIT_JUMP, start);
-JUMPHERE(found);
+if (chars[1] != 0)
+  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[1]);
+CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[0], start);
+if (location > 2 * 2)
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+if (chars[3] != 0)
+  OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, chars[3]);
+CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, chars[2], start);
+if (location > 2 * 2)
+  {
+  if (chars[5] != 0)
+    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[5]);
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[4], start);
+  }
+OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+
 JUMPHERE(quit);
 
 if (firstline)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 else
-  OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, 1);
+  OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, (location >> 1) - 1);
 return TRUE;
 }
+
+#undef MAX_N_CHARS
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_uchar first_char, BOOL caseless, BOOL firstline)
 {
@@ -7916,7 +7894,7 @@ if ((re->options & PCRE_ANCHORED) == 0)
   /* Forward search if possible. */
   if ((re->options & PCRE_NO_START_OPTIMIZE) == 0)
     {
-    if (mode == JIT_COMPILE && fast_forward_first_two_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
+    if (mode == JIT_COMPILE && fast_forward_first_n_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
       { /* Do nothing */ }
     else if ((re->flags & PCRE_FIRSTSET) != 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0, (re->options & PCRE_FIRSTLINE) != 0);
