@@ -56,6 +56,7 @@ int fulltype = UCD_CHARTYPE(c);
 int script = UCD_SCRIPT(c);
 int gbprop = UCD_GRAPHBREAK(c);
 int othercase = UCD_OTHERCASE(c);
+int caseset = UCD_CASESET(c);
 
 unsigned char *fulltypename = US"??";
 unsigned char *typename = US"??";
@@ -236,7 +237,16 @@ switch(script)
   }
 
 printf("%04x %s: %s, %s, %s", c, typename, fulltypename, scriptname, graphbreak);
-if (othercase != c) printf(", %04x", othercase);
+if (othercase != c) 
+  {
+  printf(", %04x", othercase);
+  if (caseset != 0)
+    {
+    const pcre_uint32 *p = PRIV(ucd_caseless_sets) + caseset - 1;
+    while (*(++p) < 0xffffffff)
+      if (*p != othercase && *p != c) printf(", %04x", *p);
+    }   
+  } 
 printf("\n");
 }
 

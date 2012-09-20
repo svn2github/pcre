@@ -44,10 +44,11 @@ pcre_chartables.c.non-standard
 
 README           This file.
 
-Unicode.tables   The files in this directory, DerivedGeneralCategory.txt,
-                 Scripts.txt and UnicodeData.txt, were downloaded from the
+Unicode.tables   The files in this directory (CaseFolding.txt, 
+                 DerivedGeneralCategory.txt, GraphemeBreakProperty.txt,
+                 Scripts.txt and UnicodeData.txt) were downloaded from the
                  Unicode web site. They contain information about Unicode
-                 characters and scripts.
+                 characters and scripts. 
 
 ucptest.c        A short C program for testing the Unicode property macros
                  that do lookups in the pcre_ucd.c data, mainly useful after
@@ -357,4 +358,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 18 June 2012
+Last updated: 20 September 2012

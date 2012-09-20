@@ -2435,9 +2435,11 @@ typedef struct {
   pcre_uint8 script;     /* ucp_Arabic, etc. */
   pcre_uint8 chartype;   /* ucp_Cc, etc. (general categories) */
   pcre_uint8 gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
+  pcre_uint8 caseset;    /* offset to multichar other cases or zero */ 
   pcre_int32 other_case; /* offset to other case, or zero if none */
 } ucd_record;
 
+extern const pcre_uint32 PRIV(ucd_caseless_sets)[];
 extern const ucd_record  PRIV(ucd_records)[];
 extern const pcre_uint8  PRIV(ucd_stage1)[];
 extern const pcre_uint16 PRIV(ucd_stage2)[];
@@ -2459,6 +2461,7 @@ extern const int         PRIV(ucp_typerange)[];
 #define UCD_SCRIPT(ch)      GET_UCD(ch)->script
 #define UCD_CATEGORY(ch)    PRIV(ucp_gentype)[UCD_CHARTYPE(ch)]
 #define UCD_GRAPHBREAK(ch)  GET_UCD(ch)->gbprop
+#define UCD_CASESET(ch)     GET_UCD(ch)->caseset
 #define UCD_OTHERCASE(ch)   (ch + GET_UCD(ch)->other_case)
 
 #endif /* SUPPORT_UCP */

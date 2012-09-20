@@ -78,7 +78,7 @@ findprop 40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f
 0048 Letter: Upper case letter, Latin, Other, 0068
 0049 Letter: Upper case letter, Latin, Other, 0069
 004a Letter: Upper case letter, Latin, Other, 006a
-004b Letter: Upper case letter, Latin, Other, 006b
+004b Letter: Upper case letter, Latin, Other, 006b, 212a
 004c Letter: Upper case letter, Latin, Other, 006c
 004d Letter: Upper case letter, Latin, Other, 006d
 004e Letter: Upper case letter, Latin, Other, 006e
@@ -87,7 +87,7 @@ findprop 50 51 52 53 54 55 56 57 58 59 5a 5b 5c 5d 5e 5f
 0050 Letter: Upper case letter, Latin, Other, 0070
 0051 Letter: Upper case letter, Latin, Other, 0071
 0052 Letter: Upper case letter, Latin, Other, 0072
-0053 Letter: Upper case letter, Latin, Other, 0073
+0053 Letter: Upper case letter, Latin, Other, 0073, 017f
 0054 Letter: Upper case letter, Latin, Other, 0074
 0055 Letter: Upper case letter, Latin, Other, 0075
 0056 Letter: Upper case letter, Latin, Other, 0076
@@ -112,7 +112,7 @@ findprop 60 61 62 63 64 65 66 67 68 69 6a 6b 6c 6d 6e 6f
 0068 Letter: Lower case letter, Latin, Other, 0048
 0069 Letter: Lower case letter, Latin, Other, 0049
 006a Letter: Lower case letter, Latin, Other, 004a
-006b Letter: Lower case letter, Latin, Other, 004b
+006b Letter: Lower case letter, Latin, Other, 004b, 212a
 006c Letter: Lower case letter, Latin, Other, 004c
 006d Letter: Lower case letter, Latin, Other, 004d
 006e Letter: Lower case letter, Latin, Other, 004e
@@ -121,7 +121,7 @@ findprop 70 71 72 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f
 0070 Letter: Lower case letter, Latin, Other, 0050
 0071 Letter: Lower case letter, Latin, Other, 0051
 0072 Letter: Lower case letter, Latin, Other, 0052
-0073 Letter: Lower case letter, Latin, Other, 0053
+0073 Letter: Lower case letter, Latin, Other, 0053, 017f
 0074 Letter: Lower case letter, Latin, Other, 0054
 0075 Letter: Lower case letter, Latin, Other, 0055
 0076 Letter: Lower case letter, Latin, Other, 0056
@@ -192,7 +192,7 @@ findprop b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf
 00b2 Number: Other number, Common, Other
 00b3 Number: Other number, Common, Other
 00b4 Symbol: Modifier symbol, Common, Other
-00b5 Letter: Lower case letter, Common, Other, 039c
+00b5 Letter: Lower case letter, Common, Other, 03bc, 039c
 00b6 Punctuation: Other punctuation, Common, Other
 00b7 Punctuation: Other punctuation, Common, Other
 00b8 Symbol: Modifier symbol, Common, Other
@@ -209,7 +209,7 @@ findprop c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 ca cb cc cd ce cf
 00c2 Letter: Upper case letter, Latin, Other, 00e2
 00c3 Letter: Upper case letter, Latin, Other, 00e3
 00c4 Letter: Upper case letter, Latin, Other, 00e4
-00c5 Letter: Upper case letter, Latin, Other, 00e5
+00c5 Letter: Upper case letter, Latin, Other, 00e5, 212b
 00c6 Letter: Upper case letter, Latin, Other, 00e6
 00c7 Letter: Upper case letter, Latin, Other, 00e7
 00c8 Letter: Upper case letter, Latin, Other, 00e8
@@ -236,14 +236,14 @@ findprop d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df
 00dc Letter: Upper case letter, Latin, Other, 00fc
 00dd Letter: Upper case letter, Latin, Other, 00fd
 00de Letter: Upper case letter, Latin, Other, 00fe
-00df Letter: Lower case letter, Latin, Other
+00df Letter: Lower case letter, Latin, Other, 1e9e
 findprop e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 ea eb ec ed ee ef 
 00e0 Letter: Lower case letter, Latin, Other, 00c0
 00e1 Letter: Lower case letter, Latin, Other, 00c1
 00e2 Letter: Lower case letter, Latin, Other, 00c2
 00e3 Letter: Lower case letter, Latin, Other, 00c3
 00e4 Letter: Lower case letter, Latin, Other, 00c4
-00e5 Letter: Lower case letter, Latin, Other, 00c5
+00e5 Letter: Lower case letter, Latin, Other, 00c5, 212b
 00e6 Letter: Lower case letter, Latin, Other, 00c6
 00e7 Letter: Lower case letter, Latin, Other, 00c7
 00e8 Letter: Lower case letter, Latin, Other, 00c8
