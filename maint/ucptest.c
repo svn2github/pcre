@@ -243,7 +243,7 @@ if (othercase != c)
   if (caseset != 0)
     {
     const pcre_uint32 *p = PRIV(ucd_caseless_sets) + caseset - 1;
-    while (*(++p) < 0xffffffff)
+    while (*(++p) < NOTACHAR)
       if (*p != othercase && *p != c) printf(", %04x", *p);
     }   
   } 

@@ -130,7 +130,9 @@ return 0;
 
 if (!utf || (c & 0xc0) != 0xc0)
   {
-  if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
+  if (PRINTABLE(c)) fprintf(f, "%c", c); 
+  else if (c < 0x80) fprintf(f, "\\x%02x", c);
+  else fprintf(f, "\\x{%02x}", c);
   return 0;
   }
 else
@@ -167,8 +169,8 @@ else
 if (!utf || (c & 0xfc00) != 0xd800)
   {
   if (PRINTABLE(c)) fprintf(f, "%c", c);
-  else if (c <= 0xff) fprintf(f, "\\x%02x", c);
-  else fprintf(f, "\\x{%x}", c);
+  else if (c <= 0x80) fprintf(f, "\\x%02x", c);
+  else fprintf(f, "\\x{%02x}", c);
   return 0;
   }
 else

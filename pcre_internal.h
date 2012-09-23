@@ -834,78 +834,105 @@ code. */
 
 /* Tests for Unicode horizontal and vertical whitespace characters must check a
 number of different values. Using a switch statement for this generates the
-fastest code (no loop, no memory access), and there are several places where
-this happens. In order to ensure that all the case lists remain in step, we use
-macros so that there is only one place where the lists are defined. 
+fastest code (no loop, no memory access), and there are several places in the
+interpreter code where this happens. In order to ensure that all the case lists
+remain in step, we use macros so that there is only one place where the lists
+are defined.
 
-NOTE: These values are also used explicitly in pcre_compile.c when processing
-\h, \H, \v and \V in a character class, so any changes here should be
-duplicated there as well. They also appear in pcre_jit_compile.c. */
+These values are also required as lists in pcre_compile.c when processing \h,
+\H, \v and \V in a character class. The lists are defined in pcre_tables.c, but
+macros that define the values are here so that all the definitions are
+together. The lists must be in ascending character order, terminated by 
+NOTACHAR (which is 0xffffffff).
+
+Any changes should ensure that the various macros are kept in step with each
+other. NOTE: The values also appear in pcre_jit_compile.c. */
 
 /* ------ ASCII/Unicode environments ------ */
 
 #ifndef EBCDIC
+
+#define HSPACE_LIST \
+  CHAR_HT, CHAR_SPACE, 0xa0, \
+  0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, \
+  0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202f, 0x205f, 0x3000, \
+  NOTACHAR 
+
 #define HSPACE_MULTIBYTE_CASES \
-      case 0x1680:    /* OGHAM SPACE MARK */ \
-      case 0x180e:    /* MONGOLIAN VOWEL SEPARATOR */ \
-      case 0x2000:    /* EN QUAD */ \
-      case 0x2001:    /* EM QUAD */ \
-      case 0x2002:    /* EN SPACE */ \
-      case 0x2003:    /* EM SPACE */ \
-      case 0x2004:    /* THREE-PER-EM SPACE */ \
-      case 0x2005:    /* FOUR-PER-EM SPACE */ \
-      case 0x2006:    /* SIX-PER-EM SPACE */ \
-      case 0x2007:    /* FIGURE SPACE */ \
-      case 0x2008:    /* PUNCTUATION SPACE */ \
-      case 0x2009:    /* THIN SPACE */ \
-      case 0x200A:    /* HAIR SPACE */ \
-      case 0x202f:    /* NARROW NO-BREAK SPACE */ \
-      case 0x205f:    /* MEDIUM MATHEMATICAL SPACE */ \
-      case 0x3000     /* IDEOGRAPHIC SPACE */
+  case 0x1680:  /* OGHAM SPACE MARK */ \
+  case 0x180e:  /* MONGOLIAN VOWEL SEPARATOR */ \
+  case 0x2000:  /* EN QUAD */ \
+  case 0x2001:  /* EM QUAD */ \
+  case 0x2002:  /* EN SPACE */ \
+  case 0x2003:  /* EM SPACE */ \
+  case 0x2004:  /* THREE-PER-EM SPACE */ \
+  case 0x2005:  /* FOUR-PER-EM SPACE */ \
+  case 0x2006:  /* SIX-PER-EM SPACE */ \
+  case 0x2007:  /* FIGURE SPACE */ \
+  case 0x2008:  /* PUNCTUATION SPACE */ \
+  case 0x2009:  /* THIN SPACE */ \
+  case 0x200A:  /* HAIR SPACE */ \
+  case 0x202f:  /* NARROW NO-BREAK SPACE */ \
+  case 0x205f:  /* MEDIUM MATHEMATICAL SPACE */ \
+  case 0x3000   /* IDEOGRAPHIC SPACE */
 
 #define HSPACE_BYTE_CASES \
-      case CHAR_HT: \
-      case CHAR_SPACE: \
-      case 0xa0       /* NBSP */
+  case CHAR_HT: \
+  case CHAR_SPACE: \
+  case 0xa0     /* NBSP */
+      
+#define HSPACE_CASES \
+  HSPACE_BYTE_CASES: \
+  HSPACE_MULTIBYTE_CASES
+
+#define VSPACE_LIST \
+  CHAR_LF, CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, 0x2028, 0x2029, NOTACHAR 
 
 #define VSPACE_MULTIBYTE_CASES \
-      case 0x2028:    /* LINE SEPARATOR */ \
-      case 0x2029     /* PARAGRAPH SEPARATOR */
+  case 0x2028:    /* LINE SEPARATOR */ \
+  case 0x2029     /* PARAGRAPH SEPARATOR */
 
 #define VSPACE_BYTE_CASES \
-      case CHAR_LF: \
-      case CHAR_VT: \
-      case CHAR_FF: \
-      case CHAR_CR: \
-      case CHAR_NEL
-
-#define HSPACE_CASES \
-        HSPACE_BYTE_CASES: \
-        HSPACE_MULTIBYTE_CASES
+  case CHAR_LF: \
+  case CHAR_VT: \
+  case CHAR_FF: \
+  case CHAR_CR: \
+  case CHAR_NEL
 
 #define VSPACE_CASES \
-        VSPACE_BYTE_CASES: \
-        VSPACE_MULTIBYTE_CASES
+  VSPACE_BYTE_CASES: \
+  VSPACE_MULTIBYTE_CASES
 
 /* ------ EBCDIC environments ------ */
 
 #else
+#define HSPACE_LIST CHAR_HT, CHAR_SPACE
+
 #define HSPACE_BYTE_CASES \
-      case CHAR_HT: \
-      case CHAR_SPACE
-      
-#define VSPACE_BYTE_CASES \
-      case CHAR_LF: \
-      case CHAR_VT: \
-      case CHAR_FF: \
-      case CHAR_CR: \
-      case CHAR_NEL
-      
+  case CHAR_HT: \
+  case CHAR_SPACE
+
 #define HSPACE_CASES HSPACE_BYTE_CASES
+
+#ifdef EBCDIC_NL25
+#define VSPACE_LIST \
+  CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, CHAR_LF, NOTACHAR 
+#else
+#define VSPACE_LIST \
+  CHAR_VT, CHAR_FF, CHAR_CR, CHAR_LF, CHAR_NEL, NOTACHAR 
+#endif   
+
+#define VSPACE_BYTE_CASES \
+  case CHAR_LF: \
+  case CHAR_VT: \
+  case CHAR_FF: \
+  case CHAR_CR: \
+  case CHAR_NEL
+
 #define VSPACE_CASES VSPACE_BYTE_CASES
 #endif  /* EBCDIC */
 
-/* ------ End of whitespace case macros ------ */
+/* ------ End of whitespace macros ------ */
 
 
 /* In case there is no definition of offsetof() provided - though any proper
@@ -2351,22 +2378,22 @@ but are not part of the PCRE public API. The data for these tables is in the
 pcre_tables.c module. */
 
 #ifdef COMPILE_PCRE8
-
 extern const int            PRIV(utf8_table1)[];
 extern const int            PRIV(utf8_table1_size);
 extern const int            PRIV(utf8_table2)[];
 extern const int            PRIV(utf8_table3)[];
 extern const pcre_uint8     PRIV(utf8_table4)[];
-
 #endif /* COMPILE_PCRE8 */
 
 extern const char           PRIV(utt_names)[];
 extern const ucp_type_table PRIV(utt)[];
 extern const int            PRIV(utt_size);
 
+extern const pcre_uint8     PRIV(OP_lengths)[];
 extern const pcre_uint8     PRIV(default_tables)[];
 
-extern const pcre_uint8     PRIV(OP_lengths)[];
+extern const pcre_uint32    PRIV(hspace_list)[];
+extern const pcre_uint32    PRIV(vspace_list)[];
 
 
 /* Internal shared functions. These are functions that are used by more than
@@ -2435,7 +2462,7 @@ typedef struct {
   pcre_uint8 script;     /* ucp_Arabic, etc. */
   pcre_uint8 chartype;   /* ucp_Cc, etc. (general categories) */
   pcre_uint8 gbprop;     /* ucp_gbControl, etc. (grapheme break property) */
-  pcre_uint8 caseset;    /* offset to multichar other cases or zero */ 
+  pcre_uint8 caseset;    /* offset to multichar other cases or zero */
   pcre_int32 other_case; /* offset to other case, or zero if none */
 } ucd_record;
 

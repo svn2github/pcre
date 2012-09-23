@@ -2268,4 +2268,34 @@ Partial match: AA
 
 /-- --/
 
+/\x{1e9e}+/8i
+    \x{1e9e}\x{00df}
+ 0: \x{1e9e}\x{df}
+ 1: \x{1e9e}
+
+/[z\x{1e9e}]+/8i
+    \x{1e9e}\x{00df}
+ 0: \x{1e9e}\x{df}
+ 1: \x{1e9e}
+
+/\x{00df}+/8i
+    \x{1e9e}\x{00df}
+ 0: \x{1e9e}\x{df}
+ 1: \x{1e9e}
+
+/[z\x{00df}]+/8i
+    \x{1e9e}\x{00df}
+ 0: \x{1e9e}\x{df}
+ 1: \x{1e9e}
+
+/\x{1f88}+/8i
+    \x{1f88}\x{1f80} 
+ 0: \x{1f88}\x{1f80}
+ 1: \x{1f88}
+
+/[z\x{1f88}]+/8i
+    \x{1f88}\x{1f80} 
+ 0: \x{1f88}\x{1f80}
+ 1: \x{1f88}
+
 /-- End of testinput10 --/ 

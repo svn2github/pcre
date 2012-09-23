@@ -56,9 +56,9 @@
 #
 # This script constructs four tables. The ucd_caseless_sets table contains
 # lists of characters that all match each other caselessly. Each list is
-# in order, and is terminated by 0xffffffff, which is of course larger than any
-# valid character. The first list is empty; this is used for characters that
-# are not part of any list.
+# in order, and is terminated by NOTACHAR (0xffffffff), which is larger than
+# any valid character. The first list is empty; this is used for characters
+# that are not part of any list.
 #
 # The ucd_records table contains one instance of every unique record that is
 # required. The ucd_stage1 table is indexed by a character's block number, and
@@ -435,12 +435,12 @@ print record_struct
 # --- Added by PH: output the table of caseless character sets ---
 
 print "const pcre_uint32 PRIV(ucd_caseless_sets)[] = {"
-print "  0xffffffff,"
+print "  NOTACHAR,"
 for s in sets:
   s = sorted(s)
   for x in s:
     print '  0x%04x,' % x,
-  print '  0xffffffff,'   
+  print '  NOTACHAR,'   
 print '};'
 print
 

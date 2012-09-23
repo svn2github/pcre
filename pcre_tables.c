@@ -58,6 +58,12 @@ the definition is next to the definition of the opcodes in pcre_internal.h. */
 
 const pcre_uint8 PRIV(OP_lengths)[] = { OP_LENGTHS };
 
+/* Tables of horizontal and vertical whitespace characters, suitable for
+adding to classes. */
+
+const pcre_uint32 PRIV(hspace_list)[] = { HSPACE_LIST };
+const pcre_uint32 PRIV(vspace_list)[] = { VSPACE_LIST };
+
 
 
 /*************************************************

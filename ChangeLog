@@ -85,6 +85,29 @@ Version 8.32
 
 20. Turn case lists for horizontal and vertical white space into macros so that
     they are defined only once.
+    
+21. This set of changes together give more compatible Unicode case-folding
+    behaviour for characters that have more than one other case.
+    
+    (a) The Unicode property table now has offsets into a new table of sets of
+        three or more characters that are case-equivalent. The MultiStage2.py 
+        script that generates these tables (the pcre_ucd.c file) now scans 
+        CaseFolding.txt instead of UnicodeData.txt for character case 
+        information.
+        
+    (b) The code for adding characters or ranges of characters to a character
+        class has been abstracted into a generalized function that also handles
+        case-independence. In UTF-mode with UCP support, this uses the new data
+        to handle characters with more than one other case.
+        
+    (c) A bug that is fixed as a result of (b) is that codepoints less than 256
+        whose other case is greater than 256 are now correctly matched
+        caselessly. Previously, the high codepoint matched the low one, but not 
+        vice versa. 
+        
+    (d) The processing of \h, \H, \v, and \ in character classes now makes use
+        of the new class addition function, using character lists defined as
+        macros alongside the case definitions of 20 above.
 
 
 Version 8.31 06-July-2012

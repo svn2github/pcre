@@ -68,7 +68,7 @@ COMPILE_PCREx macro will already be appropriately set. */
 
 /* Macro for setting individual bits in class bitmaps. */
 
-#define SETBIT(a,b) a[b/8] |= (1 << (b%8))
+#define SETBIT(a,b) a[(b)/8] |= (1 << ((b)&7))
 
 /* Maximum length value to check against when making sure that the integer that
 holds the compiled pattern length does not overflow. We make it a bit less than
@@ -76,6 +76,17 @@ INT_MAX to allow for adding in group terminating bytes, so that we don't have
 to check them every time. */
 
 #define OFLOW_MAX (INT_MAX - 20)
+
+/* Definitions to allow mutual recursion */
+
+static int
+  add_list_to_class(pcre_uint8 *, pcre_uchar **, int, compile_data *, 
+    const pcre_uint32 *, unsigned int);
+
+static BOOL
+  compile_regex(int, pcre_uchar **, const pcre_uchar **, int *, BOOL, BOOL, 
+    int, int, int *, int *, branch_chain *, compile_data *, int *);
+
 
 
 /*************************************************
@@ -630,12 +641,6 @@ static const pcre_uint8 ebcdic_chartab[] = { /* chartable partial dup */
   0x1c,0x1c,0x00,0x00,0x00,0x00,0x00,0x00};/*  8 -255 */
 #endif
 
-
-/* Definition to allow mutual recursion */
-
-static BOOL
-  compile_regex(int, pcre_uchar **, const pcre_uchar **, int *, BOOL, BOOL, int, int,
-    int *, int *, branch_chain *, compile_data *, int *);
 
 
 
@@ -2871,9 +2876,10 @@ PUT(previous_callout, 2 + LINK_SIZE, length);
 *************************************************/
 
 /* This function is passed the start and end of a class range, in UTF-8 mode
-with UCP support. It searches up the characters, looking for internal ranges of
+with UCP support. It searches up the characters, looking for ranges of
 characters in the "other" case. Each call returns the next one, updating the
-start address.
+start address. A character with multiple other cases is returned on its own 
+with a special return value.
 
 Arguments:
   cptr        points to starting character value; updated
@@ -2881,19 +2887,34 @@ Arguments:
   ocptr       where to put start of othercase range
   odptr       where to put end of othercase range
 
-Yield:        TRUE when range returned; FALSE when no more
+Yield:        -1 when no more
+               0 when a range is returned
+              >0 the CASESET offset for char with multiple other cases
+                in this case, ocptr contains the original 
 */
 
-static BOOL
+static int
 get_othercase_range(unsigned int *cptr, unsigned int d, unsigned int *ocptr,
   unsigned int *odptr)
 {
 unsigned int c, othercase, next;
+int co;
+
+/* Find the first character that has an other case. If it has multiple other 
+cases, return its case offset value. */
 
 for (c = *cptr; c <= d; c++)
-  { if ((othercase = UCD_OTHERCASE(c)) != c) break; }
+  { 
+  if ((co = UCD_CASESET(c)) != 0)
+    {
+    *ocptr = c++;   /* Character that has the set */
+    *cptr = c;      /* Rest of input range */
+    return co;
+    }    
+  if ((othercase = UCD_OTHERCASE(c)) != c) break; 
+  }
 
-if (c > d) return FALSE;
+if (c > d) return -1;  /* Reached end of range */
 
 *ocptr = othercase;
 next = othercase + 1;
@@ -2904,10 +2925,9 @@ for (++c; c <= d; c++)
   next++;
   }
 
-*odptr = next - 1;
-*cptr = c;
-
-return TRUE;
+*odptr = next - 1;     /* End of othercase range */
+*cptr = c;             /* Rest of input range */
+return 0;
 }
 
 
@@ -3357,6 +3377,243 @@ switch(op_code)
 
 
 /*************************************************
+*        Add a character or range to a class     *
+*************************************************/
+
+/* This function packages up the logic of adding a character or range of
+characters to a class. The character values in the arguments will be within the 
+valid values for the current mode (8-bit, 16-bit, UTF, etc). This function is 
+mutually recursive with the function immediately below.
+
+Arguments:
+  classbits     the bit map for characters < 256
+  uchardptr     points to the pointer for extra data
+  options       the options word
+  cd            contains pointers to tables etc. 
+  start         start of range character
+  end           end of range character
+  
+Returns:        the number of < 256 characters added
+                the pointer to extra data is updated
+*/
+
+static int
+add_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, int options,
+  compile_data *cd, unsigned int start, unsigned int end)
+{
+unsigned int c;
+int n8 = 0;
+
+/* If caseless matching is required, scan the range and process alternate 
+cases. In Unicode, there are 8-bit characters that have alternate cases that 
+are greater than 255 and vice-versa. Sometimes we can just extend the original 
+range. */
+
+if ((options & PCRE_CASELESS) != 0)
+  {
+#ifdef SUPPORT_UCP
+  if ((options & PCRE_UTF8) != 0)
+    { 
+    int rc; 
+    unsigned int oc, od;
+     
+    options &= ~PCRE_CASELESS;   /* Remove for recursive calls */
+    c = start;
+    
+    while ((rc = get_othercase_range(&c, end, &oc, &od)) >= 0)
+      {
+      /* Handle a single character that has more than one other case. */
+        
+      if (rc > 0) n8 += add_list_to_class(classbits, uchardptr, options, cd,
+        PRIV(ucd_caseless_sets) + rc, oc);
+    
+      /* Do nothing if the other case range is within the original range. */
+       
+      else if (oc >= start && od <= end) continue;
+      
+      /* Extend the original range if there is overlap, noting that if oc < c, we
+      can't have od > end because a subrange is always shorter than the basic
+      range. Otherwise, use a recursive call to add the additional range. */
+       
+      else if (oc < start && od >= start - 1) start = oc; /* Extend downwards */
+      else if (od > end && oc <= end + 1) end = od;       /* Extend upwards */
+      else n8 += add_to_class(classbits, uchardptr, options, cd, oc, od);
+      }
+    }
+  else
+#endif  /* SUPPORT_UCP */
+
+  /* Not UTF-mode, or no UCP */
+   
+  for (c = start; c <= end && c < 256; c++) 
+    {        
+    SETBIT(classbits, cd->fcc[c]);
+    n8++; 
+    }   
+  }   
+ 
+/* Now handle the original range. Adjust the final value according to the bit
+length - this means that the same lists of (e.g.) horizontal spaces can be used
+in all cases. */
+
+#ifdef COMPILE_PCRE8
+#ifdef SUPPORT_UTF
+  if ((options & PCRE_UTF8) == 0)
+#endif
+  if (end > 0xff) end = 0xff;
+#endif
+
+#ifdef COMPILE_PCRE16
+#ifdef SUPPORT_UTF
+  if ((options & PCRE_UTF16) == 0)
+#endif
+  if (end > 0xffff) end = 0xffff;
+#endif
+
+/* If all characters are less than 256, use the bit map. Otherwise use extra
+data. */
+
+if (end < 0x100)
+  {
+  for (c = start; c <= end; c++)
+    {
+    n8++; 
+    SETBIT(classbits, c);
+    } 
+  }
+   
+else
+  {      
+  pcre_uchar *uchardata = *uchardptr;
+   
+#ifdef SUPPORT_UTF
+  if ((options & PCRE_UTF8) != 0)  /* All UTFs use the same flag bit */
+    {
+    if (start < end)
+      {
+      *uchardata++ = XCL_RANGE;
+      uchardata += PRIV(ord2utf)(start, uchardata);  
+      uchardata += PRIV(ord2utf)(end, uchardata);  
+      }
+    else if (start == end)
+      {
+      *uchardata++ = XCL_SINGLE;
+      uchardata += PRIV(ord2utf)(start, uchardata);  
+      }
+    }
+  else
+#endif  /* SUPPORT_UTF */  
+   
+  /* Without UTF support, character values are constrained by the bit length,
+  and can only be > 256 for 16-bit and 32-bit libraries. */
+  
+#ifdef COMPILE_PCRE8
+    {}
+#else   
+  if (start < end)
+    {
+    *uchardata++ = XCL_RANGE;
+    *uchardata++ = start;
+    *uchardata++ = end;
+    }
+  else if (start == end)
+    {
+    *uchardata++ = XCL_SINGLE;
+    *uchardata++ = start;
+    }        
+#endif
+
+  *uchardptr = uchardata;   /* Updata extra data pointer */
+  } 
+
+return n8;    /* Number of 8-bit characters */
+}   
+ 
+ 
+
+
+/*************************************************
+*        Add a list of characters to a class     *
+*************************************************/
+
+/* This function is used for adding a list of case-equivalent characters to a 
+class, and also for adding a list of horizontal or vertical whitespace. If the
+list is in order (which it should be), ranges of characters are detected and
+handled appropriately. This function is mutually recursive with the function
+above.
+
+Arguments:
+  classbits     the bit map for characters < 256
+  uchardptr     points to the pointer for extra data
+  options       the options word
+  cd            contains pointers to tables etc. 
+  p             points to row of 32-bit values, terminated by NOTACHAR 
+  except        character to omit; this is used when adding lists of
+                  case-equivalent characters to avoid including the one we
+                  already know about   
+  
+Returns:        the number of < 256 characters added
+                the pointer to extra data is updated
+*/
+
+static int
+add_list_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, int options,
+  compile_data *cd, const pcre_uint32 *p, unsigned int except)
+{
+int n8 = 0;
+while (p[0] < NOTACHAR)
+  {
+  int n = 0;
+  if (p[0] != except)
+    {  
+    while(p[n+1] == p[0] + n + 1) n++;
+    n8 += add_to_class(classbits, uchardptr, options, cd, p[0], p[n]);
+    } 
+  p += n + 1; 
+  } 
+return n8;
+}   
+
+
+
+/*************************************************
+*    Add characters not in a list to a class     *
+*************************************************/
+
+/* This function is used for adding the complement of a list of horizontal or
+vertical whitespace to a class. The list must be in order.
+
+Arguments:
+  classbits     the bit map for characters < 256
+  uchardptr     points to the pointer for extra data
+  options       the options word
+  cd            contains pointers to tables etc. 
+  p             points to row of 32-bit values, terminated by NOTACHAR 
+  
+Returns:        the number of < 256 characters added
+                the pointer to extra data is updated
+*/
+
+static int
+add_not_list_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, 
+  int options, compile_data *cd, const pcre_uint32 *p)
+{
+int n8 = 0;
+if (p[0] > 0)
+  n8 += add_to_class(classbits, uchardptr, options, cd, 0, p[0] - 1);
+while (p[0] < NOTACHAR)
+  {
+  while (p[1] == p[0] + 1) p++;
+  n8 += add_to_class(classbits, uchardptr, options, cd, p[0] + 1, 
+    (p[1] == NOTACHAR)? 0x10ffff : p[1] - 1);
+  p++; 
+  } 
+return n8;
+}   
+
+
+
+/*************************************************
 *           Compile one branch                   *
 *************************************************/
 
@@ -3474,7 +3731,7 @@ for (;; ptr++)
   BOOL is_recurse;
   BOOL reset_bracount;
   int class_has_8bitchar;
-  int class_single_char;
+  int class_one_char;
   int newoptions;
   int recno;
   int refsign;
@@ -3772,25 +4029,25 @@ for (;; ptr++)
 
     should_flip_negation = FALSE;
 
-    /* For optimization purposes, we track some properties of the class.
-    class_has_8bitchar will be non-zero, if the class contains at least one
-    < 256 character. class_single_char will be 1 if the class contains only
-    a single character. */
+    /* For optimization purposes, we track some properties of the class:
+    class_has_8bitchar will be non-zero if the class contains at least one <
+    256 character; class_one_char will be 1 if the class contains just one
+    character. */
 
     class_has_8bitchar = 0;
-    class_single_char = 0;
+    class_one_char = 0;
 
     /* Initialize the 32-char bit map to all zeros. We build the map in a
-    temporary bit of memory, in case the class contains only 1 character (less
-    than 256), because in that case the compiled code doesn't use the bit map.
-    */
+    temporary bit of memory, in case the class contains fewer than two
+    8-bit characters because in that case the compiled code doesn't use the bit
+    map. */
 
     memset(classbits, 0, 32 * sizeof(pcre_uint8));
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-    xclass = FALSE;                           /* No chars >= 256 */
-    class_uchardata = code + LINK_SIZE + 2;   /* For UTF-8 items */
-    class_uchardata_base = class_uchardata;   /* For resetting in pass 1 */
+    xclass = FALSE;
+    class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
+    class_uchardata_base = class_uchardata;   /* Save the start */
 #endif
 
     /* Process characters until ] is reached. By writing this as a "do" it
@@ -3812,10 +4069,12 @@ for (;; ptr++)
       /* In the pre-compile phase, accumulate the length of any extra
       data and reset the pointer. This is so that very large classes that
       contain a zillion > 255 characters no longer overwrite the work space
-      (which is on the stack). */
+      (which is on the stack). We have to remember that there was XCLASS data, 
+      however. */
 
-      if (lengthptr != NULL)
+      if (lengthptr != NULL && class_uchardata > class_uchardata_base)
         {
+        xclass = TRUE;
         *lengthptr += class_uchardata - class_uchardata_base;
         class_uchardata = class_uchardata_base;
         }
@@ -3917,7 +4176,7 @@ for (;; ptr++)
             for (c = 0; c < 32; c++) pbits[c] &= ~cbits[c + taboffset];
           }
 
-        /* Not see if we need to remove any special characters. An option
+        /* Now see if we need to remove any special characters. An option
         value of 1 removes vertical space and 2 removes underscore. */
 
         if (tabopt < 0) tabopt = -tabopt;
@@ -3933,10 +4192,10 @@ for (;; ptr++)
           for (c = 0; c < 32; c++) classbits[c] |= pbits[c];
 
         ptr = tempptr + 1;
-        /* Every class contains at least one < 256 characters. */
+        /* Every class contains at least one < 256 character. */
         class_has_8bitchar = 1;
         /* Every class contains at least two characters. */
-        class_single_char = 2;
+        class_one_char = 2;
         continue;    /* End of POSIX syntax handling */
         }
 
@@ -3944,7 +4203,7 @@ for (;; ptr++)
       of the specials, which just set a flag. The sequence \b is a special
       case. Inside a class (and only there) it is treated as backspace. We
       assume that other escapes have more than one character in them, so
-      speculatively set both class_has_8bitchar and class_single_char bigger
+      speculatively set both class_has_8bitchar and class_one_char bigger
       than one. Unrecognized escapes fall through and are either treated
       as literal characters (by default), or are faulted if
       PCRE_EXTRA is set. */
@@ -3977,7 +4236,7 @@ for (;; ptr++)
           /* Every class contains at least two < 256 characters. */
           class_has_8bitchar++;
           /* Every class contains at least two characters. */
-          class_single_char += 2;
+          class_one_char += 2;
 
           switch (-c)
             {
@@ -4027,191 +4286,27 @@ for (;; ptr++)
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_space];
             classbits[1] |= 0x08;    /* Perl 5.004 onwards omits VT from \s */
             continue;
+            
+            /* The rest apply in both UCP and non-UCP cases. */
 
             case ESC_h:
-            SETBIT(classbits, CHAR_HT);
-            SETBIT(classbits, CHAR_SPACE);
-#ifndef EBCDIC             
-            SETBIT(classbits, 0xa0); /* NSBP */
-#ifndef COMPILE_PCRE8
-            xclass = TRUE;
-            *class_uchardata++ = XCL_SINGLE;
-            *class_uchardata++ = 0x1680;
-            *class_uchardata++ = XCL_SINGLE;
-            *class_uchardata++ = 0x180e;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x2000;
-            *class_uchardata++ = 0x200a;
-            *class_uchardata++ = XCL_SINGLE;
-            *class_uchardata++ = 0x202f;
-            *class_uchardata++ = XCL_SINGLE;
-            *class_uchardata++ = 0x205f;
-            *class_uchardata++ = XCL_SINGLE;
-            *class_uchardata++ = 0x3000;
-#elif defined SUPPORT_UTF
-            if (utf)
-              {
-              xclass = TRUE;
-              *class_uchardata++ = XCL_SINGLE;
-              class_uchardata += PRIV(ord2utf)(0x1680, class_uchardata);
-              *class_uchardata++ = XCL_SINGLE;
-              class_uchardata += PRIV(ord2utf)(0x180e, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x2000, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x200a, class_uchardata);
-              *class_uchardata++ = XCL_SINGLE;
-              class_uchardata += PRIV(ord2utf)(0x202f, class_uchardata);
-              *class_uchardata++ = XCL_SINGLE;
-              class_uchardata += PRIV(ord2utf)(0x205f, class_uchardata);
-              *class_uchardata++ = XCL_SINGLE;
-              class_uchardata += PRIV(ord2utf)(0x3000, class_uchardata);
-              }
-#endif
-#endif  /* Not EBCDIC */
+            (void)add_list_to_class(classbits, &class_uchardata, options, cd,
+              PRIV(hspace_list), NOTACHAR); 
             continue;
 
             case ESC_H:
-            for (c = 0; c < 32; c++)
-              {
-              int x = 0xff;
-              switch (c)
-                {
-                case CHAR_HT/8:    x ^= 1 << (CHAR_HT%8); break;
-                case CHAR_SPACE/8: x ^= 1 << (CHAR_SPACE%8); break;
-#ifndef EBCDIC  
-                case 0xa0/8: x ^= 1 << (0xa0%8); break;  /* NSBSP */
-#endif 
-                default: break;
-                }
-              classbits[c] |= x;
-              }
-#ifndef EBCDIC               
-#ifndef COMPILE_PCRE8
-            xclass = TRUE;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x0100;
-            *class_uchardata++ = 0x167f;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x1681;
-            *class_uchardata++ = 0x180d;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x180f;
-            *class_uchardata++ = 0x1fff;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x200b;
-            *class_uchardata++ = 0x202e;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x2030;
-            *class_uchardata++ = 0x205e;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x2060;
-            *class_uchardata++ = 0x2fff;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x3001;
-#ifdef SUPPORT_UTF
-            if (utf)
-              class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
-            else
-#endif   /* SUPPORT_UTF */
-              *class_uchardata++ = 0xffff;
-#elif defined SUPPORT_UTF
-            if (utf)
-              {
-              xclass = TRUE;
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x0100, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x167f, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x1681, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x180d, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x180f, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x1fff, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x200b, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x202e, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x2030, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x205e, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x2060, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x2fff, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x3001, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
-              }
-#endif
-#endif  /* Not EBCDIC */
+            (void)add_not_list_to_class(classbits, &class_uchardata, options, 
+              cd, PRIV(hspace_list)); 
             continue;
 
             case ESC_v:
-            SETBIT(classbits, CHAR_LF);
-            SETBIT(classbits, CHAR_VT);
-            SETBIT(classbits, CHAR_FF);
-            SETBIT(classbits, CHAR_CR);
-            SETBIT(classbits, CHAR_NEL);
-#ifndef EBCDIC             
-#ifndef COMPILE_PCRE8
-            xclass = TRUE;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x2028;
-            *class_uchardata++ = 0x2029;
-#elif defined SUPPORT_UTF
-            if (utf)
-              {
-              xclass = TRUE;
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x2028, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x2029, class_uchardata);
-              }
-#endif
-#endif  /* Not EBCDIC */
+            (void)add_list_to_class(classbits, &class_uchardata, options, cd,
+              PRIV(vspace_list), NOTACHAR); 
             continue;
 
             case ESC_V:
-            for (c = 0; c < 32; c++)
-              {
-              int x = 0xff;
-              switch (c)
-                {
-                case CHAR_LF/8: x ^= 1 << (CHAR_LF%8);
-                                x ^= 1 << (CHAR_VT%8);
-                                x ^= 1 << (CHAR_FF%8);
-                                x ^= 1 << (CHAR_CR%8);
-                                break;
-                case CHAR_NEL/8: x ^= 1 << (CHAR_NEL%8); break;
-                default: break;
-                }
-              classbits[c] |= x;
-              }
-
-#ifndef EBCDIC
-#ifndef COMPILE_PCRE8
-            xclass = TRUE;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x0100;
-            *class_uchardata++ = 0x2027;
-            *class_uchardata++ = XCL_RANGE;
-            *class_uchardata++ = 0x202a;
-#ifdef SUPPORT_UTF
-            if (utf)
-              class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
-            else
-#endif
-              *class_uchardata++ = 0xffff;
-#elif defined SUPPORT_UTF
-            if (utf)
-              {
-              xclass = TRUE;
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x0100, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x2027, class_uchardata);
-              *class_uchardata++ = XCL_RANGE;
-              class_uchardata += PRIV(ord2utf)(0x202a, class_uchardata);
-              class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
-              }
-#endif
-#endif  /* Not EBCDIC */
+            (void)add_not_list_to_class(classbits, &class_uchardata, options, 
+              cd, PRIV(vspace_list)); 
             continue;
 
 #ifdef SUPPORT_UCP
@@ -4222,7 +4317,6 @@ for (;; ptr++)
               int pdata;
               int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
               if (ptype < 0) goto FAILED;
-              xclass = TRUE;
               *class_uchardata++ = ((-c == ESC_p) != negated)?
                 XCL_PROP : XCL_NOTPROP;
               *class_uchardata++ = ptype;
@@ -4242,21 +4336,21 @@ for (;; ptr++)
               goto FAILED;
               }
             class_has_8bitchar--;    /* Undo the speculative increase. */
-            class_single_char -= 2;  /* Undo the speculative increase. */
+            class_one_char -= 2;     /* Undo the speculative increase. */
             c = *ptr;                /* Get the final character and fall through */
             break;
             }
           }
 
-        /* Fall through if we have a single character (c >= 0). This may be
-        greater than 256. */
-
+        /* Fall through if the escape just defined a single character (c >= 0).
+        This may be greater than 256. */
+         
         }   /* End of backslash handling */
 
-      /* A single character may be followed by '-' to form a range. However,
-      Perl does not permit ']' to be the end of the range. A '-' character
-      at the end is treated as a literal. Perl ignores orphaned \E sequences
-      entirely. The code for handling \Q and \E is messy. */
+      /* A character may be followed by '-' to form a range. However, Perl does
+      not permit ']' to be the end of the range. A '-' character at the end is
+      treated as a literal. Perl ignores orphaned \E sequences entirely. The
+      code for handling \Q and \E is messy. */
 
       CHECK_RANGE:
       while (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)
@@ -4264,10 +4358,9 @@ for (;; ptr++)
         inescq = FALSE;
         ptr += 2;
         }
-
       oldptr = ptr;
 
-      /* Remember \r or \n */
+      /* Remember if \r or \n were explicitly used */
 
       if (c == CHAR_CR || c == CHAR_NL) cd->external_flags |= PCRE_HASCRORLF;
 
@@ -4290,12 +4383,17 @@ for (;; ptr++)
           inescq = TRUE;
           break;
           }
+          
+        /* Minus (hyphen) at the end of a class is treated as a literal, so put
+        back the pointer and jump to handle the character that preceded it. */
 
         if (*ptr == 0 || (!inescq && *ptr == CHAR_RIGHT_SQUARE_BRACKET))
           {
           ptr = oldptr;
-          goto LONE_SINGLE_CHARACTER;
+          goto CLASS_SINGLE_CHARACTER;
           }
+          
+        /* Otherwise, we have a potential range; pick up the next character */
 
 #ifdef SUPPORT_UTF
         if (utf)
@@ -4315,203 +4413,63 @@ for (;; ptr++)
           d = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
           if (*errorcodeptr != 0) goto FAILED;
 
-          /* \b is backspace; any other special means the '-' was literal */
+          /* \b is backspace; any other special means the '-' was literal. */
 
           if (d < 0)
             {
             if (d == -ESC_b) d = CHAR_BS; else
               {
               ptr = oldptr;
-              goto LONE_SINGLE_CHARACTER;  /* A few lines below */
+              goto CLASS_SINGLE_CHARACTER;  /* A few lines below */
               }
             }
           }
 
         /* Check that the two values are in the correct order. Optimize
-        one-character ranges */
+        one-character ranges. */
 
         if (d < c)
           {
           *errorcodeptr = ERR8;
           goto FAILED;
           }
+        if (d == c) goto CLASS_SINGLE_CHARACTER;  /* A few lines below */
 
-        if (d == c) goto LONE_SINGLE_CHARACTER;  /* A few lines below */
+        /* We have found a character range, so single character optimizations
+        cannot be done anymore. Any value greater than 1 indicates that there
+        is more than one character. */
+         
+        class_one_char = 2;
 
-        /* Remember \r or \n */
+        /* Remember an explicit \r or \n, and add the range to the class. */
 
         if (d == CHAR_CR || d == CHAR_NL) cd->external_flags |= PCRE_HASCRORLF;
-
-        /* Since we found a character range, single character optimizations
-        cannot be done anymore. */
-        class_single_char = 2;
-
-        /* In UTF-8 mode, if the upper limit is > 255, or > 127 for caseless
-        matching, we have to use an XCLASS with extra data items. Caseless
-        matching for characters > 127 is available only if UCP support is
-        available. */
-
-#if defined SUPPORT_UTF && !(defined COMPILE_PCRE8)
-        if ((d > 255) || (utf && ((options & PCRE_CASELESS) != 0 && d > 127)))
-#elif defined  SUPPORT_UTF
-        if (utf && (d > 255 || ((options & PCRE_CASELESS) != 0 && d > 127)))
-#elif !(defined COMPILE_PCRE8)
-        if (d > 255)
-#endif
-#if defined SUPPORT_UTF || !(defined COMPILE_PCRE8)
-          {
-          xclass = TRUE;
-
-          /* With UCP support, we can find the other case equivalents of
-          the relevant characters. There may be several ranges. Optimize how
-          they fit with the basic range. */
-
-#ifdef SUPPORT_UCP
-#ifndef COMPILE_PCRE8
-          if (utf && (options & PCRE_CASELESS) != 0)
-#else
-          if ((options & PCRE_CASELESS) != 0)
-#endif
-            {
-            unsigned int occ, ocd;
-            unsigned int cc = c;
-            unsigned int origd = d;
-            while (get_othercase_range(&cc, origd, &occ, &ocd))
-              {
-              if (occ >= (unsigned int)c &&
-                  ocd <= (unsigned int)d)
-                continue;                          /* Skip embedded ranges */
-
-              if (occ < (unsigned int)c  &&
-                  ocd >= (unsigned int)c - 1)      /* Extend the basic range */
-                {                                  /* if there is overlap,   */
-                c = occ;                           /* noting that if occ < c */
-                continue;                          /* we can't have ocd > d  */
-                }                                  /* because a subrange is  */
-              if (ocd > (unsigned int)d &&
-                  occ <= (unsigned int)d + 1)      /* always shorter than    */
-                {                                  /* the basic range.       */
-                d = ocd;
-                continue;
-                }
-
-              if (occ == ocd)
-                {
-                *class_uchardata++ = XCL_SINGLE;
-                }
-              else
-                {
-                *class_uchardata++ = XCL_RANGE;
-                class_uchardata += PRIV(ord2utf)(occ, class_uchardata);
-                }
-              class_uchardata += PRIV(ord2utf)(ocd, class_uchardata);
-              }
-            }
-#endif  /* SUPPORT_UCP */
-
-          /* Now record the original range, possibly modified for UCP caseless
-          overlapping ranges. */
-
-          *class_uchardata++ = XCL_RANGE;
-#ifdef SUPPORT_UTF
-#ifndef COMPILE_PCRE8
-          if (utf)
-            {
-            class_uchardata += PRIV(ord2utf)(c, class_uchardata);
-            class_uchardata += PRIV(ord2utf)(d, class_uchardata);
-            }
-          else
-            {
-            *class_uchardata++ = c;
-            *class_uchardata++ = d;
-            }
-#else
-          class_uchardata += PRIV(ord2utf)(c, class_uchardata);
-          class_uchardata += PRIV(ord2utf)(d, class_uchardata);
-#endif
-#else /* SUPPORT_UTF */
-          *class_uchardata++ = c;
-          *class_uchardata++ = d;
-#endif /* SUPPORT_UTF */
-
-          /* With UCP support, we are done. Without UCP support, there is no
-          caseless matching for UTF characters > 127; we can use the bit map
-          for the smaller ones. As for 16 bit characters without UTF, we
-          can still use  */
-
-#ifdef SUPPORT_UCP
-#ifndef COMPILE_PCRE8
-          if (utf)
-#endif
-            continue;    /* With next character in the class */
-#endif  /* SUPPORT_UCP */
-
-#if defined SUPPORT_UTF && !defined(SUPPORT_UCP) && !(defined COMPILE_PCRE8)
-          if (utf)
-            {
-            if ((options & PCRE_CASELESS) == 0 || c > 127) continue;
-            /* Adjust upper limit and fall through to set up the map */
-            d = 127;
-            }
-          else
-            {
-            if (c > 255) continue;
-            /* Adjust upper limit and fall through to set up the map */
-            d = 255;
-            }
-#elif defined SUPPORT_UTF && !defined(SUPPORT_UCP)
-          if ((options & PCRE_CASELESS) == 0 || c > 127) continue;
-          /* Adjust upper limit and fall through to set up the map */
-          d = 127;
-#else
-          if (c > 255) continue;
-          /* Adjust upper limit and fall through to set up the map */
-          d = 255;
-#endif  /* SUPPORT_UTF && !SUPPORT_UCP && !COMPILE_PCRE8 */
-          }
-#endif  /* SUPPORT_UTF || !COMPILE_PCRE8 */
-
-        /* We use the bit map for 8 bit mode, or when the characters fall
-        partially or entirely to [0-255] ([0-127] for UCP) ranges. */
-
-        class_has_8bitchar = 1;
-
-        /* We can save a bit of time by skipping this in the pre-compile. */
-
-        if (lengthptr == NULL) for (; c <= d; c++)
-          {
-          classbits[c/8] |= (1 << (c&7));
-          if ((options & PCRE_CASELESS) != 0)
-            {
-            int uc = cd->fcc[c]; /* flip case */
-            classbits[uc/8] |= (1 << (uc&7));
-            }
-          }
-
+         
+        class_has_8bitchar += 
+          add_to_class(classbits, &class_uchardata, options, cd, c, d);
+           
         continue;   /* Go get the next char in the class */
         }
 
-      /* Handle a lone single character - we can get here for a normal
-      non-escape char, or after \ that introduces a single character or for an
-      apparent range that isn't. */
+      /* Handle a single character - we can get here for a normal non-escape
+      char, or after \ that introduces a single character or for an apparent
+      range that isn't. Only the value 1 matters for class_one_char, so don't 
+      increase it if it is already 2 or more ... just in case there's a class 
+      with a zillion characters in it. */
 
-      LONE_SINGLE_CHARACTER:
+      CLASS_SINGLE_CHARACTER:
+      if (class_one_char < 2) class_one_char++;
 
-      /* Only the value of 1 matters for class_single_char. */
+      /* If class_one_char is 1, we have the first single character in the
+      class, and there have been no prior ranges, or XCLASS items generated by
+      escapes. If this is the final character in the class, we can optimize by
+      turning the item into a 1-character OP_CHAR[I] if it's positive, or
+      OP_NOT[I] if it's negative. In the positive case, it can cause firstchar
+      to be set. Otherwise, there can be no first char if this item is first,
+      whatever repeat count may follow. In the case of reqchar, save the
+      previous value for reinstating. */
 
-      if (class_single_char < 2) class_single_char++;
-
-      /* If class_charcount is 1, we saw precisely one character. As long as
-      there was no use of \p or \P, in other words, no use of any XCLASS
-      features, we can optimize.
-
-      The optimization throws away the bit map. We turn the item into a
-      1-character OP_CHAR[I] if it's positive, or OP_NOT[I] if it's negative.
-      In the positive case, it can cause firstchar to be set. Otherwise, there
-      can be no first char if this item is first, whatever repeat count may
-      follow. In the case of reqchar, save the previous value for reinstating. */
-
-      if (class_single_char == 1 && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
+      if (class_one_char == 1 && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
         {
         ptr++;
         zeroreqchar = reqchar;
@@ -4544,64 +4502,12 @@ for (;; ptr++)
           }
         goto ONE_CHAR;
         }       /* End of 1-char optimization */
-
-      /* Handle a character that cannot go in the bit map. */
-
-#if defined SUPPORT_UTF && !(defined COMPILE_PCRE8)
-      if ((c > 255) || (utf && ((options & PCRE_CASELESS) != 0 && c > 127)))
-#elif defined SUPPORT_UTF
-      if (utf && (c > 255 || ((options & PCRE_CASELESS) != 0 && c > 127)))
-#elif !(defined COMPILE_PCRE8)
-      if (c > 255)
-#endif
-
-#if defined SUPPORT_UTF || !(defined COMPILE_PCRE8)
-        {
-        xclass = TRUE;
-        *class_uchardata++ = XCL_SINGLE;
-#ifdef SUPPORT_UTF
-#ifndef COMPILE_PCRE8
-        /* In non 8 bit mode, we can get here even if we are not in UTF mode. */
-        if (!utf)
-          *class_uchardata++ = c;
-        else
-#endif
-          class_uchardata += PRIV(ord2utf)(c, class_uchardata);
-#else /* SUPPORT_UTF */
-        *class_uchardata++ = c;
-#endif /* SUPPORT_UTF */
-
-#ifdef SUPPORT_UCP
-#ifdef COMPILE_PCRE8
-        if ((options & PCRE_CASELESS) != 0)
-#else
-        /* In non 8 bit mode, we can get here even if we are not in UTF mode. */
-        if (utf && (options & PCRE_CASELESS) != 0)
-#endif
-          {
-          unsigned int othercase;
-          if ((int)(othercase = UCD_OTHERCASE(c)) != c)
-            {
-            *class_uchardata++ = XCL_SINGLE;
-            class_uchardata += PRIV(ord2utf)(othercase, class_uchardata);
-            }
-          }
-#endif  /* SUPPORT_UCP */
-
-        }
-      else
-#endif  /* SUPPORT_UTF || COMPILE_PCRE16 */
-
-      /* Handle a single-byte character */
-        {
-        class_has_8bitchar = 1;
-        classbits[c/8] |= (1 << (c&7));
-        if ((options & PCRE_CASELESS) != 0)
-          {
-          c = cd->fcc[c]; /* flip case */
-          classbits[c/8] |= (1 << (c&7));
-          }
-        }
+        
+      /* There is more than one character in the class, or an XCLASS item
+      has been generated. Add this character to the class. */
+ 
+      class_has_8bitchar += 
+        add_to_class(classbits, &class_uchardata, options, cd, c, c);
       }
 
     /* Loop until ']' reached. This "while" is the end of the "do" far above.
@@ -4620,6 +4526,18 @@ for (;; ptr++)
       *errorcodeptr = ERR6;
       goto FAILED;
       }
+
+    /* We will need an XCLASS if data has been placed in class_uchardata. In 
+    the second phase this is a sufficient test. However, in the pre-compile 
+    phase, class_uchardata gets emptied to prevent workspace overflow, so it 
+    only if the very last character in the class needs XCLASS will it contain 
+    anything at this point. For this reason, xclass gets set TRUE above when
+    uchar_classdata is emptied, and that's why this code is the way it is here
+    instead of just doing a test on class_uchardata below. */
+     
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    if (class_uchardata > class_uchardata_base) xclass = TRUE;
+#endif
 
     /* If this is the first thing in the branch, there can be no first char
     setting, whatever the repeat count. Any reqchar setting must remain
