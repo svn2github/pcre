@@ -87,7 +87,8 @@ Version 8.32
     they are defined only once.
     
 21. This set of changes together give more compatible Unicode case-folding
-    behaviour for characters that have more than one other case.
+    behaviour for characters that have more than one other case when UCP 
+    support is available.
     
     (a) The Unicode property table now has offsets into a new table of sets of
         three or more characters that are case-equivalent. The MultiStage2.py 
@@ -108,6 +109,12 @@ Version 8.32
     (d) The processing of \h, \H, \v, and \ in character classes now makes use
         of the new class addition function, using character lists defined as
         macros alongside the case definitions of 20 above.
+        
+    (e) Caseless back references now work with characters that have more than 
+        one other case.
+        
+    (f) General caseless matching of characters with more than one other case 
+        is supported.
 
 
 Version 8.31 06-July-2012

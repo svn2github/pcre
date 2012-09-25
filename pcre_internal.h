@@ -1654,6 +1654,7 @@ only. */
 #define PT_SPACE      6    /* Perl space - Z plus 9,10,12,13 */
 #define PT_PXSPACE    7    /* POSIX space - Z plus 9,10,11,12,13 */
 #define PT_WORD       8    /* Word - L plus N plus underscore */
+#define PT_CLIST      9    /* Pseudo-property: match character list */
 
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
@@ -1676,7 +1677,7 @@ used for [^] in JavaScript compatibility mode, and for \C in non-utf mode. In
 non-DOTALL mode, "." behaves like \N.
 
 The special values ESC_DU, ESC_du, etc. are used instead of ESC_D, ESC_d, etc.
-when PCRE_UCP is set, when replacement of \d etc by \p sequences is required.
+when PCRE_UCP is set and replacement of \d etc by \p sequences is required.
 They must be contiguous, and remain in order so that the replacements can be
 looked up from a table.
 
@@ -1718,7 +1719,7 @@ enum {
   OP_NOT_WORDCHAR,       /* 10 \W */
   OP_WORDCHAR,           /* 11 \w */
 
-  OP_ANY,            /* 12 Match any character except newline */
+  OP_ANY,            /* 12 Match any character except newline (\N) */
   OP_ALLANY,         /* 13 Match any character */
   OP_ANYBYTE,        /* 14 Match any byte (\C); different to OP_ANY for UTF-8 */
   OP_NOTPROP,        /* 15 \P (not Unicode property) */
@@ -1729,8 +1730,8 @@ enum {
   OP_NOT_VSPACE,     /* 20 \V (not vertical whitespace) */
   OP_VSPACE,         /* 21 \v (vertical whitespace) */
   OP_EXTUNI,         /* 22 \X (extended Unicode sequence */
-  OP_EODN,           /* 23 End of data or \n at end of data: \Z. */
-  OP_EOD,            /* 24 End of data: \z */
+  OP_EODN,           /* 23 End of data or \n at end of data (\Z) */
+  OP_EOD,            /* 24 End of data (\z) */
 
   OP_CIRC,           /* 25 Start of line - not multiline */
   OP_CIRCM,          /* 26 Start of line - multiline */

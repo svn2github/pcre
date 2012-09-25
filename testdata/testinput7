@@ -613,4 +613,38 @@ of case for anything other than the ASCII letters. --/
     AA\P
     AA\P\P 
 
+/A\x{3a3}B/8iDZ
+
+/\x{3a3}B/8iDZ
+
+/[\x{3a3}]/8iBZ
+
+/[^\x{3a3}]/8iBZ
+
+/[\x{3a3}]+/8iBZ
+
+/[^\x{3a3}]+/8iBZ
+
+/a*\x{3a3}/8iBZ
+
+/\x{3a3}+a/8iBZ
+
+/\x{3a3}*\x{3c2}/8iBZ
+
+/\x{3a3}{3}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}?/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}+./8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}++./8i+
+    ** Failers
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
 /-- End of testinput7 --/

@@ -1060,6 +1060,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        const pcre_uint32 *cp; 
         const ucd_record * prop = GET_UCD(c);
         switch(code[1])
           {
@@ -1107,6 +1108,15 @@ for (;;)
                PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
           break;
+          
+          case PT_CLIST:
+          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          for (;;)
+            {
+            if (c < *cp) { OK = FALSE; break; }
+            if (c == *cp++) { OK = TRUE; break; }
+            }     
+          break; 
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1294,6 +1304,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        const pcre_uint32 *cp; 
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
@@ -1341,6 +1352,15 @@ for (;;)
                PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
           break;
+
+          case PT_CLIST:
+          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          for (;;)
+            {
+            if (c < *cp) { OK = FALSE; break; }
+            if (c == *cp++) { OK = TRUE; break; }
+            }     
+          break; 
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1522,6 +1542,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        const pcre_uint32 *cp; 
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
@@ -1569,6 +1590,15 @@ for (;;)
                PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
           break;
+
+          case PT_CLIST:
+          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          for (;;)
+            {
+            if (c < *cp) { OK = FALSE; break; }
+            if (c == *cp++) { OK = TRUE; break; }
+            }     
+          break; 
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1775,6 +1805,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
+        const pcre_uint32 *cp; 
         const ucd_record * prop = GET_UCD(c);
         switch(code[1 + IMM2_SIZE + 1])
           {
@@ -1822,6 +1853,15 @@ for (;;)
                PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
           break;
+
+          case PT_CLIST:
+          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          for (;;)
+            {
+            if (c < *cp) { OK = FALSE; break; }
+            if (c == *cp++) { OK = TRUE; break; }
+            }     
+          break; 
 
           /* Should never occur, but keep compilers from grumbling. */
 

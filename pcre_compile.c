@@ -1859,7 +1859,8 @@ for (;;)
 
     case OP_TYPEEXACT:
     branchlength += GET2(cc,1);
-    if (cc[1 + IMM2_SIZE] == OP_PROP || cc[1 + IMM2_SIZE] == OP_NOTPROP) cc += 2;
+    if (cc[1 + IMM2_SIZE] == OP_PROP || cc[1 + IMM2_SIZE] == OP_NOTPROP) 
+      cc += 2;
     cc += 1 + IMM2_SIZE + 1;
     break;
 
@@ -2097,8 +2098,8 @@ for (;;)
       case OP_TYPEMINUPTO:
       case OP_TYPEEXACT:
       case OP_TYPEPOSUPTO:
-      if (code[1 + IMM2_SIZE] == OP_PROP
-        || code[1 + IMM2_SIZE] == OP_NOTPROP) code += 2;
+      if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP) 
+        code += 2;
       break;
 
       case OP_MARK:
@@ -2217,8 +2218,8 @@ for (;;)
       case OP_TYPEUPTO:
       case OP_TYPEMINUPTO:
       case OP_TYPEEXACT:
-      if (code[1 + IMM2_SIZE] == OP_PROP
-        || code[1 + IMM2_SIZE] == OP_NOTPROP) code += 2;
+      if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP) 
+        code += 2;
       break;
 
       case OP_MARK:
@@ -2543,8 +2544,8 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_TYPEUPTO:
     case OP_TYPEMINUPTO:
     case OP_TYPEPOSUPTO:
-    if (code[1 + IMM2_SIZE] == OP_PROP
-      || code[1 + IMM2_SIZE] == OP_NOTPROP) code += 2;
+    if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP) 
+      code += 2;
     break;
 
     /* End of branch */
@@ -2951,7 +2952,12 @@ Returns:       TRUE if auto-possessifying is OK
 static BOOL
 check_char_prop(int c, int ptype, int pdata, BOOL negated)
 {
+#ifdef SUPPORT_UCP
+const pcre_uint32 *p;
+#endif
+
 const ucd_record *prop = GET_UCD(c);
+
 switch(ptype)
   {
   case PT_LAMP:
@@ -2989,7 +2995,19 @@ switch(ptype)
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
           PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
           c == CHAR_UNDERSCORE) == negated;
+ 
+#ifdef SUPPORT_UCP        
+  case PT_CLIST:
+  p = PRIV(ucd_caseless_sets) + prop->caseset;
+  for (;;)
+    {
+    if ((unsigned int)c < *p) return !negated;
+    if ((unsigned int)c == *p++) return negated;
+    }     
+  break;  /* Control never reaches here */
+#endif   
   }
+   
 return FALSE;
 }
 #endif  /* SUPPORT_UCP */
@@ -3091,134 +3109,138 @@ if ((options & PCRE_EXTENDED) != 0)
 if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
   STRNCMP_UC_C8(ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
     return FALSE;
+    
+/* If the previous item is a character, get its value. */
 
-/* Now compare the next item with the previous opcode. First, handle cases when
-the next item is a character. */
-
-if (next >= 0) switch(op_code)
-  {
-  case OP_CHAR:
+if (op_code == OP_CHAR || op_code == OP_CHARI || 
+    op_code == OP_NOT || op_code == OP_NOTI)
+  { 
 #ifdef SUPPORT_UTF
   GETCHARTEST(c, previous);
 #else
   c = *previous;
 #endif
-  return c != next;
-
-  /* For CHARI (caseless character) we must check the other case. If we have
-  Unicode property support, we can use it to test the other case of
-  high-valued characters. */
-
-  case OP_CHARI:
-#ifdef SUPPORT_UTF
-  GETCHARTEST(c, previous);
-#else
-  c = *previous;
-#endif
-  if (c == next) return FALSE;
-#ifdef SUPPORT_UTF
-  if (utf)
-    {
-    unsigned int othercase;
-    if (next < 128) othercase = cd->fcc[next]; else
-#ifdef SUPPORT_UCP
-    othercase = UCD_OTHERCASE((unsigned int)next);
-#else
-    othercase = NOTACHAR;
-#endif
-    return (unsigned int)c != othercase;
-    }
-  else
-#endif  /* SUPPORT_UTF */
-  return (c != TABLE_GET((unsigned int)next, cd->fcc, next));  /* Non-UTF-8 mode */
-
-  case OP_NOT:
-#ifdef SUPPORT_UTF
-  GETCHARTEST(c, previous);
-#else
-  c = *previous;
-#endif
-  return c == next;
-
-  case OP_NOTI:
-#ifdef SUPPORT_UTF
-  GETCHARTEST(c, previous);
-#else
-  c = *previous;
-#endif
-  if (c == next) return TRUE;
-#ifdef SUPPORT_UTF
-  if (utf)
-    {
-    unsigned int othercase;
-    if (next < 128) othercase = cd->fcc[next]; else
-#ifdef SUPPORT_UCP
-    othercase = UCD_OTHERCASE((unsigned int)next);
-#else
-    othercase = NOTACHAR;
-#endif
-    return (unsigned int)c == othercase;
-    }
-  else
-#endif  /* SUPPORT_UTF */
-  return (c == TABLE_GET((unsigned int)next, cd->fcc, next));  /* Non-UTF-8 mode */
-
-  /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set.
-  When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
-
-  case OP_DIGIT:
-  return next > 255 || (cd->ctypes[next] & ctype_digit) == 0;
-
-  case OP_NOT_DIGIT:
-  return next <= 255 && (cd->ctypes[next] & ctype_digit) != 0;
-
-  case OP_WHITESPACE:
-  return next > 255 || (cd->ctypes[next] & ctype_space) == 0;
-
-  case OP_NOT_WHITESPACE:
-  return next <= 255 && (cd->ctypes[next] & ctype_space) != 0;
-
-  case OP_WORDCHAR:
-  return next > 255 || (cd->ctypes[next] & ctype_word) == 0;
-
-  case OP_NOT_WORDCHAR:
-  return next <= 255 && (cd->ctypes[next] & ctype_word) != 0;
-
-  case OP_HSPACE:
-  case OP_NOT_HSPACE:
-  switch(next)
-    {
-    HSPACE_CASES: 
-    return op_code == OP_NOT_HSPACE;
-     
-    default:
-    return op_code != OP_NOT_HSPACE;
-    }
-
-  case OP_ANYNL:
-  case OP_VSPACE:
-  case OP_NOT_VSPACE:
-  switch(next)
-    {
-    VSPACE_CASES: 
-    return op_code == OP_NOT_VSPACE;
-     
-    default:
-    return op_code != OP_NOT_VSPACE;
-    }
-
-#ifdef SUPPORT_UCP
-  case OP_PROP:
-  return check_char_prop(next, previous[0], previous[1], FALSE);
-
-  case OP_NOTPROP:
-  return check_char_prop(next, previous[0], previous[1], TRUE);
-#endif
-
-  default:
-  return FALSE;
   }
 
+/* Now compare the next item with the previous opcode. First, handle cases when
+the next item is a character. For a caseless UTF match, the next character may 
+have more than one other case; convert this to a special property. */
+
+if (next >= 0)
+  {
+#ifdef SUPPORT_UCP
+  if (utf && (options & PCRE_CASELESS) != 0)
+    {
+    int ocs = UCD_CASESET(next);
+    if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, FALSE);
+    }  
+#endif
+
+  switch(op_code)
+    {
+    case OP_CHAR:
+    return c != next;
+  
+    /* For CHARI (caseless character) we must check the other case. If we have
+    Unicode property support, we can use it to test the other case of
+    high-valued characters. We know that next can have only one other case, 
+    because multi-other-case characters are dealt with above. */
+  
+    case OP_CHARI:
+    if (c == next) return FALSE;
+#ifdef SUPPORT_UTF
+    if (utf)
+      {
+      unsigned int othercase;
+      if (next < 128) othercase = cd->fcc[next]; else
+#ifdef SUPPORT_UCP
+      othercase = UCD_OTHERCASE((unsigned int)next);
+#else
+      othercase = NOTACHAR;
+#endif
+      return (unsigned int)c != othercase;
+      }
+    else
+#endif  /* SUPPORT_UTF */
+    return (c != TABLE_GET((unsigned int)next, cd->fcc, next));  /* Not UTF */
+  
+    case OP_NOT:
+    return c == next;
+  
+    case OP_NOTI:
+    if (c == next) return TRUE;
+#ifdef SUPPORT_UTF
+    if (utf)
+      {
+      unsigned int othercase;
+      if (next < 128) othercase = cd->fcc[next]; else
+#ifdef SUPPORT_UCP
+      othercase = UCD_OTHERCASE((unsigned int)next);
+#else
+      othercase = NOTACHAR;
+#endif
+      return (unsigned int)c == othercase;
+      }
+    else
+#endif  /* SUPPORT_UTF */
+    return (c == TABLE_GET((unsigned int)next, cd->fcc, next));  /* Not UTF */
+  
+    /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set.
+    When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
+  
+    case OP_DIGIT:
+    return next > 255 || (cd->ctypes[next] & ctype_digit) == 0;
+  
+    case OP_NOT_DIGIT:
+    return next <= 255 && (cd->ctypes[next] & ctype_digit) != 0;
+  
+    case OP_WHITESPACE:
+    return next > 255 || (cd->ctypes[next] & ctype_space) == 0;
+  
+    case OP_NOT_WHITESPACE:
+    return next <= 255 && (cd->ctypes[next] & ctype_space) != 0;
+  
+    case OP_WORDCHAR:
+    return next > 255 || (cd->ctypes[next] & ctype_word) == 0;
+  
+    case OP_NOT_WORDCHAR:
+    return next <= 255 && (cd->ctypes[next] & ctype_word) != 0;
+  
+    case OP_HSPACE:
+    case OP_NOT_HSPACE:
+    switch(next)
+      {
+      HSPACE_CASES: 
+      return op_code == OP_NOT_HSPACE;
+       
+      default:
+      return op_code != OP_NOT_HSPACE;
+      }
+  
+    case OP_ANYNL:
+    case OP_VSPACE:
+    case OP_NOT_VSPACE:
+    switch(next)
+      {
+      VSPACE_CASES: 
+      return op_code == OP_NOT_VSPACE;
+       
+      default:
+      return op_code != OP_NOT_VSPACE;
+      }
+  
+#ifdef SUPPORT_UCP
+    case OP_PROP:
+    return check_char_prop(next, previous[0], previous[1], FALSE);
+  
+    case OP_NOTPROP:
+    return check_char_prop(next, previous[0], previous[1], TRUE);
+#endif
+  
+    default:
+    return FALSE;
+    }
+  }   
 
 /* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP
 is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are
@@ -3230,11 +3252,6 @@ switch(op_code)
   {
   case OP_CHAR:
   case OP_CHARI:
-#ifdef SUPPORT_UTF
-  GETCHARTEST(c, previous);
-#else
-  c = *previous;
-#endif
   switch(-next)
     {
     case ESC_d:
@@ -3683,11 +3700,14 @@ pcre_uchar utf_chars[6];
 BOOL utf = FALSE;
 #endif
 
-/* Helper variables for OP_XCLASS opcode (for characters > 255). */
+/* Helper variables for OP_XCLASS opcode (for characters > 255). We define
+class_uchardata always so that it can be passed to add_to_class() always, 
+though it will not be used in non-UTF 8-bit cases. This avoids having to supply 
+alternative calls for the different cases. */
 
+pcre_uchar *class_uchardata;
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
 BOOL xclass;
-pcre_uchar *class_uchardata;
 pcre_uchar *class_uchardata_base;
 #endif
 
@@ -4133,7 +4153,7 @@ for (;; ptr++)
         alpha. This relies on the fact that the class table starts with
         alpha, lower, upper as the first 3 entries. */
 
-        if ((options & PCRE_CASELESS) != 0 && posix_class <= 2)
+        if ((options & PCRE_CASELESS) != 0 && posix_class <= 2) 
           posix_class = 0;
 
         /* When PCRE_UCP is set, some of the POSIX classes are converted to
@@ -4476,16 +4496,41 @@ for (;; ptr++)
 
         if (negate_class)
           {
+#ifdef SUPPORT_UCP           
+          int d;
+#endif           
           if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
           zerofirstchar = firstchar;
-          *code++ = ((options & PCRE_CASELESS) != 0)? OP_NOTI: OP_NOT;
-#ifdef SUPPORT_UTF
-          if (utf && c > MAX_VALUE_FOR_SINGLE_CHAR)
-            code += PRIV(ord2utf)(c, code);
-          else
+
+          /* For caseless UTF-8 mode when UCP support is available, check
+          whether this character has more than one other case. If so, generate
+          a special OP_NOTPROP item instead of OP_NOTI. */
+     
+#ifdef SUPPORT_UCP
+          if (utf && (options & PCRE_CASELESS) != 0 && 
+              (d = UCD_CASESET(c)) != 0)
+            {
+            *code++ = OP_NOTPROP;
+            *code++ = PT_CLIST;
+            *code++ = d;
+            }
+          else     
 #endif
-            *code++ = c;
-          goto NOT_CHAR;
+          /* Char has only one other case, or UCP not available */
+
+            {
+            *code++ = ((options & PCRE_CASELESS) != 0)? OP_NOTI: OP_NOT;
+#ifdef SUPPORT_UTF
+            if (utf && c > MAX_VALUE_FOR_SINGLE_CHAR)
+              code += PRIV(ord2utf)(c, code);
+            else
+#endif
+              *code++ = c;
+            }
+                
+          /* We are finished with this character class */
+           
+          goto END_CLASS;
           }
 
         /* For a single, positive character, get the value into mcbuffer, and
@@ -4601,7 +4646,8 @@ for (;; ptr++)
       memcpy(code, classbits, 32);
       }
     code += 32 / sizeof(pcre_uchar);
-    NOT_CHAR:
+     
+    END_CLASS:
     break;
 
 
@@ -6836,6 +6882,28 @@ for (;; ptr++)
 
     ONE_CHAR:
     previous = code;
+    
+    /* For caseless UTF-8 mode when UCP support is available, check whether 
+    this character has more than one other case. If so, generate a special 
+    OP_PROP item instead of OP_CHARI. */
+     
+#ifdef SUPPORT_UCP
+    if (utf && (options & PCRE_CASELESS) != 0)
+      {
+      GETCHAR(c, mcbuffer);
+      if ((c = UCD_CASESET(c)) != 0)
+        {
+        *code++ = OP_PROP;
+        *code++ = PT_CLIST;
+        *code++ = c;
+        if (firstchar == REQ_UNSET) firstchar = zerofirstchar = REQ_NONE; 
+        break;   
+        }   
+      }  
+#endif
+ 
+    /* Caseful matches, or not one of the multicase characters. */
+ 
     *code++ = ((options & PCRE_CASELESS) != 0)? OP_CHARI : OP_CHAR;
     for (c = 0; c < mclength; c++) *code++ = mcbuffer[c];
 

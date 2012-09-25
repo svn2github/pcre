@@ -180,21 +180,32 @@ if (caseless)
   if (md->utf)
     {
     /* Match characters up to the end of the reference. NOTE: the number of
-    bytes matched may differ, because there are some characters whose upper and
-    lower case versions code as different numbers of bytes. For example, U+023A
-    (2 bytes in UTF-8) is the upper case version of U+2C65 (3 bytes in UTF-8);
-    a sequence of 3 of the former uses 6 bytes, as does a sequence of two of
-    the latter. It is important, therefore, to check the length along the
-    reference, not along the subject (earlier code did this wrong). */
+    data units matched may differ, because in UTF-8 there are some characters
+    whose upper and lower case versions code have different numbers of bytes.
+    For example, U+023A (2 bytes in UTF-8) is the upper case version of U+2C65
+    (3 bytes in UTF-8); a sequence of 3 of the former uses 6 bytes, as does a
+    sequence of two of the latter. It is important, therefore, to check the
+    length along the reference, not along the subject (earlier code did this
+    wrong). */
 
     PCRE_PUCHAR endptr = p + length;
     while (p < endptr)
       {
-      int c, d;
+      unsigned int c, d;
+      const ucd_record *ur;
       if (eptr >= md->end_subject) return -2;   /* Partial match */
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
-      if (c != d && c != UCD_OTHERCASE(d)) return -1;
+      ur = GET_UCD(d);
+      if (c != d && c != d + ur->other_case) 
+        {
+        const pcre_uint32 *pp = PRIV(ucd_caseless_sets) + ur->caseset; 
+        for (;;)                                                                   
+          {                                                                        
+          if (c < *pp) return -1;                                                   
+          if (c == *pp++) break;     
+          }
+        } 
       }
     }
   else
@@ -2512,6 +2523,7 @@ for (;;)
       }
     GETCHARINCTEST(c, eptr);
       {
+      const pcre_uint32 *cp; 
       const ucd_record *prop = GET_UCD(c);
 
       switch(ecode[1])
@@ -2571,6 +2583,17 @@ for (;;)
              c == CHAR_UNDERSCORE) == (op == OP_NOTPROP))
           RRETURN(MATCH_NOMATCH);
         break;
+        
+        case PT_CLIST:
+        cp = PRIV(ucd_caseless_sets) + prop->caseset;
+        for (;;)
+          {
+          if (c < *cp)
+            { if (op == OP_PROP) RRETURN(MATCH_NOMATCH); else break; }
+          if (c == *cp++)   
+            { if (op == OP_PROP) break; else RRETURN(MATCH_NOMATCH); }
+          }      
+        break; 
 
         /* This should never occur */
 
@@ -2609,7 +2632,7 @@ for (;;)
     CHECK_PARTIAL();
     ecode++;
     break;
-#endif
+#endif  /* SUPPORT_UCP */
 
 
     /* Match a back reference, possibly repeatedly. Look past the end of the
@@ -4162,7 +4185,28 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
             }
           break;
-
+          
+          case PT_CLIST:
+          for (i = 1; i <= min; i++)
+            {  
+            const pcre_uint32 *cp;
+            if (eptr >= md->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(c, eptr);
+            cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
+            for (;;)
+              {
+              if (c < *cp) 
+                { if (prop_fail_result) break; else RRETURN(MATCH_NOMATCH); }
+              if (c == *cp++)
+                { if (prop_fail_result) RRETURN(MATCH_NOMATCH); else break; }
+              }    
+            }
+          break;   
+ 
           /* This should not occur */
 
           default:
@@ -4875,8 +4919,31 @@ for (;;)
             }
           /* Control never gets here */
 
-          /* This should never occur */
+          case PT_CLIST:
+          for (fi = min;; fi++)
+            {  
+            const pcre_uint32 *cp;
+            RMATCH(eptr, ecode, offset_top, md, eptrb, RM62);
+            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
+            if (eptr >= md->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(c, eptr);
+            cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
+            for (;;)
+              {
+              if (c < *cp) 
+                { if (prop_fail_result) break; else RRETURN(MATCH_NOMATCH); }
+              if (c == *cp++)
+                { if (prop_fail_result) RRETURN(MATCH_NOMATCH); else break; }
+              }    
+            }
+          /* Control never gets here */
 
+          /* This should never occur */
           default:
           RRETURN(PCRE_ERROR_INTERNAL);
           }
@@ -5344,6 +5411,30 @@ for (;;)
               break;
             eptr+= len;
             }
+          break;
+          
+          case PT_CLIST:
+          for (i = min; i < max; i++)
+            {
+            const pcre_uint32 *cp;
+            int len = 1;
+            if (eptr >= md->end_subject)
+              {
+              SCHECK_PARTIAL();
+              break;
+              }
+            GETCHARLENTEST(c, eptr, len);
+            cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
+            for (;;)
+              {
+              if (c < *cp) 
+                { if (prop_fail_result) break; else goto GOT_MAX; }
+              if (c == *cp++)
+                { if (prop_fail_result) goto GOT_MAX; else break; }
+              }    
+            eptr += len;  
+            }
+          GOT_MAX:   
           break;
 
           default:

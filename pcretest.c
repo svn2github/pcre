@@ -154,12 +154,13 @@ void pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths);
 #endif
 
 /* We need access to some of the data tables that PCRE uses. So as not to have
-to keep two copies, we include the source file here, changing the names of the
+to keep two copies, we include the source files here, changing the names of the
 external symbols to prevent clashes. */
 
 #define PCRE_INCLUDED
 
 #include "pcre_tables.c"
+#include "pcre_ucd.c"
 
 /* The definition of the macro PRINTABLE, which determines whether to print an
 output character as-is or as a hex value when showing compiled patterns, is
