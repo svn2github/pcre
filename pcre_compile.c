@@ -3036,7 +3036,8 @@ static BOOL
 check_auto_possessive(const pcre_uchar *previous, BOOL utf,
   const pcre_uchar *ptr, int options, compile_data *cd)
 {
-pcre_int32 c, next;
+pcre_int32 c = NOTACHAR;
+pcre_int32 next;
 int op_code = *previous++;
 
 /* Skip whitespace and comments in extended mode */
@@ -3123,16 +3124,18 @@ if (op_code == OP_CHAR || op_code == OP_CHARI ||
   }
 
 /* Now compare the next item with the previous opcode. First, handle cases when
-the next item is a character. For a caseless UTF match, the next character may 
-have more than one other case; convert this to a special property. */
+the next item is a character. */
 
 if (next >= 0)
   {
+  /* For a caseless UTF match, the next character may have more than one other
+  case, which maps to the special PT_CLIST property. Check this first. */
+ 
 #ifdef SUPPORT_UCP
-  if (utf && (options & PCRE_CASELESS) != 0)
+  if (utf && (unsigned int)c != NOTACHAR && (options & PCRE_CASELESS) != 0)
     {
     int ocs = UCD_CASESET(next);
-    if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, FALSE);
+    if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, op_code >= OP_NOT);
     }
 #endif
 

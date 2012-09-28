@@ -647,4 +647,10 @@ of case for anything other than the ASCII letters. --/
     ** Failers
     \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
 
+/\x{3a3}*\x{3c2}/8iBZ
+
+/[^\x{3a3}]*\x{3c2}/8iBZ
+
+/[^a]*\x{3c2}/8iBZ
+
 /-- End of testinput7 --/
