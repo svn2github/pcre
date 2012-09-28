@@ -2996,18 +2996,18 @@ switch(ptype)
           PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
           c == CHAR_UNDERSCORE) == negated;
  
-#ifdef SUPPORT_UCP        
+#ifdef SUPPORT_UCP
   case PT_CLIST:
   p = PRIV(ucd_caseless_sets) + prop->caseset;
   for (;;)
     {
     if ((unsigned int)c < *p) return !negated;
     if ((unsigned int)c == *p++) return negated;
-    }     
+    }
   break;  /* Control never reaches here */
-#endif   
+#endif
   }
-   
+
 return FALSE;
 }
 #endif  /* SUPPORT_UCP */
@@ -3109,12 +3109,12 @@ if ((options & PCRE_EXTENDED) != 0)
 if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
   STRNCMP_UC_C8(ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
     return FALSE;
-    
+
 /* If the previous item is a character, get its value. */
 
 if (op_code == OP_CHAR || op_code == OP_CHARI || 
     op_code == OP_NOT || op_code == OP_NOTI)
-  { 
+  {
 #ifdef SUPPORT_UTF
   GETCHARTEST(c, previous);
 #else
@@ -3133,19 +3133,19 @@ if (next >= 0)
     {
     int ocs = UCD_CASESET(next);
     if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, FALSE);
-    }  
+    }
 #endif
 
   switch(op_code)
     {
     case OP_CHAR:
     return c != next;
-  
+
     /* For CHARI (caseless character) we must check the other case. If we have
     Unicode property support, we can use it to test the other case of
     high-valued characters. We know that next can have only one other case, 
     because multi-other-case characters are dealt with above. */
-  
+
     case OP_CHARI:
     if (c == next) return FALSE;
 #ifdef SUPPORT_UTF
@@ -3184,39 +3184,39 @@ if (next >= 0)
     else
 #endif  /* SUPPORT_UTF */
     return (c == TABLE_GET((unsigned int)next, cd->fcc, next));  /* Not UTF */
-  
+
     /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set.
     When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
-  
+
     case OP_DIGIT:
     return next > 255 || (cd->ctypes[next] & ctype_digit) == 0;
-  
+
     case OP_NOT_DIGIT:
     return next <= 255 && (cd->ctypes[next] & ctype_digit) != 0;
-  
+
     case OP_WHITESPACE:
     return next > 255 || (cd->ctypes[next] & ctype_space) == 0;
-  
+
     case OP_NOT_WHITESPACE:
     return next <= 255 && (cd->ctypes[next] & ctype_space) != 0;
-  
+
     case OP_WORDCHAR:
     return next > 255 || (cd->ctypes[next] & ctype_word) == 0;
-  
+
     case OP_NOT_WORDCHAR:
     return next <= 255 && (cd->ctypes[next] & ctype_word) != 0;
-  
+
     case OP_HSPACE:
     case OP_NOT_HSPACE:
     switch(next)
       {
       HSPACE_CASES: 
       return op_code == OP_NOT_HSPACE;
-       
+
       default:
       return op_code != OP_NOT_HSPACE;
       }
-  
+
     case OP_ANYNL:
     case OP_VSPACE:
     case OP_NOT_VSPACE:
@@ -3224,23 +3224,23 @@ if (next >= 0)
       {
       VSPACE_CASES: 
       return op_code == OP_NOT_VSPACE;
-       
+
       default:
       return op_code != OP_NOT_VSPACE;
       }
-  
+
 #ifdef SUPPORT_UCP
     case OP_PROP:
     return check_char_prop(next, previous[0], previous[1], FALSE);
-  
+
     case OP_NOTPROP:
     return check_char_prop(next, previous[0], previous[1], TRUE);
 #endif
-  
+
     default:
     return FALSE;
     }
-  }   
+  }
 
 /* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP
 is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are
@@ -3278,7 +3278,7 @@ switch(op_code)
       {
       HSPACE_CASES: 
       return -next != ESC_h;
-       
+
       default:
       return -next == ESC_h;
       }
@@ -3289,7 +3289,7 @@ switch(op_code)
       {
       VSPACE_CASES: 
       return -next != ESC_v;
-       
+
       default:
       return -next == ESC_v;
       }

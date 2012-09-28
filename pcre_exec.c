@@ -200,12 +200,12 @@ if (caseless)
       if (c != d && c != d + ur->other_case) 
         {
         const pcre_uint32 *pp = PRIV(ucd_caseless_sets) + ur->caseset; 
-        for (;;)                                                                   
-          {                                                                        
-          if (c < *pp) return -1;                                                   
-          if (c == *pp++) break;     
+        for (;;)
+          {
+          if (c < *pp) return -1;
+          if (c == *pp++) break;
           }
-        } 
+        }
       }
     }
   else
@@ -2583,17 +2583,17 @@ for (;;)
              c == CHAR_UNDERSCORE) == (op == OP_NOTPROP))
           RRETURN(MATCH_NOMATCH);
         break;
-        
+
         case PT_CLIST:
         cp = PRIV(ucd_caseless_sets) + prop->caseset;
         for (;;)
           {
           if (c < *cp)
-            { if (op == OP_PROP) RRETURN(MATCH_NOMATCH); else break; }
-          if (c == *cp++)   
-            { if (op == OP_PROP) break; else RRETURN(MATCH_NOMATCH); }
-          }      
-        break; 
+            { if (op == OP_PROP) { RRETURN(MATCH_NOMATCH); } else break; }
+          if (c == *cp++)
+            { if (op == OP_PROP) break; else { RRETURN(MATCH_NOMATCH); } }
+          }
+        break;
 
         /* This should never occur */
 
@@ -4200,12 +4200,12 @@ for (;;)
             for (;;)
               {
               if (c < *cp) 
-                { if (prop_fail_result) break; else RRETURN(MATCH_NOMATCH); }
+                { if (prop_fail_result) break; else { RRETURN(MATCH_NOMATCH); } }
               if (c == *cp++)
-                { if (prop_fail_result) RRETURN(MATCH_NOMATCH); else break; }
-              }    
+                { if (prop_fail_result) { RRETURN(MATCH_NOMATCH); } else break; }
+              }
             }
-          break;   
+          break;
  
           /* This should not occur */
 
@@ -4935,11 +4935,11 @@ for (;;)
             cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
             for (;;)
               {
-              if (c < *cp) 
-                { if (prop_fail_result) break; else RRETURN(MATCH_NOMATCH); }
+              if (c < *cp)
+                { if (prop_fail_result) break; else { RRETURN(MATCH_NOMATCH); } }
               if (c == *cp++)
-                { if (prop_fail_result) RRETURN(MATCH_NOMATCH); else break; }
-              }    
+                { if (prop_fail_result) { RRETURN(MATCH_NOMATCH); } else break; }
+              }
             }
           /* Control never gets here */
 

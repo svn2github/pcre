@@ -3481,9 +3481,11 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 static const pcre_uchar *SLJIT_CALL do_utf_caselesscmp(pcre_uchar *src1, jit_arguments *args, pcre_uchar *end1)
 {
 /* This function would be ineffective to do in JIT level. */
-int c1, c2;
+pcre_uint32 c1, c2;
 const pcre_uchar *src2 = args->uchar_ptr;
 const pcre_uchar *end2 = args->end;
+const ucd_record *ur;
+const pcre_uint32 *pp;
 
 while (src1 < end1)
   {
@@ -3491,7 +3493,16 @@ while (src1 < end1)
     return (pcre_uchar*)1;
   GETCHARINC(c1, src1);
   GETCHARINC(c2, src2);
-  if (c1 != c2 && c1 != UCD_OTHERCASE(c2)) return NULL;
+  ur = GET_UCD(c2);
+  if (c1 != c2 && c1 != c2 + ur->other_case)
+    {
+    pp = PRIV(ucd_caseless_sets) + ur->caseset;
+    for (;;)
+      {
+      if (c1 < *pp) return NULL;
+      if (c1 == *pp++) break;
+      }
+    }
   }
 return src2;
 }
@@ -3683,18 +3694,17 @@ static void compile_xclass_matchingpath(compiler_common *common, pcre_uchar *cc,
 DEFINE_COMPILER;
 jump_list *found = NULL;
 jump_list **list = (*cc & XCL_NOT) == 0 ? &found : backtracks;
-unsigned int c;
-int compares;
+pcre_int32 c, charoffset;
+const pcre_uint32 *other_cases;
 struct sljit_jump *jump = NULL;
 pcre_uchar *ccbegin;
+int compares, invertcmp, numberofcmps;
 #ifdef SUPPORT_UCP
 BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
 int typereg = TMP1, scriptreg = TMP1;
 unsigned int typeoffset;
 #endif
-int invertcmp, numberofcmps;
-unsigned int charoffset;
 
 /* Although SUPPORT_UTF must be defined, we are
    not necessary in utf mode even in 8 bit mode. */
@@ -3789,6 +3799,10 @@ while (*cc != XCL_END)
       case PT_PXSPACE:
       case PT_WORD:
       needstype = TRUE;
+      needschar = TRUE;
+      break;
+
+      case PT_CLIST:
       needschar = TRUE;
       break;
 
@@ -3999,6 +4013,20 @@ while (*cc != XCL_END)
       SET_TYPE_OFFSET(ucp_Nd);
       OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_No - ucp_Nd);
       COND_VALUE(SLJIT_OR | SLJIT_SET_E, TMP2, 0, SLJIT_C_LESS_EQUAL);
+      jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
+      break;
+
+      case PT_CLIST:
+      other_cases = PRIV(ucd_caseless_sets) + cc[1];
+
+      OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
+      COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
+
+      while (*other_cases < NOTACHAR)
+        {
+        OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
+        COND_VALUE(SLJIT_OR, TMP2, 0, SLJIT_C_EQUAL);
+        }
       jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
       break;
       }
