@@ -3703,7 +3703,7 @@ int compares, invertcmp, numberofcmps;
 BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
 int typereg = TMP1, scriptreg = TMP1;
-unsigned int typeoffset;
+pcre_int32 typeoffset;
 #endif
 
 /* Although SUPPORT_UTF must be defined, we are
