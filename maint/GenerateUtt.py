@@ -16,6 +16,8 @@
 # Modified by PH 01-March-2010 to add new scripts for Unicode 5.2.0.
 # Modified by PH 04-May-2010 to add new "X.." special categories.
 # Modified by PH 30-April-2011 to add new scripts for Unicode 6.0.0
+# Modified by ChPe 30-September-2012 to add this note; no other changes were
+# necessary for Unicode 6.2.0 support.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -101,6 +103,6 @@ for utt in utt_table:
 		value = 'ucp_' + utt[0]
 	if utt == utt_table[-1]:
 		last = ''
-	print '  { %3d, %s, %s }%s ' % (offset, utt[1], value, last)
+	print '  { %3d, %s, %s }%s' % (offset, utt[1], value, last)
 	offset += len(utt[0]) + 1
 print '};'

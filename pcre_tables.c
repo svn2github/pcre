@@ -171,7 +171,8 @@ const pcre_uint32 PRIV(ucp_gbtable[]) = {
      (1<<ucp_gbT),
 
    (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /* 10 LVT */  
-   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)                 /* 11 Other */
+   (1<<ucp_gbRegionalIndicator),                            /* 11 RegionalIndicator */
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)                 /* 12 Other */
 }; 
     
 #ifdef SUPPORT_JIT

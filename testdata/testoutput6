@@ -1145,6 +1145,8 @@ No match
  0: \x{65d}
     \x{65e} 
  0: \x{65e}
+    \x{65f}
+ 0: \x{65f}
     \x{66a} 
  0: \x{66a}
     \x{6e9} 
@@ -1166,8 +1168,6 @@ No match
     \x{654} 
 No match
     \x{655} 
-No match
-    \x{65f}  
 No match
     
 /^\p{Cyrillic}/8

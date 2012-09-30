@@ -116,6 +116,7 @@ Version 8.32
     (f) General caseless matching of characters with more than one other case 
         is supported.
 
+22. Unicode character properties were updated from Unicode 6.2.0
 
 Version 8.31 06-July-2012
 -------------------------

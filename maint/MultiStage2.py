@@ -107,6 +107,7 @@
 #                      not much bigger than before.
 # 18-September-2012: Added code for multiple caseless sets. This uses the
 #                      final hole in the structure.
+# 30-September-2012: Added RegionalIndicator break property from Unicode 6.2.0
 ##############################################################################
 
 
@@ -304,8 +305,8 @@ category_names = ['Cc', 'Cf', 'Cn', 'Co', 'Cs', 'Ll', 'Lm', 'Lo', 'Lt', 'Lu',
   'Mc', 'Me', 'Mn', 'Nd', 'Nl', 'No', 'Pc', 'Pd', 'Pe', 'Pf', 'Pi', 'Po', 'Ps',
   'Sc', 'Sk', 'Sm', 'So', 'Zl', 'Zp', 'Zs' ]
 
-break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend', 
-  'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Other' ]
+break_property_names = ['CR', 'LF', 'Control', 'Extend', 'Prepend',
+  'SpacingMark', 'L', 'V', 'T', 'LV', 'LVT', 'Regional_Indicator', 'Other' ]
 
 test_record_size()
 
