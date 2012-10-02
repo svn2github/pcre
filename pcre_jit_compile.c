@@ -4019,14 +4019,18 @@ while (*cc != XCL_END)
       case PT_CLIST:
       other_cases = PRIV(ucd_caseless_sets) + cc[1];
 
+      /* At least two characters are required. */
+      SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR);
+
       OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
       COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
 
-      while (*other_cases < NOTACHAR)
+      do
         {
         OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
-        COND_VALUE(SLJIT_OR, TMP2, 0, SLJIT_C_EQUAL);
+        COND_VALUE(SLJIT_OR | ((*other_cases == NOTACHAR) ? SLJIT_SET_E : 0), TMP2, 0, SLJIT_C_EQUAL);
         }
+      while (*other_cases != NOTACHAR);
       jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
       break;
       }
@@ -4239,7 +4243,7 @@ switch(type)
   OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM2(TMP1, TMP2), 3);
 
   OP2(SLJIT_SHL, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, 2);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), (sljit_w)PRIV(ucp_gbtable));
+  OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(STACK_TOP), (sljit_w)PRIV(ucp_gbtable));
   OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
   OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
   OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);

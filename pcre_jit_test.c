@@ -1105,7 +1105,7 @@ static int regression_tests(void)
 			if (utf8 == utf16 && !(current->start_offset & F_FORCECONV)) {
 				/* All results must be the same. */
 				if (return_value8_1 != return_value8_2 || return_value8_1 != return_value16_1 || return_value8_1 != return_value16_2) {
-					printf("\n8 and 16 bit: Return value differs(%d:%d:%d:%d): [%d] '%s' @ '%s'\n",
+					printf("\n8 and 16 bit: Return value differs(J8:%d,I8:%d,J16:%d,I16%d): [%d] '%s' @ '%s'\n",
 						return_value8_1, return_value8_2, return_value16_1, return_value16_2,
 						total, current->pattern, current->input);
 					is_successful = 0;
@@ -1130,7 +1130,7 @@ static int regression_tests(void)
 
 					for (i = 0; i < return_value8_1; ++i)
 						if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector16_1[i] || ovector8_1[i] != ovector16_2[i]) {
-							printf("\n8 and 16 bit: Ovector[%d] value differs(%d:%d:%d:%d): [%d] '%s' @ '%s' \n",
+							printf("\n8 and 16 bit: Ovector[%d] value differs(J8:%d,I8:%d,J16:%d,I16%d): [%d] '%s' @ '%s' \n",
 								i, ovector8_1[i], ovector8_2[i], ovector16_1[i], ovector16_2[i],
 								total, current->pattern, current->input);
 							is_successful = 0;
@@ -1141,7 +1141,7 @@ static int regression_tests(void)
 				/* Only the 8 bit and 16 bit results must be equal. */
 #ifdef SUPPORT_PCRE8
 				if (return_value8_1 != return_value8_2) {
-					printf("\n8 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
+					printf("\n8 bit: Return value differs(J8:%d,I8:%d): [%d] '%s' @ '%s'\n",
 						return_value8_1, return_value8_2, total, current->pattern, current->input);
 					is_successful = 0;
 				} else if (return_value8_1 >= 0 || return_value8_1 == PCRE_ERROR_PARTIAL) {
@@ -1152,7 +1152,7 @@ static int regression_tests(void)
 
 					for (i = 0; i < return_value8_1; ++i)
 						if (ovector8_1[i] != ovector8_2[i]) {
-							printf("\n8 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
+							printf("\n8 bit: Ovector[%d] value differs(J8:%d,I8:%d): [%d] '%s' @ '%s'\n",
 								i, ovector8_1[i], ovector8_2[i], total, current->pattern, current->input);
 							is_successful = 0;
 						}
@@ -1161,7 +1161,7 @@ static int regression_tests(void)
 
 #ifdef SUPPORT_PCRE16
 				if (return_value16_1 != return_value16_2) {
-					printf("\n16 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
+					printf("\n16 bit: Return value differs(J16:%d,I16:%d): [%d] '%s' @ '%s'\n",
 						return_value16_1, return_value16_2, total, current->pattern, current->input);
 					is_successful = 0;
 				} else if (return_value16_1 >= 0 || return_value16_1 == PCRE_ERROR_PARTIAL) {
@@ -1172,7 +1172,7 @@ static int regression_tests(void)
 
 					for (i = 0; i < return_value16_1; ++i)
 						if (ovector16_1[i] != ovector16_2[i]) {
-							printf("\n16 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
+							printf("\n16 bit: Ovector[%d] value differs(J16:%d,I16:%d): [%d] '%s' @ '%s'\n",
 								i, ovector16_1[i], ovector16_2[i], total, current->pattern, current->input);
 							is_successful = 0;
 						}
