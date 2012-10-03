@@ -1692,7 +1692,7 @@ SLJIT_ASSERT(cc == ccend && stackptr == stacktop && (save || (tmp1empty && tmp2e
 #undef CASE_ITERATOR_TYPE_PRIVATE_DATA_2A
 #undef CASE_ITERATOR_TYPE_PRIVATE_DATA_2B
 
-static SLJIT_INLINE BOOL ispowerof2(unsigned int value)
+static SLJIT_INLINE BOOL is_powerof2(unsigned int value)
 {
 return (value & (value - 1)) == 0;
 }
@@ -1998,7 +1998,7 @@ if (c <= 127 && bit == 0x20)
   return (0 << 8) | 0x20;
 
 /* Since c != oc, they must have at least 1 bit difference. */
-if (!ispowerof2(bit))
+if (!is_powerof2(bit))
   return 0;
 
 #ifdef COMPILE_PCRE8
@@ -2765,7 +2765,7 @@ if (first_char == oc)
 else
   {
   bit = first_char ^ oc;
-  if (ispowerof2(bit))
+  if (is_powerof2(bit))
     {
     OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, bit);
     found = CMP(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, first_char | bit);
@@ -2983,7 +2983,7 @@ if (req_char == oc)
 else
   {
   bit = req_char ^ oc;
-  if (ispowerof2(bit))
+  if (is_powerof2(bit))
     {
     OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, bit);
     found = CMP(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, req_char | bit);
@@ -3213,7 +3213,7 @@ switch(ranges[0])
       }
     return TRUE;
     }
-  if ((ranges[3] - ranges[2]) == (ranges[5] - ranges[4]) && ispowerof2(ranges[4] - ranges[2]))
+  if ((ranges[3] - ranges[2]) == (ranges[5] - ranges[4]) && is_powerof2(ranges[4] - ranges[2]))
     {
     if (readch)
       read_char(common);
@@ -4019,18 +4019,53 @@ while (*cc != XCL_END)
       case PT_CLIST:
       other_cases = PRIV(ucd_caseless_sets) + cc[1];
 
-      /* At least two characters are required. */
-      SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR);
+      /* At least three characters are required.
+         Otherwise this case would be handled by the normal code path. */
+      SLJIT_ASSERT(other_cases[0] != NOTACHAR && other_cases[1] != NOTACHAR && other_cases[2] != NOTACHAR);
+      SLJIT_ASSERT(other_cases[0] < other_cases[1] && other_cases[1] < other_cases[2]);
 
-      OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
-      COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
+      /* Optimizing character pairs, if their difference is power of 2. */
+      if (is_powerof2(other_cases[1] ^ other_cases[0]))
+        {
+        if (charoffset == 0)
+          OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, other_cases[1] ^ other_cases[0]);
+        else
+          {
+          OP2(SLJIT_ADD, TMP2, 0, TMP1, 0, SLJIT_IMM, (sljit_w)charoffset);
+          OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, other_cases[1] ^ other_cases[0]);
+          }
+        OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, other_cases[1]);
+        COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
+        other_cases += 2;
+        }
+      else if (is_powerof2(other_cases[2] ^ other_cases[1]))
+        {
+        if (charoffset == 0)
+          OP2(SLJIT_OR, TMP2, 0, TMP1, 0, SLJIT_IMM, other_cases[2] ^ other_cases[1]);
+        else
+          {
+          OP2(SLJIT_ADD, TMP2, 0, TMP1, 0, SLJIT_IMM, (sljit_w)charoffset);
+          OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, other_cases[1] ^ other_cases[0]);
+          }
+        OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_IMM, other_cases[2]);
+        COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
 
-      do
+        OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, other_cases[0] - charoffset);
+        COND_VALUE(SLJIT_OR | ((other_cases[3] == NOTACHAR) ? SLJIT_SET_E : 0), TMP2, 0, SLJIT_C_EQUAL);
+
+        other_cases += 3;
+        }
+      else
+        {
+        OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
+        COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
+        }
+
+      while (*other_cases != NOTACHAR)
         {
         OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
         COND_VALUE(SLJIT_OR | ((*other_cases == NOTACHAR) ? SLJIT_SET_E : 0), TMP2, 0, SLJIT_C_EQUAL);
         }
-      while (*other_cases != NOTACHAR);
       jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
       break;
       }
@@ -4458,7 +4493,7 @@ switch(type)
     }
   oc = char_othercase(common, c);
   bit = c ^ oc;
-  if (ispowerof2(bit))
+  if (is_powerof2(bit))
     {
     OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, bit);
     add_jump(compiler, backtracks, CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, c | bit));
@@ -4519,7 +4554,7 @@ switch(type)
     {
     oc = char_othercase(common, c);
     bit = c ^ oc;
-    if (ispowerof2(bit))
+    if (is_powerof2(bit))
       {
       OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, bit);
       add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, c | bit));
