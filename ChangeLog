@@ -118,6 +118,9 @@ Version 8.32
 
 22. Unicode character properties were updated from Unicode 6.2.0
 
+23. Improved CMake support under Windows. Patch by Daniel Richard G.
+
+
 Version 8.31 06-July-2012
 -------------------------
 

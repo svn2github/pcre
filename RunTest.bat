@@ -27,36 +27,36 @@ if [%srcdir%]==[] (
 if exist ..\testdata\ set srcdir=..)
 if [%srcdir%]==[] (
 if exist ..\..\testdata\ set srcdir=..\..)
-if NOT exist "%srcdir%\testdata\" (
+if NOT exist %srcdir%\testdata\ (
 Error: echo distribution testdata folder not found!
 call :conferror
 exit /b 1
 goto :eof
 )
 
-if "%pcretest%"=="" set pcretest=.\pcretest.exe
+if [%pcretest%]==[] set pcretest=.\pcretest.exe
 
 echo source dir is %srcdir%
 echo pcretest=%pcretest%
 
-if NOT exist "%pcretest%" (
-echo Error: "%pcretest%" not found!
+if NOT exist %pcretest% (
+echo Error: %pcretest% not found!
 echo.
 call :conferror
 exit /b 1
 )
 
-"%pcretest%" -C linksize >NUL
+%pcretest% -C linksize >NUL
 set link_size=%ERRORLEVEL%
-"%pcretest%" -C pcre8 >NUL
+%pcretest% -C pcre8 >NUL
 set support8=%ERRORLEVEL%
-"%pcretest%" -C pcre16 >NUL
+%pcretest% -C pcre16 >NUL
 set support16=%ERRORLEVEL%
-"%pcretest%" -C utf >NUL
+%pcretest% -C utf >NUL
 set utf=%ERRORLEVEL%
-"%pcretest%" -C ucp >NUL
+%pcretest% -C ucp >NUL
 set ucp=%ERRORLEVEL%
-"%pcretest%" -C jit >NUL
+%pcretest% -C jit >NUL
 set jit=%ERRORLEVEL%
 
 if %support8% EQU 1 (
@@ -216,21 +216,21 @@ if exist %srcdir%\testdata\win%testinput% (
 )
 
 echo Test %1: %3
-"%pcretest%" %mode% %4 %5 %6 %7 %8 %9 "%srcdir%\testdata\%testinput%">%2%bits%\%testoutput%
+%pcretest% %mode% %4 %5 %6 %7 %8 %9 %srcdir%\testdata\%testinput% >%2%bits%\%testoutput%
 if errorlevel 1 (
   echo.          failed executing command-line:
-  echo.            "%pcretest%" %mode% %4 %5 %6 %7 %8 %9 "%srcdir%\testdata\%testinput%"^>%2%bits%\%testoutput%
+  echo.            %pcretest% %mode% %4 %5 %6 %7 %8 %9 %srcdir%\testdata\%testinput% ^>%2%bits%\%testoutput%
   set failed="yes"
   goto :eof
 )
 
 if [%1]==[11] (
-  fc /n "%srcdir%\testdata\%testoutput%-%bits%" "%2%bits%\%testoutput%">NUL
+  fc /n %srcdir%\testdata\%testoutput%-%bits% %2%bits%\%testoutput% >NUL
 ) else (
-  fc /n "%srcdir%\testdata\%testoutput%" "%2%bits%\%testoutput%">NUL
+  fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput% >NUL
 )
 if errorlevel 1 (
-  echo.          failed comparison: fc /n "%srcdir%\testdata\%testoutput%" "%2%bits%\%testoutput%"
+  echo.          failed comparison: fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
   if [%1]==[2] (
     echo.
     echo ** Test 2 requires a lot of stack. PCRE can be configured to
@@ -370,7 +370,7 @@ goto :eof
   echo Test 14 Skipped when running 16-bit tests.
   goto :eof
 )
-  copy /Y "%srcdir%\testdata\saved16" testsaved16
+  copy /Y %srcdir%\testdata\saved16 testsaved16
   call :runsub 14 testout "Specials for the basic 8-bit library" -q
   call :runsub 14 testoutstudy "Test with Study Override" -q -s
   if %jit% EQU 1 call :runsub 14 testoutjit "Test with JIT Override" -q -s+
@@ -409,9 +409,9 @@ goto :eof
   echo Test 17 Skipped when running 8-bit tests.
   goto :eof
 )
-  copy /Y "%srcdir%\testdata\saved8" testsaved8
-  copy /Y "%srcdir%\testdata\saved16LE-1" testsaved16LE-1
-  copy /Y "%srcdir%\testdata\saved16BE-1" testsaved16BE-1
+  copy /Y %srcdir%\testdata\saved8 testsaved8
+  copy /Y %srcdir%\testdata\saved16LE-1 testsaved16LE-1
+  copy /Y %srcdir%\testdata\saved16BE-1 testsaved16BE-1
   call :runsub 17 testout "Specials for the basic 8-bit library" -q
   call :runsub 17 testoutstudy "Test with Study Override" -q -s
   if %jit% EQU 1 call :runsub 17 testoutjit "Test with JIT Override" -q -s+
@@ -426,8 +426,8 @@ goto :eof
   echo Test 18 Skipped due to absence of UTF-8 support.
   goto :eof
 )
-  copy /Y "%srcdir%\testdata\saved16LE-2" testsaved16LE-2
-  copy /Y "%srcdir%\testdata\saved16BE-2" testsaved16BE-2
+  copy /Y %srcdir%\testdata\saved16LE-2 testsaved16LE-2
+  copy /Y %srcdir%\testdata\saved16BE-2 testsaved16BE-2
   call :runsub 18 testout "Specials for the basic 8-bit library" -q
   call :runsub 18 testoutstudy "Test with Study Override" -q -s
   if %jit% EQU 1 call :runsub 18 testoutjit "Test with JIT Override" -q -s+

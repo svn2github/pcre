@@ -682,8 +682,8 @@ IF(PCRE_BUILD_TESTS)
   FILE(WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
   "# This is a generated file.
 MESSAGE(\"When testing is complete, review test output in the
-${PROJECT_BINARY_DIR}/Testing/Temporary folder.\")
-MESSAGE(\"\")
+\\\"${PROJECT_BINARY_DIR}/Testing/Temporary\\\" folder.\")
+MESSAGE(\" \")
 ")
 
   FILE(WRITE ${PROJECT_BINARY_DIR}/pcre_test.sh
@@ -719,37 +719,24 @@ if test \"$?\" != \"0\"; then exit 1; fi
 
   IF(WIN32)
     # Provide environment for executing the bat file version of RunTest
-    string(REPLACE "/" "\\" winsrc "${PROJECT_SOURCE_DIR}")
+    FILE(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR} winsrc)
+    FILE(TO_NATIVE_PATH ${PROJECT_BINARY_DIR} winbin)
+    FILE(TO_NATIVE_PATH ${PCRETEST_EXE} winexe)
 
-    FILE(WRITE ${PROJECT_BINARY_DIR}/pcre_test.txt
+    FILE(WRITE ${PROJECT_BINARY_DIR}/pcre_test.bat
     "\@REM This is a generated file.
-\@Echo off
+\@echo off
 setlocal
-SET\ srcdir=\${srcdir}
-SET\ pcretest=\${pcretest}
-call \"\${srcdir}\\RunTest.Bat\"
+SET srcdir=\"${winsrc}\"
+SET pcretest=\"${winexe}\"
+if not [%CMAKE_CONFIG_TYPE%]==[] SET pcretest=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcretest.exe\"
+call %srcdir%\\RunTest.Bat
 if errorlevel 1 exit /b 1
 echo RunTest.bat tests successfully completed
 ")
 
-  FILE(WRITE ${PROJECT_BINARY_DIR}/BatDriver.cmake
-  "# This is a generated file.
-# this script is run with arguments via the cmake command in add_test(NAME pcre_test_bat)
-# BatDriver feeds the actual location of pcretest.exe
-FILE(TO_NATIVE_PATH \${pcretestx} pcretest)
-FILE(TO_NATIVE_PATH \${srcdirx} srcdir)
-configure_file(\"\${bindirx}/pcre_test.txt\" \"\${bindirx}/pcre_test.bat\")
-# MESSAGE(\"cmake\ variable\ pcretest\ is\ \${pcretest}\")
-# STRING(REPLACE \" \" \"\\ \" bindir \${bindirx})
-MESSAGE(\"COMMAND pcre_test.bat \")
-EXECUTE_PROCESS(COMMAND pcre_test.bat
-WORKING_DIRECTORY .
-OUTPUT_VARIABLE batoutput)
-MESSAGE(\"OUTPUT: \${batoutput}\")
-")
-
   ADD_TEST(NAME pcre_test_bat
-  COMMAND ${CMAKE_COMMAND} -D bindirx=${PROJECT_BINARY_DIR} -D srcdirx=${PROJECT_SOURCE_DIR} -D pcretestx=$<TARGET_FILE:pcretest> -P "${PROJECT_BINARY_DIR}/BatDriver.cmake")
+  COMMAND pcre_test.bat)
   SET_TESTS_PROPERTIES(pcre_test_bat PROPERTIES
   PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
 
