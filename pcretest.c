@@ -1731,6 +1731,7 @@ return(result);
 
 static int pchar(pcre_uint32 c, FILE *f)
 {
+int n;
 if (PRINTOK(c))
   {
   if (f != NULL) fprintf(f, "%c", c);
@@ -1751,11 +1752,8 @@ if (c < 0x100)
     }
   }
 
-if (f != NULL) fprintf(f, "\\x{%02x}", c);
-return (c <= 0x000000ff)? 6 :
-       (c <= 0x00000fff)? 7 :
-       (c <= 0x0000ffff)? 8 :
-       (c <= 0x000fffff)? 9 : 10;
+if (f != NULL) n = fprintf(f, "\\x{%02x}", c);
+return n >= 0 ? n : 0;
 }
 
 
