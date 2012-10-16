@@ -121,7 +121,7 @@ int main(void)
 #define OFFSET_MASK	0x00ffff
 #define F_NO8		0x010000
 #define F_NO16		0x020000
-#define F_NO32          0x020000
+#define F_NO32		0x020000
 #define F_NOMATCH	0x040000
 #define F_DIFF		0x080000
 #define F_FORCECONV	0x100000
