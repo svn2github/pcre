@@ -771,7 +771,7 @@ Returns:         zero => a data character
 */
 
 static int
-check_escape(const pcre_uchar **ptrptr, int *chptr, int *errorcodeptr, 
+check_escape(const pcre_uchar **ptrptr, pcre_uint32 *chptr, int *errorcodeptr, 
   int bracount, int options, BOOL isclass)
 {
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
@@ -795,12 +795,12 @@ Otherwise further processing may be required. */
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
 /* Not alphanumeric */
 else if (c < CHAR_0 || c > CHAR_z) {}
-else if ((i = escapes[c - CHAR_0]) != 0) { if (i > 0) c = i; else escape = -i; }
+else if ((i = escapes[c - CHAR_0]) != 0) { if (i > 0) c = (pcre_uint32)i; else escape = -i; }
 
 #else           /* EBCDIC coding */
 /* Not alphanumeric */
 else if (c < CHAR_a || (!MAX_255(c) || (ebcdic_chartab[c] & 0x0E) == 0)) {}
-else if ((i = escapes[c - 0x48]) != 0)  { if (i > 0) c = i; else escape = -i; }
+else if ((i = escapes[c - 0x48]) != 0)  { if (i > 0) c = (pcre_uint32)i; else escape = -i; }
 #endif
 
 /* Escapes that need further processing, or are illegal. */
@@ -808,7 +808,8 @@ else if ((i = escapes[c - 0x48]) != 0)  { if (i > 0) c = i; else escape = -i; }
 else
   {
   const pcre_uchar *oldptr;
-  BOOL braced, negated;
+  BOOL braced, negated, overflow;
+  int s;
 
   switch (c)
     {
@@ -915,17 +916,18 @@ else
     else negated = FALSE;
 
     /* The integer range is limited by the machine's int representation. */
-    c = 0;
+    s = 0;
+    overflow = FALSE;
     while (IS_DIGIT(ptr[1]))
       {
-      if (((unsigned int)c) > INT_MAX / 10) /* Integer overflow */
+      if (s > INT_MAX / 10 - 1) /* Integer overflow */
         {
-        c = -1;
+        overflow = TRUE;
         break;
         }
-      c = c * 10 + *(++ptr) - CHAR_0;
+      s = s * 10 + (int)(*(++ptr) - CHAR_0);
       }
-    if (((unsigned int)c) > INT_MAX) /* Integer overflow */
+    if (overflow) /* Integer overflow */
       {
       while (IS_DIGIT(ptr[1]))
         ptr++;
@@ -939,7 +941,7 @@ else
       break;
       }
 
-    if (c == 0)
+    if (s == 0)
       {
       *errorcodeptr = ERR58;
       break;
@@ -947,15 +949,15 @@ else
 
     if (negated)
       {
-      if (c > bracount)
+      if (s > bracount)
         {
         *errorcodeptr = ERR15;
         break;
         }
-      c = bracount - (c - 1);
+      s = bracount - (s - 1);
       }
 
-    escape = -c;
+    escape = -s;
     break;
 
     /* The handling of escape sequences consisting of a string of digits
@@ -977,26 +979,27 @@ else
       {
       oldptr = ptr;
       /* The integer range is limited by the machine's int representation. */
-      c -= CHAR_0;
+      s = (int)(c -CHAR_0);
+      overflow = FALSE;
       while (IS_DIGIT(ptr[1]))
         {
-        if (((unsigned int)c) > INT_MAX / 10) /* Integer overflow */
+        if (s > INT_MAX / 10 - 1) /* Integer overflow */
           {
-          c = -1;
+          overflow = TRUE;
           break;
           }
-        c = c * 10 + *(++ptr) - CHAR_0;
+        s = s * 10 + (int)(*(++ptr) - CHAR_0);
         }
-      if (((unsigned int)c) > INT_MAX) /* Integer overflow */
+      if (overflow) /* Integer overflow */
         {
         while (IS_DIGIT(ptr[1]))
           ptr++;
         *errorcodeptr = ERR61;
         break;
         }
-      if (c < 10 || c <= bracount)
+      if (s < 10 || s <= bracount)
         {
-        escape = -c;
+        escape = -s;
         break;
         }
       ptr = oldptr;      /* Put the pointer back and fall through */
@@ -1059,7 +1062,6 @@ else
     if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
       {
       const pcre_uchar *pt = ptr + 2;
-      BOOL overflow;
 
       c = 0;
       overflow = FALSE;
