@@ -1266,7 +1266,7 @@ switch(endlinetype)
 
   while (p > startptr)
     {
-    register int c;
+    register unsigned int c;
     char *pp = p - 1;
 
     if (utf8)
