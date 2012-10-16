@@ -1729,7 +1729,7 @@ return(result);
 
 /* Print a single character either literally, or as a hex escape. */
 
-static int pchar(int c, FILE *f)
+static int pchar(pcre_uint32 c, FILE *f)
 {
 if (PRINTOK(c))
   {
@@ -1848,7 +1848,7 @@ if (length < 0)
 
 while (length-- > 0)
   {
-  int c = *p++ & 0xffff;
+  pcre_uint32 c = *p++ & 0xffff;
 #if !defined NOUTF
   if (use_utf && c >= 0xD800 && c < 0xDC00 && length > 0)
     {
@@ -1887,7 +1887,7 @@ if (length < 0)
 
 while (length-- > 0)
   {
-  int c = *p++;
+  pcre_uint32 c = *p++;
   yield += pchar(c, f);
   }
 
