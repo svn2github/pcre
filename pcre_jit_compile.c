@@ -2953,7 +2953,7 @@ struct sljit_jump *alreadyfound;
 struct sljit_jump *found;
 struct sljit_jump *foundoc = NULL;
 struct sljit_jump *notfound;
-pcre_uchar oc, bit;
+pcre_uint32 oc, bit;
 
 SLJIT_ASSERT(common->req_char_ptr != 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->req_char_ptr);

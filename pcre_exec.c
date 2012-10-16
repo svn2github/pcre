@@ -191,7 +191,7 @@ if (caseless)
     PCRE_PUCHAR endptr = p + length;
     while (p < endptr)
       {
-      unsigned int c, d;
+      pcre_uint32 c, d;
       const ucd_record *ur;
       if (eptr >= md->end_subject) return -2;   /* Partial match */
       GETCHARINC(c, eptr);
@@ -499,7 +499,7 @@ so they can be ordinary variables in all cases. Mark some of them with
 
 register int  rrc;         /* Returns from recursive calls */
 register int  i;           /* Used for loops not involving calls to RMATCH() */
-register unsigned int c;   /* Character values not kept over RMATCH() calls */
+register pcre_uint32 c;    /* Character values not kept over RMATCH() calls */
 register BOOL utf;         /* Local copy of UTF flag for speed */
 
 BOOL minimize, possessive; /* Quantifier options */
@@ -629,7 +629,7 @@ int max;
 int min;
 int number;
 int offset;
-int op;
+pcre_uchar op;
 int save_capture_last;
 int save_offset1, save_offset2, save_offset3;
 int stacksave[REC_STACK_SAVE_MAX];
@@ -3197,7 +3197,7 @@ for (;;)
 
       else
         {
-        unsigned int dc;
+        pcre_uint32 dc;
         GETCHARINC(dc, eptr);
         ecode += length;
 
@@ -6745,7 +6745,7 @@ for(;;)
           {
           while (p < end_subject)
             {
-            register int pp = *p++;
+            register pcre_uint32 pp = *p++;
             if (pp == req_char || pp == req_char2) { p--; break; }
             }
           }

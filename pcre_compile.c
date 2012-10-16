@@ -7643,7 +7643,7 @@ do {
              *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? IMM2_SIZE:0;
    const pcre_uchar *scode = first_significant_code(code + 1+LINK_SIZE + xl,
      TRUE);
-   register int op = *scode;
+   register pcre_uchar op = *scode;
 
    switch(op)
      {

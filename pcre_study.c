@@ -98,7 +98,7 @@ for (;;)
   {
   int d, min;
   pcre_uchar *cs, *ce;
-  register int op = *cc;
+  register pcre_uchar op = *cc;
 
   switch (op)
     {

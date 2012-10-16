@@ -571,7 +571,7 @@ for (;;)
   {
   int i, j;
   int clen, dlen;
-  unsigned int c, d;
+  pcre_uint32 c, d;
   int forced_fail = 0;
   BOOL partial_newline = FALSE;
   BOOL could_continue = reset_could_continue;
@@ -3493,7 +3493,7 @@ for (;;)
             {
             while (p < end_subject)
               {
-              register int pp = *p++;
+              register pcre_uint32 pp = *p++;
               if (pp == req_char || pp == req_char2) { p--; break; }
               }
             }
