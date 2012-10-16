@@ -2586,7 +2586,7 @@ extern int               PRIV(ord2utf)(pcre_uint32, pcre_uchar *);
 extern int               PRIV(valid_utf)(PCRE_PUCHAR, int, int *);
 extern BOOL              PRIV(was_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,
                            int *, BOOL);
-extern BOOL              PRIV(xclass)(int, const pcre_uchar *, BOOL);
+extern BOOL              PRIV(xclass)(pcre_uint32, const pcre_uchar *, BOOL);
 
 #ifdef SUPPORT_JIT
 extern void              PRIV(jit_compile)(const REAL_PCRE *,
