@@ -2059,7 +2059,7 @@ PRIV(find_bracket)(const pcre_uchar *code, BOOL utf, int number)
 {
 for (;;)
   {
-  register int c = *code;
+  register pcre_uchar c = *code;
 
   if (c == OP_END) return NULL;
 
@@ -2082,7 +2082,7 @@ for (;;)
   else if (c == OP_CBRA || c == OP_SCBRA ||
            c == OP_CBRAPOS || c == OP_SCBRAPOS)
     {
-    int n = GET2(code, 1+LINK_SIZE);
+    int n = (int)GET2(code, 1+LINK_SIZE);
     if (n == number) return (pcre_uchar *)code;
     code += PRIV(OP_lengths)[c];
     }
