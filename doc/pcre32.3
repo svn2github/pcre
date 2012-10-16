@@ -149,14 +149,14 @@ PCRE - Perl-compatible regular expressions
 .sp
 Starting with release 8.32, it is possible to compile a PCRE library that
 supports 32-bit character strings, including UTF-32 strings, as well as or
-instead of the original 8-bit library. The majority of the work to make this
-possible was done by Zoltan Herczeg for the 16-bit library. All three libraries
-contain identical sets of functions, used in exactly the same way. Only the
-names of the functions and the data types of their arguments and results are
-different. To avoid over-complication and reduce the documentation maintenance
-load, most of the PCRE documentation describes the 8-bit library, with only
-occasional references to the 16-bit and 32-bit libraries. This page describes
-what is different when you use the 32-bit library.
+instead of the original 8-bit library. This work was done by Christian Persch,
+based on the work done by Zoltan Herczeg for the 16-bit library. All three 
+libraries contain identical sets of functions, used in exactly the same way.
+Only the names of the functions and the data types of their arguments and
+results are different. To avoid over-complication and reduce the documentation
+maintenance load, most of the PCRE documentation describes the 8-bit library,
+with only occasional references to the 16-bit and 32-bit libraries. This page
+describes what is different when you use the 32-bit library.
 .P
 WARNING: A single application can be linked with all or any of the three
 libraries, but you must take care when processing any particular pattern
