@@ -84,8 +84,9 @@ static int
     const pcre_uint32 *, unsigned int);
 
 static BOOL
-  compile_regex(int, pcre_uchar **, const pcre_uchar **, int *, BOOL, BOOL, 
-    int, int, int *, int *, branch_chain *, compile_data *, int *);
+  compile_regex(int, pcre_uchar **, const pcre_uchar **, int *, BOOL, BOOL, int, int,
+    pcre_uint32 *, pcre_int32 *, pcre_uint32 *, pcre_int32 *, branch_chain *, 
+    compile_data *, int *);
 
 
 
@@ -121,9 +122,11 @@ overrun before it actually does run off the end of the data block. */
 
 /* Private flags added to firstchar and reqchar. */
 
-#define REQ_CASELESS   0x10000000l      /* Indicates caselessness */
-#define REQ_VARY       0x20000000l      /* Reqchar followed non-literal item */
-#define REQ_MASK       (REQ_CASELESS | REQ_VARY)
+#define REQ_CASELESS    (1 << 0)        /* Indicates caselessness */
+#define REQ_VARY        (1 << 1)        /* Reqchar followed non-literal item */
+/* Negative values for the firstchar and reqchar flags */
+#define REQ_UNSET       (-2)
+#define REQ_NONE        (-1)
 
 /* Repeated character flags. */
 
@@ -642,7 +645,6 @@ static const pcre_uint8 ebcdic_chartab[] = { /* chartable partial dup */
   0x1c,0x1c,0x1c,0x1c,0x1c,0x1c,0x1c,0x1c, /*  0 - 7  */
   0x1c,0x1c,0x00,0x00,0x00,0x00,0x00,0x00};/*  8 -255 */
 #endif
-
 
 
 
@@ -3666,8 +3668,10 @@ Arguments:
   codeptr        points to the pointer to the current code point
   ptrptr         points to the current pattern pointer
   errorcodeptr   points to error code variable
-  firstcharptr   set to initial literal character, or < 0 (REQ_UNSET, REQ_NONE)
-  reqcharptr     set to the last literal character required, else < 0
+  firstcharptr    place to put the first required character
+  firstcharflagsptr place to put the first character flags, or a negative number
+  reqcharptr     place to put the last required character
+  reqcharflagsptr place to put the last required character flags, or a negative number
   bcptr          points to current branch chain
   cond_depth     conditional nesting depth
   cd             contains pointers to tables etc.
@@ -3680,16 +3684,20 @@ Returns:         TRUE on success
 
 static BOOL
 compile_branch(int *optionsptr, pcre_uchar **codeptr,
-  const pcre_uchar **ptrptr, int *errorcodeptr, pcre_int32 *firstcharptr,
-  pcre_int32 *reqcharptr, branch_chain *bcptr, int cond_depth,
+  const pcre_uchar **ptrptr, int *errorcodeptr,
+  pcre_uint32 *firstcharptr, pcre_int32 *firstcharflagsptr,
+  pcre_uint32 *reqcharptr, pcre_int32 *reqcharflagsptr,
+  branch_chain *bcptr, int cond_depth,
   compile_data *cd, int *lengthptr)
 {
 int repeat_type, op_type;
 int repeat_min = 0, repeat_max = 0;      /* To please picky compilers */
 int bravalue = 0;
 int greedy_default, greedy_non_default;
-pcre_int32 firstchar, reqchar;
-pcre_int32 zeroreqchar, zerofirstchar;
+pcre_uint32 firstchar, reqchar;
+pcre_int32 firstcharflags, reqcharflags;
+pcre_uint32 zeroreqchar, zerofirstchar;
+pcre_int32 zeroreqcharflags, zerofirstcharflags;
 pcre_int32 req_caseopt, reqvary, tempreqvary;
 int options = *optionsptr;               /* May change dynamically */
 int after_manual_callout = 0;
@@ -3752,7 +3760,8 @@ to take the zero repeat into account. This is implemented by setting them to
 zerofirstbyte and zeroreqchar when such a repeat is encountered. The individual
 item types that can be repeated set these backoff variables appropriately. */
 
-firstchar = reqchar = zerofirstchar = zeroreqchar = REQ_UNSET;
+firstchar = reqchar = zerofirstchar = zeroreqchar = 0;
+firstcharflags = reqcharflags = zerofirstcharflags = zeroreqcharflags = REQ_UNSET;
 
 /* The variable req_caseopt contains either the REQ_CASELESS value
 or zero, according to the current setting of the caseless flag. The
@@ -3778,8 +3787,8 @@ for (;; ptr++)
   int recno;
   int refsign;
   int skipbytes;
-  int subreqchar;
-  int subfirstchar;
+  pcre_uint32 subreqchar, subfirstchar;
+  pcre_int32 subreqcharflags, subfirstcharflags;
   int terminator;
   int mclength;
   int tempbracount;
@@ -3946,7 +3955,9 @@ for (;; ptr++)
     case CHAR_VERTICAL_LINE:       /* or | or ) */
     case CHAR_RIGHT_PARENTHESIS:
     *firstcharptr = firstchar;
+    *firstcharflagsptr = firstcharflags;
     *reqcharptr = reqchar;
+    *reqcharflagsptr = reqcharflags;
     *codeptr = code;
     *ptrptr = ptr;
     if (lengthptr != NULL)
@@ -3970,7 +3981,7 @@ for (;; ptr++)
     previous = NULL;
     if ((options & PCRE_MULTILINE) != 0)
       {
-      if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+      if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
       *code++ = OP_CIRCM;
       }
     else *code++ = OP_CIRC;
@@ -3985,9 +3996,11 @@ for (;; ptr++)
     repeats. The value of reqchar doesn't change either. */
 
     case CHAR_DOT:
-    if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+    if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
     zerofirstchar = firstchar;
+    zerofirstcharflags = firstcharflags;
     zeroreqchar = reqchar;
+    zeroreqcharflags = reqcharflags;
     previous = code;
     *code++ = ((options & PCRE_DOTALL) != 0)? OP_ALLANY: OP_ANY;
     break;
@@ -4061,8 +4074,9 @@ for (;; ptr++)
         (cd->external_options & PCRE_JAVASCRIPT_COMPAT) != 0)
       {
       *code++ = negate_class? OP_ALLANY : OP_FAIL;
-      if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+      if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
       zerofirstchar = firstchar;
+      zerofirstcharflags = firstcharflags;
       break;
       }
 
@@ -4522,15 +4536,16 @@ for (;; ptr++)
         {
         ptr++;
         zeroreqchar = reqchar;
+        zeroreqcharflags = reqcharflags;
 
         if (negate_class)
           {
 #ifdef SUPPORT_UCP           
-            // FIXMEchpe pcreuint32?
           int d;
 #endif           
-          if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+          if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
           zerofirstchar = firstchar;
+          zerofirstcharflags = firstcharflags;
 
           /* For caseless UTF-8 mode when UCP support is available, check
           whether this character has more than one other case. If so, generate
@@ -4618,9 +4633,11 @@ for (;; ptr++)
     setting, whatever the repeat count. Any reqchar setting must remain
     unchanged after any kind of repeat. */
 
-    if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+    if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
     zerofirstchar = firstchar;
+    zerofirstcharflags = firstcharflags;
     zeroreqchar = reqchar;
+    zeroreqcharflags = reqcharflags;
 
     /* If there are characters with values > 255, we have to compile an
     extended class, with its own opcode, unless there was a negated special
@@ -4715,7 +4732,9 @@ for (;; ptr++)
     if (repeat_min == 0)
       {
       firstchar = zerofirstchar;    /* Adjust for zero repeat */
+      firstcharflags = zerofirstcharflags;
       reqchar = zeroreqchar;        /* Ditto */
+      reqcharflags = zeroreqcharflags;
       }
 
     /* Remember whether this is a variable length repeat */
@@ -4818,7 +4837,10 @@ for (;; ptr++)
         {
         c = code[-1];
         if (*previous <= OP_CHARI && repeat_min > 1)
-          reqchar = c | req_caseopt | cd->req_varyopt;
+          {
+          reqchar = c;
+          reqcharflags = req_caseopt | cd->req_varyopt;
+          }
         }
 
       /* If the repetition is unlimited, it pays to see if the next thing on
@@ -5200,7 +5222,11 @@ for (;; ptr++)
 
           else
             {
-            if (groupsetfirstchar && reqchar < 0) reqchar = firstchar;
+            if (groupsetfirstchar && reqcharflags < 0)
+              {
+              reqchar = firstchar;
+              reqcharflags = firstcharflags;
+              }
 
             for (i = 1; i < repeat_min; i++)
               {
@@ -5620,7 +5646,7 @@ for (;; ptr++)
               (cd->assert_depth > 0)? OP_ASSERT_ACCEPT : OP_ACCEPT;
 
             /* Do not set firstchar after *ACCEPT */
-            if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+            if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
             }
 
           /* Handle other cases with/without an argument */
@@ -6383,7 +6409,7 @@ for (;; ptr++)
 
         /* Can't determine a first byte now */
 
-        if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+        if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
         continue;
 
 
@@ -6517,7 +6543,9 @@ for (;; ptr++)
          cond_depth +
            ((bravalue == OP_COND)?1:0),   /* Depth of condition subpatterns */
          &subfirstchar,                   /* For possible first char */
+         &subfirstcharflags,
          &subreqchar,                     /* For possible last char */
+         &subreqcharflags,
          bcptr,                           /* Current branch chain */
          cd,                              /* Tables block */
          (lengthptr == NULL)? NULL :      /* Actual compile phase */
@@ -6578,7 +6606,7 @@ for (;; ptr++)
           *errorcodeptr = ERR27;
           goto FAILED;
           }
-        if (condcount == 1) subfirstchar = subreqchar = REQ_NONE;
+        if (condcount == 1) subfirstcharflags = subreqcharflags = REQ_NONE;
         }
       }
 
@@ -6627,7 +6655,9 @@ for (;; ptr++)
     back off. */
 
     zeroreqchar = reqchar;
+    zeroreqcharflags = reqcharflags;
     zerofirstchar = firstchar;
+    zerofirstcharflags = firstcharflags;
     groupsetfirstchar = FALSE;
 
     if (bravalue >= OP_ONCE)
@@ -6638,28 +6668,36 @@ for (;; ptr++)
       no firstchar, set "none" for the whole branch. In both cases, a zero
       repeat forces firstchar to "none". */
 
-      if (firstchar == REQ_UNSET)
+      if (firstcharflags == REQ_UNSET)
         {
-        if (subfirstchar >= 0)
+        if (subfirstcharflags >= 0)
           {
           firstchar = subfirstchar;
+          firstcharflags = subfirstcharflags;
           groupsetfirstchar = TRUE;
           }
-        else firstchar = REQ_NONE;
-        zerofirstchar = REQ_NONE;
+        else firstcharflags = REQ_NONE;
+        zerofirstcharflags = REQ_NONE;
         }
 
       /* If firstchar was previously set, convert the subpattern's firstchar
       into reqchar if there wasn't one, using the vary flag that was in
       existence beforehand. */
 
-      else if (subfirstchar >= 0 && subreqchar < 0)
-        subreqchar = subfirstchar | tempreqvary;
+      else if (subfirstcharflags >= 0 && subreqcharflags < 0)
+        {
+        subreqchar = subfirstchar;
+        subreqcharflags = subfirstcharflags | tempreqvary;
+        }
 
       /* If the subpattern set a required byte (or set a first byte that isn't
       really the first byte - see above), set it. */
 
-      if (subreqchar >= 0) reqchar = subreqchar;
+      if (subreqcharflags >= 0) 
+        {
+        reqchar = subreqchar;
+        reqcharflags = subreqcharflags;
+        }
       }
 
     /* For a forward assertion, we take the reqchar, if set. This can be
@@ -6670,7 +6708,11 @@ for (;; ptr++)
     of a firstchar. This is overcome by a scan at the end if there's no
     firstchar, looking for an asserted first char. */
 
-    else if (bravalue == OP_ASSERT && subreqchar >= 0) reqchar = subreqchar;
+    else if (bravalue == OP_ASSERT && subreqcharflags >= 0)
+      {
+      reqchar = subreqchar;
+      reqcharflags = subreqcharflags;
+      }
     break;     /* End of processing '(' */
 
 
@@ -6706,13 +6748,15 @@ for (;; ptr++)
       /* For metasequences that actually match a character, we disable the
       setting of a first character if it hasn't already been set. */
 
-      if (firstchar == REQ_UNSET && escape > ESC_b && escape < ESC_Z)
-        firstchar = REQ_NONE;
+      if (firstcharflags == REQ_UNSET && escape > ESC_b && escape < ESC_Z)
+        firstcharflags = REQ_NONE;
 
       /* Set values to reset to if this is followed by a zero repeat. */
 
       zerofirstchar = firstchar;
+      zerofirstcharflags = firstcharflags;
       zeroreqchar = reqchar;
+      zeroreqcharflags = reqcharflags;
 
       /* \g<name> or \g'name' is a subroutine call by name and \g<n> or \g'n'
       is a subroutine call by number (Oniguruma syntax). In fact, the value
@@ -6802,7 +6846,7 @@ for (;; ptr++)
         recno = -escape;
 
         HANDLE_REFERENCE:    /* Come here from named backref handling */
-        if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
+        if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
         previous = code;
         *code++ = ((options & PCRE_CASELESS) != 0)? OP_REFI : OP_REF;
         PUT2INC(code, 0, recno);
@@ -6929,7 +6973,7 @@ for (;; ptr++)
         *code++ = OP_PROP;
         *code++ = PT_CLIST;
         *code++ = c;
-        if (firstchar == REQ_UNSET) firstchar = zerofirstchar = REQ_NONE; 
+        if (firstcharflags == REQ_UNSET) firstcharflags = zerofirstcharflags = REQ_NONE; 
         break;   
         }   
       }  
@@ -6950,10 +6994,11 @@ for (;; ptr++)
     Otherwise, leave the firstchar value alone, and don't change it on a zero
     repeat. */
 
-    if (firstchar == REQ_UNSET)
+    if (firstcharflags == REQ_UNSET)
       {
-      zerofirstchar = REQ_NONE;
+      zerofirstcharflags = REQ_NONE;
       zeroreqchar = reqchar;
+      zeroreqcharflags = reqcharflags;
 
       /* If the character is more than one byte long, we can set firstchar
       only if it is not to be matched caselessly. */
@@ -6961,9 +7006,16 @@ for (;; ptr++)
       if (mclength == 1 || req_caseopt == 0)
         {
         firstchar = mcbuffer[0] | req_caseopt;
-        if (mclength != 1) reqchar = code[-1] | cd->req_varyopt;
+        firstchar = mcbuffer[0];
+        firstcharflags = req_caseopt;
+
+        if (mclength != 1)
+          {
+          reqchar = code[-1];
+          reqcharflags = cd->req_varyopt;
+          }
         }
-      else firstchar = reqchar = REQ_NONE;
+      else firstcharflags = reqcharflags = REQ_NONE;
       }
 
     /* firstchar was previously set; we can set reqchar only if the length is
@@ -6972,9 +7024,14 @@ for (;; ptr++)
     else
       {
       zerofirstchar = firstchar;
+      zerofirstcharflags = firstcharflags;
       zeroreqchar = reqchar;
+      zeroreqcharflags = reqcharflags;
       if (mclength == 1 || req_caseopt == 0)
-        reqchar = code[-1] | req_caseopt | cd->req_varyopt;
+        {
+        reqchar = code[-1];
+        reqcharflags = req_caseopt | cd->req_varyopt;
+        }
       }
 
     break;            /* End of literal character handling */
@@ -6990,7 +7047,6 @@ FAILED:
 *ptrptr = ptr;
 return FALSE;
 }
-
 
 
 
@@ -7014,8 +7070,10 @@ Arguments:
   reset_bracount TRUE to reset the count for each branch
   skipbytes      skip this many bytes at start (for brackets and OP_COND)
   cond_depth     depth of nesting for conditional subpatterns
-  firstcharptr   place to put the first required character, or a negative number
-  reqcharptr     place to put the last required character, or a negative number
+  firstcharptr    place to put the first required character
+  firstcharflagsptr place to put the first character flags, or a negative number
+  reqcharptr     place to put the last required character
+  reqcharflagsptr place to put the last required character flags, or a negative number
   bcptr          pointer to the chain of currently open branches
   cd             points to the data block with tables pointers etc.
   lengthptr      NULL during the real compile phase
@@ -7027,7 +7085,9 @@ Returns:         TRUE on success
 static BOOL
 compile_regex(int options, pcre_uchar **codeptr, const pcre_uchar **ptrptr,
   int *errorcodeptr, BOOL lookbehind, BOOL reset_bracount, int skipbytes,
-  int cond_depth, pcre_int32 *firstcharptr, pcre_int32 *reqcharptr,
+  int cond_depth,
+  pcre_uint32 *firstcharptr, pcre_int32 *firstcharflagsptr,
+  pcre_uint32 *reqcharptr, pcre_int32 *reqcharflagsptr,
   branch_chain *bcptr, compile_data *cd, int *lengthptr)
 {
 const pcre_uchar *ptr = *ptrptr;
@@ -7037,8 +7097,10 @@ pcre_uchar *start_bracket = code;
 pcre_uchar *reverse_count = NULL;
 open_capitem capitem;
 int capnumber = 0;
-pcre_int32 firstchar, reqchar;
-pcre_int32 branchfirstchar, branchreqchar;
+pcre_uint32 firstchar, reqchar;
+pcre_int32 firstcharflags, reqcharflags;
+pcre_uint32 branchfirstchar, branchreqchar;
+pcre_int32 branchfirstcharflags, branchreqcharflags;
 int length;
 int orig_bracount;
 int max_bracount;
@@ -7047,7 +7109,8 @@ branch_chain bc;
 bc.outer = bcptr;
 bc.current_branch = code;
 
-firstchar = reqchar = REQ_UNSET;
+firstchar = reqchar = 0;
+firstcharflags = reqcharflags = REQ_UNSET;
 
 /* Accumulate the length for use in the pre-compile phase. Start with the
 length of the BRA and KET and any extra bytes that are required at the
@@ -7107,8 +7170,8 @@ for (;;)
   into the length. */
 
   if (!compile_branch(&options, &code, &ptr, errorcodeptr, &branchfirstchar,
-        &branchreqchar, &bc, cond_depth, cd,
-        (lengthptr == NULL)? NULL : &length))
+        &branchfirstcharflags, &branchreqchar, &branchreqcharflags, &bc, 
+        cond_depth, cd, (lengthptr == NULL)? NULL : &length))
     {
     *ptrptr = ptr;
     return FALSE;
@@ -7129,7 +7192,9 @@ for (;;)
     if (*last_branch != OP_ALT)
       {
       firstchar = branchfirstchar;
+      firstcharflags = branchfirstcharflags;
       reqchar = branchreqchar;
+      reqcharflags = branchreqcharflags;
       }
 
     /* If this is not the first branch, the first char and reqchar have to
@@ -7143,23 +7208,36 @@ for (;;)
       we have to abandon the firstchar for the regex, but if there was
       previously no reqchar, it takes on the value of the old firstchar. */
 
-      if (firstchar >= 0 && firstchar != branchfirstchar)
+      if (firstcharflags >= 0 && 
+          (firstcharflags != branchfirstcharflags || firstchar != branchfirstchar))
         {
-        if (reqchar < 0) reqchar = firstchar;
-        firstchar = REQ_NONE;
+        if (reqcharflags < 0) 
+          {
+          reqchar = firstchar;
+          reqcharflags = firstcharflags;
+          }
+        firstcharflags = REQ_NONE;
         }
 
       /* If we (now or from before) have no firstchar, a firstchar from the
       branch becomes a reqchar if there isn't a branch reqchar. */
 
-      if (firstchar < 0 && branchfirstchar >= 0 && branchreqchar < 0)
-          branchreqchar = branchfirstchar;
+      if (firstcharflags < 0 && branchfirstcharflags >= 0 && branchreqcharflags < 0)
+        {
+        branchreqchar = branchfirstchar;
+        branchreqcharflags = branchfirstcharflags;
+        }
 
       /* Now ensure that the reqchars match */
 
-      if ((reqchar & ~REQ_VARY) != (branchreqchar & ~REQ_VARY))
-        reqchar = REQ_NONE;
-      else reqchar |= branchreqchar;   /* To "or" REQ_VARY */
+      if (((reqcharflags & ~REQ_VARY) != (branchreqcharflags & ~REQ_VARY)) ||
+          reqchar != branchreqchar)
+        reqcharflags = REQ_NONE;
+      else
+        {
+        reqchar = branchreqchar;
+        reqcharflags |= branchreqcharflags; /* To "or" REQ_VARY */
+        }
       }
 
     /* If lookbehind, check that this branch matches a fixed-length string, and
@@ -7255,7 +7333,9 @@ for (;;)
     *codeptr = code;
     *ptrptr = ptr;
     *firstcharptr = firstchar;
+    *firstcharflagsptr = firstcharflags;
     *reqcharptr = reqchar;
+    *reqcharflagsptr = reqcharflags;
     if (lengthptr != NULL)
       {
       if (OFLOW_MAX - *lengthptr < length)
@@ -7542,17 +7622,23 @@ we return that char, otherwise -1.
 
 Arguments:
   code       points to start of expression (the bracket)
+  flags       points to the first char flags, or to REQ_NONE
   inassert   TRUE if in an assertion
 
-Returns:     -1 or the fixed first char
+Returns:     the fixed first char, or 0 with REQ_NONE in flags
 */
 
-static int
-find_firstassertedchar(const pcre_uchar *code, BOOL inassert)
+static pcre_uint32
+find_firstassertedchar(const pcre_uchar *code, pcre_int32 *flags,
+  BOOL inassert)
 {
-register int c = -1;
+register pcre_uint32 c = 0;
+int cflags = REQ_NONE;
+
+*flags = REQ_NONE;
 do {
-   int d;
+   pcre_uint32 d;
+   int dflags;
    int xl = (*code == OP_CBRA || *code == OP_SCBRA ||
              *code == OP_CBRAPOS || *code == OP_SCBRAPOS)? IMM2_SIZE:0;
    const pcre_uchar *scode = first_significant_code(code + 1+LINK_SIZE + xl,
@@ -7562,7 +7648,7 @@ do {
    switch(op)
      {
      default:
-     return -1;
+     return 0;
 
      case OP_BRA:
      case OP_BRAPOS:
@@ -7574,9 +7660,10 @@ do {
      case OP_ONCE:
      case OP_ONCE_NC:
      case OP_COND:
-     if ((d = find_firstassertedchar(scode, op == OP_ASSERT)) < 0)
-       return -1;
-     if (c < 0) c = d; else if (c != d) return -1;
+     d = find_firstassertedchar(scode, &dflags, op == OP_ASSERT);
+     if (dflags < 0)
+       return 0;
+     if (cflags < 0) { c = d; cflags = dflags; } else if (c != d || cflags != dflags) return 0;
      break;
 
      case OP_EXACT:
@@ -7587,9 +7674,9 @@ do {
      case OP_PLUS:
      case OP_MINPLUS:
      case OP_POSPLUS:
-     if (!inassert) return -1;
-     if (c < 0) c = scode[1];
-       else if (c != scode[1]) return -1;
+     if (!inassert) return 0;
+     if (cflags < 0) { c = scode[1]; cflags = 0; }
+       else if (c != scode[1]) return 0;
      break;
 
      case OP_EXACTI:
@@ -7600,15 +7687,17 @@ do {
      case OP_PLUSI:
      case OP_MINPLUSI:
      case OP_POSPLUSI:
-     if (!inassert) return -1;
-     if (c < 0) c = scode[1] | REQ_CASELESS;
-       else if (c != scode[1]) return -1;
+     if (!inassert) return 0;
+     if (cflags < 0) { c = scode[1]; cflags = REQ_CASELESS; }
+       else if (c != scode[1]) return 0;
      break;
      }
 
    code += GET(code, 1);
    }
 while (*code == OP_ALT);
+
+*flags = cflags;
 return c;
 }
 
@@ -7676,7 +7765,8 @@ pcre32_compile2(PCRE_SPTR32 pattern, int options, int *errorcodeptr,
 {
 REAL_PCRE *re;
 int length = 1;  /* For final END opcode */
-pcre_int32 firstchar, reqchar;
+pcre_uint32 firstchar, reqchar;
+pcre_int32 firstcharflags, reqcharflags;
 int newline;
 int errorcode = 0;
 int skipatstart = 0;
@@ -7926,7 +8016,8 @@ ptr += skipatstart;
 code = cworkspace;
 *code = OP_BRA;
 (void)compile_regex(cd->external_options, &code, &ptr, &errorcode, FALSE,
-  FALSE, 0, 0, &firstchar, &reqchar, NULL, cd, &length);
+  FALSE, 0, 0, &firstchar, &firstcharflags, &reqchar, &reqcharflags, NULL,
+  cd, &length);
 if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 
 DPRINTF(("end pre-compile: length=%d workspace=%d\n", length,
@@ -8004,13 +8095,17 @@ ptr = (const pcre_uchar *)pattern + skipatstart;
 code = (pcre_uchar *)codestart;
 *code = OP_BRA;
 (void)compile_regex(re->options, &code, &ptr, &errorcode, FALSE, FALSE, 0, 0,
-  &firstchar, &reqchar, NULL, cd, NULL);
+  &firstchar, &firstcharflags, &reqchar, &reqcharflags, NULL, cd, NULL);
 re->top_bracket = cd->bracount;
 re->top_backref = cd->top_backref;
 re->max_lookbehind = cd->max_lookbehind;
 re->flags = cd->external_flags | PCRE_MODE;
 
-if (cd->had_accept) reqchar = REQ_NONE;   /* Must disable after (*ACCEPT) */
+if (cd->had_accept)
+  {
+  reqchar = 0;              /* Must disable after (*ACCEPT) */
+  reqcharflags = REQ_NONE;
+  }
 
 /* If not reached end of pattern on success, there's an excess bracket. */
 
@@ -8060,7 +8155,7 @@ if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
-because they may contain forward references. Actual recursions can't be fixed
+because they may contain forward references. Actual recursions cannot be fixed
 length, but subroutine calls can. It is done like this so that those without
 OP_RECURSE that are not fixed length get a diagnosic with a useful offset. The
 exceptional ones forgo this. We scan the pattern to check that they are fixed
@@ -8131,18 +8226,18 @@ if ((re->options & PCRE_ANCHORED) == 0)
   if (is_anchored(codestart, 0, cd, 0)) re->options |= PCRE_ANCHORED;
   else
     {
-    if (firstchar < 0)
-      firstchar = find_firstassertedchar(codestart, FALSE);
-    if (firstchar >= 0)   /* Remove caseless flag for non-caseable chars */
+    if (firstcharflags < 0)
+      firstchar = find_firstassertedchar(codestart, &firstcharflags, FALSE);
+    if (firstcharflags >= 0)   /* Remove caseless flag for non-caseable chars */
       {
 #if defined COMPILE_PCRE8
       re->first_char = firstchar & 0xff;
 #elif defined COMPILE_PCRE16
       re->first_char = firstchar & 0xffff;
 #elif defined COMPILE_PCRE32
-      re->first_char = firstchar & ~REQ_MASK;
+      re->first_char = firstchar;
 #endif
-      if ((firstchar & REQ_CASELESS) != 0)
+      if ((firstcharflags & REQ_CASELESS) != 0)
         {
 #if defined SUPPORT_UCP && !(defined COMPILE_PCRE8)
         /* We ignore non-ASCII first chars in 8 bit mode. */
@@ -8174,17 +8269,17 @@ if ((re->options & PCRE_ANCHORED) == 0)
 variable length item in the regex. Remove the caseless flag for non-caseable
 bytes. */
 
-if (reqchar >= 0 &&
-     ((re->options & PCRE_ANCHORED) == 0 || (reqchar & REQ_VARY) != 0))
+if (reqcharflags >= 0 &&
+     ((re->options & PCRE_ANCHORED) == 0 || (reqcharflags & REQ_VARY) != 0))
   {
 #if defined COMPILE_PCRE8
   re->req_char = reqchar & 0xff;
 #elif defined COMPILE_PCRE16
   re->req_char = reqchar & 0xffff;
 #elif defined COMPILE_PCRE32
-  re->req_char = reqchar & ~REQ_MASK;
+  re->req_char = reqchar;
 #endif
-  if ((reqchar & REQ_CASELESS) != 0)
+  if ((reqcharflags & REQ_CASELESS) != 0)
     {
 #if defined SUPPORT_UCP && !(defined COMPILE_PCRE8)
     /* We ignore non-ASCII first chars in 8 bit mode. */

@@ -1095,11 +1095,6 @@ in different endianness. */
 
 #define REVERSED_MAGIC_NUMBER  0x45524350UL   /* 'ERCP' */
 
-/* Negative values for the firstchar and reqchar variables */
-
-#define REQ_UNSET (-2)
-#define REQ_NONE  (-1)
-
 /* The maximum remaining length of subject we are prepared to search for a
 req_byte match. */
 
