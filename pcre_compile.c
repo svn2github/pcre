@@ -3053,7 +3053,7 @@ check_auto_possessive(const pcre_uchar *previous, BOOL utf,
 pcre_uint32 c = NOTACHAR;
 pcre_uint32 next;
 int escape;
-int op_code = *previous++;
+pcre_uchar op_code = *previous++;
 
 /* Skip whitespace and comments in extended mode */
 
@@ -3251,10 +3251,10 @@ if (escape == 0)
 
 #ifdef SUPPORT_UCP
     case OP_PROP:
-    return check_char_prop(next, previous[0], previous[1], FALSE);
+    return check_char_prop(next, (int)previous[0], (int)previous[1], FALSE);
 
     case OP_NOTPROP:
-    return check_char_prop(next, previous[0], previous[1], TRUE);
+    return check_char_prop(next, (int)previous[0], (int)previous[1], TRUE);
 #endif
 
     default:
