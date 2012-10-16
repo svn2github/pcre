@@ -1457,7 +1457,7 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
     if ((*ptr == CHAR_LESS_THAN_SIGN && ptr[1] != CHAR_EXCLAMATION_MARK &&
         ptr[1] != CHAR_EQUALS_SIGN) || *ptr == CHAR_APOSTROPHE)
       {
-      int term;
+      pcre_uchar term;
       const pcre_uchar *thisname;
       *count += 1;
       if (name == NULL && *count == lorn) return *count;
@@ -1465,8 +1465,8 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
       if (term == CHAR_LESS_THAN_SIGN) term = CHAR_GREATER_THAN_SIGN;
       thisname = ptr;
       while (*ptr != term) ptr++;
-      if (name != NULL && lorn == ptr - thisname &&
-          STRNCMP_UC_UC(name, thisname, lorn) == 0)
+      if (name != NULL && lorn == (int)(ptr - thisname) &&
+          STRNCMP_UC_UC(name, thisname, (unsigned int)lorn) == 0)
         return *count;
       term++;
       }
