@@ -2706,7 +2706,7 @@ Returns:   TRUE or FALSE
 static BOOL
 check_posix_syntax(const pcre_uchar *ptr, const pcre_uchar **endptr)
 {
-int terminator;          /* Don't combine these lines; the Solaris cc */
+pcre_uchar terminator;          /* Don't combine these lines; the Solaris cc */
 terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
 for (++ptr; *ptr != 0; ptr++)
   {
