@@ -749,33 +749,35 @@ return (*p == CHAR_RIGHT_CURLY_BRACKET);
 *************************************************/
 
 /* This function is called when a \ has been encountered. It either returns a
-positive value for a simple escape such as \n, or a negative value which
-encodes one of the more complicated things such as \d. A backreference to group
-n is returned as -(ESC_REF + n); ESC_REF is the highest ESC_xxx macro. When
-UTF-8 is enabled, a positive value greater than 255 may be returned. On entry,
-ptr is pointing at the \. On exit, it is on the final character of the escape
-sequence.
+positive value for a simple escape such as \n, or 0 for a data character
+which will be placed in chptr. A backreference to group
+n is returned as ESC_REF + n; ESC_REF is the highest ESC_xxx macro. When
+UTF-8 is enabled, a positive value greater than 255 may be returned in chptr.
+On entry,ptr is pointing at the \. On exit, it is on the final character of the
+escape sequence.
 
 Arguments:
   ptrptr         points to the pattern position pointer
+  chptr          points to the data character
   errorcodeptr   points to the errorcode variable
   bracount       number of previous extracting brackets
   options        the options bits
   isclass        TRUE if inside a character class
 
-Returns:         zero or positive => a data character
-                 negative => a special escape sequence
+Returns:         zero => a data character
+                 positive => a special escape sequence
                  on error, errorcodeptr is set
 */
 
 static int
-check_escape(const pcre_uchar **ptrptr, int *errorcodeptr, int bracount,
-  int options, BOOL isclass)
+check_escape(const pcre_uchar **ptrptr, int *chptr, int *errorcodeptr, 
+  int bracount, int options, BOOL isclass)
 {
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
 BOOL utf = (options & PCRE_UTF8) != 0;
 const pcre_uchar *ptr = *ptrptr + 1;
 pcre_int32 c;
+int escape = 0;
 int i;
 
 GETCHARINCTEST(c, ptr);           /* Get character value, increment pointer */
@@ -792,12 +794,12 @@ Otherwise further processing may be required. */
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
 /* Not alphanumeric */
 else if (c < CHAR_0 || c > CHAR_z) {}
-else if ((i = escapes[c - CHAR_0]) != 0) c = i;
+else if ((i = escapes[c - CHAR_0]) != 0) { if (i > 0) c = i; else escape = -i; }
 
 #else           /* EBCDIC coding */
 /* Not alphanumeric */
 else if (c < CHAR_a || (!MAX_255(c) || (ebcdic_chartab[c] & 0x0E) == 0)) {}
-else if ((i = escapes[c - 0x48]) != 0)  c = i;
+else if ((i = escapes[c - 0x48]) != 0)  { if (i > 0) c = i; else escape = -i; }
 #endif
 
 /* Escapes that need further processing, or are illegal. */
@@ -877,13 +879,13 @@ else
     (3) For Oniguruma compatibility we also support \g followed by a name or a
     number either in angle brackets or in single quotes. However, these are
     (possibly recursive) subroutine calls, _not_ backreferences. Just return
-    the -ESC_g code (cf \k). */
+    the ESC_g code (cf \k). */
 
     case CHAR_g:
     if (isclass) break;
     if (ptr[1] == CHAR_LESS_THAN_SIGN || ptr[1] == CHAR_APOSTROPHE)
       {
-      c = -ESC_g;
+      escape = ESC_g;
       break;
       }
 
@@ -896,7 +898,7 @@ else
         if (*p != CHAR_MINUS && !IS_DIGIT(*p)) break;
       if (*p != 0 && *p != CHAR_RIGHT_CURLY_BRACKET)
         {
-        c = -ESC_k;
+        escape = ESC_k;
         break;
         }
       braced = TRUE;
@@ -952,7 +954,7 @@ else
       c = bracount - (c - 1);
       }
 
-    c = -(ESC_REF + c);
+    escape = ESC_REF + c;
     break;
 
     /* The handling of escape sequences consisting of a string of digits
@@ -993,7 +995,7 @@ else
         }
       if (c < 10 || c <= bracount)
         {
-        c = -(ESC_REF + c);
+        escape = ESC_REF + c;
         break;
         }
       ptr = oldptr;      /* Put the pointer back and fall through */
@@ -1161,22 +1163,21 @@ else
 newline". PCRE does not support \N{name}. However, it does support
 quantification such as \N{2,3}. */
 
-if (c == -ESC_N && ptr[1] == CHAR_LEFT_CURLY_BRACKET &&
+if (escape == ESC_N && ptr[1] == CHAR_LEFT_CURLY_BRACKET &&
      !is_counted_repeat(ptr+2))
   *errorcodeptr = ERR37;
 
 /* If PCRE_UCP is set, we change the values for \d etc. */
 
-if ((options & PCRE_UCP) != 0 && c <= -ESC_D && c >= -ESC_w)
-  c -= (ESC_DU - ESC_D);
+if ((options & PCRE_UCP) != 0 && escape >= ESC_D && escape <= ESC_w)
+  escape += (ESC_DU - ESC_D);
 
 /* Set the pointer to the final character before returning. */
 
 *ptrptr = ptr;
-return c;
+*chptr = c;
+return escape;
 }
-
-
 
 #ifdef SUPPORT_UCP
 /*************************************************
@@ -3038,8 +3039,9 @@ static BOOL
 check_auto_possessive(const pcre_uchar *previous, BOOL utf,
   const pcre_uchar *ptr, int options, compile_data *cd)
 {
-pcre_int32 c = NOTACHAR;
+pcre_int32 c = NOTACHAR; // FIXMEchpe pcre_uint32
 pcre_int32 next;
+int escape;
 int op_code = *previous++;
 
 /* Skip whitespace and comments in extended mode */
@@ -3071,12 +3073,13 @@ value is a character, a negative value is an escape value. */
 if (*ptr == CHAR_BACKSLASH)
   {
   int temperrorcode = 0;
-  next = check_escape(&ptr, &temperrorcode, cd->bracount, options, FALSE);
+  escape = check_escape(&ptr, &next, &temperrorcode, cd->bracount, options, FALSE);
   if (temperrorcode != 0) return FALSE;
   ptr++;    /* Point after the escape sequence */
   }
 else if (!MAX_255(*ptr) || (cd->ctypes[*ptr] & ctype_meta) == 0)
   {
+  escape = 0;
 #ifdef SUPPORT_UTF
   if (utf) { GETCHARINC(next, ptr); } else
 #endif
@@ -3117,6 +3120,7 @@ if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
 
 if (op_code == OP_CHAR || op_code == OP_CHARI || 
     op_code == OP_NOT || op_code == OP_NOTI)
+  //if (escape == 0) switch(op_code)
   {
 #ifdef SUPPORT_UTF
   GETCHARTEST(c, previous);
@@ -3128,7 +3132,7 @@ if (op_code == OP_CHAR || op_code == OP_CHARI ||
 /* Now compare the next item with the previous opcode. First, handle cases when
 the next item is a character. */
 
-if (next >= 0)
+if (escape == 0)
   {
   /* For a caseless UTF match, the next character may have more than one other
   case, which maps to the special PT_CLIST property. Check this first. */
@@ -3257,7 +3261,7 @@ switch(op_code)
   {
   case OP_CHAR:
   case OP_CHARI:
-  switch(-next)
+  switch(escape)
     {
     case ESC_d:
     return c > 255 || (cd->ctypes[c] & ctype_digit) == 0;
@@ -3282,10 +3286,10 @@ switch(op_code)
     switch(c)
       {
       HSPACE_CASES: 
-      return -next != ESC_h;
-
+      return escape != ESC_h;
+       
       default:
-      return -next == ESC_h;
+      return escape == ESC_h;
       }
 
     case ESC_v:
@@ -3293,15 +3297,15 @@ switch(op_code)
     switch(c)
       {
       VSPACE_CASES: 
-      return -next != ESC_v;
+      return escape != ESC_v;
 
       default:
-      return -next == ESC_v;
+      return escape == ESC_v;
       }
 
     /* When PCRE_UCP is set, these values get generated for \d etc. Find
     their substitutions and process them. The result will always be either
-    -ESC_p or -ESC_P. Then fall through to process those values. */
+    ESC_p or ESC_P. Then fall through to process those values. */
 
 #ifdef SUPPORT_UCP
     case ESC_du:
@@ -3312,8 +3316,8 @@ switch(op_code)
     case ESC_SU:
       {
       int temperrorcode = 0;
-      ptr = substitutes[-next - ESC_DU];
-      next = check_escape(&ptr, &temperrorcode, 0, options, FALSE);
+      ptr = substitutes[escape - ESC_DU];
+      escape = check_escape(&ptr, &next, &temperrorcode, 0, options, FALSE);
       if (temperrorcode != 0) return FALSE;
       ptr++;    /* For compatibility */
       }
@@ -3340,7 +3344,7 @@ switch(op_code)
 
       /* Do the property check. */
 
-      return check_char_prop(c, ptype, pdata, (next == -ESC_P) != negated);
+      return check_char_prop(c, ptype, pdata, (escape == ESC_P) != negated);
       }
 #endif
 
@@ -3355,39 +3359,39 @@ switch(op_code)
   these op-codes are never generated.) */
 
   case OP_DIGIT:
-  return next == -ESC_D || next == -ESC_s || next == -ESC_W ||
-         next == -ESC_h || next == -ESC_v || next == -ESC_R;
+  return escape == ESC_D || escape == ESC_s || escape == ESC_W ||
+         escape == ESC_h || escape == ESC_v || escape == ESC_R;
 
   case OP_NOT_DIGIT:
-  return next == -ESC_d;
+  return escape == ESC_d;
 
   case OP_WHITESPACE:
-  return next == -ESC_S || next == -ESC_d || next == -ESC_w;
+  return escape == ESC_S || escape == ESC_d || escape == ESC_w;
 
   case OP_NOT_WHITESPACE:
-  return next == -ESC_s || next == -ESC_h || next == -ESC_v || next == -ESC_R;
+  return escape == ESC_s || escape == ESC_h || escape == ESC_v || escape == ESC_R;
 
   case OP_HSPACE:
-  return next == -ESC_S || next == -ESC_H || next == -ESC_d ||
-         next == -ESC_w || next == -ESC_v || next == -ESC_R;
+  return escape == ESC_S || escape == ESC_H || escape == ESC_d ||
+         escape == ESC_w || escape == ESC_v || escape == ESC_R;
 
   case OP_NOT_HSPACE:
-  return next == -ESC_h;
+  return escape == ESC_h;
 
   /* Can't have \S in here because VT matches \S (Perl anomaly) */
   case OP_ANYNL:
   case OP_VSPACE:
-  return next == -ESC_V || next == -ESC_d || next == -ESC_w;
+  return escape == ESC_V || escape == ESC_d || escape == ESC_w;
 
   case OP_NOT_VSPACE:
-  return next == -ESC_v || next == -ESC_R;
+  return escape == ESC_v || escape == ESC_R;
 
   case OP_WORDCHAR:
-  return next == -ESC_W || next == -ESC_s || next == -ESC_h ||
-         next == -ESC_v || next == -ESC_R;
+  return escape == ESC_W || escape == ESC_s || escape == ESC_h ||
+         escape == ESC_v || escape == ESC_R;
 
   case OP_NOT_WORDCHAR:
-  return next == -ESC_w || next == -ESC_d;
+  return escape == ESC_w || escape == ESC_d;
 
   default:
   return FALSE;
@@ -3680,6 +3684,7 @@ int options = *optionsptr;               /* May change dynamically */
 int after_manual_callout = 0;
 int length_prevgroup = 0;
 register int c;
+int escape;
 register pcre_uchar *code = *codeptr;
 pcre_uchar *last_code = code;
 pcre_uchar *orig_code = code;
@@ -3699,7 +3704,7 @@ must not do this for other options (e.g. PCRE_EXTENDED) because they may change
 dynamically as we process the pattern. */
 
 #ifdef SUPPORT_UTF
-/* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
+/* PCRE_UTF[16|32] have the same value as PCRE_UTF8. */
 BOOL utf = (options & PCRE_UTF8) != 0;
 pcre_uchar utf_chars[6];
 #else
@@ -3767,6 +3772,7 @@ for (;; ptr++)
   int terminator;
   int mclength;
   int tempbracount;
+  int ec; // FIXMEchpe pcre_uint32
   pcre_uchar mcbuffer[8];
 
   /* Get next character in the pattern */
@@ -4236,16 +4242,19 @@ for (;; ptr++)
 
       if (c == CHAR_BACKSLASH)
         {
-        c = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
+        escape = check_escape(&ptr, &ec, errorcodeptr, cd->bracount, options, TRUE);
+
         if (*errorcodeptr != 0) goto FAILED;
 
-        if (-c == ESC_b) c = CHAR_BS;    /* \b is backspace in a class */
-        else if (-c == ESC_N)            /* \N is not supported in a class */
+        if (escape == 0)
+          c = ec;
+        else if (escape == ESC_b) c = CHAR_BS; /* \b is backspace in a class */
+        else if (escape == ESC_N)            /* \N is not supported in a class */
           {
           *errorcodeptr = ERR71;
           goto FAILED;
           }
-        else if (-c == ESC_Q)            /* Handle start of quoted string */
+        else if (escape == ESC_Q)            /* Handle start of quoted string */
           {
           if (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)
             {
@@ -4254,9 +4263,9 @@ for (;; ptr++)
           else inescq = TRUE;
           continue;
           }
-        else if (-c == ESC_E) continue;  /* Ignore orphan \E */
+        else if (escape == ESC_E) continue;  /* Ignore orphan \E */
 
-        if (c < 0)
+        else
           {
           register const pcre_uint8 *cbits = cd->cbits;
           /* Every class contains at least two < 256 characters. */
@@ -4264,7 +4273,7 @@ for (;; ptr++)
           /* Every class contains at least two characters. */
           class_one_char += 2;
 
-          switch (-c)
+          switch (escape)
             {
 #ifdef SUPPORT_UCP
             case ESC_du:     /* These are the values given for \d etc */
@@ -4274,7 +4283,7 @@ for (;; ptr++)
             case ESC_su:     /* of the default ASCII testing. */
             case ESC_SU:
             nestptr = ptr;
-            ptr = substitutes[-c - ESC_DU] - 1;  /* Just before substitute */
+            ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
             class_has_8bitchar--;                /* Undo! */
             continue;
 #endif
@@ -4343,7 +4352,7 @@ for (;; ptr++)
               int pdata;
               int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
               if (ptype < 0) goto FAILED;
-              *class_uchardata++ = ((-c == ESC_p) != negated)?
+              *class_uchardata++ = ((escape == ESC_p) != negated)?
                 XCL_PROP : XCL_NOTPROP;
               *class_uchardata++ = ptype;
               *class_uchardata++ = pdata;
@@ -4371,6 +4380,8 @@ for (;; ptr++)
         /* Fall through if the escape just defined a single character (c >= 0).
         This may be greater than 256. */
          
+        escape = 0;
+
         }   /* End of backslash handling */
 
       /* A character may be followed by '-' to form a range. However, Perl does
@@ -4436,14 +4447,15 @@ for (;; ptr++)
 
         if (!inescq && d == CHAR_BACKSLASH)
           {
-          d = check_escape(&ptr, errorcodeptr, cd->bracount, options, TRUE);
+          int descape;
+          descape = check_escape(&ptr, &d, errorcodeptr, cd->bracount, options, TRUE);
           if (*errorcodeptr != 0) goto FAILED;
 
           /* \b is backspace; any other special means the '-' was literal. */
 
-          if (d < 0)
+          if (descape > 0)
             {
-            if (d == -ESC_b) d = CHAR_BS; else
+            if (descape == ESC_b) d = CHAR_BS; else
               {
               ptr = oldptr;
               goto CLASS_SINGLE_CHARACTER;  /* A few lines below */
@@ -6662,12 +6674,15 @@ for (;; ptr++)
 
     case CHAR_BACKSLASH:
     tempptr = ptr;
-    c = check_escape(&ptr, errorcodeptr, cd->bracount, options, FALSE);
+    escape = check_escape(&ptr, &ec, errorcodeptr, cd->bracount, options, FALSE);
+
     if (*errorcodeptr != 0) goto FAILED;
 
-    if (c < 0)
+    if (escape == 0)
+      c = ec;
+    else
       {
-      if (-c == ESC_Q)            /* Handle start of quoted string */
+      if (escape == ESC_Q)            /* Handle start of quoted string */
         {
         if (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)
           ptr += 2;               /* avoid empty string */
@@ -6675,12 +6690,12 @@ for (;; ptr++)
         continue;
         }
 
-      if (-c == ESC_E) continue;  /* Perl ignores an orphan \E */
+      if (escape == ESC_E) continue;  /* Perl ignores an orphan \E */
 
       /* For metasequences that actually match a character, we disable the
       setting of a first character if it hasn't already been set. */
 
-      if (firstchar == REQ_UNSET && -c > ESC_b && -c < ESC_Z)
+      if (firstchar == REQ_UNSET && escape > ESC_b && escape < ESC_Z)
         firstchar = REQ_NONE;
 
       /* Set values to reset to if this is followed by a zero repeat. */
@@ -6690,12 +6705,12 @@ for (;; ptr++)
 
       /* \g<name> or \g'name' is a subroutine call by name and \g<n> or \g'n'
       is a subroutine call by number (Oniguruma syntax). In fact, the value
-      -ESC_g is returned only for these cases. So we don't need to check for <
-      or ' if the value is -ESC_g. For the Perl syntax \g{n} the value is
-      -ESC_REF+n, and for the Perl syntax \g{name} the result is -ESC_k (as
+      ESC_g is returned only for these cases. So we don't need to check for <
+      or ' if the value is ESC_g. For the Perl syntax \g{n} the value is
+      ESC_REF+n, and for the Perl syntax \g{name} the result is ESC_k (as
       that is a synonym for a named back reference). */
 
-      if (-c == ESC_g)
+      if (escape == ESC_g)
         {
         const pcre_uchar *p;
         save_hwm = cd->hwm;   /* Normally this is set when '(' is read */
@@ -6751,7 +6766,7 @@ for (;; ptr++)
       /* \k<name> or \k'name' is a back reference by name (Perl syntax).
       We also support \k{name} (.NET syntax).  */
 
-      if (-c == ESC_k)
+      if (escape == ESC_k)
         {
         if ((ptr[1] != CHAR_LESS_THAN_SIGN &&
           ptr[1] != CHAR_APOSTROPHE && ptr[1] != CHAR_LEFT_CURLY_BRACKET))
@@ -6770,10 +6785,10 @@ for (;; ptr++)
       not set to cope with cases like (?=(\w+))\1: which would otherwise set
       ':' later. */
 
-      if (-c >= ESC_REF)
+      if (escape >= ESC_REF)
         {
         open_capitem *oc;
-        recno = -c - ESC_REF;
+        recno = escape - ESC_REF;
 
         HANDLE_REFERENCE:    /* Come here from named backref handling */
         if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
@@ -6800,14 +6815,14 @@ for (;; ptr++)
       /* So are Unicode property matches, if supported. */
 
 #ifdef SUPPORT_UCP
-      else if (-c == ESC_P || -c == ESC_p)
+      else if (escape == ESC_P || escape == ESC_p)
         {
         BOOL negated;
         int pdata;
         int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
         if (ptype < 0) goto FAILED;
         previous = code;
-        *code++ = ((-c == ESC_p) != negated)? OP_PROP : OP_NOTPROP;
+        *code++ = ((escape == ESC_p) != negated)? OP_PROP : OP_NOTPROP;
         *code++ = ptype;
         *code++ = pdata;
         }
@@ -6816,7 +6831,7 @@ for (;; ptr++)
       /* If Unicode properties are not supported, \X, \P, and \p are not
       allowed. */
 
-      else if (-c == ESC_X || -c == ESC_P || -c == ESC_p)
+      else if (escape == ESC_X || escape == ESC_P || escape == ESC_p)
         {
         *errorcodeptr = ERR45;
         goto FAILED;
@@ -6831,13 +6846,13 @@ for (;; ptr++)
 
       else
         {
-        if ((-c == ESC_b || -c == ESC_B) && cd->max_lookbehind == 0)
+        if ((escape == ESC_b || escape == ESC_B) && cd->max_lookbehind == 0)
           cd->max_lookbehind = 1;
 #ifdef SUPPORT_UCP
-        if (-c >= ESC_DU && -c <= ESC_wu)
+        if (escape >= ESC_DU && escape <= ESC_wu)
           {
           nestptr = ptr + 1;                   /* Where to resume */
-          ptr = substitutes[-c - ESC_DU] - 1;  /* Just before substitute */
+          ptr = substitutes[escape - ESC_DU] - 1;  /* Just before substitute */
           }
         else
 #endif
@@ -6845,8 +6860,8 @@ for (;; ptr++)
         so that it works in DFA mode and in lookbehinds. */
 
           {
-          previous = (-c > ESC_b && -c < ESC_Z)? code : NULL;
-          *code++ = (!utf && c == -ESC_C)? OP_ALLANY : -c;
+          previous = (escape > ESC_b && escape < ESC_Z)? code : NULL;
+          *code++ = (!utf && escape == ESC_C)? OP_ALLANY : escape;
           }
         }
       continue;

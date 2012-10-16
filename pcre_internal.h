@@ -1764,7 +1764,7 @@ contain characters with values greater than 255. */
 
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns
-their negation. Also, they must appear in the same order as in the opcode
+0 for a data character.  Also, they must appear in the same order as in the opcode
 definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
 corresponds to "." in DOTALL mode rather than an escape sequence. It is also
 used for [^] in JavaScript compatibility mode, and for \C in non-utf mode. In
