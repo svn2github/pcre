@@ -1357,10 +1357,10 @@ Returns:      >  0 => the number of bytes consumed
 */
 
 static int
-utf82ord(pcre_uint8 *utf8bytes, int *vptr)
+utf82ord(pcre_uint8 *utf8bytes, pcre_uint32 *vptr)
 {
-int c = *utf8bytes++;
-int d = c;
+pcre_uint32 c = *utf8bytes++;
+pcre_uint32 d = c;
 int i, j, s;
 
 for (i = -1; i < 6; i++)               /* i is number of additional bytes */
@@ -1416,9 +1416,11 @@ Returns:     number of characters placed in the buffer
 */
 
 static int
-ord2utf8(int cvalue, pcre_uint8 *utf8bytes)
+ord2utf8(pcre_uint32 cvalue, pcre_uint8 *utf8bytes)
 {
 register int i, j;
+if (cvalue > 0x7fffffffu)
+  return -1;
 for (i = 0; i < utf8_table1_size; i++)
   if (cvalue <= utf8_table1[i]) break;
 utf8bytes += i;
@@ -1489,7 +1491,7 @@ if (!utf && !data)
 
 else
   {
-  int c = 0;
+  pcre_uint32 c = 0;
   while (len > 0)
     {
     int chlen = utf82ord(p, &c);
@@ -1568,7 +1570,7 @@ if (!utf && !data)
 
 else
   {
-  int c = 0;
+  pcre_uint32 c = 0;
   while (len > 0)
     {
     int chlen = utf82ord(p, &c);
@@ -1768,7 +1770,7 @@ If handed a NULL file, just counts chars without printing. */
 
 static int pchars(pcre_uint8 *p, int length, FILE *f)
 {
-int c = 0;
+pcre_uint32 c = 0;
 int yield = 0;
 
 if (length < 0)
@@ -4139,7 +4141,7 @@ while (!done)
       /* In UTF mode, input can be UTF-8, so just copy all non-backslash bytes.
       In non-UTF mode, allow the value of the byte to fall through to later,
       where values greater than 127 are turned into UTF-8 when running in
-      16-bit mode. */
+      16-bit or 32-bit mode. */
 
       if (c != '\\')
         {
@@ -4420,10 +4422,10 @@ while (!done)
 
       /* We now have a character value in c that may be greater than 255. In
       16-bit or 32-bit mode, we always convert characters to UTF-8 so that
-      values greater than 255 can be passed to non-UTF 16-bit strings. In 8-bit
-      mode we convert to UTF-8 if we are in UTF mode. Values greater than 127
-      in UTF mode must have come from \x{...} or octal constructs because values
-      from \x.. get this far only in non-UTF mode. */
+      values greater than 255 can be passed to non-UTF 16- or 32-bit strings. 
+      In 8-bit       mode we convert to UTF-8 if we are in UTF mode. Values greater
+      than 127       in UTF mode must have come from \x{...} or octal constructs
+      because values from \x.. get this far only in non-UTF mode. */
 
 #if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
       if (pcre_mode != PCRE8_MODE || use_utf)
