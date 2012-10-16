@@ -2351,7 +2351,7 @@ static BOOL
 could_be_empty_branch(const pcre_uchar *code, const pcre_uchar *endcode,
   BOOL utf, compile_data *cd)
 {
-register int c;
+register pcre_uchar c;
 for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
      code < endcode;
      code = first_significant_code(code + PRIV(OP_lengths)[c], TRUE))
@@ -2385,7 +2385,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     /* Test for forward reference */
 
     for (scode = cd->start_workspace; scode < cd->hwm; scode += LINK_SIZE)
-      if (GET(scode, 0) == code + 1 - cd->start_code) return TRUE;
+      if ((int)GET(scode, 0) == (int)(code + 1 - cd->start_code)) return TRUE;
 
     /* Not a forward reference, test for completed backward reference */
 
