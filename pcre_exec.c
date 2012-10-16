@@ -92,8 +92,6 @@ because the offset vector is always a multiple of 3 long. */
 static const char rep_min[] = { 0, 0, 1, 1, 0, 0 };
 static const char rep_max[] = { 0, 0, 0, 0, 1, 1 };
 
-
-
 #ifdef PCRE_DEBUG
 /*************************************************
 *        Debugging function to print chars       *
@@ -114,10 +112,11 @@ Returns:     nothing
 static void
 pchars(const pcre_uchar *p, int length, BOOL is_subject, match_data *md)
 {
-unsigned int c;
+pcre_uint32 c;
+BOOL utf = md->utf;
 if (is_subject && length > md->end_subject - p) length = md->end_subject - p;
 while (length-- > 0)
-  if (isprint(c = *(p++))) printf("%c", c); else printf("\\x%02x", c);
+  if (isprint(c = RAWUCHARINCTEST(p))) printf("%c", (char)c); else printf("\\x{%02x}", c);
 }
 #endif
 
@@ -150,6 +149,7 @@ match_ref(int offset, register PCRE_PUCHAR eptr, int length, match_data *md,
 {
 PCRE_PUCHAR eptr_start = eptr;
 register PCRE_PUCHAR p = md->start_subject + md->offset_vector[offset];
+BOOL utf = md->utf;
 
 #ifdef PCRE_DEBUG
 if (eptr >= md->end_subject)
@@ -177,7 +177,7 @@ if (caseless)
   {
 #ifdef SUPPORT_UTF
 #ifdef SUPPORT_UCP
-  if (md->utf)
+  if (utf)
     {
     /* Match characters up to the end of the reference. NOTE: the number of
     data units matched may differ, because in UTF-8 there are some characters
@@ -217,8 +217,11 @@ if (caseless)
     {
     while (length-- > 0)
       {
+      pcre_uchar cc, cp;
       if (eptr >= md->end_subject) return -2;   /* Partial match */
-      if (TABLE_GET(*p, md->lcc, *p) != TABLE_GET(*eptr, md->lcc, *eptr)) return -1;
+      cc = RAWUCHARTEST(eptr);
+      cp = RAWUCHARTEST(p);
+      if (TABLE_GET(cp, md->lcc, cp) != TABLE_GET(cc, md->lcc, cc)) return -1;
       p++;
       eptr++;
       }
@@ -233,7 +236,7 @@ else
   while (length-- > 0)
     {
     if (eptr >= md->end_subject) return -2;   /* Partial match */
-    if (*p++ != *eptr++) return -1;
+    if (RAWUCHARINCTEST(p) != RAWUCHARINCTEST(eptr)) return -1;
     }
   }
 
@@ -307,7 +310,7 @@ actually used in this definition. */
   }
 #define RRETURN(ra) \
   { \
-  printf("match() returned %d from line %d ", ra, __LINE__); \
+  printf("match() returned %d from line %d\n", ra, __LINE__); \
   return ra; \
   }
 #else
@@ -748,7 +751,7 @@ for (;;)
     unaltered. */
 
     else if (rrc == MATCH_SKIP_ARG &&
-        STRCMP_UC_UC(ecode + 2, md->start_match_ptr) == 0)
+        STRCMP_UC_UC_TEST(ecode + 2, md->start_match_ptr) == 0)
       {
       md->start_match_ptr = eptr;
       RRETURN(MATCH_SKIP);
@@ -2094,7 +2097,7 @@ for (;;)
             eptr + 1 >= md->end_subject &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
             NLBLOCK->nllen == 2 &&
-            *eptr == NLBLOCK->nl[0])
+            RAWUCHARTEST(eptr) == NLBLOCK->nl[0])
           {
           md->hitend = TRUE;
           if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -2138,7 +2141,7 @@ for (;;)
           eptr + 1 >= md->end_subject &&
           NLBLOCK->nltype == NLTYPE_FIXED &&
           NLBLOCK->nllen == 2 &&
-          *eptr == NLBLOCK->nl[0])
+          RAWUCHARTEST(eptr) == NLBLOCK->nl[0])
         {
         md->hitend = TRUE;
         if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -2281,7 +2284,7 @@ for (;;)
         eptr + 1 >= md->end_subject &&
         NLBLOCK->nltype == NLTYPE_FIXED &&
         NLBLOCK->nllen == 2 &&
-        *eptr == NLBLOCK->nl[0])
+        RAWUCHARTEST(eptr) == NLBLOCK->nl[0])
       {
       md->hitend = TRUE;
       if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -2435,7 +2438,7 @@ for (;;)
         {
         SCHECK_PARTIAL();
         }
-      else if (*eptr == CHAR_LF) eptr++;
+      else if (RAWUCHARTEST(eptr) == CHAR_LF) eptr++;
       break;
 
       case CHAR_LF:
@@ -3145,7 +3148,7 @@ for (;;)
         CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
         RRETURN(MATCH_NOMATCH);
         }
-      while (length-- > 0) if (*ecode++ != *eptr++) RRETURN(MATCH_NOMATCH);
+      while (length-- > 0) if (*ecode++ != RAWUCHARINC(eptr)) RRETURN(MATCH_NOMATCH);
       }
     else
 #endif
@@ -3185,8 +3188,8 @@ for (;;)
 
       if (fc < 128)
         {
-        if (md->lcc[fc]
-            != TABLE_GET(*eptr, md->lcc, *eptr)) RRETURN(MATCH_NOMATCH);
+        pcre_uchar cc = RAWUCHAR(eptr);
+        if (md->lcc[fc] != TABLE_GET(cc, md->lcc, cc)) RRETURN(MATCH_NOMATCH);
         ecode++;
         eptr++;
         }
@@ -3434,12 +3437,15 @@ for (;;)
 
       for (i = 1; i <= min; i++)
         {
+        pcre_uchar cc;
+
         if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        if (fc != *eptr && foc != *eptr) RRETURN(MATCH_NOMATCH);
+        cc = RAWUCHARTEST(eptr);
+        if (fc != cc && foc != cc) RRETURN(MATCH_NOMATCH);
         eptr++;
         }
       if (min == max) continue;
@@ -3447,6 +3453,8 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
+          pcre_uchar cc;
+
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM24);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) RRETURN(MATCH_NOMATCH);
@@ -3455,7 +3463,8 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (fc != *eptr && foc != *eptr) RRETURN(MATCH_NOMATCH);
+          cc = RAWUCHARTEST(eptr);
+          if (fc != cc && foc != cc) RRETURN(MATCH_NOMATCH);
           eptr++;
           }
         /* Control never gets here */
@@ -3465,12 +3474,15 @@ for (;;)
         pp = eptr;
         for (i = min; i < max; i++)
           {
+          pcre_uchar cc;
+
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             break;
             }
-          if (fc != *eptr && foc != *eptr) break;
+          cc = RAWUCHARTEST(eptr);
+          if (fc != cc && foc != cc) break;
           eptr++;
           }
 
@@ -3498,7 +3510,7 @@ for (;;)
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
+        if (fc != RAWUCHARINCTEST(eptr)) RRETURN(MATCH_NOMATCH);
         }
 
       if (min == max) continue;
@@ -3515,7 +3527,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
+          if (fc != RAWUCHARINCTEST(eptr)) RRETURN(MATCH_NOMATCH);
           }
         /* Control never gets here */
         }
@@ -3529,7 +3541,7 @@ for (;;)
             SCHECK_PARTIAL();
             break;
             }
-          if (fc != *eptr) break;
+          if (fc != RAWUCHARTEST(eptr)) break;
           eptr++;
           }
         if (possessive) continue;
@@ -3699,7 +3711,7 @@ for (;;)
 #ifdef SUPPORT_UTF
       if (utf)
         {
-        register unsigned int d;
+        register pcre_uint32 d;
         for (i = 1; i <= min; i++)
           {
           if (eptr >= md->end_subject)
@@ -4270,7 +4282,7 @@ for (;;)
               eptr + 1 >= md->end_subject &&
               NLBLOCK->nltype == NLTYPE_FIXED &&
               NLBLOCK->nllen == 2 &&
-              *eptr == NLBLOCK->nl[0])
+              RAWUCHAR(eptr) == NLBLOCK->nl[0])
             {
             md->hitend = TRUE;
             if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -4312,7 +4324,7 @@ for (;;)
             default: RRETURN(MATCH_NOMATCH);
 
             case CHAR_CR:
-            if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
+            if (eptr < md->end_subject && RAWUCHAR(eptr) == CHAR_LF) eptr++;
             break;
 
             case CHAR_LF:
@@ -4416,12 +4428,15 @@ for (;;)
         case OP_DIGIT:
         for (i = 1; i <= min; i++)
           {
+          pcre_uchar cc;
+
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (*eptr >= 128 || (md->ctypes[*eptr] & ctype_digit) == 0)
+          cc = RAWUCHAR(eptr);
+          if (cc >= 128 || (md->ctypes[cc] & ctype_digit) == 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
           /* No need to skip more bytes - we know it's a 1-byte character */
@@ -4431,12 +4446,15 @@ for (;;)
         case OP_NOT_WHITESPACE:
         for (i = 1; i <= min; i++)
           {
+          pcre_uchar cc;
+
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (*eptr < 128 && (md->ctypes[*eptr] & ctype_space) != 0)
+          cc = RAWUCHAR(eptr);
+          if (cc < 128 && (md->ctypes[cc] & ctype_space) != 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
           ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
@@ -4446,12 +4464,15 @@ for (;;)
         case OP_WHITESPACE:
         for (i = 1; i <= min; i++)
           {
+          pcre_uchar cc;
+
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (*eptr >= 128 || (md->ctypes[*eptr] & ctype_space) == 0)
+          cc = RAWUCHAR(eptr);
+          if (cc >= 128 || (md->ctypes[cc] & ctype_space) == 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
           /* No need to skip more bytes - we know it's a 1-byte character */
@@ -4461,12 +4482,15 @@ for (;;)
         case OP_NOT_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
+          pcre_uchar cc;
+
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (*eptr < 128 && (md->ctypes[*eptr] & ctype_word) != 0)
+          cc = RAWUCHAR(eptr);
+          if (cc < 128 && (md->ctypes[cc] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
           ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
@@ -4476,12 +4500,15 @@ for (;;)
         case OP_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
+          pcre_uchar cc;
+
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (*eptr >= 128 || (md->ctypes[*eptr] & ctype_word) == 0)
+          cc = RAWUCHAR(eptr);
+          if (cc >= 128 || (md->ctypes[cc] & ctype_word) == 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
           /* No need to skip more bytes - we know it's a 1-byte character */
@@ -5028,7 +5055,7 @@ for (;;)
               {
               default: RRETURN(MATCH_NOMATCH);
               case CHAR_CR:
-              if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
+              if (eptr < md->end_subject && RAWUCHAR(eptr) == CHAR_LF) eptr++;
               break;
 
               case CHAR_LF:
@@ -5532,7 +5559,7 @@ for (;;)
                   eptr + 1 >= md->end_subject &&
                   NLBLOCK->nltype == NLTYPE_FIXED &&
                   NLBLOCK->nllen == 2 &&
-                  *eptr == NLBLOCK->nl[0])
+                  RAWUCHAR(eptr) == NLBLOCK->nl[0])
                 {
                 md->hitend = TRUE;
                 if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -5558,7 +5585,7 @@ for (;;)
                   eptr + 1 >= md->end_subject &&
                   NLBLOCK->nltype == NLTYPE_FIXED &&
                   NLBLOCK->nllen == 2 &&
-                  *eptr == NLBLOCK->nl[0])
+                  RAWUCHAR(eptr) == NLBLOCK->nl[0])
                 {
                 md->hitend = TRUE;
                 if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -5615,7 +5642,7 @@ for (;;)
             if (c == CHAR_CR)
               {
               if (++eptr >= md->end_subject) break;
-              if (*eptr == CHAR_LF) eptr++;
+              if (RAWUCHAR(eptr) == CHAR_LF) eptr++;
               }
             else
               {
@@ -5783,8 +5810,8 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (eptr-- == pp) break;        /* Stop if tried at original pos */
           BACKCHAR(eptr);
-          if (ctype == OP_ANYNL && eptr > pp  && *eptr == CHAR_NL &&
-              eptr[-1] == CHAR_CR) eptr--;
+          if (ctype == OP_ANYNL && eptr > pp  && RAWUCHAR(eptr) == CHAR_NL &&
+              RAWUCHAR(eptr - 1) == CHAR_CR) eptr--;
           }
         }
       else
@@ -6629,12 +6656,14 @@ for(;;)
 
     if (has_first_char)
       {
+      pcre_uchar smc;
+
       if (first_char != first_char2)
         while (start_match < end_subject &&
-            *start_match != first_char && *start_match != first_char2)
+          (smc = RAWUCHARTEST(start_match)) != first_char && smc != first_char2)
           start_match++;
       else
-        while (start_match < end_subject && *start_match != first_char)
+        while (start_match < end_subject && RAWUCHARTEST(start_match) != first_char)
           start_match++;
       }
 
@@ -6666,7 +6695,7 @@ for(;;)
         if (start_match[-1] == CHAR_CR &&
              (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
              start_match < end_subject &&
-             *start_match == CHAR_NL)
+             RAWUCHARTEST(start_match) == CHAR_NL)
           start_match++;
         }
       }
@@ -6677,7 +6706,7 @@ for(;;)
       {
       while (start_match < end_subject)
         {
-        register unsigned int c = *start_match;
+        register pcre_uint32 c = RAWUCHARTEST(start_match);
 #ifndef COMPILE_PCRE8
         if (c > 255) c = 255;
 #endif
@@ -6745,7 +6774,7 @@ for(;;)
           {
           while (p < end_subject)
             {
-            register pcre_uint32 pp = *p++;
+            register pcre_uint32 pp = RAWUCHARINCTEST(p);
             if (pp == req_char || pp == req_char2) { p--; break; }
             }
           }
@@ -6753,7 +6782,7 @@ for(;;)
           {
           while (p < end_subject)
             {
-            if (*p++ == req_char) { p--; break; }
+            if (RAWUCHARINCTEST(p) == req_char) { p--; break; }
             }
           }
 
