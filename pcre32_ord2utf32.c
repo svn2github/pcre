@@ -69,12 +69,6 @@ PRIV(ord2utf)(pcre_uint32 cvalue, pcre_uchar *buffer)
 {
 #ifdef SUPPORT_UTF
 
-cvalue &= UTF32_MASK;
-
-/* Checking invalid cvalue character, encoded as invalid UTF-32 character */
-if ((cvalue & 0xfffff800u) == 0xd800u || cvalue >= 0x110000u)
-  cvalue = 0xfffeu;
-
 *buffer = (pcre_uchar)cvalue;
 return 1;
 
