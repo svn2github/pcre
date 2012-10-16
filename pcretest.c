@@ -4066,7 +4066,8 @@ while (!done)
     int use_size_offsets = size_offsets;
     int callout_data = 0;
     int callout_data_set = 0;
-    int count, c;
+    int count;
+    pcre_uint32 c;
     int copystrings = 0;
     int find_match_limit = default_find_match_limit;
     int getstrings = 0;
@@ -4420,11 +4421,11 @@ while (!done)
         }
 
       /* We now have a character value in c that may be greater than 255. In
-      16-bit mode, we always convert characters to UTF-8 so that values greater
-      than 255 can be passed to non-UTF 16-bit strings. In 8-bit mode we
-      convert to UTF-8 if we are in UTF mode. Values greater than 127 in UTF
-      mode must have come from \x{...} or octal constructs because values from
-      \x.. get this far only in non-UTF mode. */
+      16-bit or 32-bit mode, we always convert characters to UTF-8 so that
+      values greater than 255 can be passed to non-UTF 16-bit strings. In 8-bit
+      mode we convert to UTF-8 if we are in UTF mode. Values greater than 127
+      in UTF mode must have come from \x{...} or octal constructs because values
+      from \x.. get this far only in non-UTF mode. */
 
 #if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
       if (pcre_mode != PCRE8_MODE || use_utf)
