@@ -635,7 +635,7 @@ static void
 set_type_bits(pcre_uint8 *start_bits, int cbit_type, int table_limit,
   compile_data *cd)
 {
-register int c;
+register pcre_uint32 c;
 for (c = 0; c < table_limit; c++) start_bits[c] |= cd->cbits[c+cbit_type];
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (table_limit == 32) return;
@@ -677,7 +677,7 @@ static void
 set_nottype_bits(pcre_uint8 *start_bits, int cbit_type, int table_limit,
   compile_data *cd)
 {
-register int c;
+register pcre_uint32 c;
 for (c = 0; c < table_limit; c++) start_bits[c] |= ~cd->cbits[c+cbit_type];
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (table_limit != 32) for (c = 24; c < 32; c++) start_bits[c] = 0xff;
@@ -714,7 +714,7 @@ static int
 set_start_bits(const pcre_uchar *code, pcre_uint8 *start_bits, BOOL utf,
   compile_data *cd)
 {
-register int c;
+register pcre_uint32 c;
 int yield = SSB_DONE;
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 int table_limit = utf? 16:32;
