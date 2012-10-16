@@ -2452,7 +2452,7 @@ struct sljit_label *newlinelabel = NULL;
 struct sljit_jump *start;
 struct sljit_jump *end = NULL;
 struct sljit_jump *nl = NULL;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 struct sljit_jump *singlechar;
 #endif
 jump_list *newline = NULL;

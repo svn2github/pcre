@@ -3725,7 +3725,9 @@ dynamically as we process the pattern. */
 #ifdef SUPPORT_UTF
 /* PCRE_UTF[16|32] have the same value as PCRE_UTF8. */
 BOOL utf = (options & PCRE_UTF8) != 0;
+#ifndef COMPILE_PCRE32
 pcre_uchar utf_chars[6];
+#endif
 #else
 BOOL utf = FALSE;
 #endif
