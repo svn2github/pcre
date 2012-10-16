@@ -2755,7 +2755,7 @@ register int yield = 0;
 while (posix_name_lengths[yield] != 0)
   {
   if (len == posix_name_lengths[yield] &&
-    STRNCMP_UC_C8(ptr, pn, len) == 0) return yield;
+    STRNCMP_UC_C8(ptr, pn, (unsigned int)len) == 0) return yield;
   pn += posix_name_lengths[yield] + 1;
   yield++;
   }
