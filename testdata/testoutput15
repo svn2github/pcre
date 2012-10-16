@@ -85,13 +85,13 @@ First char = \x{c3}
 Need char = 'x'
 
 /abc/8
-    ร]
+    \xc3]
 Error -10 (bad UTF-8 string) offset=0 reason=6
-    ร
+    \xc3
 Error -10 (bad UTF-8 string) offset=0 reason=1
-    รรร
+    \xc3\xc3\xc3
 Error -10 (bad UTF-8 string) offset=0 reason=6
-    รรร\?
+    \xc3\xc3\xc3\?
 No match
     \xe1\x88 
 Error -10 (bad UTF-8 string) offset=0 reason=1
