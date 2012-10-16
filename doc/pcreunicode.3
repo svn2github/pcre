@@ -93,13 +93,16 @@ place. From release 7.3 of PCRE, the check is according the rules of RFC 3629,
 which are themselves derived from the Unicode specification. Earlier releases
 of PCRE followed the rules of RFC 2279, which allows the full range of 31-bit
 values (0 to 0x7FFFFFFF). The current check allows only values in the range U+0
-to U+10FFFF, excluding U+D800 to U+DFFF.
+to U+10FFFF, excluding the surrogate area, and the non-characters.
 .P
-The excluded code points are the "Surrogate Area" of Unicode. They are reserved
+Excluded code points are the "Surrogate Area" of Unicode. They are reserved
 for use by UTF-16, where they are used in pairs to encode codepoints with
 values greater than 0xFFFF. The code points that are encoded by UTF-16 pairs
 are available independently in the UTF-8 encoding. (In other words, the whole
 surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8.)
+.P
+Also excluded are the "Non-Characters" code points, which are U+FDD0 to U+FDEF
+and the last two code points in each plane, U+??FFFE and U+??FFFF.
 .P
 If an invalid UTF-8 string is passed to PCRE, an error return is given. At
 compile time, the only additional information is the offset to the first byte
@@ -143,6 +146,9 @@ to the relevant functions. Values other than those in the surrogate range
 U+D800 to U+DFFF are independent code points. Values in the surrogate range
 must be used in pairs in the correct manner.
 .P
+Excluded are the "Non-Characters" code points, which are U+FDD0 to U+FDEF
+and the last two code points in each plane, U+??FFFE and U+??FFFF.
+.P
 If an invalid UTF-16 string is passed to PCRE, an error return is given. At
 compile time, the only additional information is the offset to the first data
 unit of the failing character. The run-time functions \fBpcre16_exec()\fP and
@@ -163,7 +169,9 @@ sequences. In this case, it does not diagnose an invalid UTF-16 string.
 When you set the PCRE_UTF32 flag, the strings of 32-bit data units that are
 passed as patterns and subjects are (by default) checked for validity on entry
 to the relevant functions.  This check allows only values in the range U+0
-to U+10FFFF, excluding the surrogate are U+D800 to U+DFFF, and U+FFEF.
+to U+10FFFF, excluding the surrogate area U+D800 to U+DFFF, and the
+"Non-Characters" code points, which are U+FDD0 to U+FDEF and the last two
+characters in each plane, U+??FFFE and U+??FFFF.
 .P
 If an invalid UTF-32 string is passed to PCRE, an error return is given. At
 compile time, the only additional information is the offset to the first data
