@@ -76,7 +76,7 @@ BOOL
 PRIV(is_newline)(PCRE_PUCHAR ptr, int type, PCRE_PUCHAR endptr, int *lenptr,
   BOOL utf)
 {
-int c;
+pcre_uint32 c;
 (void)utf;
 #ifdef SUPPORT_UTF
 if (utf)
@@ -151,7 +151,7 @@ BOOL
 PRIV(was_newline)(PCRE_PUCHAR ptr, int type, PCRE_PUCHAR startptr, int *lenptr,
   BOOL utf)
 {
-int c;
+pcre_uint32 c;
 (void)utf;
 ptr--;
 #ifdef SUPPORT_UTF
