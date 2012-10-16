@@ -776,7 +776,7 @@ check_escape(const pcre_uchar **ptrptr, int *chptr, int *errorcodeptr,
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
 BOOL utf = (options & PCRE_UTF8) != 0;
 const pcre_uchar *ptr = *ptrptr + 1;
-pcre_int32 c;
+pcre_uint32 c;
 int escape = 0;
 int i;
 
@@ -832,7 +832,7 @@ else
         c = 0;
         for (i = 0; i < 4; ++i)
           {
-          register int cc = *(++ptr);
+          register pcre_uint32 cc = *(++ptr);
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
           if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
           c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
@@ -1042,7 +1042,7 @@ else
         c = 0;
         for (i = 0; i < 2; ++i)
           {
-          register int cc = *(++ptr);
+          register pcre_uint32 cc = *(++ptr);
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
           if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
           c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
@@ -1058,12 +1058,18 @@ else
     if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
       {
       const pcre_uchar *pt = ptr + 2;
+      BOOL overflow;
 
       c = 0;
+      overflow = FALSE;
       while (MAX_255(*pt) && (digitab[*pt] & ctype_xdigit) != 0)
         {
-        register int cc = *pt++;
+        register pcre_uint32 cc = *pt++;
         if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
+
+#ifdef COMPILE_PCRE32
+        if (c >= 0x10000000l) { overflow = TRUE; break; }
+#endif
 
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
         if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
@@ -1074,15 +1080,15 @@ else
 #endif
 
 #if defined COMPILE_PCRE8
-        if (c > (utf ? 0x10ffff : 0xff)) { c = -1; break; }
+        if (c > (utf ? 0x10ffff : 0xff)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE16
-        if (c > (utf ? 0x10ffff : 0xffff)) { c = -1; break; }
+        if (c > (utf ? 0x10ffff : 0xffff)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE32
-        if (utf && c > 0x10ffff) { c = -1; break; }
+        if (utf && c > 0x10ffff) { overflow = TRUE; break; }
 #endif
         }
 
-      if (c < 0)
+      if (overflow)
         {
         while (MAX_255(*pt) && (digitab[*pt] & ctype_xdigit) != 0) pt++;
         *errorcodeptr = ERR34;
@@ -1104,7 +1110,7 @@ else
     c = 0;
     while (i++ < 2 && MAX_255(ptr[1]) && (digitab[ptr[1]] & ctype_xdigit) != 0)
       {
-      int cc;                                  /* Some compilers don't like */
+      pcre_uint32 cc;                          /* Some compilers don't like */
       cc = *(++ptr);                           /* ++ in initializers */
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
       if (cc >= CHAR_a) cc -= 32;              /* Convert to upper case */

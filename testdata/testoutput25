@@ -7,7 +7,8 @@
 /\x{7fffffff}/
 
 /\x{80000000}/
-Failed: character value in \x{...} sequence is too large at offset 11
+
+/\x{ffffffff}/
 
 /-- Non-UTF characters --/
 

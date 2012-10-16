@@ -8,6 +8,8 @@
 
 /\x{80000000}/
 
+/\x{ffffffff}/
+
 /-- Non-UTF characters --/
 
 /\C{2,3}/
