@@ -223,7 +223,7 @@ print_puchar(FILE *f, PCRE_PUCHAR ptr)
 {
 while (*ptr != '\0')
   {
-  register int c = *ptr++;
+  register pcre_uint32 c = *ptr++;
   if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x{%x}", c);
   }
 }
@@ -337,7 +337,7 @@ for(;;)
   {
   pcre_uchar *ccode;
   const char *flag = "  ";
-  int c;
+  pcre_uint32 c;
   int extra = 0;
 
   if (print_lengths)
