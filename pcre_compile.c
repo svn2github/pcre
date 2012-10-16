@@ -1744,7 +1744,7 @@ for (;;)
   {
   int d;
   pcre_uchar *ce, *cs;
-  register int op = *cc;
+  register pcre_uchar op = *cc;
 
   switch (op)
     {
@@ -1864,7 +1864,7 @@ for (;;)
     case OP_EXACTI:
     case OP_NOTEXACT:
     case OP_NOTEXACTI:
-    branchlength += GET2(cc,1);
+    branchlength += (int)GET2(cc,1);
     cc += 2 + IMM2_SIZE;
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
@@ -1932,7 +1932,7 @@ for (;;)
       case OP_CRRANGE:
       case OP_CRMINRANGE:
       if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) return -1;
-      branchlength += GET2(cc,1);
+      branchlength += (int)GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
 
