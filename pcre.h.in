@@ -161,9 +161,8 @@ compiling). */
 #define PCRE_ERROR_BADUTF8         (-10)  /* Same for 8/16/32 */
 #define PCRE_ERROR_BADUTF16        (-10)  /* Same for 8/16/32 */
 #define PCRE_ERROR_BADUTF32        (-10)  /* Same for 8/16/32 */
-#define PCRE_ERROR_BADUTF8_OFFSET  (-11)  /* Same for 8/16/32 */
-#define PCRE_ERROR_BADUTF16_OFFSET (-11)  /* Same for 8/16/32 */
-#define PCRE_ERROR_BADUTF32_OFFSET (-11)  /* Same for 8/16/32 */
+#define PCRE_ERROR_BADUTF8_OFFSET  (-11)  /* Same for 8/16 */
+#define PCRE_ERROR_BADUTF16_OFFSET (-11)  /* Same for 8/16 */
 #define PCRE_ERROR_PARTIAL         (-12)
 #define PCRE_ERROR_BADPARTIAL      (-13)
 #define PCRE_ERROR_INTERNAL        (-14)
