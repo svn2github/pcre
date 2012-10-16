@@ -1775,8 +1775,8 @@ when PCRE_UCP is set and replacement of \d etc by \p sequences is required.
 They must be contiguous, and remain in order so that the replacements can be
 looked up from a table.
 
-The final escape must be ESC_REF as subsequent values are used for
-backreferences (\1, \2, \3, etc). There are two tests in the code for an escape
+Negative numbers are used to encode a backreference (\1, \2, \3, etc.) in
+check_escape(). There are two tests in the code for an escape
 greater than ESC_b and less than ESC_Z to detect the types that may be
 repeated. These are the types that consume characters. If any new escapes are
 put in between that don't consume a character, that code will have to change.
@@ -1786,8 +1786,7 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_W, ESC_w, ESC_N, ESC_dum, ESC_C, ESC_P, ESC_p, ESC_R, ESC_H,
        ESC_h, ESC_V, ESC_v, ESC_X, ESC_Z, ESC_z,
        ESC_E, ESC_Q, ESC_g, ESC_k,
-       ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu,
-       ESC_REF };
+       ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu };
 
 /* Opcode table: Starting from 1 (i.e. after OP_END), the values up to
 OP_EOD must correspond in order to the list of escapes immediately above.

@@ -750,9 +750,9 @@ return (*p == CHAR_RIGHT_CURLY_BRACKET);
 
 /* This function is called when a \ has been encountered. It either returns a
 positive value for a simple escape such as \n, or 0 for a data character
-which will be placed in chptr. A backreference to group
-n is returned as ESC_REF + n; ESC_REF is the highest ESC_xxx macro. When
-UTF-8 is enabled, a positive value greater than 255 may be returned in chptr.
+which will be placed in chptr. A backreference to group n is returned as
+negative n. When UTF-8 is enabled, a positive value greater than 255 may
+be returned in chptr.
 On entry,ptr is pointing at the \. On exit, it is on the final character of the
 escape sequence.
 
@@ -766,6 +766,7 @@ Arguments:
 
 Returns:         zero => a data character
                  positive => a special escape sequence
+                 negative => a back reference
                  on error, errorcodeptr is set
 */
 
@@ -954,7 +955,7 @@ else
       c = bracount - (c - 1);
       }
 
-    escape = ESC_REF + c;
+    escape = -c;
     break;
 
     /* The handling of escape sequences consisting of a string of digits
@@ -995,7 +996,7 @@ else
         }
       if (c < 10 || c <= bracount)
         {
-        escape = ESC_REF + c;
+        escape = -c;
         break;
         }
       ptr = oldptr;      /* Put the pointer back and fall through */
@@ -4459,7 +4460,7 @@ for (;; ptr++)
 
           /* \b is backspace; any other special means the '-' was literal. */
 
-          if (descape > 0)
+          if (descape != 0)
             {
             if (descape == ESC_b) d = CHAR_BS; else
               {
@@ -6673,7 +6674,7 @@ for (;; ptr++)
     /* Handle metasequences introduced by \. For ones like \d, the ESC_ values
     are arranged to be the negation of the corresponding OP_values in the
     default case when PCRE_UCP is not set. For the back references, the values
-    are ESC_REF plus the reference number. Only back references and those types
+    are negative the reference number. Only back references and those types
     that consume a character may be repeated. We can test for values between
     ESC_b and ESC_Z for the latter; this may have to change if any new ones are
     ever created. */
@@ -6713,7 +6714,7 @@ for (;; ptr++)
       is a subroutine call by number (Oniguruma syntax). In fact, the value
       ESC_g is returned only for these cases. So we don't need to check for <
       or ' if the value is ESC_g. For the Perl syntax \g{n} the value is
-      ESC_REF+n, and for the Perl syntax \g{name} the result is ESC_k (as
+      -n, and for the Perl syntax \g{name} the result is ESC_k (as
       that is a synonym for a named back reference). */
 
       if (escape == ESC_g)
@@ -6791,10 +6792,10 @@ for (;; ptr++)
       not set to cope with cases like (?=(\w+))\1: which would otherwise set
       ':' later. */
 
-      if (escape >= ESC_REF)
+      if (escape < 0)
         {
         open_capitem *oc;
-        recno = escape - ESC_REF;
+        recno = -escape;
 
         HANDLE_REFERENCE:    /* Come here from named backref handling */
         if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
