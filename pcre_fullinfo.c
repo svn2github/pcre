@@ -140,6 +140,17 @@ switch (what)
     ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
   break;
 
+  case PCRE_INFO_FIRSTLITERAL:
+    *((pcre_uint32 *)where) =
+      (re->flags & PCRE_FIRSTSET) != 0 ? re->first_char : 0;
+    break;
+
+  case PCRE_INFO_FIRSTLITERALSET:
+    *((int *)where) =
+      ((re->flags & PCRE_FIRSTSET) != 0) ? 1 :
+      ((re->flags & PCRE_STARTLINE) != 0) ? 2 : 0;
+    break;
+
   /* Make sure we pass back the pointer to the bit vector in the external
   block, not the internal copy (with flipped integer fields). */
 
@@ -165,6 +176,16 @@ switch (what)
   *((int *)where) =
     ((re->flags & PCRE_REQCHSET) != 0)? re->req_char : -1;
   break;
+
+  case PCRE_INFO_LASTLITERAL2:
+    *((pcre_uint32 *)where) =
+      ((re->flags & PCRE_REQCHSET) != 0) ? re->req_char : 0;
+    break;
+
+  case PCRE_INFO_LASTLITERAL2SET:
+    *((int *)where) =
+      ((re->flags & PCRE_REQCHSET) != 0);
+    break;
 
   case PCRE_INFO_NAMEENTRYSIZE:
   *((int *)where) = re->name_entry_size;

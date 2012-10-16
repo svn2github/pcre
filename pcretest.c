@@ -3757,7 +3757,8 @@ while (!done)
     if (do_showinfo)
       {
       unsigned long int all_options;
-      int count, backrefmax, first_char, need_char, okpartial, jchanged,
+      pcre_uint32 first_char, need_char;
+      int count, backrefmax, first_char_set, need_char_set, okpartial, jchanged,
         hascrorlf, maxlookbehind;
       int nameentrysize, namecount;
       const pcre_uint8 *nametable;
@@ -3765,8 +3766,10 @@ while (!done)
       if (new_info(re, NULL, PCRE_INFO_SIZE, &size) +
           new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count) +
           new_info(re, NULL, PCRE_INFO_BACKREFMAX, &backrefmax) +
-          new_info(re, NULL, PCRE_INFO_FIRSTBYTE, &first_char) +
-          new_info(re, NULL, PCRE_INFO_LASTLITERAL, &need_char) +
+          new_info(re, NULL, PCRE_INFO_FIRSTLITERAL, &first_char) +
+          new_info(re, NULL, PCRE_INFO_FIRSTLITERALSET, &first_char_set) +
+          new_info(re, NULL, PCRE_INFO_LASTLITERAL2, &need_char) +
+          new_info(re, NULL, PCRE_INFO_LASTLITERAL2SET, &need_char_set) +
           new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &nameentrysize) +
           new_info(re, NULL, PCRE_INFO_NAMECOUNT, &namecount) +
           new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable) +
@@ -3865,15 +3868,11 @@ while (!done)
         break;
         }
 
-      if (first_char == -1)
+      if (first_char_set == 2)
         {
         fprintf(outfile, "First char at start or follows newline\n");
         }
-      else if (first_char < 0)
-        {
-        fprintf(outfile, "No first char\n");
-        }
-      else
+      else if (first_char_set == 1)
         {
         const char *caseless =
           ((REAL_PCRE_FLAGS(re) & PCRE_FCH_CASELESS) == 0)?
@@ -3888,8 +3887,12 @@ while (!done)
           fprintf(outfile, "%s\n", caseless);
           }
         }
+      else
+        {
+        fprintf(outfile, "No first char\n");
+        }
 
-      if (need_char < 0)
+      if (need_char_set == 0)
         {
         fprintf(outfile, "No need char\n");
         }

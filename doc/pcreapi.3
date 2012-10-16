@@ -1235,6 +1235,11 @@ starts with "^", or
 -1 is returned, indicating that the pattern matches only at the start of a
 subject string or after any newline within the string. Otherwise -2 is
 returned. For anchored patterns, -2 is returned.
+.P
+Since for the 32-bit library using the non-UTF-32 mode, this function is unable
+to return the full 32-bit range of the character, this value is deprecated;
+instead the PCRE_INFO_FIRSTLITERALSET and PCRE_INFO_FIRSTLITERAL values should
+be used.
 .sp
   PCRE_INFO_FIRSTTABLE
 .sp
@@ -1282,6 +1287,11 @@ value, -1 is returned. For anchored patterns, a last literal value is recorded
 only if it follows something of variable length. For example, for the pattern
 /^a\ed+z\ed+/ the returned value is "z", but for /^a\edz\ed/ the returned value
 is -1.
+.P
+Since for the 32-bit library using the non-UTF-32 mode, this function is unable
+to return the full 32-bit range of the character, this value is deprecated;
+instead the PCRE_INFO_LASTLITERAL2SET and PCRE_INFO_LASTLITERAL2 values should
+be used.
 .sp
   PCRE_INFO_MAXLOOKBEHIND
 .sp
@@ -1425,6 +1435,69 @@ is made available via this option so that it can be saved and restored (see the
 \fBpcreprecompile\fP
 .\"
 documentation for details).
+.sp
+  PCRE_INFO_FIRSTLITERALSET
+.sp
+Return information about the first data unit of any matched string, for a
+non-anchored pattern. The fourth argument should point to an \fBint\fP
+variable.
+.P
+If there is a fixed first value, for example, the letter "c" from a pattern
+such as (cat|cow|coyote), 1 is returned, and the character value can be
+retrieved using PCRE_INFO_FIRSTLITERAL.
+.P
+If there is no fixed first value, and if either
+.sp
+(a) the pattern was compiled with the PCRE_MULTILINE option, and every branch
+starts with "^", or
+.sp
+(b) every branch of the pattern starts with ".*" and PCRE_DOTALL is not set
+(if it were set, the pattern would be anchored),
+.sp
+2 is returned, indicating that the pattern matches only at the start of a
+subject string or after any newline within the string. Otherwise 0 is
+returned. For anchored patterns, 0 is returned.
+.sp
+  PCRE_INFO_FIRSTLITERAL
+.sp
+Return the fixed first character value, if PCRE_INFO_FIRSTLITERALSET returned 1;
+otherwise returns 0. The fourth argument should point to an \fBuint_t\fP
+variable.
+.P
+In the 8-bit library, the value is always less than 256. In the 16-bit library
+the value can be up to 0xffff. In the 32-bit library in UTF-32 mode the value
+can be up to 0x10ffff, and up to 0xffffffff when not using UTF-32 mode.
+.P
+If there is no fixed first value, and if either
+.sp
+(a) the pattern was compiled with the PCRE_MULTILINE option, and every branch
+starts with "^", or
+.sp
+(b) every branch of the pattern starts with ".*" and PCRE_DOTALL is not set
+(if it were set, the pattern would be anchored),
+.sp
+-1 is returned, indicating that the pattern matches only at the start of a
+subject string or after any newline within the string. Otherwise -2 is
+returned. For anchored patterns, -2 is returned.
+.sp
+  PCRE_INFO_LASTLITERAL2SET
+.sp
+Returns 1 if there is a rightmost literal data unit that must exist in any matched
+string, other than at its start. The fourth argument should  point to an \fBint\fP
+variable. If there is no such value, 0 is returned. If returning 1, the character
+value itself can be retrieved using PCRE_INFO_LASTLITERAL2.
+.P
+For anchored patterns, a last literal value is recorded only if it follows something
+of variable length. For example, for the pattern /^a\ed+z\ed+/ the returned value
+1 (with "z" returned from PCRE_INFO_LASTLITERAL2), but for /^a\edz\ed/ the returned
+value is 0.
+.sp
+  PCRE_INFO_LASTLITERAL2
+.sp
+Return the value of the rightmost literal data unit that must exist in any
+matched string, other than at its start, if such a value has been recorded. The
+fourth argument should point to an \fBuint32_t\fP variable. If there is no such
+value, 0 is returned.
 .
 .
 .SH "REFERENCE COUNTS"
