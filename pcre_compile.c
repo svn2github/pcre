@@ -2197,7 +2197,7 @@ find_recurse(const pcre_uchar *code, BOOL utf)
 {
 for (;;)
   {
-  register int c = *code;
+  register pcre_uchar c = *code;
   if (c == OP_END) return NULL;
   if (c == OP_RECURSE) return code;
 
