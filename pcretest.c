@@ -4627,6 +4627,7 @@ while (!done)
       for (q32 = (pcre_uint32 *)dbuffer; *q32; q32++)
         *q32 |= ~(pcre_uint32)UTF32_MASK;
 
+      /* Need to pass NO_UTF32_CHECK so the high bits are allowed */
       options |= PCRE_NO_UTF32_CHECK;
       }
 #endif

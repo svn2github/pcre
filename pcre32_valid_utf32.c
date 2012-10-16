@@ -93,7 +93,7 @@ if (length < 0)
 
 for (p = string; length-- > 0; p++)
   {
-  c = *p & UTF32_MASK;
+  c = *p;
 
   if ((c & 0xfffff800u) != 0xd800u)
     {
