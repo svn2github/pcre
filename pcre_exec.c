@@ -3558,7 +3558,7 @@ for (;;)
 #ifdef SUPPORT_UTF
     if (utf)
       {
-      register unsigned int ch, och;
+      register pcre_uint32 ch, och;
 
       ecode++;
       GETCHARINC(ch, ecode);
@@ -3585,7 +3585,7 @@ for (;;)
     else
 #endif
       {
-      register unsigned int ch = ecode[1];
+      register pcre_uint32 ch = ecode[1];
       c = *eptr++;
       if (ch == c || (op == OP_NOTI && TABLE_GET(ch, md->fcc, ch) == c))
         RRETURN(MATCH_NOMATCH);
