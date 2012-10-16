@@ -1210,7 +1210,8 @@ Returns:         type value from ucp_type_table, or -1 for an invalid type
 static int
 get_ucp(const pcre_uchar **ptrptr, BOOL *negptr, int *dptr, int *errorcodeptr)
 {
-int c, i, bot, top;
+pcre_uchar c;
+int i, bot, top;
 const pcre_uchar *ptr = *ptrptr;
 pcre_uchar name[32];
 
@@ -1257,14 +1258,15 @@ top = PRIV(utt_size);
 
 while (bot < top)
   {
+  int r;
   i = (bot + top) >> 1;
-  c = STRCMP_UC_C8(name, PRIV(utt_names) + PRIV(utt)[i].name_offset);
-  if (c == 0)
+  r = STRCMP_UC_C8(name, PRIV(utt_names) + PRIV(utt)[i].name_offset);
+  if (r == 0)
     {
     *dptr = PRIV(utt)[i].value;
     return PRIV(utt)[i].type;
     }
-  if (c > 0) bot = i + 1; else top = i;
+  if (r > 0) bot = i + 1; else top = i;
   }
 
 *errorcodeptr = ERR47;
