@@ -2962,7 +2962,7 @@ Returns:       TRUE if auto-possessifying is OK
 */
 
 static BOOL
-check_char_prop(int c, int ptype, int pdata, BOOL negated)
+check_char_prop(pcre_uint32 c, int ptype, int pdata, BOOL negated)
 {
 #ifdef SUPPORT_UCP
 const pcre_uint32 *p;
@@ -3048,8 +3048,8 @@ static BOOL
 check_auto_possessive(const pcre_uchar *previous, BOOL utf,
   const pcre_uchar *ptr, int options, compile_data *cd)
 {
-pcre_int32 c = NOTACHAR; // FIXMEchpe pcre_uint32
-pcre_int32 next;
+pcre_uint32 c = NOTACHAR;
+pcre_uint32 next;
 int escape;
 int op_code = *previous++;
 
@@ -3147,7 +3147,7 @@ if (escape == 0)
   case, which maps to the special PT_CLIST property. Check this first. */
  
 #ifdef SUPPORT_UCP
-  if (utf && (unsigned int)c != NOTACHAR && (options & PCRE_CASELESS) != 0)
+  if (utf && c != NOTACHAR && (options & PCRE_CASELESS) != 0)
     {
     int ocs = UCD_CASESET(next);
     if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, op_code >= OP_NOT);
@@ -3169,18 +3169,18 @@ if (escape == 0)
 #ifdef SUPPORT_UTF
     if (utf)
       {
-      unsigned int othercase;
+      pcre_uint32 othercase;
       if (next < 128) othercase = cd->fcc[next]; else
 #ifdef SUPPORT_UCP
-      othercase = UCD_OTHERCASE((unsigned int)next);
+      othercase = UCD_OTHERCASE(next);
 #else
       othercase = NOTACHAR;
 #endif
-      return (unsigned int)c != othercase;
+      return c != othercase;
       }
     else
 #endif  /* SUPPORT_UTF */
-    return (c != TABLE_GET((unsigned int)next, cd->fcc, next));  /* Not UTF */
+    return (c != TABLE_GET(next, cd->fcc, next));  /* Not UTF */
   
     case OP_NOT:
     return c == next;
@@ -3190,18 +3190,18 @@ if (escape == 0)
 #ifdef SUPPORT_UTF
     if (utf)
       {
-      unsigned int othercase;
+      pcre_uint32 othercase;
       if (next < 128) othercase = cd->fcc[next]; else
 #ifdef SUPPORT_UCP
-      othercase = UCD_OTHERCASE((unsigned int)next);
+      othercase = UCD_OTHERCASE(next);
 #else
       othercase = NOTACHAR;
 #endif
-      return (unsigned int)c == othercase;
+      return c == othercase;
       }
     else
 #endif  /* SUPPORT_UTF */
-    return (c == TABLE_GET((unsigned int)next, cd->fcc, next));  /* Not UTF */
+    return (c == TABLE_GET(next, cd->fcc, next));  /* Not UTF */
 
     /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set.
     When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
