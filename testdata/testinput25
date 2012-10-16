@@ -10,6 +10,12 @@
 
 /\x{ffffffff}/
 
+/\x{7fffffff}\x{7fffffff}/I
+
+/\x{80000000}\x{80000000}/I
+
+/\x{ffffffff}\x{ffffffff}/I
+
 /-- Non-UTF characters --/
 
 /\C{2,3}/

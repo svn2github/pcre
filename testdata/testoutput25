@@ -10,6 +10,24 @@
 
 /\x{ffffffff}/
 
+/\x{7fffffff}\x{7fffffff}/I
+Capturing subpattern count = 0
+No options
+First char = \x{7fffffff}
+Need char = \x{7fffffff}
+
+/\x{80000000}\x{80000000}/I
+Capturing subpattern count = 0
+No options
+First char = \x{80000000}
+Need char = \x{80000000}
+
+/\x{ffffffff}\x{ffffffff}/I
+Capturing subpattern count = 0
+No options
+First char = \x{ffffffff}
+Need char = \x{ffffffff}
+
 /-- Non-UTF characters --/
 
 /\C{2,3}/
