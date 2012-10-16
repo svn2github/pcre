@@ -3421,9 +3421,9 @@ Returns:        the number of < 256 characters added
 
 static int
 add_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, int options,
-  compile_data *cd, unsigned int start, unsigned int end)
+  compile_data *cd, pcre_uint32 start, pcre_uint32 end)
 {
-unsigned int c;
+pcre_uint32 c;
 int n8 = 0;
 
 /* If caseless matching is required, scan the range and process alternate 
@@ -3437,7 +3437,7 @@ if ((options & PCRE_CASELESS) != 0)
   if ((options & PCRE_UTF8) != 0)
     { 
     int rc; 
-    unsigned int oc, od;
+    pcre_uint32 oc, od;
      
     options &= ~PCRE_CASELESS;   /* Remove for recursive calls */
     c = start;
@@ -3490,12 +3490,7 @@ in all cases. */
 #endif
   if (end > 0xffff) end = 0xffff;
 
-#elif defined COMPILE_PCRE32
-#ifdef SUPPORT_UTF
-  if ((options & PCRE_UTF32) == 0)
-    if (end > 0xffffu) end = 0xffffu; // FIXMEchpe rebase fix this
-#endif
-#endif /* COMPILE_PCRE[8|16|32] */
+#endif /* COMPILE_PCRE[8|16] */
 
 /* If all characters are less than 256, use the bit map. Otherwise use extra
 data. */
@@ -3625,14 +3620,15 @@ static int
 add_not_list_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, 
   int options, compile_data *cd, const pcre_uint32 *p)
 {
+BOOL utf = (options & PCRE_UTF8) != 0;
 int n8 = 0;
 if (p[0] > 0)
   n8 += add_to_class(classbits, uchardptr, options, cd, 0, p[0] - 1);
 while (p[0] < NOTACHAR)
   {
   while (p[1] == p[0] + 1) p++;
-  n8 += add_to_class(classbits, uchardptr, options, cd, p[0] + 1, 
-    (p[1] == NOTACHAR)? 0x10ffff : p[1] - 1);
+  n8 += add_to_class(classbits, uchardptr, options, cd, p[0] + 1,
+    (p[1] == NOTACHAR) ? (utf ? 0x10ffffu : 0xffffffffu) : p[1] - 1);
   p++; 
   } 
 return n8;

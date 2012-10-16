@@ -20,4 +20,10 @@
 
 /\x{400000}\x{800000}/iDZ
 
+/-- Check character ranges --/
+
+/[\H]/BZSI
+
+/[\V]/BZSI
+
 /-- End of testinput25 --/
