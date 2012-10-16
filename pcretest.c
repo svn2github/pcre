@@ -3772,10 +3772,10 @@ while (!done)
       if (new_info(re, NULL, PCRE_INFO_SIZE, &size) +
           new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count) +
           new_info(re, NULL, PCRE_INFO_BACKREFMAX, &backrefmax) +
-          new_info(re, NULL, PCRE_INFO_FIRSTLITERAL, &first_char) +
-          new_info(re, NULL, PCRE_INFO_FIRSTLITERALSET, &first_char_set) +
-          new_info(re, NULL, PCRE_INFO_LASTLITERAL2, &need_char) +
-          new_info(re, NULL, PCRE_INFO_LASTLITERAL2SET, &need_char_set) +
+          new_info(re, NULL, PCRE_INFO_FIRSTCHARACTER, &first_char) +
+          new_info(re, NULL, PCRE_INFO_FIRSTCHARACTERFLAGS, &first_char_set) +
+          new_info(re, NULL, PCRE_INFO_REQUIREDCHAR, &need_char) +
+          new_info(re, NULL, PCRE_INFO_REQUIREDCHARFLAGS, &need_char_set) +
           new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &nameentrysize) +
           new_info(re, NULL, PCRE_INFO_NAMECOUNT, &namecount) +
           new_info(re, NULL, PCRE_INFO_NAMETABLE, (void *)&nametable) +

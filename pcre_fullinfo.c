@@ -140,12 +140,12 @@ switch (what)
     ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
   break;
 
-  case PCRE_INFO_FIRSTLITERAL:
+  case PCRE_INFO_FIRSTCHARACTER:
     *((pcre_uint32 *)where) =
       (re->flags & PCRE_FIRSTSET) != 0 ? re->first_char : 0;
     break;
 
-  case PCRE_INFO_FIRSTLITERALSET:
+  case PCRE_INFO_FIRSTCHARACTERFLAGS:
     *((int *)where) =
       ((re->flags & PCRE_FIRSTSET) != 0) ? 1 :
       ((re->flags & PCRE_STARTLINE) != 0) ? 2 : 0;
@@ -177,12 +177,12 @@ switch (what)
     ((re->flags & PCRE_REQCHSET) != 0)? re->req_char : -1;
   break;
 
-  case PCRE_INFO_LASTLITERAL2:
+  case PCRE_INFO_REQUIREDCHAR:
     *((pcre_uint32 *)where) =
       ((re->flags & PCRE_REQCHSET) != 0) ? re->req_char : 0;
     break;
 
-  case PCRE_INFO_LASTLITERAL2SET:
+  case PCRE_INFO_REQUIREDCHARFLAGS:
     *((int *)where) =
       ((re->flags & PCRE_REQCHSET) != 0);
     break;

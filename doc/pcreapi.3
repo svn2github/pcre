@@ -1238,7 +1238,7 @@ returned. For anchored patterns, -2 is returned.
 .P
 Since for the 32-bit library using the non-UTF-32 mode, this function is unable
 to return the full 32-bit range of the character, this value is deprecated;
-instead the PCRE_INFO_FIRSTLITERALSET and PCRE_INFO_FIRSTLITERAL values should
+instead the PCRE_INFO_FIRSTCHARACTERFLAGS and PCRE_INFO_FIRSTCHARACTER values should
 be used.
 .sp
   PCRE_INFO_FIRSTTABLE
@@ -1290,7 +1290,7 @@ is -1.
 .P
 Since for the 32-bit library using the non-UTF-32 mode, this function is unable
 to return the full 32-bit range of the character, this value is deprecated;
-instead the PCRE_INFO_LASTLITERAL2SET and PCRE_INFO_LASTLITERAL2 values should
+instead the PCRE_INFO_REQUIREDCHARFLAGS and PCRE_INFO_REQUIREDCHAR values should
 be used.
 .sp
   PCRE_INFO_MAXLOOKBEHIND
@@ -1436,7 +1436,7 @@ is made available via this option so that it can be saved and restored (see the
 .\"
 documentation for details).
 .sp
-  PCRE_INFO_FIRSTLITERALSET
+  PCRE_INFO_FIRSTCHARACTERFLAGS
 .sp
 Return information about the first data unit of any matched string, for a
 non-anchored pattern. The fourth argument should point to an \fBint\fP
@@ -1444,7 +1444,7 @@ variable.
 .P
 If there is a fixed first value, for example, the letter "c" from a pattern
 such as (cat|cow|coyote), 1 is returned, and the character value can be
-retrieved using PCRE_INFO_FIRSTLITERAL.
+retrieved using PCRE_INFO_FIRSTCHARACTER.
 .P
 If there is no fixed first value, and if either
 .sp
@@ -1458,9 +1458,9 @@ starts with "^", or
 subject string or after any newline within the string. Otherwise 0 is
 returned. For anchored patterns, 0 is returned.
 .sp
-  PCRE_INFO_FIRSTLITERAL
+  PCRE_INFO_FIRSTCHARACTER
 .sp
-Return the fixed first character value, if PCRE_INFO_FIRSTLITERALSET returned 1;
+Return the fixed first character value, if PCRE_INFO_FIRSTCHARACTERFLAGS returned 1;
 otherwise returns 0. The fourth argument should point to an \fBuint_t\fP
 variable.
 .P
@@ -1480,19 +1480,19 @@ starts with "^", or
 subject string or after any newline within the string. Otherwise -2 is
 returned. For anchored patterns, -2 is returned.
 .sp
-  PCRE_INFO_LASTLITERAL2SET
+  PCRE_INFO_REQUIREDCHARFLAGS
 .sp
 Returns 1 if there is a rightmost literal data unit that must exist in any matched
 string, other than at its start. The fourth argument should  point to an \fBint\fP
 variable. If there is no such value, 0 is returned. If returning 1, the character
-value itself can be retrieved using PCRE_INFO_LASTLITERAL2.
+value itself can be retrieved using PCRE_INFO_REQUIREDCHAR.
 .P
 For anchored patterns, a last literal value is recorded only if it follows something
 of variable length. For example, for the pattern /^a\ed+z\ed+/ the returned value
-1 (with "z" returned from PCRE_INFO_LASTLITERAL2), but for /^a\edz\ed/ the returned
+1 (with "z" returned from PCRE_INFO_REQUIREDCHAR), but for /^a\edz\ed/ the returned
 value is 0.
 .sp
-  PCRE_INFO_LASTLITERAL2
+  PCRE_INFO_REQUIREDCHAR
 .sp
 Return the value of the rightmost literal data unit that must exist in any
 matched string, other than at its start, if such a value has been recorded. The

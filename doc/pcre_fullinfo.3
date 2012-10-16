@@ -53,16 +53,16 @@ The following information is available:
   PCRE_INFO_OPTIONS         Option bits used for compilation
   PCRE_INFO_SIZE            Size of compiled pattern
   PCRE_INFO_STUDYSIZE       Size of study data
-  PCRE_INFO_FIRSTLITERAL    Literal first data character for a match (if any; else 0)
-  PCRE_INFO_FIRSTLITERALSET Returns
-                              1 if there is a first data character set, which can
-                                then be retrieved using PCRE_INFO_FIRSTLITERAL,
-                              2 if the first character is at the start of the data
-                                string or after a newline, and
-                              0 otherwise
-  PCRE_INFO_LASTLITERAL2    Literal last data character required (if any; else 0)
-  PCRE_INFO_LASTLITERAL2SET Returns 1 if the last data character is set (which can then
-                              be retrieved using PCRE_INFO_LASTLITERAL2); 0 otherwise
+  PCRE_INFO_FIRSTCHARACTER      Fixed first data unit for a match
+  PCRE_INFO_FIRSTCHARACTERFLAGS Returns
+                                  1 if there is a first data character set, which can
+                                    then be retrieved using PCRE_INFO_FIRSTCHARACTER,
+                                  2 if the first character is at the start of the data
+                                    string or after a newline, and
+                                  0 otherwise
+  PCRE_INFO_REQUIREDCHAR      Literal last data unit required
+  PCRE_INFO_REQUIREDCHARFLAGS Returns 1 if the last data character is set (which can then
+                              be retrieved using PCRE_INFO_REQUIREDCHAR); 0 otherwise
 .sp
 The \fIwhere\fP argument must point to an integer variable, except for the
 following \fIwhat\fP values:
@@ -74,8 +74,8 @@ following \fIwhat\fP values:
   PCRE_INFO_NAMETABLE       const unsigned char * (8-bit library)
   PCRE_INFO_OPTIONS         unsigned long int
   PCRE_INFO_SIZE            size_t
-  PCRE_INFO_FIRSTLITERAL    uint32_t
-  PCRE_INOF_LASTLITERAL2    uint32_t
+  PCRE_INFO_FIRSTCHARACTER  uint32_t
+  PCRE_INFO_REQUIREDCHAR    uint32_t
 .sp
 The yield of the function is zero on success or:
 .sp

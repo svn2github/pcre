@@ -247,10 +247,10 @@ compiling). */
 #define PCRE_INFO_JIT               16
 #define PCRE_INFO_JITSIZE           17
 #define PCRE_INFO_MAXLOOKBEHIND     18
-#define PCRE_INFO_FIRSTLITERAL      19
-#define PCRE_INFO_FIRSTLITERALSET   20
-#define PCRE_INFO_LASTLITERAL2      21
-#define PCRE_INFO_LASTLITERAL2SET   22
+#define PCRE_INFO_FIRSTCHARACTER      19
+#define PCRE_INFO_FIRSTCHARACTERFLAGS   20
+#define PCRE_INFO_REQUIREDCHAR      21
+#define PCRE_INFO_REQUIREDCHARFLAGS   22
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */
