@@ -3783,7 +3783,7 @@ for (;; ptr++)
   int terminator;
   int mclength;
   int tempbracount;
-  int ec; // FIXMEchpe pcre_uint32
+  pcre_uint32 ec;
   pcre_uchar mcbuffer[8];
 
   /* Get next character in the pattern */
@@ -4416,7 +4416,7 @@ for (;; ptr++)
 
       if (!inescq && ptr[1] == CHAR_MINUS)
         {
-        int d;
+        pcre_uint32 d;
         ptr += 2;
         while (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_E) ptr += 2;
 
@@ -5786,7 +5786,7 @@ for (;; ptr++)
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0)
           {
           if (recno >= 0)
-            recno = (IS_DIGIT(*ptr))? recno * 10 + *ptr - CHAR_0 : -1;
+            recno = (IS_DIGIT(*ptr))? recno * 10 + (int)(*ptr - CHAR_0) : -1;
           ptr++;
           }
         namelen = (int)(ptr - name);
