@@ -120,6 +120,8 @@ Version 8.32
 
 23. Improved CMake support under Windows. Patch by Daniel Richard G.
 
+24. Add support for 32-bit character strings, and UTF-32
+
 
 Version 8.31 06-July-2012
 -------------------------
