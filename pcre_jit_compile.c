@@ -3529,6 +3529,10 @@ if (caseless && char_has_othercase(common, cc))
   othercasechar = cc + (othercasebit >> 8);
   othercasebit &= 0xff;
 #elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+  /* Note that this code only handles characters in the BMP. If there
+  ever are characters outside the BMP whose othercase differs in only one 
+  bit from itself (there currently are none), this code will need to be
+  revised for COMPILE_PCRE32. */
   othercasechar = cc + (othercasebit >> 9);
   if ((othercasebit & 0x100) != 0)
     othercasebit = (othercasebit & 0xff) << 8;
