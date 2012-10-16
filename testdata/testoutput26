@@ -9,6 +9,8 @@ Failed: character value in \x{...} sequence is too large at offset 9
     \x{110000}
 Error -10 (bad UTF-32 string) offset=0 reason=3
 
+/-- Invalid UTF-32 --/
+
 /noncharacter/8
     \x{fffe}
 Error -10 (bad UTF-32 string) offset=0 reason=2
