@@ -151,7 +151,7 @@ appropriately for an application, not for building PCRE. */
 
 /* The pcre_printint() function, which prints the internal form of a compiled
 regex, is held in a separate file so that (a) it can be compiled in either
-8-bit or 16-bit mode, and (b) it can be #included directly in pcre_compile.c
+8-, 16- or 32-bit mode, and (b) it can be #included directly in pcre_compile.c
 when that is compiled in debug mode. */
 
 #ifdef SUPPORT_PCRE8
@@ -211,7 +211,7 @@ automatically cut out the UTF support if PCRE is built without it. */
 #endif
 #endif
 
-/* To make the code a bit tidier for 8-bit and 16-bit support, we define macros
+/* To make the code a bit tidier for 8/16/32-bit support, we define macros
 for all the pcre[16]_xxx functions (except pcre16_fullinfo, which is called
 only from one place and is handled differently). I couldn't dream up any way of
 using a single macro to do this in a generic way, because of the many different
@@ -834,7 +834,7 @@ static pcre_uint8 *buffer = NULL;
 static pcre_uint8 *dbuffer = NULL;
 static pcre_uint8 *pbuffer = NULL;
 
-/* Another buffer is needed translation to 16-bit character strings. It will
+/* Another buffer is needed translation to 16/32-bit character strings. It will
 obtained and extended as required. */
 
 #if defined SUPPORT_PCRE8 && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32)
