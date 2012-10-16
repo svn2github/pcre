@@ -921,7 +921,7 @@ AC_CONFIG_FILES(
 	Makefile
 	libpcre.pc
 	libpcre16.pc
-        libpcre32.pc
+	libpcre32.pc
 	libpcreposix.pc
 	libpcrecpp.pc
 	pcre-config
