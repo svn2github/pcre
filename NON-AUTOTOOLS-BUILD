@@ -198,8 +198,8 @@ can skip ahead to the CMake section.
      pcreposix.c (remembering -DHAVE_CONFIG_H if necessary). Link the result
      (on its own) as the pcreposix library.
 
- (9) The pcretest program can be linked with any of the 8-bit, 16-bit and 32-bit
-     libraries (depending on what you selected in config.h). Compile
+ (9) The pcretest program can be linked with any combination of the 8-bit, 16-bit
+     and 32-bit libraries (depending on what you selected in config.h). Compile
      pcretest.c and pcre_printint.c (again, don't forget -DHAVE_CONFIG_H) and
      link them together with the appropriate library/ies. If you compiled an
      8-bit library, pcretest also needs the pcreposix wrapper library unless
