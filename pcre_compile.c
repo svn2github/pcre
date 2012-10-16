@@ -1311,7 +1311,7 @@ int max = -1;
 /* Read the minimum value and do a paranoid check: a negative value indicates
 an integer overflow. */
 
-while (IS_DIGIT(*p)) min = min * 10 + *p++ - CHAR_0;
+while (IS_DIGIT(*p)) min = min * 10 + (int)(*p++ - CHAR_0);
 if (min < 0 || min > 65535)
   {
   *errorcodeptr = ERR5;
@@ -1326,7 +1326,7 @@ if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
   if (*(++p) != CHAR_RIGHT_CURLY_BRACKET)
     {
     max = 0;
-    while(IS_DIGIT(*p)) max = max * 10 + *p++ - CHAR_0;
+    while(IS_DIGIT(*p)) max = max * 10 + (int)(*p++ - CHAR_0);
     if (max < 0 || max > 65535)
       {
       *errorcodeptr = ERR5;
