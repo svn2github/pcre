@@ -1,4 +1,4 @@
-.TH PCRECOMPAT 3 "08 January 2012" "PCRE 8.30"
+.TH PCRECOMPAT 3 "24 June 2012" "PCRE 8.30"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "DIFFERENCES BETWEEN PCRE AND PERL"
@@ -158,8 +158,9 @@ by the PCRE_BSR_ANYCRLF option.
 different hosts that have the other endianness. However, this does not apply to
 optimized data created by the just-in-time compiler.
 .sp
-(k) The alternative matching functions (\fBpcre_dfa_exec()\fP and
-\fBpcre16_dfa_exec()\fP) match in a different way and are not Perl-compatible.
+(k) The alternative matching functions (\fBpcre_dfa_exec()\fP,
+\fBpcre16_dfa_exec()\fP and \fBpcre32_dfa_exec()\fP,) match in a different way
+and are not Perl-compatible.
 .sp
 (l) PCRE recognizes some special sequences such as (*CR) at the start of
 a pattern that set overall options that cannot be changed within the pattern.

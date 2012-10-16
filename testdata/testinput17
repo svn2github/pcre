@@ -1,18 +1,11 @@
-/-- This set of tests is for the 16-bit library's basic (non-UTF-16) features 
+/-- This set of tests is for the 16- and 32-bit library's basic (non-UTF-16 or -32) features 
     that are not compatible with the 8-bit library, or which give different 
-    output in 16-bit mode. --/
+    output in 16- or 32-bit mode. --/
 
 /a\Cb/
     aXb
     a\nb
   
-/-- Check maximum non-UTF character size --/
-
-/\x{ffff}/
-    A\x{ffff}B
-
-/\x{10000}/ 
-
 /[^\x{c4}]/DZ
 
   

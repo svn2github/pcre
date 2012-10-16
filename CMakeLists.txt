@@ -58,6 +58,7 @@
 #            of the configure.ac file
 # 2012-02-26 PH added support for libedit
 # 2012-09-06 PH added support for PCRE_EBCDIC_NL25
+# 2012-09-08 ChPe added PCRE32 support
 
 PROJECT(PCRE C CXX)
 
@@ -113,6 +114,8 @@ OPTION(PCRE_BUILD_PCRE8 "Build 8 bit PCRE library" ON)
 
 OPTION(PCRE_BUILD_PCRE16 "Build 16 bit PCRE library" OFF)
 
+OPTION(PCRE_BUILD_PCRE32 "Build 32 bit PCRE library" OFF)
+
 OPTION(PCRE_BUILD_PCRECPP "Build the PCRE C++ library (pcrecpp)." ON)
 
 SET(PCRE_EBCDIC OFF CACHE BOOL
@@ -149,7 +152,7 @@ SET(PCRE_SUPPORT_PCREGREP_JIT ON CACHE BOOL
     "Enable use of Just-in-time compiling in pcregrep.")
 
 SET(PCRE_SUPPORT_UTF OFF CACHE BOOL
-    "Enable support for Unicode Transformation Format (UTF-8 and/or UTF-16) encoding.")
+    "Enable support for Unicode Transformation Format (UTF-8/UTF-16/UTF-32) encoding.")
 
 SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
     "Enable support for Unicode properties (if set, UTF support will be enabled as well).")
@@ -231,9 +234,9 @@ IF(NOT BUILD_SHARED_LIBS)
         SET(PCRE_STATIC 1)
 ENDIF(NOT BUILD_SHARED_LIBS)
 
-IF(NOT PCRE_BUILD_PCRE8 AND NOT PCRE_BUILD_PCRE16)
-        MESSAGE(FATAL_ERROR "Either PCRE_BUILD_PCRE8 or PCRE_BUILD_PCRE16 must be enabled")
-ENDIF(NOT PCRE_BUILD_PCRE8 AND NOT PCRE_BUILD_PCRE16)
+IF(NOT PCRE_BUILD_PCRE8 AND NOT PCRE_BUILD_PCRE16 AND NOT PCRE_BUILD_PCRE32)
+        MESSAGE(FATAL_ERROR "Either PCRE_BUILD_PCRE8, PCRE_BUILD_PCRE16 or PCRE_BUILD_PCRE32 must be enabled")
+ENDIF(NOT PCRE_BUILD_PCRE8 AND NOT PCRE_BUILD_PCRE16 AND NOT PCRE_BUILD_PCRE32)
 
 IF(PCRE_BUILD_PCRE8)
         SET(SUPPORT_PCRE8 1)
@@ -242,6 +245,10 @@ ENDIF(PCRE_BUILD_PCRE8)
 IF(PCRE_BUILD_PCRE16)
         SET(SUPPORT_PCRE16 1)
 ENDIF(PCRE_BUILD_PCRE16)
+
+IF(PCRE_BUILD_PCRE32)
+        SET(SUPPORT_PCRE32 1)
+ENDIF(PCRE_BUILD_PCRE32)
 
 IF(PCRE_BUILD_PCRECPP AND NOT PCRE_BUILD_PCRE8)
         MESSAGE(STATUS "** PCRE_BUILD_PCRE8 must be enabled for the C++ library support")
@@ -477,6 +484,33 @@ SET(PCRE16_SOURCES
 )
 ENDIF(PCRE_BUILD_PCRE16)
 
+IF(PCRE_BUILD_PCRE32)
+SET(PCRE32_SOURCES
+  pcre32_byte_order.c
+  pcre32_chartables.c
+  pcre32_compile.c
+  pcre32_config.c
+  pcre32_dfa_exec.c
+  pcre32_exec.c
+  pcre32_fullinfo.c
+  pcre32_get.c
+  pcre32_globals.c
+  pcre32_jit_compile.c
+  pcre32_maketables.c
+  pcre32_newline.c
+  pcre32_ord2utf32.c
+  pcre32_refcount.c
+  pcre32_string_utils.c
+  pcre32_study.c
+  pcre32_tables.c
+  pcre32_ucd.c
+  pcre32_utf32_utils.c
+  pcre32_valid_utf32.c
+  pcre32_version.c
+  pcre32_xclass.c
+)
+ENDIF(PCRE_BUILD_PCRE32)
+
 IF(MINGW AND NOT PCRE_STATIC)
 IF (EXISTS ${PROJECT_SOURCE_DIR}/pcre.rc)
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_SOURCE_DIR}/pcre.o
@@ -575,6 +609,26 @@ ENDIF(MINGW AND NOT PCRE_STATIC)
 
 ENDIF(PCRE_BUILD_PCRE16)
 
+IF(PCRE_BUILD_PCRE32)
+ADD_LIBRARY(pcre32 ${PCRE_HEADERS} ${PCRE32_SOURCES} ${PROJECT_BINARY_DIR}/config.h)
+SET(targets ${targets} pcre32)
+
+IF(MINGW AND NOT PCRE_STATIC)
+  IF(NON_STANDARD_LIB_PREFIX)
+    SET_TARGET_PROPERTIES(pcre32
+                        PROPERTIES PREFIX ""
+    )
+  ENDIF(NON_STANDARD_LIB_PREFIX)
+
+  IF(NON_STANDARD_LIB_SUFFIX)
+    SET_TARGET_PROPERTIES(pcre32
+                        PROPERTIES SUFFIX "-0.dll"
+    )
+  ENDIF(NON_STANDARD_LIB_SUFFIX)
+ENDIF(MINGW AND NOT PCRE_STATIC)
+
+ENDIF(PCRE_BUILD_PCRE32)
+
 # pcrecpp
 IF(PCRE_BUILD_PCRECPP)
 ADD_LIBRARY(pcrecpp ${PCRECPP_HEADERS} ${PCRECPP_SOURCES})
@@ -625,6 +679,9 @@ IF(PCRE_BUILD_TESTS)
   IF(PCRE_BUILD_PCRE16)
     LIST(APPEND PCRETEST_SOURCES pcre16_printint.c)
   ENDIF(PCRE_BUILD_PCRE16)
+  IF(PCRE_BUILD_PCRE32)
+    LIST(APPEND PCRETEST_SOURCES pcre32_printint.c)
+  ENDIF(PCRE_BUILD_PCRE32)
 
   ADD_EXECUTABLE(pcretest ${PCRETEST_SOURCES})
   SET(targets ${targets} pcretest)
@@ -634,6 +691,9 @@ IF(PCRE_BUILD_TESTS)
   IF(PCRE_BUILD_PCRE16)
     LIST(APPEND PCRETEST_LIBS pcre16)
   ENDIF(PCRE_BUILD_PCRE16)
+  IF(PCRE_BUILD_PCRE32)
+    LIST(APPEND PCRETEST_LIBS pcre32)
+  ENDIF(PCRE_BUILD_PCRE32)
   TARGET_LINK_LIBRARIES(pcretest ${PCRETEST_LIBS})
 
   IF(PCRE_SUPPORT_JIT)
@@ -646,6 +706,9 @@ IF(PCRE_BUILD_TESTS)
     IF(PCRE_BUILD_PCRE16)
       LIST(APPEND PCRE_JIT_TEST_LIBS pcre16)
     ENDIF(PCRE_BUILD_PCRE16)
+    IF(PCRE_BUILD_PCRE32)
+      LIST(APPEND PCRE_JIT_TEST_LIBS pcre32)
+    ENDIF(PCRE_BUILD_PCRE32)
     TARGET_LINK_LIBRARIES(pcre_jit_test ${PCRE_JIT_TEST_LIBS})
   ENDIF(PCRE_SUPPORT_JIT)
 
@@ -823,6 +886,7 @@ IF(PCRE_SHOW_REPORT)
   MESSAGE(STATUS "")
   MESSAGE(STATUS "  Build 8 bit PCRE library ........ : ${PCRE_BUILD_PCRE8}")
   MESSAGE(STATUS "  Build 16 bit PCRE library ....... : ${PCRE_BUILD_PCRE16}")
+  MESSAGE(STATUS "  Build 32 bit PCRE library ....... : ${PCRE_BUILD_PCRE32}")
   MESSAGE(STATUS "  Build C++ library ............... : ${PCRE_BUILD_PCRECPP}")
   MESSAGE(STATUS "  Enable JIT compiling support .... : ${PCRE_SUPPORT_JIT}")
   MESSAGE(STATUS "  Enable UTF support .............. : ${PCRE_SUPPORT_UTF}")

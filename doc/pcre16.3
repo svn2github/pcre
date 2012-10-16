@@ -278,8 +278,9 @@ page.
 .P
 For the \fBpcre16_config()\fP function there is an option PCRE_CONFIG_UTF16
 that returns 1 if UTF-16 support is configured, otherwise 0. If this option is
-given to \fBpcre_config()\fP, or if the PCRE_CONFIG_UTF8 option is given to
-\fBpcre16_config()\fP, the result is the PCRE_ERROR_BADOPTION error.
+given to \fBpcre_config()\fP or \fBpcre32_config()\fP, or if the
+PCRE_CONFIG_UTF8 or PCRE_CONFIG_UTF32 option is given to \fBpcre16_config()\fP,
+the result is the PCRE_ERROR_BADOPTION error.
 .
 .
 .SH "CHARACTER CODES"
@@ -354,12 +355,12 @@ files, but it can be used for testing the 16-bit library. If it is run with the
 command line option \fB-16\fP, patterns and subject strings are converted from
 8-bit to 16-bit before being passed to PCRE, and the 16-bit library functions
 are used instead of the 8-bit ones. Returned 16-bit strings are converted to
-8-bit for output. If the 8-bit library was not compiled, \fBpcretest\fP
-defaults to 16-bit and the \fB-16\fP option is ignored.
+8-bit for output. If both the 8-bit and the 32-bit libraries were not compiled,
+\fBpcretest\fP defaults to 16-bit and the \fB-16\fP option is ignored.
 .P
 When PCRE is being built, the \fBRunTest\fP script that is called by "make
-check" uses the \fBpcretest\fP \fB-C\fP option to discover which of the 8-bit
-and 16-bit libraries has been built, and runs the tests appropriately.
+check" uses the \fBpcretest\fP \fB-C\fP option to discover which of the 8-bit,
+16-bit and 32-bit libraries has been built, and runs the tests appropriately.
 .
 .
 .SH "NOT SUPPORTED IN 16-BIT MODE"

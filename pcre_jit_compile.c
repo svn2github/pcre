@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre_internal.h"
 
-#ifdef SUPPORT_JIT
+#if defined SUPPORT_JIT
 
 /* All-in-one: Since we use the JIT compiler only from here,
 we just include it. This way we don't need to touch the build
@@ -343,7 +343,9 @@ typedef struct compiler_common {
 #ifdef SUPPORT_UCP
   BOOL use_ucp;
 #endif
+#ifndef COMPILE_PCRE32
   jump_list *utfreadchar;
+#endif
 #ifdef COMPILE_PCRE8
   jump_list *utfreadtype8;
 #endif
@@ -363,25 +365,25 @@ typedef struct compare_context {
   union {
     sljit_i asint;
     sljit_uh asushort;
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
     sljit_ub asbyte;
     sljit_ub asuchars[4];
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
     sljit_uh asuchars[2];
-#endif
+#elif defined COMPILE_PCRE32
+    sljit_ui asuchars[1];
 #endif
   } c;
   union {
     sljit_i asint;
     sljit_uh asushort;
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
     sljit_ub asbyte;
     sljit_ub asuchars[4];
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
     sljit_uh asuchars[2];
-#endif
+#elif defined COMPILE_PCRE32
+    sljit_ui asuchars[1];
 #endif
   } oc;
 #endif
@@ -428,16 +430,17 @@ the start pointers when the end of the capturing group has not yet reached. */
 #define OVECTOR_PRIV(i)  (common->cbraptr + (i) * sizeof(sljit_w))
 #define PRIVATE_DATA(cc) (common->private_data_ptrs[(cc) - common->start])
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 #define MOV_UCHAR  SLJIT_MOV_UB
 #define MOVU_UCHAR SLJIT_MOVU_UB
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 #define MOV_UCHAR  SLJIT_MOV_UH
 #define MOVU_UCHAR SLJIT_MOVU_UH
+#elif defined COMPILE_PCRE32
+#define MOV_UCHAR  SLJIT_MOV_UI
+#define MOVU_UCHAR SLJIT_MOVU_UI
 #else
 #error Unsupported compiling mode
-#endif
 #endif
 
 /* Shortcuts. */
@@ -588,7 +591,7 @@ switch(*cc)
   case OP_NOTPOSPLUSI:
   case OP_NOTPOSQUERYI:
   cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
   if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
   return cc;
@@ -610,7 +613,7 @@ switch(*cc)
   case OP_NOTEXACTI:
   case OP_NOTPOSUPTOI:
   cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
   if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
   return cc;
@@ -933,7 +936,7 @@ while (cc < ccend)
     if (size < 0)
       {
       cc += -size;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       }
@@ -1073,7 +1076,7 @@ while (cc < ccend)
     if (size < 0)
       {
       cc += -size;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       }
@@ -1317,7 +1320,7 @@ while (cc < ccend)
     if (PRIVATE_DATA(cc))
       private_data_length++;
     cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1326,7 +1329,7 @@ while (cc < ccend)
     if (PRIVATE_DATA(cc))
       private_data_length += 2;
     cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1335,7 +1338,7 @@ while (cc < ccend)
     if (PRIVATE_DATA(cc))
       private_data_length += 2;
     cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1494,7 +1497,7 @@ while (status != end)
         srcw[0] = PRIVATE_DATA(cc);
         }
       cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       break;
@@ -1507,7 +1510,7 @@ while (status != end)
         srcw[1] = PRIVATE_DATA(cc) + sizeof(sljit_w);
         }
       cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       break;
@@ -1520,7 +1523,7 @@ while (status != end)
         srcw[1] = PRIVATE_DATA(cc) + sizeof(sljit_w);
         }
       cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       break;
@@ -1834,8 +1837,8 @@ loop = LABEL();
 OP2(SLJIT_SUB, SLJIT_SAVED_REG2, 0, SLJIT_MEM1(SLJIT_SAVED_REG1), 0, SLJIT_TEMPORARY_REG1, 0);
 OP2(SLJIT_ADD, SLJIT_SAVED_REG1, 0, SLJIT_SAVED_REG1, 0, SLJIT_IMM, sizeof(sljit_w));
 /* Copy the integer value to the output buffer */
-#ifdef COMPILE_PCRE16
-OP2(SLJIT_ASHR, SLJIT_SAVED_REG2, 0, SLJIT_SAVED_REG2, 0, SLJIT_IMM, 1);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+OP2(SLJIT_ASHR, SLJIT_SAVED_REG2, 0, SLJIT_SAVED_REG2, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
 OP1(SLJIT_MOVU_SI, SLJIT_MEM1(SLJIT_TEMPORARY_REG3), sizeof(int), SLJIT_SAVED_REG2, 0);
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_TEMPORARY_REG2, 0, SLJIT_TEMPORARY_REG2, 0, SLJIT_IMM, 1);
@@ -1876,14 +1879,14 @@ OP1(SLJIT_MOV, SLJIT_SAVED_REG1, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), SLJIT_OFFS
 OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG2, 0, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), SLJIT_OFFSETOF(jit_arguments, offsets));
 OP1(SLJIT_MOV, SLJIT_TEMPORARY_REG3, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mode == JIT_PARTIAL_HARD_COMPILE ? common->start_used_ptr : common->hit_start);
 OP2(SLJIT_SUB, SLJIT_SAVED_REG2, 0, STR_END, 0, SLJIT_SAVED_REG1, 0);
-#ifdef COMPILE_PCRE16
-OP2(SLJIT_ASHR, SLJIT_SAVED_REG2, 0, SLJIT_SAVED_REG2, 0, SLJIT_IMM, 1);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+OP2(SLJIT_ASHR, SLJIT_SAVED_REG2, 0, SLJIT_SAVED_REG2, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
 OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), sizeof(int), SLJIT_SAVED_REG2, 0);
 
 OP2(SLJIT_SUB, SLJIT_TEMPORARY_REG3, 0, SLJIT_TEMPORARY_REG3, 0, SLJIT_SAVED_REG1, 0);
-#ifdef COMPILE_PCRE16
-OP2(SLJIT_ASHR, SLJIT_TEMPORARY_REG3, 0, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, 1);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+OP2(SLJIT_ASHR, SLJIT_TEMPORARY_REG3, 0, SLJIT_TEMPORARY_REG3, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
 OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_TEMPORARY_REG2), 0, SLJIT_TEMPORARY_REG3, 0);
 
@@ -2001,7 +2004,7 @@ if (c <= 127 && bit == 0x20)
 if (!is_powerof2(bit))
   return 0;
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 #ifdef SUPPORT_UTF
 if (common->utf && c > 127)
@@ -2017,9 +2020,8 @@ if (common->utf && c > 127)
 #endif /* SUPPORT_UTF */
 return (0 << 8) | bit;
 
-#else /* COMPILE_PCRE8 */
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 
-#ifdef COMPILE_PCRE16
 #ifdef SUPPORT_UTF
 if (common->utf && c > 65535)
   {
@@ -2030,9 +2032,8 @@ if (common->utf && c > 65535)
   }
 #endif /* SUPPORT_UTF */
 return (bit < 256) ? ((0 << 8) | bit) : ((1 << 8) | (bit >> 8));
-#endif /* COMPILE_PCRE16 */
 
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16|32] */
 }
 
 static void check_partial(compiler_common *common, BOOL force)
@@ -2130,25 +2131,23 @@ static void read_char(compiler_common *common)
 /* Reads the character into TMP1, updates STR_PTR.
 Does not check STR_END. TMP2 Destroyed. */
 DEFINE_COMPILER;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 struct sljit_jump *jump;
 #endif
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 if (common->utf)
   {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
-#endif
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16] */
   add_jump(compiler, &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
   JUMPHERE(jump);
   }
-#endif
+#endif /* SUPPORT_UTF && !COMPILE_PCRE32 */
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 }
 
@@ -2157,33 +2156,31 @@ static void peek_char(compiler_common *common)
 /* Reads the character into TMP1, keeps STR_PTR.
 Does not check STR_END. TMP2 Destroyed. */
 DEFINE_COMPILER;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 struct sljit_jump *jump;
 #endif
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 if (common->utf)
   {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
-#endif
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16] */
   add_jump(compiler, &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
   JUMPHERE(jump);
   }
-#endif
+#endif /* SUPPORT_UTF && !COMPILE_PCRE32 */
 }
 
 static void read_char8_type(compiler_common *common)
 {
 /* Reads the character type into TMP1, updates STR_PTR. Does not check STR_END. */
 DEFINE_COMPILER;
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 struct sljit_jump *jump;
 #endif
 
@@ -2192,15 +2189,14 @@ if (common->utf)
   {
   OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), 0);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   /* This can be an extra read in some situations, but hopefully
   it is needed in most cases. */
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), common->ctypes);
   jump = CMP(SLJIT_C_LESS, TMP2, 0, SLJIT_IMM, 0xc0);
   add_jump(compiler, &common->utfreadtype8, JUMP(SLJIT_FAST_CALL));
   JUMPHERE(jump);
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
   jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 255);
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), common->ctypes);
@@ -2211,20 +2207,24 @@ if (common->utf)
   COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
   OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 1);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
-#endif
-#endif /* COMPILE_PCRE8 */
+#elif defined COMPILE_PCRE32
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
+  jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 255);
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), common->ctypes);
+  JUMPHERE(jump);
+#endif /* COMPILE_PCRE[8|16|32] */
   return;
   }
-#endif
+#endif /* SUPPORT_UTF */
 OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), 0);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 /* The ctypes array contains only 256 values. */
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
 jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 255);
 #endif
 OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), common->ctypes);
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 JUMPHERE(jump);
 #endif
 }
@@ -2233,7 +2233,8 @@ static void skip_char_back(compiler_common *common)
 {
 /* Goes one character back. Affects STR_PTR and TMP1. Does not check begin. */
 DEFINE_COMPILER;
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#if defined COMPILE_PCRE8
 struct sljit_label *label;
 
 if (common->utf)
@@ -2245,8 +2246,7 @@ if (common->utf)
   CMPTO(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, label);
   return;
   }
-#endif
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 if (common->utf)
   {
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), -IN_UCHARS(1));
@@ -2259,7 +2259,8 @@ if (common->utf)
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   return;
   }
-#endif
+#endif /* COMPILE_PCRE[8|16] */
+#endif /* SUPPORT_UTF && !COMPILE_PCRE32 */
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 }
 
@@ -2290,7 +2291,7 @@ else
 
 #ifdef SUPPORT_UTF
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 static void do_utfreadchar(compiler_common *common)
 {
 /* Fast decoding a UTF-8 character. TMP1 contains the first byte
@@ -2384,9 +2385,8 @@ OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 
-#else /* COMPILE_PCRE8 */
+#elif defined COMPILE_PCRE16
 
-#ifdef COMPILE_PCRE16
 static void do_utfreadchar(compiler_common *common)
 {
 /* Fast decoding a UTF-16 character. TMP1 contains the first 16 bit char
@@ -2411,9 +2411,8 @@ OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, IN_UCHARS(1));
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x10000);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
-#endif /* COMPILE_PCRE16 */
 
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16] */
 
 #endif /* SUPPORT_UTF */
 
@@ -2509,8 +2508,8 @@ if (newlinecheck)
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
   OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, common->newline & 0xff);
   COND_VALUE(SLJIT_MOV, TMP1, 0, SLJIT_C_EQUAL);
-#ifdef COMPILE_PCRE16
-  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   nl = JUMP(SLJIT_JUMP);
@@ -2531,7 +2530,8 @@ if (newlinecheck)
   CMPTO(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff, newlinelabel);
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#if defined COMPILE_PCRE8
 if (common->utf)
   {
   singlechar = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
@@ -2539,8 +2539,7 @@ if (common->utf)
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   JUMPHERE(singlechar);
   }
-#endif
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 if (common->utf)
   {
   singlechar = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
@@ -2551,7 +2550,8 @@ if (common->utf)
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   JUMPHERE(singlechar);
   }
-#endif
+#endif /* COMPILE_PCRE[8|16] */
+#endif /* SUPPORT_UTF && !COMPILE_PCRE32 */
 JUMPHERE(start);
 
 if (newlinecheck)
@@ -2570,7 +2570,7 @@ static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOO
 DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
-pcre_int32 chars[MAX_N_CHARS * 2];
+pcre_uint32 chars[MAX_N_CHARS * 2];
 pcre_uchar *cc = common->start + 1 + IMM2_SIZE;
 int location = 0;
 pcre_int32 len, c, bit, caseless;
@@ -2643,7 +2643,7 @@ while (TRUE)
       break;
 
   len = 1;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
   if (common->utf && HAS_EXTRALEN(cc[0])) len += GET_EXTRALEN(cc[0]);
 #endif
 
@@ -2818,8 +2818,8 @@ if (common->nltype == NLTYPE_FIXED && common->newline > 255)
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(2));
   OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, STR_PTR, 0, TMP1, 0);
   COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_GREATER_EQUAL);
-#ifdef COMPILE_PCRE16
-  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 1);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
@@ -2861,8 +2861,8 @@ if (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF)
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
   OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, CHAR_NL);
   COND_VALUE(SLJIT_MOV, TMP1, 0, SLJIT_C_EQUAL);
-#ifdef COMPILE_PCRE16
-  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+  OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   JUMPHERE(notfoundnl);
@@ -2916,15 +2916,15 @@ if (common->utf)
   OP1(SLJIT_MOV, TMP1, 0, TMP3, 0);
 #endif
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+#ifdef SUPPORT_UTF
+#if defined COMPILE_PCRE8
 if (common->utf)
   {
   CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0, start);
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)PRIV(utf8_table4) - 0xc0);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   }
-#endif
-#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 if (common->utf)
   {
   CMPTO(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800, start);
@@ -2934,7 +2934,8 @@ if (common->utf)
   OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
   }
-#endif
+#endif /* COMPILE_PCRE[8|16] */
+#endif /* SUPPORT_UTF */
 JUMPTO(SLJIT_JUMP, start);
 JUMPHERE(found);
 JUMPHERE(quit);
@@ -3314,7 +3315,7 @@ OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0a);
 OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x0d - 0x0a);
 COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_LESS_EQUAL);
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x85 - 0x0a);
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 #ifdef COMPILE_PCRE8
 if (common->utf)
   {
@@ -3325,7 +3326,7 @@ if (common->utf)
 #ifdef COMPILE_PCRE8
   }
 #endif
-#endif /* SUPPORT_UTF || COMPILE_PCRE16 */
+#endif /* SUPPORT_UTF || COMPILE_PCRE16 || COMPILE_PCRE32 */
 COND_VALUE(SLJIT_OR | SLJIT_SET_E, TMP2, 0, SLJIT_C_EQUAL);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
@@ -3342,7 +3343,7 @@ COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_EQUAL);
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x20);
 COND_VALUE(SLJIT_OR, TMP2, 0, SLJIT_C_EQUAL);
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xa0);
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 #ifdef COMPILE_PCRE8
 if (common->utf)
   {
@@ -3363,7 +3364,7 @@ if (common->utf)
 #ifdef COMPILE_PCRE8
   }
 #endif
-#endif /* SUPPORT_UTF || COMPILE_PCRE16 */
+#endif /* SUPPORT_UTF || COMPILE_PCRE16 || COMPILE_PCRE32 */
 COND_VALUE(SLJIT_OR | SLJIT_SET_E, TMP2, 0, SLJIT_C_EQUAL);
 
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
@@ -3380,7 +3381,7 @@ OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0a);
 OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x0d - 0x0a);
 COND_VALUE(SLJIT_MOV, TMP2, 0, SLJIT_C_LESS_EQUAL);
 OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x85 - 0x0a);
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 #ifdef COMPILE_PCRE8
 if (common->utf)
   {
@@ -3391,7 +3392,7 @@ if (common->utf)
 #ifdef COMPILE_PCRE8
   }
 #endif
-#endif /* SUPPORT_UTF || COMPILE_PCRE16 */
+#endif /* SUPPORT_UTF || COMPILE_PCRE16 || COMPILE_PCRE32 */
 COND_VALUE(SLJIT_OR | SLJIT_SET_E, TMP2, 0, SLJIT_C_EQUAL);
 
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
@@ -3524,23 +3525,21 @@ if (caseless && char_has_othercase(common, cc))
   othercasebit = char_get_othercase_bit(common, cc);
   SLJIT_ASSERT(othercasebit);
   /* Extracting bit difference info. */
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   othercasechar = cc + (othercasebit >> 8);
   othercasebit &= 0xff;
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
   othercasechar = cc + (othercasebit >> 9);
   if ((othercasebit & 0x100) != 0)
     othercasebit = (othercasebit & 0xff) << 8;
   else
     othercasebit &= 0xff;
-#endif
-#endif
+#endif /* COMPILE_PCRE[8|16|32] */
   }
 
 if (context->sourcereg == -1)
   {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 #if defined SLJIT_UNALIGNED && SLJIT_UNALIGNED
   if (context->length >= 4)
     OP1(SLJIT_MOV_SI, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
@@ -3549,23 +3548,25 @@ if (context->sourcereg == -1)
   else
 #endif
     OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 #if defined SLJIT_UNALIGNED && SLJIT_UNALIGNED
   if (context->length >= 4)
     OP1(SLJIT_MOV_SI, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
   else
 #endif
-    OP1(SLJIT_MOV_UH, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#endif
-#endif /* COMPILE_PCRE8 */
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
+#elif defined COMPILE_PCRE32
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), -context->length);
+#endif /* COMPILE_PCRE[8|16|32] */
   context->sourcereg = TMP2;
   }
 
 #ifdef SUPPORT_UTF
 utflength = 1;
+#ifndef COMPILE_PCRE32
 if (common->utf && HAS_EXTRALEN(*cc))
   utflength += GET_EXTRALEN(*cc);
+#endif
 
 do
   {
@@ -3587,23 +3588,29 @@ do
     }
   context->ucharptr++;
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   if (context->ucharptr >= 4 || context->length == 0 || (context->ucharptr == 2 && context->length == 1))
-#else
+#elif defined COMPILE_PCRE16
   if (context->ucharptr >= 2 || context->length == 0)
+#elif defined COMPILE_PCRE32
+  if (1 /* context->ucharptr >= 1 || context->length == 0 */)
 #endif
     {
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
     if (context->length >= 4)
       OP1(SLJIT_MOV_SI, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
     else if (context->length >= 2)
       OP1(SLJIT_MOV_UH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
     else if (context->length >= 1)
       OP1(SLJIT_MOV_UB, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#else
+#elif defined COMPILE_PCRE16
     else if (context->length >= 2)
       OP1(SLJIT_MOV_UH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#endif
+#endif /* COMPILE_PCRE[8|16] */
+#elif defined COMPILE_PCRE32
+    OP1(MOV_UCHAR, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
+#endif /* COMPILE_PCRE[8|16|32] */
     context->sourcereg = context->sourcereg == TMP1 ? TMP2 : TMP1;
 
     switch(context->ucharptr)
@@ -3614,6 +3621,7 @@ do
       add_jump(compiler, backtracks, CMP(SLJIT_C_NOT_EQUAL, context->sourcereg, 0, SLJIT_IMM, context->c.asint | context->oc.asint));
       break;
 
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
       case 2 / sizeof(pcre_uchar):
       if (context->oc.asushort != 0)
         OP2(SLJIT_OR, context->sourcereg, 0, context->sourcereg, 0, SLJIT_IMM, context->oc.asushort);
@@ -3628,6 +3636,8 @@ do
       break;
 #endif
 
+#endif /* COMPILE_PCRE[8|16] */
+
       default:
       SLJIT_ASSERT_STOP();
       break;
@@ -3638,13 +3648,9 @@ do
 #else
 
   /* Unaligned read is unsupported. */
-#ifdef COMPILE_PCRE8
   if (context->length > 0)
-    OP1(SLJIT_MOV_UB, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#else
-  if (context->length > 0)
-    OP1(SLJIT_MOV_UH, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
-#endif
+    OP1(MOV_UCHAR, context->sourcereg, 0, SLJIT_MEM1(STR_PTR), -context->length);
+
   context->sourcereg = context->sourcereg == TMP1 ? TMP2 : TMP1;
 
   if (othercasebit != 0 && othercasechar == cc)
@@ -3753,7 +3759,7 @@ while (*cc != XCL_END)
   if (*cc == XCL_SINGLE)
     {
     cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
 #ifdef SUPPORT_UCP
@@ -3763,11 +3769,11 @@ while (*cc != XCL_END)
   else if (*cc == XCL_RANGE)
     {
     cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     cc++;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
 #ifdef SUPPORT_UCP
@@ -4183,21 +4189,21 @@ switch(type)
     {
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
+#if defined COMPILE_PCRE8
     jump[0] = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
     OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_w)PRIV(utf8_table4) - 0xc0);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-#else /* COMPILE_PCRE8 */
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
     jump[0] = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
     OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
     OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xd800);
     COND_VALUE(SLJIT_MOV, TMP1, 0, SLJIT_C_EQUAL);
     OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-#endif /* COMPILE_PCRE16 */
-#endif /* COMPILE_PCRE8 */
+#endif
     JUMPHERE(jump[0]);
+#endif /* COMPILE_PCRE[8|16] */
     return cc;
     }
 #endif
@@ -4461,7 +4467,7 @@ switch(type)
   case OP_CHAR:
   case OP_CHARI:
   length = 1;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
   if (common->utf && HAS_EXTRALEN(*cc)) length += GET_EXTRALEN(*cc);
 #endif
   if (common->mode == JIT_COMPILE && (type == OP_CHAR || !char_has_othercase(common, cc) || char_get_othercase_bit(common, cc) != 0))
@@ -4602,7 +4608,7 @@ switch(type)
 #endif /* SUPPORT_UTF || !COMPILE_PCRE8 */
   return cc + 32 / sizeof(pcre_uchar);
 
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
   case OP_XCLASS:
   compile_xclass_matchingpath(common, cc + LINK_SIZE, backtracks);
   return cc + GET(cc, 0) - 1;
@@ -4656,7 +4662,7 @@ do
   if (*cc == OP_CHAR)
     {
     size = 1;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf && HAS_EXTRALEN(cc[1]))
       size += GET_EXTRALEN(cc[1]);
 #endif
@@ -4669,8 +4675,10 @@ do
       {
       if (char_has_othercase(common, cc + 1) && char_get_othercase_bit(common, cc + 1) == 0)
         size = 0;
+#ifndef COMPILE_PCRE32
       else if (HAS_EXTRALEN(cc[1]))
         size += GET_EXTRALEN(cc[1]);
+#endif
       }
     else
 #endif
@@ -6258,7 +6266,7 @@ if (*type == 0)
 if (end != NULL)
   {
   *end = cc + 1;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
   if (common->utf && HAS_EXTRALEN(*cc)) *end += GET_EXTRALEN(*cc);
 #endif
   }
@@ -6681,7 +6689,7 @@ while (cc < ccend)
       cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     break;
 
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
     case OP_XCLASS:
     if (*(cc + GET(cc, 1)) >= OP_CRSTAR && *(cc + GET(cc, 1)) <= OP_CRMINRANGE)
       cc = compile_iterator_matchingpath(common, cc, parent);
@@ -7858,7 +7866,7 @@ common->name_count = re->name_count;
 common->name_entry_size = re->name_entry_size;
 common->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 #ifdef SUPPORT_UTF
-/* PCRE_UTF16 has the same value as PCRE_UTF8. */
+/* PCRE_UTF[16|32] have the same value as PCRE_UTF8. */
 common->utf = (re->options & PCRE_UTF8) != 0;
 #ifdef SUPPORT_UCP
 common->use_ucp = (re->options & PCRE_UCP) != 0;
@@ -8179,19 +8187,21 @@ if (common->caselesscmp != NULL)
   do_caselesscmp(common);
   }
 #ifdef SUPPORT_UTF
+#ifndef COMPILE_PCRE32
 if (common->utfreadchar != NULL)
   {
   set_jumps(common->utfreadchar, LABEL());
   do_utfreadchar(common);
   }
+#endif /* !COMPILE_PCRE32 */
 #ifdef COMPILE_PCRE8
 if (common->utfreadtype8 != NULL)
   {
   set_jumps(common->utfreadtype8, LABEL());
   do_utfreadtype8(common);
   }
-#endif
 #endif /* COMPILE_PCRE8 */
+#endif /* SUPPORT_UTF */
 #ifdef SUPPORT_UCP
 if (common->getucd != NULL)
   {
@@ -8357,12 +8367,15 @@ PRIV(jit_get_target)(void)
 return sljit_get_platform_name();
 }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DECL pcre_jit_stack *
 pcre_jit_stack_alloc(int startsize, int maxsize)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DECL pcre16_jit_stack *
 pcre16_jit_stack_alloc(int startsize, int maxsize)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL pcre32_jit_stack *
+pcre32_jit_stack_alloc(int startsize, int maxsize)
 #endif
 {
 if (startsize < 1 || maxsize < 1)
@@ -8374,23 +8387,29 @@ maxsize = (maxsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
 return (PUBL(jit_stack)*)sljit_allocate_stack(startsize, maxsize);
 }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DECL void
 pcre_jit_stack_free(pcre_jit_stack *stack)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DECL void
 pcre16_jit_stack_free(pcre16_jit_stack *stack)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL void
+pcre32_jit_stack_free(pcre32_jit_stack *stack)
 #endif
 {
 sljit_free_stack((struct sljit_stack *)stack);
 }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DECL void
 pcre16_assign_jit_stack(pcre16_extra *extra, pcre16_jit_callback callback, void *userdata)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL void
+pcre32_assign_jit_stack(pcre32_extra *extra, pcre32_jit_callback callback, void *userdata)
 #endif
 {
 executable_functions *functions;
@@ -8409,12 +8428,15 @@ if (extra != NULL &&
 /* These are dummy functions to avoid linking errors when JIT support is not
 being compiled. */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DECL pcre_jit_stack *
 pcre_jit_stack_alloc(int startsize, int maxsize)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DECL pcre16_jit_stack *
 pcre16_jit_stack_alloc(int startsize, int maxsize)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL pcre32_jit_stack *
+pcre32_jit_stack_alloc(int startsize, int maxsize)
 #endif
 {
 (void)startsize;
@@ -8422,23 +8444,29 @@ pcre16_jit_stack_alloc(int startsize, int maxsize)
 return NULL;
 }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DECL void
 pcre_jit_stack_free(pcre_jit_stack *stack)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DECL void
 pcre16_jit_stack_free(pcre16_jit_stack *stack)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL void
+pcre32_jit_stack_free(pcre32_jit_stack *stack)
 #endif
 {
 (void)stack;
 }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DECL void
 pcre_assign_jit_stack(pcre_extra *extra, pcre_jit_callback callback, void *userdata)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DECL void
 pcre16_assign_jit_stack(pcre16_extra *extra, pcre16_jit_callback callback, void *userdata)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL void
+pcre32_assign_jit_stack(pcre32_extra *extra, pcre32_jit_callback callback, void *userdata)
 #endif
 {
 (void)extra;

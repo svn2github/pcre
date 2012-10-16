@@ -74,9 +74,9 @@ const pcre_uint32 PRIV(vspace_list)[] = { VSPACE_LIST };
 character. */
 
 #if (defined SUPPORT_UTF && defined COMPILE_PCRE8) \
-  || (defined PCRE_INCLUDED && defined SUPPORT_PCRE16)
+  || (defined PCRE_INCLUDED && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32))
 
-/* These tables are also required by pcretest in 16 bit mode. */
+/* These tables are also required by pcretest in 16- or 32-bit mode. */
 
 const int PRIV(utf8_table1)[] =
   { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
@@ -98,7 +98,7 @@ const pcre_uint8 PRIV(utf8_table4)[] = {
   2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
   3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5 };
 
-#endif /* (SUPPORT_UTF && COMPILE_PCRE8) || (PCRE_INCLUDED && SUPPORT_PCRE16)*/
+#endif /* (SUPPORT_UTF && COMPILE_PCRE8) || (PCRE_INCLUDED && SUPPORT_PCRE[16|32])*/
 
 #ifdef SUPPORT_UTF
 

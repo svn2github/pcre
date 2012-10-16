@@ -1,4 +1,4 @@
-.TH PCRE_FULLINFO 3 "21 January 2012" "PCRE 8.30"
+.TH PCRE_FULLINFO 3 "24 June 2012" "PCRE 8.30"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH SYNOPSIS
@@ -14,6 +14,10 @@ PCRE - Perl-compatible regular expressions
 .B int pcre16_fullinfo(const pcre16 *\fIcode\fP, "const pcre16_extra *\fIextra\fP,"
 .ti +5n
 .B int \fIwhat\fP, void *\fIwhere\fP);
+.PP
+.B int pcre32_fullinfo(const pcre32 *\fIcode\fP, "const pcre32_extra *\fIextra\fP,"
+.ti +5n
+.B int \fIwhat\fP, void *\fIwhere\fP);
 .
 .SH DESCRIPTION
 .rs
@@ -21,7 +25,7 @@ PCRE - Perl-compatible regular expressions
 This function returns information about a compiled pattern. Its arguments are:
 .sp
   \fIcode\fP                      Compiled regular expression
-  \fIextra\fP                     Result of \fBpcre[16]_study()\fP or NULL
+  \fIextra\fP                     Result of \fBpcre[16|32]_study()\fP or NULL
   \fIwhat\fP                      What information is required
   \fIwhere\fP                     Where to put the information
 .sp
@@ -56,6 +60,7 @@ following \fIwhat\fP values:
   PCRE_INFO_DEFAULT_TABLES  const unsigned char *
   PCRE_INFO_FIRSTTABLE      const unsigned char *
   PCRE_INFO_NAMETABLE       PCRE_SPTR16           (16-bit library)
+  PCRE_INFO_NAMETABLE       PCRE_SPTR32           (32-bit library)
   PCRE_INFO_NAMETABLE       const unsigned char * (8-bit library)
   PCRE_INFO_OPTIONS         unsigned long int
   PCRE_INFO_SIZE            size_t

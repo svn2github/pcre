@@ -1,0 +1,37 @@
+/-- Tests for the 32-bit library only */
+
+/-- Check maximum character size --/
+
+/\x{110000}/8
+Failed: character value in \x{...} sequence is too large at offset 9
+
+/\x{110000}/
+
+/\x{7fffffff}/
+
+/\x{80000000}/
+Failed: character value in \x{...} sequence is too large at offset 11
+
+/-- Non-UTF characters --/
+
+/\C/8
+    \x{110000}
+**Failed: character value greater than 0x10ffff cannot be converted to UTF-32
+
+/\C{2,3}/
+    \x{400000}\x{400001}\x{400002}\x{400003}
+ 0: \x{400000}\x{400001}\x{400002}
+
+/\x{400000}\x{800000}/iDZ
+------------------------------------------------------------------
+        Bra
+     /i \x{400000}\x{800000}
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless
+First char = \x{400000}
+Need char = \x{800000}
+
+/-- End of testinput25 --/

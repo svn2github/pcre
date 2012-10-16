@@ -65,13 +65,17 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data,
   int what, void *where)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_fullinfo(const pcre16 *argument_re, const pcre16_extra *extra_data,
+  int what, void *where)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_fullinfo(const pcre32 *argument_re, const pcre32_extra *extra_data,
   int what, void *where)
 #endif
 {

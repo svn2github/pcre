@@ -40,8 +40,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* This header contains definitions that are shared between the different
 modules, but which are not relevant to the exported API. This includes some
-functions whose names all begin with "_pcre_" or "_pcre16_" depending on
-the PRIV macro. */
+functions whose names all begin with "_pcre_", "_pcre16_" or "_pcre32_"
+depending on the PRIV macro. */
 
 #ifndef PCRE_INTERNAL_H
 #define PCRE_INTERNAL_H
@@ -53,7 +53,7 @@ the PRIV macro. */
 #endif
 
 /* PCRE is compiled as an 8 bit library if it is not requested otherwise. */
-#ifndef COMPILE_PCRE16
+#if !defined COMPILE_PCRE16 && ! defined COMPILE_PCRE32
 #define COMPILE_PCRE8
 #endif
 
@@ -78,11 +78,11 @@ Until then we define it if SUPPORT_UTF is defined. */
 #define SUPPORT_UTF8 1
 #endif
 
-/* We do not support both EBCDIC and UTF-8/16 at the same time. The "configure"
+/* We do not support both EBCDIC and UTF-8/16/32 at the same time. The "configure"
 script prevents both being selected, but not everybody uses "configure". */
 
 #if defined EBCDIC && defined SUPPORT_UTF
-#error The use of both EBCDIC and SUPPORT_UTF8/16 is not supported.
+#error The use of both EBCDIC and SUPPORT_UTF is not supported.
 #endif
 
 /* Use a macro for debugging printing, 'cause that eliminates the use of #ifdef
@@ -243,16 +243,15 @@ exactly 256 items. When the character is able to contain more than 256
 items, some check is needed before accessing these tables.
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 typedef unsigned char pcre_uchar;
 #define IN_UCHARS(x) (x)
 #define MAX_255(c) 1
 #define TABLE_GET(c, table, default) ((table)[c])
 
-#else
+#elif defined COMPILE_PCRE16
 
-#ifdef COMPILE_PCRE16
 #if USHRT_MAX != 65535
 /* This is a warning message. Change PCRE_UCHAR16 to a 16 bit data type in
 pcre.h(.in) and disable (comment out) this message. */
@@ -260,15 +259,25 @@ pcre.h(.in) and disable (comment out) this message. */
 #endif
 
 typedef pcre_uint16 pcre_uchar;
-#define IN_UCHARS(x) ((x) << 1)
+#define UCHAR_SHIFT (1)
+#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
+#elif defined COMPILE_PCRE32
+
+typedef pcre_uint32 pcre_uchar;
+#define UCHAR_SHIFT (2)
+#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define MAX_255(c) ((c) <= 255u)
+#define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
+
+/* Assert that pcre_uchar32 is a 32-bit type */
+typedef int __assert_pcre_uchar32_size[sizeof(pcre_uchar) == 4 ? 1 : -1];
+
 #else
 #error Unsupported compiling mode
-#endif /* COMPILE_PCRE16 */
-
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16|32] */
 
 /* This is an unsigned int value that no character can ever have. UTF-8
 characters only go up to 0x7fffffff (though Unicode doesn't go beyond
@@ -396,7 +405,7 @@ The macros are controlled by the value of LINK_SIZE. This defaults to 2 in
 the config.h file, but can be overridden by using -D on the command line. This
 is automated on Unix systems via the "configure" command. */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 #if LINK_SIZE == 2
 
@@ -441,12 +450,11 @@ is automated on Unix systems via the "configure" command. */
 #error LINK_SIZE must be either 2, 3, or 4
 #endif
 
-#else /* COMPILE_PCRE8 */
-
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 
 #if LINK_SIZE == 2
 
+/* Redefine LINK_SIZE as a multiple of sizeof(pcre_uchar) */
 #undef LINK_SIZE
 #define LINK_SIZE 1
 
@@ -460,6 +468,7 @@ is automated on Unix systems via the "configure" command. */
 
 #elif LINK_SIZE == 3 || LINK_SIZE == 4
 
+/* Redefine LINK_SIZE as a multiple of sizeof(pcre_uchar) */
 #undef LINK_SIZE
 #define LINK_SIZE 2
 
@@ -477,11 +486,25 @@ is automated on Unix systems via the "configure" command. */
 #error LINK_SIZE must be either 2, 3, or 4
 #endif
 
+#elif defined COMPILE_PCRE32
+
+/* Only supported LINK_SIZE is 4 */
+/* Redefine LINK_SIZE as a multiple of sizeof(pcre_uchar) */
+#undef LINK_SIZE
+#define LINK_SIZE 1
+
+#define PUT(a,n,d)   \
+  (a[n] = (d))
+
+#define GET(a,n) \
+  (a[n])
+
+/* Keep it positive */
+#define MAX_PATTERN_SIZE (1 << 30)
+
 #else
 #error Unsupported compiling mode
-#endif /* COMPILE_PCRE16 */
-
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16|32] */
 
 /* Convenience macro defined in terms of the others */
 
@@ -492,7 +515,7 @@ is automated on Unix systems via the "configure" command. */
 offsets changes. There are used for repeat counts and for other things such as
 capturing parenthesis numbers in back references. */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 #define IMM2_SIZE 2
 
@@ -503,9 +526,17 @@ capturing parenthesis numbers in back references. */
 #define GET2(a,n) \
   (((a)[n] << 8) | (a)[(n)+1])
 
-#else /* COMPILE_PCRE8 */
+#elif defined COMPILE_PCRE16
 
-#ifdef COMPILE_PCRE16
+#define IMM2_SIZE 1
+
+#define PUT2(a,n,d)   \
+   a[n] = d
+
+#define GET2(a,n) \
+   a[n]
+
+#elif defined COMPILE_PCRE32
 
 #define IMM2_SIZE 1
 
@@ -517,16 +548,18 @@ capturing parenthesis numbers in back references. */
 
 #else
 #error Unsupported compiling mode
-#endif /* COMPILE_PCRE16 */
-
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16|32] */
 
 #define PUT2INC(a,n,d)  PUT2(a,n,d), a += IMM2_SIZE
 
 /* The maximum length of a MARK name is currently one data unit; it may be
 changed in future to be a fixed number of bytes or to depend on LINK_SIZE. */
 
-#define MAX_MARK ((1 << (sizeof(pcre_uchar)*8)) - 1)
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+#define MAX_MARK ((1u << 16) - 1)
+#else
+#define MAX_MARK ((1u << 8) - 1)
+#endif
 
 /* When UTF encoding is being used, a character is no longer just a single
 byte. The macros for character handling generate simple sequences when used in
@@ -553,7 +586,7 @@ we don't even define them. */
 
 #else   /* SUPPORT_UTF */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 /* These macros were originally written in the form of loops that used data
 from the tables whose names start with PRIV(utf8_table). They were rewritten by
@@ -727,9 +760,7 @@ because almost all calls are already within a block of UTF-8 only code. */
 #define ACROSSCHAR(condition, eptr, action) \
   while((condition) && ((eptr) & 0xc0) == 0x80) action
 
-#else /* COMPILE_PCRE8 */
-
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 
 /* Tells the biggest code point which can be encoded as a single character. */
 
@@ -825,12 +856,70 @@ code. */
 #define ACROSSCHAR(condition, eptr, action) \
   if ((condition) && ((eptr) & 0xfc00) == 0xdc00) action
 
-#endif
+#elif defined COMPILE_PCRE32
 
-#endif /* COMPILE_PCRE8 */
+/* These are unnecessary for the 32-bit library */
+#undef MAX_VALUE_FOR_SINGLE_CHAR
+#undef HAS_EXTRALEN
+#undef GET_EXTRALEN
+#undef NOT_FIRSTCHAR
+
+/* Get the next UTF-32 character, not advancing the pointer. This is called when
+we know we are in UTF-32 mode. */
+
+#define GETCHAR(c, eptr) \
+  c = *eptr;
+
+/* Get the next UTF-32 character, testing for UTF-32 mode, and not advancing the
+pointer. */
+
+#define GETCHARTEST(c, eptr) \
+  c = *eptr;
+
+/* Get the next UTF-32 character, advancing the pointer. This is called when we
+know we are in UTF-32 mode. */
+
+#define GETCHARINC(c, eptr) \
+  c = *eptr++;
+
+/* Get the next character, testing for UTF-32 mode, and advancing the pointer.
+This is called when we don't know if we are in UTF-32 mode. */
+
+#define GETCHARINCTEST(c, eptr) \
+  c = *eptr++;
+
+/* Get the next UTF-32 character, not advancing the pointer, not incrementing
+length (since all UTF-32 is of length 1). This is called when we know we are in
+UTF-32 mode. */
+
+#define GETCHARLEN(c, eptr, len) \
+  c = *eptr;
+
+/* Get the next UTF-832character, testing for UTF-32 mode, not advancing the
+pointer, not incrementing the length (since all UTF-32 is of length 1).
+This is called when we do not know if we are in UTF-32 mode. */
+
+#define GETCHARLENTEST(c, eptr, len) \
+  c = *eptr;
+
+/* If the pointer is not at the start of a character, move it back until
+it is. This is called only in UTF-32 mode - we don't put a test within the
+macro because almost all calls are already within a block of UTF-32 only
+code. */
+
+#define BACKCHAR(eptr) do { } while (0)
+
+/* Same as above, just in the other direction. */
+#define FORWARDCHAR(eptr) do { } while (0)
+
+/* Same as above, but it allows a fully customizable form. */
+#define ACROSSCHAR(condition, eptr, action) do { } while (0)
+
+#else
+#error Unsupported compiling mode
+#endif /* COMPILE_PCRE[8|16|32] */
 
 #endif  /* SUPPORT_UTF */
-
 
 /* Tests for Unicode horizontal and vertical whitespace characters must check a
 number of different values. Using a switch statement for this generates the
@@ -935,13 +1024,6 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
 /* ------ End of whitespace macros ------ */
 
 
-/* In case there is no definition of offsetof() provided - though any proper
-Standard C system should have one. */
-
-#ifndef offsetof
-#define offsetof(p_type,field) ((size_t)&(((p_type *)0)->field))
-#endif
-
 
 /* Private flags containing information about the compiled regex. They used to
 live at the top end of the options word, but that got almost full, so now they
@@ -949,12 +1031,9 @@ are in a 16-bit flags word. From release 8.00, PCRE_NOPARTIAL is unused, as
 the restrictions on partial matching have been lifted. It remains for backwards
 compatibility. */
 
-#ifdef COMPILE_PCRE8
-#define PCRE_MODE          0x0001  /* compiled in 8 bit mode */
-#endif
-#ifdef COMPILE_PCRE16
-#define PCRE_MODE          0x0002  /* compiled in 16 bit mode */
-#endif
+#define PCRE_MODE8         0x0001  /* compiled in 8 bit mode */
+#define PCRE_MODE16        0x0002  /* compiled in 16 bit mode */
+#define PCRE_MODE32        0x0004  /* compiled in 32 bit mode */
 #define PCRE_FIRSTSET      0x0010  /* first_char is set */
 #define PCRE_FCH_CASELESS  0x0020  /* caseless first char */
 #define PCRE_REQCHSET      0x0040  /* req_byte is set */
@@ -964,6 +1043,15 @@ compatibility. */
 #define PCRE_JCHANGED      0x0400  /* j option used in regex */
 #define PCRE_HASCRORLF     0x0800  /* explicit \r or \n in pattern */
 #define PCRE_HASTHEN       0x1000  /* pattern contains (*THEN) */
+
+#if defined COMPILE_PCRE8
+#define PCRE_MODE          PCRE_MODE8
+#elif defined COMPILE_PCRE16
+#define PCRE_MODE          PCRE_MODE16
+#elif defined COMPILE_PCRE32
+#define PCRE_MODE          PCRE_MODE32
+#endif
+#define PCRE_MODE_MASK     (PCRE_MODE8 | PCRE_MODE16 | PCRE_MODE32)
 
 /* Flags for the "extra" block produced by pcre_study(). */
 
@@ -1351,6 +1439,9 @@ a positive value. */
 #ifdef COMPILE_PCRE16
 #define STRING_UTF_RIGHTPAR            "UTF16)"
 #endif
+#ifdef COMPILE_PCRE32
+#define STRING_UTF_RIGHTPAR            "UTF32)"
+#endif
 #define STRING_UCP_RIGHTPAR            "UCP)"
 #define STRING_NO_START_OPT_RIGHTPAR   "NO_START_OPT)"
 
@@ -1612,6 +1703,9 @@ only. */
 #endif
 #ifdef COMPILE_PCRE16
 #define STRING_UTF_RIGHTPAR            STR_U STR_T STR_F STR_1 STR_6 STR_RIGHT_PARENTHESIS
+#endif
+#ifdef COMPILE_PCRE32
+#define STRING_UTF_RIGHTPAR            STR_U STR_T STR_F STR_3 STR_2 STR_RIGHT_PARENTHESIS
 #endif
 #define STRING_UCP_RIGHTPAR            STR_U STR_C STR_P STR_RIGHT_PARENTHESIS
 #define STRING_NO_START_OPT_RIGHTPAR   STR_N STR_O STR_UNDERSCORE STR_S STR_T STR_A STR_R STR_T STR_UNDERSCORE STR_O STR_P STR_T STR_RIGHT_PARENTHESIS
@@ -2091,7 +2185,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
-       ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERRCOUNT };
+       ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERRCOUNT };
 
 /* JIT compiling modes. The function list is indexed by them. */
 enum { JIT_COMPILE, JIT_PARTIAL_SOFT_COMPILE, JIT_PARTIAL_HARD_COMPILE,
@@ -2114,13 +2208,20 @@ fields are present. Currently PCRE always sets the dummy fields to zero.
 NOTE NOTE NOTE
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 #define REAL_PCRE real_pcre
-#else
+#elif defined COMPILE_PCRE16
 #define REAL_PCRE real_pcre16
+#elif defined COMPILE_PCRE32
+#define REAL_PCRE real_pcre32
 #endif
 
-typedef struct REAL_PCRE {
+/* It is necessary to fork the struct for 32 bit, since it needs to use
+ * pcre_uchar for first_char and req_char. Can't put an ifdef inside the
+ * typedef since pcretest needs access to  the struct of the 8-, 16-
+ * and 32-bit variants. */
+
+typedef struct real_pcre8_or_16 {
   pcre_uint32 magic_number;
   pcre_uint32 size;               /* Total that was malloced */
   pcre_uint32 options;            /* Public options */
@@ -2136,7 +2237,42 @@ typedef struct REAL_PCRE {
   pcre_uint16 ref_count;          /* Reference count */
   const pcre_uint8 *tables;       /* Pointer to tables or NULL for std */
   const pcre_uint8 *nullpad;      /* NULL padding */
-} REAL_PCRE;
+} real_pcre8_or_16;
+
+typedef struct real_pcre8_or_16 real_pcre;
+typedef struct real_pcre8_or_16 real_pcre16;
+
+typedef struct real_pcre32 {
+  pcre_uint32 magic_number;
+  pcre_uint32 size;               /* Total that was malloced */
+  pcre_uint32 options;            /* Public options */
+  pcre_uint16 flags;              /* Private flags */
+  pcre_uint16 max_lookbehind;     /* Longest lookbehind (characters) */
+  pcre_uint16 top_bracket;        /* Highest numbered group */
+  pcre_uint16 top_backref;        /* Highest numbered back reference */
+  pcre_uint32 first_char;         /* Starting character */
+  pcre_uint32 req_char;           /* This character must be seen */
+  pcre_uint16 name_table_offset;  /* Offset to name table that follows */
+  pcre_uint16 name_entry_size;    /* Size of any name items */
+  pcre_uint16 name_count;         /* Number of name items */
+  pcre_uint16 ref_count;          /* Reference count */
+  pcre_uint16 dummy1;             /* for later expansion */
+  pcre_uint16 dummy2;             /* for later expansion */
+  const pcre_uint8 *tables;       /* Pointer to tables or NULL for std */
+  void *nullpad;                  /* for later expansion */
+} real_pcre32;
+
+/* Assert that the size of REAL_PCRE is divisible by 8 */
+typedef int __assert_real_pcre_size_divisible_8[(sizeof(REAL_PCRE) % 8) == 0 ? 1 : -1];
+
+/* Needed in pcretest to access some fields in the real_pcre* structures
+ * directly. They're unified for 8/16/32 bits since the structs only differ
+ * after these fields; if that ever changes, need to fork those defines into
+ * 8/16 and 32 bit versions. */
+#define REAL_PCRE_MAGIC(re)     (((REAL_PCRE*)re)->magic_number)
+#define REAL_PCRE_SIZE(re)      (((REAL_PCRE*)re)->size)
+#define REAL_PCRE_OPTIONS(re)   (((REAL_PCRE*)re)->options)
+#define REAL_PCRE_FLAGS(re)     (((REAL_PCRE*)re)->flags)
 
 /* The format of the block used to store data from pcre_study(). The same
 remark (see NOTE above) about extending this structure applies. */
@@ -2341,25 +2477,30 @@ total length. */
 
 /* Internal function and data prefixes. */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 #ifndef PUBL
 #define PUBL(name) pcre_##name
 #endif
 #ifndef PRIV
 #define PRIV(name) _pcre_##name
 #endif
-#else /* COMPILE_PCRE8 */
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 #ifndef PUBL
 #define PUBL(name) pcre16_##name
 #endif
 #ifndef PRIV
 #define PRIV(name) _pcre16_##name
 #endif
+#elif defined COMPILE_PCRE32
+#ifndef PUBL
+#define PUBL(name) pcre32_##name
+#endif
+#ifndef PRIV
+#define PRIV(name) _pcre32_##name
+#endif
 #else
 #error Unsupported compiling mode
-#endif /* COMPILE_PCRE16 */
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16|32] */
 
 /* Layout of the UCP type table that translates property names into types and
 codes. Each entry used to point directly to a name, but to reduce the number of
@@ -2402,7 +2543,7 @@ one of the exported public functions. They have to be "external" in the C
 sense, but are not part of the PCRE public API. */
 
 /* String comparison functions. */
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 #define STRCMP_UC_UC(str1, str2) \
   strcmp((char *)(str1), (char *)(str2))
@@ -2414,7 +2555,7 @@ sense, but are not part of the PCRE public API. */
   strncmp((char *)(str1), (str2), (num))
 #define STRLEN_UC(str) strlen((const char *)str)
 
-#else
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 
 extern int               PRIV(strcmp_uc_uc)(const pcre_uchar *,
                            const pcre_uchar *);
@@ -2436,7 +2577,7 @@ extern unsigned int      PRIV(strlen_uc)(const pcre_uchar *str);
   PRIV(strncmp_uc_c8)((str1), (str2), (num))
 #define STRLEN_UC(str) PRIV(strlen_uc)(str)
 
-#endif /* COMPILE_PCRE8 */
+#endif /* COMPILE_PCRE[8|16|32] */
 
 extern const pcre_uchar *PRIV(find_bracket)(const pcre_uchar *, BOOL, int);
 extern BOOL              PRIV(is_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,

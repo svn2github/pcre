@@ -18,17 +18,27 @@ UTF-8 strings), and a second library that supports 16-bit character strings
 built. The majority of the work to make this possible was done by Zoltan
 Herczeg.
 .P
-The two libraries contain identical sets of functions, except that the names in
-the 16-bit library start with \fBpcre16_\fP instead of \fBpcre_\fP. To avoid
+Starting with release 8.FIXME, it is possible to compile a third separate PCRE
+library, which supports 32-bit character strings (including
+UTF-32 strings). The build process allows any set of the 8-, 16- and 32-bit
+libraries.
+.P
+The three libraries contain identical sets of functions, except that the names in
+the 16-bit library start with \fBpcre16_\fP instead of \fBpcre_\fP, and the names
+in the 32-bit library start with \fBpcre32_\fP instead of \fBpcre_\fP. To avoid
 over-complication and reduce the documentation maintenance load, most of the
 documentation describes the 8-bit library, with the differences for the 16-bit
-library described separately in the
+and 32-bit library described separately in the
 .\" HREF
 \fBpcre16\fP
+or
+.\" HREF
+\fBpcre32\fP
 .\"
-page. References to functions or structures of the form \fIpcre[16]_xxx\fP
+page. References to functions or structures of the form \fIpcre[16|32]_xxx\fP
 should be read as meaning "\fIpcre_xxx\fP when using the 8-bit library and
-\fIpcre16_xxx\fP when using the 16-bit library".
+\fIpcre16_xxx\fP when using the 16-bit library and
+\fIpcre32_xxx\fP when using the 32-bit library".
 .P
 The current implementation of PCRE corresponds approximately with Perl 5.12,
 including support for UTF-8/16 encoded strings and Unicode general category
@@ -90,9 +100,9 @@ distribution.
 The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-"_pcre_" or "_pcre16_", which hopefully will not provoke any name clashes. In
-some environments, it is possible to control which external symbols are
-exported when a shared library is built, and in these cases the undocumented
+"_pcre_" or "_pcre16_" or "_pcre32_", which hopefully will not provoke any name
+clashes. In some environments, it is possible to control which external symbols
+are exported when a shared library is built, and in these cases the undocumented
 symbols are not exported.
 .
 .
@@ -107,6 +117,7 @@ of searching. The sections are as follows:
 .sp
   pcre              this document
   pcre16            details of the 16-bit library
+  pcre32            details of the 32-bit library
   pcre-config       show PCRE installation configuration information
   pcreapi           details of PCRE's native C API
   pcrebuild         options for building PCRE
@@ -129,7 +140,7 @@ of searching. The sections are as follows:
   pcrestack         discussion of stack usage
   pcresyntax        quick syntax reference
   pcretest          description of the \fBpcretest\fP testing command
-  pcreunicode       discussion of Unicode and UTF-8/16 support
+  pcreunicode       discussion of Unicode and UTF-8/16/32 support
 .sp
 In addition, in the "man" and HTML formats, there is a short page for each
 8-bit C library function, listing its arguments and results.

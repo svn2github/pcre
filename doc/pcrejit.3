@@ -18,14 +18,16 @@ It does not apply when the DFA matching function is being used. The code for
 this support was written by Zoltan Herczeg.
 .
 .
-.SH "8-BIT and 16-BIT SUPPORT"
+.SH "8-BIT, 16-BIT AND 32-BIT SUPPORT"
 .rs
 .sp
-JIT support is available for both the 8-bit and 16-bit PCRE libraries. To keep
-this documentation simple, only the 8-bit interface is described in what
+JIT support is available for all of the 8-bit, 16-bit and 32-bit PCRE libraries.
+To keep this documentation simple, only the 8-bit interface is described in what
 follows. If you are using the 16-bit library, substitute the 16-bit functions
 and 16-bit structures (for example, \fIpcre16_jit_stack\fP instead of
-\fIpcre_jit_stack\fP).
+\fIpcre_jit_stack\fP). If you are using the 32-bit library, substitute the 32-bit functions
+and 32-bit structures (for example, \fIpcre32_jit_stack\fP instead of
+\fIpcre_jit_stack\fP). 
 .
 .
 .SH "AVAILABILITY OF JIT SUPPORT"
@@ -142,8 +144,9 @@ times as you like for matching different subject strings.
 .rs
 .sp
 The only \fBpcre_exec()\fP options that are supported for JIT execution are
-PCRE_NO_UTF8_CHECK, PCRE_NO_UTF16_CHECK, PCRE_NOTBOL, PCRE_NOTEOL,
-PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART, PCRE_PARTIAL_HARD, and PCRE_PARTIAL_SOFT.
+PCRE_NO_UTF8_CHECK, PCRE_NO_UTF16_CHECK, PCRE_NO_UTF32_CHECK, PCRE_NOTBOL,
+PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NOTEMPTY_ATSTART, PCRE_PARTIAL_HARD, and
+PCRE_PARTIAL_SOFT.
 .P
 The unsupported pattern items are:
 .sp

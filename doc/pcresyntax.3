@@ -1,4 +1,4 @@
-.TH PCRESYNTAX 3 "10 January 2012" "PCRE 8.30"
+.TH PCRESYNTAX 3 "24 June 2012" "PCRE 8.30"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -348,6 +348,7 @@ newline-setting options with similar syntax:
   (*NO_START_OPT) no start-match optimization (PCRE_NO_START_OPTIMIZE)
   (*UTF8)         set UTF-8 mode: 8-bit library (PCRE_UTF8)
   (*UTF16)        set UTF-16 mode: 16-bit library (PCRE_UTF16)
+  (*UTF32)        set UTF-32 mode: 32-bit library (PCRE_UTF32)
   (*UCP)          set PCRE_UCP (use Unicode properties for \ed etc)
 .
 .
@@ -442,7 +443,7 @@ pattern is not anchored.
 .rs
 .sp
 These are recognized only at the very start of the pattern or after a
-(*BSR_...), (*UTF8), (*UTF16) or (*UCP) option.
+(*BSR_...), (*UTF8), (*UTF16), (*UTF32) or (*UCP) option.
 .sp
   (*CR)           carriage return only
   (*LF)           linefeed only

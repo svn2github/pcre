@@ -53,7 +53,7 @@ supporting internal functions that are not used by other modules. */
 #include "pcre_internal.h"
 
 
-/* When PCRE_DEBUG is defined, we need the pcre(16)_printint() function, which
+/* When PCRE_DEBUG is defined, we need the pcre(16|32)_printint() function, which
 is also used by pcretest. PCRE_DEBUG is not defined when building a production
 library. We do not need to select pcre16_printint.c specially, because the
 COMPILE_PCREx macro will already be appropriately set. */
@@ -123,6 +123,7 @@ overrun before it actually does run off the end of the data block. */
 
 #define REQ_CASELESS   0x10000000l      /* Indicates caselessness */
 #define REQ_VARY       0x20000000l      /* Reqchar followed non-literal item */
+#define REQ_MASK       (REQ_CASELESS | REQ_VARY)
 
 /* Repeated character flags. */
 
@@ -503,6 +504,7 @@ static const char error_texts[] =
   /* 75 */
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character value in \\u.... sequence is too large\0"
+  "invalid UTF-32 string\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -838,12 +840,12 @@ else
 #endif
           }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
         if (c > (utf ? 0x10ffff : 0xff))
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
         if (c > (utf ? 0x10ffff : 0xffff))
-#endif
+#elif defined COMPILE_PCRE32
+        if (utf && c > 0x10ffff)
 #endif
           {
           *errorcodeptr = ERR76;
@@ -1069,12 +1071,12 @@ else
         c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
 #endif
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
         if (c > (utf ? 0x10ffff : 0xff)) { c = -1; break; }
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
         if (c > (utf ? 0x10ffff : 0xffff)) { c = -1; break; }
-#endif
+#elif defined COMPILE_PCRE32
+        if (utf && c > 0x10ffff) { c = -1; break; }
 #endif
         }
 
@@ -1367,7 +1369,7 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
-  utf          TRUE if we are in UTF-8 / UTF-16 mode
+  utf          TRUE if we are in UTF-8 / UTF-16 / UTF-32 mode
   count        pointer to the current capturing subpattern number (updated)
 
 Returns:       the number of the named subpattern, or -1 if not found
@@ -1601,7 +1603,7 @@ Arguments:
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
-  utf          TRUE if we are in UTF-8 / UTF-16 mode
+  utf          TRUE if we are in UTF-8 / UTF-16 / UTF-32 mode
 
 Returns:       the number of the found subpattern, or -1 if not found
 */
@@ -1704,7 +1706,7 @@ and doing the check at the end; a flag specifies which mode we are running in.
 
 Arguments:
   code     points to the start of the pattern (the bracket)
-  utf      TRUE in UTF-8 / UTF-16 mode
+  utf      TRUE in UTF-8 / UTF-16 / UTF-32 mode
   atend    TRUE if called when the pattern is complete
   cd       the "compile data" structure
 
@@ -1838,7 +1840,7 @@ for (;;)
     case OP_NOTI:
     branchlength++;
     cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1852,7 +1854,7 @@ for (;;)
     case OP_NOTEXACTI:
     branchlength += GET2(cc,1);
     cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1895,7 +1897,7 @@ for (;;)
 
     /* Check a class for variable quantification */
 
-#if defined SUPPORT_UTF || defined COMPILE_PCRE16
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
     case OP_XCLASS:
     cc += GET(cc, 1) - PRIV(OP_lengths)[OP_CLASS];
     /* Fall through */
@@ -2034,7 +2036,7 @@ length.
 
 Arguments:
   code        points to start of expression
-  utf         TRUE in UTF-8 / UTF-16 mode
+  utf         TRUE in UTF-8 / UTF-16 / UTF-32 mode
   number      the required bracket number or negative to find a lookbehind
 
 Returns:      pointer to the opcode for the bracket, or NULL if not found
@@ -2121,7 +2123,7 @@ for (;;)
   a multi-byte character. The length in the table is a minimum, so we have to
   arrange to skip the extra bytes. */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf) switch(c)
       {
       case OP_CHAR:
@@ -2173,7 +2175,7 @@ instance of OP_RECURSE.
 
 Arguments:
   code        points to start of expression
-  utf         TRUE in UTF-8 / UTF-16 mode
+  utf         TRUE in UTF-8 / UTF-16 / UTF-32 mode
 
 Returns:      pointer to the opcode for OP_RECURSE, or NULL if not found
 */
@@ -2241,7 +2243,7 @@ for (;;)
     by a multi-byte character. The length in the table is a minimum, so we have
     to arrange to skip the extra bytes. */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf) switch(c)
       {
       case OP_CHAR:
@@ -2327,7 +2329,7 @@ bracket whose current branch will already have been scanned.
 Arguments:
   code        points to start of search
   endcode     points to where to stop
-  utf         TRUE if in UTF-8 / UTF-16 mode
+  utf         TRUE if in UTF-8 / UTF-16 / UTF-32 mode
   cd          contains pointers to tables etc.
 
 Returns:      TRUE if what is matched could be empty
@@ -2560,7 +2562,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     /* In UTF-8 mode, STAR, MINSTAR, POSSTAR, QUERY, MINQUERY, POSQUERY, UPTO,
     MINUPTO, and POSUPTO may be followed by a multibyte character */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     case OP_STAR:
     case OP_STARI:
     case OP_MINSTAR:
@@ -2626,7 +2628,7 @@ Arguments:
   code        points to start of the recursion
   endcode     points to where to stop (current RECURSE item)
   bcptr       points to the chain of current (unclosed) branch starts
-  utf         TRUE if in UTF-8 / UTF-16 mode
+  utf         TRUE if in UTF-8 / UTF-16 / UTF-32 mode
   cd          pointers to tables etc
 
 Returns:      TRUE if what is matched could be empty
@@ -2773,7 +2775,7 @@ value in the reference (which is a group number).
 Arguments:
   group      points to the start of the group
   adjust     the amount by which the group is to be moved
-  utf        TRUE in UTF-8 / UTF-16 mode
+  utf        TRUE in UTF-8 / UTF-16 / UTF-32 mode
   cd         contains pointers to tables etc.
   save_hwm   the hwm forward reference pointer at the start of the group
 
@@ -3024,7 +3026,7 @@ sense to automatically possessify the repeated item.
 
 Arguments:
   previous      pointer to the repeated opcode
-  utf           TRUE in UTF-8 / UTF-16 mode
+  utf           TRUE in UTF-8 / UTF-16 / UTF-32 mode
   ptr           next character in pattern
   options       options bits
   cd            contains pointers to tables etc.
@@ -3476,19 +3478,24 @@ if ((options & PCRE_CASELESS) != 0)
 length - this means that the same lists of (e.g.) horizontal spaces can be used
 in all cases. */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 #ifdef SUPPORT_UTF
   if ((options & PCRE_UTF8) == 0)
 #endif
   if (end > 0xff) end = 0xff;
-#endif
 
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 #ifdef SUPPORT_UTF
   if ((options & PCRE_UTF16) == 0)
 #endif
   if (end > 0xffff) end = 0xffff;
+
+#elif defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
+  if ((options & PCRE_UTF32) == 0)
+    if (end > 0xffffu) end = 0xffffu; // FIXMEchpe rebase fix this
 #endif
+#endif /* COMPILE_PCRE[8|16|32] */
 
 /* If all characters are less than 256, use the bit map. Otherwise use extra
 data. */
@@ -3696,7 +3703,7 @@ must not do this for other options (e.g. PCRE_EXTENDED) because they may change
 dynamically as we process the pattern. */
 
 #ifdef SUPPORT_UTF
-/* PCRE_UTF16 has the same value as PCRE_UTF8. */
+/* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
 BOOL utf = (options & PCRE_UTF8) != 0;
 pcre_uchar utf_chars[6];
 #else
@@ -4081,7 +4088,7 @@ for (;; ptr++)
       {
       const pcre_uchar *oldptr;
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (utf && HAS_EXTRALEN(c))
         {                           /* Braces are required because the */
         GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
@@ -4500,6 +4507,7 @@ for (;; ptr++)
         if (negate_class)
           {
 #ifdef SUPPORT_UCP           
+            // FIXMEchpe pcreuint32?
           int d;
 #endif           
           if (firstchar == REQ_UNSET) firstchar = REQ_NONE;
@@ -4523,7 +4531,7 @@ for (;; ptr++)
 
             {
             *code++ = ((options & PCRE_CASELESS) != 0)? OP_NOTI: OP_NOT;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
             if (utf && c > MAX_VALUE_FOR_SINGLE_CHAR)
               code += PRIV(ord2utf)(c, code);
             else
@@ -4539,7 +4547,7 @@ for (;; ptr++)
         /* For a single, positive character, get the value into mcbuffer, and
         then we can handle this with the normal one-character code. */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
         if (utf && c > MAX_VALUE_FOR_SINGLE_CHAR)
           mclength = PRIV(ord2utf)(c, mcbuffer);
         else
@@ -4774,7 +4782,7 @@ for (;; ptr++)
       hold the length of the character in bytes, plus UTF_LENGTH to flag that
       it's a length rather than a small character. */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (utf && NOT_FIRSTCHAR(code[-1]))
         {
         pcre_uchar *lastchar = code - 1;
@@ -4910,7 +4918,7 @@ for (;; ptr++)
 
         if (repeat_max < 0)
           {
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
           if (utf && (c & UTF_LENGTH) != 0)
             {
             memcpy(code, utf_chars, IN_UCHARS(c & 7));
@@ -4935,7 +4943,7 @@ for (;; ptr++)
 
         else if (repeat_max != repeat_min)
           {
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
           if (utf && (c & UTF_LENGTH) != 0)
             {
             memcpy(code, utf_chars, IN_UCHARS(c & 7));
@@ -4965,7 +4973,7 @@ for (;; ptr++)
 
       /* The character or character type itself comes last in all cases. */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
       if (utf && (c & UTF_LENGTH) != 0)
         {
         memcpy(code, utf_chars, IN_UCHARS(c & 7));
@@ -5452,7 +5460,7 @@ for (;; ptr++)
       else if (*tempcode == OP_EXACT || *tempcode == OP_NOTEXACT)
         {
         tempcode += PRIV(OP_lengths)[*tempcode];
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
         if (utf && HAS_EXTRALEN(tempcode[-1]))
           tempcode += GET_EXTRALEN(tempcode[-1]);
 #endif
@@ -5550,7 +5558,7 @@ for (;; ptr++)
         arg = ++ptr;
         while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
         arglen = (int)(ptr - arg);
-        if (arglen > (int)MAX_MARK)
+        if ((unsigned int)arglen > MAX_MARK)
           {
           *errorcodeptr = ERR75;
           goto FAILED;
@@ -6852,7 +6860,7 @@ for (;; ptr++)
     a value > 127. We set its representation in the length/buffer, and then
     handle it as a data character. */
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && c > MAX_VALUE_FOR_SINGLE_CHAR)
       mclength = PRIV(ord2utf)(c, mcbuffer);
     else
@@ -6875,7 +6883,7 @@ for (;; ptr++)
     mclength = 1;
     mcbuffer[0] = c;
 
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(c))
       ACROSSCHAR(TRUE, ptr[1], mcbuffer[mclength++] = *(++ptr));
 #endif
@@ -7606,31 +7614,41 @@ Returns:        pointer to compiled data block, or NULL on error,
                 with errorptr and erroroffset set
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN pcre * PCRE_CALL_CONVENTION
 pcre_compile(const char *pattern, int options, const char **errorptr,
   int *erroroffset, const unsigned char *tables)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN pcre16 * PCRE_CALL_CONVENTION
 pcre16_compile(PCRE_SPTR16 pattern, int options, const char **errorptr,
   int *erroroffset, const unsigned char *tables)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN pcre32 * PCRE_CALL_CONVENTION
+pcre32_compile(PCRE_SPTR32 pattern, int options, const char **errorptr,
+  int *erroroffset, const unsigned char *tables)
 #endif
 {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 return pcre_compile2(pattern, options, NULL, errorptr, erroroffset, tables);
-#else
+#elif defined COMPILE_PCRE16
 return pcre16_compile2(pattern, options, NULL, errorptr, erroroffset, tables);
+#elif defined COMPILE_PCRE32
+return pcre32_compile2(pattern, options, NULL, errorptr, erroroffset, tables);
 #endif
 }
 
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN pcre * PCRE_CALL_CONVENTION
 pcre_compile2(const char *pattern, int options, int *errorcodeptr,
   const char **errorptr, int *erroroffset, const unsigned char *tables)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN pcre16 * PCRE_CALL_CONVENTION
 pcre16_compile2(PCRE_SPTR16 pattern, int options, int *errorcodeptr,
+  const char **errorptr, int *erroroffset, const unsigned char *tables)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN pcre32 * PCRE_CALL_CONVENTION
+pcre32_compile2(PCRE_SPTR32 pattern, int options, int *errorcodeptr,
   const char **errorptr, int *erroroffset, const unsigned char *tables)
 #endif
 {
@@ -7717,6 +7735,10 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
   if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF_RIGHTPAR, 6) == 0)
     { skipatstart += 8; options |= PCRE_UTF16; continue; }
 #endif
+#ifdef COMPILE_PCRE32
+  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF_RIGHTPAR, 6) == 0)
+    { skipatstart += 8; options |= PCRE_UTF32; continue; }
+#endif
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UCP_RIGHTPAR, 4) == 0)
     { skipatstart += 6; options |= PCRE_UCP; continue; }
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_NO_START_OPT_RIGHTPAR, 13) == 0)
@@ -7745,7 +7767,7 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
   else break;
   }
 
-/* PCRE_UTF16 has the same value as PCRE_UTF8. */
+/* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
 utf = (options & PCRE_UTF8) != 0;
 
 /* Can't support UTF unless PCRE has been compiled to include the code. The
@@ -7757,10 +7779,12 @@ not used here. */
 if (utf && (options & PCRE_NO_UTF8_CHECK) == 0 &&
      (errorcode = PRIV(valid_utf)((PCRE_PUCHAR)pattern, -1, erroroffset)) != 0)
   {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   errorcode = ERR44;
-#else
+#elif defined COMPILE_PCRE16
   errorcode = ERR74;
+#elif defined COMPILE_PCRE32
+  errorcode = ERR77;
 #endif
   goto PCRE_EARLY_ERROR_RETURN2;
   }
@@ -7924,6 +7948,9 @@ re->name_count = cd->names_found;
 re->ref_count = 0;
 re->tables = (tables == PRIV(default_tables))? NULL : tables;
 re->nullpad = NULL;
+#ifdef COMPILE_PCRE32
+re->dummy1 = re->dummy2 = 0;
+#endif
 
 /* The starting points of the name/number translation table and of the code are
 passed around in the compile data block. The start/end pattern and initial
@@ -8086,12 +8113,12 @@ if ((re->options & PCRE_ANCHORED) == 0)
       firstchar = find_firstassertedchar(codestart, FALSE);
     if (firstchar >= 0)   /* Remove caseless flag for non-caseable chars */
       {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
       re->first_char = firstchar & 0xff;
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
       re->first_char = firstchar & 0xffff;
-#endif
+#elif defined COMPILE_PCRE32
+      re->first_char = firstchar & ~REQ_MASK;
 #endif
       if ((firstchar & REQ_CASELESS) != 0)
         {
@@ -8128,12 +8155,12 @@ bytes. */
 if (reqchar >= 0 &&
      ((re->options & PCRE_ANCHORED) == 0 || (reqchar & REQ_VARY) != 0))
   {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   re->req_char = reqchar & 0xff;
-#else
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
   re->req_char = reqchar & 0xffff;
-#endif
+#elif defined COMPILE_PCRE32
+  re->req_char = reqchar & ~REQ_MASK;
 #endif
   if ((reqchar & REQ_CASELESS) != 0)
     {
@@ -8185,10 +8212,12 @@ if ((re->flags & PCRE_REQCHSET) != 0)
     else printf("Req char = \\x%02x%s\n", ch, caseless);
   }
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 pcre_printint((pcre *)re, stdout, TRUE);
-#else
+#elif defined COMPILE_PCRE16
 pcre16_printint((pcre *)re, stdout, TRUE);
+#elif defined COMPILE_PCRE32
+pcre32_printint((pcre *)re, stdout, TRUE);
 #endif
 
 /* This check is done here in the debugging case so that the code that
@@ -8204,10 +8233,12 @@ if (code - codestart > length)
   }
 #endif   /* PCRE_DEBUG */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 return (pcre *)re;
-#else
+#elif defined COMPILE_PCRE16
 return (pcre16 *)re;
+#elif defined COMPILE_PCRE32
+return (pcre32 *)re;
 #endif
 }
 

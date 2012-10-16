@@ -66,12 +66,15 @@ Arguments:   none
 Returns:     pointer to the contiguous block of data
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 const unsigned char *
 pcre_maketables(void)
-#else
+#elif defined COMPILE_PCRE16
 const unsigned char *
 pcre16_maketables(void)
+#elif defined COMPILE_PCRE32
+const unsigned char *
+pcre32_maketables(void)
 #endif
 {
 unsigned char *yield, *p;

@@ -33,7 +33,7 @@ The following sections include descriptions of options whose names begin with
 exists as well, but as it specifies the default, it is not described.
 .
 .
-.SH "BUILDING 8-BIT and 16-BIT LIBRARIES"
+.SH "BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
 .rs
 .sp
 By default, a library called \fBlibpcre\fP is built, containing functions that
@@ -45,13 +45,21 @@ strings, by adding
 .sp
   --enable-pcre16
 .sp
+to the \fBconfigure\fP command. You can also build a separate
+library, called \fBlibpcre32\fP, in which strings are contained in vectors of
+32-bit data units and interpreted either as single-unit characters or UTF-32
+strings, by adding
+.sp
+  --enable-pcre32
+.sp
 to the \fBconfigure\fP command. If you do not want the 8-bit library, add
 .sp
   --disable-pcre8
 .sp
 as well. At least one of the two libraries must be built. Note that the C++ and
 POSIX wrappers are for the 8-bit library only, and that \fBpcregrep\fP is an
-8-bit program. None of these are built if you select only the 16-bit library.
+8-bit program. None of these are built if you select only the 16-bit or 32-bit
+libraries.
 .
 .
 .SH "BUILDING SHARED AND STATIC LIBRARIES"
@@ -79,7 +87,7 @@ strings). You can disable this by adding
 to the \fBconfigure\fP command.
 .
 .
-.SH "UTF-8 and UTF-16 SUPPORT"
+.SH "UTF-8, UTF-16 AND UTF-32 SUPPORT"
 .rs
 .sp
 To build PCRE with support for UTF Unicode character strings, add
@@ -87,18 +95,19 @@ To build PCRE with support for UTF Unicode character strings, add
   --enable-utf
 .sp
 to the \fBconfigure\fP command. This setting applies to both libraries, adding
-support for UTF-8 to the 8-bit library and support for UTF-16 to the 16-bit
-library. There are no separate options for enabling UTF-8 and UTF-16
+support for UTF-8 to the 8-bit library, support for UTF-16 to the 16-bit
+library, and support for UTF-32 to the to the 32-bit library.
+There are no separate options for enabling UTF-8, UTF-16 and UTF-32
 independently because that would allow ridiculous settings such as requesting
 UTF-16 support while building only the 8-bit library. It is not possible to
 build one library with UTF support and the other without in the same
 configuration. (For backwards compatibility, --enable-utf8 is a synonym of
 --enable-utf.)
 .P
-Of itself, this setting does not make PCRE treat strings as UTF-8 or UTF-16. As
-well as compiling PCRE with this option, you also have have to set the
-PCRE_UTF8 or PCRE_UTF16 option when you call one of the pattern compiling
-functions.
+Of itself, this setting does not make PCRE treat strings as UTF-8, UTF-16 or
+UTF-32. As well as compiling PCRE with this option, you also have have to set
+the PCRE_UTF8 or PCRE_UTF16 or PCRE_UTF32 option when you call one of the
+pattern compiling functions.
 .P
 If you set --enable-utf when compiling in an EBCDIC environment, PCRE expects
 its input to be either ASCII or UTF-8 (depending on the run-time option). It is
@@ -231,9 +240,9 @@ three-byte or four-byte offsets by adding a setting such as
   --with-link-size=3
 .sp
 to the \fBconfigure\fP command. The value given must be 2, 3, or 4. For the
-16-bit library, a value of 3 is rounded up to 4. Using longer offsets slows
-down the operation of PCRE because it has to load additional data when handling
-them.
+16-bit and 32-bit library, a value of 3 is rounded up to 4. Using longer offsets
+slows down the operation of PCRE because it has to load additional data when
+handling them.
 .
 .
 .SH "AVOIDING EXCESSIVE STACK USAGE"
@@ -419,7 +428,7 @@ immediately before the \fBconfigure\fP command.
 .SH "SEE ALSO"
 .rs
 .sp
-\fBpcreapi\fP(3), \fBpcre16\fP, \fBpcre_config\fP(3).
+\fBpcreapi\fP(3), \fBpcre16\fP, \fBpcre32\fP, \fBpcre_config\fP(3).
 .
 .
 .SH AUTHOR

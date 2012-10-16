@@ -1,0 +1,12 @@
+/-- Tests for the 16-bit library only */
+
+/-- Check maximum non-UTF character size --/
+
+/\x{ffff}/
+    A\x{ffff}B
+ 0: \x{ffff}
+
+/\x{10000}/
+Failed: character value in \x{...} sequence is too large at offset 8
+
+/-- End of testinput23 --/

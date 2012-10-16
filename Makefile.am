@@ -64,6 +64,10 @@ dist_html_DATA = \
   doc/html/pcretest.html \
   doc/html/pcreunicode.html
 
+#   doc/html/pcre32.html \
+#   doc/html/pcre_utf32_to_host_byte_order.html \
+#
+
 pcrecpp_html = doc/html/pcrecpp.html
 dist_noinst_DATA = $(pcrecpp_html)
 
@@ -81,7 +85,8 @@ check_SCRIPTS =
 dist_noinst_SCRIPTS =
 
 # Some of the binaries we make are to be installed, and others are
-# (non-user-visible) helper programs needed to build libpcre or libpcre16.
+# (non-user-visible) helper programs needed to build libpcre, libpcre16
+# or libpcre32.
 bin_PROGRAMS =
 noinst_PROGRAMS =
 
@@ -246,6 +251,39 @@ nodist_libpcre16_la_SOURCES = \
 
 endif # WITH_PCRE16
 
+# Build the 32 bit library if it is enabled.
+if WITH_PCRE32
+lib_LTLIBRARIES += libpcre32.la
+libpcre32_la_SOURCES = \
+  pcre32_byte_order.c \
+  pcre32_chartables.c \
+  pcre32_compile.c \
+  pcre32_config.c \
+  pcre32_dfa_exec.c \
+  pcre32_exec.c \
+  pcre32_fullinfo.c \
+  pcre32_get.c \
+  pcre32_globals.c \
+  pcre32_jit_compile.c \
+  pcre32_maketables.c \
+  pcre32_newline.c \
+  pcre32_ord2utf32.c \
+  pcre32_refcount.c \
+  pcre32_string_utils.c \
+  pcre32_study.c \
+  pcre32_tables.c \
+  pcre32_ucd.c \
+  pcre32_utf32_utils.c \
+  pcre32_valid_utf32.c \
+  pcre32_version.c \
+  pcre32_xclass.c
+
+## This file is generated as part of the building process, so don't distribute.
+nodist_libpcre32_la_SOURCES = \
+  pcre_chartables.c
+
+endif # WITH_PCRE32
+
 # The pcre_chartables.c.dist file is the default version of pcre_chartables.c,
 # used unless --enable-rebuild-chartables is specified.
 EXTRA_DIST += pcre_chartables.c.dist
@@ -276,6 +314,9 @@ endif # WITH_PCRE8
 if WITH_PCRE16
 libpcre16_la_LDFLAGS = $(EXTRA_LIBPCRE16_LDFLAGS)
 endif # WITH_PCRE16
+if WITH_PCRE32
+libpcre32_la_LDFLAGS = $(EXTRA_LIBPCRE32_LDFLAGS)
+endif # WITH_PCRE32
 
 CLEANFILES += pcre_chartables.c
 
@@ -291,6 +332,9 @@ endif # WITH_PCRE8
 if WITH_PCRE16
 pcre_jit_test_LDADD += libpcre16.la
 endif # WITH_PCRE16
+if WITH_PCRE32
+pcre_jit_test_LDADD += libpcre32.la
+endif # WITH_PCRE32
 endif # WITH_JIT
 
 ## A version of the main pcre library that has a posix re API.
@@ -350,6 +394,10 @@ if WITH_PCRE16
 pcretest_SOURCES += pcre16_printint.c
 pcretest_LDADD += libpcre16.la
 endif # WITH_PCRE16
+if WITH_PCRE32
+pcretest_SOURCES += pcre32_printint.c
+pcretest_LDADD += libpcre32.la
+endif # WITH_PCRE32
 
 if WITH_PCRE8
 TESTS += RunGrepTest
@@ -378,6 +426,11 @@ EXTRA_DIST += \
   testdata/saved16BE-2 \
   testdata/saved16LE-1 \
   testdata/saved16LE-2 \
+  testdata/saved32 \
+  testdata/saved32BE-1 \
+  testdata/saved32BE-2 \
+  testdata/saved32LE-1 \
+  testdata/saved32LE-2 \
   testdata/saved8 \
   testdata/testinput1 \
   testdata/testinput2 \
@@ -477,6 +530,9 @@ pkgconfig_DATA = libpcre.pc libpcreposix.pc
 if WITH_PCRE16
 pkgconfig_DATA += libpcre16.pc
 endif
+if WITH_PCRE32
+pkgconfig_DATA += libpcre32.pc
+endif
 if WITH_PCRE_CPP
 pkgconfig_DATA += libpcrecpp.pc
 endif
@@ -484,6 +540,7 @@ endif
 dist_man_MANS = \
   doc/pcre.3 \
   doc/pcre16.3 \
+  doc/pcre32.3 \
   doc/pcre-config.1 \
   doc/pcre_assign_jit_stack.3 \
   doc/pcre_compile.3 \
@@ -509,6 +566,7 @@ dist_man_MANS = \
   doc/pcre_refcount.3 \
   doc/pcre_study.3 \
   doc/pcre_utf16_to_host_byte_order.3 \
+  doc/pcre_utf32_to_host_byte_order.3 \
   doc/pcre_version.3 \
   doc/pcreapi.3 \
   doc/pcrebuild.3 \
@@ -529,7 +587,7 @@ dist_man_MANS = \
   doc/pcretest.1 \
   doc/pcreunicode.3
 
-# Arrange for the per-function man pages to have 16-bit names as well.
+# Arrange for the per-function man pages to have 16- and 32-bit names as well.
 install-data-hook:
 	ln -sf pcre_assign_jit_stack.3		 $(DESTDIR)$(man3dir)/pcre16_assign_jit_stack.3
 	ln -sf pcre_compile.3			 $(DESTDIR)$(man3dir)/pcre16_compile.3
@@ -556,6 +614,31 @@ install-data-hook:
 	ln -sf pcre_study.3			 $(DESTDIR)$(man3dir)/pcre16_study.3
 	ln -sf pcre_utf16_to_host_byte_order.3	 $(DESTDIR)$(man3dir)/pcre16_utf16_to_host_byte_order.3
 	ln -sf pcre_version.3			 $(DESTDIR)$(man3dir)/pcre16_version.3
+	ln -sf pcre_assign_jit_stack.3		 $(DESTDIR)$(man3dir)/pcre32_assign_jit_stack.3
+	ln -sf pcre_compile.3			 $(DESTDIR)$(man3dir)/pcre32_compile.3
+	ln -sf pcre_compile2.3			 $(DESTDIR)$(man3dir)/pcre32_compile2.3
+	ln -sf pcre_config.3			 $(DESTDIR)$(man3dir)/pcre32_config.3
+	ln -sf pcre_copy_named_substring.3	 $(DESTDIR)$(man3dir)/pcre32_copy_named_substring.3
+	ln -sf pcre_copy_substring.3		 $(DESTDIR)$(man3dir)/pcre32_copy_substring.3
+	ln -sf pcre_dfa_exec.3			 $(DESTDIR)$(man3dir)/pcre32_dfa_exec.3
+	ln -sf pcre_exec.3			 $(DESTDIR)$(man3dir)/pcre32_exec.3
+	ln -sf pcre_free_study.3		 $(DESTDIR)$(man3dir)/pcre32_free_study.3
+	ln -sf pcre_free_substring.3		 $(DESTDIR)$(man3dir)/pcre32_free_substring.3
+	ln -sf pcre_free_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_free_substring_list.3
+	ln -sf pcre_fullinfo.3			 $(DESTDIR)$(man3dir)/pcre32_fullinfo.3
+	ln -sf pcre_get_named_substring.3	 $(DESTDIR)$(man3dir)/pcre32_get_named_substring.3
+	ln -sf pcre_get_stringnumber.3		 $(DESTDIR)$(man3dir)/pcre32_get_stringnumber.3
+	ln -sf pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre32_get_stringtable_entries.3
+	ln -sf pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre32_get_substring.3
+	ln -sf pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_get_substring_list.3
+	ln -sf pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_alloc.3
+	ln -sf pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_free.3
+	ln -sf pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre32_maketables.3
+	ln -sf pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre32_pattern_to_host_byte_order.3
+	ln -sf pcre_refcount.3			 $(DESTDIR)$(man3dir)/pcre32_refcount.3
+	ln -sf pcre_study.3			 $(DESTDIR)$(man3dir)/pcre32_study.3
+	ln -sf pcre_utf32_to_host_byte_order.3	 $(DESTDIR)$(man3dir)/pcre32_utf32_to_host_byte_order.3
+	ln -sf pcre_version.3			 $(DESTDIR)$(man3dir)/pcre32_version.3
 
 pcrecpp_man = doc/pcrecpp.3
 EXTRA_DIST += $(pcrecpp_man)

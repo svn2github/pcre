@@ -1273,10 +1273,12 @@ for (;;)
         cb.version          = 2;   /* Version 1 of the callout block */
         cb.callout_number   = ecode[LINK_SIZE+2];
         cb.offset_vector    = md->offset_vector;
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
         cb.subject          = (PCRE_SPTR)md->start_subject;
-#else
+#elif defined COMPILE_PCRE16
         cb.subject          = (PCRE_SPTR16)md->start_subject;
+#elif defined COMPILE_PCRE32
+        cb.subject          = (PCRE_SPTR32)md->start_subject;
 #endif
         cb.subject_length   = (int)(md->end_subject - md->start_subject);
         cb.start_match      = (int)(mstart - md->start_subject);
@@ -1696,10 +1698,12 @@ for (;;)
       cb.version          = 2;   /* Version 1 of the callout block */
       cb.callout_number   = ecode[1];
       cb.offset_vector    = md->offset_vector;
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
       cb.subject          = (PCRE_SPTR)md->start_subject;
-#else
+#elif defined COMPILE_PCRE16
       cb.subject          = (PCRE_SPTR16)md->start_subject;
+#elif defined COMPILE_PCRE32
+      cb.subject          = (PCRE_SPTR32)md->start_subject;
 #endif
       cb.subject_length   = (int)(md->end_subject - md->start_subject);
       cb.start_match      = (int)(mstart - md->start_subject);
@@ -4558,7 +4562,7 @@ for (;;)
             case CHAR_VT:
             case CHAR_FF:
             case CHAR_NEL:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
             case 0x2028:
             case 0x2029:
 #endif
@@ -4580,7 +4584,7 @@ for (;;)
             {
             default: break;
             HSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
             HSPACE_MULTIBYTE_CASES:
 #endif
             RRETURN(MATCH_NOMATCH);
@@ -4600,7 +4604,7 @@ for (;;)
             {
             default: RRETURN(MATCH_NOMATCH);
             HSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
             HSPACE_MULTIBYTE_CASES:
 #endif
             break;
@@ -4619,7 +4623,7 @@ for (;;)
           switch(*eptr++)
             {
             VSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
             VSPACE_MULTIBYTE_CASES:
 #endif
             RRETURN(MATCH_NOMATCH);
@@ -4640,7 +4644,7 @@ for (;;)
             {
             default: RRETURN(MATCH_NOMATCH);
             VSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
             VSPACE_MULTIBYTE_CASES:
 #endif
             break;
@@ -5158,7 +5162,7 @@ for (;;)
               case CHAR_VT:
               case CHAR_FF:
               case CHAR_NEL:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               case 0x2028:
               case 0x2029:
 #endif
@@ -5172,7 +5176,7 @@ for (;;)
               {
               default: break;
               HSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               HSPACE_MULTIBYTE_CASES:
 #endif
               RRETURN(MATCH_NOMATCH);
@@ -5184,7 +5188,7 @@ for (;;)
               {
               default: RRETURN(MATCH_NOMATCH);
               HSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               HSPACE_MULTIBYTE_CASES:
 #endif
               break;
@@ -5196,7 +5200,7 @@ for (;;)
               {
               default: break;
               VSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               VSPACE_MULTIBYTE_CASES:
 #endif
               RRETURN(MATCH_NOMATCH);
@@ -5208,7 +5212,7 @@ for (;;)
               {
               default: RRETURN(MATCH_NOMATCH);
               VSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               VSPACE_MULTIBYTE_CASES:
 #endif
               break;
@@ -5840,7 +5844,7 @@ for (;;)
               {
               if (c != CHAR_LF && (md->bsr_anycrlf ||
                  (c != CHAR_VT && c != CHAR_FF && c != CHAR_NEL
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
                  && c != 0x2028 && c != 0x2029
 #endif
                  ))) break;
@@ -5861,7 +5865,7 @@ for (;;)
               {
               default: eptr++; break;
               HSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               HSPACE_MULTIBYTE_CASES:
 #endif
               goto ENDLOOP00;
@@ -5882,7 +5886,7 @@ for (;;)
               {
               default: goto ENDLOOP01;
               HSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               HSPACE_MULTIBYTE_CASES:
 #endif
               eptr++; break;
@@ -5903,7 +5907,7 @@ for (;;)
               {
               default: eptr++; break;
               VSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               VSPACE_MULTIBYTE_CASES:
 #endif
               goto ENDLOOP02;
@@ -5924,7 +5928,7 @@ for (;;)
               {
               default: goto ENDLOOP03;
               VSPACE_BYTE_CASES:
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
               VSPACE_MULTIBYTE_CASES:
 #endif
               eptr++; break;
@@ -6197,15 +6201,20 @@ Returns:          > 0 => success; value is the number of elements filled in
                  < -1 => some kind of unexpected problem
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_exec(const pcre *argument_re, const pcre_extra *extra_data,
   PCRE_SPTR subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_exec(const pcre16 *argument_re, const pcre16_extra *extra_data,
   PCRE_SPTR16 subject, int length, int start_offset, int options, int *offsets,
+  int offsetcount)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_exec(const pcre32 *argument_re, const pcre32_extra *extra_data,
+  PCRE_SPTR32 subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
 #endif
 {
@@ -6297,19 +6306,22 @@ if (utf && (options & PCRE_NO_UTF8_CHECK) == 0)
       offsets[0] = erroroffset;
       offsets[1] = errorcode;
       }
-#ifdef COMPILE_PCRE16
-    return (errorcode <= PCRE_UTF16_ERR1 && md->partial > 1)?
-      PCRE_ERROR_SHORTUTF16 : PCRE_ERROR_BADUTF16;
-#else
+#if defined COMPILE_PCRE8
     return (errorcode <= PCRE_UTF8_ERR5 && md->partial > 1)?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
+#elif defined COMPILE_PCRE16
+    return (errorcode <= PCRE_UTF16_ERR1 && md->partial > 1)?
+      PCRE_ERROR_SHORTUTF16 : PCRE_ERROR_BADUTF16;
+#elif defined COMPILE_PCRE32
+    return PCRE_ERROR_BADUTF32;
 #endif
     }
-
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
   /* Check that a start_offset points to the start of a UTF character. */
   if (start_offset > 0 && start_offset < length &&
       NOT_FIRSTCHAR(((PCRE_PUCHAR)subject)[start_offset]))
     return PCRE_ERROR_BADUTF8_OFFSET;
+#endif
   }
 #endif
 

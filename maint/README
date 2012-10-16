@@ -279,7 +279,8 @@ others are relatively new.
   support --outputfile=name.
 
 . Consider making UTF-8 and UCP the default for PCRE n.0 for some n > 8.
-  (And now presumably UTF-16 and UCP for the 16-bit library.)
+  (And now presumably UTF-16 and UCP for the 16-bit library, and UTF-32 and UCP
+  for the 32-bit library.)
 
 . Add a user pointer to pcre_malloc/free functions -- some option would be
   needed to retain backward compatibility.

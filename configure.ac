@@ -19,6 +19,7 @@ m4_define(pcre_date, [2012-08-08])
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [1:1:0])
 m4_define(libpcre16_version, [0:1:0])
+m4_define(libpcre32_version, [0:1:0])
 m4_define(libpcreposix_version, [0:1:0])
 m4_define(libpcrecpp_version, [0:0:0])
 
@@ -123,6 +124,13 @@ AC_ARG_ENABLE(pcre16,
               , enable_pcre16=unset)
 AC_SUBST(enable_pcre16)
 
+# Handle --enable-pcre32 (disabled by default)
+AC_ARG_ENABLE(pcre32,
+              AS_HELP_STRING([--enable-pcre32],
+                             [enable 32 bit character support]),
+              , enable_pcre32=unset)
+AC_SUBST(enable_pcre32)
+
 # Handle --disable-cpp. The substitution of enable_cpp is needed for use in
 # pcre-config.
 AC_ARG_ENABLE(cpp,
@@ -158,7 +166,7 @@ AC_ARG_ENABLE(utf8,
 # Handle --enable-utf (disabled by default)
 AC_ARG_ENABLE(utf,
               AS_HELP_STRING([--enable-utf],
-                             [enable UTF-8/16 support (incompatible with --enable-ebcdic)]),
+                             [enable UTF-8/16/32 support (incompatible with --enable-ebcdic)]),
               , enable_utf=unset)
 
 # Handle --enable-unicode-properties
@@ -298,10 +306,16 @@ then
   enable_pcre16=no
 fi
 
-# Make sure enable_pcre8 or enable_pcre16 was set
-if test "x$enable_pcre8$enable_pcre16" = "xnono"
+# Set the default value for pcre32
+if test "x$enable_pcre32" = "xunset"
 then
-  AC_MSG_ERROR([Either 8 or 16 bit (or both) pcre library must be enabled])
+  enable_pcre32=no
+fi
+
+# Make sure enable_pcre8 or enable_pcre16 was set
+if test "x$enable_pcre8$enable_pcre16$enable_pcre32" = "xnonono"
+then
+  AC_MSG_ERROR([At least one of 8, 16 or 32 bit pcre library must be enabled])
 fi
 
 # Make sure that if enable_unicode_properties was set, that UTF support is enabled.
@@ -309,7 +323,7 @@ if test "x$enable_unicode_properties" = "xyes"
 then
   if test "x$enable_utf" = "xno"
   then
-    AC_MSG_ERROR([support for Unicode properties requires UTF-8/16 support])
+    AC_MSG_ERROR([support for Unicode properties requires UTF-8/16/32 support])
   fi
   enable_utf=yes
 fi
@@ -365,7 +379,7 @@ if test "x$enable_ebcdic" = "xyes"; then
   enable_rebuild_chartables=yes
 
   if test "x$enable_utf" = "xyes"; then
-    AC_MSG_ERROR([support for EBCDIC and UTF-8/16 cannot be enabled at the same time])
+    AC_MSG_ERROR([support for EBCDIC and UTF-8/16/32 cannot be enabled at the same time])
   fi
 
   if test "x$enable_ebcdic_nl25" = "xno"; then
@@ -506,6 +520,7 @@ AC_SUBST(pcre_have_bits_type_traits)
 # Conditional compilation
 AM_CONDITIONAL(WITH_PCRE8, test "x$enable_pcre8" = "xyes")
 AM_CONDITIONAL(WITH_PCRE16, test "x$enable_pcre16" = "xyes")
+AM_CONDITIONAL(WITH_PCRE32, test "x$enable_pcre32" = "xyes")
 AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
@@ -624,6 +639,11 @@ if test "$enable_pcre16" = "yes"; then
     Define to any value to enable the 16 bit PCRE library.])
 fi
 
+if test "$enable_pcre32" = "yes"; then
+  AC_DEFINE([SUPPORT_PCRE32], [], [
+    Define to any value to enable the 32 bit PCRE library.])
+fi
+
 if test "$enable_jit" = "yes"; then
   AX_PTHREAD([], [AC_MSG_ERROR([JIT support requires pthreads])])
   CC="$PTHREAD_CC"
@@ -642,10 +662,10 @@ fi
 
 if test "$enable_utf" = "yes"; then
   AC_DEFINE([SUPPORT_UTF], [], [
-    Define to any value to enable support for the UTF-8/16 Unicode encoding. 
+    Define to any value to enable support for the UTF-8/16/32 Unicode encoding.
     This will work even in an EBCDIC environment, but it is incompatible
     with the EBCDIC macro. That is, PCRE can support *either* EBCDIC
-    code *or* ASCII/UTF-8/16, but not both at once.])
+    code *or* ASCII/UTF-8/16/32, but not both at once.])
 fi
 
 if test "$enable_unicode_properties" = "yes"; then
@@ -778,8 +798,8 @@ if test "$enable_ebcdic" = "yes"; then
     On systems that can use "configure" or CMake to set EBCDIC, NEWLINE is
     automatically adjusted. When EBCDIC is set, PCRE assumes that all input
     strings are in EBCDIC. If you do not define this macro, PCRE will assume
-    input strings are ASCII or UTF-8/16 Unicode. It is not possible to build a
-    version of PCRE that supports both EBCDIC and UTF-8/16.])
+    input strings are ASCII or UTF-8/16/32 Unicode. It is not possible to build
+    a version of PCRE that supports both EBCDIC and UTF-8/16/32.])
 fi
 
 if test "$enable_ebcdic_nl25" = "yes"; then
@@ -812,6 +832,9 @@ EXTRA_LIBPCRE_LDFLAGS="$EXTRA_LIBPCRE_LDFLAGS \
 EXTRA_LIBPCRE16_LDFLAGS="$EXTRA_LIBPCRE16_LDFLAGS \
                        $NO_UNDEFINED -version-info libpcre16_version"
 
+EXTRA_LIBPCRE32_LDFLAGS="$EXTRA_LIBPCRE32_LDFLAGS \
+                       $NO_UNDEFINED -version-info libpcre32_version"
+
 EXTRA_LIBPCREPOSIX_LDFLAGS="$EXTRA_LIBPCREPOSIX_LDFLAGS \
                             $NO_UNDEFINED -version-info libpcreposix_version"
 
@@ -821,12 +844,13 @@ EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS \
 
 AC_SUBST(EXTRA_LIBPCRE_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRE16_LDFLAGS)
+AC_SUBST(EXTRA_LIBPCRE32_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 
 # When we run 'make distcheck', use these arguments. Turning off compiler
 # optimization makes it run faster.
-DISTCHECK_CONFIGURE_FLAGS="CFLAGS='' CXXFLAGS='' --enable-pcre16 --enable-jit --enable-cpp --enable-unicode-properties"
+DISTCHECK_CONFIGURE_FLAGS="CFLAGS='' CXXFLAGS='' --enable-pcre16 --enable-pcre32 --enable-jit --enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
 
 # Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is
@@ -897,6 +921,7 @@ AC_CONFIG_FILES(
 	Makefile
 	libpcre.pc
 	libpcre16.pc
+        libpcre32.pc
 	libpcreposix.pc
 	libpcrecpp.pc
 	pcre-config
@@ -942,9 +967,10 @@ $PACKAGE-$VERSION configuration summary:
 
     Build 8 bit pcre library ........ : ${enable_pcre8}
     Build 16 bit pcre library ....... : ${enable_pcre16}
+    Build 32 bit pcre library ....... : ${enable_pcre32}
     Build C++ library ............... : ${enable_cpp}
     Enable JIT compiling support .... : ${enable_jit}
-    Enable UTF-8/16 support ......... : ${enable_utf}
+    Enable UTF-8/16/32 support ...... : ${enable_utf}
     Unicode properties .............. : ${enable_unicode_properties}
     Newline char/sequence ........... : ${enable_newline}
     \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}

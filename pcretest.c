@@ -134,9 +134,17 @@ appropriately for an application, not for building PCRE. */
 
 #include "pcre.h"
 
-#if defined SUPPORT_PCRE16 && !defined SUPPORT_PCRE8
+#if defined SUPPORT_PCRE32 && !defined SUPPORT_PCRE8 && !defined SUPPORT_PCRE16
+/* Configure internal macros to 32 bit mode. */
+#define COMPILE_PCRE32
+#endif
+#if defined SUPPORT_PCRE16 && !defined SUPPORT_PCRE8 && !defined SUPPORT_PCRE32
 /* Configure internal macros to 16 bit mode. */
 #define COMPILE_PCRE16
+#endif
+#if defined SUPPORT_PCRE8 && !defined SUPPORT_PCRE16 && !defined SUPPORT_PCRE32
+/* Configure internal macros to 16 bit mode. */
+#define COMPILE_PCRE8
 #endif
 
 #include "pcre_internal.h"
@@ -151,6 +159,9 @@ void pcre_printint(pcre *external_re, FILE *f, BOOL print_lengths);
 #endif
 #ifdef SUPPORT_PCRE16
 void pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths);
+#endif
+#ifdef SUPPORT_PCRE32
+void pcre32_printint(pcre *external_re, FILE *f, BOOL print_lengths);
 #endif
 
 /* We need access to some of the data tables that PCRE uses. So as not to have
@@ -176,8 +187,8 @@ that differ in their output from isprint() even in the "C" locale. */
 
 #define PRINTOK(c) (locale_set? isprint(c) : PRINTABLE(c))
 
-/* Posix support is disabled in 16 bit only mode. */
-#if defined SUPPORT_PCRE16 && !defined SUPPORT_PCRE8 && !defined NOPOSIX
+/* Posix support is disabled in 16 or 32 bit only mode. */
+#if !defined SUPPORT_PCRE8 && !defined NOPOSIX
 #define NOPOSIX
 #endif
 
@@ -222,7 +233,7 @@ argument, the casting might be incorrectly applied. */
 #define PCHARSV8(p, offset, len, f) \
   (void)pchars((pcre_uint8 *)(p) + offset, len, f)
 
-#define READ_CAPTURE_NAME8(p, cn8, cn16, re) \
+#define READ_CAPTURE_NAME8(p, cn8, cn16, cn32, re) \
   p = read_capture_name8(p, cn8, re)
 
 #define STRLEN8(p) ((int)strlen((char *)p))
@@ -304,7 +315,7 @@ argument, the casting might be incorrectly applied. */
 #define PCHARSV16(p, offset, len, f) \
   (void)pchars16((PCRE_SPTR16)(p) + offset, len, f)
 
-#define READ_CAPTURE_NAME16(p, cn8, cn16, re) \
+#define READ_CAPTURE_NAME16(p, cn8, cn16, cn32, re) \
   p = read_capture_name16(p, cn16, re)
 
 #define STRLEN16(p) ((int)strlen16((PCRE_SPTR16)p))
@@ -383,49 +394,156 @@ argument, the casting might be incorrectly applied. */
 
 #endif /* SUPPORT_PCRE16 */
 
+/* -----------------------------------------------------------*/
+
+#ifdef SUPPORT_PCRE32
+
+#define PCHARS32(lv, p, offset, len, f) \
+  lv = pchars32((PCRE_SPTR32)(p) + offset, len, f)
+
+#define PCHARSV32(p, offset, len, f) \
+  (void)pchars32((PCRE_SPTR32)(p) + offset, len, f)
+
+#define READ_CAPTURE_NAME32(p, cn8, cn16, cn32, re) \
+  p = read_capture_name32(p, cn32, re)
+
+#define STRLEN32(p) ((int)strlen32((PCRE_SPTR32)p))
+
+#define SET_PCRE_CALLOUT32(callout) \
+  pcre32_callout = (int (*)(pcre32_callout_block *))callout
+
+#define PCRE_ASSIGN_JIT_STACK32(extra, callback, userdata) \
+  pcre32_assign_jit_stack((pcre32_extra *)extra, \
+    (pcre32_jit_callback)callback, userdata)
+
+#define PCRE_COMPILE32(re, pat, options, error, erroffset, tables) \
+  re = (pcre *)pcre32_compile((PCRE_SPTR32)pat, options, error, erroffset, \
+    tables)
+
+#define PCRE_COPY_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
+    namesptr, cbuffer, size) \
+  rc = pcre32_copy_named_substring((pcre32 *)re, (PCRE_SPTR32)bptr, offsets, \
+    count, (PCRE_SPTR32)namesptr, (PCRE_UCHAR32 *)cbuffer, size/2)
+
+#define PCRE_COPY_SUBSTRING32(rc, bptr, offsets, count, i, cbuffer, size) \
+  rc = pcre32_copy_substring((PCRE_SPTR32)bptr, offsets, count, i, \
+    (PCRE_UCHAR32 *)cbuffer, size/2)
+
+#define PCRE_DFA_EXEC32(count, re, extra, bptr, len, start_offset, options, \
+    offsets, size_offsets, workspace, size_workspace) \
+  count = pcre32_dfa_exec((pcre32 *)re, (pcre32_extra *)extra, \
+    (PCRE_SPTR32)bptr, len, start_offset, options, offsets, size_offsets, \
+    workspace, size_workspace)
+
+#define PCRE_EXEC32(count, re, extra, bptr, len, start_offset, options, \
+    offsets, size_offsets) \
+  count = pcre32_exec((pcre32 *)re, (pcre32_extra *)extra, (PCRE_SPTR32)bptr, \
+    len, start_offset, options, offsets, size_offsets)
+
+#define PCRE_FREE_STUDY32(extra) \
+  pcre32_free_study((pcre32_extra *)extra)
+
+#define PCRE_FREE_SUBSTRING32(substring) \
+  pcre32_free_substring((PCRE_SPTR32)substring)
+
+#define PCRE_FREE_SUBSTRING_LIST32(listptr) \
+  pcre32_free_substring_list((PCRE_SPTR32 *)listptr)
+
+#define PCRE_GET_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
+    getnamesptr, subsptr) \
+  rc = pcre32_get_named_substring((pcre32 *)re, (PCRE_SPTR32)bptr, offsets, \
+    count, (PCRE_SPTR32)getnamesptr, (PCRE_SPTR32 *)(void*)subsptr)
+
+#define PCRE_GET_STRINGNUMBER32(n, rc, ptr) \
+  n = pcre32_get_stringnumber(re, (PCRE_SPTR32)ptr)
+
+#define PCRE_GET_SUBSTRING32(rc, bptr, offsets, count, i, subsptr) \
+  rc = pcre32_get_substring((PCRE_SPTR32)bptr, offsets, count, i, \
+    (PCRE_SPTR32 *)(void*)subsptr)
+
+#define PCRE_GET_SUBSTRING_LIST32(rc, bptr, offsets, count, listptr) \
+  rc = pcre32_get_substring_list((PCRE_SPTR32)bptr, offsets, count, \
+    (PCRE_SPTR32 **)(void*)listptr)
+
+#define PCRE_PATTERN_TO_HOST_BYTE_ORDER32(rc, re, extra, tables) \
+  rc = pcre32_pattern_to_host_byte_order((pcre32 *)re, (pcre32_extra *)extra, \
+    tables)
+
+#define PCRE_PRINTINT32(re, outfile, debug_lengths) \
+  pcre32_printint(re, outfile, debug_lengths)
+
+#define PCRE_STUDY32(extra, re, options, error) \
+  extra = (pcre_extra *)pcre32_study((pcre32 *)re, options, error)
+
+#define PCRE_JIT_STACK_ALLOC32(startsize, maxsize) \
+  (pcre_jit_stack *)pcre32_jit_stack_alloc(startsize, maxsize)
+
+#define PCRE_JIT_STACK_FREE32(stack) \
+  pcre32_jit_stack_free((pcre32_jit_stack *)stack)
+
+#endif /* SUPPORT_PCRE32 */
+
 
 /* ----- Both modes are supported; a runtime test is needed, except for
 pcre_config(), and the JIT stack functions, when it doesn't matter which
 version is called. ----- */
 
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
+enum {
+  PCRE8_MODE,
+  PCRE16_MODE,
+  PCRE32_MODE
+};
 
-#define CHAR_SIZE (use_pcre16? 2:1)
+#if (defined (SUPPORT_PCRE8) + defined (SUPPORT_PCRE16) + defined (SUPPORT_PCRE32)) >= 2
+
+#define CHAR_SIZE (1 << pcre_mode)
 
 #define PCHARS(lv, p, offset, len, f) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCHARS32(lv, p, offset, len, f); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCHARS16(lv, p, offset, len, f); \
   else \
     PCHARS8(lv, p, offset, len, f)
 
 #define PCHARSV(p, offset, len, f) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCHARSV32(p, offset, len, f); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCHARSV16(p, offset, len, f); \
   else \
     PCHARSV8(p, offset, len, f)
 
-#define READ_CAPTURE_NAME(p, cn8, cn16, re) \
-  if (use_pcre16) \
-    READ_CAPTURE_NAME16(p, cn8, cn16, re); \
+#define READ_CAPTURE_NAME(p, cn8, cn16, cn32, re) \
+  if (pcre_mode == PCRE32_MODE) \
+    READ_CAPTURE_NAME32(p, cn8, cn16, cn32, re); \
+  else if (pcre_mode == PCRE16_MODE) \
+    READ_CAPTURE_NAME16(p, cn8, cn16, cn32, re); \
   else \
-    READ_CAPTURE_NAME8(p, cn8, cn16, re)
+    READ_CAPTURE_NAME8(p, cn8, cn16, cn32, re)
 
 #define SET_PCRE_CALLOUT(callout) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    SET_PCRE_CALLOUT32(callout); \
+  else if (pcre_mode == PCRE16_MODE) \
     SET_PCRE_CALLOUT16(callout); \
   else \
     SET_PCRE_CALLOUT8(callout)
 
-#define STRLEN(p) (use_pcre16? STRLEN16(p) : STRLEN8(p))
+#define STRLEN(p) (pcre_mode == PCRE32_MODE ? STRLEN32(p) : pcre_mode == PCRE16_MODE ? STRLEN16(p) : STRLEN8(p))
 
 #define PCRE_ASSIGN_JIT_STACK(extra, callback, userdata) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_ASSIGN_JIT_STACK32(extra, callback, userdata); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_ASSIGN_JIT_STACK16(extra, callback, userdata); \
   else \
     PCRE_ASSIGN_JIT_STACK8(extra, callback, userdata)
 
 #define PCRE_COMPILE(re, pat, options, error, erroffset, tables) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_COMPILE32(re, pat, options, error, erroffset, tables); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_COMPILE16(re, pat, options, error, erroffset, tables); \
   else \
     PCRE_COMPILE8(re, pat, options, error, erroffset, tables)
@@ -434,7 +552,10 @@ version is called. ----- */
 
 #define PCRE_COPY_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
     namesptr, cbuffer, size) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_COPY_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
+      namesptr, cbuffer, size); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_COPY_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
       namesptr, cbuffer, size); \
   else \
@@ -442,14 +563,19 @@ version is called. ----- */
       namesptr, cbuffer, size)
 
 #define PCRE_COPY_SUBSTRING(rc, bptr, offsets, count, i, cbuffer, size) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_COPY_SUBSTRING32(rc, bptr, offsets, count, i, cbuffer, size); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_COPY_SUBSTRING16(rc, bptr, offsets, count, i, cbuffer, size); \
   else \
     PCRE_COPY_SUBSTRING8(rc, bptr, offsets, count, i, cbuffer, size)
 
 #define PCRE_DFA_EXEC(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets, workspace, size_workspace) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_DFA_EXEC32(count, re, extra, bptr, len, start_offset, options, \
+      offsets, size_offsets, workspace, size_workspace); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_DFA_EXEC16(count, re, extra, bptr, len, start_offset, options, \
       offsets, size_offsets, workspace, size_workspace); \
   else \
@@ -458,7 +584,10 @@ version is called. ----- */
 
 #define PCRE_EXEC(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_EXEC32(count, re, extra, bptr, len, start_offset, options, \
+      offsets, size_offsets); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_EXEC16(count, re, extra, bptr, len, start_offset, options, \
       offsets, size_offsets); \
   else \
@@ -466,26 +595,35 @@ version is called. ----- */
       offsets, size_offsets)
 
 #define PCRE_FREE_STUDY(extra) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_FREE_STUDY32(extra); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_FREE_STUDY16(extra); \
   else \
     PCRE_FREE_STUDY8(extra)
 
 #define PCRE_FREE_SUBSTRING(substring) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_FREE_SUBSTRING32(substring); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_FREE_SUBSTRING16(substring); \
   else \
     PCRE_FREE_SUBSTRING8(substring)
 
 #define PCRE_FREE_SUBSTRING_LIST(listptr) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_FREE_SUBSTRING_LIST32(listptr); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_FREE_SUBSTRING_LIST16(listptr); \
   else \
     PCRE_FREE_SUBSTRING_LIST8(listptr)
 
 #define PCRE_GET_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
     getnamesptr, subsptr) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_GET_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
+      getnamesptr, subsptr); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_GET_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
       getnamesptr, subsptr); \
   else \
@@ -493,51 +631,67 @@ version is called. ----- */
       getnamesptr, subsptr)
 
 #define PCRE_GET_STRINGNUMBER(n, rc, ptr) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_GET_STRINGNUMBER32(n, rc, ptr); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_GET_STRINGNUMBER16(n, rc, ptr); \
   else \
     PCRE_GET_STRINGNUMBER8(n, rc, ptr)
 
 #define PCRE_GET_SUBSTRING(rc, bptr, use_offsets, count, i, subsptr) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_GET_SUBSTRING32(rc, bptr, use_offsets, count, i, subsptr); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_GET_SUBSTRING16(rc, bptr, use_offsets, count, i, subsptr); \
   else \
     PCRE_GET_SUBSTRING8(rc, bptr, use_offsets, count, i, subsptr)
 
 #define PCRE_GET_SUBSTRING_LIST(rc, bptr, offsets, count, listptr) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_GET_SUBSTRING_LIST32(rc, bptr, offsets, count, listptr); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_GET_SUBSTRING_LIST16(rc, bptr, offsets, count, listptr); \
   else \
     PCRE_GET_SUBSTRING_LIST8(rc, bptr, offsets, count, listptr)
 
 #define PCRE_JIT_STACK_ALLOC(startsize, maxsize) \
-  (use_pcre16 ? \
-     PCRE_JIT_STACK_ALLOC16(startsize, maxsize) \
-    :PCRE_JIT_STACK_ALLOC8(startsize, maxsize))
+  (pcre_mode == PCRE32_MODE ? \
+     PCRE_JIT_STACK_ALLOC32(startsize, maxsize) \
+    : pcre_mode == PCRE16_MODE ? \
+      PCRE_JIT_STACK_ALLOC16(startsize, maxsize) \
+      : PCRE_JIT_STACK_ALLOC8(startsize, maxsize))
 
 #define PCRE_JIT_STACK_FREE(stack) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_JIT_STACK_FREE32(stack); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_JIT_STACK_FREE16(stack); \
   else \
     PCRE_JIT_STACK_FREE8(stack)
 
 #define PCRE_MAKETABLES \
-  (use_pcre16? pcre16_maketables() : pcre_maketables())
+  (pcre_mode == PCRE32_MODE ? pcre32_maketables() : pcre_mode == PCRE16_MODE ? pcre16_maketables() : pcre_maketables())
 
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, tables) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_PATTERN_TO_HOST_BYTE_ORDER32(rc, re, extra, tables); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables); \
   else \
     PCRE_PATTERN_TO_HOST_BYTE_ORDER8(rc, re, extra, tables)
 
 #define PCRE_PRINTINT(re, outfile, debug_lengths) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_PRINTINT32(re, outfile, debug_lengths); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_PRINTINT16(re, outfile, debug_lengths); \
   else \
     PCRE_PRINTINT8(re, outfile, debug_lengths)
 
 #define PCRE_STUDY(extra, re, options, error) \
-  if (use_pcre16) \
+  if (pcre_mode == PCRE32_MODE) \
+    PCRE_STUDY32(extra, re, options, error); \
+  else if (pcre_mode == PCRE16_MODE) \
     PCRE_STUDY16(extra, re, options, error); \
   else \
     PCRE_STUDY8(extra, re, options, error)
@@ -574,7 +728,7 @@ version is called. ----- */
 
 /* ----- Only 16-bit mode is supported ----- */
 
-#else
+#elif defined SUPPORT_PCRE16
 #define CHAR_SIZE                 2
 #define PCHARS                    PCHARS16
 #define PCHARSV                   PCHARSV16
@@ -601,6 +755,37 @@ version is called. ----- */
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER PCRE_PATTERN_TO_HOST_BYTE_ORDER16
 #define PCRE_PRINTINT             PCRE_PRINTINT16
 #define PCRE_STUDY                PCRE_STUDY16
+
+/* ----- Only 32-bit mode is supported ----- */
+
+#elif defined SUPPORT_PCRE32
+#define CHAR_SIZE                 4
+#define PCHARS                    PCHARS32
+#define PCHARSV                   PCHARSV32
+#define READ_CAPTURE_NAME         READ_CAPTURE_NAME32
+#define SET_PCRE_CALLOUT          SET_PCRE_CALLOUT32
+#define STRLEN                    STRLEN32
+#define PCRE_ASSIGN_JIT_STACK     PCRE_ASSIGN_JIT_STACK32
+#define PCRE_COMPILE              PCRE_COMPILE32
+#define PCRE_CONFIG               pcre32_config
+#define PCRE_COPY_NAMED_SUBSTRING PCRE_COPY_NAMED_SUBSTRING32
+#define PCRE_COPY_SUBSTRING       PCRE_COPY_SUBSTRING32
+#define PCRE_DFA_EXEC             PCRE_DFA_EXEC32
+#define PCRE_EXEC                 PCRE_EXEC32
+#define PCRE_FREE_STUDY           PCRE_FREE_STUDY32
+#define PCRE_FREE_SUBSTRING       PCRE_FREE_SUBSTRING32
+#define PCRE_FREE_SUBSTRING_LIST  PCRE_FREE_SUBSTRING_LIST32
+#define PCRE_GET_NAMED_SUBSTRING  PCRE_GET_NAMED_SUBSTRING32
+#define PCRE_GET_STRINGNUMBER     PCRE_GET_STRINGNUMBER32
+#define PCRE_GET_SUBSTRING        PCRE_GET_SUBSTRING32
+#define PCRE_GET_SUBSTRING_LIST   PCRE_GET_SUBSTRING_LIST32
+#define PCRE_JIT_STACK_ALLOC      PCRE_JIT_STACK_ALLOC32
+#define PCRE_JIT_STACK_FREE       PCRE_JIT_STACK_FREE32
+#define PCRE_MAKETABLES           pcre32_maketables()
+#define PCRE_PATTERN_TO_HOST_BYTE_ORDER PCRE_PATTERN_TO_HOST_BYTE_ORDER32
+#define PCRE_PRINTINT             PCRE_PRINTINT32
+#define PCRE_STUDY                PCRE_STUDY32
+
 #endif
 
 /* ----- End of mode-specific function call macros ----- */
@@ -652,20 +837,20 @@ static pcre_uint8 *pbuffer = NULL;
 /* Another buffer is needed translation to 16-bit character strings. It will
 obtained and extended as required. */
 
-#ifdef SUPPORT_PCRE16
-static int buffer16_size = 0;
-static pcre_uint16 *buffer16 = NULL;
+#if defined SUPPORT_PCRE8 && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32)
 
-#ifdef SUPPORT_PCRE8
-
-/* We need the table of operator lengths that is used for 16-bit compiling, in
+/* We need the table of operator lengths that is used for 16/32-bit compiling, in
 order to swap bytes in a pattern for saving/reloading testing. Luckily, the
 data is defined as a macro. However, we must ensure that LINK_SIZE is adjusted
-appropriately for the 16-bit world. Just as a safety check, make sure that
-COMPILE_PCRE16 is *not* set. */
+appropriately for the 16/32-bit world. Just as a safety check, make sure that
+COMPILE_PCRE[16|32] is *not* set. */
 
 #ifdef COMPILE_PCRE16
 #error COMPILE_PCRE16 must not be set when compiling pcretest.c
+#endif
+
+#ifdef COMPILE_PCRE32
+#error COMPILE_PCRE32 must not be set when compiling pcretest.c
 #endif
 
 #if LINK_SIZE == 2
@@ -681,19 +866,30 @@ COMPILE_PCRE16 is *not* set. */
 #undef IMM2_SIZE
 #define IMM2_SIZE 1
 
-#endif /* SUPPORT_PCRE8 */
+#endif /* SUPPORT_PCRE8 && (SUPPORT_PCRE16 || SUPPORT_PCRE32) */
 
+#ifdef SUPPORT_PCRE16
+static int buffer16_size = 0;
+static pcre_uint16 *buffer16 = NULL;
 static const pcre_uint16 OP_lengths16[] = { OP_LENGTHS };
 #endif  /* SUPPORT_PCRE16 */
 
-/* If we have 8-bit support, default use_pcre16 to false; if there is also
-16-bit support, it can be changed by an option. If there is no 8-bit support,
-there must be 16-bit support, so default it to 1. */
+#ifdef SUPPORT_PCRE32
+static int buffer32_size = 0;
+static pcre_uint32 *buffer32 = NULL;
+static const pcre_uint32 OP_lengths32[] = { OP_LENGTHS };
+#endif  /* SUPPORT_PCRE32 */
 
-#ifdef SUPPORT_PCRE8
-static int use_pcre16 = 0;
-#else
-static int use_pcre16 = 1;
+/* If we have 8-bit support, default to it; if there is also
+16-or 32-bit support, it can be changed by an option. If there is no 8-bit support,
+there must be 16-or 32-bit support, so default it to 1. */
+
+#if defined SUPPORT_PCRE8
+static int pcre_mode = PCRE8_MODE;
+#elif defined SUPPORT_PCRE16
+static int pcre_mode = PCRE16_MODE;
+#elif defined SUPPORT_PCRE32
+static int pcre_mode = PCRE32_MODE;
 #endif
 
 /* JIT study options for -s+n and /S+n where '1' <= n <= '7'. */
@@ -1144,7 +1340,7 @@ return (pcre_jit_stack *)arg;
 }
 
 
-#if !defined NOUTF || defined SUPPORT_PCRE16
+#if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
 /*************************************************
 *            Convert UTF-8 string to value       *
 *************************************************/
@@ -1204,7 +1400,7 @@ return i+1;
 
 
 
-#if !defined NOUTF || defined SUPPORT_PCRE16
+#if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
@@ -1316,6 +1512,83 @@ return pp - buffer16;
 }
 #endif
 
+#ifdef SUPPORT_PCRE32
+/*************************************************
+*         Convert a string to 32-bit             *
+*************************************************/
+
+/* In non-UTF mode, the space needed for a 32-bit string is exactly four times the
+8-bit size. For a UTF-8 string, the size needed for UTF-32 is no more than four
+times, because up to 0xffff uses no more than 3 bytes in UTF-8 but possibly 4
+in UTF-32. Higher values use 4 bytes in UTF-8 and up to 4 bytes in UTF-32. The
+result is always left in buffer32.
+
+Note that this function does not object to surrogate values. This is
+deliberate; it makes it possible to construct UTF-32 strings that are invalid,
+for the purpose of testing that they are correctly faulted.
+
+Patterns to be converted are either plain ASCII or UTF-8; data lines are always
+in UTF-8 so that values greater than 255 can be handled.
+
+Arguments:
+  data       TRUE if converting a data line; FALSE for a regex
+  p          points to a byte string
+  utf        true if UTF-8 (to be converted to UTF-32)
+  len        number of bytes in the string (excluding trailing zero)
+
+Returns:     number of 32-bit data items used (excluding trailing zero)
+             OR -1 if a UTF-8 string is malformed
+             OR -2 if a value > 0x10ffff is encountered
+             OR -3 if an ill-formed value is encountered (i.e. a surrogate)
+*/
+
+static int
+to32(int data, pcre_uint8 *p, int utf, int len)
+{
+pcre_uint32 *pp;
+
+if (buffer32_size < 4*len + 4)
+  {
+  if (buffer32 != NULL) free(buffer32);
+  buffer32_size = 4*len + 4;
+  buffer32 = (pcre_uint32 *)malloc(buffer32_size);
+  if (buffer32 == NULL)
+    {
+    fprintf(stderr, "pcretest: malloc(%d) failed for buffer32\n", buffer32_size);
+    exit(1);
+    }
+  }
+
+pp = buffer32;
+
+if (!utf && !data)
+  {
+  while (len-- > 0) *pp++ = *p++;
+  }
+
+else
+  {
+  int c = 0;
+  while (len > 0)
+    {
+    int chlen = utf82ord(p, &c);
+    if (chlen <= 0) return -1;
+    if (utf)
+      {
+      if (c > 0x10ffff) return -2;
+      if (!data && (c & 0xfffff800u) == 0xd800u) return -3;
+      }
+
+    p += chlen;
+    len -= chlen;
+    *pp++ = c;
+    }
+  }
+
+*pp = 0;
+return pp - buffer32;
+}
+#endif
 
 /*************************************************
 *        Read or extend an input line            *
@@ -1542,6 +1815,22 @@ return len;
 #endif  /* SUPPORT_PCRE16 */
 
 
+
+#ifdef SUPPORT_PCRE32
+/*************************************************
+*    Find length of 0-terminated 32-bit string   *
+*************************************************/
+
+static int strlen32(PCRE_SPTR32 p)
+{
+int len = 0;
+while (*p++ != 0) len++;
+return len;
+}
+#endif  /* SUPPORT_PCRE32 */
+
+
+
 #ifdef SUPPORT_PCRE16
 /*************************************************
 *           Print 16-bit character string        *
@@ -1578,6 +1867,33 @@ while (length-- > 0)
 return yield;
 }
 #endif  /* SUPPORT_PCRE16 */
+
+
+
+#ifdef SUPPORT_PCRE32
+/*************************************************
+*           Print 32-bit character string        *
+*************************************************/
+
+/* Must handle UTF-32 strings in utf mode. Yields number of characters printed.
+If handed a NULL file, just counts chars without printing. */
+
+static int pchars32(PCRE_SPTR32 p, int length, FILE *f)
+{
+int yield = 0;
+
+if (length < 0)
+  length = strlen32(p);
+
+while (length-- > 0)
+  {
+  int c = *p++;
+  yield += pchar(c, f);
+  }
+
+return yield;
+}
+#endif  /* SUPPORT_PCRE32 */
 
 
 
@@ -1631,6 +1947,33 @@ if (pcre16_get_stringnumber((pcre16 *)re, (PCRE_SPTR16)(*pp)) < 0)
 return p;
 }
 #endif  /* SUPPORT_PCRE16 */
+
+
+
+#ifdef SUPPORT_PCRE32
+/*************************************************
+*     Read a capture name (32-bit) and check it  *
+*************************************************/
+
+/* Note that the text being read is 8-bit. */
+
+static pcre_uint8 *
+read_capture_name32(pcre_uint8 *p, pcre_uint32 **pp, pcre *re)
+{
+pcre_uint32 *npp = *pp;
+while (isalnum(*p)) *npp++ = *p++;
+*npp++ = 0;
+*npp = 0;
+if (pcre32_get_stringnumber((pcre32 *)re, (PCRE_SPTR32)(*pp)) < 0)
+  {
+  fprintf(outfile, "no parentheses with name \"");
+  PCHARSV(*pp, 0, -1, outfile);
+  fprintf(outfile, "\"\n");
+  }
+*pp = npp;
+return p;
+}
+#endif  /* SUPPORT_PCRE32 */
 
 
 
@@ -1791,7 +2134,7 @@ free(block);
 *************************************************/
 
 /* Get one piece of information from the pcre_fullinfo() function. When only
-one of 8-bit or 16-bit is supported, use_pcre16 should always have the correct
+one of 8-, 16- or 32-bit is supported, pcre_mode should always have the correct
 value, but the code is defensive.
 
 Arguments:
@@ -1808,7 +2151,13 @@ new_info(pcre *re, pcre_extra *study, int option, void *ptr)
 {
 int rc;
 
-if (use_pcre16)
+if (pcre_mode == PCRE32_MODE)
+#ifdef SUPPORT_PCRE32
+  rc = pcre32_fullinfo((pcre32 *)re, (pcre32_extra *)study, option, ptr);
+#else
+  rc = PCRE_ERROR_BADMODE;
+#endif
+else if (pcre_mode == PCRE16_MODE)
 #ifdef SUPPORT_PCRE16
   rc = pcre16_fullinfo((pcre16 *)re, (pcre16_extra *)study, option, ptr);
 #else
@@ -1824,10 +2173,11 @@ else
 if (rc < 0)
   {
   fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
-    use_pcre16? "16" : "", option);
+    pcre_mode == PCRE32_MODE ? "32" : pcre_mode == PCRE16_MODE ? "16" : "", option);
   if (rc == PCRE_ERROR_BADMODE)
-    fprintf(outfile, "Running in %s-bit mode but pattern was compiled in "
-      "%s-bit mode\n", use_pcre16? "16":"8", use_pcre16? "8":"16");
+    fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
+      "%d-bit mode\n", 8 * CHAR_SIZE,
+      8 * (REAL_PCRE_FLAGS(re) & PCRE_MODE_MASK));
   }
 
 return rc;
@@ -1876,10 +2226,11 @@ bytes in the pattern itself. This is to make it possible to test PCRE's
 ability to reload byte-flipped patterns, e.g. those compiled on a different
 architecture. */
 
+#if defined SUPPORT_PCRE8 || defined SUPPORT_PCRE16
 static void
-regexflip(pcre *ere, pcre_extra *extra)
+regexflip8_or_16(pcre *ere, pcre_extra *extra)
 {
-REAL_PCRE *re = (REAL_PCRE *)ere;
+real_pcre8_or_16 *re = (real_pcre8_or_16 *)ere;
 #ifdef SUPPORT_PCRE16
 int op;
 pcre_uint16 *ptr = (pcre_uint16 *)re + re->name_table_offset;
@@ -1916,7 +2267,7 @@ if (extra != NULL)
 in the name table, if present, and then in the pattern itself. */
 
 #ifdef SUPPORT_PCRE16
-if (!use_pcre16) return;
+if (pcre_mode != PCRE16_MODE) return;
 
 while(TRUE)
   {
@@ -2054,6 +2405,117 @@ while(TRUE)
 /* Control should never reach here in 16 bit mode. */
 #endif /* SUPPORT_PCRE16 */
 }
+#endif /* SUPPORT_PCRE[8|16] */
+
+
+
+#if defined SUPPORT_PCRE32
+static void
+regexflip_32(pcre *ere, pcre_extra *extra)
+{
+real_pcre32 *re = (real_pcre32 *)ere;
+int op;
+pcre_uint32 *ptr = (pcre_uint32 *)re + re->name_table_offset;
+int length = re->name_count * re->name_entry_size;
+#ifdef SUPPORT_UTF
+BOOL utf = (re->options & PCRE_UTF32) != 0;
+#endif /* SUPPORT_UTF */
+
+/* Always flip the bytes in the main data block and study blocks. */
+
+re->magic_number = REVERSED_MAGIC_NUMBER;
+re->size = swap_uint32(re->size);
+re->options = swap_uint32(re->options);
+re->flags = swap_uint16(re->flags);
+re->top_bracket = swap_uint16(re->top_bracket);
+re->top_backref = swap_uint16(re->top_backref);
+re->first_char = swap_uint32(re->first_char);
+re->req_char = swap_uint32(re->req_char);
+re->name_table_offset = swap_uint16(re->name_table_offset);
+re->name_entry_size = swap_uint16(re->name_entry_size);
+re->name_count = swap_uint16(re->name_count);
+
+if (extra != NULL)
+  {
+  pcre_study_data *rsd = (pcre_study_data *)(extra->study_data);
+  rsd->size = swap_uint32(rsd->size);
+  rsd->flags = swap_uint32(rsd->flags);
+  rsd->minlength = swap_uint32(rsd->minlength);
+  }
+
+/* In 32-bit mode we must swap bytes
+in the name table, if present, and then in the pattern itself. */
+
+while(TRUE)
+  {
+  /* Swap previous characters. */
+  while (length-- > 0)
+    {
+    *ptr = swap_uint32(*ptr);
+    ptr++;
+    }
+
+  /* Get next opcode. */
+
+  length = 0;
+  op = *ptr;
+  *ptr++ = swap_uint32(op);
+
+  switch (op)
+    {
+    case OP_END:
+    return;
+
+    default:
+    length = OP_lengths32[op] - 1;
+    break;
+
+    case OP_CLASS:
+    case OP_NCLASS:
+    /* Skip the character bit map. */
+    ptr += 32/sizeof(pcre_uint32);
+    length = 0;
+    break;
+
+    case OP_XCLASS:
+    /* LINK_SIZE can only be 1 in 32-bit mode. */
+    length = (int)((unsigned int)(ptr[0]) - (1 + LINK_SIZE + 1));
+
+    /* Reverse the size of the XCLASS instance. */
+    *ptr = swap_uint32(*ptr);
+    ptr++;
+
+    op = *ptr;
+    *ptr = swap_uint32(op);
+    ptr++;
+    if ((op & XCL_MAP) != 0)
+      {
+      /* Skip the character bit map. */
+      ptr += 32/sizeof(pcre_uint32);
+      length -= 32/sizeof(pcre_uint32);
+      }
+    break;
+    }
+  }
+/* Control should never reach here in 32 bit mode. */
+}
+
+#endif /* SUPPORT_PCRE32 */
+
+
+
+static void
+regexflip(pcre *ere, pcre_extra *extra)
+{
+#if defined SUPPORT_PCRE32
+  if (REAL_PCRE_FLAGS(ere) & PCRE_MODE32)
+    regexflip_32(ere, extra);
+#endif
+#if defined SUPPORT_PCRE8 || defined SUPPORT_PCRE16
+  if (REAL_PCRE_FLAGS(ere) & (PCRE_MODE8 | PCRE_MODE16))
+    regexflip8_or_16(ere, extra);
+#endif
+}
 
 
 
@@ -2182,6 +2644,9 @@ printf("\nOptions:\n");
 #ifdef SUPPORT_PCRE16
 printf("  -16      use the 16-bit library\n");
 #endif
+#ifdef SUPPORT_PCRE32
+printf("  -32      use the 32-bit library\n");
+#endif
 printf("  -b       show compiled code\n");
 printf("  -C       show PCRE compile-time options and exit\n");
 printf("  -C arg   show a specific compile-time option\n");
@@ -2189,6 +2654,7 @@ printf("           and exit with its value. The arg can be:\n");
 printf("     linksize     internal link size [2, 3, 4]\n");
 printf("     pcre8        8 bit library support enabled [0, 1]\n");
 printf("     pcre16       16 bit library support enabled [0, 1]\n");
+printf("     pcre32       32 bit library support enabled [0, 1]\n");
 printf("     utf          Unicode Transformation Format supported [0, 1]\n");
 printf("     ucp          Unicode Properties supported [0, 1]\n");
 printf("     jit          Just-in-time compiler supported [0, 1]\n");
@@ -2266,13 +2732,20 @@ pcre_jit_stack *jit_stack = NULL;
 /* These vectors store, end-to-end, a list of zero-terminated captured
 substring names, each list itself being terminated by an empty name. Assume
 that 1024 is plenty long enough for the few names we'll be testing. It is
-easiest to keep separate 8-bit and 16-bit versions, using the 16-bit version
+easiest to keep separate 8-, 16- and 32-bit versions, using the 32-bit version
 for the actual memory, to ensure alignment. */
 
-pcre_uint16 copynames[1024];
-pcre_uint16 getnames[1024];
+pcre_uint32 copynames[1024];
+pcre_uint32 getnames[1024];
+
+#ifdef SUPPORT_PCRE32
+pcre_uint32 *cn32ptr;
+pcre_uint32 *gn32ptr;
+#endif
 
 #ifdef SUPPORT_PCRE16
+pcre_uint16 *copynames16 = (pcre_uint16 *)copynames;
+pcre_uint16 *getnames16 = (pcre_uint16 *)getnames;
 pcre_uint16 *cn16ptr;
 pcre_uint16 *gn16ptr;
 #endif
@@ -2285,8 +2758,8 @@ pcre_uint8 *gn8ptr;
 #endif
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
-debugging. They grow automatically when very long lines are read. The 16-bit
-buffer (buffer16) is obtained only if needed. */
+debugging. They grow automatically when very long lines are read. The 16- 
+and 32-bit buffers (buffer16, buffer32) are obtained only if needed. */
 
 buffer = (pcre_uint8 *)malloc(buffer_size);
 dbuffer = (pcre_uint8 *)malloc(buffer_size);
@@ -2308,10 +2781,12 @@ _setmode( _fileno( stdout ), _O_BINARY );
 /* Get the version number: both pcre_version() and pcre16_version() give the
 same answer. We just need to ensure that we call one that is available. */
 
-#ifdef SUPPORT_PCRE8
+#if defined SUPPORT_PCRE8
 version = pcre_version();
-#else
+#elif defined SUPPORT_PCRE16
 version = pcre16_version();
+#elif defined SUPPORT_PCRE32
+version = pcre32_version();
 #endif
 
 /* Scan options */
@@ -2338,9 +2813,18 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(arg, "-16") == 0)
     {
 #ifdef SUPPORT_PCRE16
-    use_pcre16 = 1;
+    pcre_mode = PCRE16_MODE;
 #else
     printf("** This version of PCRE was built without 16-bit support\n");
+    exit(1);
+#endif
+    }
+  else if (strcmp(arg, "-32") == 0)
+    {
+#ifdef SUPPORT_PCRE32
+    pcre_mode = PCRE32_MODE;
+#else
+    printf("** This version of PCRE was built without 32-bit support\n");
     exit(1);
 #endif
     }
@@ -2431,17 +2915,34 @@ while (argc > 1 && argv[op][0] == '-')
         yield = 0;
 #endif
         }
-      else if (strcmp(argv[op + 1], "utf") == 0)
+      else if (strcmp(argv[op + 1], "pcre32") == 0)
+        {
+#ifdef SUPPORT_PCRE32
+        printf("1\n");
+        yield = 1;
+#else
+        printf("0\n");
+        yield = 0;
+#endif
+        goto EXIT;
+        }
+      if (strcmp(argv[op + 1], "utf") == 0)
         {
 #ifdef SUPPORT_PCRE8
-        (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
-        printf("%d\n", rc);
-        yield = rc;
-#else
-        (void)pcre16_config(PCRE_CONFIG_UTF16, &rc);
-        printf("%d\n", rc);
-        yield = rc;
+        if (pcre_mode == PCRE8_MODE)
+          (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
 #endif
+#ifdef SUPPORT_PCRE16
+        if (pcre_mode == PCRE16_MODE)
+          (void)pcre16_config(PCRE_CONFIG_UTF16, &rc);
+#endif
+#ifdef SUPPORT_PCRE32
+        if (pcre_mode == PCRE32_MODE)
+          (void)pcre32_config(PCRE_CONFIG_UTF32, &rc);
+#endif
+        printf("%d\n", rc);
+        yield = rc;
+        goto EXIT;
         }
       else if (strcmp(argv[op + 1], "ucp") == 0)
         {
@@ -2496,21 +2997,20 @@ while (argc > 1 && argv[op][0] == '-')
 /* At least one of SUPPORT_PCRE8 and SUPPORT_PCRE16 will be set. If both
 are set, either both UTFs are supported or both are not supported. */
 
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
-    printf("  8-bit and 16-bit support\n");
+#ifdef SUPPORT_PCRE8
+    printf("  8-bit support\n");
     (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
-    if (rc)
-      printf("  UTF-8 and UTF-16 support\n");
-    else
-      printf("  No UTF-8 or UTF-16 support\n");
-#elif defined SUPPORT_PCRE8
-    printf("  8-bit support only\n");
-    (void)pcre_config(PCRE_CONFIG_UTF8, &rc);
-    printf("  %sUTF-8 support\n", rc? "" : "No ");
-#else
-    printf("  16-bit support only\n");
+      printf ("  %sUTF-8 support\n", rc ? "" : "No ");
+#endif
+#ifdef SUPPORT_PCRE16
+    printf("  16-bit support\n");
     (void)pcre16_config(PCRE_CONFIG_UTF16, &rc);
-    printf("  %sUTF-16 support\n", rc? "" : "No ");
+    printf ("  %sUTF-16 support\n", rc ? "" : "No ");
+#endif
+#ifdef SUPPORT_PCRE32
+    printf("  32-bit support\n");
+    (void)pcre32_config(PCRE_CONFIG_UTF32, &rc);
+    printf ("  %sUTF-32 support\n", rc ? "" : "No ");
 #endif
 
     (void)PCRE_CONFIG(PCRE_CONFIG_UNICODE_PROPERTIES, &rc);
@@ -2617,6 +3117,13 @@ pcre16_stack_malloc = stack_malloc;
 pcre16_stack_free = stack_free;
 #endif
 
+#ifdef SUPPORT_PCRE32
+pcre32_malloc = new_malloc;
+pcre32_free = new_free;
+pcre32_stack_malloc = stack_malloc;
+pcre32_stack_free = stack_free;
+#endif
+
 /* Heading line unless quiet, then prompt for first regex if stdin */
 
 if (!quiet) fprintf(outfile, "PCRE version %s\n\n", version);
@@ -2716,7 +3223,7 @@ while (!done)
 
     if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
 
-    magic = ((REAL_PCRE *)re)->magic_number;
+    magic = REAL_PCRE_MAGIC(re);
     if (magic != MAGIC_NUMBER)
       {
       if (swap_uint32(magic) == MAGIC_NUMBER)
@@ -2774,9 +3281,11 @@ while (!done)
         {
         /* Simulate the result of the function call below. */
         fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
-          use_pcre16? "16" : "", PCRE_INFO_OPTIONS);
-        fprintf(outfile, "Running in %s-bit mode but pattern was compiled in "
-          "%s-bit mode\n", use_pcre16? "16":"8", use_pcre16? "8":"16");
+          pcre_mode == PCRE32_MODE ? "32" : pcre_mode == PCRE16_MODE ? "16" : "",
+          PCRE_INFO_OPTIONS);
+        fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
+          "%d-bit mode\n", 8 * CHAR_SIZE,
+          8 * (REAL_PCRE_FLAGS(re) & PCRE_MODE_MASK));
         new_free(re);
         fclose(f);
         continue;
@@ -3040,10 +3549,10 @@ while (!done)
 #endif  /* !defined NOPOSIX */
 
     {
-    /* In 16-bit mode, convert the input. */
+    /* In 16- or 32-bit mode, convert the input. */
 
 #ifdef SUPPORT_PCRE16
-    if (use_pcre16)
+    if (pcre_mode == PCRE16_MODE)
       {
       switch(to16(FALSE, p, options & PCRE_UTF8, (int)strlen((char *)p)))
         {
@@ -3066,6 +3575,32 @@ while (!done)
         break;
         }
       p = (pcre_uint8 *)buffer16;
+      }
+#endif
+
+#ifdef SUPPORT_PCRE32
+    if (pcre_mode == PCRE32_MODE)
+      {
+      switch(to32(FALSE, p, options & PCRE_UTF32, (int)strlen((char *)p)))
+        {
+        case -1:
+        fprintf(outfile, "**Failed: invalid UTF-8 string cannot be "
+          "converted to UTF-32\n");
+        goto SKIP_DATA;
+
+        case -2:
+        fprintf(outfile, "**Failed: character value greater than 0x10ffff "
+          "cannot be converted to UTF-32\n");
+        goto SKIP_DATA;
+
+        case -3:
+        fprintf(outfile, "**Failed: character value is ill-formed UTF-32\n");
+        goto SKIP_DATA;
+
+        default:
+        break;
+        }
+      p = (pcre_uint8 *)buffer32;
       }
 #endif
 
@@ -3126,16 +3661,32 @@ while (!done)
     /* Extract the size for possible writing before possibly flipping it,
     and remember the store that was got. */
 
-    true_size = ((REAL_PCRE *)re)->size;
+    true_size = REAL_PCRE_SIZE(re);
     regex_gotten_store = first_gotten_store;
 
     /* Output code size information if requested */
 
     if (log_store)
+      {
+      int name_count, name_entry_size, real_pcre_size;
+
+      new_info(re, NULL, PCRE_INFO_NAMECOUNT, &name_count);
+      new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &name_entry_size);
+#ifdef SUPPORT_PCRE8
+      if (REAL_PCRE_FLAGS(re) & PCRE_MODE8)
+        real_pcre_size = sizeof(real_pcre);
+#endif
+#ifdef SUPPORT_PCRE16
+      if (REAL_PCRE_FLAGS(re) & PCRE_MODE16)
+        real_pcre_size = sizeof(real_pcre16);
+#endif
+#ifdef SUPPORT_PCRE32
+      if (REAL_PCRE_FLAGS(re) & PCRE_MODE32)
+        real_pcre_size = sizeof(real_pcre32);
+#endif
       fprintf(outfile, "Memory allocation (code space): %d\n",
-        (int)(first_gotten_store -
-              sizeof(REAL_PCRE) -
-              ((REAL_PCRE *)re)->name_count * ((REAL_PCRE *)re)->name_entry_size));
+        (int)(first_gotten_store - real_pcre_size - name_count * name_entry_size));
+      }
 
     /* If -s or /S was present, study the regex to generate additional info to
     help with the matching, unless the pattern has the SS option, which
@@ -3239,35 +3790,31 @@ while (!done)
         fprintf(outfile, "Named capturing subpatterns:\n");
         while (namecount-- > 0)
           {
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
-          int imm2_size = use_pcre16 ? 1 : 2;
-#else
-          int imm2_size = IMM2_SIZE;
-#endif
+          int imm2_size = pcre_mode == PCRE8_MODE ? 2 : 1;
           int length = (int)STRLEN(nametable + imm2_size);
           fprintf(outfile, "  ");
           PCHARSV(nametable, imm2_size, length, outfile);
           while (length++ < nameentrysize - imm2_size) putc(' ', outfile);
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
-          fprintf(outfile, "%3d\n", use_pcre16?
-             (int)(((PCRE_SPTR16)nametable)[0])
-            :((int)nametable[0] << 8) | (int)nametable[1]);
-          nametable += nameentrysize * (use_pcre16 ? 2 : 1);
-#else
-          fprintf(outfile, "%3d\n", GET2(nametable, 0));
+#ifdef SUPPORT_PCRE32
+          if (pcre_mode == PCRE32_MODE)
+            fprintf(outfile, "%3d\n", (int)(((PCRE_SPTR32)nametable)[0]));
+#endif
+#ifdef SUPPORT_PCRE16
+          if (pcre_mode == PCRE16_MODE)
+            fprintf(outfile, "%3d\n", (int)(((PCRE_SPTR16)nametable)[0]));
+#endif
 #ifdef SUPPORT_PCRE8
-          nametable += nameentrysize;
-#else
-          nametable += nameentrysize * 2;
+          if (pcre_mode == PCRE8_MODE)
+            fprintf(outfile, "%3d\n", ((int)nametable[0] << 8) | (int)nametable[1]);
 #endif
-#endif
+          nametable += nameentrysize * CHAR_SIZE;
           }
         }
 
       if (!okpartial) fprintf(outfile, "Partial matching not supported\n");
       if (hascrorlf) fprintf(outfile, "Contains explicit CR or LF match\n");
 
-      all_options = ((REAL_PCRE *)re)->options;
+      all_options = REAL_PCRE_OPTIONS(re);
       if (do_flip) all_options = swap_uint32(all_options);
 
       if (get_options == 0) fprintf(outfile, "No options\n");
@@ -3329,7 +3876,7 @@ while (!done)
       else
         {
         const char *caseless =
-          ((((REAL_PCRE *)re)->flags & PCRE_FCH_CASELESS) == 0)?
+          ((REAL_PCRE_FLAGS(re) & PCRE_FCH_CASELESS) == 0)?
           "" : " (caseless)";
 
         if (PRINTOK(first_char))
@@ -3349,7 +3896,7 @@ while (!done)
       else
         {
         const char *caseless =
-          ((((REAL_PCRE *)re)->flags & PCRE_RCH_CASELESS) == 0)?
+          ((REAL_PCRE_FLAGS(re) & PCRE_RCH_CASELESS) == 0)?
           "" : " (caseless)";
 
         if (PRINTOK(need_char))
@@ -3530,9 +4077,13 @@ while (!done)
     *copynames = 0;
     *getnames = 0;
 
+#ifdef SUPPORT_PCRE32
+    cn32ptr = copynames;
+    gn32ptr = getnames;
+#endif
 #ifdef SUPPORT_PCRE16
-    cn16ptr = copynames;
-    gn16ptr = getnames;
+    cn16ptr = copynames16;
+    gn16ptr = getnames16;
 #endif
 #ifdef SUPPORT_PCRE8
     cn8ptr = copynames8;
@@ -3647,7 +4198,7 @@ while (!done)
         allows UTF-8 characters to be constructed byte by byte, and also allows
         invalid UTF-8 sequences to be made. Just copy the byte in UTF mode.
         Otherwise, pass it down to later code so that it can be turned into
-        UTF-8 when running in 16-bit mode. */
+        UTF-8 when running in 16/32-bit mode. */
 
         c = 0;
         while (i++ < 2 && isxdigit(*p))
@@ -3692,7 +4243,7 @@ while (!done)
           }
         else if (isalnum(*p))
           {
-          READ_CAPTURE_NAME(p, &cn8ptr, &cn16ptr, re);
+          READ_CAPTURE_NAME(p, &cn8ptr, &cn16ptr, &cn32ptr, re);
           }
         else if (*p == '+')
           {
@@ -3755,7 +4306,7 @@ while (!done)
           }
         else if (isalnum(*p))
           {
-          READ_CAPTURE_NAME(p, &gn8ptr, &gn16ptr, re);
+          READ_CAPTURE_NAME(p, &gn8ptr, &gn16ptr, &gn32ptr, re);
           }
         continue;
 
@@ -3872,8 +4423,8 @@ while (!done)
       mode must have come from \x{...} or octal constructs because values from
       \x.. get this far only in non-UTF mode. */
 
-#if !defined NOUTF || defined SUPPORT_PCRE16
-      if (use_pcre16 || use_utf)
+#if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
+      if (pcre_mode != PCRE8_MODE || use_utf)
         {
         pcre_uint8 buff8[8];
         int ii, utn;
@@ -3944,8 +4495,7 @@ while (!done)
         (void)regerror(rc, &preg, (char *)buffer, buffer_size);
         fprintf(outfile, "No match: POSIX code %d: %s\n", rc, buffer);
         }
-      else if ((((const pcre *)preg.re_pcre)->options & PCRE_NO_AUTO_CAPTURE)
-              != 0)
+      else if ((REAL_PCRE_OPTIONS(preg.re_pcre) & PCRE_NO_AUTO_CAPTURE) != 0)
         {
         fprintf(outfile, "Matched with REG_NOSUB\n");
         }
@@ -3979,9 +4529,9 @@ while (!done)
     /* Handle matching via the native interface - repeats for /g and /G */
 
 #ifdef SUPPORT_PCRE16
-    if (use_pcre16)
+    if (pcre_mode == PCRE16_MODE)
       {
-      len = to16(TRUE, bptr, (((REAL_PCRE *)re)->options) & PCRE_UTF8, len);
+      len = to16(TRUE, bptr, REAL_PCRE_OPTIONS(re) & PCRE_UTF8, len);
       switch(len)
         {
         case -1:
@@ -4003,6 +4553,33 @@ while (!done)
         break;
         }
       bptr = (pcre_uint8 *)buffer16;
+      }
+#endif
+
+#ifdef SUPPORT_PCRE32
+    if (pcre_mode == PCRE32_MODE)
+      {
+      len = to32(TRUE, bptr, REAL_PCRE_OPTIONS(re) & PCRE_UTF32, len);
+      switch(len)
+        {
+        case -1:
+        fprintf(outfile, "**Failed: invalid UTF-8 string cannot be "
+          "converted to UTF-32\n");
+        goto NEXT_DATA;
+
+        case -2:
+        fprintf(outfile, "**Failed: character value greater than 0x10ffff "
+          "cannot be converted to UTF-32\n");
+        goto NEXT_DATA;
+
+        case -3:
+        fprintf(outfile, "**Failed: character value is ill-formed UTF-32\n");
+        goto NEXT_DATA;
+
+        default:
+        break;
+        }
+      bptr = (pcre_uint8 *)buffer32;
       }
 #endif
 
@@ -4227,7 +4804,7 @@ while (!done)
           int rc;
           char copybuffer[256];
 
-          if (use_pcre16)
+          if (pcre_mode == PCRE16_MODE)
             {
             if (*(pcre_uint16 *)cnptr == 0) break;
             }
@@ -4282,7 +4859,7 @@ while (!done)
           int rc;
           const char *substring;
 
-          if (use_pcre16)
+          if (pcre_mode == PCRE16_MODE)
             {
             if (*(pcre_uint16 *)gnptr == 0) break;
             }
@@ -4376,7 +4953,7 @@ while (!done)
         if (g_notempty != 0)
           {
           int onechar = 1;
-          unsigned int obits = ((REAL_PCRE *)re)->options;
+          unsigned int obits = REAL_PCRE_OPTIONS(re);
           use_offsets[0] = start_offset;
           if ((obits & PCRE_NEWLINE_BITS) == 0)
             {
@@ -4394,22 +4971,23 @@ while (!done)
                (obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_CRLF ||
                (obits & PCRE_NEWLINE_BITS) == PCRE_NEWLINE_ANYCRLF)
               &&
-              start_offset < len - 1 &&
-#if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
-              (use_pcre16?
-                   ((PCRE_SPTR16)bptr)[start_offset] == '\r'
-                && ((PCRE_SPTR16)bptr)[start_offset + 1] == '\n'
-              :
-                   bptr[start_offset] == '\r'
-                && bptr[start_offset + 1] == '\n')
-#elif defined SUPPORT_PCRE16
-                 ((PCRE_SPTR16)bptr)[start_offset] == '\r'
-              && ((PCRE_SPTR16)bptr)[start_offset + 1] == '\n'
-#else
-                 bptr[start_offset] == '\r'
-              && bptr[start_offset + 1] == '\n'
+              start_offset < len - 1 && (
+#ifdef SUPPORT_PCRE8
+              (pcre_mode == PCRE8_MODE &&
+               bptr[start_offset] == '\r' &&
+               bptr[start_offset + 1] == '\n') ||
 #endif
-              )
+#ifdef SUPPORT_PCRE16
+              (pcre_mode == PCRE16_MODE &&
+               ((PCRE_SPTR16)bptr)[start_offset] == '\r' &&
+               ((PCRE_SPTR16)bptr)[start_offset + 1] == '\n') ||
+#endif
+#ifdef SUPPORT_PCRE32
+              (pcre_mode == PCRE32_MODE &&
+               ((PCRE_SPTR32)bptr)[start_offset] == '\r' &&
+               ((PCRE_SPTR32)bptr)[start_offset + 1] == '\n') ||
+#endif
+              0))
             onechar++;
           else if (use_utf)
             {
@@ -4444,9 +5022,9 @@ while (!done)
 
             case PCRE_ERROR_BADUTF8:
             case PCRE_ERROR_SHORTUTF8:
-            fprintf(outfile, "Error %d (%s UTF-%s string)", count,
+            fprintf(outfile, "Error %d (%s UTF-%d string)", count,
               (count == PCRE_ERROR_BADUTF8)? "bad" : "short",
-              use_pcre16? "16" : "8");
+              8 * CHAR_SIZE);
             if (use_size_offsets >= 2)
               fprintf(outfile, " offset=%d reason=%d", use_offsets[0],
                 use_offsets[1]);
@@ -4454,8 +5032,8 @@ while (!done)
             break;
 
             case PCRE_ERROR_BADUTF8_OFFSET:
-            fprintf(outfile, "Error %d (bad UTF-%s offset)\n", count,
-              use_pcre16? "16" : "8");
+            fprintf(outfile, "Error %d (bad UTF-%d offset)\n", count,
+              8 * CHAR_SIZE);
             break;
 
             default:
@@ -4544,6 +5122,9 @@ free(offsets);
 
 #ifdef SUPPORT_PCRE16
 if (buffer16 != NULL) free(buffer16);
+#endif
+#ifdef SUPPORT_PCRE32
+if (buffer32 != NULL) free(buffer32);
 #endif
 
 #if !defined NODFA

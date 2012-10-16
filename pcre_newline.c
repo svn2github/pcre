@@ -117,7 +117,7 @@ else switch(c)
   case CHAR_NEL: *lenptr = utf? 2 : 1; return TRUE;
   case 0x2028:                                       /* LS */
   case 0x2029: *lenptr = 3; return TRUE;             /* PS */
-#else   /* 16-bit (can't be EBCDIC) */
+#else /* COMPILE_PCRE16 || COMPILE_PCRE32 */
   case CHAR_NEL:
   case 0x2028:                                       /* LS */
   case 0x2029: *lenptr = 1; return TRUE;             /* PS */
@@ -196,7 +196,7 @@ else switch(c)
   case CHAR_NEL: *lenptr = utf? 2 : 1; return TRUE;
   case 0x2028:                                       /* LS */
   case 0x2029: *lenptr = 3; return TRUE;             /* PS */
-#else
+#else /* COMPILE_PCRE16 || COMPILE_PCRE32 */
   case CHAR_NEL:
   case 0x2028:                                       /* LS */
   case 0x2029: *lenptr = 1; return TRUE;             /* PS */

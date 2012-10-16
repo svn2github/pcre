@@ -78,10 +78,13 @@ having a separate .h file just for this. */
 #ifdef PCRE_INCLUDED
 static /* Keep the following function as private. */
 #endif
-#ifdef COMPILE_PCRE8
+
+#if defined COMPILE_PCRE8
 void pcre_printint(pcre *external_re, FILE *f, BOOL print_lengths);
-#else
+#elif defined COMPILE_PCRE16
 void pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths);
+#elif defined COMPILE_PCRE32
+void pcre32_printint(pcre *external_re, FILE *f, BOOL print_lengths);
 #endif
 
 /* Macro that decides whether a character should be output as a literal or in
@@ -114,23 +117,23 @@ static const pcre_uint8 priv_OP_lengths[] = { OP_LENGTHS };
 static int
 print_char(FILE *f, pcre_uchar *ptr, BOOL utf)
 {
-int c = *ptr;
+pcre_uint32 c = *ptr;
 
 #ifndef SUPPORT_UTF
 
 (void)utf;  /* Avoid compiler warning */
-if (PRINTABLE(c)) fprintf(f, "%c", c);
+if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
 else if (c <= 0x80) fprintf(f, "\\x%02x", c);
 else fprintf(f, "\\x{%x}", c);
 return 0;
 
 #else
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 
 if (!utf || (c & 0xc0) != 0xc0)
   {
-  if (PRINTABLE(c)) fprintf(f, "%c", c); 
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c); 
   else if (c < 0x80) fprintf(f, "\\x%02x", c);
   else fprintf(f, "\\x{%02x}", c);
   return 0;
@@ -162,13 +165,11 @@ else
   return a;
   }
 
-#else
-
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
 
 if (!utf || (c & 0xfc00) != 0xd800)
   {
-  if (PRINTABLE(c)) fprintf(f, "%c", c);
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
   else if (c <= 0x80) fprintf(f, "\\x%02x", c);
   else fprintf(f, "\\x{%02x}", c);
   return 0;
@@ -190,9 +191,25 @@ else
   return 1;
   }
 
-#endif /* COMPILE_PCRE16 */
+#elif defined COMPILE_PCRE32
 
-#endif /* COMPILE_PCRE8 */
+if (!utf || (c & 0xfffff800u) != 0xd800u)
+  {
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
+  else if (c <= 0x80) fprintf(f, "\\x%02x", c);
+  else fprintf(f, "\\x{%x}", c);
+  return 0;
+  }
+else
+  {
+  /* This is a check for malformed UTF-32; it should only occur if the sanity
+  check has been turned off. Rather than swallow a surrogate, just stop if
+  we hit one. Print it with \X instead of \x as an indication. */
+  fprintf(f, "\\X{%x}", c);
+  return 0;
+  }
+
+#endif /* COMPILE_PCRE[8|16|32] */
 
 #endif /* SUPPORT_UTF */
 }
@@ -281,12 +298,15 @@ written that do not depend on the value of LINK_SIZE. */
 #ifdef PCRE_INCLUDED
 static /* Keep the following function as private. */
 #endif
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 void
 pcre_printint(pcre *external_re, FILE *f, BOOL print_lengths)
-#else
+#elif defined COMPILE_PCRE16
 void
 pcre16_printint(pcre *external_re, FILE *f, BOOL print_lengths)
+#elif defined COMPILE_PCRE32
+void
+pcre32_printint(pcre *external_re, FILE *f, BOOL print_lengths)
 #endif
 {
 REAL_PCRE *re = (REAL_PCRE *)external_re;
@@ -310,7 +330,7 @@ if (re->magic_number != MAGIC_NUMBER)
   }
 
 code = codestart = (pcre_uchar *)re + offset + count * size;
-/* PCRE_UTF16 has the same value as PCRE_UTF8. */
+/* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
 utf = (options & PCRE_UTF8) != 0;
 
 for(;;)

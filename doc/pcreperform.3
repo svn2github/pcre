@@ -68,7 +68,7 @@ that PCRE cannot otherwise handle.
 .SH "STACK USAGE AT RUN TIME"
 .rs
 .sp
-When \fBpcre_exec()\fP or \fBpcre16_exec()\fP is used for matching, certain
+When \fBpcre_exec()\fP or \fBpcre[16|32]_exec()\fP is used for matching, certain
 kinds of pattern can cause it to use large amounts of the process stack. In
 some environments the default process stack is quite small, and if it runs out
 the result is often SIGSEGV. This issue is probably the most frequently raised

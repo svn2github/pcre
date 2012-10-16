@@ -1,0 +1,23 @@
+/-- Tests for the 32-bit library only */
+
+/-- Check maximum character size --/
+
+/\x{110000}/8
+
+/\x{110000}/
+
+/\x{7fffffff}/
+
+/\x{80000000}/
+
+/-- Non-UTF characters --/
+
+/\C/8
+    \x{110000}
+
+/\C{2,3}/
+    \x{400000}\x{400001}\x{400002}\x{400003}
+
+/\x{400000}\x{800000}/iDZ
+
+/-- End of testinput25 --/

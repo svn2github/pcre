@@ -7,7 +7,10 @@ PCRE - Perl-compatible regular expressions
 From Release 8.30, in addition to its previous UTF-8 support, PCRE also
 supports UTF-16 by means of a separate 16-bit library. This can be built as
 well as, or instead of, the 8-bit library.
-.
+.P
+From Release 8.FIXME, in addition to its previous UTF-8 and UTF-16 support,
+PCRE also supports UTF-32 by means of a separate 32-bit library. This can be
+built as well as, or instead of, the 8-bit and 16-bit libraries.
 .
 .SH "UTF-8 SUPPORT"
 .rs
@@ -38,12 +41,27 @@ strings that are matched against it are treated as UTF-16 strings instead of
 strings of 16-bit characters.
 .
 .
+.SH "UTF-32 SUPPORT"
+.rs
+.sp
+In order process UTF-32 strings, you must build PCRE's 32-bit library with UTF
+support, and, in addition, you must call
+.\" HTML <a href="pcre_compile.html">
+.\" </a>
+\fBpcre32_compile()\fP
+.\"
+with the PCRE_UTF32 option flag, or the pattern must start with the sequence
+(*UTF32). When either of these is the case, both the pattern and any subject
+strings that are matched against it are treated as UTF-32 strings instead of
+strings of 32-bit characters.
+.
+.
 .SH "UTF SUPPORT OVERHEAD"
 .rs
 .sp
 If you compile PCRE with UTF support, but do not use it at run time, the
 library will be a bit bigger, but the additional run time overhead is limited
-to testing the PCRE_UTF8/16 flag occasionally, so should not be very big.
+to testing the PCRE_UTF[8|16|32] flag occasionally, so should not be very big.
 .
 .
 .SH "UNICODE PROPERTY SUPPORT"
@@ -138,6 +156,28 @@ the pattern or subject it is given (respectively) contains only valid UTF-16
 sequences. In this case, it does not diagnose an invalid UTF-16 string.
 .
 .
+.\" HTML <a name="utf32strings"></a>
+.SS "Validity of UTF-32 strings"
+.rs
+.sp
+When you set the PCRE_UTF32 flag, the strings of 32-bit data units that are
+passed as patterns and subjects are (by default) checked for validity on entry
+to the relevant functions.  This check allows only values in the range U+0
+to U+10FFFF, excluding the surrogate are U+D800 to U+DFFF, and U+FFEF.
+.P
+If an invalid UTF-32 string is passed to PCRE, an error return is given. At
+compile time, the only additional information is the offset to the first data
+unit of the failing character. The run-time functions \fBpcre32_exec()\fP and
+\fBpcre32_dfa_exec()\fP also pass back this information, as well as a more
+detailed reason code if the caller has provided memory in which to do this.
+.P
+In some situations, you may already know that your strings are valid, and
+therefore want to skip these checks in order to improve performance. If you set
+the PCRE_NO_UTF32_CHECK flag at compile time or at run time, PCRE assumes that
+the pattern or subject it is given (respectively) contains only valid UTF-32
+sequences. In this case, it does not diagnose an invalid UTF-32 string.
+.
+.
 .SS "General comments about UTF modes"
 .rs
 .sp
@@ -155,15 +195,15 @@ data units, for example: \ex{100}{3}.
 unit.
 .P
 5. The escape sequence \eC can be used to match a single byte in UTF-8 mode, or
-a single 16-bit data unit in UTF-16 mode, but its use can lead to some strange
-effects because it breaks up multi-unit characters (see the description of \eC
-in the
+a single 16-bit data unit in UTF-16 mode, or a single 32-bit data unit in
+UTF-32 mode, but its use can lead to some strange effects because it breaks up
+multi-unit characters (see the description of \eC in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
 documentation). The use of \eC is not supported in the alternative matching
-function \fBpcre[16]_dfa_exec()\fP, nor is it supported in UTF mode by the JIT
-optimization of \fBpcre[16]_exec()\fP. If JIT optimization is requested for a
+function \fBpcre[16|32]_dfa_exec()\fP, nor is it supported in UTF mode by the JIT
+optimization of \fBpcre[16|32]_exec()\fP. If JIT optimization is requested for a
 UTF pattern that contains \eC, it will not succeed, and so the matching will
 be carried out by the normal interpretive function.
 .P

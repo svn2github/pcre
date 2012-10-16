@@ -1007,7 +1007,7 @@ for (;;)
           {
           const pcre_uchar *temp = ptr - 1;
           if (temp < md->start_used_ptr) md->start_used_ptr = temp;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
           if (utf) { BACKCHAR(temp); }
 #endif
           GETCHARTEST(d, temp);
@@ -2607,10 +2607,12 @@ for (;;)
             cb.version          = 1;   /* Version 1 of the callout block */
             cb.callout_number   = code[LINK_SIZE+2];
             cb.offset_vector    = offsets;
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
             cb.subject          = (PCRE_SPTR)start_subject;
-#else
+#elif defined COMPILE_PCRE16
             cb.subject          = (PCRE_SPTR16)start_subject;
+#elif defined COMPILE_PCRE32
+            cb.subject          = (PCRE_SPTR32)start_subject;
 #endif
             cb.subject_length   = (int)(end_subject - start_subject);
             cb.start_match      = (int)(current_subject - start_subject);
@@ -2741,7 +2743,7 @@ for (;;)
           for (rc = rc*2 - 2; rc >= 0; rc -= 2)
             {
             int charcount = local_offsets[rc+1] - local_offsets[rc];
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
             if (utf)
               {
               const pcre_uchar *p = start_subject + local_offsets[rc];
@@ -2845,7 +2847,7 @@ for (;;)
             const pcre_uchar *p = ptr;
             const pcre_uchar *pp = local_ptr;
             charcount = (int)(pp - p);
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
             if (utf) while (p < pp) if (NOT_FIRSTCHAR(*p++)) charcount--;
 #endif
             ADD_NEW_DATA(-next_state_offset, 0, (charcount - 1));
@@ -2927,7 +2929,7 @@ for (;;)
             }
           else
             {
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
             if (utf)
               {
               const pcre_uchar *p = start_subject + local_offsets[0];
@@ -2956,10 +2958,12 @@ for (;;)
         cb.version          = 1;   /* Version 1 of the callout block */
         cb.callout_number   = code[1];
         cb.offset_vector    = offsets;
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
         cb.subject          = (PCRE_SPTR)start_subject;
-#else
+#elif defined COMPILE_PCRE16
         cb.subject          = (PCRE_SPTR16)start_subject;
+#elif defined COMPILE_PCRE32
+        cb.subject          = (PCRE_SPTR32)start_subject;
 #endif
         cb.subject_length   = (int)(end_subject - start_subject);
         cb.start_match      = (int)(current_subject - start_subject);
@@ -3075,15 +3079,20 @@ Returns:          > 0 => number of match offset pairs placed in offsets
                  < -1 => some kind of unexpected problem
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
   const char *subject, int length, int start_offset, int options, int *offsets,
   int offsetcount, int *workspace, int wscount)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_dfa_exec(const pcre16 *argument_re, const pcre16_extra *extra_data,
   PCRE_SPTR16 subject, int length, int start_offset, int options, int *offsets,
+  int offsetcount, int *workspace, int wscount)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_dfa_exec(const pcre32 *argument_re, const pcre32_extra *extra_data,
+  PCRE_SPTR32 subject, int length, int start_offset, int options, int *offsets,
   int offsetcount, int *workspace, int wscount)
 #endif
 {
@@ -3159,7 +3168,7 @@ end_subject = (const pcre_uchar *)subject + length;
 req_char_ptr = current_subject - 1;
 
 #ifdef SUPPORT_UTF
-/* PCRE_UTF16 has the same value as PCRE_UTF8. */
+/* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
 utf = (re->options & PCRE_UTF8) != 0;
 #else
 utf = FALSE;
@@ -3245,12 +3254,21 @@ if (utf && (options & PCRE_NO_UTF8_CHECK) == 0)
       offsets[0] = erroroffset;
       offsets[1] = errorcode;
       }
-    return (errorcode <= PCRE_UTF8_ERR5 && (options & PCRE_PARTIAL_HARD) != 0)?
+#if defined COMPILE_PCRE8
+    return (errorcode <= PCRE_UTF8_ERR5 && (options & PCRE_PARTIAL_HARD) != 0) ?
       PCRE_ERROR_SHORTUTF8 : PCRE_ERROR_BADUTF8;
+#elif defined COMPILE_PCRE16
+    return (errorcode <= PCRE_UTF16_ERR1 && (options & PCRE_PARTIAL_HARD) != 0) ?
+      PCRE_ERROR_SHORTUTF16 : PCRE_ERROR_BADUTF16;
+#elif defined COMPILE_PCRE32
+    return PCRE_ERROR_BADUTF32;
+#endif
     }
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
   if (start_offset > 0 && start_offset < length &&
         NOT_FIRSTCHAR(((PCRE_PUCHAR)subject)[start_offset]))
     return PCRE_ERROR_BADUTF8_OFFSET;
+#endif
   }
 #endif
 

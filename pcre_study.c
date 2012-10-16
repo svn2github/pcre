@@ -224,7 +224,7 @@ for (;;)
     case OP_NOTPOSPLUSI:
     branchlength++;
     cc += 2;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -245,7 +245,7 @@ for (;;)
     case OP_NOTEXACTI:
     branchlength += GET2(cc,1);
     cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -486,7 +486,7 @@ for (;;)
     case OP_NOTPOSQUERYI:
 
     cc += PRIV(OP_lengths)[op];
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -538,7 +538,7 @@ Arguments:
   p             points to the character
   caseless      the caseless flag
   cd            the block with char table pointers
-  utf           TRUE for UTF-8 / UTF-16 mode
+  utf           TRUE for UTF-8 / UTF-16 / UTF-32 mode
 
 Returns:        pointer after the character
 */
@@ -577,7 +577,7 @@ if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
 return p + 1;
 #endif  /* COMPILE_PCRE8 */
 
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 if (c > 0xff)
   {
   c = 0xff;
@@ -701,7 +701,7 @@ function fails unless the result is SSB_DONE.
 Arguments:
   code         points to an expression
   start_bits   points to a 32-byte table, initialized to 0
-  utf          TRUE if in UTF-8 / UTF-16 mode
+  utf          TRUE if in UTF-8 / UTF-16 / UTF-32 mode
   cd           the block with char table pointers
 
 Returns:       SSB_FAIL     => Failed to find any starting bytes
@@ -1000,11 +1000,10 @@ do
         SET_BIT(0xE1);  /* For U+1680, U+180E */
         SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
         SET_BIT(0xE3);  /* For U+3000 */
-#endif  /* COMPILE_PCRE8 */
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xA0);
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif  /* COMPILE_PCRE16 */
+#endif  /* COMPILE_PCRE[8|16|32] */
         }
       else
 #endif /* SUPPORT_UTF */
@@ -1012,9 +1011,9 @@ do
 #ifndef EBCDIC         
         SET_BIT(0xA0);
 #endif  /* Not EBCDIC */         
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif  /* COMPILE_PCRE16 */
+#endif  /* COMPILE_PCRE[16|32] */
         }
       try_next = FALSE;
       break;
@@ -1031,17 +1030,16 @@ do
 #ifdef COMPILE_PCRE8
         SET_BIT(0xC2);  /* For U+0085 */
         SET_BIT(0xE2);  /* For U+2028, U+2029 */
-#endif  /* COMPILE_PCRE8 */
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(CHAR_NEL);
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif  /* COMPILE_PCRE16 */
+#endif  /* COMPILE_PCRE[8|16|32] */
         }
       else
 #endif /* SUPPORT_UTF */
         {
         SET_BIT(CHAR_NEL);
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xFF);  /* For characters > 255 */
 #endif
         }
@@ -1139,11 +1137,10 @@ do
           SET_BIT(0xE1);  /* For U+1680, U+180E */
           SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
           SET_BIT(0xE3);  /* For U+3000 */
-#endif  /* COMPILE_PCRE8 */
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
           SET_BIT(0xA0);
           SET_BIT(0xFF);  /* For characters > 255 */
-#endif  /* COMPILE_PCRE16 */
+#endif  /* COMPILE_PCRE[8|16|32] */
           }
         else
 #endif /* SUPPORT_UTF */
@@ -1164,8 +1161,7 @@ do
 #ifdef COMPILE_PCRE8
           SET_BIT(0xC2);  /* For U+0085 */
           SET_BIT(0xE2);  /* For U+2028, U+2029 */
-#endif  /* COMPILE_PCRE8 */
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
           SET_BIT(CHAR_NEL);
           SET_BIT(0xFF);  /* For characters > 255 */
 #endif  /* COMPILE_PCRE16 */
@@ -1229,7 +1225,7 @@ do
         memset(start_bits+25, 0xff, 7);      /* Bits for 0xc9 - 0xff */
         }
 #endif
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
       SET_BIT(0xFF);                         /* For characters > 255 */
 #endif
       /* Fall through */
@@ -1325,12 +1321,15 @@ Returns:    pointer to a pcre[16]_extra block, with study_data filled in and
             NULL on error or if no optimization possible
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN pcre_extra * PCRE_CALL_CONVENTION
 pcre_study(const pcre *external_re, int options, const char **errorptr)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN pcre16_extra * PCRE_CALL_CONVENTION
 pcre16_study(const pcre16 *external_re, int options, const char **errorptr)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN pcre32_extra * PCRE_CALL_CONVENTION
+pcre32_study(const pcre32 *external_re, int options, const char **errorptr)
 #endif
 {
 int min;
@@ -1353,10 +1352,12 @@ if (re == NULL || re->magic_number != MAGIC_NUMBER)
 
 if ((re->flags & PCRE_MODE) == 0)
   {
-#ifdef COMPILE_PCRE8
-  *errorptr = "argument is compiled in 16 bit mode";
-#else
-  *errorptr = "argument is compiled in 8 bit mode";
+#if defined COMPILE_PCRE8
+  *errorptr = "argument not compiled in 8 bit mode";
+#elif defined COMPILE_PCRE16
+  *errorptr = "argument not compiled in 16 bit mode";
+#elif defined COMPILE_PCRE32
+  *errorptr = "argument not compiled in 32 bit mode";
 #endif
   return NULL;
   }
@@ -1383,13 +1384,17 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
   tables = re->tables;
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   if (tables == NULL)
     (void)pcre_fullinfo(external_re, NULL, PCRE_INFO_DEFAULT_TABLES,
     (void *)(&tables));
-#else
+#elif defined COMPILE_PCRE16
   if (tables == NULL)
     (void)pcre16_fullinfo(external_re, NULL, PCRE_INFO_DEFAULT_TABLES,
+    (void *)(&tables));
+#elif defined COMPILE_PCRE32
+  if (tables == NULL)
+    (void)pcre32_fullinfo(external_re, NULL, PCRE_INFO_DEFAULT_TABLES,
     (void *)(&tables));
 #endif
 
@@ -1503,11 +1508,12 @@ if (bits_set || min > 0 || (options & (
   if (study->flags == 0 && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) == 0 &&
       (options & PCRE_STUDY_EXTRA_NEEDED) == 0)
     {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
     pcre_free_study(extra);
-#endif
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
     pcre16_free_study(extra);
+#elif defined COMPILE_PCRE32
+    pcre32_free_study(extra);
 #endif
     extra = NULL;
     }
@@ -1528,12 +1534,15 @@ Argument:   a pointer to the pcre[16]_extra block
 Returns:    nothing
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN void
 pcre_free_study(pcre_extra *extra)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN void
 pcre16_free_study(pcre16_extra *extra)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN void
+pcre32_free_study(pcre32_extra *extra)
 #endif
 {
 if (extra == NULL)

@@ -1,22 +1,26 @@
-/-- This set of tests is for UTF-16 support, and is relevant only to the 16-bit
-    library. --/
+/-- This set of tests is for UTF-16 and UTF-32 support, and is relevant only to the
+    16- and 32-bit library. --/
 
 /ÃÃÃxxx/8?DZSS
-**Failed: invalid UTF-8 string cannot be converted to UTF-16
+**Failed: invalid UTF-8 string cannot be converted to UTF-32
 
 /abc/8
     Ã]
-**Failed: invalid UTF-8 string cannot be converted to UTF-16
+**Failed: invalid UTF-8 string cannot be converted to UTF-32
 
 /X(\C{3})/8
     X\x{11234}Y
- 0: X\x{11234}Y
- 1: \x{11234}Y
-
-/X(\C{4})/8
+No match
     X\x{11234}YZ
  0: X\x{11234}YZ
  1: \x{11234}YZ
+
+/X(\C{4})/8
+    X\x{11234}YZ
+No match
+    X\x{11234}YZW
+ 0: X\x{11234}YZW
+ 1: \x{11234}YZW
 
 /X\C*/8
     XYZabcdce
@@ -30,25 +34,25 @@
     Xabcdefg
  0: Xabcde
     X\x{11234}Y
- 0: X\x{11234}Y
+No match
     X\x{11234}YZ
  0: X\x{11234}YZ
     X\x{11234}\x{512}
- 0: X\x{11234}\x{512}
+No match
     X\x{11234}\x{512}YZ
  0: X\x{11234}\x{512}YZ
     X\x{11234}\x{512}\x{11234}Z
- 0: X\x{11234}\x{512}\x{11234}
+ 0: X\x{11234}\x{512}\x{11234}Z
 
 /X\C{3,5}?/8
     Xabcdefg
  0: Xabc
     X\x{11234}Y
- 0: X\x{11234}Y
+No match
     X\x{11234}YZ
- 0: X\x{11234}Y
+ 0: X\x{11234}YZ
     X\x{11234}\x{512}YZ
- 0: X\x{11234}\x{512}
+ 0: X\x{11234}\x{512}Y
     *** Failers
 No match
     X\x{11234}
@@ -62,7 +66,9 @@ No match
 
 /a\C\Cb/8
     a\x{12257}b
- 0: a\x{12257}b
+No match
+    a\x{12257}\x{11234}b
+ 0: a\x{12257}\x{11234}b
     ** Failers
 No match
     a\x{100}b
@@ -95,8 +101,8 @@ No need char
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-First char = \x{d800}
-Need char = \x{dc00}
+First char = \x{10000}
+No need char
 
 /\x{100}/8DZ
 ------------------------------------------------------------------
@@ -131,8 +137,8 @@ No need char
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-First char = \x{d800}
-Need char = \x{dc00}
+First char = \x{10000}
+No need char
 
 /\x{100000}/8DZ
 ------------------------------------------------------------------
@@ -143,8 +149,8 @@ Need char = \x{dc00}
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-First char = \x{dbc0}
-Need char = \x{dc00}
+First char = \x{100000}
+No need char
 
 /\x{10ffff}/8DZ
 ------------------------------------------------------------------
@@ -155,8 +161,8 @@ Need char = \x{dc00}
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-First char = \x{dbff}
-Need char = \x{dfff}
+First char = \x{10ffff}
+No need char
 
 /[\x{ff}]/8DZ
 ------------------------------------------------------------------
@@ -291,8 +297,8 @@ No need char
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf
-First char = \x{d844}
-Need char = \x{deab}
+First char = \x{212ab}
+No need char
 
 /-- This one is here not because it's different to Perl, but because the way
 the captured single-byte is displayed. (In Perl it becomes a character, and you
@@ -603,37 +609,42 @@ Failed: missing terminating ] for character class at offset 13
     \x{0}\x{d7ff}\x{e000}\x{10ffff}
 No match
     \x{d800}
-Error -10 (bad UTF-16 string) offset=0 reason=1
+Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{d800}\?
 No match
     \x{da00}
-Error -10 (bad UTF-16 string) offset=0 reason=1
+Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{da00}\?
 No match
     \x{dc00}
-Error -10 (bad UTF-16 string) offset=0 reason=3
+Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{dc00}\?
 No match
     \x{de00}
-Error -10 (bad UTF-16 string) offset=0 reason=3
+Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{de00}\?
 No match
     \x{dfff}
-Error -10 (bad UTF-16 string) offset=0 reason=3
+Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{dfff}\?
 No match
     \x{110000}
-**Failed: character value greater than 0x10ffff cannot be converted to UTF-16
+**Failed: character value greater than 0x10ffff cannot be converted to UTF-32
     \x{d800}\x{1234}
-Error -10 (bad UTF-16 string) offset=1 reason=2
+Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{fffe}
-Error -10 (bad UTF-16 string) offset=0 reason=4
+Error -10 (bad UTF-32 string) offset=0 reason=2
 
 /(*UTF16)\x{11234}/
-  abcd\x{11234}pqr
- 0: \x{11234}
+Failed: (*VERB) not recognized at offset 5
+
+/(*UTF-32)\x{11234}/
+Failed: (*VERB) not recognized at offset 5
 
 /(*CRLF)(*UTF16)(*BSR_UNICODE)a\Rb/I
+Failed: (*VERB) not recognized at offset 12
+
+/(*CRLF)(*UTF32)(*BSR_UNICODE)a\Rb/I
 Capturing subpattern count = 0
 Options: bsr_unicode utf
 Forced newline sequence: CRLF
@@ -846,18 +857,20 @@ Starting byte set: \x0a \x0b \x0c \x0d \x85 \xff
 
 /a/8
     \x{10000}\>1
-Error -11 (bad UTF-16 offset)
-    \x{10000}ab\>2
+No match
+    \x{10000}ab\>1
  0: a
+    \x{10000}ab\>2
+No match
     \x{10000}ab\>3
 No match
     \x{10000}ab\>4
-No match
+Error -24 (bad offset value)
     \x{10000}ab\>5
 Error -24 (bad offset value)
 
 /í¼€/8
-Failed: invalid UTF-16 string at offset 0
+**Failed: character value is ill-formed UTF-32
 
 /\w+\x{C4}/8BZ
 ------------------------------------------------------------------

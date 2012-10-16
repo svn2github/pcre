@@ -169,6 +169,14 @@ for opts in \
   "--enable-pcre16 --enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=3 --disable-shared" \
   "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared"
+  "--enable-pcre32" \
+  "--enable-pcre32 --enable-jit --enable-utf --disable-shared" \
+  "--enable-pcre32 --enable-jit --enable-unicode-properties --disable-shared" \
+  "--enable-pcre32 --enable-jit --disable-pcre8 --disable-shared" \
+  "--enable-pcre32 --enable-jit --disable-pcre8 --enable-utf --disable-shared" \
+  "--enable-pcre32 --disable-stack-for-recursion --disable-shared" \
+  "--enable-pcre32 --enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
+  "--enable-pcre32 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared"
 do
   runtest
 done
@@ -184,7 +192,8 @@ for opts in \
   "--enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-unicode-properties --with-link-size=3 --disable-shared" \
   "--enable-jit --enable-unicode-properties --disable-shared" \
-  "--enable-pcre16 --enable-jit --enable-unicode-properties --disable-shared"
+  "--enable-pcre16 --enable-pcre32 --enable-jit --enable-unicode-properties " \
+  "--disable-shared"
 do
   runtest
 done
