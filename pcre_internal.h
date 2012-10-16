@@ -914,13 +914,14 @@ code. */
 
 #elif defined COMPILE_PCRE32
 
-/* These are unnecessary for the 32-bit library */
-#undef MAX_VALUE_FOR_SINGLE_CHAR
-#undef HAS_EXTRALEN
-#undef GET_EXTRALEN
-#undef NOT_FIRSTCHAR
+/* These are trivial for the 32-bit library, since all UTF-32 characters fit
+into one pcre_uchar unit. */
+#define MAX_VALUE_FOR_SINGLE_CHAR (0x10ffffu)
+#define HAS_EXTRALEN(c) (0)
+#define GET_EXTRALEN(c) (0)
+#define NOT_FIRSTCHAR(c) (0)
 
-#define UTF32_MASK (0x1ffffful)
+#define UTF32_MASK (0x1fffffu)
 
 /* Get the next UTF-32 character, not advancing the pointer. This is called when
 we know we are in UTF-32 mode. */
@@ -989,7 +990,8 @@ pointer. */
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the
 macro because almost all calls are already within a block of UTF-32 only
-code. */
+code. 
+These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
 
 #define BACKCHAR(eptr) do { } while (0)
 

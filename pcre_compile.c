@@ -1854,7 +1854,7 @@ for (;;)
     case OP_NOTI:
     branchlength++;
     cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1868,7 +1868,7 @@ for (;;)
     case OP_NOTEXACTI:
     branchlength += (int)GET2(cc,1);
     cc += 2 + IMM2_SIZE;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -4115,7 +4115,7 @@ for (;; ptr++)
       {
       const pcre_uchar *oldptr;
 
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
       if (utf && HAS_EXTRALEN(c))
         {                           /* Braces are required because the */
         GETCHARLEN(c, ptr, ptr);    /* macro generates multiple statements */
@@ -5505,7 +5505,7 @@ for (;; ptr++)
       else if (*tempcode == OP_EXACT || *tempcode == OP_NOTEXACT)
         {
         tempcode += PRIV(OP_lengths)[*tempcode];
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
         if (utf && HAS_EXTRALEN(tempcode[-1]))
           tempcode += GET_EXTRALEN(tempcode[-1]);
 #endif
@@ -6949,7 +6949,7 @@ for (;; ptr++)
     mclength = 1;
     mcbuffer[0] = c;
 
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (utf && HAS_EXTRALEN(c))
       ACROSSCHAR(TRUE, ptr[1], mcbuffer[mclength++] = *(++ptr));
 #endif

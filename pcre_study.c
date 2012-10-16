@@ -224,7 +224,7 @@ for (;;)
     case OP_NOTPOSPLUSI:
     branchlength++;
     cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -245,7 +245,7 @@ for (;;)
     case OP_NOTEXACTI:
     branchlength += GET2(cc,1);
     cc += 2 + IMM2_SIZE;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -486,7 +486,7 @@ for (;;)
     case OP_NOTPOSQUERYI:
 
     cc += PRIV(OP_lengths)[op];
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;

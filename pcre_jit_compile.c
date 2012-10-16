@@ -591,7 +591,7 @@ switch(*cc)
   case OP_NOTPOSPLUSI:
   case OP_NOTPOSQUERYI:
   cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
   if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
   return cc;
@@ -613,7 +613,7 @@ switch(*cc)
   case OP_NOTEXACTI:
   case OP_NOTPOSUPTOI:
   cc += 2 + IMM2_SIZE;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
   if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
   return cc;
@@ -936,7 +936,7 @@ while (cc < ccend)
     if (size < 0)
       {
       cc += -size;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       }
@@ -1076,7 +1076,7 @@ while (cc < ccend)
     if (size < 0)
       {
       cc += -size;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       }
@@ -1320,7 +1320,7 @@ while (cc < ccend)
     if (PRIVATE_DATA(cc))
       private_data_length++;
     cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1329,7 +1329,7 @@ while (cc < ccend)
     if (PRIVATE_DATA(cc))
       private_data_length += 2;
     cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1338,7 +1338,7 @@ while (cc < ccend)
     if (PRIVATE_DATA(cc))
       private_data_length += 2;
     cc += 2 + IMM2_SIZE;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     break;
@@ -1497,7 +1497,7 @@ while (status != end)
         srcw[0] = PRIVATE_DATA(cc);
         }
       cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       break;
@@ -1510,7 +1510,7 @@ while (status != end)
         srcw[1] = PRIVATE_DATA(cc) + sizeof(sljit_w);
         }
       cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       break;
@@ -1523,7 +1523,7 @@ while (status != end)
         srcw[1] = PRIVATE_DATA(cc) + sizeof(sljit_w);
         }
       cc += 2 + IMM2_SIZE;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
       if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
       break;
@@ -2643,7 +2643,7 @@ while (TRUE)
       break;
 
   len = 1;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
   if (common->utf && HAS_EXTRALEN(cc[0])) len += GET_EXTRALEN(cc[0]);
 #endif
 
@@ -3563,10 +3563,8 @@ if (context->sourcereg == -1)
 
 #ifdef SUPPORT_UTF
 utflength = 1;
-#ifndef COMPILE_PCRE32
 if (common->utf && HAS_EXTRALEN(*cc))
   utflength += GET_EXTRALEN(*cc);
-#endif
 
 do
   {
@@ -3759,7 +3757,7 @@ while (*cc != XCL_END)
   if (*cc == XCL_SINGLE)
     {
     cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
 #ifdef SUPPORT_UCP
@@ -3769,11 +3767,11 @@ while (*cc != XCL_END)
   else if (*cc == XCL_RANGE)
     {
     cc += 2;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
     cc++;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
 #ifdef SUPPORT_UCP
@@ -4467,7 +4465,7 @@ switch(type)
   case OP_CHAR:
   case OP_CHARI:
   length = 1;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
   if (common->utf && HAS_EXTRALEN(*cc)) length += GET_EXTRALEN(*cc);
 #endif
   if (common->mode == JIT_COMPILE && (type == OP_CHAR || !char_has_othercase(common, cc) || char_get_othercase_bit(common, cc) != 0))
@@ -4662,7 +4660,7 @@ do
   if (*cc == OP_CHAR)
     {
     size = 1;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(cc[1]))
       size += GET_EXTRALEN(cc[1]);
 #endif
@@ -4675,10 +4673,8 @@ do
       {
       if (char_has_othercase(common, cc + 1) && char_get_othercase_bit(common, cc + 1) == 0)
         size = 0;
-#ifndef COMPILE_PCRE32
       else if (HAS_EXTRALEN(cc[1]))
         size += GET_EXTRALEN(cc[1]);
-#endif
       }
     else
 #endif
@@ -6266,7 +6262,7 @@ if (*type == 0)
 if (end != NULL)
   {
   *end = cc + 1;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifdef SUPPORT_UTF
   if (common->utf && HAS_EXTRALEN(*cc)) *end += GET_EXTRALEN(*cc);
 #endif
   }
