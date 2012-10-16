@@ -1,3 +1,12 @@
 /-- Tests for the 32-bit library with UTF-32 support only */
 
+/-- Non-UTF characters --/
+
+/\x{110000}/8
+Failed: character value in \x{...} sequence is too large at offset 9
+
+/\C/8
+    \x{110000}
+**Failed: character value greater than 0x10ffff cannot be converted to UTF-32
+
 /-- End of testinput26 --/
