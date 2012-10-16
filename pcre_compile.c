@@ -2810,7 +2810,7 @@ while ((ptr = (pcre_uchar *)find_recurse(ptr, utf)) != NULL)
 
   for (hc = save_hwm; hc < cd->hwm; hc += LINK_SIZE)
     {
-    offset = GET(hc, 0);
+    offset = (int)GET(hc, 0);
     if (cd->start_code + offset == ptr + 1)
       {
       PUT(hc, 0, offset + adjust);
@@ -2823,7 +2823,7 @@ while ((ptr = (pcre_uchar *)find_recurse(ptr, utf)) != NULL)
 
   if (hc >= cd->hwm)
     {
-    offset = GET(ptr, 1);
+    offset = (int)GET(ptr, 1);
     if (cd->start_code + offset >= group) PUT(ptr, 1, offset + adjust);
     }
 
