@@ -607,7 +607,7 @@ Failed: missing terminating ] for character class at offset 13
 
 /X/8
     \x{0}\x{d7ff}\x{e000}\x{10ffff}
-No match
+Error -10 (bad UTF-32 string) offset=3 reason=2
     \x{d800}
 Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{d800}\?

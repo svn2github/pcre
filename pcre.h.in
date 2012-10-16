@@ -209,6 +209,7 @@ compiling). */
 #define PCRE_UTF8_ERR19             19
 #define PCRE_UTF8_ERR20             20
 #define PCRE_UTF8_ERR21             21
+#define PCRE_UTF8_ERR22             22
 
 /* Specific error codes for UTF-16 validity checks */
 

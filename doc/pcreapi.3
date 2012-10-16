@@ -2328,6 +2328,11 @@ character.
 .sp
 The first byte of a character has the value 0xfe or 0xff. These values can
 never occur in a valid UTF-8 string.
+.sp
+  PCRE_UTF8_ERR2
+.sp
+Non-character. These are the last two characters in each plane (0xfffe, 0xffff,
+0x1fffe, 0x1ffff .. 0x10fffe, 0x10ffff), and the characters 0xfdd0..0xfdef.
 .
 .
 .SH "EXTRACTING CAPTURED SUBSTRINGS BY NUMBER"

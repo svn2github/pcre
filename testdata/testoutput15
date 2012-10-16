@@ -170,6 +170,140 @@ No match
     \?\xfd\x83\x80\x80\x80\x80
 No match
 
+/noncharacter/8
+    \x{fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{1fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{1ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{2fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{2ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{3fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{3ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{4fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{4ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{5fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{5ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{6fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{6ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{7fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{7ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{8fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{8ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{9fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{9ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{afffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{affff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{bfffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{bffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{cfffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{cffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{dfffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{dffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{efffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{effff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{ffffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{10fffe}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{10ffff}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd0}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd1}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd2}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd3}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd4}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd5}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd6}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd7}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd8}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdd9}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdda}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fddb}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fddc}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fddd}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdde}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fddf}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde0}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde1}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde2}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde3}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde4}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde5}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde6}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde7}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde8}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fde9}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdea}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdeb}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdec}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fded}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdee}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+    \x{fdef}
+Error -10 (bad UTF-8 string) offset=0 reason=22
+
 /\x{100}/8DZ
 ------------------------------------------------------------------
         Bra
@@ -678,7 +812,7 @@ Failed: missing terminating ] for character class at offset 15
     
 /X/8
     \x{0}\x{d7ff}\x{e000}\x{10ffff}
-No match
+Error -10 (bad UTF-8 string) offset=7 reason=22
     \x{d800}
 Error -10 (bad UTF-8 string) offset=0 reason=14
     \x{d800}\?

@@ -66,7 +66,7 @@ back in the returned value:
 
 PCRE_UTF32_ERR0  No error
 PCRE_UTF32_ERR1  Surrogate character
-PCRE_UTF32_ERR2  Disallowed character 0xfffe
+PCRE_UTF32_ERR2  Non-character
 PCRE_UTF32_ERR3  Character > 0x10ffff
 
 Arguments:
@@ -99,8 +99,9 @@ for (p = string; length-- > 0; p++)
     {
     /* Normal UTF-32 code point. Neither high nor low surrogate. */
 
-    /* This is probably a 16-bit BOM. Regardless, the string is rejected. */
-    if (c == 0xfffeu)
+    /* Check for non-characters */
+    if ((c & 0xfffeu) == 0xfffeu ||
+        c >= 0xfdd0u && c <= 0xfdefu)
       {
       *erroroffset = p - string;
       return PCRE_UTF32_ERR2;
