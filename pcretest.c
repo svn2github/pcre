@@ -399,10 +399,10 @@ argument, the casting might be incorrectly applied. */
 #ifdef SUPPORT_PCRE32
 
 #define PCHARS32(lv, p, offset, len, f) \
-  lv = pchars32((PCRE_SPTR32)(p) + offset, len, f)
+  lv = pchars32((PCRE_SPTR32)(p) + offset, len, use_utf, f)
 
-#define PCHARSV32(p, offset, len, f) \
-  (void)pchars32((PCRE_SPTR32)(p) + offset, len, f)
+#define PCHARSV32(p, offset, len, f)                \
+  (void)pchars32((PCRE_SPTR32)(p) + offset, len, use_utf, f)
 
 #define READ_CAPTURE_NAME32(p, cn8, cn16, cn32, re) \
   p = read_capture_name32(p, cn32, re)
@@ -1589,6 +1589,45 @@ else
 *pp = 0;
 return pp - buffer32;
 }
+
+/* Check that a 32-bit character string is valid UTF-32.
+
+Arguments:
+  string       points to the string
+  length       length of string, or -1 if the string is zero-terminated
+
+Returns:       TRUE  if the string is a valid UTF-32 string
+               FALSE otherwise
+*/
+
+#ifdef SUPPORT_UTF
+static BOOL
+valid_utf32(pcre_uint32 *string, int length)
+{
+register pcre_uint32 *p;
+register pcre_uint32 c;
+
+for (p = string; length-- > 0; p++)
+  {
+  c = *p;
+
+  if (c > 0x10ffffu)
+    return FALSE;
+
+  /* A surrogate */
+  if ((c & 0xfffff800u) == 0xd800u)
+    return FALSE;
+
+  /* Non-character */
+  if ((c & 0xfffeu) == 0xfffeu ||
+      c >= 0xfdd0u && c <= 0xfdefu)
+    return FALSE;
+  }
+
+return TRUE;
+}
+#endif /* SUPPORT_UTF */
+
 #endif
 
 /*************************************************
@@ -1874,7 +1913,9 @@ return yield;
 /* Must handle UTF-32 strings in utf mode. Yields number of characters printed.
 If handed a NULL file, just counts chars without printing. */
 
-static int pchars32(PCRE_SPTR32 p, int length, FILE *f)
+#define UTF32_MASK (0x1fffffu)
+
+static int pchars32(PCRE_SPTR32 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
 
@@ -1883,7 +1924,8 @@ if (length < 0)
 
 while (length-- > 0)
   {
-  pcre_uint32 c = *p++;
+  pcre_uint32 c = *p++;  
+  if (utf) c &= UTF32_MASK;
   yield += pchar(c, f);
   }
 
@@ -2714,6 +2756,7 @@ int done = 0;
 int all_use_dfa = 0;
 int verify_jit = 0;
 int yield = 0;
+int mask_utf32 = 0;
 int stack_size;
 pcre_uint8 *dbuffer = NULL;
 size_t dbuffer_size = 1u << 14;
@@ -2825,10 +2868,11 @@ while (argc > 1 && argv[op][0] == '-')
     exit(1);
 #endif
     }
-  else if (strcmp(arg, "-32") == 0)
+  else if (strcmp(arg, "-32") == 0 || strcmp(arg, "-32+") == 0)
     {
 #ifdef SUPPORT_PCRE32
     pcre_mode = PCRE32_MODE;
+    mask_utf32 = (strcmp(arg, "-32+") == 0);
 #else
     printf("** This version of PCRE was built without 32-bit support\n");
     exit(1);
@@ -4571,6 +4615,20 @@ while (!done)
       *q32 = 0;
       len = (int)(q32 - (pcre_uint32 *)dbuffer);
     }
+#endif
+
+#if defined SUPPORT_UTF && defined SUPPORT_PCRE32
+    /* If we're requsted to test UTF-32 masking of high bits, change the data
+    string to have high bits set, unless the string is invalid UTF-32. 
+    Since the JIT doesn't support this yet, only do it when not JITing. */
+    if (use_utf && mask_utf32 && (study_options & PCRE_STUDY_ALLJIT) == 0 &&
+        valid_utf32((pcre_uint32 *)dbuffer, len))
+      {
+      for (q32 = (pcre_uint32 *)dbuffer; *q32; q32++)
+        *q32 |= ~(pcre_uint32)UTF32_MASK;
+
+      options |= PCRE_NO_UTF32_CHECK;
+      }
 #endif
 
     /* Move the data to the end of the buffer so that a read over the end of
