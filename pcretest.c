@@ -2807,6 +2807,15 @@ while (argc > 1 && argv[op][0] == '-')
       force_study_options = jit_study_bits[*arg - '1'];
     else goto BAD_ARG;
     }
+  else if (strcmp(arg, "-8") == 0)
+    {
+#ifdef SUPPORT_PCRE8
+    pcre_mode = PCRE8_MODE;
+#else
+    printf("** This version of PCRE was built without 8-bit support\n");
+    exit(1);
+#endif
+    }
   else if (strcmp(arg, "-16") == 0)
     {
 #ifdef SUPPORT_PCRE16
