@@ -2907,10 +2907,10 @@ Yield:        -1 when no more
 */
 
 static int
-get_othercase_range(unsigned int *cptr, unsigned int d, unsigned int *ocptr,
-  unsigned int *odptr)
+get_othercase_range(pcre_uint32 *cptr, pcre_uint32 d, pcre_uint32 *ocptr,
+  pcre_uint32 *odptr)
 {
-unsigned int c, othercase, next;
+pcre_uint32 c, othercase, next;
 int co;
 
 /* Find the first character that has an other case. If it has multiple other 
@@ -3692,7 +3692,7 @@ pcre_int32 req_caseopt, reqvary, tempreqvary;
 int options = *optionsptr;               /* May change dynamically */
 int after_manual_callout = 0;
 int length_prevgroup = 0;
-register int c;
+register pcre_uint32 c;
 int escape;
 register pcre_uchar *code = *codeptr;
 pcre_uchar *last_code = code;
