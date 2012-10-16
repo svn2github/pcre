@@ -2622,15 +2622,15 @@ extern const int         PRIV(ucp_typerange)[];
 
 #define UCD_BLOCK_SIZE 128
 #define GET_UCD(ch) (PRIV(ucd_records) + \
-        PRIV(ucd_stage2)[PRIV(ucd_stage1)[(ch) / UCD_BLOCK_SIZE] * \
-        UCD_BLOCK_SIZE + (ch) % UCD_BLOCK_SIZE])
+        PRIV(ucd_stage2)[PRIV(ucd_stage1)[(int)(ch) / UCD_BLOCK_SIZE] * \
+        UCD_BLOCK_SIZE + (int)(ch) % UCD_BLOCK_SIZE])
 
 #define UCD_CHARTYPE(ch)    GET_UCD(ch)->chartype
 #define UCD_SCRIPT(ch)      GET_UCD(ch)->script
 #define UCD_CATEGORY(ch)    PRIV(ucp_gentype)[UCD_CHARTYPE(ch)]
 #define UCD_GRAPHBREAK(ch)  GET_UCD(ch)->gbprop
 #define UCD_CASESET(ch)     GET_UCD(ch)->caseset
-#define UCD_OTHERCASE(ch)   (ch + GET_UCD(ch)->other_case)
+#define UCD_OTHERCASE(ch)   ((pcre_uint32)((int)ch + (int)(GET_UCD(ch)->other_case)))
 
 #endif /* SUPPORT_UCP */
 
