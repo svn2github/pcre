@@ -831,7 +831,6 @@ static const unsigned char *last_callout_mark = NULL;
 
 static int buffer_size = 50000;
 static pcre_uint8 *buffer = NULL;
-static pcre_uint8 *dbuffer = NULL;
 static pcre_uint8 *pbuffer = NULL;
 
 /* Another buffer is needed translation to 16/32-bit character strings. It will
@@ -1666,10 +1665,9 @@ for (;;)
     {
     int new_buffer_size = 2*buffer_size;
     pcre_uint8 *new_buffer = (pcre_uint8 *)malloc(new_buffer_size);
-    pcre_uint8 *new_dbuffer = (pcre_uint8 *)malloc(new_buffer_size);
     pcre_uint8 *new_pbuffer = (pcre_uint8 *)malloc(new_buffer_size);
 
-    if (new_buffer == NULL || new_dbuffer == NULL || new_pbuffer == NULL)
+    if (new_buffer == NULL || new_pbuffer == NULL)
       {
       fprintf(stderr, "pcretest: malloc(%d) failed\n", new_buffer_size);
       exit(1);
@@ -1684,11 +1682,9 @@ for (;;)
     here = new_buffer + (here - buffer);
 
     free(buffer);
-    free(dbuffer);
     free(pbuffer);
 
     buffer = new_buffer;
-    dbuffer = new_dbuffer;
     pbuffer = new_pbuffer;
     }
   }
@@ -2719,6 +2715,8 @@ int all_use_dfa = 0;
 int verify_jit = 0;
 int yield = 0;
 int stack_size;
+pcre_uint8 *dbuffer = NULL;
+size_t dbuffer_size = 1u << 14;
 
 #if !defined NOPOSIX
 int posix = 0;
@@ -2762,7 +2760,6 @@ debugging. They grow automatically when very long lines are read. The 16-
 and 32-bit buffers (buffer16, buffer32) are obtained only if needed. */
 
 buffer = (pcre_uint8 *)malloc(buffer_size);
-dbuffer = (pcre_uint8 *)malloc(buffer_size);
 pbuffer = (pcre_uint8 *)malloc(buffer_size);
 
 /* The outfile variable is static so that new_malloc can use it. */
@@ -4060,7 +4057,15 @@ while (!done)
 
   for (;;)
     {
-    pcre_uint8 *q;
+#ifdef SUPPORT_PCRE8
+    pcre_uint8 *q8;
+#endif
+#ifdef SUPPORT_PCRE16
+    pcre_uint16 *q16;
+#endif
+#ifdef SUPPORT_PCRE32
+    pcre_uint32 *q32;
+#endif
     pcre_uint8 *bptr;
     int *use_offsets = offsets;
     int use_size_offsets = size_offsets;
@@ -4132,7 +4137,47 @@ while (!done)
     p = buffer;
     while (isspace(*p)) p++;
 
-    bptr = q = dbuffer;
+#ifndef NOUTF
+    /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
+       invalid input to pcre_exec, you must use \x?? or \x{} sequences. */
+    if (use_utf)
+      {
+      char *q;
+      pcre_uint32 c;
+      int n = 1;
+
+      for (q = p; n > 0 && *q; q += n) n = utf82ord(q, &c);
+      if (n <= 0)
+        {
+        fprintf(outfile, "**Failed: invalid UTF-8 string cannot be used as input in UTF mode\n");
+        goto NEXT_DATA;
+        }
+      }
+#endif
+
+    /* Allocate a buffer to hold the data line. len+1 is an upper bound on
+       the number of pcre_uchar units that will be needed. */
+    if (dbuffer == NULL || len >= dbuffer_size)
+      {
+      dbuffer_size *= 2;
+      dbuffer = (pcre_uint8 *)realloc(dbuffer, dbuffer_size * CHAR_SIZE);
+      if (dbuffer == NULL)
+        {
+        fprintf(stderr, "pcretest: malloc(%d) failed\n", dbuffer_size);
+        exit(1);
+        }
+      }
+
+#ifdef SUPPORT_PCRE8
+    q8 = (pcre_uint8 *) dbuffer;
+#endif
+#ifdef SUPPORT_PCRE16
+    q16 = (pcre_uint16 *) dbuffer;
+#endif
+#ifdef SUPPORT_PCRE32
+    q32 = (pcre_uint32 *) dbuffer;
+#endif
+
     while ((c = *p++) != 0)
       {
       int i = 0;
@@ -4145,11 +4190,9 @@ while (!done)
 
       if (c != '\\')
         {
-        if (use_utf)
-          {
-          *q++ = c;
-          continue;
-          }
+#ifndef NOUTF
+        if (use_utf && HASUTF8EXTRALEN(c)) { GETUTF8INC(c, p); }
+#endif
         }
 
       /* Handle backslash escapes */
@@ -4210,11 +4253,13 @@ while (!done)
           c = c * 16 + tolower(*p) - ((isdigit(*p))? '0' : 'a' - 10);
           p++;
           }
-        if (use_utf)
+#if !defined NOUTF && defined SUPPORT_PCRE8
+        if (use_utf && (pcre_mode == PCRE8_MODE))
           {
-          *q++ = c;
+          *q8++ = c;
           continue;
           }
+#endif
         break;
 
         case 0:   /* \ followed by EOF allows for an empty line */
@@ -4427,48 +4472,114 @@ while (!done)
       than 127       in UTF mode must have come from \x{...} or octal constructs
       because values from \x.. get this far only in non-UTF mode. */
 
-#if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
-      if (pcre_mode != PCRE8_MODE || use_utf)
+#ifdef SUPPORT_PCRE8
+      if (pcre_mode == PCRE8_MODE)
         {
-        pcre_uint8 buff8[8];
-        int ii, utn;
-        utn = ord2utf8(c, buff8);
-        for (ii = 0; ii < utn; ii++) *q++ = buff8[ii];
-        }
-      else
-#endif
-        {
-        if (c > 255)
+#ifndef NOUTF
+        if (use_utf)
           {
-          fprintf(outfile, "** Character \\x{%x} is greater than 255 "
-            "and UTF-8 mode is not enabled.\n", c);
-          fprintf(outfile, "** Truncation will probably give the wrong "
-            "result.\n");
+          q8 += ord2utf8(c, q8);
           }
-        *q++ = c;
+        else
+#endif
+          {
+          if (c > 0xffu)
+            {
+            fprintf(outfile, "** Character \\x{%x} is greater than 255 "
+              "and UTF-8 mode is not enabled.\n", c);
+            fprintf(outfile, "** Truncation will probably give the wrong "
+              "result.\n");
+            }
+
+          *q8++ = c;
+          }
         }
+#endif
+#ifdef SUPPORT_PCRE16
+      if (pcre_mode == PCRE16_MODE)
+        {
+#ifndef NOUTF
+        if (use_utf)
+          {
+          if (c > 0x10ffffu)
+            {
+            fprintf(outfile, "**Failed: character value greater than 0x10ffff "
+              "cannot be converted to UTF-16\n");
+            goto NEXT_DATA;
+            }
+          else if (c >= 0x10000u)
+            {
+            c-= 0x10000u;
+            *q16++ = 0xD800 | (c >> 10);
+            *q16++ = 0xDC00 | (c & 0x3ff);
+            }
+          else
+            *q16++ = c;
+          }
+        else 
+#endif
+          {
+          if (c > 0xffffu)
+            {
+            fprintf(outfile, "** Character value is greater than 0xffff "
+              "and UTF-16 mode is not enabled.\n", c);
+            fprintf(outfile, "** Truncation will probably give the wrong "
+              "result.\n");
+            }
+
+          *q16++ = c;
+          }
+        }
+#endif
+#ifdef SUPPORT_PCRE32
+      if (pcre_mode == PCRE32_MODE)
+        {
+        *q32++ = c;
+        }
+#endif
+
       }
 
     /* Reached end of subject string */
 
-    *q = 0;
-    len = (int)(q - dbuffer);
+#ifdef SUPPORT_PCRE8
+    if (pcre_mode == PCRE8_MODE)
+    {
+      *q8 = 0;
+      len = (int)(q8 - (pcre_uint8 *)dbuffer);
+    }
+#endif
+#ifdef SUPPORT_PCRE16
+    if (pcre_mode == PCRE16_MODE)
+    {
+      *q16 = 0;
+      len = (int)(q16 - (pcre_uint16 *)dbuffer);
+    }
+#endif
+#ifdef SUPPORT_PCRE32
+    if (pcre_mode == PCRE32_MODE)
+    {
+      *q32 = 0;
+      len = (int)(q32 - (pcre_uint32 *)dbuffer);
+    }
+#endif
 
     /* Move the data to the end of the buffer so that a read over the end of
     the buffer will be seen by valgrind, even if it doesn't cause a crash. If
     we are using the POSIX interface, we must include the terminating zero. */
 
+    bptr = dbuffer;
+
 #if !defined NOPOSIX
     if (posix || do_posix)
       {
-      memmove(bptr + buffer_size - len - 1, bptr, len + 1);
-      bptr += buffer_size - len - 1;
+      memmove(bptr + dbuffer_size - len - 1, bptr, len + 1);
+      bptr += dbuffer_size - len - 1;
       }
     else
 #endif
       {
-      memmove(bptr + buffer_size - len, bptr, len);
-      bptr += buffer_size - len;
+      bptr = memmove(bptr + (dbuffer_size - len) * CHAR_SIZE, bptr, len * CHAR_SIZE);
       }
 
     if ((all_use_dfa || use_dfa) && find_match_limit)
@@ -4531,61 +4642,6 @@ while (!done)
 #endif  /* !defined NOPOSIX */
 
     /* Handle matching via the native interface - repeats for /g and /G */
-
-#ifdef SUPPORT_PCRE16
-    if (pcre_mode == PCRE16_MODE)
-      {
-      len = to16(TRUE, bptr, REAL_PCRE_OPTIONS(re) & PCRE_UTF8, len);
-      switch(len)
-        {
-        case -1:
-        fprintf(outfile, "**Failed: invalid UTF-8 string cannot be "
-          "converted to UTF-16\n");
-        goto NEXT_DATA;
-
-        case -2:
-        fprintf(outfile, "**Failed: character value greater than 0x10ffff "
-          "cannot be converted to UTF-16\n");
-        goto NEXT_DATA;
-
-        case -3:
-        fprintf(outfile, "**Failed: character value greater than 0xffff "
-          "cannot be converted to 16-bit in non-UTF mode\n");
-        goto NEXT_DATA;
-
-        default:
-        break;
-        }
-      bptr = (pcre_uint8 *)buffer16;
-      }
-#endif
-
-#ifdef SUPPORT_PCRE32
-    if (pcre_mode == PCRE32_MODE)
-      {
-      len = to32(TRUE, bptr, REAL_PCRE_OPTIONS(re) & PCRE_UTF32, len);
-      switch(len)
-        {
-        case -1:
-        fprintf(outfile, "**Failed: invalid UTF-8 string cannot be "
-          "converted to UTF-32\n");
-        goto NEXT_DATA;
-
-        case -2:
-        fprintf(outfile, "**Failed: character value greater than 0x10ffff "
-          "cannot be converted to UTF-32\n");
-        goto NEXT_DATA;
-
-        case -3:
-        fprintf(outfile, "**Failed: character value is ill-formed UTF-32\n");
-        goto NEXT_DATA;
-
-        default:
-        break;
-        }
-      bptr = (pcre_uint8 *)buffer32;
-      }
-#endif
 
     /* Ensure that there is a JIT callback if we want to verify that JIT was
     actually used. If jit_stack == NULL, no stack has yet been assigned. */

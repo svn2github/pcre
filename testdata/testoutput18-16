@@ -6,7 +6,7 @@
 
 /abc/8
     Ã]
-**Failed: invalid UTF-8 string cannot be converted to UTF-16
+**Failed: invalid UTF-8 string cannot be used as input in UTF mode
 
 /X(\C{3})/8
     X\x{11234}Y

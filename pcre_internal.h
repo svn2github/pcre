@@ -586,30 +586,9 @@ we don't even define them. */
 
 #else   /* SUPPORT_UTF */
 
-#if defined COMPILE_PCRE8
-
-/* These macros were originally written in the form of loops that used data
-from the tables whose names start with PRIV(utf8_table). They were rewritten by
-a user so as not to use loops, because in some environments this gives a
-significant performance advantage, and it seems never to do any harm. */
-
-/* Tells the biggest code point which can be encoded as a single character. */
-
-#define MAX_VALUE_FOR_SINGLE_CHAR 127
-
 /* Tests whether the code point needs extra characters to decode. */
 
-#define HAS_EXTRALEN(c) ((c) >= 0xc0)
-
-/* Returns with the additional number of characters if IS_MULTICHAR(c) is TRUE.
-Otherwise it has an undefined behaviour. */
-
-#define GET_EXTRALEN(c) (PRIV(utf8_table4)[(c) & 0x3f])
-
-/* Returns TRUE, if the given character is not the first character
-of a UTF sequence. */
-
-#define NOT_FIRSTCHAR(c) (((c) & 0xc0) == 0x80)
+#define HASUTF8EXTRALEN(c) ((c) >= 0xc0)
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, not
 advancing the pointer. */
@@ -632,20 +611,6 @@ advancing the pointer. */
           ((eptr[2] & 0x3f) << 18) | ((eptr[3] & 0x3f) << 12) | \
           ((eptr[4] & 0x3f) << 6) | (eptr[5] & 0x3f); \
     }
-
-/* Get the next UTF-8 character, not advancing the pointer. This is called when
-we know we are in UTF-8 mode. */
-
-#define GETCHAR(c, eptr) \
-  c = *eptr; \
-  if (c >= 0xc0) GETUTF8(c, eptr);
-
-/* Get the next UTF-8 character, testing for UTF-8 mode, and not advancing the
-pointer. */
-
-#define GETCHARTEST(c, eptr) \
-  c = *eptr; \
-  if (utf && c >= 0xc0) GETUTF8(c, eptr);
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
 the pointer. */
@@ -680,6 +645,45 @@ the pointer. */
       eptr += 5; \
       } \
     }
+
+#if defined COMPILE_PCRE8
+
+/* These macros were originally written in the form of loops that used data
+from the tables whose names start with PRIV(utf8_table). They were rewritten by
+a user so as not to use loops, because in some environments this gives a
+significant performance advantage, and it seems never to do any harm. */
+
+/* Tells the biggest code point which can be encoded as a single character. */
+
+#define MAX_VALUE_FOR_SINGLE_CHAR 127
+
+/* Tests whether the code point needs extra characters to decode. */
+
+#define HAS_EXTRALEN(c) ((c) >= 0xc0)
+
+/* Returns with the additional number of characters if IS_MULTICHAR(c) is TRUE.
+Otherwise it has an undefined behaviour. */
+
+#define GET_EXTRALEN(c) (PRIV(utf8_table4)[(c) & 0x3f])
+
+/* Returns TRUE, if the given character is not the first character
+of a UTF sequence. */
+
+#define NOT_FIRSTCHAR(c) (((c) & 0xc0) == 0x80)
+
+/* Get the next UTF-8 character, not advancing the pointer. This is called when
+we know we are in UTF-8 mode. */
+
+#define GETCHAR(c, eptr) \
+  c = *eptr; \
+  if (c >= 0xc0) GETUTF8(c, eptr);
+
+/* Get the next UTF-8 character, testing for UTF-8 mode, and not advancing the
+pointer. */
+
+#define GETCHARTEST(c, eptr) \
+  c = *eptr; \
+  if (utf && c >= 0xc0) GETUTF8(c, eptr);
 
 /* Get the next UTF-8 character, advancing the pointer. This is called when we
 know we are in UTF-8 mode. */

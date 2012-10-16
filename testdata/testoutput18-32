@@ -6,7 +6,7 @@
 
 /abc/8
     Ã]
-**Failed: invalid UTF-8 string cannot be converted to UTF-32
+**Failed: invalid UTF-8 string cannot be used as input in UTF mode
 
 /X(\C{3})/8
     X\x{11234}Y
@@ -629,7 +629,7 @@ Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{dfff}\?
 No match
     \x{110000}
-**Failed: character value greater than 0x10ffff cannot be converted to UTF-32
+Error -10 (bad UTF-32 string) offset=0 reason=3
     \x{d800}\x{1234}
 Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{fffe}
