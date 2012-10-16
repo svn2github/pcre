@@ -547,7 +547,7 @@ static const pcre_uchar *
 set_table_bit(pcre_uint8 *start_bits, const pcre_uchar *p, BOOL caseless,
   compile_data *cd, BOOL utf)
 {
-unsigned int c = *p;
+pcre_uint32 c = *p;
 
 #ifdef COMPILE_PCRE8
 SET_BIT(c);

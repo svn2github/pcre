@@ -3310,7 +3310,7 @@ for (;;)
       if (length > 1)
         {
 #ifdef SUPPORT_UCP
-        unsigned int othercase;
+        pcre_uint32 othercase;
         if (op >= OP_STARI &&     /* Caseless */
             (othercase = UCD_OTHERCASE(fc)) != fc)
           oclength = PRIV(ord2utf)(othercase, occhars);
@@ -3746,7 +3746,7 @@ for (;;)
 #ifdef SUPPORT_UTF
         if (utf)
           {
-          register unsigned int d;
+          register pcre_uint32 d;
           for (fi = min;; fi++)
             {
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM28);
@@ -3791,7 +3791,7 @@ for (;;)
 #ifdef SUPPORT_UTF
         if (utf)
           {
-          register unsigned int d;
+          register pcre_uint32 d;
           for (i = min; i < max; i++)
             {
             int len = 1;
@@ -3848,7 +3848,7 @@ for (;;)
 #ifdef SUPPORT_UTF
       if (utf)
         {
-        register unsigned int d;
+        register pcre_uint32 d;
         for (i = 1; i <= min; i++)
           {
           if (eptr >= md->end_subject)
@@ -3882,7 +3882,7 @@ for (;;)
 #ifdef SUPPORT_UTF
         if (utf)
           {
-          register unsigned int d;
+          register pcre_uint32 d;
           for (fi = min;; fi++)
             {
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM32);
@@ -3926,7 +3926,7 @@ for (;;)
 #ifdef SUPPORT_UTF
         if (utf)
           {
-          register unsigned int d;
+          register pcre_uint32 d;
           for (i = min; i < max; i++)
             {
             int len = 1;
