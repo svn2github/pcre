@@ -864,43 +864,47 @@ code. */
 #undef GET_EXTRALEN
 #undef NOT_FIRSTCHAR
 
+#define UTF32_MASK (0x1ffffful)
+
 /* Get the next UTF-32 character, not advancing the pointer. This is called when
 we know we are in UTF-32 mode. */
 
 #define GETCHAR(c, eptr) \
-  c = *eptr;
+  c = (*eptr) & UTF32_MASK;
 
 /* Get the next UTF-32 character, testing for UTF-32 mode, and not advancing the
 pointer. */
 
 #define GETCHARTEST(c, eptr) \
-  c = *eptr;
+  c = *eptr; \
+  if (utf) c &= UTF32_MASK;
 
 /* Get the next UTF-32 character, advancing the pointer. This is called when we
 know we are in UTF-32 mode. */
 
 #define GETCHARINC(c, eptr) \
-  c = *eptr++;
+  c = (*eptr++) & UTF32_MASK;
 
 /* Get the next character, testing for UTF-32 mode, and advancing the pointer.
 This is called when we don't know if we are in UTF-32 mode. */
 
 #define GETCHARINCTEST(c, eptr) \
-  c = *eptr++;
+  c = *eptr++; \
+  if (utf) c &= UTF32_MASK;
 
 /* Get the next UTF-32 character, not advancing the pointer, not incrementing
 length (since all UTF-32 is of length 1). This is called when we know we are in
 UTF-32 mode. */
 
 #define GETCHARLEN(c, eptr, len) \
-  c = *eptr;
+  GETCHAR(c, eptr)
 
-/* Get the next UTF-832character, testing for UTF-32 mode, not advancing the
+/* Get the next UTF-32character, testing for UTF-32 mode, not advancing the
 pointer, not incrementing the length (since all UTF-32 is of length 1).
 This is called when we do not know if we are in UTF-32 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
-  c = *eptr;
+  GETCHARTEST(c, eptr)
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the

@@ -50,8 +50,6 @@ character value into a UTF32 string. */
 
 #include "pcre_internal.h"
 
-#define MASK (0x1fffffu)
-
 /*************************************************
 *       Convert character value to UTF-32         *
 *************************************************/
@@ -71,7 +69,7 @@ PRIV(ord2utf)(pcre_uint32 cvalue, pcre_uchar *buffer)
 {
 #ifdef SUPPORT_UTF
 
-cvalue &= MASK;
+cvalue &= UTF32_MASK;
 
 /* Checking invalid cvalue character, encoded as invalid UTF-32 character */
 if ((cvalue & 0xfffff800u) == 0xd800u || cvalue >= 0x110000u)
