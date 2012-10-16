@@ -4873,14 +4873,24 @@ while (!done)
           int rc;
           char copybuffer[256];
 
+#ifdef SUPPORT_PCRE32
+          if (pcre_mode == PCRE32_MODE)
+            {
+            if (*(pcre_uint32 *)cnptr == 0) break;
+            }
+#endif
+#ifdef SUPPORT_PCRE16
           if (pcre_mode == PCRE16_MODE)
             {
             if (*(pcre_uint16 *)cnptr == 0) break;
             }
-          else
+#endif
+#ifdef SUPPORT_PCRE8
+          if (pcre_mode == PCRE8_MODE)
             {
             if (*(pcre_uint8 *)cnptr == 0) break;
             }
+#endif
 
           PCRE_COPY_NAMED_SUBSTRING(rc, re, bptr, use_offsets, count,
             cnptr, copybuffer, sizeof(copybuffer));
@@ -4928,14 +4938,24 @@ while (!done)
           int rc;
           const char *substring;
 
+#ifdef SUPPORT_PCRE32
+          if (pcre_mode == PCRE32_MODE)
+            {
+            if (*(pcre_uint32 *)gnptr == 0) break;
+            }
+#endif
+#ifdef SUPPORT_PCRE16
           if (pcre_mode == PCRE16_MODE)
             {
             if (*(pcre_uint16 *)gnptr == 0) break;
             }
-          else
+#endif
+#ifdef SUPPORT_PCRE8
+          if (pcre_mode == PCRE8_MODE)
             {
             if (*(pcre_uint8 *)gnptr == 0) break;
             }
+#endif
 
           PCRE_GET_NAMED_SUBSTRING(rc, re, bptr, use_offsets, count,
             gnptr, &substring);
