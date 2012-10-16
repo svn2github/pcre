@@ -51,8 +51,6 @@ strings. */
 
 #include "pcre_internal.h"
 
-#define MASK (0x1fffffu)
-
 /*************************************************
 *         Validate a UTF-32 string                *
 *************************************************/
@@ -63,12 +61,13 @@ that subsequent code can assume it is dealing with a valid string. The check
 can be turned off for maximum performance, but the consequences of supplying an
 invalid string are then undefined.
 
-From release 8.21 more information about the details of the error are passed
+More information about the details of the error are passed
 back in the returned value:
 
 PCRE_UTF32_ERR0  No error
 PCRE_UTF32_ERR1  Surrogate character
-PCRE_UTF32_ERR2  Not allowed character
+PCRE_UTF32_ERR2  Disallowed character 0xfffe
+PCRE_UTF32_ERR3  Character > 0x10ffff
 
 Arguments:
   string       points to the string
@@ -94,7 +93,7 @@ if (length < 0)
 
 for (p = string; length-- > 0; p++)
   {
-  c = *p & MASK;
+  c = *p & UTF32_MASK;
 
   if ((c & 0xfffff800u) != 0xd800u)
     {
@@ -105,6 +104,11 @@ for (p = string; length-- > 0; p++)
       {
       *erroroffset = p - string;
       return PCRE_UTF32_ERR2;
+      }
+    else if (c > 0x10ffffu)
+      {
+      *erroroffset = p - string;
+      return PCRE_UTF32_ERR3;
       }
     }
   else
