@@ -302,13 +302,13 @@ Returns:       nothing
 static void
 pchars(const pcre_uchar *p, int length, FILE *f)
 {
-int c;
+pcre_uint32 c;
 while (length-- > 0)
   {
   if (isprint(c = *(p++)))
     fprintf(f, "%c", c);
   else
-    fprintf(f, "\\x%02x", c);
+    fprintf(f, "\\x{%02x}", c);
   }
 }
 #endif
