@@ -241,8 +241,8 @@ if [ $link_size -gt 4 ] ; then
   exit 1
 fi
 
-# Both 8-bit and 16-bit character strings may be supported, but only one
-# need be.
+# All of 8-bit, 16-bit, and 32-bit character strings may be supported, but only
+# one need be.
 
 $sim ./pcretest -C pcre8 >/dev/null
 support8=$?
@@ -251,63 +251,52 @@ support16=$?
 $sim ./pcretest -C pcre32 >/dev/null
 support32=$?
 
-if [ `expr $support8 + $support16 + $support32` -gt 1 ] ; then
-  test8=
-  test16=-16
-  test32=-32
-  if [ "$arg8" = yes -a "$arg16$arg32" != nono ] ; then
-    test16=skip
-    test32=skip
-  fi
-  if [ "$arg16" = yes -a "$arg8$arg32" != nono ] ; then
-    test8=skip
-    test32=skip
-  fi
-  if [ "$arg32" = yes -a "$arg8$arg16" != nono ] ; then
-    test8=skip
-    test16=skip
-  fi
-else
+# Initialize all bitsizes skipped
+
+test8=skip
+test16=skip
+test32=skip
+
+# If no bitsize arguments, select all that are available
+
+if [ "$arg8$arg16$arg32" = "" ] ; then
   if [ $support8 -ne 0 ] ; then
-    if [ "$arg16" = yes ] ; then
-      echo "Cannot run 16-bit library tests: 16-bit library not compiled"
-      exit 1
-    fi
-    if [ "$arg32" = yes ] ; then
-      echo "Cannot run 32-bit library tests: 32-bit library not compiled"
+    test8=
+  fi    
+  if [ $support16 -ne 0 ] ; then
+    test16=-16
+  fi    
+  if [ $support32 -ne 0 ] ; then
+    test32=-32
+  fi    
+
+# Select requested bit sizes
+
+else
+  if [ "$arg8" = yes ] ; then
+    if [ $support8 -eq 0 ] ; then
+      echo "Cannot run 8-bit library tests: 8-bit library not compiled"
       exit 1
     fi
     test8=
-    test16=skip
-    test32=skip
-  elif [ $support16 -ne 0 ] ; then
-    if [ "$arg8" = yes ] ; then
-      echo "Cannot run 8-bit library tests: 8-bit library not compiled"
-      exit 1
-    fi
-    if [ "$arg32" = yes ] ; then
-      echo "Cannot run 32-bit library tests: 32-bit library not compiled"
-      exit 1
-    fi
-    test8=skip
-    test16=-16
-    test32=skip
-  else # $support32 -ne 0
-    if [ "$arg8" = yes ] ; then
-      echo "Cannot run 8-bit library tests: 8-bit library not compiled"
-      exit 1
-    fi
-    if [ "$arg16" = yes ] ; then
+  fi       
+  if [ "$arg16" = yes ] ; then
+    if [ $support16 -eq 0 ] ; then
       echo "Cannot run 16-bit library tests: 16-bit library not compiled"
       exit 1
     fi
-    test8=skip
-    test16=skip
+    test16=-16
+  fi       
+  if [ "$arg32" = yes ] ; then
+    if [ $support32 -eq 0 ] ; then
+      echo "Cannot run 32-bit library tests: 32-bit library not compiled"
+      exit 1
+    fi
     test32=-32
-  fi
+  fi       
 fi
 
-# UTF support always applies to both bit sizes if both are supported; we can't
+# UTF support always applies to all bit sizes if both are supported; we can't
 # have UTF-8 support without UTF-16 support (for example).
 
 $sim ./pcretest -C utf >/dev/null
