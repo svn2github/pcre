@@ -2244,7 +2244,7 @@ return(result);
 
 static int pchar(pcre_uint32 c, FILE *f)
 {
-int n;
+int n = 0;
 if (PRINTOK(c))
   {
   if (f != NULL) fprintf(f, "%c", c);
@@ -4200,6 +4200,7 @@ while (!done)
 
       new_info(re, NULL, PCRE_INFO_NAMECOUNT, &name_count);
       new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &name_entry_size);
+      real_pcre_size = 0;
 #ifdef SUPPORT_PCRE8
       if (REAL_PCRE_FLAGS(re) & PCRE_MODE8)
         real_pcre_size = sizeof(real_pcre);
