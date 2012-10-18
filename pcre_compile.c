@@ -3133,7 +3133,6 @@ if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
 
 if (op_code == OP_CHAR || op_code == OP_CHARI || 
     op_code == OP_NOT || op_code == OP_NOTI)
-  //if (escape == 0) switch(op_code)
   {
 #ifdef SUPPORT_UTF
   GETCHARTEST(c, previous);
