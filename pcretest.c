@@ -2931,9 +2931,6 @@ real_pcre32 *re = (real_pcre32 *)ere;
 int op;
 pcre_uint32 *ptr = (pcre_uint32 *)re + re->name_table_offset;
 int length = re->name_count * re->name_entry_size;
-#ifdef SUPPORT_UTF
-BOOL utf = (re->options & PCRE_UTF32) != 0;
-#endif /* SUPPORT_UTF */
 
 /* Always flip the bytes in the main data block and study blocks. */
 
