@@ -2918,7 +2918,7 @@ get_othercase_range(pcre_uint32 *cptr, pcre_uint32 d, pcre_uint32 *ocptr,
   pcre_uint32 *odptr)
 {
 pcre_uint32 c, othercase, next;
-int co;
+unsigned int co;
 
 /* Find the first character that has an other case. If it has multiple other 
 cases, return its case offset value. */
@@ -2929,7 +2929,7 @@ for (c = *cptr; c <= d; c++)
     {
     *ocptr = c++;   /* Character that has the set */
     *cptr = c;      /* Rest of input range */
-    return co;
+    return (int)co;
     }    
   if ((othercase = UCD_OTHERCASE(c)) != c) break; 
   }
@@ -3155,7 +3155,7 @@ if (escape == 0)
 #ifdef SUPPORT_UCP
   if (utf && c != NOTACHAR && (options & PCRE_CASELESS) != 0)
     {
-    int ocs = UCD_CASESET(next);
+    unsigned int ocs = UCD_CASESET(next);
     if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, op_code >= OP_NOT);
     }
 #endif
