@@ -104,7 +104,7 @@ const pcre_uint8 PRIV(utf8_table4)[] = {
 
 /* Table to translate from particular type value to the general value. */
 
-const int PRIV(ucp_gentype)[] = {
+const pcre_uint32 PRIV(ucp_gentype)[] = {
   ucp_C, ucp_C, ucp_C, ucp_C, ucp_C,  /* Cc, Cf, Cn, Co, Cs */
   ucp_L, ucp_L, ucp_L, ucp_L, ucp_L,  /* Ll, Lu, Lm, Lo, Lt */
   ucp_M, ucp_M, ucp_M,                /* Mc, Me, Mn */
