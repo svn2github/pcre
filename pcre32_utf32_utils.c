@@ -105,8 +105,9 @@ const pcre_uchar *end;
 register pcre_uchar c;
 
 if (length < 0)
-  length = STRLEN_UC(iptr) + 1;
-end = iptr + length;
+  end = iptr + STRLEN_UC(iptr) + 1;
+else
+  end = iptr + length;
 
 while (iptr < end)
   {
@@ -118,8 +119,6 @@ while (iptr < end)
     host_bo = c == 0x0000feffu;
     if (keep_boms != 0)
       *optr++ = 0x0000feffu;
-    else
-      length--;
     }
   else
     *optr++ = host_bo ? c : swap_uint32(c);
