@@ -1203,14 +1203,16 @@ escape sequence.
 Argument:
   ptrptr         points to the pattern position pointer
   negptr         points to a boolean that is set TRUE for negation else FALSE
-  dptr           points to an int that is set to the detailed property value
+  ptypeptr       points to an unsigned int that is set to the type value
+  pdataptr       points to an unsigned int that is set to the detailed property value
   errorcodeptr   points to the error code variable
 
-Returns:         type value from ucp_type_table, or -1 for an invalid type
+Returns:         TRUE if the type value was found, or FALSE for an invalid type
 */
 
-static int
-get_ucp(const pcre_uchar **ptrptr, BOOL *negptr, int *dptr, int *errorcodeptr)
+static BOOL
+get_ucp(const pcre_uchar **ptrptr, BOOL *negptr, unsigned int *ptypeptr, 
+  unsigned int *pdataptr, int *errorcodeptr)
 {
 pcre_uchar c;
 int i, bot, top;
@@ -1265,20 +1267,21 @@ while (bot < top)
   r = STRCMP_UC_C8(name, PRIV(utt_names) + PRIV(utt)[i].name_offset);
   if (r == 0)
     {
-    *dptr = PRIV(utt)[i].value;
-    return PRIV(utt)[i].type;
+    *ptypeptr = PRIV(utt)[i].type;
+    *pdataptr = PRIV(utt)[i].value;
+    return TRUE;
     }
   if (r > 0) bot = i + 1; else top = i;
   }
 
 *errorcodeptr = ERR47;
 *ptrptr = ptr;
-return -1;
+return FALSE;
 
 ERROR_RETURN:
 *errorcodeptr = ERR46;
 *ptrptr = ptr;
-return -1;
+return FALSE;
 }
 #endif
 
@@ -3338,12 +3341,13 @@ switch(op_code)
     case ESC_p:
     case ESC_P:
       {
-      int ptype, pdata, errorcodeptr;
+      unsigned int ptype = 0, pdata = 0;
+      int errorcodeptr;
       BOOL negated;
 
       ptr--;      /* Make ptr point at the p or P */
-      ptype = get_ucp(&ptr, &negated, &pdata, &errorcodeptr);
-      if (ptype < 0) return FALSE;
+      if (!get_ucp(&ptr, &negated, &ptype, &pdata, &errorcodeptr))
+        return FALSE;
       ptr++;      /* Point past the final curly ket */
 
       /* If the property item is optional, we have to give up. (When generated
@@ -4375,9 +4379,9 @@ for (;; ptr++)
             case ESC_P:
               {
               BOOL negated;
-              int pdata;
-              int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
-              if (ptype < 0) goto FAILED;
+              unsigned int ptype = 0, pdata = 0;
+              if (!get_ucp(&ptr, &negated, &ptype, &pdata, errorcodeptr))
+                goto FAILED;
               *class_uchardata++ = ((escape == ESC_p) != negated)?
                 XCL_PROP : XCL_NOTPROP;
               *class_uchardata++ = ptype;
@@ -6874,9 +6878,9 @@ for (;; ptr++)
       else if (escape == ESC_P || escape == ESC_p)
         {
         BOOL negated;
-        int pdata;
-        int ptype = get_ucp(&ptr, &negated, &pdata, errorcodeptr);
-        if (ptype < 0) goto FAILED;
+        unsigned int ptype = 0, pdata = 0;
+        if (!get_ucp(&ptr, &negated, &ptype, &pdata, errorcodeptr))
+          goto FAILED;
         previous = code;
         *code++ = ((escape == ESC_p) != negated)? OP_PROP : OP_NOTPROP;
         *code++ = ptype;
