@@ -102,7 +102,7 @@ for (p = string; length-- > 0; p++)
     /* Normal UTF-16 code point. Neither high nor low surrogate. */
 
     /* Check for non-characters */
-    if ((c & 0xfffeu) == 0xfffeu || c >= 0xfdd0u && c <= 0xfdefu)
+    if ((c & 0xfffeu) == 0xfffeu || (c >= 0xfdd0u && c <= 0xfdefu))
       {
       *erroroffset = p - string;
       return PCRE_UTF16_ERR4;

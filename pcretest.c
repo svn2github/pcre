@@ -2096,8 +2096,7 @@ for (p = string; length-- > 0; p++)
     return FALSE;
 
   /* Non-character */
-  if ((c & 0xfffeu) == 0xfffeu ||
-      c >= 0xfdd0u && c <= 0xfdefu)
+  if ((c & 0xfffeu) == 0xfffeu || (c >= 0xfdd0u && c <= 0xfdefu))
     return FALSE;
   }
 
