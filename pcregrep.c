@@ -1487,6 +1487,8 @@ of what we have. In the case of libz, a non-zipped .gz file will be read as a
 plain file. However, if a .bz2 file isn't actually bzipped, the first read will
 fail. */
 
+(void)frtype;
+
 #ifdef SUPPORT_LIBZ
 if (frtype == FR_LIBZ)
   {
