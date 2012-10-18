@@ -2969,7 +2969,7 @@ Returns:       TRUE if auto-possessifying is OK
 */
 
 static BOOL
-check_char_prop(pcre_uint32 c, int ptype, int pdata, BOOL negated)
+check_char_prop(pcre_uint32 c, unsigned int ptype, unsigned int pdata, BOOL negated)
 {
 #ifdef SUPPORT_UCP
 const pcre_uint32 *p;
@@ -3255,10 +3255,10 @@ if (escape == 0)
 
 #ifdef SUPPORT_UCP
     case OP_PROP:
-    return check_char_prop(next, (int)previous[0], (int)previous[1], FALSE);
+    return check_char_prop(next, previous[0], previous[1], FALSE);
 
     case OP_NOTPROP:
-    return check_char_prop(next, (int)previous[0], (int)previous[1], TRUE);
+    return check_char_prop(next, previous[0], previous[1], TRUE);
 #endif
 
     default:
