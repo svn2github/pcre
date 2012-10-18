@@ -136,7 +136,7 @@ switch (what)
 
   case PCRE_INFO_FIRSTBYTE:
   *((int *)where) =
-    ((re->flags & PCRE_FIRSTSET) != 0)? re->first_char :
+    ((re->flags & PCRE_FIRSTSET) != 0)? (int)re->first_char :
     ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
   break;
 
@@ -174,7 +174,7 @@ switch (what)
 
   case PCRE_INFO_LASTLITERAL:
   *((int *)where) =
-    ((re->flags & PCRE_REQCHSET) != 0)? re->req_char : -1;
+    ((re->flags & PCRE_REQCHSET) != 0)? (int)re->req_char : -1;
   break;
 
   case PCRE_INFO_REQUIREDCHAR:

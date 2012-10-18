@@ -632,7 +632,7 @@ Returns:         nothing
 */
 
 static void
-set_type_bits(pcre_uint8 *start_bits, int cbit_type, int table_limit,
+set_type_bits(pcre_uint8 *start_bits, int cbit_type, unsigned int table_limit,
   compile_data *cd)
 {
 register pcre_uint32 c;
@@ -674,7 +674,7 @@ Returns:         nothing
 */
 
 static void
-set_nottype_bits(pcre_uint8 *start_bits, int cbit_type, int table_limit,
+set_nottype_bits(pcre_uint8 *start_bits, int cbit_type, unsigned int table_limit,
   compile_data *cd)
 {
 register pcre_uint32 c;
