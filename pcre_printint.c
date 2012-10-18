@@ -114,7 +114,7 @@ static const pcre_uint8 priv_OP_lengths[] = { OP_LENGTHS };
 *       Print single- or multi-byte character    *
 *************************************************/
 
-static int
+static unsigned int
 print_char(FILE *f, pcre_uchar *ptr, BOOL utf)
 {
 pcre_uint32 c = *ptr;
@@ -233,7 +233,7 @@ while (*ptr != '\0')
 *************************************************/
 
 static const char *
-get_ucpname(int ptype, int pvalue)
+get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UCP
 int i;
@@ -338,7 +338,7 @@ for(;;)
   pcre_uchar *ccode;
   const char *flag = "  ";
   pcre_uint32 c;
-  int extra = 0;
+  unsigned int extra = 0;
 
   if (print_lengths)
     fprintf(f, "%3d ", (int)(code - codestart));
@@ -616,7 +616,8 @@ for(;;)
     case OP_NCLASS:
     case OP_XCLASS:
       {
-      int i, min, max;
+      int i;
+      unsigned int min, max;
       BOOL printmap;
       pcre_uint8 *map;
 
@@ -667,19 +668,19 @@ for(;;)
 
       if (*code == OP_XCLASS)
         {
-        int ch;
+        pcre_uchar ch;
         while ((ch = *ccode++) != XCL_END)
           {
           if (ch == XCL_PROP)
             {
-            int ptype = *ccode++;
-            int pvalue = *ccode++;
+            unsigned int ptype = *ccode++;
+            unsigned int pvalue = *ccode++;
             fprintf(f, "\\p{%s}", get_ucpname(ptype, pvalue));
             }
           else if (ch == XCL_NOTPROP)
             {
-            int ptype = *ccode++;
-            int pvalue = *ccode++;
+            unsigned int ptype = *ccode++;
+            unsigned int pvalue = *ccode++;
             fprintf(f, "\\P{%s}", get_ucpname(ptype, pvalue));
             }
           else
@@ -717,8 +718,8 @@ for(;;)
         case OP_CRMINRANGE:
         min = GET2(ccode,1);
         max = GET2(ccode,1 + IMM2_SIZE);
-        if (max == 0) fprintf(f, "{%d,}", min);
-        else fprintf(f, "{%d,%d}", min, max);
+        if (max == 0) fprintf(f, "{%u,}", min);
+        else fprintf(f, "{%u,%u}", min, max);
         if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
         extra += priv_OP_lengths[*ccode];
         break;
