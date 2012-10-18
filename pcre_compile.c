@@ -3795,7 +3795,7 @@ for (;; ptr++)
   pcre_uint32 subreqchar, subfirstchar;
   pcre_int32 subreqcharflags, subfirstcharflags;
   int terminator;
-  int mclength;
+  unsigned int mclength;
   int tempbracount;
   pcre_uint32 ec;
   pcre_uchar mcbuffer[8];

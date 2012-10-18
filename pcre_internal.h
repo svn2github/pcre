@@ -2681,7 +2681,7 @@ extern int               PRIV(strcmp_uc_c8_utf)(const pcre_uchar *,
 extern const pcre_uchar *PRIV(find_bracket)(const pcre_uchar *, BOOL, int);
 extern BOOL              PRIV(is_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,
                            int *, BOOL);
-extern int               PRIV(ord2utf)(pcre_uint32, pcre_uchar *);
+extern unsigned int      PRIV(ord2utf)(pcre_uint32, pcre_uchar *);
 extern int               PRIV(valid_utf)(PCRE_PUCHAR, int, int *);
 extern BOOL              PRIV(was_newline)(PCRE_PUCHAR, int, PCRE_PUCHAR,
                            int *, BOOL);

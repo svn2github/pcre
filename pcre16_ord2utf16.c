@@ -64,7 +64,7 @@ Arguments:
 Returns:     number of characters placed in the buffer
 */
 
-int
+unsigned int
 PRIV(ord2utf)(pcre_uint32 cvalue, pcre_uchar *buffer)
 {
 #ifdef SUPPORT_UTF
