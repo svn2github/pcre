@@ -401,7 +401,7 @@ typedef struct heapframe {
 
 #ifdef SUPPORT_UCP
   int Xprop_type;
-  int Xprop_value;
+  unsigned int Xprop_value;
   int Xprop_fail_result;
   int Xoclength;
   pcre_uchar Xocchars[6];
@@ -619,7 +619,7 @@ BOOL prev_is_word;
 
 #ifdef SUPPORT_UCP
 int prop_type;
-int prop_value;
+unsigned int prop_value;
 int prop_fail_result;
 int oclength;
 pcre_uchar occhars[6];
