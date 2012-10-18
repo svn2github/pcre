@@ -5822,7 +5822,7 @@ for (;; ptr++)
           }
         namelen = (int)(ptr - name);
 
-        if ((terminator > 0 && *ptr++ != terminator) ||
+        if ((terminator > 0 && *ptr++ != (pcre_uchar)terminator) ||
             *ptr++ != CHAR_RIGHT_PARENTHESIS)
           {
           ptr--;      /* Error offset */
@@ -6062,7 +6062,7 @@ for (;; ptr++)
 
           if (lengthptr != NULL)
             {
-            if (*ptr != terminator)
+            if (*ptr != (pcre_uchar)terminator)
               {
               *errorcodeptr = ERR42;
               goto FAILED;
@@ -6204,7 +6204,7 @@ for (;; ptr++)
             *errorcodeptr = ERR62;
             goto FAILED;
             }
-          if (*ptr != terminator)
+          if (*ptr != (pcre_uchar)terminator)
             {
             *errorcodeptr = ERR42;
             goto FAILED;
@@ -6310,7 +6310,7 @@ for (;; ptr++)
           while(IS_DIGIT(*ptr))
             recno = recno * 10 + *ptr++ - CHAR_0;
 
-          if (*ptr != terminator)
+          if (*ptr != (pcre_uchar)terminator)
             {
             *errorcodeptr = ERR29;
             goto FAILED;
@@ -6790,13 +6790,13 @@ for (;; ptr++)
         if (ptr[1] != CHAR_PLUS && ptr[1] != CHAR_MINUS)
           {
           BOOL is_a_number = TRUE;
-          for (p = ptr + 1; *p != 0 && *p != terminator; p++)
+          for (p = ptr + 1; *p != 0 && *p != (pcre_uchar)terminator; p++)
             {
             if (!MAX_255(*p)) { is_a_number = FALSE; break; }
             if ((cd->ctypes[*p] & ctype_digit) == 0) is_a_number = FALSE;
             if ((cd->ctypes[*p] & ctype_word) == 0) break;
             }
-          if (*p != terminator)
+          if (*p != (pcre_uchar)terminator)
             {
             *errorcodeptr = ERR57;
             break;
@@ -6814,7 +6814,7 @@ for (;; ptr++)
 
         p = ptr + 2;
         while (IS_DIGIT(*p)) p++;
-        if (*p != terminator)
+        if (*p != (pcre_uchar)terminator)
           {
           *errorcodeptr = ERR57;
           break;
