@@ -3796,7 +3796,7 @@ for (;; ptr++)
   pcre_int32 subreqcharflags, subfirstcharflags;
   int terminator;
   unsigned int mclength;
-  int tempbracount;
+  unsigned int tempbracount;
   pcre_uint32 ec;
   pcre_uchar mcbuffer[8];
 
@@ -7107,8 +7107,8 @@ pcre_int32 firstcharflags, reqcharflags;
 pcre_uint32 branchfirstchar, branchreqchar;
 pcre_int32 branchfirstcharflags, branchreqcharflags;
 int length;
-int orig_bracount;
-int max_bracount;
+unsigned int orig_bracount;
+unsigned int max_bracount;
 branch_chain bc;
 
 bc.outer = bcptr;

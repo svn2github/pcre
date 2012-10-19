@@ -523,9 +523,13 @@ capturing parenthesis numbers in back references. */
 #define PUT2(a,n,d)   \
   a[n] = (d) >> 8; \
   a[(n)+1] = (d) & 255
+  
+/* For reasons that I do not understand, the expression in this GET2 macro is 
+treated by gcc as a signed expression, even when a is declared as unsigned. It 
+seems that any kind of arithmetic results in a signed value. */
 
 #define GET2(a,n) \
-  (((a)[n] << 8) | (a)[(n)+1])
+  (unsigned int)(((a)[n] << 8) | (a)[(n)+1])
 
 #elif defined COMPILE_PCRE16
 
@@ -2394,7 +2398,7 @@ typedef struct compile_data {
   int  names_found;                 /* Number of entries so far */
   int  name_entry_size;             /* Size of each entry */
   int  workspace_size;              /* Size of workspace */
-  int  bracount;                    /* Count of capturing parens as we compile */
+  unsigned int  bracount;           /* Count of capturing parens as we compile */
   int  final_bracount;              /* Saved value after first pass */
   int  max_lookbehind;              /* Maximum lookbehind (characters) */
   int  top_backref;                 /* Maximum back reference */
