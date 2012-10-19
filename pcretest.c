@@ -302,6 +302,8 @@ argument, the casting might be incorrectly applied. */
 
 #define PCRE_JIT_STACK_FREE8(stack) \
   pcre_jit_stack_free(stack)
+  
+#define pcre8_maketables pcre_maketables 
 
 #endif /* SUPPORT_PCRE8 */
 
@@ -486,7 +488,7 @@ argument, the casting might be incorrectly applied. */
 
 /* ----- More than one mode is supported; a runtime test is needed, except for
 pcre_config(), and the JIT stack functions, when it doesn't matter which
-version is called. ----- */
+available version is called. ----- */
 
 enum {
   PCRE8_MODE,
@@ -706,469 +708,191 @@ cases separately. */
     PCRE_STUDY8(extra, re, options, error)
 
 
+/* ----- Two out of three modes are supported ----- */
+
+#else
+
+/* We can use some macro trickery to make a single set of definitions work in
+the three different cases. */
+
 /* ----- 32-bit and 16-bit but not 8-bit supported ----- */
 
-#elif defined(SUPPORT_PCRE32) && defined(SUPPORT_PCRE16)
-#define PCHARS(lv, p, offset, len, f) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCHARS32(lv, p, offset, len, f); \
-  else \
-    PCHARS16(lv, p, offset, len, f)
-
-#define PCHARSV(p, offset, len, f) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCHARSV32(p, offset, len, f); \
-  else \
-    PCHARSV16(p, offset, len, f)
-
-#define READ_CAPTURE_NAME(p, cn8, cn16, cn32, re) \
-  if (pcre_mode == PCRE32_MODE) \
-    READ_CAPTURE_NAME32(p, cn8, cn16, cn32, re); \
-  else \
-    READ_CAPTURE_NAME16(p, cn8, cn16, cn32, re)
-
-#define SET_PCRE_CALLOUT(callout) \
-  if (pcre_mode == PCRE32_MODE) \
-    SET_PCRE_CALLOUT32(callout); \
-  else \
-    SET_PCRE_CALLOUT16(callout)
-
-#define STRLEN(p) (pcre_mode == PCRE32_MODE ? STRLEN32(p) : STRLEN16(p)
-
-#define PCRE_ASSIGN_JIT_STACK(extra, callback, userdata) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_ASSIGN_JIT_STACK32(extra, callback, userdata); \
-  else \
-    PCRE_ASSIGN_JIT_STACK16(extra, callback, userdata)
-
-#define PCRE_COMPILE(re, pat, options, error, erroffset, tables) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_COMPILE32(re, pat, options, error, erroffset, tables); \
-  else \
-    PCRE_COMPILE16(re, pat, options, error, erroffset, tables)
-
-#define PCRE_CONFIG pcre_config
-
-#define PCRE_COPY_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
-    namesptr, cbuffer, size) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_COPY_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
-      namesptr, cbuffer, size); \
-  else \
-    PCRE_COPY_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
-      namesptr, cbuffer, size)
-
-#define PCRE_COPY_SUBSTRING(rc, bptr, offsets, count, i, cbuffer, size) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_COPY_SUBSTRING32(rc, bptr, offsets, count, i, cbuffer, size); \
-  else \
-    PCRE_COPY_SUBSTRING16(rc, bptr, offsets, count, i, cbuffer, size)
-
-#define PCRE_DFA_EXEC(count, re, extra, bptr, len, start_offset, options, \
-    offsets, size_offsets, workspace, size_workspace) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_DFA_EXEC32(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets, workspace, size_workspace); \
-  else \
-    PCRE_DFA_EXEC16(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets, workspace, size_workspace)
-
-#define PCRE_EXEC(count, re, extra, bptr, len, start_offset, options, \
-    offsets, size_offsets) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_EXEC32(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets); \
-  else \
-    PCRE_EXEC16(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets)
-
-#define PCRE_FREE_STUDY(extra) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_FREE_STUDY32(extra); \
-  else \
-    PCRE_FREE_STUDY16(extra)
-
-#define PCRE_FREE_SUBSTRING(substring) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_FREE_SUBSTRING32(substring); \
-  else \
-    PCRE_FREE_SUBSTRING16(substring)
-
-#define PCRE_FREE_SUBSTRING_LIST(listptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_FREE_SUBSTRING_LIST32(listptr); \
-  else \
-    PCRE_FREE_SUBSTRING_LIST16(listptr)
-
-#define PCRE_GET_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
-    getnamesptr, subsptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
-      getnamesptr, subsptr); \
-  else \
-    PCRE_GET_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
-      getnamesptr, subsptr)
-
-#define PCRE_GET_STRINGNUMBER(n, rc, ptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_STRINGNUMBER32(n, rc, ptr); \
-  else \
-    PCRE_GET_STRINGNUMBER16(n, rc, ptr)
-
-#define PCRE_GET_SUBSTRING(rc, bptr, use_offsets, count, i, subsptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_SUBSTRING32(rc, bptr, use_offsets, count, i, subsptr); \
-  else \
-    PCRE_GET_SUBSTRING16(rc, bptr, use_offsets, count, i, subsptr)
-
-#define PCRE_GET_SUBSTRING_LIST(rc, bptr, offsets, count, listptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_SUBSTRING_LIST32(rc, bptr, offsets, count, listptr); \
-  else \
-    PCRE_GET_SUBSTRING_LIST16(rc, bptr, offsets, count, listptr)
-
-#define PCRE_JIT_STACK_ALLOC(startsize, maxsize) \
-  (pcre_mode == PCRE32_MODE ? \
-     PCRE_JIT_STACK_ALLOC32(startsize, maxsize) \
-    : PCRE_JIT_STACK_ALLOC16(startsize, maxsize)
-
-#define PCRE_JIT_STACK_FREE(stack) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_JIT_STACK_FREE32(stack); \
-  else \
-    PCRE_JIT_STACK_FREE16(stack)
-
-#define PCRE_MAKETABLES \
-  (pcre_mode == PCRE32_MODE ? pcre32_maketables() : pcre16_maketables())
-
-#define PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, tables) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER32(rc, re, extra, tables); \
-  else \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables)
-
-#define PCRE_PRINTINT(re, outfile, debug_lengths) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_PRINTINT32(re, outfile, debug_lengths); \
-  else \
-    PCRE_PRINTINT16(re, outfile, debug_lengths)
-
-#define PCRE_STUDY(extra, re, options, error) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_STUDY32(extra, re, options, error); \
-  else \
-    PCRE_STUDY16(extra, re, options, error)
-
+#if defined(SUPPORT_PCRE32) && defined(SUPPORT_PCRE16)
+#define BITONE 32
+#define BITTWO 16
 
 /* ----- 32-bit and 8-bit but not 16-bit supported ----- */
 
 #elif defined(SUPPORT_PCRE32) && defined(SUPPORT_PCRE8)
-
-#define PCHARS(lv, p, offset, len, f) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCHARS32(lv, p, offset, len, f); \
-  else \
-    PCHARS8(lv, p, offset, len, f)
-
-#define PCHARSV(p, offset, len, f) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCHARSV32(p, offset, len, f); \
-  else \
-    PCHARSV8(p, offset, len, f)
-
-#define READ_CAPTURE_NAME(p, cn8, cn16, cn32, re) \
-  if (pcre_mode == PCRE32_MODE) \
-    READ_CAPTURE_NAME32(p, cn8, cn16, cn32, re); \
-  else \
-    READ_CAPTURE_NAME8(p, cn8, cn16, cn32, re)
-
-#define SET_PCRE_CALLOUT(callout) \
-  if (pcre_mode == PCRE32_MODE) \
-    SET_PCRE_CALLOUT32(callout); \
-  else \
-    SET_PCRE_CALLOUT8(callout)
-
-#define STRLEN(p) (pcre_mode == PCRE32_MODE ? STRLEN32(p) : STRLEN8(p))
-
-#define PCRE_ASSIGN_JIT_STACK(extra, callback, userdata) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_ASSIGN_JIT_STACK32(extra, callback, userdata); \
-  else \
-    PCRE_ASSIGN_JIT_STACK8(extra, callback, userdata)
-
-#define PCRE_COMPILE(re, pat, options, error, erroffset, tables) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_COMPILE32(re, pat, options, error, erroffset, tables); \
-  else \
-    PCRE_COMPILE8(re, pat, options, error, erroffset, tables)
-
-#define PCRE_CONFIG pcre_config
-
-#define PCRE_COPY_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
-    namesptr, cbuffer, size) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_COPY_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
-      namesptr, cbuffer, size); \
-  else \
-    PCRE_COPY_NAMED_SUBSTRING8(rc, re, bptr, offsets, count, \
-      namesptr, cbuffer, size)
-
-#define PCRE_COPY_SUBSTRING(rc, bptr, offsets, count, i, cbuffer, size) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_COPY_SUBSTRING32(rc, bptr, offsets, count, i, cbuffer, size); \
-  else \
-    PCRE_COPY_SUBSTRING8(rc, bptr, offsets, count, i, cbuffer, size)
-
-#define PCRE_DFA_EXEC(count, re, extra, bptr, len, start_offset, options, \
-    offsets, size_offsets, workspace, size_workspace) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_DFA_EXEC32(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets, workspace, size_workspace); \
-  else \
-    PCRE_DFA_EXEC8(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets, workspace, size_workspace)
-
-#define PCRE_EXEC(count, re, extra, bptr, len, start_offset, options, \
-    offsets, size_offsets) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_EXEC32(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets); \
-  else \
-    PCRE_EXEC8(count, re, extra, bptr, len, start_offset, options, \
-      offsets, size_offsets)
-
-#define PCRE_FREE_STUDY(extra) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_FREE_STUDY32(extra); \
-  else \
-    PCRE_FREE_STUDY8(extra)
-
-#define PCRE_FREE_SUBSTRING(substring) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_FREE_SUBSTRING32(substring); \
-  else \
-    PCRE_FREE_SUBSTRING8(substring)
-
-#define PCRE_FREE_SUBSTRING_LIST(listptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_FREE_SUBSTRING_LIST32(listptr); \
-  else \
-    PCRE_FREE_SUBSTRING_LIST8(listptr)
-
-#define PCRE_GET_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
-    getnamesptr, subsptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_NAMED_SUBSTRING32(rc, re, bptr, offsets, count, \
-      getnamesptr, subsptr); \
-  else \
-    PCRE_GET_NAMED_SUBSTRING8(rc, re, bptr, offsets, count, \
-      getnamesptr, subsptr)
-
-#define PCRE_GET_STRINGNUMBER(n, rc, ptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_STRINGNUMBER32(n, rc, ptr); \
-  else \
-    PCRE_GET_STRINGNUMBER8(n, rc, ptr)
-
-#define PCRE_GET_SUBSTRING(rc, bptr, use_offsets, count, i, subsptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_SUBSTRING32(rc, bptr, use_offsets, count, i, subsptr); \
-  else \
-    PCRE_GET_SUBSTRING8(rc, bptr, use_offsets, count, i, subsptr)
-
-#define PCRE_GET_SUBSTRING_LIST(rc, bptr, offsets, count, listptr) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_GET_SUBSTRING_LIST32(rc, bptr, offsets, count, listptr); \
-  else \
-    PCRE_GET_SUBSTRING_LIST8(rc, bptr, offsets, count, listptr)
-
-#define PCRE_JIT_STACK_ALLOC(startsize, maxsize) \
-  (pcre_mode == PCRE32_MODE ? \
-     PCRE_JIT_STACK_ALLOC32(startsize, maxsize) \
-      : PCRE_JIT_STACK_ALLOC8(startsize, maxsize))
-
-#define PCRE_JIT_STACK_FREE(stack) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_JIT_STACK_FREE32(stack); \
-  else \
-    PCRE_JIT_STACK_FREE8(stack)
-
-#define PCRE_MAKETABLES \
-  (pcre_mode == PCRE32_MODE ? pcre32_maketables() : pcre_maketables())
-
-#define PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, tables) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER32(rc, re, extra, tables); \
-  else \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER8(rc, re, extra, tables)
-
-#define PCRE_PRINTINT(re, outfile, debug_lengths) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_PRINTINT32(re, outfile, debug_lengths); \
-  else \
-    PCRE_PRINTINT8(re, outfile, debug_lengths)
-
-#define PCRE_STUDY(extra, re, options, error) \
-  if (pcre_mode == PCRE32_MODE) \
-    PCRE_STUDY32(extra, re, options, error); \
-  else \
-    PCRE_STUDY8(extra, re, options, error)
-
+#define BITONE 32
+#define BITTWO 8
 
 /* ----- 16-bit and 8-bit but not 32-bit supported ----- */
 
 #else
+#define BITONE 16
+#define BITTWO 8
+#endif
+
+#define glue(a,b) a##b
+#define G(a,b) glue(a,b)
+
+
+/* ----- Common macros for two-mode cases ----- */
+
 #define PCHARS(lv, p, offset, len, f) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCHARS16(lv, p, offset, len, f); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCHARS,BITONE)(lv, p, offset, len, f); \
   else \
-    PCHARS8(lv, p, offset, len, f)
+    G(PCHARS,BITTWO)(lv, p, offset, len, f)
 
 #define PCHARSV(p, offset, len, f) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCHARSV16(p, offset, len, f); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCHARSV,BITONE)(p, offset, len, f); \
   else \
-    PCHARSV8(p, offset, len, f)
+    G(PCHARSV,BITTWO)(p, offset, len, f)
 
 #define READ_CAPTURE_NAME(p, cn8, cn16, cn32, re) \
-  if (pcre_mode == PCRE16_MODE) \
-    READ_CAPTURE_NAME16(p, cn8, cn16, cn32, re); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(READ_CAPTURE_NAME,BITONE)(p, cn8, cn16, cn32, re); \
   else \
-    READ_CAPTURE_NAME8(p, cn8, cn16, cn32, re)
+    G(READ_CAPTURE_NAME,BITTWO)(p, cn8, cn16, cn32, re)
 
 #define SET_PCRE_CALLOUT(callout) \
-  if (pcre_mode == PCRE16_MODE) \
-    SET_PCRE_CALLOUT16(callout); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(SET_PCRE_CALLOUT,BITONE)(callout); \
   else \
-    SET_PCRE_CALLOUT8(callout)
+    G(SET_PCRE_CALLOUT,BITTWO)(callout)
 
-#define STRLEN(p) (pcre_mode == PCRE16_MODE ? STRLEN16(p) : STRLEN8(p))
+#define STRLEN(p) ((pcre_mode == G(G(PCRE,BITONE),_MODE)) ? \
+  G(STRLEN,BITONE)(p) : G(STRLEN,BITTWO)(p))
 
 #define PCRE_ASSIGN_JIT_STACK(extra, callback, userdata) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_ASSIGN_JIT_STACK16(extra, callback, userdata); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_ASSIGN_JIT_STACK,BITONE)(extra, callback, userdata); \
   else \
-    PCRE_ASSIGN_JIT_STACK8(extra, callback, userdata)
+    G(PCRE_ASSIGN_JIT_STACK,BITTWO)(extra, callback, userdata)
 
 #define PCRE_COMPILE(re, pat, options, error, erroffset, tables) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_COMPILE16(re, pat, options, error, erroffset, tables); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_COMPILE,BITONE)(re, pat, options, error, erroffset, tables); \
   else \
-    PCRE_COMPILE8(re, pat, options, error, erroffset, tables)
+    G(PCRE_COMPILE,BITTWO)(re, pat, options, error, erroffset, tables)
 
-#define PCRE_CONFIG pcre_config
+#define PCRE_CONFIG G(G(pcre,BITONE),_config)
 
 #define PCRE_COPY_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
     namesptr, cbuffer, size) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_COPY_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_COPY_NAMED_SUBSTRING,BITONE)(rc, re, bptr, offsets, count, \
       namesptr, cbuffer, size); \
   else \
-    PCRE_COPY_NAMED_SUBSTRING8(rc, re, bptr, offsets, count, \
+    G(PCRE_COPY_NAMED_SUBSTRING,BITTWO)(rc, re, bptr, offsets, count, \
       namesptr, cbuffer, size)
 
 #define PCRE_COPY_SUBSTRING(rc, bptr, offsets, count, i, cbuffer, size) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_COPY_SUBSTRING16(rc, bptr, offsets, count, i, cbuffer, size); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_COPY_SUBSTRING,BITONE)(rc, bptr, offsets, count, i, cbuffer, size); \
   else \
-    PCRE_COPY_SUBSTRING8(rc, bptr, offsets, count, i, cbuffer, size)
+    G(PCRE_COPY_SUBSTRING,BITTWO)(rc, bptr, offsets, count, i, cbuffer, size)
 
 #define PCRE_DFA_EXEC(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets, workspace, size_workspace) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_DFA_EXEC16(count, re, extra, bptr, len, start_offset, options, \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_DFA_EXEC,BITONE)(count, re, extra, bptr, len, start_offset, options, \
       offsets, size_offsets, workspace, size_workspace); \
   else \
-    PCRE_DFA_EXEC8(count, re, extra, bptr, len, start_offset, options, \
+    G(PCRE_DFA_EXEC,BITTWO)(count, re, extra, bptr, len, start_offset, options, \
       offsets, size_offsets, workspace, size_workspace)
 
 #define PCRE_EXEC(count, re, extra, bptr, len, start_offset, options, \
     offsets, size_offsets) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_EXEC16(count, re, extra, bptr, len, start_offset, options, \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_EXEC,BITONE)(count, re, extra, bptr, len, start_offset, options, \
       offsets, size_offsets); \
   else \
-    PCRE_EXEC8(count, re, extra, bptr, len, start_offset, options, \
+    G(PCRE_EXEC,BITTWO)(count, re, extra, bptr, len, start_offset, options, \
       offsets, size_offsets)
 
 #define PCRE_FREE_STUDY(extra) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_FREE_STUDY16(extra); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_FREE_STUDY,BITONE)(extra); \
   else \
-    PCRE_FREE_STUDY8(extra)
+    G(PCRE_FREE_STUDY,BITTWO)(extra)
 
 #define PCRE_FREE_SUBSTRING(substring) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_FREE_SUBSTRING16(substring); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_FREE_SUBSTRING,BITONE)(substring); \
   else \
-    PCRE_FREE_SUBSTRING8(substring)
+    G(PCRE_FREE_SUBSTRING,BITTWO)(substring)
 
 #define PCRE_FREE_SUBSTRING_LIST(listptr) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_FREE_SUBSTRING_LIST16(listptr); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_FREE_SUBSTRING_LIST,BITONE)(listptr); \
   else \
-    PCRE_FREE_SUBSTRING_LIST8(listptr)
+    G(PCRE_FREE_SUBSTRING_LIST,BITTWO)(listptr)
 
 #define PCRE_GET_NAMED_SUBSTRING(rc, re, bptr, offsets, count, \
     getnamesptr, subsptr) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_GET_NAMED_SUBSTRING16(rc, re, bptr, offsets, count, \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_GET_NAMED_SUBSTRING,BITONE)(rc, re, bptr, offsets, count, \
       getnamesptr, subsptr); \
   else \
-    PCRE_GET_NAMED_SUBSTRING8(rc, re, bptr, offsets, count, \
+    G(PCRE_GET_NAMED_SUBSTRING,BITTWO)(rc, re, bptr, offsets, count, \
       getnamesptr, subsptr)
 
 #define PCRE_GET_STRINGNUMBER(n, rc, ptr) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_GET_STRINGNUMBER16(n, rc, ptr); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_GET_STRINGNUMBER,BITONE)(n, rc, ptr); \
   else \
-    PCRE_GET_STRINGNUMBER8(n, rc, ptr)
+    G(PCRE_GET_STRINGNUMBER,BITTWO)(n, rc, ptr)
 
 #define PCRE_GET_SUBSTRING(rc, bptr, use_offsets, count, i, subsptr) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_GET_SUBSTRING16(rc, bptr, use_offsets, count, i, subsptr); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_GET_SUBSTRING,BITONE)(rc, bptr, use_offsets, count, i, subsptr); \
   else \
-    PCRE_GET_SUBSTRING8(rc, bptr, use_offsets, count, i, subsptr)
+    G(PCRE_GET_SUBSTRING,BITTWO)(rc, bptr, use_offsets, count, i, subsptr)
 
 #define PCRE_GET_SUBSTRING_LIST(rc, bptr, offsets, count, listptr) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_GET_SUBSTRING_LIST16(rc, bptr, offsets, count, listptr); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_GET_SUBSTRING_LIST,BITONE)(rc, bptr, offsets, count, listptr); \
   else \
-    PCRE_GET_SUBSTRING_LIST8(rc, bptr, offsets, count, listptr)
+    G(PCRE_GET_SUBSTRING_LIST,BITTWO)(rc, bptr, offsets, count, listptr)
 
 #define PCRE_JIT_STACK_ALLOC(startsize, maxsize) \
-  (pcre_mode == PCRE16_MODE ? \
-      PCRE_JIT_STACK_ALLOC16(startsize, maxsize) \
-      : PCRE_JIT_STACK_ALLOC8(startsize, maxsize))
+  (pcre_mode == G(G(PCRE,BITONE),_MODE)) ? \
+     G(PCRE_JIT_STACK_ALLOC,BITONE)(startsize, maxsize) \
+    : G(PCRE_JIT_STACK_ALLOC,BITTWO)(startsize, maxsize)
 
 #define PCRE_JIT_STACK_FREE(stack) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_JIT_STACK_FREE16(stack); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_JIT_STACK_FREE,BITONE)(stack); \
   else \
-    PCRE_JIT_STACK_FREE8(stack)
+    G(PCRE_JIT_STACK_FREE,BITTWO)(stack)
 
 #define PCRE_MAKETABLES \
-  (pcre_mode == PCRE16_MODE ? pcre16_maketables() : pcre_maketables())
+  (pcre_mode == G(G(PCRE,BITONE),_MODE)) ? \
+    G(G(pcre,BITONE),_maketables)() : G(G(pcre,BITTWO),_maketables)()
 
 #define PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, tables) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER16(rc, re, extra, tables); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_PATTERN_TO_HOST_BYTE_ORDER,BITONE)(rc, re, extra, tables); \
   else \
-    PCRE_PATTERN_TO_HOST_BYTE_ORDER8(rc, re, extra, tables)
+    G(PCRE_PATTERN_TO_HOST_BYTE_ORDER,BITTWO)(rc, re, extra, tables)
 
 #define PCRE_PRINTINT(re, outfile, debug_lengths) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_PRINTINT16(re, outfile, debug_lengths); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_PRINTINT,BITONE)(re, outfile, debug_lengths); \
   else \
-    PCRE_PRINTINT8(re, outfile, debug_lengths)
+    G(PCRE_PRINTINT,BITTWO)(re, outfile, debug_lengths)
 
 #define PCRE_STUDY(extra, re, options, error) \
-  if (pcre_mode == PCRE16_MODE) \
-    PCRE_STUDY16(extra, re, options, error); \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(PCRE_STUDY,BITONE)(extra, re, options, error); \
   else \
-    PCRE_STUDY8(extra, re, options, error)
+    G(PCRE_STUDY,BITTWO)(extra, re, options, error)
 
-#endif
+#endif  /* Two out of three modes */
 
 /* ----- End of cases where more than one mode is supported ----- */
 
@@ -1315,8 +1039,8 @@ obtained and extended as required. */
 
 #if defined SUPPORT_PCRE8 && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32)
 
-/* We need the table of operator lengths that is used for 16/32-bit compiling, in
-order to swap bytes in a pattern for saving/reloading testing. Luckily, the
+/* We need the table of operator lengths that is used for 16/32-bit compiling,
+in order to swap bytes in a pattern for saving/reloading testing. Luckily, the
 data is defined as a macro. However, we must ensure that LINK_SIZE is adjusted
 appropriately for the 16/32-bit world. Just as a safety check, make sure that
 COMPILE_PCRE[16|32] is *not* set. */
@@ -1344,6 +1068,7 @@ COMPILE_PCRE[16|32] is *not* set. */
 
 #endif /* SUPPORT_PCRE8 && (SUPPORT_PCRE16 || SUPPORT_PCRE32) */
 
+
 #ifdef SUPPORT_PCRE16
 static int buffer16_size = 0;
 static pcre_uint16 *buffer16 = NULL;
@@ -1356,9 +1081,9 @@ static pcre_uint32 *buffer32 = NULL;
 static const pcre_uint32 OP_lengths32[] = { OP_LENGTHS };
 #endif  /* SUPPORT_PCRE32 */
 
-/* If we have 8-bit support, default to it; if there is also
-16-or 32-bit support, it can be changed by an option. If there is no 8-bit support,
-there must be 16-or 32-bit support, so default it to 1. */
+/* If we have 8-bit support, default to it; if there is also 16-or 32-bit
+support, it can be changed by an option. If there is no 8-bit support, there
+must be 16-or 32-bit support, so default it to 1. */
 
 #if defined SUPPORT_PCRE8
 static int pcre_mode = PCRE8_MODE;
@@ -1876,7 +1601,7 @@ return i+1;
 
 
 
-#if !defined NOUTF || defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32
+#if defined SUPPORT_PCRE8 && !defined NOUTF
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
@@ -2954,8 +2679,8 @@ if (extra != NULL)
   rsd->minlength = swap_uint32(rsd->minlength);
   }
 
-/* In 32-bit mode we must swap bytes
-in the name table, if present, and then in the pattern itself. */
+/* In 32-bit mode we must swap bytes in the name table, if present, and then in
+the pattern itself. */
 
 while(TRUE)
   {
@@ -4994,11 +4719,9 @@ while (!done)
         continue;
         }
 
-      /* We now have a character value in c that may be greater than 255. In
-      16-bit or 32-bit mode, we always convert characters to UTF-8 so that
-      values greater than 255 can be passed to non-UTF 16- or 32-bit strings.
-      In 8-bit       mode we convert to UTF-8 if we are in UTF mode. Values greater
-      than 127       in UTF mode must have come from \x{...} or octal constructs
+      /* We now have a character value in c that may be greater than 255. 
+      In 8-bit mode we convert to UTF-8 if we are in UTF mode. Values greater
+      than 127 in UTF mode must have come from \x{...} or octal constructs
       because values from \x.. get this far only in non-UTF mode. */
 
 #ifdef SUPPORT_PCRE8
@@ -5019,7 +4742,6 @@ while (!done)
             fprintf(outfile, "** Truncation will probably give the wrong "
               "result.\n");
             }
-
           *q8++ = c;
           }
         }
