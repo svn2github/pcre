@@ -53,6 +53,7 @@ depending on the PRIV macro. */
 #endif
 
 /* PCRE is compiled as an 8 bit library if it is not requested otherwise. */
+
 #if !defined COMPILE_PCRE16 && !defined COMPILE_PCRE32
 #define COMPILE_PCRE8
 #endif
