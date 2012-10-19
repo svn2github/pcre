@@ -36,15 +36,15 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This program now supports the testing of both the 8-bit and 16-bit PCRE
-libraries in a single program. This is different from the modules such as
-pcre_compile.c in the library itself, which are compiled separately for each
-mode. If both modes are enabled, for example, pcre_compile.c is compiled twice
-(the second time with COMPILE_PCRE16 defined). By contrast, pcretest.c is
-compiled only once. Therefore, it must not make use of any of the macros from
-pcre_internal.h that depend on COMPILE_PCRE8 or COMPILE_PCRE16. It does,
-however, make use of SUPPORT_PCRE8 and SUPPORT_PCRE16 to ensure that it calls
-only supported library functions. */
+/* This program now supports the testing of all of the 8-bit, 16-bit, and 
+32-bit PCRE libraries in a single program. This is different from the modules
+such as pcre_compile.c in the library itself, which are compiled separately for
+each mode. If two modes are enabled, for example, pcre_compile.c is compiled
+twice. By contrast, pcretest.c is compiled only once. Therefore, it must not
+make use of any of the macros from pcre_internal.h that depend on
+COMPILE_PCRE8, COMPILE_PCRE16, or COMPILE_PCRE32. It does, however, make use of
+SUPPORT_PCRE8, SUPPORT_PCRE16, and SUPPORT_PCRE32 to ensure that it calls only
+supported library functions. */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -133,20 +133,6 @@ here before pcre_internal.h so that the PCRE_EXP_xxx macros get set
 appropriately for an application, not for building PCRE. */
 
 #include "pcre.h"
-
-#if defined SUPPORT_PCRE32 && !defined SUPPORT_PCRE8 && !defined SUPPORT_PCRE16
-/* Configure internal macros to 32 bit mode. */
-#define COMPILE_PCRE32
-#endif
-#if defined SUPPORT_PCRE16 && !defined SUPPORT_PCRE8 && !defined SUPPORT_PCRE32
-/* Configure internal macros to 16 bit mode. */
-#define COMPILE_PCRE16
-#endif
-#if defined SUPPORT_PCRE8 && !defined SUPPORT_PCRE16 && !defined SUPPORT_PCRE32
-/* Configure internal macros to 16 bit mode. */
-#define COMPILE_PCRE8
-#endif
-
 #include "pcre_internal.h"
 
 /* The pcre_printint() function, which prints the internal form of a compiled
@@ -1034,16 +1020,7 @@ static int buffer_size = 50000;
 static pcre_uint8 *buffer = NULL;
 static pcre_uint8 *pbuffer = NULL;
 
-/* Another buffer is needed translation to 16/32-bit character strings. It will
-obtained and extended as required. */
-
-#if defined SUPPORT_PCRE8 && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32)
-
-/* We need the table of operator lengths that is used for 16/32-bit compiling,
-in order to swap bytes in a pattern for saving/reloading testing. Luckily, the
-data is defined as a macro. However, we must ensure that LINK_SIZE is adjusted
-appropriately for the 16/32-bit world. Just as a safety check, make sure that
-COMPILE_PCRE[16|32] is *not* set. */
+/* Just as a safety check, make sure that COMPILE_PCRE[16|32] are *not* set. */
 
 #ifdef COMPILE_PCRE16
 #error COMPILE_PCRE16 must not be set when compiling pcretest.c
@@ -1052,6 +1029,17 @@ COMPILE_PCRE[16|32] is *not* set. */
 #ifdef COMPILE_PCRE32
 #error COMPILE_PCRE32 must not be set when compiling pcretest.c
 #endif
+
+/* We need buffers for building 16/32-bit strings, and the tables of operator
+lengths that are used for 16/32-bit compiling, in order to swap bytes in a
+pattern for saving/reloading testing. Luckily, the data for these tables is
+defined as a macro. However, we must ensure that LINK_SIZE and IMM2_SIZE (which
+are used in the tables) are adjusted appropriately for the 16/32-bit world.
+LINK_SIZE is also used later in this program. */
+
+#ifdef SUPPORT_PCRE16
+#undef IMM2_SIZE
+#define IMM2_SIZE 1
 
 #if LINK_SIZE == 2
 #undef LINK_SIZE
@@ -1063,19 +1051,17 @@ COMPILE_PCRE[16|32] is *not* set. */
 #error LINK_SIZE must be either 2, 3, or 4
 #endif
 
-#undef IMM2_SIZE
-#define IMM2_SIZE 1
-
-#endif /* SUPPORT_PCRE8 && (SUPPORT_PCRE16 || SUPPORT_PCRE32) */
-
-
-#ifdef SUPPORT_PCRE16
 static int buffer16_size = 0;
 static pcre_uint16 *buffer16 = NULL;
 static const pcre_uint16 OP_lengths16[] = { OP_LENGTHS };
 #endif  /* SUPPORT_PCRE16 */
 
 #ifdef SUPPORT_PCRE32
+#undef IMM2_SIZE
+#define IMM2_SIZE 1
+#undef LINK_SIZE
+#define LINK_SIZE 1
+
 static int buffer32_size = 0;
 static pcre_uint32 *buffer32 = NULL;
 static const pcre_uint32 OP_lengths32[] = { OP_LENGTHS };
