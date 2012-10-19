@@ -2428,7 +2428,7 @@ call within the pattern; used by pcre_exec(). */
 
 typedef struct recursion_info {
   struct recursion_info *prevrec; /* Previous recursion record (or NULL) */
-  int group_num;                  /* Number of group that was called */
+  unsigned int group_num;         /* Number of group that was called */
   int *offset_save;               /* Pointer to start of saved offsets */
   int saved_max;                  /* Number of saved offsets */
   PCRE_PUCHAR subject_position;   /* Position at start of recursion */

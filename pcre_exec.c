@@ -630,7 +630,7 @@ int ctype;
 int length;
 int max;
 int min;
-int number;
+unsigned int number;
 int offset;
 pcre_uchar op;
 int save_capture_last;
@@ -1311,7 +1311,7 @@ for (;;)
         }
       else
         {
-        int recno = GET2(ecode, LINK_SIZE + 2);   /* Recursion group number*/
+        unsigned int recno = GET2(ecode, LINK_SIZE + 2);   /* Recursion group number*/
         condition = (recno == RREF_ANY || recno == md->recursive->group_num);
 
         /* If the test is for recursion into a specific subpattern, and it is
@@ -1383,7 +1383,7 @@ for (;;)
 
       if (!condition && condcode == OP_NCREF)
         {
-        int refno = offset >> 1;
+        unsigned int refno = offset >> 1;
         pcre_uchar *slotA = md->name_table;
 
         for (i = 0; i < md->name_count; i++)
@@ -1743,7 +1743,7 @@ for (;;)
     case OP_RECURSE:
       {
       recursion_info *ri;
-      int recno;
+      unsigned int recno;
 
       callpat = md->start_code + GET(ecode, 1);
       recno = (callpat == md->start_code)? 0 :
