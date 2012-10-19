@@ -95,7 +95,7 @@ int main(void)
 #elif defined SUPPORT_PCRE16
 	pcre16_config(PCRE_CONFIG_JIT, &jit);
 #elif defined SUPPORT_PCRE32
-        pcre32_config(PCRE_CONFIG_JIT, &jit);
+	pcre32_config(PCRE_CONFIG_JIT, &jit);
 #endif
 	if (!jit) {
 		printf("JIT must be enabled to run pcre_jit_test\n");
@@ -724,8 +724,8 @@ static const unsigned char *tables(int mode)
 	pcre16 *regex;
 	PCRE_UCHAR16 null_str[1] = { 0 };
 #elif defined SUPPORT_PCRE32
-        pcre32 *regex;
-        PCRE_UCHAR32 null_str[1] = { 0 };
+	pcre32 *regex;
+	PCRE_UCHAR32 null_str[1] = { 0 };
 #endif
 
 	if (mode) {
@@ -752,11 +752,11 @@ static const unsigned char *tables(int mode)
 		pcre16_free(regex);
 	}
 #elif defined SUPPORT_PCRE32
-        regex = pcre32_compile(null_str, 0, &errorptr, &erroroffset, NULL);
-        if (regex) {
-                pcre32_fullinfo(regex, NULL, PCRE_INFO_DEFAULT_TABLES, &default_tables);
-                pcre32_free(regex);
-        }
+	regex = pcre32_compile(null_str, 0, &errorptr, &erroroffset, NULL);
+	if (regex) {
+		pcre32_fullinfo(regex, NULL, PCRE_INFO_DEFAULT_TABLES, &default_tables);
+		pcre32_free(regex);
+	}
 #endif
 	/* Shouldn't ever happen. */
 	if (!default_tables)
@@ -789,7 +789,7 @@ static pcre16_jit_stack* callback16(void *arg)
 #ifdef SUPPORT_PCRE32
 static pcre32_jit_stack* callback32(void *arg)
 {
-        return (pcre32_jit_stack *)arg;
+	return (pcre32_jit_stack *)arg;
 }
 #endif
 
@@ -834,19 +834,19 @@ static void setstack16(pcre16_extra *extra)
 #ifdef SUPPORT_PCRE32
 static void setstack32(pcre32_extra *extra)
 {
-        static pcre32_jit_stack *stack;
+	static pcre32_jit_stack *stack;
 
-        if (!extra) {
-                if (stack)
-                        pcre32_jit_stack_free(stack);
-                stack = NULL;
-                return;
-        }
+	if (!extra) {
+		if (stack)
+			pcre32_jit_stack_free(stack);
+		stack = NULL;
+		return;
+	}
 
-        if (!stack)
-                stack = pcre32_jit_stack_alloc(1, 1024 * 1024);
-        /* Extra can be NULL. */
-        pcre32_assign_jit_stack(extra, callback32, stack);
+	if (!stack)
+		stack = pcre32_jit_stack_alloc(1, 1024 * 1024);
+	/* Extra can be NULL. */
+	pcre32_assign_jit_stack(extra, callback32, stack);
 }
 #endif /* SUPPORT_PCRE8 */
 
@@ -855,7 +855,7 @@ static void setstack32(pcre32_extra *extra)
 static int convert_utf8_to_utf16(const char *input, PCRE_UCHAR16 *output, int *offsetmap, int max_length)
 {
 	unsigned char *iptr = (unsigned char*)input;
-        PCRE_UCHAR16 *optr = output;
+	PCRE_UCHAR16 *optr = output;
 	unsigned int c;
 
 	if (max_length == 0)
@@ -926,54 +926,54 @@ static int regtest_offsetmap16[REGTEST_MAX_LENGTH16];
 
 static int convert_utf8_to_utf32(const char *input, PCRE_UCHAR32 *output, int *offsetmap, int max_length)
 {
-        unsigned char *iptr = (unsigned char*)input;
-        PCRE_UCHAR32 *optr = output;
-        unsigned int c;
+	unsigned char *iptr = (unsigned char*)input;
+	PCRE_UCHAR32 *optr = output;
+	unsigned int c;
 
-        if (max_length == 0)
-                return 0;
+	if (max_length == 0)
+		return 0;
 
-        while (*iptr && max_length > 1) {
-                c = 0;
-                if (offsetmap)
-                        *offsetmap++ = (int)(iptr - (unsigned char*)input);
+	while (*iptr && max_length > 1) {
+		c = 0;
+		if (offsetmap)
+			*offsetmap++ = (int)(iptr - (unsigned char*)input);
 
-                if (!(*iptr & 0x80))
-                        c = *iptr++;
-                else if (!(*iptr & 0x20)) {
-                        c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
-                        iptr += 2;
-                } else if (!(*iptr & 0x10)) {
-                        c = ((iptr[0] & 0x0f) << 12) | ((iptr[1] & 0x3f) << 6) | (iptr[2] & 0x3f);
-                        iptr += 3;
-                } else if (!(*iptr & 0x08)) {
-                        c = ((iptr[0] & 0x07) << 18) | ((iptr[1] & 0x3f) << 12) | ((iptr[2] & 0x3f) << 6) | (iptr[3] & 0x3f);
-                        iptr += 4;
-                }
+		if (!(*iptr & 0x80))
+			c = *iptr++;
+		else if (!(*iptr & 0x20)) {
+			c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
+			iptr += 2;
+		} else if (!(*iptr & 0x10)) {
+			c = ((iptr[0] & 0x0f) << 12) | ((iptr[1] & 0x3f) << 6) | (iptr[2] & 0x3f);
+			iptr += 3;
+		} else if (!(*iptr & 0x08)) {
+			c = ((iptr[0] & 0x07) << 18) | ((iptr[1] & 0x3f) << 12) | ((iptr[2] & 0x3f) << 6) | (iptr[3] & 0x3f);
+			iptr += 4;
+		}
 
-                *optr++ = c;
-                max_length--;
-        }
-        if (offsetmap)
-                *offsetmap = (int)(iptr - (unsigned char*)input);
-        *optr = 0;
-        return (int)(optr - output);
+		*optr++ = c;
+		max_length--;
+	}
+	if (offsetmap)
+		*offsetmap = (int)(iptr - (unsigned char*)input);
+	*optr = 0;
+	return (int)(optr - output);
 }
 
 static int copy_char8_to_char32(const char *input, PCRE_UCHAR32 *output, int max_length)
 {
-        unsigned char *iptr = (unsigned char*)input;
-        PCRE_UCHAR32 *optr = output;
+	unsigned char *iptr = (unsigned char*)input;
+	PCRE_UCHAR32 *optr = output;
 
-        if (max_length == 0)
-                return 0;
+	if (max_length == 0)
+		return 0;
 
-        while (*iptr && max_length > 1) {
-                *optr++ = *iptr++;
-                max_length--;
-        }
-        *optr = '\0';
-        return (int)(optr - output);
+	while (*iptr && max_length > 1) {
+		*optr++ = *iptr++;
+		max_length--;
+	}
+	*optr = '\0';
+	return (int)(optr - output);
 }
 
 #define REGTEST_MAX_LENGTH32 4096
@@ -1005,8 +1005,8 @@ static int regression_tests(void)
 	int successful_row = 0;
 	int counter = 0;
 	int study_mode;
-        int utf = 0, ucp = 0;
-        int disabled_flags = 0;
+	int utf = 0, ucp = 0;
+	int disabled_flags = 0;
 #ifdef SUPPORT_PCRE8
 	pcre *re8;
 	pcre_extra *extra8;
@@ -1027,14 +1027,14 @@ static int regression_tests(void)
 	int length16;
 #endif
 #ifdef SUPPORT_PCRE32
-        pcre32 *re32;
-        pcre32_extra *extra32;
-        pcre32_extra dummy_extra32;
-        int ovector32_1[32];
-        int ovector32_2[32];
-        int return_value32[2];
-        PCRE_UCHAR32 *mark32_1, *mark32_2;
-        int length32;
+	pcre32 *re32;
+	pcre32_extra *extra32;
+	pcre32_extra dummy_extra32;
+	int ovector32_1[32];
+	int ovector32_2[32];
+	int return_value32[2];
+	PCRE_UCHAR32 *mark32_1, *mark32_2;
+	int length32;
 #endif
 
 	/* This test compares the behaviour of interpreter and JIT. Although disabling
@@ -1046,7 +1046,7 @@ static int regression_tests(void)
 #elif defined SUPPORT_PCRE16
 	pcre16_config(PCRE_CONFIG_JITTARGET, &cpu_info);
 #elif defined SUPPORT_PCRE32
-        pcre32_config(PCRE_CONFIG_JITTARGET, &cpu_info);
+	pcre32_config(PCRE_CONFIG_JITTARGET, &cpu_info);
 #endif
 
 	printf("Running JIT regression tests\n");
@@ -1056,11 +1056,11 @@ static int regression_tests(void)
 	pcre_config(PCRE_CONFIG_UTF8, &utf);
 	pcre_config(PCRE_CONFIG_UNICODE_PROPERTIES, &ucp);
 #elif defined SUPPORT_PCRE16
-        pcre16_config(PCRE_CONFIG_UTF16, &utf);
-        pcre16_config(PCRE_CONFIG_UNICODE_PROPERTIES, &ucp);
+	pcre16_config(PCRE_CONFIG_UTF16, &utf);
+	pcre16_config(PCRE_CONFIG_UNICODE_PROPERTIES, &ucp);
 #elif defined SUPPORT_PCRE16
-        pcre32_config(PCRE_CONFIG_UTF32, &utf);
-        pcre32_config(PCRE_CONFIG_UNICODE_PROPERTIES, &ucp);
+	pcre32_config(PCRE_CONFIG_UTF32, &utf);
+	pcre32_config(PCRE_CONFIG_UNICODE_PROPERTIES, &ucp);
 #endif
 
 	if (!utf)
@@ -1074,7 +1074,7 @@ static int regression_tests(void)
 	printf("  in 16 bit mode with UTF-16 %s and ucp %s:\n", utf ? "enabled" : "disabled", ucp ? "enabled" : "disabled");
 #endif
 #ifdef SUPPORT_PCRE32
-        printf("  in 32 bit mode with UTF-32 %s and ucp %s:\n", utf ? "enabled" : "disabled", ucp ? "enabled" : "disabled");
+	printf("  in 32 bit mode with UTF-32 %s and ucp %s:\n", utf ? "enabled" : "disabled", ucp ? "enabled" : "disabled");
 #endif
 
 	while (current->pattern) {
@@ -1150,38 +1150,38 @@ static int regression_tests(void)
 			}
 			extra16->flags |= PCRE_EXTRA_MARK;
 		} else if (((utf && ucp) || is_ascii_pattern) && !(current->start_offset & F_NO16))
-                        printf("\n16 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
+			printf("\n16 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
 #endif
 #ifdef SUPPORT_PCRE32
-                if ((current->flags & PCRE_UTF32) || (current->start_offset & F_FORCECONV))
-                        convert_utf8_to_utf32(current->pattern, regtest_buf32, NULL, REGTEST_MAX_LENGTH32);
-                else
-                        copy_char8_to_char32(current->pattern, regtest_buf32, REGTEST_MAX_LENGTH32);
+		if ((current->flags & PCRE_UTF32) || (current->start_offset & F_FORCECONV))
+			convert_utf8_to_utf32(current->pattern, regtest_buf32, NULL, REGTEST_MAX_LENGTH32);
+		else
+			copy_char8_to_char32(current->pattern, regtest_buf32, REGTEST_MAX_LENGTH32);
 
-                re32 = NULL;
-                if (!(current->start_offset & F_NO32))
-                        re32 = pcre32_compile(regtest_buf32,
-                                current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | disabled_flags),
-                                &error, &err_offs, tables(0));
+		re32 = NULL;
+		if (!(current->start_offset & F_NO32))
+			re32 = pcre32_compile(regtest_buf32,
+				current->flags & ~(PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | disabled_flags),
+				&error, &err_offs, tables(0));
 
-                extra32 = NULL;
-                if (re32) {
-                        error = NULL;
-                        extra32 = pcre32_study(re32, study_mode, &error);
-                        if (!extra32) {
-                                printf("\n32 bit: Cannot study pattern: %s\n", current->pattern);
-                                pcre32_free(re32);
-                                re32 = NULL;
-                        }
-                        if (!(extra32->flags & PCRE_EXTRA_EXECUTABLE_JIT)) {
-                                printf("\n32 bit: JIT compiler does not support: %s\n", current->pattern);
-                                pcre32_free_study(extra32);
-                                pcre32_free(re32);
-                                re32 = NULL;
-                        }
-                        extra32->flags |= PCRE_EXTRA_MARK;
-                } else if (((utf && ucp) || is_ascii_pattern) && !(current->start_offset & F_NO32))
-                        printf("\n32 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
+		extra32 = NULL;
+		if (re32) {
+			error = NULL;
+			extra32 = pcre32_study(re32, study_mode, &error);
+			if (!extra32) {
+				printf("\n32 bit: Cannot study pattern: %s\n", current->pattern);
+				pcre32_free(re32);
+				re32 = NULL;
+			}
+			if (!(extra32->flags & PCRE_EXTRA_EXECUTABLE_JIT)) {
+				printf("\n32 bit: JIT compiler does not support: %s\n", current->pattern);
+				pcre32_free_study(extra32);
+				pcre32_free(re32);
+				re32 = NULL;
+			}
+			extra32->flags |= PCRE_EXTRA_MARK;
+		} else if (((utf && ucp) || is_ascii_pattern) && !(current->start_offset & F_NO32))
+			printf("\n32 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
 #endif
 
 		counter++;
@@ -1193,7 +1193,7 @@ static int regression_tests(void)
 			setstack16(NULL);
 #endif
 #ifdef SUPPORT_PCRE32
-                        setstack32(NULL);
+			setstack32(NULL);
 #endif
 		}
 
@@ -1246,37 +1246,37 @@ static int regression_tests(void)
 #endif
 
 #ifdef SUPPORT_PCRE32
-                return_value32[0] = -1000;
-                return_value32[1] = -1000;
-                for (i = 0; i < 32; ++i)
-                        ovector32_1[i] = -2;
-                for (i = 0; i < 32; ++i)
-                        ovector32_2[i] = -2;
-                if (re32) {
-                        mark32_1 = NULL;
-                        mark32_2 = NULL;
-                        setstack32(extra32);
-                        if ((current->flags & PCRE_UTF32) || (current->start_offset & F_FORCECONV))
-                                length32 = convert_utf8_to_utf32(current->input, regtest_buf32, regtest_offsetmap32, REGTEST_MAX_LENGTH32);
-                        else
-                                length32 = copy_char8_to_char32(current->input, regtest_buf32, REGTEST_MAX_LENGTH32);
-                        extra32->mark = &mark32_1;
-                        return_value32[0] = pcre32_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
-                                current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32);
-                        memset(&dummy_extra32, 0, sizeof(pcre32_extra));
-                        dummy_extra32.flags = PCRE_EXTRA_MARK;
-                        dummy_extra32.mark = &mark32_2;
-                        return_value32[1] = pcre32_exec(re32, &dummy_extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
-                                current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_2, 32);
-                }
+		return_value32[0] = -1000;
+		return_value32[1] = -1000;
+		for (i = 0; i < 32; ++i)
+			ovector32_1[i] = -2;
+		for (i = 0; i < 32; ++i)
+			ovector32_2[i] = -2;
+		if (re32) {
+			mark32_1 = NULL;
+			mark32_2 = NULL;
+			setstack32(extra32);
+			if ((current->flags & PCRE_UTF32) || (current->start_offset & F_FORCECONV))
+				length32 = convert_utf8_to_utf32(current->input, regtest_buf32, regtest_offsetmap32, REGTEST_MAX_LENGTH32);
+			else
+				length32 = copy_char8_to_char32(current->input, regtest_buf32, REGTEST_MAX_LENGTH32);
+			extra32->mark = &mark32_1;
+			return_value32[0] = pcre32_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32);
+			memset(&dummy_extra32, 0, sizeof(pcre32_extra));
+			dummy_extra32.flags = PCRE_EXTRA_MARK;
+			dummy_extra32.mark = &mark32_2;
+			return_value32[1] = pcre32_exec(re32, &dummy_extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_2, 32);
+		}
 #endif
 
 		/* printf("[%d-%d-%d|%d-%d|%d-%d|%d-%d]%s",
-                 *        return_value8[0], return_value16[0],
-                 *        ovector8_1[0], ovector8_1[1],
-                 *        ovector16_1[0], ovector16_1[1],
-                 *        ovector32_1[0], ovector32_1[1],
-                 *        (current->flags & PCRE_CASELESS) ? "C" : ""); */
+			return_value8[0], return_value16[0],
+			ovector8_1[0], ovector8_1[1],
+			ovector16_1[0], ovector16_1[1],
+			ovector32_1[0], ovector32_1[1],
+			(current->flags & PCRE_CASELESS) ? "C" : ""); */
 
 		/* If F_DIFF is set, just run the test, but do not compare the results.
 		Segfaults can still be captured. */
@@ -1285,53 +1285,53 @@ static int regression_tests(void)
 		if (!(current->start_offset & F_DIFF)) {
 #if defined SUPPORT_UTF && ((defined(SUPPORT_PCRE8) + defined(SUPPORT_PCRE16) + defined(SUPPORT_PCRE32)) >= 2)
 			if (!(current->start_offset & F_FORCECONV)) {
-                                int return_value;
+				int return_value;
 
 				/* All results must be the same. */
 #ifdef SUPPORT_PCRE8
-                                if ((return_value = return_value8[0]) != return_value8[1]) {
-                                        printf("\n8 bit: Return value differs(J8:%d,I8:%d): [%d] '%s' @ '%s'\n",
-                                                return_value8[0], return_value8[1], total, current->pattern, current->input);
-                                        is_successful = 0;
-                                } else
+				if ((return_value = return_value8[0]) != return_value8[1]) {
+					printf("\n8 bit: Return value differs(J8:%d,I8:%d): [%d] '%s' @ '%s'\n",
+						return_value8[0], return_value8[1], total, current->pattern, current->input);
+					is_successful = 0;
+				} else
 #endif
 #ifdef SUPPORT_PCRE16
-                                if ((return_value = return_value16[0]) != return_value16[1]) {
-                                        printf("\n16 bit: Return value differs(J16:%d,I16:%d): [%d] '%s' @ '%s'\n",
-                                                return_value16[0], return_value16[1], total, current->pattern, current->input);
-                                        is_successful = 0;
-                                } else
+				if ((return_value = return_value16[0]) != return_value16[1]) {
+					printf("\n16 bit: Return value differs(J16:%d,I16:%d): [%d] '%s' @ '%s'\n",
+						return_value16[0], return_value16[1], total, current->pattern, current->input);
+					is_successful = 0;
+				} else
 #endif
 #ifdef SUPPORT_PCRE32
-                                if ((return_value = return_value32[0]) != return_value32[1]) {
-                                        printf("\n32 bit: Return value differs(J32:%d,I32:%d): [%d] '%s' @ '%s'\n",
-                                                return_value32[0], return_value32[1], total, current->pattern, current->input);
-                                        is_successful = 0;
-                                } else
+				if ((return_value = return_value32[0]) != return_value32[1]) {
+					printf("\n32 bit: Return value differs(J32:%d,I32:%d): [%d] '%s' @ '%s'\n",
+						return_value32[0], return_value32[1], total, current->pattern, current->input);
+					is_successful = 0;
+				} else
 #endif
 #if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
-                                if (return_value8[0] != return_value16[0]) {
+				if (return_value8[0] != return_value16[0]) {
 					printf("\n8 and 16 bit: Return value differs(J8:%d,J16:%d): [%d] '%s' @ '%s'\n",
 						return_value8[0], return_value16[0],
 						total, current->pattern, current->input);
 					is_successful = 0;
-                                } else
+				} else
 #endif
 #if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE32
-                                if (return_value8[0] != return_value32[0]) {
-                                        printf("\n8 and 32 bit: Return value differs(J8:%d,J32:%d): [%d] '%s' @ '%s'\n",
-                                                return_value8[0], return_value32[0],
-                                                total, current->pattern, current->input);
-                                        is_successful = 0;
-                                } else
+				if (return_value8[0] != return_value32[0]) {
+					printf("\n8 and 32 bit: Return value differs(J8:%d,J32:%d): [%d] '%s' @ '%s'\n",
+						return_value8[0], return_value32[0],
+						total, current->pattern, current->input);
+					is_successful = 0;
+				} else
 #endif
 #if defined SUPPORT_PCRE16 && defined SUPPORT_PCRE32
-                                if (return_value16[0] != return_value32[0]) {
-                                        printf("\n16 and 32 bit: Return value differs(J16:%d,J32:%d): [%d] '%s' @ '%s'\n",
-                                                return_value16[0], return_value32[0],
-                                                total, current->pattern, current->input);
-                                        is_successful = 0;
-                                } else
+				if (return_value16[0] != return_value32[0]) {
+					printf("\n16 and 32 bit: Return value differs(J16:%d,J32:%d): [%d] '%s' @ '%s'\n",
+						return_value16[0], return_value32[0],
+						total, current->pattern, current->input);
+					is_successful = 0;
+				} else
 #endif
 				if (return_value >= 0 || return_value == PCRE_ERROR_PARTIAL) {
 					if (return_value == PCRE_ERROR_PARTIAL) {
@@ -1340,13 +1340,13 @@ static int regression_tests(void)
 						return_value *= 2;
 					}
 #ifdef SUPPORT_PCRE8
-                                        return_value8[0] = return_value;
+					return_value8[0] = return_value;
 #endif
 #ifdef SUPPORT_PCRE16
-                                        return_value16[0] = return_value;
+					return_value16[0] = return_value;
 #endif
 #ifdef SUPPORT_PCRE32
-                                        return_value32[0] = return_value;
+					return_value32[0] = return_value;
 #endif
 					/* Transform back the results. */
 					if (current->flags & PCRE_UTF8) {
@@ -1359,14 +1359,14 @@ static int regression_tests(void)
 						}
 #endif
 #ifdef SUPPORT_PCRE32
-                                                for (i = 0; i < return_value; ++i) {
-                                                        if (ovector32_1[i] >= 0)
-                                                                ovector32_1[i] = regtest_offsetmap32[ovector32_1[i]];
-                                                        if (ovector32_2[i] >= 0)
-                                                                ovector32_2[i] = regtest_offsetmap32[ovector32_2[i]];
-                                                }
+						for (i = 0; i < return_value; ++i) {
+							if (ovector32_1[i] >= 0)
+								ovector32_1[i] = regtest_offsetmap32[ovector32_1[i]];
+							if (ovector32_2[i] >= 0)
+								ovector32_2[i] = regtest_offsetmap32[ovector32_2[i]];
+						}
 #endif
-                                        }
+					}
 
 					for (i = 0; i < return_value; ++i) {
 #if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE16
@@ -1378,26 +1378,26 @@ static int regression_tests(void)
 						}
 #endif
 #if defined SUPPORT_PCRE8 && defined SUPPORT_PCRE32
-                                                if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector32_1[i] || ovector8_1[i] != ovector32_2[i]) {
-                                                        printf("\n8 and 32 bit: Ovector[%d] value differs(J8:%d,I8:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
-                                                                i, ovector8_1[i], ovector8_2[i], ovector32_1[i], ovector32_2[i],
-                                                                total, current->pattern, current->input);
-                                                        is_successful = 0;
-                                                }
+						if (ovector8_1[i] != ovector8_2[i] || ovector8_1[i] != ovector32_1[i] || ovector8_1[i] != ovector32_2[i]) {
+							printf("\n8 and 32 bit: Ovector[%d] value differs(J8:%d,I8:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
+								i, ovector8_1[i], ovector8_2[i], ovector32_1[i], ovector32_2[i],
+								total, current->pattern, current->input);
+							is_successful = 0;
+						}
 #endif
 #if defined SUPPORT_PCRE16 && defined SUPPORT_PCRE16
-                                                if (ovector16_1[i] != ovector16_2[i] || ovector16_1[i] != ovector16_1[i] || ovector16_1[i] != ovector16_2[i]) {
-                                                        printf("\n16 and 16 bit: Ovector[%d] value differs(J16:%d,I16:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
-                                                                i, ovector16_1[i], ovector16_2[i], ovector16_1[i], ovector16_2[i],
-                                                                total, current->pattern, current->input);
-                                                        is_successful = 0;
-                                                }
+						if (ovector16_1[i] != ovector16_2[i] || ovector16_1[i] != ovector16_1[i] || ovector16_1[i] != ovector16_2[i]) {
+							printf("\n16 and 16 bit: Ovector[%d] value differs(J16:%d,I16:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
+								i, ovector16_1[i], ovector16_2[i], ovector16_1[i], ovector16_2[i],
+								total, current->pattern, current->input);
+							is_successful = 0;
+						}
 #endif
-                                        }
+					}
 				}
 			} else
 #endif /* more than one of SUPPORT_PCRE8, SUPPORT_PCRE16 and SUPPORT_PCRE32 */
-                        {
+			{
 				/* Only the 8 bit and 16 bit results must be equal. */
 #ifdef SUPPORT_PCRE8
 				if (return_value8[0] != return_value8[1]) {
@@ -1440,25 +1440,25 @@ static int regression_tests(void)
 #endif
 
 #ifdef SUPPORT_PCRE32
-                                if (return_value32[0] != return_value32[1]) {
-                                        printf("\n32 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
-                                                return_value32[0], return_value32[1], total, current->pattern, current->input);
-                                        is_successful = 0;
-                                } else if (return_value32[0] >= 0 || return_value32[0] == PCRE_ERROR_PARTIAL) {
-                                        if (return_value32[0] == PCRE_ERROR_PARTIAL)
-                                                return_value32[0] = 2;
-                                        else
-                                                return_value32[0] *= 2;
+				if (return_value32[0] != return_value32[1]) {
+					printf("\n32 bit: Return value differs(%d:%d): [%d] '%s' @ '%s'\n",
+						return_value32[0], return_value32[1], total, current->pattern, current->input);
+					is_successful = 0;
+				} else if (return_value32[0] >= 0 || return_value32[0] == PCRE_ERROR_PARTIAL) {
+					if (return_value32[0] == PCRE_ERROR_PARTIAL)
+						return_value32[0] = 2;
+					else
+						return_value32[0] *= 2;
 
-                                        for (i = 0; i < return_value32[0]; ++i)
-                                                if (ovector32_1[i] != ovector32_2[i]) {
-                                                        printf("\n32 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
-                                                                i, ovector32_1[i], ovector32_2[i], total, current->pattern, current->input);
-                                                        is_successful = 0;
-                                                }
-                                }
+					for (i = 0; i < return_value32[0]; ++i)
+						if (ovector32_1[i] != ovector32_2[i]) {
+							printf("\n32 bit: Ovector[%d] value differs(%d:%d): [%d] '%s' @ '%s'\n",
+								i, ovector32_1[i], ovector32_2[i], total, current->pattern, current->input);
+							is_successful = 0;
+						}
+				}
 #endif
-                        }
+			}
 		}
 
 		if (is_successful) {
@@ -1493,19 +1493,19 @@ static int regression_tests(void)
 			}
 #endif
 #ifdef SUPPORT_PCRE32
-                        if (!(current->start_offset & F_NO32) && ((utf && ucp) || is_ascii_input)) {
-                                if (return_value32[0] < 0 && !(current->start_offset & F_NOMATCH)) {
-                                        printf("32 bit: Test should match: [%d] '%s' @ '%s'\n",
-                                                total, current->pattern, current->input);
-                                        is_successful = 0;
-                                }
+			if (!(current->start_offset & F_NO32) && ((utf && ucp) || is_ascii_input)) {
+				if (return_value32[0] < 0 && !(current->start_offset & F_NOMATCH)) {
+					printf("32 bit: Test should match: [%d] '%s' @ '%s'\n",
+						total, current->pattern, current->input);
+					is_successful = 0;
+				}
 
-                                if (return_value32[0] >= 0 && (current->start_offset & F_NOMATCH)) {
-                                        printf("32 bit: Test should not match: [%d] '%s' @ '%s'\n",
-                                                total, current->pattern, current->input);
-                                        is_successful = 0;
-                                }
-                        }
+				if (return_value32[0] >= 0 && (current->start_offset & F_NOMATCH)) {
+					printf("32 bit: Test should not match: [%d] '%s' @ '%s'\n",
+						total, current->pattern, current->input);
+					is_successful = 0;
+				}
+			}
 #endif
 		}
 
@@ -1525,11 +1525,11 @@ static int regression_tests(void)
 			}
 #endif
 #ifdef SUPPORT_PCRE32
-                        if (mark32_1 != mark32_2) {
-                                printf("32 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
-                                        total, current->pattern, current->input);
-                                is_successful = 0;
-                        }
+			if (mark32_1 != mark32_2) {
+				printf("32 bit: Mark value mismatch: [%d] '%s' @ '%s'\n",
+					total, current->pattern, current->input);
+				is_successful = 0;
+			}
 #endif
 		}
 
@@ -1546,10 +1546,10 @@ static int regression_tests(void)
 		}
 #endif
 #ifdef SUPPORT_PCRE32
-                if (re32) {
-                        pcre32_free_study(extra32);
-                        pcre32_free(re32);
-                }
+		if (re32) {
+			pcre32_free_study(extra32);
+			pcre32_free(re32);
+		}
 #endif
 
 		if (is_successful) {
@@ -1574,7 +1574,7 @@ static int regression_tests(void)
 	setstack16(NULL);
 #endif
 #ifdef SUPPORT_PCRE32
-        setstack32(NULL);
+	setstack32(NULL);
 #endif
 
 	if (total == successful) {
