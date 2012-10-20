@@ -323,16 +323,19 @@ for (;;)
 
     /* Check a class for variable quantification */
 
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-    case OP_XCLASS:
-    cc += GET(cc, 1);
-    cc -= PRIV(OP_lengths)[OP_CLASS];
-    /* Fall through */
-#endif
-
     case OP_CLASS:
     case OP_NCLASS:
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+    case OP_XCLASS:
+    /* The original code caused an unsigned overflow in 64 bit systems,
+    so now we use a conditional statement. */
+    if (op == OP_XCLASS)
+      cc += GET(cc, 1);
+    else
+      cc += PRIV(OP_lengths)[OP_CLASS];
+#else
     cc += PRIV(OP_lengths)[OP_CLASS];
+#endif
 
     switch (*cc)
       {
