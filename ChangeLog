@@ -122,6 +122,9 @@ Version 8.32
 
 24. Add support for 32-bit character strings, and UTF-32
 
+25. Major JIT compiler update (code refactoring and bugfixing).
+    Experimental Sparc 32 support is added.
+
 
 Version 8.31 06-July-2012
 -------------------------
