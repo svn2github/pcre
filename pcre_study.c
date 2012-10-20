@@ -325,7 +325,8 @@ for (;;)
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
     case OP_XCLASS:
-    cc += GET(cc, 1) - PRIV(OP_lengths)[OP_CLASS];
+    cc += GET(cc, 1);
+    cc -= PRIV(OP_lengths)[OP_CLASS];
     /* Fall through */
 #endif
 
