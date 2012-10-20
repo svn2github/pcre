@@ -1916,13 +1916,23 @@ for (;;)
 
 #if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
     case OP_XCLASS:
-    cc += GET(cc, 1) - PRIV(OP_lengths)[OP_CLASS];
-    /* Fall through */
 #endif
-
     case OP_CLASS:
     case OP_NCLASS:
-    cc += PRIV(OP_lengths)[OP_CLASS];
+
+    switch (op)
+      {
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+      case OP_XCLASS:
+      cc += GET(cc, 1);
+      break;
+#endif
+
+      case OP_CLASS:
+      case OP_NCLASS:
+      cc += PRIV(OP_lengths)[OP_CLASS];
+      break;
+      }
 
     switch (*cc)
       {
