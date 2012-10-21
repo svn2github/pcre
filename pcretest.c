@@ -4399,6 +4399,14 @@ while (!done)
       }
 #endif
 
+#ifdef SUPPORT_VALGRIND
+    /* Mark the dbuffer as addressable but undefined again. */
+    if (dbuffer != NULL)
+      {
+      VALGRIND_MAKE_MEM_UNDEFINED(dbuffer, dbuffer_size * CHAR_SIZE);
+      }
+#endif
+
     /* Allocate a buffer to hold the data line. len+1 is an upper bound on
        the number of pcre_uchar units that will be needed. */
     if (dbuffer == NULL || (size_t)len >= dbuffer_size)
@@ -4820,22 +4828,33 @@ while (!done)
       }
 #endif
 
-    /* Move the data to the end of the buffer so that a read over the end of
-    the buffer will be seen by valgrind, even if it doesn't cause a crash. If
-    we are using the POSIX interface, we must include the terminating zero. */
+    /* If we're compiling with explicit valgrind support, Mark the data from after
+    its end to the end of the buffer as unaddressable, so that a read over the end
+    of the buffer will be seen by valgrind, even if it doesn't cause a crash.
+    If we're not building with valgrind support, at least move the data to the end
+    of the buffer so that it might at least cause a crash.
+    If we are using the POSIX interface, we must include the terminating zero. */
 
     bptr = dbuffer;
 
 #if !defined NOPOSIX
     if (posix || do_posix)
       {
+#ifdef SUPPORT_VALGRIND
+      VALGRIND_MAKE_MEM_NOACCESS(dbuffer + len + 1, dbuffer_size - (len + 1));
+#else
       memmove(bptr + dbuffer_size - len - 1, bptr, len + 1);
       bptr += dbuffer_size - len - 1;
+#endif
       }
     else
 #endif
       {
+#ifdef SUPPORT_VALGRIND
+      VALGRIND_MAKE_MEM_NOACCESS(dbuffer + len * CHAR_SIZE, (dbuffer_size - len) * CHAR_SIZE);
+#else
       bptr = memmove(bptr + (dbuffer_size - len) * CHAR_SIZE, bptr, len * CHAR_SIZE);
+#endif
       }
 
     if ((all_use_dfa || use_dfa) && find_match_limit)
