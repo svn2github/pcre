@@ -212,6 +212,11 @@ libpcre_la_SOURCES = \
   pcre_xclass.c \
   ucp.h
 
+libpcre_la_CFLAGS = \
+  $(AM_CFLAGS)
+
+libpcre_la_LIBADD =
+
 ## This file is generated as part of the building process, so don't distribute.
 nodist_libpcre_la_SOURCES = \
   pcre_chartables.c
@@ -245,6 +250,11 @@ libpcre16_la_SOURCES = \
   pcre16_version.c \
   pcre16_xclass.c
 
+libpcre16_la_CFLAGS = \
+  $(AM_CFLAGS)
+
+libpcre16_la_LIBADD =
+
 ## This file is generated as part of the building process, so don't distribute.
 nodist_libpcre16_la_SOURCES = \
   pcre_chartables.c
@@ -277,6 +287,10 @@ libpcre32_la_SOURCES = \
   pcre32_valid_utf32.c \
   pcre32_version.c \
   pcre32_xclass.c
+
+libpcre32_la_CFLAGS = \
+  $(AM_CFLAGS)
+libpcre32_la_LIBADD =
 
 ## This file is generated as part of the building process, so don't distribute.
 nodist_libpcre32_la_SOURCES = \
@@ -317,6 +331,18 @@ endif # WITH_PCRE16
 if WITH_PCRE32
 libpcre32_la_LDFLAGS = $(EXTRA_LIBPCRE32_LDFLAGS)
 endif # WITH_PCRE32
+
+if WITH_VALGRIND
+if WITH_PCRE8
+libpcre_la_CFLAGS += $(VALGRIND_CFLAGS)
+endif # WITH_PCRE8
+if WITH_PCRE16
+libpcre16_la_CFLAGS += $(VALGRIND_CFLAGS)
+endif # WITH_PCRE16
+if WITH_PCRE32
+libpcre32_la_CFLAGS += $(VALGRIND_CFLAGS)
+endif # WITH_PCRE32
+endif # WITH_VALGRIND
 
 CLEANFILES += pcre_chartables.c
 
@@ -385,6 +411,7 @@ dist_noinst_SCRIPTS += RunTest
 EXTRA_DIST += RunTest.bat
 bin_PROGRAMS += pcretest
 pcretest_SOURCES = pcretest.c
+pcretest_CFLAGS = $(AM_CFLAGS)
 pcretest_LDADD = $(LIBREADLINE)
 if WITH_PCRE8
 pcretest_SOURCES += pcre_printint.c
@@ -398,6 +425,9 @@ if WITH_PCRE32
 pcretest_SOURCES += pcre32_printint.c
 pcretest_LDADD += libpcre32.la
 endif # WITH_PCRE32
+if WITH_VALGRIND
+pcretest_CFLAGS += $(VALGRIND_CFLAGS)
+endif # WITH_VALGRIND
 
 if WITH_PCRE8
 TESTS += RunGrepTest

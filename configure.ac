@@ -48,6 +48,7 @@ remember_set_CXXFLAGS="$CXXFLAGS"
 
 AC_PROG_CC
 AC_PROG_CXX
+AM_PROG_CC_C_O
 
 if test "x$remember_set_CFLAGS" = "x"
 then
@@ -283,6 +284,12 @@ AC_ARG_WITH(match-limit-recursion,
             AS_HELP_STRING([--with-match-limit-recursion=N],
                            [default limit on internal recursion (default=MATCH_LIMIT)]),
             , with_match_limit_recursion=MATCH_LIMIT)
+
+# Handle --enable-valgrind
+AC_ARG_ENABLE(valgrind,
+              AS_HELP_STRING([--enable-valgrind],
+                             [valgrind support]),
+              , enable_valgrind=no)
 
 # Copy enable_utf8 value to enable_utf for compatibility reasons
 if test "x$enable_utf8" != "xunset"
@@ -525,6 +532,7 @@ AM_CONDITIONAL(WITH_PCRE_CPP, test "x$enable_cpp" = "xyes")
 AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xyes")
 AM_CONDITIONAL(WITH_JIT, test "x$enable_jit" = "xyes")
 AM_CONDITIONAL(WITH_UTF, test "x$enable_utf" = "xyes")
+AM_CONDITIONAL(WITH_VALGRIND, test "x$enable_valgrind" = "xyes")
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -811,6 +819,11 @@ if test "$enable_ebcdic_nl25" = "yes"; then
     set EBCDIC_NL25, the adjustment of NEWLINE is automatic.])
 fi       
 
+if test "$enable_valgrind" = "yes"; then
+  AC_DEFINE_UNQUOTED([SUPPORT_VALGRIND], [], [
+     Valgrind support to find invalid memory reads.])
+fi
+
 # Platform specific issues
 NO_UNDEFINED=
 EXPORT_ALL_SYMBOLS=
@@ -916,6 +929,14 @@ if test "$enable_pcretest_libreadline" = "yes"; then
   fi
 fi
 
+# Check for valgrind
+
+if test "$enable_valgrind" = "yes"; then
+  m4_ifdef([PKG_CHECK_MODULES],
+           [PKG_CHECK_MODULES([VALGRIND],[valgrind])],
+           [AC_MSG_ERROR([pkg-config not supported])])
+fi
+
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
 	Makefile
@@ -990,6 +1011,7 @@ $PACKAGE-$VERSION configuration summary:
     Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
     Link pcretest with libedit ...... : ${enable_pcretest_libedit}
     Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
+    Valgrind support ................ : ${enable_valgrind}
 
 EOF
 

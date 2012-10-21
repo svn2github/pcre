@@ -425,6 +425,18 @@ automatically included, you may need to add something like
 immediately before the \fBconfigure\fP command.
 .
 .
+.SH "DEBUGGING WITH VALGRIND SUPPORT"
+.rs
+.sp
+By adding the
+.sp
+  --enable-valgrind
+.sp
+option to to the \fBconfigure\fP command, PCRE will use valgrind annotations
+to mark certain memory regions as unaddressable. This allows to detect invalid
+memory accesses, and is mostly useful for debugging PCRE itself.
+.
+.
 .SH "SEE ALSO"
 .rs
 .sp
