@@ -8129,6 +8129,13 @@ if debugging, leave the test till after things are printed out. */
 if (code - codestart > length) errorcode = ERR23;
 #endif
 
+#ifdef SUPPORT_VALGRIND
+/* If the estimated length exceeds the really used length, mark the extra
+allocated memory as unadressable, so that any out-of-bound reads can be 
+detected. */
+VALGRIND_MAKE_MEM_NOACCESS(code, (length - (code - codestart)) * sizeof(pcre_uchar));
+#endif
+
 /* Fill in any forward references that are required. There may be repeated
 references; optimize for them, as searching a large regex takes time. */
 
