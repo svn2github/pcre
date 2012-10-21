@@ -51,6 +51,7 @@ strings to host byte order. */
 
 #include "pcre_internal.h"
 
+#ifdef SUPPORT_UTF
 static pcre_uint32
 swap_uint32(pcre_uint32 value)
 {
@@ -59,6 +60,8 @@ return ((value & 0x000000ff) << 24) |
        ((value & 0x00ff0000) >>  8) |
        (value >> 24);
 }
+#endif
+
 
 /*************************************************
 *  Convert any UTF-32 string to host byte order  *
@@ -130,6 +133,7 @@ if (host_byte_order != NULL)
 (void)(output);  /* Keep picky compilers happy */
 (void)(input);
 (void)(keep_boms);
+(void)(host_byte_order);
 #endif /* SUPPORT_UTF */
 return length;
 }
