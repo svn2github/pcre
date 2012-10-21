@@ -3515,13 +3515,17 @@ while (!done)
       PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, NULL);
       if (rc == PCRE_ERROR_BADMODE)
         {
+        pcre_uint16 flags_in_host_byte_order;
+        if (REAL_PCRE_MAGIC(re) == MAGIC_NUMBER)
+          flags_in_host_byte_order = REAL_PCRE_FLAGS(re);
+        else
+          flags_in_host_byte_order = swap_uint16(REAL_PCRE_FLAGS(re));
         /* Simulate the result of the function call below. */
         fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
           pcre_mode == PCRE32_MODE ? "32" : pcre_mode == PCRE16_MODE ? "16" : "",
           PCRE_INFO_OPTIONS);
         fprintf(outfile, "Running in %d-bit mode but pattern was compiled in "
-          "%d-bit mode\n", 8 * CHAR_SIZE,
-          8 * (REAL_PCRE_FLAGS(re) & PCRE_MODE_MASK));
+          "%d-bit mode\n", 8 * CHAR_SIZE, 8 * (flags_in_host_byte_order & PCRE_MODE_MASK));
         new_free(re);
         fclose(f);
         continue;

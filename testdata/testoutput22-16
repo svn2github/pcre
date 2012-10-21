@@ -66,6 +66,6 @@ Running in 16-bit mode but pattern was compiled in 32-bit mode
 Compiled pattern loaded from testsaved32BE-2
 Study data loaded from testsaved32BE-2
 Error -28 from pcre16_fullinfo(0)
-Running in 16-bit mode but pattern was compiled in 0-bit mode
+Running in 16-bit mode but pattern was compiled in 32-bit mode
 
 /-- End of testinput22 --/
