@@ -20,6 +20,7 @@
 
 #cmakedefine SUPPORT_PCRE8 1
 #cmakedefine SUPPORT_PCRE16 1
+#cmakedefine SUPPORT_PCRE32 1
 #cmakedefine SUPPORT_JIT 1
 #cmakedefine SUPPORT_PCREGREP_JIT 1
 #cmakedefine SUPPORT_UTF 1
