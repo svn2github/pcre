@@ -528,6 +528,10 @@ EXTRA_DIST += \
   testdata/testinput20 \
   testdata/testinput21 \
   testdata/testinput22 \
+  testdata/testinput23 \
+  testdata/testinput24 \
+  testdata/testinput25 \
+  testdata/testinput26 \
   testdata/testinputEBC \
   testdata/testoutput1 \
   testdata/testoutput2 \
@@ -539,19 +543,27 @@ EXTRA_DIST += \
   testdata/testoutput8 \
   testdata/testoutput9 \
   testdata/testoutput10 \
-  testdata/testoutput11-16 \
   testdata/testoutput11-8 \
+  testdata/testoutput11-16 \
+  testdata/testoutput11-32 \
   testdata/testoutput12 \
   testdata/testoutput13 \
   testdata/testoutput14 \
   testdata/testoutput15 \
   testdata/testoutput16 \
   testdata/testoutput17 \
-  testdata/testoutput18 \
+  testdata/testoutput18-16 \
+  testdata/testoutput18-32 \
   testdata/testoutput19 \
   testdata/testoutput20 \
-  testdata/testoutput21 \
-  testdata/testoutput22 \
+  testdata/testoutput21-16 \
+  testdata/testoutput21-32 \
+  testdata/testoutput22-16 \
+  testdata/testoutput22-32 \
+  testdata/testoutput23 \
+  testdata/testoutput24 \
+  testdata/testoutput25 \
+  testdata/testoutput26 \
   testdata/testoutputEBC \
   testdata/wintestinput3 \
   testdata/wintestoutput3 \
