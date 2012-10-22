@@ -735,6 +735,8 @@ endif
 
 # gcov/lcov code coverage reporting
 
+if WITH_GCOV
+
 GCOV_NAME ?= $(PACKAGE)-$(VERSION)
 GCOV_OUTPUT_FILE ?= $(GCOV_NAME)-coverage.info
 GCOV_OUTPUT_DIR ?= $(GCOV_NAME)-coverage
@@ -784,6 +786,13 @@ coverage-clean:
 coverage: coverage-check coverage-report
 clean-local: coverage-clean
 distclean-local: coverage-clean
+
+else
+
+coverage:
+	@echo "Configuring with --enable-coverage required to generate code coverage report."
+
+endif # WITH_GCOV
 
 ## CMake support
 
