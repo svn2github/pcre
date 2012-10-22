@@ -291,6 +291,12 @@ AC_ARG_ENABLE(valgrind,
                              [valgrind support]),
               , enable_valgrind=no)
 
+# Enable code coverage reports using gcov
+AC_ARG_ENABLE(coverage,
+              AS_HELP_STRING([--enable-coverage],
+                             [enable code coverage reports using gcov]),
+              , enable_coverage=no)
+
 # Copy enable_utf8 value to enable_utf for compatibility reasons
 if test "x$enable_utf8" != "xunset"
 then
@@ -937,6 +943,52 @@ if test "$enable_valgrind" = "yes"; then
            [AC_MSG_ERROR([pkg-config not supported])])
 fi
 
+# test code coverage reporting
+if test "$enable_coverage" = "yes"; then
+  if test "x$GCC" != "xyes"; then
+    AC_MSG_ERROR([Code coverage reports can only be generated when using GCC])
+  fi
+
+  # ccache is incompatible with gcov
+  AC_PATH_PROG([SHTOOL],[shtool],[false])
+  case `$SHTOOL path $CC` in
+    *ccache*) cc_ccache=yes;;
+    *) cc_ccache=no;;
+  esac
+
+  if test "$cc_ccache" = "yes"; then
+    if test -z "$CCACHE_DISABLE" -o "$CCACHE_DISABLE" != "1"; then
+      AC_MSG_ERROR([must export CCACHE_DISABLE=1 to disable ccache for code coverage])
+    fi
+  fi
+
+  AC_ARG_VAR([LCOV],[the ltp lcov program])
+  AC_PATH_PROG([LCOV],[lcov],[false])
+  if test "x$LCOV" = "xfalse"; then
+    AC_MSG_ERROR([lcov not found])
+  fi
+
+  AC_ARG_VAR([GENHTML],[the ltp genhtml program])
+  AC_PATH_PROG([GENHTML],[genhtml],[false])
+  if test "x$GENHTML" = "xfalse"; then
+    AC_MSG_ERROR([genhtml not found])
+  fi
+
+  AC_DEFINE([SUPPORT_GCOV],[1], [
+    Define to allow pcregrep to be linked with gcov, so that it is
+    able to generate code coverage reports.])
+
+  # And add flags needed for gcov
+  GCOV_CFLAGS="-O0 -ggdb3 -fprofile-arcs -ftest-coverage"
+  GCOV_CXXFLAGS="-O0 -ggdb3 -fprofile-arcs -ftest-coverage"
+  GCOV_LIBS="-lgcov"
+  AC_SUBST([GCOV_CFLAGS])
+  AC_SUBST([GCOV_CXXFLAGS])
+  AC_SUBST([GCOV_LIBS])
+fi # enable_coverage
+
+AM_CONDITIONAL([WITH_GCOV],[test "x$enable_coverage" = "xyes"])
+
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
 	Makefile
@@ -1012,6 +1064,7 @@ $PACKAGE-$VERSION configuration summary:
     Link pcretest with libedit ...... : ${enable_pcretest_libedit}
     Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
     Valgrind support ................ : ${enable_valgrind}
+    Code coverage ................... : ${enable_coverage}
 
 EOF
 

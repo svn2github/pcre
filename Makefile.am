@@ -344,6 +344,18 @@ libpcre32_la_CFLAGS += $(VALGRIND_CFLAGS)
 endif # WITH_PCRE32
 endif # WITH_VALGRIND
 
+if WITH_GCOV
+if WITH_PCRE8
+libpcre_la_CFLAGS += $(GCOV_CFLAGS)
+endif # WITH_PCRE8
+if WITH_PCRE16
+libpcre16_la_CFLAGS += $(GCOV_CFLAGS)
+endif # WITH_PCRE16
+if WITH_PCRE32
+libpcre32_la_CFLAGS += $(GCOV_CFLAGS)
+endif # WITH_PCRE32
+endif # WITH_GCOV
+
 CLEANFILES += pcre_chartables.c
 
 ## If JIT support is enabled, arrange for the JIT test program to run.
@@ -351,6 +363,7 @@ if WITH_JIT
 TESTS += pcre_jit_test
 noinst_PROGRAMS += pcre_jit_test
 pcre_jit_test_SOURCES = pcre_jit_test.c
+pcre_jit_test_CFLAGS = $(AM_CFLAGS)
 pcre_jit_test_LDADD =
 if WITH_PCRE8
 pcre_jit_test_LDADD += libpcre.la
@@ -361,15 +374,26 @@ endif # WITH_PCRE16
 if WITH_PCRE32
 pcre_jit_test_LDADD += libpcre32.la
 endif # WITH_PCRE32
+if WITH_GCOV
+pcre_jit_test_CFLAGS += $(GCOV_CFLAGS)
+pcre_jit_test_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
 endif # WITH_JIT
 
 ## A version of the main pcre library that has a posix re API.
 if WITH_PCRE8
+
 lib_LTLIBRARIES += libpcreposix.la
 libpcreposix_la_SOURCES = \
   pcreposix.c
+libpcreposix_la_CFLAGS = $(AM_CFLAGS)
 libpcreposix_la_LDFLAGS = $(EXTRA_LIBPCREPOSIX_LDFLAGS)
 libpcreposix_la_LIBADD = libpcre.la
+
+if WITH_GCOV
+libpcreposix_la_CFLAGS += $(GCOV_CFLAGS)
+endif # WITH_GCOV
+
 endif # WITH_PCRE8
 
 ## There's a C++ library as well.
@@ -381,23 +405,34 @@ libpcrecpp_la_SOURCES = \
   pcrecpp.cc \
   pcre_scanner.cc \
   pcre_stringpiece.cc
+libpcrecpp_la_CXXFLAGS = $(AM_CXXFLAGS)
 libpcrecpp_la_LDFLAGS = $(EXTRA_LIBPCRECPP_LDFLAGS)
 libpcrecpp_la_LIBADD = libpcre.la
 
 TESTS += pcrecpp_unittest
 noinst_PROGRAMS += pcrecpp_unittest
 pcrecpp_unittest_SOURCES = pcrecpp_unittest.cc
+pcrecpp_unittest_CXXFLAGS = $(AM_CXXFLAGS)
 pcrecpp_unittest_LDADD = libpcrecpp.la
 
 TESTS += pcre_scanner_unittest
 noinst_PROGRAMS += pcre_scanner_unittest
 pcre_scanner_unittest_SOURCES = pcre_scanner_unittest.cc
+pcre_scanner_unittest_CXXFLAGS = $(AM_CXXFLAGS)
 pcre_scanner_unittest_LDADD = libpcrecpp.la
 
 TESTS += pcre_stringpiece_unittest
 noinst_PROGRAMS += pcre_stringpiece_unittest
 pcre_stringpiece_unittest_SOURCES = pcre_stringpiece_unittest.cc
+pcre_stringpiece_unittest_CXXFLAGS = $(AM_CXXFLAGS)
 pcre_stringpiece_unittest_LDADD = libpcrecpp.la
+
+if WITH_GCOV
+libpcrecpp_la_CXXFLAGS += $(GCOV_CXXFLAGS)
+pcrecpp_unittest_LDADD += $(GCOV_LIBS)
+pcre_scanner_unittest_LDADD += $(GCOV_LIBS)
+pcre_stringpiece_unittest_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
 
 endif # WITH_PCRE_CPP
 
@@ -428,14 +463,23 @@ endif # WITH_PCRE32
 if WITH_VALGRIND
 pcretest_CFLAGS += $(VALGRIND_CFLAGS)
 endif # WITH_VALGRIND
+if WITH_GCOV
+pcretest_CFLAGS += $(GCOV_CFLAGS)
+pcretest_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
 
 if WITH_PCRE8
 TESTS += RunGrepTest
 dist_noinst_SCRIPTS += RunGrepTest
 bin_PROGRAMS += pcregrep
 pcregrep_SOURCES = pcregrep.c
+pcregrep_CFLAGS = $(AM_CFLAGS)
 pcregrep_LDADD = $(LIBZ) $(LIBBZ2)
 pcregrep_LDADD += libpcre.la libpcreposix.la
+if WITH_GCOV
+pcregrep_CFLAGS += $(GCOV_CFLAGS)
+pcregrep_LDADD += $(GCOV_LIBS)
+endif # WITH_GCOV
 endif # WITH_PCRE8
 
 EXTRA_DIST += \
@@ -676,6 +720,58 @@ EXTRA_DIST += $(pcrecpp_man)
 if WITH_PCRE_CPP
 man_MANS = $(pcrecpp_man)
 endif
+
+# gcov/lcov code coverage reporting
+
+GCOV_NAME ?= $(PACKAGE)-$(VERSION)
+GCOV_OUTPUT_FILE ?= $(GCOV_NAME)-coverage.info
+GCOV_OUTPUT_DIR ?= $(GCOV_NAME)-coverage
+GCOV_LCOV_FLAGS ?=
+GCOV_GENHTML_FLAGS ?=
+
+gcov_quiet = $(gcov_quiet_$(V))
+gcov_quiet_ = $(gcov_quiet_$(AM_DEFAULT_VERBOSITY))
+gcov_quiet_0 = --quiet
+
+coverage-check: all
+	-$(MAKE) $(AM_MAKEFLAGS) -k check
+
+coverage-report:
+	$(LCOV) $(gcov_quiet) \
+		--directory $(top_builddir) \
+		--capture \
+		--output-file "$(GCOV_OUTPUT_FILE).tmp" \
+		--test-name "$(GCOV_NAME)" \
+		--no-checksum \
+		--compat-libtool \
+		$(GCOV_LCOV_FLAGS)
+	$(LCOV) $(gcov_quiet) \
+		--directory $(top_builddir) \
+		--output-file "$(GCOV_OUTPUT_FILE)" \
+		--remove "$(GCOV_OUTPUT_FILE).tmp" \
+		"/tmp/*" \
+		"/usr/include/*" \
+		"$(includedir)/*"
+	-@rm -f "$(GCOV_OUTPUT_FILE).tmp"
+	LANG=C $(GENHTML) $(gcov_quiet) \
+		--prefix $(top_builddir) \
+		--output-directory "$(GCOV_OUTPUT_DIR)" \
+		--title "$(PACKAGE) $(VERSION) Code Coverage Report" \
+		--show-details "$(GCOV_OUTPUT_FILE)" \
+		--legend \
+		$(GCOV_GENHTML_FLAGS)
+	@echo "Code coverage report written to file://$(abs_builddir)/$(GCOV_OUTPUT_DIR)/index.html"
+
+coverage-clean:
+	-$(LCOV) $(gcov_quiet) --zerocounters --directory $(top_builddir)
+	-rm -f "$(GCOV_OUTPUT_FILE)"
+	-rm -f "$(GCOV_OUTPUT_FILE).tmp"
+	-rm -rf "$(GCOV_NAME)"
+	-find $(top_builddir) -name '*.gcda' -o -name "*.gcov" -delete
+
+coverage: coverage-check coverage-report
+clean-local: coverage-clean
+distclean-local: coverage-clean
 
 ## CMake support
 

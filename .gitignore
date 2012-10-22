@@ -10,6 +10,7 @@
 /configure
 /depcomp
 /.deps
+/dftables
 /*.gcda
 /*.gcno
 /INSTALL
@@ -21,6 +22,7 @@
 /*.lo
 /ltmain.sh
 /m4/
+/maint/ucptest
 /Makefile
 /Makefile.in
 /missing
@@ -32,8 +34,8 @@
 /pcrecpp_unittest
 pcregrep
 /pcre.h
-/pcre-lcov.info
-/pcre-lcov/
+/pcre-*-coverage.info
+/pcre-*-coverage/
 /pcre_jit_test
 /pcre_scanner_unittest
 /pcre_stringpiece.h

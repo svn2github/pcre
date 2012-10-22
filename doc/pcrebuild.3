@@ -437,6 +437,26 @@ to mark certain memory regions as unaddressable. This allows to detect invalid
 memory accesses, and is mostly useful for debugging PCRE itself.
 .
 .
+.SH "CODE COVERAGE REPORTING"
+.rs
+.sp
+The build process can generate a code coverage report for the test suite.
+To enable this, you must install \fBlcov\fP version 1.6 or above. Then use
+.sp
+  --enable-coverage
+.sp
+to the \fBconfigure\fP command, and generate the report by running
+.sp
+  make coverage
+.sp
+Note that using \fBccache\fP is incompatible with code coverage reporting;
+you must set the environment variable
+.sp
+  CCACHE_DISABLE=1
+.sp
+before running make.
+.
+.
 .SH "SEE ALSO"
 .rs
 .sp
