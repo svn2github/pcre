@@ -59,6 +59,7 @@
 # 2012-02-26 PH added support for libedit
 # 2012-09-06 PH added support for PCRE_EBCDIC_NL25
 # 2012-09-08 ChPe added PCRE32 support
+# 2012-10-23 PH added support for VALGRIND and GCOV
 
 PROJECT(PCRE C CXX)
 
@@ -159,6 +160,12 @@ SET(PCRE_SUPPORT_UNICODE_PROPERTIES OFF CACHE BOOL
 
 SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
     "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks")
+
+SET(PCRE_SUPPORT_VALGRIND OFF CACHE BOOL
+    "Enable Valgrind support.")
+    
+SET(PCRE_SUPPORT_COVERAGE OFF CACHE BOOL
+    "Enable GCOV support.") 
 
 OPTION(PCRE_SHOW_REPORT    "Show the final configuration report" ON)
 OPTION(PCRE_BUILD_PCREGREP "Build pcregrep" ON)
@@ -284,6 +291,14 @@ ENDIF(PCRE_SUPPORT_JIT)
 IF(PCRE_SUPPORT_PCREGREP_JIT)
         SET(SUPPORT_PCREGREP_JIT 1)
 ENDIF(PCRE_SUPPORT_PCREGREP_JIT)
+
+IF(PCRE_SUPPORT_VALGRIND)
+        SET(SUPPORT_VALGRIND 1)
+ENDIF(PCRE_SUPPORT_VALGRIND)
+
+IF(PCRE_SUPPORT_COVERAGE)
+        SET(SUPPORT_GCOV 1)
+ENDIF(PCRE_SUPPORT_COVERAGE)                  
 
 # This next one used to contain
 #       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
@@ -928,6 +943,8 @@ IF(PCRE_SHOW_REPORT)
   ELSE(READLINE_FOUND)
     MESSAGE(STATUS "  Link pcretest with libreadline .. : Library not found" )
   ENDIF(READLINE_FOUND)
+  MESSAGE(STATUS "  Support Valgrind .................: ${PCRE_SUPPORT_VALGRIND}")
+  MESSAGE(STATUS "  Support coverage .................: ${PCRE_SUPPORT_COVERAGE}")  
 
   IF(MINGW AND NOT PCRE_STATIC)
     MESSAGE(STATUS "  Non-standard dll names (prefix) . : ${NON_STANDARD_LIB_PREFIX}")
