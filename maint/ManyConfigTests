@@ -176,7 +176,9 @@ for opts in \
   "--enable-pcre32 --enable-jit --disable-pcre8 --enable-utf --disable-shared" \
   "--enable-pcre32 --disable-stack-for-recursion --disable-shared" \
   "--enable-pcre32 --enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
-  "--enable-pcre32 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared"
+  "--enable-pcre32 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared" \
+  "--enable-pcre32 --enable-pcre16 --disable-shared" \
+  "--enable-pcre32 --enable-pcre16 --disable-pcre8 --disable-shared"
 do
   runtest
 done
