@@ -975,8 +975,8 @@ if test "$enable_coverage" = "yes"; then
   fi
 
   AC_DEFINE([SUPPORT_GCOV],[1], [
-    Define to allow pcregrep to be linked with gcov, so that it is
-    able to generate code coverage reports.])
+    Define to allow pcretest and pcregrep to be linked with gcov, so that they 
+    are able to generate code coverage reports.])
 
   # And add flags needed for gcov
   GCOV_CFLAGS="-O0 -ggdb3 -fprofile-arcs -ftest-coverage"
