@@ -4752,8 +4752,8 @@ while (!done)
           {
           if (c > 0x10ffffu)
             {
-            fprintf(outfile, "**Failed: character value greater than 0x10ffff "
-              "cannot be converted to UTF-16\n");
+            fprintf(outfile, "** Failed: character \\x{%x} is greater than "
+              "0x10ffff and so cannot be converted to UTF-16\n", c);
             goto NEXT_DATA;
             }
           else if (c >= 0x10000u)
@@ -4770,8 +4770,8 @@ while (!done)
           {
           if (c > 0xffffu)
             {
-            fprintf(outfile, "** Character value is greater than 0xffff "
-              "and UTF-16 mode is not enabled.\n");
+            fprintf(outfile, "** Character \\x{%x} is greater than 0xffff "
+              "and UTF-16 mode is not enabled.\n", c);
             fprintf(outfile, "** Truncation will probably give the wrong "
               "result.\n");
             }
