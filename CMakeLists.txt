@@ -165,7 +165,7 @@ SET(PCRE_SUPPORT_VALGRIND OFF CACHE BOOL
     "Enable Valgrind support.")
     
 SET(PCRE_SUPPORT_COVERAGE OFF CACHE BOOL
-    "Enable GCOV support.") 
+    "Enable code coverage support using gcov.") 
 
 OPTION(PCRE_SHOW_REPORT    "Show the final configuration report" ON)
 OPTION(PCRE_BUILD_PCREGREP "Build pcregrep" ON)
@@ -298,6 +298,9 @@ ENDIF(PCRE_SUPPORT_VALGRIND)
 
 IF(PCRE_SUPPORT_COVERAGE)
         SET(SUPPORT_GCOV 1)
+        IF(NOT CMAKE_COMPILER_IS_GNUCC)
+            MESSAGE(FATAL_ERROR "Code coverage reports can only be generated when using GCC") 
+        ENDIF(NOT CMAKE_COMPILER_IS_GNUCC)  
 ENDIF(PCRE_SUPPORT_COVERAGE)                  
 
 # This next one used to contain
