@@ -737,11 +737,11 @@ endif
 
 if WITH_GCOV
 
-GCOV_NAME ?= $(PACKAGE)-$(VERSION)
-GCOV_OUTPUT_FILE ?= $(GCOV_NAME)-coverage.info
-GCOV_OUTPUT_DIR ?= $(GCOV_NAME)-coverage
-GCOV_LCOV_FLAGS ?=
-GCOV_GENHTML_FLAGS ?=
+GCOV_NAME = $(PACKAGE)-$(VERSION)
+GCOV_OUTPUT_FILE = $(GCOV_NAME)-coverage.info
+GCOV_OUTPUT_DIR = $(GCOV_NAME)-coverage
+GCOV_LCOV_FLAGS =
+GCOV_GENHTML_FLAGS =
 
 gcov_quiet = $(gcov_quiet_$(V))
 gcov_quiet_ = $(gcov_quiet_$(AM_DEFAULT_VERBOSITY))
