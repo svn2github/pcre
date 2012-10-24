@@ -124,6 +124,10 @@ Version 8.32
 
 25. Major JIT compiler update (code refactoring and bugfixing).
     Experimental Sparc 32 support is added.
+    
+26. Applied a modified version of Daniel Richard G's patch to create 
+    pcre.h.generic and config.h.generic by "make" instead of in the 
+    PrepareRelease script.
 
 
 Version 8.31 06-July-2012

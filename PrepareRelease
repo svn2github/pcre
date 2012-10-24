@@ -248,34 +248,6 @@ files="\
 echo Detrailing
 perl ./Detrail $files doc/p* doc/html/*
 
-echo Doing basic configure to get default pcre.h and config.h
-# This is in case the caller has set aliases (as I do - PH)
-unset cp ls mv rm
-./configure >/dev/null
-
-echo Converting pcre.h and config.h to generic forms
-cp -f pcre.h pcre.h.generic
-
-perl <<'END'
-  open(IN, "<config.h") || die "Can't open config.h: $!\n";
-  open(OUT, ">config.h.generic") || die "Can't open config.h.generic: $!\n";
-  while (<IN>)
-    {
-    if (/^#define\s(?!PACKAGE)(\w+)/)
-      {
-      print OUT "#ifndef $1\n";
-      print OUT;
-      print OUT "#endif\n";
-      }
-    else
-      {
-      print OUT;
-      }
-    }
-  close IN;
-  close OUT;
-END
-
 echo Done
 
 #End

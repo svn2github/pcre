@@ -132,11 +132,27 @@ EXTRA_DIST += \
   pcre.h.generic \
   config.h.generic
 
-pcre.h.generic: configure.ac
+# The only difference between pcre.h.in and pcre.h is the setting of the PCRE
+# version number. Therefore, we can create the generic version just by copying.
+pcre.h.generic: pcre.h.in configure.ac
 	rm -f $@
 	cp -p pcre.h $@
 
-MAINTAINERCLEANFILES += pcre.h.generic
+# It is more complicated for config.h.generic. We need the version that results
+# from a default configuration. We can get this by doing a configure in a
+# temporary directory. It has to be entirely done using files in that 
+# directory, because the source directory may already be configured. If you 
+# just try running configure in a new directory, it complains that the source
+# directory is already configured.
+config.h.generic: configure.ac
+	rm -rf $@ _generic
+	mkdir _generic
+	cp configure *.in _generic
+	(cd _generic; ./configure srcdir=.)
+	perl -pe 'if(/^#define\s(?!PACKAGE)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$_="";}' _generic/config.h >$@
+	rm -rf _generic
+
+MAINTAINERCLEANFILES += pcre.h.generic config.h.generic
 
 # These are the header files we'll install. We do not distribute pcre.h because
 # it is generated from pcre.h.in.
