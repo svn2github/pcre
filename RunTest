@@ -22,8 +22,8 @@
 # possible to select which to test by the arguments -8, -16 or -32.
 #
 # Other arguments for this script can be individual test numbers, or the word
-# "valgrind", or "sim" followed by an argument to run cross-compiled
-# executables under a simulator, for example:
+# "valgrind", "valgrind-log" or "sim" followed by an argument to run cross-
+# compiled executables under a simulator, for example:
 #
 # RunTest 3 sim "qemu-arm -s 8388608"
 #
@@ -221,7 +221,8 @@ while [ $# -gt 0 ] ; do
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
-   valgrind) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
+   valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
+   valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
    sim) shift; sim=$1;;
     *) echo "Unknown test number '$1'"; exit 1;;
   esac
