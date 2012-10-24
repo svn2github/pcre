@@ -6111,14 +6111,11 @@ switch (frame->Xwhere)
   LBL(32) LBL(34) LBL(42) LBL(46)
 #ifdef SUPPORT_UCP
   LBL(36) LBL(37) LBL(38) LBL(39) LBL(40) LBL(41) LBL(44) LBL(45)
-  LBL(59) LBL(60) LBL(61) LBL(62)
+  LBL(59) LBL(60) LBL(61) LBL(62) LBL(67)
 #endif  /* SUPPORT_UCP */
 #endif  /* SUPPORT_UTF */
   default:
   DPRINTF(("jump error in pcre match: label %d non-existent\n", frame->Xwhere));
-
-printf("+++jump error in pcre match: label %d non-existent\n", frame->Xwhere);
-
   return PCRE_ERROR_INTERNAL;
   }
 #undef LBL
