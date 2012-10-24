@@ -197,6 +197,7 @@ for opts in \
   "--enable-pcre16 --enable-pcre32 --enable-jit --enable-unicode-properties " \
   "--disable-shared"
 do
+  opts="--enable-valgrind $opts"
   runtest
 done
 
