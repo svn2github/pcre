@@ -1,4 +1,4 @@
-.TH PCREBUILD 3 "08 September 2012" "PCRE 8.32"
+.TH PCREBUILD 3 "27 October 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .
@@ -433,8 +433,8 @@ By adding the
   --enable-valgrind
 .sp
 option to to the \fBconfigure\fP command, PCRE will use valgrind annotations
-to mark certain memory regions as unaddressable. This allows to detect invalid
-memory accesses, and is mostly useful for debugging PCRE itself.
+to mark certain memory regions as unaddressable. This allows it to detect
+invalid memory accesses, and is mostly useful for debugging PCRE itself.
 .
 .
 .SH "CODE COVERAGE REPORTING"
@@ -449,12 +449,13 @@ to the \fBconfigure\fP command, and generate the report by running
 .sp
   make coverage
 .sp
-Note that using \fBccache\fP is incompatible with code coverage reporting;
-you must set the environment variable
+Note that using \fBccache\fP (a caching C compiler) is incompatible with code
+coverage reporting. If you have configured \fBccache\fP to run automatically
+on your system you must set the environment variable
 .sp
   CCACHE_DISABLE=1
 .sp
-before running make.
+before running make to build PCRE, so that \fBccache\fP is not used.
 .
 .
 .SH "SEE ALSO"
@@ -477,6 +478,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 September 2012
+Last updated: 27 October 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
