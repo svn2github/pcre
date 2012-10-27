@@ -147,8 +147,10 @@ pcre.h.generic: pcre.h.in configure.ac
 config.h.generic: configure.ac
 	rm -rf $@ _generic
 	mkdir _generic
-	cp configure *.in _generic
-	(cd _generic; ./configure srcdir=.)
+	cs=$(srcdir)/config.status; test ! -f $$cs || mv -f $$cs $$cs.aside
+	cd _generic && $(abs_top_srcdir)/configure || :
+	cs=$(srcdir)/config.status; test ! -f $$cs.aside || mv -f $$cs.aside $$cs
+	test -f _generic/config.h
 	perl -pe 'if(/^#define\s(?!PACKAGE)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$_="";}' _generic/config.h >$@
 	rm -rf _generic
 
