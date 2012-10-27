@@ -763,6 +763,8 @@ if WITH_GCOV
 # coverage-report: This creates the coverage report only
 # coverage-clean-report: This removes the generated coverage report
 #   without cleaning the coverage data itself
+# coverage-clean-data: This removes the captured coverage data without
+#   removing the coverage files created at compile time (*.gcno)
 # coverage-clean: This cleans all coverage data including the generated
 #   coverage report.
 
@@ -820,16 +822,19 @@ coverage-clean-report:
 	-rm -f "$(COVERAGE_OUTPUT_FILE)" "$(COVERAGE_OUTPUT_FILE).tmp"
 	-rm -rf "$(COVERAGE_OUTPUT_DIR)"
 
-coverage-clean: coverage-reset coverage-clean-report
-	-find $(top_builddir) -name "*.gcda" -or -name "*.gcno" -delete
+coverage-clean-data:
+	-find $(top_builddir) -name "*.gcda" -delete
+
+coverage-clean: coverage-reset coverage-clean-report coverage-clean-data
+	-find $(top_builddir) -name "*.gcno" -delete
 
 coverage-distclean: coverage-clean
 
-coverage: coverage-baseline coverage-check coverage-report
+coverage: coverage-reset coverage-baseline coverage-check coverage-report
 clean-local: coverage-clean
 distclean-local: coverage-distclean
 
-.PHONY: coverage coverage-baseline coverage-check coverage-report coverage-reset coverage-clean-report coverage-clean coverage-distclean
+.PHONY: coverage coverage-baseline coverage-check coverage-report coverage-reset coverage-clean-report coverage-clean-data coverage-clean coverage-distclean
 
 else
 
