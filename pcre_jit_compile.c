@@ -767,7 +767,8 @@ int private_data_length = 0;
 pcre_uchar *alternative;
 pcre_uchar *name;
 pcre_uchar *end = NULL;
-int space, size, bracketlen, i;
+int space, size, i;
+pcre_uint32 bracketlen;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
@@ -944,7 +945,7 @@ while (cc < ccend)
       cc += size;
     }
 
-  if (bracketlen > 0)
+  if (bracketlen != 0)
     {
     if (cc >= end)
       {
@@ -5331,7 +5332,7 @@ common->accept = save_accept;
 return cc + 1 + LINK_SIZE;
 }
 
-static sljit_w SLJIT_CALL do_searchovector(sljit_w refno, sljit_w* locals, pcre_uchar *name_table)
+static sljit_w SLJIT_CALL do_searchovector(sljit_uw refno, sljit_w* locals, pcre_uchar *name_table)
 {
 int condition = FALSE;
 pcre_uchar *slotA = name_table;
@@ -5388,15 +5389,15 @@ if (i < name_count)
 return condition;
 }
 
-static sljit_w SLJIT_CALL do_searchgroups(sljit_w recno, sljit_w* locals, pcre_uchar *name_table)
+static sljit_w SLJIT_CALL do_searchgroups(sljit_uw recno, sljit_uw* locals, pcre_uchar *name_table)
 {
 int condition = FALSE;
 pcre_uchar *slotA = name_table;
 pcre_uchar *slotB;
-sljit_w name_count = locals[LOCALS0 / sizeof(sljit_w)];
-sljit_w name_entry_size = locals[LOCALS1 / sizeof(sljit_w)];
-sljit_w group_num = locals[POSSESSIVE0 / sizeof(sljit_w)];
-int i;
+sljit_uw name_count = locals[LOCALS0 / sizeof(sljit_w)];
+sljit_uw name_entry_size = locals[LOCALS1 / sizeof(sljit_w)];
+sljit_uw group_num = locals[POSSESSIVE0 / sizeof(sljit_w)];
+sljit_uw i;
 
 for (i = 0; i < name_count; i++)
   {
@@ -5551,7 +5552,7 @@ if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND))
     else if (common->currententry->start == 0)
       has_alternatives = stacksize != 0;
     else
-      has_alternatives = stacksize != GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
+      has_alternatives = stacksize != (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
     }
   }
 
@@ -5786,7 +5787,7 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     else if (common->currententry->start == 0)
       stacksize = stacksize == 0;
     else
-      stacksize = stacksize == GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
+      stacksize = stacksize == (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
 
     if (*matchingpath == OP_RREF || stacksize || common->currententry == NULL)
       {
