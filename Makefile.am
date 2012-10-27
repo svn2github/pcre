@@ -755,55 +755,81 @@ endif
 
 if WITH_GCOV
 
-GCOV_NAME = $(PACKAGE)-$(VERSION)
-GCOV_OUTPUT_FILE = $(GCOV_NAME)-coverage.info
-GCOV_OUTPUT_DIR = $(GCOV_NAME)-coverage
-GCOV_LCOV_FLAGS =
-GCOV_GENHTML_FLAGS =
+# Coverage reporting targets:
+#
+# coverage: Create a coverage report from 'make check'
+# coverage-baseline: Capture baseline coverage information
+# coverage-reset: This zeros the coverage counters only
+# coverage-report: This creates the coverage report only
+# coverage-clean-report: This removes the generated coverage report
+#   without cleaning the coverage data itself
+# coverage-clean: This cleans all coverage data including the generated
+#   coverage report.
 
-gcov_quiet = $(gcov_quiet_$(V))
-gcov_quiet_ = $(gcov_quiet_$(AM_DEFAULT_VERBOSITY))
-gcov_quiet_0 = --quiet
+COVERAGE_TEST_NAME = $(PACKAGE)
+COVERAGE_NAME = $(PACKAGE)-$(VERSION)
+COVERAGE_OUTPUT_FILE = $(COVERAGE_NAME)-coverage.info
+COVERAGE_OUTPUT_DIR = $(COVERAGE_NAME)-coverage
+COVERAGE_LCOV_EXTRA_FLAGS =
+COVERAGE_GENHTML_EXTRA_FLAGS =
+
+coverage_quiet = $(coverage_quiet_$(V))
+coverage_quiet_ = $(coverage_quiet_$(AM_DEFAULT_VERBOSITY))
+coverage_quiet_0 = --quiet
 
 coverage-check: all
 	-$(MAKE) $(AM_MAKEFLAGS) -k check
 
+coverage-baseline:
+	$(LCOV) $(coverage_quiet) \
+		--directory $(top_builddir) \
+		--output-file "$(COVERAGE_OUTPUT_FILE)" \
+		--capture \
+		--initial
+
 coverage-report:
-	$(LCOV) $(gcov_quiet) \
+	$(LCOV) $(coverage_quiet) \
 		--directory $(top_builddir) \
 		--capture \
-		--output-file "$(GCOV_OUTPUT_FILE).tmp" \
-		--test-name "$(GCOV_NAME)" \
+		--output-file "$(COVERAGE_OUTPUT_FILE).tmp" \
+		--test-name "$(COVERAGE_TEST_NAME)" \
 		--no-checksum \
 		--compat-libtool \
-		$(GCOV_LCOV_FLAGS)
-	$(LCOV) $(gcov_quiet) \
+		$(COVERAGE_LCOV_EXTRA_FLAGS)
+	$(LCOV) $(coverage_quiet) \
 		--directory $(top_builddir) \
-		--output-file "$(GCOV_OUTPUT_FILE)" \
-		--remove "$(GCOV_OUTPUT_FILE).tmp" \
+		--output-file "$(COVERAGE_OUTPUT_FILE)" \
+		--remove "$(COVERAGE_OUTPUT_FILE).tmp" \
 		"/tmp/*" \
 		"/usr/include/*" \
 		"$(includedir)/*"
-	-@rm -f "$(GCOV_OUTPUT_FILE).tmp"
-	LANG=C $(GENHTML) $(gcov_quiet) \
+	-@rm -f "$(COVERAGE_OUTPUT_FILE).tmp"
+	LANG=C $(GENHTML) $(coverage_quiet) \
 		--prefix $(top_builddir) \
-		--output-directory "$(GCOV_OUTPUT_DIR)" \
+		--output-directory "$(COVERAGE_OUTPUT_DIR)" \
 		--title "$(PACKAGE) $(VERSION) Code Coverage Report" \
-		--show-details "$(GCOV_OUTPUT_FILE)" \
+		--show-details "$(COVERAGE_OUTPUT_FILE)" \
 		--legend \
-		$(GCOV_GENHTML_FLAGS)
-	@echo "Code coverage report written to file://$(abs_builddir)/$(GCOV_OUTPUT_DIR)/index.html"
+		$(COVERAGE_GENHTML_EXTRA_FLAGS)
+	@echo "Code coverage report written to file://$(abs_builddir)/$(COVERAGE_OUTPUT_DIR)/index.html"
 
-coverage-clean:
-	-$(LCOV) $(gcov_quiet) --zerocounters --directory $(top_builddir)
-	-rm -f "$(GCOV_OUTPUT_FILE)"
-	-rm -f "$(GCOV_OUTPUT_FILE).tmp"
-	-rm -rf "$(GCOV_NAME)"
-	-find $(top_builddir) -name '*.gcda' -o -name "*.gcov" -delete
+coverage-reset:
+	-$(LCOV) $(coverage_quiet) --zerocounters --directory $(top_builddir)
 
-coverage: coverage-check coverage-report
+coverage-clean-report:
+	-rm -f "$(COVERAGE_OUTPUT_FILE)" "$(COVERAGE_OUTPUT_FILE).tmp"
+	-rm -rf "$(COVERAGE_OUTPUT_DIR)"
+
+coverage-clean: coverage-reset coverage-clean-report
+	-find $(top_builddir) -name "*.gcda" -or -name "*.gcno" -delete
+
+coverage-distclean: coverage-clean
+
+coverage: coverage-baseline coverage-check coverage-report
 clean-local: coverage-clean
-distclean-local: coverage-clean
+distclean-local: coverage-distclean
+
+.PHONY: coverage coverage-baseline coverage-check coverage-report coverage-reset coverage-clean-report coverage-clean coverage-distclean
 
 else
 
