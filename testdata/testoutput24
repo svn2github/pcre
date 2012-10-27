@@ -134,4 +134,12 @@ Error -10 (bad UTF-16 string) offset=0 reason=4
     \x{fdef}
 Error -10 (bad UTF-16 string) offset=0 reason=4
 
+/bad/8
+    \x{d800}
+Error -10 (bad UTF-16 string) offset=0 reason=1
+
+/short/8
+    \P\P\x{d800}
+Error -25 (short UTF-16 string) offset=0 reason=1
+
 /-- End of testinput24 --/

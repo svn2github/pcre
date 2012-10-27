@@ -84,7 +84,7 @@ Options: utf no_utf_check
 First char = \x{c3}
 Need char = 'x'
 
-/abc/8
+/badutf/8
     \xdf
 Error -10 (bad UTF-8 string) offset=0 reason=1
     \xef
@@ -166,13 +166,45 @@ Error -10 (bad UTF-8 string) offset=0 reason=21
     \xef\xb7\x90
 Error -10 (bad UTF-8 string) offset=0 reason=22
 
-/abc/8
+/badutf/8
     \xfb\x80\x80\x80\x80
 Error -10 (bad UTF-8 string) offset=0 reason=11
     \xfd\x80\x80\x80\x80\x80
 Error -10 (bad UTF-8 string) offset=0 reason=12
     \xf7\xbf\xbf\xbf
 Error -10 (bad UTF-8 string) offset=0 reason=13
+
+/shortutf/8
+    \P\P\xdf
+Error -25 (short UTF-8 string) offset=0 reason=1
+    \P\P\xef
+Error -25 (short UTF-8 string) offset=0 reason=2
+    \P\P\xef\x80
+Error -25 (short UTF-8 string) offset=0 reason=1
+    \P\P\xf7
+Error -25 (short UTF-8 string) offset=0 reason=3
+    \P\P\xf7\x80
+Error -25 (short UTF-8 string) offset=0 reason=2
+    \P\P\xf7\x80\x80
+Error -25 (short UTF-8 string) offset=0 reason=1
+    \P\P\xfb
+Error -25 (short UTF-8 string) offset=0 reason=4
+    \P\P\xfb\x80
+Error -25 (short UTF-8 string) offset=0 reason=3
+    \P\P\xfb\x80\x80
+Error -25 (short UTF-8 string) offset=0 reason=2
+    \P\P\xfb\x80\x80\x80
+Error -25 (short UTF-8 string) offset=0 reason=1
+    \P\P\xfd
+Error -25 (short UTF-8 string) offset=0 reason=5
+    \P\P\xfd\x80
+Error -25 (short UTF-8 string) offset=0 reason=4
+    \P\P\xfd\x80\x80
+Error -25 (short UTF-8 string) offset=0 reason=3
+    \P\P\xfd\x80\x80\x80
+Error -25 (short UTF-8 string) offset=0 reason=2
+    \P\P\xfd\x80\x80\x80\x80
+Error -25 (short UTF-8 string) offset=0 reason=1
 
 /anything/8
     \xc0\x80

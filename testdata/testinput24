@@ -68,4 +68,10 @@
     \x{fdee}
     \x{fdef}
 
+/bad/8
+    \x{d800}
+
+/short/8
+    \P\P\x{d800}
+
 /-- End of testinput24 --/
