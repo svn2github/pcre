@@ -128,6 +128,9 @@ Version 8.32
 26. Applied a modified version of Daniel Richard G's patch to create 
     pcre.h.generic and config.h.generic by "make" instead of in the 
     PrepareRelease script.
+    
+27. Added a definition for CHAR_NULL (helpful for the z/OS port). The code base 
+    should be refactored to use it as and when convenient.
 
 
 Version 8.31 06-July-2012

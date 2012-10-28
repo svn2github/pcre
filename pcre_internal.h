@@ -1286,6 +1286,7 @@ a positive value. */
 
 /* The remaining definitions work in both environments. */
 
+#define CHAR_NULL                   '\0'
 #define CHAR_HT                     '\t'
 #define CHAR_VT                     '\v'
 #define CHAR_FF                     '\f'
