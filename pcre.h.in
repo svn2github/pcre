@@ -116,15 +116,15 @@ compiling). */
 #define PCRE_NOTEOL             0x00000100  /* Exec, DFA exec */
 #define PCRE_UNGREEDY           0x00000200  /* Compile */
 #define PCRE_NOTEMPTY           0x00000400  /* Exec, DFA exec */
-/* The next two are also used in exec and DFA exec */
-#define PCRE_UTF8               0x00000800  /* Compile (same as PCRE_UTF16 and PCRE_UTF32) */
-#define PCRE_UTF16              0x00000800  /* Compile (same as PCRE_UTF8 and PCRE_UTF32) */
-#define PCRE_UTF32              0x00000800  /* Compile (same as PCRE_UTF8 and PCRE_UTF16) */
+/* The next three are all used in compile, exec and DFA exec */
+#define PCRE_UTF8               0x00000800  /* Same as PCRE_UTF16 and PCRE_UTF32 */
+#define PCRE_UTF16              0x00000800  /* Same as PCRE_UTF8 and PCRE_UTF32 */
+#define PCRE_UTF32              0x00000800  /* Same as PCRE_UTF8 and PCRE_UTF16 */
 #define PCRE_NO_AUTO_CAPTURE    0x00001000  /* Compile */
-/* The next two are also used in exec and DFA exec */
-#define PCRE_NO_UTF8_CHECK      0x00002000  /* Compile (same as PCRE_NO_UTF16_CHECK and PCRE_NO_UTF32_CHECK) */
-#define PCRE_NO_UTF16_CHECK     0x00002000  /* Compile (same as PCRE_NO_UTF8_CHECK and PCRE_NO_UTF32_CHECK) */
-#define PCRE_NO_UTF32_CHECK     0x00002000  /* Compile (same as PCRE_NO_UTF8_CHECK and PCRE_NO_UTF16_CHECK) */
+/* The next three are all used in compile, exec and DFA exec */
+#define PCRE_NO_UTF8_CHECK      0x00002000  /* Same as PCRE_NO_UTF16_CHECK and PCRE_NO_UTF32_CHECK */
+#define PCRE_NO_UTF16_CHECK     0x00002000  /* Same as PCRE_NO_UTF8_CHECK and PCRE_NO_UTF32_CHECK */
+#define PCRE_NO_UTF32_CHECK     0x00002000  /* Same as PCRE_NO_UTF8_CHECK and PCRE_NO_UTF16_CHECK */
 #define PCRE_AUTO_CALLOUT       0x00004000  /* Compile */
 #define PCRE_PARTIAL_SOFT       0x00008000  /* Exec, DFA exec */
 #define PCRE_PARTIAL            0x00008000  /* Backwards compatible synonym */
