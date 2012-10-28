@@ -667,8 +667,8 @@ find_error_text(int n)
 const char *s = error_texts;
 for (; n > 0; n--)
   {
-  while (*s++ != 0) {};
-  if (*s == 0) return "Error text not found (please report)";
+  while (*s++ != CHAR_NULL) {};
+  if (*s == CHAR_NULL) return "Error text not found (please report)";
   }
 return s;
 }
@@ -788,7 +788,7 @@ ptr--;                            /* Set pointer back to the last byte */
 
 /* If backslash is at the end of the pattern, it's an error. */
 
-if (c == 0) *errorcodeptr = ERR1;
+if (c == CHAR_NULL) *errorcodeptr = ERR1;
 
 /* Non-alphanumerics are literals. For digits or letters, do an initial lookup
 in a table. A non-zero result is something that can be returned immediately.
@@ -898,9 +898,9 @@ else
     if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
       {
       const pcre_uchar *p;
-      for (p = ptr+2; *p != 0 && *p != CHAR_RIGHT_CURLY_BRACKET; p++)
+      for (p = ptr+2; *p != CHAR_NULL && *p != CHAR_RIGHT_CURLY_BRACKET; p++)
         if (*p != CHAR_MINUS && !IS_DIGIT(*p)) break;
-      if (*p != 0 && *p != CHAR_RIGHT_CURLY_BRACKET)
+      if (*p != CHAR_NULL && *p != CHAR_RIGHT_CURLY_BRACKET)
         {
         escape = ESC_k;
         break;
@@ -1134,7 +1134,7 @@ else
 
     case CHAR_c:
     c = *(++ptr);
-    if (c == 0)
+    if (c == CHAR_NULL)
       {
       *errorcodeptr = ERR2;
       break;
@@ -1220,7 +1220,7 @@ const pcre_uchar *ptr = *ptrptr;
 pcre_uchar name[32];
 
 c = *(++ptr);
-if (c == 0) goto ERROR_RETURN;
+if (c == CHAR_NULL) goto ERROR_RETURN;
 
 *negptr = FALSE;
 
@@ -1237,7 +1237,7 @@ if (c == CHAR_LEFT_CURLY_BRACKET)
   for (i = 0; i < (int)(sizeof(name) / sizeof(pcre_uchar)) - 1; i++)
     {
     c = *(++ptr);
-    if (c == 0) goto ERROR_RETURN;
+    if (c == CHAR_NULL) goto ERROR_RETURN;
     if (c == CHAR_RIGHT_CURLY_BRACKET) break;
     name[i] = c;
     }
@@ -1432,7 +1432,8 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
 
   else if (ptr[2] == CHAR_NUMBER_SIGN)
     {
-    for (ptr += 3; *ptr != 0; ptr++) if (*ptr == CHAR_RIGHT_PARENTHESIS) break;
+    for (ptr += 3; *ptr != CHAR_NULL; ptr++) 
+      if (*ptr == CHAR_RIGHT_PARENTHESIS) break;
     goto FAIL_EXIT;
     }
 
@@ -1445,8 +1446,8 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
     ptr += 2;
     if (ptr[1] != CHAR_QUESTION_MARK)
       {
-      while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr != 0) ptr++;
+      while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+      if (*ptr != CHAR_NULL) ptr++;
       }
     }
 
@@ -1489,11 +1490,11 @@ for (; ptr < cd->end_pattern; ptr++)
 
   if (*ptr == CHAR_BACKSLASH)
     {
-    if (*(++ptr) == 0) goto FAIL_EXIT;
+    if (*(++ptr) == CHAR_NULL) goto FAIL_EXIT;
     if (*ptr == CHAR_Q) for (;;)
       {
-      while (*(++ptr) != 0 && *ptr != CHAR_BACKSLASH) {};
-      if (*ptr == 0) goto FAIL_EXIT;
+      while (*(++ptr) != CHAR_NULL && *ptr != CHAR_BACKSLASH) {};
+      if (*ptr == CHAR_NULL) goto FAIL_EXIT;
       if (*(++ptr) == CHAR_E) break;
       }
     continue;
@@ -1537,14 +1538,14 @@ for (; ptr < cd->end_pattern; ptr++)
 
     while (*(++ptr) != CHAR_RIGHT_SQUARE_BRACKET)
       {
-      if (*ptr == 0) return -1;
+      if (*ptr == CHAR_NULL) return -1;
       if (*ptr == CHAR_BACKSLASH)
         {
-        if (*(++ptr) == 0) goto FAIL_EXIT;
+        if (*(++ptr) == CHAR_NULL) goto FAIL_EXIT;
         if (*ptr == CHAR_Q) for (;;)
           {
-          while (*(++ptr) != 0 && *ptr != CHAR_BACKSLASH) {};
-          if (*ptr == 0) goto FAIL_EXIT;
+          while (*(++ptr) != CHAR_NULL && *ptr != CHAR_BACKSLASH) {};
+          if (*ptr == CHAR_NULL) goto FAIL_EXIT;
           if (*(++ptr) == CHAR_E) break;
           }
         continue;
@@ -1558,7 +1559,7 @@ for (; ptr < cd->end_pattern; ptr++)
   if (xmode && *ptr == CHAR_NUMBER_SIGN)
     {
     ptr++;
-    while (*ptr != 0)
+    while (*ptr != CHAR_NULL)
       {
       if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
       ptr++;
@@ -1566,7 +1567,7 @@ for (; ptr < cd->end_pattern; ptr++)
       if (utf) FORWARDCHAR(ptr);
 #endif
       }
-    if (*ptr == 0) goto FAIL_EXIT;
+    if (*ptr == CHAR_NULL) goto FAIL_EXIT;
     continue;
     }
 
@@ -1576,7 +1577,7 @@ for (; ptr < cd->end_pattern; ptr++)
     {
     int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf, count);
     if (rc > 0) return rc;
-    if (*ptr == 0) goto FAIL_EXIT;
+    if (*ptr == CHAR_NULL) goto FAIL_EXIT;
     }
 
   else if (*ptr == CHAR_RIGHT_PARENTHESIS)
@@ -1641,7 +1642,7 @@ matching closing parens. That is why we have to have a loop. */
 for (;;)
   {
   rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf, &count);
-  if (rc > 0 || *ptr++ == 0) break;
+  if (rc > 0 || *ptr++ == CHAR_NULL) break;
   }
 
 return rc;
@@ -2717,7 +2718,7 @@ check_posix_syntax(const pcre_uchar *ptr, const pcre_uchar **endptr)
 {
 pcre_uchar terminator;          /* Don't combine these lines; the Solaris cc */
 terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
-for (++ptr; *ptr != 0; ptr++)
+for (++ptr; *ptr != CHAR_NULL; ptr++)
   {
   if (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
     ptr++;
@@ -3074,7 +3075,7 @@ if ((options & PCRE_EXTENDED) != 0)
     if (*ptr == CHAR_NUMBER_SIGN)
       {
       ptr++;
-      while (*ptr != 0)
+      while (*ptr != CHAR_NULL)
         {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
         ptr++;
@@ -3117,7 +3118,7 @@ if ((options & PCRE_EXTENDED) != 0)
     if (*ptr == CHAR_NUMBER_SIGN)
       {
       ptr++;
-      while (*ptr != 0)
+      while (*ptr != CHAR_NULL)
         {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
         ptr++;
@@ -3811,7 +3812,7 @@ for (;; ptr++)
   /* If we are at the end of a nested substitution, revert to the outer level
   string. Nesting only happens one level deep. */
 
-  if (c == 0 && nestptr != NULL)
+  if (c == CHAR_NULL && nestptr != NULL)
     {
     ptr = nestptr;
     nestptr = NULL;
@@ -3886,7 +3887,7 @@ for (;; ptr++)
 
   /* If in \Q...\E, check for the end; if not, we have a literal */
 
-  if (inescq && c != 0)
+  if (inescq && c != CHAR_NULL)
     {
     if (c == CHAR_BACKSLASH && ptr[1] == CHAR_E)
       {
@@ -3934,7 +3935,7 @@ for (;; ptr++)
     if (c == CHAR_NUMBER_SIGN)
       {
       ptr++;
-      while (*ptr != 0)
+      while (*ptr != CHAR_NULL)
         {
         if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
         ptr++;
@@ -3942,7 +3943,7 @@ for (;; ptr++)
         if (utf) FORWARDCHAR(ptr);
 #endif
         }
-      if (*ptr != 0) continue;
+      if (*ptr != CHAR_NULL) continue;
 
       /* Else fall through to handle end of string */
       c = 0;
@@ -4120,7 +4121,7 @@ for (;; ptr++)
     means that an initial ] is taken as a data character. At the start of the
     loop, c contains the first byte of the character. */
 
-    if (c != 0) do
+    if (c != CHAR_NULL) do
       {
       const pcre_uchar *oldptr;
 
@@ -4458,7 +4459,7 @@ for (;; ptr++)
         /* Minus (hyphen) at the end of a class is treated as a literal, so put
         back the pointer and jump to handle the character that preceded it. */
 
-        if (*ptr == 0 || (!inescq && *ptr == CHAR_RIGHT_SQUARE_BRACKET))
+        if (*ptr == CHAR_NULL || (!inescq && *ptr == CHAR_RIGHT_SQUARE_BRACKET))
           {
           ptr = oldptr;
           goto CLASS_SINGLE_CHARACTER;
@@ -4613,14 +4614,14 @@ for (;; ptr++)
     If we are at the end of an internal nested string, revert to the outer
     string. */
 
-    while (((c = *(++ptr)) != 0 ||
+    while (((c = *(++ptr)) != CHAR_NULL ||
            (nestptr != NULL &&
-             (ptr = nestptr, nestptr = NULL, c = *(++ptr)) != 0)) &&
+             (ptr = nestptr, nestptr = NULL, c = *(++ptr)) != CHAR_NULL)) &&
            (c != CHAR_RIGHT_SQUARE_BRACKET || inescq));
 
     /* Check for missing terminating ']' */
 
-    if (c == 0)
+    if (c == CHAR_NULL)
       {
       *errorcodeptr = ERR6;
       goto FAILED;
@@ -5610,7 +5611,7 @@ for (;; ptr++)
       if (*ptr == CHAR_COLON)
         {
         arg = ++ptr;
-        while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+        while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
         arglen = (int)(ptr - arg);
         if ((unsigned int)arglen > MAX_MARK)
           {
@@ -5724,8 +5725,8 @@ for (;; ptr++)
         {
         case CHAR_NUMBER_SIGN:                 /* Comment; skip to ket */
         ptr++;
-        while (*ptr != 0 && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-        if (*ptr == 0)
+        while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+        if (*ptr == CHAR_NULL)
           {
           *errorcodeptr = ERR18;
           goto FAILED;
@@ -5801,7 +5802,7 @@ for (;; ptr++)
           }
         else
           {
-          terminator = 0;
+          terminator = CHAR_NULL;
           if (ptr[1] == CHAR_MINUS || ptr[1] == CHAR_PLUS) refsign = *(++ptr);
           }
 
@@ -5891,13 +5892,13 @@ for (;; ptr++)
           code[1+LINK_SIZE]++;
           }
 
-        /* If terminator == 0 it means that the name followed directly after
-        the opening parenthesis [e.g. (?(abc)...] and in this case there are
-        some further alternatives to try. For the cases where terminator != 0
-        [things like (?(<name>... or (?('name')... or (?(R&name)... ] we have
+        /* If terminator == CHAR_NULL it means that the name followed directly
+        after the opening parenthesis [e.g. (?(abc)...] and in this case there
+        are some further alternatives to try. For the cases where terminator !=
+        0 [things like (?(<name>... or (?('name')... or (?(R&name)... ] we have
         now checked all the possibilities, so give an error. */
 
-        else if (terminator != 0)
+        else if (terminator != CHAR_NULL)
           {
           *errorcodeptr = ERR15;
           goto FAILED;
@@ -6794,7 +6795,7 @@ for (;; ptr++)
         if (ptr[1] != CHAR_PLUS && ptr[1] != CHAR_MINUS)
           {
           BOOL is_a_number = TRUE;
-          for (p = ptr + 1; *p != 0 && *p != (pcre_uchar)terminator; p++)
+          for (p = ptr + 1; *p != CHAR_NULL && *p != (pcre_uchar)terminator; p++)
             {
             if (!MAX_255(*p)) { is_a_number = FALSE; break; }
             if ((cd->ctypes[*p] & ctype_digit) == 0) is_a_number = FALSE;
@@ -8118,7 +8119,7 @@ if (cd->had_accept)
 
 /* If not reached end of pattern on success, there's an excess bracket. */
 
-if (errorcode == 0 && *ptr != 0) errorcode = ERR22;
+if (errorcode == 0 && *ptr != CHAR_NULL) errorcode = ERR22;
 
 /* Fill in the terminating state and check for disastrous overflow, but
 if debugging, leave the test till after things are printed out. */

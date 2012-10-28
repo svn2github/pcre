@@ -1556,6 +1556,7 @@ only. */
 #define CHAR_ESC                    '\033'
 #define CHAR_DEL                    '\177'
 
+#define CHAR_NULL                   '\0'
 #define CHAR_SPACE                  '\040'
 #define CHAR_EXCLAMATION_MARK       '\041'
 #define CHAR_QUOTATION_MARK         '\042'
