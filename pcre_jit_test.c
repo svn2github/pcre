@@ -796,7 +796,7 @@ static pcre32_jit_stack* callback32(void *arg)
 #ifdef SUPPORT_PCRE8
 static pcre_jit_stack *stack8;
 
-static pcre_jit_stack *getstack8()
+static pcre_jit_stack *getstack8(void)
 {
 	if (!stack8)
 		stack8 = pcre_jit_stack_alloc(1, 1024 * 1024);
@@ -819,7 +819,7 @@ static void setstack8(pcre_extra *extra)
 #ifdef SUPPORT_PCRE16
 static pcre16_jit_stack *stack16;
 
-static pcre16_jit_stack *getstack16()
+static pcre16_jit_stack *getstack16(void)
 {
 	if (!stack16)
 		stack16 = pcre16_jit_stack_alloc(1, 1024 * 1024);
@@ -842,7 +842,7 @@ static void setstack16(pcre16_extra *extra)
 #ifdef SUPPORT_PCRE32
 static pcre32_jit_stack *stack32;
 
-static pcre32_jit_stack *getstack32()
+static pcre32_jit_stack *getstack32(void)
 {
 	if (!stack32)
 		stack32 = pcre32_jit_stack_alloc(1, 1024 * 1024);
