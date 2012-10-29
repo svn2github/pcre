@@ -132,6 +132,12 @@ Version 8.32
 27. Added a definition for CHAR_NULL (helpful for the z/OS port), and use it in 
     pcre_compile.c when checking for a zero character.
 
+28. Introducing a native interface for JIT. Through this interface, the compiled
+    machine code can be directly executed. The purpose of this interface is to
+    provide fast pattern matching, so several sanity checks are not performed.
+    However, feature tests are still performed. The new interface provides
+    1.4x speedup compared to the old one.
+
 
 Version 8.31 06-July-2012
 -------------------------

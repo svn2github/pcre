@@ -794,59 +794,71 @@ static pcre32_jit_stack* callback32(void *arg)
 #endif
 
 #ifdef SUPPORT_PCRE8
+static pcre_jit_stack *stack8;
+
+static pcre_jit_stack *getstack8()
+{
+	if (!stack8)
+		stack8 = pcre_jit_stack_alloc(1, 1024 * 1024);
+	return stack8;
+}
+
 static void setstack8(pcre_extra *extra)
 {
-	static pcre_jit_stack *stack;
-
 	if (!extra) {
-		if (stack)
-			pcre_jit_stack_free(stack);
-		stack = NULL;
+		if (stack8)
+			pcre_jit_stack_free(stack8);
+		stack8 = NULL;
 		return;
 	}
 
-	if (!stack)
-		stack = pcre_jit_stack_alloc(1, 1024 * 1024);
-	/* Extra can be NULL. */
-	pcre_assign_jit_stack(extra, callback8, stack);
+	pcre_assign_jit_stack(extra, callback8, getstack8());
 }
 #endif /* SUPPORT_PCRE8 */
 
 #ifdef SUPPORT_PCRE16
+static pcre16_jit_stack *stack16;
+
+static pcre16_jit_stack *getstack16()
+{
+	if (!stack16)
+		stack16 = pcre16_jit_stack_alloc(1, 1024 * 1024);
+	return stack16;
+}
+
 static void setstack16(pcre16_extra *extra)
 {
-	static pcre16_jit_stack *stack;
-
 	if (!extra) {
-		if (stack)
-			pcre16_jit_stack_free(stack);
-		stack = NULL;
+		if (stack16)
+			pcre16_jit_stack_free(stack16);
+		stack16 = NULL;
 		return;
 	}
 
-	if (!stack)
-		stack = pcre16_jit_stack_alloc(1, 1024 * 1024);
-	/* Extra can be NULL. */
-	pcre16_assign_jit_stack(extra, callback16, stack);
+	pcre16_assign_jit_stack(extra, callback16, getstack16());
 }
 #endif /* SUPPORT_PCRE8 */
 
 #ifdef SUPPORT_PCRE32
+static pcre32_jit_stack *stack32;
+
+static pcre32_jit_stack *getstack32()
+{
+	if (!stack32)
+		stack32 = pcre32_jit_stack_alloc(1, 1024 * 1024);
+	return stack32;
+}
+
 static void setstack32(pcre32_extra *extra)
 {
-	static pcre32_jit_stack *stack;
-
 	if (!extra) {
-		if (stack)
-			pcre32_jit_stack_free(stack);
-		stack = NULL;
+		if (stack32)
+			pcre32_jit_stack_free(stack32);
+		stack32 = NULL;
 		return;
 	}
 
-	if (!stack)
-		stack = pcre32_jit_stack_alloc(1, 1024 * 1024);
-	/* Extra can be NULL. */
-	pcre32_assign_jit_stack(extra, callback32, stack);
+	pcre32_assign_jit_stack(extra, callback32, getstack32());
 }
 #endif /* SUPPORT_PCRE8 */
 
@@ -1207,10 +1219,15 @@ static int regression_tests(void)
 		if (re8) {
 			mark8_1 = NULL;
 			mark8_2 = NULL;
-			setstack8(extra8);
 			extra8->mark = &mark8_1;
-			return_value8[0] = pcre_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32);
+
+			if ((counter & 0x1) != 0) {
+				setstack8(extra8);
+				return_value8[0] = pcre_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32);
+			} else
+				return_value8[0] = pcre_jit_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32, getstack8());
 			memset(&dummy_extra8, 0, sizeof(pcre_extra));
 			dummy_extra8.flags = PCRE_EXTRA_MARK;
 			dummy_extra8.mark = &mark8_2;
@@ -1229,14 +1246,18 @@ static int regression_tests(void)
 		if (re16) {
 			mark16_1 = NULL;
 			mark16_2 = NULL;
-			setstack16(extra16);
 			if ((current->flags & PCRE_UTF16) || (current->start_offset & F_FORCECONV))
 				length16 = convert_utf8_to_utf16(current->input, regtest_buf16, regtest_offsetmap16, REGTEST_MAX_LENGTH16);
 			else
 				length16 = copy_char8_to_char16(current->input, regtest_buf16, REGTEST_MAX_LENGTH16);
 			extra16->mark = &mark16_1;
-			return_value16[0] = pcre16_exec(re16, extra16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32);
+			if ((counter & 0x1) != 0) {
+				setstack16(extra16);
+				return_value16[0] = pcre16_exec(re16, extra16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32);
+			} else
+				return_value16[0] = pcre16_jit_exec(re16, extra16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32, getstack16());
 			memset(&dummy_extra16, 0, sizeof(pcre16_extra));
 			dummy_extra16.flags = PCRE_EXTRA_MARK;
 			dummy_extra16.mark = &mark16_2;
@@ -1255,14 +1276,18 @@ static int regression_tests(void)
 		if (re32) {
 			mark32_1 = NULL;
 			mark32_2 = NULL;
-			setstack32(extra32);
 			if ((current->flags & PCRE_UTF32) || (current->start_offset & F_FORCECONV))
 				length32 = convert_utf8_to_utf32(current->input, regtest_buf32, regtest_offsetmap32, REGTEST_MAX_LENGTH32);
 			else
 				length32 = copy_char8_to_char32(current->input, regtest_buf32, REGTEST_MAX_LENGTH32);
 			extra32->mark = &mark32_1;
-			return_value32[0] = pcre32_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32);
+			if ((counter & 0x1) != 0) {
+				setstack32(extra32);
+				return_value32[0] = pcre32_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32);
+			} else
+				return_value32[0] = pcre32_jit_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32, getstack32());
 			memset(&dummy_extra32, 0, sizeof(pcre32_extra));
 			dummy_extra32.flags = PCRE_EXTRA_MARK;
 			dummy_extra32.mark = &mark32_2;

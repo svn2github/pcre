@@ -183,6 +183,7 @@ compiling). */
 #define PCRE_ERROR_BADMODE         (-28)
 #define PCRE_ERROR_BADENDIANNESS   (-29)
 #define PCRE_ERROR_DFA_BADRESTART  (-30)
+#define PCRE_ERROR_JIT_BADOPTION   (-31)
 
 /* Specific error codes for UTF-8 validity checks */
 
@@ -539,6 +540,15 @@ PCRE_EXP_DECL int  pcre16_exec(const pcre16 *, const pcre16_extra *,
                    PCRE_SPTR16, int, int, int, int *, int);
 PCRE_EXP_DECL int  pcre32_exec(const pcre32 *, const pcre32_extra *,
                    PCRE_SPTR32, int, int, int, int *, int);
+PCRE_EXP_DECL int  pcre_jit_exec(const pcre *, const pcre_extra *,
+                   PCRE_SPTR, int, int, int, int *, int,
+                   pcre_jit_stack *);
+PCRE_EXP_DECL int  pcre16_jit_exec(const pcre16 *, const pcre16_extra *,
+                   PCRE_SPTR16, int, int, int, int *, int,
+                   pcre16_jit_stack *);
+PCRE_EXP_DECL int  pcre32_jit_exec(const pcre32 *, const pcre32_extra *,
+                   PCRE_SPTR32, int, int, int, int *, int,
+                   pcre32_jit_stack *);
 PCRE_EXP_DECL void pcre_free_substring(const char *);
 PCRE_EXP_DECL void pcre16_free_substring(PCRE_SPTR16);
 PCRE_EXP_DECL void pcre32_free_substring(PCRE_SPTR32);

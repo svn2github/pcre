@@ -170,6 +170,7 @@ typedef struct executable_functions {
   void *executable_funcs[JIT_NUMBER_OF_COMPILE_MODES];
   PUBL(jit_callback) callback;
   void *userdata;
+  pcre_uint32 top_bracket;
   sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
 } executable_functions;
 
@@ -8242,6 +8243,7 @@ else
     return;
     }
   memset(functions, 0, sizeof(executable_functions));
+  functions->top_bracket = (re->top_bracket + 1) * 2;
   extra->executable_jit = functions;
   extra->flags |= PCRE_EXTRA_EXECUTABLE_JIT;
   }
@@ -8269,7 +8271,7 @@ return convert_executable_func.call_executable_func(arguments);
 }
 
 int
-PRIV(jit_exec)(const REAL_PCRE *re, const PUBL(extra) *extra_data, const pcre_uchar *subject,
+PRIV(jit_exec)(const PUBL(extra) *extra_data, const pcre_uchar *subject,
   int length, int start_offset, int options, int *offsets, int offsetcount)
 {
 executable_functions *functions = (executable_functions *)extra_data->executable_jit;
@@ -8288,10 +8290,9 @@ else if ((options & PCRE_PARTIAL_SOFT) != 0)
   mode = JIT_PARTIAL_SOFT_COMPILE;
 
 if (functions->executable_funcs[mode] == NULL)
-  return PCRE_ERROR_NULL;
+  return PCRE_ERROR_JIT_BADOPTION;
 
 /* Sanity checks should be handled by pcre_exec. */
-arguments.stack = NULL;
 arguments.str = subject + start_offset;
 arguments.begin = subject;
 arguments.end = subject + length;
@@ -8312,7 +8313,7 @@ gets the same result with and without JIT. */
 
 if (offsetcount != 2)
   offsetcount = ((offsetcount - (offsetcount % 3)) * 2) / 3;
-maxoffsetcount = (re->top_bracket + 1) * 2;
+maxoffsetcount = functions->top_bracket;
 if (offsetcount > maxoffsetcount)
   offsetcount = maxoffsetcount;
 arguments.offsetcount = offsetcount;
@@ -8329,6 +8330,85 @@ else
   convert_executable_func.executable_func = functions->executable_funcs[mode];
   retval = convert_executable_func.call_executable_func(&arguments);
   }
+
+if (retval * 2 > offsetcount)
+  retval = 0;
+if ((extra_data->flags & PCRE_EXTRA_MARK) != 0)
+  *(extra_data->mark) = arguments.mark_ptr;
+
+return retval;
+}
+
+#if defined COMPILE_PCRE8
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre_jit_exec(const pcre *argument_re, const pcre_extra *extra_data,
+  PCRE_SPTR subject, int length, int start_offset, int options,
+  int *offsets, int offsetcount, pcre_jit_stack *stack)
+#elif defined COMPILE_PCRE16
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_jit_exec(const pcre16 *argument_re, const pcre16_extra *extra_data,
+  PCRE_SPTR16 subject, int length, int start_offset, int options,
+  int *offsets, int offsetcount, pcre16_jit_stack *stack)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_jit_exec(const pcre32 *argument_re, const pcre32_extra *extra_data,
+  PCRE_SPTR32 subject, int length, int start_offset, int options,
+  int *offsets, int offsetcount, pcre32_jit_stack *stack)
+#endif
+{
+pcre_uchar *subject_ptr = (pcre_uchar *)subject;
+executable_functions *functions = (executable_functions *)extra_data->executable_jit;
+union {
+   void* executable_func;
+   jit_function call_executable_func;
+} convert_executable_func;
+jit_arguments arguments;
+int maxoffsetcount;
+int retval;
+int mode = JIT_COMPILE;
+
+SLJIT_UNUSED_ARG(argument_re);
+
+/* Plausibility checks */
+if ((options & ~PUBLIC_JIT_EXEC_OPTIONS) != 0) return PCRE_ERROR_JIT_BADOPTION;
+
+if ((options & PCRE_PARTIAL_HARD) != 0)
+  mode = JIT_PARTIAL_HARD_COMPILE;
+else if ((options & PCRE_PARTIAL_SOFT) != 0)
+  mode = JIT_PARTIAL_SOFT_COMPILE;
+
+if (functions->executable_funcs[mode] == NULL)
+  return PCRE_ERROR_JIT_BADOPTION;
+
+/* Sanity checks should be handled by pcre_exec. */
+arguments.stack = (struct sljit_stack *)stack;
+arguments.str = subject_ptr + start_offset;
+arguments.begin = subject_ptr;
+arguments.end = subject_ptr + length;
+arguments.mark_ptr = NULL;
+/* JIT decreases this value less frequently than the interpreter. */
+arguments.calllimit = ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0) ? MATCH_LIMIT : extra_data->match_limit;
+arguments.notbol = (options & PCRE_NOTBOL) != 0;
+arguments.noteol = (options & PCRE_NOTEOL) != 0;
+arguments.notempty = (options & PCRE_NOTEMPTY) != 0;
+arguments.notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
+arguments.offsets = offsets;
+
+/* pcre_exec() rounds offsetcount to a multiple of 3, and then uses only 2/3 of
+the output vector for storing captured strings, with the remainder used as
+workspace. We don't need the workspace here. For compatibility, we limit the
+number of captured strings in the same way as pcre_exec(), so that the user
+gets the same result with and without JIT. */
+
+if (offsetcount != 2)
+  offsetcount = ((offsetcount - (offsetcount % 3)) * 2) / 3;
+maxoffsetcount = functions->top_bracket;
+if (offsetcount > maxoffsetcount)
+  offsetcount = maxoffsetcount;
+arguments.offsetcount = offsetcount;
+
+convert_executable_func.executable_func = functions->executable_funcs[mode];
+retval = convert_executable_func.call_executable_func(&arguments);
 
 if (retval * 2 > offsetcount)
   retval = 0;

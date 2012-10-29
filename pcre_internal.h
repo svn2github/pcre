@@ -1183,6 +1183,10 @@ time, run time, or study time, respectively. */
    (PCRE_STUDY_JIT_COMPILE|PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE| \
     PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE|PCRE_STUDY_EXTRA_NEEDED)
 
+#define PUBLIC_JIT_EXEC_OPTIONS \
+   (PCRE_NO_UTF8_CHECK|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|\
+    PCRE_NOTEMPTY_ATSTART|PCRE_PARTIAL_SOFT|PCRE_PARTIAL_HARD)
+
 /* Magic number to provide a small check against being handed junk. */
 
 #define MAGIC_NUMBER  0x50435245UL   /* 'PCRE' */
@@ -2703,7 +2707,7 @@ extern BOOL              PRIV(xclass)(pcre_uint32, const pcre_uchar *, BOOL);
 #ifdef SUPPORT_JIT
 extern void              PRIV(jit_compile)(const REAL_PCRE *,
                            PUBL(extra) *, int);
-extern int               PRIV(jit_exec)(const REAL_PCRE *, const PUBL(extra) *,
+extern int               PRIV(jit_exec)(const PUBL(extra) *,
                            const pcre_uchar *, int, int, int, int *, int);
 extern void              PRIV(jit_free)(void *);
 extern int               PRIV(jit_get_size)(void *);

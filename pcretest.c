@@ -4415,7 +4415,7 @@ while (!done)
       dbuffer = (pcre_uint8 *)realloc(dbuffer, dbuffer_size * CHAR_SIZE);
       if (dbuffer == NULL)
         {
-        fprintf(stderr, "pcretest: malloc(%d) failed\n", dbuffer_size);
+        fprintf(stderr, "pcretest: malloc(%d) failed\n", (int)dbuffer_size);
         exit(1);
         }
       }

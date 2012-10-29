@@ -6361,17 +6361,15 @@ if (extra_data != NULL
     && (extra_data->flags & (PCRE_EXTRA_EXECUTABLE_JIT |
                              PCRE_EXTRA_TABLES)) == PCRE_EXTRA_EXECUTABLE_JIT
     && extra_data->executable_jit != NULL
-    && (options & ~(PCRE_NO_UTF8_CHECK | PCRE_NOTBOL | PCRE_NOTEOL |
-                    PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART |
-                    PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD)) == 0)
+    && (options & ~PUBLIC_JIT_EXEC_OPTIONS) == 0)
   {
-  rc = PRIV(jit_exec)(re, extra_data, (const pcre_uchar *)subject, length,
+  rc = PRIV(jit_exec)(extra_data, (const pcre_uchar *)subject, length,
        start_offset, options, offsets, offsetcount);
 
   /* PCRE_ERROR_NULL means that the selected normal or partial matching
   mode is not compiled. In this case we simply fallback to interpreter. */
 
-  if (rc != PCRE_ERROR_NULL) return rc;
+  if (rc != PCRE_ERROR_JIT_BADOPTION) return rc;
   }
 #endif
 
