@@ -1129,7 +1129,9 @@ static const char *errtexts[] = {
   "JIT stack limit reached",
   "pattern compiled in wrong mode: 8-bit/16-bit error",
   "pattern compiled with other endianness",
-  "invalid data in workspace for DFA restart"
+  "invalid data in workspace for DFA restart",
+  "bad JIT option",
+  "bad length"  
 };
 
 

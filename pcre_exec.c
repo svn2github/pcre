@@ -6295,6 +6295,7 @@ if ((options & ~PUBLIC_EXEC_OPTIONS) != 0) return PCRE_ERROR_BADOPTION;
 if (re == NULL || subject == NULL || (offsets == NULL && offsetcount > 0))
   return PCRE_ERROR_NULL;
 if (offsetcount < 0) return PCRE_ERROR_BADCOUNT;
+if (length < 0) return PCRE_ERROR_BADLENGTH;
 if (start_offset < 0 || start_offset > length) return PCRE_ERROR_BADOFFSET;
 
 /* Check that the first field in the block is the magic number. If it is not,
