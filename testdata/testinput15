@@ -423,4 +423,8 @@ correctly, but that messes up comparisons). --/
 /\x{a0}+\s!/8BZT1
     \x{a0}\x20!
 
+/A/8
+  \x{ff000041}
+  \x{7f000041} 
+
 /-- End of testinput15 --/

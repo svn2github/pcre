@@ -1260,4 +1260,10 @@ Need char = \x{bf}
     \x{a0}\x20!
  0: \x{a0} !
 
+/A/8
+  \x{ff000041}
+** Character \x{ff000041} is greater than 0x7fffffff and so cannot be converted to UTF-8
+  \x{7f000041} 
+Error -10 (bad UTF-8 string) offset=0 reason=12
+
 /-- End of testinput15 --/

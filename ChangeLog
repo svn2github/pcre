@@ -137,6 +137,15 @@ Version 8.32
     provide fast pattern matching, so several sanity checks are not performed.
     However, feature tests are still performed. The new interface provides
     1.4x speedup compared to the old one.
+    
+29. If pcre_exec() or pcre_dfa_exec() was called with a negative value for
+    the subject string length, the error given was PCRE_ERROR_BADOFFSET, which 
+    was confusing. There is now a new error PCRE_ERROR_BADLENGTH for this case.
+    
+30. In 8-bit UTF-8 mode, pcretest failed to give an error for data codepoints
+    greater than 0x7fffffff (which cannot be represented in UTF-8, even under
+    the "old" RFC 2279). Instead, it ended up passing a negative length to 
+    pcre_exec().
 
 
 Version 8.31 06-July-2012

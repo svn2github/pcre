@@ -4730,6 +4730,12 @@ while (!done)
 #ifndef NOUTF
         if (use_utf)
           {
+          if (c > 0x7fffffff)
+            {
+            fprintf(outfile, "** Character \\x{%x} is greater than 0x7fffffff "
+              "and so cannot be converted to UTF-8\n", c);
+            goto NEXT_DATA;     
+            }  
           q8 += ord2utf8(c, q8);
           }
         else
