@@ -1,4 +1,4 @@
-.TH PCREBUILD 3 "27 October 2012" "PCRE 8.32"
+.TH PCREBUILD 3 "30 October 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .
@@ -56,10 +56,10 @@ to the \fBconfigure\fP command. If you do not want the 8-bit library, add
 .sp
   --disable-pcre8
 .sp
-as well. At least one of the two libraries must be built. Note that the C++ and
-POSIX wrappers are for the 8-bit library only, and that \fBpcregrep\fP is an
-8-bit program. None of these are built if you select only the 16-bit or 32-bit
-libraries.
+as well. At least one of the three libraries must be built. Note that the C++
+and POSIX wrappers are for the 8-bit library only, and that \fBpcregrep\fP is
+an 8-bit program. None of these are built if you select only the 16-bit or
+32-bit libraries.
 .
 .
 .SH "BUILDING SHARED AND STATIC LIBRARIES"
@@ -94,20 +94,19 @@ To build PCRE with support for UTF Unicode character strings, add
 .sp
   --enable-utf
 .sp
-to the \fBconfigure\fP command. This setting applies to both libraries, adding
-support for UTF-8 to the 8-bit library, support for UTF-16 to the 16-bit
-library, and support for UTF-32 to the to the 32-bit library.
-There are no separate options for enabling UTF-8, UTF-16 and UTF-32
-independently because that would allow ridiculous settings such as requesting
-UTF-16 support while building only the 8-bit library. It is not possible to
-build one library with UTF support and the other without in the same
-configuration. (For backwards compatibility, --enable-utf8 is a synonym of
---enable-utf.)
+to the \fBconfigure\fP command. This setting applies to all three libraries,
+adding support for UTF-8 to the 8-bit library, support for UTF-16 to the 16-bit
+library, and support for UTF-32 to the to the 32-bit library. There are no
+separate options for enabling UTF-8, UTF-16 and UTF-32 independently because
+that would allow ridiculous settings such as requesting UTF-16 support while
+building only the 8-bit library. It is not possible to build one library with
+UTF support and another without in the same configuration. (For backwards
+compatibility, --enable-utf8 is a synonym of --enable-utf.)
 .P
 Of itself, this setting does not make PCRE treat strings as UTF-8, UTF-16 or
 UTF-32. As well as compiling PCRE with this option, you also have have to set
-the PCRE_UTF8 or PCRE_UTF16 or PCRE_UTF32 option when you call one of the
-pattern compiling functions.
+the PCRE_UTF8, PCRE_UTF16 or PCRE_UTF32 option (as appropriate) when you call
+one of the pattern compiling functions.
 .P
 If you set --enable-utf when compiling in an EBCDIC environment, PCRE expects
 its input to be either ASCII or UTF-8 (depending on the run-time option). It is
@@ -231,18 +230,20 @@ to the \fBconfigure\fP command.
 .sp
 Within a compiled pattern, offset values are used to point from one part to
 another (for example, from an opening parenthesis to an alternation
-metacharacter). By default, two-byte values are used for these offsets, leading
-to a maximum size for a compiled pattern of around 64K. This is sufficient to
-handle all but the most gigantic patterns. Nevertheless, some people do want to
-process truly enormous patterns, so it is possible to compile PCRE to use
-three-byte or four-byte offsets by adding a setting such as
+metacharacter). By default, in the 8-bit and 16-bit libraries, two-byte values
+are used for these offsets, leading to a maximum size for a compiled pattern of
+around 64K. This is sufficient to handle all but the most gigantic patterns.
+Nevertheless, some people do want to process truly enormous patterns, so it is
+possible to compile PCRE to use three-byte or four-byte offsets by adding a
+setting such as
 .sp
   --with-link-size=3
 .sp
 to the \fBconfigure\fP command. The value given must be 2, 3, or 4. For the
-16-bit and 32-bit library, a value of 3 is rounded up to 4. Using longer offsets
-slows down the operation of PCRE because it has to load additional data when
-handling them.
+16-bit library, a value of 3 is rounded up to 4. In these libraries, using
+longer offsets slows down the operation of PCRE because it has to load
+additional data when handling them. For the 32-bit library the value is always
+4 and cannot be overridden; the value of --with-link-size is ignored.
 .
 .
 .SH "AVOIDING EXCESSIVE STACK USAGE"
@@ -440,22 +441,58 @@ invalid memory accesses, and is mostly useful for debugging PCRE itself.
 .SH "CODE COVERAGE REPORTING"
 .rs
 .sp
-The build process can generate a code coverage report for the test suite.
-To enable this, you must install \fBlcov\fP version 1.6 or above. Then use
+If your C compiler is gcc, you can build a version of PCRE that can generate a
+code coverage report for its test suite. To enable this, you must install
+\fBlcov\fP version 1.6 or above. Then specify
 .sp
   --enable-coverage
 .sp
-to the \fBconfigure\fP command, and generate the report by running
-.sp
-  make coverage
-.sp
+to the \fBconfigure\fP command and build PCRE in the usual way. 
+.P
 Note that using \fBccache\fP (a caching C compiler) is incompatible with code
 coverage reporting. If you have configured \fBccache\fP to run automatically
-on your system you must set the environment variable
+on your system, you must set the environment variable
 .sp
   CCACHE_DISABLE=1
 .sp
-before running make to build PCRE, so that \fBccache\fP is not used.
+before running \fBmake\fP to build PCRE, so that \fBccache\fP is not used.
+.P
+When --enable-coverage is used, the following addition targets are added to the
+\fIMakefile\fP:
+.sp
+  make coverage
+.sp
+This creates a fresh coverage report for the PCRE test suite. It is equivalent
+to running "make coverage-reset", "make coverage-baseline", "make check", and
+then "make coverage-report".
+.sp
+  make coverage-reset
+.sp
+This zeroes the coverage counters, but does nothing else.
+.sp
+  make coverage-baseline
+.sp   
+This captures baseline coverage information.
+.sp
+  make coverage-report
+.sp
+This creates the coverage report.
+.sp
+  make coverage-clean-report
+.sp
+This removes the generated coverage report without cleaning the coverage data
+itself.
+.sp
+  make coverage-clean-data
+.sp
+This removes the captured coverage data without removing the coverage files
+created at compile time (*.gcno).
+.sp
+  make coverage-clean
+.sp
+This cleans all coverage data including the generated coverage report. For more 
+information about code coverage, see the \fBgcov\fP and \fBlcov\fP 
+documentation. 
 .
 .
 .SH "SEE ALSO"
@@ -478,6 +515,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 October 2012
+Last updated: 30 October 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
