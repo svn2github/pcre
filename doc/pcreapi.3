@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "07 September 2012" "PCRE 8.32"
+.TH PCREAPI 3 "29 October 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -144,38 +144,27 @@ library for handling 32-bit character strings. To avoid too much complication,
 this document describes the 8-bit versions of the functions, with only
 occasional references to the 16-bit and 32-bit libraries.
 .P
-The 16-bit functions operate in the same way as their 8-bit counterparts; they
-just use different data types for their arguments and results, and their names
-start with \fBpcre16_\fP instead of \fBpcre_\fP. For every option that has UTF8
-in its name (for example, PCRE_UTF8), there is a corresponding 16-bit name with
-UTF8 replaced by UTF16. This facility is in fact just cosmetic; the 16-bit
-option names define the same bit values.
-.P
-The 32-bit functions operate in the same way as their 8-bit counterparts; they
-just use different data types for their arguments and results, and their names
-start with \fBpcre32_\fP instead of \fBpcre_\fP. For every option that has UTF8
-in its name (for example, PCRE_UTF8), there is a corresponding 32-bit name with
-UTF8 replaced by UTF32. This facility is in fact just cosmetic; the 32-bit
-option names define the same bit values.
+The 16-bit and 32-bit functions operate in the same way as their 8-bit
+counterparts; they just use different data types for their arguments and
+results, and their names start with \fBpcre16_\fP or \fBpcre32_\fP instead of
+\fBpcre_\fP. For every option that has UTF8 in its name (for example,
+PCRE_UTF8), there are corresponding 16-bit and 32-bit names with UTF8 replaced
+by UTF16 or UTF32, respectively. This facility is in fact just cosmetic; the
+16-bit and 32-bit option names define the same bit values.
 .P
 References to bytes and UTF-8 in this document should be read as references to
-16-bit data quantities and UTF-16 when using the 16-bit library, unless
-specified otherwise. More details of the specific differences for the 16-bit
-library are given in the
+16-bit data quantities and UTF-16 when using the 16-bit library, or 32-bit data 
+quantities and UTF-32 when using the 32-bit library, unless specified
+otherwise. More details of the specific differences for the 16-bit and 32-bit
+libraries are given in the
 .\" HREF
 \fBpcre16\fP
 .\"
-page.
-.
-.P
-References to bytes and UTF-8 in this document should be read as references to
-32-bit data quantities and UTF-32 when using the 32-bit library, unless
-specified otherwise. More details of the specific differences for the 32-bit
-library are given in the
+and
 .\" HREF
 \fBpcre32\fP
 .\"
-page.
+pages.
 .
 .
 .SH "PCRE API OVERVIEW"
@@ -231,7 +220,9 @@ used if available, by setting an option that is ignored when it is not
 relevant. More complicated programs might need to make use of the functions
 \fBpcre_jit_stack_alloc()\fP, \fBpcre_jit_stack_free()\fP, and
 \fBpcre_assign_jit_stack()\fP in order to control the JIT code's memory usage.
-These functions are discussed in the
+.P
+From release 8.32 there is also a direct interface for JIT execution, which
+gives improved performance. The JIT-specific functions are discussed in the
 .\" HREF
 \fBpcrejit\fP
 .\"
@@ -860,8 +851,8 @@ page.
 .sp
   PCRE_NO_UTF8_CHECK
 .sp
-When PCRE_UTF8 is set, the validity of the pattern as a UTF-8
-string is automatically checked. There is a discussion about the
+When PCRE_UTF8 is set, the validity of the pattern as a UTF-8 string is
+automatically checked. There is a discussion about the
 .\" HTML <a href="pcreunicode.html#utf8strings">
 .\" </a>
 validity of UTF-8 strings
@@ -876,7 +867,9 @@ this check for performance reasons, you can set the PCRE_NO_UTF8_CHECK option.
 When it is set, the effect of passing an invalid UTF-8 string as a pattern is
 undefined. It may cause your program to crash. Note that this option can also
 be passed to \fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP, to suppress the
-validity checking of subject strings.
+validity checking of subject strings only. If the same string is being matched 
+many times, the option can be safely set for the second and subsequent 
+matchings to improve performance.
 .
 .
 .SH "COMPILATION ERROR CODES"
@@ -1238,8 +1231,8 @@ returned. For anchored patterns, -2 is returned.
 .P
 Since for the 32-bit library using the non-UTF-32 mode, this function is unable
 to return the full 32-bit range of the character, this value is deprecated;
-instead the PCRE_INFO_FIRSTCHARACTERFLAGS and PCRE_INFO_FIRSTCHARACTER values should
-be used.
+instead the PCRE_INFO_FIRSTCHARACTERFLAGS and PCRE_INFO_FIRSTCHARACTER values
+should be used.
 .sp
   PCRE_INFO_FIRSTTABLE
 .sp
@@ -1460,9 +1453,9 @@ returned. For anchored patterns, 0 is returned.
 .sp
   PCRE_INFO_FIRSTCHARACTER
 .sp
-Return the fixed first character value, if PCRE_INFO_FIRSTCHARACTERFLAGS returned 1;
-otherwise returns 0. The fourth argument should point to an \fBuint_t\fP
-variable.
+Return the fixed first character value, if PCRE_INFO_FIRSTCHARACTERFLAGS
+returned 1; otherwise returns 0. The fourth argument should point to an
+\fBuint_t\fP variable.
 .P
 In the 8-bit library, the value is always less than 256. In the 16-bit library
 the value can be up to 0xffff. In the 32-bit library in UTF-32 mode the value
@@ -1482,15 +1475,15 @@ returned. For anchored patterns, -2 is returned.
 .sp
   PCRE_INFO_REQUIREDCHARFLAGS
 .sp
-Returns 1 if there is a rightmost literal data unit that must exist in any matched
-string, other than at its start. The fourth argument should  point to an \fBint\fP
-variable. If there is no such value, 0 is returned. If returning 1, the character
-value itself can be retrieved using PCRE_INFO_REQUIREDCHAR.
+Returns 1 if there is a rightmost literal data unit that must exist in any
+matched string, other than at its start. The fourth argument should  point to
+an \fBint\fP variable. If there is no such value, 0 is returned. If returning
+1, the character value itself can be retrieved using PCRE_INFO_REQUIREDCHAR.
 .P
-For anchored patterns, a last literal value is recorded only if it follows something
-of variable length. For example, for the pattern /^a\ed+z\ed+/ the returned value
-1 (with "z" returned from PCRE_INFO_REQUIREDCHAR), but for /^a\edz\ed/ the returned
-value is 0.
+For anchored patterns, a last literal value is recorded only if it follows
+something of variable length. For example, for the pattern /^a\ed+z\ed+/ the
+returned value 1 (with "z" returned from PCRE_INFO_REQUIREDCHAR), but for
+/^a\edz\ed/ the returned value is 0.
 .sp
   PCRE_INFO_REQUIREDCHAR
 .sp
@@ -2241,8 +2234,13 @@ This error is given if a pattern that was compiled and saved is reloaded on a
 host with different endianness. The utility function
 \fBpcre_pattern_to_host_byte_order()\fP can be used to convert such a pattern
 so that it runs on the new host.
+.sp
+  PCRE_ERROR_BADLENGTH      (-32)
+.sp
+This error is given if \fBpcre_exec()\fP is called with a negative value for 
+the \fIlength\fP argument.   
 .P
-Error numbers -16 to -20, -22, and -30 are not used by \fBpcre_exec()\fP.
+Error numbers -16 to -20, -22, 30, and -31 are not used by \fBpcre_exec()\fP.
 .
 .
 .\" HTML <a name="badutf8reasons"></a>
@@ -2801,6 +2799,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 September 2012
+Last updated: 29 October 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

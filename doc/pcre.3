@@ -1,4 +1,4 @@
-.TH PCRE 3 "10 January 2012" "PCRE 8.30"
+.TH PCRE 3 "29 October 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH INTRODUCTION
@@ -21,29 +21,30 @@ Herczeg.
 Starting with release 8.32 it is possible to compile a third separate PCRE
 library, which supports 32-bit character strings (including
 UTF-32 strings). The build process allows any set of the 8-, 16- and 32-bit
-libraries.
+libraries. The work to make this possible was done by Christian Persch.
 .P
-The three libraries contain identical sets of functions, except that the names in
-the 16-bit library start with \fBpcre16_\fP instead of \fBpcre_\fP, and the names
-in the 32-bit library start with \fBpcre32_\fP instead of \fBpcre_\fP. To avoid
-over-complication and reduce the documentation maintenance load, most of the
-documentation describes the 8-bit library, with the differences for the 16-bit
-and 32-bit library described separately in the
+The three libraries contain identical sets of functions, except that the names
+in the 16-bit library start with \fBpcre16_\fP instead of \fBpcre_\fP, and the
+names in the 32-bit library start with \fBpcre32_\fP instead of \fBpcre_\fP. To
+avoid over-complication and reduce the documentation maintenance load, most of
+the documentation describes the 8-bit library, with the differences for the
+16-bit and 32-bit libraries described separately in the
 .\" HREF
 \fBpcre16\fP
-or
+and
 .\" HREF
 \fBpcre32\fP
 .\"
-page. References to functions or structures of the form \fIpcre[16|32]_xxx\fP
-should be read as meaning "\fIpcre_xxx\fP when using the 8-bit library and
-\fIpcre16_xxx\fP when using the 16-bit library and
-\fIpcre32_xxx\fP when using the 32-bit library".
+pages. References to functions or structures of the form \fIpcre[16|32]_xxx\fP
+should be read as meaning "\fIpcre_xxx\fP when using the 8-bit library,
+\fIpcre16_xxx\fP when using the 16-bit library, or \fIpcre32_xxx\fP when using
+the 32-bit library".
 .P
 The current implementation of PCRE corresponds approximately with Perl 5.12,
-including support for UTF-8/16 encoded strings and Unicode general category
-properties. However, UTF-8/16 and Unicode support has to be explicitly enabled;
-it is not the default. The Unicode tables correspond to Unicode release 6.2.0.
+including support for UTF-8/16/32 encoded strings and Unicode general category
+properties. However, UTF-8/16/32 and Unicode support has to be explicitly
+enabled; it is not the default. The Unicode tables correspond to Unicode
+release 6.2.0.
 .P
 In addition to the Perl-compatible matching function, PCRE contains an
 alternative function that matches the same compiled patterns in a different
@@ -94,7 +95,7 @@ available. The features themselves are described in the
 \fBpcrebuild\fP
 .\"
 page. Documentation about building PCRE for various operating systems can be
-found in the \fBREADME\fP and \fBNON-UNIX-USE\fP files in the source
+found in the \fBREADME\fP and \fBNON-AUTOTOOLS_BUILD\fP files in the source
 distribution.
 .P
 The libraries contains a number of undocumented internal functions and data
@@ -102,8 +103,8 @@ tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
 "_pcre_" or "_pcre16_" or "_pcre32_", which hopefully will not provoke any name
 clashes. In some environments, it is possible to control which external symbols
-are exported when a shared library is built, and in these cases the undocumented
-symbols are not exported.
+are exported when a shared library is built, and in these cases the
+undocumented symbols are not exported.
 .
 .
 .SH "USER DOCUMENTATION"
@@ -143,7 +144,7 @@ of searching. The sections are as follows:
   pcreunicode       discussion of Unicode and UTF-8/16/32 support
 .sp
 In addition, in the "man" and HTML formats, there is a short page for each
-8-bit C library function, listing its arguments and results.
+C library function, listing its arguments and results.
 .
 .
 .SH AUTHOR
@@ -164,6 +165,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 10 January 2012
+Last updated: 29 October 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
