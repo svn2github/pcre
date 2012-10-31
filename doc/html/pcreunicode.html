@@ -20,6 +20,11 @@ From Release 8.30, in addition to its previous UTF-8 support, PCRE also
 supports UTF-16 by means of a separate 16-bit library. This can be built as
 well as, or instead of, the 8-bit library.
 </P>
+<P>
+From Release 8.32, in addition to its previous UTF-8 and UTF-16 support,
+PCRE also supports UTF-32 by means of a separate 32-bit library. This can be
+built as well as, or instead of, the 8-bit and 16-bit libraries.
+</P>
 <br><b>
 UTF-8 SUPPORT
 </b><br>
@@ -45,12 +50,24 @@ strings that are matched against it are treated as UTF-16 strings instead of
 strings of 16-bit characters.
 </P>
 <br><b>
+UTF-32 SUPPORT
+</b><br>
+<P>
+In order process UTF-32 strings, you must build PCRE's 32-bit library with UTF
+support, and, in addition, you must call
+<a href="pcre_compile.html"><b>pcre32_compile()</b></a>
+with the PCRE_UTF32 option flag, or the pattern must start with the sequence
+(*UTF32). When either of these is the case, both the pattern and any subject
+strings that are matched against it are treated as UTF-32 strings instead of
+strings of 32-bit characters.
+</P>
+<br><b>
 UTF SUPPORT OVERHEAD
 </b><br>
 <P>
 If you compile PCRE with UTF support, but do not use it at run time, the
 library will be a bit bigger, but the additional run time overhead is limited
-to testing the PCRE_UTF8/16 flag occasionally, so should not be very big.
+to testing the PCRE_UTF[8|16|32] flag occasionally, so should not be very big.
 </P>
 <br><b>
 UNICODE PROPERTY SUPPORT
@@ -79,14 +96,18 @@ place. From release 7.3 of PCRE, the check is according the rules of RFC 3629,
 which are themselves derived from the Unicode specification. Earlier releases
 of PCRE followed the rules of RFC 2279, which allows the full range of 31-bit
 values (0 to 0x7FFFFFFF). The current check allows only values in the range U+0
-to U+10FFFF, excluding U+D800 to U+DFFF.
+to U+10FFFF, excluding the surrogate area, and the non-characters.
 </P>
 <P>
-The excluded code points are the "Surrogate Area" of Unicode. They are reserved
+Excluded code points are the "Surrogate Area" of Unicode. They are reserved
 for use by UTF-16, where they are used in pairs to encode codepoints with
 values greater than 0xFFFF. The code points that are encoded by UTF-16 pairs
 are available independently in the UTF-8 encoding. (In other words, the whole
 surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8.)
+</P>
+<P>
+Also excluded are the "Non-Characters" code points, which are U+FDD0 to U+FDEF
+and the last two code points in each plane, U+??FFFE and U+??FFFF.
 </P>
 <P>
 If an invalid UTF-8 string is passed to PCRE, an error return is given. At
@@ -134,6 +155,10 @@ U+D800 to U+DFFF are independent code points. Values in the surrogate range
 must be used in pairs in the correct manner.
 </P>
 <P>
+Excluded are the "Non-Characters" code points, which are U+FDD0 to U+FDEF
+and the last two code points in each plane, U+??FFFE and U+??FFFF.
+</P>
+<P>
 If an invalid UTF-16 string is passed to PCRE, an error return is given. At
 compile time, the only additional information is the offset to the first data
 unit of the failing character. The run-time functions <b>pcre16_exec()</b> and
@@ -146,6 +171,42 @@ therefore want to skip these checks in order to improve performance. If you set
 the PCRE_NO_UTF16_CHECK flag at compile time or at run time, PCRE assumes that
 the pattern or subject it is given (respectively) contains only valid UTF-16
 sequences. In this case, it does not diagnose an invalid UTF-16 string.
+<a name="utf32strings"></a></P>
+<br><b>
+Validity of UTF-32 strings
+</b><br>
+<P>
+When you set the PCRE_UTF32 flag, the strings of 32-bit data units that are
+passed as patterns and subjects are (by default) checked for validity on entry
+to the relevant functions.  This check allows only values in the range U+0
+to U+10FFFF, excluding the surrogate area U+D800 to U+DFFF, and the
+"Non-Characters" code points, which are U+FDD0 to U+FDEF and the last two
+characters in each plane, U+??FFFE and U+??FFFF.
+</P>
+<P>
+If an invalid UTF-32 string is passed to PCRE, an error return is given. At
+compile time, the only additional information is the offset to the first data
+unit of the failing character. The run-time functions <b>pcre32_exec()</b> and
+<b>pcre32_dfa_exec()</b> also pass back this information, as well as a more
+detailed reason code if the caller has provided memory in which to do this.
+</P>
+<P>
+In some situations, you may already know that your strings are valid, and
+therefore want to skip these checks in order to improve performance. If you set
+the PCRE_NO_UTF32_CHECK flag at compile time or at run time, PCRE assumes that
+the pattern or subject it is given (respectively) contains only valid UTF-32
+sequences. In this case, it does not diagnose an invalid UTF-32 string.
+</P>
+<P>
+UTF-32 only uses the lowest 21 bits of the 32 bit characters, and the
+application may use the upper bits for internal purposes. To allow you to
+pass these strings to PCRE unmodified (thus avoiding the costly operation of
+creating a copy of the string with the upper bits masked), PCRE accepts
+these 32-bit character strings as-is, but only uses the lowest 21 bits for
+matching, if you pass the PCRE_NO_UTF32_CHECK flag to <b>pcre32_exec()</b> and
+<b>pcre32_dfa_exec()</b>. However, in this situation, you will have to apply
+your own validity check, and avoid the use of JIT optimization.
+(The latter restriction may be lifter in a later version of PCRE.)
 </P>
 <br><b>
 General comments about UTF modes
@@ -169,13 +230,13 @@ unit.
 </P>
 <P>
 5. The escape sequence \C can be used to match a single byte in UTF-8 mode, or
-a single 16-bit data unit in UTF-16 mode, but its use can lead to some strange
-effects because it breaks up multi-unit characters (see the description of \C
-in the
+a single 16-bit data unit in UTF-16 mode, or a single 32-bit data unit in
+UTF-32 mode, but its use can lead to some strange effects because it breaks up
+multi-unit characters (see the description of \C in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
 documentation). The use of \C is not supported in the alternative matching
-function <b>pcre[16]_dfa_exec()</b>, nor is it supported in UTF mode by the JIT
-optimization of <b>pcre[16]_exec()</b>. If JIT optimization is requested for a
+function <b>pcre[16|32]_dfa_exec()</b>, nor is it supported in UTF mode by the JIT
+optimization of <b>pcre[16|32]_exec()</b>. If JIT optimization is requested for a
 UTF pattern that contains \C, it will not succeed, and so the matching will
 be carried out by the normal interpretive function.
 </P>
@@ -208,13 +269,11 @@ PCRE_UCP is set.
 </P>
 <P>
 9. Case-insensitive matching applies only to characters whose values are less
-than 128, unless PCRE is built with Unicode property support. Even when Unicode
-property support is available, PCRE still uses its own character tables when
-checking the case of low-valued characters, so as not to degrade performance.
-The Unicode property information is used only for characters with higher
-values. Furthermore, PCRE supports case-insensitive matching only when there is
-a one-to-one mapping between a letter's cases. There are a small number of
-many-to-one mappings in Unicode; these are not supported by PCRE.
+than 128, unless PCRE is built with Unicode property support. A few Unicode
+characters such as Greek sigma have more than two codepoints that are
+case-equivalent. Up to and including PCRE release 8.31, only one-to-one case
+mappings were supported, but later releases (with Unicode property support) do
+treat as case-equivalent all versions of characters such as Greek sigma.
 </P>
 <br><b>
 AUTHOR
@@ -231,7 +290,7 @@ Cambridge CB2 3QH, England.
 REVISION
 </b><br>
 <P>
-Last updated: 14 April 2012
+Last updated: 25 September 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

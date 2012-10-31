@@ -36,6 +36,7 @@ dist_html_DATA = \
   doc/html/pcre_get_stringtable_entries.html \
   doc/html/pcre_get_substring.html \
   doc/html/pcre_get_substring_list.html \
+  doc/html/pcre_jit_exec.html \
   doc/html/pcre_jit_stack_alloc.html \
   doc/html/pcre_jit_stack_free.html \
   doc/html/pcre_maketables.html \
@@ -140,8 +141,8 @@ pcre.h.generic: pcre.h.in configure.ac
 
 # It is more complicated for config.h.generic. We need the version that results
 # from a default configuration. We can get this by doing a configure in a
-# temporary directory. It has to be entirely done using files in that 
-# directory, because the source directory may already be configured. If you 
+# temporary directory. It has to be entirely done using files in that
+# directory, because the source directory may already be configured. If you
 # just try running configure in a new directory, it complains that the source
 # directory is already configured.
 config.h.generic: configure.ac
@@ -663,6 +664,7 @@ dist_man_MANS = \
   doc/pcre_get_stringtable_entries.3 \
   doc/pcre_get_substring.3 \
   doc/pcre_get_substring_list.3 \
+  doc/pcre_jit_exec.3 \
   doc/pcre_jit_stack_alloc.3 \
   doc/pcre_jit_stack_free.3 \
   doc/pcre_maketables.3 \
@@ -710,6 +712,7 @@ install-data-hook:
 	ln -sf pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre16_get_stringtable_entries.3
 	ln -sf pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre16_get_substring.3
 	ln -sf pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre16_get_substring_list.3
+	ln -sf pcre_jit_exec.3			 $(DESTDIR)$(man3dir)/pcre16_jit_exec.3
 	ln -sf pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre16_jit_stack_alloc.3
 	ln -sf pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre16_jit_stack_free.3
 	ln -sf pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre16_maketables.3
@@ -735,6 +738,7 @@ install-data-hook:
 	ln -sf pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre32_get_stringtable_entries.3
 	ln -sf pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre32_get_substring.3
 	ln -sf pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_get_substring_list.3
+	ln -sf pcre_jit_exec.3			 $(DESTDIR)$(man3dir)/pcre32_jit_exec.3
 	ln -sf pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_alloc.3
 	ln -sf pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_free.3
 	ln -sf pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre32_maketables.3
