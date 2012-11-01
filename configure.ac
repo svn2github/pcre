@@ -86,6 +86,12 @@ AC_LIBTOOL_WIN32_DLL
 LT_INIT
 AC_PROG_LN_S
 
+# Check for GCC visibility feature
+
+PCRE_VISIBILITY
+
+# Versioning
+
 PCRE_MAJOR="pcre_major"
 PCRE_MINOR="pcre_minor"
 PCRE_PRERELEASE="pcre_prerelease"
@@ -1033,8 +1039,8 @@ $PACKAGE-$VERSION configuration summary:
     C++ compiler .................... : ${CXX}
     Linker .......................... : ${LD}
     C preprocessor flags ............ : ${CPPFLAGS}
-    C compiler flags ................ : ${CFLAGS}
-    C++ compiler flags .............. : ${CXXFLAGS}
+    C compiler flags ................ : ${CFLAGS} ${VISIBILITY_CFLAGS}
+    C++ compiler flags .............. : ${CXXFLAGS} ${VISIBILITY_CXXFLAGS}
     Linker flags .................... : ${LDFLAGS}
     Extra libraries ................. : ${LIBS}
 

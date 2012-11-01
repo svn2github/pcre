@@ -101,7 +101,7 @@ EXTRA_DIST =
 
 # These files contain additional m4 macros that are used by autoconf.
 EXTRA_DIST += \
-  m4/ax_pthread.m4
+  m4/ax_pthread.m4 m4/pcre_visibility.m4
 
 # These files contain maintenance information
 EXTRA_DIST += \
@@ -207,6 +207,7 @@ BUILT_SOURCES = pcre_chartables.c
 # Build the 8 bit library if it is enabled.
 if WITH_PCRE8
 lib_LTLIBRARIES += libpcre.la
+
 libpcre_la_SOURCES = \
   pcre_byte_order.c \
   pcre_compile.c \
@@ -232,6 +233,7 @@ libpcre_la_SOURCES = \
   ucp.h
 
 libpcre_la_CFLAGS = \
+  $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 
 libpcre_la_LIBADD =
@@ -270,6 +272,7 @@ libpcre16_la_SOURCES = \
   pcre16_xclass.c
 
 libpcre16_la_CFLAGS = \
+  $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
 
 libpcre16_la_LIBADD =
@@ -308,7 +311,9 @@ libpcre32_la_SOURCES = \
   pcre32_xclass.c
 
 libpcre32_la_CFLAGS = \
+  $(VISIBILITY_CFLAGS) \
   $(AM_CFLAGS)
+
 libpcre32_la_LIBADD =
 
 ## This file is generated as part of the building process, so don't distribute.
@@ -407,7 +412,7 @@ if WITH_PCRE8
 lib_LTLIBRARIES += libpcreposix.la
 libpcreposix_la_SOURCES = \
   pcreposix.c
-libpcreposix_la_CFLAGS = $(AM_CFLAGS)
+libpcreposix_la_CFLAGS = $(VISIBILITY_CFLAGS) $(AM_CFLAGS)
 libpcreposix_la_LDFLAGS = $(EXTRA_LIBPCREPOSIX_LDFLAGS)
 libpcreposix_la_LIBADD = libpcre.la
 
@@ -426,7 +431,7 @@ libpcrecpp_la_SOURCES = \
   pcrecpp.cc \
   pcre_scanner.cc \
   pcre_stringpiece.cc
-libpcrecpp_la_CXXFLAGS = $(AM_CXXFLAGS)
+libpcrecpp_la_CXXFLAGS = $(VISIBILITY_CXXFLAGS) $(AM_CXXFLAGS)
 libpcrecpp_la_LDFLAGS = $(EXTRA_LIBPCRECPP_LDFLAGS)
 libpcrecpp_la_LIBADD = libpcre.la
 

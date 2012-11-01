@@ -146,6 +146,8 @@ Version 8.32
     greater than 0x7fffffff (which cannot be represented in UTF-8, even under
     the "old" RFC 2279). Instead, it ended up passing a negative length to 
     pcre_exec().
+    
+31. Add support for GCC's visibility feature to hide internal functions.
 
 
 Version 8.31 06-July-2012
