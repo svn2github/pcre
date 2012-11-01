@@ -776,7 +776,7 @@ we know we are in UTF mode. */
 we know we are in UTF mode. */
 
 #define RAWUCHARINC(eptr) \
-  (*(eptr)++)
+  (*((eptr)++))
 
 /* Returns the next uchar, testing for UTF mode, and not advancing the
 pointer. */
@@ -788,7 +788,7 @@ pointer. */
 pointer. */
 
 #define RAWUCHARINCTEST(eptr) \
-  (*(eptr)++)
+  (*((eptr)++))
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
@@ -895,7 +895,7 @@ we know we are in UTF mode. */
 we know we are in UTF mode. */
 
 #define RAWUCHARINC(eptr) \
-  (*(eptr)++)
+  (*((eptr)++))
 
 /* Returns the next uchar, testing for UTF mode, and not advancing the
 pointer. */
@@ -907,7 +907,7 @@ pointer. */
 pointer. */
 
 #define RAWUCHARINCTEST(eptr) \
-  (*(eptr)++)
+  (*((eptr)++))
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-16 mode - we don't put a test within the
@@ -984,7 +984,7 @@ we know we are in UTF mode. */
 we know we are in UTF mode. */
 
 #define RAWUCHARINC(eptr) \
-  (*(eptr)++ & UTF32_MASK)
+  (*((eptr)++) & UTF32_MASK)
 
 /* Returns the next uchar, testing for UTF mode, and not advancing the
 pointer. */
@@ -996,7 +996,7 @@ pointer. */
 pointer. */
 
 #define RAWUCHARINCTEST(eptr) \
-  (utf ? (*(eptr)++ & UTF32_MASK) : *(eptr)++)
+  (utf ? (*((eptr)++) & UTF32_MASK) : *((eptr)++))
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the
