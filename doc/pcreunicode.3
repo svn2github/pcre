@@ -184,16 +184,6 @@ therefore want to skip these checks in order to improve performance. If you set
 the PCRE_NO_UTF32_CHECK flag at compile time or at run time, PCRE assumes that
 the pattern or subject it is given (respectively) contains only valid UTF-32
 sequences. In this case, it does not diagnose an invalid UTF-32 string.
-.P
-UTF-32 only uses the lowest 21 bits of the 32 bit characters, and the
-application may use the upper bits for internal purposes. To allow you to
-pass these strings to PCRE unmodified (thus avoiding the costly operation of
-creating a copy of the string with the upper bits masked), PCRE accepts
-these 32-bit character strings as-is, but only uses the lowest 21 bits for
-matching, if you pass the PCRE_NO_UTF32_CHECK flag to \fBpcre32_exec()\fP and
-\fBpcre32_dfa_exec()\fP. However, in this situation, you will have to apply
-your own validity check, and avoid the use of JIT optimization.
-(The latter restriction may be lifter in a later version of PCRE.)
 .
 .
 .SS "General comments about UTF modes"

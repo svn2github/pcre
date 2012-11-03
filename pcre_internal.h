@@ -934,43 +934,29 @@ into one pcre_uchar unit. */
 #define GET_EXTRALEN(c) (0)
 #define NOT_FIRSTCHAR(c) (0)
 
-#define UTF32_MASK (0x1fffffu)
-
-/* Base macro to pick up an UTF-32 character out of a uint32 */
-
-#define MASKHIGHBITS(c) ((c) & UTF32_MASK)
-
-/* Base macro to pick up an UTF-32 character, not advancing the pointer */
-
-#define GETUTF32(eptr) (MASKHIGHBITS(*(eptr)))
-
-/* Base macro to pick up an UTF-32 character, advancing the pointer */
-
-#define GETUTF32INC(eptr) (MASKHIGHBITS(*((eptr)++)))
-
 /* Get the next UTF-32 character, not advancing the pointer. This is called when
 we know we are in UTF-32 mode. */
 
 #define GETCHAR(c, eptr) \
-  c = GETUTF32(eptr);
+  c = *(eptr);
 
 /* Get the next UTF-32 character, testing for UTF-32 mode, and not advancing the
 pointer. */
 
 #define GETCHARTEST(c, eptr) \
-  c = (utf ? GETUTF32(eptr) : *(eptr));
+  c = *(eptr);
 
 /* Get the next UTF-32 character, advancing the pointer. This is called when we
 know we are in UTF-32 mode. */
 
 #define GETCHARINC(c, eptr) \
-  c = GETUTF32INC(eptr);
+  c = *((eptr)++);
 
 /* Get the next character, testing for UTF-32 mode, and advancing the pointer.
 This is called when we don't know if we are in UTF-32 mode. */
 
 #define GETCHARINCTEST(c, eptr) \
-  c = (utf ? GETUTF32INC(eptr) : *((eptr)++));
+  c = *((eptr)++);
 
 /* Get the next UTF-32 character, not advancing the pointer, not incrementing
 length (since all UTF-32 is of length 1). This is called when we know we are in
@@ -990,25 +976,25 @@ This is called when we do not know if we are in UTF-32 mode. */
 we know we are in UTF mode. */
 
 #define RAWUCHAR(eptr) \
-  (MASKHIGHBITS(*(eptr)))
+  (*(eptr))
 
 /* Returns the next uchar, advancing the pointer. This is called when
 we know we are in UTF mode. */
 
 #define RAWUCHARINC(eptr) \
-  (MASKHIGHBITS(*((eptr)++)))
+  (*((eptr)++))
 
 /* Returns the next uchar, testing for UTF mode, and not advancing the
 pointer. */
 
 #define RAWUCHARTEST(eptr) \
-  (utf ? (MASKHIGHBITS(*(eptr))) : *(eptr))
+  (*(eptr))
 
 /* Returns the next uchar, testing for UTF mode, advancing the
 pointer. */
 
 #define RAWUCHARINCTEST(eptr) \
-  (utf ? (MASKHIGHBITS(*((eptr)++))) : *((eptr)++))
+  (*((eptr)++))
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the

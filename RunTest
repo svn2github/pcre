@@ -418,38 +418,21 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do26=yes
 fi
 
-# Extra test round for testing 32-bit UTF mode with high bits set
-if test "$test32" != "skip" -a $utf -eq 1; then
-  test32plus="-32+"
-else
-  test32plus=skip
-fi
-
 # Show which release and which test data
 
 echo ""
 echo PCRE C library tests using test data from $testdata
 $sim ./pcretest /dev/null
 
-for bmode in "$test8" "$test16" "$test32" "$test32plus"; do
+for bmode in "$test8" "$test16" "$test32"; do
   case "$bmode" in
     skip) continue;;
     -16)  if [ "$test8$test32" != "skipskip" ] ; then echo ""; fi
           bits=16; echo "---- Testing 16-bit library ----"; echo "";;
     -32)  if [ "$test8$test16" != "skipskip" ] ; then echo ""; fi
           bits=32; echo "---- Testing 32-bit library ----"; echo "";;
-    -32+) echo ""
-          bits=32; echo "---- Testing 32-bit library UTF-32 mode with high bits set ----"; echo "";;
     *)    bits=8; echo "---- Testing 8-bit library ----"; echo "";;
   esac
-
-  # When testing 32-bit UTF mode with high bits masked, skip all non-UTF tests
-  # Since this is the last test, we can just set doN=no
-  if test "$bmode" = "-32+"; then
-    do1=no do2=no do3=no do8=no 
-    do12=no do13=no do14=no do15=no do16=no do17=no
-    do20=no do21=no do23=no do24=no do25=no
-  fi
 
 # Primary test, compatible with JIT and all versions of Perl >= 5.8
 
