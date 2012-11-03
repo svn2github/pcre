@@ -279,9 +279,6 @@ typedef pcre_uint32 pcre_uchar;
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
-/* Assert that pcre_uchar32 is a 32-bit type */
-typedef int __assert_pcre_uchar32_size[sizeof(pcre_uchar) == 4 ? 1 : -1];
-
 #else
 #error Unsupported compiling mode
 #endif /* COMPILE_PCRE[8|16|32] */
@@ -350,6 +347,11 @@ values. */
 
 #include "pcre.h"
 #include "ucp.h"
+
+#ifdef COMPILE_PCRE32
+/* Assert that the public PCRE_UCHAR32 is a 32-bit type */
+typedef int __assert_pcre_uchar32_size[sizeof(PCRE_UCHAR32) == 4 ? 1 : -1];
+#endif
 
 /* When compiling for use with the Virtual Pascal compiler, these functions
 need to have their names changed. PCRE must be compiled with the -DVPCOMPAT
