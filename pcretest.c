@@ -1790,6 +1790,8 @@ Returns:       TRUE  if the string is a valid UTF-32 string
                FALSE otherwise
 */
 
+#ifdef NEVER
+
 #ifdef SUPPORT_UTF
 static BOOL
 valid_utf32(pcre_uint32 *string, int length)
@@ -1816,6 +1818,9 @@ for (p = string; length-- > 0; p++)
 return TRUE;
 }
 #endif /* SUPPORT_UTF */
+
+#endif /* NEVER */
+
 
 #endif
 
@@ -2105,6 +2110,8 @@ If handed a NULL file, just counts chars without printing. */
 static int pchars32(PCRE_SPTR32 p, int length, BOOL utf, FILE *f)
 {
 int yield = 0;
+
+(void)(utf);  /* Avoid compiler warning */
 
 if (length < 0)
   length = strlen32(p);
