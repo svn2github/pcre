@@ -53,7 +53,7 @@ Support for 16-bit and 32-bit data strings
 -------------------------------------------
 
 From release 8.30, PCRE supports 16-bit as well as 8-bit data strings; and from
-release 8.FIXME, PCRE supports 32-bit data strings. The library can be compiled
+release 8.32, PCRE supports 32-bit data strings. The library can be compiled
 in any combination of 8-bit, 16-bit or 32-bit modes, creating different
 libraries. In the description that follows, the word "short" is 
 used for a 16-bit data quantity, and the word "unit" is used for a quantity
