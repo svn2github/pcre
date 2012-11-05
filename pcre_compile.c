@@ -3025,8 +3025,8 @@ switch(ptype)
   p = PRIV(ucd_caseless_sets) + prop->caseset;
   for (;;)
     {
-    if ((unsigned int)c < *p) return !negated;
-    if ((unsigned int)c == *p++) return negated;
+    if (c < *p) return !negated;
+    if (c == *p++) return negated;
     }
   break;  /* Control never reaches here */
 #endif
