@@ -3142,6 +3142,7 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
+        goto EXIT;
         }
       else if (strcmp(argv[op + 1], "pcre16") == 0)
         {
@@ -3152,6 +3153,7 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
+        goto EXIT;
         }
       else if (strcmp(argv[op + 1], "pcre32") == 0)
         {

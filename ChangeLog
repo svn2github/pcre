@@ -149,6 +149,9 @@ Version 8.32
     
 31. Add support for GCC's visibility feature to hide internal functions.
 
+32. Running "pcretest -C pcre8" or "pcretest -C pcre16" gave a spurious error
+    "unknown -C option" after outputting 0 or 1.
+
 
 Version 8.31 06-July-2012
 -------------------------
