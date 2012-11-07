@@ -1,6 +1,6 @@
-/-- This set of tests is for the 16- and 32-bit library's basic (non-UTF-16 or -32) features 
-    that are not compatible with the 8-bit library, or which give different 
-    output in 16- or 32-bit mode. --/
+/-- This set of tests is for the 16- and 32-bit library's basic (non-UTF-16 
+    or -32) features that are not compatible with the 8-bit library, or which 
+    give different output in 16- or 32-bit mode. --/
 
 /a\Cb/
     aXb
@@ -19,7 +19,6 @@ Capturing subpattern count = 0
 No options
 No first char
 No need char
-
   
 /\x{100}/I
 Capturing subpattern count = 0
@@ -482,5 +481,25 @@ MK: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789AB
         Ket
         End
 ------------------------------------------------------------------
+
+/^\x{ffff}+/i
+    \x{ffff}
+ 0: \x{ffff}
+
+/^\x{ffff}?/i
+    \x{ffff}
+ 0: \x{ffff}
+
+/^\x{ffff}*/i
+    \x{ffff}
+ 0: \x{ffff}
+
+/^\x{ffff}{3}/i
+    \x{ffff}\x{ffff}\x{ffff}
+ 0: \x{ffff}\x{ffff}\x{ffff}
+
+/^\x{ffff}{0,3}/i
+    \x{ffff}
+ 0: \x{ffff}
 
 /-- End of testinput17 --/

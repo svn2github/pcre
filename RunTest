@@ -872,7 +872,7 @@ if [ $do19 = yes ] ; then
   fi
 fi
 
-# Tests for 16/32-bit-specific features in DFA non-UTF-16 mode
+# Tests for 16/32-bit-specific features in DFA non-UTF-16/32 mode
 
 if [ $do20 = yes ] ; then
   echo $title20
@@ -880,7 +880,7 @@ if [ $do20 = yes ] ; then
     echo "  Skipped when running 8-bit tests"
   else
     for opt in "" "-s"; do
-      $sim $valgrind ./pcretest -q $bmode $opt $testdata/testinput20 testtry
+      $sim $valgrind ./pcretest -q $bmode $opt -dfa $testdata/testinput20 testtry
       if [ $? = 0 ] ; then
         $cf $testdata/testoutput20 testtry
         if [ $? != 0 ] ; then exit 1; fi
