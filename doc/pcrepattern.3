@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "10 September 2012" "PCRE 8.31"
+.TH PCREPATTERN 3 "07 November 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -120,10 +120,11 @@ Perl-compatible, are recognized only at the very start of a pattern, and that
 they must be in upper case. If more than one of them is present, the last one
 is used.
 .P
-The newline convention affects the interpretation of the dot metacharacter when
-PCRE_DOTALL is not set, and also the behaviour of \eN. However, it does not
-affect what the \eR escape sequence matches. By default, this is any Unicode
-newline sequence, for Perl compatibility. However, this can be changed; see the
+The newline convention affects where the circumflex and dollar assertions are
+true. It also affects the interpretation of the dot metacharacter when
+PCRE_DOTALL is not set, and the behaviour of \eN. However, it does not affect
+what the \eR escape sequence matches. By default, this is any Unicode newline
+sequence, for Perl compatibility. However, this can be changed; see the
 description of \eR in the section entitled
 .\" HTML <a href="#newlineseq">
 .\" </a>
@@ -976,9 +977,13 @@ regular expression.
 .SH "CIRCUMFLEX AND DOLLAR"
 .rs
 .sp
+The circumflex and dollar metacharacters are zero-width assertions. That is, 
+they test for a particular condition being true without consuming any 
+characters from the subject string.
+.P
 Outside a character class, in the default matching mode, the circumflex
-character is an assertion that is true only if the current matching point is
-at the start of the subject string. If the \fIstartoffset\fP argument of
+character is an assertion that is true only if the current matching point is at
+the start of the subject string. If the \fIstartoffset\fP argument of
 \fBpcre_exec()\fP is non-zero, circumflex can never match if the PCRE_MULTILINE
 option is unset. Inside a character class, circumflex has an entirely different
 meaning
@@ -995,12 +1000,12 @@ constrained to match only at the start of the subject, it is said to be an
 "anchored" pattern. (There are also other constructs that can cause a pattern
 to be anchored.)
 .P
-A dollar character is an assertion that is true only if the current matching
-point is at the end of the subject string, or immediately before a newline
-at the end of the string (by default). Dollar need not be the last character of
-the pattern if a number of alternatives are involved, but it should be the last
-item in any branch in which it appears. Dollar has no special meaning in a
-character class.
+The dollar character is an assertion that is true only if the current matching
+point is at the end of the subject string, or immediately before a newline at
+the end of the string (by default). Note, however, that it does not actually
+match the newline. Dollar need not be the last character of the pattern if a
+number of alternatives are involved, but it should be the last item in any
+branch in which it appears. Dollar has no special meaning in a character class.
 .P
 The meaning of dollar can be changed so that it matches only at the very end of
 the string, by setting the PCRE_DOLLAR_ENDONLY option at compile time. This
@@ -2970,6 +2975,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 10 September 2012
+Last updated: 07 November 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
