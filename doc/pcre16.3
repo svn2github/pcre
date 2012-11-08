@@ -1,4 +1,4 @@
-.TH PCRE 3 "14 April 2012" "PCRE 8.31"
+.TH PCRE 3 "08 November 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -170,7 +170,7 @@ library. For example, if you want to study a pattern that was compiled with
 .rs
 .sp
 There is only one header file, \fBpcre.h\fP. It contains prototypes for all the
-functions in both libraries, as well as definitions of flags, structures, error
+functions in all libraries, as well as definitions of flags, structures, error
 codes, etc.
 .
 .
@@ -190,9 +190,9 @@ of bytes with the C type "char *". In the 16-bit library, strings are passed as
 vectors of unsigned 16-bit quantities. The macro PCRE_UCHAR16 specifies an
 appropriate data type, and PCRE_SPTR16 is defined as "const PCRE_UCHAR16 *". In
 very many environments, "short int" is a 16-bit data type. When PCRE is built,
-it defines PCRE_UCHAR16 as "short int", but checks that it really is a 16-bit
-data type. If it is not, the build fails with an error message telling the
-maintainer to modify the definition appropriately.
+it defines PCRE_UCHAR16 as "unsigned short int", but checks that it really is a
+16-bit data type. If it is not, the build fails with an error message telling
+the maintainer to modify the definition appropriately.
 .
 .
 .SH "STRUCTURE TYPES"
@@ -385,6 +385,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 April 2012
+Last updated: 08 November 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

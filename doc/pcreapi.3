@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "31 October 2012" "PCRE 8.32"
+.TH PCREAPI 3 "08 November 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -142,15 +142,15 @@ PCRE - Perl-compatible regular expressions
 .B int (*pcre_callout)(pcre_callout_block *);
 .
 .
-.SH "PCRE 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
+.SH "PCRE 8-BIT, 16-BIT, AND 32-BIT LIBRARIES"
 .rs
 .sp
-From release 8.30, PCRE can be compiled as a library for handling 16-bit
-character strings as well as, or instead of, the original library that handles
-8-bit character strings. From release 8.32, PCRE can also be compiled as a
-library for handling 32-bit character strings. To avoid too much complication,
-this document describes the 8-bit versions of the functions, with only
-occasional references to the 16-bit and 32-bit libraries.
+As well as support for 8-bit character strings, PCRE also supports 16-bit
+strings (from release 8.30) and 32-bit strings (from release 8.32), by means of
+two additional libraries. They can be built as well as, or instead of, the
+8-bit library. To avoid too much complication, this document describes the
+8-bit versions of the functions, with only occasional references to the 16-bit
+and 32-bit libraries.
 .P
 The 16-bit and 32-bit functions operate in the same way as their 8-bit
 counterparts; they just use different data types for their arguments and
@@ -2267,15 +2267,15 @@ Error numbers -16 to -20, -22, and 30 are not used by \fBpcre_exec()\fP.
 .rs
 .sp
 This section applies only to the 8-bit library. The corresponding information
-for the 16-bit library is given in the
+for the 16-bit and 32-bit libraries is given in the
 .\" HREF
 \fBpcre16\fP
 .\"
-page. The corresponding information for the 32-bit library is given in the
+and
 .\" HREF
 \fBpcre32\fP
 .\"
-page.
+pages. 
 .P
 When \fBpcre_exec()\fP returns either PCRE_ERROR_BADUTF8 or
 PCRE_ERROR_SHORTUTF8, and the size of the output vector (\fIovecsize\fP) is at
@@ -2818,6 +2818,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 31 October 2012
+Last updated: 08 November 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi
