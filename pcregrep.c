@@ -1575,8 +1575,8 @@ while (ptr < endptr)
 #ifdef JFRIEDL_DEBUG
   if (jfriedl_XT || jfriedl_XR)
   {
-      #include <sys/time.h>
-      #include <time.h>
+#     include <sys/time.h>
+#     include <time.h>
       struct timeval start_time, end_time;
       struct timezone dummy;
       int i;

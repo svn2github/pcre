@@ -200,7 +200,7 @@ typedef unsigned char pcre_uint8;
   typedef unsigned int pcre_uint16;
   typedef int pcre_int16;
 #else
-  #error Cannot determine a type for 16-bit unsigned integers
+# error Cannot determine a type for 16-bit unsigned integers
 #endif
 
 #if UINT_MAX == 4294967295
@@ -210,7 +210,7 @@ typedef unsigned char pcre_uint8;
   typedef unsigned long int pcre_uint32;
   typedef long int pcre_int32;
 #else
-  #error Cannot determine a type for 32-bit unsigned integers
+# error Cannot determine a type for 32-bit unsigned integers
 #endif
 
 /* When checking for integer overflow in pcre_compile(), we need to handle

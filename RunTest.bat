@@ -499,8 +499,8 @@ if %bits% EQU 8 (
   echo Test 20 Skipped when running 8-bit tests.
   goto :eof
 )
-  call :runsub 20 testout "DFA specials for the basic 16/32-bit library" -q
-  call :runsub 20 testoutstudy "Test with Study Override" -q -s
+  call :runsub 20 testout "DFA specials for the basic 16/32-bit library" -q -dfa
+  call :runsub 20 testoutstudy "Test with Study Override" -q -dfa -s
 goto :eof
 
 :do21
