@@ -340,13 +340,6 @@ others are relatively new.
   implementation that I tried made things worse in many simple cases, so this
   is not an obviously good thing.
 
-. Make the longest lookbehind available via pcre_fullinfo(). This is not
-  straightforward because lookbehinds can be nested inside lookbehinds. This
-  case will have to be identified, and the amounts added. This should then give
-  the maximum possible lookbehind length. The reason for wanting this is to
-  help when implementing multi-segment matching using pcre_exec() with partial
-  matching and overlapping segments.
-
 . PCRE cannot at present distinguish between subpatterns with different names,
   but the same number (created by the use of ?|). In order to do so, a way of
   remembering *which* subpattern numbered n matched is needed. Bugzilla #760.
@@ -359,4 +352,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 September 2012
+Last updated: 09 November 2012

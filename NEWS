@@ -1,14 +1,14 @@
 News about PCRE releases
 ------------------------
 
-Release 8.32 xx-xxxx-2012
--------------------------
+Release 8.32 12-November-2012
+-----------------------------
 
 This release fixes a number of bugs, but also has some new features. These are
 the highlights:
 
 .  There is now support for 32-bit character strings and UTF-32. Like the 
-   16-bit support, this is done by compile a separater 32-bit library.
+   16-bit support, this is done by compiling a separate 32-bit library.
 
 .  \X now matches a Unicode extended grapheme cluster. 
 

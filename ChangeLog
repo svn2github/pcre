@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.32
-------------
+Version 8.32 11-November-2012
+-----------------------------
 
 1.  Improved JIT compiler optimizations for first character search and single
     character iterators.
@@ -151,6 +151,14 @@ Version 8.32
 
 32. Running "pcretest -C pcre8" or "pcretest -C pcre16" gave a spurious error
     "unknown -C option" after outputting 0 or 1.
+    
+33. There is now support for generating a code coverage report for the test
+    suite in environments where gcc is the compiler and lcov is installed. This 
+    is mainly for the benefit of the developers.  
+    
+34. If PCRE is built with --enable-valgrind, certain memory regions are marked
+    unaddressable using valgrind annotations, allowing valgrind to detect 
+    invalid memory accesses. This is mainly for the benefit of the developers.
 
 
 Version 8.31 06-July-2012
