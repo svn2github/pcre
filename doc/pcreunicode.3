@@ -1,4 +1,4 @@
-.TH PCREUNICODE 3 "08 November 2012" "PCRE 8.32"
+.TH PCREUNICODE 3 "11 November 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "UTF-8, UTF-16, UTF-32, AND UNICODE PROPERTY SUPPORT"
@@ -18,9 +18,9 @@ support, and, in addition, you must call
 \fBpcre_compile()\fP
 .\"
 with the PCRE_UTF8 option flag, or the pattern must start with the sequence
-(*UTF8). When either of these is the case, both the pattern and any subject
-strings that are matched against it are treated as UTF-8 strings instead of
-strings of individual 1-byte characters.
+(*UTF8) or (*UTF). When either of these is the case, both the pattern and any
+subject strings that are matched against it are treated as UTF-8 strings
+instead of strings of individual 1-byte characters.
 .
 .
 .SH "UTF-16 AND UTF-32 SUPPORT"
@@ -36,10 +36,11 @@ or
 \fBpcre32_compile()\fP
 .\"
 with the PCRE_UTF16 or PCRE_UTF32 option flag, as appropriate. Alternatively,
-the pattern must start with the sequence (*UTF16) or (*UTF32). When UTF mode is 
-set, both the pattern and any subject strings that are matched against it are
-treated as UTF-16 or UTF-32 strings instead of strings of individual 16-bit or
-32-bit characters.
+the pattern must start with the sequence (*UTF16), (*UTF32), as appropriate, or
+(*UTF), which can be used with either library. When UTF mode is set, both the
+pattern and any subject strings that are matched against it are treated as
+UTF-16 or UTF-32 strings instead of strings of individual 16-bit or 32-bit
+characters.
 .
 .
 .SH "UTF SUPPORT OVERHEAD"
@@ -249,6 +250,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2012
+Last updated: 11 November 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

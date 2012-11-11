@@ -1,4 +1,4 @@
-.TH PCRE 3 "30 October 2012" "PCRE 8.32"
+.TH PCRE 3 "11 November 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH INTRODUCTION
@@ -114,10 +114,12 @@ If you are using PCRE in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern, provided that PCRE
 was built with UTF support. For example, an 8-bit pattern that begins with
-"(*UTF8)" turns on UTF-8 mode. This causes both the pattern and any data
-against which it is matched to be checked for UTF-8 validity. If the data
-string is very long, such a check might use sufficiently many resources as to
-cause your application to lose performance.
+"(*UTF8)" or "(*UTF)" turns on UTF-8 mode, which interprets patterns and 
+subjects as strings of UTF-8 characters instead of individual 8-bit characters.
+This causes both the pattern and any data against which it is matched to be
+checked for UTF-8 validity. If the data string is very long, such a check might
+use sufficiently many resources as to cause your application to lose
+performance.
 .P
 The best way of guarding against this possibility is to use the
 \fBpcre_fullinfo()\fP function to check the compiled pattern's options for UTF.
@@ -195,6 +197,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 30 October 2012
+Last updated: 11 November 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

@@ -327,7 +327,7 @@ correctly, but that messes up comparisons). --/
 /(*UTF8)\x{1234}/
   abcd\x{1234}pqr
 
-/(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
+/(*CRLF)(*UTF)(*BSR_UNICODE)a\Rb/I
 
 /\h/SI8
     ABC\x{09}

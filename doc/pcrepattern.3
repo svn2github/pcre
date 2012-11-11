@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "07 November 2012" "PCRE 8.32"
+.TH PCREPATTERN 3 "11 November 2012" "PCRE 8.32"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -22,17 +22,19 @@ description of PCRE's regular expressions is intended as reference material.
 .P
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 strings in the original library, an
-extra library that supports 16-bit and UTF-16 character strings, and an
-extra library that supports 32-bit and UTF-32 character strings. To use these
+extra library that supports 16-bit and UTF-16 character strings, and a
+third library that supports 32-bit and UTF-32 character strings. To use these
 features, PCRE must be built to include appropriate support. When using UTF
 strings you must either call the compiling function with the PCRE_UTF8,
-PCRE_UTF16 or PCRE_UTF32 option, or the pattern must start with one of
+PCRE_UTF16, or PCRE_UTF32 option, or the pattern must start with one of
 these special sequences:
 .sp
   (*UTF8)
   (*UTF16)
   (*UTF32)
+  (*UTF) 
 .sp
+(*UTF) is a generic sequence that can be used with any of the libraries.
 Starting a pattern with such a sequence is equivalent to setting the relevant
 option. This feature is not Perl-compatible. How setting a UTF mode affects
 pattern matching is mentioned in several places below. There is also a summary
@@ -43,7 +45,7 @@ of features in the
 page.
 .P
 Another special sequence that may appear at the start of a pattern or in
-combination with (*UTF8) or (*UTF16) or (*UTF32) is:
+combination with (*UTF8), (*UTF16), (*UTF32) or (*UTF) is:
 .sp
   (*UCP)
 .sp
@@ -573,10 +575,10 @@ change of newline convention; for example, a pattern can start with:
 .sp
   (*ANY)(*BSR_ANYCRLF)
 .sp
-They can also be combined with the (*UTF8), (*UTF16), (*UTF32) or (*UCP) special
-sequences. Inside a character class, \eR is treated as an unrecognized escape
-sequence, and so matches the letter "R" by default, but causes an error if
-PCRE_EXTRA is set.
+They can also be combined with the (*UTF8), (*UTF16), (*UTF32), (*UTF) or
+(*UCP) special sequences. Inside a character class, \eR is treated as an
+unrecognized escape sequence, and so matches the letter "R" by default, but
+causes an error if PCRE_EXTRA is set.
 .
 .
 .\" HTML <a name="uniextseq"></a>
@@ -1349,10 +1351,11 @@ the section entitled
 .\" </a>
 "Newline sequences"
 .\"
-above. There are also the (*UTF8), (*UTF16),(*UTF32) and (*UCP) leading
+above. There are also the (*UTF8), (*UTF16),(*UTF32), and (*UCP) leading
 sequences that can be used to set UTF and Unicode property modes; they are
 equivalent to setting the PCRE_UTF8, PCRE_UTF16, PCRE_UTF32 and the PCRE_UCP
-options, respectively.
+options, respectively. The (*UTF) sequence is a generic version that can be
+used with any of the libraries.
 .
 .
 .\" HTML <a name="subpattern"></a>
@@ -2975,6 +2978,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 07 November 2012
+Last updated: 11 November 2012
 Copyright (c) 1997-2012 University of Cambridge.
 .fi

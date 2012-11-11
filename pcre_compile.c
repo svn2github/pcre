@@ -7848,19 +7848,26 @@ while (ptr[skipatstart] == CHAR_LEFT_PARENTHESIS &&
   {
   int newnl = 0;
   int newbsr = 0;
+  
+/* For completeness and backward compatibility, (*UTFn) is supported in the
+relevant libraries, but (*UTF) is generic and always supported. Note that 
+PCRE_UTF8 == PCRE_UTF16 == PCRE_UTF32. */ 
 
 #ifdef COMPILE_PCRE8
-  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF_RIGHTPAR, 5) == 0)
+  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF8_RIGHTPAR, 5) == 0)
     { skipatstart += 7; options |= PCRE_UTF8; continue; }
 #endif
 #ifdef COMPILE_PCRE16
-  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF_RIGHTPAR, 6) == 0)
+  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF16_RIGHTPAR, 6) == 0)
     { skipatstart += 8; options |= PCRE_UTF16; continue; }
 #endif
 #ifdef COMPILE_PCRE32
-  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF_RIGHTPAR, 6) == 0)
+  if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF32_RIGHTPAR, 6) == 0)
     { skipatstart += 8; options |= PCRE_UTF32; continue; }
 #endif
+
+  else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UTF_RIGHTPAR, 4) == 0)
+    { skipatstart += 6; options |= PCRE_UTF8; continue; } 
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UCP_RIGHTPAR, 4) == 0)
     { skipatstart += 6; options |= PCRE_UCP; continue; }
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_NO_START_OPT_RIGHTPAR, 13) == 0)

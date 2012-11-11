@@ -638,6 +638,14 @@ Error -10 (bad UTF-32 string) offset=0 reason=2
 /(*UTF16)\x{11234}/
 Failed: (*VERB) not recognized at offset 5
 
+/(*UTF)\x{11234}/I
+Capturing subpattern count = 0
+Options: utf
+First char = \x{11234}
+No need char
+  abcd\x{11234}pqr
+ 0: \x{11234}
+
 /(*UTF-32)\x{11234}/
 Failed: (*VERB) not recognized at offset 5
 

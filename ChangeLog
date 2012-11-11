@@ -159,6 +159,8 @@ Version 8.32 11-November-2012
 34. If PCRE is built with --enable-valgrind, certain memory regions are marked
     unaddressable using valgrind annotations, allowing valgrind to detect 
     invalid memory accesses. This is mainly for the benefit of the developers.
+    
+25. (*UTF) can now be used to start a pattern in any of the three libraries. 
 
 
 Version 8.31 06-July-2012

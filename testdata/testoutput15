@@ -922,7 +922,7 @@ No match
   abcd\x{1234}pqr
  0: \x{1234}
 
-/(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
+/(*CRLF)(*UTF)(*BSR_UNICODE)a\Rb/I
 Capturing subpattern count = 0
 Options: bsr_unicode utf
 Forced newline sequence: CRLF

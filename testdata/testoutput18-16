@@ -641,6 +641,14 @@ Error -10 (bad UTF-16 string) offset=0 reason=4
   abcd\x{11234}pqr
  0: \x{11234}
 
+/(*UTF)\x{11234}/I
+Capturing subpattern count = 0
+Options: utf
+First char = \x{d804}
+Need char = \x{de34}
+  abcd\x{11234}pqr
+ 0: \x{11234}
+
 /(*UTF-32)\x{11234}/
 Failed: (*VERB) not recognized at offset 5
 
