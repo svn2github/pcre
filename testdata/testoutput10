@@ -2701,4 +2701,26 @@ Partial match: AA
  1: Ss
  2: S
 
+/ist/8i
+    ikt
+No match
+
+/is+t/8i
+    iSs\x{17f}t
+ 0: iSs\x{17f}t
+    ikt
+No match
+
+/is+?t/8i
+    ikt
+No match
+
+/is?t/8i
+    ikt
+No match
+
+/is{2}t/8i
+    iskt
+No match
+
 /-- End of testinput10 --/ 

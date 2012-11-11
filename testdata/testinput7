@@ -653,4 +653,20 @@ of case for anything other than the ASCII letters. --/
 
 /[^a]*\x{3c2}/8iBZ
 
+/ist/8iBZ
+    ikt
+
+/is+t/8i
+    iSs\x{17f}t
+    ikt
+
+/is+?t/8i
+    ikt
+
+/is?t/8i
+    ikt
+
+/is{2}t/8i
+    iskt
+
 /-- End of testinput7 --/

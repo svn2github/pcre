@@ -1318,4 +1318,20 @@
 /\x{017f}+/8i
     \x{0053}\x{0073}\x{017f}
 
+/ist/8i
+    ikt
+
+/is+t/8i
+    iSs\x{17f}t
+    ikt
+
+/is+?t/8i
+    ikt
+
+/is?t/8i
+    ikt
+
+/is{2}t/8i
+    iskt
+
 /-- End of testinput10 --/ 

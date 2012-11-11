@@ -1112,7 +1112,7 @@ for (;;)
           break;
           
           case PT_CLIST:
-          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          cp = PRIV(ucd_caseless_sets) + code[2];
           for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
@@ -1356,7 +1356,7 @@ for (;;)
           break;
 
           case PT_CLIST:
-          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          cp = PRIV(ucd_caseless_sets) + code[3];
           for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
@@ -1594,7 +1594,7 @@ for (;;)
           break;
 
           case PT_CLIST:
-          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          cp = PRIV(ucd_caseless_sets) + code[3];
           for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
@@ -1857,7 +1857,7 @@ for (;;)
           break;
 
           case PT_CLIST:
-          cp = PRIV(ucd_caseless_sets) + prop->caseset;
+          cp = PRIV(ucd_caseless_sets) + code[1 + IMM2_SIZE + 2];
           for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }

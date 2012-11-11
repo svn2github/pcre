@@ -2594,7 +2594,7 @@ for (;;)
         break;
 
         case PT_CLIST:
-        cp = PRIV(ucd_caseless_sets) + prop->caseset;
+        cp = PRIV(ucd_caseless_sets) + ecode[2];
         for (;;)
           {
           if (c < *cp)
@@ -4214,7 +4214,7 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
+            cp = PRIV(ucd_caseless_sets) + prop_value;
             for (;;)
               {
               if (c < *cp) 
@@ -4965,7 +4965,7 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
+            cp = PRIV(ucd_caseless_sets) + prop_value;
             for (;;)
               {
               if (c < *cp)
@@ -5457,7 +5457,7 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            cp = PRIV(ucd_caseless_sets) + UCD_CASESET(c);
+            cp = PRIV(ucd_caseless_sets) + prop_value;
             for (;;)
               {
               if (c < *cp) 
