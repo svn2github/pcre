@@ -168,7 +168,7 @@ for opts in \
   "--enable-pcre16 --disable-stack-for-recursion --disable-shared" \
   "--enable-pcre16 --enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=3 --disable-shared" \
-  "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared"
+  "--enable-pcre16 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared" \
   "--enable-pcre32" \
   "--enable-pcre32 --enable-jit --enable-utf --disable-shared" \
   "--enable-pcre32 --enable-jit --enable-unicode-properties --disable-shared" \
