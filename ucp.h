@@ -60,8 +60,8 @@ enum {
   ucp_Zs     /* Space separator */
 };
 
-/* These are grapheme break properties. Note that the code for processing them 
-assumes that the values are less than 16. If more values are added that take 
+/* These are grapheme break properties. Note that the code for processing them
+assumes that the values are less than 16. If more values are added that take
 the number to 16 or more, the code will have to be rewritten. */
 
 enum {

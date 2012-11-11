@@ -56,7 +56,7 @@ It returns offsets to captured substrings. Its arguments are:
   <i>options</i>      Option bits
   <i>ovector</i>      Points to a vector of ints for result offsets
   <i>ovecsize</i>     Number of elements in the vector (a multiple of 3)
-  <i>jstack</i>       Pointer to a JIT stack 
+  <i>jstack</i>       Pointer to a JIT stack
 </pre>
 The allowed options are:
 <pre>
@@ -79,7 +79,7 @@ The allowed options are:
   PCRE_PARTIAL_HARD      Return PCRE_ERROR_PARTIAL for a partial match
                            if that is found before a full match
 </pre>
-However, the PCRE_NO_UTF[8|16|32]_CHECK options have no effect, as this check 
+However, the PCRE_NO_UTF[8|16|32]_CHECK options have no effect, as this check
 is never applied. For details of partial matching, see the
 <a href="pcrepartial.html"><b>pcrepartial</b></a>
 page. A <b>pcre_extra</b> structure contains the following fields:

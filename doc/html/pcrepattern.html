@@ -63,17 +63,19 @@ description of PCRE's regular expressions is intended as reference material.
 <P>
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 strings in the original library, an
-extra library that supports 16-bit and UTF-16 character strings, and an
-extra library that supports 32-bit and UTF-32 character strings. To use these
+extra library that supports 16-bit and UTF-16 character strings, and a
+third library that supports 32-bit and UTF-32 character strings. To use these
 features, PCRE must be built to include appropriate support. When using UTF
 strings you must either call the compiling function with the PCRE_UTF8,
-PCRE_UTF16 or PCRE_UTF32 option, or the pattern must start with one of
+PCRE_UTF16, or PCRE_UTF32 option, or the pattern must start with one of
 these special sequences:
 <pre>
   (*UTF8)
   (*UTF16)
   (*UTF32)
+  (*UTF)
 </pre>
+(*UTF) is a generic sequence that can be used with any of the libraries.
 Starting a pattern with such a sequence is equivalent to setting the relevant
 option. This feature is not Perl-compatible. How setting a UTF mode affects
 pattern matching is mentioned in several places below. There is also a summary
@@ -83,7 +85,7 @@ page.
 </P>
 <P>
 Another special sequence that may appear at the start of a pattern or in
-combination with (*UTF8) or (*UTF16) or (*UTF32) is:
+combination with (*UTF8), (*UTF16), (*UTF32) or (*UTF) is:
 <pre>
   (*UCP)
 </pre>
@@ -112,10 +114,10 @@ page.
 </P>
 <br><a name="SEC2" href="#TOC1">EBCDIC CHARACTER CODES</a><br>
 <P>
-PCRE can be compiled to run in an environment that uses EBCDIC as its character 
-code rather than ASCII or Unicode (typically a mainframe system). In the 
-sections below, character code values are ASCII or Unicode; in an EBCDIC 
-environment these characters may have different code values, and there are no 
+PCRE can be compiled to run in an environment that uses EBCDIC as its character
+code rather than ASCII or Unicode (typically a mainframe system). In the
+sections below, character code values are ASCII or Unicode; in an EBCDIC
+environment these characters may have different code values, and there are no
 code points greater than 255.
 <a name="newlines"></a></P>
 <br><a name="SEC3" href="#TOC1">NEWLINE CONVENTIONS</a><br>
@@ -152,10 +154,11 @@ they must be in upper case. If more than one of them is present, the last one
 is used.
 </P>
 <P>
-The newline convention affects the interpretation of the dot metacharacter when
-PCRE_DOTALL is not set, and also the behaviour of \N. However, it does not
-affect what the \R escape sequence matches. By default, this is any Unicode
-newline sequence, for Perl compatibility. However, this can be changed; see the
+The newline convention affects where the circumflex and dollar assertions are
+true. It also affects the interpretation of the dot metacharacter when
+PCRE_DOTALL is not set, and the behaviour of \N. However, it does not affect
+what the \R escape sequence matches. By default, this is any Unicode newline
+sequence, for Perl compatibility. However, this can be changed; see the
 description of \R in the section entitled
 <a href="#newlineseq">"Newline sequences"</a>
 below. A change of \R setting can be combined with a change of newline
@@ -298,7 +301,7 @@ recognized when PCRE is compiled in EBCDIC mode, where data items are always
 bytes. In this mode, all values are valid after \c. If the next character is a
 lower case letter, it is converted to upper case. Then the 0xc0 bits of the
 byte are inverted. Thus \cA becomes hex 01, as in ASCII (A is C1), but because
-the EBCDIC letters are disjoint, \cZ becomes hex 29 (Z is E9), and other 
+the EBCDIC letters are disjoint, \cZ becomes hex 29 (Z is E9), and other
 characters also generate different values.
 </P>
 <P>
@@ -574,10 +577,10 @@ change of newline convention; for example, a pattern can start with:
 <pre>
   (*ANY)(*BSR_ANYCRLF)
 </pre>
-They can also be combined with the (*UTF8), (*UTF16), (*UTF32) or (*UCP) special
-sequences. Inside a character class, \R is treated as an unrecognized escape
-sequence, and so matches the letter "R" by default, but causes an error if
-PCRE_EXTRA is set.
+They can also be combined with the (*UTF8), (*UTF16), (*UTF32), (*UTF) or
+(*UCP) special sequences. Inside a character class, \R is treated as an
+unrecognized escape sequence, and so matches the letter "R" by default, but
+causes an error if PCRE_EXTRA is set.
 <a name="uniextseq"></a></P>
 <br><b>
 Unicode character properties
@@ -836,7 +839,7 @@ of extended grapheme clusters. In releases of PCRE later than 8.31, \X matches
 one of these clusters.
 </P>
 <P>
-\X always matches at least one character. Then it decides whether to add 
+\X always matches at least one character. Then it decides whether to add
 additional characters according to the following rules for ending a cluster:
 </P>
 <P>
@@ -846,9 +849,9 @@ additional characters according to the following rules for ending a cluster:
 2. Do not end between CR and LF; otherwise end after any control character.
 </P>
 <P>
-3. Do not break Hangul (a Korean script) syllable sequences. Hangul characters 
+3. Do not break Hangul (a Korean script) syllable sequences. Hangul characters
 are of five types: L, V, T, LV, and LVT. An L character may be followed by an
-L, V, LV, or LVT character; an LV or V character may be followed by a V or T 
+L, V, LV, or LVT character; an LV or V character may be followed by a V or T
 character; an LVT or T character may be follwed only by a T character.
 </P>
 <P>
@@ -978,9 +981,14 @@ regular expression.
 </P>
 <br><a name="SEC6" href="#TOC1">CIRCUMFLEX AND DOLLAR</a><br>
 <P>
+The circumflex and dollar metacharacters are zero-width assertions. That is,
+they test for a particular condition being true without consuming any
+characters from the subject string.
+</P>
+<P>
 Outside a character class, in the default matching mode, the circumflex
-character is an assertion that is true only if the current matching point is
-at the start of the subject string. If the <i>startoffset</i> argument of
+character is an assertion that is true only if the current matching point is at
+the start of the subject string. If the <i>startoffset</i> argument of
 <b>pcre_exec()</b> is non-zero, circumflex can never match if the PCRE_MULTILINE
 option is unset. Inside a character class, circumflex has an entirely different
 meaning
@@ -996,12 +1004,12 @@ constrained to match only at the start of the subject, it is said to be an
 to be anchored.)
 </P>
 <P>
-A dollar character is an assertion that is true only if the current matching
-point is at the end of the subject string, or immediately before a newline
-at the end of the string (by default). Dollar need not be the last character of
-the pattern if a number of alternatives are involved, but it should be the last
-item in any branch in which it appears. Dollar has no special meaning in a
-character class.
+The dollar character is an assertion that is true only if the current matching
+point is at the end of the subject string, or immediately before a newline at
+the end of the string (by default). Note, however, that it does not actually
+match the newline. Dollar need not be the last character of the pattern if a
+number of alternatives are involved, but it should be the last item in any
+branch in which it appears. Dollar has no special meaning in a character class.
 </P>
 <P>
 The meaning of dollar can be changed so that it matches only at the very end of
@@ -1344,10 +1352,11 @@ the pattern can contain special leading sequences such as (*CRLF) to override
 what the application has set or what has been defaulted. Details are given in
 the section entitled
 <a href="#newlineseq">"Newline sequences"</a>
-above. There are also the (*UTF8), (*UTF16),(*UTF32) and (*UCP) leading
+above. There are also the (*UTF8), (*UTF16),(*UTF32), and (*UCP) leading
 sequences that can be used to set UTF and Unicode property modes; they are
 equivalent to setting the PCRE_UTF8, PCRE_UTF16, PCRE_UTF32 and the PCRE_UCP
-options, respectively.
+options, respectively. The (*UTF) sequence is a generic version that can be
+used with any of the libraries.
 <a name="subpattern"></a></P>
 <br><a name="SEC13" href="#TOC1">SUBPATTERNS</a><br>
 <P>
@@ -1674,7 +1683,7 @@ one succeeds. Consider this pattern:
 <pre>
   (?&#62;.*?a)b
 </pre>
-It matches "ab" in the subject "aab". The use of the backtracking control verbs 
+It matches "ab" in the subject "aab". The use of the backtracking control verbs
 (*PRUNE) and (*SKIP) also disable this optimization.
 </P>
 <P>
@@ -2935,7 +2944,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC29" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 September 2012
+Last updated: 11 November 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

@@ -168,7 +168,7 @@ man page, in case the conversion went wrong.
 Starting with release 8.32, it is possible to compile a PCRE library that
 supports 32-bit character strings, including UTF-32 strings, as well as or
 instead of the original 8-bit library. This work was done by Christian Persch,
-based on the work done by Zoltan Herczeg for the 16-bit library. All three 
+based on the work done by Zoltan Herczeg for the 16-bit library. All three
 libraries contain identical sets of functions, used in exactly the same way.
 Only the names of the functions and the data types of their arguments and
 results are different. To avoid over-complication and reduce the documentation
@@ -187,7 +187,7 @@ study data with <b>pcre32_free_study()</b>.
 <br><a name="SEC7" href="#TOC1">THE HEADER FILE</a><br>
 <P>
 There is only one header file, <b>pcre.h</b>. It contains prototypes for all the
-functions in both libraries, as well as definitions of flags, structures, error
+functions in all libraries, as well as definitions of flags, structures, error
 codes, etc.
 </P>
 <br><a name="SEC8" href="#TOC1">THE LIBRARY NAME</a><br>
@@ -202,10 +202,10 @@ In the 8-bit library, strings are passed to PCRE library functions as vectors
 of bytes with the C type "char *". In the 32-bit library, strings are passed as
 vectors of unsigned 32-bit quantities. The macro PCRE_UCHAR32 specifies an
 appropriate data type, and PCRE_SPTR32 is defined as "const PCRE_UCHAR32 *". In
-very many environments, "unsigned int" is a 32-bit data type. When PCRE is built,
-it defines PCRE_UCHAR32 as "unsigned int", but checks that it really is a 32-bit
-data type. If it is not, the build fails with an error message telling the
-maintainer to modify the definition appropriately.
+very many environments, "unsigned int" is a 32-bit data type. When PCRE is
+built, it defines PCRE_UCHAR32 as "unsigned int", but checks that it really is
+a 32-bit data type. If it is not, the build fails with an error message telling
+the maintainer to modify the definition appropriately.
 </P>
 <br><a name="SEC10" href="#TOC1">STRUCTURE TYPES</a><br>
 <P>
@@ -373,7 +373,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 24 June 2012
+Last updated: 08 November 2012
 <br>
 Copyright &copy; 1997-2012 University of Cambridge.
 <br>

@@ -163,9 +163,9 @@ SET(PCRE_SUPPORT_BSR_ANYCRLF OFF CACHE BOOL
 
 SET(PCRE_SUPPORT_VALGRIND OFF CACHE BOOL
     "Enable Valgrind support.")
-    
+
 SET(PCRE_SUPPORT_COVERAGE OFF CACHE BOOL
-    "Enable code coverage support using gcov.") 
+    "Enable code coverage support using gcov.")
 
 OPTION(PCRE_SHOW_REPORT    "Show the final configuration report" ON)
 OPTION(PCRE_BUILD_PCREGREP "Build pcregrep" ON)
@@ -299,9 +299,9 @@ ENDIF(PCRE_SUPPORT_VALGRIND)
 IF(PCRE_SUPPORT_COVERAGE)
         SET(SUPPORT_GCOV 1)
         IF(NOT CMAKE_COMPILER_IS_GNUCC)
-            MESSAGE(FATAL_ERROR "Code coverage reports can only be generated when using GCC") 
-        ENDIF(NOT CMAKE_COMPILER_IS_GNUCC)  
-ENDIF(PCRE_SUPPORT_COVERAGE)                  
+            MESSAGE(FATAL_ERROR "Code coverage reports can only be generated when using GCC")
+        ENDIF(NOT CMAKE_COMPILER_IS_GNUCC)
+ENDIF(PCRE_SUPPORT_COVERAGE)
 
 # This next one used to contain
 #       SET(PCRETEST_LIBS ${READLINE_LIBRARY})
@@ -372,7 +372,7 @@ ENDIF(PCRE_NEWLINE STREQUAL "LF")
 IF(PCRE_NEWLINE STREQUAL "CRLF")
         SET(NEWLINE "3365")
 ENDIF(PCRE_NEWLINE STREQUAL "CRLF")
-ENDIF(PCRE_EBCDIC_NL25)          
+ENDIF(PCRE_EBCDIC_NL25)
 
 IF(PCRE_NO_RECURSE)
         SET(NO_RECURSE 1)
@@ -947,7 +947,7 @@ IF(PCRE_SHOW_REPORT)
     MESSAGE(STATUS "  Link pcretest with libreadline .. : Library not found" )
   ENDIF(READLINE_FOUND)
   MESSAGE(STATUS "  Support Valgrind .................: ${PCRE_SUPPORT_VALGRIND}")
-  MESSAGE(STATUS "  Support coverage .................: ${PCRE_SUPPORT_COVERAGE}")  
+  MESSAGE(STATUS "  Support coverage .................: ${PCRE_SUPPORT_COVERAGE}")
 
   IF(MINGW AND NOT PCRE_STATIC)
     MESSAGE(STATUS "  Non-standard dll names (prefix) . : ${NON_STANDARD_LIB_PREFIX}")

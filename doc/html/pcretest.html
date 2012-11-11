@@ -47,7 +47,7 @@ options, see the
 <a href="pcre16.html"><b>pcre16</b></a>
 and
 <a href="pcre32.html"><b>pcre32</b></a>
-documentation. 
+documentation.
 </P>
 <P>
 The input for <b>pcretest</b> is a sequence of regular expression patterns and
@@ -60,7 +60,7 @@ As PCRE has evolved, it has acquired many different features, and as a result,
 <b>pcretest</b> now has rather a lot of obscure options for testing every
 possible feature. Some of these options are specifically designed for use in
 conjunction with the test script and data files that are distributed as part of
-PCRE, and are unlikely to be of use otherwise. They are all documented here, 
+PCRE, and are unlikely to be of use otherwise. They are all documented here,
 but without much justification.
 </P>
 <br><a name="SEC2" href="#TOC1">PCRE's 8-BIT, 16-BIT AND 32-BIT LIBRARIES</a><br>
@@ -120,7 +120,7 @@ functionality is intended for use in scripts such as <b>RunTest</b>. The
 following options output the value indicated:
 <pre>
   ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
-               0x15 or 0x25 
+               0x15 or 0x25
                0 if used in an ASCII environment
   linksize   the internal link size (2, 3, or 4)
   newline    the default newline setting:
@@ -216,7 +216,7 @@ the text "(JIT)" is added to the first output line after a match or no match
 when JIT-compiled code was actually used.
 <br>
 <br>
-Note that there are pattern options that can override <b>-s</b>, either 
+Note that there are pattern options that can override <b>-s</b>, either
 specifying no studying at all, or suppressing JIT compilation.
 <br>
 <br>
@@ -353,7 +353,7 @@ sections.
   <b>/X</b>              set PCRE_EXTRA
   <b>/x</b>              set PCRE_EXTENDED
   <b>/Y</b>              set PCRE_NO_START_OPTIMIZE
-  <b>/Z</b>              don't show lengths in <b>/B</b> output 
+  <b>/Z</b>              don't show lengths in <b>/B</b> output
 
   <b>/&#60;any&#62;</b>          set PCRE_NEWLINE_ANY
   <b>/&#60;anycrlf&#62;</b>      set PCRE_NEWLINE_ANYCRLF
@@ -540,12 +540,12 @@ JIT compiled code is also output.
 <P>
 The <b>/S</b> modifier causes <b>pcre[16|32]_study()</b> to be called after the
 expression has been compiled, and the results used when the expression is
-matched. There are a number of qualifying characters that may follow <b>/S</b>. 
+matched. There are a number of qualifying characters that may follow <b>/S</b>.
 They may appear in any order.
 </P>
 <P>
-If <b>S</b> is followed by an exclamation mark, <b>pcre[16|32]_study()</b> is called 
-with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a 
+If <b>S</b> is followed by an exclamation mark, <b>pcre[16|32]_study()</b> is called
+with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a
 <b>pcre_extra</b> block, even when studying discovers no useful information.
 </P>
 <P>

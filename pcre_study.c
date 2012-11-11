@@ -572,7 +572,7 @@ if (utf && c > 127)
   return p;
   }
 #else   /* Not SUPPORT_UTF */
-(void)(utf);   /* Stops warning for unused parameter */ 
+(void)(utf);   /* Stops warning for unused parameter */
 #endif  /* SUPPORT_UTF */
 
 /* Not UTF-8 mode, or character is less than 127. */
@@ -605,7 +605,7 @@ if (utf && c > 127)
   return p;
   }
 #else   /* Not SUPPORT_UTF */
-(void)(utf);   /* Stops warning for unused parameter */ 
+(void)(utf);   /* Stops warning for unused parameter */
 #endif  /* SUPPORT_UTF */
 
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
@@ -1012,9 +1012,9 @@ do
       else
 #endif /* SUPPORT_UTF */
         {
-#ifndef EBCDIC         
+#ifndef EBCDIC
         SET_BIT(0xA0);
-#endif  /* Not EBCDIC */         
+#endif  /* Not EBCDIC */
 #if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xFF);  /* For characters > 255 */
 #endif  /* COMPILE_PCRE[16|32] */
@@ -1066,7 +1066,7 @@ do
       break;
 
       /* The cbit_space table has vertical tab as whitespace; we have to
-      ensure it is set as not whitespace. Luckily, the code value is the same 
+      ensure it is set as not whitespace. Luckily, the code value is the same
       (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate bit. */
 
       case OP_NOT_WHITESPACE:
@@ -1150,7 +1150,7 @@ do
 #endif /* SUPPORT_UTF */
 #ifndef EBCDIC
           SET_BIT(0xA0);
-#endif  /* Not EBCDIC */ 
+#endif  /* Not EBCDIC */
         break;
 
         case OP_ANYNL:
@@ -1430,7 +1430,7 @@ switch(min = find_minlength(code, code, re->options, 0))
   }
 
 /* If a set of starting bytes has been identified, or if the minimum length is
-greater than zero, or if JIT optimization has been requested, or if 
+greater than zero, or if JIT optimization has been requested, or if
 PCRE_STUDY_EXTRA_NEEDED is set, get a pcre[16]_extra block and a
 pcre_study_data block. The study data is put in the latter, which is pointed to
 by the former, which may also get additional data set later by the calling
@@ -1441,7 +1441,7 @@ becomes variable in the future, we don't have to change that code. */
 if (bits_set || min > 0 || (options & (
 #ifdef SUPPORT_JIT
     PCRE_STUDY_JIT_COMPILE | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE |
-    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE | 
+    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE |
 #endif
     PCRE_STUDY_EXTRA_NEEDED)) != 0)
   {
@@ -1497,7 +1497,7 @@ if (bits_set || min > 0 || (options & (
 
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT
-  compilation fails, abandon the extra block and return NULL, unless 
+  compilation fails, abandon the extra block and return NULL, unless
   PCRE_STUDY_EXTRA_NEEDED is set. */
 
 #ifdef SUPPORT_JIT

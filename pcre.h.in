@@ -105,7 +105,7 @@ compiling).
 Some options for pcre_compile() change its behaviour but do not affect the
 behaviour of the execution functions. Other options are passed through to the
 execution functions and affect their behaviour, with or without affecting the
-behaviour of pcre_compile(). 
+behaviour of pcre_compile().
 
 Options that can be passed to pcre_compile() are tagged Cx below, with these
 variants:

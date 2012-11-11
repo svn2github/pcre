@@ -285,7 +285,7 @@ if (preg->re_pcre == NULL)
 
 (void)pcre_fullinfo((const pcre *)preg->re_pcre, NULL, PCRE_INFO_CAPTURECOUNT,
   &re_nsub);
-preg->re_nsub = (size_t)re_nsub; 
+preg->re_nsub = (size_t)re_nsub;
 return 0;
 }
 

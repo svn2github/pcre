@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This program now supports the testing of all of the 8-bit, 16-bit, and 
+/* This program now supports the testing of all of the 8-bit, 16-bit, and
 32-bit PCRE libraries in a single program. This is different from the modules
 such as pcre_compile.c in the library itself, which are compiled separately for
 each mode. If two modes are enabled, for example, pcre_compile.c is compiled
@@ -288,8 +288,8 @@ argument, the casting might be incorrectly applied. */
 
 #define PCRE_JIT_STACK_FREE8(stack) \
   pcre_jit_stack_free(stack)
-  
-#define pcre8_maketables pcre_maketables 
+
+#define pcre8_maketables pcre_maketables
 
 #endif /* SUPPORT_PCRE8 */
 
@@ -1131,7 +1131,7 @@ static const char *errtexts[] = {
   "pattern compiled with other endianness",
   "invalid data in workspace for DFA restart",
   "bad JIT option",
-  "bad length"  
+  "bad length"
 };
 
 
@@ -4721,7 +4721,7 @@ while (!done)
         continue;
         }
 
-      /* We now have a character value in c that may be greater than 255. 
+      /* We now have a character value in c that may be greater than 255.
       In 8-bit mode we convert to UTF-8 if we are in UTF mode. Values greater
       than 127 in UTF mode must have come from \x{...} or octal constructs
       because values from \x.. get this far only in non-UTF mode. */
@@ -4736,8 +4736,8 @@ while (!done)
             {
             fprintf(outfile, "** Character \\x{%x} is greater than 0x7fffffff "
               "and so cannot be converted to UTF-8\n", c);
-            goto NEXT_DATA;     
-            }  
+            goto NEXT_DATA;
+            }
           q8 += ord2utf8(c, q8);
           }
         else

@@ -133,7 +133,7 @@ return 0;
 
 if (!utf || (c & 0xc0) != 0xc0)
   {
-  if (PRINTABLE(c)) fprintf(f, "%c", (char)c); 
+  if (PRINTABLE(c)) fprintf(f, "%c", (char)c);
   else if (c < 0x80) fprintf(f, "\\x%02x", c);
   else fprintf(f, "\\x{%02x}", c);
   return 0;
@@ -254,10 +254,10 @@ return (ptype == pvalue)? "??" : "??";
 *       Print Unicode property value             *
 *************************************************/
 
-/* "Normal" properties can be printed from tables. The PT_CLIST property is a 
-pseudo-property that contains a pointer to a list of case-equivalent 
-characters. This is used only when UCP support is available and UTF mode is 
-selected. It should never occur otherwise, but just in case it does, have 
+/* "Normal" properties can be printed from tables. The PT_CLIST property is a
+pseudo-property that contains a pointer to a list of case-equivalent
+characters. This is used only when UCP support is available and UTF mode is
+selected. It should never occur otherwise, but just in case it does, have
 something ready to print. */
 
 static void
@@ -265,21 +265,21 @@ print_prop(FILE *f, pcre_uchar *code, const char *before, const char *after)
 {
 if (code[1] != PT_CLIST)
   {
-  fprintf(f, "%s%s %s%s", before, priv_OP_names[*code], get_ucpname(code[1], 
+  fprintf(f, "%s%s %s%s", before, priv_OP_names[*code], get_ucpname(code[1],
     code[2]), after);
   }
 else
   {
   const char *not = (*code == OP_PROP)? "" : "not ";
-#ifndef SUPPORT_UCP   
+#ifndef SUPPORT_UCP
   fprintf(f, "%s%sclist %d%s", before, not, code[2], after);
 #else
   const pcre_uint32 *p = PRIV(ucd_caseless_sets) + code[2];
   fprintf (f, "%s%sclist", before, not);
-  while (*p < NOTACHAR) fprintf(f, " %04x", *p++); 
-  fprintf(f, "%s", after); 
-#endif  
-  }     
+  while (*p < NOTACHAR) fprintf(f, " %04x", *p++);
+  fprintf(f, "%s", after);
+#endif
+  }
 }
 
 

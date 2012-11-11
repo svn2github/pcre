@@ -127,7 +127,7 @@ if [ $# -eq 1 -a "$1" = "ebcdic" ]; then
   if [ $ebcdic -ne 1 ] ; then
     echo "Cannot run EBCDIC tests: EBCDIC support not compiled"
     exit 1
-  fi    
+  fi
 
   for opt in "" "-s" "-dfa" "-s -dfa"; do
     ./pcretest -q $opt $testdata/testinputEBC >testtry
@@ -138,7 +138,7 @@ if [ $# -eq 1 -a "$1" = "ebcdic" ]; then
     fi
     if [ "$opt" = "-s" ] ; then echo "  OK with study"
     elif [ "$opt" = "-dfa" ] ; then echo "  OK using DFA"
-    elif [ "$opt" = "-s -dfa" ] ; then echo "  OK using DFA with study"  
+    elif [ "$opt" = "-s -dfa" ] ; then echo "  OK using DFA with study"
     else echo "  OK"
     fi
   done
@@ -147,7 +147,7 @@ exit 0
 fi
 
 
-# ------ Normal Tests ------ 
+# ------ Normal Tests ------
 
 # Default values
 
@@ -229,7 +229,7 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-# Find which optional facilities are available. 
+# Find which optional facilities are available.
 
 $sim ./pcretest -C linksize >/dev/null
 link_size=$?
@@ -263,13 +263,13 @@ test32=skip
 if [ "$arg8$arg16$arg32" = "" ] ; then
   if [ $support8 -ne 0 ] ; then
     test8=
-  fi    
+  fi
   if [ $support16 -ne 0 ] ; then
     test16=-16
-  fi    
+  fi
   if [ $support32 -ne 0 ] ; then
     test32=-32
-  fi    
+  fi
 
 # Select requested bit sizes
 
@@ -280,21 +280,21 @@ else
       exit 1
     fi
     test8=
-  fi       
+  fi
   if [ "$arg16" = yes ] ; then
     if [ $support16 -eq 0 ] ; then
       echo "Cannot run 16-bit library tests: 16-bit library not compiled"
       exit 1
     fi
     test16=-16
-  fi       
+  fi
   if [ "$arg32" = yes ] ; then
     if [ $support32 -eq 0 ] ; then
       echo "Cannot run 32-bit library tests: 32-bit library not compiled"
       exit 1
     fi
     test32=-32
-  fi       
+  fi
 fi
 
 # UTF support always applies to all bit sizes if both are supported; we can't

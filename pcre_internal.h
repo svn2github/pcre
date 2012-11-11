@@ -531,9 +531,9 @@ capturing parenthesis numbers in back references. */
 #define PUT2(a,n,d)   \
   a[n] = (d) >> 8; \
   a[(n)+1] = (d) & 255
-  
-/* For reasons that I do not understand, the expression in this GET2 macro is 
-treated by gcc as a signed expression, even when a is declared as unsigned. It 
+
+/* For reasons that I do not understand, the expression in this GET2 macro is
+treated by gcc as a signed expression, even when a is declared as unsigned. It
 seems that any kind of arithmetic results in a signed value. */
 
 #define GET2(a,n) \
@@ -999,7 +999,7 @@ pointer. */
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the
 macro because almost all calls are already within a block of UTF-32 only
-code. 
+code.
 These are all no-ops since all UTF-32 characters fit into one pcre_uchar. */
 
 #define BACKCHAR(eptr) do { } while (0)
@@ -1026,7 +1026,7 @@ are defined.
 These values are also required as lists in pcre_compile.c when processing \h,
 \H, \v and \V in a character class. The lists are defined in pcre_tables.c, but
 macros that define the values are here so that all the definitions are
-together. The lists must be in ascending character order, terminated by 
+together. The lists must be in ascending character order, terminated by
 NOTACHAR (which is 0xffffffff).
 
 Any changes should ensure that the various macros are kept in step with each
@@ -1040,7 +1040,7 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
   CHAR_HT, CHAR_SPACE, 0xa0, \
   0x1680, 0x180e, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, \
   0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202f, 0x205f, 0x3000, \
-  NOTACHAR 
+  NOTACHAR
 
 #define HSPACE_MULTIBYTE_CASES \
   case 0x1680:  /* OGHAM SPACE MARK */ \
@@ -1064,13 +1064,13 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
   case CHAR_HT: \
   case CHAR_SPACE: \
   case 0xa0     /* NBSP */
-      
+
 #define HSPACE_CASES \
   HSPACE_BYTE_CASES: \
   HSPACE_MULTIBYTE_CASES
 
 #define VSPACE_LIST \
-  CHAR_LF, CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, 0x2028, 0x2029, NOTACHAR 
+  CHAR_LF, CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, 0x2028, 0x2029, NOTACHAR
 
 #define VSPACE_MULTIBYTE_CASES \
   case 0x2028:    /* LINE SEPARATOR */ \
@@ -1100,11 +1100,11 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
 
 #ifdef EBCDIC_NL25
 #define VSPACE_LIST \
-  CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, CHAR_LF, NOTACHAR 
+  CHAR_VT, CHAR_FF, CHAR_CR, CHAR_NEL, CHAR_LF, NOTACHAR
 #else
 #define VSPACE_LIST \
-  CHAR_VT, CHAR_FF, CHAR_CR, CHAR_LF, CHAR_NEL, NOTACHAR 
-#endif   
+  CHAR_VT, CHAR_FF, CHAR_CR, CHAR_LF, CHAR_NEL, NOTACHAR
+#endif
 
 #define VSPACE_BYTE_CASES \
   case CHAR_LF: \

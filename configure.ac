@@ -368,7 +368,7 @@ then
   fi
 fi
 
-# Convert the newline identifier into the appropriate integer value. The first 
+# Convert the newline identifier into the appropriate integer value. The first
 # three are ASCII values 0x0a, 0x0d, and 0x0d0a, but if EBCDIC is enabled, they
 # are changed below.
 
@@ -386,7 +386,7 @@ esac
 # --enable-ebcdic-nl25 implies --enable-ebcdic
 if test "x$enable_ebcdic_nl25" = "xyes"; then
   enable_ebcdic=yes
-fi   
+fi
 
 # Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled,
 # and the newline value is adjusted appropriately (CR is still 13, but LF is
@@ -405,13 +405,13 @@ if test "x$enable_ebcdic" = "xyes"; then
     case "$ac_pcre_newline_value" in
       10)   ac_pcre_newline_value=21 ;;
       3338) ac_pcre_newline_value=3349 ;;
-    esac    
-  else   
+    esac
+  else
     case "$ac_pcre_newline_value" in
       10)   ac_pcre_newline_value=37 ;;
       3338) ac_pcre_newline_value=3365 ;;
-    esac    
-  fi   
+    esac
+  fi
 fi
 
 # Check argument to --with-link-size
@@ -697,8 +697,8 @@ if test "$enable_stack_for_recursion" = "no"; then
   AC_DEFINE([NO_RECURSE], [], [
     PCRE uses recursive function calls to handle backtracking while
     matching. This can sometimes be a problem on systems that have
-    stacks of limited size. Define NO_RECURSE to any value to get a 
-    version that doesn't use recursion in the match() function; instead 
+    stacks of limited size. Define NO_RECURSE to any value to get a
+    version that doesn't use recursion in the match() function; instead
     it creates its own stack by steam using pcre_recurse_malloc() to obtain
     memory from the heap. For more detail, see the comments and other stuff
     just above the match() function.])
@@ -748,7 +748,7 @@ if test "$enable_bsr_anycrlf" = "yes"; then
   AC_DEFINE([BSR_ANYCRLF], [], [
     By default, the \R escape sequence matches any Unicode line ending
     character or sequence of characters. If BSR_ANYCRLF is defined (to any
-    value), this is changed so that backslash-R matches only CR, LF, or CRLF. 
+    value), this is changed so that backslash-R matches only CR, LF, or CRLF.
     The build-time default can be overridden by the user of PCRE at runtime.])
 fi
 
@@ -803,10 +803,10 @@ AH_VERBATIM([PCRE_EXP_DEFN], [
    Win32, and it needs some magic to be inserted before the definition
    of a function that is exported by the library, define this macro to
    contain the relevant magic. If you do not define this macro, a suitable
-    __declspec value is used for Windows systems; in other environments 
-   "extern" is used for a C compiler and "extern C" for a C++ compiler. 
-   This macro apears at the start of every exported function that is part 
-   of the external API. It does not appear on functions that are "external" 
+    __declspec value is used for Windows systems; in other environments
+   "extern" is used for a C compiler and "extern C" for a C++ compiler.
+   This macro apears at the start of every exported function that is part
+   of the external API. It does not appear on functions that are "external"
    in the C sense, but which are internal to the library. */
 #undef PCRE_EXP_DEFN])
 
@@ -829,7 +829,7 @@ if test "$enable_ebcdic_nl25" = "yes"; then
     that LF does in an ASCII/Unicode environment. The value must also be set in
     the NEWLINE macro below. On systems that can use "configure" or CMake to
     set EBCDIC_NL25, the adjustment of NEWLINE is automatic.])
-fi       
+fi
 
 if test "$enable_valgrind" = "yes"; then
   AC_DEFINE_UNQUOTED([SUPPORT_VALGRIND], [], [
@@ -981,7 +981,7 @@ if test "$enable_coverage" = "yes"; then
   fi
 
   AC_DEFINE([SUPPORT_GCOV],[1], [
-    Define to allow pcretest and pcregrep to be linked with gcov, so that they 
+    Define to allow pcretest and pcregrep to be linked with gcov, so that they
     are able to generate code coverage reports.])
 
   # And add flags needed for gcov
@@ -1026,7 +1026,7 @@ if test "$enable_ebcdic_nl25" = "yes"; then
   ebcdic_nl_code=0x25
 elif test "$enable_ebcdic" = "yes"; then
   ebcdic_nl_code=0x15
-fi   
+fi
 
 cat <<EOF
 
@@ -1054,7 +1054,7 @@ $PACKAGE-$VERSION configuration summary:
     Newline char/sequence ........... : ${enable_newline}
     \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
     EBCDIC coding ................... : ${enable_ebcdic}
-    EBCDIC code for NL .............. : ${ebcdic_nl_code} 
+    EBCDIC code for NL .............. : ${ebcdic_nl_code}
     Rebuild char tables ............. : ${enable_rebuild_chartables}
     Use stack recursion ............. : ${enable_stack_for_recursion}
     POSIX mem threshold ............. : ${with_posix_malloc_threshold}

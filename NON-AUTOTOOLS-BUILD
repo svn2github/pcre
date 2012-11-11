@@ -56,12 +56,12 @@ can skip ahead to the CMake section.
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
      settings that it contains to whatever is appropriate for your environment.
 
-     In particular, you can alter the definition of the NEWLINE macro to 
+     In particular, you can alter the definition of the NEWLINE macro to
      specify what character(s) you want to be interpreted as line terminators.
      In an EBCDIC environment, you MUST change NEWLINE, because its default
      value is 10, an ASCII LF. The usual EBCDIC newline character is 21 (0x15,
      NL), though in some cases it may be 37 (0x25).
-      
+
      When you compile any of the PCRE modules, you must specify -DHAVE_CONFIG_H
      to your compiler so that config.h is included in the sources.
 
@@ -392,7 +392,7 @@ CMake build process. In the CMake GUI, the cache can be deleted by selecting
 
 4.  Run cmake-gui from the Shell envirornment of your build tool, for example,
     Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++. Do not try
-    to start Cmake from the Windows Start menu, as this can lead to errors. 
+    to start Cmake from the Windows Start menu, as this can lead to errors.
 
 5.  Enter C:\pcre\pcre-xx and C:\pcre\pcre-xx\build for the source and build
     directories, respectively.

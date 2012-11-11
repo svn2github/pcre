@@ -1704,7 +1704,7 @@ while (ptr < endptr)
           {
           BOOL printed = FALSE;
           omstr *om;
-           
+
           for (om = only_matching; om != NULL; om = om->next)
             {
             int n = om->groupnum;
@@ -1713,7 +1713,7 @@ while (ptr < endptr)
               int plen = offsets[2*n + 1] - offsets[2*n];
               if (plen > 0)
                 {
-                if (printed) fprintf(stdout, "%s", om_separator); 
+                if (printed) fprintf(stdout, "%s", om_separator);
                 if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
                 FWRITE(matchptr + offsets[n*2], 1, plen, stdout);
                 if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
@@ -1721,7 +1721,7 @@ while (ptr < endptr)
                 }
               }
             }
-             
+
           if (printed || printname != NULL || number) fprintf(stdout, "\n");
           }
 
@@ -2261,12 +2261,12 @@ switch(letter)
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
   case 'n': number = TRUE; break;
-   
+
   case 'o':
   only_matching_last = add_number(0, only_matching_last);
   if (only_matching == NULL) only_matching = only_matching_last;
   break;
-   
+
   case 'q': quiet = TRUE; break;
   case 'r': dee_action = dee_RECURSE; break;
   case 's': silent = TRUE; break;
@@ -2652,7 +2652,7 @@ for (i = 1; i < argc; i++)
     {
     char *s = argv[i] + 1;
     longop = FALSE;
-    
+
     while (*s != 0)
       {
       for (op = optionlist; op->one_char != 0; op++)
@@ -2665,13 +2665,13 @@ for (i = 1; i < argc; i++)
           *s, argv[i]);
         pcregrep_exit(usage(2));
         }
-         
+
       option_data = s+1;
-      
-      /* Break out if this is the last character in the string; it's handled 
+
+      /* Break out if this is the last character in the string; it's handled
       below like a single multi-char option. */
-      
-      if (*option_data == 0) break; 
+
+      if (*option_data == 0) break;
 
       /* Check for a single-character option that has data: OP_OP_NUMBER(S)
       are used for ones that either have a numerical number or defaults, i.e.
@@ -2689,11 +2689,11 @@ for (i = 1; i < argc; i++)
 
       /* Handle a single-character option with no data, then loop for the
       next character in the string. */
-      
+
       pcre_options = handle_option(*s++, pcre_options);
       }
     }
-    
+
   /* At this point we should have op pointing to a matched option. If the type
   is NO_DATA, it means that there is no data, and the option might set
   something in the PCRE options. */
@@ -2708,7 +2708,7 @@ for (i = 1; i < argc; i++)
   either has a value or defaults to something. It cannot have data in a
   separate item. At the moment, the only such options are "colo(u)r",
   "only-matching", and Jeffrey Friedl's special -S debugging option. */
-  
+
   if (*option_data == 0 &&
       (op->type == OP_OP_STRING || op->type == OP_OP_NUMBER ||
        op->type == OP_OP_NUMBERS))

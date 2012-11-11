@@ -41,7 +41,7 @@ JIT. The support is limited to the following hardware platforms:
   Intel x86 32-bit and 64-bit
   MIPS 32-bit
   Power PC 32-bit and 64-bit
-  SPARC 32-bit (experimental) 
+  SPARC 32-bit (experimental)
 .sp
 If --enable-jit is set on an unsupported platform, compilation fails.
 .P
@@ -49,8 +49,8 @@ A program that is linked with PCRE 8.20 or later can tell if JIT support is
 available by calling \fBpcre_config()\fP with the PCRE_CONFIG_JIT option. The
 result is 1 when JIT is available, and 0 otherwise. However, a simple program
 does not need to check this in order to use JIT. The normal API is implemented
-in a way that falls back to the interpretive code if JIT is not available. For 
-programs that need the best possible performance, there is also a "fast path" 
+in a way that falls back to the interpretive code if JIT is not available. For
+programs that need the best possible performance, there is also a "fast path"
 API that is JIT-specific.
 .P
 If your program may sometimes be linked with versions of PCRE that are older
@@ -387,17 +387,17 @@ callback.
 .SH "JIT FAST PATH API"
 .rs
 .sp
-Because the API described above falls back to interpreted execution when JIT is 
-not available, it is convenient for programs that are written for general use 
-in many environments. However, calling JIT via \fBpcre_exec()\fP does have a 
-performance impact. Programs that are written for use where JIT is known to be 
+Because the API described above falls back to interpreted execution when JIT is
+not available, it is convenient for programs that are written for general use
+in many environments. However, calling JIT via \fBpcre_exec()\fP does have a
+performance impact. Programs that are written for use where JIT is known to be
 available, and which need the best possible performance, can instead use a
 "fast path" API to call JIT execution directly instead of calling
-\fBpcre_exec()\fP (obviously only for patterns that have been successfully 
+\fBpcre_exec()\fP (obviously only for patterns that have been successfully
 studied by JIT).
 .P
-The fast path function is called \fBpcre_jit_exec()\fP, and it takes exactly 
-the same arguments as \fBpcre_exec()\fP, plus one additional argument that 
+The fast path function is called \fBpcre_jit_exec()\fP, and it takes exactly
+the same arguments as \fBpcre_exec()\fP, plus one additional argument that
 must point to a JIT stack. The JIT stack arrangements described above do not
 apply. The return values are the same as for \fBpcre_exec()\fP.
 .P
@@ -408,7 +408,7 @@ given. Also, unless PCRE_NO_UTF[8|16|32] is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
 fast path, and if invalid data is passed, the result is undefined.
 .P
-Bypassing the sanity checks and the \fBpcre_exec()\fP wrapping can give 
+Bypassing the sanity checks and the \fBpcre_exec()\fP wrapping can give
 speedups of more than 10%.
 .
 .

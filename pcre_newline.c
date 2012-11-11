@@ -60,7 +60,7 @@ http://unicode.org/unicode/reports/tr18/. */
 *************************************************/
 
 /* It is guaranteed that the initial value of ptr is less than the end of the
-string that is being processed. 
+string that is being processed.
 
 Arguments:
   ptr          pointer to possible newline
@@ -86,8 +86,8 @@ if (utf)
 else
 #endif  /* SUPPORT_UTF */
   c = *ptr;
-  
-/* Note that this function is called only for ANY or ANYCRLF. */ 
+
+/* Note that this function is called only for ANY or ANYCRLF. */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
@@ -103,12 +103,12 @@ else switch(c)
   {
 #ifdef EBCDIC
   case CHAR_NEL:
-#endif     
+#endif
   case CHAR_LF:
   case CHAR_VT:
   case CHAR_FF: *lenptr = 1; return TRUE;
 
-  case CHAR_CR: 
+  case CHAR_CR:
   *lenptr = (ptr < endptr - 1 && ptr[1] == CHAR_LF)? 2 : 1;
   return TRUE;
 
@@ -164,14 +164,14 @@ else
 #endif  /* SUPPORT_UTF */
   c = *ptr;
 
-/* Note that this function is called only for ANY or ANYCRLF. */ 
+/* Note that this function is called only for ANY or ANYCRLF. */
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
-  case CHAR_LF: 
+  case CHAR_LF:
   *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
   return TRUE;
-   
+
   case CHAR_CR: *lenptr = 1; return TRUE;
   default: return FALSE;
   }
@@ -180,18 +180,18 @@ if (type == NLTYPE_ANYCRLF) switch(c)
 
 else switch(c)
   {
-  case CHAR_LF: 
+  case CHAR_LF:
   *lenptr = (ptr > startptr && ptr[-1] == CHAR_CR)? 2 : 1;
   return TRUE;
-                
+
 #ifdef EBCDIC
   case CHAR_NEL:
-#endif     
+#endif
   case CHAR_VT:
   case CHAR_FF:
   case CHAR_CR: *lenptr = 1; return TRUE;
-   
-#ifndef EBCDIC 
+
+#ifndef EBCDIC
 #ifdef COMPILE_PCRE8
   case CHAR_NEL: *lenptr = utf? 2 : 1; return TRUE;
   case 0x2028:                                       /* LS */

@@ -48,8 +48,8 @@ the GUI facility of <b>cmake-gui</b> if you are using <b>CMake</b> instead of
 <b>configure</b> to build PCRE.
 </P>
 <P>
-There is a lot more information about building PCRE without using 
-<b>configure</b> (including information about using <b>CMake</b> or building "by 
+There is a lot more information about building PCRE without using
+<b>configure</b> (including information about using <b>CMake</b> or building "by
 hand") in the file called <i>NON-AUTOTOOLS-BUILD</i>, which is part of the PCRE
 distribution. You should consult this file as well as the <i>README</i> file if
 you are building in a non-Unix-like environment.
@@ -351,19 +351,19 @@ an EBCDIC environment (for example, an IBM mainframe operating system). The
 --enable-ebcdic option is incompatible with --enable-utf.
 </P>
 <P>
-The EBCDIC character that corresponds to an ASCII LF is assumed to have the 
-value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In 
+The EBCDIC character that corresponds to an ASCII LF is assumed to have the
+value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In
 such an environment you should use
 <pre>
   --enable-ebcdic-nl25
 </pre>
-as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR has the 
-same value as in ASCII, namely, 0x0d. Whichever of 0x15 and 0x25 is <i>not</i> 
-chosen as LF is made to correspond to the Unicode NEL character (which, in 
+as well as, or instead of, --enable-ebcdic. The EBCDIC character for CR has the
+same value as in ASCII, namely, 0x0d. Whichever of 0x15 and 0x25 is <i>not</i>
+chosen as LF is made to correspond to the Unicode NEL character (which, in
 Unicode, is 0x85).
 </P>
 <P>
-The options that select newline behaviour, such as --enable-newline-is-cr, 
+The options that select newline behaviour, such as --enable-newline-is-cr,
 and equivalent run-time options, refer to these character values in an EBCDIC
 environment.
 </P>
@@ -444,7 +444,7 @@ code coverage report for its test suite. To enable this, you must install
 <pre>
   --enable-coverage
 </pre>
-to the <b>configure</b> command and build PCRE in the usual way. 
+to the <b>configure</b> command and build PCRE in the usual way.
 </P>
 <P>
 Note that using <b>ccache</b> (a caching C compiler) is incompatible with code
@@ -489,9 +489,9 @@ created at compile time (*.gcno).
 <pre>
   make coverage-clean
 </pre>
-This cleans all coverage data including the generated coverage report. For more 
-information about code coverage, see the <b>gcov</b> and <b>lcov</b> 
-documentation. 
+This cleans all coverage data including the generated coverage report. For more
+information about code coverage, see the <b>gcov</b> and <b>lcov</b>
+documentation.
 </P>
 <br><a name="SEC21" href="#TOC1">SEE ALSO</a><br>
 <P>

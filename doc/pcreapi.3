@@ -161,7 +161,7 @@ by UTF16 or UTF32, respectively. This facility is in fact just cosmetic; the
 16-bit and 32-bit option names define the same bit values.
 .P
 References to bytes and UTF-8 in this document should be read as references to
-16-bit data quantities and UTF-16 when using the 16-bit library, or 32-bit data 
+16-bit data quantities and UTF-16 when using the 16-bit library, or 32-bit data
 quantities and UTF-32 when using the 32-bit library, unless specified
 otherwise. More details of the specific differences for the 16-bit and 32-bit
 libraries are given in the
@@ -447,7 +447,7 @@ unaligned)". If JIT support is not available, the result is NULL.
   PCRE_CONFIG_NEWLINE
 .sp
 The output is an integer whose value specifies the default character sequence
-that is recognized as meaning "newline". The values that are supported in 
+that is recognized as meaning "newline". The values that are supported in
 ASCII/Unicode environments are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for
 ANYCRLF, and -1 for ANY. In EBCDIC environments, CR, ANYCRLF, and ANY yield the
 same values. However, the value for LF is normally 21, though some EBCDIC
@@ -767,7 +767,7 @@ indicated by a single character (CR or LF, respectively). Setting
 PCRE_NEWLINE_CRLF specifies that a newline is indicated by the two-character
 CRLF sequence. Setting PCRE_NEWLINE_ANYCRLF specifies that any of the three
 preceding sequences should be recognized. Setting PCRE_NEWLINE_ANY specifies
-that any Unicode newline sequence should be recognized. 
+that any Unicode newline sequence should be recognized.
 .P
 In an ASCII/Unicode environment, the Unicode newline sequences are the three
 just mentioned, plus the single characters VT (vertical tab, U+000B), FF (form
@@ -777,8 +777,8 @@ recognized only in UTF-8 mode.
 .P
 When PCRE is compiled to run in an EBCDIC (mainframe) environment, the code for
 CR is 0x0d, the same as ASCII. However, the character code for LF is normally
-0x15, though in some EBCDIC environments 0x25 is used. Whichever of these is 
-not LF is made to correspond to Unicode's NEL character. EBCDIC codes are all 
+0x15, though in some EBCDIC environments 0x25 is used. Whichever of these is
+not LF is made to correspond to Unicode's NEL character. EBCDIC codes are all
 less than 256. For more details, see the
 .\" HREF
 \fBpcrebuild\fP
@@ -875,8 +875,8 @@ this check for performance reasons, you can set the PCRE_NO_UTF8_CHECK option.
 When it is set, the effect of passing an invalid UTF-8 string as a pattern is
 undefined. It may cause your program to crash. Note that this option can also
 be passed to \fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP, to suppress the
-validity checking of subject strings only. If the same string is being matched 
-many times, the option can be safely set for the second and subsequent 
+validity checking of subject strings only. If the same string is being matched
+many times, the option can be safely set for the second and subsequent
 matchings to improve performance.
 .
 .
@@ -1005,7 +1005,7 @@ in the section on matching a pattern.
 If studying the pattern does not produce any useful information,
 \fBpcre_study()\fP returns NULL by default. In that circumstance, if the
 calling program wants to pass any of the other fields to \fBpcre_exec()\fP or
-\fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block. However, 
+\fBpcre_dfa_exec()\fP, it must set up its own \fBpcre_extra\fP block. However,
 if \fBpcre_study()\fP is called with the PCRE_STUDY_EXTRA_NEEDED option, it
 returns a \fBpcre_extra\fP block even if studying did not find any additional
 information. It may still return NULL, however, if an error occurs in
@@ -2247,7 +2247,7 @@ so that it runs on the new host.
 .sp
 This error is returned when a pattern that was successfully studied using a JIT
 compile option is being matched, but the matching mode (partial or complete
-match) does not correspond to any JIT compilation mode. When the JIT fast path 
+match) does not correspond to any JIT compilation mode. When the JIT fast path
 function is used, this error may be also given for invalid options. See the
 .\" HREF
 \fBpcrejit\fP
@@ -2256,8 +2256,8 @@ documentation for more details.
 .sp
   PCRE_ERROR_BADLENGTH      (-32)
 .sp
-This error is given if \fBpcre_exec()\fP is called with a negative value for 
-the \fIlength\fP argument.   
+This error is given if \fBpcre_exec()\fP is called with a negative value for
+the \fIlength\fP argument.
 .P
 Error numbers -16 to -20, -22, and 30 are not used by \fBpcre_exec()\fP.
 .
@@ -2275,7 +2275,7 @@ and
 .\" HREF
 \fBpcre32\fP
 .\"
-pages. 
+pages.
 .P
 When \fBpcre_exec()\fP returns either PCRE_ERROR_BADUTF8 or
 PCRE_ERROR_SHORTUTF8, and the size of the output vector (\fIovecsize\fP) is at

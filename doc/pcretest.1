@@ -25,7 +25,7 @@ and
 .\" HREF
 \fBpcre32\fP
 .\"
-documentation. 
+documentation.
 .P
 The input for \fBpcretest\fP is a sequence of regular expression patterns and
 strings to be matched, as described below. The output shows the result of each
@@ -36,7 +36,7 @@ As PCRE has evolved, it has acquired many different features, and as a result,
 \fBpcretest\fP now has rather a lot of obscure options for testing every
 possible feature. Some of these options are specifically designed for use in
 conjunction with the test script and data files that are distributed as part of
-PCRE, and are unlikely to be of use otherwise. They are all documented here, 
+PCRE, and are unlikely to be of use otherwise. They are all documented here,
 but without much justification.
 .
 .
@@ -94,7 +94,7 @@ functionality is intended for use in scripts such as \fBRunTest\fP. The
 following options output the value indicated:
 .sp
   ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
-               0x15 or 0x25 
+               0x15 or 0x25
                0 if used in an ASCII environment
   linksize   the internal link size (2, 3, or 4)
   newline    the default newline setting:
@@ -177,7 +177,7 @@ If \fB-s++\fP is used instead of \fB-s+\fP (with or without a following digit),
 the text "(JIT)" is added to the first output line after a match or no match
 when JIT-compiled code was actually used.
 .sp
-Note that there are pattern options that can override \fB-s\fP, either 
+Note that there are pattern options that can override \fB-s\fP, either
 specifying no studying at all, or suppressing JIT compilation.
 .sp
 If the \fB/I\fP or \fB/D\fP option is present on a pattern (requesting output
@@ -310,8 +310,8 @@ sections.
   \fB/X\fP              set PCRE_EXTRA
   \fB/x\fP              set PCRE_EXTENDED
   \fB/Y\fP              set PCRE_NO_START_OPTIMIZE
-  \fB/Z\fP              don't show lengths in \fB/B\fP output 
-.sp   
+  \fB/Z\fP              don't show lengths in \fB/B\fP output
+.sp
   \fB/<any>\fP          set PCRE_NEWLINE_ANY
   \fB/<anycrlf>\fP      set PCRE_NEWLINE_ANYCRLF
   \fB/<cr>\fP           set PCRE_NEWLINE_CR
@@ -485,11 +485,11 @@ JIT compiled code is also output.
 .P
 The \fB/S\fP modifier causes \fBpcre[16|32]_study()\fP to be called after the
 expression has been compiled, and the results used when the expression is
-matched. There are a number of qualifying characters that may follow \fB/S\fP. 
+matched. There are a number of qualifying characters that may follow \fB/S\fP.
 They may appear in any order.
 .P
-If \fBS\fP is followed by an exclamation mark, \fBpcre[16|32]_study()\fP is called 
-with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a 
+If \fBS\fP is followed by an exclamation mark, \fBpcre[16|32]_study()\fP is called
+with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a
 \fBpcre_extra\fP block, even when studying discovers no useful information.
 .P
 If \fB/S\fP is followed by a second S character, it suppresses studying, even

@@ -26,7 +26,7 @@ instead of strings of individual 1-byte characters.
 .SH "UTF-16 AND UTF-32 SUPPORT"
 .rs
 .sp
-In order process UTF-16 or UTF-32 strings, you must build PCRE's 16-bit or 
+In order process UTF-16 or UTF-32 strings, you must build PCRE's 16-bit or
 32-bit library with UTF support, and, in addition, you must call
 .\" HREF
 \fBpcre16_compile()\fP
@@ -90,7 +90,7 @@ Characters in the "Surrogate Area" of Unicode are reserved for use by UTF-16,
 where they are used in pairs to encode codepoints with values greater than
 0xFFFF. The code points that are encoded by UTF-16 pairs are available
 independently in the UTF-8 and UTF-32 encodings. (In other words, the whole
-surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8 and 
+surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8 and
 UTF-32.)
 .P
 Also excluded are the "Non-Character" code points, which are U+FDD0 to U+FDEF
@@ -109,12 +109,12 @@ If you set the PCRE_NO_UTF8_CHECK flag at compile time or at run time, PCRE
 assumes that the pattern or subject it is given (respectively) contains only
 valid UTF-8 codes. In this case, it does not diagnose an invalid UTF-8 string.
 .P
-Note that passing PCRE_NO_UTF8_CHECK to \fBpcre_compile()\fP just disables the 
-check for the pattern; it does not also apply to subject strings. If you want 
+Note that passing PCRE_NO_UTF8_CHECK to \fBpcre_compile()\fP just disables the
+check for the pattern; it does not also apply to subject strings. If you want
 to disable the check for a subject string you must pass this option to
 \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP.
 .P
-If you pass an invalid UTF-8 string when PCRE_NO_UTF8_CHECK is set, the result 
+If you pass an invalid UTF-8 string when PCRE_NO_UTF8_CHECK is set, the result
 is undefined and your program may crash.
 .
 .
@@ -166,7 +166,7 @@ In some situations, you may already know that your strings are valid, and
 therefore want to skip these checks in order to improve performance. If you set
 the PCRE_NO_UTF32_CHECK flag at compile time or at run time, PCRE assumes that
 the pattern or subject it is given (respectively) contains only valid UTF-32
-sequences. In this case, it does not diagnose an invalid UTF-32 string. 
+sequences. In this case, it does not diagnose an invalid UTF-32 string.
 However, if an invalid string is passed, the result is undefined.
 .
 .

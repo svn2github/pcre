@@ -199,9 +199,9 @@ if (caseless)
       GETCHARINC(c, eptr);
       GETCHARINC(d, p);
       ur = GET_UCD(d);
-      if (c != d && c != d + ur->other_case) 
+      if (c != d && c != d + ur->other_case)
         {
-        const pcre_uint32 *pp = PRIV(ucd_caseless_sets) + ur->caseset; 
+        const pcre_uint32 *pp = PRIV(ucd_caseless_sets) + ur->caseset;
         for (;;)
           {
           if (c < *pp) return -1;
@@ -2532,7 +2532,7 @@ for (;;)
       }
     GETCHARINCTEST(c, eptr);
       {
-      const pcre_uint32 *cp; 
+      const pcre_uint32 *cp;
       const ucd_record *prop = GET_UCD(c);
 
       switch(ecode[1])
@@ -4203,10 +4203,10 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
             }
           break;
-          
+
           case PT_CLIST:
           for (i = 1; i <= min; i++)
-            {  
+            {
             const pcre_uint32 *cp;
             if (eptr >= md->end_subject)
               {
@@ -4217,14 +4217,14 @@ for (;;)
             cp = PRIV(ucd_caseless_sets) + prop_value;
             for (;;)
               {
-              if (c < *cp) 
+              if (c < *cp)
                 { if (prop_fail_result) break; else { RRETURN(MATCH_NOMATCH); } }
               if (c == *cp++)
                 { if (prop_fail_result) { RRETURN(MATCH_NOMATCH); } else break; }
               }
             }
           break;
- 
+
           /* This should not occur */
 
           default:
@@ -4954,7 +4954,7 @@ for (;;)
 
           case PT_CLIST:
           for (fi = min;; fi++)
-            {  
+            {
             const pcre_uint32 *cp;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM67);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -5445,7 +5445,7 @@ for (;;)
             eptr+= len;
             }
           break;
-          
+
           case PT_CLIST:
           for (i = min; i < max; i++)
             {
@@ -5460,14 +5460,14 @@ for (;;)
             cp = PRIV(ucd_caseless_sets) + prop_value;
             for (;;)
               {
-              if (c < *cp) 
+              if (c < *cp)
                 { if (prop_fail_result) break; else goto GOT_MAX; }
               if (c == *cp++)
                 { if (prop_fail_result) goto GOT_MAX; else break; }
-              }    
-            eptr += len;  
+              }
+            eptr += len;
             }
-          GOT_MAX:   
+          GOT_MAX:
           break;
 
           default:

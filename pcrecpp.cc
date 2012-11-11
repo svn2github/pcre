@@ -522,9 +522,9 @@ int RE::TryMatch(const StringPiece& text,
   }
 
   // int options = 0;
-  // Changed by PH as a result of bugzilla #1288 
+  // Changed by PH as a result of bugzilla #1288
   int options = (options_.all_options() & PCRE_NO_UTF8_CHECK);
-   
+
   if (anchor != UNANCHORED)
     options |= PCRE_ANCHORED;
   if (!empty_ok)

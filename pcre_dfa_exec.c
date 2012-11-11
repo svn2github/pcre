@@ -1062,7 +1062,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        const pcre_uint32 *cp; 
+        const pcre_uint32 *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[1])
           {
@@ -1110,15 +1110,15 @@ for (;;)
                PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
                c == CHAR_UNDERSCORE;
           break;
-          
+
           case PT_CLIST:
           cp = PRIV(ucd_caseless_sets) + code[2];
           for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
             if (c == *cp++) { OK = TRUE; break; }
-            }     
-          break; 
+            }
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1306,7 +1306,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        const pcre_uint32 *cp; 
+        const pcre_uint32 *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
@@ -1361,8 +1361,8 @@ for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
             if (c == *cp++) { OK = TRUE; break; }
-            }     
-          break; 
+            }
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1470,7 +1470,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          VSPACE_CASES: 
+          VSPACE_CASES:
           OK = TRUE;
           break;
 
@@ -1503,7 +1503,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          HSPACE_CASES: 
+          HSPACE_CASES:
           OK = TRUE;
           break;
 
@@ -1544,7 +1544,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        const pcre_uint32 *cp; 
+        const pcre_uint32 *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
@@ -1599,8 +1599,8 @@ for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
             if (c == *cp++) { OK = TRUE; break; }
-            }     
-          break; 
+            }
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1733,7 +1733,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          VSPACE_CASES: 
+          VSPACE_CASES:
           OK = TRUE;
           break;
 
@@ -1773,7 +1773,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          HSPACE_CASES: 
+          HSPACE_CASES:
           OK = TRUE;
           break;
 
@@ -1807,7 +1807,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        const pcre_uint32 *cp; 
+        const pcre_uint32 *cp;
         const ucd_record * prop = GET_UCD(c);
         switch(code[1 + IMM2_SIZE + 1])
           {
@@ -1862,8 +1862,8 @@ for (;;)
             {
             if (c < *cp) { OK = FALSE; break; }
             if (c == *cp++) { OK = TRUE; break; }
-            }     
-          break; 
+            }
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1985,7 +1985,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          VSPACE_CASES: 
+          VSPACE_CASES:
           OK = TRUE;
           break;
 
@@ -2021,7 +2021,7 @@ for (;;)
         BOOL OK;
         switch (c)
           {
-          HSPACE_CASES: 
+          HSPACE_CASES:
           OK = TRUE;
           break;
 
@@ -2164,7 +2164,7 @@ for (;;)
       case OP_NOT_VSPACE:
       if (clen > 0) switch(c)
         {
-        VSPACE_CASES: 
+        VSPACE_CASES:
         break;
 
         default:
@@ -2177,11 +2177,11 @@ for (;;)
       case OP_VSPACE:
       if (clen > 0) switch(c)
         {
-        VSPACE_CASES: 
+        VSPACE_CASES:
         ADD_NEW(state_offset + 1, 0);
         break;
 
-        default: 
+        default:
         break;
         }
       break;
@@ -2190,7 +2190,7 @@ for (;;)
       case OP_NOT_HSPACE:
       if (clen > 0) switch(c)
         {
-        HSPACE_CASES: 
+        HSPACE_CASES:
         break;
 
         default:
@@ -2203,12 +2203,12 @@ for (;;)
       case OP_HSPACE:
       if (clen > 0) switch(c)
         {
-        HSPACE_CASES: 
+        HSPACE_CASES:
         ADD_NEW(state_offset + 1, 0);
         break;
-        
+
         default:
-        break;  
+        break;
         }
       break;
 
