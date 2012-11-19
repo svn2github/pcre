@@ -268,8 +268,12 @@ static sljit_si cpu_has_sse2 = -1;
 static sljit_si cpu_has_cmov = -1;
 
 #if defined(_MSC_VER) && (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+#if _MSC_VER >= 1400
 #include <intrin.h>
+#else
+#error "MSVC does not support inline assembly in 64 bit mode"
 #endif
+#endif /* _MSC_VER && SLJIT_CONFIG_X86_64 */
 
 static void get_cpu_features(void)
 {
@@ -277,9 +281,9 @@ static void get_cpu_features(void)
 
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 
-#if defined(__GNUC__) || defined(__SUNPRO_C)
+#if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__SUNPRO_C)
 	/* AT&T syntax. */
-	asm (
+	__asm__ (
 		"pushl %%ebx\n"
 		"movl $0x1, %%eax\n"
 		"cpuid\n"
@@ -304,9 +308,9 @@ static void get_cpu_features(void)
 
 #else /* SLJIT_CONFIG_X86_32 */
 
-#if defined(__GNUC__) || defined(__SUNPRO_C)
+#if defined(__GNUC__) || defined(__INTEL_COMPILER) || defined(__SUNPRO_C)
 	/* AT&T syntax. */
-	asm (
+	__asm__ (
 		"pushq %%rbx\n"
 		"movl $0x1, %%eax\n"
 		"cpuid\n"
@@ -316,13 +320,19 @@ static void get_cpu_features(void)
 		:
 		: "%rax", "%rcx", "%rdx"
 	);
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && _MSC_VER >= 1400
 	int CPUInfo[4];
 
 	__cpuid(CPUInfo, 1);
 	features = (sljit_ui)CPUInfo[3];
 #else
-#	error "SLJIT_DETECT_SSE2 is not implemented for this C compiler"
+	__asm {
+		mov eax, 1
+		push rbx
+		cpuid
+		pop rbx
+		mov features, edx
+	}
 #endif
 
 #endif /* SLJIT_CONFIG_X86_32 */
@@ -2554,9 +2564,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compil
 		}
 		if (src == SLJIT_MEM1(SLJIT_LOCALS_REG) && type >= SLJIT_CALL3)
 			srcw += sizeof(sljit_sw);
-#else
-		if (src == SLJIT_MEM1(SLJIT_LOCALS_REG))
-			srcw += sizeof(sljit_sw) * (type - SLJIT_CALL0);
 #endif
 #endif
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64) && defined(_WIN64)
