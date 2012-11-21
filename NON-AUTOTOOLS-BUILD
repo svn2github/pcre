@@ -16,6 +16,7 @@ This document contains the following sections:
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
   Building PCRE on Stratus OpenVOS
+  Building PCRE on native z/OS and z/VM
 
 
 GENERAL
@@ -619,5 +620,20 @@ appear to be related to the port itself, please let me know. Please see the
 build.log file in the root of the package also.
 
 
+BUILDING PCRE ON NATIVE Z/OS
+
+z/OS and z/VM are operating systems for mainframe computers, produced by IBM.
+The character code used is EBCDIC, not ASCII or Unicode. In z/OS, UNIX APIs and
+applications can be supported through UNIX System Services, and in such an
+environment PCRE can be built in the same way as in other systems. However, in
+native z/OS (without UNIX System Services) and in z/VM, special ports are
+required. For details, please see this web site:
+
+  http://www.zaconsultants.net
+
+There is also a mirror here:
+
+  http://www.vsoft-software.com/downloads.html
+
 ==========================
-Last Updated: 04 September 2012
+Last Updated: 21 November 2012
