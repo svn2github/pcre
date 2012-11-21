@@ -620,7 +620,7 @@ appear to be related to the port itself, please let me know. Please see the
 build.log file in the root of the package also.
 
 
-BUILDING PCRE ON NATIVE Z/OS
+BUILDING PCRE ON NATIVE Z/OS AND Z/VM
 
 z/OS and z/VM are operating systems for mainframe computers, produced by IBM.
 The character code used is EBCDIC, not ASCII or Unicode. In z/OS, UNIX APIs and
