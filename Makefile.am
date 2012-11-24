@@ -141,10 +141,13 @@ pcre.h.generic: pcre.h.in configure.ac
 
 # It is more complicated for config.h.generic. We need the version that results
 # from a default configuration. We can get this by doing a configure in a
-# temporary directory. It has to be entirely done using files in that
-# directory, because the source directory may already be configured. If you
-# just try running configure in a new directory, it complains that the source
-# directory is already configured.
+# temporary directory. However, some trickery is needed,
+# because the source directory may already be configured. If you
+# just try running configure in a new directory, it complains. For this reason,
+# we move config.status out of the way while doing the default configuration.
+# The resulting config.h is munged by perl to put #ifdefs round any #defines
+# and to get rid of any gcc-specific visibility settings. Make sure that
+# PCRE_EXP_DEFN is unset (in case it has visibility settings).
 config.h.generic: configure.ac
 	rm -rf $@ _generic
 	mkdir _generic
@@ -152,7 +155,14 @@ config.h.generic: configure.ac
 	cd _generic && $(abs_top_srcdir)/configure || :
 	cs=$(srcdir)/config.status; test ! -f $$cs.aside || mv -f $$cs.aside $$cs
 	test -f _generic/config.h
-	perl -pe 'if(/^#define\s(?!PACKAGE)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$_="";}' _generic/config.h >$@
+	perl -n \
+	  -e 'BEGIN{$$blank=0;}' \
+	  -e 'if(/PCRE_EXP_DEFN/){print"/* #undef PCRE_EXP_DEFN */\n";$$blank=0;next;}' \
+	  -e 'if(/to make a symbol visible/){next;}' \
+	  -e 'if(/__attribute__ \(\(visibility/){next;}' \
+	  -e 'if(/^#define\s(?!PACKAGE)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$blank=0;}' \
+	  -e 'else {if(/^\s*$$/){print unless $$blank; $$blank=1;} else{print;$$blank=0;}}' \
+	  _generic/config.h >$@
 	rm -rf _generic
 
 MAINTAINERCLEANFILES += pcre.h.generic config.h.generic
