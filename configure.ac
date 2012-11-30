@@ -10,15 +10,15 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [32])
-m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2012-11-11])
+m4_define(pcre_prerelease, [])
+m4_define(pcre_date, [2012-11-30])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre_version, [2:0:1])
-m4_define(libpcre16_version, [1:0:1])
+m4_define(libpcre_version, [3:0:2])
+m4_define(libpcre16_version, [2:0:2])
 m4_define(libpcre32_version, [0:0:0])
 m4_define(libpcreposix_version, [0:1:0])
 m4_define(libpcrecpp_version, [0:0:0])
@@ -449,6 +449,11 @@ AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h windows.h)
 # The files below are C++ header files.
 pcre_have_type_traits="0"
 pcre_have_bits_type_traits="0"
+
+if test "x$enable_cpp" = "xyes" -a -z "$CXX"; then
+   AC_MSG_ERROR([You need a C++ compiler for C++ support.])
+fi
+
 if test "x$enable_cpp" = "xyes" -a -n "$CXX"
 then
 AC_LANG_PUSH(C++)

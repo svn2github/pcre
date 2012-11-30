@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.32 11-November-2012
+Version 8.32 30-November-2012
 -----------------------------
 
 1.  Improved JIT compiler optimizations for first character search and single
@@ -161,6 +161,8 @@ Version 8.32 11-November-2012
     invalid memory accesses. This is mainly for the benefit of the developers.
 
 25. (*UTF) can now be used to start a pattern in any of the three libraries.
+
+26. Give configure error if --enable-cpp but no C++ compiler found.
 
 
 Version 8.31 06-July-2012
