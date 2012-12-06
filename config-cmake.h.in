@@ -51,4 +51,8 @@
 #define MAX_NAME_SIZE	32
 #define MAX_NAME_COUNT	10000
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS 1
+#endif
+
 /* end config.h for CMake builds */
