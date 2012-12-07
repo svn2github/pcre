@@ -146,9 +146,6 @@ functions.
 <tr><td><a href="pcre_get_substring_list.html">pcre_get_substring_list</a></td>
     <td>&nbsp;&nbsp;Extract all substrings into new memory</td></tr>
 
-<tr><td><a href="pcre_info.html">pcre_info</a></td>
-    <td>&nbsp;&nbsp;Obsolete information extraction function</td></tr>
-
 <tr><td><a href="pcre_jit_stack_alloc.html">pcre_jit_stack_alloc</a></td>
     <td>&nbsp;&nbsp;Create a stack for JIT matching</td></tr>
 

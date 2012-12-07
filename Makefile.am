@@ -18,6 +18,7 @@ dist_html_DATA = \
   doc/html/index.html \
   doc/html/pcre.html \
   doc/html/pcre16.html \
+  doc/html/pcre32.html \
   doc/html/pcre-config.html \
   doc/html/pcre_assign_jit_stack.html \
   doc/html/pcre_compile.html \
@@ -44,6 +45,7 @@ dist_html_DATA = \
   doc/html/pcre_refcount.html \
   doc/html/pcre_study.html \
   doc/html/pcre_utf16_to_host_byte_order.html \
+  doc/html/pcre_utf32_to_host_byte_order.html \
   doc/html/pcre_version.html \
   doc/html/pcreapi.html \
   doc/html/pcrebuild.html \
@@ -64,10 +66,6 @@ dist_html_DATA = \
   doc/html/pcresyntax.html \
   doc/html/pcretest.html \
   doc/html/pcreunicode.html
-
-#   doc/html/pcre32.html \
-#   doc/html/pcre_utf32_to_host_byte_order.html \
-#
 
 pcrecpp_html = doc/html/pcrecpp.html
 dist_noinst_DATA = $(pcrecpp_html)
