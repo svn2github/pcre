@@ -4907,16 +4907,6 @@ for (;; ptr++)
 
       if (repeat_max == 0) goto END_REPEAT;
 
-      /*--------------------------------------------------------------------*/
-      /* This code is obsolete from release 8.00; the restriction was finally
-      removed: */
-
-      /* All real repeats make it impossible to handle partial matching (maybe
-      one day we will be able to remove this restriction). */
-
-      /* if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL; */
-      /*--------------------------------------------------------------------*/
-
       /* Combine the op_type with the repeat_type */
 
       repeat_type += op_type;
@@ -5062,16 +5052,6 @@ for (;; ptr++)
         code = previous;
         goto END_REPEAT;
         }
-
-      /*--------------------------------------------------------------------*/
-      /* This code is obsolete from release 8.00; the restriction was finally
-      removed: */
-
-      /* All real repeats make it impossible to handle partial matching (maybe
-      one day we will be able to remove this restriction). */
-
-      /* if (repeat_max != 1) cd->external_flags |= PCRE_NOPARTIAL; */
-      /*--------------------------------------------------------------------*/
 
       if (repeat_min == 0 && repeat_max == -1)
         *code++ = OP_CRSTAR + repeat_type;
