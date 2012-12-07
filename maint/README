@@ -16,13 +16,6 @@ also contains some notes for maintainers. Its contents are:
 Files in the maint directory
 ============================
 
----------------- This file is now OBSOLETE and no longer used ----------------
-Builducptable    A Perl script that creates the contents of the ucptable.h file
-                 from two Unicode data files, which themselves are downloaded
-                 from the Unicode web site. Run this script in the "maint"
-                 directory.
----------------- This file is now OBSOLETE and no longer used ----------------
-
 GenerateUtt.py   A Python script to generate part of the pcre_tables.c file
                  that contains Unicode script names in a long string with
                  offsets, which is tedious to maintain by hand.
@@ -352,4 +345,4 @@ others are relatively new.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 09 November 2012
+Last updated: 07 December 2012
