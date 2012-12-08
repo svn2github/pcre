@@ -8,6 +8,9 @@ Version 8.33 xx-xxxx-201x
     avoid compiler signed/unsigned warnings. Added (int) casts to unsigned
     variables that are added to signed variables, to ensure the result is
     signed and can be negated.
+    
+2.  Applied patch by Daniel Richard G for quashing MSVC warnings to the
+    CMake config files.
      
 
 Version 8.32 30-November-2012
