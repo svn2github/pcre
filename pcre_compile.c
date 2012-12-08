@@ -847,11 +847,11 @@ else
           }
 
 #if defined COMPILE_PCRE8
-        if (c > (utf ? 0x10ffff : 0xff))
+        if (c > (utf ? 0x10ffffU : 0xffU))
 #elif defined COMPILE_PCRE16
-        if (c > (utf ? 0x10ffff : 0xffff))
+        if (c > (utf ? 0x10ffffU : 0xffffU))
 #elif defined COMPILE_PCRE32
-        if (utf && c > 0x10ffff)
+        if (utf && c > 0x10ffffU)
 #endif
           {
           *errorcodeptr = ERR76;
@@ -1085,11 +1085,11 @@ else
 #endif
 
 #if defined COMPILE_PCRE8
-        if (c > (utf ? 0x10ffff : 0xff)) { overflow = TRUE; break; }
+        if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE16
-        if (c > (utf ? 0x10ffff : 0xffff)) { overflow = TRUE; break; }
+        if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE32
-        if (utf && c > 0x10ffff) { overflow = TRUE; break; }
+        if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
 #endif
         }
 
