@@ -11,6 +11,10 @@ Version 8.33 xx-xxxx-201x
     
 2.  Applied patch by Daniel Richard G for quashing MSVC warnings to the
     CMake config files.
+    
+3.  Revise the creation of config.h.generic so that all boolean macros are
+    #undefined, whereas non-boolean macros are #ifndef/#endif-ed. This makes
+    overriding via -D on the command line possible.  
      
 
 Version 8.32 30-November-2012

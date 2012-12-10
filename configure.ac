@@ -427,20 +427,28 @@ AH_TOP([
 can cope with, allowing it to run on SunOS4 and other "close to standard"
 systems.
 
-In environments that support the facilities, config.h.in is converted by
-"configure", or config-cmake.h.in is converted by CMake, into config.h. If you
-are going to build PCRE "by hand" without using "configure" or CMake, you
-should copy the distributed config.h.generic to config.h, and then edit the
-macro definitions to be the way you need them. You must then add
--DHAVE_CONFIG_H to all of your compile commands, so that config.h is included
-at the start of every source.
+In environments that support the GNU autotools, config.h.in is converted into
+config.h by the "configure" script. In environments that use CMake,
+config-cmake.in is converted into config.h. If you are going to build PCRE "by
+hand" without using "configure" or CMake, you should copy the distributed
+config.h.generic to config.h, and edit the macro definitions to be the way you
+need them. You must then add -DHAVE_CONFIG_H to all of your compile commands,
+so that config.h is included at the start of every source.
 
 Alternatively, you can avoid editing by using -D on the compiler command line
-to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H.
+to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H,
+but if you do, default values will be taken from config.h for non-boolean
+macros that are not defined on the command line.
 
-PCRE uses memmove() if HAVE_MEMMOVE is set to 1; otherwise it uses bcopy() if
-HAVE_BCOPY is set to 1. If your system has neither bcopy() nor memmove(), set
-them both to 0; an emulation function will be used. */])
+Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE8 should either be defined
+(conventionally to 1) for TRUE, and not defined at all for FALSE. All such 
+macros are listed as a commented #undef in config.h.generic. Macros such as 
+MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
+surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
+
+PCRE uses memmove() if HAVE_MEMMOVE is defined; otherwise it uses bcopy() if
+HAVE_BCOPY is defined. If your system has neither bcopy() nor memmove(), make
+sure both macros are undefined; an emulation function will then be used. */])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -838,7 +846,7 @@ fi
 
 if test "$enable_valgrind" = "yes"; then
   AC_DEFINE_UNQUOTED([SUPPORT_VALGRIND], [], [
-     Valgrind support to find invalid memory reads.])
+     Define to any value for valgrind support to find invalid memory reads.])
 fi
 
 # Platform specific issues
