@@ -15,6 +15,12 @@ Version 8.33 xx-xxxx-201x
 3.  Revise the creation of config.h.generic so that all boolean macros are
     #undefined, whereas non-boolean macros are #ifndef/#endif-ed. This makes
     overriding via -D on the command line possible.  
+    
+4.  Changing the definition of the variable "op" in pcre_exec.c from pcre_uchar
+    to unsigned int is reported to make a quite noticeable speed difference in
+    a specific Windows environment. Testing on Linux did also appear to show
+    some benefit (and it is clearly not harmful). Also fixed the definition of
+    Xop which should be unsigned. 
      
 
 Version 8.32 30-November-2012
