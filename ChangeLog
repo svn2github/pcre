@@ -21,6 +21,10 @@ Version 8.33 xx-xxxx-201x
     a specific Windows environment. Testing on Linux did also appear to show
     some benefit (and it is clearly not harmful). Also fixed the definition of
     Xop which should be unsigned. 
+    
+5.  Related to (4), changing the definition of the intermediate variable cc
+    in repeated character loops from pcre_uchar to pcre_uint32 also gave speed
+    improvements.
      
 
 Version 8.32 30-November-2012

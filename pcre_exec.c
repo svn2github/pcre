@@ -3439,8 +3439,7 @@ for (;;)
 
       for (i = 1; i <= min; i++)
         {
-        pcre_uchar cc;
-
+        pcre_uint32 cc;                 /* Faster than pcre_uchar */
         if (eptr >= md->end_subject)
           {
           SCHECK_PARTIAL();
@@ -3455,8 +3454,7 @@ for (;;)
         {
         for (fi = min;; fi++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;               /* Faster than pcre_uchar */
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM24);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max) RRETURN(MATCH_NOMATCH);
@@ -3476,8 +3474,7 @@ for (;;)
         pp = eptr;
         for (i = min; i < max; i++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;               /* Faster than pcre_uchar */
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
