@@ -86,4 +86,7 @@ and a couple of things that are different with JIT. --/
 
 /.?(*THEN)/S!+I
 
+/^12345678abcd/mS++
+    12345678abcd
+
 /-- End of testinput12 --/

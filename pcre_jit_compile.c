@@ -2573,7 +2573,7 @@ DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
 pcre_uint32 chars[MAX_N_CHARS * 2];
-pcre_uchar *cc = common->start + 1 + IMM2_SIZE;
+pcre_uchar *cc = common->start + 1 + LINK_SIZE;
 int location = 0;
 pcre_int32 len, c, bit, caseless;
 int must_stop;

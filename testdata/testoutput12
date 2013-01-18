@@ -178,4 +178,8 @@ Subject length lower bound = -1
 No set of starting bytes
 JIT study was not successful
 
+/^12345678abcd/mS++
+    12345678abcd
+ 0: 12345678abcd (JIT)
+
 /-- End of testinput12 --/
