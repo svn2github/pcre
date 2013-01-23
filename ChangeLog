@@ -28,6 +28,9 @@ Version 8.33 xx-xxxx-201x
 
 6.  Fix forward search in JIT when link size is 3 or greater. Also removed some
     unnecessary spaces.
+    
+7.  Adjust autogen.sh and configure.ac to lose warnings given by automake 1.12
+    and later. 
 
 
 Version 8.32 30-November-2012

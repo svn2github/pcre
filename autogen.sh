@@ -6,10 +6,6 @@
 # again. Moving aclocal to after libtoolize does not seem to cause any
 # problems, and it fixes this issue.
 
-#set -ex
-#rm -rf autom4te.cache Makefile.in aclocal.m4
-#aclocal --force -I m4
-
 # GNU libtool is named differently on some systems.  This code tries several
 # variants like glibtoolize (MacOSX) and libtoolize1x (FreeBSD)
 
@@ -37,7 +33,11 @@ rm -rf autom4te.cache Makefile.in aclocal.m4
 aclocal --force -I m4
 autoconf -f -W all,no-obsolete
 autoheader -f -W all
-automake -a -c -f -W all
+
+# Added no-portability to suppress automake 1.12's warning about the use
+# of recursive variables.
+
+automake -a -c -f -W all,no-portability
 
 rm -rf autom4te.cache
 exit 0

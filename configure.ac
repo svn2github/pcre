@@ -30,6 +30,9 @@ AM_INIT_AUTOMAKE([dist-bzip2 dist-zip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS(config.h)
 
+# This is a new thing required to stop a warning from automake 1.12
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+
 # This was added at the suggestion of libtoolize (03-Jan-10)
 AC_CONFIG_MACRO_DIR([m4])
 
