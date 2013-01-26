@@ -32,6 +32,8 @@ Version 8.33 xx-xxxx-201x
 7.  Adjust autogen.sh and configure.ac to lose warnings given by automake 1.12
     and later. 
 
+8.  Fix two buffer over read issues in 16 and 32 bit modes. Affects JIT only.
+
 
 Version 8.32 30-November-2012
 -----------------------------
