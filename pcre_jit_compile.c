@@ -2877,15 +2877,23 @@ if (firstline)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 }
 
+static BOOL check_class_ranges(compiler_common *common, const pcre_uint8 *bits, BOOL nclass, jump_list **backtracks);
+
 static SLJIT_INLINE void fast_forward_start_bits(compiler_common *common, sljit_uw start_bits, BOOL firstline)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
-struct sljit_jump *found;
+struct sljit_jump *found = NULL;
+jump_list *matches = NULL;
+pcre_uint8 inverted_start_bits[32];
+int i;
 #ifndef COMPILE_PCRE8
 struct sljit_jump *jump;
 #endif
+
+for (i = 0; i < 32; ++i)
+  inverted_start_bits[i] = ~(((pcre_uint8*)start_bits)[i]);
 
 if (firstline)
   {
@@ -2901,17 +2909,21 @@ OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 if (common->utf)
   OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
 #endif
+
+if (!check_class_ranges(common, inverted_start_bits, (inverted_start_bits[31] & 0x80) != 0, &matches))
+  {
 #ifndef COMPILE_PCRE8
-jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 255);
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 255);
-JUMPHERE(jump);
+  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 255);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 255);
+  JUMPHERE(jump);
 #endif
-OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
-OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
-OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), start_bits);
-OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
-OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
-found = JUMP(SLJIT_C_NOT_ZERO);
+  OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
+  OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), start_bits);
+  OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
+  found = JUMP(SLJIT_C_NOT_ZERO);
+  }
 
 #ifdef SUPPORT_UTF
 if (common->utf)
@@ -2939,7 +2951,10 @@ if (common->utf)
 #endif /* COMPILE_PCRE[8|16] */
 #endif /* SUPPORT_UTF */
 JUMPTO(SLJIT_JUMP, start);
-JUMPHERE(found);
+if (found != NULL)
+  JUMPHERE(found);
+if (matches != NULL)
+  set_jumps(matches, LABEL());
 JUMPHERE(quit);
 
 if (firstline)
