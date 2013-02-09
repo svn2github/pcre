@@ -36,6 +36,15 @@ Version 8.33 xx-xxxx-201x
 
 9.  Optimizing fast_forward_start_bits in JIT.
 
+10. Adding experimental support for callouts in JIT, and fixing some
+    issues revealed during this work. Namely:
+
+    (a) Unoptimized capturing brackets incorrectly reset on backtrack.
+
+    (b) Minimum length was not checked before the matching is started.
+
+    WARNING: Callouts are not release ready! <- this line needs to be removed when it is.
+
 
 Version 8.32 30-November-2012
 -----------------------------
