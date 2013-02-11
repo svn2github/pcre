@@ -65,6 +65,12 @@ system files. */
 #error Unsupported architecture
 #endif
 
+/* Defines for debugging purposes. */
+
+/* 1 - Use unoptimized capturing brackets.
+   2 - Enable capture_last_ptr (includes option 1). */
+/* #define DEBUG_FORCE_UNOPTIMIZED_CBRAS 2 */
+
 /* Allocate memory for the regex stack on the real machine stack.
 Fast, but limited size. */
 #define MACHINE_STACK_SIZE 32768
@@ -1126,7 +1132,8 @@ int length = 0;
 int possessive = 0;
 BOOL setsom_found = recursive;
 BOOL setmark_found = recursive;
-BOOL capture_last_found = recursive;
+/* The last capture is a local variable even for recursions. */
+BOOL capture_last_found = FALSE;
 
 if (!recursive && (*cc == OP_CBRAPOS || *cc == OP_SCBRAPOS))
   {
@@ -1213,7 +1220,8 @@ DEFINE_COMPILER;
 pcre_uchar *ccend = bracketend(cc);
 BOOL setsom_found = recursive;
 BOOL setmark_found = recursive;
-BOOL capture_last_found = recursive;
+/* The last capture is a local variable even for recursions. */
+BOOL capture_last_found = FALSE;
 int offset;
 
 /* >= 1 + shortest item size (2) */
@@ -8116,9 +8124,17 @@ common->ovector_start = CALL_LIMIT + sizeof(sljit_sw);
 common->optimized_cbracket = (pcre_uint8 *)SLJIT_MALLOC(re->top_bracket + 1);
 if (!common->optimized_cbracket)
   return;
+#if defined DEBUG_FORCE_UNOPTIMIZED_CBRAS && DEBUG_FORCE_UNOPTIMIZED_CBRAS == 1
+memset(common->optimized_cbracket, 0, re->top_bracket + 1);
+#else
 memset(common->optimized_cbracket, 1, re->top_bracket + 1);
+#endif
 
 SLJIT_ASSERT(*rootbacktrack.cc == OP_BRA && ccend[-(1 + LINK_SIZE)] == OP_KET);
+#if defined DEBUG_FORCE_UNOPTIMIZED_CBRAS && DEBUG_FORCE_UNOPTIMIZED_CBRAS == 2
+common->capture_last_ptr = common->ovector_start;
+common->ovector_start += sizeof(sljit_sw);
+#endif
 private_data_size = get_private_data_length(common, rootbacktrack.cc, ccend);
 if (private_data_size < 0)
   {
@@ -8304,35 +8320,19 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
   }
 
 /* Check we have remaining characters. */
+if ((re->options & PCRE_ANCHORED) == 0 && (re->options & PCRE_FIRSTLINE) != 0)
+  {
+  SLJIT_ASSERT(common->first_line_end != 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end);
+  }
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0));
 
 if ((re->options & PCRE_ANCHORED) == 0)
   {
   if ((re->options & PCRE_FIRSTLINE) == 0)
-    {
-    if (mode == JIT_COMPILE && study != NULL && study->minlength > 1 && (re->options & PCRE_NO_START_OPTIMIZE) == 0)
-      {
-      OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(study->minlength + 1));
-      CMPTO(SLJIT_C_LESS_EQUAL, TMP1, 0, STR_END, 0, mainloop);
-      }
-    else
-      CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, mainloop);
-    }
+    CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, mainloop);
   else
-    {
-    SLJIT_ASSERT(common->first_line_end != 0);
-    if (mode == JIT_COMPILE && study != NULL && study->minlength > 1 && (re->options & PCRE_NO_START_OPTIMIZE) == 0)
-      {
-      OP2(SLJIT_ADD, TMP1, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(study->minlength + 1));
-      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, STR_END, 0);
-      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_GREATER);
-      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end);
-      OP_FLAGS(SLJIT_OR | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_C_GREATER_EQUAL);
-      JUMPTO(SLJIT_C_ZERO, mainloop);
-      }
-    else
-      CMPTO(SLJIT_C_LESS, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, mainloop);
-    }
+    CMPTO(SLJIT_C_LESS, STR_PTR, 0, TMP1, 0, mainloop);
   }
 
 /* No more remaining characters. */
