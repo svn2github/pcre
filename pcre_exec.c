@@ -56,6 +56,20 @@ possible. There are also some static supporting functions. */
 #undef min
 #undef max
 
+/* The md->capture_last field uses the lower 16 bits for the last captured 
+substring (which can never be greater than 65535) and a bit in the top half
+to mean "capture vector overflowed". This odd way of doing things was 
+implemented when it was realized that preserving and restoring the overflow bit 
+whenever the last capture number was saved/restored made for a neater 
+interface, and doing it this way saved on (a) another variable, which would 
+have increased the stack frame size (a big NO-NO in PCRE) and (b) another 
+separate set of save/restore instructions. The following defines are used in 
+implementing this. */
+
+#define CAPLMASK    0x0000ffff    /* The bits used for last_capture */
+#define OVFLMASK    0xffff0000    /* The bits used for the overflow flag */
+#define OVFLBIT     0x00010000    /* The bit that is set for overflow */
+
 /* Values for setting in md->match_function_type to indicate two special types
 of call to match(). We do it this way to save on using another stack variable,
 as stack usage is to be discouraged. */
@@ -419,7 +433,7 @@ typedef struct heapframe {
   unsigned int Xnumber;
   int Xoffset;
   unsigned int Xop;
-  int Xsave_capture_last;
+  pcre_int32 Xsave_capture_last;
   int Xsave_offset1, Xsave_offset2, Xsave_offset3;
   int Xstacksave[REC_STACK_SAVE_MAX];
 
@@ -635,7 +649,7 @@ int min;
 unsigned int number;
 int offset;
 unsigned int op;
-int save_capture_last;
+pcre_int32 save_capture_last;
 int save_offset1, save_offset2, save_offset3;
 int stacksave[REC_STACK_SAVE_MAX];
 
@@ -1066,6 +1080,7 @@ for (;;)
       /* In all other cases, we have to make another call to match(). */
 
       save_mark = md->mark;
+      save_capture_last = md->capture_last;
       RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, md, eptrb,
         RM2);
 
@@ -1097,6 +1112,7 @@ for (;;)
       ecode += GET(ecode, 1);
       md->mark = save_mark;
       if (*ecode != OP_ALT) break;
+      md->capture_last = save_capture_last;
       }
 
     RRETURN(MATCH_NOMATCH);
@@ -1218,6 +1234,7 @@ for (;;)
     POSSESSIVE_NON_CAPTURE:
     matched_once = FALSE;
     code_offset = (int)(ecode - md->start_code);
+    save_capture_last = md->capture_last;
 
     for (;;)
       {
@@ -1247,6 +1264,7 @@ for (;;)
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode, 1);
       if (*ecode != OP_ALT) break;
+      md->capture_last = save_capture_last;
       }
 
     if (matched_once || allow_zero)
@@ -1291,7 +1309,9 @@ for (;;)
         cb.pattern_position = GET(ecode, LINK_SIZE + 3);
         cb.next_item_length = GET(ecode, 3 + 2*LINK_SIZE);
         cb.capture_top      = offset_top/2;
-        cb.capture_last     = md->capture_last;
+        cb.capture_last     = md->capture_last & CAPLMASK;
+        /* Internal change requires this for API compatibility. */ 
+        if (cb.capture_last == 0) cb.capture_last = -1; 
         cb.callout_data     = md->callout_data;
         cb.mark             = md->nomatch_mark;
         if ((rrc = (*PUBL(callout))(&cb)) > 0) RRETURN(MATCH_NOMATCH);
@@ -1513,7 +1533,7 @@ for (;;)
     to close any currently open capturing brackets. */
 
     case OP_CLOSE:
-    number = GET2(ecode, 1);
+    number = GET2(ecode, 1);   /* Must be less than 65536 */
     offset = number << 1;
 
 #ifdef PCRE_DEBUG
@@ -1521,8 +1541,8 @@ for (;;)
       printf("\n");
 #endif
 
-    md->capture_last = number;
-    if (offset >= md->offset_max) md->offset_overflow = TRUE; else
+    md->capture_last = (md->capture_last & OVFLMASK) | number;
+    if (offset >= md->offset_max) md->capture_last |= OVFLBIT; else
       {
       md->offset_vector[offset] =
         md->offset_vector[md->offset_end - number];
@@ -1716,7 +1736,9 @@ for (;;)
       cb.pattern_position = GET(ecode, 2);
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
       cb.capture_top      = offset_top/2;
-      cb.capture_last     = md->capture_last;
+      cb.capture_last     = md->capture_last & CAPLMASK;
+      /* Internal change requires this for API compatibility. */ 
+      if (cb.capture_last == 0) cb.capture_last = -1; 
       cb.callout_data     = md->callout_data;
       cb.mark             = md->nomatch_mark;
       if ((rrc = (*PUBL(callout))(&cb)) > 0) RRETURN(MATCH_NOMATCH);
@@ -1762,6 +1784,7 @@ for (;;)
       /* Add to "recursing stack" */
 
       new_recursive.group_num = recno;
+      new_recursive.saved_capture_last = md->capture_last; 
       new_recursive.subject_position = eptr;
       new_recursive.prevrec = md->recursive;
       md->recursive = &new_recursive;
@@ -1785,8 +1808,9 @@ for (;;)
             new_recursive.saved_max * sizeof(int));
 
       /* OK, now we can do the recursion. After processing each alternative,
-      restore the offset data. If there were nested recursions, md->recursive
-      might be changed, so reset it before looping. */
+      restore the offset data and the last captured value. If there were nested
+      recursions, md->recursive might be changed, so reset it before looping.
+      */
 
       DPRINTF(("Recursing into group %d\n", new_recursive.group_num));
       cbegroup = (*callpat >= OP_SBRA);
@@ -1797,6 +1821,7 @@ for (;;)
           md, eptrb, RM6);
         memcpy(md->offset_vector, new_recursive.offset_save,
             new_recursive.saved_max * sizeof(int));
+        md->capture_last = new_recursive.saved_capture_last;     
         md->recursive = new_recursive.prevrec;
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
@@ -1947,8 +1972,8 @@ for (;;)
 
       /* Deal with capturing */
 
-      md->capture_last = number;
-      if (offset >= md->offset_max) md->offset_overflow = TRUE; else
+      md->capture_last = (md->capture_last & OVFLMASK) | number;
+      if (offset >= md->offset_max) md->capture_last |= OVFLBIT; else
         {
         /* If offset is greater than offset_top, it means that we are
         "skipping" a capturing group, and that group's offsets must be marked
@@ -6539,11 +6564,9 @@ if (re->top_backref > 0 && re->top_backref >= ocount/3)
   DPRINTF(("Got memory to hold back references\n"));
   }
 else md->offset_vector = offsets;
-
 md->offset_end = ocount;
 md->offset_max = (2*ocount)/3;
-md->offset_overflow = FALSE;
-md->capture_last = -1;
+md->capture_last = 0;
 
 /* Reset the working variable associated with each extraction. These should
 never be used unless previously set, but they get saved and restored, and so we
@@ -6940,7 +6963,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
         (arg_offset_max - 2) * sizeof(int));
       DPRINTF(("Copied offsets from temporary memory\n"));
       }
-    if (md->end_offset_top > arg_offset_max) md->offset_overflow = TRUE;
+    if (md->end_offset_top > arg_offset_max) md->capture_last |= OVFLBIT;
     DPRINTF(("Freeing temporary memory\n"));
     (PUBL(free))(md->offset_vector);
     }
@@ -6948,7 +6971,8 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   /* Set the return code to the number of captured strings, or 0 if there were
   too many to fit into the vector. */
 
-  rc = (md->offset_overflow && md->end_offset_top >= arg_offset_max)?
+  rc = ((md->capture_last & OVFLBIT) != 0 && 
+         md->end_offset_top >= arg_offset_max)?
     0 : md->end_offset_top/2;
 
   /* If there is space in the offset vector, set any unused pairs at the end of

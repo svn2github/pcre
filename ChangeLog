@@ -45,6 +45,18 @@ Version 8.33 xx-xxxx-201x
 
     WARNING: Callouts are not release ready! <- this line needs to be removed when it is.
 
+11. The value of capture_last that is passed to callouts was incorrect in some
+    cases when there was a capture on one path that was subsequently abandoned 
+    after a backtrack. Also, the capture_last value is now reset after a 
+    recursion, since all captures are also reset in this case.
+    
+12. The interpreter no longer returns the "too many substrings" error in the 
+    case when an overflowing capture is in a branch that is subsequently 
+    abandoned after a backtrack.
+    
+13. In the pathological case when an offset vector of size 2 is used, pcretest 
+    now prints out the matched string after a yield of 0 or 1.
+
 
 Version 8.32 30-November-2012
 -----------------------------

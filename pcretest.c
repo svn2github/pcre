@@ -5029,7 +5029,8 @@ while (!done)
         if (count == 0)
           {
           fprintf(outfile, "Matched, but too many substrings\n");
-          count = use_size_offsets/3;
+          /* 2 is a special case; match can be returned */
+          count = (use_size_offsets == 2)? 1 : use_size_offsets/3;
           }
         }
 
@@ -5043,7 +5044,8 @@ while (!done)
 #if !defined NODFA
         if (all_use_dfa || use_dfa) maxcount = use_size_offsets/2; else
 #endif
-          maxcount = use_size_offsets/3;
+          /* 2 is a special case; match can be returned */
+          maxcount = (use_size_offsets == 2)? 1 : use_size_offsets/3;
 
         /* This is a check against a lunatic return value. */
 

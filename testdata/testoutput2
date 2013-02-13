@@ -11319,7 +11319,6 @@ No match
 
 /(a)b|ac/++SS
     ac\O3
-Matched, but too many substrings
  0: ac
  0+ 
     
@@ -12480,5 +12479,125 @@ No first char
 No need char
 Subject length lower bound = -1
 No set of starting bytes
+
+/(?:(a)+(?C1)bb|aa(?C2)b)/
+    aab\C+
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^ ^     b
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+   
+/(?:(a)++(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^ ^     b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+    
+/(?:(?>(a))(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+
+/(?:(?1)(?C1)x|ab(?C2))((a)){0}/                                                
+    aab\C+ 
+Callout 1: last capture = -1
+ 0: <unset>
+--->aab
+    ^^      x
+Callout 1: last capture = -1
+ 0: <unset>
+--->aab
+     ^^     x
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+     ^ ^    )
+ 0: ab
+
+/(?1)(?C1)((a)(?C2)){0}/   
+    aab\C+ 
+Callout 2: last capture = 2
+ 0: <unset>
+ 1: <unset>
+ 2: a
+--->aab
+    ^^      )
+Callout 1: last capture = -1
+ 0: <unset>
+--->aab
+    ^^      ((a)(?C2)){0}
+ 0: a
+
+/(?:(a)+(?C1)bb|aa(?C2)b)++/
+    aab\C+
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^ ^     b
+Callout 1: last capture = 1
+ 0: <unset>
+ 1: a
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+    aab\C+\O2
+Callout 1: last capture = 1
+ 0: <unset>
+--->aab
+    ^ ^     b
+Callout 1: last capture = 1
+ 0: <unset>
+--->aab
+    ^^      b
+Callout 2: last capture = -1
+ 0: <unset>
+--->aab
+    ^ ^     b
+ 0: aab
+
+/(ab)x|ab/
+    ab\O3
+ 0: ab
+    ab\O2 
+ 0: ab
+  
+/(ab)/
+    ab\O3
+Matched, but too many substrings
+ 0: ab
+    ab\O2 
+Matched, but too many substrings
+ 0: ab
 
 /-- End of testinput2 --/

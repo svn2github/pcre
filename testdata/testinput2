@@ -3810,4 +3810,31 @@ settings of the anchored and startline bits. --/
 
 /.?/S!I
 
+/(?:(a)+(?C1)bb|aa(?C2)b)/
+    aab\C+
+   
+/(?:(a)++(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+    
+/(?:(?>(a))(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+
+/(?:(?1)(?C1)x|ab(?C2))((a)){0}/                                                
+    aab\C+ 
+
+/(?1)(?C1)((a)(?C2)){0}/   
+    aab\C+ 
+
+/(?:(a)+(?C1)bb|aa(?C2)b)++/
+    aab\C+
+    aab\C+\O2
+
+/(ab)x|ab/
+    ab\O3
+    ab\O2 
+  
+/(ab)/
+    ab\O3
+    ab\O2 
+
 /-- End of testinput2 --/

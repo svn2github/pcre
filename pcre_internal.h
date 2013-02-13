@@ -2431,6 +2431,7 @@ typedef struct recursion_info {
   unsigned int group_num;         /* Number of group that was called */
   int *offset_save;               /* Pointer to start of saved offsets */
   int saved_max;                  /* Number of saved offsets */
+  int saved_capture_last;         /* Last capture number */ 
   PCRE_PUCHAR subject_position;   /* Position at start of recursion */
 } recursion_info;
 
@@ -2472,7 +2473,6 @@ typedef struct match_data {
   const  pcre_uint8 *lcc;         /* Points to lower casing table */
   const  pcre_uint8 *fcc;         /* Points to case-flipping table */
   const  pcre_uint8 *ctypes;      /* Points to table of type maps */
-  BOOL   offset_overflow;         /* Set if too many extractions */
   BOOL   notbol;                  /* NOTBOL flag */
   BOOL   noteol;                  /* NOTEOL flag */
   BOOL   utf;                     /* UTF-8 / UTF-16 flag */
@@ -2493,7 +2493,7 @@ typedef struct match_data {
   PCRE_PUCHAR start_used_ptr;     /* Earliest consulted character */
   int    partial;                 /* PARTIAL options */
   int    end_offset_top;          /* Highwater mark at end of match */
-  int    capture_last;            /* Most recent capture number */
+  pcre_int32 capture_last;        /* Most recent capture number + overflow flag */
   int    start_offset;            /* The start offset value */
   int    match_function_type;     /* Set for certain special calls of MATCH() */
   eptrblock *eptrchain;           /* Chain of eptrblocks for tail recursions */
