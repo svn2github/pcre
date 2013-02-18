@@ -43,8 +43,6 @@ Version 8.33 xx-xxxx-201x
 
     (b) Minimum length was not checked before the matching is started.
 
-    WARNING: Callouts are not release ready! <- this line needs to be removed when it is.
-
 11. The value of capture_last that is passed to callouts was incorrect in some
     cases when there was a capture on one path that was subsequently abandoned 
     after a backtrack. Also, the capture_last value is now reset after a 
@@ -56,6 +54,9 @@ Version 8.33 xx-xxxx-201x
     
 13. In the pathological case when an offset vector of size 2 is used, pcretest 
     now prints out the matched string after a yield of 0 or 1.
+
+14. Inlining subpatterns in recursions, when certain conditions are fulfilled.
+    Only supported by the JIT compiler at the moment.
 
 
 Version 8.32 30-November-2012

@@ -186,15 +186,13 @@ typedef struct jump_list {
   struct jump_list *next;
 } jump_list;
 
-enum stub_types { stack_alloc };
-
 typedef struct stub_list {
-  enum stub_types type;
-  int data;
   struct sljit_jump *start;
   struct sljit_label *quit;
   struct stub_list *next;
 } stub_list;
+
+enum frame_types { no_frame = -1, no_stack = -2 };
 
 typedef int (SLJIT_CALL *jit_function)(jit_arguments *args);
 
@@ -277,6 +275,7 @@ typedef struct recurse_entry {
 
 typedef struct recurse_backtrack {
   backtrack_common common;
+  BOOL inlined_pattern;
 } recurse_backtrack;
 
 #define MAX_RANGE_SIZE 6
@@ -514,6 +513,8 @@ switch(*cc)
   case OP_WORDCHAR:
   case OP_ANY:
   case OP_ALLANY:
+  case OP_NOTPROP:
+  case OP_PROP:
   case OP_ANYNL:
   case OP_NOT_HSPACE:
   case OP_HSPACE:
@@ -526,21 +527,46 @@ switch(*cc)
   case OP_CIRCM:
   case OP_DOLL:
   case OP_DOLLM:
-  case OP_TYPESTAR:
-  case OP_TYPEMINSTAR:
-  case OP_TYPEPLUS:
-  case OP_TYPEMINPLUS:
-  case OP_TYPEQUERY:
-  case OP_TYPEMINQUERY:
-  case OP_TYPEPOSSTAR:
-  case OP_TYPEPOSPLUS:
-  case OP_TYPEPOSQUERY:
   case OP_CRSTAR:
   case OP_CRMINSTAR:
   case OP_CRPLUS:
   case OP_CRMINPLUS:
   case OP_CRQUERY:
   case OP_CRMINQUERY:
+  case OP_CRRANGE:
+  case OP_CRMINRANGE:
+  case OP_CLASS:
+  case OP_NCLASS:
+  case OP_REF:
+  case OP_REFI:
+  case OP_RECURSE:
+  case OP_CALLOUT:
+  case OP_ALT:
+  case OP_KET:
+  case OP_KETRMAX:
+  case OP_KETRMIN:
+  case OP_KETRPOS:
+  case OP_REVERSE:
+  case OP_ASSERT:
+  case OP_ASSERT_NOT:
+  case OP_ASSERTBACK:
+  case OP_ASSERTBACK_NOT:
+  case OP_ONCE:
+  case OP_ONCE_NC:
+  case OP_BRA:
+  case OP_BRAPOS:
+  case OP_CBRA:
+  case OP_CBRAPOS:
+  case OP_COND:
+  case OP_SBRA:
+  case OP_SBRAPOS:
+  case OP_SCBRA:
+  case OP_SCBRAPOS:
+  case OP_SCOND:
+  case OP_CREF:
+  case OP_NCREF:
+  case OP_RREF:
+  case OP_NRREF:
   case OP_DEF:
   case OP_BRAZERO:
   case OP_BRAMINZERO:
@@ -549,14 +575,9 @@ switch(*cc)
   case OP_FAIL:
   case OP_ACCEPT:
   case OP_ASSERT_ACCEPT:
+  case OP_CLOSE:
   case OP_SKIPZERO:
-  return cc + 1;
-
-  case OP_ANYBYTE:
-#ifdef SUPPORT_UTF
-  if (common->utf) return NULL;
-#endif
-  return cc + 1;
+  return cc + PRIV(OP_lengths)[*cc];
 
   case OP_CHAR:
   case OP_CHARI:
@@ -568,127 +589,87 @@ switch(*cc)
   case OP_MINPLUS:
   case OP_QUERY:
   case OP_MINQUERY:
+  case OP_UPTO:
+  case OP_MINUPTO:
+  case OP_EXACT:
   case OP_POSSTAR:
   case OP_POSPLUS:
   case OP_POSQUERY:
+  case OP_POSUPTO:
   case OP_STARI:
   case OP_MINSTARI:
   case OP_PLUSI:
   case OP_MINPLUSI:
   case OP_QUERYI:
   case OP_MINQUERYI:
+  case OP_UPTOI:
+  case OP_MINUPTOI:
+  case OP_EXACTI:
   case OP_POSSTARI:
   case OP_POSPLUSI:
   case OP_POSQUERYI:
+  case OP_POSUPTOI:
   case OP_NOTSTAR:
   case OP_NOTMINSTAR:
   case OP_NOTPLUS:
   case OP_NOTMINPLUS:
   case OP_NOTQUERY:
   case OP_NOTMINQUERY:
+  case OP_NOTUPTO:
+  case OP_NOTMINUPTO:
+  case OP_NOTEXACT:
   case OP_NOTPOSSTAR:
   case OP_NOTPOSPLUS:
   case OP_NOTPOSQUERY:
+  case OP_NOTPOSUPTO:
   case OP_NOTSTARI:
   case OP_NOTMINSTARI:
   case OP_NOTPLUSI:
   case OP_NOTMINPLUSI:
   case OP_NOTQUERYI:
   case OP_NOTMINQUERYI:
-  case OP_NOTPOSSTARI:
-  case OP_NOTPOSPLUSI:
-  case OP_NOTPOSQUERYI:
-  cc += 2;
-#ifdef SUPPORT_UTF
-  if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
-#endif
-  return cc;
-
-  case OP_UPTO:
-  case OP_MINUPTO:
-  case OP_EXACT:
-  case OP_POSUPTO:
-  case OP_UPTOI:
-  case OP_MINUPTOI:
-  case OP_EXACTI:
-  case OP_POSUPTOI:
-  case OP_NOTUPTO:
-  case OP_NOTMINUPTO:
-  case OP_NOTEXACT:
-  case OP_NOTPOSUPTO:
   case OP_NOTUPTOI:
   case OP_NOTMINUPTOI:
   case OP_NOTEXACTI:
+  case OP_NOTPOSSTARI:
+  case OP_NOTPOSPLUSI:
+  case OP_NOTPOSQUERYI:
   case OP_NOTPOSUPTOI:
-  cc += 2 + IMM2_SIZE;
+  cc += PRIV(OP_lengths)[*cc];
 #ifdef SUPPORT_UTF
   if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
 #endif
   return cc;
 
-  case OP_NOTPROP:
-  case OP_PROP:
-  return cc + 1 + 2;
-
+  /* Special cases. */
+  case OP_TYPESTAR:
+  case OP_TYPEMINSTAR:
+  case OP_TYPEPLUS:
+  case OP_TYPEMINPLUS:
+  case OP_TYPEQUERY:
+  case OP_TYPEMINQUERY:
   case OP_TYPEUPTO:
   case OP_TYPEMINUPTO:
   case OP_TYPEEXACT:
+  case OP_TYPEPOSSTAR:
+  case OP_TYPEPOSPLUS:
+  case OP_TYPEPOSQUERY:
   case OP_TYPEPOSUPTO:
-  case OP_REF:
-  case OP_REFI:
-  case OP_CREF:
-  case OP_NCREF:
-  case OP_RREF:
-  case OP_NRREF:
-  case OP_CLOSE:
-  cc += 1 + IMM2_SIZE;
-  return cc;
+  return cc + PRIV(OP_lengths)[*cc] - 1;
 
-  case OP_CRRANGE:
-  case OP_CRMINRANGE:
-  return cc + 1 + 2 * IMM2_SIZE;
-
-  case OP_CLASS:
-  case OP_NCLASS:
-  return cc + 1 + 32 / sizeof(pcre_uchar);
+  case OP_ANYBYTE:
+#ifdef SUPPORT_UTF
+  if (common->utf) return NULL;
+#endif
+  return cc + 1;
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
   case OP_XCLASS:
   return cc + GET(cc, 1);
 #endif
 
-  case OP_RECURSE:
-  case OP_ASSERT:
-  case OP_ASSERT_NOT:
-  case OP_ASSERTBACK:
-  case OP_ASSERTBACK_NOT:
-  case OP_REVERSE:
-  case OP_ONCE:
-  case OP_ONCE_NC:
-  case OP_BRA:
-  case OP_BRAPOS:
-  case OP_COND:
-  case OP_SBRA:
-  case OP_SBRAPOS:
-  case OP_SCOND:
-  case OP_ALT:
-  case OP_KET:
-  case OP_KETRMAX:
-  case OP_KETRMIN:
-  case OP_KETRPOS:
-  return cc + 1 + LINK_SIZE;
-
-  case OP_CBRA:
-  case OP_CBRAPOS:
-  case OP_SCBRA:
-  case OP_SCBRAPOS:
-  return cc + 1 + LINK_SIZE + IMM2_SIZE;
-
   case OP_MARK:
   return cc + 1 + 2 + cc[1];
-
-  case OP_CALLOUT:
-  return cc + 2 + 2 * LINK_SIZE;
 
   default:
   return NULL;
@@ -1124,12 +1105,13 @@ while (cc < ccend)
   }
 }
 
-/* Returns with -1 if no need for frame. */
+/* Returns with a frame_types (always < 0) if no need for frame. */
 static int get_framesize(compiler_common *common, pcre_uchar *cc, BOOL recursive)
 {
-pcre_uchar *ccend = bracketend(cc);
+pcre_uchar *ccend = bracketend(cc) - (1 + LINK_SIZE);
 int length = 0;
 int possessive = 0;
+BOOL stack_restore = FALSE;
 BOOL setsom_found = recursive;
 BOOL setmark_found = recursive;
 /* The last capture is a local variable even for recursions. */
@@ -1149,6 +1131,7 @@ while (cc < ccend)
     {
     case OP_SET_SOM:
     SLJIT_ASSERT(common->has_set_som);
+    stack_restore = TRUE;
     if (!setsom_found)
       {
       length += 2;
@@ -1159,6 +1142,7 @@ while (cc < ccend)
 
     case OP_MARK:
     SLJIT_ASSERT(common->mark_ptr != 0);
+    stack_restore = TRUE;
     if (!setmark_found)
       {
       length += 2;
@@ -1168,6 +1152,7 @@ while (cc < ccend)
     break;
 
     case OP_RECURSE:
+    stack_restore = TRUE;
     if (common->has_set_som && !setsom_found)
       {
       length += 2;
@@ -1190,6 +1175,7 @@ while (cc < ccend)
     case OP_CBRAPOS:
     case OP_SCBRA:
     case OP_SCBRAPOS:
+    stack_restore = TRUE;
     if (common->capture_last_ptr != 0 && !capture_last_found)
       {
       length += 2;
@@ -1200,6 +1186,73 @@ while (cc < ccend)
     break;
 
     default:
+    stack_restore = TRUE;
+    /* Fall through. */
+
+    case OP_NOT_WORD_BOUNDARY:
+    case OP_WORD_BOUNDARY:
+    case OP_NOT_DIGIT:
+    case OP_DIGIT:
+    case OP_NOT_WHITESPACE:
+    case OP_WHITESPACE:
+    case OP_NOT_WORDCHAR:
+    case OP_WORDCHAR:
+    case OP_ANY:
+    case OP_ALLANY:
+    case OP_ANYBYTE:
+    case OP_NOTPROP:
+    case OP_PROP:
+    case OP_ANYNL:
+    case OP_NOT_HSPACE:
+    case OP_HSPACE:
+    case OP_NOT_VSPACE:
+    case OP_VSPACE:
+    case OP_EXTUNI:
+    case OP_EODN:
+    case OP_EOD:
+    case OP_CIRC:
+    case OP_CIRCM:
+    case OP_DOLL:
+    case OP_DOLLM:
+    case OP_CHAR:
+    case OP_CHARI:
+    case OP_NOT:
+    case OP_NOTI:
+
+    case OP_EXACT:
+    case OP_POSSTAR:
+    case OP_POSPLUS:
+    case OP_POSQUERY:
+    case OP_POSUPTO:
+
+    case OP_EXACTI:
+    case OP_POSSTARI:
+    case OP_POSPLUSI:
+    case OP_POSQUERYI:
+    case OP_POSUPTOI:
+
+    case OP_NOTEXACT:
+    case OP_NOTPOSSTAR:
+    case OP_NOTPOSPLUS:
+    case OP_NOTPOSQUERY:
+    case OP_NOTPOSUPTO:
+
+    case OP_NOTEXACTI:
+    case OP_NOTPOSSTARI:
+    case OP_NOTPOSPLUSI:
+    case OP_NOTPOSQUERYI:
+    case OP_NOTPOSUPTOI:
+
+    case OP_TYPEEXACT:
+    case OP_TYPEPOSSTAR:
+    case OP_TYPEPOSPLUS:
+    case OP_TYPEPOSQUERY:
+    case OP_TYPEPOSUPTO:
+
+    case OP_CLASS:
+    case OP_NCLASS:
+    case OP_XCLASS:
+
     cc = next_opcode(common, cc);
     SLJIT_ASSERT(cc != NULL);
     break;
@@ -1207,17 +1260,17 @@ while (cc < ccend)
 
 /* Possessive quantifiers can use a special case. */
 if (SLJIT_UNLIKELY(possessive == length))
-  return -1;
+  return stack_restore ? no_frame : no_stack;
 
 if (length > 0)
   return length + 1;
-return -1;
+return stack_restore ? no_frame : no_stack;
 }
 
 static void init_frame(compiler_common *common, pcre_uchar *cc, int stackpos, int stacktop, BOOL recursive)
 {
 DEFINE_COMPILER;
-pcre_uchar *ccend = bracketend(cc);
+pcre_uchar *ccend = bracketend(cc) - (1 + LINK_SIZE);
 BOOL setsom_found = recursive;
 BOOL setmark_found = recursive;
 /* The last capture is a local variable even for recursions. */
@@ -1782,15 +1835,13 @@ if (list_item)
   }
 }
 
-static void add_stub(compiler_common *common, enum stub_types type, int data, struct sljit_jump *start)
+static void add_stub(compiler_common *common, struct sljit_jump *start)
 {
 DEFINE_COMPILER;
 stub_list* list_item = sljit_alloc_memory(compiler, sizeof(stub_list));
 
 if (list_item)
   {
-  list_item->type = type;
-  list_item->data = data;
   list_item->start = start;
   list_item->quit = LABEL();
   list_item->next = common->stubs;
@@ -1806,12 +1857,7 @@ stub_list* list_item = common->stubs;
 while (list_item)
   {
   JUMPHERE(list_item->start);
-  switch(list_item->type)
-    {
-    case stack_alloc:
-    add_jump(compiler, &common->stackalloc, JUMP(SLJIT_FAST_CALL));
-    break;
-    }
+  add_jump(compiler, &common->stackalloc, JUMP(SLJIT_FAST_CALL));
   JUMPTO(SLJIT_JUMP, list_item->quit);
   list_item = list_item->next;
   }
@@ -1839,7 +1885,7 @@ OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, TMP1, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, TMP1, 0);
 #endif
-add_stub(common, stack_alloc, 0, CMP(SLJIT_C_GREATER, STACK_TOP, 0, STACK_LIMIT, 0));
+add_stub(common, CMP(SLJIT_C_GREATER, STACK_TOP, 0, STACK_LIMIT, 0));
 }
 
 static SLJIT_INLINE void free_stack(compiler_common *common, int size)
@@ -4060,7 +4106,7 @@ while (*cc != XCL_END)
       case PT_WORD:
       OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, CHAR_UNDERSCORE - charoffset);
       OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_EQUAL);
-      /* ... fall through */
+      /* Fall through. */
 
       case PT_ALNUM:
       SET_TYPE_OFFSET(ucp_Ll);
@@ -5047,8 +5093,19 @@ backtrack_common *backtrack;
 recurse_entry *entry = common->entries;
 recurse_entry *prev = NULL;
 int start = GET(cc, 1);
+pcre_uchar *start_cc;
 
 PUSH_BACKTRACK(sizeof(recurse_backtrack), cc, NULL);
+
+/* Inlining simple patterns. */
+if (get_framesize(common, common->start + start, TRUE) == no_stack)
+  {
+  start_cc = common->start + start;
+  compile_matchingpath(common, next_opcode(common, start_cc), bracketend(start_cc) - (1 + LINK_SIZE), backtrack);
+  BACKTRACK_AS(recurse_backtrack)->inlined_pattern = TRUE;
+  return cc + 1 + LINK_SIZE;
+  }
+
 while (entry != NULL)
   {
   if (entry->start == start)
@@ -6197,7 +6254,8 @@ if (framesize < 0)
 
   BACKTRACK_AS(bracketpos_backtrack)->stacksize = stacksize;
   allocate_stack(common, stacksize);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0);
+  if (framesize == no_frame)
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0);
 
   if (offset != 0)
     {
@@ -6261,7 +6319,8 @@ while (*cc != OP_KETRPOS)
 
   if (framesize < 0)
     {
-    OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+    if (framesize == no_frame)
+      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
 
     if (offset != 0)
       {
@@ -7183,7 +7242,11 @@ static void compile_recurse_backtrackingpath(compiler_common *common, struct bac
 {
 DEFINE_COMPILER;
 
+if (CURRENT_AS(recurse_backtrack)->inlined_pattern)
+  compile_backtrackingpath(common, current->top);
 set_jumps(current->topbacktracks, LABEL());
+if (CURRENT_AS(recurse_backtrack)->inlined_pattern)
+  return;
 
 if (common->has_set_som && common->mark_ptr != 0)
   {
