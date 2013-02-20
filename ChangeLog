@@ -58,6 +58,8 @@ Version 8.33 xx-xxxx-201x
 14. Inlining subpatterns in recursions, when certain conditions are fulfilled.
     Only supported by the JIT compiler at the moment.
 
+15. JIT compiler now supports 32 bit Macs thanks to Lawrence Velazquez.
+
 
 Version 8.32 30-November-2012
 -----------------------------
