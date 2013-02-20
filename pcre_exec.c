@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -6286,6 +6286,7 @@ const pcre_uint8 *start_bits = NULL;
 PCRE_PUCHAR start_match = (PCRE_PUCHAR)subject + start_offset;
 PCRE_PUCHAR end_subject;
 PCRE_PUCHAR start_partial = NULL;
+PCRE_PUCHAR match_partial;
 PCRE_PUCHAR req_char_ptr = start_match - 1;
 
 const pcre_study_data *study;
@@ -6837,7 +6838,11 @@ for(;;)
   md->match_function_type = 0;
   md->end_offset_top = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, NULL, 0);
-  if (md->hitend && start_partial == NULL) start_partial = md->start_used_ptr;
+  if (md->hitend && start_partial == NULL) 
+    {
+    start_partial = md->start_used_ptr;
+    match_partial = start_match;
+    }  
 
   switch(rc)
     {
@@ -7045,6 +7050,8 @@ if (start_partial != NULL)
     {
     offsets[0] = (int)(start_partial - (PCRE_PUCHAR)subject);
     offsets[1] = (int)(end_subject - (PCRE_PUCHAR)subject);
+    if (offsetcount > 2) 
+      offsets[2] = (int)(match_partial - (PCRE_PUCHAR)subject);
     }
   rc = PCRE_ERROR_PARTIAL;
   }

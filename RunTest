@@ -14,9 +14,10 @@
 # disabled with /SS.
 #
 # When JIT support is available, all the tests are also run with -s+ to test
-# (again, almost) everything with studying and the JIT option. There are also
-# two tests for JIT-specific features, one to be run when JIT support is
-# available, and one when it is not.
+# (again, almost) everything with studying and the JIT option, unless "nojit"
+# is given on the command line. There are also two tests for JIT-specific 
+# features, one to be run when JIT support is available (unless "nojit" is
+# specified), and one when it is not.
 #
 # Whichever of the 8-, 16- and 32-bit libraries exist are tested. It is also
 # possible to select which to test by the arguments -8, -16 or -32.
@@ -151,11 +152,12 @@ fi
 
 # Default values
 
-valgrind=
-sim=
 arg8=
 arg16=
 arg32=
+nojit=
+sim=
+valgrind=
 
 # This is in case the caller has set aliases (as I do - PH)
 unset cp ls mv rm
@@ -221,9 +223,10 @@ while [ $# -gt 0 ] ; do
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
+   nojit) nojit=yes;; 
+   sim) shift; sim=$1;;
    valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
    valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
-   sim) shift; sim=$1;;
     *) echo "Unknown test number '$1'"; exit 1;;
   esac
   shift
@@ -309,7 +312,7 @@ ucp=$?
 jitopt=
 $sim ./pcretest -C jit >/dev/null
 jit=$?
-if [ $jit -ne 0 ] ; then
+if [ $jit -ne 0 -a "$nojit" != "yes" ] ; then
   jitopt=-s+
 fi
 
@@ -700,7 +703,7 @@ fi
 
 if [ $do12 = yes ] ; then
   echo $title12
-  if [ $jit -eq 0 ] ; then
+  if [ $jit -eq 0 -o "$nojit" = "yes" ] ; then
     echo "  Skipped because JIT is not available or not usable"
   else
     $sim $valgrind ./pcretest -q $bmode $testdata/testinput12 testtry

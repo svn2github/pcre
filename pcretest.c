@@ -5263,14 +5263,17 @@ while (!done)
           }
         }
 
-      /* There was a partial match */
+      /* There was a partial match. If the bumpalong point is not the same as 
+      the first inspected character, show the offset explicitly. */
 
       else if (count == PCRE_ERROR_PARTIAL)
         {
-        if (markptr == NULL) fprintf(outfile, "Partial match");
-        else
+        fprintf(outfile, "Partial match");
+        if (use_size_offsets > 2 && use_offsets[0] != use_offsets[2])
+          fprintf(outfile, " at offset %d", use_offsets[2]);  
+        if (markptr != NULL) 
           {
-          fprintf(outfile, "Partial match, mark=");
+          fprintf(outfile, ", mark=");
           PCHARSV(markptr, 0, -1, outfile);
           }
         if (use_size_offsets > 1)

@@ -3836,5 +3836,13 @@ settings of the anchored and startline bits. --/
 /(ab)/
     ab\O3
     ab\O2 
+    
+/(?<=123)(*MARK:xx)abc/K
+    xxxx123a\P\P
+    xxxx123a\P
+    
+/123\Kabc/
+    xxxx123a\P\P
+    xxxx123a\P
 
 /-- End of testinput2 --/

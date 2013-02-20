@@ -985,7 +985,7 @@ Partial match: abc
    xyzfo\P 
 No match
    foob\P\>2 
-Partial match: foob
+Partial match at offset 3: foob
    foobar...\R\P\>4 
  0: ar
    xyzfo\P
@@ -7466,17 +7466,17 @@ Error -16 (item unsupported for DFA matching)
     xyzabc123pqr 
  0: 123
     xyzabc12\P
-Partial match: abc12
+Partial match at offset 6: abc12
     xyzabc12\P\P
-Partial match: abc12
+Partial match at offset 6: abc12
 
 /\babc\b/
     +++abc+++
  0: abc
     +++ab\P
-Partial match: +ab
+Partial match at offset 3: +ab
     +++ab\P\P  
-Partial match: +ab
+Partial match at offset 3: +ab
 
 /(?=C)/g+
     ABCDECBA
@@ -7625,7 +7625,7 @@ Error -16 (item unsupported for DFA matching)
 
 /(?<=abc)def/
     abc\P\P
-Partial match: abc
+Partial match at offset 3: abc
 
 /abc$/
     abc

@@ -60,6 +60,10 @@ Version 8.33 xx-xxxx-201x
 
 15. JIT compiler now supports 32 bit Macs thanks to Lawrence Velazquez.
 
+16. Partial matches now set offsets[2] to the "bumpalong" value, that is, the
+    offset of the starting point of the matching process, provided the offsets 
+    vector is large enough.
+
 
 Version 8.32 30-November-2012
 -----------------------------

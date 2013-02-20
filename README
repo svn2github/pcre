@@ -633,10 +633,14 @@ run forces pcre_study() to be called for all patterns except for a few in some
 tests that are marked "never study" (see the pcretest program for how this is
 done). If JIT support is available, the non-DFA tests are run a third time,
 this time with a forced pcre_study() with the PCRE_STUDY_JIT_COMPILE option.
+This testing can be suppressed by putting "nojit" on the RunTest command line.
 
 The entire set of tests is run once for each of the 8-bit, 16-bit and 32-bit
 libraries that are enabled. If you want to run just one set of tests, call
 RunTest with either the -8, -16 or -32 option.
+
+If valgrind is installed, you can run the tests under it by putting "valgrind" 
+on the RunTest command line.
 
 RunTest uses a file called testtry to hold the main output from pcretest.
 Other files whose names begin with "test" are used as working files in some
@@ -932,4 +936,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 27 October 2012
+Last updated: 20 February 2013

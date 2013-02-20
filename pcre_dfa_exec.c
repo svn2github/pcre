@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language (but see
 below for why this module is different).
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -3023,15 +3023,7 @@ for (;;)
           ptr > md->start_used_ptr)            /* Inspected non-empty string */
           )
         )
-      {
-      if (offsetcount >= 2)
-        {
-        offsets[0] = (int)(md->start_used_ptr - start_subject);
-        offsets[1] = (int)(end_subject - start_subject);
-        }
       match_count = PCRE_ERROR_PARTIAL;
-      }
-
     DPRINTF(("%.*sEnd of internal_dfa_exec %d: returning %d\n"
       "%.*s---------------------\n\n", rlevel*2-2, SP, rlevel, match_count,
       rlevel*2-2, SP));
@@ -3545,7 +3537,17 @@ for (;;)
   /* Anything other than "no match" means we are done, always; otherwise, carry
   on only if not anchored. */
 
-  if (rc != PCRE_ERROR_NOMATCH || anchored) return rc;
+  if (rc != PCRE_ERROR_NOMATCH || anchored) 
+    {
+    if (rc == PCRE_ERROR_PARTIAL && offsetcount >= 2)
+      {
+      offsets[0] = (int)(md->start_used_ptr - (PCRE_PUCHAR)subject);
+      offsets[1] = (int)(end_subject - (PCRE_PUCHAR)subject);
+      if (offsetcount > 2) 
+        offsets[2] = (int)(current_subject - (PCRE_PUCHAR)subject);
+      }
+    return rc;
+    } 
 
   /* Advance to the next subject character unless we are at the end of a line
   and firstline is set. */

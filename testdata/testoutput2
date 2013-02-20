@@ -9719,17 +9719,17 @@ Partial match: abc12
     xyzabc123pqr 
  0: 123
     xyzabc12\P
-Partial match: abc12
+Partial match at offset 6: abc12
     xyzabc12\P\P
-Partial match: abc12
+Partial match at offset 6: abc12
 
 /\babc\b/
     +++abc+++
  0: abc
     +++ab\P
-Partial match: +ab
+Partial match at offset 3: +ab
     +++ab\P\P  
-Partial match: +ab
+Partial match at offset 3: +ab
 
 /(?&word)(?&element)(?(DEFINE)(?<element><[^m][^>]>[^<])(?<word>\w*+))/BZ
 ------------------------------------------------------------------
@@ -10840,7 +10840,7 @@ No match
 
 /(?<=abc)def/
     abc\P\P
-Partial match: abc
+Partial match at offset 3: abc
 
 /abc$/
     abc
@@ -12599,5 +12599,17 @@ Matched, but too many substrings
     ab\O2 
 Matched, but too many substrings
  0: ab
+    
+/(?<=123)(*MARK:xx)abc/K
+    xxxx123a\P\P
+Partial match at offset 7, mark=xx: 123a
+    xxxx123a\P
+Partial match at offset 7, mark=xx: 123a
+    
+/123\Kabc/
+    xxxx123a\P\P
+Partial match: 123a
+    xxxx123a\P
+Partial match: 123a
 
 /-- End of testinput2 --/
