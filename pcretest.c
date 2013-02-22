@@ -121,6 +121,12 @@ input mode under Windows. */
 #endif
 #endif
 
+#ifdef __VMS
+#include <ssdef.h>
+void vms_setsymbol( char *, char *, int );
+#endif
+
+
 #define PRIV(name) name
 
 /* We have to include pcre_internal.h because we need the internal info for
@@ -3099,7 +3105,7 @@ while (argc > 1 && argv[op][0] == '-')
       ((stack_size = get_value((pcre_uint8 *)argv[op+1], &endptr)),
         *endptr == 0))
     {
-#if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS)
+#if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS) || defined(__VMS)
     printf("PCRE: -S not supported on this OS\n");
     exit(1);
 #else
@@ -3132,6 +3138,10 @@ while (argc > 1 && argv[op][0] == '-')
         (void)PCRE_CONFIG(PCRE_CONFIG_LINK_SIZE, &rc);
         printf("%d\n", rc);
         yield = rc;
+        
+#ifdef __VMS
+        vms_setsymbol("LINKSIZE",0,yield );
+#endif
         }
       else if (strcmp(argv[op + 1], "pcre8") == 0)
         {
@@ -3142,7 +3152,9 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
-        goto EXIT;
+#ifdef __VMS
+        vms_setsymbol("PCRE8",0,yield );
+#endif
         }
       else if (strcmp(argv[op + 1], "pcre16") == 0)
         {
@@ -3153,7 +3165,9 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
-        goto EXIT;
+#ifdef __VMS
+        vms_setsymbol("PCRE16",0,yield );
+#endif
         }
       else if (strcmp(argv[op + 1], "pcre32") == 0)
         {
@@ -3164,9 +3178,11 @@ while (argc > 1 && argv[op][0] == '-')
         printf("0\n");
         yield = 0;
 #endif
-        goto EXIT;
+#ifdef __VMS
+        vms_setsymbol("PCRE32",0,yield );
+#endif
         }
-      if (strcmp(argv[op + 1], "utf") == 0)
+      else if (strcmp(argv[op + 1], "utf") == 0)
         {
 #ifdef SUPPORT_PCRE8
         if (pcre_mode == PCRE8_MODE)
@@ -3182,7 +3198,9 @@ while (argc > 1 && argv[op][0] == '-')
 #endif
         printf("%d\n", rc);
         yield = rc;
-        goto EXIT;
+#ifdef __VMS
+        vms_setsymbol("UTF",0,yield );
+#endif
         }
       else if (strcmp(argv[op + 1], "ucp") == 0)
         {
@@ -5485,6 +5503,10 @@ if (buffer32 != NULL) free(buffer32);
 #if !defined NODFA
 if (dfa_workspace != NULL)
   free(dfa_workspace);
+#endif
+
+#if defined(__VMS)
+  yield = SS$_NORMAL;  /* Return values via DCL symbols */
 #endif
 
 return yield;

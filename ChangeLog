@@ -70,6 +70,8 @@ Version 8.33 xx-xxxx-201x
     segment is retained when a new segment is processed. Otherwise, if there
     are no lookbehinds in the pattern, \A might match incorrectly at the start
     of a new segment.
+    
+18. Added some #ifdef __VMS code into pcretest.c to help VMS implementations.
 
 
 Version 8.32 30-November-2012
