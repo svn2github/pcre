@@ -233,7 +233,7 @@ if (caseless)
     {
     while (length-- > 0)
       {
-      pcre_uchar cc, cp;
+      pcre_uint32 cc, cp;
       if (eptr >= md->end_subject) return -2;   /* Partial match */
       cc = RAWUCHARTEST(eptr);
       cp = RAWUCHARTEST(p);
@@ -3215,7 +3215,7 @@ for (;;)
 
       if (fc < 128)
         {
-        pcre_uchar cc = RAWUCHAR(eptr);
+        pcre_uint32 cc = RAWUCHAR(eptr);
         if (md->lcc[fc] != TABLE_GET(cc, md->lcc, cc)) RRETURN(MATCH_NOMATCH);
         ecode++;
         eptr++;
@@ -4452,8 +4452,7 @@ for (;;)
         case OP_DIGIT:
         for (i = 1; i <= min; i++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -4470,8 +4469,7 @@ for (;;)
         case OP_NOT_WHITESPACE:
         for (i = 1; i <= min; i++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -4488,8 +4486,7 @@ for (;;)
         case OP_WHITESPACE:
         for (i = 1; i <= min; i++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -4506,8 +4503,7 @@ for (;;)
         case OP_NOT_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
@@ -4524,8 +4520,7 @@ for (;;)
         case OP_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
-          pcre_uchar cc;
-
+          pcre_uint32 cc;
           if (eptr >= md->end_subject)
             {
             SCHECK_PARTIAL();
