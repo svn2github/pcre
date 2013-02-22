@@ -634,6 +634,7 @@ Capturing subpattern count = 0
 Options: anchored multiline
 No first char
 No need char
+Max lookbehind = 1
 
 /^abc/Im
 Capturing subpattern count = 0

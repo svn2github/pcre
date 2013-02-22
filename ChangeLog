@@ -63,6 +63,13 @@ Version 8.33 xx-xxxx-201x
 16. Partial matches now set offsets[2] to the "bumpalong" value, that is, the
     offset of the starting point of the matching process, provided the offsets 
     vector is large enough.
+    
+17. The \A escape now records a lookbehind value of 1, though its execution
+    does not actually inspect the previous character. This is to ensure that,
+    in partial multi-segment matching, at least one character from the old
+    segment is retained when a new segment is processed. Otherwise, if there
+    are no lookbehinds in the pattern, \A might match incorrectly at the start
+    of a new segment.
 
 
 Version 8.32 30-November-2012

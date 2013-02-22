@@ -797,7 +797,8 @@ Otherwise further processing may be required. */
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
 /* Not alphanumeric */
 else if (c < CHAR_0 || c > CHAR_z) {}
-else if ((i = escapes[c - CHAR_0]) != 0) { if (i > 0) c = (pcre_uint32)i; else escape = -i; }
+else if ((i = escapes[c - CHAR_0]) != 0) 
+  { if (i > 0) c = (pcre_uint32)i; else escape = -i; }
 
 #else           /* EBCDIC coding */
 /* Not alphanumeric */
@@ -3094,7 +3095,8 @@ value is a character, a negative value is an escape value. */
 if (*ptr == CHAR_BACKSLASH)
   {
   int temperrorcode = 0;
-  escape = check_escape(&ptr, &next, &temperrorcode, cd->bracount, options, FALSE);
+  escape = check_escape(&ptr, &next, &temperrorcode, cd->bracount, options, 
+    FALSE);
   if (temperrorcode != 0) return FALSE;
   ptr++;    /* Point after the escape sequence */
   }
@@ -4277,14 +4279,12 @@ for (;; ptr++)
 
       if (c == CHAR_BACKSLASH)
         {
-        escape = check_escape(&ptr, &ec, errorcodeptr, cd->bracount, options, TRUE);
-
+        escape = check_escape(&ptr, &ec, errorcodeptr, cd->bracount, options, 
+          TRUE);
         if (*errorcodeptr != 0) goto FAILED;
-
-        if (escape == 0)
-          c = ec;
+        if (escape == 0) c = ec;
         else if (escape == ESC_b) c = CHAR_BS; /* \b is backspace in a class */
-        else if (escape == ESC_N)            /* \N is not supported in a class */
+        else if (escape == ESC_N)          /* \N is not supported in a class */
           {
           *errorcodeptr = ERR71;
           goto FAILED;
@@ -6718,10 +6718,9 @@ for (;; ptr++)
     case CHAR_BACKSLASH:
     tempptr = ptr;
     escape = check_escape(&ptr, &ec, errorcodeptr, cd->bracount, options, FALSE);
-
     if (*errorcodeptr != 0) goto FAILED;
 
-    if (escape == 0)
+    if (escape == 0)                  /* The escape coded a single character */
       c = ec;
     else
       {
@@ -6887,11 +6886,12 @@ for (;; ptr++)
       can obtain the OP value by negating the escape value in the default
       situation when PCRE_UCP is not set. When it *is* set, we substitute
       Unicode property tests. Note that \b and \B do a one-character
-      lookbehind. */
+      lookbehind, and \A also behaves as if it does. */
 
       else
         {
-        if ((escape == ESC_b || escape == ESC_B) && cd->max_lookbehind == 0)
+        if ((escape == ESC_b || escape == ESC_B || escape == ESC_A) && 
+             cd->max_lookbehind == 0)
           cd->max_lookbehind = 1;
 #ifdef SUPPORT_UCP
         if (escape >= ESC_DU && escape <= ESC_wu)

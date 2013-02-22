@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "08 November 2012" "PCRE 8.32"
+.TH PCREAPI 3 "22 February 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -1297,9 +1297,14 @@ be used.
   PCRE_INFO_MAXLOOKBEHIND
 .sp
 Return the number of characters (NB not bytes) in the longest lookbehind
-assertion in the pattern. Note that the simple assertions \eb and \eB require a
-one-character lookbehind. This information is useful when doing multi-segment
-matching using the partial matching facilities.
+assertion in the pattern. This information is useful when doing multi-segment
+matching using the partial matching facilities. Note that the simple assertions
+\eb and \eB require a one-character lookbehind. \eA also registers a
+one-character lookbehind, though it does not actually inspect the previous
+character. This is to ensure that at least one character from the old segment
+is retained when a new segment is processed. Otherwise, if there are no 
+lookbehinds in the pattern, \eA might match incorrectly at the start of a new 
+segment.
 .sp
   PCRE_INFO_MINLENGTH
 .sp
@@ -2818,6 +2823,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2012
-Copyright (c) 1997-2012 University of Cambridge.
+Last updated: 22 February 2013
+Copyright (c) 1997-2013 University of Cambridge.
 .fi
