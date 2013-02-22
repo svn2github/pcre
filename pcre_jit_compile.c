@@ -165,6 +165,7 @@ typedef struct jit_arguments {
   pcre_uchar *mark_ptr;
   void *callout_data;
   /* Everything else after. */
+  int real_offset_count;
   int offset_count;
   int call_limit;
   pcre_uint8 notbol;
@@ -1971,18 +1972,28 @@ else
 static SLJIT_INLINE void return_with_partial_match(compiler_common *common, struct sljit_label *quit)
 {
 DEFINE_COMPILER;
+struct sljit_jump *jump;
 
 SLJIT_COMPILE_ASSERT(STR_END == SLJIT_SAVED_REG2, str_end_must_be_saved_reg2);
 SLJIT_ASSERT(common->start_used_ptr != 0 && (common->mode == JIT_PARTIAL_SOFT_COMPILE ? common->hit_start != 0 : common->hit_start == 0));
 
 OP1(SLJIT_MOV, SLJIT_SCRATCH_REG2, 0, ARGUMENTS, 0);
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_PARTIAL);
-OP1(SLJIT_MOV_SI, SLJIT_SCRATCH_REG3, 0, SLJIT_MEM1(SLJIT_SCRATCH_REG2), SLJIT_OFFSETOF(jit_arguments, offset_count));
-CMPTO(SLJIT_C_LESS, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, 2, quit);
+OP1(SLJIT_MOV_SI, SLJIT_SCRATCH_REG3, 0, SLJIT_MEM1(SLJIT_SCRATCH_REG2), SLJIT_OFFSETOF(jit_arguments, real_offset_count));
+CMPTO(SLJIT_C_SIG_LESS, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, 2, quit);
 
 /* Store match begin and end. */
 OP1(SLJIT_MOV, SLJIT_SAVED_REG1, 0, SLJIT_MEM1(SLJIT_SCRATCH_REG2), SLJIT_OFFSETOF(jit_arguments, begin));
 OP1(SLJIT_MOV, SLJIT_SCRATCH_REG2, 0, SLJIT_MEM1(SLJIT_SCRATCH_REG2), SLJIT_OFFSETOF(jit_arguments, offsets));
+
+jump = CMP(SLJIT_C_SIG_LESS, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, 3);
+OP2(SLJIT_SUB, SLJIT_SCRATCH_REG3, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), (common->mode == JIT_PARTIAL_HARD_COMPILE ? common->start_used_ptr : common->hit_start) + sizeof(sljit_sw), SLJIT_SAVED_REG1, 0);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+OP2(SLJIT_ASHR, SLJIT_SCRATCH_REG3, 0, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, UCHAR_SHIFT);
+#endif
+OP1(SLJIT_MOV_SI, SLJIT_MEM1(SLJIT_SCRATCH_REG2), 2 * sizeof(int), SLJIT_SCRATCH_REG3, 0);
+JUMPHERE(jump);
+
 OP1(SLJIT_MOV, SLJIT_SCRATCH_REG3, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mode == JIT_PARTIAL_HARD_COMPILE ? common->start_used_ptr : common->hit_start);
 OP2(SLJIT_SUB, SLJIT_SAVED_REG2, 0, STR_END, 0, SLJIT_SAVED_REG1, 0);
 #if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
@@ -8214,11 +8225,11 @@ if (mode == JIT_COMPILE && (re->flags & PCRE_REQCHSET) != 0 && (re->options & PC
 if (mode != JIT_COMPILE)
   {
   common->start_used_ptr = common->ovector_start;
-  common->ovector_start += sizeof(sljit_sw);
+  common->ovector_start += 2 * sizeof(sljit_sw);
   if (mode == JIT_PARTIAL_SOFT_COMPILE)
     {
     common->hit_start = common->ovector_start;
-    common->ovector_start += sizeof(sljit_sw);
+    common->ovector_start += 2 * sizeof(sljit_sw);
     }
   }
 if ((re->options & PCRE_FIRSTLINE) != 0)
@@ -8321,10 +8332,14 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
   {
   jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr + sizeof(sljit_sw), STR_PTR, 0);
   JUMPHERE(jump);
   }
 else if (mode == JIT_PARTIAL_HARD_COMPILE)
+  {
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr + sizeof(sljit_sw), STR_PTR, 0);
+  }
 
 compile_matchingpath(common, rootbacktrack.cc, ccend, &rootbacktrack);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
@@ -8377,8 +8392,10 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
   /* Update hit_start only in the first time. */
   jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr + sizeof(sljit_sw));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, TMP1, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start + sizeof(sljit_sw), TMP2, 0);
   JUMPHERE(jump);
   }
 
@@ -8619,6 +8636,7 @@ arguments.notempty = (options & PCRE_NOTEMPTY) != 0;
 arguments.notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
 arguments.offsets = offsets;
 arguments.callout_data = (extra_data->flags & PCRE_EXTRA_CALLOUT_DATA) != 0 ? extra_data->callout_data : NULL;
+arguments.real_offset_count = offset_count;
 
 /* pcre_exec() rounds offset_count to a multiple of 3, and then uses only 2/3 of
 the output vector for storing captured strings, with the remainder used as
@@ -8709,6 +8727,7 @@ arguments.notempty = (options & PCRE_NOTEMPTY) != 0;
 arguments.notempty_atstart = (options & PCRE_NOTEMPTY_ATSTART) != 0;
 arguments.offsets = offsets;
 arguments.callout_data = (extra_data->flags & PCRE_EXTRA_CALLOUT_DATA) != 0 ? extra_data->callout_data : NULL;
+arguments.real_offset_count = offset_count;
 
 /* pcre_exec() rounds offset_count to a multiple of 3, and then uses only 2/3 of
 the output vector for storing captured strings, with the remainder used as
