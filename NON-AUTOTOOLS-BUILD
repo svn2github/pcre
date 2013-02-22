@@ -512,9 +512,19 @@ site.
 
 BUILDING PCRE ON OPENVMS
 
-Dan Mooney sent the following comments about building PCRE on OpenVMS. They
-relate to an older version of PCRE that used fewer source files, so the exact
-commands will need changing. See the current list of source files above.
+Stephen Hoffman sent the following, in December 2012:
+
+"Here <http://labs.hoffmanlabs.com/node/1847> is a very short write-up on the
+OpenVMS port and here
+
+<http://labs.hoffmanlabs.com/labsnotes/pcre-vms-8_32.zip>
+
+is a zip with the OpenVMS files, and with one modified testing-related PCRE
+file." This is a port of PCRE 8.32.
+
+Earlier, Dan Mooney sent the following comments about building PCRE on OpenVMS.
+They relate to an older version of PCRE that used fewer source files, so the
+exact commands will need changing. See the current list of source files above.
 
 "It was quite easy to compile and link the library. I don't have a formal
 make file but the attached file [reproduced below] contains the OpenVMS DCL
@@ -636,4 +646,4 @@ There is also a mirror here:
   http://www.vsoft-software.com/downloads.html
 
 ==========================
-Last Updated: 21 November 2012
+Last Updated: 22 February 2013
