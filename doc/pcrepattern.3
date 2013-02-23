@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "11 November 2012" "PCRE 8.32"
+.TH PCREPATTERN 3 "23 February 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -802,7 +802,8 @@ Instead, this property is assumed for any code point that is not in the
 Unicode table.
 .P
 Specifying caseless matching does not affect these escape sequences. For
-example, \ep{Lu} always matches only upper case letters.
+example, \ep{Lu} always matches only upper case letters. This is different from 
+the behaviour of current versions of Perl.
 .P
 Matching characters by Unicode property is not fast, because PCRE has to do a
 multistage table lookup in order to find a character's property. That is why
@@ -2978,6 +2979,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 November 2012
-Copyright (c) 1997-2012 University of Cambridge.
+Last updated: 23 February 2013
+Copyright (c) 1997-2013 University of Cambridge.
 .fi
