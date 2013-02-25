@@ -1987,7 +1987,7 @@ OP1(SLJIT_MOV, SLJIT_SAVED_REG1, 0, SLJIT_MEM1(SLJIT_SCRATCH_REG2), SLJIT_OFFSET
 OP1(SLJIT_MOV, SLJIT_SCRATCH_REG2, 0, SLJIT_MEM1(SLJIT_SCRATCH_REG2), SLJIT_OFFSETOF(jit_arguments, offsets));
 
 jump = CMP(SLJIT_C_SIG_LESS, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, 3);
-OP2(SLJIT_SUB, SLJIT_SCRATCH_REG3, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), (common->mode == JIT_PARTIAL_HARD_COMPILE ? common->start_used_ptr : common->hit_start) + sizeof(sljit_sw), SLJIT_SAVED_REG1, 0);
+OP2(SLJIT_SUB, SLJIT_SCRATCH_REG3, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr + sizeof(sljit_sw), SLJIT_SAVED_REG1, 0);
 #if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 OP2(SLJIT_ASHR, SLJIT_SCRATCH_REG3, 0, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
@@ -8229,7 +8229,7 @@ if (mode != JIT_COMPILE)
   if (mode == JIT_PARTIAL_SOFT_COMPILE)
     {
     common->hit_start = common->ovector_start;
-    common->ovector_start += 2 * sizeof(sljit_sw);
+    common->ovector_start += sizeof(sljit_sw);
     }
   }
 if ((re->options & PCRE_FIRSTLINE) != 0)
@@ -8392,10 +8392,8 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
   /* Update hit_start only in the first time. */
   jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr);
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr + sizeof(sljit_sw));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, TMP1, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start + sizeof(sljit_sw), TMP2, 0);
   JUMPHERE(jump);
   }
 
