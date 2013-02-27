@@ -1835,6 +1835,7 @@ only. */
 #define PT_PXSPACE    7    /* POSIX space - Z plus 9,10,11,12,13 */
 #define PT_WORD       8    /* Word - L plus N plus underscore */
 #define PT_CLIST      9    /* Pseudo-property: match character list */
+#define PT_UCNC      10    /* Universal Character nameable character */
 
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */

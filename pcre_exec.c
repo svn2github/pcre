@@ -308,7 +308,7 @@ enum { RM1=1, RM2,  RM3,  RM4,  RM5,  RM6,  RM7,  RM8,  RM9,  RM10,
        RM31,  RM32, RM33, RM34, RM35, RM36, RM37, RM38, RM39, RM40,
        RM41,  RM42, RM43, RM44, RM45, RM46, RM47, RM48, RM49, RM50,
        RM51,  RM52, RM53, RM54, RM55, RM56, RM57, RM58, RM59, RM60,
-       RM61,  RM62, RM63, RM64, RM65, RM66, RM67 };
+       RM61,  RM62, RM63, RM64, RM65, RM66, RM67, RM68 };
 
 /* These versions of the macros use the stack, as normal. There are debugging
 versions and production versions. Note that the "rw" argument of RMATCH isn't
@@ -2628,6 +2628,13 @@ for (;;)
             { if (op == OP_PROP) break; else { RRETURN(MATCH_NOMATCH); } }
           }
         break;
+        
+        case PT_UCNC:
+        if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+             c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
+             c >= 0xe000) == (op == OP_NOTPROP))
+          RRETURN(MATCH_NOMATCH);  
+        break;            
 
         /* This should never occur */
 
@@ -4246,6 +4253,22 @@ for (;;)
               }
             }
           break;
+          
+          case PT_UCNC:
+          for (i = 1; i <= min; i++)
+            {
+            if (eptr >= md->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(c, eptr);
+            if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
+                 c >= 0xe000) == prop_fail_result)
+              RRETURN(MATCH_NOMATCH);
+            }   
+          break;            
 
           /* This should not occur */
 
@@ -4992,6 +5015,25 @@ for (;;)
               }
             }
           /* Control never gets here */
+          
+          case PT_UCNC:
+          for (fi = min;; fi++)
+            {
+            RMATCH(eptr, ecode, offset_top, md, eptrb, RM68);
+            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (fi >= max) RRETURN(MATCH_NOMATCH);
+            if (eptr >= md->end_subject)
+              {
+              SCHECK_PARTIAL();
+              RRETURN(MATCH_NOMATCH);
+              }
+            GETCHARINCTEST(c, eptr);
+            if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
+                 c >= 0xe000) == prop_fail_result)
+              RRETURN(MATCH_NOMATCH);    
+            }   
+          /* Control never gets here */
 
           /* This should never occur */
           default:
@@ -5485,6 +5527,24 @@ for (;;)
             eptr += len;
             }
           GOT_MAX:
+          break;
+
+          case PT_UCNC:
+          for (i = min; i < max; i++)
+            {
+            int len = 1;
+            if (eptr >= md->end_subject)
+              {
+              SCHECK_PARTIAL();
+              break;
+              }
+            GETCHARLENTEST(c, eptr, len);
+            if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+                 c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
+                 c >= 0xe000) == prop_fail_result)
+              break;
+            eptr += len;
+            }   
           break;
 
           default:
@@ -6128,7 +6188,7 @@ switch (frame->Xwhere)
   LBL(32) LBL(34) LBL(42) LBL(46)
 #ifdef SUPPORT_UCP
   LBL(36) LBL(37) LBL(38) LBL(39) LBL(40) LBL(41) LBL(44) LBL(45)
-  LBL(59) LBL(60) LBL(61) LBL(62) LBL(67)
+  LBL(59) LBL(60) LBL(61) LBL(62) LBL(67) LBL(68)
 #endif  /* SUPPORT_UCP */
 #endif  /* SUPPORT_UTF */
   default:

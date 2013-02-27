@@ -75,6 +75,10 @@ Version 8.33 xx-xxxx-201x
 
 19. Redefined some pcre_uchar variables in pcre_exec.c as pcre_uint32; this 
     gives some modest performance improvement in 8-bit mode.
+    
+20. Added the PCRE-specific property \p{Xuc} for matching characters that can
+    be expressed in certain programming languages using Universal Character 
+    Names. 
 
 
 Version 8.32 30-November-2012

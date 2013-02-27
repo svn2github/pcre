@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "23 February 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "27 February 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -863,7 +863,8 @@ the "mark" property always have the "extend" grapheme breaking property.
 As well as the standard Unicode properties described above, PCRE supports four
 more that make it possible to convert traditional escape sequences such as \ew
 and \es and POSIX character classes to use Unicode properties. PCRE uses these
-non-standard, non-Perl properties internally when PCRE_UCP is set. They are:
+non-standard, non-Perl properties internally when PCRE_UCP is set. However, 
+they may also be used explicitly. These properties are:
 .sp
   Xan   Any alphanumeric character
   Xps   Any POSIX space character
@@ -875,6 +876,15 @@ property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the
 same characters as Xan, plus underscore.
+.P
+There is another non-standard property, Xuc, which matches any character that 
+can be represented by a Universal Character Name in C++ and other programming 
+languages. These are the characters $, @, ` (grave accent), and all characters 
+with Unicode code points greater than or equal to U+00A0, except for the 
+surrogates U+D800 to U+DFFF. Note that most base (ASCII) characters are 
+excluded. (Universal Character Names are of the form \euHHHH or \eUHHHHHHHH
+where H is a hexadecimal digit. Note that the Xuc property does not match these 
+sequences but the characters that they represent.)
 .
 .
 .\" HTML <a name="resetmatchstart"></a>
@@ -2979,6 +2989,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 23 February 2013
+Last updated: 27 February 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

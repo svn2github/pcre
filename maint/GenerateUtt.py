@@ -1,6 +1,8 @@
 #! /usr/bin/python
 
-# Generate utt tables.
+# Generate utt tables. Note: this script is written in Python 2 and is
+# incompatible with Python 3. However, the 2to3 conversion script has been 
+# successfully tested on it.
 
 # The source file pcre_tables.c contains (amongst other things), a table that
 # is indexed by script name. In order to reduce the number of relocations when
@@ -18,6 +20,7 @@
 # Modified by PH 30-April-2011 to add new scripts for Unicode 6.0.0
 # Modified by ChPe 30-September-2012 to add this note; no other changes were
 # necessary for Unicode 6.2.0 support.
+# Modfied by PH 26-February-2013 to add the Xuc special category.
 
 script_names = ['Arabic', 'Armenian', 'Bengali', 'Bopomofo', 'Braille', 'Buginese', 'Buhid', 'Canadian_Aboriginal', \
  'Cherokee', 'Common', 'Coptic', 'Cypriot', 'Cyrillic', 'Deseret', 'Devanagari', 'Ethiopic', 'Georgian', \
@@ -60,6 +63,7 @@ utt_table.append(('L&',  'PT_LAMP'))
 utt_table.append(('Xan', 'PT_ALNUM'))
 utt_table.append(('Xps', 'PT_PXSPACE'))
 utt_table.append(('Xsp', 'PT_SPACE'))
+utt_table.append(('Xuc', 'PT_UCNC'))
 utt_table.append(('Xwd', 'PT_WORD'))
 
 # Sort the table.
@@ -86,8 +90,8 @@ print ''
 print 'const char PRIV(utt_names)[] =';
 last = ''
 for utt in utt_table:
-	if utt == utt_table[-1]:
-		last = ';'
+        if utt == utt_table[-1]:
+                last = ';'
         print '  STRING_%s0%s' % (utt[0].replace('&', '_AMPERSAND'), last)
 # This was how it was done before the EBCDIC-compatible modification.
 #        print '  "%s\\0"%s' % (utt[0], last)
@@ -96,13 +100,13 @@ print '\nconst ucp_type_table PRIV(utt)[] = {'
 offset = 0
 last = ','
 for utt in utt_table:
-	if utt[1] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE', 
-          'PT_SPACE', 'PT_WORD'):
-		value = '0'
-	else:
-		value = 'ucp_' + utt[0]
-	if utt == utt_table[-1]:
-		last = ''
-	print '  { %3d, %s, %s }%s' % (offset, utt[1], value, last)
-	offset += len(utt[0]) + 1
+        if utt[1] in ('PT_ANY', 'PT_LAMP', 'PT_ALNUM', 'PT_PXSPACE', 
+          'PT_SPACE', 'PT_UCNC', 'PT_WORD'):
+                value = '0'
+        else:
+                value = 'ucp_' + utt[0]
+        if utt == utt_table[-1]:
+                last = ''
+        print '  { %3d, %s, %s }%s' % (offset, utt[1], value, last)
+        offset += len(utt[0]) + 1
 print '};'

@@ -1119,6 +1119,12 @@ for (;;)
             if (c == *cp++) { OK = TRUE; break; }
             }
           break;
+          
+          case PT_UCNC:
+          OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c >= 0xe000;
+          break;         
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1364,6 +1370,12 @@ for (;;)
             }
           break;
 
+          case PT_UCNC:
+          OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c >= 0xe000;
+          break;         
+
           /* Should never occur, but keep compilers from grumbling. */
 
           default:
@@ -1601,6 +1613,12 @@ for (;;)
             if (c == *cp++) { OK = TRUE; break; }
             }
           break;
+
+          case PT_UCNC:
+          OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c >= 0xe000;
+          break;         
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1864,6 +1882,12 @@ for (;;)
             if (c == *cp++) { OK = TRUE; break; }
             }
           break;
+
+          case PT_UCNC:
+          OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c >= 0xe000;
+          break;         
 
           /* Should never occur, but keep compilers from grumbling. */
 

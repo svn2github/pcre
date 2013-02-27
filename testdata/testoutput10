@@ -2723,4 +2723,129 @@ No match
     iskt
 No match
 
+/^\p{Xuc}/8
+    $abc
+ 0: $
+    @abc
+ 0: @
+    `abc
+ 0: `
+    \x{1234}abc
+ 0: \x{1234}
+    ** Failers
+No match
+    abc     
+No match
+
+/^\p{Xuc}+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+ 1: $@`\x{a0}\x{1234}
+ 2: $@`\x{a0}
+ 3: $@`
+ 4: $@
+ 5: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}+?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+ 1: $@`\x{a0}\x{1234}
+ 2: $@`\x{a0}
+ 3: $@`
+ 4: $@
+ 5: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}+?\*/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}*
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}++/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}{3,5}/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}
+ 1: $@`\x{a0}
+ 2: $@`
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}{3,5}?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}
+ 1: $@`\x{a0}
+ 2: $@`
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^[\p{Xuc}]/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^[\p{Xuc}]+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+ 1: $@`\x{a0}\x{1234}
+ 2: $@`\x{a0}
+ 3: $@`
+ 4: $@
+ 5: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\P{Xuc}/8
+    abc
+ 0: a
+    ** Failers
+ 0: *
+    $abc
+No match
+    @abc
+No match
+    `abc
+No match
+    \x{1234}abc
+No match
+
+/^[\P{Xuc}]/8
+    abc
+ 0: a
+    ** Failers
+ 0: *
+    $abc
+No match
+    @abc
+No match
+    `abc
+No match
+    \x{1234}abc
+No match
+
 /-- End of testinput10 --/ 

@@ -668,5 +668,71 @@ of case for anything other than the ASCII letters. --/
 
 /is{2}t/8i
     iskt
+    
+/-- This property is a PCRE special --/
+
+/^\p{Xuc}/8
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+    ** Failers
+    abc     
+
+/^\p{Xuc}+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}+?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}+?\*/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}++/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}{3,5}/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}{3,5}?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^[\p{Xuc}]/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^[\p{Xuc}]+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\P{Xuc}/8
+    abc
+    ** Failers
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+
+/^[\P{Xuc}]/8
+    abc
+    ** Failers
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
 
 /-- End of testinput7 --/

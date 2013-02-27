@@ -1469,5 +1469,113 @@ No match
 /is{2}t/8i
     iskt
 No match
+    
+/-- This property is a PCRE special --/
+
+/^\p{Xuc}/8
+    $abc
+ 0: $
+    @abc
+ 0: @
+    `abc
+ 0: `
+    \x{1234}abc
+ 0: \x{1234}
+    ** Failers
+No match
+    abc     
+No match
+
+/^\p{Xuc}+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}+?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}+?\*/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}*
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}++/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}{3,5}/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}{3,5}?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^[\p{Xuc}]/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^[\p{Xuc}]+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\P{Xuc}/8
+    abc
+ 0: a
+    ** Failers
+ 0: *
+    $abc
+No match
+    @abc
+No match
+    `abc
+No match
+    \x{1234}abc
+No match
+
+/^[\P{Xuc}]/8
+    abc
+ 0: a
+    ** Failers
+ 0: *
+    $abc
+No match
+    @abc
+No match
+    `abc
+No match
+    \x{1234}abc
+No match
 
 /-- End of testinput7 --/
