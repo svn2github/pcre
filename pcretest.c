@@ -2076,7 +2076,7 @@ while (length-- > 0)
   if (use_utf && c >= 0xD800 && c < 0xDC00 && length > 0)
     {
     int d = *p & 0xffff;
-    if (d >= 0xDC00 && d < 0xDFFF)
+    if (d >= 0xDC00 && d <= 0xDFFF)
       {
       c = ((c & 0x3ff) << 10) + (d & 0x3ff) + 0x10000;
       length--;

@@ -8,67 +8,67 @@
     \x{1fffe}
  0: \x{1fffe}
     \x{1ffff}
- 0: \x{d83f}\x{dfff}
+ 0: \x{1ffff}
     \x{2fffe}
  0: \x{2fffe}
     \x{2ffff}
- 0: \x{d87f}\x{dfff}
+ 0: \x{2ffff}
     \x{3fffe}
  0: \x{3fffe}
     \x{3ffff}
- 0: \x{d8bf}\x{dfff}
+ 0: \x{3ffff}
     \x{4fffe}
  0: \x{4fffe}
     \x{4ffff}
- 0: \x{d8ff}\x{dfff}
+ 0: \x{4ffff}
     \x{5fffe}
  0: \x{5fffe}
     \x{5ffff}
- 0: \x{d93f}\x{dfff}
+ 0: \x{5ffff}
     \x{6fffe}
  0: \x{6fffe}
     \x{6ffff}
- 0: \x{d97f}\x{dfff}
+ 0: \x{6ffff}
     \x{7fffe}
  0: \x{7fffe}
     \x{7ffff}
- 0: \x{d9bf}\x{dfff}
+ 0: \x{7ffff}
     \x{8fffe}
  0: \x{8fffe}
     \x{8ffff}
- 0: \x{d9ff}\x{dfff}
+ 0: \x{8ffff}
     \x{9fffe}
  0: \x{9fffe}
     \x{9ffff}
- 0: \x{da3f}\x{dfff}
+ 0: \x{9ffff}
     \x{afffe}
  0: \x{afffe}
     \x{affff}
- 0: \x{da7f}\x{dfff}
+ 0: \x{affff}
     \x{bfffe}
  0: \x{bfffe}
     \x{bffff}
- 0: \x{dabf}\x{dfff}
+ 0: \x{bffff}
     \x{cfffe}
  0: \x{cfffe}
     \x{cffff}
- 0: \x{daff}\x{dfff}
+ 0: \x{cffff}
     \x{dfffe}
  0: \x{dfffe}
     \x{dffff}
- 0: \x{db3f}\x{dfff}
+ 0: \x{dffff}
     \x{efffe}
  0: \x{efffe}
     \x{effff}
- 0: \x{db7f}\x{dfff}
+ 0: \x{effff}
     \x{ffffe}
  0: \x{ffffe}
     \x{fffff}
- 0: \x{dbbf}\x{dfff}
+ 0: \x{fffff}
     \x{10fffe}
  0: \x{10fffe}
     \x{10ffff}
- 0: \x{dbff}\x{dfff}
+ 0: \x{10ffff}
     \x{fdd0}
  0: \x{fdd0}
     \x{fdd1}
