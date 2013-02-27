@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "22 February 2013" "PCRE 8.33"
+.TH PCREAPI 3 "27 February 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -2353,8 +2353,10 @@ never occur in a valid UTF-8 string.
 .sp
   PCRE_UTF8_ERR2
 .sp
-Non-character. These are the last two characters in each plane (0xfffe, 0xffff,
-0x1fffe, 0x1ffff .. 0x10fffe, 0x10ffff), and the characters 0xfdd0..0xfdef.
+This error code was formerly used when the presence of a so-called
+"non-character" caused an error. Unicode corrigendum #9 makes it clear that 
+such characters should not cause a string to be rejected, and so this code is 
+no longer in use and is never returned.
 .
 .
 .SH "EXTRACTING CAPTURED SUBSTRINGS BY NUMBER"
@@ -2823,6 +2825,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 February 2013
+Last updated: 27 February 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

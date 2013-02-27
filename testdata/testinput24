@@ -1,6 +1,6 @@
 /-- Tests for the 16-bit library with UTF-16 support only */
 
-/noncharacter/8
+/./8
     \x{fffe}
     \x{ffff}
     \x{1fffe}

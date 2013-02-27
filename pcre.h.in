@@ -224,7 +224,7 @@ with J. */
 #define PCRE_UTF8_ERR19             19
 #define PCRE_UTF8_ERR20             20
 #define PCRE_UTF8_ERR21             21
-#define PCRE_UTF8_ERR22             22
+#define PCRE_UTF8_ERR22             22  /* Unused (was non-character) */
 
 /* Specific error codes for UTF-16 validity checks */
 
@@ -232,13 +232,13 @@ with J. */
 #define PCRE_UTF16_ERR1              1
 #define PCRE_UTF16_ERR2              2
 #define PCRE_UTF16_ERR3              3
-#define PCRE_UTF16_ERR4              4
+#define PCRE_UTF16_ERR4              4  /* Unused (was non-character) */
 
 /* Specific error codes for UTF-32 validity checks */
 
 #define PCRE_UTF32_ERR0              0
 #define PCRE_UTF32_ERR1              1
-#define PCRE_UTF32_ERR2              2
+#define PCRE_UTF32_ERR2              2  /* Unused (was non-character) */
 #define PCRE_UTF32_ERR3              3
 
 /* Request types for pcre_fullinfo() */

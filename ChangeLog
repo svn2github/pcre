@@ -79,6 +79,11 @@ Version 8.33 xx-xxxx-201x
 20. Added the PCRE-specific property \p{Xuc} for matching characters that can
     be expressed in certain programming languages using Universal Character 
     Names. 
+    
+21. Unicode validation has been updated in the light of Unicode Corrigendum #9,
+    which points out that "non characters" are not "characters that may not 
+    appear in Unicode strings" but rather "characters that are reserved for 
+    internal use and have only local meaning".
 
 
 Version 8.32 30-November-2012

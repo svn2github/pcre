@@ -608,8 +608,6 @@ Need char = 'X'
 Failed: missing terminating ] for character class at offset 13
 
 /X/8
-    \x{0}\x{d7ff}\x{e000}\x{10ffff}
-Error -10 (bad UTF-16 string) offset=4 reason=4
     \x{d800}
 Error -10 (bad UTF-16 string) offset=0 reason=1
     \x{d800}\?
@@ -634,8 +632,6 @@ No match
 ** Failed: character \x{110000} is greater than 0x10ffff and so cannot be converted to UTF-16
     \x{d800}\x{1234}
 Error -10 (bad UTF-16 string) offset=1 reason=2
-    \x{fffe}
-Error -10 (bad UTF-16 string) offset=0 reason=4
 
 /(*UTF16)\x{11234}/
   abcd\x{11234}pqr

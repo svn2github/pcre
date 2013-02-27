@@ -7,9 +7,9 @@
 /\C/8
     \x{110000}
 
-/-- Invalid UTF-32 --/
+/-- Noncharacters --/
 
-/noncharacter/8
+/./8
     \x{fffe}
     \x{ffff}
     \x{1fffe}

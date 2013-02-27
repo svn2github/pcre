@@ -156,7 +156,6 @@ correctly, but that messes up comparisons). --/
 /^[\QĀ\E-\QŐ\E/BZ8
 
 /X/8
-    \x{0}\x{d7ff}\x{e000}\x{10ffff}
     \x{d800}
     \x{d800}\?
     \x{da00}
@@ -169,7 +168,6 @@ correctly, but that messes up comparisons). --/
     \x{dfff}\?
     \x{110000}
     \x{d800}\x{1234}
-    \x{fffe}
 
 /(*UTF16)\x{11234}/
   abcd\x{11234}pqr

@@ -1796,8 +1796,7 @@ Returns:       TRUE  if the string is a valid UTF-32 string
                FALSE otherwise
 */
 
-#ifdef NEVER
-
+#ifdef NEVER   /* Not used */
 #ifdef SUPPORT_UTF
 static BOOL
 valid_utf32(pcre_uint32 *string, int length)
@@ -1808,27 +1807,16 @@ register pcre_uint32 c;
 for (p = string; length-- > 0; p++)
   {
   c = *p;
-
-  if (c > 0x10ffffu)
-    return FALSE;
-
-  /* A surrogate */
-  if ((c & 0xfffff800u) == 0xd800u)
-    return FALSE;
-
-  /* Non-character */
-  if ((c & 0xfffeu) == 0xfffeu || (c >= 0xfdd0u && c <= 0xfdefu))
-    return FALSE;
+  if (c > 0x10ffffu) return FALSE;                 /* Too big */
+  if ((c & 0xfffff800u) == 0xd800u) return FALSE;  /* Surrogate */
   }
 
 return TRUE;
 }
 #endif /* SUPPORT_UTF */
-
 #endif /* NEVER */
+#endif /* SUPPORT_PCRE32 */
 
-
-#endif
 
 /*************************************************
 *        Read or extend an input line            *

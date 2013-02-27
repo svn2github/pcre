@@ -606,8 +606,6 @@ Need char = 'X'
 Failed: missing terminating ] for character class at offset 13
 
 /X/8
-    \x{0}\x{d7ff}\x{e000}\x{10ffff}
-Error -10 (bad UTF-32 string) offset=3 reason=2
     \x{d800}
 Error -10 (bad UTF-32 string) offset=0 reason=1
     \x{d800}\?
@@ -632,8 +630,6 @@ No match
 Error -10 (bad UTF-32 string) offset=0 reason=3
     \x{d800}\x{1234}
 Error -10 (bad UTF-32 string) offset=0 reason=1
-    \x{fffe}
-Error -10 (bad UTF-32 string) offset=0 reason=2
 
 /(*UTF16)\x{11234}/
 Failed: (*VERB) not recognized at offset 5
