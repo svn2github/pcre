@@ -1318,6 +1318,7 @@ for (;;)
         if (rrc < 0) RRETURN(rrc);
         }
       ecode += PRIV(OP_lengths)[OP_CALLOUT];
+      codelink -= PRIV(OP_lengths)[OP_CALLOUT]; 
       }
 
     condcode = ecode[LINK_SIZE+1];

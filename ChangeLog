@@ -84,6 +84,11 @@ Version 8.33 xx-xxxx-201x
     which points out that "non characters" are not "characters that may not 
     appear in Unicode strings" but rather "characters that are reserved for 
     internal use and have only local meaning".
+    
+22. When a pattern was compiled with automatic callouts (PCRE_AUTO_CALLOUT) and
+    there was a conditional group that depended on an assertion, if the 
+    assertion was false, the callout that immediately followed the alternation 
+    in the condition was skipped when pcre_exec() was used for matching.
 
 
 Version 8.32 30-November-2012
