@@ -89,6 +89,10 @@ Version 8.33 xx-xxxx-201x
     there was a conditional group that depended on an assertion, if the 
     assertion was false, the callout that immediately followed the alternation 
     in the condition was skipped when pcre_exec() was used for matching.
+    
+23. Allow an explicit callout to be inserted before an assertion that is the
+    condition for a conditional group, for compatibility with automatic 
+    callouts, which always insert a callout at this point.
 
 
 Version 8.32 30-November-2012

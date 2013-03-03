@@ -5729,6 +5729,7 @@ for (;; ptr++)
         /* ------------------------------------------------------------ */
         case CHAR_LEFT_PARENTHESIS:
         bravalue = OP_COND;       /* Conditional group */
+        tempptr = ptr; 
 
         /* A condition can be an assertion, a number (referring to a numbered
         group), a name (referring to a named group), or 'R', referring to
@@ -5741,14 +5742,28 @@ for (;; ptr++)
         be the recursive thing or the name 'R' (and similarly for 'R' followed
         by digits), and (b) a number could be a name that consists of digits.
         In both cases, we look for a name first; if not found, we try the other
-        cases. */
+        cases.
+        
+        For compatibility with auto-callouts, we allow a callout to be 
+        specified before a condition that is an assertion. First, check for the 
+        syntax of a callout; if found, adjust the temporary pointer that is 
+        used to check for an assertion condition. That's all that is needed! */
+        
+        if (ptr[1] == CHAR_QUESTION_MARK && ptr[2] == CHAR_C)
+          {
+          for (i = 3;; i++) if (!IS_DIGIT(ptr[i])) break;
+          if (ptr[i] == CHAR_RIGHT_PARENTHESIS)
+            tempptr += i + 1; 
+          }    
 
         /* For conditions that are assertions, check the syntax, and then exit
         the switch. This will take control down to where bracketed groups,
         including assertions, are processed. */
 
-        if (ptr[1] == CHAR_QUESTION_MARK && (ptr[2] == CHAR_EQUALS_SIGN ||
-            ptr[2] == CHAR_EXCLAMATION_MARK || ptr[2] == CHAR_LESS_THAN_SIGN))
+        if (tempptr[1] == CHAR_QUESTION_MARK && 
+              (tempptr[2] == CHAR_EQUALS_SIGN ||
+               tempptr[2] == CHAR_EXCLAMATION_MARK || 
+               tempptr[2] == CHAR_LESS_THAN_SIGN))
           break;
 
         /* Most other conditions use OP_CREF (a couple change to OP_RREF

@@ -1,4 +1,4 @@
-.TH PCRECALLOUT 3 "13 January 2013" "PCRE 8.33"
+.TH PCRECALLOUT 3 "03 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH SYNOPSIS
@@ -41,8 +41,17 @@ it is processed as if it were
 (?C255)A(?C255)((?C255)\ed{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
 .sp
 Notice that there is a callout before and after each parenthesis and
-alternation bar. Automatic callouts can be used for tracking the progress of
-pattern matching. The
+alternation bar. If the pattern contains a conditional group whose condition is 
+an assertion, an automatic callout is inserted immediately before the 
+condition. Such a callout may also be inserted explicitly, for example:
+.sp
+  (?(?C9)(?=a)ab|de)
+.sp
+This applies only to assertion conditions (because they are themselves 
+independent groups).   
+.P
+Automatic callouts can be used for tracking the progress of pattern matching.
+The
 .\" HREF
 \fBpcretest\fP
 .\"
@@ -115,10 +124,10 @@ automatically generated callouts).
 .P
 The \fIoffset_vector\fP field is a pointer to the vector of offsets that was
 passed by the caller to the matching function. When \fBpcre_exec()\fP or
-\fBpcre[16|32]_exec()\fP is used, the contents can be inspected, in order to extract
-substrings that have been matched so far, in the same way as for extracting
-substrings after a match has completed. For the DFA matching functions, this
-field is not useful.
+\fBpcre[16|32]_exec()\fP is used, the contents can be inspected, in order to
+extract substrings that have been matched so far, in the same way as for
+extracting substrings after a match has completed. For the DFA matching
+functions, this field is not useful.
 .P
 The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
 that were passed to the matching function.
@@ -171,11 +180,12 @@ help in distinguishing between different automatic callouts, which all have the
 same callout number. However, they are set for all callouts.
 .P
 The \fImark\fP field is present from version 2 of the callout structure. In
-callouts from \fBpcre_exec()\fP or \fBpcre[16|32]_exec()\fP it contains a pointer to
-the zero-terminated name of the most recently passed (*MARK), (*PRUNE), or
-(*THEN) item in the match, or NULL if no such items have been passed. Instances
-of (*PRUNE) or (*THEN) without a name do not obliterate a previous (*MARK). In
-callouts from the DFA matching functions this field always contains NULL.
+callouts from \fBpcre_exec()\fP or \fBpcre[16|32]_exec()\fP it contains a
+pointer to the zero-terminated name of the most recently passed (*MARK),
+(*PRUNE), or (*THEN) item in the match, or NULL if no such items have been
+passed. Instances of (*PRUNE) or (*THEN) without a name do not obliterate a
+previous (*MARK). In callouts from the DFA matching functions this field always
+contains NULL.
 .
 .
 .SH "RETURN VALUES"
@@ -207,6 +217,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 13 January 2013
+Last updated: 03 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

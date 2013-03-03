@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "27 February 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "03 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2640,7 +2640,14 @@ For example, this pattern has two callout points:
 .sp
 If the PCRE_AUTO_CALLOUT flag is passed to a compiling function, callouts are
 automatically installed before each item in the pattern. They are all numbered
-255.
+255. If there is a conditional group in the pattern whose condition is an
+assertion, an additional callout is inserted just before the condition. An
+explicit callout may also be set at this position, as in this example:
+.sp
+  (?(?C9)(?=a)abc|def)
+.sp
+Note that this applies only to assertion conditions, not to other types of 
+condition.   
 .P
 During matching, when PCRE reaches a callout point, the external function is
 called. It is provided with the number of the callout, the position in the
@@ -2989,6 +2996,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 February 2013
+Last updated: 03 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

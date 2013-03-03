@@ -3845,4 +3845,10 @@ settings of the anchored and startline bits. --/
     xxxx123a\P\P
     xxxx123a\P
 
+/^(?(?=a)aa|bb)/C
+    bb
+
+/(?C1)^(?C2)(?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))(?C11)/
+    bb
+
 /-- End of testinput2 --/
