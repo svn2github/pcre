@@ -6,10 +6,10 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
   The machine code generator part (this module) was written by Zoltan Herczeg
-                      Copyright (c) 2010-2012
+                      Copyright (c) 2010-2013
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -3916,6 +3916,7 @@ while (*cc != XCL_END)
       break;
 
       case PT_CLIST:
+      case PT_UCNC:
       needschar = TRUE;
       break;
 
@@ -4179,6 +4180,23 @@ while (*cc != XCL_END)
         OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, *other_cases++ - charoffset);
         OP_FLAGS(SLJIT_OR | ((*other_cases == NOTACHAR) ? SLJIT_SET_E : 0), TMP2, 0, TMP2, 0, SLJIT_C_EQUAL);
         }
+      jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
+      break;
+
+      case PT_UCNC:
+      OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, CHAR_DOLLAR_SIGN - charoffset);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_EQUAL);
+      OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, CHAR_COMMERCIAL_AT - charoffset);
+      OP_FLAGS(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_C_EQUAL);
+      OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, CHAR_GRAVE_ACCENT - charoffset);
+      OP_FLAGS(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_C_EQUAL);
+
+      SET_CHAR_OFFSET(0xa0);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xd7ff - charoffset);
+      OP_FLAGS(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_C_LESS_EQUAL);
+      SET_CHAR_OFFSET(0);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xe000 - 0);
+      OP_FLAGS(SLJIT_OR | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_C_GREATER_EQUAL);
       jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
       break;
       }
