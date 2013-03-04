@@ -2170,7 +2170,7 @@ else if (common->mode == JIT_PARTIAL_SOFT_COMPILE)
   jump = CMP(SLJIT_C_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, SLJIT_IMM, -1);
 
 if (common->mode == JIT_PARTIAL_SOFT_COMPILE)
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
 else
   {
   if (common->partialmatchlabel != NULL)
@@ -2183,35 +2183,34 @@ if (jump != NULL)
   JUMPHERE(jump);
 }
 
-static struct sljit_jump *check_str_end(compiler_common *common)
+static void check_str_end(compiler_common *common, jump_list **end_reached)
 {
 /* Does not affect registers. Usually used in a tight spot. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
-struct sljit_jump *nohit;
-struct sljit_jump *return_value;
 
 if (common->mode == JIT_COMPILE)
-  return CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+  {
+  add_jump(compiler, end_reached, CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  return;
+  }
 
 jump = CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0);
 if (common->mode == JIT_PARTIAL_SOFT_COMPILE)
   {
-  nohit = CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
-  JUMPHERE(nohit);
-  return_value = JUMP(SLJIT_JUMP);
+  add_jump(compiler, end_reached, CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0));
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
+  add_jump(compiler, end_reached, JUMP(SLJIT_JUMP));
   }
 else
   {
-  return_value = CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0);
+  add_jump(compiler, end_reached, CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0));
   if (common->partialmatchlabel != NULL)
     JUMPTO(SLJIT_JUMP, common->partialmatchlabel);
   else
     add_jump(compiler, &common->partialmatch, JUMP(SLJIT_JUMP));
   }
 JUMPHERE(jump);
-return return_value;
 }
 
 static void detect_partial_match(compiler_common *common, jump_list **backtracks)
@@ -2230,7 +2229,7 @@ jump = CMP(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0);
 add_jump(compiler, backtracks, CMP(SLJIT_C_GREATER_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0));
 if (common->mode == JIT_PARTIAL_SOFT_COMPILE)
   {
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
   add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
   }
 else
@@ -3178,6 +3177,7 @@ static void check_wordboundary(compiler_common *common)
 {
 DEFINE_COMPILER;
 struct sljit_jump *skipread;
+jump_list *skipread_list = NULL;
 #if !(defined COMPILE_PCRE8) || defined SUPPORT_UTF
 struct sljit_jump *jump;
 #endif
@@ -3235,7 +3235,7 @@ else
 JUMPHERE(skipread);
 
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
-skipread = check_str_end(common);
+check_str_end(common, &skipread_list);
 peek_char(common);
 
 /* Testing char type. This is a code duplication. */
@@ -3276,7 +3276,7 @@ else
     JUMPHERE(jump);
 #endif /* COMPILE_PCRE8 */
   }
-JUMPHERE(skipread);
+set_jumps(skipread_list, LABEL());
 
 OP2(SLJIT_XOR | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1);
 sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
@@ -4224,6 +4224,7 @@ int length;
 unsigned int c, oc, bit;
 compare_context context;
 struct sljit_jump *jump[4];
+jump_list *end_list;
 #ifdef SUPPORT_UTF
 struct sljit_label *label;
 #ifdef SUPPORT_UCP
@@ -4292,15 +4293,15 @@ switch(type)
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     jump[0] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
+    end_list = NULL;
     if (common->mode != JIT_PARTIAL_HARD_COMPILE)
-      jump[1] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+      add_jump(compiler, &end_list, CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
     else
-      jump[1] = check_str_end(common);
+      check_str_end(common, &end_list);
 
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
     add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, common->newline & 0xff));
-    if (jump[1] != NULL)
-      JUMPHERE(jump[1]);
+    set_jumps(end_list, LABEL());
     JUMPHERE(jump[0]);
     }
   else
@@ -4359,19 +4360,20 @@ switch(type)
   read_char(common);
   jump[0] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
   /* We don't need to handle soft partial matching case. */
+  end_list = NULL;
   if (common->mode != JIT_PARTIAL_HARD_COMPILE)
-    jump[1] = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+    add_jump(compiler, &end_list, CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
   else
-    jump[1] = check_str_end(common);
+    check_str_end(common, &end_list);
   OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-  jump[2] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL);
+  jump[1] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  jump[3] = JUMP(SLJIT_JUMP);
+  jump[2] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[0]);
   check_newlinechar(common, common->bsr_nltype, backtracks, FALSE);
+  set_jumps(end_list, LABEL());
   JUMPHERE(jump[1]);
   JUMPHERE(jump[2]);
-  JUMPHERE(jump[3]);
   return cc;
 
   case OP_NOT_HSPACE:
@@ -8309,7 +8311,7 @@ OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_sta
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_LIMIT, TMP1, 0);
 
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
 
 /* Main part of the matching */
 if ((re->options & PCRE_ANCHORED) == 0)
@@ -8348,7 +8350,7 @@ if (common->capture_last_ptr != 0)
 /* Copy the beginning of the string. */
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
   {
-  jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
+  jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, STR_PTR, 0);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr + sizeof(sljit_sw), STR_PTR, 0);
   JUMPHERE(jump);
@@ -8408,7 +8410,7 @@ SLJIT_ASSERT(rootbacktrack.prev == NULL);
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
   {
   /* Update hit_start only in the first time. */
-  jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
+  jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_used_ptr, SLJIT_IMM, -1);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, TMP1, 0);
@@ -8436,7 +8438,7 @@ if (reqbyte_notfound != NULL)
   JUMPHERE(reqbyte_notfound);
 
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
-  CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, 0, common->partialmatchlabel);
+  CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1, common->partialmatchlabel);
 
 OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
 JUMPTO(SLJIT_JUMP, common->quit_label);
