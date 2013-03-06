@@ -5303,4 +5303,13 @@ name were given. ---/
 "(?>.*?)foo"
     abcdfooxyz
 
+/(?:(a(*PRUNE)b)){0}(?:(?1)|ac)/
+    ac
+    
+/(?:(a(*SKIP)b)){0}(?:(?1)|ac)/
+    ac 
+
+/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
+    aac 
+
 /-- End of testinput1 --/

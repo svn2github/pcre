@@ -93,6 +93,9 @@ Version 8.33 xx-xxxx-201x
 23. Allow an explicit callout to be inserted before an assertion that is the
     condition for a conditional group, for compatibility with automatic 
     callouts, which always insert a callout at this point.
+    
+24. In 8.31, (*COMMIT) was confined to within a recursive subpattern. Perl also 
+    confines (*SKIP) and (*PRUNE) in the same way, and this has now been done.
 
 
 Version 8.32 30-November-2012

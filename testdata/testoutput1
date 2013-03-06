@@ -8795,4 +8795,16 @@ No match
     abcdfooxyz
  0: foo
 
+/(?:(a(*PRUNE)b)){0}(?:(?1)|ac)/
+    ac
+ 0: ac
+    
+/(?:(a(*SKIP)b)){0}(?:(?1)|ac)/
+    ac 
+ 0: ac
+
+/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
+    aac 
+ 0: aac
+
 /-- End of testinput1 --/

@@ -56,14 +56,14 @@ possible. There are also some static supporting functions. */
 #undef min
 #undef max
 
-/* The md->capture_last field uses the lower 16 bits for the last captured 
+/* The md->capture_last field uses the lower 16 bits for the last captured
 substring (which can never be greater than 65535) and a bit in the top half
-to mean "capture vector overflowed". This odd way of doing things was 
-implemented when it was realized that preserving and restoring the overflow bit 
-whenever the last capture number was saved/restored made for a neater 
-interface, and doing it this way saved on (a) another variable, which would 
-have increased the stack frame size (a big NO-NO in PCRE) and (b) another 
-separate set of save/restore instructions. The following defines are used in 
+to mean "capture vector overflowed". This odd way of doing things was
+implemented when it was realized that preserving and restoring the overflow bit
+whenever the last capture number was saved/restored made for a neater
+interface, and doing it this way saved on (a) another variable, which would
+have increased the stack frame size (a big NO-NO in PCRE) and (b) another
+separate set of save/restore instructions. The following defines are used in
 implementing this. */
 
 #define CAPLMASK    0x0000ffff    /* The bits used for last_capture */
@@ -87,13 +87,17 @@ defined PCRE_ERROR_xxx codes, which are all negative. */
 negative to avoid the external error codes. */
 
 #define MATCH_ACCEPT       (-999)
-#define MATCH_COMMIT       (-998)
-#define MATCH_KETRPOS      (-997)
-#define MATCH_ONCE         (-996)
+#define MATCH_KETRPOS      (-998)
+#define MATCH_ONCE         (-997)
+/* The next 5 must be kept together and in sequence so that a test that checks
+for any one of them can use a range. */
+#define MATCH_COMMIT       (-996)
 #define MATCH_PRUNE        (-995)
 #define MATCH_SKIP         (-994)
 #define MATCH_SKIP_ARG     (-993)
 #define MATCH_THEN         (-992)
+#define MATCH_BACKTRACK_MAX MATCH_THEN
+#define MATCH_BACKTRACK_MIN MATCH_COMMIT
 
 /* Maximum number of ints of offset to save on the stack for recursive calls.
 If the offset vector is bigger, malloc is used. This should be a multiple of 3,
@@ -1310,15 +1314,15 @@ for (;;)
         cb.next_item_length = GET(ecode, 3 + 2*LINK_SIZE);
         cb.capture_top      = offset_top/2;
         cb.capture_last     = md->capture_last & CAPLMASK;
-        /* Internal change requires this for API compatibility. */ 
-        if (cb.capture_last == 0) cb.capture_last = -1; 
+        /* Internal change requires this for API compatibility. */
+        if (cb.capture_last == 0) cb.capture_last = -1;
         cb.callout_data     = md->callout_data;
         cb.mark             = md->nomatch_mark;
         if ((rrc = (*PUBL(callout))(&cb)) > 0) RRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
         }
       ecode += PRIV(OP_lengths)[OP_CALLOUT];
-      codelink -= PRIV(OP_lengths)[OP_CALLOUT]; 
+      codelink -= PRIV(OP_lengths)[OP_CALLOUT];
       }
 
     condcode = ecode[LINK_SIZE+1];
@@ -1738,8 +1742,8 @@ for (;;)
       cb.next_item_length = GET(ecode, 2 + LINK_SIZE);
       cb.capture_top      = offset_top/2;
       cb.capture_last     = md->capture_last & CAPLMASK;
-      /* Internal change requires this for API compatibility. */ 
-      if (cb.capture_last == 0) cb.capture_last = -1; 
+      /* Internal change requires this for API compatibility. */
+      if (cb.capture_last == 0) cb.capture_last = -1;
       cb.callout_data     = md->callout_data;
       cb.mark             = md->nomatch_mark;
       if ((rrc = (*PUBL(callout))(&cb)) > 0) RRETURN(MATCH_NOMATCH);
@@ -1785,7 +1789,7 @@ for (;;)
       /* Add to "recursing stack" */
 
       new_recursive.group_num = recno;
-      new_recursive.saved_capture_last = md->capture_last; 
+      new_recursive.saved_capture_last = md->capture_last;
       new_recursive.subject_position = eptr;
       new_recursive.prevrec = md->recursive;
       md->recursive = &new_recursive;
@@ -1822,7 +1826,7 @@ for (;;)
           md, eptrb, RM6);
         memcpy(md->offset_vector, new_recursive.offset_save,
             new_recursive.saved_max * sizeof(int));
-        md->capture_last = new_recursive.saved_capture_last;     
+        md->capture_last = new_recursive.saved_capture_last;
         md->recursive = new_recursive.prevrec;
         if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
           {
@@ -1839,11 +1843,12 @@ for (;;)
           goto RECURSION_MATCHED;        /* Exit loop; end processing */
           }
 
-        /* PCRE does not allow THEN or COMMIT to escape beyond a recursion; it
-        is treated as NOMATCH. */
+        /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
+        recursion; they are treated as NOMATCH. These codes are defined in a 
+        range that can be tested for. Any other return code is an error. */
 
-        else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN &&
-                 rrc != MATCH_COMMIT)
+        else if (rrc != MATCH_NOMATCH && 
+                 (rrc < MATCH_BACKTRACK_MIN || rrc > MATCH_BACKTRACK_MAX))
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)
@@ -2629,13 +2634,13 @@ for (;;)
             { if (op == OP_PROP) break; else { RRETURN(MATCH_NOMATCH); } }
           }
         break;
-        
+
         case PT_UCNC:
         if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
              c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
              c >= 0xe000) == (op == OP_NOTPROP))
-          RRETURN(MATCH_NOMATCH);  
-        break;            
+          RRETURN(MATCH_NOMATCH);
+        break;
 
         /* This should never occur */
 
@@ -4254,7 +4259,7 @@ for (;;)
               }
             }
           break;
-          
+
           case PT_UCNC:
           for (i = 1; i <= min; i++)
             {
@@ -4268,8 +4273,8 @@ for (;;)
                  c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                  c >= 0xe000) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
-            }   
-          break;            
+            }
+          break;
 
           /* This should not occur */
 
@@ -5016,7 +5021,7 @@ for (;;)
               }
             }
           /* Control never gets here */
-          
+
           case PT_UCNC:
           for (fi = min;; fi++)
             {
@@ -5032,8 +5037,8 @@ for (;;)
             if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
                  c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                  c >= 0xe000) == prop_fail_result)
-              RRETURN(MATCH_NOMATCH);    
-            }   
+              RRETURN(MATCH_NOMATCH);
+            }
           /* Control never gets here */
 
           /* This should never occur */
@@ -5545,7 +5550,7 @@ for (;;)
                  c >= 0xe000) == prop_fail_result)
               break;
             eptr += len;
-            }   
+            }
           break;
 
           default:
@@ -6894,11 +6899,11 @@ for(;;)
   md->match_function_type = 0;
   md->end_offset_top = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, NULL, 0);
-  if (md->hitend && start_partial == NULL) 
+  if (md->hitend && start_partial == NULL)
     {
     start_partial = md->start_used_ptr;
     match_partial = start_match;
-    }  
+    }
 
   switch(rc)
     {
@@ -7032,7 +7037,7 @@ if (rc == MATCH_MATCH || rc == MATCH_ACCEPT)
   /* Set the return code to the number of captured strings, or 0 if there were
   too many to fit into the vector. */
 
-  rc = ((md->capture_last & OVFLBIT) != 0 && 
+  rc = ((md->capture_last & OVFLBIT) != 0 &&
          md->end_offset_top >= arg_offset_max)?
     0 : md->end_offset_top/2;
 
@@ -7106,7 +7111,7 @@ if (start_partial != NULL)
     {
     offsets[0] = (int)(start_partial - (PCRE_PUCHAR)subject);
     offsets[1] = (int)(end_subject - (PCRE_PUCHAR)subject);
-    if (offsetcount > 2) 
+    if (offsetcount > 2)
       offsets[2] = (int)(match_partial - (PCRE_PUCHAR)subject);
     }
   rc = PCRE_ERROR_PARTIAL;
