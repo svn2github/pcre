@@ -97,6 +97,8 @@ Version 8.33 xx-xxxx-201x
 24. In 8.31, (*COMMIT) was confined to within a recursive subpattern. Perl also 
     confines (*SKIP) and (*PRUNE) in the same way, and this has now been done.
 
+25. (*PRUNE) is now supported by the JIT compiler.
+
 
 Version 8.32 30-November-2012
 -----------------------------
