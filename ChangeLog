@@ -101,6 +101,9 @@ Version 8.33 xx-xxxx-201x
 
 26. Fix infinite loop when /(?<=(*SKIP)ac)a/ is matched against aa.
 
+27. Fix the case where there are two or more SKIPs with arguments that may be 
+    ignored. 
+
 
 Version 8.32 30-November-2012
 -----------------------------

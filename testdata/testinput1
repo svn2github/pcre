@@ -5315,4 +5315,16 @@ name were given. ---/
 /(?<=(*SKIP)ac)a/
     aa
 
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+
+/a(*SKIP:m)x|ac(*:n)(*SKIP:n)d|ac/K
+    acacd
+
+/A(*SKIP:m)x|A(*SKIP:n)x|AB/K
+    AB
+
+/((*SKIP:r)d){0}a(*SKIP:m)x|ac(*:n)|ac/K
+    acacd
+
 /-- End of testinput1 --/

@@ -2469,6 +2469,8 @@ typedef struct match_data {
   int    nllen;                   /* Newline string length */
   int    name_count;              /* Number of names in name table */
   int    name_entry_size;         /* Size of entry in names table */
+  unsigned int skip_arg_count;    /* For counting SKIP_ARGs */
+  unsigned int ignore_skip_arg;   /* For re-run when SKIP arg name not found */
   pcre_uchar *name_table;         /* Table of names */
   pcre_uchar nl[4];               /* Newline string when fixed */
   const  pcre_uint8 *lcc;         /* Points to lower casing table */
@@ -2485,7 +2487,6 @@ typedef struct match_data {
   BOOL   hitend;                  /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;             /* \R is just any CRLF, not full Unicode */
   BOOL   hasthen;                 /* Pattern contains (*THEN) */
-  BOOL   ignore_skip_arg;         /* For re-run when SKIP name not found */
   const  pcre_uchar *start_code;  /* For use when recursing */
   PCRE_PUCHAR start_subject;      /* Start of the subject string */
   PCRE_PUCHAR end_subject;        /* End of the subject string */

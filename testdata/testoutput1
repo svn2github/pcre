@@ -8811,4 +8811,22 @@ No match
     aa
 No match
 
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+ 0: AC
+
+/a(*SKIP:m)x|ac(*:n)(*SKIP:n)d|ac/K
+    acacd
+ 0: acd
+MK: n
+
+/A(*SKIP:m)x|A(*SKIP:n)x|AB/K
+    AB
+ 0: AB
+
+/((*SKIP:r)d){0}a(*SKIP:m)x|ac(*:n)|ac/K
+    acacd
+ 0: ac
+MK: n
+
 /-- End of testinput1 --/

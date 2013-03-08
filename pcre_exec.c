@@ -821,11 +821,16 @@ for (;;)
     RRETURN(MATCH_SKIP);
 
     /* Note that, for Perl compatibility, SKIP with an argument does NOT set
-    nomatch_mark. There is a flag that disables this opcode when re-matching a
-    pattern that ended with a SKIP for which there was not a matching MARK. */
+    nomatch_mark. When a pattern match ends with a SKIP_ARG for which there was 
+    not a matching mark, we have to re-run the match, ignoring the SKIP_ARG
+    that failed and any that preceed it (either they also failed, or were not 
+    triggered). To do this, we maintain a count of executed SKIP_ARGs. If a 
+    SKIP_ARG gets to top level, the match is re-run with md->ignore_skip_arg
+    set to the count of the one that failed. */
 
     case OP_SKIP_ARG:
-    if (md->ignore_skip_arg)
+    md->skip_arg_count++;
+    if (md->skip_arg_count <= md->ignore_skip_arg)
       {
       ecode += PRIV(OP_lengths)[*ecode] + ecode[1];
       break;
@@ -834,11 +839,11 @@ for (;;)
       eptrb, RM57);
     if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
       RRETURN(rrc);
-
+      
     /* Pass back the current skip name by overloading md->start_match_ptr and
     returning the special MATCH_SKIP_ARG return code. This will either be
     caught by a matching MARK, or get to the top, where it causes a rematch
-    with the md->ignore_skip_arg flag set. */
+    with md->ignore_skip_arg set to the value of md->skip_arg_count. */
 
     md->start_match_ptr = ecode + 2;
     RRETURN(MATCH_SKIP_ARG);
@@ -6516,7 +6521,7 @@ end_subject = md->end_subject;
 md->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 md->use_ucp = (re->options & PCRE_UCP) != 0;
 md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
-md->ignore_skip_arg = FALSE;
+md->ignore_skip_arg = 0;
 
 /* Some options are unpacked into BOOL variables in the hope that testing
 them will be faster than individual option bits. */
@@ -6898,6 +6903,7 @@ for(;;)
   md->match_call_count = 0;
   md->match_function_type = 0;
   md->end_offset_top = 0;
+  md->skip_arg_count = 0;
   rc = match(start_match, md->start_code, start_match, 2, md, NULL, 0);
   if (md->hitend && start_partial == NULL)
     {
@@ -6916,7 +6922,7 @@ for(;;)
 
     case MATCH_SKIP_ARG:
     new_start_match = start_match;
-    md->ignore_skip_arg = TRUE;
+    md->ignore_skip_arg = md->skip_arg_count;
     break;
 
     /* SKIP passes back the next starting point explicitly, but if it is no
@@ -6931,12 +6937,12 @@ for(;;)
     /* Fall through */
 
     /* NOMATCH and PRUNE advance by one character. THEN at this level acts
-    exactly like PRUNE. Unset the ignore SKIP-with-argument flag. */
+    exactly like PRUNE. Unset ignore SKIP-with-argument. */
 
     case MATCH_NOMATCH:
     case MATCH_PRUNE:
     case MATCH_THEN:
-    md->ignore_skip_arg = FALSE;
+    md->ignore_skip_arg = 0;
     new_start_match = start_match + 1;
 #ifdef SUPPORT_UTF
     if (utf)
