@@ -5312,4 +5312,7 @@ name were given. ---/
 /(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
     aac 
 
+/(?<=(*SKIP)ac)a/
+    aa
+
 /-- End of testinput1 --/

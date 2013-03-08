@@ -8807,4 +8807,8 @@ No match
     aac 
  0: aac
 
+/(?<=(*SKIP)ac)a/
+    aa
+No match
+
 /-- End of testinput1 --/

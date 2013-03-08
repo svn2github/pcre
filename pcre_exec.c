@@ -6919,11 +6919,11 @@ for(;;)
     md->ignore_skip_arg = TRUE;
     break;
 
-    /* SKIP passes back the next starting point explicitly, but if it is the
-    same as the match we have just done, treat it as NOMATCH. */
+    /* SKIP passes back the next starting point explicitly, but if it is no
+    greater than the match we have just done, treat it as NOMATCH. */
 
     case MATCH_SKIP:
-    if (md->start_match_ptr != start_match)
+    if (md->start_match_ptr > start_match)
       {
       new_start_match = md->start_match_ptr;
       break;

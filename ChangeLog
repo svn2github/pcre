@@ -99,6 +99,8 @@ Version 8.33 xx-xxxx-201x
 
 25. (*PRUNE) is now supported by the JIT compiler.
 
+26. Fix infinite loop when /(?<=(*SKIP)ac)a/ is matched against aa.
+
 
 Version 8.32 30-November-2012
 -----------------------------
