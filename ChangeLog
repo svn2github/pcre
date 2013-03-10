@@ -104,6 +104,8 @@ Version 8.33 xx-xxxx-201x
 27. Fix the case where there are two or more SKIPs with arguments that may be 
     ignored. 
 
+28. Experimental support of (*SKIP) backtracking verb in the JIT compiler.
+
 
 Version 8.32 30-November-2012
 -----------------------------
