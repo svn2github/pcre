@@ -1148,7 +1148,7 @@ while (cc < ccend)
 }
 
 /* Returns with a frame_types (always < 0) if no need for frame. */
-static int get_framesize(compiler_common *common, pcre_uchar *cc, BOOL recursive)
+static int get_framesize(compiler_common *common, pcre_uchar *cc, BOOL recursive, BOOL* needs_control_head)
 {
 pcre_uchar *ccend = bracketend(cc) - (1 + LINK_SIZE);
 int length = 0;
@@ -1158,6 +1158,13 @@ BOOL setsom_found = recursive;
 BOOL setmark_found = recursive;
 /* The last capture is a local variable even for recursions. */
 BOOL capture_last_found = FALSE;
+
+#if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
+SLJIT_ASSERT(common->control_head_ptr != 0);
+*needs_control_head = TRUE;
+#else
+*needs_control_head = FALSE;
+#endif
 
 if (!recursive && (*cc == OP_CBRAPOS || *cc == OP_SCBRAPOS))
   {
@@ -1191,6 +1198,8 @@ while (cc < ccend)
       length += 2;
       setmark_found = TRUE;
       }
+    if (common->control_head_ptr != 0)
+      *needs_control_head = TRUE;
     cc += 1 + 2 + cc[1];
     break;
 
@@ -1227,6 +1236,13 @@ while (cc < ccend)
     length += 3;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
+
+    case OP_PRUNE:
+    case OP_SKIP:
+    case OP_COMMIT:
+    if (common->control_head_ptr != 0)
+      *needs_control_head = TRUE;
+    /* Fall through. */
 
     default:
     stack_restore = TRUE;
@@ -5245,11 +5261,12 @@ recurse_entry *entry = common->entries;
 recurse_entry *prev = NULL;
 int start = GET(cc, 1);
 pcre_uchar *start_cc;
+BOOL needs_control_head;
 
 PUSH_BACKTRACK(sizeof(recurse_backtrack), cc, NULL);
 
 /* Inlining simple patterns. */
-if (get_framesize(common, common->start + start, TRUE) == no_stack)
+if (get_framesize(common, common->start + start, TRUE, &needs_control_head) == no_stack)
   {
   start_cc = common->start + start;
   compile_matchingpath(common, next_opcode(common, start_cc), bracketend(start_cc) - (1 + LINK_SIZE), backtrack);
@@ -5409,7 +5426,7 @@ static pcre_uchar *compile_assert_matchingpath(compiler_common *common, pcre_uch
 DEFINE_COMPILER;
 int framesize;
 int extrasize;
-BOOL needs_control_head = common->control_head_ptr != 0;
+BOOL needs_control_head;
 int private_data_ptr;
 backtrack_common altbacktrack;
 pcre_uchar *ccbegin;
@@ -5435,7 +5452,7 @@ if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   }
 private_data_ptr = PRIVATE_DATA(cc);
 SLJIT_ASSERT(private_data_ptr != 0);
-framesize = get_framesize(common, cc, FALSE);
+framesize = get_framesize(common, cc, FALSE, &needs_control_head);
 backtrack->framesize = framesize;
 backtrack->private_data_ptr = private_data_ptr;
 opcode = *cc;
@@ -5872,6 +5889,77 @@ if (i < name_count)
 return condition;
 }
 
+static SLJIT_INLINE void match_once_common(compiler_common *common, pcre_uchar ket, int framesize, int private_data_ptr, BOOL has_alternatives, BOOL needs_control_head)
+{
+DEFINE_COMPILER;
+int stacksize;
+
+if (framesize < 0)
+  {
+  if (framesize == no_frame)
+    OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+  else
+    {
+    stacksize = needs_control_head ? 1 : 0;
+    if (ket != OP_KET || has_alternatives)
+      stacksize++;
+    free_stack(common, stacksize);
+    }
+
+  if (needs_control_head)
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), (ket != OP_KET || has_alternatives) ? sizeof(sljit_sw) : 0);
+
+  /* TMP2 which is set here used by OP_KETRMAX below. */
+  if (ket == OP_KETRMAX)
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), 0);
+  else if (ket == OP_KETRMIN)
+    {
+    /* Move the STR_PTR to the private_data_ptr. */
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_MEM1(STACK_TOP), 0);
+    }
+  }
+else
+  {
+  stacksize = (ket != OP_KET || has_alternatives) ? 2 : 1;
+  OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_IMM, (framesize + stacksize) * sizeof(sljit_sw));
+  if (needs_control_head)
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), 0);
+
+  if (ket == OP_KETRMAX)
+    {
+    /* TMP2 which is set here used by OP_KETRMAX below. */
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    }
+  }
+if (needs_control_head)
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP1, 0);
+}
+
+static SLJIT_INLINE int match_capture_common(compiler_common *common, int stacksize, int offset, int private_data_ptr)
+{
+DEFINE_COMPILER;
+
+if (common->capture_last_ptr != 0)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr, SLJIT_IMM, offset >> 1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
+  stacksize++;
+  }
+if (common->optimized_cbracket[offset >> 1] == 0)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset));
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1));
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize + 1), TMP2, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
+  stacksize += 2;
+  }
+return stacksize;
+}
+
 /*
   Handling bracketed expressions is probably the most complex part.
 
@@ -5940,6 +6028,7 @@ pcre_uchar bra = OP_BRA;
 pcre_uchar ket;
 assert_backtrack *assert;
 BOOL has_alternatives;
+BOOL needs_control_head = FALSE;
 struct sljit_jump *jump;
 struct sljit_jump *skip;
 struct sljit_label *rmaxlabel = NULL;
@@ -6015,12 +6104,12 @@ else if (opcode == OP_ONCE || opcode == OP_SBRA || opcode == OP_SCOND)
   SLJIT_ASSERT(private_data_ptr != 0);
   BACKTRACK_AS(bracket_backtrack)->private_data_ptr = private_data_ptr;
   if (opcode == OP_ONCE)
-    BACKTRACK_AS(bracket_backtrack)->u.framesize = get_framesize(common, ccbegin, FALSE);
+    BACKTRACK_AS(bracket_backtrack)->u.framesize = get_framesize(common, ccbegin, FALSE, &needs_control_head);
   }
 
 /* Instructions before the first alternative. */
 stacksize = 0;
-if ((ket == OP_KETRMAX) || (ket == OP_KETRMIN && bra != OP_BRAMINZERO))
+if (ket == OP_KETRMAX || (ket == OP_KETRMIN && bra != OP_BRAMINZERO))
   stacksize++;
 if (bra == OP_BRAZERO)
   stacksize++;
@@ -6029,7 +6118,7 @@ if (stacksize > 0)
   allocate_stack(common, stacksize);
 
 stacksize = 0;
-if ((ket == OP_KETRMAX) || (ket == OP_KETRMIN && bra != OP_BRAMINZERO))
+if (ket == OP_KETRMAX || (ket == OP_KETRMIN && bra != OP_BRAMINZERO))
   {
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
   stacksize++;
@@ -6092,47 +6181,80 @@ if (ket == OP_KETRMAX)
 /* Handling capturing brackets and alternatives. */
 if (opcode == OP_ONCE)
   {
+  stacksize = 0;
+  if (needs_control_head)
+    {
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+    stacksize++;
+    }
+
   if (BACKTRACK_AS(bracket_backtrack)->u.framesize < 0)
     {
     /* Neither capturing brackets nor recursions are found in the block. */
     if (ket == OP_KETRMIN)
       {
-      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-      allocate_stack(common, 2);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP2, 0);
-      OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0, SLJIT_IMM, sizeof(sljit_sw));
-      }
-    else if (ket == OP_KETRMAX || has_alternatives)
-      {
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0);
-      allocate_stack(common, 1);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+      stacksize += 2;
+      if (!needs_control_head)
+        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
       }
     else
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0);
+      {
+      if (BACKTRACK_AS(bracket_backtrack)->u.framesize == no_frame)
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0);
+      if (ket == OP_KETRMAX || has_alternatives)
+        stacksize++;
+      }
+
+    if (stacksize > 0)
+      allocate_stack(common, stacksize);
+
+    stacksize = 0;
+    if (needs_control_head)
+      {
+      stacksize++;
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
+      }
+
+    if (ket == OP_KETRMIN)
+      {
+      if (needs_control_head)
+        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), STR_PTR, 0);
+      if (BACKTRACK_AS(bracket_backtrack)->u.framesize == no_frame)
+        OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STACK_TOP, 0, SLJIT_IMM, needs_control_head ? (2 * sizeof(sljit_sw)) : sizeof(sljit_sw));
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize + 1), TMP2, 0);
+      }
+    else if (ket == OP_KETRMAX || has_alternatives)
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), STR_PTR, 0);
     }
   else
     {
-    if (ket == OP_KETRMIN || ket == OP_KETRMAX || has_alternatives)
+    if (ket != OP_KET || has_alternatives)
+      stacksize++;
+
+    stacksize += BACKTRACK_AS(bracket_backtrack)->u.framesize + 1;
+    allocate_stack(common, stacksize);
+
+    if (needs_control_head)
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
+
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+    OP2(SLJIT_SUB, TMP2, 0, STACK_TOP, 0, SLJIT_IMM, stacksize * sizeof(sljit_sw));
+
+    stacksize = needs_control_head ? 1 : 0;
+    if (ket != OP_KET || has_alternatives)
       {
-      allocate_stack(common, BACKTRACK_AS(bracket_backtrack)->u.framesize + 2);
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-      OP2(SLJIT_SUB, TMP2, 0, STACK_TOP, 0, SLJIT_IMM, (BACKTRACK_AS(bracket_backtrack)->u.framesize + 2) * sizeof(sljit_sw));
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), STR_PTR, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, TMP2, 0);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
-      init_frame(common, ccbegin, BACKTRACK_AS(bracket_backtrack)->u.framesize + 1, 2, FALSE);
+      stacksize++;
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
       }
     else
       {
-      allocate_stack(common, BACKTRACK_AS(bracket_backtrack)->u.framesize + 1);
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-      OP2(SLJIT_SUB, TMP2, 0, STACK_TOP, 0, SLJIT_IMM, (BACKTRACK_AS(bracket_backtrack)->u.framesize + 1) * sizeof(sljit_sw));
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, TMP2, 0);
-      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP1, 0);
-      init_frame(common, ccbegin, BACKTRACK_AS(bracket_backtrack)->u.framesize, 1, FALSE);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
       }
+    init_frame(common, ccbegin, BACKTRACK_AS(bracket_backtrack)->u.framesize + stacksize, stacksize + 1, FALSE);
     }
   }
 else if (opcode == OP_CBRA || opcode == OP_SCBRA)
@@ -6268,30 +6390,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   return NULL;
 
 if (opcode == OP_ONCE)
-  {
-  if (BACKTRACK_AS(bracket_backtrack)->u.framesize < 0)
-    {
-    OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-    /* TMP2 which is set here used by OP_KETRMAX below. */
-    if (ket == OP_KETRMAX)
-      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), 0);
-    else if (ket == OP_KETRMIN)
-      {
-      /* Move the STR_PTR to the private_data_ptr. */
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_MEM1(STACK_TOP), 0);
-      }
-    }
-  else
-    {
-    stacksize = (ket == OP_KETRMIN || ket == OP_KETRMAX || has_alternatives) ? 2 : 1;
-    OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_IMM, (BACKTRACK_AS(bracket_backtrack)->u.framesize + stacksize) * sizeof(sljit_sw));
-    if (ket == OP_KETRMAX)
-      {
-      /* TMP2 which is set here used by OP_KETRMAX below. */
-      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-      }
-    }
-  }
+  match_once_common(common, ket, BACKTRACK_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
 
 stacksize = 0;
 if (ket != OP_KET || bra != OP_BRA)
@@ -6320,26 +6419,7 @@ if (ket != OP_KET || bra != OP_BRA)
   }
 
 if (offset != 0)
-  {
-  if (common->capture_last_ptr != 0)
-    {
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr, SLJIT_IMM, offset >> 1);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP2, 0);
-    stacksize++;
-    }
-  if (common->optimized_cbracket[offset >> 1] == 0)
-    {
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset));
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1));
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize + 1), TMP2, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), STR_PTR, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
-    stacksize += 2;
-    }
-  }
+  stacksize = match_capture_common(common, stacksize, offset, private_data_ptr);
 
 if (has_alternatives)
   {
@@ -6410,6 +6490,10 @@ if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO)
 while (*cc == OP_ALT)
   cc += GET(cc, 1);
 cc += 1 + LINK_SIZE;
+
+/* Temporarily encoding the needs_control_head in framesize. */
+if (opcode == OP_ONCE)
+  BACKTRACK_AS(bracket_backtrack)->u.framesize = (BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
 return cc;
 }
 
@@ -6420,7 +6504,7 @@ backtrack_common *backtrack;
 pcre_uchar opcode;
 int private_data_ptr;
 int cbraprivptr = 0;
-BOOL needs_control_head = common->control_head_ptr != 0;
+BOOL needs_control_head;
 int framesize;
 int stacksize;
 int offset = 0;
@@ -6464,7 +6548,7 @@ switch(opcode)
   break;
   }
 
-framesize = get_framesize(common, cc, FALSE);
+framesize = get_framesize(common, cc, FALSE, &needs_control_head);
 BACKTRACK_AS(bracketpos_backtrack)->framesize = framesize;
 if (framesize < 0)
   {
@@ -7637,6 +7721,7 @@ pcre_uchar bra = OP_BRA;
 pcre_uchar ket;
 assert_backtrack *assert;
 BOOL has_alternatives;
+BOOL needs_control_head = FALSE;
 struct sljit_jump *brazero = NULL;
 struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
@@ -7661,6 +7746,13 @@ if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN
   opcode = OP_SCOND;
 if (SLJIT_UNLIKELY(opcode == OP_ONCE_NC))
   opcode = OP_ONCE;
+
+/* Decoding the needs_control_head in framesize. */
+if (opcode == OP_ONCE)
+  {
+  needs_control_head = (CURRENT_AS(bracket_backtrack)->u.framesize & 0x1) != 0;
+  CURRENT_AS(bracket_backtrack)->u.framesize >>= 1;
+  }
 
 if (ket == OP_KETRMAX)
   {
@@ -7819,16 +7911,22 @@ if (has_alternatives)
     current->top = NULL;
     current->topbacktracks = NULL;
     current->nextbacktracks = NULL;
+    /* Conditional blocks always have an additional alternative, even if it is empty. */
     if (*cc == OP_ALT)
       {
       ccprev = cc + 1 + LINK_SIZE;
       cc += GET(cc, 1);
       if (opcode != OP_COND && opcode != OP_SCOND)
         {
-        if (private_data_ptr != 0 && opcode != OP_ONCE)
-          OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+        if (opcode != OP_ONCE)
+          {
+          if (private_data_ptr != 0)
+            OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+          else
+            OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+          }
         else
-          OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+          OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(needs_control_head ? 1 : 0));
         }
       compile_matchingpath(common, ccprev, cc, current);
       if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
@@ -7838,29 +7936,7 @@ if (has_alternatives)
     /* Instructions after the current alternative is succesfully matched. */
     /* There is a similar code in compile_bracket_matchingpath. */
     if (opcode == OP_ONCE)
-      {
-      if (CURRENT_AS(bracket_backtrack)->u.framesize < 0)
-        {
-        OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-        /* TMP2 which is set here used by OP_KETRMAX below. */
-        if (ket == OP_KETRMAX)
-          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), 0);
-        else if (ket == OP_KETRMIN)
-          {
-          /* Move the STR_PTR to the private_data_ptr. */
-          OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_MEM1(STACK_TOP), 0);
-          }
-        }
-      else
-        {
-        OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_IMM, (CURRENT_AS(bracket_backtrack)->u.framesize + 2) * sizeof(sljit_sw));
-        if (ket == OP_KETRMAX)
-          {
-          /* TMP2 which is set here used by OP_KETRMAX below. */
-          OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-          }
-        }
-      }
+      match_once_common(common, ket, CURRENT_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
 
     stacksize = 0;
     if (ket != OP_KET || bra != OP_BRA)
@@ -7875,7 +7951,8 @@ if (has_alternatives)
     if (opcode != OP_ONCE)
       stacksize++;
 
-    if (stacksize > 0) {
+    if (stacksize > 0)
+      {
       if (opcode != OP_ONCE || CURRENT_AS(bracket_backtrack)->u.framesize >= 0)
         allocate_stack(common, stacksize);
       else
@@ -7884,7 +7961,7 @@ if (has_alternatives)
         SLJIT_ASSERT(stacksize == 1);
         OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, sizeof(sljit_sw));
         }
-    }
+      }
 
     stacksize = 0;
     if (ket != OP_KET || bra != OP_BRA)
@@ -7897,26 +7974,7 @@ if (has_alternatives)
       }
 
     if (offset != 0)
-      {
-      if (common->capture_last_ptr != 0)
-        {
-        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr);
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr, SLJIT_IMM, offset >> 1);
-        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
-        stacksize++;
-        }
-      if (common->optimized_cbracket[offset >> 1] == 0)
-        {
-        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset));
-        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1));
-        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
-        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-        OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize + 1), TMP2, 0);
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset + 1), STR_PTR, 0);
-        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(offset), TMP1, 0);
-        stacksize += 2;
-        }
-      }
+      stacksize = match_capture_common(common, stacksize, offset, private_data_ptr);
 
     if (opcode != OP_ONCE)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, count++);
@@ -7989,17 +8047,19 @@ else if (opcode == OP_SBRA || opcode == OP_SCOND)
 else if (opcode == OP_ONCE)
   {
   cc = ccbegin + GET(ccbegin, 1);
+  stacksize = needs_control_head ? 1 : 0;
+
   if (CURRENT_AS(bracket_backtrack)->u.framesize >= 0)
     {
     /* Reset head and drop saved frame. */
-    stacksize = (ket == OP_KETRMAX || ket == OP_KETRMIN || *cc == OP_ALT) ? 2 : 1;
-    free_stack(common, CURRENT_AS(bracket_backtrack)->u.framesize + stacksize);
+    stacksize += CURRENT_AS(bracket_backtrack)->u.framesize + ((ket != OP_KET || *cc == OP_ALT) ? 2 : 1);
     }
   else if (ket == OP_KETRMAX || (*cc == OP_ALT && ket != OP_KETRMIN))
     {
     /* The STR_PTR must be released. */
-    free_stack(common, 1);
+    stacksize++;
     }
+  free_stack(common, stacksize);
 
   JUMPHERE(once);
   /* Restore previous private_data_ptr */
@@ -8309,8 +8369,8 @@ DEFINE_COMPILER;
 pcre_uchar *cc = common->start + common->currententry->start;
 pcre_uchar *ccbegin = cc + 1 + LINK_SIZE + (*cc == OP_BRA ? 0 : IMM2_SIZE);
 pcre_uchar *ccend = bracketend(cc);
-BOOL needs_control_head = common->control_head_ptr != 0;
-int framesize = get_framesize(common, cc, TRUE);
+BOOL needs_control_head;
+int framesize = get_framesize(common, cc, TRUE, &needs_control_head);
 int private_data_size = get_private_data_copy_length(common, ccbegin, ccend, needs_control_head);
 int alternativesize;
 BOOL needs_frame;

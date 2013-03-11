@@ -719,6 +719,18 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(a(*COMMIT)b)++(*PRUNE)d|c", "ababc" },
 	{ MUA, 0, "((a)(*COMMIT)b)++(*PRUNE)d|c", "ababc" },
 	{ MUA, 0 | F_NOMATCH, "(*COMMIT)((a)(*COMMIT)b)++(*PRUNE)d|c", "ababc" },
+	{ MUA, 0, "(?>a(*COMMIT)b)*abab(*PRUNE)d|ba", "ababab" },
+	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)*abab(*PRUNE)d|ba", "ababab" },
+	{ MUA, 0, "(?>a(*COMMIT)b)+abab(*PRUNE)d|ba", "ababab" },
+	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)+abab(*PRUNE)d|ba", "ababab" },
+	{ MUA, 0, "(?>a(*COMMIT)b)?ab(*PRUNE)d|ba", "aba" },
+	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)?ab(*PRUNE)d|ba", "aba" },
+	{ MUA, 0, "(?>a(*COMMIT)b)*?n(*PRUNE)d|ba", "abababn" },
+	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)*?n(*PRUNE)d|ba", "abababn" },
+	{ MUA, 0, "(?>a(*COMMIT)b)+?n(*PRUNE)d|ba", "abababn" },
+	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)+?n(*PRUNE)d|ba", "abababn" },
+	{ MUA, 0, "(?>a(*COMMIT)b)??n(*PRUNE)d|bn", "abn" },
+	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)??n(*PRUNE)d|bn", "abn" },
 
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
