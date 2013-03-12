@@ -204,7 +204,9 @@ enum frame_types {
 enum control_types {
   type_commit = 0,
   type_prune = 1,
-  type_skip = 2
+  type_skip = 2,
+  type_skip_arg = 3,
+  type_mark = 4
 };
 
 typedef int (SLJIT_CALL *jit_function)(jit_arguments *args);
@@ -332,6 +334,8 @@ typedef struct compiler_common {
   int mode;
   /* \K is in the pattern. */
   BOOL has_set_som;
+  /* (*SKIP:arg) is in the pattern. */
+  BOOL has_skip_arg;
   /* Needs to know the start position anytime. */
   BOOL needs_start_ptr;
   /* Currently in recurse or assert. */
@@ -696,6 +700,7 @@ switch(*cc)
 
   case OP_MARK:
   case OP_PRUNE_ARG:
+  case OP_SKIP_ARG:
   return cc + 1 + 2 + cc[1];
 
   default:
@@ -964,11 +969,14 @@ while (cc < ccend)
     case OP_PRUNE:
     case OP_SKIP:
     common->needs_start_ptr = TRUE;
-    /* Fall through. */
-
-    case OP_COMMIT:
     common->control_head_ptr = 1;
     cc += 1;
+    break;
+
+    case OP_SKIP_ARG:
+    common->control_head_ptr = 1;
+    common->has_skip_arg = TRUE;
+    cc += 1 + 2 + cc[1];
     break;
 
     default:
@@ -1239,6 +1247,7 @@ while (cc < ccend)
 
     case OP_PRUNE:
     case OP_SKIP:
+    case OP_SKIP_ARG:
     case OP_COMMIT:
     if (common->control_head_ptr != 0)
       *needs_control_head = TRUE;
@@ -2025,6 +2034,7 @@ OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), SLJIT_OFFSETOF(struct sljit_
 static sljit_sw SLJIT_CALL do_check_control_chain(sljit_sw *current)
 {
 sljit_sw return_value = 0;
+const pcre_uchar *skip_arg = NULL;
 
 SLJIT_ASSERT(current != NULL);
 do
@@ -2040,8 +2050,19 @@ do
 
     case type_skip:
     /* Overwrites prune, but not other skips. */
-    if (return_value == 0)
+    if (return_value == 0 && skip_arg == NULL)
       return_value = current[-3];
+    break;
+
+    case type_skip_arg:
+    if (return_value == 0 && skip_arg == NULL)
+      skip_arg = (pcre_uchar *)current[-3];
+    break;
+
+    case type_mark:
+    if (return_value == 0 && skip_arg != NULL)
+      if (STRCMP_UC_UC(skip_arg, (pcre_uchar *)current[-3]) == 0)
+        return_value = current[-4];
     break;
 
     default:
@@ -2051,7 +2072,7 @@ do
   current = (sljit_sw*)current[-1];
   }
 while (current != NULL);
-return return_value;
+return (return_value != 0 || skip_arg == NULL) ? return_value : -2;
 }
 
 static SLJIT_INLINE void copy_ovector(compiler_common *common, int topbracket)
@@ -7368,12 +7389,21 @@ while (cc < ccend)
     PUSH_BACKTRACK_NOVALUE(sizeof(backtrack_common), cc);
     SLJIT_ASSERT(common->mark_ptr != 0);
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr);
-    allocate_stack(common, 1);
+    allocate_stack(common, common->has_skip_arg ? 5 : 1);
     OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(common->has_skip_arg ? 4 : 0), TMP2, 0);
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)(cc + 2));
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, TMP2, 0);
     OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr), TMP2, 0);
+    if (common->has_skip_arg)
+      {
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, type_mark);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), SLJIT_IMM, (sljit_sw)(cc + 2));
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(3), STR_PTR, 0);
+      OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP1, 0);
+      }
     cc += 1 + 2 + cc[1];
     break;
 
@@ -7397,14 +7427,15 @@ while (cc < ccend)
     break;
 
     case OP_SKIP:
+    case OP_SKIP_ARG:
     PUSH_BACKTRACK_NOVALUE(sizeof(backtrack_common), cc);
     OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
     allocate_stack(common, 3);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, type_skip);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), STR_PTR, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_SKIP ? type_skip : type_skip_arg);
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), *cc == OP_SKIP ? STR_PTR : SLJIT_IMM, *cc == OP_SKIP ? 0 : (sljit_sw)(cc + 2));
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
-    cc += 1;
+    cc += (*cc == OP_SKIP_ARG) ? (1 + 2 + cc[1]) : 1;
     break;
 
     case OP_FAIL:
@@ -8310,9 +8341,13 @@ while (current)
     break;
 
     case OP_MARK:
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-    free_stack(common, 1);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(common->has_skip_arg ? 4 : 0));
+    if (common->has_skip_arg)
+      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    free_stack(common, common->has_skip_arg ? 5 : 1);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, TMP1, 0);
+    if (common->has_skip_arg)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP2, 0);
     break;
 
     case OP_PRUNE:
@@ -8337,6 +8372,39 @@ while (current)
       add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
     else
       JUMPTO(SLJIT_JUMP, common->quit_label);
+    break;
+
+    case OP_SKIP_ARG:
+    if (!common->local_exit)
+      {
+      SLJIT_ASSERT(common->control_head_ptr != 0);
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
+      sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_check_control_chain));
+      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
+
+      OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
+      add_jump(compiler, &common->reset_match, CMP(SLJIT_C_LESS, STR_PTR, 0, SLJIT_IMM, -2));
+
+      /* May not find suitable mark. */
+      OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
+      if (common->quit_label == NULL)
+        add_jump(compiler, &common->quit, CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, -1));
+      else
+        CMPTO(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, -1, common->quit_label);
+
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+      free_stack(common, 3);
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP1, 0);
+      }
+    else
+      {
+      /* In recurse or accept. */
+      if (common->quit_label == NULL)
+        add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
+      else
+        JUMPTO(SLJIT_JUMP, common->quit_label);
+      }
     break;
 
     case OP_COMMIT:
