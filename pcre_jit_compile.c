@@ -196,6 +196,11 @@ typedef struct stub_list {
   struct stub_list *next;
 } stub_list;
 
+enum bytecode_flag_types {
+  flag_optimized_cbracket = 1,
+  flag_then_start = 2,
+};
+
 enum frame_types {
   no_frame = -1,
   no_stack = -2
@@ -206,7 +211,8 @@ enum control_types {
   type_prune = 1,
   type_skip = 2,
   type_skip_arg = 3,
-  type_mark = 4
+  type_mark = 4,
+  type_then_trap = 5
 };
 
 typedef int (SLJIT_CALL *jit_function)(jit_arguments *args);
@@ -293,6 +299,13 @@ typedef struct recurse_backtrack {
   BOOL inlined_pattern;
 } recurse_backtrack;
 
+typedef struct then_trap_backtrack {
+  backtrack_common common;
+  struct then_trap_backtrack *then_trap;
+  jump_list *quit;
+  int framesize;
+} then_trap_backtrack;
+
 #define MAX_RANGE_SIZE 6
 
 typedef struct compiler_common {
@@ -304,6 +317,10 @@ typedef struct compiler_common {
   int *private_data_ptrs;
   /* Tells whether the capturing bracket is optimized. */
   pcre_uint8 *optimized_cbracket;
+  /* Tells whether the starting offset is a target of then. */
+  pcre_uint8 *then_offsets;
+  /* Current position where a THEN must jump. */
+  then_trap_backtrack *then_trap;
   /* Starting offset of private data for capturing brackets. */
   int cbra_ptr;
   /* Output vector starting point. Must be divisible by 2. */
@@ -332,10 +349,12 @@ typedef struct compiler_common {
   sljit_sw lcc;
   /* Mode can be PCRE_STUDY_JIT_COMPILE and others. */
   int mode;
-  /* \K is in the pattern. */
+  /* \K is found in the pattern. */
   BOOL has_set_som;
-  /* (*SKIP:arg) is in the pattern. */
+  /* (*SKIP:arg) is found in the pattern. */
   BOOL has_skip_arg;
+  /* (*THEN) is found in the pattern. */
+  BOOL has_then;
   /* Needs to know the start position anytime. */
   BOOL needs_start_ptr;
   /* Currently in recurse or assert. */
@@ -601,6 +620,7 @@ switch(*cc)
   case OP_BRAPOSZERO:
   case OP_PRUNE:
   case OP_SKIP:
+  case OP_THEN:
   case OP_COMMIT:
   case OP_FAIL:
   case OP_ACCEPT:
@@ -701,6 +721,7 @@ switch(*cc)
   case OP_MARK:
   case OP_PRUNE_ARG:
   case OP_SKIP_ARG:
+  case OP_THEN_ARG:
   return cc + 1 + 2 + cc[1];
 
   default:
@@ -952,6 +973,10 @@ while (cc < ccend)
     cc += 2 + 2 * LINK_SIZE;
     break;
 
+    case OP_THEN_ARG:
+    common->has_then = TRUE;
+    /* Fall through. */
+
     case OP_PRUNE_ARG:
     common->needs_start_ptr = TRUE;
     common->control_head_ptr = 1;
@@ -965,6 +990,10 @@ while (cc < ccend)
       }
     cc += 1 + 2 + cc[1];
     break;
+
+    case OP_THEN:
+    common->has_then = TRUE;
+    /* Fall through. */
 
     case OP_PRUNE:
     case OP_SKIP:
@@ -1156,9 +1185,8 @@ while (cc < ccend)
 }
 
 /* Returns with a frame_types (always < 0) if no need for frame. */
-static int get_framesize(compiler_common *common, pcre_uchar *cc, BOOL recursive, BOOL* needs_control_head)
+static int get_framesize(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, BOOL recursive, BOOL* needs_control_head)
 {
-pcre_uchar *ccend = bracketend(cc) - (1 + LINK_SIZE);
 int length = 0;
 int possessive = 0;
 BOOL stack_restore = FALSE;
@@ -1174,14 +1202,18 @@ SLJIT_ASSERT(common->control_head_ptr != 0);
 *needs_control_head = FALSE;
 #endif
 
-if (!recursive && (*cc == OP_CBRAPOS || *cc == OP_SCBRAPOS))
+if (ccend == NULL)
   {
-  possessive = length = (common->capture_last_ptr != 0) ? 5 : 3;
-  /* This is correct regardless of common->capture_last_ptr. */
-  capture_last_found = TRUE;
+  ccend = bracketend(cc) - (1 + LINK_SIZE);
+  if (!recursive && (*cc == OP_CBRAPOS || *cc == OP_SCBRAPOS))
+    {
+    possessive = length = (common->capture_last_ptr != 0) ? 5 : 3;
+    /* This is correct regardless of common->capture_last_ptr. */
+    capture_last_found = TRUE;
+    }
+  cc = next_opcode(common, cc);
   }
 
-cc = next_opcode(common, cc);
 SLJIT_ASSERT(cc != NULL);
 while (cc < ccend)
   switch(*cc)
@@ -1199,6 +1231,7 @@ while (cc < ccend)
 
     case OP_MARK:
     case OP_PRUNE_ARG:
+    case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
     stack_restore = TRUE;
     if (!setmark_found)
@@ -1335,10 +1368,9 @@ if (length > 0)
 return stack_restore ? no_frame : no_stack;
 }
 
-static void init_frame(compiler_common *common, pcre_uchar *cc, int stackpos, int stacktop, BOOL recursive)
+static void init_frame(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, int stackpos, int stacktop, BOOL recursive)
 {
 DEFINE_COMPILER;
-pcre_uchar *ccend = bracketend(cc) - (1 + LINK_SIZE);
 BOOL setsom_found = recursive;
 BOOL setmark_found = recursive;
 /* The last capture is a local variable even for recursions. */
@@ -1350,8 +1382,13 @@ SLJIT_UNUSED_ARG(stacktop);
 SLJIT_ASSERT(stackpos >= stacktop + 2);
 
 stackpos = STACK(stackpos);
-if (recursive || (*cc != OP_CBRAPOS && *cc != OP_SCBRAPOS))
-  cc = next_opcode(common, cc);
+if (ccend == NULL)
+  {
+  ccend = bracketend(cc) - (1 + LINK_SIZE);
+  if (recursive || (*cc != OP_CBRAPOS && *cc != OP_SCBRAPOS))
+    cc = next_opcode(common, cc);
+  }
+
 SLJIT_ASSERT(cc != NULL);
 while (cc < ccend)
   switch(*cc)
@@ -1372,6 +1409,7 @@ while (cc < ccend)
 
     case OP_MARK:
     case OP_PRUNE_ARG:
+    case OP_THEN_ARG:
     SLJIT_ASSERT(common->mark_ptr != 0);
     if (!setmark_found)
       {
@@ -1877,6 +1915,39 @@ if (save)
 SLJIT_ASSERT(cc == ccend && stackptr == stacktop && (save || (tmp1empty && tmp2empty)));
 }
 
+static SLJIT_INLINE pcre_uchar *set_then_offsets(compiler_common *common, pcre_uchar *cc, pcre_uint8 *current_offset)
+{
+pcre_uchar *end = bracketend(cc);
+BOOL has_alternatives = cc[GET(cc, 1)] == OP_ALT;
+
+/* Assert captures then. */
+if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT)
+  current_offset = NULL;
+/* Conditional block does not. */
+if (*cc == OP_COND || *cc == OP_SCOND)
+  has_alternatives = FALSE;
+
+cc = next_opcode(common, cc);
+if (has_alternatives)
+  current_offset = common->then_offsets + (cc - common->start);
+
+while (cc < end)
+  {
+  if ((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND))
+    cc = set_then_offsets(common, cc, current_offset);
+  else
+    {
+    if (*cc == OP_ALT && has_alternatives)
+      current_offset = common->then_offsets + (cc + 1 + LINK_SIZE - common->start);
+    if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && current_offset != NULL)
+      *current_offset = 1;
+    cc = next_opcode(common, cc);
+    }
+  }
+
+return end;
+}
+
 #undef CASE_ITERATOR_PRIVATE_DATA_1
 #undef CASE_ITERATOR_PRIVATE_DATA_2A
 #undef CASE_ITERATOR_PRIVATE_DATA_2B
@@ -2046,6 +2117,7 @@ do
     return -1;
 
     case type_prune:
+    case type_then_trap:
     break;
 
     case type_skip:
@@ -2073,6 +2145,35 @@ do
   }
 while (current != NULL);
 return (return_value != 0 || skip_arg == NULL) ? return_value : -2;
+}
+
+static sljit_sw SLJIT_CALL do_search_then_trap(sljit_sw *current)
+{
+do
+  {
+  switch (current[-2])
+    {
+    case type_commit:
+    /* Commit overwrites all. */
+    return 0;
+
+    case type_then_trap:
+    return (sljit_sw)current;
+
+    case type_prune:
+    case type_skip:
+    case type_skip_arg:
+    case type_mark:
+    break;
+
+    default:
+    SLJIT_ASSERT_STOP();
+    break;
+    }
+  current = (sljit_sw*)current[-1];
+  SLJIT_ASSERT(current != NULL);
+  }
+while (TRUE);
 }
 
 static SLJIT_INLINE void copy_ovector(compiler_common *common, int topbracket)
@@ -5287,7 +5388,7 @@ BOOL needs_control_head;
 PUSH_BACKTRACK(sizeof(recurse_backtrack), cc, NULL);
 
 /* Inlining simple patterns. */
-if (get_framesize(common, common->start + start, TRUE, &needs_control_head) == no_stack)
+if (get_framesize(common, common->start + start, NULL, TRUE, &needs_control_head) == no_stack)
   {
   start_cc = common->start + start;
   compile_matchingpath(common, next_opcode(common, start_cc), bracketend(start_cc) - (1 + LINK_SIZE), backtrack);
@@ -5457,13 +5558,17 @@ jump_list *tmp = NULL;
 jump_list **target = (conditional) ? &backtrack->condfailed : &backtrack->common.topbacktracks;
 jump_list **found;
 /* Saving previous accept variables. */
+BOOL save_local_exit = common->local_exit;
+then_trap_backtrack *save_then_trap = common->then_trap;
 struct sljit_label *save_quit_label = common->quit_label;
 struct sljit_label *save_accept_label = common->accept_label;
 jump_list *save_quit = common->quit;
 jump_list *save_accept = common->accept;
-BOOL save_local_exit = common->local_exit;
 struct sljit_jump *jump;
 struct sljit_jump *brajump = NULL;
+
+/* Assert captures then. */
+common->then_trap = NULL;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -5473,7 +5578,7 @@ if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   }
 private_data_ptr = PRIVATE_DATA(cc);
 SLJIT_ASSERT(private_data_ptr != 0);
-framesize = get_framesize(common, cc, FALSE, &needs_control_head);
+framesize = get_framesize(common, cc, NULL, FALSE, &needs_control_head);
 backtrack->framesize = framesize;
 backtrack->private_data_ptr = private_data_ptr;
 opcode = *cc;
@@ -5523,7 +5628,7 @@ else
     }
   else
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
-  init_frame(common, ccbegin, framesize + extrasize - 1, extrasize, FALSE);
+  init_frame(common, ccbegin, NULL, framesize + extrasize - 1, extrasize, FALSE);
   }
 
 memset(&altbacktrack, 0, sizeof(backtrack_common));
@@ -5545,6 +5650,7 @@ while (1)
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     common->local_exit = save_local_exit;
+    common->then_trap = save_then_trap;
     common->quit_label = save_quit_label;
     common->accept_label = save_accept_label;
     common->quit = save_quit;
@@ -5613,6 +5719,7 @@ while (1)
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
     common->local_exit = save_local_exit;
+    common->then_trap = save_then_trap;
     common->quit_label = save_quit_label;
     common->accept_label = save_accept_label;
     common->quit = save_quit;
@@ -5793,6 +5900,7 @@ else
   }
 
 common->local_exit = save_local_exit;
+common->then_trap = save_then_trap;
 common->quit_label = save_quit_label;
 common->accept_label = save_accept_label;
 common->quit = save_quit;
@@ -6125,7 +6233,7 @@ else if (opcode == OP_ONCE || opcode == OP_SBRA || opcode == OP_SCOND)
   SLJIT_ASSERT(private_data_ptr != 0);
   BACKTRACK_AS(bracket_backtrack)->private_data_ptr = private_data_ptr;
   if (opcode == OP_ONCE)
-    BACKTRACK_AS(bracket_backtrack)->u.framesize = get_framesize(common, ccbegin, FALSE, &needs_control_head);
+    BACKTRACK_AS(bracket_backtrack)->u.framesize = get_framesize(common, ccbegin, NULL, FALSE, &needs_control_head);
   }
 
 /* Instructions before the first alternative. */
@@ -6275,7 +6383,7 @@ if (opcode == OP_ONCE)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, TMP2, 0);
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP1, 0);
       }
-    init_frame(common, ccbegin, BACKTRACK_AS(bracket_backtrack)->u.framesize + stacksize, stacksize + 1, FALSE);
+    init_frame(common, ccbegin, NULL, BACKTRACK_AS(bracket_backtrack)->u.framesize + stacksize, stacksize + 1, FALSE);
     }
   }
 else if (opcode == OP_CBRA || opcode == OP_SCBRA)
@@ -6569,7 +6677,7 @@ switch(opcode)
   break;
   }
 
-framesize = get_framesize(common, cc, FALSE, &needs_control_head);
+framesize = get_framesize(common, cc, NULL, FALSE, &needs_control_head);
 BACKTRACK_AS(bracketpos_backtrack)->framesize = framesize;
 if (framesize < 0)
   {
@@ -6662,7 +6770,7 @@ else
     stack++;
     }
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stack), TMP1, 0);
-  init_frame(common, cc, stacksize - 1, stacksize - framesize, FALSE);
+  init_frame(common, cc, NULL, stacksize - 1, stacksize - framesize, FALSE);
   stack -= 1 + (offset == 0);
   }
 
@@ -7169,10 +7277,99 @@ if (!optimized_cbracket)
 return cc + 1 + IMM2_SIZE;
 }
 
+static SLJIT_INLINE pcre_uchar *compile_control_verb_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
+{
+DEFINE_COMPILER;
+backtrack_common *backtrack;
+pcre_uchar opcode = *cc;
+pcre_uchar *ccend = cc + 1;
+
+SLJIT_ASSERT(common->control_head_ptr != 0 || *cc == OP_COMMIT);
+
+if (opcode == OP_PRUNE_ARG || opcode == OP_SKIP_ARG || opcode == OP_THEN_ARG)
+  ccend += 2 + cc[1];
+
+PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
+
+if (opcode == OP_SKIP || opcode == OP_SKIP_ARG)
+  {
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+  allocate_stack(common, 3);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_SKIP ? type_skip : type_skip_arg);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), (opcode == OP_SKIP) ? STR_PTR : SLJIT_IMM, (opcode == OP_SKIP) ? 0 : (sljit_sw)(cc + 2));
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
+  return ccend;
+  }
+
+if (opcode == OP_PRUNE_ARG || opcode == OP_THEN_ARG)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)(cc + 2));
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, TMP2, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr), TMP2, 0);
+  }
+
+if (common->control_head_ptr != 0 && ((opcode != OP_THEN && opcode != OP_THEN_ARG) || common->then_trap == NULL))
+  {
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+  allocate_stack(common, 2);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_COMMIT ? type_commit : type_prune);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
+  }
+
+return ccend;
+}
+
+static pcre_uchar then_trap_opcode[1] = { OP_TABLE_LENGTH };
+
+static SLJIT_INLINE void compile_then_trap_matchingpath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, backtrack_common *parent)
+{
+DEFINE_COMPILER;
+backtrack_common *backtrack;
+BOOL needs_control_head;
+int size;
+
+PUSH_BACKTRACK_NOVALUE(sizeof(then_trap_backtrack), cc);
+common->then_trap = BACKTRACK_AS(then_trap_backtrack);
+BACKTRACK_AS(then_trap_backtrack)->common.cc = then_trap_opcode;
+BACKTRACK_AS(then_trap_backtrack)->framesize = get_framesize(common, cc, ccend, FALSE, &needs_control_head);
+
+size = BACKTRACK_AS(then_trap_backtrack)->framesize;
+size = 2 + (size < 0 ? 0 : size);
+
+OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+allocate_stack(common, size);
+if (size > 2)
+  OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0, SLJIT_IMM, (size - 2) * sizeof(sljit_sw));
+else
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 1), SLJIT_IMM, type_then_trap);
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 2), TMP2, 0);
+
+size = BACKTRACK_AS(then_trap_backtrack)->framesize;
+if (size >= 0)
+  init_frame(common, cc, ccend, size - 1, 0, FALSE);
+}
+
 static void compile_matchingpath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, backtrack_common *parent)
 {
 DEFINE_COMPILER;
 backtrack_common *backtrack;
+BOOL has_then_trap = FALSE;
+then_trap_backtrack *save_then_trap = NULL;
+
+SLJIT_ASSERT(*ccend == OP_END || (*ccend >= OP_ALT && *ccend <= OP_KETRPOS));
+
+if (common->has_then && common->then_offsets[cc - common->start] != 0)
+  {
+  SLJIT_ASSERT(*ccend != OP_END && common->control_head_ptr != 0);
+  has_then_trap = TRUE;
+  save_then_trap = common->then_trap;
+  /* Tail item on backtrack. */
+  compile_then_trap_matchingpath(common, cc, ccend, parent);
+  }
 
 while (cc < ccend)
   {
@@ -7407,35 +7604,14 @@ while (cc < ccend)
     cc += 1 + 2 + cc[1];
     break;
 
-    case OP_PRUNE_ARG:
-    OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)(cc + 2));
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, TMP2, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr), TMP2, 0);
-    /* Fall through. */
-
     case OP_PRUNE:
-    case OP_COMMIT:
-    PUSH_BACKTRACK_NOVALUE(sizeof(backtrack_common), cc);
-    SLJIT_ASSERT(common->control_head_ptr != 0);
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-    allocate_stack(common, 2);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_COMMIT ? type_commit : type_prune);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
-    cc += (*cc == OP_PRUNE_ARG) ? (1 + 2 + cc[1]) : 1;
-    break;
-
+    case OP_PRUNE_ARG:
     case OP_SKIP:
     case OP_SKIP_ARG:
-    PUSH_BACKTRACK_NOVALUE(sizeof(backtrack_common), cc);
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-    allocate_stack(common, 3);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_SKIP ? type_skip : type_skip_arg);
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), *cc == OP_SKIP ? STR_PTR : SLJIT_IMM, *cc == OP_SKIP ? 0 : (sljit_sw)(cc + 2));
-    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
-    cc += (*cc == OP_SKIP_ARG) ? (1 + 2 + cc[1]) : 1;
+    case OP_THEN:
+    case OP_THEN_ARG:
+    case OP_COMMIT:
+    cc = compile_control_verb_matchingpath(common, cc, parent);
     break;
 
     case OP_FAIL:
@@ -7458,6 +7634,15 @@ while (cc < ccend)
     }
   if (cc == NULL)
     return;
+  }
+
+if (has_then_trap)
+  {
+  /* Head item on backtrack. */
+  PUSH_BACKTRACK_NOVALUE(sizeof(then_trap_backtrack), cc);
+  BACKTRACK_AS(then_trap_backtrack)->common.cc = then_trap_opcode;
+  BACKTRACK_AS(then_trap_backtrack)->then_trap = common->then_trap;
+  common->then_trap = save_then_trap;
   }
 SLJIT_ASSERT(cc == ccend);
 }
@@ -7620,7 +7805,7 @@ switch(opcode)
   }
 }
 
-static void compile_ref_iterator_backtrackingpath(compiler_common *common, struct backtrack_common *current)
+static SLJIT_INLINE void compile_ref_iterator_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 pcre_uchar *cc = current->cc;
@@ -7642,7 +7827,7 @@ set_jumps(current->topbacktracks, LABEL());
 free_stack(common, 2);
 }
 
-static void compile_recurse_backtrackingpath(compiler_common *common, struct backtrack_common *current)
+static SLJIT_INLINE void compile_recurse_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 
@@ -8142,7 +8327,7 @@ else if (bra == OP_BRAZERO)
   }
 }
 
-static void compile_bracketpos_backtrackingpath(compiler_common *common, struct backtrack_common *current)
+static SLJIT_INLINE void compile_bracketpos_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
 int offset;
@@ -8181,7 +8366,7 @@ if (current->topbacktracks)
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CURRENT_AS(bracketpos_backtrack)->private_data_ptr, SLJIT_MEM1(STACK_TOP), CURRENT_AS(bracketpos_backtrack)->framesize * sizeof(sljit_sw));
 }
 
-static void compile_braminzero_backtrackingpath(compiler_common *common, struct backtrack_common *current)
+static SLJIT_INLINE void compile_braminzero_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 assert_backtrack backtrack;
 
@@ -8205,9 +8390,84 @@ else
 SLJIT_ASSERT(!current->nextbacktracks && !current->topbacktracks);
 }
 
+static SLJIT_INLINE void compile_control_verb_backtrackingpath(compiler_common *common, struct backtrack_common *current)
+{
+DEFINE_COMPILER;
+pcre_uchar opcode = *current->cc;
+
+SLJIT_ASSERT(common->control_head_ptr != 0);
+
+if ((opcode == OP_THEN || opcode == OP_THEN_ARG) && common->then_trap != NULL)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
+  sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_search_then_trap));
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
+
+  if (common->quit_label == NULL)
+    add_jump(compiler, &common->quit, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, 0));
+  else
+    CMPTO(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, 0, common->quit_label);
+
+  OP1(SLJIT_MOV, STACK_TOP, 0, TMP1, 0);
+  add_jump(compiler, &common->then_trap->quit, JUMP(SLJIT_JUMP));
+  return;
+  }
+
+if (!common->local_exit)
+  {
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
+  sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_check_control_chain));
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
+
+  OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
+  add_jump(compiler, &common->reset_match, CMP(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, -1));
+
+  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
+  }
+
+/* Commit or in recurse or accept. */
+if (common->quit_label == NULL)
+  add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
+else
+  JUMPTO(SLJIT_JUMP, common->quit_label);
+}
+
+static SLJIT_INLINE void compile_then_trap_backtrackingpath(compiler_common *common, struct backtrack_common *current)
+{
+DEFINE_COMPILER;
+struct sljit_jump *jump;
+int size;
+
+if (CURRENT_AS(then_trap_backtrack)->then_trap)
+  {
+  common->then_trap = CURRENT_AS(then_trap_backtrack)->then_trap;
+  return;
+  }
+
+size = CURRENT_AS(then_trap_backtrack)->framesize;
+size = 2 + (size < 0 ? 0 : size);
+
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(size - 2));
+free_stack(common, size);
+jump = JUMP(SLJIT_JUMP);
+
+set_jumps(CURRENT_AS(then_trap_backtrack)->quit, LABEL());
+/* STACK_TOP is set by THEN. */
+if (CURRENT_AS(then_trap_backtrack)->framesize >= 0)
+  add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+free_stack(common, 2);
+
+JUMPHERE(jump);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP1, 0);
+}
+
 static void compile_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
+then_trap_backtrack *save_then_trap = common->then_trap;
 
 while (current)
   {
@@ -8350,28 +8610,12 @@ while (current)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP2, 0);
     break;
 
+    case OP_THEN:
+    case OP_THEN_ARG:
     case OP_PRUNE:
     case OP_PRUNE_ARG:
     case OP_SKIP:
-    if (!common->local_exit)
-      {
-      SLJIT_ASSERT(common->control_head_ptr != 0);
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
-      sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_check_control_chain));
-      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
-
-      OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
-      add_jump(compiler, &common->reset_match, CMP(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, -1));
-
-      OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
-      }
-
-    /* Commit or in recurse or accept. */
-    if (common->quit_label == NULL)
-      add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
-    else
-      JUMPTO(SLJIT_JUMP, common->quit_label);
+    compile_control_verb_backtrackingpath(common, current);
     break;
 
     case OP_SKIP_ARG:
@@ -8423,12 +8667,18 @@ while (current)
     set_jumps(current->topbacktracks, LABEL());
     break;
 
+    case OP_TABLE_LENGTH:
+    /* A virtual opcode for then traps. */
+    compile_then_trap_backtrackingpath(common, current);
+    break;
+
     default:
     SLJIT_ASSERT_STOP();
     break;
     }
   current = current->prev;
   }
+common->then_trap = save_then_trap;
 }
 
 static SLJIT_INLINE void compile_recurse(compiler_common *common)
@@ -8438,12 +8688,15 @@ pcre_uchar *cc = common->start + common->currententry->start;
 pcre_uchar *ccbegin = cc + 1 + LINK_SIZE + (*cc == OP_BRA ? 0 : IMM2_SIZE);
 pcre_uchar *ccend = bracketend(cc);
 BOOL needs_control_head;
-int framesize = get_framesize(common, cc, TRUE, &needs_control_head);
+int framesize = get_framesize(common, cc, NULL, TRUE, &needs_control_head);
 int private_data_size = get_private_data_copy_length(common, ccbegin, ccend, needs_control_head);
 int alternativesize;
 BOOL needs_frame;
 backtrack_common altbacktrack;
 struct sljit_jump *jump;
+
+/* Recurse captures then. */
+common->then_trap = NULL;
 
 SLJIT_ASSERT(*cc == OP_BRA || *cc == OP_CBRA || *cc == OP_CBRAPOS || *cc == OP_SCBRA || *cc == OP_SCBRAPOS);
 needs_frame = framesize >= 0;
@@ -8463,7 +8716,7 @@ if (needs_control_head)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, SLJIT_IMM, 0);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->recursive_head_ptr, STACK_TOP, 0);
 if (needs_frame)
-  init_frame(common, cc, framesize + alternativesize - 1, alternativesize, TRUE);
+  init_frame(common, cc, NULL, framesize + alternativesize - 1, alternativesize, TRUE);
 
 if (alternativesize > 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
@@ -8727,6 +8980,7 @@ if (private_data_size > SLJIT_MAX_LOCAL_SIZE)
   SLJIT_FREE(common->optimized_cbracket);
   return;
   }
+
 common->private_data_ptrs = (int *)SLJIT_MALLOC((ccend - rootbacktrack.cc) * sizeof(int));
 if (!common->private_data_ptrs)
   {
@@ -8736,11 +8990,26 @@ if (!common->private_data_ptrs)
 memset(common->private_data_ptrs, 0, (ccend - rootbacktrack.cc) * sizeof(int));
 set_private_data_ptrs(common, common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw), ccend);
 
+if (common->has_then)
+  {
+  common->then_offsets = (pcre_uint8 *)SLJIT_MALLOC(ccend - rootbacktrack.cc);
+  if (!common->then_offsets)
+    {
+    SLJIT_FREE(common->optimized_cbracket);
+    SLJIT_FREE(common->private_data_ptrs);
+    return;
+    }
+  memset(common->then_offsets, 0, ccend - rootbacktrack.cc);
+  set_then_offsets(common, rootbacktrack.cc, NULL);
+  }
+
 compiler = sljit_create_compiler();
 if (!compiler)
   {
   SLJIT_FREE(common->optimized_cbracket);
   SLJIT_FREE(common->private_data_ptrs);
+  if (common->has_then)
+    SLJIT_FREE(common->then_offsets);
   return;
   }
 common->compiler = compiler;
@@ -8832,6 +9101,8 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket);
   SLJIT_FREE(common->private_data_ptrs);
+  if (common->has_then)
+    SLJIT_FREE(common->then_offsets);
   return;
   }
 
@@ -8867,6 +9138,8 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket);
   SLJIT_FREE(common->private_data_ptrs);
+  if (common->has_then)
+    SLJIT_FREE(common->then_offsets);
   return;
   }
 
@@ -8934,6 +9207,8 @@ while (common->currententry != NULL)
     sljit_free_compiler(compiler);
     SLJIT_FREE(common->optimized_cbracket);
     SLJIT_FREE(common->private_data_ptrs);
+    if (common->has_then)
+      SLJIT_FREE(common->then_offsets);
     return;
     }
   flush_stubs(common);
@@ -9042,6 +9317,9 @@ if (common->getucd != NULL)
 
 SLJIT_FREE(common->optimized_cbracket);
 SLJIT_FREE(common->private_data_ptrs);
+if (common->has_then)
+  SLJIT_FREE(common->then_offsets);
+
 executable_func = sljit_generate_code(compiler);
 executable_size = sljit_get_generated_code_size(compiler);
 sljit_free_compiler(compiler);
