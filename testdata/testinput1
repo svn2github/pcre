@@ -5413,4 +5413,16 @@ backtracked onto, whether or not it has a label. --/
 /aaaaa(*COMMIT)(*THEN)b|a+c/
     aaaaaac
 
+/aaaaa(*:m)(*PRUNE:m)(*SKIP:m)m|a+/
+    aaaaaa
+
+/aaaaa(*:m)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
+    aaaaaa
+
+/aaaaa(*:n)(*PRUNE:m)(*SKIP:m)m|a+/
+    aaaaaa
+
+/aaaaa(*:n)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
+    aaaaaa
+
 /-- End of testinput1 --/

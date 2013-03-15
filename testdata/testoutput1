@@ -8929,4 +8929,20 @@ No match
     aaaaaac
  0: aaaaaac
 
+/aaaaa(*:m)(*PRUNE:m)(*SKIP:m)m|a+/
+    aaaaaa
+ 0: a
+
+/aaaaa(*:m)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
+    aaaaaa
+ 0: a
+
+/aaaaa(*:n)(*PRUNE:m)(*SKIP:m)m|a+/
+    aaaaaa
+ 0: aaaa
+
+/aaaaa(*:n)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
+    aaaaaa
+ 0: a
+
 /-- End of testinput1 --/
