@@ -8928,6 +8928,8 @@ No match
 /aaaaa(*COMMIT)(*THEN)b|a+c/
     aaaaaac
  0: aaaaaac
+    
+/-- End of "priority" tests --/ 
 
 /aaaaa(*:m)(*PRUNE:m)(*SKIP:m)m|a+/
     aaaaaa
@@ -8944,5 +8946,21 @@ No match
 /aaaaa(*:n)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
     aaaaaa
  0: a
+
+/a(*MARK:A)aa(*PRUNE:A)a(*SKIP:A)b|a+c/
+    aaaac
+ 0: aac
+
+/a(*MARK:A)aa(*MARK:A)a(*SKIP:A)b|a+c/
+    aaaac
+ 0: ac
+
+/aaa(*PRUNE:A)a(*SKIP:A)b|a+c/
+    aaaac
+ 0: aac
+
+/aaa(*MARK:A)a(*SKIP:A)b|a+c/
+    aaaac
+ 0: ac
 
 /-- End of testinput1 --/

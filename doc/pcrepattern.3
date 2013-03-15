@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "03 March 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "15 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2769,8 +2769,9 @@ starting point (see (*SKIP) below).
 A name is always required with this verb. There may be as many instances of
 (*MARK) as you like in a pattern, and their names do not have to be unique.
 .P
-When a match succeeds, the name of the last-encountered (*MARK) on the matching
-path is passed back to the caller as described in the section entitled
+When a match succeeds, the name of the last-encountered (*MARK:NAME),
+(*PRUNE:NAME), or (*THEN:NAME) on the matching path is passed back to the
+caller as described in the section entitled
 .\" HTML <a href="pcreapi.html#extradata">
 .\" </a>
 "Extra data for \fBpcre_exec()\fP"
@@ -2795,12 +2796,12 @@ indicates which of the two alternatives matched. This is a more efficient way
 of obtaining this information than putting each alternative in its own
 capturing parentheses.
 .P
-If (*MARK) is encountered in a positive assertion, its name is recorded and
-passed back if it is the last-encountered. This does not happen for negative
-assertions.
+If a verb with a name is encountered in a positive assertion, its name is
+recorded and passed back if it is the last-encountered. This does not happen
+for negative assertions.
 .P
-After a partial match or a failed match, the name of the last encountered
-(*MARK) in the entire match process is returned. For example:
+After a partial match or a failed match, the last encountered name in the
+entire match process is returned. For example:
 .sp
     re> /X(*MARK:A)Y|X(*MARK:B)Z/K
   data> XP
@@ -2876,8 +2877,11 @@ reached, or when matching to the right of (*PRUNE), but if there is no match to
 the right, backtracking cannot cross (*PRUNE). In simple cases, the use of
 (*PRUNE) is just an alternative to an atomic group or possessive quantifier,
 but there are some uses of (*PRUNE) that cannot be expressed in any other way.
-The behaviour of (*PRUNE:NAME) is the same as (*MARK:NAME)(*PRUNE). In an
-anchored pattern (*PRUNE) has the same effect as (*COMMIT).
+In an anchored pattern (*PRUNE) has the same effect as (*COMMIT).
+.P
+The behaviour of (*PRUNE:NAME) is the not the same as (*MARK:NAME)(*PRUNE). 
+It is like (*MARK:NAME) in that the name is remembered for passing back to the
+caller. However, (*SKIP:NAME) searches only for names set with (*MARK).
 .sp
   (*SKIP)
 .sp
@@ -2904,6 +2908,9 @@ searched for the most recent (*MARK) that has the same name. If one is found,
 the "bumpalong" advance is to the subject position that corresponds to that
 (*MARK) instead of to where (*SKIP) was encountered. If no (*MARK) with a
 matching name is found, the (*SKIP) is ignored.
+.P
+Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores 
+names that are set by (*PRUNE:NAME) or (*THEN:NAME).
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
@@ -2916,9 +2923,12 @@ be used for a pattern-based if-then-else block:
 .sp
 If the COND1 pattern matches, FOO is tried (and possibly further items after
 the end of the group if FOO succeeds); on failure, the matcher skips to the
-second alternative and tries COND2, without backtracking into COND1. The
-behaviour of (*THEN:NAME) is exactly the same as (*MARK:NAME)(*THEN).
+second alternative and tries COND2, without backtracking into COND1.
 If (*THEN) is not inside an alternation, it acts like (*PRUNE).
+.P
+The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN). 
+It is like (*MARK:NAME) in that the name is remembered for passing back to the
+caller. However, (*SKIP:NAME) searches only for names set with (*MARK).
 .P
 Note that a subpattern that does not contain a | character is just a part of
 the enclosing alternative; it is not a nested alternation with only one
@@ -2996,6 +3006,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 March 2013
+Last updated: 15 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
