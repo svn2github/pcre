@@ -3851,4 +3851,9 @@ settings of the anchored and startline bits. --/
 /(?C1)^(?C2)(?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))(?C11)/
     bb
 
+/-- Perl seems to have a bug with this one --/
+
+/aaaaa(*COMMIT)(*PRUNE)b|a+c/
+    aaaaaac
+
 /-- End of testinput2 --/

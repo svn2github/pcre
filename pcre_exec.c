@@ -781,23 +781,16 @@ for (;;)
     case OP_FAIL:
     RRETURN(MATCH_NOMATCH);
 
-    /* COMMIT overrides PRUNE, SKIP, and THEN */
-
     case OP_COMMIT:
     RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, md,
       eptrb, RM52);
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE &&
-        rrc != MATCH_SKIP && rrc != MATCH_SKIP_ARG &&
-        rrc != MATCH_THEN)
-      RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     RRETURN(MATCH_COMMIT);
-
-    /* PRUNE overrides THEN */
 
     case OP_PRUNE:
     RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, md,
       eptrb, RM51);
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     RRETURN(MATCH_PRUNE);
 
     case OP_PRUNE_ARG:
@@ -807,16 +800,13 @@ for (;;)
       eptrb, RM56);
     if ((rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) &&
          md->mark == NULL) md->mark = ecode + 2;
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     RRETURN(MATCH_PRUNE);
-
-    /* SKIP overrides PRUNE and THEN */
 
     case OP_SKIP:
     RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode], offset_top, md,
       eptrb, RM53);
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
-      RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
     md->start_match_ptr = eptr;   /* Pass back current position */
     RRETURN(MATCH_SKIP);
 
@@ -837,8 +827,7 @@ for (;;)
       }
     RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode] + ecode[1], offset_top, md,
       eptrb, RM57);
-    if (rrc != MATCH_NOMATCH && rrc != MATCH_PRUNE && rrc != MATCH_THEN)
-      RRETURN(rrc);
+    if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       
     /* Pass back the current skip name by overloading md->start_match_ptr and
     returning the special MATCH_SKIP_ARG return code. This will either be

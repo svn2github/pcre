@@ -12642,4 +12642,10 @@ Partial match: 123a
  11 ^ ^    
  0: bb
 
+/-- Perl seems to have a bug with this one --/
+
+/aaaaa(*COMMIT)(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+
 /-- End of testinput2 --/

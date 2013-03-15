@@ -8829,4 +8829,104 @@ MK: n
  0: ac
 MK: n
 
+/-- Tests that try to figure out how Perl works. My hypothesis is that the
+    first verb that is backtracked onto is the one that acts. This seems to be
+    the case almost all the time, but there is one exception that is perhaps a 
+    bug. --/
+
+/-- This matches "aaaac"; each PRUNE advances one character until the subject
+    no longer starts with 5 'a's. --/
+
+/aaaaa(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+
+/-- Putting SKIP in front of PRUNE makes no difference, as it is never 
+backtracked onto, whether or not it has a label. --/
+
+/aaaaa(*SKIP)(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+
+/aaaaa(*SKIP:N)(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+
+/aaaa(*:N)a(*SKIP:N)(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+
+/-- Putting THEN in front makes no difference. */
+    
+/aaaaa(*THEN)(*PRUNE)b|a+c/
+    aaaaaac
+ 0: aaaac
+ 
+/-- However, putting COMMIT in front of the prune changes it to "no match". I 
+    think this is inconsistent and possibly a bug. For the moment, running this
+    test is moved out of the Perl-compatible file. --/
+
+/aaaaa(*COMMIT)(*PRUNE)b|a+c/
+    
+
+/---- OK, lets play the same game again using SKIP instead of PRUNE. ----/
+
+/-- This matches "ac" because SKIP forces the next match to start on the
+    sixth "a". --/
+
+/aaaaa(*SKIP)b|a+c/
+    aaaaaac
+ 0: ac
+ 
+/-- Putting PRUNE in front makes no difference. --/
+
+/aaaaa(*PRUNE)(*SKIP)b|a+c/
+    aaaaaac
+ 0: ac
+
+/-- Putting THEN in front makes no difference. --/
+
+/aaaaa(*THEN)(*SKIP)b|a+c/
+    aaaaaac
+ 0: ac
+
+/-- In this case, neither does COMMIT. This still matches "ac". --/
+
+/aaaaa(*COMMIT)(*SKIP)b|a+c/
+    aaaaaac
+ 0: ac
+    
+/-- This gives "no match", as expected. --/
+
+/aaaaa(*COMMIT)b|a+c/
+    aaaaaac
+No match
+    
+
+/------ Tests using THEN ------/
+
+/-- This matches "aaaaaac", as expected. --/
+
+/aaaaa(*THEN)b|a+c/
+    aaaaaac
+ 0: aaaaaac
+
+/-- Putting SKIP in front makes no difference. --/
+
+/aaaaa(*SKIP)(*THEN)b|a+c/
+    aaaaaac
+ 0: aaaaaac
+    
+/-- Putting PRUNE in front makes no difference. --/
+
+/aaaaa(*PRUNE)(*THEN)b|a+c/
+    aaaaaac
+ 0: aaaaaac
+    
+/-- Putting COMMIT in front makes no difference. --/
+
+/aaaaa(*COMMIT)(*THEN)b|a+c/
+    aaaaaac
+ 0: aaaaaac
+
 /-- End of testinput1 --/

@@ -110,6 +110,12 @@ Version 8.33 xx-xxxx-201x
 
 30. Update RunTest with additional test selector options.
 
+31. PCRE has been changed to be more compatible with Perl when there is more
+    than one backtracking verb present. Previously, in something like 
+    (*COMMIT)(*SKIP), COMMIT would override SKIP. Apart from one anomaly (which 
+    has been reported), Perl seems to act on whichever backtracking verb is 
+    reached first, so PCRE has been changed to follow this behaviour.
+
 
 Version 8.32 30-November-2012
 -----------------------------
