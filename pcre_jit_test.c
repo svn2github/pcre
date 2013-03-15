@@ -732,6 +732,13 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?>a(*COMMIT)b)??n(*PRUNE)d|bn", "abn" },
 	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)??n(*PRUNE)d|bn", "abn" },
 
+	/* (*THEN) verb. */
+	{ MUA, 0, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcaabcaabcaabcnacm" },
+	{ MUA, 0 | F_NOMATCH, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcm" },
+	{ MUA, 0, "((?:a(*THEN)|aab)c|a+)+m", "aabcaabcnmaabcaabcm" },
+	{ MUA, 0, "((?:a|aab)(*THEN)c|a+)+m", "aam" },
+	{ MUA, 0 | F_NOMATCH, "((?:a(*COMMIT)|aab)(*THEN)c|a+)+m", "aam" },
+
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },
 	{ MUA, 0, "(?:((?:(?:(?:\\w*?)+)??|(?>\\w)?|\\w*+)*)+)+?\\s", "aa+ " },

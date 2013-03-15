@@ -291,7 +291,7 @@ typedef struct recurse_entry {
   /* Collects the calls until the function is not created. */
   jump_list *calls;
   /* Points to the starting opcode. */
-  int start;
+  sljit_sw start;
 } recurse_entry;
 
 typedef struct recurse_backtrack {
@@ -299,10 +299,18 @@ typedef struct recurse_backtrack {
   BOOL inlined_pattern;
 } recurse_backtrack;
 
+#define OP_THEN_TRAP OP_TABLE_LENGTH
+
 typedef struct then_trap_backtrack {
   backtrack_common common;
+  /* If then_trap is not NULL, this structure contains the real
+  then_trap for the backtracking path. */
   struct then_trap_backtrack *then_trap;
+  /* Points to the starting opcode. */
+  sljit_sw start;
+  /* Exit point for the then opcodes of this alternative. */
   jump_list *quit;
+  /* Frame size of the current alternative. */
   int framesize;
 } then_trap_backtrack;
 
@@ -725,6 +733,8 @@ switch(*cc)
   return cc + 1 + 2 + cc[1];
 
   default:
+  /* All opcodes are supported now! */
+  SLJIT_ASSERT_STOP();
   return NULL;
   }
 }
@@ -2147,7 +2157,7 @@ while (current != NULL);
 return (return_value != 0 || skip_arg == NULL) ? return_value : -2;
 }
 
-static sljit_sw SLJIT_CALL do_search_then_trap(sljit_sw *current)
+static sljit_sw SLJIT_CALL do_search_then_trap(sljit_sw *current, sljit_sw start)
 {
 do
   {
@@ -2158,7 +2168,9 @@ do
     return 0;
 
     case type_then_trap:
-    return (sljit_sw)current;
+    if (current[-3] == start)
+      return (sljit_sw)current;
+    break;
 
     case type_prune:
     case type_skip:
@@ -5381,7 +5393,7 @@ DEFINE_COMPILER;
 backtrack_common *backtrack;
 recurse_entry *entry = common->entries;
 recurse_entry *prev = NULL;
-int start = GET(cc, 1);
+sljit_sw start = GET(cc, 1);
 pcre_uchar *start_cc;
 BOOL needs_control_head;
 
@@ -7322,7 +7334,7 @@ if (common->control_head_ptr != 0 && ((opcode != OP_THEN && opcode != OP_THEN_AR
 return ccend;
 }
 
-static pcre_uchar then_trap_opcode[1] = { OP_TABLE_LENGTH };
+static pcre_uchar then_trap_opcode[1] = { OP_THEN_TRAP };
 
 static SLJIT_INLINE void compile_then_trap_matchingpath(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, backtrack_common *parent)
 {
@@ -7334,19 +7346,21 @@ int size;
 PUSH_BACKTRACK_NOVALUE(sizeof(then_trap_backtrack), cc);
 common->then_trap = BACKTRACK_AS(then_trap_backtrack);
 BACKTRACK_AS(then_trap_backtrack)->common.cc = then_trap_opcode;
+BACKTRACK_AS(then_trap_backtrack)->start = (sljit_sw)(cc - common->start);
 BACKTRACK_AS(then_trap_backtrack)->framesize = get_framesize(common, cc, ccend, FALSE, &needs_control_head);
 
 size = BACKTRACK_AS(then_trap_backtrack)->framesize;
-size = 2 + (size < 0 ? 0 : size);
+size = 3 + (size < 0 ? 0 : size);
 
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
 allocate_stack(common, size);
-if (size > 2)
-  OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0, SLJIT_IMM, (size - 2) * sizeof(sljit_sw));
+if (size > 3)
+  OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0, SLJIT_IMM, (size - 3) * sizeof(sljit_sw));
 else
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 1), SLJIT_IMM, type_then_trap);
-OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 2), TMP2, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 1), SLJIT_IMM, BACKTRACK_AS(then_trap_backtrack)->start);
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 2), SLJIT_IMM, type_then_trap);
+OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(size - 3), TMP2, 0);
 
 size = BACKTRACK_AS(then_trap_backtrack)->framesize;
 if (size >= 0)
@@ -8401,15 +8415,18 @@ if ((opcode == OP_THEN || opcode == OP_THEN_ARG) && common->then_trap != NULL)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
-  sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_search_then_trap));
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_IMM, common->then_trap->start);
+  sljit_emit_ijump(compiler, SLJIT_CALL2, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_search_then_trap));
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 
+  OP1(SLJIT_MOV, TMP2, 0, TMP1, 0);
+  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
   if (common->quit_label == NULL)
-    add_jump(compiler, &common->quit, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, 0));
+    add_jump(compiler, &common->quit, CMP(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0));
   else
-    CMPTO(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, 0, common->quit_label);
+    CMPTO(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0, common->quit_label);
 
-  OP1(SLJIT_MOV, STACK_TOP, 0, TMP1, 0);
+  OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
   add_jump(compiler, &common->then_trap->quit, JUMP(SLJIT_JUMP));
   return;
   }
@@ -8447,9 +8464,9 @@ if (CURRENT_AS(then_trap_backtrack)->then_trap)
   }
 
 size = CURRENT_AS(then_trap_backtrack)->framesize;
-size = 2 + (size < 0 ? 0 : size);
+size = 3 + (size < 0 ? 0 : size);
 
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(size - 2));
+OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(size - 3));
 free_stack(common, size);
 jump = JUMP(SLJIT_JUMP);
 
@@ -8458,7 +8475,7 @@ set_jumps(CURRENT_AS(then_trap_backtrack)->quit, LABEL());
 if (CURRENT_AS(then_trap_backtrack)->framesize >= 0)
   add_jump(compiler, &common->revertframes, JUMP(SLJIT_FAST_CALL));
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-free_stack(common, 2);
+free_stack(common, 3);
 
 JUMPHERE(jump);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP1, 0);
@@ -8667,7 +8684,7 @@ while (current)
     set_jumps(current->topbacktracks, LABEL());
     break;
 
-    case OP_TABLE_LENGTH:
+    case OP_THEN_TRAP:
     /* A virtual opcode for then traps. */
     compile_then_trap_backtrackingpath(common, current);
     break;
