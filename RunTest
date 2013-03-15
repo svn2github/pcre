@@ -1,5 +1,6 @@
 #! /bin/sh
 
+###############################################################################
 # Run the PCRE tests using the pcretest program. The appropriate tests are
 # selected, depending on which build-time options were used.
 #
@@ -20,14 +21,21 @@
 # specified), and one when it is not.
 #
 # Whichever of the 8-, 16- and 32-bit libraries exist are tested. It is also
-# possible to select which to test by the arguments -8, -16 or -32.
+# possible to select which to test by giving "-8", "-16" or "-32" on the
+# command line.
 #
-# Other arguments for this script can be individual test numbers, or the word
-# "valgrind", "valgrind-log" or "sim" followed by an argument to run cross-
-# compiled executables under a simulator, for example:
+# As well as "nojit", "-8", "-16", and "-32", arguments for this script are
+# individual test numbers, ranges of tests such as 3-6 or 3- (meaning 3 to the
+# end), or a number preceded by ~ to exclude a test. For example, "3-15 ~10"
+# runs tests 3 to 15, excluding test 10, and just "~10" runs all the tests
+# except test 10. Whatever order the arguments are in, the tests are always run
+# in numerical order.
+
+# Other arguments can be one of the words "valgrind", "valgrind-log", or "sim"
+# followed by an argument to run cross- compiled executables under a simulator,
+# for example:
 #
 # RunTest 3 sim "qemu-arm -s 8388608"
-#
 #
 # There are two special cases where only one argument is allowed:
 #
@@ -37,7 +45,7 @@
 #
 # If the script is obeyed as "RunTest list", a list of available tests is
 # output, but none of them are run.
-
+###############################################################################
 
 # Define test titles in variables so that they can be output as a list. Some
 # of them are modified (e.g. with -8 or -16) when used in the actual tests.
@@ -69,6 +77,8 @@ title23="Test 23: Specials for the 16-bit library"
 title24="Test 24: Specials for the 16-bit library with UTF-16 support"
 title25="Test 25: Specials for the 32-bit library"
 title26="Test 26: Specials for the 32-bit library with UTF-32 support"
+
+maxtest=26
 
 if [ $# -eq 1 -a "$1" = "list" ]; then
   echo $title1
@@ -157,13 +167,14 @@ arg16=
 arg32=
 nojit=
 sim=
+skip=
 valgrind=
 
 # This is in case the caller has set aliases (as I do - PH)
 unset cp ls mv rm
 
-# Select which tests to run; for those that are explicitly requested, check
-# that the necessary optional facilities are available.
+# Process options and select which tests to run; for those that are explicitly
+# requested, check that the necessary optional facilities are available.
 
 do1=no
 do2=no
@@ -227,7 +238,30 @@ while [ $# -gt 0 ] ; do
    sim) shift; sim=$1;;
    valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
    valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
-    *) echo "Unknown test number '$1'"; exit 1;;
+   ~*)
+     if expr "$1" : '~[0-9][0-9]*$' >/dev/null; then
+       skip="$skip `expr "$1" : '~\([0-9]*\)*$'`"
+     else
+       echo "Unknown option or test selector '$1'"; exit 1
+     fi      
+   ;; 
+   *-*)
+     if expr "$1" : '[0-9][0-9]*-[0-9]*$' >/dev/null; then
+       tf=`expr "$1" : '\([0-9]*\)'` 
+       tt=`expr "$1" : '.*-\([0-9]*\)'`
+       if [ "$tt" = "" ] ; then tt=$maxtest; fi 
+       if expr \( "$tf" "<" 1 \) \| \( "$tt" ">" "$maxtest" \) >/dev/null; then
+         echo "Invalid test range '$1'"; exit 1
+       fi       
+       while expr "$tf" "<=" "$tt" >/dev/null; do
+         eval do${tf}=yes
+         tf=`expr $tf + 1`  
+       done
+     else
+       echo "Invalid test range '$1'"; exit 1
+     fi        
+   ;;
+   *) echo "Unknown option or test selector '$1'"; exit 1;;
   esac
   shift
 done
@@ -316,6 +350,12 @@ if [ $jit -ne 0 -a "$nojit" != "yes" ] ; then
   jitopt=-s+
 fi
 
+# Handle any explicit skips
+
+for i in $skip; do eval do$i=no; done
+
+# If any unsuitable tests were explicitly requested, grumble.
+
 if [ $utf -eq 0 ] ; then
   if [ $do4 = yes ] ; then
     echo "Can't run test 4 because UTF support is not configured"
@@ -384,7 +424,7 @@ else
 fi
 
 # If no specific tests were requested, select all. Those that are not
-# relevant will be skipped.
+# relevant will be automatically skipped.
 
 if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
      $do5  = no -a $do6  = no -a $do7  = no -a $do8  = no -a \
@@ -420,6 +460,11 @@ if [ $do1  = no -a $do2  = no -a $do3  = no -a $do4  = no -a \
   do25=yes
   do26=yes
 fi
+
+# Handle any explicit skips (again, so that an argument list may consist only
+# of explicit skips).
+
+for i in $skip; do eval do$i=no; done
 
 # Show which release and which test data
 

@@ -108,6 +108,8 @@ Version 8.33 xx-xxxx-201x
 
 29. Experimental support of (*THEN) backtracking verb in the JIT compiler.
 
+30. Update RunTest with additional test selector options.
+
 
 Version 8.32 30-November-2012
 -----------------------------
