@@ -708,7 +708,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(a)(a)(a)(a)(a)(a)(a)(a)(*PRUNE)b|(a)", "aaaaaaaa" },
 	{ MUA | PCRE_PARTIAL_SOFT, 0, "a(*PRUNE)a|", "a" },
 	{ MUA | PCRE_PARTIAL_SOFT, 0, "a(*PRUNE)a|m", "a" },
-	{ MUA, 0 | F_NOMATCH, "a(*COMMIT)(*PRUNE)d|bc", "abc" },
+	{ MUA, 0, "a(*COMMIT)(*PRUNE)d|bc", "abc" },
 	{ MUA, 0, "(?=a(*COMMIT)b)a(*PRUNE)c|bc", "abc" },
 	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?=a(*COMMIT)b)a(*PRUNE)c|bc", "abc" },
 	{ MUA, 0, "(?=(a)(*COMMIT)b)a(*PRUNE)c|bc", "abc" },
@@ -737,7 +737,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0 | F_NOMATCH, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcm" },
 	{ MUA, 0, "((?:a(*THEN)|aab)c|a+)+m", "aabcaabcnmaabcaabcm" },
 	{ MUA, 0, "((?:a|aab)(*THEN)c|a+)+m", "aam" },
-	{ MUA, 0 | F_NOMATCH, "((?:a(*COMMIT)|aab)(*THEN)c|a+)+m", "aam" },
+	{ MUA, 0, "((?:a(*COMMIT)|aab)(*THEN)c|a+)+m", "aam" },
 
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },

@@ -196,23 +196,14 @@ typedef struct stub_list {
   struct stub_list *next;
 } stub_list;
 
-enum bytecode_flag_types {
-  flag_optimized_cbracket = 1,
-  flag_then_start = 2,
-};
-
 enum frame_types {
   no_frame = -1,
   no_stack = -2
 };
 
 enum control_types {
-  type_commit = 0,
-  type_prune = 1,
-  type_skip = 2,
-  type_skip_arg = 3,
-  type_mark = 4,
-  type_then_trap = 5
+  type_mark = 0,
+  type_then_trap = 1
 };
 
 typedef int (SLJIT_CALL *jit_function)(jit_arguments *args);
@@ -985,11 +976,11 @@ while (cc < ccend)
 
     case OP_THEN_ARG:
     common->has_then = TRUE;
+    common->control_head_ptr = 1;
     /* Fall through. */
 
     case OP_PRUNE_ARG:
     common->needs_start_ptr = TRUE;
-    common->control_head_ptr = 1;
     /* Fall through. */
 
     case OP_MARK:
@@ -1003,12 +994,12 @@ while (cc < ccend)
 
     case OP_THEN:
     common->has_then = TRUE;
+    common->control_head_ptr = 1;
     /* Fall through. */
 
     case OP_PRUNE:
     case OP_SKIP:
     common->needs_start_ptr = TRUE;
-    common->control_head_ptr = 1;
     cc += 1;
     break;
 
@@ -1287,14 +1278,6 @@ while (cc < ccend)
     length += 3;
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
-
-    case OP_PRUNE:
-    case OP_SKIP:
-    case OP_SKIP_ARG:
-    case OP_COMMIT:
-    if (common->control_head_ptr != 0)
-      *needs_control_head = TRUE;
-    /* Fall through. */
 
     default:
     stack_restore = TRUE;
@@ -2105,46 +2088,25 @@ else
 OP1(SLJIT_MOV, STACK_TOP, 0, ARGUMENTS, 0);
 if (common->mark_ptr != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, SLJIT_IMM, 0);
-SLJIT_ASSERT(common->control_head_ptr != 0);
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, SLJIT_IMM, 0);
+if (common->control_head_ptr != 0)
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, SLJIT_IMM, 0);
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), SLJIT_OFFSETOF(jit_arguments, stack));
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_ptr);
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), SLJIT_OFFSETOF(struct sljit_stack, base));
 }
 
-static sljit_sw SLJIT_CALL do_check_control_chain(sljit_sw *current)
+static sljit_sw SLJIT_CALL do_search_mark(sljit_sw *current, const pcre_uchar *skip_arg)
 {
-sljit_sw return_value = 0;
-const pcre_uchar *skip_arg = NULL;
-
-SLJIT_ASSERT(current != NULL);
-do
+while (current != NULL)
   {
   switch (current[-2])
     {
-    case type_commit:
-    /* Commit overwrites all. */
-    return -1;
-
-    case type_prune:
     case type_then_trap:
     break;
 
-    case type_skip:
-    /* Overwrites prune, but not other skips. */
-    if (return_value == 0 && skip_arg == NULL)
-      return_value = current[-3];
-    break;
-
-    case type_skip_arg:
-    if (return_value == 0 && skip_arg == NULL)
-      skip_arg = (pcre_uchar *)current[-3];
-    break;
-
     case type_mark:
-    if (return_value == 0 && skip_arg != NULL)
-      if (STRCMP_UC_UC(skip_arg, (pcre_uchar *)current[-3]) == 0)
-        return_value = current[-4];
+    if (STRCMP_UC_UC(skip_arg, (pcre_uchar *)current[-3]) == 0)
+      return current[-4];
     break;
 
     default:
@@ -2153,28 +2115,21 @@ do
     }
   current = (sljit_sw*)current[-1];
   }
-while (current != NULL);
-return (return_value != 0 || skip_arg == NULL) ? return_value : -2;
+return -1;
 }
 
 static sljit_sw SLJIT_CALL do_search_then_trap(sljit_sw *current, sljit_sw start)
 {
 do
   {
+  SLJIT_ASSERT(current != NULL);
   switch (current[-2])
     {
-    case type_commit:
-    /* Commit overwrites all. */
-    return 0;
-
     case type_then_trap:
     if (current[-3] == start)
       return (sljit_sw)current;
     break;
 
-    case type_prune:
-    case type_skip:
-    case type_skip_arg:
     case type_mark:
     break;
 
@@ -2183,7 +2138,6 @@ do
     break;
     }
   current = (sljit_sw*)current[-1];
-  SLJIT_ASSERT(current != NULL);
   }
 while (TRUE);
 }
@@ -7296,21 +7250,15 @@ backtrack_common *backtrack;
 pcre_uchar opcode = *cc;
 pcre_uchar *ccend = cc + 1;
 
-SLJIT_ASSERT(common->control_head_ptr != 0 || *cc == OP_COMMIT);
-
 if (opcode == OP_PRUNE_ARG || opcode == OP_SKIP_ARG || opcode == OP_THEN_ARG)
   ccend += 2 + cc[1];
 
 PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
-if (opcode == OP_SKIP || opcode == OP_SKIP_ARG)
+if (opcode == OP_SKIP)
   {
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-  allocate_stack(common, 3);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_SKIP ? type_skip : type_skip_arg);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(2), (opcode == OP_SKIP) ? STR_PTR : SLJIT_IMM, (opcode == OP_SKIP) ? 0 : (sljit_sw)(cc + 2));
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
+  allocate_stack(common, 1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
   return ccend;
   }
 
@@ -7320,15 +7268,6 @@ if (opcode == OP_PRUNE_ARG || opcode == OP_THEN_ARG)
   OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, (sljit_sw)(cc + 2));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->mark_ptr, TMP2, 0);
   OP1(SLJIT_MOV, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, mark_ptr), TMP2, 0);
-  }
-
-if (common->control_head_ptr != 0 && ((opcode != OP_THEN && opcode != OP_THEN_ARG) || common->then_trap == NULL))
-  {
-  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-  allocate_stack(common, 2);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, STACK_TOP, 0);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, *cc == OP_COMMIT ? type_commit : type_prune);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
   }
 
 return ccend;
@@ -8409,10 +8348,9 @@ static SLJIT_INLINE void compile_control_verb_backtrackingpath(compiler_common *
 DEFINE_COMPILER;
 pcre_uchar opcode = *current->cc;
 
-SLJIT_ASSERT(common->control_head_ptr != 0);
-
 if ((opcode == OP_THEN || opcode == OP_THEN_ARG) && common->then_trap != NULL)
   {
+  SLJIT_ASSERT(common->control_head_ptr != 0);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_IMM, common->then_trap->start);
@@ -8431,24 +8369,34 @@ if ((opcode == OP_THEN || opcode == OP_THEN_ARG) && common->then_trap != NULL)
   return;
   }
 
-if (!common->local_exit)
+if (common->local_exit)
   {
+  if (common->quit_label == NULL)
+    add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
+  else
+    JUMPTO(SLJIT_JUMP, common->quit_label);
+  return;
+  }
+
+if (opcode == OP_SKIP_ARG)
+  {
+  SLJIT_ASSERT(common->control_head_ptr != 0);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
-  sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_check_control_chain));
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_IMM, (sljit_sw)(current->cc + 2));
+  sljit_emit_ijump(compiler, SLJIT_CALL2, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_search_mark));
   OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 
   OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
   add_jump(compiler, &common->reset_match, CMP(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, -1));
-
-  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
+  return;
   }
 
-/* Commit or in recurse or accept. */
-if (common->quit_label == NULL)
-  add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
+if (opcode == OP_SKIP)
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
 else
-  JUMPTO(SLJIT_JUMP, common->quit_label);
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_IMM, 0);
+add_jump(compiler, &common->reset_match, JUMP(SLJIT_JUMP));
 }
 
 static SLJIT_INLINE void compile_then_trap_backtrackingpath(compiler_common *common, struct backtrack_common *current)
@@ -8632,40 +8580,8 @@ while (current)
     case OP_PRUNE:
     case OP_PRUNE_ARG:
     case OP_SKIP:
-    compile_control_verb_backtrackingpath(common, current);
-    break;
-
     case OP_SKIP_ARG:
-    if (!common->local_exit)
-      {
-      SLJIT_ASSERT(common->control_head_ptr != 0);
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
-      sljit_emit_ijump(compiler, SLJIT_CALL1, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_check_control_chain));
-      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
-
-      OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
-      add_jump(compiler, &common->reset_match, CMP(SLJIT_C_LESS, STR_PTR, 0, SLJIT_IMM, -2));
-
-      /* May not find suitable mark. */
-      OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
-      if (common->quit_label == NULL)
-        add_jump(compiler, &common->quit, CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, -1));
-      else
-        CMPTO(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, -1, common->quit_label);
-
-      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-      free_stack(common, 3);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr, TMP1, 0);
-      }
-    else
-      {
-      /* In recurse or accept. */
-      if (common->quit_label == NULL)
-        add_jump(compiler, &common->quit, JUMP(SLJIT_JUMP));
-      else
-        JUMPTO(SLJIT_JUMP, common->quit_label);
-      }
+    compile_control_verb_backtrackingpath(common, current);
     break;
 
     case OP_COMMIT:
