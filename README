@@ -25,6 +25,8 @@ The contents of this README file are:
   Shared libraries
   Cross-compiling using autotools
   Using HP's ANSI C++ compiler (aCC)
+  Compiling in Tru64 using native compilers
+  Using Sun's compilers for Solaris
   Using PCRE from MySQL
   Making new tarballs
   Testing PCRE
@@ -573,6 +575,27 @@ use the workaround of specifying the following environment variable prior to
 running the "configure" script:
 
   CXXLDFLAGS="-lstd_v2 -lCsup_v2"
+  
+
+Compiling in Tru64 using native compilers
+-----------------------------------------
+
+The following error may occur when compiling with native compilers in the Tru64 
+operating system:
+
+  CXX    libpcrecpp_la-pcrecpp.lo
+cxx: Error: /usr/lib/cmplrs/cxx/V7.1-006/include/cxx/iosfwd, line 58: #error
+          directive: "cannot include iosfwd -- define __USE_STD_IOSTREAM to
+          override default - see section 7.1.2 of the C++ Using Guide"
+#error "cannot include iosfwd -- define __USE_STD_IOSTREAM to override default
+- see section 7.1.2 of the C++ Using Guide"
+
+This may be followed by other errors, complaining that 'namespace "std" has no
+member'. The solution to this is to add the line
+
+#define __USE_STD_IOSTREAM 1
+
+to the config.h file.
 
 
 Using Sun's compilers for Solaris
@@ -936,4 +959,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 20 February 2013
+Last updated: 16 March 2013
