@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "15 March 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "17 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1975,8 +1975,8 @@ except that it does not cause the current matching position to be changed.
 Assertion subpatterns are not capturing subpatterns. If such an assertion
 contains capturing subpatterns within it, these are counted for the purposes of
 numbering the capturing subpatterns in the whole pattern. However, substring
-capturing is carried out only for positive assertions, because it does not make
-sense for negative assertions.
+capturing is carried out only for positive assertions. (Perl sometimes, but not 
+always, does do capturing in negative assertions.)
 .P
 For compatibility with Perl, assertion subpatterns may be repeated; though
 it makes no sense to assert the same thing several times, the side effect of
@@ -3006,6 +3006,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 15 March 2013
+Last updated: 17 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

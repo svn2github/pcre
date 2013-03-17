@@ -1,4 +1,4 @@
-.TH PCRECOMPAT 3 "23 February 2013" "PCRE 8.33"
+.TH PCRECOMPAT 3 "17 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "DIFFERENCES BETWEEN PCRE AND PERL"
@@ -23,10 +23,8 @@ just once). Perl allows repeat quantifiers on other assertions such as \eb, but
 these do not seem to have any use.
 .P
 3. Capturing subpatterns that occur inside negative lookahead assertions are
-counted, but their entries in the offsets vector are never set. Perl sets its
-numerical variables from any such patterns that are matched before the
-assertion fails to match something (thereby succeeding), but only if the
-negative lookahead assertion contains just one branch.
+counted, but their entries in the offsets vector are never set. Perl sometimes
+(but not always) sets its numerical variables from inside negative assertions.
 .P
 4. Though binary zero characters are supported in the subject string, they are
 not allowed in a pattern string because it is passed as a normal C string,
@@ -186,6 +184,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 23 February 2013
+Last updated: 17 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
