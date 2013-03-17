@@ -2118,30 +2118,6 @@ while (current != NULL)
 return -1;
 }
 
-static sljit_sw SLJIT_CALL do_search_then_trap(sljit_sw *current, sljit_sw start)
-{
-do
-  {
-  SLJIT_ASSERT(current != NULL);
-  switch (current[-2])
-    {
-    case type_then_trap:
-    if (current[-3] == start)
-      return (sljit_sw)current;
-    break;
-
-    case type_mark:
-    break;
-
-    default:
-    SLJIT_ASSERT_STOP();
-    break;
-    }
-  current = (sljit_sw*)current[-1];
-  }
-while (TRUE);
-}
-
 static SLJIT_INLINE void copy_ovector(compiler_common *common, int topbracket)
 {
 DEFINE_COMPILER;
@@ -8347,24 +8323,23 @@ static SLJIT_INLINE void compile_control_verb_backtrackingpath(compiler_common *
 {
 DEFINE_COMPILER;
 pcre_uchar opcode = *current->cc;
+struct sljit_label *loop;
+struct sljit_jump *jump;
 
 if ((opcode == OP_THEN || opcode == OP_THEN_ARG) && common->then_trap != NULL)
   {
   SLJIT_ASSERT(common->control_head_ptr != 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_IMM, common->then_trap->start);
-  sljit_emit_ijump(compiler, SLJIT_CALL2, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_search_then_trap));
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 
-  OP1(SLJIT_MOV, TMP2, 0, TMP1, 0);
-  OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE_ERROR_NOMATCH);
-  if (common->quit_label == NULL)
-    add_jump(compiler, &common->quit, CMP(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0));
-  else
-    CMPTO(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0, common->quit_label);
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->control_head_ptr);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, type_then_trap);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, common->then_trap->start);
+  jump = JUMP(SLJIT_JUMP);
 
-  OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
+  loop = LABEL();
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(STACK_TOP), -(int)sizeof(sljit_sw));
+  JUMPHERE(jump);
+  CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(STACK_TOP), -(int)(2 * sizeof(sljit_sw)), TMP1, 0, loop);
+  CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(STACK_TOP), -(int)(3 * sizeof(sljit_sw)), TMP2, 0, loop);
   add_jump(compiler, &common->then_trap->quit, JUMP(SLJIT_JUMP));
   return;
   }
