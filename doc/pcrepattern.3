@@ -2973,16 +2973,16 @@ unanchored pattern). (*SKIP) is similar, except that the advance may be more
 than one character. (*COMMIT) is the strongest, causing the entire match to
 fail.
 .P
-If more than one such verb is present in a pattern, the "strongest" one wins.
-For example, consider this pattern, where A, B, etc. are complex pattern
-fragments:
+If more than one such verb is present in a pattern, the one that is backtracked
+onto first acts. For example, consider this pattern, where A, B, etc. are
+complex pattern fragments:
 .sp
-  (A(*COMMIT)B(*THEN)C|D)
+  (A(*COMMIT)B(*THEN)C|ABD)
 .sp
-Once A has matched, PCRE is committed to this match, at the current starting
-position. If subsequently B matches, but C does not, the normal (*THEN) action
-of trying the next alternative (that is, D) does not happen because (*COMMIT)
-overrides.
+If A matches but B fails, the backtrack to (*COMMIT) causes the entire match to 
+fail. However, if A and B match, but C fails, the backtrack to (*THEN) causes 
+the next alternative (ABD) to be tried. This behaviour is consistent, but is
+not always the same as Perl's.
 .
 .
 .SH "SEE ALSO"

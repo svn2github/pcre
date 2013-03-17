@@ -100,11 +100,17 @@ encountered in a successful positive assertion \fIis\fP passed back when a
 match succeeds (compare capturing parentheses in assertions). Note that such
 subpatterns are processed as anchored at the point where they are tested.
 .P
-11. There are some differences that are concerned with the settings of captured
+11. If a pattern contains more than one backtracking control verb, the first
+one that is backtracked onto acts. For example, in the pattern
+A(*COMMIT)B(*PRUNE)C a failure in B triggers (*COMMIT), but a failure in C
+triggers (*PRUNE). Perl's behaviour is more complex; in many cases it is the
+same as PCRE, but there are examples where it differs.
+.P
+12. There are some differences that are concerned with the settings of captured
 strings when part of a pattern is repeated. For example, matching "aba" against
 the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE it is set to "b".
 .P
-12. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
+13. PCRE's handling of duplicate subpattern numbers and duplicate subpattern
 names is not as general as Perl's. This is a consequence of the fact the PCRE
 works internally just with numbers, using an external table to translate
 between numbers and names. In particular, a pattern such as (?|(?<a>A)|(?<b)B),
@@ -114,18 +120,18 @@ would not be possible to distinguish which parentheses matched, because both
 names map to capturing subpattern number 1. To avoid this confusing situation,
 an error is given at compile time.
 .P
-13. Perl recognizes comments in some places that PCRE does not, for example,
+14. Perl recognizes comments in some places that PCRE does not, for example,
 between the ( and ? at the start of a subpattern. If the /x modifier is set,
 Perl allows white space between ( and ? but PCRE never does, even if the
 PCRE_EXTENDED option is set.
 .P
-14. In PCRE, the upper/lower case character properties Lu and Ll are not 
+15. In PCRE, the upper/lower case character properties Lu and Ll are not 
 affected when case-independent matching is specified. For example, \ep{Lu}
 always matches an upper case letter. I think Perl has changed in this respect;
 in the release at the time of writing (5.16), \ep{Lu} and \ep{Ll} match all
 letters, regardless of case, when case independence is specified.
 .P
-15. PCRE provides some extensions to the Perl regular expression facilities.
+16. PCRE provides some extensions to the Perl regular expression facilities.
 Perl 5.10 includes new features that are not in earlier versions of Perl, some
 of which (such as named parentheses) have been in PCRE for some time. This list
 is with respect to Perl 5.10:
