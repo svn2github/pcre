@@ -8963,4 +8963,8 @@ No match
     aaaac
  0: ac
 
+/a(*:m)a(*COMMIT)(*SKIP:m)b|a+c/K
+    aaaaaac
+ 0: ac
+
 /-- End of testinput1 --/

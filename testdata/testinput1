@@ -5439,4 +5439,7 @@ backtracked onto, whether or not it has a label. --/
 /aaa(*MARK:A)a(*SKIP:A)b|a+c/
     aaaac
 
+/a(*:m)a(*COMMIT)(*SKIP:m)b|a+c/K
+    aaaaaac
+
 /-- End of testinput1 --/
