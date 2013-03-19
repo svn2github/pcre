@@ -4656,14 +4656,8 @@
 /(?<pn> \( ( [^()]++ | (?&pn) )* \) )/x
     (ab(cd)ef)
 
-/^(?!a(*SKIP)b)/
-    ac
-    
 /^(?=a(*SKIP)b|ac)/
     ** Failers
-    ac
-    
-/^(?=a(*THEN)b|ac)/
     ac
     
 /^(?=a(*PRUNE)b)/
@@ -4672,9 +4666,6 @@
     ac
 
 /^(?=a(*ACCEPT)b)/
-    ac
-
-/^(?(?!a(*SKIP)b))/
     ac
 
 /(?>a\Kb)/
@@ -4899,31 +4890,13 @@ however, we need the complication for Perl. ---/
 /(A (A|B(*ACCEPT)|C) D)(E)/x
     AB
 
-/\A.*?(?:a|b(*THEN)c)/
-    ba
-
-/\A.*?(?:a|bc)/
-    ba
-
-/\A.*?(a|b(*THEN)c)/
-    ba
-
 /\A.*?(a|bc)/
-    ba
-
-/\A.*?(?:a|b(*THEN)c)++/
     ba
 
 /\A.*?(?:a|bc)++/
     ba
 
-/\A.*?(a|b(*THEN)c)++/
-    ba
-
 /\A.*?(a|bc)++/
-    ba
-
-/\A.*?(?:a|b(*THEN)c|d)/
     ba
 
 /\A.*?(?:a|bc|d)/
@@ -5253,9 +5226,6 @@ name were given. ---/
 /(a(*COMMIT)b){0}a(?1)|aac/
     aac
 
-/(?!a(*COMMIT)b)ac|cd/
-    ac
-
 /((?:a?)*)*c/
   aac   
 
@@ -5308,9 +5278,6 @@ name were given. ---/
     
 /(?:(a(*SKIP)b)){0}(?:(?1)|ac)/
     ac 
-
-/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
-    aac 
 
 /(?<=(*SKIP)ac)a/
     aa
@@ -5441,5 +5408,40 @@ backtracked onto, whether or not it has a label. --/
 
 /a(*:m)a(*COMMIT)(*SKIP:m)b|a+c/K
     aaaaaac
+
+/.?(a|b(*THEN)c)/
+    ba
+
+/(a(*COMMIT)b)c|abd/
+    abc
+    abd
+
+/(?=a(*COMMIT)b)abc|abd/
+    abc
+    abd
+
+/(?>a(*COMMIT)b)c|abd/
+    abc
+    abd
+
+/a(?=b(*COMMIT)c)[^d]|abd/
+    abd
+    abc 
+
+/a(?=bc).|abd/
+    abd
+    abc 
+    
+/a(?>b(*COMMIT)c)d|abd/
+    abceabd 
+
+/a(?>bc)d|abd/
+    abceabd 
+
+/(?>a(*COMMIT)b)c|abd/
+    abd
+
+/(?>a(*COMMIT)c)d|abd/
+    abd
 
 /-- End of testinput1 --/

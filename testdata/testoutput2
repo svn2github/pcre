@@ -12345,13 +12345,11 @@ COMMIT to escape from the assertion. --/
 
 /(?=a(*COMMIT)b|ac)ac|ac/
     ac
- 0: ac
+No match
 
 /(?=a(*COMMIT)b|(ac)) ac | (a)c/x
     ac
- 0: ac
- 1: <unset>
- 2: a
+No match
 
 "AB(C(D))(E(F))?(?(?=\2)(?=\4))"
     ABCDGHI\O03
@@ -12648,5 +12646,89 @@ Partial match: 123a
 /aaaaa(*COMMIT)(*PRUNE)b|a+c/
     aaaaaac
  0: aaaac
+    
+/-- Here are some that Perl treats differently because of the way it handles
+backtracking verbs. --/
+
+ /^(?!a(*SKIP)b)/
+     ac
+No match
+
+ /^(?!a(*SKIP)b)../
+     acd
+No match
+
+/(?!a(*SKIP)b)../
+     acd
+ 0: cd
+
+/^(?(?!a(*SKIP)b))/
+     ac
+No match
+
+/^(?!a(*PRUNE)b)../
+     acd
+No match
+
+/(?!a(*PRUNE)b)../
+     acd
+ 0: cd
+
+ /(?!a(*COMMIT)b)ac|cd/
+     ac
+No match
+
+ /(?!a(*COMMIT)b)ac|ad/
+     ac
+No match
+     ad 
+No match
+
+/^(?!a(*THEN)b|ac)../
+     ac
+No match
+     ad 
+ 0: ad
+
+/^(?=a(*THEN)b|ac)/
+    ac
+ 0: 
+    
+/\A.*?(?:a|b(*THEN)c)/
+    ba
+ 0: ba
+
+/\A.*?(?:a|bc)/
+    ba
+ 0: ba
+
+/\A.*?(?:a|b(*THEN)c)++/
+    ba
+ 0: ba
+
+/\A.*?(?:a|b(*THEN)c|d)/
+    ba
+ 0: ba
+
+/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
+    aac 
+ 0: aac
+
+/\A.*?(a|b(*THEN)c)/
+    ba
+ 0: ba
+ 1: a
+
+/^(A(*THEN)B|C(*THEN)D)/
+    CD           
+ 0: CD
+ 1: CD
+
+/^(A(*THEN)B|A(*THEN)D)/
+    AD           
+ 0: AD
+ 1: AD
+
+/-- End of Perl diffences --/ 
 
 /-- End of testinput2 --/

@@ -7770,19 +7770,11 @@ No match
  1: (ab(cd)ef)
  2: ef
 
-/^(?!a(*SKIP)b)/
-    ac
- 0: 
-    
 /^(?=a(*SKIP)b|ac)/
     ** Failers
 No match
     ac
 No match
-    
-/^(?=a(*THEN)b|ac)/
-    ac
- 0: 
     
 /^(?=a(*PRUNE)b)/
     ab  
@@ -7793,10 +7785,6 @@ No match
 No match
 
 /^(?=a(*ACCEPT)b)/
-    ac
- 0: 
-
-/^(?(?!a(*SKIP)b))/
     ac
  0: 
 
@@ -8169,45 +8157,19 @@ No match
  1: AB
  2: B
 
-/\A.*?(?:a|b(*THEN)c)/
-    ba
- 0: ba
-
-/\A.*?(?:a|bc)/
-    ba
- 0: ba
-
-/\A.*?(a|b(*THEN)c)/
-    ba
- 0: ba
- 1: a
-
 /\A.*?(a|bc)/
     ba
  0: ba
  1: a
 
-/\A.*?(?:a|b(*THEN)c)++/
-    ba
- 0: ba
-
 /\A.*?(?:a|bc)++/
     ba
  0: ba
-
-/\A.*?(a|b(*THEN)c)++/
-    ba
- 0: ba
- 1: a
 
 /\A.*?(a|bc)++/
     ba
  0: ba
  1: a
-
-/\A.*?(?:a|b(*THEN)c|d)/
-    ba
- 0: ba
 
 /\A.*?(?:a|bc|d)/
     ba
@@ -8719,10 +8681,6 @@ No match
     aac
  0: aac
 
-/(?!a(*COMMIT)b)ac|cd/
-    ac
- 0: ac
-
 /((?:a?)*)*c/
   aac   
  0: aac
@@ -8802,10 +8760,6 @@ No match
 /(?:(a(*SKIP)b)){0}(?:(?1)|ac)/
     ac 
  0: ac
-
-/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
-    aac 
- 0: aac
 
 /(?<=(*SKIP)ac)a/
     aa
@@ -8966,5 +8920,57 @@ No match
 /a(*:m)a(*COMMIT)(*SKIP:m)b|a+c/K
     aaaaaac
  0: ac
+
+/.?(a|b(*THEN)c)/
+    ba
+ 0: ba
+ 1: a
+
+/(a(*COMMIT)b)c|abd/
+    abc
+ 0: abc
+ 1: ab
+    abd
+No match
+
+/(?=a(*COMMIT)b)abc|abd/
+    abc
+ 0: abc
+    abd
+ 0: abd
+
+/(?>a(*COMMIT)b)c|abd/
+    abc
+ 0: abc
+    abd
+ 0: abd
+
+/a(?=b(*COMMIT)c)[^d]|abd/
+    abd
+No match
+    abc 
+ 0: ab
+
+/a(?=bc).|abd/
+    abd
+ 0: abd
+    abc 
+ 0: ab
+    
+/a(?>b(*COMMIT)c)d|abd/
+    abceabd 
+No match
+
+/a(?>bc)d|abd/
+    abceabd 
+ 0: abd
+
+/(?>a(*COMMIT)b)c|abd/
+    abd
+ 0: abd
+
+/(?>a(*COMMIT)c)d|abd/
+    abd
+No match
 
 /-- End of testinput1 --/

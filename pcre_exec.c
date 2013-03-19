@@ -1603,6 +1603,8 @@ for (;;)
       }
     else condassert = FALSE;
 
+    /* Loop for each branch */
+     
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM4);
@@ -1613,18 +1615,28 @@ for (;;)
         }
       md->mark = save_mark;
 
-      /* A COMMIT failure must fail the entire assertion, without trying any
-      subsequent branches. */
+      /* See comment in the code for capturing groups above about handling
+      THEN. */
 
-      if (rrc == MATCH_COMMIT) RRETURN(MATCH_NOMATCH);
+      if (rrc == MATCH_THEN)
+        {
+        next = ecode + GET(ecode,1);
+        if (md->start_match_ptr < next &&
+            (*ecode == OP_ALT || *next == OP_ALT))
+          rrc = MATCH_NOMATCH;
+        }
+        
+      /* Anything other than NOMATCH causes the assertion to fail. This 
+      includes COMMIT, SKIP, and PRUNE. However, this consistent approach does 
+      not always have exactly the same effect as in Perl. */
 
-      /* PCRE does not allow THEN to escape beyond an assertion; it
-      is treated as NOMATCH. */
-
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);
+    
+    /* If we have tried all the alternative branches, the assertion has
+    failed. */ 
 
     if (*ecode == OP_KET) RRETURN(MATCH_NOMATCH);
 
@@ -1632,17 +1644,16 @@ for (;;)
 
     if (condassert) RRETURN(MATCH_MATCH);
 
-    /* Continue from after the assertion, updating the offsets high water
-    mark, since extracts may have been taken during the assertion. */
+    /* Continue from after a successful assertion, updating the offsets high
+    water mark, since extracts may have been taken during the assertion. */
 
     do ecode += GET(ecode,1); while (*ecode == OP_ALT);
     ecode += 1 + LINK_SIZE;
     offset_top = md->end_offset_top;
     continue;
 
-    /* Negative assertion: all branches must fail to match. Encountering SKIP,
-    PRUNE, or COMMIT means we must assume failure without checking subsequent
-    branches. */
+    /* Negative assertion: all branches must fail to match for the assertion to 
+    succeed. */
 
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
@@ -1654,28 +1665,42 @@ for (;;)
       }
     else condassert = FALSE;
 
+    /* Loop for each alternative branch. */
+     
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM5);
       md->mark = save_mark;
+      
+      /* A successful match means the assertion has failed. */
+       
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) RRETURN(MATCH_NOMATCH);
-      if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
+
+      /* See comment in the code for capturing groups above about handling
+      THEN. */
+
+      if (rrc == MATCH_THEN)
         {
-        do ecode += GET(ecode,1); while (*ecode == OP_ALT);
-        break;
+        next = ecode + GET(ecode,1);
+        if (md->start_match_ptr < next &&
+            (*ecode == OP_ALT || *next == OP_ALT))
+          rrc = MATCH_NOMATCH;
         }
+        
+      /* No match on a branch means we must carry on and try the next branch. 
+      Anything else, in particular, SKIP, PRUNE, etc. causes a failure in the 
+      enclosing branch. This is a consistent approach, but does not always have 
+      the same effect as in Perl. */ 
 
-      /* PCRE does not allow THEN to escape beyond an assertion; it is treated
-      as NOMATCH. */
-
-      if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
+      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
+    
+    /* All branches in the assertion failed to match. */
 
     if (condassert) RRETURN(MATCH_MATCH);  /* Condition assertion */
-
-    ecode += 1 + LINK_SIZE;
+    ecode += 1 + LINK_SIZE;                /* Continue with current branch */
     continue;
 
     /* Move the subject pointer back. This occurs only at the start of
