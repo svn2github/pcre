@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "17 March 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "19 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2666,35 +2666,37 @@ documentation.
 .rs
 .sp
 Perl 5.10 introduced a number of "Special Backtracking Control Verbs", which
-are described in the Perl documentation as "experimental and subject to change
-or removal in a future version of Perl". It goes on to say: "Their usage in
-production code should be noted to avoid problems during upgrades." The same
+are still described in the Perl documentation as "experimental and subject to
+change or removal in a future version of Perl". It goes on to say: "Their usage
+in production code should be noted to avoid problems during upgrades." The same
 remarks apply to the PCRE features described in this section.
-.P
-Since these verbs are specifically related to backtracking, most of them can be
-used only when the pattern is to be matched using one of the traditional
-matching functions, which use a backtracking algorithm. With the exception of
-(*FAIL), which behaves like a failing negative assertion, they cause an error
-if encountered by a DFA matching function.
-.P
-If any of these verbs are used in an assertion or in a subpattern that is
-called as a subroutine (whether or not recursively), their effect is confined
-to that subpattern; it does not extend to the surrounding pattern, with one
-exception: the name from a *(MARK), (*PRUNE), or (*THEN) that is encountered in
-a successful positive assertion \fIis\fP passed back when a match succeeds
-(compare capturing parentheses in assertions). Note that such subpatterns are
-processed as anchored at the point where they are tested. Note also that Perl's
-treatment of subroutines and assertions is different in some cases.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
 (*VERB) or (*VERB:NAME). Some may take either form, with differing behaviour,
-depending on whether or not an argument is present. A name is any sequence of
+depending on whether or not a name is present. A name is any sequence of
 characters that does not include a closing parenthesis. The maximum length of
-name is 255 in the 8-bit library and 65535 in the 16-bit and 32-bit library.
+name is 255 in the 8-bit library and 65535 in the 16-bit and 32-bit libraries.
 If the name is empty, that is, if the closing parenthesis immediately follows
 the colon, the effect is as if the colon were not there. Any number of these
 verbs may occur in a pattern.
+.P
+Since these verbs are specifically related to backtracking, most of them can be
+used only when the pattern is to be matched using one of the traditional
+matching functions, because these use a backtracking algorithm. With the
+exception of (*FAIL), which behaves like a failing negative assertion, the 
+backtracking control verbs cause an error if encountered by a DFA matching
+function.
+.P
+If any of these verbs are used in a subpattern that is called as a subroutine
+(whether or not recursively), their effect is confined to that subpattern; it
+does not extend to the surrounding pattern. (This is the same as for capturing 
+parentheses in subroutines.) Note that such subpatterns are processed as
+anchored at the point where they are tested. Note also that Perl's treatment of
+subroutines is different in some cases.
+.P
+By contrast, if any of these verbs are used in an assertion, they have their 
+normal action. Again, Perl's treatment differs in some cases.
 .
 .
 .\" HTML <a name="nooptimize"></a>
@@ -2704,7 +2706,7 @@ verbs may occur in a pattern.
 PCRE contains some optimizations that are used to speed up matching by running
 some checks at the start of each match attempt. For example, it may know the
 minimum length of matching subject, or that a particular character must be
-present. When one of these optimizations suppresses the running of a match, any
+present. When one of these optimizations bypasses the running of a match, any
 included backtracking verbs will not, of course, be processed. You can suppress
 the start-of-match optimizations by setting the PCRE_NO_START_OPTIMIZE option
 when calling \fBpcre_compile()\fP or \fBpcre_exec()\fP, or by starting the
@@ -2735,8 +2737,11 @@ followed by a name.
 This verb causes the match to end successfully, skipping the remainder of the
 pattern. However, when it is inside a subpattern that is called as a
 subroutine, only that subpattern is ended successfully. Matching then continues
-at the outer level. If (*ACCEPT) is inside capturing parentheses, the data so
-far is captured. For example:
+at the outer level. If (*ACCEPT) in triggered in a positive assertion, the 
+assertion succeeds; in a negative assertion, the assertion fails.
+.P
+If (*ACCEPT) is inside capturing parentheses, the data so far is captured. For
+example:
 .sp
   A((?:A|B(*ACCEPT)|C)D)
 .sp
@@ -2827,11 +2832,12 @@ to ensure that the match is always attempted.
 The following verbs do nothing when they are encountered. Matching continues
 with what follows, but if there is no subsequent match, causing a backtrack to
 the verb, a failure is forced. That is, backtracking cannot pass to the left of
-the verb. However, when one of these verbs appears inside an atomic group, its
-effect is confined to that group, because once the group has been matched,
-there is never any backtracking into it. In this situation, backtracking can
-"jump back" to the left of the entire atomic group. (Remember also, as stated
-above, that this localization also applies in subroutine calls and assertions.)
+the verb. However, when one of these verbs appears inside an atomic group or an 
+assertion, its effect is confined to that group, because once the group has
+been matched, there is never any backtracking into it. In this situation,
+backtracking can "jump back" to the left of the entire atomic group or 
+assertion. (Remember also, as stated above, that this localization also applies
+in subroutine calls.)
 .P
 These verbs differ in exactly what kind of failure occurs when backtracking
 reaches them.
@@ -2839,10 +2845,12 @@ reaches them.
   (*COMMIT)
 .sp
 This verb, which may not be followed by a name, causes the whole match to fail
-outright if the rest of the pattern does not match. Even if the pattern is
-unanchored, no further attempts to find a match by advancing the starting point
-take place. Once (*COMMIT) has been passed, \fBpcre_exec()\fP is committed to
-finding a match at the current starting point, or not at all. For example:
+outright if there is a later matching failure that causes backtracking to reach 
+it. Even if the pattern is unanchored, no further attempts to find a match by
+advancing the starting point take place. If (*COMMIT) is the only backtracking
+verb that is encountered, once it has been passed \fBpcre_exec()\fP is
+committed to finding a match at the current starting point, or not at all. For
+example:
 .sp
   a+(*COMMIT)b
 .sp
@@ -2850,6 +2858,10 @@ This matches "xxaab" but not "aacaab". It can be thought of as a kind of
 dynamic anchor, or "I've started, so I must finish." The name of the most
 recently passed (*MARK) in the path is passed back when (*COMMIT) forces a
 match failure.
+.P
+If there is more than one backtracking verb in a pattern, a different one that 
+follows (*COMMIT) may be triggered first, so merely passing (*COMMIT) during a 
+match does not always guarantee that a match must be at this starting point.
 .P
 Note that (*COMMIT) at the start of a pattern is not the same as an anchor,
 unless PCRE's start-of-match optimizations are turned off, as shown in this
@@ -2870,14 +2882,15 @@ starting points.
   (*PRUNE) or (*PRUNE:NAME)
 .sp
 This verb causes the match to fail at the current starting position in the
-subject if the rest of the pattern does not match. If the pattern is
-unanchored, the normal "bumpalong" advance to the next starting character then
-happens. Backtracking can occur as usual to the left of (*PRUNE), before it is
-reached, or when matching to the right of (*PRUNE), but if there is no match to
-the right, backtracking cannot cross (*PRUNE). In simple cases, the use of
-(*PRUNE) is just an alternative to an atomic group or possessive quantifier,
-but there are some uses of (*PRUNE) that cannot be expressed in any other way.
-In an anchored pattern (*PRUNE) has the same effect as (*COMMIT).
+subject if there is a later matching failure that causes backtracking to reach
+it. If the pattern is unanchored, the normal "bumpalong" advance to the next
+starting character then happens. Backtracking can occur as usual to the left of
+(*PRUNE), before it is reached, or when matching to the right of (*PRUNE), but
+if there is no match to the right, backtracking cannot cross (*PRUNE). In
+simple cases, the use of (*PRUNE) is just an alternative to an atomic group or
+possessive quantifier, but there are some uses of (*PRUNE) that cannot be
+expressed in any other way. In an anchored pattern (*PRUNE) has the same effect
+as (*COMMIT).
 .P
 The behaviour of (*PRUNE:NAME) is the not the same as (*MARK:NAME)(*PRUNE). 
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
@@ -2902,22 +2915,22 @@ instead of skipping on to "c".
 .sp
   (*SKIP:NAME)
 .sp
-When (*SKIP) has an associated name, its behaviour is modified. If the
-following pattern fails to match, the previous path through the pattern is
-searched for the most recent (*MARK) that has the same name. If one is found,
-the "bumpalong" advance is to the subject position that corresponds to that
-(*MARK) instead of to where (*SKIP) was encountered. If no (*MARK) with a
-matching name is found, the (*SKIP) is ignored.
+When (*SKIP) has an associated name, its behaviour is modified. When it is 
+triggered, the previous path through the pattern is searched for the most
+recent (*MARK) that has the same name. If one is found, the "bumpalong" advance
+is to the subject position that corresponds to that (*MARK) instead of to where
+(*SKIP) was encountered. If no (*MARK) with a matching name is found, the
+(*SKIP) is ignored.
 .P
 Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores 
 names that are set by (*PRUNE:NAME) or (*THEN:NAME).
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
-This verb causes a skip to the next innermost alternative if the rest of the
-pattern does not match. That is, it cancels pending backtracking, but only
-within the current alternative. Its name comes from the observation that it can
-be used for a pattern-based if-then-else block:
+This verb causes a skip to the next innermost alternative when backtracking 
+reaches it. That is, it cancels any further backtracking within the current
+alternative. Its name comes from the observation that it can be used for a
+pattern-based if-then-else block:
 .sp
   ( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
 .sp
@@ -2930,8 +2943,8 @@ The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN).
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK).
 .P
-Note that a subpattern that does not contain a | character is just a part of
-the enclosing alternative; it is not a nested alternation with only one
+A subpattern that does not contain a | character is just a part of the
+enclosing alternative; it is not a nested alternation with only one
 alternative. The effect of (*THEN) extends beyond such a subpattern to the
 enclosing alternative. Consider this pattern, where A, B, etc. are complex
 pattern fragments that do not contain any | characters at this level:
@@ -2950,7 +2963,7 @@ in C, matching moves to (*FAIL), which causes the whole subpattern to fail
 because there are no more alternatives to try. In this case, matching does now
 backtrack into A.
 .P
-Note also that a conditional subpattern is not considered as having two
+Note that a conditional subpattern is not considered as having two
 alternatives, because only one is ever used. In other words, the | character in
 a conditional subpattern has a different meaning. Ignoring white space,
 consider:
@@ -2972,17 +2985,41 @@ starting position, but allowing an advance to the next character (for an
 unanchored pattern). (*SKIP) is similar, except that the advance may be more
 than one character. (*COMMIT) is the strongest, causing the entire match to
 fail.
-.P
-If more than one such verb is present in a pattern, the one that is backtracked
-onto first acts. For example, consider this pattern, where A, B, etc. are
-complex pattern fragments:
+.
+.
+.SS "More than one backtracking verb"
+.rs
+.sp
+If more than one backtracking verb is present in a pattern, the one that is
+backtracked onto first acts. For example, consider this pattern, where A, B,
+etc. are complex pattern fragments:
 .sp
   (A(*COMMIT)B(*THEN)C|ABD)
 .sp
 If A matches but B fails, the backtrack to (*COMMIT) causes the entire match to 
 fail. However, if A and B match, but C fails, the backtrack to (*THEN) causes 
 the next alternative (ABD) to be tried. This behaviour is consistent, but is
-not always the same as Perl's.
+not always the same as Perl's. It means that if two or more backtracking verbs
+appear in succession, all the the last of them has no effect. Consider this
+example:
+.sp
+  ...(*COMMIT)(*PRUNE)...
+.sp
+If there is a matching failure to the right, backtracking onto (*PRUNE) cases 
+it to be triggered, and its action is taken. There can never be a backtrack 
+onto (*COMMIT). 
+.
+.
+.SS "Backtracking verbs in repeated groups"
+.rs
+.sp
+PCRE differs from Perl in its handling of backtracking verbs in repeated 
+groups. For example, consider:
+.sp
+  /(a(*COMMIT)b)+ac/
+.sp
+If the subject is "abac", Perl matches, but PCRE fails because the (*COMMIT) in 
+the second repeat of the group acts.   
 .
 .
 .SH "SEE ALSO"
@@ -3006,6 +3043,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 March 2013
+Last updated: 19 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
