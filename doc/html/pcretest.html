@@ -110,23 +110,27 @@ internal form is output after compilation.
 <P>
 <b>-C</b>
 Output the version number of the PCRE library, and all available information
-about the optional features that are included, and then exit. All other options
-are ignored.
+about the optional features that are included, and then exit with zero exit 
+code. All other options are ignored.
 </P>
 <P>
 <b>-C</b> <i>option</i>
 Output information about a specific build-time option, then exit. This
 functionality is intended for use in scripts such as <b>RunTest</b>. The
-following options output the value indicated:
+following options output the value and set the exit code as indicated:
 <pre>
   ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
                0x15 or 0x25
                0 if used in an ASCII environment
-  linksize   the internal link size (2, 3, or 4)
+               exit code is always 0 
+  linksize   the configured internal link size (2, 3, or 4)
+               exit code is set to the link size 
   newline    the default newline setting:
                CR, LF, CRLF, ANYCRLF, or ANY
+               exit code is always 0 
 </pre>
-The following options output 1 for true or zero for false:
+The following options output 1 for true or 0 for false, and set the exit code 
+to the same value:
 <pre>
   ebcdic     compiled for an EBCDIC environment
   jit        just-in-time support is available
@@ -134,8 +138,10 @@ The following options output 1 for true or zero for false:
   pcre32     the 32-bit library was built
   pcre8      the 8-bit library was built
   ucp        Unicode property support is available
-  utf        UTF-8 and/or UTF-16 and/or UTF-32 support is available
-</PRE>
+  utf        UTF-8 and/or UTF-16 and/or UTF-32 support 
+               is available
+</pre>
+If an unknown option is given, an error message is output; the exit code is 0.   
 </P>
 <P>
 <b>-d</b>
@@ -1073,9 +1079,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC16" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 10 September 2012
+Last updated: 22 February 2013
 <br>
-Copyright &copy; 1997-2012 University of Cambridge.
+Copyright &copy; 1997-2013 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

@@ -12362,6 +12362,8 @@ assertion, and therefore fails the entire subroutine call. --/
 /((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
     ac 
  0: ac
+ 1: <unset>
+ 2: c
     
 /-- These are all run as real matches in test 1; here we are just checking the
 settings of the anchored and startline bits. --/ 

@@ -1288,9 +1288,14 @@ be used.
   PCRE_INFO_MAXLOOKBEHIND
 </pre>
 Return the number of characters (NB not bytes) in the longest lookbehind
-assertion in the pattern. Note that the simple assertions \b and \B require a
-one-character lookbehind. This information is useful when doing multi-segment
-matching using the partial matching facilities.
+assertion in the pattern. This information is useful when doing multi-segment
+matching using the partial matching facilities. Note that the simple assertions
+\b and \B require a one-character lookbehind. \A also registers a
+one-character lookbehind, though it does not actually inspect the previous
+character. This is to ensure that at least one character from the old segment
+is retained when a new segment is processed. Otherwise, if there are no 
+lookbehinds in the pattern, \A might match incorrectly at the start of a new 
+segment.
 <pre>
   PCRE_INFO_MINLENGTH
 </pre>
@@ -2332,10 +2337,12 @@ character.
 The first byte of a character has the value 0xfe or 0xff. These values can
 never occur in a valid UTF-8 string.
 <pre>
-  PCRE_UTF8_ERR2
+  PCRE_UTF8_ERR22
 </pre>
-Non-character. These are the last two characters in each plane (0xfffe, 0xffff,
-0x1fffe, 0x1ffff .. 0x10fffe, 0x10ffff), and the characters 0xfdd0..0xfdef.
+This error code was formerly used when the presence of a so-called
+"non-character" caused an error. Unicode corrigendum #9 makes it clear that 
+such characters should not cause a string to be rejected, and so this code is 
+no longer in use and is never returned.
 </P>
 <br><a name="SEC18" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
 <P>
@@ -2777,9 +2784,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 November 2012
+Last updated: 27 February 2013
 <br>
-Copyright &copy; 1997-2012 University of Cambridge.
+Copyright &copy; 1997-2013 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

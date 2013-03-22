@@ -1,9 +1,9 @@
-PCREGREP(1)                                                        PCREGREP(1)
+PCREGREP(1)                 General Commands Manual                PCREGREP(1)
+
 
 
 NAME
        pcregrep - a grep with Perl-compatible regular expressions.
-
 
 SYNOPSIS
        pcregrep [options] [long options] [pattern] [path1 path2 ...]

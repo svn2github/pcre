@@ -1863,11 +1863,15 @@ for (;;)
           }
 
         /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
-        recursion; they are treated as NOMATCH. These codes are defined in a 
-        range that can be tested for. Any other return code is an error. */
+        recursion; they cause a NOMATCH for the entire recursion. These codes
+        are defined in a range that can be tested for. */
+        
+        if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
+          RRETURN(MATCH_NOMATCH); 
+ 
+        /* Any return code other than NOMATCH is an error. */
 
-        else if (rrc != MATCH_NOMATCH && 
-                 (rrc < MATCH_BACKTRACK_MIN || rrc > MATCH_BACKTRACK_MAX))
+        if (rrc != MATCH_NOMATCH)
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
           if (new_recursive.offset_save != stacksave)

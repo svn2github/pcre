@@ -118,8 +118,8 @@ Version 8.33 xx-xxxx-201x
     rather obscure rules do not always do the same thing.
     
     (2) Previously, backtracking verbs were confined within assertions. This is 
-    no longer the case. Again, this sometimes improves Perl compatibility, and 
-    sometimes does not. 
+    no longer the case, except for (*ACCEPT). Again, this sometimes improves
+    Perl compatibility, and sometimes does not.
 
 
 Version 8.32 30-November-2012

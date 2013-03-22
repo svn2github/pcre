@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "19 March 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "22 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2688,15 +2688,21 @@ exception of (*FAIL), which behaves like a failing negative assertion, the
 backtracking control verbs cause an error if encountered by a DFA matching
 function.
 .P
-If any of these verbs are used in a subpattern that is called as a subroutine
-(whether or not recursively), their effect is confined to that subpattern; it
-does not extend to the surrounding pattern. (This is the same as for capturing 
-parentheses in subroutines.) Note that such subpatterns are processed as
-anchored at the point where they are tested. Note also that Perl's treatment of
-subroutines is different in some cases.
-.P
-By contrast, if any of these verbs are used in an assertion, they have their 
-normal action. Again, Perl's treatment differs in some cases.
+The behaviour of these verbs in 
+.\" HTML <a href="#btrepeat">
+.\" </a>
+repeated groups, 
+.\"
+.\" HTML <a href="#btassert">
+.\" </a>
+assertions, 
+.\"
+and in 
+.\" HTML <a href="#btsub">
+.\" </a>
+subpatterns called as subroutines
+.\"
+(whether or not recursively) is documented below.
 .
 .
 .\" HTML <a name="nooptimize"></a>
@@ -3010,6 +3016,7 @@ it to be triggered, and its action is taken. There can never be a backtrack
 onto (*COMMIT). 
 .
 .
+.\" HTML <a name="btrepeat"></a>
 .SS "Backtracking verbs in repeated groups"
 .rs
 .sp
@@ -3020,6 +3027,44 @@ groups. For example, consider:
 .sp
 If the subject is "abac", Perl matches, but PCRE fails because the (*COMMIT) in 
 the second repeat of the group acts.   
+.
+.
+.\" HTML <a name="btassert"></a>
+.SS "Backtracking verbs in assertions"
+.rs
+.sp
+(*FAIL) in an assertion has its normal effect: it forces an immediate backtrack.
+.P
+(*ACCEPT) in a positive assertion causes the assertion to succeed without any 
+further processing. In a negative assertion, (*ACCEPT) causes the assertion to 
+fail without any further processing.
+.P
+The other backtracking verbs are not treated specially if they appear in an
+assertion. In particular, (*THEN) skips to the next alternative in the
+innermost enclosing group that has alternations, whether or not this is within
+the assertion.
+.
+.
+.\" HTML <a name="btsub"></a>
+.SS "Backtracking verbs in subroutines"
+.rs
+.sp
+These behaviours occur whether or not the subpattern is called recursively. 
+Perl's treatment of subroutines is different in some cases.
+.P
+(*FAIL) in a subpattern called as a subroutine has its normal effect: it forces
+an immediate backtrack.
+.P
+(*ACCEPT) in a subpattern called as a subroutine causes the subroutine match to 
+succeed without any further processing. Matching then continues after the 
+subroutine call.
+.P
+(*COMMIT), (*SKIP), and (*PRUNE) in a subpattern called as a subroutine cause
+the subroutine match to fail.
+.P
+(*THEN) skips to the next alternative in the innermost enclosing group within
+the subpattern that has alternatives. If there is no such group within the 
+subpattern, (*THEN) causes the subroutine match to fail.
 .
 .
 .SH "SEE ALSO"
@@ -3043,6 +3088,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 19 March 2013
+Last updated: 22 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
