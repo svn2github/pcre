@@ -120,6 +120,10 @@ Version 8.33 xx-xxxx-201x
     (2) Previously, backtracking verbs were confined within assertions. This is 
     no longer the case, except for (*ACCEPT). Again, this sometimes improves
     Perl compatibility, and sometimes does not.
+    
+32. A number of tests that were in test 2 because Perl did things differently 
+    have been moved to test 1, because either Perl or PCRE has changed, and 
+    these tests are now compatible.
 
 
 Version 8.32 30-November-2012

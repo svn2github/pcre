@@ -5444,4 +5444,82 @@ backtracked onto, whether or not it has a label. --/
 /(?>a(*COMMIT)c)d|abd/
     abd
 
+/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
+    ac 
+    
+/-- These tests were formerly in test 2, but changes in PCRE and Perl have
+    made them compatible. --/
+    
+/^(a)?(?(1)a|b)+$/
+    *** Failers
+    a
+
+/(?=a\Kb)ab/
+    ab 
+
+/(?!a\Kb)ac/
+    ac 
+    
+/^abc(?<=b\Kc)d/
+    abcd
+
+/^abc(?<!b\Kq)d/
+    abcd
+
+
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+    *** Failers 
+    abcxy 
+    
+/^((yes|no)(*THEN)(*F))?/
+  yes
+
+/(A (.*)   C? (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C? (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C? (*THEN)  | A D) \s* (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C? (*THEN)  | A D) \s* z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (?:C|) (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (?:C|) (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C{0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C{0,6} (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (CE){0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCEBefgBhiBqz
+
+/(A (.*)   (CE){0,6} (*THEN)  | A D) z/x
+AbcdCEBefgBhiBqz
+
+/(A (.*)   (CE*){0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (CE*){0,6} (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(?=a(*COMMIT)b|ac)ac|ac/
+    ac
+
+/(?=a(*COMMIT)b|(ac)) ac | (a)c/x
+    ac
+
+/--------/
+    
 /-- End of testinput1 --/

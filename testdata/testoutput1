@@ -8973,4 +8973,111 @@ No match
     abd
 No match
 
+/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
+    ac 
+ 0: ac
+ 1: <unset>
+ 2: c
+    
+/-- These tests were formerly in test 2, but changes in PCRE and Perl have
+    made them compatible. --/
+    
+/^(a)?(?(1)a|b)+$/
+    *** Failers
+No match
+    a
+No match
+
+/(?=a\Kb)ab/
+    ab 
+ 0: b
+
+/(?!a\Kb)ac/
+    ac 
+ 0: ac
+    
+/^abc(?<=b\Kc)d/
+    abcd
+ 0: cd
+
+/^abc(?<!b\Kq)d/
+    abcd
+ 0: abcd
+
+
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+No match, mark = A
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+ 0: abcd
+ 1: abcd
+    *** Failers 
+No match
+    abcxy 
+No match
+    
+/^((yes|no)(*THEN)(*F))?/
+  yes
+No match
+
+/(A (.*)   C? (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   C? (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   C? (*THEN)  | A D) \s* (*FAIL)/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   C? (*THEN)  | A D) \s* z/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   (?:C|) (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   (?:C|) (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   C{0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   C{0,6} (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   (CE){0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCEBefgBhiBqz
+No match
+
+/(A (.*)   (CE){0,6} (*THEN)  | A D) z/x
+AbcdCEBefgBhiBqz
+No match
+
+/(A (.*)   (CE*){0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+No match
+
+/(A (.*)   (CE*){0,6} (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+No match
+
+/(?=a(*COMMIT)b|ac)ac|ac/
+    ac
+No match
+
+/(?=a(*COMMIT)b|(ac)) ac | (a)c/x
+    ac
+No match
+
+/--------/
+    
 /-- End of testinput1 --/
