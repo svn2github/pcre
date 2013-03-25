@@ -694,12 +694,9 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0 | F_NOMATCH, "a(*COMMIT)b", "ac" },
 	{ MUA, 0, "aa(*COMMIT)b", "xaxaab" },
 	{ MUA, 0 | F_NOMATCH, "a(*COMMIT)(*:msg)b|ac", "ac" },
-	{ MUA, 0, "(?=a(*COMMIT)b|ac)ac|(*:m)(a)c", "ac" },
-	{ MUA, 0, "(?!a(*COMMIT)(*:msg)b)a(c)|cd", "acd" },
-	{ MUA, 0, "(?=(a)(*COMMIT)b)|ac", "ac" },
-	{ MUA, 0, "(?=(a)+(*COMMIT)b)|ac", "ac" },
 	{ MUA, 0 | F_NOMATCH, "(a(*COMMIT)b)++", "abac" },
 	{ MUA, 0 | F_NOMATCH, "((a)(*COMMIT)b)++", "abac" },
+	{ MUA, 0 | F_NOMATCH, "(?=a(*COMMIT)b)ab|ad", "ad" },
 
 	/* (*PRUNE) verb. */
 	{ MUA, 0, "aa\\K(*PRUNE)b", "aaab" },
@@ -708,6 +705,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(a)(a)(a)(a)(a)(a)(a)(a)(*PRUNE)b|(a)", "aaaaaaaa" },
 	{ MUA | PCRE_PARTIAL_SOFT, 0, "a(*PRUNE)a|", "a" },
 	{ MUA | PCRE_PARTIAL_SOFT, 0, "a(*PRUNE)a|m", "a" },
+	{ MUA, 0 | F_NOMATCH, "(?=a(*PRUNE)b)ab|ad", "ad" },
 	{ MUA, 0, "a(*COMMIT)(*PRUNE)d|bc", "abc" },
 	{ MUA, 0, "(?=a(*COMMIT)b)a(*PRUNE)c|bc", "abc" },
 	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?=a(*COMMIT)b)a(*PRUNE)c|bc", "abc" },
@@ -732,12 +730,19 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?>a(*COMMIT)b)??n(*PRUNE)d|bn", "abn" },
 	{ MUA, 0 | F_NOMATCH, "(*COMMIT)(?>a(*COMMIT)b)??n(*PRUNE)d|bn", "abn" },
 
+	/* (*SKIP) verb. */
+	{ MUA, 0 | F_NOMATCH, "(?=a(*SKIP)b)ab|ad", "ad" },
+
 	/* (*THEN) verb. */
 	{ MUA, 0, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcaabcaabcaabcnacm" },
 	{ MUA, 0 | F_NOMATCH, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcm" },
 	{ MUA, 0, "((?:a(*THEN)|aab)c|a+)+m", "aabcaabcnmaabcaabcm" },
 	{ MUA, 0, "((?:a|aab)(*THEN)c|a+)+m", "aam" },
 	{ MUA, 0, "((?:a(*COMMIT)|aab)(*THEN)c|a+)+m", "aam" },
+	{ MUA, 0, "(?(?=a(*THEN)b)ab|ad)", "ad" },
+	{ MUA, 0, "(?(?!a(*THEN)b)ad|add)", "add" },
+	{ MUA, 0 | F_NOMATCH, "(?(?=a)a(*THEN)b|ad)", "ad" },
+	{ MUA, 0, "(?!(?(?=a)ab|b(*THEN)d))bn|bnn", "bnn" },
 
 	/* Deep recursion. */
 	{ MUA, 0, "((((?:(?:(?:\\w)+)?)*|(?>\\w)+?)+|(?>\\w)?\?)*)?\\s", "aaaaa+ " },

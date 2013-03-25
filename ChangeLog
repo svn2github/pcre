@@ -104,9 +104,9 @@ Version 8.33 xx-xxxx-201x
 27. Fix the case where there are two or more SKIPs with arguments that may be 
     ignored. 
 
-28. Experimental support of (*SKIP) backtracking verb in the JIT compiler.
+28. (*SKIP) is now supported by the JIT compiler.
 
-29. Experimental support of (*THEN) backtracking verb in the JIT compiler.
+29. (*THEN) is now supported by the JIT compiler.
 
 30. Update RunTest with additional test selector options.
 
@@ -124,6 +124,8 @@ Version 8.33 xx-xxxx-201x
 32. A number of tests that were in test 2 because Perl did things differently 
     have been moved to test 1, because either Perl or PCRE has changed, and 
     these tests are now compatible.
+
+32. Control verbs are handled in the same way in JIT and interpreter.
 
 
 Version 8.32 30-November-2012
