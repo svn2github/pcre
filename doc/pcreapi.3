@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "27 February 2013" "PCRE 8.33"
+.TH PCREAPI 3 "26 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -810,12 +810,14 @@ were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
 in Perl.
 .sp
-  NO_START_OPTIMIZE
+  PCRE_NO_START_OPTIMIZE
 .sp
 This is an option that acts at matching time; that is, it is really an option
 for \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP. If it is set at compile time,
-it is remembered with the compiled pattern and assumed at matching time. For
-details see the discussion of PCRE_NO_START_OPTIMIZE
+it is remembered with the compiled pattern and assumed at matching time. This
+is necessary if you want to use JIT execution, because the JIT compiler needs
+to know whether or not this option is set. For details see the discussion of
+PCRE_NO_START_OPTIMIZE
 .\" HTML <a href="#execoptions">
 .\" </a>
 below.
@@ -1081,11 +1083,17 @@ In 32-bit mode, the bitmap is used for 32-bit values less than 256.)
 .P
 These two optimizations apply to both \fBpcre_exec()\fP and
 \fBpcre_dfa_exec()\fP, and the information is also used by the JIT compiler.
-The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option
-when calling \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP, but if this is done,
-JIT execution is also disabled. You might want to do this if your pattern
-contains callouts or (*MARK) and you want to make use of these facilities in
-cases where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option. 
+You might want to do this if your pattern contains callouts or (*MARK) and you
+want to make use of these facilities in cases where matching fails.
+.P
+PCRE_NO_START_OPTIMIZE can be specified at either compile time or execution
+time. However, if PCRE_NO_START_OPTIMIZE is passed to \fBpcre_exec()\fP, (that 
+is, after any JIT compilation has happened) JIT execution is disabled. For JIT 
+execution to work with PCRE_NO_START_OPTIMIZE, the option must be set at
+compile time.
+.P
+There is a longer discussion of PCRE_NO_START_OPTIMIZE
 .\" HTML <a href="#execoptions">
 .\" </a>
 below.
@@ -1829,18 +1837,19 @@ unanchored match must start with a specific character, it searches the subject
 for that character, and fails immediately if it cannot find it, without
 actually running the main matching function. This means that a special item
 such as (*COMMIT) at the start of a pattern is not considered until after a
-suitable starting point for the match has been found. When callouts or (*MARK)
-items are in use, these "start-up" optimizations can cause them to be skipped
-if the pattern is never actually used. The start-up optimizations are in effect
-a pre-scan of the subject that takes place before the pattern is run.
+suitable starting point for the match has been found. Also, when callouts or
+(*MARK) items are in use, these "start-up" optimizations can cause them to be
+skipped if the pattern is never actually used. The start-up optimizations are
+in effect a pre-scan of the subject that takes place before the pattern is run.
 .P
 The PCRE_NO_START_OPTIMIZE option disables the start-up optimizations, possibly
 causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
 are considered at every possible starting position in the subject string. If
 PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
-time. The use of PCRE_NO_START_OPTIMIZE disables JIT execution; when it is set,
-matching is always done using interpretively.
+time. The use of PCRE_NO_START_OPTIMIZE at matching time (that is, passing it
+to \fBpcre_exec()\fP) disables JIT execution; in this situation, matching is
+always done using interpretively.
 .P
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
 Consider the pattern
@@ -2825,6 +2834,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 February 2013
+Last updated: 26 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
