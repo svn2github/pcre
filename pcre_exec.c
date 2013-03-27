@@ -1608,11 +1608,18 @@ for (;;)
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM4);
+      
+      /* A match means that the assertion is true; break out of the loop
+      that matches its alternatives. */
+        
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
         {
         mstart = md->start_match_ptr;   /* In case \K reset it */
         break;
         }
+        
+      /* If not matched, restore the previous mark setting. */
+ 
       md->mark = save_mark;
 
       /* See comment in the code for capturing groups above about handling
@@ -1626,17 +1633,19 @@ for (;;)
           rrc = MATCH_NOMATCH;
         }
         
-      /* Anything other than NOMATCH causes the assertion to fail. This 
-      includes COMMIT, SKIP, and PRUNE. However, this consistent approach does 
-      not always have exactly the same effect as in Perl. */
+      /* Anything other than NOMATCH causes the entire assertion to fail,
+      passing back the return code. This includes COMMIT, SKIP, PRUNE and an
+      uncaptured THEN, which means they take their normal effect. This
+      consistent approach does not always have exactly the same effect as in
+      Perl. */
 
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode += GET(ecode, 1);
       }
-    while (*ecode == OP_ALT);
+    while (*ecode == OP_ALT);   /* Continue for next alternative */
     
     /* If we have tried all the alternative branches, the assertion has
-    failed. */ 
+    failed. If not, we broke out after a match. */ 
 
     if (*ecode == OP_KET) RRETURN(MATCH_NOMATCH);
 
@@ -1670,35 +1679,57 @@ for (;;)
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM5);
-      md->mark = save_mark;
+      md->mark = save_mark;   /* Always restore the mark setting */
       
-      /* A successful match means the assertion has failed. */
-       
-      if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT) RRETURN(MATCH_NOMATCH);
-
-      /* See comment in the code for capturing groups above about handling
-      THEN. */
-
-      if (rrc == MATCH_THEN)
+      switch(rrc)
         {
+        case MATCH_MATCH:            /* A successful match means */
+        case MATCH_ACCEPT:           /* the assertion has failed. */
+        RRETURN(MATCH_NOMATCH);
+        
+        case MATCH_NOMATCH:          /* Carry on with next branch */
+        break;  
+
+        /* See comment in the code for capturing groups above about handling
+        THEN. */
+
+        case MATCH_THEN:
         next = ecode + GET(ecode,1);
         if (md->start_match_ptr < next &&
             (*ecode == OP_ALT || *next == OP_ALT))
+          {   
           rrc = MATCH_NOMATCH;
+          break;
+          }
+        /* Otherwise fall through. */  
+  
+        /* COMMIT, SKIP, PRUNE, and an uncaptured THEN cause the whole
+        assertion to fail to match, without considering any more alternatives.
+        Failing to match means the assertion is true. This is a consistent
+        approach, but does not always have the same effect as in Perl. */
+
+        case MATCH_COMMIT:
+        case MATCH_SKIP:
+        case MATCH_SKIP_ARG: 
+        case MATCH_PRUNE:
+        do ecode += GET(ecode,1); while (*ecode == OP_ALT);
+        goto NEG_ASSERT_TRUE;   /* Break out of alternation loop */
+      
+        /* Anything else is an error */
+         
+        default:
+        RRETURN(rrc); 
         }
         
-      /* No match on a branch means we must carry on and try the next branch. 
-      Anything else, in particular, SKIP, PRUNE, etc. causes a failure in the 
-      enclosing branch. This is a consistent approach, but does not always have 
-      the same effect as in Perl. */ 
-
-      if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+      /* Continue with next branch */
+       
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
     
     /* All branches in the assertion failed to match. */
-
+    
+    NEG_ASSERT_TRUE:
     if (condassert) RRETURN(MATCH_MATCH);  /* Condition assertion */
     ecode += 1 + LINK_SIZE;                /* Continue with current branch */
     continue;

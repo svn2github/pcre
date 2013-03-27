@@ -5521,5 +5521,32 @@ AbcdCBefgBhiBqz
     ac
 
 /--------/
+
+/(?(?!b(*THEN)a)bn|bnn)/
+   bnn 
+
+/(?!b(*SKIP)a)bn|bnn/
+    bnn
+    
+/(?(?!b(*SKIP)a)bn|bnn)/
+   bnn 
+
+/(?!b(*PRUNE)a)bn|bnn/
+    bnn
+    
+/(?(?!b(*PRUNE)a)bn|bnn)/
+   bnn 
+   
+/(?!b(*COMMIT)a)bn|bnn/
+    bnn
+    
+/(?(?!b(*COMMIT)a)bn|bnn)/
+   bnn 
+
+/(?=b(*SKIP)a)bn|bnn/
+    bnn
+
+/(?=b(*THEN)a)bn|bnn/
+    bnn
     
 /-- End of testinput1 --/

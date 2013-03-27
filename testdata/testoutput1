@@ -9079,5 +9079,41 @@ No match
 No match
 
 /--------/
+
+/(?(?!b(*THEN)a)bn|bnn)/
+   bnn 
+ 0: bn
+
+/(?!b(*SKIP)a)bn|bnn/
+    bnn
+ 0: bn
+    
+/(?(?!b(*SKIP)a)bn|bnn)/
+   bnn 
+ 0: bn
+
+/(?!b(*PRUNE)a)bn|bnn/
+    bnn
+ 0: bn
+    
+/(?(?!b(*PRUNE)a)bn|bnn)/
+   bnn 
+ 0: bn
+   
+/(?!b(*COMMIT)a)bn|bnn/
+    bnn
+ 0: bn
+    
+/(?(?!b(*COMMIT)a)bn|bnn)/
+   bnn 
+ 0: bn
+
+/(?=b(*SKIP)a)bn|bnn/
+    bnn
+No match
+
+/(?=b(*THEN)a)bn|bnn/
+    bnn
+ 0: bnn
     
 /-- End of testinput1 --/

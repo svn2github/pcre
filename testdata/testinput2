@@ -3817,6 +3817,15 @@ backtracking verbs. --/
 
 /^(A(*THEN)B|A(*THEN)D)/
     AD           
+    
+/(?!b(*THEN)a)bn|bnn/
+    bnn
+
+/(?(?=b(*SKIP)a)bn|bnn)/
+    bnn
+
+/(?=b(*THEN)a|)bn|bnn/
+    bnn
 
 /-------------------------/ 
 

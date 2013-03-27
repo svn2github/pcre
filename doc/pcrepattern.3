@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "22 March 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "27 March 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2673,13 +2673,13 @@ remarks apply to the PCRE features described in this section.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
-(*VERB) or (*VERB:NAME). Some may take either form, with differing behaviour,
-depending on whether or not a name is present. A name is any sequence of
-characters that does not include a closing parenthesis. The maximum length of
-name is 255 in the 8-bit library and 65535 in the 16-bit and 32-bit libraries.
-If the name is empty, that is, if the closing parenthesis immediately follows
-the colon, the effect is as if the colon were not there. Any number of these
-verbs may occur in a pattern.
+(*VERB) or (*VERB:NAME). Some may take either form, possibly behaving 
+differently depending on whether or not a name is present. A name is any
+sequence of characters that does not include a closing parenthesis. The maximum
+length of name is 255 in the 8-bit library and 65535 in the 16-bit and 32-bit
+libraries. If the name is empty, that is, if the closing parenthesis
+immediately follows the colon, the effect is as if the colon were not there.
+Any number of these verbs may occur in a pattern.
 .P
 Since these verbs are specifically related to backtracking, most of them can be
 used only when the pattern is to be matched using one of the traditional
@@ -2807,9 +2807,9 @@ indicates which of the two alternatives matched. This is a more efficient way
 of obtaining this information than putting each alternative in its own
 capturing parentheses.
 .P
-If a verb with a name is encountered in a positive assertion, its name is
-recorded and passed back if it is the last-encountered. This does not happen
-for negative assertions.
+If a verb with a name is encountered in a positive assertion that is true, the
+name is recorded and passed back if it is the last-encountered. This does not
+happen for negative assertions or failing positive assertions.
 .P
 After a partial match or a failed match, the last encountered name in the
 entire match process is returned. For example:
@@ -2839,14 +2839,16 @@ The following verbs do nothing when they are encountered. Matching continues
 with what follows, but if there is no subsequent match, causing a backtrack to
 the verb, a failure is forced. That is, backtracking cannot pass to the left of
 the verb. However, when one of these verbs appears inside an atomic group or an 
-assertion, its effect is confined to that group, because once the group has
-been matched, there is never any backtracking into it. In this situation,
-backtracking can "jump back" to the left of the entire atomic group or 
-assertion. (Remember also, as stated above, that this localization also applies
-in subroutine calls.)
+assertion that is true, its effect is confined to that group, because once the
+group has been matched, there is never any backtracking into it. In this
+situation, backtracking can "jump back" to the left of the entire atomic group
+or assertion. (Remember also, as stated above, that this localization also
+applies in subroutine calls.)
 .P
 These verbs differ in exactly what kind of failure occurs when backtracking
-reaches them.
+reaches them. The behaviour described below is what happens when the verb is
+not in a subroutine or an assertion. Subsequent sections cover these special 
+cases.
 .sp
   (*COMMIT)
 .sp
@@ -2942,8 +2944,10 @@ pattern-based if-then-else block:
 .sp
 If the COND1 pattern matches, FOO is tried (and possibly further items after
 the end of the group if FOO succeeds); on failure, the matcher skips to the
-second alternative and tries COND2, without backtracking into COND1.
-If (*THEN) is not inside an alternation, it acts like (*PRUNE).
+second alternative and tries COND2, without backtracking into COND1. If that
+succeeds and BAR fails, COND3 is tried. If subsequently BAZ fails, there are no
+more alternatives, so there is a backtrack to whatever came before the entire
+group. If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 .P
 The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN). 
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
@@ -3039,10 +3043,18 @@ the second repeat of the group acts.
 further processing. In a negative assertion, (*ACCEPT) causes the assertion to 
 fail without any further processing.
 .P
-The other backtracking verbs are not treated specially if they appear in an
-assertion. In particular, (*THEN) skips to the next alternative in the
+The other backtracking verbs are not treated specially if they appear in a
+positive assertion. In particular, (*THEN) skips to the next alternative in the
 innermost enclosing group that has alternations, whether or not this is within
 the assertion.
+.P
+Negative assertions are, however, different, in order to ensure that changing a
+positive assertion into a negative assertion changes its result. Backtracking
+into (*COMMIT), (*SKIP), or (*PRUNE) causes a negative assertion to be true, 
+without considering any further alternative branches in the assertion. 
+Backtracking into (*THEN) causes it to skip to the next enclosing alternative
+within the assertion (the normal behaviour), but if the assertion does not have 
+such an alternative, (*THEN) behaves like (*PRUNE).
 .
 .
 .\" HTML <a name="btsub"></a>
@@ -3088,6 +3100,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 March 2013
+Last updated: 27 March 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

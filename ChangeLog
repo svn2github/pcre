@@ -110,7 +110,7 @@ Version 8.33 xx-xxxx-201x
 
 30. Update RunTest with additional test selector options.
 
-31. The way PCRE handles backtracking verbs has been changed in to ways.
+31. The way PCRE handles backtracking verbs has been changed in two ways.
 
     (1) Previously, in something like (*COMMIT)(*SKIP), COMMIT would override
     SKIP. Now, PCRE acts on whichever backtracking verb is reached first by
@@ -118,8 +118,8 @@ Version 8.33 xx-xxxx-201x
     rather obscure rules do not always do the same thing.
     
     (2) Previously, backtracking verbs were confined within assertions. This is 
-    no longer the case, except for (*ACCEPT). Again, this sometimes improves
-    Perl compatibility, and sometimes does not.
+    no longer the case for positive assertions, except for (*ACCEPT). Again,
+    this sometimes improves Perl compatibility, and sometimes does not.
     
 32. A number of tests that were in test 2 because Perl did things differently 
     have been moved to test 1, because either Perl or PCRE has changed, and 

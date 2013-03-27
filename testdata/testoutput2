@@ -12520,37 +12520,37 @@ backtracking verbs. --/
 
  /^(?!a(*SKIP)b)/
      ac
-No match
+ 0: 
 
  /^(?!a(*SKIP)b)../
      acd
-No match
+ 0: ac
 
 /(?!a(*SKIP)b)../
      acd
- 0: cd
+ 0: ac
 
 /^(?(?!a(*SKIP)b))/
      ac
-No match
+ 0: 
 
 /^(?!a(*PRUNE)b)../
      acd
-No match
+ 0: ac
 
 /(?!a(*PRUNE)b)../
      acd
- 0: cd
+ 0: ac
 
  /(?!a(*COMMIT)b)ac|cd/
      ac
-No match
+ 0: ac
 
  /(?!a(*COMMIT)b)ac|ad/
      ac
-No match
+ 0: ac
      ad 
-No match
+ 0: ad
 
 /^(?!a(*THEN)b|ac)../
      ac
@@ -12596,6 +12596,18 @@ No match
     AD           
  0: AD
  1: AD
+    
+/(?!b(*THEN)a)bn|bnn/
+    bnn
+ 0: bn
+
+/(?(?=b(*SKIP)a)bn|bnn)/
+    bnn
+No match
+
+/(?=b(*THEN)a|)bn|bnn/
+    bnn
+ 0: bn
 
 /-------------------------/ 
 
