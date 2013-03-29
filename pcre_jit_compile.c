@@ -356,10 +356,10 @@ typedef struct compiler_common {
   BOOL has_then;
   /* Needs to know the start position anytime. */
   BOOL needs_start_ptr;
-  /* Currently in recurse. */
+  /* Currently in recurse or negative assert. */
   BOOL local_exit;
-  /* Currently in assert. */
-  int then_local_exit;
+  /* Currently in a positive assert. */
+  BOOL positive_assert;
   /* Newline control. */
   int nltype;
   int newline;
@@ -384,7 +384,7 @@ typedef struct compiler_common {
   recurse_entry *currententry;
   jump_list *partialmatch;
   jump_list *quit;
-  jump_list *then_quit;
+  jump_list *positive_assert_quit;
   jump_list *forced_quit;
   jump_list *accept;
   jump_list *calllimit;
@@ -5503,10 +5503,13 @@ jump_list *tmp = NULL;
 jump_list **target = (conditional) ? &backtrack->condfailed : &backtrack->common.topbacktracks;
 jump_list **found;
 /* Saving previous accept variables. */
-int save_then_local_exit = common->then_local_exit;
+BOOL save_local_exit = common->local_exit;
+BOOL save_positive_assert = common->positive_assert;
 then_trap_backtrack *save_then_trap = common->then_trap;
+struct sljit_label *save_quit_label = common->quit_label;
 struct sljit_label *save_accept_label = common->accept_label;
-jump_list *save_then_quit = common->then_quit;
+jump_list *save_quit = common->quit;
+jump_list *save_positive_assert_quit = common->positive_assert_quit;
 jump_list *save_accept = common->accept;
 struct sljit_jump *jump;
 struct sljit_jump *brajump = NULL;
@@ -5576,8 +5579,18 @@ else
   }
 
 memset(&altbacktrack, 0, sizeof(backtrack_common));
-common->then_local_exit = (opcode == OP_ASSERT || opcode == OP_ASSERTBACK) ? 1 : -1;
-common->then_quit = NULL;
+if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+  {
+  /* Negative assert is stronger than positive assert. */
+  common->local_exit = TRUE;
+  common->quit_label = NULL;
+  common->quit = NULL;
+  common->positive_assert = FALSE;
+  }
+else
+  common->positive_assert = TRUE;
+common->positive_assert_quit = NULL;
+
 while (1)
   {
   common->accept_label = NULL;
@@ -5592,10 +5605,16 @@ while (1)
   compile_matchingpath(common, ccbegin + 1 + LINK_SIZE, cc, &altbacktrack);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    common->then_local_exit = save_then_local_exit;
+    if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+      {
+      common->local_exit = save_local_exit;
+      common->quit_label = save_quit_label;
+      common->quit = save_quit;
+      }
+    common->positive_assert = save_positive_assert;
     common->then_trap = save_then_trap;
     common->accept_label = save_accept_label;
-    common->then_quit = save_then_quit;
+    common->positive_assert_quit = save_positive_assert_quit;
     common->accept = save_accept;
     return NULL;
     }
@@ -5660,10 +5679,16 @@ while (1)
   compile_backtrackingpath(common, altbacktrack.top);
   if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
     {
-    common->then_local_exit = save_then_local_exit;
+    if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+      {
+      common->local_exit = save_local_exit;
+      common->quit_label = save_quit_label;
+      common->quit = save_quit;
+      }
+    common->positive_assert = save_positive_assert;
     common->then_trap = save_then_trap;
     common->accept_label = save_accept_label;
-    common->then_quit = save_then_quit;
+    common->positive_assert_quit = save_positive_assert_quit;
     common->accept = save_accept;
     return NULL;
     }
@@ -5676,11 +5701,18 @@ while (1)
   cc += GET(cc, 1);
   }
 
+if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+  {
+  SLJIT_ASSERT(common->positive_assert_quit == NULL);
+  /* Makes the check less complicated below. */
+  common->positive_assert_quit = common->quit;
+  }
+
 /* None of them matched. */
-if (common->then_quit != NULL)
+if (common->positive_assert_quit != NULL)
   {
   jump = JUMP(SLJIT_JUMP);
-  set_jumps(common->then_quit, LABEL());
+  set_jumps(common->positive_assert_quit, LABEL());
   SLJIT_ASSERT(framesize != no_stack);
   if (framesize < 0)
     OP2(SLJIT_ADD, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, SLJIT_IMM, extrasize * sizeof(sljit_sw));
@@ -5840,10 +5872,16 @@ else
     }
   }
 
-common->then_local_exit = save_then_local_exit;
+if (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT)
+  {
+  common->local_exit = save_local_exit;
+  common->quit_label = save_quit_label;
+  common->quit = save_quit;
+  }
+common->positive_assert = save_positive_assert;
 common->then_trap = save_then_trap;
 common->accept_label = save_accept_label;
-common->then_quit = save_then_quit;
+common->positive_assert_quit = save_positive_assert_quit;
 common->accept = save_accept;
 return cc + 1 + LINK_SIZE;
 }
@@ -8343,14 +8381,9 @@ if (opcode == OP_THEN || opcode == OP_THEN_ARG)
     add_jump(compiler, &common->then_trap->quit, JUMP(SLJIT_JUMP));
     return;
     }
-  else if (common->then_local_exit != 0)
+  else if (common->positive_assert)
     {
-    if (common->then_local_exit > 0)
-      add_jump(compiler, &common->then_quit, JUMP(SLJIT_JUMP));
-    else if (common->accept_label == NULL)
-      add_jump(compiler, &common->accept, JUMP(SLJIT_JUMP));
-    else
-      JUMPTO(SLJIT_JUMP, common->accept_label);
+    add_jump(compiler, &common->positive_assert_quit, JUMP(SLJIT_JUMP));
     return;
     }
   }
