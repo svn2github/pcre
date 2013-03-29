@@ -12518,34 +12518,6 @@ Partial match: 123a
 /-- Here are some that Perl treats differently because of the way it handles
 backtracking verbs. --/
 
- /^(?!a(*SKIP)b)/
-     ac
- 0: 
-
- /^(?!a(*SKIP)b)../
-     acd
- 0: ac
-
-/(?!a(*SKIP)b)../
-     acd
- 0: ac
-
-/^(?(?!a(*SKIP)b))/
-     ac
- 0: 
-
-/^(?!a(*PRUNE)b)../
-     acd
- 0: ac
-
-/(?!a(*PRUNE)b)../
-     acd
- 0: ac
-
- /(?!a(*COMMIT)b)ac|cd/
-     ac
- 0: ac
-
  /(?!a(*COMMIT)b)ac|ad/
      ac
  0: ac
@@ -12566,10 +12538,6 @@ No match
     ba
  0: ba
 
-/\A.*?(?:a|bc)/
-    ba
- 0: ba
-
 /\A.*?(?:a|b(*THEN)c)++/
     ba
  0: ba
@@ -12586,11 +12554,6 @@ No match
     ba
  0: ba
  1: a
-
-/^(A(*THEN)B|C(*THEN)D)/
-    CD           
- 0: CD
- 1: CD
 
 /^(A(*THEN)B|A(*THEN)D)/
     AD           

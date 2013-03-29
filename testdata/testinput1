@@ -5549,4 +5549,31 @@ AbcdCBefgBhiBqz
 /(?=b(*THEN)a)bn|bnn/
     bnn
     
+ /^(?!a(*SKIP)b)/
+     ac
+
+ /^(?!a(*SKIP)b)../
+     acd
+
+/(?!a(*SKIP)b)../
+     acd
+
+/^(?(?!a(*SKIP)b))/
+     ac
+
+/^(?!a(*PRUNE)b)../
+     acd
+
+/(?!a(*PRUNE)b)../
+     acd
+
+ /(?!a(*COMMIT)b)ac|cd/
+     ac
+
+/\A.*?(?:a|bc)/
+    ba
+
+/^(A(*THEN)B|C(*THEN)D)/
+    CD           
+
 /-- End of testinput1 --/

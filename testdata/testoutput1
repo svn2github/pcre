@@ -9116,4 +9116,41 @@ No match
     bnn
  0: bnn
     
+ /^(?!a(*SKIP)b)/
+     ac
+ 0: 
+
+ /^(?!a(*SKIP)b)../
+     acd
+ 0: ac
+
+/(?!a(*SKIP)b)../
+     acd
+ 0: ac
+
+/^(?(?!a(*SKIP)b))/
+     ac
+ 0: 
+
+/^(?!a(*PRUNE)b)../
+     acd
+ 0: ac
+
+/(?!a(*PRUNE)b)../
+     acd
+ 0: ac
+
+ /(?!a(*COMMIT)b)ac|cd/
+     ac
+ 0: ac
+
+/\A.*?(?:a|bc)/
+    ba
+ 0: ba
+
+/^(A(*THEN)B|C(*THEN)D)/
+    CD           
+ 0: CD
+ 1: CD
+
 /-- End of testinput1 --/

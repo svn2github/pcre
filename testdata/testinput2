@@ -3762,27 +3762,6 @@ settings of the anchored and startline bits. --/
 /-- Here are some that Perl treats differently because of the way it handles
 backtracking verbs. --/
 
- /^(?!a(*SKIP)b)/
-     ac
-
- /^(?!a(*SKIP)b)../
-     acd
-
-/(?!a(*SKIP)b)../
-     acd
-
-/^(?(?!a(*SKIP)b))/
-     ac
-
-/^(?!a(*PRUNE)b)../
-     acd
-
-/(?!a(*PRUNE)b)../
-     acd
-
- /(?!a(*COMMIT)b)ac|cd/
-     ac
-
  /(?!a(*COMMIT)b)ac|ad/
      ac
      ad 
@@ -3797,9 +3776,6 @@ backtracking verbs. --/
 /\A.*?(?:a|b(*THEN)c)/
     ba
 
-/\A.*?(?:a|bc)/
-    ba
-
 /\A.*?(?:a|b(*THEN)c)++/
     ba
 
@@ -3811,9 +3787,6 @@ backtracking verbs. --/
 
 /\A.*?(a|b(*THEN)c)/
     ba
-
-/^(A(*THEN)B|C(*THEN)D)/
-    CD           
 
 /^(A(*THEN)B|A(*THEN)D)/
     AD           
