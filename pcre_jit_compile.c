@@ -6139,8 +6139,8 @@ BOOL has_alternatives;
 BOOL needs_control_head = FALSE;
 struct sljit_jump *jump;
 struct sljit_jump *skip;
-struct sljit_label *rmaxlabel = NULL;
-struct sljit_jump *braminzerojump = NULL;
+struct sljit_label *rmax_label = NULL;
+struct sljit_jump *braminzero = NULL;
 
 PUSH_BACKTRACK(sizeof(bracket_backtrack), cc, NULL);
 
@@ -6255,7 +6255,7 @@ if (bra == OP_BRAMINZERO)
   if (ket != OP_KETRMIN)
     {
     free_stack(common, 1);
-    braminzerojump = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
+    braminzero = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
     }
   else
     {
@@ -6270,13 +6270,13 @@ if (bra == OP_BRAMINZERO)
       if (opcode != OP_ONCE || BACKTRACK_AS(bracket_backtrack)->u.framesize < 0)
         {
         /* When we come from outside, private_data_ptr contains the previous STR_PTR. */
-        braminzerojump = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
+        braminzero = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
         }
       else
         {
         /* Except when the whole stack frame must be saved. */
         OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
-        braminzerojump = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), (BACKTRACK_AS(bracket_backtrack)->u.framesize + 1) * sizeof(sljit_sw));
+        braminzero = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), (BACKTRACK_AS(bracket_backtrack)->u.framesize + 1) * sizeof(sljit_sw));
         }
       JUMPHERE(skip);
       }
@@ -6293,7 +6293,7 @@ if (repeat_type != 0)
   {
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, repeat_count);
   if (repeat_type == OP_EXACT)
-    rmaxlabel = LABEL();
+    rmax_label = LABEL();
   }
 
 if (ket == OP_KETRMIN)
@@ -6301,9 +6301,9 @@ if (ket == OP_KETRMIN)
 
 if (ket == OP_KETRMAX)
   {
-  rmaxlabel = LABEL();
+  rmax_label = LABEL();
   if (has_alternatives && opcode != OP_ONCE && opcode < OP_SBRA && repeat_type == 0)
-    BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = rmaxlabel;
+    BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = rmax_label;
   }
 
 /* Handling capturing brackets and alternatives. */
@@ -6584,7 +6584,7 @@ if (ket == OP_KETRMAX)
     if (has_alternatives)
       BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
     OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
-    JUMPTO(SLJIT_C_NOT_ZERO, rmaxlabel);
+    JUMPTO(SLJIT_C_NOT_ZERO, rmax_label);
     /* Drop STR_PTR for greedy plus quantifier. */
     if (opcode != OP_ONCE)
       free_stack(common, 1);
@@ -6596,24 +6596,24 @@ if (ket == OP_KETRMAX)
     /* Checking zero-length iteration. */
     if (opcode != OP_ONCE)
       {
-      CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STR_PTR, 0, rmaxlabel);
+      CMPTO(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr, STR_PTR, 0, rmax_label);
       /* Drop STR_PTR for greedy plus quantifier. */
       if (bra != OP_BRAZERO)
         free_stack(common, 1);
       }
     else
       /* TMP2 must contain the starting STR_PTR. */
-      CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_PTR, 0, rmaxlabel);
+      CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_PTR, 0, rmax_label);
     }
   else
-    JUMPTO(SLJIT_JUMP, rmaxlabel);
+    JUMPTO(SLJIT_JUMP, rmax_label);
   BACKTRACK_AS(bracket_backtrack)->recursive_matchingpath = LABEL();
   }
 
 if (repeat_type == OP_EXACT)
   {
   OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
-  JUMPTO(SLJIT_C_NOT_ZERO, rmaxlabel);
+  JUMPTO(SLJIT_C_NOT_ZERO, rmax_label);
   }
 else if (repeat_type == OP_UPTO)
   {
@@ -6630,9 +6630,9 @@ if (bra == OP_BRAMINZERO)
   {
   /* This is a backtrack path! (From the viewpoint of OP_BRAMINZERO) */
   JUMPTO(SLJIT_JUMP, ((braminzero_backtrack *)parent)->matchingpath);
-  if (braminzerojump != NULL)
+  if (braminzero != NULL)
     {
-    JUMPHERE(braminzerojump);
+    JUMPHERE(braminzero);
     /* We need to release the end pointer to perform the
     backtrack for the zero-length iteration. When
     framesize is < 0, OP_ONCE will do the release itself. */
@@ -7962,7 +7962,7 @@ BOOL needs_control_head = FALSE;
 struct sljit_jump *brazero = NULL;
 struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
-struct sljit_label *rminlabel = NULL;
+struct sljit_label *rmin_label = NULL;
 struct sljit_label *exact_label = NULL;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
@@ -8054,7 +8054,7 @@ else if (ket == OP_KETRMIN)
     else
       JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
     }
-  rminlabel = LABEL();
+  rmin_label = LABEL();
   if (repeat_type != 0)
     OP2(SLJIT_ADD, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
   }
@@ -8385,7 +8385,7 @@ else if (ket == OP_KETRMIN)
   affect badly the free_stack(2) above. */
   if (opcode != OP_ONCE)
     free_stack(common, 1);
-  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, rminlabel);
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, rmin_label);
   if (opcode == OP_ONCE)
     free_stack(common, bra == OP_BRAMINZERO ? 2 : 1);
   else if (bra == OP_BRAMINZERO)
