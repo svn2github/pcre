@@ -9153,4 +9153,23 @@ No match
  0: CD
  1: CD
 
+/(*:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+ 0: b
+MK: m(m
+
+/(*PRUNE:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+ 0: b
+MK: m(m
+
+/(*SKIP:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+ 0: b
+
+/(*THEN:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+ 0: b
+MK: m(m
+
 /-- End of testinput1 --/

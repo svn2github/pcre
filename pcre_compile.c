@@ -1409,7 +1409,11 @@ if (ptr[0] == CHAR_LEFT_PARENTHESIS)
   {
   /* Handle specials such as (*SKIP) or (*UTF8) etc. */
 
-  if (ptr[1] == CHAR_ASTERISK) ptr += 2;
+  if (ptr[1] == CHAR_ASTERISK) 
+    {
+    ptr += 2;
+    while (ptr < cd->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+    } 
 
   /* Handle a normal, unnamed capturing parenthesis. */
 
@@ -2130,9 +2134,6 @@ for (;;)
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
-      code += code[1];
-      break;
-
       case OP_THEN_ARG:
       code += code[1];
       break;
@@ -2250,9 +2251,6 @@ for (;;)
       case OP_MARK:
       case OP_PRUNE_ARG:
       case OP_SKIP_ARG:
-      code += code[1];
-      break;
-
       case OP_THEN_ARG:
       code += code[1];
       break;
@@ -2617,9 +2615,6 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_MARK:
     case OP_PRUNE_ARG:
     case OP_SKIP_ARG:
-    code += code[1];
-    break;
-
     case OP_THEN_ARG:
     code += code[1];
     break;

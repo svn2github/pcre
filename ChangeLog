@@ -127,6 +127,9 @@ Version 8.33 xx-xxxx-201x
 
 32. Control verbs are handled in the same way in JIT and interpreter.
 
+33. An opening parenthesis in a MARK/PRUNE/SKIP/THEN name in a pattern that
+    contained a forward subroutine reference caused a compile error.
+
 
 Version 8.32 30-November-2012
 -----------------------------

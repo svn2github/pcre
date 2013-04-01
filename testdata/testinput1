@@ -5576,4 +5576,16 @@ AbcdCBefgBhiBqz
 /^(A(*THEN)B|C(*THEN)D)/
     CD           
 
+/(*:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/(*PRUNE:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/(*SKIP:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/(*THEN:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
 /-- End of testinput1 --/
