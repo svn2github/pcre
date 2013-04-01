@@ -130,6 +130,8 @@ Version 8.33 xx-xxxx-201x
 33. An opening parenthesis in a MARK/PRUNE/SKIP/THEN name in a pattern that
     contained a forward subroutine reference caused a compile error.
 
+34. Auto-detect and optimize limited repetitions in JIT.
+
 
 Version 8.32 30-November-2012
 -----------------------------

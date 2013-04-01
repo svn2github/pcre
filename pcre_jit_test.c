@@ -308,6 +308,17 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "[^\xe1\xbd\xb8][^\xc3\xa9]", "\xe1\xbd\xb8\xe1\xbf\xb8\xc3\xa9\xc3\x89#" },
 	{ MUA, 0, "[^\xe1\xbd\xb8]{3,}?", "##\xe1\xbd\xb8#\xe1\xbd\xb8#\xc3\x89#\xe1\xbd\xb8" },
 
+	/* Bracket repeats with limit. */
+	{ MUA, 0, "(?:(ab){2}){5}M", "abababababababababababM" },
+	{ MUA, 0, "(?:ab|abab){1,5}M", "abababababababababababM" },
+	{ MUA, 0, "(?>ab|abab){1,5}M", "abababababababababababM" },
+	{ MUA, 0, "(?:ab|abab){1,5}?M", "abababababababababababM" },
+	{ MUA, 0, "(?>ab|abab){1,5}?M", "abababababababababababM" },
+	{ MUA, 0, "(?:(ab){1,4}?){1,3}?M", "abababababababababababababM" },
+	{ MUA, 0, "(?:(ab){1,4}){1,3}abababababababababababM", "ababababababababababababM" },
+	{ MUA, 0 | F_NOMATCH, "(?:(ab){1,4}){1,3}abababababababababababM", "abababababababababababM" },
+	{ MUA, 0, "(ab){4,6}?M", "abababababababM" },
+
 	/* Basic character sets. */
 	{ MUA, 0, "(?:\\s)+(?:\\S)+", "ab \t\xc3\xa9\xe6\x92\xad " },
 	{ MUA, 0, "(\\w)*(k)(\\W)?\?", "abcdef abck11" },

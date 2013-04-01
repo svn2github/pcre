@@ -313,7 +313,7 @@ typedef struct compiler_common {
   /* First byte code. */
   pcre_uchar *start;
   /* Maps private data offset to each opcode. */
-  int *private_data_ptrs;
+  sljit_si *private_data_ptrs;
   /* Tells whether the capturing bracket is optimized. */
   pcre_uint8 *optimized_cbracket;
   /* Tells whether the starting offset is a target of then. */
@@ -534,7 +534,7 @@ return cc;
 
 /* Functions whose might need modification for all new supported opcodes:
  next_opcode
- get_private_data_length
+ check_opcode_types
  set_private_data_ptrs
  get_framesize
  init_frame
@@ -733,98 +733,15 @@ switch(*cc)
   }
 }
 
-#define CASE_ITERATOR_PRIVATE_DATA_1 \
-    case OP_MINSTAR: \
-    case OP_MINPLUS: \
-    case OP_QUERY: \
-    case OP_MINQUERY: \
-    case OP_MINSTARI: \
-    case OP_MINPLUSI: \
-    case OP_QUERYI: \
-    case OP_MINQUERYI: \
-    case OP_NOTMINSTAR: \
-    case OP_NOTMINPLUS: \
-    case OP_NOTQUERY: \
-    case OP_NOTMINQUERY: \
-    case OP_NOTMINSTARI: \
-    case OP_NOTMINPLUSI: \
-    case OP_NOTQUERYI: \
-    case OP_NOTMINQUERYI:
-
-#define CASE_ITERATOR_PRIVATE_DATA_2A \
-    case OP_STAR: \
-    case OP_PLUS: \
-    case OP_STARI: \
-    case OP_PLUSI: \
-    case OP_NOTSTAR: \
-    case OP_NOTPLUS: \
-    case OP_NOTSTARI: \
-    case OP_NOTPLUSI:
-
-#define CASE_ITERATOR_PRIVATE_DATA_2B \
-    case OP_UPTO: \
-    case OP_MINUPTO: \
-    case OP_UPTOI: \
-    case OP_MINUPTOI: \
-    case OP_NOTUPTO: \
-    case OP_NOTMINUPTO: \
-    case OP_NOTUPTOI: \
-    case OP_NOTMINUPTOI:
-
-#define CASE_ITERATOR_TYPE_PRIVATE_DATA_1 \
-    case OP_TYPEMINSTAR: \
-    case OP_TYPEMINPLUS: \
-    case OP_TYPEQUERY: \
-    case OP_TYPEMINQUERY:
-
-#define CASE_ITERATOR_TYPE_PRIVATE_DATA_2A \
-    case OP_TYPESTAR: \
-    case OP_TYPEPLUS:
-
-#define CASE_ITERATOR_TYPE_PRIVATE_DATA_2B \
-    case OP_TYPEUPTO: \
-    case OP_TYPEMINUPTO:
-
-static int get_class_iterator_size(pcre_uchar *cc)
+static BOOL check_opcode_types(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend)
 {
-switch(*cc)
-  {
-  case OP_CRSTAR:
-  case OP_CRPLUS:
-  return 2;
-
-  case OP_CRMINSTAR:
-  case OP_CRMINPLUS:
-  case OP_CRQUERY:
-  case OP_CRMINQUERY:
-  return 1;
-
-  case OP_CRRANGE:
-  case OP_CRMINRANGE:
-  if (GET2(cc, 1) == GET2(cc, 1 + IMM2_SIZE))
-    return 0;
-  return 2;
-
-  default:
-  return 0;
-  }
-}
-
-static int get_private_data_length(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend)
-{
-int private_data_length = 0;
-pcre_uchar *alternative;
 pcre_uchar *name;
-pcre_uchar *end = NULL;
-int space, size, i;
-pcre_uint32 bracketlen;
+pcre_uchar *name2;
+int i, cbra_index;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
   {
-  space = 0;
-  size = 0;
-  bracketlen = 0;
   switch(*cc)
     {
     case OP_SET_SOM:
@@ -838,24 +755,10 @@ while (cc < ccend)
     cc += 1 + IMM2_SIZE;
     break;
 
-    case OP_ASSERT:
-    case OP_ASSERT_NOT:
-    case OP_ASSERTBACK:
-    case OP_ASSERTBACK_NOT:
-    case OP_ONCE:
-    case OP_ONCE_NC:
-    case OP_BRAPOS:
-    case OP_SBRA:
-    case OP_SBRAPOS:
-    private_data_length += sizeof(sljit_sw);
-    bracketlen = 1 + LINK_SIZE;
-    break;
-
     case OP_CBRAPOS:
     case OP_SCBRAPOS:
-    private_data_length += sizeof(sljit_sw);
     common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] = 0;
-    bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
+    cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
     case OP_COND:
@@ -863,18 +766,8 @@ while (cc < ccend)
     /* Only AUTO_CALLOUT can insert this opcode. We do
        not intend to support this case. */
     if (cc[1 + LINK_SIZE] == OP_CALLOUT)
-      return -1;
-
-    if (*cc == OP_COND)
-      {
-      /* Might be a hidden SCOND. */
-      alternative = cc + GET(cc, 1);
-      if (*alternative == OP_KETRMAX || *alternative == OP_KETRMIN)
-        private_data_length += sizeof(sljit_sw);
-      }
-    else
-      private_data_length += sizeof(sljit_sw);
-    bracketlen = 1 + LINK_SIZE;
+      return FALSE;
+    cc += 1 + LINK_SIZE;
     break;
 
     case OP_CREF:
@@ -884,79 +777,24 @@ while (cc < ccend)
     break;
 
     case OP_NCREF:
-    bracketlen = GET2(cc, 1);
+    cbra_index = GET2(cc, 1);
     name = (pcre_uchar *)common->name_table;
-    alternative = name;
+    name2 = name;
     for (i = 0; i < common->name_count; i++)
       {
-      if (GET2(name, 0) == bracketlen) break;
+      if (GET2(name, 0) == cbra_index) break;
       name += common->name_entry_size;
       }
     SLJIT_ASSERT(i != common->name_count);
 
     for (i = 0; i < common->name_count; i++)
       {
-      if (STRCMP_UC_UC(alternative + IMM2_SIZE, name + IMM2_SIZE) == 0)
-        common->optimized_cbracket[GET2(alternative, 0)] = 0;
-      alternative += common->name_entry_size;
+      if (STRCMP_UC_UC(name2 + IMM2_SIZE, name + IMM2_SIZE) == 0)
+        common->optimized_cbracket[GET2(name2, 0)] = 0;
+      name2 += common->name_entry_size;
       }
-    bracketlen = 0;
     cc += 1 + IMM2_SIZE;
     break;
-
-    case OP_BRA:
-    bracketlen = 1 + LINK_SIZE;
-    break;
-
-    case OP_CBRA:
-    case OP_SCBRA:
-    bracketlen = 1 + LINK_SIZE + IMM2_SIZE;
-    break;
-
-    CASE_ITERATOR_PRIVATE_DATA_1
-    space = 1;
-    size = -2;
-    break;
-
-    CASE_ITERATOR_PRIVATE_DATA_2A
-    space = 2;
-    size = -2;
-    break;
-
-    CASE_ITERATOR_PRIVATE_DATA_2B
-    space = 2;
-    size = -(2 + IMM2_SIZE);
-    break;
-
-    CASE_ITERATOR_TYPE_PRIVATE_DATA_1
-    space = 1;
-    size = 1;
-    break;
-
-    CASE_ITERATOR_TYPE_PRIVATE_DATA_2A
-    if (cc[1] != OP_ANYNL && cc[1] != OP_EXTUNI)
-      space = 2;
-    size = 1;
-    break;
-
-    CASE_ITERATOR_TYPE_PRIVATE_DATA_2B
-    if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
-      space = 2;
-    size = 1 + IMM2_SIZE;
-    break;
-
-    case OP_CLASS:
-    case OP_NCLASS:
-    size += 1 + 32 / sizeof(pcre_uchar);
-    space = get_class_iterator_size(cc + size);
-    break;
-
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-    case OP_XCLASS:
-    size = GET(cc, 1);
-    space = get_class_iterator_size(cc + size);
-    break;
-#endif
 
     case OP_RECURSE:
     /* Set its value only once. */
@@ -1015,45 +853,181 @@ while (cc < ccend)
     default:
     cc = next_opcode(common, cc);
     if (cc == NULL)
-      return -1;
+      return FALSE;
     break;
     }
-
-  if (space > 0 && cc >= end)
-    private_data_length += sizeof(sljit_sw) * space;
-
-  if (size != 0)
-    {
-    if (size < 0)
-      {
-      cc += -size;
-#ifdef SUPPORT_UTF
-      if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
-#endif
-      }
-    else
-      cc += size;
-    }
-
-  if (bracketlen != 0)
-    {
-    if (cc >= end)
-      {
-      end = bracketend(cc);
-      if (end[-1 - LINK_SIZE] == OP_KET)
-        end = NULL;
-      }
-    cc += bracketlen;
-    }
   }
-return private_data_length;
+return TRUE;
 }
 
-static void set_private_data_ptrs(compiler_common *common, int private_data_ptr, pcre_uchar *ccend)
+static int get_class_iterator_size(pcre_uchar *cc)
+{
+switch(*cc)
+  {
+  case OP_CRSTAR:
+  case OP_CRPLUS:
+  return 2;
+
+  case OP_CRMINSTAR:
+  case OP_CRMINPLUS:
+  case OP_CRQUERY:
+  case OP_CRMINQUERY:
+  return 1;
+
+  case OP_CRRANGE:
+  case OP_CRMINRANGE:
+  if (GET2(cc, 1) == GET2(cc, 1 + IMM2_SIZE))
+    return 0;
+  return 2;
+
+  default:
+  return 0;
+  }
+}
+
+static BOOL detect_repeat(compiler_common *common, pcre_uchar *begin)
+{
+pcre_uchar *end = bracketend(begin);
+pcre_uchar *next;
+pcre_uchar *next_end;
+pcre_uchar *max_end;
+pcre_uchar type;
+sljit_uw length = end - begin;
+int min, max, i;
+
+/* Detect fixed iterations first. */
+if (end[-(1 + LINK_SIZE)] != OP_KET)
+  return FALSE;
+
+/* Already detected repeat. */
+if (common->private_data_ptrs[end - common->start - LINK_SIZE] != 0)
+  return TRUE;
+
+next = end;
+min = 1;
+while (1)
+  {
+  if (*next != *begin)
+    break;
+  next_end = bracketend(next);
+  if (next_end - next != length || memcmp(begin, next, IN_UCHARS(length)) != 0)
+    break;
+  next = next_end;
+  min++;
+  }
+
+if (min == 2)
+  return FALSE;
+
+max = 0;
+max_end = next;
+if (*next == OP_BRAZERO || *next == OP_BRAMINZERO)
+  {
+  type = *next;
+  while (1)
+    {
+    if (next[0] != type || next[1] != OP_BRA || next[2 + LINK_SIZE] != *begin)
+      break;
+    next_end = bracketend(next + 2 + LINK_SIZE);
+    if (next_end - next != (length + 2 + LINK_SIZE) || memcmp(begin, next + 2 + LINK_SIZE, IN_UCHARS(length)) != 0)
+      break;
+    next = next_end;
+    max++;
+    }
+
+  if (next[0] == type && next[1] == *begin && max >= 1)
+    {
+    next_end = bracketend(next + 1);
+    if (next_end - next == (length + 1) && memcmp(begin, next + 1, IN_UCHARS(length)) == 0)
+      {
+      for (i = 0; i < max; i++, next_end += 1 + LINK_SIZE)
+        if (*next_end != OP_KET)
+          break;
+
+      if (i == max)
+        {
+        common->private_data_ptrs[max_end - common->start - LINK_SIZE] = next_end - max_end;
+        common->private_data_ptrs[max_end - common->start - LINK_SIZE + 1] = (type == OP_BRAZERO) ? OP_UPTO : OP_MINUPTO;
+        /* +2 the original and the last. */
+        common->private_data_ptrs[max_end - common->start - LINK_SIZE + 2] = max + 2;
+        if (min == 1)
+          return TRUE;
+        min--;
+        max_end -= (1 + LINK_SIZE) + GET(max_end, -LINK_SIZE);
+        }
+      }
+    }
+  }
+
+if (min >= 3)
+  {
+  common->private_data_ptrs[end - common->start - LINK_SIZE] = max_end - end;
+  common->private_data_ptrs[end - common->start - LINK_SIZE + 1] = OP_EXACT;
+  common->private_data_ptrs[end - common->start - LINK_SIZE + 2] = min;
+  return TRUE;
+  }
+
+return FALSE;
+}
+
+#define CASE_ITERATOR_PRIVATE_DATA_1 \
+    case OP_MINSTAR: \
+    case OP_MINPLUS: \
+    case OP_QUERY: \
+    case OP_MINQUERY: \
+    case OP_MINSTARI: \
+    case OP_MINPLUSI: \
+    case OP_QUERYI: \
+    case OP_MINQUERYI: \
+    case OP_NOTMINSTAR: \
+    case OP_NOTMINPLUS: \
+    case OP_NOTQUERY: \
+    case OP_NOTMINQUERY: \
+    case OP_NOTMINSTARI: \
+    case OP_NOTMINPLUSI: \
+    case OP_NOTQUERYI: \
+    case OP_NOTMINQUERYI:
+
+#define CASE_ITERATOR_PRIVATE_DATA_2A \
+    case OP_STAR: \
+    case OP_PLUS: \
+    case OP_STARI: \
+    case OP_PLUSI: \
+    case OP_NOTSTAR: \
+    case OP_NOTPLUS: \
+    case OP_NOTSTARI: \
+    case OP_NOTPLUSI:
+
+#define CASE_ITERATOR_PRIVATE_DATA_2B \
+    case OP_UPTO: \
+    case OP_MINUPTO: \
+    case OP_UPTOI: \
+    case OP_MINUPTOI: \
+    case OP_NOTUPTO: \
+    case OP_NOTMINUPTO: \
+    case OP_NOTUPTOI: \
+    case OP_NOTMINUPTOI:
+
+#define CASE_ITERATOR_TYPE_PRIVATE_DATA_1 \
+    case OP_TYPEMINSTAR: \
+    case OP_TYPEMINPLUS: \
+    case OP_TYPEQUERY: \
+    case OP_TYPEMINQUERY:
+
+#define CASE_ITERATOR_TYPE_PRIVATE_DATA_2A \
+    case OP_TYPESTAR: \
+    case OP_TYPEPLUS:
+
+#define CASE_ITERATOR_TYPE_PRIVATE_DATA_2B \
+    case OP_TYPEUPTO: \
+    case OP_TYPEMINUPTO:
+
+static void set_private_data_ptrs(compiler_common *common, int *private_data_start, pcre_uchar *ccend)
 {
 pcre_uchar *cc = common->start;
 pcre_uchar *alternative;
 pcre_uchar *end = NULL;
+int private_data_ptr = *private_data_start;
 int space, size, bracketlen;
 
 while (cc < ccend)
@@ -1061,8 +1035,30 @@ while (cc < ccend)
   space = 0;
   size = 0;
   bracketlen = 0;
+  if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
+    return;
+
+  if (*cc == OP_BRA || *cc == OP_CBRA || *cc == OP_ONCE || *cc == OP_ONCE_NC)
+    if (detect_repeat(common, cc))
+      {
+      /* These brackets are converted to repeats, so no global
+      based single character repeat is allowed. */
+      if (cc >= end)
+        end = bracketend(cc);
+      }
+
   switch(*cc)
     {
+    case OP_KET:
+    if (common->private_data_ptrs[cc + 1 - common->start] != 0)
+      {
+      common->private_data_ptrs[cc - common->start] = private_data_ptr;
+      private_data_ptr += sizeof(sljit_sw);
+      cc += common->private_data_ptrs[cc + 1 - common->start];
+      }
+    cc += 1 + LINK_SIZE;
+    break;
+
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
@@ -1156,6 +1152,8 @@ while (cc < ccend)
     break;
     }
 
+  /* Character iterators, which are not inside a repeated bracket,
+     gets a private slot instead of allocating it on the stack. */
   if (space > 0 && cc >= end)
     {
     common->private_data_ptrs[cc - common->start] = private_data_ptr;
@@ -1186,6 +1184,7 @@ while (cc < ccend)
     cc += bracketlen;
     }
   }
+*private_data_start = private_data_ptr;
 }
 
 /* Returns with a frame_types (always < 0) if no need for frame. */
@@ -6129,6 +6128,8 @@ pcre_uchar opcode;
 int private_data_ptr = 0;
 int offset = 0;
 int stacksize;
+int repeat_ptr = 0, repeat_length = 0;
+int repeat_type = 0, repeat_count = 0;
 pcre_uchar *ccbegin;
 pcre_uchar *matchingpath;
 pcre_uchar bra = OP_BRA;
@@ -6152,16 +6153,29 @@ if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
 
 opcode = *cc;
 ccbegin = cc;
-matchingpath = ccbegin + 1 + LINK_SIZE;
+matchingpath = bracketend(cc) - 1 - LINK_SIZE;
+ket = *matchingpath;
+if (ket == OP_KET && PRIVATE_DATA(matchingpath) != 0)
+  {
+  repeat_ptr = PRIVATE_DATA(matchingpath);
+  repeat_length = PRIVATE_DATA(matchingpath + 1);
+  repeat_type = PRIVATE_DATA(matchingpath + 2);
+  repeat_count = PRIVATE_DATA(matchingpath + 3);
+  SLJIT_ASSERT(repeat_length != 0 && repeat_type != 0 && repeat_count != 0);
+  if (repeat_type == OP_UPTO)
+    ket = OP_KETRMAX;
+  if (repeat_type == OP_MINUPTO)
+    ket = OP_KETRMIN;
+  }
 
 if ((opcode == OP_COND || opcode == OP_SCOND) && cc[1 + LINK_SIZE] == OP_DEF)
   {
   /* Drop this bracket_backtrack. */
   parent->top = backtrack->prev;
-  return bracketend(cc);
+  return matchingpath + 1 + LINK_SIZE + repeat_length;
   }
 
-ket = *(bracketend(cc) - 1 - LINK_SIZE);
+matchingpath = ccbegin + 1 + LINK_SIZE;
 SLJIT_ASSERT(ket == OP_KET || ket == OP_KETRMAX || ket == OP_KETRMIN);
 SLJIT_ASSERT(!((bra == OP_BRAZERO && ket == OP_KETRMIN) || (bra == OP_BRAMINZERO && ket == OP_KETRMAX)));
 cc += GET(cc, 1);
@@ -6275,13 +6289,20 @@ if (bra == OP_BRAMINZERO)
     }
   }
 
+if (repeat_type != 0)
+  {
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, repeat_count);
+  if (repeat_type == OP_EXACT)
+    rmaxlabel = LABEL();
+  }
+
 if (ket == OP_KETRMIN)
   BACKTRACK_AS(bracket_backtrack)->recursive_matchingpath = LABEL();
 
 if (ket == OP_KETRMAX)
   {
   rmaxlabel = LABEL();
-  if (has_alternatives && opcode != OP_ONCE && opcode < OP_SBRA)
+  if (has_alternatives && opcode != OP_ONCE && opcode < OP_SBRA && repeat_type == 0)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = rmaxlabel;
   }
 
@@ -6500,6 +6521,12 @@ if (opcode == OP_ONCE)
   match_once_common(common, ket, BACKTRACK_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
 
 stacksize = 0;
+if (repeat_type == OP_MINUPTO)
+  {
+  /* We need to preserve the counter. TMP2 will be used below. */
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr);
+  stacksize++;
+  }
 if (ket != OP_KET || bra != OP_BRA)
   stacksize++;
 if (offset != 0)
@@ -6516,6 +6543,13 @@ if (stacksize > 0)
   allocate_stack(common, stacksize);
 
 stacksize = 0;
+if (repeat_type == OP_MINUPTO)
+  {
+  /* TMP2 was set above. */
+  OP2(SLJIT_SUB, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP2, 0, SLJIT_IMM, 1);
+  stacksize++;
+  }
+
 if (ket != OP_KET || bra != OP_BRA)
   {
   if (ket != OP_KET)
@@ -6545,7 +6579,17 @@ if (offset != 0 && common->optimized_cbracket[offset >> 1] != 0)
 
 if (ket == OP_KETRMAX)
   {
-  if (opcode == OP_ONCE || opcode >= OP_SBRA)
+  if (repeat_type != 0)
+    {
+    if (has_alternatives)
+      BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
+    OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
+    JUMPTO(SLJIT_C_NOT_ZERO, rmaxlabel);
+    /* Drop STR_PTR for greedy plus quantifier. */
+    if (opcode != OP_ONCE)
+      free_stack(common, 1);
+    }
+  else if (opcode == OP_ONCE || opcode >= OP_SBRA)
     {
     if (has_alternatives)
       BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
@@ -6564,6 +6608,19 @@ if (ket == OP_KETRMAX)
   else
     JUMPTO(SLJIT_JUMP, rmaxlabel);
   BACKTRACK_AS(bracket_backtrack)->recursive_matchingpath = LABEL();
+  }
+
+if (repeat_type == OP_EXACT)
+  {
+  OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
+  JUMPTO(SLJIT_C_NOT_ZERO, rmaxlabel);
+  }
+else if (repeat_type == OP_UPTO)
+  {
+  /* We need to preserve the counter. */
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr);
+  allocate_stack(common, 1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
   }
 
 if (bra == OP_BRAZERO)
@@ -6601,7 +6658,7 @@ cc += 1 + LINK_SIZE;
 /* Temporarily encoding the needs_control_head in framesize. */
 if (opcode == OP_ONCE)
   BACKTRACK_AS(bracket_backtrack)->u.framesize = (BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
-return cc;
+return cc + repeat_length;
 }
 
 static pcre_uchar *compile_bracketpos_matchingpath(compiler_common *common, pcre_uchar *cc, backtrack_common *parent)
@@ -7888,11 +7945,10 @@ if (bra == OP_BRAZERO)
 static void compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_common *current)
 {
 DEFINE_COMPILER;
-int opcode;
+int opcode, stacksize, count;
 int offset = 0;
 int private_data_ptr = CURRENT_AS(bracket_backtrack)->private_data_ptr;
-int stacksize;
-int count;
+int repeat_ptr = 0, repeat_type = 0, repeat_count = 0;
 pcre_uchar *cc = current->cc;
 pcre_uchar *ccbegin;
 pcre_uchar *ccprev;
@@ -7907,6 +7963,7 @@ struct sljit_jump *brazero = NULL;
 struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
 struct sljit_label *rminlabel = NULL;
+struct sljit_label *exact_label = NULL;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -7915,8 +7972,20 @@ if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   }
 
 opcode = *cc;
+ccbegin = bracketend(cc) - 1 - LINK_SIZE;
+ket = *ccbegin;
+if (ket == OP_KET && PRIVATE_DATA(ccbegin) != 0)
+  {
+  repeat_ptr = PRIVATE_DATA(ccbegin);
+  repeat_type = PRIVATE_DATA(ccbegin + 2);
+  repeat_count = PRIVATE_DATA(ccbegin + 3);
+  SLJIT_ASSERT(repeat_type != 0 && repeat_count != 0);
+  if (repeat_type == OP_UPTO)
+    ket = OP_KETRMAX;
+  if (repeat_type == OP_MINUPTO)
+    ket = OP_KETRMIN;
+  }
 ccbegin = cc;
-ket = *(bracketend(ccbegin) - 1 - LINK_SIZE);
 cc += GET(cc, 1);
 has_alternatives = *cc == OP_ALT;
 if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND))
@@ -7935,6 +8004,17 @@ if (opcode == OP_ONCE)
   CURRENT_AS(bracket_backtrack)->u.framesize >>= 1;
   }
 
+if (ket != OP_KET && repeat_type != 0)
+  {
+  /* TMP1 is used in OP_KETRMIN below. */
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+  free_stack(common, 1);
+  if (repeat_type == OP_UPTO)
+    OP2(SLJIT_ADD, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, TMP1, 0, SLJIT_IMM, 1);
+  else
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, TMP1, 0);
+  }
+
 if (ket == OP_KETRMAX)
   {
   if (bra == OP_BRAZERO)
@@ -7949,7 +8029,15 @@ else if (ket == OP_KETRMIN)
   if (bra != OP_BRAMINZERO)
     {
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
-    if (opcode >= OP_SBRA || opcode == OP_ONCE)
+    if (repeat_type != 0)
+      {
+      /* TMP1 was set a few lines above. */
+      CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
+      /* Drop STR_PTR for non-greedy plus quantifier. */
+      if (opcode != OP_ONCE)
+        free_stack(common, 1);
+      }
+    else if (opcode >= OP_SBRA || opcode == OP_ONCE)
       {
       /* Checking zero-length iteration. */
       if (opcode != OP_ONCE || CURRENT_AS(bracket_backtrack)->u.framesize < 0)
@@ -7959,6 +8047,7 @@ else if (ket == OP_KETRMIN)
         OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), private_data_ptr);
         CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1), (CURRENT_AS(bracket_backtrack)->u.framesize + 1) * sizeof(sljit_sw), CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
         }
+      /* Drop STR_PTR for non-greedy plus quantifier. */
       if (opcode != OP_ONCE)
         free_stack(common, 1);
       }
@@ -7966,12 +8055,19 @@ else if (ket == OP_KETRMIN)
       JUMPTO(SLJIT_JUMP, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
     }
   rminlabel = LABEL();
+  if (repeat_type != 0)
+    OP2(SLJIT_ADD, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
   }
 else if (bra == OP_BRAZERO)
   {
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 1);
   brazero = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0);
+  }
+else if (repeat_type == OP_EXACT)
+  {
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
+  exact_label = LABEL();
   }
 
 if (offset != 0)
@@ -8120,6 +8216,12 @@ if (has_alternatives)
       match_once_common(common, ket, CURRENT_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
 
     stacksize = 0;
+    if (repeat_type == OP_MINUPTO)
+      {
+      /* We need to preserve the counter. TMP2 will be used below. */
+      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr);
+      stacksize++;
+      }
     if (ket != OP_KET || bra != OP_BRA)
       stacksize++;
     if (offset != 0)
@@ -8133,18 +8235,16 @@ if (has_alternatives)
       stacksize++;
 
     if (stacksize > 0)
-      {
-      if (opcode != OP_ONCE || CURRENT_AS(bracket_backtrack)->u.framesize >= 0)
-        allocate_stack(common, stacksize);
-      else
-        {
-        /* We know we have place at least for one item on the top of the stack. */
-        SLJIT_ASSERT(stacksize == 1);
-        OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, sizeof(sljit_sw));
-        }
-      }
+      allocate_stack(common, stacksize);
 
     stacksize = 0;
+    if (repeat_type == OP_MINUPTO)
+      {
+      /* TMP2 was set above. */
+      OP2(SLJIT_SUB, SLJIT_MEM1(STACK_TOP), STACK(stacksize), TMP2, 0, SLJIT_IMM, 1);
+      stacksize++;
+      }
+
     if (ket != OP_KET || bra != OP_BRA)
       {
       if (ket != OP_KET)
@@ -8255,11 +8355,18 @@ else if (opcode == OP_ONCE)
     }
   }
 
-if (ket == OP_KETRMAX)
+if (repeat_type == OP_EXACT)
+  {
+  OP2(SLJIT_ADD, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, TMP1, 0);
+  CMPTO(SLJIT_C_LESS_EQUAL, TMP1, 0, SLJIT_IMM, repeat_count, exact_label);
+  }
+else if (ket == OP_KETRMAX)
   {
   OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   if (bra != OP_BRAZERO)
     free_stack(common, 1);
+
   CMPTO(SLJIT_C_NOT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0, CURRENT_AS(bracket_backtrack)->recursive_matchingpath);
   if (bra == OP_BRAZERO)
     {
@@ -8863,8 +8970,7 @@ SLJIT_ASSERT(*rootbacktrack.cc == OP_BRA && ccend[-(1 + LINK_SIZE)] == OP_KET);
 common->capture_last_ptr = common->ovector_start;
 common->ovector_start += sizeof(sljit_sw);
 #endif
-private_data_size = get_private_data_length(common, rootbacktrack.cc, ccend);
-if (private_data_size < 0)
+if (!check_opcode_types(common, rootbacktrack.cc, ccend))
   {
   SLJIT_FREE(common->optimized_cbracket);
   return;
@@ -8926,21 +9032,23 @@ if (common->capture_last_ptr != 0)
 
 SLJIT_ASSERT(!(common->req_char_ptr != 0 && common->start_used_ptr != 0));
 common->cbra_ptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_sw);
-private_data_size += common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
-if (private_data_size > SLJIT_MAX_LOCAL_SIZE)
-  {
-  SLJIT_FREE(common->optimized_cbracket);
-  return;
-  }
 
-common->private_data_ptrs = (int *)SLJIT_MALLOC((ccend - rootbacktrack.cc) * sizeof(int));
+common->private_data_ptrs = (int *)SLJIT_MALLOC((ccend - rootbacktrack.cc) * sizeof(sljit_si));
 if (!common->private_data_ptrs)
   {
   SLJIT_FREE(common->optimized_cbracket);
   return;
   }
 memset(common->private_data_ptrs, 0, (ccend - rootbacktrack.cc) * sizeof(int));
-set_private_data_ptrs(common, common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw), ccend);
+
+private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
+set_private_data_ptrs(common, &private_data_size, ccend);
+if (private_data_size > SLJIT_MAX_LOCAL_SIZE)
+  {
+  SLJIT_FREE(common->private_data_ptrs);
+  SLJIT_FREE(common->optimized_cbracket);
+  return;
+  }
 
 if (common->has_then)
   {
