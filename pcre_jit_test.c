@@ -640,6 +640,10 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?(R0)aa|bb(?R))", "abba aabb bbaa" },
 	{ MUA, 0, "((?(R)(?:aaaa|a)|(?:(aaaa)|(a)))+)(?1)$", "aaaaaaaaaa aaaa" },
 	{ MUA, 0, "(?P<Name>a(?(R&Name)a|b))(?1)", "aab abb abaa" },
+	{ MUA, 0, "((?(R)a|(?1)){3})", "XaaaaaaaaaX" },
+	{ MUA, 0, "((?:(?(R)a|(?1))){3})", "XaaaaaaaaaX" },
+	{ MUA, 0, "((?(R)a|(?1)){1,3})aaaaaa", "aaaaaaaaXaaaaaaaaa" },
+	{ MUA, 0, "((?(R)a|(?1)){1,3}?)M", "aaaM" },
 
 	/* 16 bit specific tests. */
 	{ CMA, 0 | F_FORCECONV, "\xc3\xa1", "\xc3\x81\xc3\xa1" },

@@ -1038,7 +1038,7 @@ while (cc < ccend)
   if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
     return;
 
-  if (*cc == OP_BRA || *cc == OP_CBRA || *cc == OP_ONCE || *cc == OP_ONCE_NC)
+  if (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND)
     if (detect_repeat(common, cc))
       {
       /* These brackets are converted to repeats, so no global
@@ -1496,6 +1496,12 @@ while (cc < ccend)
   size = 0;
   switch(*cc)
     {
+    case OP_KET:
+    if (PRIVATE_DATA(cc) != 0)
+      private_data_length++;
+    cc += 1 + LINK_SIZE;
+    break;
+
     case OP_ASSERT:
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK:
@@ -1664,6 +1670,15 @@ do
 
     switch(*cc)
       {
+      case OP_KET:
+      if (PRIVATE_DATA(cc) != 0)
+        {
+        count = 1;
+        srcw[0] = PRIVATE_DATA(cc);
+        }
+      cc += 1 + LINK_SIZE;
+      break;
+
       case OP_ASSERT:
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
