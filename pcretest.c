@@ -3689,6 +3689,7 @@ while (!done)
       case 'Y': options |= PCRE_NO_START_OPTIMISE; break;
       case 'Z': debug_lengths = 0; break;
       case '8': options |= PCRE_UTF8; use_utf = 1; break;
+      case '9': options |= PCRE_NEVER_UTF; break; 
       case '?': options |= PCRE_NO_UTF8_CHECK; break;
 
       case 'T':

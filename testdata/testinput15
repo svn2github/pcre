@@ -357,4 +357,8 @@ correctly, but that messes up comparisons). --/
   \x{ff000041}
   \x{7f000041} 
 
+/(*UTF8)abc/9
+
+/abc/89
+
 /-- End of testinput15 --/

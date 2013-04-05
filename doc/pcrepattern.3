@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "27 March 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "05 April 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1366,7 +1366,8 @@ above. There are also the (*UTF8), (*UTF16),(*UTF32), and (*UCP) leading
 sequences that can be used to set UTF and Unicode property modes; they are
 equivalent to setting the PCRE_UTF8, PCRE_UTF16, PCRE_UTF32 and the PCRE_UCP
 options, respectively. The (*UTF) sequence is a generic version that can be
-used with any of the libraries.
+used with any of the libraries. However, the application can set the 
+PCRE_NEVER_UTF option, which locks out the use of the (*UTF) sequences.
 .
 .
 .\" HTML <a name="subpattern"></a>
@@ -3100,6 +3101,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 March 2013
+Last updated: 05 April 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

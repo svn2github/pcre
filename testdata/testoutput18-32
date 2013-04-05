@@ -1012,4 +1012,10 @@ Error -24 (bad offset value)
     \x{a0}\x20!
  0: \x{a0} !
 
+/(*UTF)abc/9
+Failed: setting UTF is disabled by the application at offset 0
+
+/abc/89
+Failed: setting UTF is disabled by the application at offset 0
+
 /-- End of testinput18 --/

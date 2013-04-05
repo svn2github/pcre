@@ -1128,4 +1128,10 @@ Need char = \x{bf}
   \x{7f000041} 
 Error -10 (bad UTF-8 string) offset=0 reason=12
 
+/(*UTF8)abc/9
+Failed: setting UTF is disabled by the application at offset 0
+
+/abc/89
+Failed: setting UTF is disabled by the application at offset 0
+
 /-- End of testinput15 --/

@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "22 February 2013" "PCRE 8.33"
+.TH PCRETEST 1 "05 April 2013" "PCRE 8.33"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -287,6 +287,7 @@ fall into several groups that are described in detail in the following
 sections.
 .sp
   \fB/8\fP              set UTF mode
+  \fB/9\fP              set PCRE_NEVER_UTF (locks out UTF mode) 
   \fB/?\fP              disable UTF validity check
   \fB/+\fP              show remainder of subject after match
   \fB/=\fP              show all captures (not just those that are set)
@@ -357,6 +358,7 @@ options that do not correspond to anything in Perl:
   \fB/8\fP              PCRE_UTF32          ) when using the 32-bit
   \fB/?\fP              PCRE_NO_UTF32_CHECK )   library
 .sp
+  \fB/9\fP              PCRE_NEVER_UTF
   \fB/A\fP              PCRE_ANCHORED
   \fB/C\fP              PCRE_AUTO_CALLOUT
   \fB/E\fP              PCRE_DOLLAR_ENDONLY
@@ -1081,6 +1083,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 22 February 2013
+Last updated: 05 April 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

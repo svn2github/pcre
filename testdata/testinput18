@@ -291,4 +291,8 @@ correctly, but that messes up comparisons). --/
 /\x{a0}+\s!/8BZT1
     \x{a0}\x20!
 
+/(*UTF)abc/9
+
+/abc/89
+
 /-- End of testinput18 --/

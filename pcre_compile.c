@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -508,6 +508,7 @@ static const char error_texts[] =
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character value in \\u.... sequence is too large\0"
   "invalid UTF-32 string\0"
+  "setting UTF is disabled by the application\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -7771,6 +7772,7 @@ int newline;
 int errorcode = 0;
 int skipatstart = 0;
 BOOL utf;
+BOOL never_utf = FALSE;
 size_t size;
 pcre_uchar *code;
 const pcre_uchar *codestart;
@@ -7829,6 +7831,15 @@ if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0)
   errorcode = ERR17;
   goto PCRE_EARLY_ERROR_RETURN;
   }
+  
+/* If PCRE_NEVER_UTF is set, remember it. As this option steals a bit that is 
+also used for execution options, flatten it just in case. */ 
+
+if ((options & PCRE_NEVER_UTF) != 0)
+  {
+  never_utf = TRUE; 
+  options &= ~PCRE_NEVER_UTF; 
+  } 
 
 /* Check for global one-time settings at the start of the pattern, and remember
 the offset for later. */
@@ -7885,9 +7896,14 @@ PCRE_UTF8 == PCRE_UTF16 == PCRE_UTF32. */
     options = (options & ~(PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE)) | newbsr;
   else break;
   }
-
+  
 /* PCRE_UTF(16|32) have the same value as PCRE_UTF8. */
 utf = (options & PCRE_UTF8) != 0;
+if (utf && never_utf)
+  {
+  errorcode = ERR78;
+  goto PCRE_EARLY_ERROR_RETURN2;
+  } 
 
 /* Can't support UTF unless PCRE has been compiled to include the code. The
 return of an error code from PRIV(valid_utf)() is a new feature, introduced in

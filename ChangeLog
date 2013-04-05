@@ -132,6 +132,9 @@ Version 8.33 xx-xxxx-201x
 
 34. Auto-detect and optimize limited repetitions in JIT.
 
+35. Implement PCRE_NEVER_UTF to lock out the use of UTF, in particular, 
+    blocking (*UTF) etc.
+
 
 Version 8.32 30-November-2012
 -----------------------------

@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "26 March 2013" "PCRE 8.33"
+.TH PCREAPI 3 "05 April 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -754,6 +754,15 @@ subject string, respectively, as well as at the very start and end. This is
 equivalent to Perl's /m option, and it can be changed within a pattern by a
 (?m) option setting. If there are no newlines in a subject string, or no
 occurrences of ^ or $ in a pattern, setting PCRE_MULTILINE has no effect.
+.sp
+  PCRE_NEVER_UTF
+.sp
+This option locks out interpretation of the pattern as UTF-8 (or UTF-16 or
+UTF-32 in the 16-bit and 32-bit libraries). In particular, it prevents the
+creator of the pattern from switching to UTF interpretation by starting the
+pattern with (*UTF). This may be useful in applications that process patterns
+from external sources. The combination of PCRE_UTF8 and PCRE_NEVER_UTF also 
+causes an error.
 .sp
   PCRE_NEWLINE_CR
   PCRE_NEWLINE_LF
@@ -2834,6 +2843,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 March 2013
+Last updated: 05 April 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
