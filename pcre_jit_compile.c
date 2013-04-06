@@ -737,7 +737,8 @@ static BOOL check_opcode_types(compiler_common *common, pcre_uchar *cc, pcre_uch
 {
 pcre_uchar *name;
 pcre_uchar *name2;
-int i, cbra_index;
+unsigned int cbra_index;
+int i;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
 while (cc < ccend)
@@ -892,7 +893,7 @@ pcre_uchar *next;
 pcre_uchar *next_end;
 pcre_uchar *max_end;
 pcre_uchar type;
-sljit_uw length = end - begin;
+sljit_sw length = end - begin;
 int min, max, i;
 
 /* Detect fixed iterations first. */
