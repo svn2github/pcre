@@ -134,6 +134,9 @@ Version 8.33 xx-xxxx-201x
 
 35. Implement PCRE_NEVER_UTF to lock out the use of UTF, in particular, 
     blocking (*UTF) etc.
+    
+36. In the interpreter, maximizing pattern repetitions for characters and 
+    character types now use tail recursion, which reduces stack usage.
 
 
 Version 8.32 30-November-2012

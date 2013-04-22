@@ -4348,7 +4348,7 @@ Minimum match() recursion limit = 6
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   aaaaaaaaaaaaaz\M
 Minimum match() limit = 32768
-Minimum match() recursion limit = 42
+Minimum match() recursion limit = 29
 No match
 
 /(aaa(?C1)bbb|ab)/I

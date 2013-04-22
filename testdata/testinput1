@@ -5588,4 +5588,24 @@ AbcdCBefgBhiBqz
 /(*THEN:m(m)(?&y)(?(DEFINE)(?<y>b))/K
     abc
 
+/^\d*\w{4}/
+    1234
+    123 
+
+/^[^b]*\w{4}/
+    aaaa
+    aaa     
+
+/^[^b]*\w{4}/i
+    aaaa
+    aaa     
+
+/^a*\w{4}/
+    aaaa
+    aaa     
+
+/^a*\w{4}/i
+    aaaa
+    aaa     
+
 /-- End of testinput1 --/

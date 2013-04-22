@@ -3387,7 +3387,22 @@ for (;;)
     max = rep_max[c];                 /* zero for max => infinity */
     if (max == 0) max = INT_MAX;
 
-    /* Common code for all repeated single-character matches. */
+    /* Common code for all repeated single-character matches. We first check 
+    for the minimum number of characters. If the minimum equals the maximum, we 
+    are done. Otherwise, if minimizing, check the rest of the pattern for a 
+    match; if there isn't one, advance up to the maximum, one character at a 
+    time.
+    
+    If maximizing, advance up to the maximum number of matching characters, 
+    until eptr is past the end of the maximum run. If possessive, we are
+    then done (no backing up). Otherwise, match at this position; anything
+    other than no match is immediately returned. For nomatch, back up one
+    character, unless we are matching \R and the last thing matched was
+    \r\n, in which case, back up two bytes. When we reach the first optional 
+    character position, we can save stack by doing a tail recurse. 
+    
+    The various UTF/non-UTF and caseful/caseless cases are handled separately,
+    for speed. */
 
     REPEATCHAR:
 #ifdef SUPPORT_UTF
@@ -3471,13 +3486,13 @@ for (;;)
               }
             }
 
-          if (possessive) continue;
-
+          if (possessive) continue;    /* No backtracking */
           for(;;)
             {
+            if (eptr == pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM23);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (eptr == pp) { RRETURN(MATCH_NOMATCH); }
+            /* if (eptr == pp) { RRETURN(MATCH_NOMATCH); } */
 #ifdef SUPPORT_UCP
             eptr--;
             BACKCHAR(eptr);
@@ -3577,10 +3592,10 @@ for (;;)
           eptr++;
           }
 
-        if (possessive) continue;
-
-        while (eptr >= pp)
+        if (possessive) continue;       /* No backtracking */
+        for (;;)
           {
+          if (eptr == pp) goto TAIL_RECURSE; 
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM25);
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -3635,10 +3650,10 @@ for (;;)
           if (fc != RAWUCHARTEST(eptr)) break;
           eptr++;
           }
-        if (possessive) continue;
-
-        while (eptr >= pp)
+        if (possessive) continue;    /* No backtracking */
+        for (;;)
           {
+          if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM27);
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -3815,7 +3830,7 @@ for (;;)
           }
         }
       else
-#endif
+#endif  /* SUPPORT_UTF */
       /* Not UTF mode */
         {
         for (i = 1; i <= min; i++)
@@ -3853,7 +3868,7 @@ for (;;)
             }
           }
         else
-#endif
+#endif  /*SUPPORT_UTF */
         /* Not UTF mode */
           {
           for (fi = min;; fi++)
@@ -3895,17 +3910,18 @@ for (;;)
             if (fc == d || (unsigned int)foc == d) break;
             eptr += len;
             }
-          if (possessive) continue;
+          if (possessive) continue;    /* No backtracking */
           for(;;)
             {
+            if (eptr == pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM30);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (eptr-- == pp) break;        /* Stop if tried at original pos */
+            eptr--;
             BACKCHAR(eptr);
             }
           }
         else
-#endif
+#endif  /* SUPPORT_UTF */
         /* Not UTF mode */
           {
           for (i = min; i < max; i++)
@@ -3918,9 +3934,10 @@ for (;;)
             if (fc == *eptr || foc == *eptr) break;
             eptr++;
             }
-          if (possessive) continue;
-          while (eptr >= pp)
+          if (possessive) continue;    /* No backtracking */
+          for (;;)
             {
+            if (eptr == pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM31);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -4030,12 +4047,13 @@ for (;;)
             if (fc == d) break;
             eptr += len;
             }
-          if (possessive) continue;
+          if (possessive) continue;    /* No backtracking */
           for(;;)
             {
+            if (eptr == pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM34);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (eptr-- == pp) break;        /* Stop if tried at original pos */
+            eptr--;
             BACKCHAR(eptr);
             }
           }
@@ -4053,9 +4071,10 @@ for (;;)
             if (fc == *eptr) break;
             eptr++;
             }
-          if (possessive) continue;
-          while (eptr >= pp)
+          if (possessive) continue;    /* No backtracking */
+          for (;;)
             {
+            if (eptr == pp) goto TAIL_RECURSE; 
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM35);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -5613,12 +5632,13 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        if (possessive) continue;
+        if (possessive) continue;    /* No backtracking */
         for(;;)
           {
+          if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM44);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (eptr-- == pp) break;        /* Stop if tried at original pos */
+          eptr--;
           if (utf) BACKCHAR(eptr);
           }
         }
@@ -5655,13 +5675,13 @@ for (;;)
 
         /* eptr is now past the end of the maximum run */
 
-        if (possessive) continue;
-
+        if (possessive) continue;    /* No backtracking */
         for(;;)
           {
+          if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM45);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (eptr-- == pp) break;        /* Stop if tried at original pos */
+          eptr--; 
           for (;;)                        /* Move back over one extended */
             {
             if (!utf) c = *eptr; else
@@ -5936,18 +5956,13 @@ for (;;)
           RRETURN(PCRE_ERROR_INTERNAL);
           }
 
-        /* eptr is now past the end of the maximum run. If possessive, we are
-        done (no backing up). Otherwise, match at this position; anything other
-        than no match is immediately returned. For nomatch, back up one
-        character, unless we are matching \R and the last thing matched was
-        \r\n, in which case, back up two bytes. */
-
-        if (possessive) continue;
+        if (possessive) continue;    /* No backtracking */
         for(;;)
           {
+          if (eptr == pp) goto TAIL_RECURSE; 
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM46);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (eptr-- == pp) break;        /* Stop if tried at original pos */
+          eptr--;
           BACKCHAR(eptr);
           if (ctype == OP_ANYNL && eptr > pp  && RAWUCHAR(eptr) == CHAR_NL &&
               RAWUCHAR(eptr - 1) == CHAR_CR) eptr--;
@@ -6185,15 +6200,10 @@ for (;;)
           RRETURN(PCRE_ERROR_INTERNAL);
           }
 
-        /* eptr is now past the end of the maximum run. If possessive, we are
-        done (no backing up). Otherwise, match at this position; anything other
-        than no match is immediately returned. For nomatch, back up one
-        character (byte), unless we are matching \R and the last thing matched
-        was \r\n, in which case, back up two bytes. */
-
-        if (possessive) continue;
-        while (eptr >= pp)
+        if (possessive) continue;    /* No backtracking */
+        for (;;)
           {
+          if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM47);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
