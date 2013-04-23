@@ -3492,7 +3492,6 @@ for (;;)
             if (eptr == pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM23);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            /* if (eptr == pp) { RRETURN(MATCH_NOMATCH); } */
 #ifdef SUPPORT_UCP
             eptr--;
             BACKCHAR(eptr);
