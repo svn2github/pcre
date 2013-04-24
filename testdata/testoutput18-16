@@ -646,7 +646,7 @@ Need char = \x{de34}
  0: \x{11234}
 
 /(*UTF-32)\x{11234}/
-Failed: (*VERB) not recognized at offset 5
+Failed: (*VERB) not recognized or malformed at offset 5
 
 /(*CRLF)(*UTF16)(*BSR_UNICODE)a\Rb/I
 Capturing subpattern count = 0
@@ -656,7 +656,7 @@ First char = 'a'
 Need char = 'b'
 
 /(*CRLF)(*UTF32)(*BSR_UNICODE)a\Rb/I
-Failed: (*VERB) not recognized at offset 12
+Failed: (*VERB) not recognized or malformed at offset 12
 
 /\h/SI8
 Capturing subpattern count = 0

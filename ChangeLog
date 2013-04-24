@@ -137,6 +137,11 @@ Version 8.33 xx-xxxx-201x
     
 36. In the interpreter, maximizing pattern repetitions for characters and 
     character types now use tail recursion, which reduces stack usage.
+    
+37. The value of the max lookbehind was not correctly preserved if a compiled
+    and saved regex was reloaded on a host of different endianness.
+    
+38. Implemented (*LIMIT_MATCH) and (*LIMIT_RECURSION). 
 
 
 Version 8.32 30-November-2012

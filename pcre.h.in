@@ -206,6 +206,7 @@ with J. */
 #define PCRE_ERROR_DFA_BADRESTART  (-30)
 #define PCRE_ERROR_JIT_BADOPTION   (-31)
 #define PCRE_ERROR_BADLENGTH       (-32)
+#define PCRE_ERROR_UNSET           (-33)
 
 /* Specific error codes for UTF-8 validity checks */
 
@@ -270,10 +271,12 @@ with J. */
 #define PCRE_INFO_JIT               16
 #define PCRE_INFO_JITSIZE           17
 #define PCRE_INFO_MAXLOOKBEHIND     18
-#define PCRE_INFO_FIRSTCHARACTER      19
-#define PCRE_INFO_FIRSTCHARACTERFLAGS   20
+#define PCRE_INFO_FIRSTCHARACTER    19
+#define PCRE_INFO_FIRSTCHARACTERFLAGS 20
 #define PCRE_INFO_REQUIREDCHAR      21
-#define PCRE_INFO_REQUIREDCHARFLAGS   22
+#define PCRE_INFO_REQUIREDCHARFLAGS 22
+#define PCRE_INFO_MATCHLIMIT        23
+#define PCRE_INFO_RECURSIONLIMIT    24
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */

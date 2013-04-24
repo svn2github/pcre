@@ -2395,7 +2395,7 @@ else
   rc = PCRE_ERROR_BADMODE;
 #endif
 
-if (rc < 0)
+if (rc < 0 && rc != PCRE_ERROR_UNSET)
   {
   fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
     pcre_mode == PCRE32_MODE ? "32" : pcre_mode == PCRE16_MODE ? "16" : "", option);
@@ -2471,14 +2471,18 @@ BOOL utf16_char = FALSE;
 re->magic_number = REVERSED_MAGIC_NUMBER;
 re->size = swap_uint32(re->size);
 re->options = swap_uint32(re->options);
-re->flags = swap_uint16(re->flags);
-re->top_bracket = swap_uint16(re->top_bracket);
-re->top_backref = swap_uint16(re->top_backref);
+re->flags = swap_uint32(re->flags);
+re->limit_match = swap_uint32(re->limit_match);
+re->limit_recursion = swap_uint32(re->limit_recursion);
 re->first_char = swap_uint16(re->first_char);
 re->req_char = swap_uint16(re->req_char);
+re->max_lookbehind = swap_uint16(re->max_lookbehind);
+re->top_bracket = swap_uint16(re->top_bracket);
+re->top_backref = swap_uint16(re->top_backref);
 re->name_table_offset = swap_uint16(re->name_table_offset);
 re->name_entry_size = swap_uint16(re->name_entry_size);
 re->name_count = swap_uint16(re->name_count);
+re->ref_count = swap_uint16(re->ref_count);
 
 if (extra != NULL)
   {
@@ -2648,14 +2652,18 @@ int length = re->name_count * re->name_entry_size;
 re->magic_number = REVERSED_MAGIC_NUMBER;
 re->size = swap_uint32(re->size);
 re->options = swap_uint32(re->options);
-re->flags = swap_uint16(re->flags);
-re->top_bracket = swap_uint16(re->top_bracket);
-re->top_backref = swap_uint16(re->top_backref);
+re->flags = swap_uint32(re->flags);
+re->limit_match = swap_uint32(re->limit_match);
+re->limit_recursion = swap_uint32(re->limit_recursion);
 re->first_char = swap_uint32(re->first_char);
 re->req_char = swap_uint32(re->req_char);
+re->max_lookbehind = swap_uint16(re->max_lookbehind);
+re->top_bracket = swap_uint16(re->top_bracket);
+re->top_backref = swap_uint16(re->top_backref);
 re->name_table_offset = swap_uint16(re->name_table_offset);
 re->name_entry_size = swap_uint16(re->name_entry_size);
 re->name_count = swap_uint16(re->name_count);
+re->ref_count = swap_uint16(re->ref_count);
 
 if (extra != NULL)
   {
@@ -3525,11 +3533,11 @@ while (!done)
       PCRE_PATTERN_TO_HOST_BYTE_ORDER(rc, re, extra, NULL);
       if (rc == PCRE_ERROR_BADMODE)
         {
-        pcre_uint16 flags_in_host_byte_order;
+        pcre_uint32 flags_in_host_byte_order;
         if (REAL_PCRE_MAGIC(re) == MAGIC_NUMBER)
           flags_in_host_byte_order = REAL_PCRE_FLAGS(re);
         else
-          flags_in_host_byte_order = swap_uint16(REAL_PCRE_FLAGS(re));
+          flags_in_host_byte_order = swap_uint32(REAL_PCRE_FLAGS(re));
         /* Simulate the result of the function call below. */
         fprintf(outfile, "Error %d from pcre%s_fullinfo(%d)\n", rc,
           pcre_mode == PCRE32_MODE ? "32" : pcre_mode == PCRE16_MODE ? "16" : "",
@@ -4010,6 +4018,7 @@ while (!done)
       {
       unsigned long int all_options;
       pcre_uint32 first_char, need_char;
+      pcre_uint32 match_limit, recursion_limit; 
       int count, backrefmax, first_char_set, need_char_set, okpartial, jchanged,
         hascrorlf, maxlookbehind;
       int nameentrysize, namecount;
@@ -4037,8 +4046,18 @@ while (!done)
         (int)size, (int)regex_gotten_store);
 
       fprintf(outfile, "Capturing subpattern count = %d\n", count);
+
       if (backrefmax > 0)
         fprintf(outfile, "Max back reference = %d\n", backrefmax);
+
+      if (maxlookbehind > 0)
+        fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
+        
+      if (new_info(re, NULL, PCRE_INFO_MATCHLIMIT, &match_limit) == 0)
+        fprintf(outfile, "Match limit = %u\n", match_limit); 
+
+      if (new_info(re, NULL, PCRE_INFO_RECURSIONLIMIT, &recursion_limit) == 0)
+        fprintf(outfile, "Recursion limit = %u\n", recursion_limit); 
 
       if (namecount > 0)
         {
@@ -4073,7 +4092,7 @@ while (!done)
       if (do_flip) all_options = swap_uint32(all_options);
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -4090,7 +4109,8 @@ while (!done)
           ((get_options & PCRE_UCP) != 0)? " ucp" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf_check" : "",
           ((get_options & PCRE_NO_START_OPTIMIZE) != 0)? " no_start_optimize" : "",
-          ((get_options & PCRE_DUPNAMES) != 0)? " dupnames" : "");
+          ((get_options & PCRE_DUPNAMES) != 0)? " dupnames" : "",
+          ((get_options & PCRE_NEVER_UTF) != 0)? " never_utf" : "");
 
       if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
@@ -4163,9 +4183,6 @@ while (!done)
           fprintf(outfile, "%s\n", caseless);
           }
         }
-
-      if (maxlookbehind > 0)
-        fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
 
       /* Don't output study size; at present it is in any case a fixed
       value, but it varies, depending on the computer architecture, and

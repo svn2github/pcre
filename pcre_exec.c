@@ -6511,6 +6511,30 @@ if (extra_data != NULL
     && extra_data->executable_jit != NULL
     && (options & ~PUBLIC_JIT_EXEC_OPTIONS) == 0)
   {
+  /* A facility for setting the match limit in the regex was added; this puts
+  a value in the compiled block. (Similarly for recursion limit, but the JIT 
+  does not make use of that.) Because the regex is not passed to jit_exec, we 
+  fudge up an alternative extra block, because we must not modify the extra 
+  block that the user has passed. */ 
+ 
+#if defined COMPILE_PCRE8
+  pcre_extra extra_data_copy;
+#elif defined COMPILE_PCRE16
+  pcre16_extra extra_data_copy;
+#elif defined COMPILE_PCRE32
+  pcre32_extra extra_data_copy;
+#endif
+    
+  if ((re->flags & PCRE_MLSET) != 0 && 
+      ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0 ||
+       re->limit_match < extra_data->match_limit)) 
+    {
+    extra_data_copy = *extra_data;
+    extra_data_copy.match_limit = re->limit_match;
+    extra_data_copy.flags |= PCRE_EXTRA_MATCH_LIMIT;   
+    extra_data = &extra_data_copy;
+    }  
+
   rc = PRIV(jit_exec)(extra_data, (const pcre_uchar *)subject, length,
        start_offset, options, offsets, offsetcount);
 
@@ -6540,6 +6564,8 @@ md->callout_data = NULL;
 
 tables = re->tables;
 
+/* The two limit values override the defaults, whatever their value. */
+
 if (extra_data != NULL)
   {
   register unsigned int flags = extra_data->flags;
@@ -6553,6 +6579,15 @@ if (extra_data != NULL)
     md->callout_data = extra_data->callout_data;
   if ((flags & PCRE_EXTRA_TABLES) != 0) tables = extra_data->tables;
   }
+
+/* Limits in the regex override only if they are smaller. */
+  
+if ((re->flags & PCRE_MLSET) != 0 && re->limit_match < md->match_limit)
+  md->match_limit = re->limit_match;
+ 
+if ((re->flags & PCRE_RLSET) != 0 && 
+    re->limit_recursion < md->match_limit_recursion)
+  md->match_limit_recursion = re->limit_recursion;
 
 /* If the exec call supplied NULL for tables, use the inbuilt ones. This
 is a feature that makes it possible to save compiled regex and re-use them

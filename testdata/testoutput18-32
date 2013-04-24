@@ -632,7 +632,7 @@ Error -10 (bad UTF-32 string) offset=0 reason=3
 Error -10 (bad UTF-32 string) offset=0 reason=1
 
 /(*UTF16)\x{11234}/
-Failed: (*VERB) not recognized at offset 5
+Failed: (*VERB) not recognized or malformed at offset 5
 
 /(*UTF)\x{11234}/I
 Capturing subpattern count = 0
@@ -643,10 +643,10 @@ No need char
  0: \x{11234}
 
 /(*UTF-32)\x{11234}/
-Failed: (*VERB) not recognized at offset 5
+Failed: (*VERB) not recognized or malformed at offset 5
 
 /(*CRLF)(*UTF16)(*BSR_UNICODE)a\Rb/I
-Failed: (*VERB) not recognized at offset 12
+Failed: (*VERB) not recognized or malformed at offset 12
 
 /(*CRLF)(*UTF32)(*BSR_UNICODE)a\Rb/I
 Capturing subpattern count = 0

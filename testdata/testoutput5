@@ -1818,10 +1818,10 @@ Partial match: \x{0d}\x{0d}
 
 /(?<=\x{1234}\x{1234})\bxy/I8
 Capturing subpattern count = 0
+Max lookbehind = 2
 Options: utf
 First char = 'x'
 Need char = 'y'
-Max lookbehind = 2
 
 /(?<!^)ETA/8
     ETA

@@ -448,10 +448,10 @@ Need char = '='
 
 /(?<!bar|cattle)foo/I
 Capturing subpattern count = 0
+Max lookbehind = 6
 No options
 First char = 'f'
 Need char = 'o'
-Max lookbehind = 6
     foo
  0: foo
     catfoo
@@ -631,10 +631,10 @@ No match
 
 /\Aabc/Im
 Capturing subpattern count = 0
+Max lookbehind = 1
 Options: anchored multiline
 No first char
 No need char
-Max lookbehind = 1
 
 /^abc/Im
 Capturing subpattern count = 0
@@ -657,19 +657,19 @@ No need char
 
 /(?<=foo)[ab]/IS
 Capturing subpattern count = 0
+Max lookbehind = 3
 No options
 No first char
 No need char
-Max lookbehind = 3
 Subject length lower bound = 1
 Starting byte set: a b 
 
 /(?<!foo)(alpha|omega)/IS
 Capturing subpattern count = 1
+Max lookbehind = 3
 No options
 No first char
 Need char = 'a'
-Max lookbehind = 3
 Subject length lower bound = 5
 Starting byte set: a o 
 
@@ -683,11 +683,11 @@ Starting byte set: a b
 
 /(?<=foo\n)^bar/Im
 Capturing subpattern count = 0
+Max lookbehind = 4
 Contains explicit CR or LF match
 Options: multiline
 No first char
 Need char = 'r'
-Max lookbehind = 4
     foo\nbarbar
  0: bar
     ***Failers
@@ -701,11 +701,11 @@ No match
 
 /^(?<=foo\n)bar/Im
 Capturing subpattern count = 0
+Max lookbehind = 4
 Contains explicit CR or LF match
 Options: multiline
 First char at start or follows newline
 Need char = 'r'
-Max lookbehind = 4
     foo\nbarbar
  0: bar
     ***Failers
@@ -744,10 +744,10 @@ Failed: lookbehind assertion is not fixed length at offset 13
 
 /(?<=bullock|donkey)-cart/I
 Capturing subpattern count = 0
+Max lookbehind = 7
 No options
 First char = '-'
 Need char = 't'
-Max lookbehind = 7
     the bullock-cart
  0: -cart
     a donkey-cart race
@@ -761,17 +761,17 @@ No match
 
 /(?<=ab(?i)x|y|z)/I
 Capturing subpattern count = 0
+Max lookbehind = 3
 No options
 No first char
 No need char
-Max lookbehind = 3
 
 /(?>.*)(?<=(abcd)|(xyz))/I
 Capturing subpattern count = 2
+Max lookbehind = 4
 No options
 No first char
 No need char
-Max lookbehind = 4
     alphabetabcd
  0: alphabetabcd
  1: abcd
@@ -782,10 +782,10 @@ Max lookbehind = 4
 
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/I
 Capturing subpattern count = 0
+Max lookbehind = 4
 No options
 First char = 'Z'
 Need char = 'Z'
-Max lookbehind = 4
     abxyZZ
  0: ZZ
     abXyZZ
@@ -811,10 +811,10 @@ No match
 
 /(?<!(foo)a)bar/I
 Capturing subpattern count = 1
+Max lookbehind = 4
 No options
 First char = 'b'
 Need char = 'r'
-Max lookbehind = 4
     bar
  0: bar
     foobbar
@@ -1197,10 +1197,10 @@ No need char
 
 /\Biss\B/I+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
-Max lookbehind = 1
     Mississippi
  0: iss
  0+ issippi
@@ -1218,20 +1218,20 @@ Need char = 's'
 
 /\Biss\B/IG+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
-Max lookbehind = 1
     Mississippi
  0: iss
  0+ issippi
 
 /\Biss\B/Ig+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
-Max lookbehind = 1
     Mississippi
  0: iss
  0+ issippi
@@ -1244,10 +1244,10 @@ No match
 
 /(?<=[Ms])iss/Ig+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
-Max lookbehind = 1
     Mississippi
  0: iss
  0+ issippi
@@ -1256,10 +1256,10 @@ Max lookbehind = 1
 
 /(?<=[Ms])iss/IG+
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 'i'
 Need char = 's'
-Max lookbehind = 1
     Mississippi
  0: iss
  0+ issippi
@@ -1437,10 +1437,10 @@ Need char = 'r'
 
 /...(?<=abc)/I
 Capturing subpattern count = 0
+Max lookbehind = 3
 No options
 No first char
 No need char
-Max lookbehind = 3
 
 /abc(?!pqr)/I
 Capturing subpattern count = 0
@@ -3218,10 +3218,10 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = '8'
 Need char = 'X'
-Max lookbehind = 1
 
 |\$\<\.X\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDZ
 ------------------------------------------------------------------
@@ -3232,10 +3232,10 @@ Max lookbehind = 1
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = '$'
 Need char = 'X'
-Max lookbehind = 1
 
 /(.*)\d+\1/I
 Capturing subpattern count = 1
@@ -3748,10 +3748,10 @@ Callout 2: last capture = -1
 
 /(?<=(abc)(?C))xyz/I
 Capturing subpattern count = 1
+Max lookbehind = 3
 No options
 First char = 'x'
 Need char = 'z'
-Max lookbehind = 3
    abcxyz\C+
 Callout 0: last capture = 1
  0: <unset>
@@ -5396,19 +5396,19 @@ Need char = '3'
 
 /\b.*/I
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 No first char
 No need char
-Max lookbehind = 1
   ab cd\>1
  0:  cd
 
 /\b.*/Is
 Capturing subpattern count = 0
+Max lookbehind = 1
 Options: dotall
 No first char
 No need char
-Max lookbehind = 1
   ab cd\>1
  0:  cd
 
@@ -8788,7 +8788,7 @@ No match
  1: \x0a
 
 /a(*CR)b/
-Failed: (*VERB) not recognized at offset 5
+Failed: (*VERB) not recognized or malformed at offset 5
 
 /(*CR)a.b/
     a\nb
@@ -11627,19 +11627,19 @@ No match
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b/IS
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 First char = 't'
 Need char = 't'
-Max lookbehind = 1
 Subject length lower bound = 18
 No set of starting bytes
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/IS
 Capturing subpattern count = 0
+Max lookbehind = 1
 No options
 No first char
 No need char
-Max lookbehind = 1
 Subject length lower bound = 8
 Starting byte set: < o t u 
 
@@ -12236,17 +12236,17 @@ settings of the anchored and startline bits. --/
 
 /(?>.*?a)(?<=ba)/I
 Capturing subpattern count = 0
+Max lookbehind = 2
 No options
 No first char
 Need char = 'a'
-Max lookbehind = 2
 
 /(?:.*?a)(?<=ba)/I
 Capturing subpattern count = 0
+Max lookbehind = 2
 No options
 First char at start or follows newline
 Need char = 'a'
-Max lookbehind = 2
 
 /.*?a(*PRUNE)b/I
 Capturing subpattern count = 0
@@ -12292,17 +12292,17 @@ No need char
 
 /(?>.*?)(?<=(abcd)|(wxyz))/I
 Capturing subpattern count = 2
+Max lookbehind = 4
 No options
 No first char
 No need char
-Max lookbehind = 4
 
 /(?>.*)(?<=(abcd)|(wxyz))/I
 Capturing subpattern count = 2
+Max lookbehind = 4
 No options
 No first char
 No need char
-Max lookbehind = 4
 
 "(?>.*)foo"I
 Capturing subpattern count = 0
@@ -12573,5 +12573,96 @@ No match
  0: bn
 
 /-------------------------/ 
+
+/(*LIMIT_MATCH=12bc)abc/
+Failed: (*VERB) not recognized or malformed at offset 7
+
+/(*LIMIT_MATCH=4294967290)abc/
+Failed: (*VERB) not recognized or malformed at offset 7
+
+/(*LIMIT_RECURSION=4294967280)abc/I
+Capturing subpattern count = 0
+Recursion limit = 4294967280
+No options
+First char = 'a'
+Need char = 'c'
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\q3000
+Error -8 (match limit exceeded)
+
+/(a+)*zz/S-
+    aaaaaaaaaaaaaz\Q10 
+Error -21 (recursion limit exceeded)
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+No options
+No first char
+Need char = 'z'
+    aaaaaaaaaaaaaz
+Error -8 (match limit exceeded)
+    aaaaaaaaaaaaaz\q60000
+Error -8 (match limit exceeded)
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 3000
+No options
+No first char
+Need char = 'z'
+    aaaaaaaaaaaaaz
+Error -8 (match limit exceeded)
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+Capturing subpattern count = 1
+Match limit = 60000
+No options
+No first char
+Need char = 'z'
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\q3000
+Error -8 (match limit exceeded)
+
+/(*LIMIT_RECURSION=10)(a+)*zz/IS-
+Capturing subpattern count = 1
+Recursion limit = 10
+No options
+No first char
+Need char = 'z'
+Subject length lower bound = 2
+Starting byte set: a z 
+    aaaaaaaaaaaaaz
+Error -21 (recursion limit exceeded)
+    aaaaaaaaaaaaaz\Q1000
+Error -21 (recursion limit exceeded)
+
+/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+Capturing subpattern count = 1
+Recursion limit = 10
+No options
+No first char
+Need char = 'z'
+Subject length lower bound = 2
+Starting byte set: a z 
+    aaaaaaaaaaaaaz
+Error -21 (recursion limit exceeded)
+
+/(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+Capturing subpattern count = 1
+Recursion limit = 1000
+No options
+No first char
+Need char = 'z'
+Subject length lower bound = 2
+Starting byte set: a z 
+    aaaaaaaaaaaaaz
+No match
+    aaaaaaaaaaaaaz\Q10
+Error -21 (recursion limit exceeded)
 
 /-- End of testinput2 --/

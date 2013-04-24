@@ -3802,4 +3802,39 @@ backtracking verbs. --/
 
 /-------------------------/ 
 
+/(*LIMIT_MATCH=12bc)abc/
+
+/(*LIMIT_MATCH=4294967290)abc/
+
+/(*LIMIT_RECURSION=4294967280)abc/I
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\q3000
+
+/(a+)*zz/S-
+    aaaaaaaaaaaaaz\Q10 
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\q60000
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\q3000
+
+/(*LIMIT_RECURSION=10)(a+)*zz/IS-
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\Q1000
+
+/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+    aaaaaaaaaaaaaz
+
+/(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\Q10
+
 /-- End of testinput2 --/
