@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "05 April 2013" "PCRE 8.33"
+.TH PCRETEST 1 "26 April 2013" "PCRE 8.33"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -40,23 +40,34 @@ PCRE, and are unlikely to be of use otherwise. They are all documented here,
 but without much justification.
 .
 .
+.SH "INPUT DATA FORMAT"
+.rs
+.sp
+Input to \fBpcretest\fP is processed line by line, either by calling the C
+library's \fBfgets()\fP function, or via the \fBlibreadline\fP library (see 
+below). In Unix-like environments, \fBfgets()\fP treats any bytes other than 
+newline as data characters. However, in some Windows environments character 26 
+(hex 1A) causes an immediate end of file, and no further data is read. For 
+maximum portability, therefore, it is safest to use only ASCII characters in 
+\fBpcretest\fP input files.
+.
+.
 .SH "PCRE's 8-BIT, 16-BIT AND 32-BIT LIBRARIES"
 .rs
 .sp
 From release 8.30, two separate PCRE libraries can be built. The original one
 supports 8-bit character strings, whereas the newer 16-bit library supports
-character strings encoded in 16-bit units. From release 8.32, a third
-library can be built, supporting character strings encoded in 32-bit units.
-The \fBpcretest\fP program can be
-used to test all three libraries. However, it is itself still an 8-bit program,
-reading 8-bit input and writing 8-bit output. When testing the 16-bit or 32-bit
-library, the patterns and data strings are converted to 16- or 32-bit format
-before being passed to the PCRE library functions. Results are converted to
-8-bit for output.
+character strings encoded in 16-bit units. From release 8.32, a third library
+can be built, supporting character strings encoded in 32-bit units. The
+\fBpcretest\fP program can be used to test all three libraries. However, it is
+itself still an 8-bit program, reading 8-bit input and writing 8-bit output.
+When testing the 16-bit or 32-bit library, the patterns and data strings are
+converted to 16- or 32-bit format before being passed to the PCRE library
+functions. Results are converted to 8-bit for output.
 .P
 References to functions and structures of the form \fBpcre[16|32]_xx\fP below
-mean "\fBpcre_xx\fP when using the 8-bit library or \fBpcre16_xx\fP when using
-the 16-bit library".
+mean "\fBpcre_xx\fP when using the 8-bit library, \fBpcre16_xx\fP when using
+the 16-bit library, or \fBpcre32_xx\fP when using the 32-bit library".
 .
 .
 .SH "COMMAND LINE OPTIONS"
@@ -1083,6 +1094,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 April 2013
+Last updated: 26 April 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

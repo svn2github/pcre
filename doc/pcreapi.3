@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "05 April 2013" "PCRE 8.33"
+.TH PCREAPI 3 "26 April 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -761,7 +761,7 @@ This option locks out interpretation of the pattern as UTF-8 (or UTF-16 or
 UTF-32 in the 16-bit and 32-bit libraries). In particular, it prevents the
 creator of the pattern from switching to UTF interpretation by starting the
 pattern with (*UTF). This may be useful in applications that process patterns
-from external sources. The combination of PCRE_UTF8 and PCRE_NEVER_UTF also 
+from external sources. The combination of PCRE_UTF8 and PCRE_NEVER_UTF also
 causes an error.
 .sp
   PCRE_NEWLINE_CR
@@ -1092,13 +1092,13 @@ In 32-bit mode, the bitmap is used for 32-bit values less than 256.)
 .P
 These two optimizations apply to both \fBpcre_exec()\fP and
 \fBpcre_dfa_exec()\fP, and the information is also used by the JIT compiler.
-The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option. 
+The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option.
 You might want to do this if your pattern contains callouts or (*MARK) and you
 want to make use of these facilities in cases where matching fails.
 .P
 PCRE_NO_START_OPTIMIZE can be specified at either compile time or execution
-time. However, if PCRE_NO_START_OPTIMIZE is passed to \fBpcre_exec()\fP, (that 
-is, after any JIT compilation has happened) JIT execution is disabled. For JIT 
+time. However, if PCRE_NO_START_OPTIMIZE is passed to \fBpcre_exec()\fP, (that
+is, after any JIT compilation has happened) JIT execution is disabled. For JIT
 execution to work with PCRE_NO_START_OPTIMIZE, the option must be set at
 compile time.
 .P
@@ -1193,6 +1193,7 @@ the following negative numbers:
   PCRE_ERROR_BADENDIANNESS  the pattern was compiled with different
                             endianness
   PCRE_ERROR_BADOPTION      the value of \fIwhat\fP was invalid
+  PCRE_ERROR_UNSET          the requested field is not set
 .sp
 The "magic number" is placed at the start of each compiled pattern as an simple
 check against passing an arbitrary memory pointer. The endianness error can
@@ -1311,6 +1312,13 @@ to return the full 32-bit range of the character, this value is deprecated;
 instead the PCRE_INFO_REQUIREDCHARFLAGS and PCRE_INFO_REQUIREDCHAR values should
 be used.
 .sp
+  PCRE_INFO_MATCHLIMIT
+.sp
+If the pattern set a match limit by including an item of the form
+(*LIMIT_MATCH=nnnn) at the start, the value is returned. The fourth argument
+should point to an unsigned 32-bit integer. If no such value has been set, the
+call to \fBpcre_fullinfo()\fP returns the error PCRE_ERROR_UNSET.
+.sp
   PCRE_INFO_MAXLOOKBEHIND
 .sp
 Return the number of characters (NB not bytes) in the longest lookbehind
@@ -1319,8 +1327,8 @@ matching using the partial matching facilities. Note that the simple assertions
 \eb and \eB require a one-character lookbehind. \eA also registers a
 one-character lookbehind, though it does not actually inspect the previous
 character. This is to ensure that at least one character from the old segment
-is retained when a new segment is processed. Otherwise, if there are no 
-lookbehinds in the pattern, \eA might match incorrectly at the start of a new 
+is retained when a new segment is processed. Otherwise, if there are no
+lookbehinds in the pattern, \eA might match incorrectly at the start of a new
 segment.
 .sp
   PCRE_INFO_MINLENGTH
@@ -1429,6 +1437,13 @@ alternatives begin with one of the following:
 .sp
 For such patterns, the PCRE_ANCHORED bit is set in the options returned by
 \fBpcre_fullinfo()\fP.
+.sp
+  PCRE_INFO_RECURSIONLIMIT
+.sp
+If the pattern set a recursion limit by including an item of the form
+(*LIMIT_RECURSION=nnnn) at the start, the value is returned. The fourth
+argument should point to an unsigned 32-bit integer. If no such value has been
+set, the call to \fBpcre_fullinfo()\fP returns the error PCRE_ERROR_UNSET.
 .sp
   PCRE_INFO_SIZE
 .sp
@@ -1663,6 +1678,15 @@ block in which \fImatch_limit\fP is set, and PCRE_EXTRA_MATCH_LIMIT is set in
 the \fIflags\fP field. If the limit is exceeded, \fBpcre_exec()\fP returns
 PCRE_ERROR_MATCHLIMIT.
 .P
+A value for the match limit may also be supplied by an item at the start of a
+pattern of the form
+.sp
+  (*LIMIT_MATCH=d)
+.sp
+where d is a decimal number. However, such a setting is ignored unless d is
+less than the limit set by the caller of \fBpcre_exec()\fP or, if no such limit
+is set, less than the default.
+.P
 The \fImatch_limit_recursion\fP field is similar to \fImatch_limit\fP, but
 instead of limiting the total number of times that \fBmatch()\fP is called, it
 limits the depth of recursion. The recursion depth is a smaller number than the
@@ -1680,6 +1704,15 @@ built; the default default is the same value as the default for
 with a \fBpcre_extra\fP block in which \fImatch_limit_recursion\fP is set, and
 PCRE_EXTRA_MATCH_LIMIT_RECURSION is set in the \fIflags\fP field. If the limit
 is exceeded, \fBpcre_exec()\fP returns PCRE_ERROR_RECURSIONLIMIT.
+.P
+A value for the recursion limit may also be supplied by an item at the start of
+a pattern of the form
+.sp
+  (*LIMIT_RECURSION=d)
+.sp
+where d is a decimal number. However, such a setting is ignored unless d is
+less than the limit set by the caller of \fBpcre_exec()\fP or, if no such limit
+is set, less than the default.
 .P
 The \fIcallout_data\fP field is used in conjunction with the "callout" feature,
 and is described in the
@@ -2372,8 +2405,8 @@ never occur in a valid UTF-8 string.
   PCRE_UTF8_ERR22
 .sp
 This error code was formerly used when the presence of a so-called
-"non-character" caused an error. Unicode corrigendum #9 makes it clear that 
-such characters should not cause a string to be rejected, and so this code is 
+"non-character" caused an error. Unicode corrigendum #9 makes it clear that
+such characters should not cause a string to be rejected, and so this code is
 no longer in use and is never returned.
 .
 .
@@ -2843,6 +2876,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 April 2013
+Last updated: 26 April 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

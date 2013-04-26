@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "05 April 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "26 April 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -20,6 +20,34 @@ have copious examples. Jeffrey Friedl's "Mastering Regular Expressions",
 published by O'Reilly, covers regular expressions in great detail. This
 description of PCRE's regular expressions is intended as reference material.
 .P
+This document discusses the patterns that are supported by PCRE when one its
+main matching functions, \fBpcre_exec()\fP (8-bit) or \fBpcre[16|32]_exec()\fP
+(16- or 32-bit), is used. PCRE also has alternative matching functions,
+\fBpcre_dfa_exec()\fP and \fBpcre[16|32_dfa_exec()\fP, which match using a
+different algorithm that is not Perl-compatible. Some of the features discussed
+below are not available when DFA matching is used. The advantages and
+disadvantages of the alternative functions, and how they differ from the normal
+functions, are discussed in the
+.\" HREF
+\fBpcrematching\fP
+.\"
+page.
+.
+.
+.SH "SPECIAL START-OF-PATTERN ITEMS"
+.rs
+.sp
+A number of options that can be passed to \fBpcre_compile()\fP can also be set 
+by special items at the start of a pattern. These are not Perl-compatible, but
+are provided to make these options accessible to pattern writers who are not
+able to change the program that processes the pattern. Any number of these
+items may appear, but they must all be together right at the start of the
+pattern string, and the letters must be in upper case.
+.
+.
+.SS "UTF support"
+.rs
+.sp
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 strings in the original library, an
 extra library that supports 16-bit and UTF-16 character strings, and a
@@ -36,16 +64,23 @@ these special sequences:
 .sp
 (*UTF) is a generic sequence that can be used with any of the libraries.
 Starting a pattern with such a sequence is equivalent to setting the relevant
-option. This feature is not Perl-compatible. How setting a UTF mode affects
-pattern matching is mentioned in several places below. There is also a summary
-of features in the
+option. How setting a UTF mode affects pattern matching is mentioned in several
+places below. There is also a summary of features in the
 .\" HREF
 \fBpcreunicode\fP
 .\"
 page.
 .P
-Another special sequence that may appear at the start of a pattern or in
-combination with (*UTF8), (*UTF16), (*UTF32) or (*UTF) is:
+Some applications that allow their users to supply patterns may wish to 
+restrict them to non-UTF data for security reasons. If the PCRE_NEVER_UTF
+option is set at compile time, (*UTF) etc. are not allowed, and their
+appearance causes an error.
+.
+.
+.SS "Unicode property support"
+.rs
+.sp
+Another special sequence that may appear at the start of a pattern is
 .sp
   (*UCP)
 .sp
@@ -53,38 +88,17 @@ This has the same effect as setting the PCRE_UCP option: it causes sequences
 such as \ed and \ew to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 128 via a lookup
 table.
-.P
-If a pattern starts with (*NO_START_OPT), it has the same effect as setting the
-PCRE_NO_START_OPTIMIZE option either at compile or matching time. There are
-also some more of these special sequences that are concerned with the handling
-of newlines; they are described below.
-.P
-The remainder of this document discusses the patterns that are supported by
-PCRE when one its main matching functions, \fBpcre_exec()\fP (8-bit) or
-\fBpcre[16|32]_exec()\fP (16- or 32-bit), is used. PCRE also has alternative
-matching functions, \fBpcre_dfa_exec()\fP and \fBpcre[16|32_dfa_exec()\fP,
-which match using a different algorithm that is not Perl-compatible. Some of
-the features discussed below are not available when DFA matching is used. The
-advantages and disadvantages of the alternative functions, and how they differ
-from the normal functions, are discussed in the
-.\" HREF
-\fBpcrematching\fP
-.\"
-page.
 .
 .
-.SH "EBCDIC CHARACTER CODES"
+.SS "Disabling start-up optimizations"
 .rs
 .sp
-PCRE can be compiled to run in an environment that uses EBCDIC as its character
-code rather than ASCII or Unicode (typically a mainframe system). In the
-sections below, character code values are ASCII or Unicode; in an EBCDIC
-environment these characters may have different code values, and there are no
-code points greater than 255.
+If a pattern starts with (*NO_START_OPT), it has the same effect as setting the
+PCRE_NO_START_OPTIMIZE option either at compile or matching time.
 .
 .
 .\" HTML <a name="newlines"></a>
-.SH "NEWLINE CONVENTIONS"
+.SS "Newline conventions"
 .rs
 .sp
 PCRE supports five different conventions for indicating line breaks in
@@ -117,9 +131,7 @@ example, on a Unix system where LF is the default newline sequence, the pattern
   (*CR)a.b
 .sp
 changes the convention to CR. That pattern matches "a\enb" because LF is no
-longer a newline. Note that these special settings, which are not
-Perl-compatible, are recognized only at the very start of a pattern, and that
-they must be in upper case. If more than one of them is present, the last one
+longer a newline. If more than one of these settings is present, the last one
 is used.
 .P
 The newline convention affects where the circumflex and dollar assertions are
@@ -134,6 +146,38 @@ description of \eR in the section entitled
 .\"
 below. A change of \eR setting can be combined with a change of newline
 convention.
+.
+.
+.SS "Setting match and recursion limits"
+.rs
+.sp
+The caller of \fBpcre_exec()\fP can set a limit on the number of times the 
+internal \fBmatch()\fP function is called and on the maximum depth of 
+recursive calls. These facilities are provided to catch runaway matches that
+are provoked by patterns with huge matching trees (a typical example is a
+pattern with nested unlimited repeats) and to avoid running out of system stack
+by too much recursion. When one of these limits is reached, \fBpcre_exec()\fP
+gives an error return. The limits can also be set by items at the start of the 
+pattern of the form
+.sp
+  (*LIMIT_MATCH=d)
+  (*LIMIT_RECURSION=d)
+.sp
+where d is any number of decimal digits. However, the value of the setting must 
+be less than the value set by the caller of \fBpcre_exec()\fP for it to have 
+any effect. In other words, the pattern writer can lower the limit set by the 
+programmer, but not raise it. If there is more than one setting of one of these 
+limits, the lower value is used.   
+.
+.
+.SH "EBCDIC CHARACTER CODES"
+.rs
+.sp
+PCRE can be compiled to run in an environment that uses EBCDIC as its character
+code rather than ASCII or Unicode (typically a mainframe system). In the
+sections below, character code values are ASCII or Unicode; in an EBCDIC
+environment these characters may have different code values, and there are no
+code points greater than 255.
 .
 .
 .SH "CHARACTERS AND METACHARACTERS"
@@ -3101,6 +3145,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 April 2013
+Last updated: 26 April 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

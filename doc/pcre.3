@@ -1,4 +1,4 @@
-.TH PCRE 3 "11 November 2012" "PCRE 8.32"
+.TH PCRE 3 "26 April 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH INTRODUCTION
@@ -121,8 +121,11 @@ checked for UTF-8 validity. If the data string is very long, such a check might
 use sufficiently many resources as to cause your application to lose
 performance.
 .P
-The best way of guarding against this possibility is to use the
+One way of guarding against this possibility is to use the
 \fBpcre_fullinfo()\fP function to check the compiled pattern's options for UTF.
+Alternatively, from release 8.33, you can set the PCRE_NEVER_UTF option at
+compile time. This causes an compile time error if a pattern contains a
+UTF-setting sequence.
 .P
 If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
@@ -197,6 +200,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 11 November 2012
-Copyright (c) 1997-2012 University of Cambridge.
+Last updated: 26 April 2013
+Copyright (c) 1997-2013 University of Cambridge.
 .fi
