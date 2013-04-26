@@ -6160,11 +6160,9 @@ No match
  1: bc
  2: bc
 
-/-- This tests for an IPv6 address in the form where it can have up to --/
-/-- eight components, one and only one of which is empty. This must be --/
-No match
-/-- an internal component. --/
-No match
+/-- This tests for an IPv6 address in the form where it can have up to
+    eight components, one and only one of which is empty. This must be
+    an internal component. --/
 
 /^(?!:)                       # colon disallowed at start
   (?:                         # start of item
