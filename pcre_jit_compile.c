@@ -168,9 +168,9 @@ typedef struct jit_arguments {
   pcre_uchar *mark_ptr;
   void *callout_data;
   /* Everything else after. */
+  pcre_uint32 limit_match;
   int real_offset_count;
   int offset_count;
-  int call_limit;
   pcre_uint8 notbol;
   pcre_uint8 noteol;
   pcre_uint8 notempty;
@@ -182,6 +182,7 @@ typedef struct executable_functions {
   PUBL(jit_callback) callback;
   void *userdata;
   pcre_uint32 top_bracket;
+  pcre_uint32 limit_match;
   sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
 } executable_functions;
 
@@ -463,7 +464,7 @@ typedef struct compare_context {
 #define STACK_TOP     SLJIT_SCRATCH_REG2
 #define STACK_LIMIT   SLJIT_SAVED_REG3
 #define ARGUMENTS     SLJIT_SAVED_EREG1
-#define CALL_COUNT    SLJIT_SAVED_EREG2
+#define COUNT_MATCH   SLJIT_SAVED_EREG2
 #define RETURN_ADDR   SLJIT_TEMPORARY_EREG1
 
 /* Local space layout. */
@@ -474,7 +475,7 @@ typedef struct compare_context {
 #define POSSESSIVE0      (2 * sizeof(sljit_sw))
 #define POSSESSIVE1      (3 * sizeof(sljit_sw))
 /* Max limit of recursions. */
-#define CALL_LIMIT       (4 * sizeof(sljit_sw))
+#define LIMIT_MATCH      (4 * sizeof(sljit_sw))
 /* The output vector is stored on the stack, and contains pointers
 to characters. The vector data is divided into two groups: the first
 group contains the start / end character pointers, and the second is
@@ -2022,11 +2023,11 @@ while (list_item)
 common->stubs = NULL;
 }
 
-static SLJIT_INLINE void decrease_call_count(compiler_common *common)
+static SLJIT_INLINE void count_match(compiler_common *common)
 {
 DEFINE_COMPILER;
 
-OP2(SLJIT_SUB | SLJIT_SET_E, CALL_COUNT, 0, CALL_COUNT, 0, SLJIT_IMM, 1);
+OP2(SLJIT_SUB | SLJIT_SET_E, COUNT_MATCH, 0, COUNT_MATCH, 0, SLJIT_IMM, 1);
 add_jump(compiler, &common->calllimit, JUMP(SLJIT_C_ZERO));
 }
 
@@ -5292,7 +5293,7 @@ if (!minimize)
   JUMPHERE(zerolength);
   BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
 
-  decrease_call_count(common);
+  count_match(common);
   return cc;
   }
 
@@ -5331,7 +5332,7 @@ if (jump != NULL)
   JUMPHERE(jump);
 JUMPHERE(zerolength);
 
-decrease_call_count(common);
+count_match(common);
 return cc;
 }
 
@@ -6664,7 +6665,7 @@ if (bra == OP_BRAMINZERO)
   }
 
 if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO)
-  decrease_call_count(common);
+  count_match(common);
 
 /* Skip the other alternatives. */
 while (*cc == OP_ALT)
@@ -6951,7 +6952,7 @@ if (!zero)
 
 /* None of them matched. */
 set_jumps(emptymatch, LABEL());
-decrease_call_count(common);
+count_match(common);
 return cc + 1 + LINK_SIZE;
 }
 
@@ -7261,7 +7262,7 @@ switch(opcode)
   break;
   }
 
-decrease_call_count(common);
+count_match(common);
 return end;
 }
 
@@ -7588,7 +7589,7 @@ while (cc < ccend)
       }
     BACKTRACK_AS(braminzero_backtrack)->matchingpath = LABEL();
     if (cc[1] > OP_ASSERTBACK_NOT)
-      decrease_call_count(common);
+      count_match(common);
     break;
 
     case OP_ONCE:
@@ -8971,7 +8972,7 @@ common->use_ucp = (re->options & PCRE_UCP) != 0;
 ccend = bracketend(rootbacktrack.cc);
 
 /* Calculate the local space size on the stack. */
-common->ovector_start = CALL_LIMIT + sizeof(sljit_sw);
+common->ovector_start = LIMIT_MATCH + sizeof(sljit_sw);
 common->optimized_cbracket = (pcre_uint8 *)SLJIT_MALLOC(re->top_bracket + 1);
 if (!common->optimized_cbracket)
   return;
@@ -9103,10 +9104,10 @@ OP1(SLJIT_MOV, TMP1, 0, SLJIT_SAVED_REG1, 0);
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
 OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, end));
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
-OP1(SLJIT_MOV_SI, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, call_limit));
+OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, limit_match));
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, base));
 OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, limit));
-OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_LIMIT, TMP1, 0);
+OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LIMIT_MATCH, TMP1, 0);
 
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->hit_start, SLJIT_IMM, -1);
@@ -9148,7 +9149,7 @@ if (common->req_char_ptr != 0)
 /* Store the current STR_PTR in OVECTOR(0). */
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0), STR_PTR, 0);
 /* Copy the limit of allowed recursions. */
-OP1(SLJIT_MOV, CALL_COUNT, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), CALL_LIMIT);
+OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), LIMIT_MATCH);
 if (common->capture_last_ptr != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->capture_last_ptr, SLJIT_IMM, -1);
 
@@ -9426,6 +9427,7 @@ else
     }
   memset(functions, 0, sizeof(executable_functions));
   functions->top_bracket = (re->top_bracket + 1) * 2;
+  functions->limit_match = (re->flags & PCRE_MLSET) != 0 ? re->limit_match : 0;
   extra->executable_jit = functions;
   extra->flags |= PCRE_EXTRA_EXECUTABLE_JIT;
   }
@@ -9480,7 +9482,9 @@ arguments.begin = subject;
 arguments.end = subject + length;
 arguments.mark_ptr = NULL;
 /* JIT decreases this value less frequently than the interpreter. */
-arguments.call_limit = ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0) ? MATCH_LIMIT : extra_data->match_limit;
+arguments.limit_match = ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0) ? MATCH_LIMIT : (pcre_uint32)(extra_data->match_limit);
+if (functions->limit_match != 0 && functions->limit_match < arguments.limit_match)
+  arguments.limit_match = functions->limit_match;
 arguments.notbol = (options & PCRE_NOTBOL) != 0;
 arguments.noteol = (options & PCRE_NOTEOL) != 0;
 arguments.notempty = (options & PCRE_NOTEMPTY) != 0;
@@ -9571,7 +9575,9 @@ arguments.begin = subject_ptr;
 arguments.end = subject_ptr + length;
 arguments.mark_ptr = NULL;
 /* JIT decreases this value less frequently than the interpreter. */
-arguments.call_limit = ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0) ? MATCH_LIMIT : extra_data->match_limit;
+arguments.limit_match = ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0) ? MATCH_LIMIT : (pcre_uint32)(extra_data->match_limit);
+if (functions->limit_match != 0 && functions->limit_match < arguments.limit_match)
+  arguments.limit_match = functions->limit_match;
 arguments.notbol = (options & PCRE_NOTBOL) != 0;
 arguments.noteol = (options & PCRE_NOTEOL) != 0;
 arguments.notempty = (options & PCRE_NOTEMPTY) != 0;

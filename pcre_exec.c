@@ -6511,30 +6511,6 @@ if (extra_data != NULL
     && extra_data->executable_jit != NULL
     && (options & ~PUBLIC_JIT_EXEC_OPTIONS) == 0)
   {
-  /* A facility for setting the match limit in the regex was added; this puts
-  a value in the compiled block. (Similarly for recursion limit, but the JIT 
-  does not make use of that.) Because the regex is not passed to jit_exec, we 
-  fudge up an alternative extra block, because we must not modify the extra 
-  block that the user has passed. */ 
- 
-#if defined COMPILE_PCRE8
-  pcre_extra extra_data_copy;
-#elif defined COMPILE_PCRE16
-  pcre16_extra extra_data_copy;
-#elif defined COMPILE_PCRE32
-  pcre32_extra extra_data_copy;
-#endif
-    
-  if ((re->flags & PCRE_MLSET) != 0 && 
-      ((extra_data->flags & PCRE_EXTRA_MATCH_LIMIT) == 0 ||
-       re->limit_match < extra_data->match_limit)) 
-    {
-    extra_data_copy = *extra_data;
-    extra_data_copy.match_limit = re->limit_match;
-    extra_data_copy.flags |= PCRE_EXTRA_MATCH_LIMIT;   
-    extra_data = &extra_data_copy;
-    }  
-
   rc = PRIV(jit_exec)(extra_data, (const pcre_uchar *)subject, length,
        start_offset, options, offsets, offsetcount);
 
