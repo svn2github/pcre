@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.33 xx-xxxx-201x
--------------------------
+Version 8.33 28-April-2013
+--------------------------
 
 1.  Added 'U' to some constants that are compared to unsigned integers, to
     avoid compiler signed/unsigned warnings. Added (int) casts to unsigned

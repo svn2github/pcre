@@ -1,6 +1,30 @@
 News about PCRE releases
 ------------------------
 
+Release 8.33 28-April-2013
+--------------------------
+
+A number of bugs are fixed, and some performance improvements have been made. 
+There are also some new features, of which these are the most important:
+
+.  The behaviour of the backtracking verbs has been rationalized and 
+   documented in more detail.
+
+.  JIT now supports callouts and all of the backtracking verbs.
+
+.  Unicode validation has been updated in the light of Unicode Corrigendum #9,
+   which points out that "non characters" are not "characters that may not 
+   appear in Unicode strings" but rather "characters that are reserved for 
+   internal use and have only local meaning".
+   
+.  (*LIMIT_MATCH=d) and (*LIMIT_RECURSION=d) have been added so that the 
+   creator of a pattern can specify lower (but not higher) limits for the 
+   matching process.
+   
+.  The PCRE_NEVER_UTF option is available to prevent pattern-writers from using
+   the (*UTF) feature, as this could be a security issue. 
+
+
 Release 8.32 30-November-2012
 -----------------------------
 

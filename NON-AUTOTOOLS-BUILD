@@ -168,7 +168,7 @@ can skip ahead to the CMake section.
        pcre16_version.c
        pcre16_xclass.c
 
- (7') If you want to build a 16-bit library (as well as, or instead of the 8-bit
+ (8) If you want to build a 16-bit library (as well as, or instead of the 8-bit
      or 32-bit libraries) repeat steps 5-6 with the following files:
 
        pcre32_byte_order.c
@@ -194,30 +194,31 @@ can skip ahead to the CMake section.
        pcre32_version.c
        pcre32_xclass.c
 
- (8) If you want to build the POSIX wrapper functions (which apply only to the
+ (9) If you want to build the POSIX wrapper functions (which apply only to the
      8-bit library), ensure that you have the pcreposix.h file and then compile
      pcreposix.c (remembering -DHAVE_CONFIG_H if necessary). Link the result
      (on its own) as the pcreposix library.
 
- (9) The pcretest program can be linked with any combination of the 8-bit, 16-bit
-     and 32-bit libraries (depending on what you selected in config.h). Compile
-     pcretest.c and pcre_printint.c (again, don't forget -DHAVE_CONFIG_H) and
-     link them together with the appropriate library/ies. If you compiled an
-     8-bit library, pcretest also needs the pcreposix wrapper library unless
-     you compiled it with -DNOPOSIX.
+(10) The pcretest program can be linked with any combination of the 8-bit,
+     16-bit and 32-bit libraries (depending on what you selected in config.h).
+     Compile pcretest.c and pcre_printint.c (again, don't forget
+     -DHAVE_CONFIG_H) and link them together with the appropriate library/ies.
+     If you compiled an 8-bit library, pcretest also needs the pcreposix
+     wrapper library unless you compiled it with -DNOPOSIX.
 
-(10) Run pcretest on the testinput files in the testdata directory, and check
+(11) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. There are
      comments about what each test does in the section entitled "Testing PCRE"
      in the README file. If you compiled more than one of the 8-bit, 16-bit and
-     32-bit libraries, you need to run pcretest with the -16 option to do 16-bit
-     tests and with the -32 option to do 32-bit tests.
+     32-bit libraries, you need to run pcretest with the -16 option to do
+     16-bit tests and with the -32 option to do 32-bit tests.
 
      Some tests are relevant only when certain build-time options are selected.
-     For example, test 4 is for UTF-8/UTF-16/UTF-32 support, and will not run if
-     you have built PCRE without it. See the comments at the start of each
+     For example, test 4 is for UTF-8/UTF-16/UTF-32 support, and will not run
+     if you have built PCRE without it. See the comments at the start of each
      testinput file. If you have a suitable Unix-like shell, the RunTest script
-     will run the appropriate tests for you.
+     will run the appropriate tests for you. The command "RunTest list" will 
+     output a list of all the tests.
 
      Note that the supplied files are in Unix format, with just LF characters
      as line terminators. You may need to edit them to change this if your
@@ -227,11 +228,11 @@ can skip ahead to the CMake section.
      locale to "french" rather than "fr_FR", and there some minor output
      differences.
 
-(11) If you have built PCRE with SUPPORT_JIT, the JIT features will be tested
+(12) If you have built PCRE with SUPPORT_JIT, the JIT features will be tested
      by the testdata files. However, you might also like to build and run
-     the JIT test program, pcre_jit_test.c.
+     the freestanding JIT test program, pcre_jit_test.c.
 
-(12) If you want to use the pcregrep command, compile and link pcregrep.c; it
+(13) If you want to use the pcregrep command, compile and link pcregrep.c; it
      uses only the basic 8-bit PCRE library (it does not need the pcreposix
      library).
 
@@ -435,9 +436,9 @@ CMAKE_USE_RELATIVE_PATHS support on Windows.
 
 Here it is:
 -- AdditionalIncludeDirectories is only partially modified (only the
-first path - see below)
+   first path - see below)
 -- Only some of the contained file paths are modified - shown below for
-pcre.vcproj
+   pcre.vcproj
 -- It properly modifies
 
 I am sure CMake people can fix that if they want to. Until then one will
@@ -449,9 +450,9 @@ deal.
 AdditionalIncludeDirectories="E:\builds\pcre\build;E:\builds\pcre\pcre-7.5;"
 AdditionalIncludeDirectories=".;E:\builds\pcre\pcre-7.5;"
 
-RelativePath="pcre.h">
-RelativePath="pcre_chartables.c">
-RelativePath="pcre_chartables.c.rule">
+RelativePath="pcre.h"
+RelativePath="pcre_chartables.c"
+RelativePath="pcre_chartables.c.rule"
 
 
 TESTING WITH RUNTEST.BAT
@@ -646,4 +647,4 @@ There is also a mirror here:
   http://www.vsoft-software.com/downloads.html
 
 ==========================
-Last Updated: 22 February 2013
+Last Updated: 28 April 2013

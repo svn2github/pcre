@@ -37,10 +37,10 @@ The contents of this README file are:
 The PCRE APIs
 -------------
 
-PCRE is written in C, and it has its own API. There are three sets of functions,
-one for the 8-bit library, which processes strings of bytes, one for the
-16-bit library, which processes strings of 16-bit values, and one for the 32-bit
-library, which processes strings of 32-bit values. The distribution also
+PCRE is written in C, and it has its own API. There are three sets of
+functions, one for the 8-bit library, which processes strings of bytes, one for
+the 16-bit library, which processes strings of 16-bit values, and one for the
+32-bit library, which processes strings of 32-bit values. The distribution also
 includes a set of C++ wrapper functions (see the pcrecpp man page for details),
 courtesy of Google Inc., which can be used to call the 8-bit PCRE library from
 C++.
@@ -647,9 +647,13 @@ NON-AUTOTOOLS-BUILD.
 The RunTest script runs the pcretest test program (which is documented in its
 own man page) on each of the relevant testinput files in the testdata
 directory, and compares the output with the contents of the corresponding
-testoutput files. Some tests are relevant only when certain build-time options
-were selected. For example, the tests for UTF-8/16/32 support are run only if
---enable-utf was used. RunTest outputs a comment when it skips a test.
+testoutput files. RunTest uses a file called testtry to hold the main output
+from pcretest. Other files whose names begin with "test" are used as working
+files in some tests.
+
+Some tests are relevant only when certain build-time options were selected. For
+example, the tests for UTF-8/16/32 support are run only if --enable-utf was
+used. RunTest outputs a comment when it skips a test.
 
 Many of the tests that are not skipped are run up to three times. The second
 run forces pcre_study() to be called for all patterns except for a few in some
@@ -662,15 +666,20 @@ The entire set of tests is run once for each of the 8-bit, 16-bit and 32-bit
 libraries that are enabled. If you want to run just one set of tests, call
 RunTest with either the -8, -16 or -32 option.
 
-If valgrind is installed, you can run the tests under it by putting "valgrind" 
-on the RunTest command line.
-
-RunTest uses a file called testtry to hold the main output from pcretest.
-Other files whose names begin with "test" are used as working files in some
-tests. To run pcretest on just one or more specific test files, give their
-numbers as arguments to RunTest, for example:
+If valgrind is installed, you can run the tests under it by putting "valgrind"
+on the RunTest command line. To run pcretest on just one or more specific test
+files, give their numbers as arguments to RunTest, for example:
 
   RunTest 2 7 11
+  
+You can also specify ranges of tests such as 3-6 or 3- (meaning 3 to the
+end), or a number preceded by ~ to exclude a test. For example:
+
+  Runtest 3-15 ~10
+
+This runs tests 3 to 15, excluding test 10, and just ~13 runs all the tests
+except test 13. Whatever order the arguments are in, the tests are always run
+in numerical order.
 
 You can also call RunTest with the single argument "list" to cause it to output
 a list of tests.
@@ -731,21 +740,24 @@ test is run only when JIT support is not available. They test some JIT-specific
 features such as information output from pcretest about JIT compilation.
 
 The fourteenth, fifteenth, and sixteenth tests are run only in 8-bit mode, and
-the seventeenth, eighteenth, and nineteenth tests are run only in 16/32-bit mode.
-These are tests that generate different output in the two modes. They are for
-general cases, UTF-8/16/32 support, and Unicode property support, respectively.
+the seventeenth, eighteenth, and nineteenth tests are run only in 16/32-bit
+mode. These are tests that generate different output in the two modes. They are
+for general cases, UTF-8/16/32 support, and Unicode property support,
+respectively.
 
 The twentieth test is run only in 16/32-bit mode. It tests some specific
 16/32-bit features of the DFA matching engine.
 
-The twenty-first and twenty-second tests are run only in 16/32-bit mode, when the
-link size is set to 2 for the 16-bit library. They test reloading pre-compiled patterns.
+The twenty-first and twenty-second tests are run only in 16/32-bit mode, when
+the link size is set to 2 for the 16-bit library. They test reloading
+pre-compiled patterns.
 
-The twenty-third and twenty-fourth tests are run only in 16-bit mode. They are for
-general cases, and UTF-16 support, respectively.
+The twenty-third and twenty-fourth tests are run only in 16-bit mode. They are
+for general cases, and UTF-16 support, respectively.
 
-The twenty-fifth and twenty-sixth tests are run only in 32-bit mode. They are for
-general cases, and UTF-32 support, respectively.
+The twenty-fifth and twenty-sixth tests are run only in 32-bit mode. They are
+for general cases, and UTF-32 support, respectively.
+
 
 Character tables
 ----------------
@@ -811,11 +823,11 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 (A) Source files of the PCRE library functions and their headers:
 
   dftables.c              auxiliary program for building pcre_chartables.c
-                            when --enable-rebuild-chartables is specified
+                          when --enable-rebuild-chartables is specified
 
   pcre_chartables.c.dist  a default set of character tables that assume ASCII
-                            coding; used, unless --enable-rebuild-chartables is
-                            specified, by copying to pcre[16]_chartables.c
+                          coding; used, unless --enable-rebuild-chartables is
+                          specified, by copying to pcre[16]_chartables.c
 
   pcreposix.c                )
   pcre[16|32]_byte_order.c   )
@@ -959,4 +971,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 16 March 2013
+Last updated: 28 April 2013
