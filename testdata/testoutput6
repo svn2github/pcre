@@ -2134,4 +2134,16 @@ No match
     \x{0053}\x{0073}\x{017f}
  0: Ss\x{17f}
 
+/^\p{Any}*\d{4}/8
+    1234
+ 0: 1234
+    123 
+No match
+ 
+/^\X*\w{4}/8
+    1234
+ 0: 1234
+    123  
+No match
+    
 /-- End of testinput6 --/

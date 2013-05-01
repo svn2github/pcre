@@ -1233,18 +1233,6 @@ MK: a\x{a3}b
     123 
 No match
     
-/^\p{Any}*\d{4}/8
-    1234
- 0: 1234
-    123 
-No match
- 
-/^\X*\w{4}/8
-    1234
- 0: 1234
-    123  
-No match
-    
 /^[^b]*\w{4}/8
     aaaa
  0: aaaa
