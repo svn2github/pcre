@@ -217,7 +217,7 @@ can skip ahead to the CMake section.
      For example, test 4 is for UTF-8/UTF-16/UTF-32 support, and will not run
      if you have built PCRE without it. See the comments at the start of each
      testinput file. If you have a suitable Unix-like shell, the RunTest script
-     will run the appropriate tests for you. The command "RunTest list" will 
+     will run the appropriate tests for you. The command "RunTest list" will
      output a list of all the tests.
 
      Note that the supplied files are in Unix format, with just LF characters

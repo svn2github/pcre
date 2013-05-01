@@ -14,13 +14,13 @@ Version 8.33 28-April-2013
 
 3.  Revise the creation of config.h.generic so that all boolean macros are
     #undefined, whereas non-boolean macros are #ifndef/#endif-ed. This makes
-    overriding via -D on the command line possible.  
+    overriding via -D on the command line possible.
 
 4.  Changing the definition of the variable "op" in pcre_exec.c from pcre_uchar
     to unsigned int is reported to make a quite noticeable speed difference in
     a specific Windows environment. Testing on Linux did also appear to show
     some benefit (and it is clearly not harmful). Also fixed the definition of
-    Xop which should be unsigned. 
+    Xop which should be unsigned.
 
 5.  Related to (4), changing the definition of the intermediate variable cc
     in repeated character loops from pcre_uchar to pcre_uint32 also gave speed
@@ -28,9 +28,9 @@ Version 8.33 28-April-2013
 
 6.  Fix forward search in JIT when link size is 3 or greater. Also removed some
     unnecessary spaces.
-    
+
 7.  Adjust autogen.sh and configure.ac to lose warnings given by automake 1.12
-    and later. 
+    and later.
 
 8.  Fix two buffer over read issues in 16 and 32 bit modes. Affects JIT only.
 
@@ -44,15 +44,15 @@ Version 8.33 28-April-2013
     (b) Minimum length was not checked before the matching is started.
 
 11. The value of capture_last that is passed to callouts was incorrect in some
-    cases when there was a capture on one path that was subsequently abandoned 
-    after a backtrack. Also, the capture_last value is now reset after a 
+    cases when there was a capture on one path that was subsequently abandoned
+    after a backtrack. Also, the capture_last value is now reset after a
     recursion, since all captures are also reset in this case.
-    
-12. The interpreter no longer returns the "too many substrings" error in the 
-    case when an overflowing capture is in a branch that is subsequently 
+
+12. The interpreter no longer returns the "too many substrings" error in the
+    case when an overflowing capture is in a branch that is subsequently
     abandoned after a backtrack.
-    
-13. In the pathological case when an offset vector of size 2 is used, pcretest 
+
+13. In the pathological case when an offset vector of size 2 is used, pcretest
     now prints out the matched string after a yield of 0 or 1.
 
 14. Inlining subpatterns in recursions, when certain conditions are fulfilled.
@@ -61,48 +61,48 @@ Version 8.33 28-April-2013
 15. JIT compiler now supports 32 bit Macs thanks to Lawrence Velazquez.
 
 16. Partial matches now set offsets[2] to the "bumpalong" value, that is, the
-    offset of the starting point of the matching process, provided the offsets 
+    offset of the starting point of the matching process, provided the offsets
     vector is large enough.
-    
+
 17. The \A escape now records a lookbehind value of 1, though its execution
     does not actually inspect the previous character. This is to ensure that,
     in partial multi-segment matching, at least one character from the old
     segment is retained when a new segment is processed. Otherwise, if there
     are no lookbehinds in the pattern, \A might match incorrectly at the start
     of a new segment.
-    
+
 18. Added some #ifdef __VMS code into pcretest.c to help VMS implementations.
 
-19. Redefined some pcre_uchar variables in pcre_exec.c as pcre_uint32; this 
+19. Redefined some pcre_uchar variables in pcre_exec.c as pcre_uint32; this
     gives some modest performance improvement in 8-bit mode.
-    
+
 20. Added the PCRE-specific property \p{Xuc} for matching characters that can
-    be expressed in certain programming languages using Universal Character 
-    Names. 
-    
+    be expressed in certain programming languages using Universal Character
+    Names.
+
 21. Unicode validation has been updated in the light of Unicode Corrigendum #9,
-    which points out that "non characters" are not "characters that may not 
-    appear in Unicode strings" but rather "characters that are reserved for 
+    which points out that "non characters" are not "characters that may not
+    appear in Unicode strings" but rather "characters that are reserved for
     internal use and have only local meaning".
-    
+
 22. When a pattern was compiled with automatic callouts (PCRE_AUTO_CALLOUT) and
-    there was a conditional group that depended on an assertion, if the 
-    assertion was false, the callout that immediately followed the alternation 
+    there was a conditional group that depended on an assertion, if the
+    assertion was false, the callout that immediately followed the alternation
     in the condition was skipped when pcre_exec() was used for matching.
-    
+
 23. Allow an explicit callout to be inserted before an assertion that is the
-    condition for a conditional group, for compatibility with automatic 
+    condition for a conditional group, for compatibility with automatic
     callouts, which always insert a callout at this point.
-    
-24. In 8.31, (*COMMIT) was confined to within a recursive subpattern. Perl also 
+
+24. In 8.31, (*COMMIT) was confined to within a recursive subpattern. Perl also
     confines (*SKIP) and (*PRUNE) in the same way, and this has now been done.
 
 25. (*PRUNE) is now supported by the JIT compiler.
 
 26. Fix infinite loop when /(?<=(*SKIP)ac)a/ is matched against aa.
 
-27. Fix the case where there are two or more SKIPs with arguments that may be 
-    ignored. 
+27. Fix the case where there are two or more SKIPs with arguments that may be
+    ignored.
 
 28. (*SKIP) is now supported by the JIT compiler.
 
@@ -116,13 +116,13 @@ Version 8.33 28-April-2013
     SKIP. Now, PCRE acts on whichever backtracking verb is reached first by
     backtracking. In some cases this makes it more Perl-compatible, but Perl's
     rather obscure rules do not always do the same thing.
-    
-    (2) Previously, backtracking verbs were confined within assertions. This is 
+
+    (2) Previously, backtracking verbs were confined within assertions. This is
     no longer the case for positive assertions, except for (*ACCEPT). Again,
     this sometimes improves Perl compatibility, and sometimes does not.
-    
-32. A number of tests that were in test 2 because Perl did things differently 
-    have been moved to test 1, because either Perl or PCRE has changed, and 
+
+32. A number of tests that were in test 2 because Perl did things differently
+    have been moved to test 1, because either Perl or PCRE has changed, and
     these tests are now compatible.
 
 32. Control verbs are handled in the same way in JIT and interpreter.
@@ -132,17 +132,17 @@ Version 8.33 28-April-2013
 
 34. Auto-detect and optimize limited repetitions in JIT.
 
-35. Implement PCRE_NEVER_UTF to lock out the use of UTF, in particular, 
+35. Implement PCRE_NEVER_UTF to lock out the use of UTF, in particular,
     blocking (*UTF) etc.
-    
-36. In the interpreter, maximizing pattern repetitions for characters and 
+
+36. In the interpreter, maximizing pattern repetitions for characters and
     character types now use tail recursion, which reduces stack usage.
-    
+
 37. The value of the max lookbehind was not correctly preserved if a compiled
     and saved regex was reloaded on a host of different endianness.
-    
+
 38. Implemented (*LIMIT_MATCH) and (*LIMIT_RECURSION). As part of the extension
-    of the compiled pattern block, expand the flags field from 16 to 32 bits 
+    of the compiled pattern block, expand the flags field from 16 to 32 bits
     because it was almost full.
 
 

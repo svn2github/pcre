@@ -211,12 +211,12 @@ typedef int pcre_int16;
 typedef unsigned int pcre_uint32;
 typedef int pcre_int32;
 #define PCRE_UINT32_MAX UINT_MAX
-#define PCRE_INT32_MAX INT_MAX  
+#define PCRE_INT32_MAX INT_MAX
 #elif ULONG_MAX == 4294967295UL
 typedef unsigned long int pcre_uint32;
 typedef long int pcre_int32;
 #define PCRE_UINT32_MAX ULONG_MAX
-#define PCRE_INT32_MAX LONG_MAX  
+#define PCRE_INT32_MAX LONG_MAX
 #else
 #error Cannot determine a type for 32-bit integers
 #endif
@@ -2296,7 +2296,7 @@ enum { JIT_COMPILE, JIT_PARTIAL_SOFT_COMPILE, JIT_PARTIAL_HARD_COMPILE,
 code vector run on as long as necessary after the end. We store an explicit
 offset to the name table so that if a regex is compiled on one host, saved, and
 then run on another where the size of pointers is different, all might still
-be well. 
+be well.
 
 The size of the structure must be a multiple of 8 bytes. For the case of
 compiled-on-4 and run-on-8, we include an extra pointer that is always NULL so
@@ -2306,14 +2306,14 @@ bytes.
 It is necessary to fork the struct for the 32 bit library, since it needs to
 use pcre_uint32 for first_char and req_char. We can't put an ifdef inside the
 typedef because pcretest needs access to the struct of the 8-, 16- and 32-bit
-variants. 
+variants.
 
-*** WARNING *** 
-When new fields are added to these structures, remember to adjust the code in 
+*** WARNING ***
+When new fields are added to these structures, remember to adjust the code in
 pcre_byte_order.c that is concerned with swapping the byte order of the fields
 when a compiled regex is reloaded on a host with different endianness.
 *** WARNING ***
-There is also similar byte-flipping code in pcretest.c, which is used for 
+There is also similar byte-flipping code in pcretest.c, which is used for
 testing the byte-flipping features. It must also be kept in step.
 *** WARNING ***
 */
@@ -2324,7 +2324,7 @@ typedef struct real_pcre8_or_16 {
   pcre_uint32 options;            /* Public options */
   pcre_uint32 flags;              /* Private flags */
   pcre_uint32 limit_match;        /* Limit set from regex */
-  pcre_uint32 limit_recursion;    /* Limit set from regex */ 
+  pcre_uint32 limit_recursion;    /* Limit set from regex */
   pcre_uint16 first_char;         /* Starting character */
   pcre_uint16 req_char;           /* This character must be seen */
   pcre_uint16 max_lookbehind;     /* Longest lookbehind (characters) */
@@ -2334,9 +2334,9 @@ typedef struct real_pcre8_or_16 {
   pcre_uint16 name_entry_size;    /* Size of any name items */
   pcre_uint16 name_count;         /* Number of name items */
   pcre_uint16 ref_count;          /* Reference count */
-  pcre_uint16 dummy1;             /* To ensure size is a multiple of 8 */ 
-  pcre_uint16 dummy2;             /* To ensure size is a multiple of 8 */ 
-  pcre_uint16 dummy3;             /* To ensure size is a multiple of 8 */ 
+  pcre_uint16 dummy1;             /* To ensure size is a multiple of 8 */
+  pcre_uint16 dummy2;             /* To ensure size is a multiple of 8 */
+  pcre_uint16 dummy3;             /* To ensure size is a multiple of 8 */
   const pcre_uint8 *tables;       /* Pointer to tables or NULL for std */
   void             *nullpad;      /* NULL padding */
 } real_pcre8_or_16;
@@ -2350,7 +2350,7 @@ typedef struct real_pcre32 {
   pcre_uint32 options;            /* Public options */
   pcre_uint32 flags;              /* Private flags */
   pcre_uint32 limit_match;        /* Limit set from regex */
-  pcre_uint32 limit_recursion;    /* Limit set from regex */ 
+  pcre_uint32 limit_recursion;    /* Limit set from regex */
   pcre_uint32 first_char;         /* Starting character */
   pcre_uint32 req_char;           /* This character must be seen */
   pcre_uint16 max_lookbehind;     /* Longest lookbehind (characters) */
@@ -2360,7 +2360,7 @@ typedef struct real_pcre32 {
   pcre_uint16 name_entry_size;    /* Size of any name items */
   pcre_uint16 name_count;         /* Number of name items */
   pcre_uint16 ref_count;          /* Reference count */
-  pcre_uint16 dummy;              /* To ensure size is a multiple of 8 */ 
+  pcre_uint16 dummy;              /* To ensure size is a multiple of 8 */
   const pcre_uint8 *tables;       /* Pointer to tables or NULL for std */
   void             *nullpad;      /* NULL padding */
 } real_pcre32;
@@ -2457,7 +2457,7 @@ typedef struct recursion_info {
   unsigned int group_num;         /* Number of group that was called */
   int *offset_save;               /* Pointer to start of saved offsets */
   int saved_max;                  /* Number of saved offsets */
-  int saved_capture_last;         /* Last capture number */ 
+  int saved_capture_last;         /* Last capture number */
   PCRE_PUCHAR subject_position;   /* Position at start of recursion */
 } recursion_info;
 

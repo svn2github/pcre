@@ -1119,12 +1119,12 @@ for (;;)
             if (c == *cp++) { OK = TRUE; break; }
             }
           break;
-          
+
           case PT_UCNC:
           OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                c >= 0xe000;
-          break;         
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1372,9 +1372,9 @@ for (;;)
 
           case PT_UCNC:
           OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                c >= 0xe000;
-          break;         
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1616,9 +1616,9 @@ for (;;)
 
           case PT_UCNC:
           OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                c >= 0xe000;
-          break;         
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -1885,9 +1885,9 @@ for (;;)
 
           case PT_UCNC:
           OK = c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) || 
+               c == CHAR_GRAVE_ACCENT || (c >= 0xa0 && c <= 0xd7ff) ||
                c >= 0xe000;
-          break;         
+          break;
 
           /* Should never occur, but keep compilers from grumbling. */
 
@@ -3561,17 +3561,17 @@ for (;;)
   /* Anything other than "no match" means we are done, always; otherwise, carry
   on only if not anchored. */
 
-  if (rc != PCRE_ERROR_NOMATCH || anchored) 
+  if (rc != PCRE_ERROR_NOMATCH || anchored)
     {
     if (rc == PCRE_ERROR_PARTIAL && offsetcount >= 2)
       {
       offsets[0] = (int)(md->start_used_ptr - (PCRE_PUCHAR)subject);
       offsets[1] = (int)(end_subject - (PCRE_PUCHAR)subject);
-      if (offsetcount > 2) 
+      if (offsetcount > 2)
         offsets[2] = (int)(current_subject - (PCRE_PUCHAR)subject);
       }
     return rc;
-    } 
+    }
 
   /* Advance to the next subject character unless we are at the end of a line
   and firstline is set. */

@@ -126,8 +126,11 @@ use sufficiently many resources as to cause your application to lose
 performance.
 </P>
 <P>
-The best way of guarding against this possibility is to use the
+One way of guarding against this possibility is to use the
 <b>pcre_fullinfo()</b> function to check the compiled pattern's options for UTF.
+Alternatively, from release 8.33, you can set the PCRE_NEVER_UTF option at
+compile time. This causes an compile time error if a pattern contains a
+UTF-setting sequence.
 </P>
 <P>
 If your application is one that supports UTF, be aware that validity checking
@@ -195,9 +198,9 @@ two digits 10, at the domain cam.ac.uk.
 </P>
 <br><a name="SEC5" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 November 2012
+Last updated: 26 April 2013
 <br>
-Copyright &copy; 1997-2012 University of Cambridge.
+Copyright &copy; 1997-2013 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

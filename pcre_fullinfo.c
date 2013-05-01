@@ -221,16 +221,16 @@ switch (what)
   case PCRE_INFO_MAXLOOKBEHIND:
   *((int *)where) = re->max_lookbehind;
   break;
-  
+
   case PCRE_INFO_MATCHLIMIT:
   if ((re->flags & PCRE_MLSET) == 0) return PCRE_ERROR_UNSET;
   *((unsigned long int *)where) = re->limit_match;
-  break; 
+  break;
 
   case PCRE_INFO_RECURSIONLIMIT:
   if ((re->flags & PCRE_RLSET) == 0) return PCRE_ERROR_UNSET;
   *((unsigned long int *)where) = re->limit_recursion;
-  break; 
+  break;
 
   default: return PCRE_ERROR_BADOPTION;
   }

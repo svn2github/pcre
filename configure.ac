@@ -444,8 +444,8 @@ but if you do, default values will be taken from config.h for non-boolean
 macros that are not defined on the command line.
 
 Boolean macros such as HAVE_STDLIB_H and SUPPORT_PCRE8 should either be defined
-(conventionally to 1) for TRUE, and not defined at all for FALSE. All such 
-macros are listed as a commented #undef in config.h.generic. Macros such as 
+(conventionally to 1) for TRUE, and not defined at all for FALSE. All such
+macros are listed as a commented #undef in config.h.generic. Macros such as
 MATCH_LIMIT, whose actual value is relevant, have defaults defined, but are
 surrounded by #ifndef/#endif lines so that the value can be overridden by -D.
 

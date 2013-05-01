@@ -811,10 +811,10 @@ for (;;)
     RRETURN(MATCH_SKIP);
 
     /* Note that, for Perl compatibility, SKIP with an argument does NOT set
-    nomatch_mark. When a pattern match ends with a SKIP_ARG for which there was 
+    nomatch_mark. When a pattern match ends with a SKIP_ARG for which there was
     not a matching mark, we have to re-run the match, ignoring the SKIP_ARG
-    that failed and any that preceed it (either they also failed, or were not 
-    triggered). To do this, we maintain a count of executed SKIP_ARGs. If a 
+    that failed and any that preceed it (either they also failed, or were not
+    triggered). To do this, we maintain a count of executed SKIP_ARGs. If a
     SKIP_ARG gets to top level, the match is re-run with md->ignore_skip_arg
     set to the count of the one that failed. */
 
@@ -828,7 +828,7 @@ for (;;)
     RMATCH(eptr, ecode + PRIV(OP_lengths)[*ecode] + ecode[1], offset_top, md,
       eptrb, RM57);
     if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-      
+
     /* Pass back the current skip name by overloading md->start_match_ptr and
     returning the special MATCH_SKIP_ARG return code. This will either be
     caught by a matching MARK, or get to the top, where it causes a rematch
@@ -1604,22 +1604,22 @@ for (;;)
     else condassert = FALSE;
 
     /* Loop for each branch */
-     
+
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM4);
-      
+
       /* A match means that the assertion is true; break out of the loop
       that matches its alternatives. */
-        
+
       if (rrc == MATCH_MATCH || rrc == MATCH_ACCEPT)
         {
         mstart = md->start_match_ptr;   /* In case \K reset it */
         break;
         }
-        
+
       /* If not matched, restore the previous mark setting. */
- 
+
       md->mark = save_mark;
 
       /* See comment in the code for capturing groups above about handling
@@ -1632,7 +1632,7 @@ for (;;)
             (*ecode == OP_ALT || *next == OP_ALT))
           rrc = MATCH_NOMATCH;
         }
-        
+
       /* Anything other than NOMATCH causes the entire assertion to fail,
       passing back the return code. This includes COMMIT, SKIP, PRUNE and an
       uncaptured THEN, which means they take their normal effect. This
@@ -1643,9 +1643,9 @@ for (;;)
       ecode += GET(ecode, 1);
       }
     while (*ecode == OP_ALT);   /* Continue for next alternative */
-    
+
     /* If we have tried all the alternative branches, the assertion has
-    failed. If not, we broke out after a match. */ 
+    failed. If not, we broke out after a match. */
 
     if (*ecode == OP_KET) RRETURN(MATCH_NOMATCH);
 
@@ -1661,7 +1661,7 @@ for (;;)
     offset_top = md->end_offset_top;
     continue;
 
-    /* Negative assertion: all branches must fail to match for the assertion to 
+    /* Negative assertion: all branches must fail to match for the assertion to
     succeed. */
 
     case OP_ASSERT_NOT:
@@ -1675,20 +1675,20 @@ for (;;)
     else condassert = FALSE;
 
     /* Loop for each alternative branch. */
-     
+
     do
       {
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, NULL, RM5);
       md->mark = save_mark;   /* Always restore the mark setting */
-      
+
       switch(rrc)
         {
         case MATCH_MATCH:            /* A successful match means */
         case MATCH_ACCEPT:           /* the assertion has failed. */
         RRETURN(MATCH_NOMATCH);
-        
+
         case MATCH_NOMATCH:          /* Carry on with next branch */
-        break;  
+        break;
 
         /* See comment in the code for capturing groups above about handling
         THEN. */
@@ -1697,12 +1697,12 @@ for (;;)
         next = ecode + GET(ecode,1);
         if (md->start_match_ptr < next &&
             (*ecode == OP_ALT || *next == OP_ALT))
-          {   
+          {
           rrc = MATCH_NOMATCH;
           break;
           }
-        /* Otherwise fall through. */  
-  
+        /* Otherwise fall through. */
+
         /* COMMIT, SKIP, PRUNE, and an uncaptured THEN cause the whole
         assertion to fail to match, without considering any more alternatives.
         Failing to match means the assertion is true. This is a consistent
@@ -1710,25 +1710,25 @@ for (;;)
 
         case MATCH_COMMIT:
         case MATCH_SKIP:
-        case MATCH_SKIP_ARG: 
+        case MATCH_SKIP_ARG:
         case MATCH_PRUNE:
         do ecode += GET(ecode,1); while (*ecode == OP_ALT);
         goto NEG_ASSERT_TRUE;   /* Break out of alternation loop */
-      
+
         /* Anything else is an error */
-         
+
         default:
-        RRETURN(rrc); 
+        RRETURN(rrc);
         }
-        
+
       /* Continue with next branch */
-       
+
       ecode += GET(ecode,1);
       }
     while (*ecode == OP_ALT);
-    
+
     /* All branches in the assertion failed to match. */
-    
+
     NEG_ASSERT_TRUE:
     if (condassert) RRETURN(MATCH_MATCH);  /* Condition assertion */
     ecode += 1 + LINK_SIZE;                /* Continue with current branch */
@@ -1896,10 +1896,10 @@ for (;;)
         /* PCRE does not allow THEN, SKIP, PRUNE or COMMIT to escape beyond a
         recursion; they cause a NOMATCH for the entire recursion. These codes
         are defined in a range that can be tested for. */
-        
+
         if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
-          RRETURN(MATCH_NOMATCH); 
- 
+          RRETURN(MATCH_NOMATCH);
+
         /* Any return code other than NOMATCH is an error. */
 
         if (rrc != MATCH_NOMATCH)
@@ -3387,20 +3387,20 @@ for (;;)
     max = rep_max[c];                 /* zero for max => infinity */
     if (max == 0) max = INT_MAX;
 
-    /* Common code for all repeated single-character matches. We first check 
-    for the minimum number of characters. If the minimum equals the maximum, we 
-    are done. Otherwise, if minimizing, check the rest of the pattern for a 
-    match; if there isn't one, advance up to the maximum, one character at a 
+    /* Common code for all repeated single-character matches. We first check
+    for the minimum number of characters. If the minimum equals the maximum, we
+    are done. Otherwise, if minimizing, check the rest of the pattern for a
+    match; if there isn't one, advance up to the maximum, one character at a
     time.
-    
-    If maximizing, advance up to the maximum number of matching characters, 
+
+    If maximizing, advance up to the maximum number of matching characters,
     until eptr is past the end of the maximum run. If possessive, we are
     then done (no backing up). Otherwise, match at this position; anything
     other than no match is immediately returned. For nomatch, back up one
     character, unless we are matching \R and the last thing matched was
-    \r\n, in which case, back up two bytes. When we reach the first optional 
-    character position, we can save stack by doing a tail recurse. 
-    
+    \r\n, in which case, back up two bytes. When we reach the first optional
+    character position, we can save stack by doing a tail recurse.
+
     The various UTF/non-UTF and caseful/caseless cases are handled separately,
     for speed. */
 
@@ -3594,7 +3594,7 @@ for (;;)
         if (possessive) continue;       /* No backtracking */
         for (;;)
           {
-          if (eptr == pp) goto TAIL_RECURSE; 
+          if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM25);
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -4073,7 +4073,7 @@ for (;;)
           if (possessive) continue;    /* No backtracking */
           for (;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE; 
+            if (eptr == pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM35);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -5680,7 +5680,7 @@ for (;;)
           if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM45);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          eptr--; 
+          eptr--;
           for (;;)                        /* Move back over one extended */
             {
             if (!utf) c = *eptr; else
@@ -5958,7 +5958,7 @@ for (;;)
         if (possessive) continue;    /* No backtracking */
         for(;;)
           {
-          if (eptr == pp) goto TAIL_RECURSE; 
+          if (eptr == pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM46);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
@@ -6557,11 +6557,11 @@ if (extra_data != NULL)
   }
 
 /* Limits in the regex override only if they are smaller. */
-  
+
 if ((re->flags & PCRE_MLSET) != 0 && re->limit_match < md->match_limit)
   md->match_limit = re->limit_match;
- 
-if ((re->flags & PCRE_RLSET) != 0 && 
+
+if ((re->flags & PCRE_RLSET) != 0 &&
     re->limit_recursion < md->match_limit_recursion)
   md->match_limit_recursion = re->limit_recursion;
 

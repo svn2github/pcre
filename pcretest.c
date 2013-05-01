@@ -3134,7 +3134,7 @@ while (argc > 1 && argv[op][0] == '-')
         (void)PCRE_CONFIG(PCRE_CONFIG_LINK_SIZE, &rc);
         printf("%d\n", rc);
         yield = rc;
-        
+
 #ifdef __VMS
         vms_setsymbol("LINKSIZE",0,yield );
 #endif
@@ -3697,7 +3697,7 @@ while (!done)
       case 'Y': options |= PCRE_NO_START_OPTIMISE; break;
       case 'Z': debug_lengths = 0; break;
       case '8': options |= PCRE_UTF8; use_utf = 1; break;
-      case '9': options |= PCRE_NEVER_UTF; break; 
+      case '9': options |= PCRE_NEVER_UTF; break;
       case '?': options |= PCRE_NO_UTF8_CHECK; break;
 
       case 'T':
@@ -4018,7 +4018,7 @@ while (!done)
       {
       unsigned long int all_options;
       pcre_uint32 first_char, need_char;
-      pcre_uint32 match_limit, recursion_limit; 
+      pcre_uint32 match_limit, recursion_limit;
       int count, backrefmax, first_char_set, need_char_set, okpartial, jchanged,
         hascrorlf, maxlookbehind;
       int nameentrysize, namecount;
@@ -4052,12 +4052,12 @@ while (!done)
 
       if (maxlookbehind > 0)
         fprintf(outfile, "Max lookbehind = %d\n", maxlookbehind);
-        
+
       if (new_info(re, NULL, PCRE_INFO_MATCHLIMIT, &match_limit) == 0)
-        fprintf(outfile, "Match limit = %u\n", match_limit); 
+        fprintf(outfile, "Match limit = %u\n", match_limit);
 
       if (new_info(re, NULL, PCRE_INFO_RECURSIONLIMIT, &recursion_limit) == 0)
-        fprintf(outfile, "Recursion limit = %u\n", recursion_limit); 
+        fprintf(outfile, "Recursion limit = %u\n", recursion_limit);
 
       if (namecount > 0)
         {
@@ -5287,15 +5287,15 @@ while (!done)
           }
         }
 
-      /* There was a partial match. If the bumpalong point is not the same as 
+      /* There was a partial match. If the bumpalong point is not the same as
       the first inspected character, show the offset explicitly. */
 
       else if (count == PCRE_ERROR_PARTIAL)
         {
         fprintf(outfile, "Partial match");
         if (use_size_offsets > 2 && use_offsets[0] != use_offsets[2])
-          fprintf(outfile, " at offset %d", use_offsets[2]);  
-        if (markptr != NULL) 
+          fprintf(outfile, " at offset %d", use_offsets[2]);
+        if (markptr != NULL)
           {
           fprintf(outfile, ", mark=");
           PCHARSV(markptr, 0, -1, outfile);

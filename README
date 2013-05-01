@@ -575,12 +575,12 @@ use the workaround of specifying the following environment variable prior to
 running the "configure" script:
 
   CXXLDFLAGS="-lstd_v2 -lCsup_v2"
-  
+
 
 Compiling in Tru64 using native compilers
 -----------------------------------------
 
-The following error may occur when compiling with native compilers in the Tru64 
+The following error may occur when compiling with native compilers in the Tru64
 operating system:
 
   CXX    libpcrecpp_la-pcrecpp.lo
@@ -671,7 +671,7 @@ on the RunTest command line. To run pcretest on just one or more specific test
 files, give their numbers as arguments to RunTest, for example:
 
   RunTest 2 7 11
-  
+
 You can also specify ranges of tests such as 3-6 or 3- (meaning 3 to the
 end), or a number preceded by ~ to exclude a test. For example:
 

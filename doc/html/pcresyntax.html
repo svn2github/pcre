@@ -377,6 +377,8 @@ but some of them use Unicode properties if PCRE_UCP is set. You can use
 The following are recognized only at the start of a pattern or after one of the
 newline-setting options with similar syntax:
 <pre>
+  (*LIMIT_MATCH=d) set the match limit to d (decimal number)
+  (*LIMIT_RECURSION=d) set the recursion limit to d (decimal number)
   (*NO_START_OPT) no start-match optimization (PCRE_NO_START_OPTIMIZE)
   (*UTF8)         set UTF-8 mode: 8-bit library (PCRE_UTF8)
   (*UTF16)        set UTF-16 mode: 16-bit library (PCRE_UTF16)
@@ -514,7 +516,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC27" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 February 2013
+Last updated: 26 April 2013
 <br>
 Copyright &copy; 1997-2013 University of Cambridge.
 <br>

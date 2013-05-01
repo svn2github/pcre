@@ -756,6 +756,15 @@ equivalent to Perl's /m option, and it can be changed within a pattern by a
 (?m) option setting. If there are no newlines in a subject string, or no
 occurrences of ^ or $ in a pattern, setting PCRE_MULTILINE has no effect.
 <pre>
+  PCRE_NEVER_UTF
+</pre>
+This option locks out interpretation of the pattern as UTF-8 (or UTF-16 or
+UTF-32 in the 16-bit and 32-bit libraries). In particular, it prevents the
+creator of the pattern from switching to UTF interpretation by starting the
+pattern with (*UTF). This may be useful in applications that process patterns
+from external sources. The combination of PCRE_UTF8 and PCRE_NEVER_UTF also
+causes an error.
+<pre>
   PCRE_NEWLINE_CR
   PCRE_NEWLINE_LF
   PCRE_NEWLINE_CRLF
@@ -814,12 +823,14 @@ were followed by ?: but named parentheses can still be used for capturing (and
 they acquire numbers in the usual way). There is no equivalent of this option
 in Perl.
 <pre>
-  NO_START_OPTIMIZE
+  PCRE_NO_START_OPTIMIZE
 </pre>
 This is an option that acts at matching time; that is, it is really an option
 for <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>. If it is set at compile time,
-it is remembered with the compiled pattern and assumed at matching time. For
-details see the discussion of PCRE_NO_START_OPTIMIZE
+it is remembered with the compiled pattern and assumed at matching time. This
+is necessary if you want to use JIT execution, because the JIT compiler needs
+to know whether or not this option is set. For details see the discussion of
+PCRE_NO_START_OPTIMIZE
 <a href="#execoptions">below.</a>
 <pre>
   PCRE_UCP
@@ -938,7 +949,7 @@ have fallen out of use. To avoid confusion, they have not been re-used.
         name/number or by a plain number
   58  a numbered reference must not be zero
   59  an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)
-  60  (*VERB) not recognized
+  60  (*VERB) not recognized or malformed
   61  number is too big
   62  subpattern name expected
   63  digit expected after (?+
@@ -1069,11 +1080,19 @@ In 32-bit mode, the bitmap is used for 32-bit values less than 256.)
 <P>
 These two optimizations apply to both <b>pcre_exec()</b> and
 <b>pcre_dfa_exec()</b>, and the information is also used by the JIT compiler.
-The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option
-when calling <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>, but if this is done,
-JIT execution is also disabled. You might want to do this if your pattern
-contains callouts or (*MARK) and you want to make use of these facilities in
-cases where matching fails. See the discussion of PCRE_NO_START_OPTIMIZE
+The optimizations can be disabled by setting the PCRE_NO_START_OPTIMIZE option.
+You might want to do this if your pattern contains callouts or (*MARK) and you
+want to make use of these facilities in cases where matching fails.
+</P>
+<P>
+PCRE_NO_START_OPTIMIZE can be specified at either compile time or execution
+time. However, if PCRE_NO_START_OPTIMIZE is passed to <b>pcre_exec()</b>, (that
+is, after any JIT compilation has happened) JIT execution is disabled. For JIT
+execution to work with PCRE_NO_START_OPTIMIZE, the option must be set at
+compile time.
+</P>
+<P>
+There is a longer discussion of PCRE_NO_START_OPTIMIZE
 <a href="#execoptions">below.</a>
 <a name="localesupport"></a></P>
 <br><a name="SEC14" href="#TOC1">LOCALE SUPPORT</a><br>
@@ -1162,6 +1181,7 @@ the following negative numbers:
   PCRE_ERROR_BADENDIANNESS  the pattern was compiled with different
                             endianness
   PCRE_ERROR_BADOPTION      the value of <i>what</i> was invalid
+  PCRE_ERROR_UNSET          the requested field is not set
 </pre>
 The "magic number" is placed at the start of each compiled pattern as an simple
 check against passing an arbitrary memory pointer. The endianness error can
@@ -1285,6 +1305,13 @@ to return the full 32-bit range of the character, this value is deprecated;
 instead the PCRE_INFO_REQUIREDCHARFLAGS and PCRE_INFO_REQUIREDCHAR values should
 be used.
 <pre>
+  PCRE_INFO_MATCHLIMIT
+</pre>
+If the pattern set a match limit by including an item of the form
+(*LIMIT_MATCH=nnnn) at the start, the value is returned. The fourth argument
+should point to an unsigned 32-bit integer. If no such value has been set, the
+call to <b>pcre_fullinfo()</b> returns the error PCRE_ERROR_UNSET.
+<pre>
   PCRE_INFO_MAXLOOKBEHIND
 </pre>
 Return the number of characters (NB not bytes) in the longest lookbehind
@@ -1293,8 +1320,8 @@ matching using the partial matching facilities. Note that the simple assertions
 \b and \B require a one-character lookbehind. \A also registers a
 one-character lookbehind, though it does not actually inspect the previous
 character. This is to ensure that at least one character from the old segment
-is retained when a new segment is processed. Otherwise, if there are no 
-lookbehinds in the pattern, \A might match incorrectly at the start of a new 
+is retained when a new segment is processed. Otherwise, if there are no
+lookbehinds in the pattern, \A might match incorrectly at the start of a new
 segment.
 <pre>
   PCRE_INFO_MINLENGTH
@@ -1396,6 +1423,13 @@ alternatives begin with one of the following:
 </pre>
 For such patterns, the PCRE_ANCHORED bit is set in the options returned by
 <b>pcre_fullinfo()</b>.
+<pre>
+  PCRE_INFO_RECURSIONLIMIT
+</pre>
+If the pattern set a recursion limit by including an item of the form
+(*LIMIT_RECURSION=nnnn) at the start, the value is returned. The fourth
+argument should point to an unsigned 32-bit integer. If no such value has been
+set, the call to <b>pcre_fullinfo()</b> returns the error PCRE_ERROR_UNSET.
 <pre>
   PCRE_INFO_SIZE
 </pre>
@@ -1639,6 +1673,16 @@ the <i>flags</i> field. If the limit is exceeded, <b>pcre_exec()</b> returns
 PCRE_ERROR_MATCHLIMIT.
 </P>
 <P>
+A value for the match limit may also be supplied by an item at the start of a
+pattern of the form
+<pre>
+  (*LIMIT_MATCH=d)
+</pre>
+where d is a decimal number. However, such a setting is ignored unless d is
+less than the limit set by the caller of <b>pcre_exec()</b> or, if no such limit
+is set, less than the default.
+</P>
+<P>
 The <i>match_limit_recursion</i> field is similar to <i>match_limit</i>, but
 instead of limiting the total number of times that <b>match()</b> is called, it
 limits the depth of recursion. The recursion depth is a smaller number than the
@@ -1658,6 +1702,16 @@ built; the default default is the same value as the default for
 with a <b>pcre_extra</b> block in which <i>match_limit_recursion</i> is set, and
 PCRE_EXTRA_MATCH_LIMIT_RECURSION is set in the <i>flags</i> field. If the limit
 is exceeded, <b>pcre_exec()</b> returns PCRE_ERROR_RECURSIONLIMIT.
+</P>
+<P>
+A value for the recursion limit may also be supplied by an item at the start of
+a pattern of the form
+<pre>
+  (*LIMIT_RECURSION=d)
+</pre>
+where d is a decimal number. However, such a setting is ignored unless d is
+less than the limit set by the caller of <b>pcre_exec()</b> or, if no such limit
+is set, less than the default.
 </P>
 <P>
 The <i>callout_data</i> field is used in conjunction with the "callout" feature,
@@ -1821,10 +1875,10 @@ unanchored match must start with a specific character, it searches the subject
 for that character, and fails immediately if it cannot find it, without
 actually running the main matching function. This means that a special item
 such as (*COMMIT) at the start of a pattern is not considered until after a
-suitable starting point for the match has been found. When callouts or (*MARK)
-items are in use, these "start-up" optimizations can cause them to be skipped
-if the pattern is never actually used. The start-up optimizations are in effect
-a pre-scan of the subject that takes place before the pattern is run.
+suitable starting point for the match has been found. Also, when callouts or
+(*MARK) items are in use, these "start-up" optimizations can cause them to be
+skipped if the pattern is never actually used. The start-up optimizations are
+in effect a pre-scan of the subject that takes place before the pattern is run.
 </P>
 <P>
 The PCRE_NO_START_OPTIMIZE option disables the start-up optimizations, possibly
@@ -1832,8 +1886,9 @@ causing performance to suffer, but ensuring that in cases where the result is
 "no match", the callouts do occur, and that items such as (*COMMIT) and (*MARK)
 are considered at every possible starting position in the subject string. If
 PCRE_NO_START_OPTIMIZE is set at compile time, it cannot be unset at matching
-time. The use of PCRE_NO_START_OPTIMIZE disables JIT execution; when it is set,
-matching is always done using interpretively.
+time. The use of PCRE_NO_START_OPTIMIZE at matching time (that is, passing it
+to <b>pcre_exec()</b>) disables JIT execution; in this situation, matching is
+always done using interpretively.
 </P>
 <P>
 Setting PCRE_NO_START_OPTIMIZE can change the outcome of a matching operation.
@@ -2340,8 +2395,8 @@ never occur in a valid UTF-8 string.
   PCRE_UTF8_ERR22
 </pre>
 This error code was formerly used when the presence of a so-called
-"non-character" caused an error. Unicode corrigendum #9 makes it clear that 
-such characters should not cause a string to be rejected, and so this code is 
+"non-character" caused an error. Unicode corrigendum #9 makes it clear that
+such characters should not cause a string to be rejected, and so this code is
 no longer in use and is never returned.
 </P>
 <br><a name="SEC18" href="#TOC1">EXTRACTING CAPTURED SUBSTRINGS BY NUMBER</a><br>
@@ -2784,7 +2839,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 27 February 2013
+Last updated: 26 April 2013
 <br>
 Copyright &copy; 1997-2013 University of Cambridge.
 <br>

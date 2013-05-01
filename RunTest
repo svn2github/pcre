@@ -16,7 +16,7 @@
 #
 # When JIT support is available, all the tests are also run with -s+ to test
 # (again, almost) everything with studying and the JIT option, unless "nojit"
-# is given on the command line. There are also two tests for JIT-specific 
+# is given on the command line. There are also two tests for JIT-specific
 # features, one to be run when JIT support is available (unless "nojit" is
 # specified), and one when it is not.
 #
@@ -234,7 +234,7 @@ while [ $# -gt 0 ] ; do
    -8) arg8=yes;;
   -16) arg16=yes;;
   -32) arg32=yes;;
-   nojit) nojit=yes;; 
+   nojit) nojit=yes;;
    sim) shift; sim=$1;;
    valgrind) valgrind="valgrind --tool=memcheck -q --smc-check=all";;
    valgrind-log) valgrind="valgrind --tool=memcheck --num-callers=30 --leak-check=no --error-limit=no --smc-check=all --log-file=report.%p ";;
@@ -243,23 +243,23 @@ while [ $# -gt 0 ] ; do
        skip="$skip `expr "$1" : '~\([0-9]*\)*$'`"
      else
        echo "Unknown option or test selector '$1'"; exit 1
-     fi      
-   ;; 
+     fi
+   ;;
    *-*)
      if expr "$1" : '[0-9][0-9]*-[0-9]*$' >/dev/null; then
-       tf=`expr "$1" : '\([0-9]*\)'` 
+       tf=`expr "$1" : '\([0-9]*\)'`
        tt=`expr "$1" : '.*-\([0-9]*\)'`
-       if [ "$tt" = "" ] ; then tt=$maxtest; fi 
+       if [ "$tt" = "" ] ; then tt=$maxtest; fi
        if expr \( "$tf" "<" 1 \) \| \( "$tt" ">" "$maxtest" \) >/dev/null; then
          echo "Invalid test range '$1'"; exit 1
-       fi       
+       fi
        while expr "$tf" "<=" "$tt" >/dev/null; do
          eval do${tf}=yes
-         tf=`expr $tf + 1`  
+         tf=`expr $tf + 1`
        done
      else
        echo "Invalid test range '$1'"; exit 1
-     fi        
+     fi
    ;;
    *) echo "Unknown option or test selector '$1'"; exit 1;;
   esac
