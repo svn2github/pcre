@@ -145,6 +145,8 @@ Version 8.33 28-April-2013
     of the compiled pattern block, expand the flags field from 16 to 32 bits
     because it was almost full.
 
+39. Try madvise first before posix_madvise.
+
 
 Version 8.32 30-November-2012
 -----------------------------
