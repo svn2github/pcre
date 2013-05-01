@@ -23,6 +23,11 @@ if [ "$1" = "-v" ] ; then verbose=1; fi
 
 tmp=/tmp/pcretesting
 
+# Don't bother with compiler optimization; it just slows down compilation a lot
+# (and these tests themselves are quick).
+
+CFLAGS="-g -O0"
+
 
 # This function runs a single test with the set of configuration options that
 # are in $opts. The source directory must be set in srcdir.
@@ -30,15 +35,18 @@ tmp=/tmp/pcretesting
 function runtest()
   {
   rm -f *_unittest
+  testcount=`expr $testcount + 1` 
 
   if [ "$opts" = "" ] ; then
-    echo "Configuring with: default settings"
+    echo "[$testcount/$testtotal] Configuring with: default settings"
   else
-    echo "Configuring with:"
+    echo "[$testcount/$testtotal] Configuring with:"
     echo "  $opts"
   fi
 
-  $srcdir/configure $opts >/dev/null 2>teststderr
+  CFLAGS="$CFLAGS" CXXFLAGS="$CFLAGS" \
+    $srcdir/configure $opts >/dev/null 2>teststderr
+     
   if [ $? -ne 0 ]; then
     echo " "
     echo "**** Error while configuring ****"
@@ -140,6 +148,12 @@ function runtest()
 valgrind=
 cvalgrind=
 withvalgrind=
+
+# Update the total count whenever a new test is added; it is used to show
+# progess as each test is run.
+
+testtotal=41
+testcount=0
 
 echo "Tests in the current directory"
 srcdir=.
