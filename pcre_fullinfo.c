@@ -224,12 +224,12 @@ switch (what)
 
   case PCRE_INFO_MATCHLIMIT:
   if ((re->flags & PCRE_MLSET) == 0) return PCRE_ERROR_UNSET;
-  *((unsigned long int *)where) = re->limit_match;
+  *((pcre_uint32 *)where) = re->limit_match;
   break;
 
   case PCRE_INFO_RECURSIONLIMIT:
   if ((re->flags & PCRE_RLSET) == 0) return PCRE_ERROR_UNSET;
-  *((unsigned long int *)where) = re->limit_recursion;
+  *((pcre_uint32 *)where) = re->limit_recursion;
   break;
 
   default: return PCRE_ERROR_BADOPTION;
