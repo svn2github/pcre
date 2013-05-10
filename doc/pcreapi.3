@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "26 April 2013" "PCRE 8.33"
+.TH PCREAPI 3 "10 May 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -741,12 +741,14 @@ binary zero character followed by z).
 .sp
   PCRE_MULTILINE
 .sp
-By default, PCRE treats the subject string as consisting of a single line of
-characters (even if it actually contains newlines). The "start of line"
-metacharacter (^) matches only at the start of the string, while the "end of
-line" metacharacter ($) matches only at the end of the string, or before a
-terminating newline (unless PCRE_DOLLAR_ENDONLY is set). This is the same as
-Perl.
+By default, for the purposes of matching "start of line" and "end of line",
+PCRE treats the subject string as consisting of a single line of characters,
+even if it actually contains newlines. The "start of line" metacharacter (^)
+matches only at the start of the string, and the "end of line" metacharacter
+($) matches only at the end of the string, or before a terminating newline
+(except when PCRE_DOLLAR_ENDONLY is set). Note, however, that unless
+PCRE_DOTALL is set, the "any character" metacharacter (.) does not match at a
+newline. This behaviour (for ^, $, and dot) is the same as Perl.
 .P
 When PCRE_MULTILINE it is set, the "start of line" and "end of line" constructs
 match immediately following or immediately before internal newlines in the
@@ -2876,6 +2878,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 April 2013
+Last updated: 10 May 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
