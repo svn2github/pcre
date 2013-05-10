@@ -813,7 +813,7 @@ for (;;)
     /* Note that, for Perl compatibility, SKIP with an argument does NOT set
     nomatch_mark. When a pattern match ends with a SKIP_ARG for which there was
     not a matching mark, we have to re-run the match, ignoring the SKIP_ARG
-    that failed and any that preceed it (either they also failed, or were not
+    that failed and any that precede it (either they also failed, or were not
     triggered). To do this, we maintain a count of executed SKIP_ARGs. If a
     SKIP_ARG gets to top level, the match is re-run with md->ignore_skip_arg
     set to the count of the one that failed. */

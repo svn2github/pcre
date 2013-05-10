@@ -1322,7 +1322,7 @@ graph, print, punct, and cntrl. Other classes are built from combinations. */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, /* 240-247 */
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};/* 248-255 */
 
-/* This is a set of tables that came orginally from a Windows user. It seems to
+/* This is a set of tables that came originally from a Windows user. It seems to
 be at least an approximation of ISO 8859. In particular, there are characters
 greater than 128 that are marked as spaces, letters, etc. */
 

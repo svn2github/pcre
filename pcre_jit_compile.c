@@ -211,7 +211,7 @@ typedef int (SLJIT_CALL *jit_function)(jit_arguments *args);
 
 /* The following structure is the key data type for the recursive
 code generator. It is allocated by compile_matchingpath, and contains
-the aguments for compile_backtrackingpath. Must be the first member
+the arguments for compile_backtrackingpath. Must be the first member
 of its descendants. */
 typedef struct backtrack_common {
   /* Concatenation stack. */
@@ -2374,7 +2374,7 @@ return (bit < 256) ? ((0 << 8) | bit) : ((1 << 8) | (bit >> 8));
 
 static void check_partial(compiler_common *common, BOOL force)
 {
-/* Checks whether a partial matching is occured. Does not modify registers. */
+/* Checks whether a partial matching is occurred. Does not modify registers. */
 DEFINE_COMPILER;
 struct sljit_jump *jump = NULL;
 
@@ -8227,7 +8227,7 @@ if (has_alternatives)
         return;
       }
 
-    /* Instructions after the current alternative is succesfully matched. */
+    /* Instructions after the current alternative is successfully matched. */
     /* There is a similar code in compile_bracket_matchingpath. */
     if (opcode == OP_ONCE)
       match_once_common(common, ket, CURRENT_AS(bracket_backtrack)->u.framesize, private_data_ptr, has_alternatives, needs_control_head);
