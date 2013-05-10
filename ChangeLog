@@ -156,6 +156,8 @@ Version 8.33 28-April-2013
     
 41. Applied a user patch to fix a number of spelling mistakes in comments. 
 
+42. Data lines longer than 65536 caused pcretest to crash.
+
 
 Version 8.32 30-November-2012
 -----------------------------

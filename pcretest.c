@@ -4411,7 +4411,8 @@ while (!done)
 
 #ifndef NOUTF
     /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
-       invalid input to pcre_exec, you must use \x?? or \x{} sequences. */
+    invalid input to pcre_exec, you must use \x?? or \x{} sequences. */
+        
     if (use_utf)
       {
       pcre_uint8 *q;
@@ -4429,21 +4430,23 @@ while (!done)
 
 #ifdef SUPPORT_VALGRIND
     /* Mark the dbuffer as addressable but undefined again. */
+     
     if (dbuffer != NULL)
       {
       VALGRIND_MAKE_MEM_UNDEFINED(dbuffer, dbuffer_size * CHAR_SIZE);
       }
 #endif
 
-    /* Allocate a buffer to hold the data line. len+1 is an upper bound on
-       the number of pcre_uchar units that will be needed. */
-    if (dbuffer == NULL || (size_t)len >= dbuffer_size)
+    /* Allocate a buffer to hold the data line; len+1 is an upper bound on
+    the number of pcre_uchar units that will be needed. */
+        
+    while (dbuffer == NULL || (size_t)len >= dbuffer_size)
       {
       dbuffer_size *= 2;
       dbuffer = (pcre_uint8 *)realloc(dbuffer, dbuffer_size * CHAR_SIZE);
       if (dbuffer == NULL)
         {
-        fprintf(stderr, "pcretest: malloc(%d) failed\n", (int)dbuffer_size);
+        fprintf(stderr, "pcretest: realloc(%d) failed\n", (int)dbuffer_size);
         exit(1);
         }
       }
