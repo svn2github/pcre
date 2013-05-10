@@ -1378,6 +1378,7 @@ to find all possible matches.
 Arguments:
   matchptr     the start of the subject
   length       the length of the subject to match
+  options      options for pcre_exec 
   startoffset  where to start matching
   offsets      the offets vector to fill in
   mrc          address of where to put the result of pcre_exec()
@@ -1388,8 +1389,8 @@ Returns:      TRUE if there was a match
 */
 
 static BOOL
-match_patterns(char *matchptr, size_t length, int startoffset, int *offsets,
-  int *mrc)
+match_patterns(char *matchptr, size_t length, unsigned int options, 
+  int startoffset, int *offsets, int *mrc)
 {
 int i;
 size_t slen = length;
@@ -1404,7 +1405,7 @@ if (slen > 200)
 for (i = 1; p != NULL; p = p->next, i++)
   {
   *mrc = pcre_exec(p->compiled, p->hint, matchptr, (int)length,
-    startoffset, PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
+    startoffset, options, offsets, OFFSET_SIZE);
   if (*mrc >= 0) return TRUE;
   if (*mrc == PCRE_ERROR_NOMATCH) continue;
   fprintf(stderr, "pcregrep: pcre_exec() gave error %d while matching ", *mrc);
@@ -1539,6 +1540,7 @@ while (ptr < endptr)
   int endlinelength;
   int mrc = 0;
   int startoffset = 0;
+  unsigned int options = 0; 
   BOOL match;
   char *matchptr = ptr;
   char *t = ptr;
@@ -1628,9 +1630,12 @@ while (ptr < endptr)
 
   /* Run through all the patterns until one matches or there is an error other
   than NOMATCH. This code is in a subroutine so that it can be re-used for
-  finding subsequent matches when colouring matched lines. */
+  finding subsequent matches when colouring matched lines. After finding one 
+  match, set PCRE_NOTEMPTY to disable any further matches of null strings in 
+  this line. */
 
-  match = match_patterns(matchptr, length, startoffset, offsets, &mrc);
+  match = match_patterns(matchptr, length, options, startoffset, offsets, &mrc);
+  options = PCRE_NOTEMPTY;
 
   /* If it's a match or a not-match (as required), do what's wanted. */
 
@@ -1871,7 +1876,8 @@ while (ptr < endptr)
           {
           startoffset = offsets[1];
           if (startoffset >= (int)linelength + endlinelength ||
-              !match_patterns(matchptr, length, startoffset, offsets, &mrc))
+              !match_patterns(matchptr, length, options, startoffset, offsets,
+                &mrc))
             break;
           FWRITE(matchptr + startoffset, 1, offsets[0] - startoffset, stdout);
           fprintf(stdout, "%c[%sm", 0x1b, colour_string);

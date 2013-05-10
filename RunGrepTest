@@ -486,6 +486,22 @@ echo "---------------------------- Test 101 ------------------------------" >>te
 (cd $srcdir; $valgrind $pcregrep -o3 -Ho2 -o12 --only-matching=1 -o3 --colour=always --om-separator='|' '(\w+) binary (\w+)(\.)?' ./testdata/grepinput) >>testtry
 echo "RC=$?" >>testtry
 
+echo "---------------------------- Test 102 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -n "^$" ./testdata/grepinput3) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 103 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --only-matching "^$" ./testdata/grepinput3) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 104 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -n --only-matching "^$" ./testdata/grepinput3) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
+echo "---------------------------- Test 105 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --colour=always "ipsum|" ./testdata/grepinput3) >>testtry 2>&1
+echo "RC=$?" >>testtry
+
 
 # Now compare the results.
 

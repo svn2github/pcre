@@ -147,6 +147,13 @@ Version 8.33 28-April-2013
 
 39. Try madvise first before posix_madvise.
 
+40. Change 7 for PCRE 7.9 made it impossible for pcregrep to find empty lines
+    with a pattern such as ^$. It has taken 4 years for anybody to notice! The 
+    original change locked out all matches of empty strings. This has been 
+    changed so that one match of an empty string per line is recognized. 
+    Subsequent searches on the same line (for colouring or for --only-matching, 
+    for example) do not recognize empty strings. 
+
 
 Version 8.32 30-November-2012
 -----------------------------
@@ -1655,7 +1662,8 @@ Version 7.9 11-Apr-09
 7.  A pattern that could match an empty string could cause pcregrep to loop; it
     doesn't make sense to accept an empty string match in pcregrep, so I have
     locked it out (using PCRE's PCRE_NOTEMPTY option). By experiment, this
-    seems to be how GNU grep behaves.
+    seems to be how GNU grep behaves. [But see later change 40 for release 
+    8.33.]
 
 8.  The pattern (?(?=.*b)b|^) was incorrectly compiled as "match must be at
     start or after a newline", because the conditional assertion was not being
