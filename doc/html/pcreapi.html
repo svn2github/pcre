@@ -187,10 +187,10 @@ by UTF16 or UTF32, respectively. This facility is in fact just cosmetic; the
 </P>
 <P>
 References to bytes and UTF-8 in this document should be read as references to
-16-bit data quantities and UTF-16 when using the 16-bit library, or 32-bit data
-quantities and UTF-32 when using the 32-bit library, unless specified
-otherwise. More details of the specific differences for the 16-bit and 32-bit
-libraries are given in the
+16-bit data units and UTF-16 when using the 16-bit library, or 32-bit data
+units and UTF-32 when using the 32-bit library, unless specified otherwise.
+More details of the specific differences for the 16-bit and 32-bit libraries
+are given in the
 <a href="pcre16.html"><b>pcre16</b></a>
 and
 <a href="pcre32.html"><b>pcre32</b></a>
@@ -558,16 +558,16 @@ Otherwise, if compilation of a pattern fails, <b>pcre_compile()</b> returns
 NULL, and sets the variable pointed to by <i>errptr</i> to point to a textual
 error message. This is a static string that is part of the library. You must
 not try to free it. Normally, the offset from the start of the pattern to the
-byte that was being processed when the error was discovered is placed in the
-variable pointed to by <i>erroffset</i>, which must not be NULL (if it is, an
-immediate error is given). However, for an invalid UTF-8 string, the offset is
-that of the first byte of the failing character.
+data unit that was being processed when the error was discovered is placed in
+the variable pointed to by <i>erroffset</i>, which must not be NULL (if it is,
+an immediate error is given). However, for an invalid UTF-8 or UTF-16 string,
+the offset is that of the first data unit of the failing character.
 </P>
 <P>
 Some errors are not detected until the whole pattern has been scanned; in these
 cases, the offset passed back is the length of the pattern. Note that the
-offset is in bytes, not characters, even in UTF-8 mode. It may sometimes point
-into the middle of a UTF-8 character.
+offset is in data units, not characters, even in a UTF mode. It may sometimes
+point into the middle of a UTF-8 or UTF-16 character.
 </P>
 <P>
 If <b>pcre_compile2()</b> is used instead of <b>pcre_compile()</b>, and the
@@ -741,12 +741,14 @@ binary zero character followed by z).
 <pre>
   PCRE_MULTILINE
 </pre>
-By default, PCRE treats the subject string as consisting of a single line of
-characters (even if it actually contains newlines). The "start of line"
-metacharacter (^) matches only at the start of the string, while the "end of
-line" metacharacter ($) matches only at the end of the string, or before a
-terminating newline (unless PCRE_DOLLAR_ENDONLY is set). This is the same as
-Perl.
+By default, for the purposes of matching "start of line" and "end of line",
+PCRE treats the subject string as consisting of a single line of characters,
+even if it actually contains newlines. The "start of line" metacharacter (^)
+matches only at the start of the string, and the "end of line" metacharacter
+($) matches only at the end of the string, or before a terminating newline
+(except when PCRE_DOLLAR_ENDONLY is set). Note, however, that unless
+PCRE_DOTALL is set, the "any character" metacharacter (.) does not match at a
+newline. This behaviour (for ^, $, and dot) is the same as Perl.
 </P>
 <P>
 When PCRE_MULTILINE it is set, the "start of line" and "end of line" constructs
@@ -1314,7 +1316,7 @@ call to <b>pcre_fullinfo()</b> returns the error PCRE_ERROR_UNSET.
 <pre>
   PCRE_INFO_MAXLOOKBEHIND
 </pre>
-Return the number of characters (NB not bytes) in the longest lookbehind
+Return the number of characters (NB not data units) in the longest lookbehind
 assertion in the pattern. This information is useful when doing multi-segment
 matching using the partial matching facilities. Note that the simple assertions
 \b and \B require a one-character lookbehind. \A also registers a
@@ -1328,11 +1330,11 @@ segment.
 </pre>
 If the pattern was studied and a minimum length for matching subject strings
 was computed, its value is returned. Otherwise the returned value is -1. The
-value is a number of characters, which in UTF-8 mode may be different from the
-number of bytes. The fourth argument should point to an <b>int</b> variable. A
-non-negative value is a lower bound to the length of any matching string. There
-may not be any strings of that length that do actually match, but every string
-that does match is at least that long.
+value is a number of characters, which in UTF mode may be different from the
+number of data units. The fourth argument should point to an <b>int</b>
+variable. A non-negative value is a lower bound to the length of any matching
+string. There may not be any strings of that length that do actually match, but
+every string that does match is at least that long.
 <pre>
   PCRE_INFO_NAMECOUNT
   PCRE_INFO_NAMEENTRYSIZE
@@ -1356,10 +1358,10 @@ length of the longest name. PCRE_INFO_NAMETABLE returns a pointer to the first
 entry of the table. This is a pointer to <b>char</b> in the 8-bit library, where
 the first two bytes of each entry are the number of the capturing parenthesis,
 most significant byte first. In the 16-bit library, the pointer points to
-16-bit data units, the first of which contains the parenthesis number.
-In the 32-bit library, the pointer points to 32-bit data units, the first of
-which contains the parenthesis number. The rest
-of the entry is the corresponding name, zero terminated.
+16-bit data units, the first of which contains the parenthesis number. In the
+32-bit library, the pointer points to 32-bit data units, the first of which
+contains the parenthesis number. The rest of the entry is the corresponding
+name, zero terminated.
 </P>
 <P>
 The names are in alphabetical order. Duplicate names may appear if (?| is used
@@ -1433,7 +1435,7 @@ set, the call to <b>pcre_fullinfo()</b> returns the error PCRE_ERROR_UNSET.
 <pre>
   PCRE_INFO_SIZE
 </pre>
-Return the size of the compiled pattern in bytes (for both libraries). The
+Return the size of the compiled pattern in bytes (for all three libraries). The
 fourth argument should point to a <b>size_t</b> variable. This value does not
 include the size of the <b>pcre</b> structure that is returned by
 <b>pcre_compile()</b>. The value that is passed as the argument to
@@ -1444,11 +1446,12 @@ does not alter the value returned by this option.
 <pre>
   PCRE_INFO_STUDYSIZE
 </pre>
-Return the size in bytes of the data block pointed to by the <i>study_data</i>
-field in a <b>pcre_extra</b> block. If <b>pcre_extra</b> is NULL, or there is no
-study data, zero is returned. The fourth argument should point to a
-<b>size_t</b> variable. The <i>study_data</i> field is set by <b>pcre_study()</b>
-to record information that will speed up matching (see the section entitled
+Return the size in bytes (for all three libraries) of the data block pointed to
+by the <i>study_data</i> field in a <b>pcre_extra</b> block. If <b>pcre_extra</b>
+is NULL, or there is no study data, zero is returned. The fourth argument
+should point to a <b>size_t</b> variable. The <i>study_data</i> field is set by
+<b>pcre_study()</b> to record information that will speed up matching (see the
+section entitled
 <a href="#studyingapattern">"Studying a pattern"</a>
 above). The format of the <i>study_data</i> block is private, but its length
 is made available via this option so that it can be saved and restored (see the
@@ -1982,13 +1985,19 @@ The string to be matched by <b>pcre_exec()</b>
 </b><br>
 <P>
 The subject string is passed to <b>pcre_exec()</b> as a pointer in
-<i>subject</i>, a length in bytes in <i>length</i>, and a starting byte offset
-in <i>startoffset</i>. If this is negative or greater than the length of the
-subject, <b>pcre_exec()</b> returns PCRE_ERROR_BADOFFSET. When the starting
-offset is zero, the search for a match starts at the beginning of the subject,
-and this is by far the most common case. In UTF-8 mode, the byte offset must
-point to the start of a UTF-8 character (or the end of the subject). Unlike the
-pattern string, the subject may contain binary zero bytes.
+<i>subject</i>, a length in <i>length</i>, and a starting offset in
+<i>startoffset</i>. The units for <i>length</i> and <i>startoffset</i> are bytes
+for the 8-bit library, 16-bit data items for the 16-bit library, and 32-bit
+data items for the 32-bit library.
+</P>
+<P>
+If <i>startoffset</i> is negative or greater than the length of the subject,
+<b>pcre_exec()</b> returns PCRE_ERROR_BADOFFSET. When the starting offset is
+zero, the search for a match starts at the beginning of the subject, and this
+is by far the most common case. In UTF-8 or UTF-16 mode, the offset must point
+to the start of a character, or the end of the subject (in UTF-32 mode, one 
+data unit equals one character, so all offsets are valid). Unlike the pattern
+string, the subject may contain binary zeroes.
 </P>
 <P>
 A non-zero starting offset is useful when searching for another match in the
@@ -2056,10 +2065,12 @@ rounded down.
 When a match is successful, information about captured substrings is returned
 in pairs of integers, starting at the beginning of <i>ovector</i>, and
 continuing up to two-thirds of its length at the most. The first element of
-each pair is set to the byte offset of the first character in a substring, and
-the second is set to the byte offset of the first character after the end of a
-substring. <b>Note</b>: these values are always byte offsets, even in UTF-8
-mode. They are not character counts.
+each pair is set to the offset of the first character in a substring, and the
+second is set to the offset of the first character after the end of a
+substring. These values are always data unit offsets, even in UTF mode. They
+are byte offsets in the 8-bit library, 16-bit data item offsets in the 16-bit
+library, and 32-bit data item offsets in the 32-bit library. <b>Note</b>: they
+are not character counts.
 </P>
 <P>
 The first pair of integers, <i>ovector[0]</i> and <i>ovector[1]</i>, identify the
@@ -2839,7 +2850,7 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC26" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 April 2013
+Last updated: 12 May 2013
 <br>
 Copyright &copy; 1997-2013 University of Cambridge.
 <br>

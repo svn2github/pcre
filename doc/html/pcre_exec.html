@@ -45,14 +45,15 @@ offsets to captured substrings. Its arguments are:
   <i>extra</i>        Points to an associated <b>pcre[16|32]_extra</b> structure,
                  or is NULL
   <i>subject</i>      Points to the subject string
-  <i>length</i>       Length of the subject string, in bytes
-  <i>startoffset</i>  Offset in bytes in the subject at which to
-                 start matching
+  <i>length</i>       Length of the subject string
+  <i>startoffset</i>  Offset in the subject at which to start matching
   <i>options</i>      Option bits
   <i>ovector</i>      Points to a vector of ints for result offsets
   <i>ovecsize</i>     Number of elements in the vector (a multiple of 3)
 </pre>
-The options are:
+The units for <i>length</i> and <i>startoffset</i> are bytes for
+<b>pcre_exec()</b>, 16-bit data items for <b>pcre16_exec()</b>, and 32-bit items
+for <b>pcre32_exec()</b>. The options are:
 <pre>
   PCRE_ANCHORED          Match only at the first position
   PCRE_BSR_ANYCRLF       \R matches only CR, LF, or CRLF

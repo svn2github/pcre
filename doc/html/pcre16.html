@@ -259,8 +259,9 @@ buffer, including the zero terminator if the string was zero-terminated.
 </P>
 <br><a name="SEC12" href="#TOC1">SUBJECT STRING OFFSETS</a><br>
 <P>
-The offsets within subject strings that are returned by the matching functions
-are in 16-bit units rather than bytes.
+The lengths and starting offsets of subject strings must be specified in 16-bit
+data units, and the offsets within subject strings that are returned by the
+matching functions are in also 16-bit units rather than bytes.
 </P>
 <br><a name="SEC13" href="#TOC1">NAMED SUBPATTERNS</a><br>
 <P>
@@ -374,9 +375,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 November 2012
+Last updated: 12 May 2013
 <br>
-Copyright &copy; 1997-2012 University of Cambridge.
+Copyright &copy; 1997-2013 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
