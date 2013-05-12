@@ -1,4 +1,4 @@
-.TH PCRE_DFA_EXEC 3 "24 June 2012" "PCRE 8.30"
+.TH PCRE_DFA_EXEC 3 "12 May 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH SYNOPSIS
@@ -44,16 +44,17 @@ are:
   \fIextra\fP        Points to an associated \fBpcre[16|32]_extra\fP structure,
                  or is NULL
   \fIsubject\fP      Points to the subject string
-  \fIlength\fP       Length of the subject string, in bytes
-  \fIstartoffset\fP  Offset in bytes in the subject at which to
-                 start matching
+  \fIlength\fP       Length of the subject string
+  \fIstartoffset\fP  Offset in the subject at which to start matching
   \fIoptions\fP      Option bits
   \fIovector\fP      Points to a vector of ints for result offsets
   \fIovecsize\fP     Number of elements in the vector
   \fIworkspace\fP    Points to a vector of ints used as working space
   \fIwscount\fP      Number of elements in the vector
 .sp
-The options are:
+The units for \fIlength\fP and \fIstartoffset\fP are bytes for
+\fBpcre_exec()\fP, 16-bit data items for \fBpcre16_exec()\fP, and 32-bit items
+for \fBpcre32_exec()\fP. The options are:
 .sp
   PCRE_ANCHORED          Match only at the first position
   PCRE_BSR_ANYCRLF       \eR matches only CR, LF, or CRLF

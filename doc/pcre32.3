@@ -1,4 +1,4 @@
-.TH PCRE 3 "08 November 2012" "PCRE 8.32"
+.TH PCRE 3 "12 May 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -246,8 +246,9 @@ buffer, including the zero terminator if the string was zero-terminated.
 .SH "SUBJECT STRING OFFSETS"
 .rs
 .sp
-The offsets within subject strings that are returned by the matching functions
-are in 32-bit units rather than bytes.
+The lengths and starting offsets of subject strings must be specified in 32-bit
+data units, and the offsets within subject strings that are returned by the
+matching functions are in also 32-bit units rather than bytes.
 .
 .
 .SH "NAMED SUBPATTERNS"
@@ -384,6 +385,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2012
-Copyright (c) 1997-2012 University of Cambridge.
+Last updated: 12 May 2013
+Copyright (c) 1997-2013 University of Cambridge.
 .fi
