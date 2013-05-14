@@ -38,9 +38,9 @@ Herczeg.
 </P>
 <P>
 Starting with release 8.32 it is possible to compile a third separate PCRE
-library, which supports 32-bit character strings (including
-UTF-32 strings). The build process allows any set of the 8-, 16- and 32-bit
-libraries. The work to make this possible was done by Christian Persch.
+library that supports 32-bit character strings (including UTF-32 strings). The
+build process allows any combination of the 8-, 16- and 32-bit libraries. The
+work to make this possible was done by Christian Persch.
 </P>
 <P>
 The three libraries contain identical sets of functions, except that the names
@@ -100,8 +100,11 @@ function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 <a href="pcrebuild.html"><b>pcrebuild</b></a>
 page. Documentation about building PCRE for various operating systems can be
-found in the <b>README</b> and <b>NON-AUTOTOOLS_BUILD</b> files in the source
-distribution.
+found in the 
+<a href="README.txt"><b>README</b></a>
+and 
+<a href="NON-AUTOTOOLS-BUILD.txt"><b>NON-AUTOTOOLS_BUILD</b></a>
+files in the source distribution.
 </P>
 <P>
 The libraries contains a number of undocumented internal functions and data
@@ -155,11 +158,11 @@ all the sections, except the <b>pcredemo</b> section, are concatenated, for ease
 of searching. The sections are as follows:
 <pre>
   pcre              this document
+  pcre-config       show PCRE installation configuration information
   pcre16            details of the 16-bit library
   pcre32            details of the 32-bit library
-  pcre-config       show PCRE installation configuration information
   pcreapi           details of PCRE's native C API
-  pcrebuild         options for building PCRE
+  pcrebuild         building PCRE
   pcrecallout       details of the callout feature
   pcrecompat        discussion of Perl compatibility
   pcrecpp           details of the C++ wrapper for the 8-bit library
@@ -198,7 +201,7 @@ two digits 10, at the domain cam.ac.uk.
 </P>
 <br><a name="SEC5" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 26 April 2013
+Last updated: 13 May 2013
 <br>
 Copyright &copy; 1997-2013 University of Cambridge.
 <br>

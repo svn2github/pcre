@@ -33,112 +33,113 @@ INTRODUCTION
        possible was done by Zoltan Herczeg.
 
        Starting with release 8.32 it is possible to compile a  third  separate
-       PCRE library, which supports 32-bit character strings (including UTF-32
-       strings). The build process allows any set of the 8-,  16-  and  32-bit
-       libraries. The work to make this possible was done by Christian Persch.
+       PCRE  library  that supports 32-bit character strings (including UTF-32
+       strings). The build process allows any combination of the 8-,  16-  and
+       32-bit  libraries. The work to make this possible was done by Christian
+       Persch.
 
-       The  three  libraries  contain identical sets of functions, except that
-       the names in the 16-bit library start with pcre16_  instead  of  pcre_,
-       and  the  names  in  the  32-bit  library start with pcre32_ instead of
-       pcre_. To avoid over-complication and reduce the documentation  mainte-
+       The three libraries contain identical sets of  functions,  except  that
+       the  names  in  the 16-bit library start with pcre16_ instead of pcre_,
+       and the names in the 32-bit  library  start  with  pcre32_  instead  of
+       pcre_.  To avoid over-complication and reduce the documentation mainte-
        nance load, most of the documentation describes the 8-bit library, with
-       the differences for the 16-bit and  32-bit  libraries  described  sepa-
-       rately  in  the  pcre16  and  pcre32  pages. References to functions or
-       structures of the  form  pcre[16|32]_xxx  should  be  read  as  meaning
-       "pcre_xxx  when  using  the  8-bit  library,  pcre16_xxx when using the
+       the  differences  for  the  16-bit and 32-bit libraries described sepa-
+       rately in the pcre16 and  pcre32  pages.  References  to  functions  or
+       structures  of  the  form  pcre[16|32]_xxx  should  be  read as meaning
+       "pcre_xxx when using the  8-bit  library,  pcre16_xxx  when  using  the
        16-bit library, or pcre32_xxx when using the 32-bit library".
 
-       The current implementation of PCRE corresponds approximately with  Perl
-       5.12,  including  support  for  UTF-8/16/32 encoded strings and Unicode
-       general category properties. However, UTF-8/16/32 and  Unicode  support
+       The  current implementation of PCRE corresponds approximately with Perl
+       5.12, including support for UTF-8/16/32  encoded  strings  and  Unicode
+       general  category  properties. However, UTF-8/16/32 and Unicode support
        has to be explicitly enabled; it is not the default. The Unicode tables
        correspond to Unicode release 6.2.0.
 
-       In addition to the Perl-compatible matching function, PCRE contains  an
-       alternative  function that matches the same compiled patterns in a dif-
+       In  addition to the Perl-compatible matching function, PCRE contains an
+       alternative function that matches the same compiled patterns in a  dif-
        ferent way. In certain circumstances, the alternative function has some
-       advantages.   For  a discussion of the two matching algorithms, see the
+       advantages.  For a discussion of the two matching algorithms,  see  the
        pcrematching page.
 
-       PCRE is written in C and released as a C library. A  number  of  people
-       have  written  wrappers and interfaces of various kinds. In particular,
-       Google Inc.  have provided a comprehensive C++ wrapper  for  the  8-bit
-       library.  This  is  now  included as part of the PCRE distribution. The
-       pcrecpp page has details of this interface.  Other  people's  contribu-
-       tions  can  be  found in the Contrib directory at the primary FTP site,
+       PCRE  is  written  in C and released as a C library. A number of people
+       have written wrappers and interfaces of various kinds.  In  particular,
+       Google  Inc.   have  provided a comprehensive C++ wrapper for the 8-bit
+       library. This is now included as part of  the  PCRE  distribution.  The
+       pcrecpp  page  has  details of this interface. Other people's contribu-
+       tions can be found in the Contrib directory at the  primary  FTP  site,
        which is:
 
        ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre
 
-       Details of exactly which Perl regular expression features are  and  are
+       Details  of  exactly which Perl regular expression features are and are
        not supported by PCRE are given in separate documents. See the pcrepat-
-       tern and pcrecompat pages. There is a syntax summary in the  pcresyntax
+       tern  and pcrecompat pages. There is a syntax summary in the pcresyntax
        page.
 
-       Some  features  of  PCRE can be included, excluded, or changed when the
-       library is built. The pcre_config() function makes it  possible  for  a
-       client  to  discover  which  features are available. The features them-
-       selves are described in the pcrebuild page. Documentation about  build-
-       ing  PCRE  for various operating systems can be found in the README and
+       Some features of PCRE can be included, excluded, or  changed  when  the
+       library  is  built.  The pcre_config() function makes it possible for a
+       client to discover which features are  available.  The  features  them-
+       selves  are described in the pcrebuild page. Documentation about build-
+       ing PCRE for various operating systems can be found in the  README  and
        NON-AUTOTOOLS_BUILD files in the source distribution.
 
-       The libraries contains a number of undocumented internal functions  and
-       data  tables  that  are  used by more than one of the exported external
-       functions, but which are not intended  for  use  by  external  callers.
-       Their  names all begin with "_pcre_" or "_pcre16_" or "_pcre32_", which
-       hopefully will not provoke any name clashes. In some  environments,  it
-       is  possible  to  control  which  external  symbols are exported when a
-       shared library is built, and in these cases  the  undocumented  symbols
+       The  libraries contains a number of undocumented internal functions and
+       data tables that are used by more than one  of  the  exported  external
+       functions,  but  which  are  not  intended for use by external callers.
+       Their names all begin with "_pcre_" or "_pcre16_" or "_pcre32_",  which
+       hopefully  will  not provoke any name clashes. In some environments, it
+       is possible to control which  external  symbols  are  exported  when  a
+       shared  library  is  built, and in these cases the undocumented symbols
        are not exported.
 
 
 SECURITY CONSIDERATIONS
 
-       If  you  are  using PCRE in a non-UTF application that permits users to
-       supply arbitrary patterns for compilation, you should  be  aware  of  a
+       If you are using PCRE in a non-UTF application that  permits  users  to
+       supply  arbitrary  patterns  for  compilation, you should be aware of a
        feature that allows users to turn on UTF support from within a pattern,
-       provided that PCRE was built with UTF support. For  example,  an  8-bit
-       pattern  that  begins  with  "(*UTF8)" or "(*UTF)" turns on UTF-8 mode,
-       which interprets patterns and subjects as strings of  UTF-8  characters
-       instead  of  individual 8-bit characters.  This causes both the pattern
+       provided  that  PCRE  was built with UTF support. For example, an 8-bit
+       pattern that begins with "(*UTF8)" or "(*UTF)"  turns  on  UTF-8  mode,
+       which  interprets  patterns and subjects as strings of UTF-8 characters
+       instead of individual 8-bit characters.  This causes both  the  pattern
        and any data against which it is matched to be checked for UTF-8 valid-
-       ity.  If  the  data  string is very long, such a check might use suffi-
-       ciently many resources as to cause your  application  to  lose  perfor-
+       ity. If the data string is very long, such a  check  might  use  suffi-
+       ciently  many  resources  as  to cause your application to lose perfor-
        mance.
 
-       One   way   of   guarding  against  this  possibility  is  to  use  the
-       pcre_fullinfo() function to check the compiled  pattern's  options  for
-       UTF.   Alternatively, from release 8.33, you can set the PCRE_NEVER_UTF
-       option at compile time. This causes an compile time error if a  pattern
+       One  way  of  guarding  against  this  possibility  is   to   use   the
+       pcre_fullinfo()  function  to  check the compiled pattern's options for
+       UTF.  Alternatively, from release 8.33, you can set the  PCRE_NEVER_UTF
+       option  at compile time. This causes an compile time error if a pattern
        contains a UTF-setting sequence.
 
-       If  your  application  is one that supports UTF, be aware that validity
-       checking can take time. If the same data string is to be  matched  many
+       If your application is one that supports UTF, be  aware  that  validity
+       checking  can  take time. If the same data string is to be matched many
        times, you can use the PCRE_NO_UTF[8|16|32]_CHECK option for the second
        and subsequent matches to save redundant checks.
 
-       Another way that performance can be hit is by running  a  pattern  that
-       has  a  very  large search tree against a string that will never match.
-       Nested unlimited repeats in a pattern are a common example.  PCRE  pro-
+       Another  way  that  performance can be hit is by running a pattern that
+       has a very large search tree against a string that  will  never  match.
+       Nested  unlimited  repeats in a pattern are a common example. PCRE pro-
        vides some protection against this: see the PCRE_EXTRA_MATCH_LIMIT fea-
        ture in the pcreapi page.
 
 
 USER DOCUMENTATION
 
-       The user documentation for PCRE comprises a number  of  different  sec-
-       tions.  In the "man" format, each of these is a separate "man page". In
-       the HTML format, each is a separate page, linked from the  index  page.
-       In  the  plain  text format, all the sections, except the pcredemo sec-
+       The  user  documentation  for PCRE comprises a number of different sec-
+       tions. In the "man" format, each of these is a separate "man page".  In
+       the  HTML  format, each is a separate page, linked from the index page.
+       In the plain text format, all the sections, except  the  pcredemo  sec-
        tion, are concatenated, for ease of searching. The sections are as fol-
        lows:
 
          pcre              this document
+         pcre-config       show PCRE installation configuration information
          pcre16            details of the 16-bit library
          pcre32            details of the 32-bit library
-         pcre-config       show PCRE installation configuration information
          pcreapi           details of PCRE's native C API
-         pcrebuild         options for building PCRE
+         pcrebuild         building PCRE
          pcrecallout       details of the callout feature
          pcrecompat        discussion of Perl compatibility
          pcrecpp           details of the C++ wrapper for the 8-bit library
@@ -159,7 +160,7 @@ USER DOCUMENTATION
          pcretest          description of the pcretest testing command
          pcreunicode       discussion of Unicode and UTF-8/16/32 support
 
-       In  addition,  in the "man" and HTML formats, there is a short page for
+       In addition, in the "man" and HTML formats, there is a short  page  for
        each C library function, listing its arguments and results.
 
 
@@ -169,14 +170,14 @@ AUTHOR
        University Computing Service
        Cambridge CB2 3QH, England.
 
-       Putting an actual email address here seems to have been a spam  magnet,
-       so  I've  taken  it away. If you want to email me, use my two initials,
+       Putting  an actual email address here seems to have been a spam magnet,
+       so I've taken it away. If you want to email me, use  my  two  initials,
        followed by the two digits 10, at the domain cam.ac.uk.
 
 
 REVISION
 
-       Last updated: 26 April 2013
+       Last updated: 13 May 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
  
@@ -849,21 +850,34 @@ PCREBUILD(3)               Library Functions Manual               PCREBUILD(3)
 NAME
        PCRE - Perl-compatible regular expressions
 
+BUILDING PCRE
+
+       PCRE  is  distributed with a configure script that can be used to build
+       the library in Unix-like environments using the applications  known  as
+       Autotools.   Also  in  the  distribution  are files to support building
+       using CMake instead of configure. The text file README contains general
+       information  about  building  with Autotools (some of which is repeated
+       below), and also has some comments about building on various  operating
+       systems.  There  is  a lot more information about building PCRE without
+       using Autotools (including information about using CMake  and  building
+       "by  hand")  in  the  text file called NON-AUTOTOOLS-BUILD.  You should
+       consult this file as well as the README file if you are building  in  a
+       non-Unix-like environment.
+
+
 PCRE BUILD-TIME OPTIONS
 
-       This  document  describes  the  optional  features  of PCRE that can be
-       selected when the library is compiled. It assumes use of the  configure
-       script,  where the optional features are selected or deselected by pro-
-       viding options to configure before running the make  command.  However,
-       the  same  options  can be selected in both Unix-like and non-Unix-like
-       environments using the GUI facility of cmake-gui if you are using CMake
-       instead of configure to build PCRE.
+       The  rest of this document describes the optional features of PCRE that
+       can be selected when the library is compiled. It  assumes  use  of  the
+       configure  script,  where  the  optional features are selected or dese-
+       lected by providing options to configure before running the  make  com-
+       mand.  However,  the same options can be selected in both Unix-like and
+       non-Unix-like environments using the GUI facility of cmake-gui  if  you
+       are using CMake instead of configure to build PCRE.
 
-       There  is a lot more information about building PCRE without using con-
-       figure (including information about using CMake or building "by  hand")
-       in  the file called NON-AUTOTOOLS-BUILD, which is part of the PCRE dis-
-       tribution. You should consult this file as well as the README  file  if
-       you are building in a non-Unix-like environment.
+       If  you  are not using Autotools or CMake, option selection can be done
+       by editing the config.h file, or by passing parameter settings  to  the
+       compiler, as described in NON-AUTOTOOLS-BUILD.
 
        The complete list of options for configure (which includes the standard
        ones such as the  selection  of  the  installation  directory)  can  be
@@ -890,10 +904,10 @@ BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 
          --enable-pcre16
 
-       to the configure command. You can also build a separate library, called
-       libpcre32, in which strings are contained in  vectors  of  32-bit  data
-       units  and  interpreted  either  as  single-unit  characters  or UTF-32
-       strings, by adding
+       to  the  configure  command.  You  can  also build yet another separate
+       library, called libpcre32, in which strings are contained in vectors of
+       32-bit  data  units and interpreted either as single-unit characters or
+       UTF-32 strings, by adding
 
          --enable-pcre32
 
@@ -909,9 +923,9 @@ BUILDING 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 
 BUILDING SHARED AND STATIC LIBRARIES
 
-       The  PCRE building process uses libtool to build both shared and static
-       Unix libraries by default. You can suppress one of these by adding  one
-       of
+       The  Autotools  PCRE building process uses libtool to build both shared
+       and static libraries by default. You  can  suppress  one  of  these  by
+       adding one of
 
          --disable-shared
          --disable-static
@@ -1327,8 +1341,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 30 October 2012
-       Copyright (c) 1997-2012 University of Cambridge.
+       Last updated: 12 May 2013
+       Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
  
  

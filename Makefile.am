@@ -14,12 +14,16 @@ dist_doc_DATA = \
   NEWS \
   README
 
+# Note that pcrecpp.html is not in this list; it is listed separately below.
+
 dist_html_DATA = \
+  doc/html/NON-AUTOTOOLS-BUILD.txt \
+  doc/html/README.txt \
   doc/html/index.html \
+  doc/html/pcre-config.html \
   doc/html/pcre.html \
   doc/html/pcre16.html \
   doc/html/pcre32.html \
-  doc/html/pcre-config.html \
   doc/html/pcre_assign_jit_stack.html \
   doc/html/pcre_compile.html \
   doc/html/pcre_compile2.html \
@@ -661,11 +665,13 @@ if WITH_PCRE_CPP
 pkgconfig_DATA += libpcrecpp.pc
 endif
 
+# Note that pcrecpp.3 is not in this list, but is included separately below.
+
 dist_man_MANS = \
+  doc/pcre-config.1 \
   doc/pcre.3 \
   doc/pcre16.3 \
   doc/pcre32.3 \
-  doc/pcre-config.1 \
   doc/pcre_assign_jit_stack.3 \
   doc/pcre_compile.3 \
   doc/pcre_compile2.3 \
@@ -697,6 +703,7 @@ dist_man_MANS = \
   doc/pcrebuild.3 \
   doc/pcrecallout.3 \
   doc/pcrecompat.3 \
+  doc/pcredemo.3 \
   doc/pcregrep.1 \
   doc/pcrejit.3 \
   doc/pcrelimits.3 \

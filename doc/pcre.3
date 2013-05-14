@@ -1,4 +1,4 @@
-.TH PCRE 3 "26 April 2013" "PCRE 8.33"
+.TH PCRE 3 "13 May 2013" "PCRE 8.33"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH INTRODUCTION
@@ -19,9 +19,9 @@ built. The majority of the work to make this possible was done by Zoltan
 Herczeg.
 .P
 Starting with release 8.32 it is possible to compile a third separate PCRE
-library, which supports 32-bit character strings (including
-UTF-32 strings). The build process allows any set of the 8-, 16- and 32-bit
-libraries. The work to make this possible was done by Christian Persch.
+library that supports 32-bit character strings (including UTF-32 strings). The
+build process allows any combination of the 8-, 16- and 32-bit libraries. The
+work to make this possible was done by Christian Persch.
 .P
 The three libraries contain identical sets of functions, except that the names
 in the 16-bit library start with \fBpcre16_\fP instead of \fBpcre_\fP, and the
@@ -68,6 +68,7 @@ in the \fIContrib\fP directory at the primary FTP site, which is:
 .\" HTML <a href="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre">
 .\" </a>
 ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre
+.\"
 .P
 Details of exactly which Perl regular expression features are and are not
 supported by PCRE are given in separate documents. See the
@@ -95,8 +96,17 @@ available. The features themselves are described in the
 \fBpcrebuild\fP
 .\"
 page. Documentation about building PCRE for various operating systems can be
-found in the \fBREADME\fP and \fBNON-AUTOTOOLS_BUILD\fP files in the source
-distribution.
+found in the 
+.\" HTML <a href="README.txt">
+.\" </a>
+\fBREADME\fP 
+.\"
+and 
+.\" HTML <a href="NON-AUTOTOOLS-BUILD.txt">
+.\" </a>
+\fBNON-AUTOTOOLS_BUILD\fP 
+.\"
+files in the source distribution.
 .P
 The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
@@ -152,11 +162,11 @@ all the sections, except the \fBpcredemo\fP section, are concatenated, for ease
 of searching. The sections are as follows:
 .sp
   pcre              this document
+  pcre-config       show PCRE installation configuration information
   pcre16            details of the 16-bit library
   pcre32            details of the 32-bit library
-  pcre-config       show PCRE installation configuration information
   pcreapi           details of PCRE's native C API
-  pcrebuild         options for building PCRE
+  pcrebuild         building PCRE
   pcrecallout       details of the callout feature
   pcrecompat        discussion of Perl compatibility
   pcrecpp           details of the C++ wrapper for the 8-bit library
@@ -200,6 +210,6 @@ two digits 10, at the domain cam.ac.uk.
 .rs
 .sp
 .nf
-Last updated: 26 April 2013
+Last updated: 13 May 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
