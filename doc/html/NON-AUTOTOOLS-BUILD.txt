@@ -9,11 +9,14 @@ This document contains the following sections:
   Building for virtual Pascal
   Stack size in Windows environments
   Linking programs in Windows environments
+  Calling conventions in Windows environments
   Comments about Win32 builds
   Building PCRE on Windows with CMake
   Use of relative paths with CMake on Windows
   Testing with RunTest.bat
+  Building under Windows CE with Visual Studio 200x
   Building under Windows with BCC5.5
+  Building using Borland C++ Builder 2007 (CB2007) and higher
   Building PCRE on OpenVMS
   Building PCRE on Stratus OpenVOS
   Building PCRE on native z/OS and z/VM
@@ -429,12 +432,9 @@ CMake build process. In the CMake GUI, the cache can be deleted by selecting
 
 USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
 
-A PCRE user comments as follows:
+A PCRE user comments as follows: I thought that others may want to know the
+current state of CMAKE_USE_RELATIVE_PATHS support on Windows. Here it is:
 
-I thought that others may want to know the current state of
-CMAKE_USE_RELATIVE_PATHS support on Windows.
-
-Here it is:
 -- AdditionalIncludeDirectories is only partially modified (only the
    first path - see below)
 -- Only some of the contained file paths are modified - shown below for
@@ -490,25 +490,139 @@ To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
 pcre_scanner_unittest.exe.
 
 
-BUILDING UNDER WINDOWS WITH BCC5.5
-
-Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
-
-  Some of the core BCC libraries have a version of PCRE from 1998 built in,
-  which can lead to pcre_exec() giving an erroneous PCRE_ERROR_NULL from a
-  version mismatch. I'm including an easy workaround below, if you'd like to
-  include it in the non-unix instructions:
-
-  When linking a project with BCC5.5, pcre.lib must be included before any of
-  the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
-  line.
-
-
 BUILDING UNDER WINDOWS CE WITH VISUAL STUDIO 200x
 
 Vincent Richomme sent a zip archive of files to help with this process. They
 can be found in the file "pcre-vsbuild.zip" in the Contrib directory of the FTP
 site.
+
+
+BUILDING UNDER WINDOWS WITH BCC5.5
+
+Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
+
+Some of the core BCC libraries have a version of PCRE from 1998 built in, which
+can lead to pcre_exec() giving an erroneous PCRE_ERROR_NULL from a version
+mismatch. I'm including an easy workaround below, if you'd like to include it
+in the non-unix instructions:
+
+When linking a project with BCC5.5, pcre.lib must be included before any of the
+libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command line.
+
+
+BUILDING USING BORLAND C++ BUILDER 2007 (CB2007) AND HIGHER
+
+A PCRE user sent these comments about this environment (see also the comment
+from another user that follows them):
+
+The XE versions of C++ Builder come with a RegularExpressionsCore class which
+contain a version of TPerlRegEx. However, direct use of the C PCRE library may
+be desirable.
+
+The default makevp.bat, however, supplied with PCRE builds a version of PCRE
+that is not usable with any version of C++ Builder because the compiler ships
+with an embedded version of PCRE, version 2.01 from 1998! [See also the note
+about BCC5.5 above.] If you want to use PCRE you'll need to rename the
+functions (pcre_compile to pcre_compile_bcc, etc) or do as I have done and just
+use the 16 bit versions. I'm using std::wstring everywhere anyway. Since the
+embedded version of PCRE does not have the 16 bit function names, there is no
+conflict.
+
+Building PCRE using a C++ Builder static library project file (recommended):
+
+1. Rename or remove pcre.h, pcreposi.h, and pcreposix.h from your C++ Builder
+original include path.
+
+2. Download PCRE from pcre.org and extract to a directory.
+
+3. Rename pcre_chartables.c.dist to pcre_chartables.c, pcre.h.generic to
+pcre.h, and config.h.generic to config.h.
+
+4. Edit pcre.h and pcre_config.c so that they include config.h.
+
+5. Edit config.h like so:
+
+Comment out the following lines:
+#define PACKAGE "pcre"
+#define PACKAGE_BUGREPORT ""
+#define PACKAGE_NAME "PCRE"
+#define PACKAGE_STRING "PCRE 8.32"
+#define PACKAGE_TARNAME "pcre"
+#define PACKAGE_URL ""
+#define PACKAGE_VERSION "8.32"
+
+Add the following lines:
+#ifndef SUPPORT_UTF
+#define SUPPORT_UTF 100 // any value is fine
+#endif
+
+#ifndef SUPPORT_UCP
+#define SUPPORT_UCP 101 // any value is fine
+#endif
+
+#ifndef SUPPORT_UCP
+#define SUPPORT_PCRE16 102 // any value is fine
+#endif
+
+#ifndef SUPPORT_UTF8
+#define SUPPORT_UTF8 103 // any value is fine
+#endif
+
+6. Build a C++ Builder project using the IDE. Go to File / New / Other and
+choose Static Library. You can name it pcre.cbproj or whatever. Now set your
+paths by going to Project / Options. Set the Include path. Do this from the
+"Base" option to apply to both Release and Debug builds. Now add the following
+files to the project:
+
+pcre.h
+pcre16_byte_order.c
+pcre16_chartables.c
+pcre16_compile.c
+pcre16_config.c
+pcre16_dfa_exec.c
+pcre16_exec.c
+pcre16_fullinfo.c
+pcre16_get.c
+pcre16_globals.c
+pcre16_maketables.c
+pcre16_newline.c
+pcre16_ord2utf16.c
+pcre16_printint.c
+pcre16_refcount.c
+pcre16_string_utils.c
+pcre16_study.c
+pcre16_tables.c
+pcre16_ucd.c
+pcre16_utf16_utils.c
+pcre16_valid_utf16.c
+pcre16_version.c
+pcre16_xclass.c
+
+//Optional
+pcre_version.c
+
+7. After compiling the .lib file, copy the .lib and header files to a project
+you want to use PCRE with. Enjoy.
+
+Optional ... Building PCRE using the makevp.bat file:
+
+1. Edit makevp_c.txt and makevp_l.txt and change all the names to the 16 bit
+versions.
+
+2. Edit makevp.bat and set the path to C++ Builder. Run makevp.bat.
+
+Another PCRE user added this comment:
+
+Another approach I successfully used for some years with BCB 5 and 6 was to
+make sure that include and library paths of PCRE are configured before the
+default paths of the IDE in the dialogs where one can manage those paths.
+Afterwards one can open the project files using a text editor and manually add
+the self created library for pcre itself, pcrecpp doesn't ship with the IDE, in
+the library nodes where the IDE manages its own libraries to link against in
+front of the IDE-own libraries. This way one can use the default PCRE function
+names without getting access violations on runtime.
+
+  <ALLLIB value="libpcre.lib $(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
 
 
 BUILDING PCRE ON OPENVMS
@@ -647,4 +761,4 @@ There is also a mirror here:
   http://www.vsoft-software.com/downloads.html
 
 ==========================
-Last Updated: 28 April 2013
+Last Updated: 14 May 2013
