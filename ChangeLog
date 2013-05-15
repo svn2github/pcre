@@ -158,10 +158,13 @@ Version 8.33 28-April-2013
 
 42. Data lines longer than 65536 caused pcretest to crash.
 
-44. Clarified the data type for length and startoffset arguments for pcre_exec 
+43. Clarified the data type for length and startoffset arguments for pcre_exec 
     and pcre_dfa_exec in the function-specific man pages, where they were 
     explicitly stated to be in bytes, never having been updated. I also added 
     some clarification to the pcreapi man page.
+    
+44. A call to pcre_dfa_exec() with an output vector size less than 2 caused
+    a segmentation fault. 
 
 
 Version 8.32 30-November-2012

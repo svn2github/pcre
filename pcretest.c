@@ -5043,7 +5043,7 @@ while (!done)
           DFA_WS_DIMENSION);
         if (count == 0)
           {
-          fprintf(outfile, "Matched, but too many subsidiary matches\n");
+          fprintf(outfile, "Matched, but offsets vector is too small to show all matches\n");
           count = use_size_offsets/2;
           }
         }

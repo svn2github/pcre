@@ -636,7 +636,7 @@ for (;;)
     const pcre_uchar *code;
     int state_offset = current_state->offset;
     int codevalue, rrc;
-    unsigned int count;
+    int count;
 
 #ifdef PCRE_DEBUG
     printf ("%.*sProcessing state %d c=", rlevel*2-2, SP, state_offset);
@@ -1255,7 +1255,7 @@ for (;;)
               (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW(state_offset + 1 + IMM2_SIZE + 1, 0); }
           else
             { ADD_NEW(state_offset, count); }
@@ -1289,7 +1289,7 @@ for (;;)
             active_count--;           /* Remove non-match possibility */
             next_active_state--;
             }
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW(state_offset + 2 + IMM2_SIZE, 0); }
           else
             { ADD_NEW(state_offset, count); }
@@ -1903,7 +1903,7 @@ for (;;)
             active_count--;           /* Remove non-match possibility */
             next_active_state--;
             }
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW(state_offset + 1 + IMM2_SIZE + 3, 0); }
           else
             { ADD_NEW(state_offset, count); }
@@ -1942,7 +1942,7 @@ for (;;)
           }
         if (nptr >= end_subject && (md->moptions & PCRE_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
-        if (++count >= GET2(code, 1))
+        if (++count >= (int)GET2(code, 1))
           { ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount); }
         else
           { ADD_NEW_DATA(-state_offset, count, ncount); }
@@ -1984,7 +1984,7 @@ for (;;)
             active_count--;           /* Remove non-match possibility */
             next_active_state--;
             }
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, ncount); }
           else
             { ADD_NEW_DATA(-state_offset, count, ncount); }
@@ -2024,7 +2024,7 @@ for (;;)
             active_count--;           /* Remove non-match possibility */
             next_active_state--;
             }
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0); }
           else
             { ADD_NEW_DATA(-state_offset, count, 0); }
@@ -2061,7 +2061,7 @@ for (;;)
             active_count--;           /* Remove non-match possibility */
             next_active_state--;
             }
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW_DATA(-(state_offset + 2 + IMM2_SIZE), 0, 0); }
           else
             { ADD_NEW_DATA(-state_offset, count, 0); }
@@ -2431,7 +2431,7 @@ for (;;)
           }
         if ((c == d || c == otherd) == (codevalue < OP_NOTSTAR))
           {
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0); }
           else
             { ADD_NEW(state_offset, count); }
@@ -2480,7 +2480,7 @@ for (;;)
             active_count--;             /* Remove non-match possibility */
             next_active_state--;
             }
-          if (++count >= GET2(code, 1))
+          if (++count >= (int)GET2(code, 1))
             { ADD_NEW(state_offset + dlen + 1 + IMM2_SIZE, 0); }
           else
             { ADD_NEW(state_offset, count); }
@@ -2553,11 +2553,11 @@ for (;;)
           case OP_CRRANGE:
           case OP_CRMINRANGE:
           count = current_state->count;  /* Already matched */
-          if (count >= GET2(ecode, 1))
+          if (count >= (int)GET2(ecode, 1))
             { ADD_ACTIVE(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
           if (isinclass)
             {
-            unsigned int max = GET2(ecode, 1 + IMM2_SIZE);
+            int max = (int)GET2(ecode, 1 + IMM2_SIZE);
             if (++count >= max && max != 0)   /* Max 0 => no limit */
               { ADD_NEW(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
             else
