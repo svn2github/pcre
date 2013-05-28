@@ -44,11 +44,11 @@ but without much justification.
 .rs
 .sp
 Input to \fBpcretest\fP is processed line by line, either by calling the C
-library's \fBfgets()\fP function, or via the \fBlibreadline\fP library (see 
-below). In Unix-like environments, \fBfgets()\fP treats any bytes other than 
-newline as data characters. However, in some Windows environments character 26 
-(hex 1A) causes an immediate end of file, and no further data is read. For 
-maximum portability, therefore, it is safest to use only ASCII characters in 
+library's \fBfgets()\fP function, or via the \fBlibreadline\fP library (see
+below). In Unix-like environments, \fBfgets()\fP treats any bytes other than
+newline as data characters. However, in some Windows environments character 26
+(hex 1A) causes an immediate end of file, and no further data is read. For
+maximum portability, therefore, it is safest to use only ASCII characters in
 \fBpcretest\fP input files.
 .
 .
@@ -96,7 +96,7 @@ internal form is output after compilation.
 .TP 10
 \fB-C\fP
 Output the version number of the PCRE library, and all available information
-about the optional features that are included, and then exit with zero exit 
+about the optional features that are included, and then exit with zero exit
 code. All other options are ignored.
 .TP 10
 \fB-C\fP \fIoption\fP
@@ -107,14 +107,14 @@ following options output the value and set the exit code as indicated:
   ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
                0x15 or 0x25
                0 if used in an ASCII environment
-               exit code is always 0 
+               exit code is always 0
   linksize   the configured internal link size (2, 3, or 4)
-               exit code is set to the link size 
+               exit code is set to the link size
   newline    the default newline setting:
                CR, LF, CRLF, ANYCRLF, or ANY
-               exit code is always 0 
+               exit code is always 0
 .sp
-The following options output 1 for true or 0 for false, and set the exit code 
+The following options output 1 for true or 0 for false, and set the exit code
 to the same value:
 .sp
   ebcdic     compiled for an EBCDIC environment
@@ -123,10 +123,10 @@ to the same value:
   pcre32     the 32-bit library was built
   pcre8      the 8-bit library was built
   ucp        Unicode property support is available
-  utf        UTF-8 and/or UTF-16 and/or UTF-32 support 
+  utf        UTF-8 and/or UTF-16 and/or UTF-32 support
                is available
 .sp
-If an unknown option is given, an error message is output; the exit code is 0.   
+If an unknown option is given, an error message is output; the exit code is 0.
 .TP 10
 \fB-d\fP
 Behave as if each pattern has the \fB/D\fP (debug) modifier; the internal
@@ -298,7 +298,7 @@ fall into several groups that are described in detail in the following
 sections.
 .sp
   \fB/8\fP              set UTF mode
-  \fB/9\fP              set PCRE_NEVER_UTF (locks out UTF mode) 
+  \fB/9\fP              set PCRE_NEVER_UTF (locks out UTF mode)
   \fB/?\fP              disable UTF validity check
   \fB/+\fP              show remainder of subject after match
   \fB/=\fP              show all captures (not just those that are set)

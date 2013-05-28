@@ -41,14 +41,14 @@ it is processed as if it were
 (?C255)A(?C255)((?C255)\ed{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)
 .sp
 Notice that there is a callout before and after each parenthesis and
-alternation bar. If the pattern contains a conditional group whose condition is 
-an assertion, an automatic callout is inserted immediately before the 
+alternation bar. If the pattern contains a conditional group whose condition is
+an assertion, an automatic callout is inserted immediately before the
 condition. Such a callout may also be inserted explicitly, for example:
 .sp
   (?(?C9)(?=a)ab|de)
 .sp
-This applies only to assertion conditions (because they are themselves 
-independent groups).   
+This applies only to assertion conditions (because they are themselves
+independent groups).
 .P
 Automatic callouts can be used for tracking the progress of pattern matching.
 The

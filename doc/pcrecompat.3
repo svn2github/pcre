@@ -103,7 +103,7 @@ A(*COMMIT)B(*PRUNE)C a failure in B triggers (*COMMIT), but a failure in C
 triggers (*PRUNE). Perl's behaviour is more complex; in many cases it is the
 same as PCRE, but there are examples where it differs.
 .P
-12. Most backtracking verbs in assertions have their normal actions. They are 
+12. Most backtracking verbs in assertions have their normal actions. They are
 not confined to the assertion.
 .P
 13. There are some differences that are concerned with the settings of captured
@@ -125,7 +125,7 @@ between the ( and ? at the start of a subpattern. If the /x modifier is set,
 Perl allows white space between ( and ? but PCRE never does, even if the
 PCRE_EXTENDED option is set.
 .P
-16. In PCRE, the upper/lower case character properties Lu and Ll are not 
+16. In PCRE, the upper/lower case character properties Lu and Ll are not
 affected when case-independent matching is specified. For example, \ep{Lu}
 always matches an upper case letter. I think Perl has changed in this respect;
 in the release at the time of writing (5.16), \ep{Lu} and \ep{Ll} match all

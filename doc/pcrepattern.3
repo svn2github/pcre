@@ -37,7 +37,7 @@ page.
 .SH "SPECIAL START-OF-PATTERN ITEMS"
 .rs
 .sp
-A number of options that can be passed to \fBpcre_compile()\fP can also be set 
+A number of options that can be passed to \fBpcre_compile()\fP can also be set
 by special items at the start of a pattern. These are not Perl-compatible, but
 are provided to make these options accessible to pattern writers who are not
 able to change the program that processes the pattern. Any number of these
@@ -71,7 +71,7 @@ places below. There is also a summary of features in the
 .\"
 page.
 .P
-Some applications that allow their users to supply patterns may wish to 
+Some applications that allow their users to supply patterns may wish to
 restrict them to non-UTF data for security reasons. If the PCRE_NEVER_UTF
 option is set at compile time, (*UTF) etc. are not allowed, and their
 appearance causes an error.
@@ -151,23 +151,23 @@ convention.
 .SS "Setting match and recursion limits"
 .rs
 .sp
-The caller of \fBpcre_exec()\fP can set a limit on the number of times the 
-internal \fBmatch()\fP function is called and on the maximum depth of 
+The caller of \fBpcre_exec()\fP can set a limit on the number of times the
+internal \fBmatch()\fP function is called and on the maximum depth of
 recursive calls. These facilities are provided to catch runaway matches that
 are provoked by patterns with huge matching trees (a typical example is a
 pattern with nested unlimited repeats) and to avoid running out of system stack
 by too much recursion. When one of these limits is reached, \fBpcre_exec()\fP
-gives an error return. The limits can also be set by items at the start of the 
+gives an error return. The limits can also be set by items at the start of the
 pattern of the form
 .sp
   (*LIMIT_MATCH=d)
   (*LIMIT_RECURSION=d)
 .sp
-where d is any number of decimal digits. However, the value of the setting must 
-be less than the value set by the caller of \fBpcre_exec()\fP for it to have 
-any effect. In other words, the pattern writer can lower the limit set by the 
-programmer, but not raise it. If there is more than one setting of one of these 
-limits, the lower value is used.   
+where d is any number of decimal digits. However, the value of the setting must
+be less than the value set by the caller of \fBpcre_exec()\fP for it to have
+any effect. In other words, the pattern writer can lower the limit set by the
+programmer, but not raise it. If there is more than one setting of one of these
+limits, the lower value is used.
 .
 .
 .SH "EBCDIC CHARACTER CODES"
@@ -846,7 +846,7 @@ Instead, this property is assumed for any code point that is not in the
 Unicode table.
 .P
 Specifying caseless matching does not affect these escape sequences. For
-example, \ep{Lu} always matches only upper case letters. This is different from 
+example, \ep{Lu} always matches only upper case letters. This is different from
 the behaviour of current versions of Perl.
 .P
 Matching characters by Unicode property is not fast, because PCRE has to do a
@@ -907,7 +907,7 @@ the "mark" property always have the "extend" grapheme breaking property.
 As well as the standard Unicode properties described above, PCRE supports four
 more that make it possible to convert traditional escape sequences such as \ew
 and \es and POSIX character classes to use Unicode properties. PCRE uses these
-non-standard, non-Perl properties internally when PCRE_UCP is set. However, 
+non-standard, non-Perl properties internally when PCRE_UCP is set. However,
 they may also be used explicitly. These properties are:
 .sp
   Xan   Any alphanumeric character
@@ -921,13 +921,13 @@ carriage return, and any other character that has the Z (separator) property.
 Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the
 same characters as Xan, plus underscore.
 .P
-There is another non-standard property, Xuc, which matches any character that 
-can be represented by a Universal Character Name in C++ and other programming 
-languages. These are the characters $, @, ` (grave accent), and all characters 
-with Unicode code points greater than or equal to U+00A0, except for the 
-surrogates U+D800 to U+DFFF. Note that most base (ASCII) characters are 
+There is another non-standard property, Xuc, which matches any character that
+can be represented by a Universal Character Name in C++ and other programming
+languages. These are the characters $, @, ` (grave accent), and all characters
+with Unicode code points greater than or equal to U+00A0, except for the
+surrogates U+D800 to U+DFFF. Note that most base (ASCII) characters are
 excluded. (Universal Character Names are of the form \euHHHH or \eUHHHHHHHH
-where H is a hexadecimal digit. Note that the Xuc property does not match these 
+where H is a hexadecimal digit. Note that the Xuc property does not match these
 sequences but the characters that they represent.)
 .
 .
@@ -1410,7 +1410,7 @@ above. There are also the (*UTF8), (*UTF16),(*UTF32), and (*UCP) leading
 sequences that can be used to set UTF and Unicode property modes; they are
 equivalent to setting the PCRE_UTF8, PCRE_UTF16, PCRE_UTF32 and the PCRE_UCP
 options, respectively. The (*UTF) sequence is a generic version that can be
-used with any of the libraries. However, the application can set the 
+used with any of the libraries. However, the application can set the
 PCRE_NEVER_UTF option, which locks out the use of the (*UTF) sequences.
 .
 .
@@ -2020,7 +2020,7 @@ except that it does not cause the current matching position to be changed.
 Assertion subpatterns are not capturing subpatterns. If such an assertion
 contains capturing subpatterns within it, these are counted for the purposes of
 numbering the capturing subpatterns in the whole pattern. However, substring
-capturing is carried out only for positive assertions. (Perl sometimes, but not 
+capturing is carried out only for positive assertions. (Perl sometimes, but not
 always, does do capturing in negative assertions.)
 .P
 For compatibility with Perl, assertion subpatterns may be repeated; though
@@ -2691,8 +2691,8 @@ explicit callout may also be set at this position, as in this example:
 .sp
   (?(?C9)(?=a)abc|def)
 .sp
-Note that this applies only to assertion conditions, not to other types of 
-condition.   
+Note that this applies only to assertion conditions, not to other types of
+condition.
 .P
 During matching, when PCRE reaches a callout point, the external function is
 called. It is provided with the number of the callout, the position in the
@@ -2718,7 +2718,7 @@ remarks apply to the PCRE features described in this section.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
 parenthesis followed by an asterisk. They are generally of the form
-(*VERB) or (*VERB:NAME). Some may take either form, possibly behaving 
+(*VERB) or (*VERB:NAME). Some may take either form, possibly behaving
 differently depending on whether or not a name is present. A name is any
 sequence of characters that does not include a closing parenthesis. The maximum
 length of name is 255 in the 8-bit library and 65535 in the 16-bit and 32-bit
@@ -2729,20 +2729,20 @@ Any number of these verbs may occur in a pattern.
 Since these verbs are specifically related to backtracking, most of them can be
 used only when the pattern is to be matched using one of the traditional
 matching functions, because these use a backtracking algorithm. With the
-exception of (*FAIL), which behaves like a failing negative assertion, the 
+exception of (*FAIL), which behaves like a failing negative assertion, the
 backtracking control verbs cause an error if encountered by a DFA matching
 function.
 .P
-The behaviour of these verbs in 
+The behaviour of these verbs in
 .\" HTML <a href="#btrepeat">
 .\" </a>
-repeated groups, 
+repeated groups,
 .\"
 .\" HTML <a href="#btassert">
 .\" </a>
-assertions, 
+assertions,
 .\"
-and in 
+and in
 .\" HTML <a href="#btsub">
 .\" </a>
 subpatterns called as subroutines
@@ -2788,7 +2788,7 @@ followed by a name.
 This verb causes the match to end successfully, skipping the remainder of the
 pattern. However, when it is inside a subpattern that is called as a
 subroutine, only that subpattern is ended successfully. Matching then continues
-at the outer level. If (*ACCEPT) in triggered in a positive assertion, the 
+at the outer level. If (*ACCEPT) in triggered in a positive assertion, the
 assertion succeeds; in a negative assertion, the assertion fails.
 .P
 If (*ACCEPT) is inside capturing parentheses, the data so far is captured. For
@@ -2883,7 +2883,7 @@ to ensure that the match is always attempted.
 The following verbs do nothing when they are encountered. Matching continues
 with what follows, but if there is no subsequent match, causing a backtrack to
 the verb, a failure is forced. That is, backtracking cannot pass to the left of
-the verb. However, when one of these verbs appears inside an atomic group or an 
+the verb. However, when one of these verbs appears inside an atomic group or an
 assertion that is true, its effect is confined to that group, because once the
 group has been matched, there is never any backtracking into it. In this
 situation, backtracking can "jump back" to the left of the entire atomic group
@@ -2892,13 +2892,13 @@ applies in subroutine calls.)
 .P
 These verbs differ in exactly what kind of failure occurs when backtracking
 reaches them. The behaviour described below is what happens when the verb is
-not in a subroutine or an assertion. Subsequent sections cover these special 
+not in a subroutine or an assertion. Subsequent sections cover these special
 cases.
 .sp
   (*COMMIT)
 .sp
 This verb, which may not be followed by a name, causes the whole match to fail
-outright if there is a later matching failure that causes backtracking to reach 
+outright if there is a later matching failure that causes backtracking to reach
 it. Even if the pattern is unanchored, no further attempts to find a match by
 advancing the starting point take place. If (*COMMIT) is the only backtracking
 verb that is encountered, once it has been passed \fBpcre_exec()\fP is
@@ -2912,8 +2912,8 @@ dynamic anchor, or "I've started, so I must finish." The name of the most
 recently passed (*MARK) in the path is passed back when (*COMMIT) forces a
 match failure.
 .P
-If there is more than one backtracking verb in a pattern, a different one that 
-follows (*COMMIT) may be triggered first, so merely passing (*COMMIT) during a 
+If there is more than one backtracking verb in a pattern, a different one that
+follows (*COMMIT) may be triggered first, so merely passing (*COMMIT) during a
 match does not always guarantee that a match must be at this starting point.
 .P
 Note that (*COMMIT) at the start of a pattern is not the same as an anchor,
@@ -2945,7 +2945,7 @@ possessive quantifier, but there are some uses of (*PRUNE) that cannot be
 expressed in any other way. In an anchored pattern (*PRUNE) has the same effect
 as (*COMMIT).
 .P
-The behaviour of (*PRUNE:NAME) is the not the same as (*MARK:NAME)(*PRUNE). 
+The behaviour of (*PRUNE:NAME) is the not the same as (*MARK:NAME)(*PRUNE).
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK).
 .sp
@@ -2968,19 +2968,19 @@ instead of skipping on to "c".
 .sp
   (*SKIP:NAME)
 .sp
-When (*SKIP) has an associated name, its behaviour is modified. When it is 
+When (*SKIP) has an associated name, its behaviour is modified. When it is
 triggered, the previous path through the pattern is searched for the most
 recent (*MARK) that has the same name. If one is found, the "bumpalong" advance
 is to the subject position that corresponds to that (*MARK) instead of to where
 (*SKIP) was encountered. If no (*MARK) with a matching name is found, the
 (*SKIP) is ignored.
 .P
-Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores 
+Note that (*SKIP:NAME) searches only for names set by (*MARK:NAME). It ignores
 names that are set by (*PRUNE:NAME) or (*THEN:NAME).
 .sp
   (*THEN) or (*THEN:NAME)
 .sp
-This verb causes a skip to the next innermost alternative when backtracking 
+This verb causes a skip to the next innermost alternative when backtracking
 reaches it. That is, it cancels any further backtracking within the current
 alternative. Its name comes from the observation that it can be used for a
 pattern-based if-then-else block:
@@ -2994,7 +2994,7 @@ succeeds and BAR fails, COND3 is tried. If subsequently BAZ fails, there are no
 more alternatives, so there is a backtrack to whatever came before the entire
 group. If (*THEN) is not inside an alternation, it acts like (*PRUNE).
 .P
-The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN). 
+The behaviour of (*THEN:NAME) is the not the same as (*MARK:NAME)(*THEN).
 It is like (*MARK:NAME) in that the name is remembered for passing back to the
 caller. However, (*SKIP:NAME) searches only for names set with (*MARK).
 .P
@@ -3051,8 +3051,8 @@ etc. are complex pattern fragments:
 .sp
   (A(*COMMIT)B(*THEN)C|ABD)
 .sp
-If A matches but B fails, the backtrack to (*COMMIT) causes the entire match to 
-fail. However, if A and B match, but C fails, the backtrack to (*THEN) causes 
+If A matches but B fails, the backtrack to (*COMMIT) causes the entire match to
+fail. However, if A and B match, but C fails, the backtrack to (*THEN) causes
 the next alternative (ABD) to be tried. This behaviour is consistent, but is
 not always the same as Perl's. It means that if two or more backtracking verbs
 appear in succession, all the the last of them has no effect. Consider this
@@ -3060,22 +3060,22 @@ example:
 .sp
   ...(*COMMIT)(*PRUNE)...
 .sp
-If there is a matching failure to the right, backtracking onto (*PRUNE) cases 
-it to be triggered, and its action is taken. There can never be a backtrack 
-onto (*COMMIT). 
+If there is a matching failure to the right, backtracking onto (*PRUNE) cases
+it to be triggered, and its action is taken. There can never be a backtrack
+onto (*COMMIT).
 .
 .
 .\" HTML <a name="btrepeat"></a>
 .SS "Backtracking verbs in repeated groups"
 .rs
 .sp
-PCRE differs from Perl in its handling of backtracking verbs in repeated 
+PCRE differs from Perl in its handling of backtracking verbs in repeated
 groups. For example, consider:
 .sp
   /(a(*COMMIT)b)+ac/
 .sp
-If the subject is "abac", Perl matches, but PCRE fails because the (*COMMIT) in 
-the second repeat of the group acts.   
+If the subject is "abac", Perl matches, but PCRE fails because the (*COMMIT) in
+the second repeat of the group acts.
 .
 .
 .\" HTML <a name="btassert"></a>
@@ -3084,8 +3084,8 @@ the second repeat of the group acts.
 .sp
 (*FAIL) in an assertion has its normal effect: it forces an immediate backtrack.
 .P
-(*ACCEPT) in a positive assertion causes the assertion to succeed without any 
-further processing. In a negative assertion, (*ACCEPT) causes the assertion to 
+(*ACCEPT) in a positive assertion causes the assertion to succeed without any
+further processing. In a negative assertion, (*ACCEPT) causes the assertion to
 fail without any further processing.
 .P
 The other backtracking verbs are not treated specially if they appear in a
@@ -3095,10 +3095,10 @@ the assertion.
 .P
 Negative assertions are, however, different, in order to ensure that changing a
 positive assertion into a negative assertion changes its result. Backtracking
-into (*COMMIT), (*SKIP), or (*PRUNE) causes a negative assertion to be true, 
-without considering any further alternative branches in the assertion. 
+into (*COMMIT), (*SKIP), or (*PRUNE) causes a negative assertion to be true,
+without considering any further alternative branches in the assertion.
 Backtracking into (*THEN) causes it to skip to the next enclosing alternative
-within the assertion (the normal behaviour), but if the assertion does not have 
+within the assertion (the normal behaviour), but if the assertion does not have
 such an alternative, (*THEN) behaves like (*PRUNE).
 .
 .
@@ -3106,21 +3106,21 @@ such an alternative, (*THEN) behaves like (*PRUNE).
 .SS "Backtracking verbs in subroutines"
 .rs
 .sp
-These behaviours occur whether or not the subpattern is called recursively. 
+These behaviours occur whether or not the subpattern is called recursively.
 Perl's treatment of subroutines is different in some cases.
 .P
 (*FAIL) in a subpattern called as a subroutine has its normal effect: it forces
 an immediate backtrack.
 .P
-(*ACCEPT) in a subpattern called as a subroutine causes the subroutine match to 
-succeed without any further processing. Matching then continues after the 
+(*ACCEPT) in a subpattern called as a subroutine causes the subroutine match to
+succeed without any further processing. Matching then continues after the
 subroutine call.
 .P
 (*COMMIT), (*SKIP), and (*PRUNE) in a subpattern called as a subroutine cause
 the subroutine match to fail.
 .P
 (*THEN) skips to the next alternative in the innermost enclosing group within
-the subpattern that has alternatives. If there is no such group within the 
+the subpattern that has alternatives. If there is no such group within the
 subpattern, (*THEN) causes the subroutine match to fail.
 .
 .

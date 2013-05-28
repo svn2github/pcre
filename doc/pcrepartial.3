@@ -69,8 +69,8 @@ of the subject.
 If there are at least two slots in the offsets vector when a partial match is
 returned, the first slot is set to the offset of the earliest character that
 was inspected. For convenience, the second offset points to the end of the
-subject so that a substring can easily be identified. If there are at least 
-three slots in the offsets vector, the third slot is set to the offset of the 
+subject so that a substring can easily be identified. If there are at least
+three slots in the offsets vector, the third slot is set to the offset of the
 character where matching started.
 .P
 For the majority of patterns, the contents of the first and third slots will be
@@ -83,7 +83,7 @@ inspected while carrying out the match. For example, consider this pattern:
 This pattern matches "123", but only if it is preceded by "abc". If the subject
 string is "xyzabc12", the first two offsets after a partial match are for the
 substring "abc12", because all these characters were inspected. However, the
-third offset is set to 6, because that is the offset where matching began. 
+third offset is set to 6, because that is the offset where matching began.
 .P
 What happens when a partial match is identified depends on which of the two
 partial matching options are set.
@@ -311,8 +311,8 @@ processing time is needed.
 .P
 \fBNote:\fP If the pattern contains lookbehind assertions, or \eK, or starts
 with \eb or \eB, the string that is returned for a partial match includes
-characters that precede the start of what would be returned for a complete 
-match, because it contains all the characters that were inspected during the 
+characters that precede the start of what would be returned for a complete
+match, because it contains all the characters that were inspected during the
 partial match.
 .
 .
@@ -342,8 +342,8 @@ characters should be retained.)
 From release 8.33, there is a more accurate way of deciding which characters to
 retain. Instead of subtracting the length of the longest lookbehind from the
 earliest inspected character (\fIoffsets[0]\fP), the match start position
-(\fIoffsets[2]\fP) should be used, and the next match attempt started at the 
-\fIoffsets[2]\fP character by setting the \fIstartoffset\fP argument of 
+(\fIoffsets[2]\fP) should be used, and the next match attempt started at the
+\fIoffsets[2]\fP character by setting the \fIstartoffset\fP argument of
 \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP.
 .P
 For example, if the pattern "(?<=123)abc" is partially
@@ -352,7 +352,7 @@ and 5. This indicates that the matching process that gave a partial match
 started at offset 5, but the characters "123a" were all inspected. The maximum
 lookbehind for that pattern is 3, so taking that away from 5 shows that we need
 only keep "123a", and the next match attempt can be started at offset 3 (that
-is, at "a") when further characters have been added. When the match start is 
+is, at "a") when further characters have been added. When the match start is
 not the earliest inspected character, \fBpcretest\fP shows it explicitly:
 .sp
     re> "(?<=123)abc"

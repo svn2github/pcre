@@ -2003,7 +2003,7 @@ If \fIstartoffset\fP is negative or greater than the length of the subject,
 \fBpcre_exec()\fP returns PCRE_ERROR_BADOFFSET. When the starting offset is
 zero, the search for a match starts at the beginning of the subject, and this
 is by far the most common case. In UTF-8 or UTF-16 mode, the offset must point
-to the start of a character, or the end of the subject (in UTF-32 mode, one 
+to the start of a character, or the end of the subject (in UTF-32 mode, one
 data unit equals one character, so all offsets are valid). Unlike the pattern
 string, the subject may contain binary zeroes.
 .P

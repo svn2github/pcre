@@ -179,20 +179,20 @@ while ((t = *data++) != XCL_END)
              == (t == XCL_PROP))
         return !negated;
       break;
-      
+
       case PT_UCNC:
-      if (c < 0xa0)                                                  
-        {                                                            
-        if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||        
+      if (c < 0xa0)
+        {
+        if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
              c == CHAR_GRAVE_ACCENT) == (t == XCL_PROP))
           return !negated;
-        }                                      
-      else                                                                 
-        {                                                                   
-        if ((c < 0xd800 || c > 0xdfff) == (t == XCL_PROP))            
+        }
+      else
+        {
+        if ((c < 0xd800 || c > 0xdfff) == (t == XCL_PROP))
           return !negated;
-        }                                                            
-      break;                                                           
+        }
+      break;
 
       /* This should never occur, but compilers may mutter if there is no
       default. */

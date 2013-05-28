@@ -245,8 +245,6 @@ files="\
   pcre_stringpiece_unittest.cc \
   perltest.pl \
   ucp.h \
-  ucpinternal.h \
-  ucptable.h \
   makevp.bat \
   pcre.def \
   libpcre.def \

@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.33 28-April-2013
+Version 8.33 28-May-2013
 --------------------------
 
 1.  Added 'U' to some constants that are compared to unsigned integers, to
@@ -36,8 +36,8 @@ Version 8.33 28-April-2013
 
 9.  Optimizing fast_forward_start_bits in JIT.
 
-10. Adding experimental support for callouts in JIT, and fixing some
-    issues revealed during this work. Namely:
+10. Adding support for callouts in JIT, and fixing some issues revealed
+    during this work. Namely:
 
     (a) Unoptimized capturing brackets incorrectly reset on backtrack.
 
@@ -125,7 +125,8 @@ Version 8.33 28-April-2013
     have been moved to test 1, because either Perl or PCRE has changed, and
     these tests are now compatible.
 
-32. Control verbs are handled in the same way in JIT and interpreter.
+32. Backtracking control verbs are now handled in the same way in JIT and
+    interpreter.
 
 33. An opening parenthesis in a MARK/PRUNE/SKIP/THEN name in a pattern that
     contained a forward subroutine reference caused a compile error.
@@ -148,23 +149,23 @@ Version 8.33 28-April-2013
 39. Try madvise first before posix_madvise.
 
 40. Change 7 for PCRE 7.9 made it impossible for pcregrep to find empty lines
-    with a pattern such as ^$. It has taken 4 years for anybody to notice! The 
-    original change locked out all matches of empty strings. This has been 
-    changed so that one match of an empty string per line is recognized. 
-    Subsequent searches on the same line (for colouring or for --only-matching, 
-    for example) do not recognize empty strings. 
-    
-41. Applied a user patch to fix a number of spelling mistakes in comments. 
+    with a pattern such as ^$. It has taken 4 years for anybody to notice! The
+    original change locked out all matches of empty strings. This has been
+    changed so that one match of an empty string per line is recognized.
+    Subsequent searches on the same line (for colouring or for --only-matching,
+    for example) do not recognize empty strings.
+
+41. Applied a user patch to fix a number of spelling mistakes in comments.
 
 42. Data lines longer than 65536 caused pcretest to crash.
 
-43. Clarified the data type for length and startoffset arguments for pcre_exec 
-    and pcre_dfa_exec in the function-specific man pages, where they were 
-    explicitly stated to be in bytes, never having been updated. I also added 
+43. Clarified the data type for length and startoffset arguments for pcre_exec
+    and pcre_dfa_exec in the function-specific man pages, where they were
+    explicitly stated to be in bytes, never having been updated. I also added
     some clarification to the pcreapi man page.
-    
+
 44. A call to pcre_dfa_exec() with an output vector size less than 2 caused
-    a segmentation fault. 
+    a segmentation fault.
 
 
 Version 8.32 30-November-2012
@@ -1674,7 +1675,7 @@ Version 7.9 11-Apr-09
 7.  A pattern that could match an empty string could cause pcregrep to loop; it
     doesn't make sense to accept an empty string match in pcregrep, so I have
     locked it out (using PCRE's PCRE_NOTEMPTY option). By experiment, this
-    seems to be how GNU grep behaves. [But see later change 40 for release 
+    seems to be how GNU grep behaves. [But see later change 40 for release
     8.33.]
 
 8.  The pattern (?(?=.*b)b|^) was incorrectly compiled as "match must be at

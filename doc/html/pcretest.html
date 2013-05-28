@@ -67,11 +67,11 @@ but without much justification.
 <br><a name="SEC2" href="#TOC1">INPUT DATA FORMAT</a><br>
 <P>
 Input to <b>pcretest</b> is processed line by line, either by calling the C
-library's <b>fgets()</b> function, or via the <b>libreadline</b> library (see 
-below). In Unix-like environments, <b>fgets()</b> treats any bytes other than 
-newline as data characters. However, in some Windows environments character 26 
-(hex 1A) causes an immediate end of file, and no further data is read. For 
-maximum portability, therefore, it is safest to use only ASCII characters in 
+library's <b>fgets()</b> function, or via the <b>libreadline</b> library (see
+below). In Unix-like environments, <b>fgets()</b> treats any bytes other than
+newline as data characters. However, in some Windows environments character 26
+(hex 1A) causes an immediate end of file, and no further data is read. For
+maximum portability, therefore, it is safest to use only ASCII characters in
 <b>pcretest</b> input files.
 </P>
 <br><a name="SEC3" href="#TOC1">PCRE's 8-BIT, 16-BIT AND 32-BIT LIBRARIES</a><br>
@@ -120,7 +120,7 @@ internal form is output after compilation.
 <P>
 <b>-C</b>
 Output the version number of the PCRE library, and all available information
-about the optional features that are included, and then exit with zero exit 
+about the optional features that are included, and then exit with zero exit
 code. All other options are ignored.
 </P>
 <P>
@@ -132,14 +132,14 @@ following options output the value and set the exit code as indicated:
   ebcdic-nl  the code for LF (= NL) in an EBCDIC environment:
                0x15 or 0x25
                0 if used in an ASCII environment
-               exit code is always 0 
+               exit code is always 0
   linksize   the configured internal link size (2, 3, or 4)
-               exit code is set to the link size 
+               exit code is set to the link size
   newline    the default newline setting:
                CR, LF, CRLF, ANYCRLF, or ANY
-               exit code is always 0 
+               exit code is always 0
 </pre>
-The following options output 1 for true or 0 for false, and set the exit code 
+The following options output 1 for true or 0 for false, and set the exit code
 to the same value:
 <pre>
   ebcdic     compiled for an EBCDIC environment
@@ -148,10 +148,10 @@ to the same value:
   pcre32     the 32-bit library was built
   pcre8      the 8-bit library was built
   ucp        Unicode property support is available
-  utf        UTF-8 and/or UTF-16 and/or UTF-32 support 
+  utf        UTF-8 and/or UTF-16 and/or UTF-32 support
                is available
 </pre>
-If an unknown option is given, an error message is output; the exit code is 0.   
+If an unknown option is given, an error message is output; the exit code is 0.
 </P>
 <P>
 <b>-d</b>
@@ -339,7 +339,7 @@ fall into several groups that are described in detail in the following
 sections.
 <pre>
   <b>/8</b>              set UTF mode
-  <b>/9</b>              set PCRE_NEVER_UTF (locks out UTF mode) 
+  <b>/9</b>              set PCRE_NEVER_UTF (locks out UTF mode)
   <b>/?</b>              disable UTF validity check
   <b>/+</b>              show remainder of subject after match
   <b>/=</b>              show all captures (not just those that are set)
