@@ -9696,6 +9696,20 @@ if (extra != NULL &&
   }
 }
 
+#if defined COMPILE_PCRE8
+PCRE_EXP_DECL void
+pcre_jit_free_unused_memory(void)
+#elif defined COMPILE_PCRE16
+PCRE_EXP_DECL void
+pcre16_jit_free_unused_memory(void)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL void
+pcre32_jit_free_unused_memory(void)
+#endif
+{
+sljit_free_unused_memory_exec();
+}
+
 #else  /* SUPPORT_JIT */
 
 /* These are dummy functions to avoid linking errors when JIT support is not
@@ -9745,6 +9759,19 @@ pcre32_assign_jit_stack(pcre32_extra *extra, pcre32_jit_callback callback, void 
 (void)extra;
 (void)callback;
 (void)userdata;
+}
+
+#if defined COMPILE_PCRE8
+PCRE_EXP_DECL void
+pcre_jit_free_unused_memory(void)
+#elif defined COMPILE_PCRE16
+PCRE_EXP_DECL void
+pcre16_jit_free_unused_memory(void)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DECL void
+pcre32_jit_free_unused_memory(void)
+#endif
+{
 }
 
 #endif

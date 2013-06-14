@@ -655,6 +655,9 @@ PCRE_EXP_DECL void pcre16_assign_jit_stack(pcre16_extra *,
                   pcre16_jit_callback, void *);
 PCRE_EXP_DECL void pcre32_assign_jit_stack(pcre32_extra *,
                   pcre32_jit_callback, void *);
+PCRE_EXP_DECL void pcre_jit_free_unused_memory(void);
+PCRE_EXP_DECL void pcre16_jit_free_unused_memory(void);
+PCRE_EXP_DECL void pcre32_jit_free_unused_memory(void);
 
 #ifdef __cplusplus
 }  /* extern "C" */
