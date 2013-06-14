@@ -6,30 +6,22 @@ PCRE - Perl-compatible regular expressions
 .sp
 .B #include <pcre.h>
 .PP
-.SM
+.nf
 .B pcre *pcre_compile2(const char *\fIpattern\fP, int \fIoptions\fP,
-.ti +5n
-.B int *\fIerrorcodeptr\fP,
-.ti +5n
-.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
-.ti +5n
-.B const unsigned char *\fItableptr\fP);
-.PP
+.B "     int *\fIerrorcodeptr\fP,"
+.B "     const char **\fIerrptr\fP, int *\fIerroffset\fP,"
+.B "     const unsigned char *\fItableptr\fP);"
+.sp
 .B pcre16 *pcre16_compile2(PCRE_SPTR16 \fIpattern\fP, int \fIoptions\fP,
-.ti +5n
-.B int *\fIerrorcodeptr\fP,
-.ti +5n
-.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
-.ti +5n
-.B const unsigned char *\fItableptr\fP);
-.PP
+.B "     int *\fIerrorcodeptr\fP,"
+.B "     const char **\fIerrptr\fP, int *\fIerroffset\fP,"
+.B "     const unsigned char *\fItableptr\fP);"
+.sp
 .B pcre32 *pcre32_compile2(PCRE_SPTR32 \fIpattern\fP, int \fIoptions\fP,
-.ti +5n
-.B int *\fIerrorcodeptr\fP,
-.ti +5n
-.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
-.ti +5n
-.B const unsigned char *\fItableptr\fP);
+.B "     int *\fIerrorcodeptr\fP,£
+.B "     const char **\fIerrptr\fP, int *\fIerroffset\fP,"
+.B "     const unsigned char *\fItableptr\fP);"
+.fi
 .
 .SH DESCRIPTION
 .rs

@@ -180,8 +180,8 @@ REVISION
        Last updated: 13 May 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE(3)                    Library Functions Manual                    PCRE(3)
 
 
@@ -512,8 +512,8 @@ REVISION
        Last updated: 12 May 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRE(3)                    Library Functions Manual                    PCRE(3)
 
 
@@ -532,7 +532,6 @@ PCRE 32-BIT API BASIC FUNCTIONS
 
        pcre32 *pcre32_compile2(PCRE_SPTR32 pattern, int options,
             int *errorcodeptr,
-            const char **errptr, int *erroffset,
             const unsigned char *tableptr);
 
        pcre32_extra *pcre32_study(const pcre32 *code, int options,
@@ -841,8 +840,8 @@ REVISION
        Last updated: 12 May 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREBUILD(3)               Library Functions Manual               PCREBUILD(3)
 
 
@@ -1344,8 +1343,8 @@ REVISION
        Last updated: 12 May 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREMATCHING(3)            Library Functions Manual            PCREMATCHING(3)
 
 
@@ -1553,8 +1552,8 @@ REVISION
        Last updated: 08 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREAPI(3)                 Library Functions Manual                 PCREAPI(3)
 
 
@@ -2440,7 +2439,7 @@ COMPILATION ERROR CODES
 
 STUDYING A PATTERN
 
-       pcre_extra *pcre_study(const pcre *code, int options
+       pcre_extra *pcre_study(const pcre *code, int options,
             const char **errptr);
 
        If  a  compiled  pattern is going to be used several times, it is worth
@@ -4193,11 +4192,11 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 May 2013
+       Last updated: 12 June 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECALLOUT(3)             Library Functions Manual             PCRECALLOUT(3)
 
 
@@ -4414,8 +4413,8 @@ REVISION
        Last updated: 03 March 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECOMPAT(3)              Library Functions Manual              PCRECOMPAT(3)
 
 
@@ -4603,8 +4602,8 @@ REVISION
        Last updated: 19 March 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPATTERN(3)             Library Functions Manual             PCREPATTERN(3)
 
 
@@ -7438,8 +7437,8 @@ REVISION
        Last updated: 26 April 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESYNTAX(3)              Library Functions Manual              PCRESYNTAX(3)
 
 
@@ -7822,8 +7821,8 @@ REVISION
        Last updated: 26 April 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREUNICODE(3)             Library Functions Manual             PCREUNICODE(3)
 
 
@@ -8041,8 +8040,8 @@ REVISION
        Last updated: 27 February 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREJIT(3)                 Library Functions Manual                 PCREJIT(3)
 
 
@@ -8454,8 +8453,8 @@ REVISION
        Last updated: 17 March 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPARTIAL(3)             Library Functions Manual             PCREPARTIAL(3)
 
 
@@ -8929,8 +8928,8 @@ REVISION
        Last updated: 20 February 2013
        Copyright (c) 1997-2013 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPRECOMPILE(3)          Library Functions Manual          PCREPRECOMPILE(3)
 
 
@@ -9064,8 +9063,8 @@ REVISION
        Last updated: 24 June 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPERFORM(3)             Library Functions Manual             PCREPERFORM(3)
 
 
@@ -9234,8 +9233,8 @@ REVISION
        Last updated: 25 August 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCREPOSIX(3)               Library Functions Manual               PCREPOSIX(3)
 
 
@@ -9243,7 +9242,7 @@ PCREPOSIX(3)               Library Functions Manual               PCREPOSIX(3)
 NAME
        PCRE - Perl-compatible regular expressions.
 
-SYNOPSIS OF POSIX API
+SYNOPSIS
 
        #include <pcreposix.h>
 
@@ -9252,8 +9251,7 @@ SYNOPSIS OF POSIX API
 
        int regexec(regex_t *preg, const char *string,
             size_t nmatch, regmatch_t pmatch[], int eflags);
-
-       size_t regerror(int errcode, const regex_t *preg,
+            size_t regerror(int errcode, const regex_t *preg,
             char *errbuf, size_t errbuf_size);
 
        void regfree(regex_t *preg);
@@ -9499,8 +9497,8 @@ REVISION
        Last updated: 09 January 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRECPP(3)                 Library Functions Manual                 PCRECPP(3)
 
 
@@ -9842,8 +9840,8 @@ REVISION
 
        Last updated: 08 January 2012
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESAMPLE(3)              Library Functions Manual              PCRESAMPLE(3)
 
 
@@ -9991,8 +9989,8 @@ REVISION
        Last updated: 04 May 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 
 PCRESTACK(3)               Library Functions Manual               PCRESTACK(3)
 
 
@@ -10177,5 +10175,5 @@ REVISION
        Last updated: 24 June 2012
        Copyright (c) 1997-2012 University of Cambridge.
 ------------------------------------------------------------------------------
-
-
+ 
+ 

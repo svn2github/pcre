@@ -6,24 +6,19 @@ PCRE - Perl-compatible regular expressions
 .sp
 .B #include <pcre.h>
 .PP
-.SM
+.nf
 .B pcre *pcre_compile(const char *\fIpattern\fP, int \fIoptions\fP,
-.ti +5n
-.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
-.ti +5n
-.B const unsigned char *\fItableptr\fP);
-.PP
+.B "     const char **\fIerrptr\fP, int *\fIerroffset\fP,"
+.B "     const unsigned char *\fItableptr\fP);"
+.sp
 .B pcre16 *pcre16_compile(PCRE_SPTR16 \fIpattern\fP, int \fIoptions\fP,
-.ti +5n
-.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
-.ti +5n
-.B const unsigned char *\fItableptr\fP);
-.PP
+.B "     const char **\fIerrptr\fP, int *\fIerroffset\fP,"
+.B "     const unsigned char *\fItableptr\fP);"
+.sp
 .B pcre32 *pcre32_compile(PCRE_SPTR32 \fIpattern\fP, int \fIoptions\fP,
-.ti +5n
-.B const char **\fIerrptr\fP, int *\fIerroffset\fP,
-.ti +5n
-.B const unsigned char *\fItableptr\fP);
+.B "     const char **\fIerrptr\fP, int *\fIerroffset\fP,"
+.B "     const unsigned char *\fItableptr\fP);"
+.fi
 .
 .SH DESCRIPTION
 .rs
