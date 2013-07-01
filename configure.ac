@@ -957,7 +957,7 @@ if test "$enable_pcretest_libreadline" = "yes"; then
   fi
 fi
 
-# Check for valgrind
+# Handle valgrind support
 
 if test "$enable_valgrind" = "yes"; then
   m4_ifdef([PKG_CHECK_MODULES],
@@ -965,7 +965,7 @@ if test "$enable_valgrind" = "yes"; then
            [AC_MSG_ERROR([pkg-config not supported])])
 fi
 
-# test code coverage reporting
+# Handle code coverage reporting support
 if test "$enable_coverage" = "yes"; then
   if test "x$GCC" != "xyes"; then
     AC_MSG_ERROR([Code coverage reports can only be generated when using GCC])
@@ -996,11 +996,7 @@ if test "$enable_coverage" = "yes"; then
     AC_MSG_ERROR([genhtml not found])
   fi
 
-  AC_DEFINE([SUPPORT_GCOV],[1], [
-    Define to allow pcretest and pcregrep to be linked with gcov, so that they
-    are able to generate code coverage reports.])
-
-  # And add flags needed for gcov
+  # Set flags needed for gcov
   GCOV_CFLAGS="-O0 -ggdb3 -fprofile-arcs -ftest-coverage"
   GCOV_CXXFLAGS="-O0 -ggdb3 -fprofile-arcs -ftest-coverage"
   GCOV_LIBS="-lgcov"

@@ -6,6 +6,14 @@ Version 8.34 xx-xxxx-201x
 
 1.  Add pcre[16|32]_jit_free_unused_memory to forcibly free unused JIT
     executable memory. Patch inspired by Carsten Klein.
+    
+2.  ./configure --enable-coverage defined SUPPORT_GCOV in config.h, although
+    this macro is never tested and has no effect, because the work to support
+    coverage involves only compiling and linking options and special targets in 
+    the Makefile. The comment in config.h implied that defining the macro would
+    enable coverage support, which is totally false. There was also support for
+    setting this macro in the CMake files (my fault, I just copied it from
+    configure). SUPPORT_GCOV has now been removed.
 
 
 Version 8.33 28-May-2013
