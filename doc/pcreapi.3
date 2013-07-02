@@ -1477,25 +1477,13 @@ returned. For anchored patterns, 0 is returned.
 .sp
   PCRE_INFO_FIRSTCHARACTER
 .sp
-Return the fixed first character value, if PCRE_INFO_FIRSTCHARACTERFLAGS
-returned 1; otherwise returns 0. The fourth argument should point to an
-\fBuint_t\fP variable.
+Return the fixed first character value in the situation where
+PCRE_INFO_FIRSTCHARACTERFLAGS returns 1; otherwise return 0. The fourth
+argument should point to an \fBuint_t\fP variable.
 .P
 In the 8-bit library, the value is always less than 256. In the 16-bit library
 the value can be up to 0xffff. In the 32-bit library in UTF-32 mode the value
 can be up to 0x10ffff, and up to 0xffffffff when not using UTF-32 mode.
-.P
-If there is no fixed first value, and if either
-.sp
-(a) the pattern was compiled with the PCRE_MULTILINE option, and every branch
-starts with "^", or
-.sp
-(b) every branch of the pattern starts with ".*" and PCRE_DOTALL is not set
-(if it were set, the pattern would be anchored),
-.sp
--1 is returned, indicating that the pattern matches only at the start of a
-subject string or after any newline within the string. Otherwise -2 is
-returned. For anchored patterns, -2 is returned.
 .sp
   PCRE_INFO_REQUIREDCHARFLAGS
 .sp
@@ -2854,6 +2842,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 June 2013
+Last updated: 02 July 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
