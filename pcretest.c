@@ -2031,9 +2031,9 @@ return yield;
 
 static int strlen16(PCRE_SPTR16 p)
 {
-int len = 0;
-while (*p++ != 0) len++;
-return len;
+PCRE_SPTR16 pp = p;
+while (*pp != 0) pp++;
+return (int)(pp - p);
 }
 #endif  /* SUPPORT_PCRE16 */
 
@@ -2046,9 +2046,9 @@ return len;
 
 static int strlen32(PCRE_SPTR32 p)
 {
-int len = 0;
-while (*p++ != 0) len++;
-return len;
+PCRE_SPTR32 pp = p;
+while (*pp != 0) pp++;
+return (int)(pp - p);
 }
 #endif  /* SUPPORT_PCRE32 */
 
