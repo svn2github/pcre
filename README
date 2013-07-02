@@ -9,8 +9,10 @@ from:
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.zip
 
 There is a mailing list for discussion about the development of PCRE at
+pcre-dev@exim.org. You can access the archives and subscribe or manage your 
+subscription here:
 
-  pcre-dev@exim.org
+   https://lists.exim.org/mailman/listinfo/pcre-dev 
 
 Please read the NEWS file if you are upgrading from a previous release.
 The contents of this README file are:
@@ -111,6 +113,11 @@ Some of this material is likely to be well out-of-date. Several of the earlier
 contributions provided support for compiling PCRE on various flavours of
 Windows (I myself do not use Windows). Nowadays there is more Windows support
 in the standard distribution, so these contibutions have been archived.
+
+A PCRE user maintains downloadable Windows binaries of the pcregrep and
+pcretest programs here:
+
+  http://www.asiteaboutnothing.net/regex/pcregrep-pcretest.html
 
 
 Building PCRE on non-Unix-like systems
@@ -972,4 +979,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 01 July 2013
+Last updated: 02 July 2013
