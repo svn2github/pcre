@@ -3590,7 +3590,6 @@ for (;;)
           if (fc != cc && foc != cc) break;
           eptr++;
           }
-
         if (possessive) continue;       /* No backtracking */
         for (;;)
           {
@@ -3599,9 +3598,8 @@ for (;;)
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           }
-        RRETURN(MATCH_NOMATCH);
+        /* Control never gets here */
         }
-      /* Control never gets here */
       }
 
     /* Caseful comparisons (includes all multi-byte characters) */
@@ -3657,7 +3655,7 @@ for (;;)
           eptr--;
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           }
-        RRETURN(MATCH_NOMATCH);
+        /* Control never gets here */
         }
       }
     /* Control never gets here */
@@ -3942,10 +3940,8 @@ for (;;)
             eptr--;
             }
           }
-
-        RRETURN(MATCH_NOMATCH);
+        /* Control never gets here */
         }
-      /* Control never gets here */
       }
 
     /* Caseful comparisons */
@@ -4079,8 +4075,7 @@ for (;;)
             eptr--;
             }
           }
-
-        RRETURN(MATCH_NOMATCH);
+        /* Control never gets here */
         }
       }
     /* Control never gets here */
@@ -6210,12 +6205,9 @@ for (;;)
               eptr[-1] == CHAR_CR) eptr--;
           }
         }
-
-      /* Get here if we can't make it match with any permitted repetitions */
-
-      RRETURN(MATCH_NOMATCH);
+        
+      /* Control never gets here */
       }
-    /* Control never gets here */
 
     /* There's been some horrible disaster. Arrival here can only mean there is
     something seriously wrong in the code above or the OP_xxx definitions. */
@@ -6410,7 +6402,7 @@ const pcre_uint8 *start_bits = NULL;
 PCRE_PUCHAR start_match = (PCRE_PUCHAR)subject + start_offset;
 PCRE_PUCHAR end_subject;
 PCRE_PUCHAR start_partial = NULL;
-PCRE_PUCHAR match_partial;
+PCRE_PUCHAR match_partial = NULL;
 PCRE_PUCHAR req_char_ptr = start_match - 1;
 
 const pcre_study_data *study;
@@ -7178,7 +7170,7 @@ if (rc != MATCH_NOMATCH && rc != PCRE_ERROR_PARTIAL)
 
 /* Handle partial matches - disable any mark data */
 
-if (start_partial != NULL)
+if (match_partial != NULL)
   {
   DPRINTF((">>>> returning PCRE_ERROR_PARTIAL\n"));
   md->mark = NULL;

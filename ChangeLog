@@ -17,6 +17,12 @@ Version 8.34 xx-xxxx-201x
     
 3.  Make a small performance improvement in strlen16() and strlen32() in
     pcretest.
+    
+4.  Change 36 for 8.33 left some unreachable statements in pcre_exec.c,
+    detected by the Solaris compiler (gcc doesn't seem to be able to diagnose
+    these cases). There was also one in pcretest.c.
+    
+5.  Cleaned up a "may be uninitialized" compiler warning in pcre_exec.c. 
 
 
 Version 8.33 28-May-2013

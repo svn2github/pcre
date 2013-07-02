@@ -1916,7 +1916,7 @@ for (;;)
     }
   }
 
-return NULL;  /* Control never gets here */
+/* Control never gets here */
 }
 
 
