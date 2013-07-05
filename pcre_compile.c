@@ -2353,15 +2353,23 @@ Arguments:
   endcode     points to where to stop
   utf         TRUE if in UTF-8 / UTF-16 / UTF-32 mode
   cd          contains pointers to tables etc.
+  recurses    chain of recurse_check to catch mutual recursion
 
 Returns:      TRUE if what is matched could be empty
 */
 
+typedef struct recurse_check {
+  struct recurse_check *prev;
+  const pcre_uchar *group;
+} recurse_check;    
+
 static BOOL
 could_be_empty_branch(const pcre_uchar *code, const pcre_uchar *endcode,
-  BOOL utf, compile_data *cd)
+  BOOL utf, compile_data *cd, recurse_check *recurses)
 {
 register pcre_uchar c;
+recurse_check this_recurse;
+
 for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
      code < endcode;
      code = first_significant_code(code + PRIV(OP_lengths)[c], TRUE))
@@ -2369,7 +2377,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   const pcre_uchar *ccode;
 
   c = *code;
-
+  
   /* Skip over forward assertions; the other assertions are skipped by
   first_significant_code() with a TRUE final argument. */
 
@@ -2389,25 +2397,50 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
 
   if (c == OP_RECURSE)
     {
-    const pcre_uchar *scode;
+    const pcre_uchar *scode = cd->start_code + GET(code, 1);
     BOOL empty_branch;
 
-    /* Test for forward reference */
+    /* Test for forward reference or uncompleted reference. This is disabled
+    when called to scan a completed pattern by setting cd->start_workspace to
+    NULL. */
 
-    for (scode = cd->start_workspace; scode < cd->hwm; scode += LINK_SIZE)
-      if ((int)GET(scode, 0) == (int)(code + 1 - cd->start_code)) return TRUE;
+    if (cd->start_workspace != NULL)
+      { 
+      const pcre_uchar *tcode; 
+      for (tcode = cd->start_workspace; tcode < cd->hwm; tcode += LINK_SIZE)
+        if ((int)GET(tcode, 0) == (int)(code + 1 - cd->start_code)) return TRUE;
+      if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
+      }
+    
+    /* If we are scanning a completed pattern, there are no forward references 
+    and all groups are complete. We need to detect whether this is a recursive 
+    call, as otherwise there will be an infinite loop. If it is a recursion,
+    just skip over it. Simple recursions are easily detected. For mutual 
+    recursions we keep a chain on the stack. */ 
+     
+    else
+      {  
+      recurse_check *r = recurses;
+      const pcre_uchar *endgroup = scode;
+       
+      do endgroup += GET(endgroup, 1); while (*endgroup == OP_ALT);
+      if (code >= scode && code <= endgroup) continue;  /* Simple recursion */
+      
+      for (r = recurses; r != NULL; r = r->prev)
+        if (r->group == scode) break;
+      if (r != NULL) continue;   /* Mutual recursion */
+      }
 
-    /* Not a forward reference, test for completed backward reference */
+    /* Completed reference; scan the referenced group, remembering it on the
+    stack chain to detect mutual recursions. */
 
     empty_branch = FALSE;
-    scode = cd->start_code + GET(code, 1);
-    if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
-
-    /* Completed backwards reference */
-
+    this_recurse.prev = recurses;
+    this_recurse.group = scode; 
+     
     do
       {
-      if (could_be_empty_branch(scode, endcode, utf, cd))
+      if (could_be_empty_branch(scode, endcode, utf, cd, &this_recurse))
         {
         empty_branch = TRUE;
         break;
@@ -2463,7 +2496,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       empty_branch = FALSE;
       do
         {
-        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cd))
+        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cd, NULL))
           empty_branch = TRUE;
         code += GET(code, 1);
         }
@@ -2521,34 +2554,57 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
 
     /* Opcodes that must match a character */
 
+    case OP_ANY:
+    case OP_ALLANY:
+    case OP_ANYBYTE:
+     
     case OP_PROP:
     case OP_NOTPROP:
+    case OP_ANYNL:
+     
+    case OP_NOT_HSPACE:
+    case OP_HSPACE:
+    case OP_NOT_VSPACE:
+    case OP_VSPACE:    
     case OP_EXTUNI:
+ 
     case OP_NOT_DIGIT:
     case OP_DIGIT:
     case OP_NOT_WHITESPACE:
     case OP_WHITESPACE:
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
-    case OP_ANY:
-    case OP_ALLANY:
-    case OP_ANYBYTE:
+     
     case OP_CHAR:
     case OP_CHARI:
     case OP_NOT:
     case OP_NOTI:
+     
     case OP_PLUS:
+    case OP_PLUSI:
     case OP_MINPLUS:
-    case OP_POSPLUS:
-    case OP_EXACT:
+    case OP_MINPLUSI:
+
     case OP_NOTPLUS:
+    case OP_NOTPLUSI:
     case OP_NOTMINPLUS:
+    case OP_NOTMINPLUSI:
+     
+    case OP_POSPLUS:
+    case OP_POSPLUSI:
     case OP_NOTPOSPLUS:
+    case OP_NOTPOSPLUSI:
+     
+    case OP_EXACT:
+    case OP_EXACTI:
     case OP_NOTEXACT:
+    case OP_NOTEXACTI:  
+     
     case OP_TYPEPLUS:
     case OP_TYPEMINPLUS:
     case OP_TYPEPOSPLUS:
     case OP_TYPEEXACT:
+     
     return FALSE;
 
     /* These are going to continue, as they may be empty, but we have to
@@ -2582,30 +2638,58 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     return TRUE;
 
     /* In UTF-8 mode, STAR, MINSTAR, POSSTAR, QUERY, MINQUERY, POSQUERY, UPTO,
-    MINUPTO, and POSUPTO may be followed by a multibyte character */
+    MINUPTO, and POSUPTO and their caseless and negative versions may be
+    followed by a multibyte character. */
 
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     case OP_STAR:
     case OP_STARI:
+    case OP_NOTSTAR:    
+    case OP_NOTSTARI:   
+     
     case OP_MINSTAR:
     case OP_MINSTARI:
+    case OP_NOTMINSTAR: 
+    case OP_NOTMINSTARI:
+     
     case OP_POSSTAR:
     case OP_POSSTARI:
+    case OP_NOTPOSSTAR: 
+    case OP_NOTPOSSTARI:
+     
     case OP_QUERY:
     case OP_QUERYI:
+    case OP_NOTQUERY:   
+    case OP_NOTQUERYI:  
+     
     case OP_MINQUERY:
     case OP_MINQUERYI:
+    case OP_NOTMINQUERY:
+    case OP_NOTMINQUERYI:
+     
     case OP_POSQUERY:
     case OP_POSQUERYI:
+    case OP_NOTPOSQUERY:
+    case OP_NOTPOSQUERYI:
+     
     if (utf && HAS_EXTRALEN(code[1])) code += GET_EXTRALEN(code[1]);
     break;
 
     case OP_UPTO:
     case OP_UPTOI:
+    case OP_NOTUPTO:    
+    case OP_NOTUPTOI:   
+     
     case OP_MINUPTO:
     case OP_MINUPTOI:
+    case OP_NOTMINUPTO: 
+    case OP_NOTMINUPTOI:
+     
     case OP_POSUPTO:
     case OP_POSUPTOI:
+    case OP_NOTPOSUPTO: 
+    case OP_NOTPOSUPTOI:
+     
     if (utf && HAS_EXTRALEN(code[1 + IMM2_SIZE])) code += GET_EXTRALEN(code[1 + IMM2_SIZE]);
     break;
 #endif
@@ -2659,7 +2743,7 @@ could_be_empty(const pcre_uchar *code, const pcre_uchar *endcode,
 {
 while (bcptr != NULL && bcptr->current_branch >= code)
   {
-  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf, cd))
+  if (!could_be_empty_branch(bcptr->current_branch, endcode, utf, cd, NULL))
     return FALSE;
   bcptr = bcptr->outer;
   }
@@ -5391,7 +5475,7 @@ for (;; ptr++)
             pcre_uchar *scode = bracode;
             do
               {
-              if (could_be_empty_branch(scode, ketcode, utf, cd))
+              if (could_be_empty_branch(scode, ketcode, utf, cd, NULL))
                 {
                 *bracode += OP_SBRA - OP_BRA;
                 break;
@@ -8213,10 +8297,12 @@ if (cd->hwm > cd->start_workspace)
     }
   }
 
-/* If the workspace had to be expanded, free the new memory. */
+/* If the workspace had to be expanded, free the new memory. Set the pointer to 
+NULL to indicate that forward references have been filled in. */
 
 if (cd->workspace_size > COMPILE_WORK_SIZE)
   (PUBL(free))((void *)cd->start_workspace);
+cd->start_workspace = NULL;   
 
 /* Give an error if there's back reference to a non-existent capturing
 subpattern. */
@@ -8419,6 +8505,20 @@ if (code - codestart > length)
   return NULL;
   }
 #endif   /* PCRE_DEBUG */
+
+/* Check for a pattern than can match an empty string, so that this information 
+can be provided to applications. */
+
+do
+  {
+  if (could_be_empty_branch(codestart, code, utf, cd, NULL))
+    {
+    re->flags |= PCRE_MATCH_EMPTY;
+    break;
+    }  
+  codestart += GET(codestart, 1);
+  }
+while (*codestart == OP_ALT);
 
 #if defined COMPILE_PCRE8
 return (pcre *)re;

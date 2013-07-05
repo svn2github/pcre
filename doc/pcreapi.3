@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "12 June 2013" "PCRE 8.33"
+.TH PCREAPI 3 "05 July 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -1286,9 +1286,14 @@ only if it follows something of variable length. For example, for the pattern
 is -1.
 .P
 Since for the 32-bit library using the non-UTF-32 mode, this function is unable
-to return the full 32-bit range of the character, this value is deprecated;
+to return the full 32-bit range of characters, this value is deprecated;
 instead the PCRE_INFO_REQUIREDCHARFLAGS and PCRE_INFO_REQUIREDCHAR values should
 be used.
+.sp
+  PCRE_INFO_MATCH_EMPTY
+.sp
+Return 1 if the pattern can match an empty string, otherwise 0. The fourth 
+argument should point to an \fBint\fP variable.   
 .sp
   PCRE_INFO_MATCHLIMIT
 .sp
@@ -2842,6 +2847,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 02 July 2013
+Last updated: 05 July 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

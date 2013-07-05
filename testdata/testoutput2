@@ -10,6 +10,7 @@
   
 /(a)b|/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -498,6 +499,7 @@ No need char
 
 /(?s).*/I
 Capturing subpattern count = 0
+May match empty string
 Options: anchored dotall
 No first char
 No need char
@@ -762,6 +764,7 @@ No match
 /(?<=ab(?i)x|y|z)/I
 Capturing subpattern count = 0
 Max lookbehind = 3
+May match empty string
 No options
 No first char
 No need char
@@ -769,6 +772,7 @@ No need char
 /(?>.*)(?<=(abcd)|(xyz))/I
 Capturing subpattern count = 2
 Max lookbehind = 4
+May match empty string
 No options
 No first char
 No need char
@@ -1377,6 +1381,7 @@ Need char = 'c'
 
 /a*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1395,6 +1400,7 @@ Need char = 'a'
 
 /a{0,3}/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1594,6 +1600,7 @@ Need char = 'e'
 
 /a?b?/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -1612,6 +1619,7 @@ No match
 
 /|-/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -2625,6 +2633,7 @@ Need char = '-'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 Options: extended
 No first char
 No need char
@@ -2767,6 +2776,7 @@ Need char = '0'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -2866,6 +2876,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -2908,12 +2919,14 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
 
 /^(\w++|\s++)*$/I
 Capturing subpattern count = 1
+May match empty string
 Options: anchored
 No first char
 No need char
@@ -3289,6 +3302,7 @@ Need char = 'b'
 
 /(?=a).*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 First char = 'a'
 No need char
@@ -3307,6 +3321,7 @@ Need char = 'z' (caseless)
 
 /(?=a)(?=b)/I
 Capturing subpattern count = 0
+May match empty string
 No options
 First char = 'a'
 No need char
@@ -3373,6 +3388,7 @@ Need char = 'a'
 
 /(a)*/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -3601,6 +3617,7 @@ No match
 
 /(?C0)(abc(?C1))*/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -3634,6 +3651,7 @@ No need char
 
 /(\d{3}(?C))*/I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -3880,6 +3898,7 @@ Failed: recursive call could loop indefinitely at offset 16
 
 /^([^()]|\((?1)*\))*$/I
 Capturing subpattern count = 1
+May match empty string
 Options: anchored
 No first char
 No need char
@@ -4159,6 +4178,7 @@ Named capturing subpatterns:
   one     1
   three   3
   two     2
+May match empty string
 Options: anchored caseless
 No first char
 No need char
@@ -4258,6 +4278,7 @@ Need char = 'z'
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a/Is
 Capturing subpattern count = 31
+May match empty string
 Options: anchored dotall
 No first char
 No need char
@@ -4265,6 +4286,7 @@ No need char
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\31/Is
 Capturing subpattern count = 31
 Max back reference = 31
+May match empty string
 Options: dotall
 No first char
 No need char
@@ -4272,6 +4294,7 @@ No need char
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\32/Is
 Capturing subpattern count = 32
 Max back reference = 32
+May match empty string
 Options: dotall
 No first char
 No need char
@@ -4423,6 +4446,7 @@ Capturing subpattern count = 2
 Named capturing subpatterns:
   Tes    1
   Test   2
+May match empty string
 No options
 No first char
 No need char
@@ -4441,6 +4465,7 @@ Capturing subpattern count = 2
 Named capturing subpatterns:
   Tes    2
   Test   1
+May match empty string
 No options
 No first char
 No need char
@@ -4518,6 +4543,7 @@ Need char = ']'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 No options
 No first char
 No need char
@@ -4538,6 +4564,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 No options
 No first char
 No need char
@@ -4569,6 +4596,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 No options
 No first char
 No need char
@@ -5397,6 +5425,7 @@ Need char = '3'
 /\b.*/I
 Capturing subpattern count = 0
 Max lookbehind = 1
+May match empty string
 No options
 No first char
 No need char
@@ -5406,6 +5435,7 @@ No need char
 /\b.*/Is
 Capturing subpattern count = 0
 Max lookbehind = 1
+May match empty string
 Options: dotall
 No first char
 No need char
@@ -5414,6 +5444,7 @@ No need char
 
 /(?!.bcd).*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -6002,6 +6033,7 @@ Matched, but too many substrings
 
 /[^()]*(?:\((?R)\)[^()]*)*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -6014,6 +6046,7 @@ No need char
 
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -6024,6 +6057,7 @@ No need char
 
 /[^()]*(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -6034,6 +6068,7 @@ No need char
 
 /(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -6046,6 +6081,7 @@ No need char
 
 /(?:\((?R)\))|[^()]*/I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -6503,6 +6539,7 @@ Unknown newline type at: <bad>
 
 /.*/I<lf>
 Capturing subpattern count = 0
+May match empty string
 Options:
 Forced newline sequence: LF
 First char at start or follows newline
@@ -6544,6 +6581,7 @@ Need char = 'f'
 
 +((?:\s|//.*\\n|/[*](?:\\n|.)*?[*]/)*)+I
 Capturing subpattern count = 1
+May match empty string
 No options
 No first char
 No need char
@@ -7710,6 +7748,7 @@ Named capturing subpatterns:
   one     1
   three   3
   two     2
+May match empty string
 Options: anchored caseless
 No first char
 No need char
@@ -9249,6 +9288,7 @@ Starting byte set: x y z
 
 /(?(?=.*b)b|^)/CI
 Capturing subpattern count = 0
+May match empty string
 Options:
 No first char
 No need char
@@ -11036,12 +11076,14 @@ No need char
 
 /(^ab|^)+/I
 Capturing subpattern count = 1
+May match empty string
 Options: anchored
 No first char
 No need char
 
 /(^ab|^)++/I
 Capturing subpattern count = 1
+May match empty string
 Options: anchored
 No first char
 No need char
@@ -11060,12 +11102,14 @@ No need char
 
 /(?:^ab|^)+/I
 Capturing subpattern count = 0
+May match empty string
 Options: anchored
 No first char
 No need char
 
 /(?:^ab|^)++/I
 Capturing subpattern count = 0
+May match empty string
 Options: anchored
 No first char
 No need char
@@ -11084,12 +11128,14 @@ Need char = 'b'
 
 /(.*ab|.*)+/I
 Capturing subpattern count = 1
+May match empty string
 No options
 First char at start or follows newline
 No need char
 
 /(.*ab|.*)++/I
 Capturing subpattern count = 1
+May match empty string
 No options
 First char at start or follows newline
 No need char
@@ -11108,12 +11154,14 @@ Need char = 'b'
 
 /(?:.*ab|.*)+/I
 Capturing subpattern count = 0
+May match empty string
 No options
 First char at start or follows newline
 No need char
 
 /(?:.*ab|.*)++/I
 Capturing subpattern count = 0
+May match empty string
 No options
 First char at start or follows newline
 No need char
@@ -11645,6 +11693,7 @@ Starting byte set: < o t u
 
 /a(*SKIP)c|b(*ACCEPT)|/+S!I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -12293,6 +12342,7 @@ No need char
 /(?>.*?)(?<=(abcd)|(wxyz))/I
 Capturing subpattern count = 2
 Max lookbehind = 4
+May match empty string
 No options
 No first char
 No need char
@@ -12300,6 +12350,7 @@ No need char
 /(?>.*)(?<=(abcd)|(wxyz))/I
 Capturing subpattern count = 2
 Max lookbehind = 4
+May match empty string
 No options
 No first char
 No need char
@@ -12338,6 +12389,7 @@ Need char = 'c'
 
 /.?/S-I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char
@@ -12345,6 +12397,7 @@ Study returned NULL
 
 /.?/S!I
 Capturing subpattern count = 0
+May match empty string
 No options
 No first char
 No need char

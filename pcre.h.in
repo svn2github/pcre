@@ -277,6 +277,7 @@ with J. */
 #define PCRE_INFO_REQUIREDCHARFLAGS 22
 #define PCRE_INFO_MATCHLIMIT        23
 #define PCRE_INFO_RECURSIONLIMIT    24
+#define PCRE_INFO_MATCH_EMPTY       25
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
 compatible. */

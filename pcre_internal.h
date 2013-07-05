@@ -1149,6 +1149,7 @@ compatibility. */
 #define PCRE_HASTHEN       0x00001000  /* pattern contains (*THEN) */
 #define PCRE_MLSET         0x00002000  /* match limit set by regex */
 #define PCRE_RLSET         0x00004000  /* recursion limit set by regex */
+#define PCRE_MATCH_EMPTY   0x00008000  /* pattern can match empty string */
 
 #if defined COMPILE_PCRE8
 #define PCRE_MODE          PCRE_MODE8

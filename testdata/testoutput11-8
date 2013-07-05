@@ -63,6 +63,7 @@ Memory allocation (code space): 7
   6     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 Options: extended
 No first char
 No need char

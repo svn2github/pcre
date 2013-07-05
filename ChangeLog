@@ -24,6 +24,20 @@ Version 8.34 xx-xxxx-201x
     
 5.  Cleaned up a "may be uninitialized" compiler warning in pcre_exec.c. 
 
+6.  In UTF mode, the code for checking whether a group could match an empty
+    string (which is used for indefinitely repeated groups to allow for
+    breaking an infinite loop) was broken when the group contained a repeated
+    negated single-character class with a character that occupied more than one
+    data item and had a minimum repetition of zero (for example, [^\x{100}]* in
+    UTF-8 mode). The effect was undefined: the group might or might not be
+    deemed as matching an empty string, or the program might have crashed.
+    
+7.  The code for checking whether a group could match an empty string was not
+    recognizing that \h, \H, \v, \V, and \R must match a character.
+    
+8.  Implemented PCRE_INFO_MATCH_EMPTY, which yields 1 if the pattern can match
+    an empty string. If it can, pcretest shows this in its information output. 
+
 
 Version 8.33 28-May-2013
 --------------------------

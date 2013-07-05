@@ -4020,7 +4020,7 @@ while (!done)
       pcre_uint32 first_char, need_char;
       pcre_uint32 match_limit, recursion_limit;
       int count, backrefmax, first_char_set, need_char_set, okpartial, jchanged,
-        hascrorlf, maxlookbehind;
+        hascrorlf, maxlookbehind, match_empty;
       int nameentrysize, namecount;
       const pcre_uint8 *nametable;
 
@@ -4037,6 +4037,7 @@ while (!done)
           new_info(re, NULL, PCRE_INFO_OKPARTIAL, &okpartial) +
           new_info(re, NULL, PCRE_INFO_JCHANGED, &jchanged) +
           new_info(re, NULL, PCRE_INFO_HASCRORLF, &hascrorlf) +
+          new_info(re, NULL, PCRE_INFO_MATCH_EMPTY, &match_empty) +
           new_info(re, NULL, PCRE_INFO_MAXLOOKBEHIND, &maxlookbehind)
           != 0)
         goto SKIP_DATA;
@@ -4085,8 +4086,9 @@ while (!done)
           }
         }
 
-      if (!okpartial) fprintf(outfile, "Partial matching not supported\n");
-      if (hascrorlf) fprintf(outfile, "Contains explicit CR or LF match\n");
+      if (!okpartial)  fprintf(outfile, "Partial matching not supported\n");
+      if (hascrorlf)   fprintf(outfile, "Contains explicit CR or LF match\n");
+      if (match_empty) fprintf(outfile, "May match empty string\n");
 
       all_options = REAL_PCRE_OPTIONS(re);
       if (do_flip) all_options = swap_uint32(all_options);

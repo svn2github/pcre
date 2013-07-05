@@ -151,6 +151,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 Options: utf
 No first char
 No need char
@@ -373,6 +374,7 @@ Need char = 'z'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -404,6 +406,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -424,6 +427,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -455,6 +459,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
