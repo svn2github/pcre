@@ -37,6 +37,20 @@ Version 8.34 xx-xxxx-201x
     
 8.  Implemented PCRE_INFO_MATCH_EMPTY, which yields 1 if the pattern can match
     an empty string. If it can, pcretest shows this in its information output. 
+    
+9.  Fixed two related bugs that applied to Unicode extended grapheme clusters
+    that were repeated with a maximizing qualifier (e.g. \X* or \X{2,5}) when 
+    matched by pcre_exec() without using JIT:
+    
+    (a) If the rest of the pattern did not match after a maximal run of 
+        grapheme clusters, the code for backing up to try with fewer of them 
+        did not always back up over a full grapheme when characters that do not
+        have the modifier quality were involved, e.g. Hangul syllables.
+        
+    (b) If the match point in a subject started with modifier character, and 
+        there was no match, the code could incorrectly back up beyond the match 
+        point, and potentially beyond the first character in the subject, 
+        leading to a segfault or an incorrect match result.
 
 
 Version 8.33 28-May-2013
