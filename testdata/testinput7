@@ -123,8 +123,9 @@
     \x{2028}
     \x{200d} 
   
-/-- These four are here rather than in test 6 because Perl has problems with
-    the negative versions of the properties. --/
+/-- These are here rather than in test 6 because Perl has problems with
+    the negative versions of the properties and behaves has changed how
+    it behaves for caseless matching. --/
       
 /\p{^Lu}/8i
     1234
@@ -148,6 +149,12 @@
     ** Failers 
     a
     \x{1d00}  
+
+/\p{Lu}/8i
+    A
+    aZ
+    ** Failers
+    abc   
 
 /[\x{c0}\x{391}]/8i
     \x{c0}

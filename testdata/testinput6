@@ -325,12 +325,6 @@
     ** Failers
     abc   
 
-/\p{Lu}/8i
-    A
-    aZ
-    ** Failers
-    abc   
-
 /\p{Ll}/8 
     a
     Az

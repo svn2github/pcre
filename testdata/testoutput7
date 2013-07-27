@@ -310,8 +310,9 @@ No match
     \x{200d} 
 No match
   
-/-- These four are here rather than in test 6 because Perl has problems with
-    the negative versions of the properties. --/
+/-- These are here rather than in test 6 because Perl has problems with
+    the negative versions of the properties and behaves has changed how
+    it behaves for caseless matching. --/
       
 /\p{^Lu}/8i
     1234
@@ -349,6 +350,16 @@ No match
     a
 No match
     \x{1d00}  
+No match
+
+/\p{Lu}/8i
+    A
+ 0: A
+    aZ
+ 0: Z
+    ** Failers
+ 0: F
+    abc   
 No match
 
 /[\x{c0}\x{391}]/8i

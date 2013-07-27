@@ -543,16 +543,6 @@ No match
     abc   
 No match
 
-/\p{Lu}/8i
-    A
- 0: A
-    aZ
- 0: Z
-    ** Failers
- 0: F
-    abc   
-No match
-
 /\p{Ll}/8 
     a
  0: a
