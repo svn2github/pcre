@@ -2361,7 +2361,7 @@ Returns:      TRUE if what is matched could be empty
 typedef struct recurse_check {
   struct recurse_check *prev;
   const pcre_uchar *group;
-} recurse_check;    
+} recurse_check;
 
 static BOOL
 could_be_empty_branch(const pcre_uchar *code, const pcre_uchar *endcode,
@@ -2377,7 +2377,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   const pcre_uchar *ccode;
 
   c = *code;
-  
+
   /* Skip over forward assertions; the other assertions are skipped by
   first_significant_code() with a TRUE final argument. */
 
@@ -2405,27 +2405,27 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     NULL. */
 
     if (cd->start_workspace != NULL)
-      { 
-      const pcre_uchar *tcode; 
+      {
+      const pcre_uchar *tcode;
       for (tcode = cd->start_workspace; tcode < cd->hwm; tcode += LINK_SIZE)
         if ((int)GET(tcode, 0) == (int)(code + 1 - cd->start_code)) return TRUE;
       if (GET(scode, 1) == 0) return TRUE;    /* Unclosed */
       }
-    
-    /* If we are scanning a completed pattern, there are no forward references 
-    and all groups are complete. We need to detect whether this is a recursive 
+
+    /* If we are scanning a completed pattern, there are no forward references
+    and all groups are complete. We need to detect whether this is a recursive
     call, as otherwise there will be an infinite loop. If it is a recursion,
-    just skip over it. Simple recursions are easily detected. For mutual 
-    recursions we keep a chain on the stack. */ 
-     
+    just skip over it. Simple recursions are easily detected. For mutual
+    recursions we keep a chain on the stack. */
+
     else
-      {  
+      {
       recurse_check *r = recurses;
       const pcre_uchar *endgroup = scode;
-       
+
       do endgroup += GET(endgroup, 1); while (*endgroup == OP_ALT);
       if (code >= scode && code <= endgroup) continue;  /* Simple recursion */
-      
+
       for (r = recurses; r != NULL; r = r->prev)
         if (r->group == scode) break;
       if (r != NULL) continue;   /* Mutual recursion */
@@ -2436,8 +2436,8 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
 
     empty_branch = FALSE;
     this_recurse.prev = recurses;
-    this_recurse.group = scode; 
-     
+    this_recurse.group = scode;
+
     do
       {
       if (could_be_empty_branch(scode, endcode, utf, cd, &this_recurse))
@@ -2557,29 +2557,29 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_ANY:
     case OP_ALLANY:
     case OP_ANYBYTE:
-     
+
     case OP_PROP:
     case OP_NOTPROP:
     case OP_ANYNL:
-     
+
     case OP_NOT_HSPACE:
     case OP_HSPACE:
     case OP_NOT_VSPACE:
-    case OP_VSPACE:    
+    case OP_VSPACE:
     case OP_EXTUNI:
- 
+
     case OP_NOT_DIGIT:
     case OP_DIGIT:
     case OP_NOT_WHITESPACE:
     case OP_WHITESPACE:
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
-     
+
     case OP_CHAR:
     case OP_CHARI:
     case OP_NOT:
     case OP_NOTI:
-     
+
     case OP_PLUS:
     case OP_PLUSI:
     case OP_MINPLUS:
@@ -2589,22 +2589,22 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     case OP_NOTPLUSI:
     case OP_NOTMINPLUS:
     case OP_NOTMINPLUSI:
-     
+
     case OP_POSPLUS:
     case OP_POSPLUSI:
     case OP_NOTPOSPLUS:
     case OP_NOTPOSPLUSI:
-     
+
     case OP_EXACT:
     case OP_EXACTI:
     case OP_NOTEXACT:
-    case OP_NOTEXACTI:  
-     
+    case OP_NOTEXACTI:
+
     case OP_TYPEPLUS:
     case OP_TYPEMINPLUS:
     case OP_TYPEPOSPLUS:
     case OP_TYPEEXACT:
-     
+
     return FALSE;
 
     /* These are going to continue, as they may be empty, but we have to
@@ -2644,52 +2644,52 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     case OP_STAR:
     case OP_STARI:
-    case OP_NOTSTAR:    
-    case OP_NOTSTARI:   
-     
+    case OP_NOTSTAR:
+    case OP_NOTSTARI:
+
     case OP_MINSTAR:
     case OP_MINSTARI:
-    case OP_NOTMINSTAR: 
+    case OP_NOTMINSTAR:
     case OP_NOTMINSTARI:
-     
+
     case OP_POSSTAR:
     case OP_POSSTARI:
-    case OP_NOTPOSSTAR: 
+    case OP_NOTPOSSTAR:
     case OP_NOTPOSSTARI:
-     
+
     case OP_QUERY:
     case OP_QUERYI:
-    case OP_NOTQUERY:   
-    case OP_NOTQUERYI:  
-     
+    case OP_NOTQUERY:
+    case OP_NOTQUERYI:
+
     case OP_MINQUERY:
     case OP_MINQUERYI:
     case OP_NOTMINQUERY:
     case OP_NOTMINQUERYI:
-     
+
     case OP_POSQUERY:
     case OP_POSQUERYI:
     case OP_NOTPOSQUERY:
     case OP_NOTPOSQUERYI:
-     
+
     if (utf && HAS_EXTRALEN(code[1])) code += GET_EXTRALEN(code[1]);
     break;
 
     case OP_UPTO:
     case OP_UPTOI:
-    case OP_NOTUPTO:    
-    case OP_NOTUPTOI:   
-     
+    case OP_NOTUPTO:
+    case OP_NOTUPTOI:
+
     case OP_MINUPTO:
     case OP_MINUPTOI:
-    case OP_NOTMINUPTO: 
+    case OP_NOTMINUPTO:
     case OP_NOTMINUPTOI:
-     
+
     case OP_POSUPTO:
     case OP_POSUPTOI:
-    case OP_NOTPOSUPTO: 
+    case OP_NOTPOSUPTO:
     case OP_NOTPOSUPTOI:
-     
+
     if (utf && HAS_EXTRALEN(code[1 + IMM2_SIZE])) code += GET_EXTRALEN(code[1 + IMM2_SIZE]);
     break;
 #endif
@@ -3754,22 +3754,22 @@ to find out the amount of memory needed, as well as during the real compile
 phase. The value of lengthptr distinguishes the two phases.
 
 Arguments:
-  optionsptr     pointer to the option bits
-  codeptr        points to the pointer to the current code point
-  ptrptr         points to the current pattern pointer
-  errorcodeptr   points to error code variable
-  firstcharptr    place to put the first required character
+  optionsptr        pointer to the option bits
+  codeptr           points to the pointer to the current code point
+  ptrptr            points to the current pattern pointer
+  errorcodeptr      points to error code variable
+  firstcharptr      place to put the first required character
   firstcharflagsptr place to put the first character flags, or a negative number
-  reqcharptr     place to put the last required character
-  reqcharflagsptr place to put the last required character flags, or a negative number
-  bcptr          points to current branch chain
-  cond_depth     conditional nesting depth
-  cd             contains pointers to tables etc.
-  lengthptr      NULL during the real compile phase
-                 points to length accumulator during pre-compile phase
+  reqcharptr        place to put the last required character
+  reqcharflagsptr   place to put the last required character flags, or a negative number
+  bcptr             points to current branch chain
+  cond_depth        conditional nesting depth
+  cd                contains pointers to tables etc.
+  lengthptr         NULL during the real compile phase
+                    points to length accumulator during pre-compile phase
 
-Returns:         TRUE on success
-                 FALSE, with *errorcodeptr set non-zero on error
+Returns:            TRUE on success
+                    FALSE, with *errorcodeptr set non-zero on error
 */
 
 static BOOL
@@ -7058,7 +7058,8 @@ for (;; ptr++)
         *code++ = OP_PROP;
         *code++ = PT_CLIST;
         *code++ = c;
-        if (firstcharflags == REQ_UNSET) firstcharflags = zerofirstcharflags = REQ_NONE;
+        if (firstcharflags == REQ_UNSET)
+          firstcharflags = zerofirstcharflags = REQ_NONE;
         break;
         }
       }
@@ -7147,24 +7148,24 @@ out the amount of memory needed, as well as during the real compile phase. The
 value of lengthptr distinguishes the two phases.
 
 Arguments:
-  options        option bits, including any changes for this subpattern
-  codeptr        -> the address of the current code pointer
-  ptrptr         -> the address of the current pattern pointer
-  errorcodeptr   -> pointer to error code variable
-  lookbehind     TRUE if this is a lookbehind assertion
-  reset_bracount TRUE to reset the count for each branch
-  skipbytes      skip this many bytes at start (for brackets and OP_COND)
-  cond_depth     depth of nesting for conditional subpatterns
-  firstcharptr    place to put the first required character
+  options           option bits, including any changes for this subpattern
+  codeptr           -> the address of the current code pointer
+  ptrptr            -> the address of the current pattern pointer
+  errorcodeptr      -> pointer to error code variable
+  lookbehind        TRUE if this is a lookbehind assertion
+  reset_bracount    TRUE to reset the count for each branch
+  skipbytes         skip this many bytes at start (for brackets and OP_COND)
+  cond_depth        depth of nesting for conditional subpatterns
+  firstcharptr      place to put the first required character
   firstcharflagsptr place to put the first character flags, or a negative number
-  reqcharptr     place to put the last required character
-  reqcharflagsptr place to put the last required character flags, or a negative number
-  bcptr          pointer to the chain of currently open branches
-  cd             points to the data block with tables pointers etc.
-  lengthptr      NULL during the real compile phase
-                 points to length accumulator during pre-compile phase
+  reqcharptr        place to put the last required character
+  reqcharflagsptr   place to put the last required character flags, or a negative number
+  bcptr             pointer to the chain of currently open branches
+  cd                points to the data block with tables pointers etc.
+  lengthptr         NULL during the real compile phase
+                    points to length accumulator during pre-compile phase
 
-Returns:         TRUE on success
+Returns:            TRUE on success
 */
 
 static BOOL
@@ -7701,13 +7702,14 @@ return TRUE;
 discarded, because they can cause conflicts with actual literals that follow.
 However, if we end up without a first char setting for an unanchored pattern,
 it is worth scanning the regex to see if there is an initial asserted first
-char. If all branches start with the same asserted char, or with a bracket all
-of whose alternatives start with the same asserted char (recurse ad lib), then
-we return that char, otherwise -1.
+char. If all branches start with the same asserted char, or with a
+non-conditional bracket all of whose alternatives start with the same asserted
+char (recurse ad lib), then we return that char, with the flags set to zero or
+REQ_CASELESS; otherwise return zero with REQ_NONE in the flags.
 
 Arguments:
   code       points to start of expression (the bracket)
-  flags       points to the first char flags, or to REQ_NONE
+  flags      points to the first char flags, or to REQ_NONE
   inassert   TRUE if in an assertion
 
 Returns:     the fixed first char, or 0 with REQ_NONE in flags
@@ -7744,7 +7746,6 @@ do {
      case OP_ASSERT:
      case OP_ONCE:
      case OP_ONCE_NC:
-     case OP_COND:
      d = find_firstassertedchar(scode, &dflags, op == OP_ASSERT);
      if (dflags < 0)
        return 0;
@@ -8297,12 +8298,12 @@ if (cd->hwm > cd->start_workspace)
     }
   }
 
-/* If the workspace had to be expanded, free the new memory. Set the pointer to 
+/* If the workspace had to be expanded, free the new memory. Set the pointer to
 NULL to indicate that forward references have been filled in. */
 
 if (cd->workspace_size > COMPILE_WORK_SIZE)
   (PUBL(free))((void *)cd->start_workspace);
-cd->start_workspace = NULL;   
+cd->start_workspace = NULL;
 
 /* Give an error if there's back reference to a non-existent capturing
 subpattern. */
@@ -8506,7 +8507,7 @@ if (code - codestart > length)
   }
 #endif   /* PCRE_DEBUG */
 
-/* Check for a pattern than can match an empty string, so that this information 
+/* Check for a pattern than can match an empty string, so that this information
 can be provided to applications. */
 
 do
@@ -8515,7 +8516,7 @@ do
     {
     re->flags |= PCRE_MATCH_EMPTY;
     break;
-    }  
+    }
   codestart += GET(codestart, 1);
   }
 while (*codestart == OP_ALT);

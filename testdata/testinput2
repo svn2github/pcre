@@ -3837,4 +3837,9 @@ backtracking verbs. --/
     aaaaaaaaaaaaaz
     aaaaaaaaaaaaaz\Q10
 
+/-- This test causes a segfault with Perl 5.18.0 --/
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+
 /-- End of testinput2 --/

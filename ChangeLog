@@ -51,6 +51,12 @@ Version 8.34 xx-xxxx-201x
         there was no match, the code could incorrectly back up beyond the match 
         point, and potentially beyond the first character in the subject, 
         leading to a segfault or an incorrect match result.
+        
+10. A conditional group with an assertion condition could lead to PCRE 
+    recording an incorrect first data item for a match if no other firse data 
+    item was recorded. For example, the pattern (?(?=ab)ab) recorded "a" as a
+    first data item, and therefore matched "ca" after "c" instead of at the 
+    start.
 
 
 Version 8.33 28-May-2013

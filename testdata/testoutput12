@@ -15,7 +15,7 @@ JIT study was successful
 Capturing subpattern count = 0
 May match empty string
 No options
-First char = 'a'
+No first char
 No need char
 Study returned NULL
 JIT study was not successful
@@ -24,7 +24,7 @@ JIT study was not successful
 Capturing subpattern count = 0
 May match empty string
 No options
-First char = 'a'
+No first char
 No need char
 Subject length lower bound = -1
 No set of starting bytes

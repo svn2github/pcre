@@ -12718,4 +12718,10 @@ No match
     aaaaaaaaaaaaaz\Q10
 Error -21 (recursion limit exceeded)
 
+/-- This test causes a segfault with Perl 5.18.0 --/
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+ 0: ba
+
 /-- End of testinput2 --/

@@ -1,6 +1,6 @@
 /-- This set of tests is for features that are compatible with all versions of
-    Perl >= 5.10, in non-UTF-8 mode. It should run clean for both the 8-bit and
-    16-bit PCRE libraries. --/
+    Perl >= 5.10, in non-UTF-8 mode. It should run clean for the 8-bit, 16-bit,
+    and 32-bit PCRE libraries. --/
 
 /the quick brown fox/
     the quick brown fox
@@ -4221,9 +4221,6 @@
     ab
     bc
 
-/^(?=(a)){0}b(?1)/
-    backgammon
-
 /^(?=(?1))?[az]([abc])d/
     abd 
     zcdxx 
@@ -5607,5 +5604,9 @@ AbcdCBefgBhiBqz
 /^a*\w{4}/i
     aaaa
     aaa     
+
+/(?(?=ab)ab)/+
+    ca
+    cd 
 
 /-- End of testinput1 --/
