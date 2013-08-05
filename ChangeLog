@@ -57,6 +57,9 @@ Version 8.34 xx-xxxx-201x
     item was recorded. For example, the pattern (?(?=ab)ab) recorded "a" as a
     first data item, and therefore matched "ca" after "c" instead of at the 
     start.
+    
+11. Change 40 for 8.33 (allowing pcregrep to find empty strings) showed up a 
+    bug that caused the command "echo a | ./pcregrep -M '|a'" to loop.
 
 
 Version 8.33 28-May-2013

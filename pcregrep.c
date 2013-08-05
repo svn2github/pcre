@@ -1835,7 +1835,7 @@ while (ptr < endptr)
         {
         char *endmatch = ptr + offsets[1];
         t = ptr;
-        while (t < endmatch)
+        while (t <= endmatch)
           {
           t = end_of_line(t, endptr, &endlinelength);
           if (t < endmatch) linenumber++; else break;
