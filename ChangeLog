@@ -60,10 +60,13 @@ Version 8.34 xx-xxxx-201x
     
 11. Change 40 for 8.33 (allowing pcregrep to find empty strings) showed up a 
     bug that caused the command "echo a | ./pcregrep -M '|a'" to loop.
+    
+12. The source of pcregrep now includes z/OS-specific code so that it can be
+    compiled for z/OS as part of the special z/OS distribution.
 
 
 Version 8.33 28-May-2013
---------------------------
+------------------------
 
 1.  Added 'U' to some constants that are compared to unsigned integers, to
     avoid compiler signed/unsigned warnings. Added (int) casts to unsigned
