@@ -2153,7 +2153,7 @@ fclose (zos_test_file);
 
 if (zos_type == __ZOS_PDS || zos_type == __ZOS_PDSE)
    {
-   rc = travelonpdsdir (pathname, only_one_at_top);
+   return travelonpdsdir (pathname, only_one_at_top);
    }
 
 /* Deal with regular files in the normal way below. These types are:
