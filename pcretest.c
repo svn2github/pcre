@@ -2913,6 +2913,8 @@ printf("  -s       force each pattern to be studied at basic level\n"
 printf("  -t <n>   time compilation and execution, repeating <n> times\n");
 printf("  -tm      time execution (matching) only\n");
 printf("  -tm <n>  time execution (matching) only, repeating <n> times\n");
+printf("  -T       same as -t, but show total times at the end\n");
+printf("  -TM      same as -tm, but show total time at the end\n");
 }
 
 
@@ -2935,6 +2937,7 @@ int default_find_match_limit = FALSE;
 int op = 1;
 int timeit = 0;
 int timeitm = 0;
+int showtotaltimes = 0;
 int showinfo = 0;
 int showstore = 0;
 int force_study = -1;
@@ -2951,6 +2954,9 @@ int yield = 0;
 int stack_size;
 pcre_uint8 *dbuffer = NULL;
 size_t dbuffer_size = 1u << 14;
+clock_t total_compile_time = 0;
+clock_t total_study_time = 0;
+clock_t total_match_time = 0;
 
 #if !defined NOPOSIX
 int posix = 0;
@@ -3083,10 +3089,12 @@ while (argc > 1 && argv[op][0] == '-')
     op++;
     argc--;
     }
-  else if (strcmp(arg, "-t") == 0 || strcmp(arg, "-tm") == 0)
+  else if (strcmp(arg, "-t") == 0 || strcmp(arg, "-tm") == 0 ||
+           strcmp(arg, "-T") == 0 || strcmp(arg, "-TM") == 0)
     {
-    int both = arg[2] == 0;
     int temp;
+    int both = arg[2] == 0;
+    showtotaltimes = arg[1] == 'T'; 
     if (argc > 2 && (temp = get_value((pcre_uint8 *)argv[op+1], &endptr),
                      *endptr == 0))
       {
@@ -3875,7 +3883,7 @@ while (!done)
         PCRE_COMPILE(re, p, options, &error, &erroroffset, tables);
         if (re != NULL) free(re);
         }
-      time_taken = clock() - start_time;
+      total_compile_time += (time_taken = clock() - start_time);
       fprintf(outfile, "Compile time %.4f milliseconds\n",
         (((double)time_taken * 1000.0) / (double)timeit) /
           (double)CLOCKS_PER_SEC);
@@ -3964,7 +3972,7 @@ while (!done)
           {
           PCRE_STUDY(extra, re, study_options, &error);
           }
-        time_taken = clock() - start_time;
+        total_study_time = (time_taken = clock() - start_time);
         if (extra != NULL)
           {
           PCRE_FREE_STUDY(extra);
@@ -4984,7 +4992,7 @@ while (!done)
           PCRE_EXEC(count, re, extra, bptr, len, start_offset,
             (options | g_notempty), use_offsets, use_size_offsets);
           }
-        time_taken = clock() - start_time;
+        total_match_time += (time_taken = clock() - start_time);
         fprintf(outfile, "Execute time %.4f milliseconds\n",
           (((double)time_taken * 1000.0) / (double)timeitm) /
             (double)CLOCKS_PER_SEC);
@@ -5493,6 +5501,23 @@ while (!done)
   }
 
 if (infile == stdin) fprintf(outfile, "\n");
+
+if (showtotaltimes)
+  {
+  fprintf(outfile, "--------------------------------------\n");
+  if (timeit > 0)
+    {
+    fprintf(outfile, "Total compile time %.4f milliseconds\n",
+      (((double)total_compile_time * 1000.0) / (double)timeit) /
+        (double)CLOCKS_PER_SEC);
+    fprintf(outfile, "Total study time   %.4f milliseconds\n",
+      (((double)total_study_time * 1000.0) / (double)timeit) /
+        (double)CLOCKS_PER_SEC);
+    }
+  fprintf(outfile, "Total execute time %.4f milliseconds\n",
+    (((double)total_match_time * 1000.0) / (double)timeitm) /
+      (double)CLOCKS_PER_SEC);
+  }
 
 EXIT:
 

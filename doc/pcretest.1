@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "26 April 2013" "PCRE 8.33"
+.TH PCRETEST 1 "27 August 2013" "PCRE 8.34"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -216,17 +216,21 @@ contains (*MARK) items there may also be differences, for the same reason. The
 should never be studied (see the \fB/S\fP pattern modifier below).
 .TP 10
 \fB-t\fP
-Run each compile, study, and match many times with a timer, and output
-resulting time per compile or match (in milliseconds). Do not set \fB-m\fP with
-\fB-t\fP, because you will then get the size output a zillion times, and the
-timing will be distorted. You can control the number of iterations that are
-used for timing by following \fB-t\fP with a number (as a separate item on the
-command line). For example, "-t 1000" would iterate 1000 times. The default is
-to iterate 500000 times.
+Run each compile, study, and match many times with a timer, and output the
+resulting times per compile, study, or match (in milliseconds). Do not set
+\fB-m\fP with \fB-t\fP, because you will then get the size output a zillion
+times, and the timing will be distorted. You can control the number of
+iterations that are used for timing by following \fB-t\fP with a number (as a
+separate item on the command line). For example, "-t 1000" iterates 1000 times.
+The default is to iterate 500000 times.
 .TP 10
 \fB-tm\fP
 This is like \fB-t\fP except that it times only the matching phase, not the
 compile or study phases.
+.TP 10
+\fB-T\fp \fB-TM\fP
+These behave like \fB-t\fP and \fB-tm\fP, but in addition, at the end of a run, 
+the total times for all compiles, studies, and matches are output.
 .
 .
 .SH DESCRIPTION
@@ -1094,6 +1098,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 April 2013
+Last updated: 27 August 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

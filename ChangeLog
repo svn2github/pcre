@@ -53,7 +53,7 @@ Version 8.34 xx-xxxx-201x
         leading to a segfault or an incorrect match result.
         
 10. A conditional group with an assertion condition could lead to PCRE 
-    recording an incorrect first data item for a match if no other firse data 
+    recording an incorrect first data item for a match if no other first data 
     item was recorded. For example, the pattern (?(?=ab)ab) recorded "a" as a
     first data item, and therefore matched "ca" after "c" instead of at the 
     start.
@@ -63,6 +63,8 @@ Version 8.34 xx-xxxx-201x
     
 12. The source of pcregrep now includes z/OS-specific code so that it can be
     compiled for z/OS as part of the special z/OS distribution.
+    
+13. Added the -T and -TM options to pcretest. 
 
 
 Version 8.33 28-May-2013
