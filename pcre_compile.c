@@ -5976,9 +5976,8 @@ for (;; ptr++)
 
           /* The name table does not exist in the first pass; instead we must
           scan the list of names encountered so far in order to get the 
-          number. The number may be negative if it is for a name that may be 
-          duplicated. If the name is not found, set the value to 0 for a
-          forward reference. */
+          number. If the name is not found, set the value to 0 for a forward
+          reference. */
 
           ng = cd->named_groups;
           for (i = 0; i < cd->names_found; i++, ng++)
