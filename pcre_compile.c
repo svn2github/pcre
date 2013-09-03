@@ -115,6 +115,13 @@ kicks in at the same number of forward references in all cases. */
 #define COMPILE_WORK_SIZE (2048*LINK_SIZE)
 #define COMPILE_WORK_SIZE_MAX (100*COMPILE_WORK_SIZE)
 
+/* This value determines the size of the initial vector that is used for 
+remembering named groups during the pre-compile. It is allocated on the stack, 
+but if it is too small, it is expanded using malloc(), in a similar way to the 
+workspace. The value is the number of slots in the list. */
+
+#define NAMED_GROUP_LIST_SIZE  20
+
 /* The overrun tests check for a slightly smaller size so that they detect the
 overrun before it actually does run off the end of the data block. */
 
@@ -1354,306 +1361,6 @@ if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
 *maxp = max;
 return p;
 }
-
-
-
-/*************************************************
-*  Subroutine for finding forward reference      *
-*************************************************/
-
-/* This recursive function is called only from find_parens() below. The
-top-level call starts at the beginning of the pattern. All other calls must
-start at a parenthesis. It scans along a pattern's text looking for capturing
-subpatterns, and counting them. If it finds a named pattern that matches the
-name it is given, it returns its number. Alternatively, if the name is NULL, it
-returns when it reaches a given numbered subpattern. Recursion is used to keep
-track of subpatterns that reset the capturing group numbers - the (?| feature.
-
-This function was originally called only from the second pass, in which we know
-that if (?< or (?' or (?P< is encountered, the name will be correctly
-terminated because that is checked in the first pass. There is now one call to
-this function in the first pass, to check for a recursive back reference by
-name (so that we can make the whole group atomic). In this case, we need check
-only up to the current position in the pattern, and that is still OK because
-and previous occurrences will have been checked. To make this work, the test
-for "end of pattern" is a check against cd->end_pattern in the main loop,
-instead of looking for a binary zero. This means that the special first-pass
-call can adjust cd->end_pattern temporarily. (Checks for binary zero while
-processing items within the loop are OK, because afterwards the main loop will
-terminate.)
-
-Arguments:
-  ptrptr       address of the current character pointer (updated)
-  cd           compile background data
-  name         name to seek, or NULL if seeking a numbered subpattern
-  lorn         name length, or subpattern number if name is NULL
-  xmode        TRUE if we are in /x mode
-  utf          TRUE if we are in UTF-8 / UTF-16 / UTF-32 mode
-  count        pointer to the current capturing subpattern number (updated)
-
-Returns:       the number of the named subpattern, or -1 if not found
-*/
-
-static int
-find_parens_sub(pcre_uchar **ptrptr, compile_data *cd, const pcre_uchar *name, int lorn,
-  BOOL xmode, BOOL utf, int *count)
-{
-pcre_uchar *ptr = *ptrptr;
-int start_count = *count;
-int hwm_count = start_count;
-BOOL dup_parens = FALSE;
-
-/* If the first character is a parenthesis, check on the type of group we are
-dealing with. The very first call may not start with a parenthesis. */
-
-if (ptr[0] == CHAR_LEFT_PARENTHESIS)
-  {
-  /* Handle specials such as (*SKIP) or (*UTF8) etc. */
-
-  if (ptr[1] == CHAR_ASTERISK)
-    {
-    ptr += 2;
-    while (ptr < cd->end_pattern && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-    }
-
-  /* Handle a normal, unnamed capturing parenthesis. */
-
-  else if (ptr[1] != CHAR_QUESTION_MARK)
-    {
-    *count += 1;
-    if (name == NULL && *count == lorn) return *count;
-    ptr++;
-    }
-
-  /* All cases now have (? at the start. Remember when we are in a group
-  where the parenthesis numbers are duplicated. */
-
-  else if (ptr[2] == CHAR_VERTICAL_LINE)
-    {
-    ptr += 3;
-    dup_parens = TRUE;
-    }
-
-  /* Handle comments; all characters are allowed until a ket is reached. */
-
-  else if (ptr[2] == CHAR_NUMBER_SIGN)
-    {
-    for (ptr += 3; *ptr != CHAR_NULL; ptr++)
-      if (*ptr == CHAR_RIGHT_PARENTHESIS) break;
-    goto FAIL_EXIT;
-    }
-
-  /* Handle a condition. If it is an assertion, just carry on so that it
-  is processed as normal. If not, skip to the closing parenthesis of the
-  condition (there can't be any nested parens). */
-
-  else if (ptr[2] == CHAR_LEFT_PARENTHESIS)
-    {
-    ptr += 2;
-    if (ptr[1] != CHAR_QUESTION_MARK)
-      {
-      while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr != CHAR_NULL) ptr++;
-      }
-    }
-
-  /* Start with (? but not a condition. */
-
-  else
-    {
-    ptr += 2;
-    if (*ptr == CHAR_P) ptr++;                      /* Allow optional P */
-
-    /* We have to disambiguate (?<! and (?<= from (?<name> for named groups */
-
-    if ((*ptr == CHAR_LESS_THAN_SIGN && ptr[1] != CHAR_EXCLAMATION_MARK &&
-        ptr[1] != CHAR_EQUALS_SIGN) || *ptr == CHAR_APOSTROPHE)
-      {
-      pcre_uchar term;
-      const pcre_uchar *thisname;
-      *count += 1;
-      if (name == NULL && *count == lorn) return *count;
-      term = *ptr++;
-      if (term == CHAR_LESS_THAN_SIGN) term = CHAR_GREATER_THAN_SIGN;
-      thisname = ptr;
-      while (*ptr != term) ptr++;
-      if (name != NULL && lorn == (int)(ptr - thisname) &&
-          STRNCMP_UC_UC(name, thisname, (unsigned int)lorn) == 0)
-        return *count;
-      term++;
-      }
-    }
-  }
-
-/* Past any initial parenthesis handling, scan for parentheses or vertical
-bars. Stop if we get to cd->end_pattern. Note that this is important for the
-first-pass call when this value is temporarily adjusted to stop at the current
-position. So DO NOT change this to a test for binary zero. */
-
-for (; ptr < cd->end_pattern; ptr++)
-  {
-  /* Skip over backslashed characters and also entire \Q...\E */
-
-  if (*ptr == CHAR_BACKSLASH)
-    {
-    if (*(++ptr) == CHAR_NULL) goto FAIL_EXIT;
-    if (*ptr == CHAR_Q) for (;;)
-      {
-      while (*(++ptr) != CHAR_NULL && *ptr != CHAR_BACKSLASH) {};
-      if (*ptr == CHAR_NULL) goto FAIL_EXIT;
-      if (*(++ptr) == CHAR_E) break;
-      }
-    continue;
-    }
-
-  /* Skip over character classes; this logic must be similar to the way they
-  are handled for real. If the first character is '^', skip it. Also, if the
-  first few characters (either before or after ^) are \Q\E or \E we skip them
-  too. This makes for compatibility with Perl. Note the use of STR macros to
-  encode "Q\\E" so that it works in UTF-8 on EBCDIC platforms. */
-
-  if (*ptr == CHAR_LEFT_SQUARE_BRACKET)
-    {
-    BOOL negate_class = FALSE;
-    for (;;)
-      {
-      if (ptr[1] == CHAR_BACKSLASH)
-        {
-        if (ptr[2] == CHAR_E)
-          ptr+= 2;
-        else if (STRNCMP_UC_C8(ptr + 2,
-                 STR_Q STR_BACKSLASH STR_E, 3) == 0)
-          ptr += 4;
-        else
-          break;
-        }
-      else if (!negate_class && ptr[1] == CHAR_CIRCUMFLEX_ACCENT)
-        {
-        negate_class = TRUE;
-        ptr++;
-        }
-      else break;
-      }
-
-    /* If the next character is ']', it is a data character that must be
-    skipped, except in JavaScript compatibility mode. */
-
-    if (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET &&
-        (cd->external_options & PCRE_JAVASCRIPT_COMPAT) == 0)
-      ptr++;
-
-    while (*(++ptr) != CHAR_RIGHT_SQUARE_BRACKET)
-      {
-      if (*ptr == CHAR_NULL) return -1;
-      if (*ptr == CHAR_BACKSLASH)
-        {
-        if (*(++ptr) == CHAR_NULL) goto FAIL_EXIT;
-        if (*ptr == CHAR_Q) for (;;)
-          {
-          while (*(++ptr) != CHAR_NULL && *ptr != CHAR_BACKSLASH) {};
-          if (*ptr == CHAR_NULL) goto FAIL_EXIT;
-          if (*(++ptr) == CHAR_E) break;
-          }
-        continue;
-        }
-      }
-    continue;
-    }
-
-  /* Skip comments in /x mode */
-
-  if (xmode && *ptr == CHAR_NUMBER_SIGN)
-    {
-    ptr++;
-    while (*ptr != CHAR_NULL)
-      {
-      if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
-      ptr++;
-#ifdef SUPPORT_UTF
-      if (utf) FORWARDCHAR(ptr);
-#endif
-      }
-    if (*ptr == CHAR_NULL) goto FAIL_EXIT;
-    continue;
-    }
-
-  /* Check for the special metacharacters */
-
-  if (*ptr == CHAR_LEFT_PARENTHESIS)
-    {
-    int rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf, count);
-    if (rc > 0) return rc;
-    if (*ptr == CHAR_NULL) goto FAIL_EXIT;
-    }
-
-  else if (*ptr == CHAR_RIGHT_PARENTHESIS)
-    {
-    if (dup_parens && *count < hwm_count) *count = hwm_count;
-    goto FAIL_EXIT;
-    }
-
-  else if (*ptr == CHAR_VERTICAL_LINE && dup_parens)
-    {
-    if (*count > hwm_count) hwm_count = *count;
-    *count = start_count;
-    }
-  }
-
-FAIL_EXIT:
-*ptrptr = ptr;
-return -1;
-}
-
-
-
-
-/*************************************************
-*       Find forward referenced subpattern       *
-*************************************************/
-
-/* This function scans along a pattern's text looking for capturing
-subpatterns, and counting them. If it finds a named pattern that matches the
-name it is given, it returns its number. Alternatively, if the name is NULL, it
-returns when it reaches a given numbered subpattern. This is used for forward
-references to subpatterns. We used to be able to start this scan from the
-current compiling point, using the current count value from cd->bracount, and
-do it all in a single loop, but the addition of the possibility of duplicate
-subpattern numbers means that we have to scan from the very start, in order to
-take account of such duplicates, and to use a recursive function to keep track
-of the different types of group.
-
-Arguments:
-  cd           compile background data
-  name         name to seek, or NULL if seeking a numbered subpattern
-  lorn         name length, or subpattern number if name is NULL
-  xmode        TRUE if we are in /x mode
-  utf          TRUE if we are in UTF-8 / UTF-16 / UTF-32 mode
-
-Returns:       the number of the found subpattern, or -1 if not found
-*/
-
-static int
-find_parens(compile_data *cd, const pcre_uchar *name, int lorn, BOOL xmode,
-  BOOL utf)
-{
-pcre_uchar *ptr = (pcre_uchar *)cd->start_pattern;
-int count = 0;
-int rc;
-
-/* If the pattern does not start with an opening parenthesis, the first call
-to find_parens_sub() will scan right to the end (if necessary). However, if it
-does start with a parenthesis, find_parens_sub() will return when it hits the
-matching closing parens. That is why we have to have a loop. */
-
-for (;;)
-  {
-  rc = find_parens_sub(&ptr, cd, name, lorn, xmode, utf, &count);
-  if (rc > 0 || *ptr++ == CHAR_NULL) break;
-  }
-
-return rc;
-}
-
 
 
 
@@ -5949,21 +5656,12 @@ for (;; ptr++)
           slot += cd->name_entry_size;
           }
 
-        /* Found a previous named subpattern */
+        /* Found the named subpattern */
 
         if (i < cd->names_found)
           {
           recno = GET2(slot, 0);
           PUT2(code, 2+LINK_SIZE, recno);
-          code[1+LINK_SIZE]++;
-          }
-
-        /* Search the pattern for a forward reference */
-
-        else if ((i = find_parens(cd, name, namelen,
-                        (options & PCRE_EXTENDED) != 0, utf)) > 0)
-          {
-          PUT2(code, 2+LINK_SIZE, i);
           code[1+LINK_SIZE]++;
           }
 
@@ -6130,124 +5828,105 @@ for (;; ptr++)
         /* ------------------------------------------------------------ */
         DEFINE_NAME:    /* Come here from (?< handling */
         case CHAR_APOSTROPHE:
+        terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
+          CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
+        name = ++ptr;
+
+        while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
+        namelen = (int)(ptr - name);
+
+        /* In the pre-compile phase, do a syntax check, remember the longest
+        name, and then remember the group in a vector, expanding it if
+        necessary. Duplicates for the same number are skipped; other duplicates 
+        are checked for validity. In the actual compile, there is nothing to
+        do. */
+
+        if (lengthptr != NULL)
           {
-          terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
-            CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
-          name = ++ptr;
-
-          while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
-          namelen = (int)(ptr - name);
-
-          /* In the pre-compile phase, just do a syntax check. */
-
-          if (lengthptr != NULL)
+          named_group *ng; 
+          pcre_uint32 number = cd->bracount + 1;
+ 
+          if (*ptr != (pcre_uchar)terminator)
             {
-            if (*ptr != (pcre_uchar)terminator)
+            *errorcodeptr = ERR42;
+            goto FAILED;
+            }
+             
+          if (cd->names_found >= MAX_NAME_COUNT)
+            {
+            *errorcodeptr = ERR49;
+            goto FAILED;
+            }
+             
+          if (namelen + IMM2_SIZE + 1 > cd->name_entry_size)
+            {
+            cd->name_entry_size = namelen + IMM2_SIZE + 1;
+            if (namelen > MAX_NAME_SIZE)
               {
-              *errorcodeptr = ERR42;
+              *errorcodeptr = ERR48;
               goto FAILED;
-              }
-            if (cd->names_found >= MAX_NAME_COUNT)
-              {
-              *errorcodeptr = ERR49;
-              goto FAILED;
-              }
-            if (namelen + IMM2_SIZE + 1 > cd->name_entry_size)
-              {
-              cd->name_entry_size = namelen + IMM2_SIZE + 1;
-              if (namelen > MAX_NAME_SIZE)
-                {
-                *errorcodeptr = ERR48;
-                goto FAILED;
-                }
               }
             }
-
-          /* In the real compile, create the entry in the table, maintaining
-          alphabetical order. Duplicate names for different numbers are
-          permitted only if PCRE_DUPNAMES is set. Duplicate names for the same
-          number are always OK. (An existing number can be re-used if (?|
-          appears in the pattern.) In either event, a duplicate name results in
-          a duplicate entry in the table, even if the number is the same. This
-          is because the number of names, and hence the table size, is computed
-          in the pre-compile, and it affects various numbers and pointers which
-          would all have to be modified, and the compiled code moved down, if
-          duplicates with the same number were omitted from the table. This
-          doesn't seem worth the hassle. However, *different* names for the
-          same number are not permitted. */
-
-          else
+            
+          /* Scan the list to check for duplicates. For duplicate names, if the
+          number is the same, break the loop, which causes the name to be
+          discarded; otherwise, if DUPNAMES is not set, give an error.
+          If it is set, allow the name with a different number, but continue
+          scanning in case this is a duplicate with the same number. For
+          non-duplicate names, give an error if the number is duplicated. */
+          
+          ng = cd->named_groups;
+          for (i = 0; i < cd->names_found; i++, ng++)
             {
-            BOOL dupname = FALSE;
-            slot = cd->name_table;
-
-            for (i = 0; i < cd->names_found; i++)
+            if (namelen == ng->length &&
+                STRNCMP_UC_UC(name, ng->name, namelen) == 0)
+              {  
+              if (ng->number == number) break;
+              if ((options & PCRE_DUPNAMES) == 0)
+                {
+                *errorcodeptr = ERR43;
+                goto FAILED;  
+                }  
+              } 
+            else if (ng->number == number)
               {
-              int crc = memcmp(name, slot+IMM2_SIZE, IN_UCHARS(namelen));
-              if (crc == 0)
-                {
-                if (slot[IMM2_SIZE+namelen] == 0)
-                  {
-                  if (GET2(slot, 0) != cd->bracount + 1 &&
-                      (options & PCRE_DUPNAMES) == 0)
-                    {
-                    *errorcodeptr = ERR43;
-                    goto FAILED;
-                    }
-                  else dupname = TRUE;
-                  }
-                else crc = -1;      /* Current name is a substring */
-                }
+              *errorcodeptr = ERR65;
+              goto FAILED;
+              }      
+            }       
 
-              /* Make space in the table and break the loop for an earlier
-              name. For a duplicate or later name, carry on. We do this for
-              duplicates so that in the simple case (when ?(| is not used) they
-              are in order of their numbers. */
-
-              if (crc < 0)
-                {
-                memmove(slot + cd->name_entry_size, slot,
-                  IN_UCHARS((cd->names_found - i) * cd->name_entry_size));
-                break;
-                }
-
-              /* Continue the loop for a later or duplicate name */
-
-              slot += cd->name_entry_size;
-              }
-
-            /* For non-duplicate names, check for a duplicate number before
-            adding the new name. */
-
-            if (!dupname)
+          if (i >= cd->names_found)     /* Not a duplicate with same number */
+            { 
+            /* Increase the list size if necessary */
+            
+            if (cd->names_found >= cd->named_group_list_size)
               {
-              pcre_uchar *cslot = cd->name_table;
-              for (i = 0; i < cd->names_found; i++)
+              int newsize = cd->named_group_list_size * 2;
+              named_group *newspace = (PUBL(malloc))
+                (newsize * sizeof(named_group));
+                 
+              if (newspace == NULL) 
                 {
-                if (cslot != slot)
-                  {
-                  if (GET2(cslot, 0) == cd->bracount + 1)
-                    {
-                    *errorcodeptr = ERR65;
-                    goto FAILED;
-                    }
-                  }
-                else i--;
-                cslot += cd->name_entry_size;
-                }
-              }
-
-            PUT2(slot, 0, cd->bracount + 1);
-            memcpy(slot + IMM2_SIZE, name, IN_UCHARS(namelen));
-            slot[IMM2_SIZE + namelen] = 0;
+                *errorcodeptr = ERR21;
+                goto FAILED; 
+                } 
+                 
+              memcpy(newspace, cd->named_groups, 
+                cd->named_group_list_size * sizeof(named_group));
+              if (cd->named_group_list_size > NAMED_GROUP_LIST_SIZE)
+                (PUBL(free))((void *)cd->named_groups);
+              cd->named_groups = newspace;
+              cd->named_group_list_size = newsize;
+              }  
+            
+            cd->named_groups[cd->names_found].name = name;
+            cd->named_groups[cd->names_found].length = namelen;
+            cd->named_groups[cd->names_found].number = number;
+            cd->names_found++;
             }
           }
 
-        /* In both pre-compile and compile, count the number of names we've
-        encountered. */
-
-        cd->names_found++;
-        ptr++;                    /* Move past > or ' */
+        ptr++;                    /* Move past > or ' in both passes. */
         goto NUMBERED_GROUP;
 
 
@@ -6277,8 +5956,8 @@ for (;; ptr++)
 
         if (lengthptr != NULL)
           {
-          const pcre_uchar *temp;
-
+          named_group *ng;
+           
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -6295,27 +5974,26 @@ for (;; ptr++)
             goto FAILED;
             }
 
-          /* The name table does not exist in the first pass, so we cannot
-          do a simple search as in the code below. Instead, we have to scan the
-          pattern to find the number. It is important that we scan it only as
-          far as we have got because the syntax of named subpatterns has not
-          been checked for the rest of the pattern, and find_parens() assumes
-          correct syntax. In any case, it's a waste of resources to scan
-          further. We stop the scan at the current point by temporarily
-          adjusting the value of cd->endpattern. */
+          /* The name table does not exist in the first pass; instead we must
+          scan the list of names encountered so far in order to get the 
+          number. The number may be negative if it is for a name that may be 
+          duplicated. If the name is not found, set the value to 0 for a
+          forward reference. */
 
-          temp = cd->end_pattern;
-          cd->end_pattern = ptr;
-          recno = find_parens(cd, name, namelen,
-            (options & PCRE_EXTENDED) != 0, utf);
-          cd->end_pattern = temp;
-          if (recno < 0) recno = 0;    /* Forward ref; set dummy number */
+          ng = cd->named_groups;
+          for (i = 0; i < cd->names_found; i++, ng++)
+            {
+            if (namelen == ng->length &&
+                STRNCMP_UC_UC(name, ng->name, namelen) == 0)
+              break;
+            }       
+          recno = (i < cd->names_found)? ng->number : 0;
           }
 
-        /* In the real compile, seek the name in the table. We check the name
+        /* In the real compile, search the name table. We check the name
         first, and then check that we have reached the end of the name in the
-        table. That way, if the name that is longer than any in the table,
-        the comparison will fail without reading beyond the table entry. */
+        table. That way, if the name is longer than any in the table, the
+        comparison will fail without reading beyond the table entry. */
 
         else
           {
@@ -6328,13 +6006,11 @@ for (;; ptr++)
             slot += cd->name_entry_size;
             }
 
-          if (i < cd->names_found)         /* Back reference */
+          if (i < cd->names_found)
             {
             recno = GET2(slot, 0);
             }
-          else if ((recno =                /* Forward back reference */
-                    find_parens(cd, name, namelen,
-                      (options & PCRE_EXTENDED) != 0, utf)) <= 0)
+          else 
             {
             *errorcodeptr = ERR15;
             goto FAILED;
@@ -6444,8 +6120,7 @@ for (;; ptr++)
 
             if (called == NULL)
               {
-              if (find_parens(cd, NULL, recno,
-                    (options & PCRE_EXTENDED) != 0, utf) < 0)
+              if (recno > cd->final_bracount)
                 {
                 *errorcodeptr = ERR15;
                 goto FAILED;
@@ -7790,6 +7465,61 @@ return c;
 
 
 /*************************************************
+*     Add an entry to the name/number table      *
+*************************************************/
+
+/* This function is called between compiling passes to add an entry to the
+name/number table, maintaining alphabetical order. Checking for permitted 
+and forbidden duplicates has already been done.
+
+Arguments:
+  cd           the compile data block
+  name         the name to add
+  length       the length of the name
+  groupno      the group number   
+
+Returns:       nothing
+*/
+
+static void
+add_name(compile_data *cd, const pcre_uchar *name, int length, 
+  unsigned int groupno)
+{
+int i;
+pcre_uchar *slot = cd->name_table;
+
+for (i = 0; i < cd->names_found; i++)
+  {
+  int crc = memcmp(name, slot+IMM2_SIZE, IN_UCHARS(length));
+  if (crc == 0 && slot[IMM2_SIZE+length] != 0) 
+    crc = -1; /* Current name is a substring */
+
+  /* Make space in the table and break the loop for an earlier name. For a
+  duplicate or later name, carry on. We do this for duplicates so that in the
+  simple case (when ?(| is not used) they are in order of their numbers. In all
+  cases they are in the order in which they appear in the pattern. */
+
+  if (crc < 0)
+    {
+    memmove(slot + cd->name_entry_size, slot,
+      IN_UCHARS((cd->names_found - i) * cd->name_entry_size));
+    break;
+    }
+
+  /* Continue the loop for a later or duplicate name */
+
+  slot += cd->name_entry_size;
+  }
+
+PUT2(slot, 0, groupno);
+memcpy(slot + IMM2_SIZE, name, IN_UCHARS(length));
+slot[IMM2_SIZE + length] = 0;
+cd->names_found++;
+}
+
+
+
+/*************************************************
 *        Compile a Regular Expression            *
 *************************************************/
 
@@ -7875,6 +7605,11 @@ to fill in forward references to subpatterns. That may overflow, in which case
 new memory is obtained from malloc(). */
 
 pcre_uchar cworkspace[COMPILE_WORK_SIZE];
+
+/* This vector is used for remembering name groups during the pre-compile. In a 
+similar way to cworkspace, it can be expanded using malloc() if necessary. */
+
+named_group named_groups[NAMED_GROUP_LIST_SIZE];
 
 /* Set this early so that early errors get offset 0. */
 
@@ -8142,6 +7877,8 @@ cd->start_code = cworkspace;
 cd->hwm = cworkspace;
 cd->start_workspace = cworkspace;
 cd->workspace_size = COMPILE_WORK_SIZE;
+cd->named_groups = named_groups;
+cd->named_group_list_size = NAMED_GROUP_LIST_SIZE;
 cd->start_pattern = (const pcre_uchar *)pattern;
 cd->end_pattern = (const pcre_uchar *)(pattern + STRLEN_UC((const pcre_uchar *)pattern));
 cd->req_varyopt = 0;
@@ -8224,7 +7961,6 @@ cd->final_bracount = cd->bracount;  /* Save for checking forward references */
 cd->assert_depth = 0;
 cd->bracount = 0;
 cd->max_lookbehind = 0;
-cd->names_found = 0;
 cd->name_table = (pcre_uchar *)re + re->name_table_offset;
 codestart = cd->name_table + re->name_entry_size * re->name_count;
 cd->start_code = codestart;
@@ -8234,6 +7970,20 @@ cd->had_accept = FALSE;
 cd->had_pruneorskip = FALSE;
 cd->check_lookbehind = FALSE;
 cd->open_caps = NULL;
+
+/* If any named groups were found, create the name/number table from the list 
+created in the first pass. */
+
+if (cd->names_found > 0)
+  {
+  int i = cd->names_found;
+  named_group *ng = cd->named_groups; 
+  cd->names_found = 0;
+  for (; i > 0; i--, ng++)
+    add_name(cd, ng->name, ng->length, ng->number); 
+  if (cd->named_group_list_size > NAMED_GROUP_LIST_SIZE)
+    (PUBL(free))((void *)cd->named_groups);
+  } 
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
 error, errorcode will be set non-zero, so we don't need to look at the result

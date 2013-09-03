@@ -6131,6 +6131,17 @@ no parentheses with name "Z"
  2: a1
 copy substring Z failed -7
   C a1 (2) A
+    
+/(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/IJ
+Capturing subpattern count = 3
+Named capturing subpatterns:
+  a   1
+  a   3
+  b   2
+May match empty string
+Options: dupnames
+No first char
+No need char
 
 /^(?P<A>a)(?P<A>b)/IJ
 Capturing subpattern count = 2
@@ -10199,7 +10210,6 @@ No set of starting bytes
 /(?|(?<a>A)|(?<a>B))/I
 Capturing subpattern count = 1
 Named capturing subpatterns:
-  a   1
   a   1
 No options
 No first char

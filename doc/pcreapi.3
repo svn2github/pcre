@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "05 July 2013" "PCRE 8.34"
+.TH PCREAPI 3 "03 September 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -1350,8 +1350,8 @@ most significant byte first. In the 16-bit library, the pointer points to
 contains the parenthesis number. The rest of the entry is the corresponding
 name, zero terminated.
 .P
-The names are in alphabetical order. Duplicate names may appear if (?| is used
-to create multiple groups with the same number, as described in the
+The names are in alphabetical order. If (?| is used to create multiple groups
+with the same number, as described in the
 .\" HTML <a href="pcrepattern.html#dupsubpatternnumber">
 .\" </a>
 section on duplicate subpattern numbers
@@ -1360,11 +1360,13 @@ in the
 .\" HREF
 \fBpcrepattern\fP
 .\"
-page. Duplicate names for subpatterns with different numbers are permitted only
-if PCRE_DUPNAMES is set. In all cases of duplicate names, they appear in the
-table in the order in which they were found in the pattern. In the absence of
-(?| this is the order of increasing number; when (?| is used this is not
-necessarily the case because later subpatterns may have lower numbers.
+page, the groups may be given the same name, but there is only one entry in the
+table. Different names for groups of the same number are not permitted.
+Duplicate names for subpatterns with different numbers are permitted,
+but only if PCRE_DUPNAMES is set. They appear in the table in the order in
+which they were found in the pattern. In the absence of (?| this is the order
+of increasing number; when (?| is used this is not necessarily the case because
+later subpatterns may have lower numbers.
 .P
 As a simple example of the name/number table, consider the following pattern
 after compilation by the 8-bit library (assume PCRE_EXTENDED is set, so white
@@ -2847,6 +2849,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 July 2013
+Last updated: 03 September 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

@@ -1016,8 +1016,6 @@ static int jit_was_used;
 static int locale_set = 0;
 static int show_malloc;
 static int use_utf;
-static size_t gotten_store;
-static size_t first_gotten_store = 0;
 static const unsigned char *last_callout_mark = NULL;
 
 /* The buffers grow automatically if very long input lines are encountered. */
@@ -2322,8 +2320,6 @@ show_malloc variable is set only during matching. */
 static void *new_malloc(size_t size)
 {
 void *block = malloc(size);
-gotten_store = size;
-if (first_gotten_store == 0) first_gotten_store = size;
 if (show_malloc)
   fprintf(outfile, "malloc       %3d %p\n", (int)size, block);
 return block;
@@ -3409,7 +3405,7 @@ while (!done)
   const pcre_uint8 *tables = NULL;
   unsigned long int get_options;
   unsigned long int true_size, true_study_size = 0;
-  size_t size, regex_gotten_store;
+  size_t size;
   int do_allcaps = 0;
   int do_mark = 0;
   int do_study = 0;
@@ -3464,8 +3460,6 @@ while (!done)
       fprintf(outfile, "Failed to open %s: %s\n", p, strerror(errno));
       continue;
       }
-
-    first_gotten_store = 0;
     if (fread(sbuf, 1, 8, f) != 8) goto FAIL_READ;
 
     true_size =
@@ -3481,8 +3475,6 @@ while (!done)
       yield = 1;
       goto EXIT;
       }
-    regex_gotten_store = first_gotten_store;
-
     if (fread(re, 1, true_size, f) != true_size) goto FAIL_READ;
 
     magic = REAL_PCRE_MAGIC(re);
@@ -3796,7 +3788,6 @@ while (!done)
     if ((options & PCRE_UCP) != 0) cflags |= REG_UCP;
     if ((options & PCRE_UNGREEDY) != 0) cflags |= REG_UNGREEDY;
 
-    first_gotten_store = 0;
     rc = regcomp(&preg, (char *)p, cflags);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -3889,7 +3880,6 @@ while (!done)
           (double)CLOCKS_PER_SEC);
       }
 
-    first_gotten_store = 0;
     PCRE_COMPILE(re, p, options, &error, &erroroffset, tables);
 
     /* Compilation failed; go back for another re, skipping to blank line
@@ -3929,7 +3919,6 @@ while (!done)
     and remember the store that was got. */
 
     true_size = REAL_PCRE_SIZE(re);
-    regex_gotten_store = first_gotten_store;
 
     /* Output code size information if requested */
 
@@ -3952,8 +3941,9 @@ while (!done)
       if (REAL_PCRE_FLAGS(re) & PCRE_MODE32)
         real_pcre_size = sizeof(real_pcre32);
 #endif
+      new_info(re, NULL, PCRE_INFO_SIZE, &size);
       fprintf(outfile, "Memory allocation (code space): %d\n",
-        (int)(first_gotten_store - real_pcre_size - name_count * name_entry_size));
+        (int)(size - real_pcre_size - name_count * name_entry_size));
       }
 
     /* If -s or /S was present, study the regex to generate additional info to
@@ -4032,8 +4022,7 @@ while (!done)
       int nameentrysize, namecount;
       const pcre_uint8 *nametable;
 
-      if (new_info(re, NULL, PCRE_INFO_SIZE, &size) +
-          new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count) +
+      if (new_info(re, NULL, PCRE_INFO_CAPTURECOUNT, &count) +
           new_info(re, NULL, PCRE_INFO_BACKREFMAX, &backrefmax) +
           new_info(re, NULL, PCRE_INFO_FIRSTCHARACTER, &first_char) +
           new_info(re, NULL, PCRE_INFO_FIRSTCHARACTERFLAGS, &first_char_set) +
@@ -4049,10 +4038,6 @@ while (!done)
           new_info(re, NULL, PCRE_INFO_MAXLOOKBEHIND, &maxlookbehind)
           != 0)
         goto SKIP_DATA;
-
-      if (size != regex_gotten_store) fprintf(outfile,
-        "Size disagreement: pcre_fullinfo=%d call to malloc for %d\n",
-        (int)size, (int)regex_gotten_store);
 
       fprintf(outfile, "Capturing subpattern count = %d\n", count);
 

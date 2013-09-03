@@ -2407,6 +2407,15 @@ typedef struct open_capitem {
   pcre_uint16 flag;             /* Set TRUE if recursive back ref */
 } open_capitem;
 
+/* Structure for building a list of named groups during the first pass of 
+compiling. */
+
+typedef struct named_group {
+  const pcre_uchar  *name;          /* Points to the name in the pattern */
+  int                length;        /* Length of the name */
+  pcre_uint32        number;        /* Group number */
+} named_group;    
+
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
 
@@ -2419,11 +2428,13 @@ typedef struct compile_data {
   const pcre_uchar *start_code;     /* The start of the compiled code */
   const pcre_uchar *start_pattern;  /* The start of the pattern */
   const pcre_uchar *end_pattern;    /* The end of the pattern */
-  open_capitem *open_caps;          /* Chain of open capture items */
   pcre_uchar *hwm;                  /* High watermark of workspace */
+  open_capitem *open_caps;          /* Chain of open capture items */
+  named_group *named_groups;        /* Points to vector in pre-compile */
   pcre_uchar *name_table;           /* The name/number table */
   int  names_found;                 /* Number of entries so far */
   int  name_entry_size;             /* Size of each entry */
+  int  named_group_list_size;       /* Number of entries in the list */ 
   int  workspace_size;              /* Size of workspace */
   unsigned int bracount;            /* Count of capturing parens as we compile */
   int  final_bracount;              /* Saved value after first pass */

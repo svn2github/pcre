@@ -1495,6 +1495,8 @@
     a2b\CA
     ** Failers
     a1b\CZ\CA
+    
+/(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/IJ
 
 /^(?P<A>a)(?P<A>b)/IJ
     ab\CA
