@@ -1722,6 +1722,8 @@ for (;;)
     case OP_QUERYI:
     case OP_REF:
     case OP_REFI:
+    case OP_DNREF:
+    case OP_DNREFI:
     case OP_SBRA:
     case OP_SBRAPOS:
     case OP_SCBRA:
@@ -4826,13 +4828,12 @@ for (;; ptr++)
     /* If previous was a character class or a back reference, we put the repeat
     stuff after it, but just skip the item if the repeat was {0,0}. */
 
-    else if (*previous == OP_CLASS ||
-             *previous == OP_NCLASS ||
+    else if (*previous == OP_CLASS || *previous == OP_NCLASS ||
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
              *previous == OP_XCLASS ||
 #endif
-             *previous == OP_REF ||
-             *previous == OP_REFI)
+             *previous == OP_REF   || *previous == OP_REFI ||
+             *previous == OP_DNREF || *previous == OP_DNREFI)
       {
       if (repeat_max == 0)
         {
@@ -5886,7 +5887,8 @@ for (;; ptr++)
                 {
                 *errorcodeptr = ERR43;
                 goto FAILED;  
-                }  
+                }
+              cd->dupnames = TRUE;  /* Duplicate names exist */     
               } 
             else if (ng->number == number)
               {
@@ -5987,6 +5989,10 @@ for (;; ptr++)
               break;
             }       
           recno = (i < cd->names_found)? ng->number : 0;
+          
+          /* Count named back references. */
+          
+          if (!is_recurse) cd->namedrefcount++; 
           }
 
         /* In the real compile, search the name table. We check the name
@@ -6016,12 +6022,66 @@ for (;; ptr++)
             }
           }
 
-        /* In both phases, we can now go to the code than handles numerical
-        recursion or backreferences. */
+        /* In both phases, for recursions, we can now go to the code than
+        handles numerical recursion. */
 
         if (is_recurse) goto HANDLE_RECURSION;
-          else goto HANDLE_REFERENCE;
+        
+        /* In the second pass we must see if the name is duplicated. If so, we
+        generate a different opcode. */
+         
+        if (lengthptr == NULL && cd->dupnames)
+          {
+          int count = 1;   
+          unsigned int index = i;
+          pcre_uchar *cslot = slot + cd->name_entry_size;
+        
+          for (i++; i < cd->names_found; i++) 
+            {
+            if (STRCMP_UC_UC(slot + IMM2_SIZE, cslot + IMM2_SIZE) != 0) break;
+            count++; 
+            cslot += cd->name_entry_size;
+            }  
 
+          if (count > 1)
+            { 
+            if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
+            previous = code;
+            *code++ = ((options & PCRE_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
+            PUT2INC(code, 0, index);
+            PUT2INC(code, 0, count); 
+            
+            /* Process each potentially referenced group. */
+            
+            for (; slot < cslot; slot += cd->name_entry_size)
+              {
+              open_capitem *oc;
+              recno = GET2(slot, 0);  
+              cd->backref_map |= (recno < 32)? (1 << recno) : 1;
+              if (recno > cd->top_backref) cd->top_backref = recno;
+            
+              /* Check to see if this back reference is recursive, that it, it
+              is inside the group that it references. A flag is set so that the
+              group can be made atomic. */
+              
+              for (oc = cd->open_caps; oc != NULL; oc = oc->next)
+                {
+                if (oc->number == recno)
+                  {
+                  oc->flag = TRUE;
+                  break;
+                  }
+                }
+              }   
+            
+            continue;  /* End of back ref handling */
+            } 
+          }
+          
+        /* First pass, or a non-duplicated name. */
+           
+        goto HANDLE_REFERENCE;
+         
 
         /* ------------------------------------------------------------ */
         case CHAR_R:              /* Recursion */
@@ -6602,8 +6662,11 @@ for (;; ptr++)
         {
         open_capitem *oc;
         recno = -escape;
+        
+        /* Come here from named backref handling when the reference is to a 
+        single group (i.e. not to a duplicated name. */
 
-        HANDLE_REFERENCE:    /* Come here from named backref handling */
+        HANDLE_REFERENCE:
         if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
         previous = code;
         *code++ = ((options & PCRE_CASELESS) != 0)? OP_REFI : OP_REF;
@@ -7872,6 +7935,8 @@ cd->bracount = cd->final_bracount = 0;
 cd->names_found = 0;
 cd->name_entry_size = 0;
 cd->name_table = NULL;
+cd->dupnames = FALSE;
+cd->namedrefcount = 0;
 cd->start_code = cworkspace;
 cd->hwm = cworkspace;
 cd->start_workspace = cworkspace;
@@ -7909,14 +7974,23 @@ if (length > MAX_PATTERN_SIZE)
   goto PCRE_EARLY_ERROR_RETURN;
   }
 
-/* Compute the size of data block needed and get it, either from malloc or
-externally provided function. Integer overflow should no longer be possible
-because nowadays we limit the maximum value of cd->names_found and
-cd->name_entry_size. */
+/* If there are groups with duplicate names and there are also references by
+name, we must allow for the possibility of named references to duplicated
+groups. These require an extra data item each. */
 
-size = sizeof(REAL_PCRE) + (length + cd->names_found * cd->name_entry_size) * sizeof(pcre_uchar);
+if (cd->dupnames && cd->namedrefcount > 0)
+  length += cd->namedrefcount * IMM2_SIZE * sizeof(pcre_uchar);
+  
+/* Compute the size of the data block for storing the compiled pattern. Integer
+overflow should no longer be possible because nowadays we limit the maximum
+value of cd->names_found and cd->name_entry_size. */
+
+size = sizeof(REAL_PCRE) + 
+  (length + cd->names_found * cd->name_entry_size) * sizeof(pcre_uchar);
+  
+/* Get the memory. */ 
+
 re = (REAL_PCRE *)(PUBL(malloc))(size);
-
 if (re == NULL)
   {
   errorcode = ERR21;

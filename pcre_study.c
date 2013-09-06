@@ -66,8 +66,9 @@ string of that length that matches. In UTF8 mode, the result is in characters
 rather than bytes.
 
 Arguments:
+  re              compiled pattern block
   code            pointer to start of group (the bracket)
-  startcode       pointer to start of the whole pattern
+  startcode       pointer to start of the whole pattern's code
   options         the compiling options
   int             RECURSE depth
 
@@ -78,8 +79,8 @@ Returns:   the minimum length
 */
 
 static int
-find_minlength(const pcre_uchar *code, const pcre_uchar *startcode, int options,
-  int recurse_depth)
+find_minlength(const REAL_PCRE *re, const pcre_uchar *code, 
+  const pcre_uchar *startcode, int options, int recurse_depth)
 {
 int length = -1;
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
@@ -129,7 +130,7 @@ for (;;)
     case OP_SBRAPOS:
     case OP_ONCE:
     case OP_ONCE_NC:
-    d = find_minlength(cc, startcode, options, recurse_depth);
+    d = find_minlength(re, cc, startcode, options, recurse_depth);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -374,8 +375,39 @@ for (;;)
     If PCRE_JAVASCRIPT_COMPAT is set, a backreference to an unset bracket
     matches an empty string (by default it causes a matching failure), so in
     that case we must set the minimum length to zero. */
+    
+    case OP_DNREF:     /* Duplicate named pattern back reference */
+    case OP_DNREFI:
+    if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
+      {
+      int count = GET2(cc, 1+IMM2_SIZE); 
+      pcre_uchar *slot = (pcre_uchar *)re + 
+        re->name_table_offset + GET2(cc, 1) * re->name_entry_size;
+      d = INT_MAX;
+      while (count-- > 0)
+        {
+        ce = cs = (pcre_uchar *)PRIV(find_bracket)(startcode, utf, GET2(slot, 0));
+        if (cs == NULL) return -2;
+        do ce += GET(ce, 1); while (*ce == OP_ALT);
+        if (cc > cs && cc < ce)
+          {
+          d = 0;
+          had_recurse = TRUE;
+          break; 
+          }
+        else
+          {
+          int dd = find_minlength(re, cs, startcode, options, recurse_depth);
+          if (dd < d) d = dd; 
+          }
+        slot += re->name_entry_size;
+        }  
+      }
+    else d = 0;     
+    cc += 1 + 2*IMM2_SIZE;
+    goto REPEAT_BACK_REFERENCE;     
 
-    case OP_REF:
+    case OP_REF:      /* Single back reference */
     case OP_REFI:
     if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
       {
@@ -389,7 +421,7 @@ for (;;)
         }
       else
         {
-        d = find_minlength(cs, startcode, options, recurse_depth);
+        d = find_minlength(re, cs, startcode, options, recurse_depth);
         }
       }
     else d = 0;
@@ -397,6 +429,7 @@ for (;;)
 
     /* Handle repeated back references */
 
+    REPEAT_BACK_REFERENCE:
     switch (*cc)
       {
       case OP_CRSTAR:
@@ -437,7 +470,8 @@ for (;;)
       had_recurse = TRUE;
     else
       {
-      branchlength += find_minlength(cs, startcode, options, recurse_depth + 1);
+      branchlength += find_minlength(re, cs, startcode, options, 
+        recurse_depth + 1);
       }
     cc += 1 + LINK_SIZE;
     break;
@@ -825,6 +859,8 @@ do
       case OP_RECURSE:
       case OP_REF:
       case OP_REFI:
+      case OP_DNREF:
+      case OP_DNREFI:
       case OP_REVERSE:
       case OP_RREF:
       case OP_SCOND:
@@ -1346,6 +1382,7 @@ pcre_uchar *code;
 compile_data compile_block;
 const REAL_PCRE *re = (const REAL_PCRE *)external_re;
 
+
 *errorptr = NULL;
 
 if (re == NULL || re->magic_number != MAGIC_NUMBER)
@@ -1422,7 +1459,7 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(code, code, re->options, 0))
+switch(min = find_minlength(re, code, code, re->options, 0))
   {
   case -2: *errorptr = "internal error: missing capturing bracket"; return NULL;
   case -3: *errorptr = "internal error: opcode not recognized"; return NULL;

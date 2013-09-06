@@ -156,6 +156,8 @@ static const pcre_uint8 coptable[] = {
   0,                             /* XCLASS - variable length               */
   0,                             /* REF                                    */
   0,                             /* REFI                                   */
+  0,                             /* DNREF                                  */
+  0,                             /* DNREFI                                 */
   0,                             /* RECURSE                                */
   0,                             /* CALLOUT                                */
   0,                             /* Alt                                    */
@@ -225,6 +227,8 @@ static const pcre_uint8 poptable[] = {
   1,                             /* XCLASS - variable length               */
   0,                             /* REF                                    */
   0,                             /* REFI                                   */
+  0,                             /* DNREF                                  */
+  0,                             /* DNREFI                                 */
   0,                             /* RECURSE                                */
   0,                             /* CALLOUT                                */
   0,                             /* Alt                                    */

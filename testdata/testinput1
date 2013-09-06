@@ -5609,4 +5609,15 @@ AbcdCBefgBhiBqz
     ca
     cd 
 
+/(?:(?<n>foo)|(?<n>bar))\k<n>/J
+    foofoo
+    barbar
+
+/(?<n>A)(?:(?<n>foo)|(?<n>bar))\k<n>/J
+    AfooA
+    AbarA  
+    ** Failers 
+    Afoofoo
+    Abarbar
+
 /-- End of testinput1 --/

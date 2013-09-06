@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "26 April 2013" "PCRE 8.33"
+.TH PCREPATTERN 3 "06 September 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1577,9 +1577,20 @@ for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was.
 .P
 If you make a back reference to a non-unique named subpattern from elsewhere in
-the pattern, the one that corresponds to the first occurrence of the name is
-used. In the absence of duplicate numbers (see the previous section) this is
-the one with the lowest number. If you use a named reference in a condition
+the pattern, the subpatterns to which the name refers are checked in the order 
+in which they appear in the overall pattern. The first one that is set is used 
+for the reference. For example, this pattern matches both "foofoo" and 
+"barbar" but not "foobar" or "barfoo":
+.sp
+  (?:(?<n>foo)|(?<n>bar))\k<n>
+.sp
+.P
+If you make a subroutine call to a non-unique named subpattern, the one that
+corresponds to the first occurrence of the name is used. In the absence of
+duplicate numbers (see the previous section) this is the one with the lowest
+number.
+.P
+If you use a named reference in a condition
 test (see the
 .\"
 .\" HTML <a href="#conditions">
@@ -1599,8 +1610,9 @@ documentation.
 \fBWarning:\fP You cannot use different names to distinguish between two
 subpatterns with the same number because PCRE uses only the numbers when
 matching. For this reason, an error is given at compile time if different names
-are given to subpatterns with the same number. However, you can give the same
-name to subpatterns with the same number, even when PCRE_DUPNAMES is not set.
+are given to subpatterns with the same number. However, you can always give the
+same name to subpatterns with the same number, even when PCRE_DUPNAMES is not
+set.
 .
 .
 .SH REPETITION
@@ -3145,6 +3157,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 April 2013
+Last updated: 06 September 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

@@ -12734,4 +12734,38 @@ Error -21 (recursion limit exceeded)
     backgammon
  0: ba
 
+/(?|(?<n>f)|(?<n>b))/JI
+Capturing subpattern count = 1
+Named capturing subpatterns:
+  n   1
+Options: dupnames
+No first char
+No need char
+
+/(?<a>abc)(?<a>z)\k<a>()/JDZS
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        abc
+        Ket
+        CBra 2
+        z
+        Ket
+        \k<a>2
+        CBra 3
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 3
+Max back reference = 2
+Named capturing subpatterns:
+  a   1
+  a   2
+Options: dupnames
+First char = 'a'
+Need char = 'z'
+Subject length lower bound = 5
+No set of starting bytes
+
 /-- End of testinput2 --/

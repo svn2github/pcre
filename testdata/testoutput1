@@ -9204,4 +9204,30 @@ No match
  0: 
  0+ cd
 
+/(?:(?<n>foo)|(?<n>bar))\k<n>/J
+    foofoo
+ 0: foofoo
+ 1: foo
+    barbar
+ 0: barbar
+ 1: <unset>
+ 2: bar
+
+/(?<n>A)(?:(?<n>foo)|(?<n>bar))\k<n>/J
+    AfooA
+ 0: AfooA
+ 1: A
+ 2: foo
+    AbarA  
+ 0: AbarA
+ 1: A
+ 2: <unset>
+ 3: bar
+    ** Failers 
+No match
+    Afoofoo
+No match
+    Abarbar
+No match
+
 /-- End of testinput1 --/

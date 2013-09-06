@@ -3844,4 +3844,8 @@ backtracking verbs. --/
 /^(?=(a)){0}b(?1)/
     backgammon
 
+/(?|(?<n>f)|(?<n>b))/JI
+
+/(?<a>abc)(?<a>z)\k<a>()/JDZS
+
 /-- End of testinput2 --/

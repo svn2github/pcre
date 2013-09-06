@@ -598,6 +598,20 @@ for(;;)
     ccode = code + priv_OP_lengths[*code];
     goto CLASS_REF_REPEAT;
 
+    case OP_DNREFI:
+    flag = "/i";
+    /* Fall through */
+    case OP_DNREF:
+      {
+      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) + 
+        IMM2_SIZE;  
+      fprintf(f, " %s \\k<", flag);
+      print_puchar(f, entry);
+      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE)); 
+      }
+    ccode = code + priv_OP_lengths[*code];
+    goto CLASS_REF_REPEAT;
+
     case OP_CALLOUT:
     fprintf(f, "    %s %d %d %d", priv_OP_names[*code], code[1], GET(code,2),
       GET(code, 2 + LINK_SIZE));

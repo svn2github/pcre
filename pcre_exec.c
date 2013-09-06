@@ -2742,15 +2742,7 @@ for (;;)
     similar code to character type repeats - written out again for speed.
     However, if the referenced string is the empty string, always treat
     it as matched, any number of times (otherwise there could be infinite
-    loops). */
-
-    case OP_REF:
-    case OP_REFI:
-    caseless = op == OP_REFI;
-    offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
-    ecode += 1 + IMM2_SIZE;
-
-    /* If the reference is unset, there are two possibilities:
+    loops). If the reference is unset, there are two possibilities:
 
     (a) In the default, Perl-compatible state, set the length negative;
     this ensures that every attempt at a match fails. We can't just fail
@@ -2760,7 +2752,40 @@ for (;;)
     so that the back reference matches an empty string.
 
     Otherwise, set the length to the length of what was matched by the
-    referenced subpattern. */
+    referenced subpattern.
+    
+    The OP_REF and OP_REFI opcodes are used for a reference to a numbered group 
+    or to a non-duplicated named group. For a duplicated named group, OP_DNREF 
+    and OP_DNREFI are used. In this case we must scan the list of groups to 
+    which the name refers, and use the first one that is set. */
+    
+    case OP_DNREF:
+    case OP_DNREFI:
+    caseless = op == OP_DNREFI;
+      {
+      int count = GET2(ecode, 1+IMM2_SIZE); 
+      pcre_uchar *slot = md->name_table + GET2(ecode, 1) * md->name_entry_size;
+      ecode += 1 + 2*IMM2_SIZE;
+      
+      while (count-- > 0)
+        {
+        offset = GET2(slot, 0) << 1;
+        if (offset < offset_top && md->offset_vector[offset] >= 0) break;
+        slot += md->name_entry_size;
+        }
+      if (count < 0)     
+        length = (md->jscript_compat)? 0 : -1;
+      else
+        length = md->offset_vector[offset+1] - md->offset_vector[offset];
+      }
+    goto REF_REPEAT;
+
+    case OP_REF:
+    case OP_REFI:
+    caseless = op == OP_REFI;
+    offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
+    ecode += 1 + IMM2_SIZE;
+
 
     if (offset >= offset_top || md->offset_vector[offset] < 0)
       length = (md->jscript_compat)? 0 : -1;
@@ -2769,6 +2794,7 @@ for (;;)
 
     /* Set up for repetition, or handle the non-repeated case */
 
+    REF_REPEAT:
     switch (*ecode)
       {
       case OP_CRSTAR:

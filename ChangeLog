@@ -74,6 +74,11 @@ Version 8.34 xx-xxxx-201x
     compile happens. This has simplified the code (it is now nearly 150 lines
     shorter) and prepared the way for better handling of references to groups 
     with duplicate names.
+    
+15. A back reference to a named subpattern when there is more than one of the 
+    same name now checks them in the order in which they appear in the pattern. 
+    The first one that is set is used for the reference. Previously only the 
+    first one was inspected. This change makes PCRE more compatible with Perl. 
 
 
 Version 8.33 28-May-2013
