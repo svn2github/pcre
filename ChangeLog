@@ -80,6 +80,7 @@ Version 8.34 xx-xxxx-201x
     The first one that is set is used for the reference. Previously only the 
     first one was inspected. This change makes PCRE more compatible with Perl. 
 
+16. Unicode character properties were updated from Unicode 6.3.0.
 
 Version 8.33 28-May-2013
 ------------------------

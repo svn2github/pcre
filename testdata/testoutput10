@@ -255,6 +255,18 @@ No match
 /^\p{Cf}/8
     \x{601}
  0: \x{601}
+    \x{180e}
+ 0: \x{180e}
+    \x{061c}
+ 0: \x{61c}
+    \x{2066}
+ 0: \x{2066}
+    \x{2067}
+ 0: \x{2067}
+    \x{2068}
+ 0: \x{2068}
+    \x{2069}
+ 0: \x{2069}
     ** Failers
 No match
     \x{09f} 
@@ -353,6 +365,8 @@ No match
 /^\p{Mn}/8
     \x{300}
  0: \x{300}
+    \x{1a1b}
+ 0: \x{1a1b}
     ** Failers
 No match
     X
@@ -466,6 +480,10 @@ No match
  0: }
     \x{f3b}
  0: \x{f3b}
+    \x{2309}
+ 0: \x{2309}
+    \x{230b}
+ 0: \x{230b}
     ** Failers
 No match
     X
@@ -480,7 +498,7 @@ No match
 No match
     \x{f3c}
 No match
-  
+
 /^\p{Pf}/8
     \x{bb}
  0: \x{bb}
@@ -526,6 +544,10 @@ No match
  0: {
     \x{f3c}
  0: \x{f3c}
+    \x{2308}
+ 0: \x{2308}
+    \x{230a}
+ 0: \x{230a}
     ** Failers
 No match
     X
@@ -619,8 +641,6 @@ No match
  0: \x{a0}
     \x{1680}
  0: \x{1680}
-    \x{180e}
- 0: \x{180e}
     \x{2000}
  0: \x{2000}
     \x{2001}     

@@ -419,6 +419,7 @@
 /^[\p{Arabic}]/8
     \x{06e9}
     \x{060b}
+    \x{061c}
     ** Failers
     X\x{06e9}   
 
