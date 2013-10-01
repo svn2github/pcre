@@ -1174,7 +1174,8 @@ time, run time, or study time, respectively. */
 #define PUBLIC_COMPILE_OPTIONS \
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8| \
-   PCRE_NO_AUTO_CAPTURE|PCRE_NO_UTF8_CHECK|PCRE_AUTO_CALLOUT|PCRE_FIRSTLINE| \
+   PCRE_NO_AUTO_CAPTURE|PCRE_NO_AUTO_POSSESSIFY| \
+   PCRE_NO_UTF8_CHECK|PCRE_AUTO_CALLOUT|PCRE_FIRSTLINE| \
    PCRE_DUPNAMES|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
    PCRE_JAVASCRIPT_COMPAT|PCRE_UCP|PCRE_NO_START_OPTIMIZE|PCRE_NEVER_UTF)
 
@@ -1852,6 +1853,7 @@ only. */
 #define PT_WORD       8    /* Word - L plus N plus underscore */
 #define PT_CLIST      9    /* Pseudo-property: match character list */
 #define PT_UCNC      10    /* Universal Character nameable character */
+#define PT_TABSIZE   11    /* Size of square table for autopossessify tests */
 
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
@@ -1891,12 +1893,30 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_E, ESC_Q, ESC_g, ESC_k,
        ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu };
 
-/* Opcode table: Starting from 1 (i.e. after OP_END), the values up to
-OP_EOD must correspond in order to the list of escapes immediately above.
+/* Opcode table */
 
-*** NOTE NOTE NOTE *** Whenever this list is updated, the two macro definitions
-that follow must also be updated to match. There are also tables called
-"coptable" and "poptable" in pcre_dfa_exec.c that must be updated. */
+
+/****** NOTE NOTE NOTE ****** 
+
+Starting from 1 (i.e. after OP_END), the values up to OP_EOD must correspond in
+order to the list of escapes immediately above. Furthermore, values up to
+OP_DOLLM must not be changed without adjusting the table called autoposstab in
+pcre_compile.c
+
+Whenever this list is updated, the two macro definitions that follow must also
+be updated to match. There are also tables called "coptable" and "poptable" in
+pcre_dfa_exec.c that must be updated.
+
+****** NOTE NOTE NOTE ******/
+
+
+/* The values between FIRST_AUTOTAB_OP and LAST_AUTOTAB_RIGHT_OP, inclusive,
+are used in a table for deciding whether a repeated character type can be
+auto-possessified. */
+
+#define FIRST_AUTOTAB_OP       OP_NOT_DIGIT
+#define LAST_AUTOTAB_LEFT_OP   OP_EXTUNI
+#define LAST_AUTOTAB_RIGHT_OP  OP_DOLLM
 
 enum {
   OP_END,            /* 0 End of pattern */
@@ -1928,11 +1948,16 @@ enum {
   OP_EXTUNI,         /* 22 \X (extended Unicode sequence */
   OP_EODN,           /* 23 End of data or \n at end of data (\Z) */
   OP_EOD,            /* 24 End of data (\z) */
+  
+  /* Line end assertions */
 
-  OP_CIRC,           /* 25 Start of line - not multiline */
-  OP_CIRCM,          /* 26 Start of line - multiline */
-  OP_DOLL,           /* 27 End of line - not multiline */
-  OP_DOLLM,          /* 28 End of line - multiline */
+  OP_DOLL,           /* 25 End of line - not multiline */
+  OP_DOLLM,          /* 26 End of line - multiline */
+  OP_CIRC,           /* 27 Start of line - not multiline */
+  OP_CIRCM,          /* 28 Start of line - multiline */
+  
+  /* Single characters; caseful must precede the caseless ones */
+   
   OP_CHAR,           /* 29 Match one character, casefully */
   OP_CHARI,          /* 30 Match one character, caselessly */
   OP_NOT,            /* 31 Match one character, not the given one, casefully */
@@ -1941,7 +1966,7 @@ enum {
   /* The following sets of 13 opcodes must always be kept in step because
   the offset from the first one is used to generate the others. */
 
-  /**** Single characters, caseful, must precede the caseless ones ****/
+  /* Repeated characters; caseful must precede the caseless ones */
 
   OP_STAR,           /* 33 The maximizing and minimizing versions of */
   OP_MINSTAR,        /* 34 these six opcodes must come in pairs, with */
@@ -1959,7 +1984,7 @@ enum {
   OP_POSQUERY,       /* 44 Posesssified query, caseful */
   OP_POSUPTO,        /* 45 Possessified upto, caseful */
 
-  /**** Single characters, caseless, must follow the caseful ones */
+  /* Repeated characters; caseless must follow the caseful ones */
 
   OP_STARI,          /* 46 */
   OP_MINSTARI,       /* 47 */
@@ -1977,8 +2002,8 @@ enum {
   OP_POSQUERYI,      /* 57 Posesssified query, caseless */
   OP_POSUPTOI,       /* 58 Possessified upto, caseless */
 
-  /**** The negated ones must follow the non-negated ones, and match them ****/
-  /**** Negated single character, caseful; must precede the caseless ones ****/
+  /* The negated ones must follow the non-negated ones, and match them */
+  /* Negated repeated character, caseful; must precede the caseless ones */
 
   OP_NOTSTAR,        /* 59 The maximizing and minimizing versions of */
   OP_NOTMINSTAR,     /* 60 these six opcodes must come in pairs, with */
@@ -1996,7 +2021,7 @@ enum {
   OP_NOTPOSQUERY,    /* 70 */
   OP_NOTPOSUPTO,     /* 71 */
 
-  /**** Negated single character, caseless; must follow the caseful ones ****/
+  /* Negated repeated character, caseless; must follow the caseful ones */
 
   OP_NOTSTARI,       /* 72 */
   OP_NOTMINSTARI,    /* 73 */
@@ -2014,7 +2039,7 @@ enum {
   OP_NOTPOSQUERYI,   /* 83 */
   OP_NOTPOSUPTOI,    /* 84 */
 
-  /**** Character types ****/
+  /* Character types */
 
   OP_TYPESTAR,       /* 85 The maximizing and minimizing versions of */
   OP_TYPEMINSTAR,    /* 86 these six opcodes must come in pairs, with */
@@ -2055,8 +2080,8 @@ enum {
                               class. This does both positive and negative. */
   OP_REF,            /* 109 Match a back reference, casefully */
   OP_REFI,           /* 110 Match a back reference, caselessly */
-  OP_DNREF,          /* 111 Match a duplicate name backref, casefully */ 
-  OP_DNREFI,         /* 112 Match a duplicate name backref, caselessly */ 
+  OP_DNREF,          /* 111 Match a duplicate name backref, casefully */
+  OP_DNREFI,         /* 112 Match a duplicate name backref, caselessly */
   OP_RECURSE,        /* 113 Match a numbered subpattern (possibly recursive) */
   OP_CALLOUT,        /* 114 Call out to external function if provided */
 
@@ -2153,7 +2178,7 @@ some cases doesn't actually use these names at all). */
   "\\S", "\\s", "\\W", "\\w", "Any", "AllAny", "Anybyte",         \
   "notprop", "prop", "\\R", "\\H", "\\h", "\\V", "\\v",           \
   "extuni",  "\\Z", "\\z",                                        \
-  "^", "^", "$", "$", "char", "chari", "not", "noti",             \
+  "$", "$", "^", "^", "char", "chari", "not", "noti",             \
   "*", "*?", "+", "+?", "?", "??",                                \
   "{", "{", "{",                                                  \
   "*+","++", "?+", "{",                                           \
@@ -2203,7 +2228,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   3, 3,                          /* \P, \p                                 */ \
   1, 1, 1, 1, 1,                 /* \R, \H, \h, \V, \v                     */ \
   1,                             /* \X                                     */ \
-  1, 1, 1, 1, 1, 1,              /* \Z, \z, ^, ^M, $, $M                   */ \
+  1, 1, 1, 1, 1, 1,              /* \Z, \z, $, $M ^, ^M                    */ \
   2,                             /* Char  - the minimum length             */ \
   2,                             /* Chari  - the minimum length            */ \
   2,                             /* not                                    */ \
@@ -2411,14 +2436,14 @@ typedef struct open_capitem {
   pcre_uint16 flag;             /* Set TRUE if recursive back ref */
 } open_capitem;
 
-/* Structure for building a list of named groups during the first pass of 
+/* Structure for building a list of named groups during the first pass of
 compiling. */
 
 typedef struct named_group {
   const pcre_uchar  *name;          /* Points to the name in the pattern */
   int                length;        /* Length of the name */
   pcre_uint32        number;        /* Group number */
-} named_group;    
+} named_group;
 
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
@@ -2438,14 +2463,14 @@ typedef struct compile_data {
   pcre_uchar *name_table;           /* The name/number table */
   int  names_found;                 /* Number of entries so far */
   int  name_entry_size;             /* Size of each entry */
-  int  named_group_list_size;       /* Number of entries in the list */ 
+  int  named_group_list_size;       /* Number of entries in the list */
   int  workspace_size;              /* Size of workspace */
   unsigned int bracount;            /* Count of capturing parens as we compile */
   int  final_bracount;              /* Saved value after first pass */
   int  max_lookbehind;              /* Maximum lookbehind (characters) */
   int  top_backref;                 /* Maximum back reference */
   unsigned int backref_map;         /* Bitmap of low back refs */
-  unsigned int namedrefcount;       /* Number of backreferences by name */ 
+  unsigned int namedrefcount;       /* Number of backreferences by name */
   int  assert_depth;                /* Depth of nested assertions */
   pcre_uint32 external_options;     /* External (initial) options */
   pcre_uint32 external_flags;       /* External flag bits to be set */

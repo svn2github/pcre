@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "27 August 2013" "PCRE 8.34"
+.TH PCRETEST 1 "01 October 2013" "PCRE 8.34"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -154,6 +154,10 @@ calling \fBpcre[16|32]_exec()\fP repeatedly with different limits.
 Output the size of each compiled pattern after it has been compiled. This is
 equivalent to adding \fB/M\fP to each regular expression. The size is given in
 bytes for both libraries.
+.TP 10
+\fB-O\fP
+Behave as if each pattern has the \fB/O\fP modifier, that is disable 
+auto-possessification for all patterns. 
 .TP 10
 \fB-o\fP \fIosize\fP
 Set the number of elements in the output vector that is used when calling
@@ -324,6 +328,7 @@ sections.
   \fB/M\fP              show compiled memory size
   \fB/m\fP              set PCRE_MULTILINE
   \fB/N\fP              set PCRE_NO_AUTO_CAPTURE
+  \fB/O\fP              set PCRE_NO_AUTO_POSSESSIFY 
   \fB/P\fP              use the POSIX wrapper
   \fB/S\fP              study the pattern after compilation
   \fB/s\fP              set PCRE_DOTALL
@@ -380,6 +385,7 @@ options that do not correspond to anything in Perl:
   \fB/f\fP              PCRE_FIRSTLINE
   \fB/J\fP              PCRE_DUPNAMES
   \fB/N\fP              PCRE_NO_AUTO_CAPTURE
+  \fB/O\fP              PCRE_NO_AUTO_POSSESSIFY 
   \fB/U\fP              PCRE_UNGREEDY
   \fB/W\fP              PCRE_UCP
   \fB/X\fP              PCRE_EXTRA
@@ -512,8 +518,8 @@ expression has been compiled, and the results used when the expression is
 matched. There are a number of qualifying characters that may follow \fB/S\fP.
 They may appear in any order.
 .P
-If \fBS\fP is followed by an exclamation mark, \fBpcre[16|32]_study()\fP is called
-with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a
+If \fB/S\fP is followed by an exclamation mark, \fBpcre[16|32]_study()\fP is
+called with the PCRE_STUDY_EXTRA_NEEDED option, causing it always to return a
 \fBpcre_extra\fP block, even when studying discovers no useful information.
 .P
 If \fB/S\fP is followed by a second S character, it suppresses studying, even
@@ -1098,6 +1104,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 27 August 2013
+Last updated: 01 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

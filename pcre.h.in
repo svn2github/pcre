@@ -150,7 +150,10 @@ with J. */
 #define PCRE_NEVER_UTF          0x00010000  /* C1        ) Overlaid */
 #define PCRE_DFA_SHORTEST       0x00010000  /*      D    ) Overlaid */
 
-#define PCRE_DFA_RESTART        0x00020000  /*      D   */
+/* This pair use the same big. */
+#define PCRE_NO_AUTO_POSSESSIFY 0x00020000  /* C1        ) Overlaid */
+#define PCRE_DFA_RESTART        0x00020000  /*      D    ) Overlaid */
+
 #define PCRE_FIRSTLINE          0x00040000  /* C3       */
 #define PCRE_DUPNAMES           0x00080000  /* C1       */
 #define PCRE_NEWLINE_CR         0x00100000  /* C3 E D   */

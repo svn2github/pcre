@@ -105,7 +105,7 @@ Memory allocation (code space): 19
   0  15 Bra
   3   9 Once
   6     x
-  8     x{0,2}
+  8     x{0,2}+
  12   9 Ket
  15  15 Ket
  18     End
@@ -139,7 +139,7 @@ Memory allocation (code space): 120
  66     [bc]+
 100  39 Ket
 103   7 CBra 5
-108     \w*
+108     \w*+
 110   7 Ket
 113 109 Ket
 116 116 Ket

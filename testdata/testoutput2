@@ -2898,7 +2898,7 @@ No need char
         Bra
         Once
         x
-        x{0,2}
+        x{0,2}+
         Ket
         Ket
         End
@@ -3088,7 +3088,7 @@ Need char = 'b'
         [bc]+
         Ket
         CBra 5
-        \w*
+        \w*+
         Ket
         Ket
         Ket
@@ -3787,12 +3787,6 @@ Need char = 'b'
     abbbbbccc\C*1
 --->abbbbbccc
   1 ^        ^    
-Callout data = 1
-  1 ^       ^     
-Callout data = 1
-  1 ^      ^      
-Callout data = 1
-  1 ^     ^       
 Callout data = 1
   1 ^    ^        
 Callout data = 1
@@ -7516,7 +7510,7 @@ Matched, but too many substrings
 /a*[^a]/BZ
 ------------------------------------------------------------------
         Bra
-        a*
+        a*+
         [^a]
         Ket
         End
@@ -8596,7 +8590,7 @@ No match
         \d
         \v++
         \w
-        \v+
+        \v++
         \S
         \v++
         \V
@@ -8694,27 +8688,18 @@ No match
  +6 ^      ^    (*FAIL)
  +6 ^     ^     (*FAIL)
  +6 ^    ^      (*FAIL)
- +4 ^  ^        c+
- +2 ^ ^         b?
- +4 ^ ^         c+
- +2 ^^          b?
- +4 ^^          c+
  +0  ^          a+
  +2  ^ ^        b?
  +4  ^  ^       c+
  +6  ^     ^    (*FAIL)
  +6  ^    ^     (*FAIL)
  +6  ^   ^      (*FAIL)
- +4  ^ ^        c+
- +2  ^^         b?
- +4  ^^         c+
  +0   ^         a+
  +2   ^^        b?
  +4   ^ ^       c+
  +6   ^    ^    (*FAIL)
  +6   ^   ^     (*FAIL)
  +6   ^  ^      (*FAIL)
- +4   ^^        c+
 No match
 
 /a+b?(*PRUNE)c+(*FAIL)/C
@@ -11577,7 +11562,7 @@ Matched, but too many substrings
         Assert not
         a
         Ket
-        \w+
+        \w++
         Ket
         End
 ------------------------------------------------------------------
@@ -11837,14 +11822,14 @@ No match
 
 /^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
      \Maabbccddee
-Minimum match() limit = 12
+Minimum match() limit = 11
 Minimum match() recursion limit = 3
  0: aabbccddee
 
 /^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
      \Maabbccddee
-Minimum match() limit = 22
-Minimum match() recursion limit = 21
+Minimum match() limit = 21
+Minimum match() recursion limit = 20
  0: aabbccddee
  1: aa
  2: bb
@@ -11854,8 +11839,8 @@ Minimum match() recursion limit = 21
 
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      \Maabbccddee
-Minimum match() limit = 18
-Minimum match() recursion limit = 13
+Minimum match() limit = 17
+Minimum match() recursion limit = 12
  0: aabbccddee
  1: aa
  2: cc
@@ -12767,5 +12752,765 @@ First char = 'a'
 Need char = 'z'
 Subject length lower bound = 5
 No set of starting bytes
+
+/a*[bcd]/BZ
+------------------------------------------------------------------
+        Bra
+        a*+
+        [b-d]
+        Ket
+        End
+------------------------------------------------------------------
+
+/[bcd]*a/BZ
+------------------------------------------------------------------
+        Bra
+        [b-d]*
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/-- A complete set of tests for auto-possessification of character types --/
+
+/\D+\D \D+\d \D+\S \D+\s \D+\W \D+\w \D+. \D+\C \D+\R \D+\H \D+\h \D+\V \D+\v \D+\X \D+\Z \D+\z \D+$/BZx
+------------------------------------------------------------------
+        Bra
+        \D+
+        \D
+        \D++
+        \d
+        \D+
+        \S
+        \D+
+        \s
+        \D+
+        \W
+        \D+
+        \w
+        \D+
+        Any
+        \D+
+        AllAny
+        \D+
+        \R
+        \D+
+        \H
+        \D+
+        \h
+        \D+
+        \V
+        \D+
+        \v
+        \D+
+        extuni
+        \D+
+        \Z
+        \D++
+        \z
+        \D+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\d+\D \d+\d \d+\S \d+\s \d+\W \d+\w \d+. \d+\C \d+\R \d+\H \d+\h \d+\V \d+\v \d+\X \d+\Z \d+\z \d+$/BZx
+------------------------------------------------------------------
+        Bra
+        \d++
+        \D
+        \d+
+        \d
+        \d+
+        \S
+        \d++
+        \s
+        \d++
+        \W
+        \d+
+        \w
+        \d+
+        Any
+        \d+
+        AllAny
+        \d++
+        \R
+        \d+
+        \H
+        \d++
+        \h
+        \d+
+        \V
+        \d++
+        \v
+        \d+
+        extuni
+        \d++
+        \Z
+        \d++
+        \z
+        \d++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\S+\D \S+\d \S+\S \S+\s \S+\W \S+\w \S+. \S+\C \S+\R \S+\H \S+\h \S+\V \S+\v \S+\X \S+\Z \S+\z \S+$/BZx
+------------------------------------------------------------------
+        Bra
+        \S+
+        \D
+        \S+
+        \d
+        \S+
+        \S
+        \S++
+        \s
+        \S+
+        \W
+        \S+
+        \w
+        \S+
+        Any
+        \S+
+        AllAny
+        \S++
+        \R
+        \S+
+        \H
+        \S++
+        \h
+        \S+
+        \V
+        \S++
+        \v
+        \S+
+        extuni
+        \S++
+        \Z
+        \S++
+        \z
+        \S++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\s+\D \s+\d \s+\S \s+\s \s+\W \s+\w \s+. \s+\C \s+\R \s+\H \s+\h \s+\V \s+\v \s+\X \s+\Z \s+\z \s+$/BZx
+------------------------------------------------------------------
+        Bra
+        \s+
+        \D
+        \s++
+        \d
+        \s++
+        \S
+        \s+
+        \s
+        \s+
+        \W
+        \s++
+        \w
+        \s+
+        Any
+        \s+
+        AllAny
+        \s+
+        \R
+        \s+
+        \H
+        \s+
+        \h
+        \s+
+        \V
+        \s+
+        \v
+        \s+
+        extuni
+        \s+
+        \Z
+        \s++
+        \z
+        \s+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\W+\D \W+\d \W+\S \W+\s \W+\W \W+\w \W+. \W+\C \W+\R \W+\H \W+\h \W+\V \W+\v \W+\X \W+\Z \W+\z \W+$/BZx
+------------------------------------------------------------------
+        Bra
+        \W+
+        \D
+        \W++
+        \d
+        \W+
+        \S
+        \W+
+        \s
+        \W+
+        \W
+        \W++
+        \w
+        \W+
+        Any
+        \W+
+        AllAny
+        \W+
+        \R
+        \W+
+        \H
+        \W+
+        \h
+        \W+
+        \V
+        \W+
+        \v
+        \W+
+        extuni
+        \W+
+        \Z
+        \W++
+        \z
+        \W+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\w+\D \w+\d \w+\S \w+\s \w+\W \w+\w \w+. \w+\C \w+\R \w+\H \w+\h \w+\V \w+\v \w+\X \w+\Z \w+\z \w+$/BZx
+------------------------------------------------------------------
+        Bra
+        \w+
+        \D
+        \w+
+        \d
+        \w+
+        \S
+        \w++
+        \s
+        \w++
+        \W
+        \w+
+        \w
+        \w+
+        Any
+        \w+
+        AllAny
+        \w++
+        \R
+        \w+
+        \H
+        \w++
+        \h
+        \w+
+        \V
+        \w++
+        \v
+        \w+
+        extuni
+        \w++
+        \Z
+        \w++
+        \z
+        \w++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\C+\D \C+\d \C+\S \C+\s \C+\W \C+\w \C+. \C+\C \C+\R \C+\H \C+\h \C+\V \C+\v \C+\X \C+\Z \C+\z \C+$/BZx
+------------------------------------------------------------------
+        Bra
+        AllAny+
+        \D
+        AllAny+
+        \d
+        AllAny+
+        \S
+        AllAny+
+        \s
+        AllAny+
+        \W
+        AllAny+
+        \w
+        AllAny+
+        Any
+        AllAny+
+        AllAny
+        AllAny+
+        \R
+        AllAny+
+        \H
+        AllAny+
+        \h
+        AllAny+
+        \V
+        AllAny+
+        \v
+        AllAny+
+        extuni
+        AllAny+
+        \Z
+        AllAny++
+        \z
+        AllAny+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\R+\D \R+\d \R+\S \R+\s \R+\W \R+\w \R+. \R+\C \R+\R \R+\H \R+\h \R+\V \R+\v \R+\X \R+\Z \R+\z \R+$/BZx
+------------------------------------------------------------------
+        Bra
+        \R+
+        \D
+        \R++
+        \d
+        \R+
+        \S
+        \R++
+        \s
+        \R+
+        \W
+        \R++
+        \w
+        \R++
+        Any
+        \R+
+        AllAny
+        \R+
+        \R
+        \R+
+        \H
+        \R++
+        \h
+        \R+
+        \V
+        \R+
+        \v
+        \R+
+        extuni
+        \R+
+        \Z
+        \R++
+        \z
+        \R+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\H+\D \H+\d \H+\S \H+\s \H+\W \H+\w \H+. \H+\C \H+\R \H+\H \H+\h \H+\V \H+\v \H+\X \H+\Z \H+\z \H+$/BZx
+------------------------------------------------------------------
+        Bra
+        \H+
+        \D
+        \H+
+        \d
+        \H+
+        \S
+        \H+
+        \s
+        \H+
+        \W
+        \H+
+        \w
+        \H+
+        Any
+        \H+
+        AllAny
+        \H+
+        \R
+        \H+
+        \H
+        \H++
+        \h
+        \H+
+        \V
+        \H+
+        \v
+        \H+
+        extuni
+        \H+
+        \Z
+        \H++
+        \z
+        \H+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\h+\D \h+\d \h+\S \h+\s \h+\W \h+\w \h+. \h+\C \h+\R \h+\H \h+\h \h+\V \h+\v \h+\X \h+\Z \h+\z \h+$/BZx
+------------------------------------------------------------------
+        Bra
+        \h+
+        \D
+        \h++
+        \d
+        \h++
+        \S
+        \h+
+        \s
+        \h+
+        \W
+        \h++
+        \w
+        \h+
+        Any
+        \h+
+        AllAny
+        \h++
+        \R
+        \h++
+        \H
+        \h+
+        \h
+        \h+
+        \V
+        \h++
+        \v
+        \h+
+        extuni
+        \h+
+        \Z
+        \h++
+        \z
+        \h+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\V+\D \V+\d \V+\S \V+\s \V+\W \V+\w \V+. \V+\C \V+\R \V+\H \V+\h \V+\V \V+\v \V+\X \V+\Z \V+\z \V+$/BZx
+------------------------------------------------------------------
+        Bra
+        \V+
+        \D
+        \V+
+        \d
+        \V+
+        \S
+        \V+
+        \s
+        \V+
+        \W
+        \V+
+        \w
+        \V+
+        Any
+        \V+
+        AllAny
+        \V++
+        \R
+        \V+
+        \H
+        \V+
+        \h
+        \V+
+        \V
+        \V++
+        \v
+        \V+
+        extuni
+        \V+
+        \Z
+        \V++
+        \z
+        \V+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\v+\D \v+\d \v+\S \v+\s \v+\W \v+\w \v+. \v+\C \v+\R \v+\H \v+\h \v+\V \v+\v \v+\X \v+\Z \v+\z \v+$/BZx
+------------------------------------------------------------------
+        Bra
+        \v+
+        \D
+        \v++
+        \d
+        \v++
+        \S
+        \v+
+        \s
+        \v+
+        \W
+        \v++
+        \w
+        \v+
+        Any
+        \v+
+        AllAny
+        \v+
+        \R
+        \v+
+        \H
+        \v++
+        \h
+        \v++
+        \V
+        \v+
+        \v
+        \v+
+        extuni
+        \v+
+        \Z
+        \v++
+        \z
+        \v+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/BZx
+------------------------------------------------------------------
+        Bra
+        extuni+
+        \D
+        extuni+
+        \d
+        extuni+
+        \S
+        extuni+
+        \s
+        extuni+
+        \W
+        extuni+
+        \w
+        extuni+
+        Any
+        extuni+
+        AllAny
+        extuni+
+        \R
+        extuni+
+        \H
+        extuni+
+        \h
+        extuni+
+        \V
+        extuni+
+        \v
+        extuni+
+        extuni
+        extuni+
+        \Z
+        extuni++
+        \z
+        extuni+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ a+\D  a+\d  a+\S  a+\s  a+\W  a+\w  a+.  a+\C  a+\R  a+\H  a+\h  a+\V  a+\v  a+\X  a+\Z  a+\z  a+$/BZx
+------------------------------------------------------------------
+        Bra
+        a+
+        \D
+        a++
+        \d
+        a+
+        \S
+        a++
+        \s
+        a++
+        \W
+        a+
+        \w
+        a+
+        Any
+        a+
+        AllAny
+        a++
+        \R
+        a+
+        \H
+        a++
+        \h
+        a+
+        \V
+        a++
+        \v
+        a+
+        extuni
+        a++
+        \Z
+        a++
+        \z
+        a++
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\n+\D \n+\d \n+\S \n+\s \n+\W \n+\w \n+. \n+\C \n+\R \n+\H \n+\h \n+\V \n+\v \n+\X \n+\Z \n+\z \n+$/BZx
+------------------------------------------------------------------
+        Bra
+        \x0a+
+        \D
+        \x0a++
+        \d
+        \x0a++
+        \S
+        \x0a+
+        \s
+        \x0a+
+        \W
+        \x0a++
+        \w
+        \x0a+
+        Any
+        \x0a+
+        AllAny
+        \x0a+
+        \R
+        \x0a+
+        \H
+        \x0a++
+        \h
+        \x0a++
+        \V
+        \x0a+
+        \v
+        \x0a+
+        extuni
+        \x0a+
+        \Z
+        \x0a++
+        \z
+        \x0a+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\X  .+\Z  .+\z  .+$/BZx
+------------------------------------------------------------------
+        Bra
+        Any+
+        \D
+        Any+
+        \d
+        Any+
+        \S
+        Any+
+        \s
+        Any+
+        \W
+        Any+
+        \w
+        Any+
+        Any
+        Any+
+        AllAny
+        Any++
+        \R
+        Any+
+        \H
+        Any+
+        \h
+        Any+
+        \V
+        Any+
+        \v
+        Any+
+        extuni
+        Any+
+        \Z
+        Any++
+        \z
+        Any+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\X  .+\Z  .+\z  .+$/BZxs
+------------------------------------------------------------------
+        Bra
+        AllAny+
+        \D
+        AllAny+
+        \d
+        AllAny+
+        \S
+        AllAny+
+        \s
+        AllAny+
+        \W
+        AllAny+
+        \w
+        AllAny+
+        AllAny
+        AllAny+
+        AllAny
+        AllAny+
+        \R
+        AllAny+
+        \H
+        AllAny+
+        \h
+        AllAny+
+        \V
+        AllAny+
+        \v
+        AllAny+
+        extuni
+        AllAny+
+        \Z
+        AllAny++
+        \z
+        AllAny+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\D+$  \d+$  \S+$  \s+$  \W+$  \w+$  \C+$  \R+$  \H+$  \h+$  \V+$  \v+$  \X+$   a+$  \n+$   .+$  .+$/BZxm
+------------------------------------------------------------------
+        Bra
+        \D+
+     /m $
+        \d++
+     /m $
+        \S++
+     /m $
+        \s+
+     /m $
+        \W+
+     /m $
+        \w++
+     /m $
+        AllAny+
+     /m $
+        \R+
+     /m $
+        \H+
+     /m $
+        \h+
+     /m $
+        \V+
+     /m $
+        \v+
+     /m $
+        extuni+
+     /m $
+        a+
+     /m $
+        \x0a+
+     /m $
+        Any+
+     /m $
+        Any+
+     /m $
+        Ket
+        End
+------------------------------------------------------------------
+
+/-- End of special auto-possessive tests --/
 
 /-- End of testinput2 --/

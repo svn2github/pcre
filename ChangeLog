@@ -82,6 +82,13 @@ Version 8.34 xx-xxxx-201x
 
 16. Unicode character properties were updated from Unicode 6.3.0.
 
+17. The compile-time code for auto-possessification has been refactored, based 
+    on a patch by Zoltan Herczeg. It now happens after instead of during 
+    compilation. The code is cleaner, and more cases are handled. The option 
+    PCRE_NO_AUTO_POSSESSIFY is added for testing purposes, and the -O and /O 
+    options in pcretest are provided to set it.
+
+
 Version 8.33 28-May-2013
 ------------------------
 

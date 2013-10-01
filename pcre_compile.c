@@ -115,9 +115,9 @@ kicks in at the same number of forward references in all cases. */
 #define COMPILE_WORK_SIZE (2048*LINK_SIZE)
 #define COMPILE_WORK_SIZE_MAX (100*COMPILE_WORK_SIZE)
 
-/* This value determines the size of the initial vector that is used for 
-remembering named groups during the pre-compile. It is allocated on the stack, 
-but if it is too small, it is expanded using malloc(), in a similar way to the 
+/* This value determines the size of the initial vector that is used for
+remembering named groups during the pre-compile. It is allocated on the stack,
+but if it is too small, it is expanded using malloc(), in a similar way to the
 workspace. The value is the number of slots in the list. */
 
 #define NAMED_GROUP_LIST_SIZE  20
@@ -655,6 +655,125 @@ static const pcre_uint8 ebcdic_chartab[] = { /* chartable partial dup */
 #endif
 
 
+/* This table is used to check whether auto-possessification is possible
+between adjacent character-type opcodes. The left-hand (repeated) opcode is
+used to select the row, and the right-hand opcode is use to select the column.
+A value of 1 means that auto-possessification is OK. For example, the second
+value in the first row means that \D+\d can be turned into \D++\d.
+
+The Unicode property types (\P and \p) have to be present to fill out the table
+because of what their opcode values are, but the table values should always be
+zero because property types are handled separately in the code. The last four
+columns apply to items that cannot be repeated, so there is no need to have
+rows for them. Note that OP_DIGIT etc. are generated only when PCRE_UCP is
+*not* set. When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
+
+#define APTROWS (LAST_AUTOTAB_LEFT_OP - FIRST_AUTOTAB_OP + 1)
+#define APTCOLS (LAST_AUTOTAB_RIGHT_OP - FIRST_AUTOTAB_OP + 1)
+
+static const pcre_uint8 autoposstab[APTROWS][APTCOLS] = {
+/* \D \d \S \s \W \w  . .+ \C \P \p \R \H \h \V \v \X \Z \z  $ $M */
+  { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \D */
+  { 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \d */
+  { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \S */
+  { 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \s */
+  { 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \W */
+  { 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1 },  /* \w */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* .  */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* .+ */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },  /* \C */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* \P */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* \p */
+  { 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },  /* \R */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },  /* \H */
+  { 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0 },  /* \h */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0 },  /* \V */
+  { 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0 },  /* \v */
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }   /* \X */
+};
+
+
+/* This table is used to check whether auto-possessification is possible
+between adjacent Unicode property opcodes (OP_PROP and OP_NOTPROP). The
+left-hand (repeated) opcode is used to select the row, and the right-hand
+opcode is used to select the column. The values are as follows:
+
+  0   Always return FALSE (never auto-possessify)
+  1   Character groups are distinct (possessify if both are OP_PROP)
+  2   Check character categories in the same group (general or particular)
+  3   TRUE if the two opcodes are not the same (PROP vs NOTPROP)
+
+  4   Check left general category vs right particular category
+  5   Check right general category vs left particular category
+
+  6   Left alphanum vs right general category
+  7   Left space vs right general category
+  8   Left word vs right general category
+
+  9   Right alphanum vs left general category
+ 10   Right space vs left general category
+ 11   Right word vs left general category
+
+ 12   Left alphanum vs right particular category
+ 13   Left space vs right particular category
+ 14   Left word vs right particular category
+
+ 15   Right alphanum vs left particular category
+ 16   Right space vs left particular category
+ 17   Right word vs left particular category
+*/
+
+static const pcre_uint8 propposstab[PT_TABSIZE][PT_TABSIZE] = {
+/* ANY LAMP GC  PC  SC ALNUM SPACE PXSPACE WORD CLIST UCNC */
+  { 0,  0,  0,  0,  0,    0,    0,      0,   0,    0,   0 },  /* PT_ANY */
+  { 0,  3,  0,  0,  0,    3,    1,      1,   0,    0,   0 },  /* PT_LAMP */
+  { 0,  0,  2,  4,  0,    9,   10,     10,  11,    0,   0 },  /* PT_GC */
+  { 0,  0,  5,  2,  0,   15,   16,     16,  17,    0,   0 },  /* PT_PC */
+  { 0,  0,  0,  0,  2,    0,    0,      0,   0,    0,   0 },  /* PT_SC */
+  { 0,  3,  6, 12,  0,    3,    1,      1,   0,    0,   0 },  /* PT_ALNUM */
+  { 0,  1,  7, 13,  0,    1,    3,      3,   1,    0,   0 },  /* PT_SPACE */
+  { 0,  1,  7, 13,  0,    1,    3,      3,   1,    0,   0 },  /* PT_PXSPACE */
+  { 0,  0,  8, 14,  0,    0,    1,      1,   3,    0,   0 },  /* PT_WORD */
+  { 0,  0,  0,  0,  0,    0,    0,      0,   0,    0,   0 },  /* PT_CLIST */
+  { 0,  0,  0,  0,  0,    0,    0,      0,   0,    0,   3 }   /* PT_UCNC */
+};
+
+/* This table is used to check whether auto-possessification is possible
+between adjacent Unicode property opcodes (OP_PROP and OP_NOTPROP) when one
+specifies a general category and the other specifies a particular category. The
+row is selected by the general category and the column by the particular
+category. The value is 1 if the particular category is not part of the general
+category. */
+
+static const pcre_uint8 catposstab[7][30] = {
+/* Cc Cf Cn Co Cs Ll Lm Lo Lt Lu Mc Me Mn Nd Nl No Pc Pd Pe Pf Pi Po Ps Sc Sk Sm So Zl Zp Zs */
+  { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* C */
+  { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* L */
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* M */
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },  /* N */
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 },  /* P */
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1 },  /* S */
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 }   /* Z */
+};
+
+/* This table is used when checking ALNUM, (PX)SPACE, SPACE, and WORD against
+a general or particular category. The properties in each row are those
+that apply to the character set in question. Duplication means that a little
+unnecessary work is done when checking, but this keeps things much simpler
+because they can all use the same code. For more details see the comment where
+this table is used.
+
+Note: SPACE and PXSPACE used to be different because Perl excluded VT from
+"space", but from Perl 5.18 it's included, so both categories are treated the
+same here. */
+
+static const pcre_uint8 posspropstab[3][4] = {
+  { ucp_L, ucp_N, ucp_N, ucp_Nl },  /* ALNUM, 3rd and 4th values redundant */
+  { ucp_Z, ucp_Z, ucp_C, ucp_Cc },  /* SPACE and PXSPACE, 2nd value redundant */
+  { ucp_L, ucp_N, ucp_P, ucp_Po }   /* WORD */
+};
+
+
 
 /*************************************************
 *            Find an error text                  *
@@ -680,6 +799,7 @@ for (; n > 0; n--)
   }
 return s;
 }
+
 
 
 /*************************************************
@@ -1199,6 +1319,8 @@ if ((options & PCRE_UCP) != 0 && escape >= ESC_D && escape <= ESC_w)
 return escape;
 }
 
+
+
 #ifdef SUPPORT_UCP
 /*************************************************
 *               Handle \P and \p                 *
@@ -1293,7 +1415,6 @@ ERROR_RETURN:
 return FALSE;
 }
 #endif
-
 
 
 
@@ -1416,7 +1537,6 @@ for (;;)
   }
 /* Control never reaches here */
 }
-
 
 
 
@@ -1757,7 +1877,6 @@ for (;;)
   }
 /* Control never gets here */
 }
-
 
 
 
@@ -2462,6 +2581,851 @@ return TRUE;
 
 
 /*************************************************
+*        Base opcode of repeated opcodes         *
+*************************************************/
+
+/* Returns the base opcode for repeated single character type opcodes. If the
+opcode is not a repeated character type, it returns with the original value.
+
+Arguments:  c opcode
+Returns:    base opcode for the type
+*/
+
+static pcre_uchar
+get_repeat_base(pcre_uchar c)
+{
+return (c > OP_TYPEPOSUPTO)? c :
+       (c >= OP_TYPESTAR)?   OP_TYPESTAR :
+       (c >= OP_NOTSTARI)?   OP_NOTSTARI :
+       (c >= OP_NOTSTAR)?    OP_NOTSTAR :
+       (c >= OP_STARI)?      OP_STARI :
+                             OP_STAR;
+}
+
+
+
+#ifdef SUPPORT_UCP
+/*************************************************
+*        Check a character and a property        *
+*************************************************/
+
+/* This function is called by check_auto_possessive() when a property item
+is adjacent to a fixed character.
+
+Arguments:
+  c            the character
+  ptype        the property type
+  pdata        the data for the type
+  negated      TRUE if it's a negated property (\P or \p{^)
+
+Returns:       TRUE if auto-possessifying is OK
+*/
+
+static BOOL
+check_char_prop(pcre_uint32 c, unsigned int ptype, unsigned int pdata,
+  BOOL negated)
+{
+const pcre_uint32 *p;
+const ucd_record *prop = GET_UCD(c);
+
+switch(ptype)
+  {
+  case PT_LAMP:
+  return (prop->chartype == ucp_Lu ||
+          prop->chartype == ucp_Ll ||
+          prop->chartype == ucp_Lt) == negated;
+
+  case PT_GC:
+  return (pdata == PRIV(ucp_gentype)[prop->chartype]) == negated;
+
+  case PT_PC:
+  return (pdata == prop->chartype) == negated;
+
+  case PT_SC:
+  return (pdata == prop->script) == negated;
+
+  /* These are specials */
+
+  case PT_ALNUM:
+  return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
+          PRIV(ucp_gentype)[prop->chartype] == ucp_N) == negated;
+
+  case PT_SPACE:    /* Perl space */
+  return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
+          c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
+          == negated;
+
+  case PT_PXSPACE:  /* POSIX space */
+  return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
+          c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
+          c == CHAR_FF || c == CHAR_CR)
+          == negated;
+
+  case PT_WORD:
+  return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
+          PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
+          c == CHAR_UNDERSCORE) == negated;
+
+  case PT_CLIST:
+  p = PRIV(ucd_caseless_sets) + prop->caseset;
+  for (;;)
+    {
+    if (c < *p) return !negated;
+    if (c == *p++) return negated;
+    }
+  break;  /* Control never reaches here */
+  }
+
+return FALSE;
+}
+#endif  /* SUPPORT_UCP */
+
+
+
+/*************************************************
+*        Fill the character property list        *
+*************************************************/
+
+/* Checks whether the code points to an opcode that can take part in auto-
+possessification, and if so, fills a list with its properties.
+
+Arguments:
+  code        points to start of expression
+  utf         TRUE if in UTF-8 / UTF-16 / UTF-32 mode
+  fcc         points to case-flipping table
+  list        points to output list
+              list[0] will be filled with the opcode
+              list[1] will be non-zero if this opcode
+                can match an empty character string
+              list[2..7] depends on the opcode
+
+Returns:      points to the start of the next opcode if *code is accepted
+              NULL if *code is not accepted
+*/
+
+static const pcre_uchar *
+get_chr_property_list(const pcre_uchar *code, BOOL utf,
+  const pcre_uint8 *fcc, pcre_uint32 *list)
+{
+pcre_uchar c = *code;
+const pcre_uchar *end;
+const pcre_uint32 *clist_src;
+pcre_uint32 *clist_dest;
+pcre_uint32 chr;
+pcre_uchar base;
+
+list[0] = c;
+list[1] = FALSE;
+code++;
+
+if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
+  {
+  base = get_repeat_base(c);
+  c -= (base - OP_STAR);
+
+  if (c == OP_UPTO || c == OP_MINUPTO || c == OP_EXACT || c == OP_POSUPTO)
+    code += IMM2_SIZE;
+
+  list[1] = (c != OP_PLUS && c != OP_MINPLUS && c != OP_EXACT && c != OP_POSPLUS);
+
+  switch(base)
+    {
+    case OP_STAR:
+    list[0] = OP_CHAR;
+    break;
+
+    case OP_STARI:
+    list[0] = OP_CHARI;
+    break;
+
+    case OP_NOTSTAR:
+    list[0] = OP_NOT;
+    break;
+
+    case OP_NOTSTARI:
+    list[0] = OP_NOTI;
+    break;
+
+    case OP_TYPESTAR:
+    list[0] = *code;
+    code++;
+    break;
+    }
+  c = list[0];
+  }
+
+switch(c)
+  {
+  case OP_NOT_DIGIT:
+  case OP_DIGIT:
+  case OP_NOT_WHITESPACE:
+  case OP_WHITESPACE:
+  case OP_NOT_WORDCHAR:
+  case OP_WORDCHAR:
+  case OP_ANY:
+  case OP_ALLANY:
+  case OP_ANYNL:
+  case OP_NOT_HSPACE:
+  case OP_HSPACE:
+  case OP_NOT_VSPACE:
+  case OP_VSPACE:
+  case OP_EXTUNI:
+  case OP_EODN:
+  case OP_EOD:
+  case OP_DOLL:
+  case OP_DOLLM:
+  return code;
+
+  case OP_CHAR:
+  case OP_NOT:
+  GETCHARINCTEST(chr, code);
+  list[2] = chr;
+  list[3] = NOTACHAR;
+  return code;
+
+  case OP_CHARI:
+  case OP_NOTI:
+  list[0] = (c == OP_CHARI) ? OP_CHAR : OP_NOT;
+  GETCHARINCTEST(chr, code);
+  list[2] = chr;
+
+#ifdef SUPPORT_UCP
+  if (chr < 128 || (chr < 256 && !utf))
+    list[3] = fcc[chr];
+  else
+    list[3] = UCD_OTHERCASE(chr);
+#elif defined SUPPORT_UTF || !defined COMPILE_PCRE8
+  list[3] = (chr < 256) ? fcc[chr] : chr;
+#else
+  list[3] = fcc[chr];
+#endif
+
+  /* The othercase might be the same value. */
+
+  if (chr == list[3])
+    list[3] = NOTACHAR;
+  else
+    list[4] = NOTACHAR;
+  return code;
+
+#ifdef SUPPORT_UCP
+  case OP_PROP:
+  case OP_NOTPROP:
+  if (code[0] != PT_CLIST)
+    {
+    list[2] = code[0];
+    list[3] = code[1];
+    return code + 2;
+    }
+
+  /* Convert only if we have anough space. */
+
+  clist_src = PRIV(ucd_caseless_sets) + code[1];
+  clist_dest = list + 2;
+  code += 2;
+
+  do {
+     /* Early return if there is not enough space. */
+     if (clist_dest >= list + 8)
+       {
+       list[2] = code[0];
+       list[3] = code[1];
+       return code;
+       }
+     *clist_dest++ = *clist_src;
+     }
+   while(*clist_src++ != NOTACHAR);
+
+  /* Enough space to store all characters. */
+
+  list[0] = (c == OP_PROP) ? OP_CHAR : OP_NOT;
+  return code;
+#endif
+
+  case OP_NCLASS:
+  case OP_CLASS:
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+  case OP_XCLASS:
+
+  if (c == OP_XCLASS)
+    end = code + GET(code, 0);
+  else
+#endif
+    end = code + 32 / sizeof(pcre_uchar);
+
+  switch(*end)
+    {
+    case OP_CRSTAR:
+    case OP_CRMINSTAR:
+    case OP_CRQUERY:
+    case OP_CRMINQUERY:
+    list[1] = TRUE;
+    end++;
+    break;
+
+    case OP_CRRANGE:
+    case OP_CRMINRANGE:
+    list[1] = (GET2(end, 1) == 0);
+    end += 1 + 2 * IMM2_SIZE;
+    break;
+    }
+  list[2] = end - code;
+  return end;
+  }
+return NULL;    /* Opcode not accepted */
+}
+
+
+
+/*************************************************
+*    Scan further character sets for match       *
+*************************************************/
+
+/* Checks whether the base and the current opcode have a common character, in
+which case the base cannot be possessified.
+
+Arguments:
+  code        points to the byte code
+  utf         TRUE in UTF-8 / UTF-16 / UTF-32 mode
+  cd          static compile data
+  base_list   the data list of the base opcode
+
+Returns:      TRUE if the auto-possessification is possible
+*/
+
+static BOOL
+compare_opcodes(const pcre_uchar *code, BOOL utf, const compile_data *cd,
+  const pcre_uint32* base_list)
+{
+pcre_uchar c;
+pcre_uint32 list[8];
+const pcre_uint32* chr_ptr;
+const pcre_uint32* ochr_ptr;
+const pcre_uint32* list_ptr;
+pcre_uint32 chr;
+
+for(;;)
+  {
+  c = *code;
+
+  /* Skip over callouts */
+
+  if (c == OP_CALLOUT)
+    {
+    code += PRIV(OP_lengths)[c];
+    continue;
+    }
+
+  if (c == OP_ALT)
+    {
+    do code += GET(code, 1); while (*code == OP_ALT);
+    c = *code;
+    }
+
+  switch(c)
+    {
+    case OP_END:
+    /* TRUE only in greedy case. The non-greedy case could be replaced by an
+    OP_EXACT, but it is probably not worth it. (And note that OP_EXACT uses
+    more memory, which we cannot get at this stage.) */
+
+    return base_list[1] != 0;
+
+    case OP_KET:
+    /* If the bracket is capturing, and referenced by an OP_RECURSE, the
+    non-greedy case cannot be converted to a possessive form. We do not test
+    the bracket type at the moment, but we might do it in the future to improve
+    this condition. (But note that recursive calls are always atomic.) */
+
+    if (base_list[1] == 0) return FALSE;
+    code += PRIV(OP_lengths)[c];
+    continue;
+    }
+
+  /* Check for a supported opcode, and load its properties. */
+
+  code = get_chr_property_list(code, utf, cd->fcc, list);
+  if (code == NULL) return FALSE;    /* Unsupported */
+
+  /* If either opcode is a small character list, set pointers for comparing
+  characters from that list with another list, or with a property. */
+
+  if (base_list[0] == OP_CHAR)
+    {
+    chr_ptr = base_list + 2;
+    list_ptr = list;
+    }
+  else if (list[0] == OP_CHAR)
+    {
+    chr_ptr = list + 2;
+    list_ptr = base_list;
+    }
+
+  /* Some property combinations also acceptable. Unicode property opcodes are
+  processed specially; the rest can be handled with a lookup table. */
+
+  else
+    {
+    pcre_uint32 leftop, rightop;
+
+    if (list[1] != 0) return FALSE;   /* Must match at least one character */
+    leftop = base_list[0];
+    rightop = list[0];
+
+#ifdef SUPPORT_UCP
+    if (leftop == OP_PROP || leftop == OP_NOTPROP)
+      {
+      if (rightop == OP_EOD) return TRUE;
+      if (rightop == OP_PROP || rightop == OP_NOTPROP)
+        {
+        int n;
+        const pcre_uint8 *p;
+        BOOL same = leftop == rightop;
+        BOOL lisprop = leftop == OP_PROP;
+        BOOL risprop = rightop == OP_PROP;
+        BOOL bothprop = lisprop && risprop;
+
+        /* There's a table that specifies how each combination is to be
+        processed:
+          0   Always return FALSE (never auto-possessify)
+          1   Character groups are distinct (possessify if both are OP_PROP)
+          2   Check character categories in the same group (general or particular)
+          3   Return TRUE if the two opcodes are not the same
+          ... see comments below
+        */
+
+        n = propposstab[base_list[2]][list[2]];
+        switch(n)
+          {
+          case 0: return FALSE;
+          case 1: return bothprop;
+          case 2: return (base_list[3] == list[3]) != same;
+          case 3: return !same;
+
+          case 4:  /* Left general category, right particular category */
+          return risprop && catposstab[base_list[3]][list[3]] == same;
+
+          case 5:  /* Right general category, left particular category */
+          return lisprop && catposstab[list[3]][base_list[3]] == same;
+
+          /* This code is logically tricky. Think hard before fiddling with it.
+          The posspropstab table has four entries per row. Each row relates to
+          one of PCRE's special properties such as ALNUM or SPACE or WORD.
+          Only WORD actually needs all four entries, but using repeats for the 
+          others means they can all use the same code below. 
+           
+          The first two entries in each row are Unicode general categories, and
+          apply always, because all the characters they include are part of the
+          PCRE character set. The third and fourth entries are a general and a
+          particular category, respectively, that include one or more relevant
+          characters. One or the other is used, depending on whether the check
+          is for a general or a particular category. However, in both cases the
+          category contains more characters than the specials that are defined
+          for the property being tested against. Therefore, it cannot be used
+          in a NOTPROP case.
+          
+          Example: the row for WORD contains ucp_L, ucp_N, ucp_P, ucp_Po.
+          Underscore is covered by ucp_P or ucp_Po. */
+
+          case 6:  /* Left alphanum vs right general category */
+          case 7:  /* Left space vs right general category */
+          case 8:  /* Left word vs right general category */
+          p = posspropstab[n-6];
+          return risprop && lisprop ==
+            (list[3] != p[0] &&
+             list[3] != p[1] &&
+            (list[3] != p[2] || !lisprop));
+
+          case 9:   /* Right alphanum vs left general category */
+          case 10:  /* Right space vs left general category */
+          case 11:  /* Right word vs left general category */
+          p = posspropstab[n-9];
+          return lisprop && risprop ==
+            (base_list[3] != p[0] &&
+             base_list[3] != p[1] &&
+            (base_list[3] != p[2] || !risprop));
+
+          case 12:  /* Left alphanum vs right particular category */
+          case 13:  /* Left space vs right particular category */
+          case 14:  /* Left word vs right particular category */
+          p = posspropstab[n-12];
+          return risprop && lisprop ==
+            (catposstab[p[0]][list[3]] &&
+             catposstab[p[1]][list[3]] &&
+            (list[3] != p[3] || !lisprop));
+
+          case 15:  /* Right alphanum vs left particular category */
+          case 16:  /* Right space vs left particular category */
+          case 17:  /* Right word vs left particular category */
+          p = posspropstab[n-15];
+          return lisprop && risprop ==
+            (catposstab[p[0]][base_list[3]] &&
+             catposstab[p[1]][base_list[3]] &&
+            (base_list[3] != p[3] || !risprop));
+          }
+        }
+      return FALSE;
+      }
+
+    else
+#endif  /* SUPPORT_UCP */
+
+    return leftop >= FIRST_AUTOTAB_OP && leftop <= LAST_AUTOTAB_LEFT_OP &&
+           rightop >= FIRST_AUTOTAB_OP && rightop <= LAST_AUTOTAB_RIGHT_OP &&
+           autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
+    }
+
+  /* Control reaches here only if one of the items is a small character list.
+  All characters are checked against the other side. */
+
+  do
+    {
+    chr = *chr_ptr;
+
+    switch(list_ptr[0])
+      {
+      case OP_CHAR:
+      ochr_ptr = list_ptr + 2;
+      do
+        {
+        if (chr == *ochr_ptr) return FALSE;
+        ochr_ptr++;
+        }
+      while(*ochr_ptr != NOTACHAR);
+      break;
+
+      case OP_NOT:
+      ochr_ptr = list_ptr + 2;
+      do
+        {
+        if (chr == *ochr_ptr)
+          break;
+        ochr_ptr++;
+        }
+      while(*ochr_ptr != NOTACHAR);
+      if (*ochr_ptr == NOTACHAR) return FALSE;   /* Not found */
+      break;
+
+      /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not*
+      set. When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
+
+      case OP_DIGIT:
+      if (chr < 256 && (cd->ctypes[chr] & ctype_digit) != 0) return FALSE;
+      break;
+
+      case OP_NOT_DIGIT:
+      if (chr > 255 || (cd->ctypes[chr] & ctype_digit) == 0) return FALSE;
+      break;
+
+      case OP_WHITESPACE:
+      if (chr < 256 && (cd->ctypes[chr] & ctype_space) != 0) return FALSE;
+      break;
+
+      case OP_NOT_WHITESPACE:
+      if (chr > 255 || (cd->ctypes[chr] & ctype_space) == 0) return FALSE;
+      break;
+
+      case OP_WORDCHAR:
+      if (chr < 255 && (cd->ctypes[chr] & ctype_word) != 0) return FALSE;
+      break;
+
+      case OP_NOT_WORDCHAR:
+      if (chr > 255 || (cd->ctypes[chr] & ctype_word) == 0) return FALSE;
+      break;
+
+      case OP_HSPACE:
+      switch(chr)
+        {
+        HSPACE_CASES: return FALSE;
+        default: break;
+        }
+      break;
+
+      case OP_NOT_HSPACE:
+      switch(chr)
+        {
+        HSPACE_CASES: break;
+        default: return FALSE;
+        }
+      break;
+
+      case OP_ANYNL:
+      case OP_VSPACE:
+      switch(chr)
+        {
+        VSPACE_CASES: return FALSE;
+        default: break;
+        }
+      break;
+
+      case OP_NOT_VSPACE:
+      switch(chr)
+        {
+        VSPACE_CASES: break;
+        default: return FALSE;
+        }
+      break;
+
+      case OP_DOLL:
+      case OP_EODN:
+      switch (chr)
+        {
+        case CHAR_CR:
+        case CHAR_LF:
+        case CHAR_VT:
+        case CHAR_FF:
+        case CHAR_NEL:
+#ifndef EBCDIC
+        case 0x2028:
+        case 0x2029:
+#endif  /* Not EBCDIC */
+        return FALSE;
+        }
+      break;
+
+      case OP_EOD:    /* Can always possessify before \z */
+      break;
+
+      case OP_PROP:
+      case OP_NOTPROP:
+      if (!check_char_prop(chr, list_ptr[2], list_ptr[3],
+            list_ptr[0] == OP_NOTPROP))
+        return FALSE;
+      break;
+
+      /* The class comparisons work only when the class is the second item
+      of the pair, because there are at present no possessive forms of the
+      class opcodes. Note also that the "code" variable that is used below
+      points after the second item, and that the pointer for the first item
+      is not available, so even if there were possessive forms of the class
+      opcodes, the correct comparison could not be done. */
+
+      case OP_NCLASS:
+      if (chr > 255) return FALSE;
+      /* Fall through */
+
+      case OP_CLASS:
+      if (list_ptr != list) return FALSE;   /* Class is first opcode */
+      if (chr > 255) break;
+      if ((((pcre_uint8 *)(code - list_ptr[2] + 1))[chr >> 3] & (1 << (chr & 7))) != 0)
+        return FALSE;
+      break;
+
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+      case OP_XCLASS:
+      if (list_ptr != list) return FALSE;   /* Class is first opcode */
+      if (PRIV(xclass)(chr, code - list_ptr[2] + 1 + LINK_SIZE, utf))
+        return FALSE;
+      break;
+#endif
+
+      default:
+      return FALSE;
+      }
+
+    chr_ptr++;
+    }
+  while(*chr_ptr != NOTACHAR);
+
+  /* At least one character must be matched from this opcode. */
+
+  if (list[1] == 0) return TRUE;
+  }
+
+return FALSE;
+}
+
+
+
+/*************************************************
+*    Scan compiled regex for auto-possession     *
+*************************************************/
+
+/* Replaces single character iterations with their possessive alternatives
+if appropriate. This function modifies the compiled opcode!
+
+Arguments:
+  code        points to start of the byte code
+  utf         TRUE in UTF-8 / UTF-16 / UTF-32 mode
+  cd          static compile data
+
+Returns:      nothing
+*/
+
+static void
+auto_possessify(pcre_uchar *code, BOOL utf, const compile_data *cd)
+{
+register pcre_uchar c;
+const pcre_uchar *end;
+pcre_uint32 list[8];
+
+for (;;)
+  {
+  c = *code;
+
+  if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
+    {
+    c -= get_repeat_base(c) - OP_STAR;
+    end = (c <= OP_MINUPTO) ?
+      get_chr_property_list(code, utf, cd->fcc, list) : NULL;
+    list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
+
+    if (end != NULL && compare_opcodes(end, utf, cd, list))
+      {
+      switch(c)
+        {
+        case OP_STAR:
+        *code += OP_POSSTAR - OP_STAR;
+        break;
+
+        case OP_MINSTAR:
+        *code += OP_POSSTAR - OP_MINSTAR;
+        break;
+
+        case OP_PLUS:
+        *code += OP_POSPLUS - OP_PLUS;
+        break;
+
+        case OP_MINPLUS:
+        *code += OP_POSPLUS - OP_MINPLUS;
+        break;
+
+        case OP_QUERY:
+        *code += OP_POSQUERY - OP_QUERY;
+        break;
+
+        case OP_MINQUERY:
+        *code += OP_POSQUERY - OP_MINQUERY;
+        break;
+
+        case OP_UPTO:
+        *code += OP_POSUPTO - OP_UPTO;
+        break;
+
+        case OP_MINUPTO:
+        *code += OP_MINUPTO - OP_UPTO;
+        break;
+        }
+      }
+    c = *code;
+    }
+
+  switch(c)
+    {
+    case OP_END:
+    return;
+
+    case OP_TYPESTAR:
+    case OP_TYPEMINSTAR:
+    case OP_TYPEPLUS:
+    case OP_TYPEMINPLUS:
+    case OP_TYPEQUERY:
+    case OP_TYPEMINQUERY:
+    case OP_TYPEPOSSTAR:
+    case OP_TYPEPOSPLUS:
+    case OP_TYPEPOSQUERY:
+    if (code[1] == OP_PROP || code[1] == OP_NOTPROP) code += 2;
+    break;
+
+    case OP_TYPEUPTO:
+    case OP_TYPEMINUPTO:
+    case OP_TYPEEXACT:
+    case OP_TYPEPOSUPTO:
+    if (code[1 + IMM2_SIZE] == OP_PROP || code[1 + IMM2_SIZE] == OP_NOTPROP)
+      code += 2;
+    break;
+
+    case OP_XCLASS:
+    code += GET(code, 1);
+    break;
+
+    case OP_MARK:
+    case OP_PRUNE_ARG:
+    case OP_SKIP_ARG:
+    case OP_THEN_ARG:
+    code += code[1];
+    break;
+    }
+
+  /* Add in the fixed length from the table */
+
+  code += PRIV(OP_lengths)[c];
+
+  /* In UTF-8 mode, opcodes that are followed by a character may be followed by
+  a multi-byte character. The length in the table is a minimum, so we have to
+  arrange to skip the extra bytes. */
+
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+  if (utf) switch(c)
+    {
+    case OP_CHAR:
+    case OP_CHARI:
+    case OP_NOT:
+    case OP_NOTI:
+    case OP_STAR:
+    case OP_MINSTAR:
+    case OP_PLUS:
+    case OP_MINPLUS:
+    case OP_QUERY:
+    case OP_MINQUERY:
+    case OP_UPTO:
+    case OP_MINUPTO:
+    case OP_EXACT:
+    case OP_POSSTAR:
+    case OP_POSPLUS:
+    case OP_POSQUERY:
+    case OP_POSUPTO:
+    case OP_STARI:
+    case OP_MINSTARI:
+    case OP_PLUSI:
+    case OP_MINPLUSI:
+    case OP_QUERYI:
+    case OP_MINQUERYI:
+    case OP_UPTOI:
+    case OP_MINUPTOI:
+    case OP_EXACTI:
+    case OP_POSSTARI:
+    case OP_POSPLUSI:
+    case OP_POSQUERYI:
+    case OP_POSUPTOI:
+    case OP_NOTSTAR:
+    case OP_NOTMINSTAR:
+    case OP_NOTPLUS:
+    case OP_NOTMINPLUS:
+    case OP_NOTQUERY:
+    case OP_NOTMINQUERY:
+    case OP_NOTUPTO:
+    case OP_NOTMINUPTO:
+    case OP_NOTEXACT:
+    case OP_NOTPOSSTAR:
+    case OP_NOTPOSPLUS:
+    case OP_NOTPOSQUERY:
+    case OP_NOTPOSUPTO:
+    case OP_NOTSTARI:
+    case OP_NOTMINSTARI:
+    case OP_NOTPLUSI:
+    case OP_NOTMINPLUSI:
+    case OP_NOTQUERYI:
+    case OP_NOTMINQUERYI:
+    case OP_NOTUPTOI:
+    case OP_NOTMINUPTOI:
+    case OP_NOTEXACTI:
+    case OP_NOTPOSSTARI:
+    case OP_NOTPOSPLUSI:
+    case OP_NOTPOSQUERYI:
+    case OP_NOTPOSUPTOI:
+    if (HAS_EXTRALEN(code[-1])) code += GET_EXTRALEN(code[-1]);
+    break;
+    }
+#else
+  (void)(utf);  /* Keep compiler happy by referencing function argument */
+#endif
+  }
+}
+
+
+
+/*************************************************
 *           Check for POSIX class syntax         *
 *************************************************/
 
@@ -2744,473 +3708,7 @@ for (++c; c <= d; c++)
 *cptr = c;             /* Rest of input range */
 return 0;
 }
-
-
-
-/*************************************************
-*        Check a character and a property        *
-*************************************************/
-
-/* This function is called by check_auto_possessive() when a property item
-is adjacent to a fixed character.
-
-Arguments:
-  c            the character
-  ptype        the property type
-  pdata        the data for the type
-  negated      TRUE if it's a negated property (\P or \p{^)
-
-Returns:       TRUE if auto-possessifying is OK
-*/
-
-static BOOL
-check_char_prop(pcre_uint32 c, unsigned int ptype, unsigned int pdata, BOOL negated)
-{
-#ifdef SUPPORT_UCP
-const pcre_uint32 *p;
-#endif
-
-const ucd_record *prop = GET_UCD(c);
-
-switch(ptype)
-  {
-  case PT_LAMP:
-  return (prop->chartype == ucp_Lu ||
-          prop->chartype == ucp_Ll ||
-          prop->chartype == ucp_Lt) == negated;
-
-  case PT_GC:
-  return (pdata == PRIV(ucp_gentype)[prop->chartype]) == negated;
-
-  case PT_PC:
-  return (pdata == prop->chartype) == negated;
-
-  case PT_SC:
-  return (pdata == prop->script) == negated;
-
-  /* These are specials */
-
-  case PT_ALNUM:
-  return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-          PRIV(ucp_gentype)[prop->chartype] == ucp_N) == negated;
-
-  case PT_SPACE:    /* Perl space */
-  return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-          c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
-          == negated;
-
-  case PT_PXSPACE:  /* POSIX space */
-  return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-          c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-          c == CHAR_FF || c == CHAR_CR)
-          == negated;
-
-  case PT_WORD:
-  return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-          PRIV(ucp_gentype)[prop->chartype] == ucp_N ||
-          c == CHAR_UNDERSCORE) == negated;
-
-#ifdef SUPPORT_UCP
-  case PT_CLIST:
-  p = PRIV(ucd_caseless_sets) + prop->caseset;
-  for (;;)
-    {
-    if (c < *p) return !negated;
-    if (c == *p++) return negated;
-    }
-  break;  /* Control never reaches here */
-#endif
-  }
-
-return FALSE;
-}
 #endif  /* SUPPORT_UCP */
-
-
-
-/*************************************************
-*     Check if auto-possessifying is possible    *
-*************************************************/
-
-/* This function is called for unlimited repeats of certain items, to see
-whether the next thing could possibly match the repeated item. If not, it makes
-sense to automatically possessify the repeated item.
-
-Arguments:
-  previous      pointer to the repeated opcode
-  utf           TRUE in UTF-8 / UTF-16 / UTF-32 mode
-  ptr           next character in pattern
-  options       options bits
-  cd            contains pointers to tables etc.
-
-Returns:        TRUE if possessifying is wanted
-*/
-
-static BOOL
-check_auto_possessive(const pcre_uchar *previous, BOOL utf,
-  const pcre_uchar *ptr, int options, compile_data *cd)
-{
-pcre_uint32 c = NOTACHAR;
-pcre_uint32 next;
-int escape;
-pcre_uchar op_code = *previous++;
-
-/* Skip whitespace and comments in extended mode */
-
-if ((options & PCRE_EXTENDED) != 0)
-  {
-  for (;;)
-    {
-    while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_space) != 0) ptr++;
-    if (*ptr == CHAR_NUMBER_SIGN)
-      {
-      ptr++;
-      while (*ptr != CHAR_NULL)
-        {
-        if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
-        ptr++;
-#ifdef SUPPORT_UTF
-        if (utf) FORWARDCHAR(ptr);
-#endif
-        }
-      }
-    else break;
-    }
-  }
-
-/* If the next item is one that we can handle, get its value. A non-negative
-value is a character, a negative value is an escape value. */
-
-if (*ptr == CHAR_BACKSLASH)
-  {
-  int temperrorcode = 0;
-  escape = check_escape(&ptr, &next, &temperrorcode, cd->bracount, options,
-    FALSE);
-  if (temperrorcode != 0) return FALSE;
-  ptr++;    /* Point after the escape sequence */
-  }
-else if (!MAX_255(*ptr) || (cd->ctypes[*ptr] & ctype_meta) == 0)
-  {
-  escape = 0;
-#ifdef SUPPORT_UTF
-  if (utf) { GETCHARINC(next, ptr); } else
-#endif
-  next = *ptr++;
-  }
-else return FALSE;
-
-/* Skip whitespace and comments in extended mode */
-
-if ((options & PCRE_EXTENDED) != 0)
-  {
-  for (;;)
-    {
-    while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_space) != 0) ptr++;
-    if (*ptr == CHAR_NUMBER_SIGN)
-      {
-      ptr++;
-      while (*ptr != CHAR_NULL)
-        {
-        if (IS_NEWLINE(ptr)) { ptr += cd->nllen; break; }
-        ptr++;
-#ifdef SUPPORT_UTF
-        if (utf) FORWARDCHAR(ptr);
-#endif
-        }
-      }
-    else break;
-    }
-  }
-
-/* If the next thing is itself optional, we have to give up. */
-
-if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
-  STRNCMP_UC_C8(ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
-    return FALSE;
-
-/* If the previous item is a character, get its value. */
-
-if (op_code == OP_CHAR || op_code == OP_CHARI ||
-    op_code == OP_NOT || op_code == OP_NOTI)
-  {
-#ifdef SUPPORT_UTF
-  GETCHARTEST(c, previous);
-#else
-  c = *previous;
-#endif
-  }
-
-/* Now compare the next item with the previous opcode. First, handle cases when
-the next item is a character. */
-
-if (escape == 0)
-  {
-  /* For a caseless UTF match, the next character may have more than one other
-  case, which maps to the special PT_CLIST property. Check this first. */
-
-#ifdef SUPPORT_UCP
-  if (utf && c != NOTACHAR && (options & PCRE_CASELESS) != 0)
-    {
-    unsigned int ocs = UCD_CASESET(next);
-    if (ocs > 0) return check_char_prop(c, PT_CLIST, ocs, op_code >= OP_NOT);
-    }
-#endif
-
-  switch(op_code)
-    {
-    case OP_CHAR:
-    return c != next;
-
-    /* For CHARI (caseless character) we must check the other case. If we have
-    Unicode property support, we can use it to test the other case of
-    high-valued characters. We know that next can have only one other case,
-    because multi-other-case characters are dealt with above. */
-
-    case OP_CHARI:
-    if (c == next) return FALSE;
-#ifdef SUPPORT_UTF
-    if (utf)
-      {
-      pcre_uint32 othercase;
-      if (next < 128) othercase = cd->fcc[next]; else
-#ifdef SUPPORT_UCP
-      othercase = UCD_OTHERCASE(next);
-#else
-      othercase = NOTACHAR;
-#endif
-      return c != othercase;
-      }
-    else
-#endif  /* SUPPORT_UTF */
-    return (c != TABLE_GET(next, cd->fcc, next));  /* Not UTF */
-
-    case OP_NOT:
-    return c == next;
-
-    case OP_NOTI:
-    if (c == next) return TRUE;
-#ifdef SUPPORT_UTF
-    if (utf)
-      {
-      pcre_uint32 othercase;
-      if (next < 128) othercase = cd->fcc[next]; else
-#ifdef SUPPORT_UCP
-      othercase = UCD_OTHERCASE(next);
-#else
-      othercase = NOTACHAR;
-#endif
-      return c == othercase;
-      }
-    else
-#endif  /* SUPPORT_UTF */
-    return (c == TABLE_GET(next, cd->fcc, next));  /* Not UTF */
-
-    /* Note that OP_DIGIT etc. are generated only when PCRE_UCP is *not* set.
-    When it is set, \d etc. are converted into OP_(NOT_)PROP codes. */
-
-    case OP_DIGIT:
-    return next > 255 || (cd->ctypes[next] & ctype_digit) == 0;
-
-    case OP_NOT_DIGIT:
-    return next <= 255 && (cd->ctypes[next] & ctype_digit) != 0;
-
-    case OP_WHITESPACE:
-    return next > 255 || (cd->ctypes[next] & ctype_space) == 0;
-
-    case OP_NOT_WHITESPACE:
-    return next <= 255 && (cd->ctypes[next] & ctype_space) != 0;
-
-    case OP_WORDCHAR:
-    return next > 255 || (cd->ctypes[next] & ctype_word) == 0;
-
-    case OP_NOT_WORDCHAR:
-    return next <= 255 && (cd->ctypes[next] & ctype_word) != 0;
-
-    case OP_HSPACE:
-    case OP_NOT_HSPACE:
-    switch(next)
-      {
-      HSPACE_CASES:
-      return op_code == OP_NOT_HSPACE;
-
-      default:
-      return op_code != OP_NOT_HSPACE;
-      }
-
-    case OP_ANYNL:
-    case OP_VSPACE:
-    case OP_NOT_VSPACE:
-    switch(next)
-      {
-      VSPACE_CASES:
-      return op_code == OP_NOT_VSPACE;
-
-      default:
-      return op_code != OP_NOT_VSPACE;
-      }
-
-#ifdef SUPPORT_UCP
-    case OP_PROP:
-    return check_char_prop(next, previous[0], previous[1], FALSE);
-
-    case OP_NOTPROP:
-    return check_char_prop(next, previous[0], previous[1], TRUE);
-#endif
-
-    default:
-    return FALSE;
-    }
-  }
-
-/* Handle the case when the next item is \d, \s, etc. Note that when PCRE_UCP
-is set, \d turns into ESC_du rather than ESC_d, etc., so ESC_d etc. are
-generated only when PCRE_UCP is *not* set, that is, when only ASCII
-characteristics are recognized. Similarly, the opcodes OP_DIGIT etc. are
-replaced by OP_PROP codes when PCRE_UCP is set. */
-
-switch(op_code)
-  {
-  case OP_CHAR:
-  case OP_CHARI:
-  switch(escape)
-    {
-    case ESC_d:
-    return c > 255 || (cd->ctypes[c] & ctype_digit) == 0;
-
-    case ESC_D:
-    return c <= 255 && (cd->ctypes[c] & ctype_digit) != 0;
-
-    case ESC_s:
-    return c > 255 || (cd->ctypes[c] & ctype_space) == 0;
-
-    case ESC_S:
-    return c <= 255 && (cd->ctypes[c] & ctype_space) != 0;
-
-    case ESC_w:
-    return c > 255 || (cd->ctypes[c] & ctype_word) == 0;
-
-    case ESC_W:
-    return c <= 255 && (cd->ctypes[c] & ctype_word) != 0;
-
-    case ESC_h:
-    case ESC_H:
-    switch(c)
-      {
-      HSPACE_CASES:
-      return escape != ESC_h;
-
-      default:
-      return escape == ESC_h;
-      }
-
-    case ESC_v:
-    case ESC_V:
-    switch(c)
-      {
-      VSPACE_CASES:
-      return escape != ESC_v;
-
-      default:
-      return escape == ESC_v;
-      }
-
-    /* When PCRE_UCP is set, these values get generated for \d etc. Find
-    their substitutions and process them. The result will always be either
-    ESC_p or ESC_P. Then fall through to process those values. */
-
-#ifdef SUPPORT_UCP
-    case ESC_du:
-    case ESC_DU:
-    case ESC_wu:
-    case ESC_WU:
-    case ESC_su:
-    case ESC_SU:
-      {
-      int temperrorcode = 0;
-      ptr = substitutes[escape - ESC_DU];
-      escape = check_escape(&ptr, &next, &temperrorcode, 0, options, FALSE);
-      if (temperrorcode != 0) return FALSE;
-      ptr++;    /* For compatibility */
-      }
-    /* Fall through */
-
-    case ESC_p:
-    case ESC_P:
-      {
-      unsigned int ptype = 0, pdata = 0;
-      int errorcodeptr;
-      BOOL negated;
-
-      ptr--;      /* Make ptr point at the p or P */
-      if (!get_ucp(&ptr, &negated, &ptype, &pdata, &errorcodeptr))
-        return FALSE;
-      ptr++;      /* Point past the final curly ket */
-
-      /* If the property item is optional, we have to give up. (When generated
-      from \d etc by PCRE_UCP, this test will have been applied much earlier,
-      to the original \d etc. At this point, ptr will point to a zero byte. */
-
-      if (*ptr == CHAR_ASTERISK || *ptr == CHAR_QUESTION_MARK ||
-        STRNCMP_UC_C8(ptr, STR_LEFT_CURLY_BRACKET STR_0 STR_COMMA, 3) == 0)
-          return FALSE;
-
-      /* Do the property check. */
-
-      return check_char_prop(c, ptype, pdata, (escape == ESC_P) != negated);
-      }
-#endif
-
-    default:
-    return FALSE;
-    }
-
-  /* In principle, support for Unicode properties should be integrated here as
-  well. It means re-organizing the above code so as to get hold of the property
-  values before switching on the op-code. However, I wonder how many patterns
-  combine ASCII \d etc with Unicode properties? (Note that if PCRE_UCP is set,
-  these op-codes are never generated.) */
-
-  case OP_DIGIT:
-  return escape == ESC_D || escape == ESC_s || escape == ESC_W ||
-         escape == ESC_h || escape == ESC_v || escape == ESC_R;
-
-  case OP_NOT_DIGIT:
-  return escape == ESC_d;
-
-  case OP_WHITESPACE:
-  return escape == ESC_S || escape == ESC_d || escape == ESC_w;
-
-  case OP_NOT_WHITESPACE:
-  return escape == ESC_s || escape == ESC_h || escape == ESC_v || escape == ESC_R;
-
-  case OP_HSPACE:
-  return escape == ESC_S || escape == ESC_H || escape == ESC_d ||
-         escape == ESC_w || escape == ESC_v || escape == ESC_R;
-
-  case OP_NOT_HSPACE:
-  return escape == ESC_h;
-
-  /* Can't have \S in here because VT matches \S (Perl anomaly) */
-  case OP_ANYNL:
-  case OP_VSPACE:
-  return escape == ESC_V || escape == ESC_d || escape == ESC_w;
-
-  case OP_NOT_VSPACE:
-  return escape == ESC_v || escape == ESC_R;
-
-  case OP_WORDCHAR:
-  return escape == ESC_W || escape == ESC_s || escape == ESC_h ||
-         escape == ESC_v || escape == ESC_R;
-
-  case OP_NOT_WORDCHAR:
-  return escape == ESC_w || escape == ESC_d;
-
-  default:
-  return FALSE;
-  }
-
-/* Control does not reach here */
-}
 
 
 
@@ -4642,19 +5140,6 @@ for (;; ptr++)
           }
         }
 
-      /* If the repetition is unlimited, it pays to see if the next thing on
-      the line is something that cannot possibly match this character. If so,
-      automatically possessifying this item gains some performance in the case
-      where the match fails. */
-
-      if (!possessive_quantifier &&
-          repeat_max < 0 &&
-          check_auto_possessive(previous, utf, ptr + 1, options, cd))
-        {
-        repeat_type = 0;    /* Force greedy */
-        possessive_quantifier = TRUE;
-        }
-
       goto OUTPUT_SINGLE_REPEAT;   /* Code shared with single character types */
       }
 
@@ -4671,14 +5156,6 @@ for (;; ptr++)
       int prop_type, prop_value;
       op_type = OP_TYPESTAR - OP_STAR;  /* Use type opcodes */
       c = *previous;
-
-      if (!possessive_quantifier &&
-          repeat_max < 0 &&
-          check_auto_possessive(previous, utf, ptr + 1, options, cd))
-        {
-        repeat_type = 0;    /* Force greedy */
-        possessive_quantifier = TRUE;
-        }
 
       OUTPUT_SINGLE_REPEAT:
       if (*previous == OP_PROP || *previous == OP_NOTPROP)
@@ -5838,27 +6315,27 @@ for (;; ptr++)
 
         /* In the pre-compile phase, do a syntax check, remember the longest
         name, and then remember the group in a vector, expanding it if
-        necessary. Duplicates for the same number are skipped; other duplicates 
+        necessary. Duplicates for the same number are skipped; other duplicates
         are checked for validity. In the actual compile, there is nothing to
         do. */
 
         if (lengthptr != NULL)
           {
-          named_group *ng; 
+          named_group *ng;
           pcre_uint32 number = cd->bracount + 1;
- 
+
           if (*ptr != (pcre_uchar)terminator)
             {
             *errorcodeptr = ERR42;
             goto FAILED;
             }
-             
+
           if (cd->names_found >= MAX_NAME_COUNT)
             {
             *errorcodeptr = ERR49;
             goto FAILED;
             }
-             
+
           if (namelen + IMM2_SIZE + 1 > cd->name_entry_size)
             {
             cd->name_entry_size = namelen + IMM2_SIZE + 1;
@@ -5868,59 +6345,59 @@ for (;; ptr++)
               goto FAILED;
               }
             }
-            
+
           /* Scan the list to check for duplicates. For duplicate names, if the
           number is the same, break the loop, which causes the name to be
           discarded; otherwise, if DUPNAMES is not set, give an error.
           If it is set, allow the name with a different number, but continue
           scanning in case this is a duplicate with the same number. For
           non-duplicate names, give an error if the number is duplicated. */
-          
+
           ng = cd->named_groups;
           for (i = 0; i < cd->names_found; i++, ng++)
             {
             if (namelen == ng->length &&
                 STRNCMP_UC_UC(name, ng->name, namelen) == 0)
-              {  
+              {
               if (ng->number == number) break;
               if ((options & PCRE_DUPNAMES) == 0)
                 {
                 *errorcodeptr = ERR43;
-                goto FAILED;  
+                goto FAILED;
                 }
-              cd->dupnames = TRUE;  /* Duplicate names exist */     
-              } 
+              cd->dupnames = TRUE;  /* Duplicate names exist */
+              }
             else if (ng->number == number)
               {
               *errorcodeptr = ERR65;
               goto FAILED;
-              }      
-            }       
+              }
+            }
 
           if (i >= cd->names_found)     /* Not a duplicate with same number */
-            { 
+            {
             /* Increase the list size if necessary */
-            
+
             if (cd->names_found >= cd->named_group_list_size)
               {
               int newsize = cd->named_group_list_size * 2;
               named_group *newspace = (PUBL(malloc))
                 (newsize * sizeof(named_group));
-                 
-              if (newspace == NULL) 
+
+              if (newspace == NULL)
                 {
                 *errorcodeptr = ERR21;
-                goto FAILED; 
-                } 
-                 
-              memcpy(newspace, cd->named_groups, 
+                goto FAILED;
+                }
+
+              memcpy(newspace, cd->named_groups,
                 cd->named_group_list_size * sizeof(named_group));
               if (cd->named_group_list_size > NAMED_GROUP_LIST_SIZE)
                 (PUBL(free))((void *)cd->named_groups);
               cd->named_groups = newspace;
               cd->named_group_list_size = newsize;
-              }  
-            
+              }
+
             cd->named_groups[cd->names_found].name = name;
             cd->named_groups[cd->names_found].length = namelen;
             cd->named_groups[cd->names_found].number = number;
@@ -5959,7 +6436,7 @@ for (;; ptr++)
         if (lengthptr != NULL)
           {
           named_group *ng;
-           
+
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -5977,7 +6454,7 @@ for (;; ptr++)
             }
 
           /* The name table does not exist in the first pass; instead we must
-          scan the list of names encountered so far in order to get the 
+          scan the list of names encountered so far in order to get the
           number. If the name is not found, set the value to 0 for a forward
           reference. */
 
@@ -5987,12 +6464,12 @@ for (;; ptr++)
             if (namelen == ng->length &&
                 STRNCMP_UC_UC(name, ng->name, namelen) == 0)
               break;
-            }       
+            }
           recno = (i < cd->names_found)? ng->number : 0;
-          
+
           /* Count named back references. */
-          
-          if (!is_recurse) cd->namedrefcount++; 
+
+          if (!is_recurse) cd->namedrefcount++;
           }
 
         /* In the real compile, search the name table. We check the name
@@ -6015,7 +6492,7 @@ for (;; ptr++)
             {
             recno = GET2(slot, 0);
             }
-          else 
+          else
             {
             *errorcodeptr = ERR15;
             goto FAILED;
@@ -6026,44 +6503,44 @@ for (;; ptr++)
         handles numerical recursion. */
 
         if (is_recurse) goto HANDLE_RECURSION;
-        
+
         /* In the second pass we must see if the name is duplicated. If so, we
         generate a different opcode. */
-         
+
         if (lengthptr == NULL && cd->dupnames)
           {
-          int count = 1;   
+          int count = 1;
           unsigned int index = i;
           pcre_uchar *cslot = slot + cd->name_entry_size;
-        
-          for (i++; i < cd->names_found; i++) 
+
+          for (i++; i < cd->names_found; i++)
             {
             if (STRCMP_UC_UC(slot + IMM2_SIZE, cslot + IMM2_SIZE) != 0) break;
-            count++; 
+            count++;
             cslot += cd->name_entry_size;
-            }  
+            }
 
           if (count > 1)
-            { 
+            {
             if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
             previous = code;
             *code++ = ((options & PCRE_CASELESS) != 0)? OP_DNREFI : OP_DNREF;
             PUT2INC(code, 0, index);
-            PUT2INC(code, 0, count); 
-            
+            PUT2INC(code, 0, count);
+
             /* Process each potentially referenced group. */
-            
+
             for (; slot < cslot; slot += cd->name_entry_size)
               {
               open_capitem *oc;
-              recno = GET2(slot, 0);  
+              recno = GET2(slot, 0);
               cd->backref_map |= (recno < 32)? (1 << recno) : 1;
               if (recno > cd->top_backref) cd->top_backref = recno;
-            
+
               /* Check to see if this back reference is recursive, that it, it
               is inside the group that it references. A flag is set so that the
               group can be made atomic. */
-              
+
               for (oc = cd->open_caps; oc != NULL; oc = oc->next)
                 {
                 if (oc->number == recno)
@@ -6072,16 +6549,16 @@ for (;; ptr++)
                   break;
                   }
                 }
-              }   
-            
+              }
+
             continue;  /* End of back ref handling */
-            } 
+            }
           }
-          
+
         /* First pass, or a non-duplicated name. */
-           
+
         goto HANDLE_REFERENCE;
-         
+
 
         /* ------------------------------------------------------------ */
         case CHAR_R:              /* Recursion */
@@ -6662,8 +7139,8 @@ for (;; ptr++)
         {
         open_capitem *oc;
         recno = -escape;
-        
-        /* Come here from named backref handling when the reference is to a 
+
+        /* Come here from named backref handling when the reference is to a
         single group (i.e. not to a duplicated name. */
 
         HANDLE_REFERENCE:
@@ -7531,20 +8008,20 @@ return c;
 *************************************************/
 
 /* This function is called between compiling passes to add an entry to the
-name/number table, maintaining alphabetical order. Checking for permitted 
+name/number table, maintaining alphabetical order. Checking for permitted
 and forbidden duplicates has already been done.
 
 Arguments:
   cd           the compile data block
   name         the name to add
   length       the length of the name
-  groupno      the group number   
+  groupno      the group number
 
 Returns:       nothing
 */
 
 static void
-add_name(compile_data *cd, const pcre_uchar *name, int length, 
+add_name(compile_data *cd, const pcre_uchar *name, int length,
   unsigned int groupno)
 {
 int i;
@@ -7553,7 +8030,7 @@ pcre_uchar *slot = cd->name_table;
 for (i = 0; i < cd->names_found; i++)
   {
   int crc = memcmp(name, slot+IMM2_SIZE, IN_UCHARS(length));
-  if (crc == 0 && slot[IMM2_SIZE+length] != 0) 
+  if (crc == 0 && slot[IMM2_SIZE+length] != 0)
     crc = -1; /* Current name is a substring */
 
   /* Make space in the table and break the loop for an earlier name. For a
@@ -7668,7 +8145,7 @@ new memory is obtained from malloc(). */
 
 pcre_uchar cworkspace[COMPILE_WORK_SIZE];
 
-/* This vector is used for remembering name groups during the pre-compile. In a 
+/* This vector is used for remembering name groups during the pre-compile. In a
 similar way to cworkspace, it can be expanded using malloc() if necessary. */
 
 named_group named_groups[NAMED_GROUP_LIST_SIZE];
@@ -7980,15 +8457,15 @@ groups. These require an extra data item each. */
 
 if (cd->dupnames && cd->namedrefcount > 0)
   length += cd->namedrefcount * IMM2_SIZE * sizeof(pcre_uchar);
-  
+
 /* Compute the size of the data block for storing the compiled pattern. Integer
 overflow should no longer be possible because nowadays we limit the maximum
 value of cd->names_found and cd->name_entry_size. */
 
-size = sizeof(REAL_PCRE) + 
+size = sizeof(REAL_PCRE) +
   (length + cd->names_found * cd->name_entry_size) * sizeof(pcre_uchar);
-  
-/* Get the memory. */ 
+
+/* Get the memory. */
 
 re = (REAL_PCRE *)(PUBL(malloc))(size);
 if (re == NULL)
@@ -8044,19 +8521,19 @@ cd->had_pruneorskip = FALSE;
 cd->check_lookbehind = FALSE;
 cd->open_caps = NULL;
 
-/* If any named groups were found, create the name/number table from the list 
+/* If any named groups were found, create the name/number table from the list
 created in the first pass. */
 
 if (cd->names_found > 0)
   {
   int i = cd->names_found;
-  named_group *ng = cd->named_groups; 
+  named_group *ng = cd->named_groups;
   cd->names_found = 0;
   for (; i > 0; i--, ng++)
-    add_name(cd, ng->name, ng->length, ng->number); 
+    add_name(cd, ng->name, ng->length, ng->number);
   if (cd->named_group_list_size > NAMED_GROUP_LIST_SIZE)
     (PUBL(free))((void *)cd->named_groups);
-  } 
+  }
 
 /* Set up a starting, non-extracting bracket, then compile the expression. On
 error, errorcode will be set non-zero, so we don't need to look at the result
@@ -8132,6 +8609,12 @@ cd->start_workspace = NULL;
 subpattern. */
 
 if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
+
+/* Unless disabled, check whether single character iterators can be
+auto-possessified. The function overwrites the appropriate opcode values. */
+
+if ((options & PCRE_NO_AUTO_POSSESSIFY) == 0)
+  auto_possessify((pcre_uchar *)codestart, utf, cd);
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,

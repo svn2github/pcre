@@ -9230,4 +9230,11 @@ No match
     Abarbar
 No match
 
+/^(\d+)\s+IN\s+SOA\s+(\S+)\s+(\S+)\s*\(\s*$/
+    1 IN SOA non-sp1 non-sp2(
+ 0: 1 IN SOA non-sp1 non-sp2(
+ 1: 1
+ 2: non-sp1
+ 3: non-sp2
+
 /-- End of testinput1 --/

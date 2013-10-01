@@ -5620,4 +5620,7 @@ AbcdCBefgBhiBqz
     Afoofoo
     Abarbar
 
+/^(\d+)\s+IN\s+SOA\s+(\S+)\s+(\S+)\s*\(\s*$/
+    1 IN SOA non-sp1 non-sp2(
+
 /-- End of testinput1 --/

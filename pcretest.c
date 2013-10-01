@@ -2893,6 +2893,7 @@ printf("  -help    show usage information\n");
 printf("  -i       show information about compiled patterns\n"
        "  -M       find MATCH_LIMIT minimum for each subject\n"
        "  -m       output memory used information\n"
+       "  -O       set PCRE_NO_AUTO_POSSESSIFY on each pattern\n" 
        "  -o <n>   set size of offsets vector to <n>\n");
 #if !defined NOPOSIX
 printf("  -p       use POSIX interface\n");
@@ -2930,6 +2931,7 @@ const char *version;
 int options = 0;
 int study_options = 0;
 int default_find_match_limit = FALSE;
+pcre_uint32 default_options = 0;
 int op = 1;
 int timeit = 0;
 int timeitm = 0;
@@ -3075,6 +3077,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(arg, "-i") == 0) showinfo = 1;
   else if (strcmp(arg, "-d") == 0) showinfo = debug = 1;
   else if (strcmp(arg, "-M") == 0) default_find_match_limit = TRUE;
+  else if (strcmp(arg, "-O") == 0) default_options = PCRE_NO_AUTO_POSSESSIFY;
 #if !defined NODFA
   else if (strcmp(arg, "-dfa") == 0) all_use_dfa = 1;
 #endif
@@ -3615,7 +3618,7 @@ while (!done)
 
   /* Look for options after final delimiter */
 
-  options = 0;
+  options = default_options;
   study_options = force_study_options;
   log_store = showstore;  /* default from command line */
 
@@ -3647,6 +3650,7 @@ while (!done)
       case 'K': do_mark = 1; break;
       case 'M': log_store = 1; break;
       case 'N': options |= PCRE_NO_AUTO_CAPTURE; break;
+      case 'O': options |= PCRE_NO_AUTO_POSSESSIFY; break;
 
 #if !defined NOPOSIX
       case 'P': do_posix = 1; break;
@@ -4087,7 +4091,7 @@ while (!done)
       if (do_flip) all_options = swap_uint32(all_options);
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -4100,6 +4104,7 @@ while (!done)
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
           ((get_options & PCRE_NO_AUTO_CAPTURE) != 0)? " no_auto_capture" : "",
+          ((get_options & PCRE_NO_AUTO_POSSESSIFY) != 0)? " no_auto_possessify" : "",
           ((get_options & PCRE_UTF8) != 0)? " utf" : "",
           ((get_options & PCRE_UCP) != 0)? " ucp" : "",
           ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf_check" : "",
