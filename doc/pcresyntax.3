@@ -1,4 +1,4 @@
-.TH PCRESYNTAX 3 "26 April 2013" "PCRE 8.33"
+.TH PCRESYNTAX 3 "05 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -115,10 +115,13 @@ PCRE_UCP option.
 .sp
   Xan        Alphanumeric: union of properties L and N
   Xps        POSIX space: property Z or tab, NL, VT, FF, CR
-  Xsp        Perl space: property Z or tab, NL, FF, CR
+  Xsp        Perl space: property Z or tab, NL, VT, FF, CR
   Xuc        Univerally-named character: one that can be
                represented by a Universal Character Name
   Xwd        Perl word: property Xan or underscore
+.sp  
+Perl and POSIX space are now the same. Perl added VT to its space character set
+at release 5.18 and PCRE changed at release 8.34.
 .
 .
 .SH "SCRIPT NAMES FOR \ep AND \eP"
@@ -495,6 +498,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 26 April 2013
+Last updated: 05 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

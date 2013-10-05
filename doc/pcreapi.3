@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "01 October 2013" "PCRE 8.34"
+.TH PCREAPI 3 "05 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -645,11 +645,14 @@ documentation.
   PCRE_EXTENDED
 .sp
 If this bit is set, white space data characters in the pattern are totally
-ignored except when escaped or inside a character class. White space does not
-include the VT character (code 11). In addition, characters between an
-unescaped # outside a character class and the next newline, inclusive, are also
-ignored. This is equivalent to Perl's /x option, and it can be changed within a
-pattern by a (?x) option setting.
+ignored except when escaped or inside a character class. White space did not
+used to include the VT character (code 11), because Perl did not treat this 
+character as white space. However, Perl changed at release 5.18, so PCRE
+followed at release 8.34, and VT is now treated as white space. PCRE_EXTENDED
+also causes characters between an unescaped # outside a character class and the
+next newline, inclusive, to be ignored. PCRE_EXTENDED is equivalent to
+Perl's /x option, and it can be changed within a pattern by a (?x) option
+setting.
 .P
 Which characters are interpreted as newlines is controlled by the options
 passed to \fBpcre_compile()\fP or by a special sequence at the start of the
@@ -2863,6 +2866,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 October 2013
+Last updated: 05 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

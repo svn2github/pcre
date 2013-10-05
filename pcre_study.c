@@ -1219,24 +1219,16 @@ do
         set_type_bits(start_bits, cbit_digit, table_limit, cd);
         break;
 
-        /* The cbit_space table has vertical tab as whitespace; we have to
-        ensure it gets set as not whitespace. Luckily, the code value is the
-        same (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate
-        bit. */
+        /* The cbit_space table has vertical tab as whitespace; we no longer 
+        have to play fancy tricks because Perl added VT to its whitespace at 
+        release 5.18. PCRE added it at release 8.34. */
 
         case OP_NOT_WHITESPACE:
         set_nottype_bits(start_bits, cbit_space, table_limit, cd);
-        start_bits[1] |= 0x08;
         break;
 
-        /* The cbit_space table has vertical tab as whitespace; we have to
-        avoid setting it. Luckily, the code value is the same (0x0b) in ASCII
-        and EBCDIC, so we can just adjust the appropriate bit. */
-
         case OP_WHITESPACE:
-        c = start_bits[1];    /* Save in case it was already set */
         set_type_bits(start_bits, cbit_space, table_limit, cd);
-        start_bits[1] = (start_bits[1] & ~0x08) | c;
         break;
 
         case OP_NOT_WORDCHAR:

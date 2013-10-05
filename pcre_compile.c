@@ -2650,11 +2650,11 @@ switch(ptype)
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
           PRIV(ucp_gentype)[prop->chartype] == ucp_N) == negated;
 
+  /* Perl space used to exclude VT, but from Perl 5.18 it is included, which
+  means that Perl space and POSIX space are now identical. PCRE was changed
+  at release 8.34. */
+    
   case PT_SPACE:    /* Perl space */
-  return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-          c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
-          == negated;
-
   case PT_PXSPACE:  /* POSIX space */
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
           c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
@@ -4627,21 +4627,20 @@ for (;; ptr++)
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_word];
             continue;
 
-            /* Perl 5.004 onwards omits VT from \s, but we must preserve it
-            if it was previously set by something earlier in the character
-            class. Luckily, the value of CHAR_VT is 0x0b in both ASCII and
-            EBCDIC, so we lazily just adjust the appropriate bit. */
+            /* Perl 5.004 onwards omitted VT from \s, but restored it at Perl
+            5.18. Before PCRE 8.34, we had to preserve the VT bit if it was
+            previously set by something earlier in the character class.
+            Luckily, the value of CHAR_VT is 0x0b in both ASCII and EBCDIC, so
+            we could just adjust the appropriate bit. From PCRE 8.34 we no 
+            longer treat \s and \S specially. */
 
             case ESC_s:
-            classbits[0] |= cbits[cbit_space];
-            classbits[1] |= cbits[cbit_space+1] & ~0x08;
-            for (c = 2; c < 32; c++) classbits[c] |= cbits[c+cbit_space];
+            for (c = 0; c < 32; c++) classbits[c] |= cbits[c+cbit_space];
             continue;
 
             case ESC_S:
             should_flip_negation = TRUE;
             for (c = 0; c < 32; c++) classbits[c] |= ~cbits[c+cbit_space];
-            classbits[1] |= 0x08;    /* Perl 5.004 onwards omits VT from \s */
             continue;
 
             /* The rest apply in both UCP and non-UCP cases. */

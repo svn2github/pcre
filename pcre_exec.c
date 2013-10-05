@@ -2656,13 +2656,11 @@ for (;;)
           RRETURN(MATCH_NOMATCH);
         break;
 
+        /* Perl space used to exclude VT, but from Perl 5.18 it is included,
+        which means that Perl space and POSIX space are now identical. PCRE
+        was changed at release 8.34. */
+    
         case PT_SPACE:    /* Perl space */
-        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-             c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
-               == (op == OP_NOTPROP))
-          RRETURN(MATCH_NOMATCH);
-        break;
-
         case PT_PXSPACE:  /* POSIX space */
         if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
              c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
@@ -4283,22 +4281,11 @@ for (;;)
             }
           break;
 
+          /* Perl space used to exclude VT, but from Perl 5.18 it is included,
+          which means that Perl space and POSIX space are now identical. PCRE
+          was changed at release 8.34. */
+    
           case PT_SPACE:    /* Perl space */
-          for (i = 1; i <= min; i++)
-            {
-            if (eptr >= md->end_subject)
-              {
-              SCHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
-            GETCHARINCTEST(c, eptr);
-            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_FF || c == CHAR_CR)
-                   == prop_fail_result)
-              RRETURN(MATCH_NOMATCH);
-            }
-          break;
-
           case PT_PXSPACE:  /* POSIX space */
           for (i = 1; i <= min; i++)
             {
@@ -5031,25 +5018,11 @@ for (;;)
             }
           /* Control never gets here */
 
+          /* Perl space used to exclude VT, but from Perl 5.18 it is included,
+          which means that Perl space and POSIX space are now identical. PCRE
+          was changed at release 8.34. */
+    
           case PT_SPACE:    /* Perl space */
-          for (fi = min;; fi++)
-            {
-            RMATCH(eptr, ecode, offset_top, md, eptrb, RM60);
-            if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (fi >= max) RRETURN(MATCH_NOMATCH);
-            if (eptr >= md->end_subject)
-              {
-              SCHECK_PARTIAL();
-              RRETURN(MATCH_NOMATCH);
-              }
-            GETCHARINCTEST(c, eptr);
-            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_FF || c == CHAR_CR)
-                   == prop_fail_result)
-              RRETURN(MATCH_NOMATCH);
-            }
-          /* Control never gets here */
-
           case PT_PXSPACE:  /* POSIX space */
           for (fi = min;; fi++)
             {
@@ -5549,24 +5522,11 @@ for (;;)
             }
           break;
 
+          /* Perl space used to exclude VT, but from Perl 5.18 it is included,
+          which means that Perl space and POSIX space are now identical. PCRE
+          was changed at release 8.34. */
+    
           case PT_SPACE:    /* Perl space */
-          for (i = min; i < max; i++)
-            {
-            int len = 1;
-            if (eptr >= md->end_subject)
-              {
-              SCHECK_PARTIAL();
-              break;
-              }
-            GETCHARLENTEST(c, eptr, len);
-            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_FF || c == CHAR_CR)
-                 == prop_fail_result)
-              break;
-            eptr+= len;
-            }
-          break;
-
           case PT_PXSPACE:  /* POSIX space */
           for (i = min; i < max; i++)
             {

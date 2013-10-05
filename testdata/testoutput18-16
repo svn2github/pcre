@@ -742,7 +742,7 @@ Options: utf
 No first char
 Need char = 'x'
 Subject length lower bound = 4
-Starting byte set: \x09 \x0a \x0c \x0d \x20 x 
+Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 x 
 
 /\sxxx\s/I8ST1
 Capturing subpattern count = 0

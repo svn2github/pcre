@@ -159,13 +159,11 @@ while ((t = *data++) != XCL_END)
         return !negated;
       break;
 
+      /* Perl space used to exclude VT, but from Perl 5.18 it is included,
+      which means that Perl space and POSIX space are now identical. PCRE
+      was changed at release 8.34. */
+    
       case PT_SPACE:    /* Perl space */
-      if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-           c == CHAR_HT || c == CHAR_NL || c == CHAR_FF || c == CHAR_CR)
-             == (t == XCL_PROP))
-        return !negated;
-      break;
-
       case PT_PXSPACE:  /* POSIX space */
       if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
            c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||

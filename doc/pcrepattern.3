@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "06 September 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "05 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -494,11 +494,10 @@ classes. They each match one character of the appropriate type. If the current
 matching point is at the end of the subject string, all of them fail, because
 there is no character to match.
 .P
-For compatibility with Perl, \es does not match the VT character (code 11).
-This makes it different from the the POSIX "space" class. The \es characters
-are HT (9), LF (10), FF (12), CR (13), and space (32). If "use locale;" is
-included in a Perl script, \es may match the VT character. In PCRE, it never
-does.
+For compatibility with Perl, \es did not used to match the VT character (code
+11), which made it different from the the POSIX "space" class. However, Perl
+added VT at release 5.18, and PCRE followed suit at release 8.34. The \es
+characters are now HT (9), LF (10), VT (11), FF (12), CR (13), and space (32).
 .P
 A "word" character is an underscore or any character that is a letter or digit.
 By default, the definition of letters and digits is controlled by PCRE's
@@ -1296,9 +1295,9 @@ are:
   xdigit   hexadecimal digits
 .sp
 The "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
-space (32). Notice that this list includes the VT character (code 11). This
-makes "space" different to \es, which does not include VT (for Perl
-compatibility).
+space (32). "Space" used to be different to \es, which did not include VT, for
+Perl compatibility. However, Perl changed at release 5.18, and PCRE followed at
+release 8.34. "Space" and \es now match the same set of characters.
 .P
 The name "word" is a Perl extension, and "blank" is a GNU extension from Perl
 5.8. Another Perl extension is negation, which is indicated by a ^ character
@@ -3157,6 +3156,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 06 September 2013
+Last updated: 05 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
