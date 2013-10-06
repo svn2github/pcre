@@ -91,6 +91,12 @@ Version 8.34 xx-xxxx-201x
 18. The character VT has been added to the set of characters that match \s and
     are generally treated as white space, following this same change in Perl 
     5.18. There is now no difference between "Perl space" and "POSIX space". 
+    
+19. The code for checking named groups as conditions, either for being set or 
+    for being recursed, has been refactored (this is related to 14 and 15
+    above). Processing unduplicated named groups should now be as fast at
+    numerical groups, and processing duplicated groups should be faster than
+    before.
 
 
 Version 8.33 28-May-2013
