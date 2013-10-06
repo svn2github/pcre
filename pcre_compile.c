@@ -1524,9 +1524,9 @@ for (;;)
 
     case OP_CALLOUT:
     case OP_CREF:
-    case OP_NCREF:
+    case OP_DNCREF:
     case OP_RREF:
-    case OP_NRREF:
+    case OP_DNRREF:
     case OP_DEF:
     code += PRIV(OP_lengths)[*code];
     break;
@@ -1663,13 +1663,13 @@ for (;;)
     case OP_COMMIT:
     case OP_CREF:
     case OP_DEF:
+    case OP_DNCREF:
+    case OP_DNRREF:
     case OP_DOLL:
     case OP_DOLLM:
     case OP_EOD:
     case OP_EODN:
     case OP_FAIL:
-    case OP_NCREF:
-    case OP_NRREF:
     case OP_NOT_WORD_BOUNDARY:
     case OP_PRUNE:
     case OP_REVERSE:
@@ -6030,8 +6030,8 @@ for (;; ptr++)
                tempptr[2] == CHAR_LESS_THAN_SIGN))
           break;
 
-        /* Most other conditions use OP_CREF (a couple change to OP_RREF
-        below), and all need to skip 1+IMM2_SIZE bytes at the start of the group. */
+        /* Other conditions use OP_CREF/OP_DNCREF/OP_RREF/OP_DNRREF, and all
+        need to skip at least 1+IMM2_SIZE bytes at the start of the group. */
 
         code[1+LINK_SIZE] = OP_CREF;
         skipbytes = 1+IMM2_SIZE;
@@ -6047,7 +6047,9 @@ for (;; ptr++)
           }
 
         /* Check for a test for a named group's having been set, using the Perl
-        syntax (?(<name>) or (?('name') */
+        syntax (?(<name>) or (?('name'), and also allow for the original PCRE
+        syntax of (?(name) or for (?(+n), (?(-n), and just (?(n). As names may 
+        consist entirely of digits, there is scope for ambiguity. */
 
         else if (ptr[1] == CHAR_LESS_THAN_SIGN)
           {
@@ -6064,8 +6066,16 @@ for (;; ptr++)
           terminator = CHAR_NULL;
           if (ptr[1] == CHAR_MINUS || ptr[1] == CHAR_PLUS) refsign = *(++ptr);
           }
+          
+        /* When a name is one of a number of duplicates, a different opcode is 
+        used and it needs more memory. Unfortunately we cannot tell whether a 
+        name is a duplicate in the first pass, so we have to allow for more 
+        memory except when we know it is a relative numerical reference. */
+          
+        if (refsign < 0 && lengthptr != NULL) *lengthptr += IMM2_SIZE;
 
-        /* We now expect to read a name; any thing else is an error */
+        /* We now expect to read a name (possibly all digits); any thing else
+        is an error. In the case of all digits, also get it as a number. */
 
         if (!MAX_255(ptr[1]) || (cd->ctypes[ptr[1]] & ctype_word) == 0)
           {
@@ -6073,8 +6083,6 @@ for (;; ptr++)
           *errorcodeptr = ERR28;
           goto FAILED;
           }
-
-        /* Read the name, but also get it as a number if it's all digits */
 
         recno = 0;
         name = ++ptr;
@@ -6086,6 +6094,8 @@ for (;; ptr++)
           }
         namelen = (int)(ptr - name);
 
+        /* Check the terminator */
+         
         if ((terminator > 0 && *ptr++ != (pcre_uchar)terminator) ||
             *ptr++ != CHAR_RIGHT_PARENTHESIS)
           {
@@ -6121,11 +6131,8 @@ for (;; ptr++)
           }
 
         /* Otherwise (did not start with "+" or "-"), start by looking for the
-        name. If we find a name, add one to the opcode to change OP_CREF or
-        OP_RREF into OP_NCREF or OP_NRREF. These behave exactly the same,
-        except they record that the reference was originally to a name. The
-        information is used to check duplicate names. */
-
+        name. */
+         
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
           {
@@ -6133,13 +6140,33 @@ for (;; ptr++)
           slot += cd->name_entry_size;
           }
 
-        /* Found the named subpattern */
+        /* Found the named subpattern. If the name is duplicated, add one to 
+        the opcode to change CREF/RREF into DNCREF/DNRREF and insert 
+        appropriate data values. Otherwise, just insert the unique subpattern 
+        number. */
 
         if (i < cd->names_found)
           {
-          recno = GET2(slot, 0);
-          PUT2(code, 2+LINK_SIZE, recno);
-          code[1+LINK_SIZE]++;
+          int offset = i++;
+          int count = 1; 
+          recno = GET2(slot, 0);   /* Number from first found */
+          for (; i < cd->names_found; i++)
+            {
+            slot += cd->name_entry_size;
+            if (STRNCMP_UC_UC(name, slot+IMM2_SIZE, namelen) != 0) break;
+            count++; 
+            }
+          if (count > 1)
+            {
+            PUT2(code, 2+LINK_SIZE, offset);
+            PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);  
+            skipbytes += IMM2_SIZE;
+            code[1+LINK_SIZE]++;
+            }    
+          else  /* Not a duplicated name */
+            {
+            PUT2(code, 2+LINK_SIZE, recno);
+            } 
           }
 
         /* If terminator == CHAR_NULL it means that the name followed directly
@@ -7829,9 +7856,9 @@ do {
      switch (*scode)
        {
        case OP_CREF:
-       case OP_NCREF:
+       case OP_DNCREF:
        case OP_RREF:
-       case OP_NRREF:
+       case OP_DNRREF:
        case OP_DEF:
        return FALSE;
 

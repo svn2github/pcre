@@ -176,9 +176,9 @@ for (;;)
 
     case OP_REVERSE:
     case OP_CREF:
-    case OP_NCREF:
+    case OP_DNCREF:
     case OP_RREF:
-    case OP_NRREF:
+    case OP_DNRREF:
     case OP_DEF:
     case OP_CALLOUT:
     case OP_SOD:
@@ -812,6 +812,10 @@ do
       case OP_COND:
       case OP_CREF:
       case OP_DEF:
+      case OP_DNCREF:
+      case OP_DNREF:
+      case OP_DNREFI:
+      case OP_DNRREF:
       case OP_DOLL:
       case OP_DOLLM:
       case OP_END:
@@ -820,7 +824,6 @@ do
       case OP_EXTUNI:
       case OP_FAIL:
       case OP_MARK:
-      case OP_NCREF:
       case OP_NOT:
       case OP_NOTEXACT:
       case OP_NOTEXACTI:
@@ -852,15 +855,12 @@ do
       case OP_NOTUPTOI:
       case OP_NOT_HSPACE:
       case OP_NOT_VSPACE:
-      case OP_NRREF:
       case OP_PROP:
       case OP_PRUNE:
       case OP_PRUNE_ARG:
       case OP_RECURSE:
       case OP_REF:
       case OP_REFI:
-      case OP_DNREF:
-      case OP_DNREFI:
       case OP_REVERSE:
       case OP_RREF:
       case OP_SCOND:

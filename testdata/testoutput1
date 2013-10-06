@@ -9237,4 +9237,14 @@ No match
  2: non-sp1
  3: non-sp2
 
+/^ (?:(?<A>A)|(?'B'B)(?<A>A)) (?('A')x) (?(<B>)y)$/xJ
+    Ax
+ 0: Ax
+ 1: A
+    BAxy 
+ 0: BAxy
+ 1: <unset>
+ 2: B
+ 3: A
+
 /-- End of testinput1 --/

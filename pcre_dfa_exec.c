@@ -173,8 +173,8 @@ static const pcre_uint8 coptable[] = {
   0, 0,                          /* ONCE, ONCE_NC                          */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
-  0, 0,                          /* CREF, NCREF                            */
-  0, 0,                          /* RREF, NRREF                            */
+  0, 0,                          /* CREF, DNCREF                           */
+  0, 0,                          /* RREF, DNRREF                           */
   0,                             /* DEF                                    */
   0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
   0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG                 */
@@ -244,8 +244,8 @@ static const pcre_uint8 poptable[] = {
   0, 0,                          /* ONCE, ONCE_NC                          */
   0, 0, 0, 0, 0,                 /* BRA, BRAPOS, CBRA, CBRAPOS, COND       */
   0, 0, 0, 0, 0,                 /* SBRA, SBRAPOS, SCBRA, SCBRAPOS, SCOND  */
-  0, 0,                          /* CREF, NCREF                            */
-  0, 0,                          /* RREF, NRREF                            */
+  0, 0,                          /* CREF, DNCREF                           */
+  0, 0,                          /* RREF, DNRREF                           */
   0,                             /* DEF                                    */
   0, 0, 0,                       /* BRAZERO, BRAMINZERO, BRAPOSZERO        */
   0, 0, 0,                       /* MARK, PRUNE, PRUNE_ARG                 */
@@ -2661,9 +2661,11 @@ for (;;)
 
         condcode = code[LINK_SIZE+1];
 
-        /* Back reference conditions are not supported */
+        /* Back reference conditions and duplicate named recursion conditions
+        are not supported */
 
-        if (condcode == OP_CREF || condcode == OP_NCREF)
+        if (condcode == OP_CREF || condcode == OP_DNCREF || 
+            condcode == OP_DNRREF)
           return PCRE_ERROR_DFA_UCOND;
 
         /* The DEFINE condition is always false */
@@ -2675,7 +2677,7 @@ for (;;)
         which means "test if in any recursion". We can't test for specifically
         recursed groups. */
 
-        else if (condcode == OP_RREF || condcode == OP_NRREF)
+        else if (condcode == OP_RREF)
           {
           int value = GET2(code, LINK_SIZE + 2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;

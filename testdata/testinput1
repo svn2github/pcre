@@ -5623,4 +5623,8 @@ AbcdCBefgBhiBqz
 /^(\d+)\s+IN\s+SOA\s+(\S+)\s+(\S+)\s*\(\s*$/
     1 IN SOA non-sp1 non-sp2(
 
+/^ (?:(?<A>A)|(?'B'B)(?<A>A)) (?('A')x) (?(<B>)y)$/xJ
+    Ax
+    BAxy 
+
 /-- End of testinput1 --/

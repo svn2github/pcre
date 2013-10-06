@@ -7693,7 +7693,7 @@ No match
         ^
         CBra 1
         Cond
-      2 Cond nref
+      2 Cond ref
         y
         Ket
         [()]
@@ -10268,7 +10268,7 @@ No match
         Ket
         Ket
         Cond
-      4 Cond nref
+        Cond ref <D>2
         X
         Alt
         Y
@@ -10314,7 +10314,7 @@ No match
         CBra 4
         d
         Cond
-        Cond nrecurse 1
+        Cond recurse <A>2
         $
         Alt
         Recurse

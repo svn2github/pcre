@@ -425,8 +425,17 @@ for(;;)
     break;
 
     case OP_CREF:
-    case OP_NCREF:
     fprintf(f, "%3d %s", GET2(code,1), priv_OP_names[*code]);
+    break;
+
+    case OP_DNCREF:
+      {
+      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) + 
+        IMM2_SIZE;  
+      fprintf(f, " %s Cond ref <", flag);
+      print_puchar(f, entry);
+      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE)); 
+      }
     break;
 
     case OP_RREF:
@@ -437,12 +446,14 @@ for(;;)
       fprintf(f, "    Cond recurse %d", c);
     break;
 
-    case OP_NRREF:
-    c = GET2(code, 1);
-    if (c == RREF_ANY)
-      fprintf(f, "    Cond nrecurse any");
-    else
-      fprintf(f, "    Cond nrecurse %d", c);
+    case OP_DNRREF:
+      {
+      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) + 
+        IMM2_SIZE;  
+      fprintf(f, " %s Cond recurse <", flag);
+      print_puchar(f, entry);
+      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE)); 
+      }
     break;
 
     case OP_DEF:
