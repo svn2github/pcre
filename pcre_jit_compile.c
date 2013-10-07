@@ -371,7 +371,7 @@ typedef struct compiler_common {
   sljit_sw ctypes;
   int digits[2 + MAX_RANGE_SIZE];
   /* Named capturing brackets. */
-  sljit_uw name_table;
+  pcre_uchar *name_table;
   sljit_sw name_count;
   sljit_sw name_entry_size;
 
@@ -614,9 +614,9 @@ switch(*cc)
   case OP_SCBRAPOS:
   case OP_SCOND:
   case OP_CREF:
-  case OP_NCREF:
+  case OP_DNCREF:
   case OP_RREF:
-  case OP_NRREF:
+  case OP_DNRREF:
   case OP_DEF:
   case OP_BRAZERO:
   case OP_BRAMINZERO:
@@ -736,9 +736,7 @@ switch(*cc)
 
 static BOOL check_opcode_types(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend)
 {
-pcre_uchar *name;
-pcre_uchar *name2;
-unsigned int cbra_index;
+pcre_uchar *slot;
 int i;
 
 /* Calculate important variables (like stack size) and checks whether all opcodes are supported. */
@@ -778,24 +776,15 @@ while (cc < ccend)
     cc += 1 + IMM2_SIZE;
     break;
 
-    case OP_NCREF:
-    cbra_index = GET2(cc, 1);
-    name = (pcre_uchar *)common->name_table;
-    name2 = name;
-    for (i = 0; i < common->name_count; i++)
+    case OP_DNCREF:
+    i = GET2(cc, 1 + IMM2_SIZE);
+    slot = common->name_table + GET2(cc, 1) * common->name_entry_size;
+    while (i-- > 0)
       {
-      if (GET2(name, 0) == cbra_index) break;
-      name += common->name_entry_size;
+      common->optimized_cbracket[GET2(slot, 0)] = 0;
+      slot += common->name_entry_size;
       }
-    SLJIT_ASSERT(i != common->name_count);
-
-    for (i = 0; i < common->name_count; i++)
-      {
-      if (STRCMP_UC_UC(name2 + IMM2_SIZE, name + IMM2_SIZE) == 0)
-        common->optimized_cbracket[GET2(name2, 0)] = 0;
-      name2 += common->name_entry_size;
-      }
-    cc += 1 + IMM2_SIZE;
+    cc += 1 + 2 * IMM2_SIZE;
     break;
 
     case OP_RECURSE:
@@ -4317,16 +4306,9 @@ while (*cc != XCL_END)
 
       case PT_SPACE:
       case PT_PXSPACE:
-      if (*cc == PT_SPACE)
-        {
-        OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
-        jump = CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, 11 - charoffset);
-        }
       SET_CHAR_OFFSET(9);
       OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 13 - 9);
       OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_LESS_EQUAL);
-      if (*cc == PT_SPACE)
-        JUMPHERE(jump);
 
       SET_TYPE_OFFSET(ucp_Zl);
       OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_Zs - ucp_Zl);
@@ -5902,116 +5884,6 @@ common->accept = save_accept;
 return cc + 1 + LINK_SIZE;
 }
 
-static sljit_sw SLJIT_CALL do_searchovector(sljit_uw refno, sljit_sw* locals, pcre_uchar *name_table)
-{
-int condition = FALSE;
-pcre_uchar *slotA = name_table;
-pcre_uchar *slotB;
-sljit_sw name_count = locals[LOCALS0 / sizeof(sljit_sw)];
-sljit_sw name_entry_size = locals[LOCALS1 / sizeof(sljit_sw)];
-sljit_sw no_capture;
-int i;
-
-locals += refno & 0xff;
-refno >>= 8;
-no_capture = locals[1];
-
-for (i = 0; i < name_count; i++)
-  {
-  if (GET2(slotA, 0) == refno) break;
-  slotA += name_entry_size;
-  }
-
-if (i < name_count)
-  {
-  /* Found a name for the number - there can be only one; duplicate names
-  for different numbers are allowed, but not vice versa. First scan down
-  for duplicates. */
-
-  slotB = slotA;
-  while (slotB > name_table)
-    {
-    slotB -= name_entry_size;
-    if (STRCMP_UC_UC(slotA + IMM2_SIZE, slotB + IMM2_SIZE) == 0)
-      {
-      condition = locals[GET2(slotB, 0) << 1] != no_capture;
-      if (condition) break;
-      }
-    else break;
-    }
-
-  /* Scan up for duplicates */
-  if (!condition)
-    {
-    slotB = slotA;
-    for (i++; i < name_count; i++)
-      {
-      slotB += name_entry_size;
-      if (STRCMP_UC_UC(slotA + IMM2_SIZE, slotB + IMM2_SIZE) == 0)
-        {
-        condition = locals[GET2(slotB, 0) << 1] != no_capture;
-        if (condition) break;
-        }
-      else break;
-      }
-    }
-  }
-return condition;
-}
-
-static sljit_sw SLJIT_CALL do_searchgroups(sljit_uw recno, sljit_uw* locals, pcre_uchar *name_table)
-{
-int condition = FALSE;
-pcre_uchar *slotA = name_table;
-pcre_uchar *slotB;
-sljit_uw name_count = locals[LOCALS0 / sizeof(sljit_sw)];
-sljit_uw name_entry_size = locals[LOCALS1 / sizeof(sljit_sw)];
-sljit_uw group_num = locals[POSSESSIVE0 / sizeof(sljit_sw)];
-sljit_uw i;
-
-for (i = 0; i < name_count; i++)
-  {
-  if (GET2(slotA, 0) == recno) break;
-  slotA += name_entry_size;
-  }
-
-if (i < name_count)
-  {
-  /* Found a name for the number - there can be only one; duplicate
-  names for different numbers are allowed, but not vice versa. First
-  scan down for duplicates. */
-
-  slotB = slotA;
-  while (slotB > name_table)
-    {
-    slotB -= name_entry_size;
-    if (STRCMP_UC_UC(slotA + IMM2_SIZE, slotB + IMM2_SIZE) == 0)
-      {
-      condition = GET2(slotB, 0) == group_num;
-      if (condition) break;
-      }
-    else break;
-    }
-
-  /* Scan up for duplicates */
-  if (!condition)
-    {
-    slotB = slotA;
-    for (i++; i < name_count; i++)
-      {
-      slotB += name_entry_size;
-      if (STRCMP_UC_UC(slotA + IMM2_SIZE, slotB + IMM2_SIZE) == 0)
-        {
-        condition = GET2(slotB, 0) == group_num;
-        if (condition) break;
-        }
-      else break;
-      }
-    }
-  }
-return condition;
-}
-
 static SLJIT_INLINE void match_once_common(compiler_common *common, pcre_uchar ket, int framesize, int private_data_ptr, BOOL has_alternatives, BOOL needs_control_head)
 {
 DEFINE_COMPILER;
@@ -6144,11 +6016,12 @@ backtrack_common *backtrack;
 pcre_uchar opcode;
 int private_data_ptr = 0;
 int offset = 0;
-int stacksize;
+int i, stacksize;
 int repeat_ptr = 0, repeat_length = 0;
 int repeat_type = 0, repeat_count = 0;
 pcre_uchar *ccbegin;
 pcre_uchar *matchingpath;
+pcre_uchar *slot;
 pcre_uchar bra = OP_BRA;
 pcre_uchar ket;
 assert_backtrack *assert;
@@ -6198,20 +6071,8 @@ SLJIT_ASSERT(!((bra == OP_BRAZERO && ket == OP_KETRMIN) || (bra == OP_BRAMINZERO
 cc += GET(cc, 1);
 
 has_alternatives = *cc == OP_ALT;
-if (SLJIT_UNLIKELY(opcode == OP_COND) || SLJIT_UNLIKELY(opcode == OP_SCOND))
-  {
-  has_alternatives = (*matchingpath == OP_RREF) ? FALSE : TRUE;
-  if (*matchingpath == OP_NRREF)
-    {
-    stacksize = GET2(matchingpath, 1);
-    if (common->currententry == NULL || stacksize == RREF_ANY)
-      has_alternatives = FALSE;
-    else if (common->currententry->start == 0)
-      has_alternatives = stacksize != 0;
-    else
-      has_alternatives = stacksize != (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
-    }
-  }
+if (SLJIT_UNLIKELY(opcode == OP_COND || opcode == OP_SCOND))
+  has_alternatives = (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF) ? FALSE : TRUE;
 
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
@@ -6448,46 +6309,72 @@ if (opcode == OP_COND || opcode == OP_SCOND)
       CMP(SLJIT_C_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(GET2(matchingpath, 1) << 1), SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(1)));
     matchingpath += 1 + IMM2_SIZE;
     }
-  else if (*matchingpath == OP_NCREF)
+  else if (*matchingpath == OP_DNCREF)
     {
     SLJIT_ASSERT(has_alternatives);
-    stacksize = GET2(matchingpath, 1);
-    jump = CMP(SLJIT_C_NOT_EQUAL, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(stacksize << 1), SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(1));
 
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1, STACK_TOP, 0);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, SLJIT_IMM, common->name_count);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, SLJIT_IMM, common->name_entry_size);
-    OP1(SLJIT_MOV, SLJIT_SCRATCH_REG1, 0, SLJIT_IMM, (stacksize << 8) | (common->ovector_start / sizeof(sljit_sw)));
-    GET_LOCAL_BASE(SLJIT_SCRATCH_REG2, 0, 0);
-    OP1(SLJIT_MOV, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, common->name_table);
-    sljit_emit_ijump(compiler, SLJIT_CALL3, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_searchovector));
-    OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1);
-    add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), CMP(SLJIT_C_EQUAL, SLJIT_SCRATCH_REG1, 0, SLJIT_IMM, 0));
-
-    JUMPHERE(jump);
-    matchingpath += 1 + IMM2_SIZE;
+    i = GET2(matchingpath, 1 + IMM2_SIZE);
+    slot = common->name_table + GET2(matchingpath, 1) * common->name_entry_size;
+    OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(1));
+    OP2(SLJIT_SUB | SLJIT_SET_E, TMP2, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(GET2(slot, 0) << 1), TMP1, 0);
+    slot += common->name_entry_size;
+    i--;
+    while (i-- > 0)
+      {
+      OP2(SLJIT_SUB, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(GET2(slot, 0) << 1), TMP1, 0);
+      OP2(SLJIT_OR | SLJIT_SET_E, TMP2, 0, TMP2, 0, STR_PTR, 0);
+      slot += common->name_entry_size;
+      }
+    OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+    add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), JUMP(SLJIT_C_ZERO));
+    matchingpath += 1 + 2 * IMM2_SIZE;
     }
-  else if (*matchingpath == OP_RREF || *matchingpath == OP_NRREF)
+  else if (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF)
     {
     /* Never has other case. */
     BACKTRACK_AS(bracket_backtrack)->u.condfailed = NULL;
+    SLJIT_ASSERT(!has_alternatives);
 
-    stacksize = GET2(matchingpath, 1);
-    if (common->currententry == NULL)
-      stacksize = 0;
-    else if (stacksize == RREF_ANY)
-      stacksize = 1;
-    else if (common->currententry->start == 0)
-      stacksize = stacksize == 0;
-    else
-      stacksize = stacksize == (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
-
-    if (*matchingpath == OP_RREF || stacksize || common->currententry == NULL)
+    if (*matchingpath == OP_RREF)
       {
-      SLJIT_ASSERT(!has_alternatives);
+      stacksize = GET2(matchingpath, 1);
+      if (common->currententry == NULL)
+        stacksize = 0;
+      else if (stacksize == RREF_ANY)
+        stacksize = 1;
+      else if (common->currententry->start == 0)
+        stacksize = stacksize == 0;
+      else
+        stacksize = stacksize == (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
+
       if (stacksize != 0)
         matchingpath += 1 + IMM2_SIZE;
+      }
+    else
+      {
+      if (common->currententry == NULL || common->currententry->start == 0)
+        stacksize = 0;
       else
+        {
+        stacksize = GET2(matchingpath, 1 + IMM2_SIZE);
+        slot = common->name_table + GET2(matchingpath, 1) * common->name_entry_size;
+        i = (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE);
+        while (stacksize > 0)
+          {
+          if (GET2(slot, 0) == i)
+            break;
+          slot += common->name_entry_size;
+          stacksize--;
+          }
+        }
+
+      if (stacksize != 0)
+        matchingpath += 1 + 2 * IMM2_SIZE;
+      }
+
+      /* The stacksize == 0 is a common "else" case. */
+      if (stacksize == 0)
         {
         if (*cc == OP_ALT)
           {
@@ -6497,24 +6384,6 @@ if (opcode == OP_COND || opcode == OP_SCOND)
         else
           matchingpath = cc;
         }
-      }
-    else
-      {
-      SLJIT_ASSERT(has_alternatives);
-
-      stacksize = GET2(matchingpath, 1);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1, STACK_TOP, 0);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0, SLJIT_IMM, common->name_count);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, SLJIT_IMM, common->name_entry_size);
-      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0, SLJIT_IMM, GET2(common->start, common->currententry->start + 1 + LINK_SIZE));
-      OP1(SLJIT_MOV, SLJIT_SCRATCH_REG1, 0, SLJIT_IMM, stacksize);
-      GET_LOCAL_BASE(SLJIT_SCRATCH_REG2, 0, 0);
-      OP1(SLJIT_MOV, SLJIT_SCRATCH_REG3, 0, SLJIT_IMM, common->name_table);
-      sljit_emit_ijump(compiler, SLJIT_CALL3, SLJIT_IMM, SLJIT_FUNC_OFFSET(do_searchgroups));
-      OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE1);
-      add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), CMP(SLJIT_C_EQUAL, SLJIT_SCRATCH_REG1, 0, SLJIT_IMM, 0));
-      matchingpath += 1 + IMM2_SIZE;
-      }
     }
   else
     {
@@ -8958,7 +8827,7 @@ else
 common->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 common->ctypes = (sljit_sw)(tables + ctypes_offset);
 common->digits[0] = -2;
-common->name_table = (sljit_sw)((pcre_uchar *)re + re->name_table_offset);
+common->name_table = ((pcre_uchar *)re) + re->name_table_offset;
 common->name_count = re->name_count;
 common->name_entry_size = re->name_entry_size;
 common->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
