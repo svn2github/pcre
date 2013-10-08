@@ -1923,14 +1923,16 @@
     abc\100\060
     abc\100\60
 
-/abc\81/
-    abc\081
-    abc\0\x38\x31
-
-/abc\91/
-    abc\091
-    abc\0\x39\x31
-
+/^A\8B\9C$/
+    A8B9C
+    *** Failers
+    A\08B\09C  
+    
+/^[A\8B\9C]+$/
+    A8B9C
+    *** Failers 
+    A8B9C\x00
+    
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
 

@@ -879,16 +879,15 @@ return (*p == CHAR_RIGHT_CURLY_BRACKET);
 *************************************************/
 
 /* This function is called when a \ has been encountered. It either returns a
-positive value for a simple escape such as \n, or 0 for a data character
-which will be placed in chptr. A backreference to group n is returned as
-negative n. When UTF-8 is enabled, a positive value greater than 255 may
-be returned in chptr.
-On entry,ptr is pointing at the \. On exit, it is on the final character of the
-escape sequence.
+positive value for a simple escape such as \n, or 0 for a data character which
+will be placed in chptr. A backreference to group n is returned as negative n.
+When UTF-8 is enabled, a positive value greater than 255 may be returned in
+chptr. On entry, ptr is pointing at the \. On exit, it is on the final
+character of the escape sequence.
 
 Arguments:
   ptrptr         points to the pattern position pointer
-  chptr          points to the data character
+  chptr          points to a returned data character
   errorcodeptr   points to the errorcode variable
   bracount       number of previous extracting brackets
   options        the options bits
@@ -1092,16 +1091,20 @@ else
     break;
 
     /* The handling of escape sequences consisting of a string of digits
-    starting with one that is not zero is not straightforward. By experiment,
-    the way Perl works seems to be as follows:
+    starting with one that is not zero is not straightforward. Perl has changed 
+    over the years. Nowadays \g{} for backreferences and \o{} for octal are 
+    recommended to avoid the ambiguities in the old syntax.
 
     Outside a character class, the digits are read as a decimal number. If the
-    number is less than 10, or if there are that many previous extracting
-    left brackets, then it is a back reference. Otherwise, up to three octal
-    digits are read to form an escaped byte. Thus \123 is likely to be octal
-    123 (cf \0123, which is octal 012 followed by the literal 3). If the octal
-    value is greater than 377, the least significant 8 bits are taken. Inside a
-    character class, \ followed by a digit is always an octal number. */
+    number is less than 8 (used to be 10), or if there are that many previous
+    extracting left brackets, then it is a back reference. Otherwise, up to
+    three octal digits are read to form an escaped byte. Thus \123 is likely to
+    be octal 123 (cf \0123, which is octal 012 followed by the literal 3). If
+    the octal value is greater than 377, the least significant 8 bits are
+    taken. \8 and \9 are treated as the literal characters 8 and 9.
+     
+    Inside a character class, \ followed by a digit is always either a literal
+    8 or 9 or an octal number. */
 
     case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4: case CHAR_5:
     case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
@@ -1128,7 +1131,7 @@ else
         *errorcodeptr = ERR61;
         break;
         }
-      if (s < 10 || s <= bracount)
+      if (s < 8 || s <= bracount)  /* Check for back reference */
         {
         escape = -s;
         break;
@@ -1136,16 +1139,14 @@ else
       ptr = oldptr;      /* Put the pointer back and fall through */
       }
 
-    /* Handle an octal number following \. If the first digit is 8 or 9, Perl
-    generates a binary zero byte and treats the digit as a following literal.
-    Thus we have to pull back the pointer by one. */
+    /* Handle a digit following \ when the number is not a back reference. If
+    the first digit is 8 or 9, Perl used to generate a binary zero byte and
+    then treat the digit as a following literal. At least by Perl 5.18 this
+    changed so as not to insert the binary zero. */
 
-    if ((c = *ptr) >= CHAR_8)
-      {
-      ptr--;
-      c = 0;
-      break;
-      }
+    if ((c = *ptr) >= CHAR_8) break;
+    
+    /* Fall through with a digit less than 8 */   
 
     /* \0 always starts an octal number, but we may drop through to here with a
     larger first octal digit. The original code used just to take the least

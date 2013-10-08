@@ -1,4 +1,4 @@
-.TH PCRESYNTAX 3 "05 October 2013" "PCRE 8.34"
+.TH PCRESYNTAX 3 "08 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -32,6 +32,9 @@ documentation. This document contains a quick-reference summary of the syntax.
   \eddd       character with octal code ddd, or backreference
   \exhh       character with hex code hh
   \ex{hhh..}  character with hex code hhh..
+.sp
+Note that \e0dd is always an octal code, and that \e8 and \e9 are the literal 
+characters "8" and "9".   
 .
 .
 .SH "CHARACTER TYPES"
@@ -498,6 +501,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2013
+Last updated: 08 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

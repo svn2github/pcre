@@ -1483,14 +1483,19 @@
     abc\100\x30
     abc\100\060
     abc\100\60
+    
+/^A\8B\9C$/
+    A8B9C
+    *** Failers
+    A\08B\09C  
+    
+/^(A)(B)(C)(D)(E)(F)(G)(H)(I)\8\9$/
+    ABCDEFGHIHI 
 
-/abc\81/
-    abc\081
-    abc\0\x38\x31
-
-/abc\91/
-    abc\091
-    abc\0\x39\x31
+/^[A\8B\9C]+$/
+    A8B9C
+    *** Failers 
+    A8B9C\x00
 
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)\12\123/
     abcdefghijkllS
@@ -5626,5 +5631,8 @@ AbcdCBefgBhiBqz
 /^ (?:(?<A>A)|(?'B'B)(?<A>A)) (?('A')x) (?(<B>)y)$/xJ
     Ax
     BAxy 
+    
+/^A\xZ/
+    A\0Z 
 
 /-- End of testinput1 --/

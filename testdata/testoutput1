@@ -2149,18 +2149,35 @@ No match
     abc\100\60
  0: abc@0
  1: abc
+    
+/^A\8B\9C$/
+    A8B9C
+ 0: A8B9C
+    *** Failers
+No match
+    A\08B\09C  
+No match
+    
+/^(A)(B)(C)(D)(E)(F)(G)(H)(I)\8\9$/
+    ABCDEFGHIHI 
+ 0: ABCDEFGHIHI
+ 1: A
+ 2: B
+ 3: C
+ 4: D
+ 5: E
+ 6: F
+ 7: G
+ 8: H
+ 9: I
 
-/abc\81/
-    abc\081
- 0: abc\x0081
-    abc\0\x38\x31
- 0: abc\x0081
-
-/abc\91/
-    abc\091
- 0: abc\x0091
-    abc\0\x39\x31
- 0: abc\x0091
+/^[A\8B\9C]+$/
+    A8B9C
+ 0: A8B9C
+    *** Failers 
+No match
+    A8B9C\x00
+No match
 
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)\12\123/
     abcdefghijkllS
@@ -9246,5 +9263,9 @@ No match
  1: <unset>
  2: B
  3: A
+    
+/^A\xZ/
+    A\0Z 
+ 0: A\x00Z
 
 /-- End of testinput1 --/

@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "05 October 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "08 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -359,9 +359,10 @@ specifies two binary zeros followed by a BEL character (code value 7). Make
 sure you supply two digits after the initial zero if the pattern character that
 follows is itself an octal digit.
 .P
-The handling of a backslash followed by a digit other than 0 is complicated.
-Outside a character class, PCRE reads it and any following digits as a decimal
-number. If the number is less than 10, or if there have been at least that many
+The handling of a backslash followed by a digit other than 0 is complicated,
+and Perl has changed in recent releases, causing PCRE also to change. Outside a
+character class, PCRE reads the digit and any following digits as a decimal
+number. If the number is less than 8, or if there have been at least that many
 previous capturing left parentheses in the expression, the entire sequence is
 taken as a \fIback reference\fP. A description of how this works is given
 .\" HTML <a href="#backreferences">
@@ -374,12 +375,13 @@ following the discussion of
 parenthesized subpatterns.
 .\"
 .P
-Inside a character class, or if the decimal number is greater than 9 and there
-have not been that many capturing subpatterns, PCRE re-reads up to three octal
-digits following the backslash, and uses them to generate a data character. Any
-subsequent digits stand for themselves. The value of the character is
-constrained in the same way as characters specified in hexadecimal.
-For example:
+Inside a character class, or if the decimal number following \e is greater than
+7 and there have not been that many capturing subpatterns, PCRE handles \e8 and
+\e9 as the literal characters "8" and "9", and otherwise re-reads up to three
+octal digits following the backslash, using them to generate a data character.
+Any subsequent digits stand for themselves. The value of the character is
+constrained in the same way as characters specified in hexadecimal. For
+example:
 .sp
   \e040   is another way of writing an ASCII space
 .\" JOIN
@@ -398,8 +400,8 @@ For example:
   \e377   might be a back reference, otherwise
             the value 255 (decimal)
 .\" JOIN
-  \e81    is either a back reference, or a binary zero
-            followed by the two characters "8" and "1"
+  \e81    is either a back reference, or the two
+            characters "8" and "1"
 .sp
 Note that octal values of 100 or greater must not be introduced by a leading
 zero, because no more than three octal digits are ever read.
@@ -3156,6 +3158,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2013
+Last updated: 08 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

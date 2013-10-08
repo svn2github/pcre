@@ -2930,18 +2930,22 @@ No match
     abc\100\60
  0: abc@0
 
-/abc\81/
-    abc\081
- 0: abc\x0081
-    abc\0\x38\x31
- 0: abc\x0081
-
-/abc\91/
-    abc\091
- 0: abc\x0091
-    abc\0\x39\x31
- 0: abc\x0091
-
+/^A\8B\9C$/
+    A8B9C
+ 0: A8B9C
+    *** Failers
+No match
+    A\08B\09C  
+No match
+    
+/^[A\8B\9C]+$/
+    A8B9C
+ 0: A8B9C
+    *** Failers 
+No match
+    A8B9C\x00
+No match
+    
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
  0: abcdefghijk\x0aS

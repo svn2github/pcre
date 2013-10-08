@@ -105,6 +105,11 @@ Version 8.34 xx-xxxx-201x
           
       (2) Add missing HAVE_STDINT_H and HAVE_INTTYPES_H to config-cmake.h.in; 
           without these the CMake build does not work on Solaris.
+          
+21. Perl has changed its handling of \8 and \9. If there is no previously 
+    encountered capturing group of those numbers, they are treated as the 
+    literal characters 8 and 9 instead of a binary zero followed by the 
+    literals. PCRE now does the same.
 
 
 Version 8.33 28-May-2013
