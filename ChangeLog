@@ -97,6 +97,14 @@ Version 8.34 xx-xxxx-201x
     above). Processing unduplicated named groups should now be as fast at
     numerical groups, and processing duplicated groups should be faster than
     before.
+    
+20. Two patches to the CMake build system, by Alexander Barkov:
+
+      (1) Replace the "source" command by "." in CMakeLists.txt because 
+          "source" is a bash-ism.
+          
+      (2) Add missing HAVE_STDINT_H and HAVE_INTTYPES_H to config-cmake.h.in; 
+          without these the CMake build does not work on Solaris.
 
 
 Version 8.33 28-May-2013

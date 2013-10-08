@@ -63,6 +63,7 @@
 # 2012-12-08 PH added patch from Daniel Richard G to quash some MSVC warnings
 # 2013-07-01 PH realized that the "support" for GCOV was a total nonsense and
 #            so it has been removed.
+# 2013-10-08 PH got rid of the "source" command, which is a bash-ism (use ".")
 
 PROJECT(PCRE C CXX)
 
@@ -765,7 +766,7 @@ MESSAGE(\" \")
 # This is a generated file.
 srcdir=${PROJECT_SOURCE_DIR}
 pcretest=${PCRETEST_EXE}
-source ${PROJECT_SOURCE_DIR}/RunTest
+. ${PROJECT_SOURCE_DIR}/RunTest
 if test \"$?\" != \"0\"; then exit 1; fi
 # End
 ")
@@ -781,7 +782,7 @@ if test \"$?\" != \"0\"; then exit 1; fi
 srcdir=${PROJECT_SOURCE_DIR}
 pcregrep=${PCREGREP_EXE}
 pcretest=${PCRETEST_EXE}
-source ${PROJECT_SOURCE_DIR}/RunGrepTest
+. ${PROJECT_SOURCE_DIR}/RunGrepTest
 if test \"$?\" != \"0\"; then exit 1; fi
 # End
 ")
