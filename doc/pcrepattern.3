@@ -300,7 +300,9 @@ one of the following escape sequences than the binary character it represents:
   \en        linefeed (hex 0A)
   \er        carriage return (hex 0D)
   \et        tab (hex 09)
+  \e0dd      character with octal code 0dd 
   \eddd      character with octal code ddd, or back reference
+  \eo{ddd..} character with octal code ddd.. 
   \exhh      character with hex code hh
   \ex{hhh..} character with hex code hhh.. (non-JavaScript mode)
   \euhhhh    character with hex code hhhh (JavaScript mode only)
@@ -321,43 +323,22 @@ byte are inverted. Thus \ecA becomes hex 01, as in ASCII (A is C1), but because
 the EBCDIC letters are disjoint, \ecZ becomes hex 29 (Z is E9), and other
 characters also generate different values.
 .P
-By default, after \ex, from zero to two hexadecimal digits are read (letters
-can be in upper or lower case). Any number of hexadecimal digits may appear
-between \ex{ and }, but the character code is constrained as follows:
-.sp
-  8-bit non-UTF mode    less than 0x100
-  8-bit UTF-8 mode      less than 0x10ffff and a valid codepoint
-  16-bit non-UTF mode   less than 0x10000
-  16-bit UTF-16 mode    less than 0x10ffff and a valid codepoint
-  32-bit non-UTF mode   less than 0x80000000
-  32-bit UTF-32 mode    less than 0x10ffff and a valid codepoint
-.sp
-Invalid Unicode codepoints are the range 0xd800 to 0xdfff (the so-called
-"surrogate" codepoints), and 0xffef.
-.P
-If characters other than hexadecimal digits appear between \ex{ and }, or if
-there is no terminating }, this form of escape is not recognized. Instead, the
-initial \ex will be interpreted as a basic hexadecimal escape, with no
-following digits, giving a character whose value is zero.
-.P
-If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \ex is
-as just described only when it is followed by two hexadecimal digits.
-Otherwise, it matches a literal "x" character. In JavaScript mode, support for
-code points greater than 256 is provided by \eu, which must be followed by
-four hexadecimal digits; otherwise it matches a literal "u" character.
-Character codes specified by \eu in JavaScript mode are constrained in the same
-was as those specified by \ex in non-JavaScript mode.
-.P
-Characters whose value is less than 256 can be defined by either of the two
-syntaxes for \ex (or by \eu in JavaScript mode). There is no difference in the
-way they are handled. For example, \exdc is exactly the same as \ex{dc} (or
-\eu00dc in JavaScript mode).
-.P
 After \e0 up to two further octal digits are read. If there are fewer than two
 digits, just those that are present are used. Thus the sequence \e0\ex\e07
 specifies two binary zeros followed by a BEL character (code value 7). Make
 sure you supply two digits after the initial zero if the pattern character that
 follows is itself an octal digit.
+.P
+The escape \eo must be followed by a sequence of octal digits, enclosed in 
+braces. An error occurs if this is not the case. This escape is a recent
+addition to Perl; it provides way of specifying character code points as octal
+numbers greater than 0777, and it also allows octal numbers and back references
+to be unambiguously specified.
+.P
+For greater clarity and unambiguity, it is best to avoid following \e by a
+digit greater than zero. Instead, use \eo{} or \ex{} to specify character
+numbers, and \eg{} to specify back references. The following paragraphs
+describe the old, ambiguous syntax.
 .P
 The handling of a backslash followed by a digit other than 0 is complicated,
 and Perl has changed in recent releases, causing PCRE also to change. Outside a
@@ -379,9 +360,7 @@ Inside a character class, or if the decimal number following \e is greater than
 7 and there have not been that many capturing subpatterns, PCRE handles \e8 and
 \e9 as the literal characters "8" and "9", and otherwise re-reads up to three
 octal digits following the backslash, using them to generate a data character.
-Any subsequent digits stand for themselves. The value of the character is
-constrained in the same way as characters specified in hexadecimal. For
-example:
+Any subsequent digits stand for themselves. For example:
 .sp
   \e040   is another way of writing an ASCII space
 .\" JOIN
@@ -403,9 +382,48 @@ example:
   \e81    is either a back reference, or the two
             characters "8" and "1"
 .sp
-Note that octal values of 100 or greater must not be introduced by a leading
-zero, because no more than three octal digits are ever read.
+Note that octal values of 100 or greater that are specified using this syntax
+must not be introduced by a leading zero, because no more than three octal
+digits are ever read.
 .P
+By default, after \ex that is not followed by {, from zero to two hexadecimal
+digits are read (letters can be in upper or lower case). Any number of
+hexadecimal digits may appear between \ex{ and }. If a character other than
+a hexadecimal digit appears between \ex{ and }, or if there is no terminating
+}, an error occurs.
+.P
+If the PCRE_JAVASCRIPT_COMPAT option is set, the interpretation of \ex is
+as just described only when it is followed by two hexadecimal digits.
+Otherwise, it matches a literal "x" character. In JavaScript mode, support for
+code points greater than 256 is provided by \eu, which must be followed by
+four hexadecimal digits; otherwise it matches a literal "u" character.
+.P
+Characters whose value is less than 256 can be defined by either of the two
+syntaxes for \ex (or by \eu in JavaScript mode). There is no difference in the
+way they are handled. For example, \exdc is exactly the same as \ex{dc} (or
+\eu00dc in JavaScript mode).
+.
+.
+.SS "Constraints on character values"
+.rs
+.sp
+Characters that are specified using octal or hexadecimal numbers are
+limited to certain values, as follows:
+.sp
+  8-bit non-UTF mode    less than 0x100
+  8-bit UTF-8 mode      less than 0x10ffff and a valid codepoint
+  16-bit non-UTF mode   less than 0x10000
+  16-bit UTF-16 mode    less than 0x10ffff and a valid codepoint
+  32-bit non-UTF mode   less than 0x80000000
+  32-bit UTF-32 mode    less than 0x10ffff and a valid codepoint
+.sp
+Invalid Unicode codepoints are the range 0xd800 to 0xdfff (the so-called
+"surrogate" codepoints), and 0xffef. 
+.
+.
+.SS "Escape sequences in character classes"
+.rs
+.sp
 All the sequences that define a single character value can be used both inside
 and outside character classes. In addition, inside a character class, \eb is
 interpreted as the backspace character (hex 08).

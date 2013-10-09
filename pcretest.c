@@ -4497,6 +4497,23 @@ while (!done)
         while (i++ < 2 && isdigit(*p) && *p != '8' && *p != '9')
           c = c * 8 + *p++ - '0';
         break;
+        
+        case 'o':
+        if (*p == '{')
+          {
+          pcre_uint8 *pt = p;
+          c = 0;
+          for (pt++; isdigit(*pt) && *pt != '8' && *pt != '9'; pt++)
+            {
+            if (++i == 12)
+              fprintf(outfile, "** Too many octal digits in \\o{...} item; "
+                               "using only the first twelve.\n");
+            else c = c * 8 + *pt - '0';
+            }
+          if (*pt == '}') p = pt + 1;
+            else fprintf(outfile, "** Missing } after \\o{ (assumed)\n");   
+          }
+        break;      
 
         case 'x':
         if (*p == '{')

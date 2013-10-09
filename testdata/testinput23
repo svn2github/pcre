@@ -7,6 +7,8 @@
 
 /\x{10000}/
 
+/\o{20000}/
+
 /-- Check character ranges --/
 
 /[\H]/BZSI

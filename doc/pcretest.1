@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "01 October 2013" "PCRE 8.34"
+.TH PCRETEST 1 "09 October 2013" "PCRE 8.34"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -618,6 +618,7 @@ recognized:
   \ev         vertical tab (\ex0b)
   \ennn       octal character (up to 3 octal digits); always
                a byte unless > 255 in UTF-8 or 16-bit or 32-bit mode
+  \eo{dd...}  octal character (any number of octal digits}              
   \exhh       hexadecimal byte (up to 2 hex digits)
   \ex{hh...}  hexadecimal character (any number of hex digits)
 .\" JOIN
@@ -1104,6 +1105,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 01 October 2013
+Last updated: 09 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

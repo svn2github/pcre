@@ -462,7 +462,7 @@ static const char error_texts[] =
   "POSIX collating elements are not supported\0"
   "this version of PCRE is compiled without UTF support\0"
   "spare error\0"  /** DEAD **/
-  "character value in \\x{...} sequence is too large\0"
+  "character value in \\x{} or \\o{} is too large\0"
   /* 35 */
   "invalid condition (?(0)\0"
   "\\C not allowed in lookbehind assertion\0"
@@ -516,6 +516,10 @@ static const char error_texts[] =
   "character value in \\u.... sequence is too large\0"
   "invalid UTF-32 string\0"
   "setting UTF is disabled by the application\0"
+  "non-hex character in \\x{} (closing brace missing?)\0" 
+  /* 80 */ 
+  "non-octal character in \\o{} (closing brace missing?)\0" 
+  "missing opening brace after \\o\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1162,16 +1166,51 @@ else
     if (!utf && c > 0xff) *errorcodeptr = ERR51;
 #endif
     break;
+    
+    /* \o is a relatively new Perl feature, supporting a more general way of 
+    specifying character codes in octal. The only supported form is \o{ddd}. */
+    
+    case CHAR_o:
+    if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR81; else
+      {
+      ptr += 2; 
+      c = 0;
+      overflow = FALSE;
+      while (*ptr >= CHAR_0 && *ptr <= CHAR_7)
+        {
+        register pcre_uint32 cc = *ptr++;
+        if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
+#ifdef COMPILE_PCRE32
+        if (c >= 0x10000000l) { overflow = TRUE; break; }
+#endif
+        c = (c << 3) + cc - CHAR_0 ;
+#if defined COMPILE_PCRE8
+        if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
+#elif defined COMPILE_PCRE16
+        if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
+#elif defined COMPILE_PCRE32
+        if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
+#endif
+        }
+      if (overflow)
+        {
+        while (*ptr >= CHAR_0 && *ptr <= CHAR_7) ptr++;
+        *errorcodeptr = ERR34;
+        }
+      else if (*ptr == CHAR_RIGHT_CURLY_BRACKET)
+        {
+        if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
+        }
+      else *errorcodeptr = ERR80;
+      }
+    break;   
 
-    /* \x is complicated. \x{ddd} is a character number which can be greater
-    than 0xff in utf or non-8bit mode, but only if the ddd are hex digits.
-    If not, { is treated as a data character. */
+    /* \x is complicated. In JavaScript, \x must be followed by two hexadecimal
+    numbers. Otherwise it is a lowercase x letter. */
 
     case CHAR_x:
     if ((options & PCRE_JAVASCRIPT_COMPAT) != 0)
       {
-      /* In JavaScript, \x must be followed by two hexadecimal numbers.
-      Otherwise it is a lowercase x letter. */
       if (MAX_255(ptr[1]) && (digitab[ptr[1]] & ctype_xdigit) != 0
         && MAX_255(ptr[2]) && (digitab[ptr[2]] & ctype_xdigit) != 0)
         {
@@ -1188,73 +1227,86 @@ else
 #endif
           }
         }
-      break;
-      }
-
-    if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
-      {
-      const pcre_uchar *pt = ptr + 2;
-
-      c = 0;
-      overflow = FALSE;
-      while (MAX_255(*pt) && (digitab[*pt] & ctype_xdigit) != 0)
+      }    /* End JavaScript handling */
+    
+    /* Handle \x in Perl's style. \x{ddd} is a character number which can be
+    greater than 0xff in utf or non-8bit mode, but only if the ddd are hex
+    digits. If not, { used to be treated as a data character. However, Perl
+    seems to read hex digits up to the first non-such, and ignore the rest, so
+    that, for example \x{zz} matches a binary zero. This seems crazy, so PCRE
+    now gives an error. */
+      
+    else
+      {    
+      if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
         {
-        register pcre_uint32 cc = *pt++;
-        if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
-
+        ptr += 2;
+        c = 0;
+        overflow = FALSE;
+        while (MAX_255(*ptr) && (digitab[*ptr] & ctype_xdigit) != 0)
+          {
+          register pcre_uint32 cc = *ptr++;
+          if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
+      
 #ifdef COMPILE_PCRE32
-        if (c >= 0x10000000l) { overflow = TRUE; break; }
+          if (c >= 0x10000000l) { overflow = TRUE; break; }
 #endif
-
+      
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
-        if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
-        c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
+          if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
+          c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
 #else           /* EBCDIC coding */
-        if (cc >= CHAR_a && cc <= CHAR_z) cc += 64;  /* Convert to upper case */
-        c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
+          if (cc >= CHAR_a && cc <= CHAR_z) cc += 64;  /* Convert to upper case */
+          c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
 #endif
-
+      
 #if defined COMPILE_PCRE8
-        if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
+          if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE16
-        if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
+          if (c > (utf ? 0x10ffffU : 0xffffU)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE32
-        if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
+          if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
 #endif
-        }
+          }
+      
+        if (overflow)
+          {
+          while (MAX_255(*ptr) && (digitab[*ptr] & ctype_xdigit) != 0) ptr++;
+          *errorcodeptr = ERR34;
+          }
+      
+        else if (*ptr == CHAR_RIGHT_CURLY_BRACKET)
+          {
+          if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
+          }
+      
+        /* If the sequence of hex digits does not end with '}', give an error.
+        We used just to recognize this construct and fall through to the normal
+        \x handling, but nowadays Perl gives an error, which seems much more
+        sensible, so we do too. */
+        
+        else *errorcodeptr = ERR79;
+        }   /* End of \x{} processing */
 
-      if (overflow)
-        {
-        while (MAX_255(*pt) && (digitab[*pt] & ctype_xdigit) != 0) pt++;
-        *errorcodeptr = ERR34;
-        }
+      /* Read a single-byte hex-defined char (up to two hex digits after \x) */
 
-      if (*pt == CHAR_RIGHT_CURLY_BRACKET)
-        {
-        if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
-        ptr = pt;
-        break;
-        }
-
-      /* If the sequence of hex digits does not end with '}', then we don't
-      recognize this construct; fall through to the normal \x handling. */
-      }
-
-    /* Read just a single-byte hex-defined char */
-
-    c = 0;
-    while (i++ < 2 && MAX_255(ptr[1]) && (digitab[ptr[1]] & ctype_xdigit) != 0)
-      {
-      pcre_uint32 cc;                          /* Some compilers don't like */
-      cc = *(++ptr);                           /* ++ in initializers */
+      else
+        { 
+        c = 0;
+        while (i++ < 2 && MAX_255(ptr[1]) && (digitab[ptr[1]] & ctype_xdigit) != 0)
+          {
+          pcre_uint32 cc;                          /* Some compilers don't like */
+          cc = *(++ptr);                           /* ++ in initializers */
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
-      if (cc >= CHAR_a) cc -= 32;              /* Convert to upper case */
-      c = c * 16 + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
+          if (cc >= CHAR_a) cc -= 32;              /* Convert to upper case */
+          c = c * 16 + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
 #else           /* EBCDIC coding */
-      if (cc <= CHAR_z) cc += 64;              /* Convert to upper case */
-      c = c * 16 + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
+          if (cc <= CHAR_z) cc += 64;              /* Convert to upper case */
+          c = c * 16 + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
 #endif
-      }
+          }
+        }     /* End of \xdd handling */
+      }       /* End of Perl-style \x handling */
     break;
 
     /* For \c, a following letter is upper-cased; then the 0x40 bit is flipped.

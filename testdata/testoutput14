@@ -147,9 +147,16 @@ No match
 ** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
 ** Truncation will probably give the wrong result.
 No match
+    A\o{443}B 
+** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
+** Truncation will probably give the wrong result.
+No match
   
 /\x{100}/I
-Failed: character value in \x{...} sequence is too large at offset 6
+Failed: character value in \x{} or \o{} is too large at offset 6
+
+/\o{400}/I
+Failed: character value in \x{} or \o{} is too large at offset 6
 
 /  (?: [\040\t] |  \(
 (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  |  \( (?:  [^\\\x80-\xff\n\015()]  |  \\ [^\x80-\xff]  )* \)  )*

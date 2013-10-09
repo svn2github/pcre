@@ -5635,4 +5635,7 @@ AbcdCBefgBhiBqz
 /^A\xZ/
     A\0Z 
 
+/^A\o{123}B/
+    A\123B
+
 /-- End of testinput1 --/

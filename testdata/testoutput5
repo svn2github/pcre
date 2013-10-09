@@ -3,23 +3,42 @@
     results in 8-bit and 16-bit modes are excluded (see tests 16 and 17). --/
 
 /\x{110000}/8DZ
-Failed: character value in \x{...} sequence is too large at offset 9
+Failed: character value in \x{} or \o{} is too large at offset 9
+
+/\o{4200000}/8DZ
+Failed: character value in \x{} or \o{} is too large at offset 10
 
 /\x{ffffffff}/8
-Failed: character value in \x{...} sequence is too large at offset 11
+Failed: character value in \x{} or \o{} is too large at offset 11
+
+/\o{37777777777}/8
+Failed: character value in \x{} or \o{} is too large at offset 14
 
 /\x{100000000}/8
-Failed: character value in \x{...} sequence is too large at offset 12
+Failed: character value in \x{} or \o{} is too large at offset 12
+
+/\o{77777777777}/8
+Failed: character value in \x{} or \o{} is too large at offset 14
 
 /\x{d800}/8
 Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
+/\o{154000}/8
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 9
+
 /\x{dfff}/8
 Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
+/\o{157777}/8
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 9
+
 /\x{d7ff}/8
 
+/\o{153777}/8
+
 /\x{e000}/8
+
+/\o{170000}/8
 
 /^\x{100}a\x{1234}/8
     \x{100}a\x{1234}bcd

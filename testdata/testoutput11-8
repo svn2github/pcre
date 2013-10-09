@@ -328,7 +328,7 @@ Memory allocation (code space): 12
 ------------------------------------------------------------------
 
 /\x{110000}/8BM
-Failed: character value in \x{...} sequence is too large at offset 9
+Failed: character value in \x{} or \o{} is too large at offset 9
 
 /[\x{ff}]/8BM
 Memory allocation (code space): 10

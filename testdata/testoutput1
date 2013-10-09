@@ -9268,4 +9268,8 @@ No match
     A\0Z 
  0: A\x00Z
 
+/^A\o{123}B/
+    A\123B
+ 0: ASB
+
 /-- End of testinput1 --/

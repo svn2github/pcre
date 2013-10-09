@@ -110,7 +110,20 @@ Version 8.34 xx-xxxx-201x
     encountered capturing group of those numbers, they are treated as the 
     literal characters 8 and 9 instead of a binary zero followed by the 
     literals. PCRE now does the same.
+    
+22. Following Perl, added \o{} to specify codepoints in octal, making it
+    possible to specify values greater than 0777 and also making them 
+    unambiguous. 
+    
+23. Perl now gives an error for missing closing braces after \x{... instead of 
+    treating the string as literal. PCRE now does the same.
+    
+24. RunTest used to grumble if an inappropriate test was selected explicitly, 
+    but just skip it when running all tests. This make it awkward to run ranges 
+    of tests when one of them was inappropriate. Now it just skips any 
+    inappropriate tests, as it always did when running all tests.  
 
+ 
 
 Version 8.33 28-May-2013
 ------------------------

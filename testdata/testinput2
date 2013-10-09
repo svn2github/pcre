@@ -3892,4 +3892,15 @@ backtracking verbs. --/
 
 /-- End of special auto-possessive tests --/
 
+/^A\o{1239}B/
+    A\123B
+
+/^A\oB/
+    
+/^A\x{zz}B/ 
+
+/^A\x{12Z/
+
+/^A\x{/
+
 /-- End of testinput2 --/

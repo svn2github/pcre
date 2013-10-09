@@ -13513,4 +13513,19 @@ No set of starting bytes
 
 /-- End of special auto-possessive tests --/
 
+/^A\o{1239}B/
+Failed: non-octal character in \o{} (closing brace missing?) at offset 8
+
+/^A\oB/
+Failed: missing opening brace after \o at offset 3
+
+/^A\x{zz}B/ 
+Failed: non-hex character in \x{} (closing brace missing?) at offset 5
+
+/^A\x{12Z/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 7
+
+/^A\x{/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 5
+
 /-- End of testinput2 --/

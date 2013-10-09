@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "05 October 2013" "PCRE 8.34"
+.TH PCREAPI 3 "08 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -919,7 +919,7 @@ have fallen out of use. To avoid confusion, they have not been re-used.
   31  POSIX collating elements are not supported
   32  this version of PCRE is compiled without UTF support
   33  [this code is not in use]
-  34  character value in \ex{...} sequence is too large
+  34  character value in \ex{} or \eo{} is too large
   35  invalid condition (?(0)
   36  \eC not allowed in lookbehind assertion
   37  PCRE does not support \eL, \el, \eN{name}, \eU, or \eu
@@ -967,6 +967,10 @@ have fallen out of use. To avoid confusion, they have not been re-used.
   75  name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)
   76  character value in \eu.... sequence is too large
   77  invalid UTF-32 string (specifically UTF-32)
+  78  setting UTF is disabled by the application
+  79  non-hex character in \ex{} (closing brace missing?)
+  80  non-octal character in \eo{} (closing brace missing?)
+  81  missing opening brace after \eo 
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.
@@ -2866,6 +2870,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 October 2013
+Last updated: 08 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
