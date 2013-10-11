@@ -2121,4 +2121,19 @@ No match
 
 /-- End auto-possessification tests --/ 
 
+/\w+/8CWBZ
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 3
+        prop Xwd ++
+        Callout 255 3 0
+        Ket
+        End
+------------------------------------------------------------------
+    abcd
+--->abcd
+ +0 ^        \w+
+ +3 ^   ^    
+ 0: abcd
+
 /-- End of testinput7 --/

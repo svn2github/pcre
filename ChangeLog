@@ -122,6 +122,10 @@ Version 8.34 xx-xxxx-201x
     but just skip it when running all tests. This make it awkward to run ranges 
     of tests when one of them was inappropriate. Now it just skips any 
     inappropriate tests, as it always did when running all tests.  
+    
+25. If PCRE_AUTO_CALLOUT and PCRE_UCP were set for a pattern that contained 
+    character types such as \d or \w, too many callouts were inserted, and the 
+    data that they returned was rubbish.  
 
  
 

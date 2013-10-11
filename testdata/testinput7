@@ -812,4 +812,7 @@ of case for anything other than the ASCII letters. --/
 
 /-- End auto-possessification tests --/ 
 
+/\w+/8CWBZ
+    abcd
+
 /-- End of testinput7 --/

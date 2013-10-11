@@ -4254,14 +4254,14 @@ for (;; ptr++)
       }
     }
 
-  /* Fill in length of a previous callout, except when the next thing is
-  a quantifier. */
-
   is_quantifier =
     c == CHAR_ASTERISK || c == CHAR_PLUS || c == CHAR_QUESTION_MARK ||
     (c == CHAR_LEFT_CURLY_BRACKET && is_counted_repeat(ptr+1));
 
-  if (!is_quantifier && previous_callout != NULL &&
+  /* Fill in length of a previous callout, except when the next thing is a
+  quantifier or when processing a property substitution string in UCP mode. */
+
+  if (!is_quantifier && previous_callout != NULL && nestptr == NULL &&
        after_manual_callout-- <= 0)
     {
     if (lengthptr == NULL)      /* Don't attempt in pre-compile phase */
@@ -4292,9 +4292,10 @@ for (;; ptr++)
       }
     }
 
-  /* No auto callout for quantifiers. */
+  /* No auto callout for quantifiers, or while processing property strings that 
+  are substituted for \w etc in UCP mode. */
 
-  if ((options & PCRE_AUTO_CALLOUT) != 0 && !is_quantifier)
+  if ((options & PCRE_AUTO_CALLOUT) != 0 && !is_quantifier && nestptr == NULL)
     {
     previous_callout = code;
     code = auto_callout(code, ptr, cd);
