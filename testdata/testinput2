@@ -3890,6 +3890,14 @@ backtracking verbs. --/
 
 /\D+$  \d+$  \S+$  \s+$  \W+$  \w+$  \C+$  \R+$  \H+$  \h+$  \V+$  \v+$  \X+$   a+$  \n+$   .+$  .+$/BZxm
 
+/(?=a+)a(a+)++a/BZ
+
+/a+(bb|cc)a+(?:bb|cc)a+(?>bb|cc)a+(?:bb|cc)+a+(aa)a+(?:bb|aa)/BZ
+
+/a+(bb|cc)?#a+(?:bb|cc)??#a+(?:bb|cc)?+#a+(?:bb|cc)*#a+(bb|cc)?a#a+(?:aa)?/BZ
+
+/a+(?:bb)?a#a+(?:|||)#a+(?:|b)a#a+(?:|||)?a/BZ
+
 /-- End of special auto-possessive tests --/
 
 /^A\o{1239}B/

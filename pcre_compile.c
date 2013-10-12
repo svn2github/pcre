@@ -516,10 +516,10 @@ static const char error_texts[] =
   "character value in \\u.... sequence is too large\0"
   "invalid UTF-32 string\0"
   "setting UTF is disabled by the application\0"
-  "non-hex character in \\x{} (closing brace missing?)\0" 
-  /* 80 */ 
-  "non-octal character in \\o{} (closing brace missing?)\0" 
-  "missing opening brace after \\o\0" 
+  "non-hex character in \\x{} (closing brace missing?)\0"
+  /* 80 */
+  "non-octal character in \\o{} (closing brace missing?)\0"
+  "missing opening brace after \\o\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1095,8 +1095,8 @@ else
     break;
 
     /* The handling of escape sequences consisting of a string of digits
-    starting with one that is not zero is not straightforward. Perl has changed 
-    over the years. Nowadays \g{} for backreferences and \o{} for octal are 
+    starting with one that is not zero is not straightforward. Perl has changed
+    over the years. Nowadays \g{} for backreferences and \o{} for octal are
     recommended to avoid the ambiguities in the old syntax.
 
     Outside a character class, the digits are read as a decimal number. If the
@@ -1106,7 +1106,7 @@ else
     be octal 123 (cf \0123, which is octal 012 followed by the literal 3). If
     the octal value is greater than 377, the least significant 8 bits are
     taken. \8 and \9 are treated as the literal characters 8 and 9.
-     
+
     Inside a character class, \ followed by a digit is always either a literal
     8 or 9 or an octal number. */
 
@@ -1149,8 +1149,8 @@ else
     changed so as not to insert the binary zero. */
 
     if ((c = *ptr) >= CHAR_8) break;
-    
-    /* Fall through with a digit less than 8 */   
+
+    /* Fall through with a digit less than 8 */
 
     /* \0 always starts an octal number, but we may drop through to here with a
     larger first octal digit. The original code used just to take the least
@@ -1166,14 +1166,14 @@ else
     if (!utf && c > 0xff) *errorcodeptr = ERR51;
 #endif
     break;
-    
-    /* \o is a relatively new Perl feature, supporting a more general way of 
+
+    /* \o is a relatively new Perl feature, supporting a more general way of
     specifying character codes in octal. The only supported form is \o{ddd}. */
-    
+
     case CHAR_o:
     if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR81; else
       {
-      ptr += 2; 
+      ptr += 2;
       c = 0;
       overflow = FALSE;
       while (*ptr >= CHAR_0 && *ptr <= CHAR_7)
@@ -1203,7 +1203,7 @@ else
         }
       else *errorcodeptr = ERR80;
       }
-    break;   
+    break;
 
     /* \x is complicated. In JavaScript, \x must be followed by two hexadecimal
     numbers. Otherwise it is a lowercase x letter. */
@@ -1228,16 +1228,16 @@ else
           }
         }
       }    /* End JavaScript handling */
-    
+
     /* Handle \x in Perl's style. \x{ddd} is a character number which can be
     greater than 0xff in utf or non-8bit mode, but only if the ddd are hex
     digits. If not, { used to be treated as a data character. However, Perl
     seems to read hex digits up to the first non-such, and ignore the rest, so
     that, for example \x{zz} matches a binary zero. This seems crazy, so PCRE
     now gives an error. */
-      
+
     else
-      {    
+      {
       if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
         {
         ptr += 2;
@@ -1247,11 +1247,11 @@ else
           {
           register pcre_uint32 cc = *ptr++;
           if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
-      
+
 #ifdef COMPILE_PCRE32
           if (c >= 0x10000000l) { overflow = TRUE; break; }
 #endif
-      
+
 #ifndef EBCDIC  /* ASCII/UTF-8 coding */
           if (cc >= CHAR_a) cc -= 32;               /* Convert to upper case */
           c = (c << 4) + cc - ((cc < CHAR_A)? CHAR_0 : (CHAR_A - 10));
@@ -1259,7 +1259,7 @@ else
           if (cc >= CHAR_a && cc <= CHAR_z) cc += 64;  /* Convert to upper case */
           c = (c << 4) + cc - ((cc >= CHAR_0)? CHAR_0 : (CHAR_A - 10));
 #endif
-      
+
 #if defined COMPILE_PCRE8
           if (c > (utf ? 0x10ffffU : 0xffU)) { overflow = TRUE; break; }
 #elif defined COMPILE_PCRE16
@@ -1268,30 +1268,30 @@ else
           if (utf && c > 0x10ffffU) { overflow = TRUE; break; }
 #endif
           }
-      
+
         if (overflow)
           {
           while (MAX_255(*ptr) && (digitab[*ptr] & ctype_xdigit) != 0) ptr++;
           *errorcodeptr = ERR34;
           }
-      
+
         else if (*ptr == CHAR_RIGHT_CURLY_BRACKET)
           {
           if (utf && c >= 0xd800 && c <= 0xdfff) *errorcodeptr = ERR73;
           }
-      
+
         /* If the sequence of hex digits does not end with '}', give an error.
         We used just to recognize this construct and fall through to the normal
         \x handling, but nowadays Perl gives an error, which seems much more
         sensible, so we do too. */
-        
+
         else *errorcodeptr = ERR79;
         }   /* End of \x{} processing */
 
       /* Read a single-byte hex-defined char (up to two hex digits after \x) */
 
       else
-        { 
+        {
         c = 0;
         while (i++ < 2 && MAX_255(ptr[1]) && (digitab[ptr[1]] & ctype_xdigit) != 0)
           {
@@ -2706,7 +2706,7 @@ switch(ptype)
   /* Perl space used to exclude VT, but from Perl 5.18 it is included, which
   means that Perl space and POSIX space are now identical. PCRE was changed
   at release 8.34. */
-    
+
   case PT_SPACE:    /* Perl space */
   case PT_PXSPACE:  /* POSIX space */
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
@@ -2871,25 +2871,27 @@ switch(c)
     return code + 2;
     }
 
-  /* Convert only if we have anough space. */
+  /* Convert only if we have enough space. */
 
   clist_src = PRIV(ucd_caseless_sets) + code[1];
   clist_dest = list + 2;
   code += 2;
 
   do {
-     /* Early return if there is not enough space. */
      if (clist_dest >= list + 8)
        {
+       /* Early return if there is not enough space. This should never
+       happen, since all clists are shorter than 5 character now. */
        list[2] = code[0];
        list[3] = code[1];
        return code;
        }
      *clist_dest++ = *clist_src;
      }
-   while(*clist_src++ != NOTACHAR);
+  while(*clist_src++ != NOTACHAR);
 
-  /* Enough space to store all characters. */
+  /* All characters are stored. The terminating NOTACHAR
+  is copied form the clist itself. */
 
   list[0] = (c == OP_PROP) ? OP_CHAR : OP_NOT;
   return code;
@@ -2955,7 +2957,13 @@ pcre_uint32 list[8];
 const pcre_uint32* chr_ptr;
 const pcre_uint32* ochr_ptr;
 const pcre_uint32* list_ptr;
+const pcre_uchar *next_code;
 pcre_uint32 chr;
+
+/* Note: the base_list[1] contains whether the current opcode has greedy
+(represented by a non-zero value) quantifier. This is a different from
+other character type lists, which stores here that the character iterator
+matches to an empty string (also represented by a non-zero value). */
 
 for(;;)
   {
@@ -2978,19 +2986,77 @@ for(;;)
   switch(c)
     {
     case OP_END:
-    /* TRUE only in greedy case. The non-greedy case could be replaced by an
-    OP_EXACT, but it is probably not worth it. (And note that OP_EXACT uses
-    more memory, which we cannot get at this stage.) */
+    case OP_KETRPOS:
+    /* TRUE only in greedy case. The non-greedy case could be replaced by
+    an OP_EXACT, but it is probably not worth it. (And note that OP_EXACT
+    uses more memory, which we cannot get at this stage.) */
 
     return base_list[1] != 0;
 
     case OP_KET:
-    /* If the bracket is capturing, and referenced by an OP_RECURSE, the
-    non-greedy case cannot be converted to a possessive form. We do not test
-    the bracket type at the moment, but we might do it in the future to improve
-    this condition. (But note that recursive calls are always atomic.) */
+    /* If the bracket is capturing, and referenced by an OP_RECURSE, or
+    it is an atomic sub-pattern (assert, once, etc.) the non-greedy case
+    cannot be converted to a possessive form. */
 
     if (base_list[1] == 0) return FALSE;
+
+    switch(*(code - GET(code, 1)))
+      {
+      case OP_ASSERT:
+      case OP_ASSERT_NOT:
+      case OP_ASSERTBACK:
+      case OP_ASSERTBACK_NOT:
+      case OP_ONCE:
+      case OP_ONCE_NC:
+      /* Atomic sub-patterns and assertions can always auto-possessify their
+      last iterator. */
+      return TRUE;
+      }
+
+    code += PRIV(OP_lengths)[c];
+    continue;
+
+    case OP_ONCE:
+    case OP_ONCE_NC:
+    case OP_BRA:
+    case OP_CBRA:
+    next_code = code;
+    do next_code += GET(next_code, 1); while (*next_code == OP_ALT);
+
+    /* We do not support repeated brackets, because they can lead to
+    infinite recursion. */
+
+    if (*next_code != OP_KET) return FALSE;
+
+    next_code = code + GET(code, 1);
+    code += PRIV(OP_lengths)[c];
+
+    while (*next_code == OP_ALT)
+      {
+      if (!compare_opcodes(code, utf, cd, base_list)) return FALSE;
+      code = next_code + 1 + LINK_SIZE;
+      next_code += GET(next_code, 1);
+      }
+    continue;
+
+    case OP_BRAZERO:
+    case OP_BRAMINZERO:
+
+    next_code = code + 1;
+    if (*next_code != OP_BRA && *next_code != OP_CBRA)
+      return FALSE;
+
+    do next_code += GET(next_code, 1); while (*next_code == OP_ALT);
+
+    /* We do not support repeated brackets, because they can lead to
+    infinite recursion. */
+    if (*next_code != OP_KET) return FALSE;
+
+    /* The bracket content will be checked by the
+    OP_BRA/OP_CBRA case above. */
+    next_code += 1 + LINK_SIZE;
+    if (!compare_opcodes(next_code, utf, cd, base_list)) return FALSE;
+
     code += PRIV(OP_lengths)[c];
     continue;
     }
@@ -3064,9 +3130,9 @@ for(;;)
           /* This code is logically tricky. Think hard before fiddling with it.
           The posspropstab table has four entries per row. Each row relates to
           one of PCRE's special properties such as ALNUM or SPACE or WORD.
-          Only WORD actually needs all four entries, but using repeats for the 
-          others means they can all use the same code below. 
-           
+          Only WORD actually needs all four entries, but using repeats for the
+          others means they can all use the same code below.
+
           The first two entries in each row are Unicode general categories, and
           apply always, because all the characters they include are part of the
           PCRE character set. The third and fourth entries are a general and a
@@ -3076,7 +3142,7 @@ for(;;)
           category contains more characters than the specials that are defined
           for the property being tested against. Therefore, it cannot be used
           in a NOTPROP case.
-          
+
           Example: the row for WORD contains ucp_L, ucp_N, ucp_P, ucp_Po.
           Underscore is covered by ucp_P or ucp_Po. */
 
@@ -3260,7 +3326,7 @@ for(;;)
       case OP_CLASS:
       if (list_ptr != list) return FALSE;   /* Class is first opcode */
       if (chr > 255) break;
-      if ((((pcre_uint8 *)(code - list_ptr[2] + 1))[chr >> 3] & (1 << (chr & 7))) != 0)
+      if ((((pcre_uint8 *)(code - list_ptr[2]))[chr >> 3] & (1 << (chr & 7))) != 0)
         return FALSE;
       break;
 
@@ -4292,7 +4358,7 @@ for (;; ptr++)
       }
     }
 
-  /* No auto callout for quantifiers, or while processing property strings that 
+  /* No auto callout for quantifiers, or while processing property strings that
   are substituted for \w etc in UCP mode. */
 
   if ((options & PCRE_AUTO_CALLOUT) != 0 && !is_quantifier && nestptr == NULL)
@@ -4685,7 +4751,7 @@ for (;; ptr++)
             5.18. Before PCRE 8.34, we had to preserve the VT bit if it was
             previously set by something earlier in the character class.
             Luckily, the value of CHAR_VT is 0x0b in both ASCII and EBCDIC, so
-            we could just adjust the appropriate bit. From PCRE 8.34 we no 
+            we could just adjust the appropriate bit. From PCRE 8.34 we no
             longer treat \s and \S specially. */
 
             case ESC_s:
@@ -6102,7 +6168,7 @@ for (;; ptr++)
 
         /* Check for a test for a named group's having been set, using the Perl
         syntax (?(<name>) or (?('name'), and also allow for the original PCRE
-        syntax of (?(name) or for (?(+n), (?(-n), and just (?(n). As names may 
+        syntax of (?(name) or for (?(+n), (?(-n), and just (?(n). As names may
         consist entirely of digits, there is scope for ambiguity. */
 
         else if (ptr[1] == CHAR_LESS_THAN_SIGN)
@@ -6120,12 +6186,12 @@ for (;; ptr++)
           terminator = CHAR_NULL;
           if (ptr[1] == CHAR_MINUS || ptr[1] == CHAR_PLUS) refsign = *(++ptr);
           }
-          
-        /* When a name is one of a number of duplicates, a different opcode is 
-        used and it needs more memory. Unfortunately we cannot tell whether a 
-        name is a duplicate in the first pass, so we have to allow for more 
+
+        /* When a name is one of a number of duplicates, a different opcode is
+        used and it needs more memory. Unfortunately we cannot tell whether a
+        name is a duplicate in the first pass, so we have to allow for more
         memory except when we know it is a relative numerical reference. */
-          
+
         if (refsign < 0 && lengthptr != NULL) *lengthptr += IMM2_SIZE;
 
         /* We now expect to read a name (possibly all digits); any thing else
@@ -6149,7 +6215,7 @@ for (;; ptr++)
         namelen = (int)(ptr - name);
 
         /* Check the terminator */
-         
+
         if ((terminator > 0 && *ptr++ != (pcre_uchar)terminator) ||
             *ptr++ != CHAR_RIGHT_PARENTHESIS)
           {
@@ -6186,7 +6252,7 @@ for (;; ptr++)
 
         /* Otherwise (did not start with "+" or "-"), start by looking for the
         name. */
-         
+
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
           {
@@ -6194,33 +6260,33 @@ for (;; ptr++)
           slot += cd->name_entry_size;
           }
 
-        /* Found the named subpattern. If the name is duplicated, add one to 
-        the opcode to change CREF/RREF into DNCREF/DNRREF and insert 
-        appropriate data values. Otherwise, just insert the unique subpattern 
+        /* Found the named subpattern. If the name is duplicated, add one to
+        the opcode to change CREF/RREF into DNCREF/DNRREF and insert
+        appropriate data values. Otherwise, just insert the unique subpattern
         number. */
 
         if (i < cd->names_found)
           {
           int offset = i++;
-          int count = 1; 
+          int count = 1;
           recno = GET2(slot, 0);   /* Number from first found */
           for (; i < cd->names_found; i++)
             {
             slot += cd->name_entry_size;
             if (STRNCMP_UC_UC(name, slot+IMM2_SIZE, namelen) != 0) break;
-            count++; 
+            count++;
             }
           if (count > 1)
             {
             PUT2(code, 2+LINK_SIZE, offset);
-            PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);  
+            PUT2(code, 2+LINK_SIZE+IMM2_SIZE, count);
             skipbytes += IMM2_SIZE;
             code[1+LINK_SIZE]++;
-            }    
+            }
           else  /* Not a duplicated name */
             {
             PUT2(code, 2+LINK_SIZE, recno);
-            } 
+            }
           }
 
         /* If terminator == CHAR_NULL it means that the name followed directly

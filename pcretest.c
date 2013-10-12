@@ -3077,7 +3077,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(arg, "-i") == 0) showinfo = 1;
   else if (strcmp(arg, "-d") == 0) showinfo = debug = 1;
   else if (strcmp(arg, "-M") == 0) default_find_match_limit = TRUE;
-  else if (strcmp(arg, "-O") == 0) default_options = PCRE_NO_AUTO_POSSESSIFY;
+  else if (strcmp(arg, "-O") == 0) default_options |= PCRE_NO_AUTO_POSSESSIFY;
 #if !defined NODFA
   else if (strcmp(arg, "-dfa") == 0) all_use_dfa = 1;
 #endif

@@ -3788,14 +3788,6 @@ Need char = 'b'
 --->abbbbbccc
   1 ^        ^    
 Callout data = 1
-  1 ^    ^        
-Callout data = 1
-  1 ^   ^         
-Callout data = 1
-  1 ^  ^          
-Callout data = 1
-  1 ^ ^           
-Callout data = 1
 No match
 
 /a(b+?)(c*?)(?C1)/I
@@ -11759,11 +11751,11 @@ Minimum match() recursion limit = 45
         Bra
         ^
         Once_NC
-        a+
+        a++
         Ket
         Once
         CBra 1
-        z+
+        z++
         Ket
         Ket
         \w
@@ -11822,14 +11814,14 @@ No match
 
 /^(?>a+)(?>b+)(?>c+)(?>d+)(?>e+)/
      \Maabbccddee
-Minimum match() limit = 11
-Minimum match() recursion limit = 3
+Minimum match() limit = 7
+Minimum match() recursion limit = 2
  0: aabbccddee
 
 /^(?>(a+))(?>(b+))(?>(c+))(?>(d+))(?>(e+))/
      \Maabbccddee
-Minimum match() limit = 21
-Minimum match() recursion limit = 20
+Minimum match() limit = 17
+Minimum match() recursion limit = 16
  0: aabbccddee
  1: aa
  2: bb
@@ -11839,8 +11831,8 @@ Minimum match() recursion limit = 20
 
 /^(?>(a+))(?>b+)(?>(c+))(?>d+)(?>(e+))/
      \Maabbccddee
-Minimum match() limit = 17
-Minimum match() recursion limit = 12
+Minimum match() limit = 13
+Minimum match() recursion limit = 10
  0: aabbccddee
  1: aa
  2: cc
@@ -13507,6 +13499,150 @@ No set of starting bytes
      /m $
         Any+
      /m $
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?=a+)a(a+)++a/BZ
+------------------------------------------------------------------
+        Bra
+        Assert
+        a++
+        Ket
+        a
+        CBraPos 1
+        a++
+        KetRpos
+        a
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(bb|cc)a+(?:bb|cc)a+(?>bb|cc)a+(?:bb|cc)+a+(aa)a+(?:bb|aa)/BZ
+------------------------------------------------------------------
+        Bra
+        a++
+        CBra 1
+        bb
+        Alt
+        cc
+        Ket
+        a++
+        Bra
+        bb
+        Alt
+        cc
+        Ket
+        a++
+        Once_NC
+        bb
+        Alt
+        cc
+        Ket
+        a+
+        Bra
+        bb
+        Alt
+        cc
+        KetRmax
+        a+
+        CBra 2
+        aa
+        Ket
+        a+
+        Bra
+        bb
+        Alt
+        aa
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(bb|cc)?#a+(?:bb|cc)??#a+(?:bb|cc)?+#a+(?:bb|cc)*#a+(bb|cc)?a#a+(?:aa)?/BZ
+------------------------------------------------------------------
+        Bra
+        a++
+        Brazero
+        CBra 1
+        bb
+        Alt
+        cc
+        Ket
+        #
+        a++
+        Braminzero
+        Bra
+        bb
+        Alt
+        cc
+        Ket
+        #
+        a++
+        Once
+        Brazero
+        Bra
+        bb
+        Alt
+        cc
+        Ket
+        Ket
+        #
+        a+
+        Brazero
+        Bra
+        bb
+        Alt
+        cc
+        KetRmax
+        #
+        a+
+        Brazero
+        CBra 2
+        bb
+        Alt
+        cc
+        Ket
+        a#
+        a+
+        Brazero
+        Bra
+        aa
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/a+(?:bb)?a#a+(?:|||)#a+(?:|b)a#a+(?:|||)?a/BZ
+------------------------------------------------------------------
+        Bra
+        a+
+        Brazero
+        Bra
+        bb
+        Ket
+        a#
+        a++
+        Bra
+        Alt
+        Alt
+        Alt
+        Ket
+        #
+        a+
+        Bra
+        Alt
+        b
+        Ket
+        a#
+        a+
+        Brazero
+        Bra
+        Alt
+        Alt
+        Alt
+        Ket
+        a
         Ket
         End
 ------------------------------------------------------------------

@@ -150,7 +150,7 @@ with J. */
 #define PCRE_NEVER_UTF          0x00010000  /* C1        ) Overlaid */
 #define PCRE_DFA_SHORTEST       0x00010000  /*      D    ) Overlaid */
 
-/* This pair use the same big. */
+/* This pair use the same bit. */
 #define PCRE_NO_AUTO_POSSESSIFY 0x00020000  /* C1        ) Overlaid */
 #define PCRE_DFA_RESTART        0x00020000  /*      D    ) Overlaid */
 
