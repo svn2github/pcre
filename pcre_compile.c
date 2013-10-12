@@ -1181,7 +1181,7 @@ else
         register pcre_uint32 cc = *ptr++;
         if (c == 0 && cc == CHAR_0) continue;     /* Leading zeroes */
 #ifdef COMPILE_PCRE32
-        if (c >= 0x10000000l) { overflow = TRUE; break; }
+        if (c >= 0x20000000l) { overflow = TRUE; break; }
 #endif
         c = (c << 3) + cc - CHAR_0 ;
 #if defined COMPILE_PCRE8
