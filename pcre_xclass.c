@@ -165,10 +165,18 @@ while ((t = *data++) != XCL_END)
     
       case PT_SPACE:    /* Perl space */
       case PT_PXSPACE:  /* POSIX space */
-      if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-           c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-           c == CHAR_FF || c == CHAR_CR) == (t == XCL_PROP))
-        return !negated;
+      switch(c)
+        {
+        HSPACE_CASES:
+        VSPACE_CASES:
+        if (t == XCL_PROP) return !negated; 
+        break;
+        
+        default:
+        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == (t == XCL_PROP))
+          return !negated;
+        break;
+        }
       break;
 
       case PT_WORD:

@@ -1281,12 +1281,12 @@ for (;;)
 
     case OP_COND:
     case OP_SCOND:
-    
-    /* The variable codelink will be added to ecode when the condition is 
-    false, to get to the second branch. Setting it to the offset to the ALT 
-    or KET, then incrementing ecode achieves this effect. We now have ecode 
+
+    /* The variable codelink will be added to ecode when the condition is
+    false, to get to the second branch. Setting it to the offset to the ALT
+    or KET, then incrementing ecode achieves this effect. We now have ecode
     pointing to the condition or callout. */
- 
+
     codelink = GET(ecode, 1);   /* Offset to the second branch */
     ecode += 1 + LINK_SIZE;     /* From this opcode */
 
@@ -1322,10 +1322,10 @@ for (;;)
         if ((rrc = (*PUBL(callout))(&cb)) > 0) RRETURN(MATCH_NOMATCH);
         if (rrc < 0) RRETURN(rrc);
         }
-        
-      /* Advance ecode past the callout, so it now points to the condition. We 
+
+      /* Advance ecode past the callout, so it now points to the condition. We
       must adjust codelink so that the value of ecode+codelink is unchanged. */
-       
+
       ecode += PRIV(OP_lengths)[OP_CALLOUT];
       codelink -= PRIV(OP_lengths)[OP_CALLOUT];
       }
@@ -1334,7 +1334,7 @@ for (;;)
 
     condition = FALSE;
     switch(condcode = *ecode)
-      { 
+      {
       case OP_RREF:         /* Numbered group recursion test */
       if (md->recursive != NULL)     /* Not recursing => FALSE */
         {
@@ -1345,8 +1345,8 @@ for (;;)
 
       case OP_DNRREF:       /* Duplicate named group recursion test */
       if (md->recursive != NULL)
-        {       
-        int count = GET2(ecode, 1 + IMM2_SIZE); 
+        {
+        int count = GET2(ecode, 1 + IMM2_SIZE);
         pcre_uchar *slot = md->name_table + GET2(ecode, 1) * md->name_entry_size;
         while (count-- > 0)
           {
@@ -1355,7 +1355,7 @@ for (;;)
           if (condition) break;
           slot += md->name_entry_size;
           }
-        }   
+        }
       break;
 
       case OP_CREF:         /* Numbered group used test */
@@ -1365,7 +1365,7 @@ for (;;)
 
       case OP_DNCREF:      /* Duplicate named group used test */
         {
-        int count = GET2(ecode, 1 + IMM2_SIZE); 
+        int count = GET2(ecode, 1 + IMM2_SIZE);
         pcre_uchar *slot = md->name_table + GET2(ecode, 1) * md->name_entry_size;
         while (count-- > 0)
           {
@@ -1375,7 +1375,7 @@ for (;;)
           slot += md->name_entry_size;
           }
         }
-      break;   
+      break;
 
       case OP_DEF:     /* DEFINE - always false */
       break;
@@ -1383,8 +1383,8 @@ for (;;)
       /* The condition is an assertion. Call match() to evaluate it - setting
       md->match_function_type to MATCH_CONDASSERT causes it to stop at the end
       of an assertion. */
-      
-      default: 
+
+      default:
       md->match_function_type = MATCH_CONDASSERT;
       RMATCH(eptr, ecode, offset_top, md, NULL, RM3);
       if (rrc == MATCH_MATCH)
@@ -1392,30 +1392,30 @@ for (;;)
         if (md->end_offset_top > offset_top)
           offset_top = md->end_offset_top;  /* Captures may have happened */
         condition = TRUE;
-         
-        /* Advance ecode past the assertion to the start of the first branch, 
+
+        /* Advance ecode past the assertion to the start of the first branch,
         but adjust it so that the general choosing code below works. */
- 
+
         ecode += GET(ecode, 1);
         while (*ecode == OP_ALT) ecode += GET(ecode, 1);
-        ecode += 1 + LINK_SIZE - PRIV(OP_lengths)[condcode]; 
+        ecode += 1 + LINK_SIZE - PRIV(OP_lengths)[condcode];
         }
 
       /* PCRE doesn't allow the effect of (*THEN) to escape beyond an
-      assertion; it is therefore treated as NOMATCH. Any other return is an 
+      assertion; it is therefore treated as NOMATCH. Any other return is an
       error. */
 
       else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
         {
         RRETURN(rrc);         /* Need braces because of following else */
         }
-      break;   
+      break;
       }
-      
+
     /* Choose branch according to the condition */
-      
+
     ecode += condition? PRIV(OP_lengths)[condcode] : codelink;
- 
+
     /* We are now at the branch that is to be obeyed. As there is only one, we
     can use tail recursion to avoid using another stack frame, except when
     there is unlimited repeat of a possibly empty group. In the latter case, a
@@ -1425,7 +1425,7 @@ for (;;)
     creating two alternatives. If a THEN is encountered in the branch, it
     propagates out to the enclosing alternative (unless nested in a deeper set
     of alternatives, of course). */
-    
+
     if (condition || ecode[-(1+LINK_SIZE)] == OP_ALT)
       {
       if (op != OP_SCOND)
@@ -2577,14 +2577,21 @@ for (;;)
         /* Perl space used to exclude VT, but from Perl 5.18 it is included,
         which means that Perl space and POSIX space are now identical. PCRE
         was changed at release 8.34. */
-    
+
         case PT_SPACE:    /* Perl space */
         case PT_PXSPACE:  /* POSIX space */
-        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-             c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-             c == CHAR_FF || c == CHAR_CR)
-               == (op == OP_NOTPROP))
-          RRETURN(MATCH_NOMATCH);
+        switch(c)
+          {
+          HSPACE_CASES:
+          VSPACE_CASES:
+          if (op == OP_NOTPROP) RRETURN(MATCH_NOMATCH);
+          break;
+
+          default:
+          if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) ==
+            (op == OP_NOTPROP)) RRETURN(MATCH_NOMATCH);
+          break;
+          }
         break;
 
         case PT_WORD:
@@ -2669,27 +2676,27 @@ for (;;)
 
     Otherwise, set the length to the length of what was matched by the
     referenced subpattern.
-    
-    The OP_REF and OP_REFI opcodes are used for a reference to a numbered group 
-    or to a non-duplicated named group. For a duplicated named group, OP_DNREF 
-    and OP_DNREFI are used. In this case we must scan the list of groups to 
+
+    The OP_REF and OP_REFI opcodes are used for a reference to a numbered group
+    or to a non-duplicated named group. For a duplicated named group, OP_DNREF
+    and OP_DNREFI are used. In this case we must scan the list of groups to
     which the name refers, and use the first one that is set. */
-    
+
     case OP_DNREF:
     case OP_DNREFI:
     caseless = op == OP_DNREFI;
       {
-      int count = GET2(ecode, 1+IMM2_SIZE); 
+      int count = GET2(ecode, 1+IMM2_SIZE);
       pcre_uchar *slot = md->name_table + GET2(ecode, 1) * md->name_entry_size;
       ecode += 1 + 2*IMM2_SIZE;
-      
+
       while (count-- > 0)
         {
         offset = GET2(slot, 0) << 1;
         if (offset < offset_top && md->offset_vector[offset] >= 0) break;
         slot += md->name_entry_size;
         }
-      if (count < 0)     
+      if (count < 0)
         length = (md->jscript_compat)? 0 : -1;
       else
         length = md->offset_vector[offset+1] - md->offset_vector[offset];
@@ -4200,7 +4207,7 @@ for (;;)
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
           which means that Perl space and POSIX space are now identical. PCRE
           was changed at release 8.34. */
-    
+
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
           for (i = 1; i <= min; i++)
@@ -4211,10 +4218,18 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
-                   == prop_fail_result)
-              RRETURN(MATCH_NOMATCH);
+            switch(c)
+              {
+              HSPACE_CASES:
+              VSPACE_CASES:
+              if (prop_fail_result) RRETURN(MATCH_NOMATCH);
+              break;
+
+              default:
+              if ((UCD_CATEGORY(c) == ucp_Z) == prop_fail_result)
+                RRETURN(MATCH_NOMATCH);
+              break;
+              }
             }
           break;
 
@@ -4937,7 +4952,7 @@ for (;;)
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
           which means that Perl space and POSIX space are now identical. PCRE
           was changed at release 8.34. */
-    
+
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
           for (fi = min;; fi++)
@@ -4951,10 +4966,18 @@ for (;;)
               RRETURN(MATCH_NOMATCH);
               }
             GETCHARINCTEST(c, eptr);
-            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
-                   == prop_fail_result)
-              RRETURN(MATCH_NOMATCH);
+            switch(c)
+              {
+              HSPACE_CASES:
+              VSPACE_CASES:
+              if (prop_fail_result) RRETURN(MATCH_NOMATCH);
+              break;
+
+              default:
+              if ((UCD_CATEGORY(c) == ucp_Z) == prop_fail_result)
+                RRETURN(MATCH_NOMATCH);
+              break;
+              }
             }
           /* Control never gets here */
 
@@ -5441,7 +5464,7 @@ for (;;)
           /* Perl space used to exclude VT, but from Perl 5.18 it is included,
           which means that Perl space and POSIX space are now identical. PCRE
           was changed at release 8.34. */
-    
+
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
           for (i = min; i < max; i++)
@@ -5453,12 +5476,21 @@ for (;;)
               break;
               }
             GETCHARLENTEST(c, eptr, len);
-            if ((UCD_CATEGORY(c) == ucp_Z || c == CHAR_HT || c == CHAR_NL ||
-                 c == CHAR_VT || c == CHAR_FF || c == CHAR_CR)
-                 == prop_fail_result)
+            switch(c)
+              {
+              HSPACE_CASES:
+              VSPACE_CASES:
+              if (prop_fail_result) goto ENDLOOP99;  /* Break the loop */
               break;
+
+              default:
+              if ((UCD_CATEGORY(c) == ucp_Z) == prop_fail_result)
+                goto ENDLOOP99;   /* Break the loop */
+              break;
+              }
             eptr+= len;
             }
+          ENDLOOP99:
           break;
 
           case PT_WORD:
@@ -5572,12 +5604,12 @@ for (;;)
         /* eptr is now past the end of the maximum run */
 
         if (possessive) continue;    /* No backtracking */
-         
+
         for(;;)
           {
-          int lgb, rgb; 
+          int lgb, rgb;
           PCRE_PUCHAR fptr;
-            
+
           if (eptr == pp) goto TAIL_RECURSE;   /* At start of char run */
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM45);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
@@ -5585,7 +5617,7 @@ for (;;)
           /* Backtracking over an extended grapheme cluster involves inspecting
           the previous two characters (if present) to see if a break is
           permitted between them. */
- 
+
           eptr--;
           if (!utf) c = *eptr; else
             {
@@ -5603,7 +5635,7 @@ for (;;)
               BACKCHAR(fptr);
               GETCHAR(c, fptr);
               }
-            lgb = UCD_GRAPHBREAK(c);        
+            lgb = UCD_GRAPHBREAK(c);
             if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0) break;
             eptr = fptr;
             rgb = lgb;
@@ -6127,7 +6159,7 @@ for (;;)
               eptr[-1] == CHAR_CR) eptr--;
           }
         }
-        
+
       /* Control never gets here */
       }
 

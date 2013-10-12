@@ -2151,4 +2151,16 @@ No match
     123  
 No match
     
+/^A\s+Z/8W
+    A\x{2005}Z
+ 0: A\x{2005}Z
+    A\x{85}\x{180e}\x{2005}Z
+ 0: A\x{85}\x{180e}\x{2005}Z
+
+/^A[\s]+Z/8W
+    A\x{2005}Z
+ 0: A\x{2005}Z
+    A\x{85}\x{180e}\x{2005}Z
+ 0: A\x{85}\x{180e}\x{2005}Z
+
 /-- End of testinput6 --/

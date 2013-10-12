@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "08 October 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "12 October 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -543,9 +543,9 @@ efficiency reasons. However, if PCRE is compiled with Unicode property support,
 and the PCRE_UCP option is set, the behaviour is changed so that Unicode
 properties are used to determine character types, as follows:
 .sp
-  \ed  any character that \ep{Nd} matches (decimal digit)
-  \es  any character that \ep{Z} matches, plus HT, LF, FF, CR
-  \ew  any character that \ep{L} or \ep{N} matches, plus underscore
+  \ed  any character that matches \ep{Nd} (decimal digit)
+  \es  any character that matches \ep{Z} or \eh or \ev
+  \ew  any character that matches \ep{L} or \ep{N}, plus underscore
 .sp
 The upper case escapes match the inverse sets of characters. Note that \ed
 matches only decimal digits, whereas \ew matches any Unicode digit, as well as
@@ -1309,7 +1309,7 @@ are:
   lower    lower case letters
   print    printing characters, including space
   punct    printing characters, excluding letters and digits and space
-  space    white space (not quite the same as \es)
+  space    white space (the same as \es from PCRE 8.34)
   upper    upper case letters
   word     "word" characters (same as \ew)
   xdigit   hexadecimal digits
@@ -3176,6 +3176,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 October 2013
+Last updated: 12 October 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

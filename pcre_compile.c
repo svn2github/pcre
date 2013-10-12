@@ -2709,10 +2709,16 @@ switch(ptype)
 
   case PT_SPACE:    /* Perl space */
   case PT_PXSPACE:  /* POSIX space */
-  return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-          c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-          c == CHAR_FF || c == CHAR_CR)
-          == negated;
+  switch(c)
+    {
+    HSPACE_CASES:
+    VSPACE_CASES:
+    return negated;
+    
+    default:
+    return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
+    }       
+  break;  /* Control never reaches here */
 
   case PT_WORD:
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||

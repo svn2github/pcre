@@ -126,7 +126,12 @@ Version 8.34 xx-xxxx-201x
 25. If PCRE_AUTO_CALLOUT and PCRE_UCP were set for a pattern that contained 
     character types such as \d or \w, too many callouts were inserted, and the 
     data that they returned was rubbish.  
-
+    
+26. In UCP mode, \s was not matching two of the characters that Perl matches,
+    namely NEL (U+0085) and MONGOLIAN VOWEL SEPARATOR (U+180E), though they 
+    were matched by \h. The code has now been refactored so that the lists of 
+    the horizontal and vertical whitespace characters used for \h and \v (which 
+    are defined only in one place) are now also used for \s.  
  
 
 Version 8.33 28-May-2013

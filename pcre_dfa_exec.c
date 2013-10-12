@@ -1104,9 +1104,17 @@ for (;;)
     
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-               c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-               c == CHAR_FF || c == CHAR_CR;
+          switch(c)
+            {
+            HSPACE_CASES:
+            VSPACE_CASES:
+            OK = TRUE;
+            break;
+             
+            default:      
+            OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
+            break;
+            }  
           break;
 
           case PT_WORD:
@@ -1354,9 +1362,17 @@ for (;;)
     
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-               c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-               c == CHAR_FF || c == CHAR_CR;
+          switch(c)
+            {
+            HSPACE_CASES:
+            VSPACE_CASES:
+            OK = TRUE;
+            break;
+             
+            default:      
+            OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
+            break;
+            }  
           break;
 
           case PT_WORD:
@@ -1598,9 +1614,17 @@ for (;;)
     
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-               c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-               c == CHAR_FF || c == CHAR_CR;
+          switch(c)
+            {
+            HSPACE_CASES:
+            VSPACE_CASES:
+            OK = TRUE;
+            break;
+             
+            default:      
+            OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
+            break;
+            }  
           break;
 
           case PT_WORD:
@@ -1867,9 +1891,17 @@ for (;;)
     
           case PT_SPACE:    /* Perl space */
           case PT_PXSPACE:  /* POSIX space */
-          OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z ||
-               c == CHAR_HT || c == CHAR_NL || c == CHAR_VT ||
-               c == CHAR_FF || c == CHAR_CR;
+          switch(c)
+            {
+            HSPACE_CASES:
+            VSPACE_CASES:
+            OK = TRUE;
+            break;
+             
+            default:      
+            OK = PRIV(ucp_gentype)[prop->chartype] == ucp_Z;
+            break;
+            }  
           break;
 
           case PT_WORD:
