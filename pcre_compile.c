@@ -3333,7 +3333,7 @@ for(;;)
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
       case OP_XCLASS:
       if (list_ptr != list) return FALSE;   /* Class is first opcode */
-      if (PRIV(xclass)(chr, code - list_ptr[2] + 1 + LINK_SIZE, utf))
+      if (PRIV(xclass)(chr, code - list_ptr[2] + LINK_SIZE, utf))
         return FALSE;
       break;
 #endif
