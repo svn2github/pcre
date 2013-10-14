@@ -132,7 +132,10 @@ Version 8.34 xx-xxxx-201x
     were matched by \h. The code has now been refactored so that the lists of 
     the horizontal and vertical whitespace characters used for \h and \v (which 
     are defined only in one place) are now also used for \s.  
- 
+
+27. Add JIT support for the 64 bit TileGX architecture.
+    Patch by Jiong Wang (Tilera Corporation).
+
 
 Version 8.33 28-May-2013
 ------------------------
