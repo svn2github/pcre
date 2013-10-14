@@ -1549,18 +1549,6 @@ No match
 /^[.^$|()*+?{,}]+/
     .^\$(*+)|{?,?}
  0: .^$(*+)|{?,?}
- 1: .^$(*+)|{?,?
- 2: .^$(*+)|{?,
- 3: .^$(*+)|{?
- 4: .^$(*+)|{
- 5: .^$(*+)|
- 6: .^$(*+)
- 7: .^$(*+
- 8: .^$(*
- 9: .^$(
-10: .^$
-11: .^
-12: .
 
 /^a*\w/
     z
@@ -2790,8 +2778,6 @@ No match
 /[-az]+/
     az-
  0: az-
- 1: az
- 2: a
     *** Failers
  0: a
     b
@@ -2800,8 +2786,6 @@ No match
 /[az-]+/
     za-
  0: za-
- 1: za
- 2: z
     *** Failers
  0: a
     b
@@ -2810,8 +2794,6 @@ No match
 /[a\-z]+/
     a-z
  0: a-z
- 1: a-
- 2: a
     *** Failers
  0: a
     b
@@ -2820,20 +2802,10 @@ No match
 /[a-z]+/
     abcdxyz
  0: abcdxyz
- 1: abcdxy
- 2: abcdx
- 3: abcd
- 4: abc
- 5: ab
- 6: a
 
 /[\d-]+/
     12-34
  0: 12-34
- 1: 12-3
- 2: 12-
- 3: 12
- 4: 1
     *** Failers
 No match
     aaa
@@ -2842,11 +2814,6 @@ No match
 /[\d-z]+/
     12-34z
  0: 12-34z
- 1: 12-34
- 2: 12-3
- 3: 12-
- 4: 12
- 5: 1
     *** Failers
 No match
     aaa
@@ -4782,9 +4749,6 @@ No match
 /[^ab]*/
     cde
  0: cde
- 1: cd
- 2: c
- 3: 
 
 /abc/
     *** Failers
@@ -4884,10 +4848,6 @@ No match
 /[a-zA-Z_][a-zA-Z0-9_]*/
     alpha
  0: alpha
- 1: alph
- 2: alp
- 3: al
- 4: a
 
 /^a(bc+|b[eh])g|.h$/
     abh
@@ -5244,9 +5204,6 @@ No match
 /[^ab]*/i
     CDE
  0: CDE
- 1: CD
- 2: C
- 3: 
 
 /abc/i
 
@@ -5337,10 +5294,6 @@ No match
 /[a-zA-Z_][a-zA-Z0-9_]*/i
     ALPHA
  0: ALPHA
- 1: ALPH
- 2: ALP
- 3: AL
- 4: A
 
 /^a(bc+|b[eh])g|.h$/i
     ABH
@@ -5897,17 +5850,14 @@ No match
 /([[:]+)/
     a:[b]:
  0: :[
- 1: :
 
 /([[=]+)/
     a=[b]=
  0: =[
- 1: =
 
 /([[.]+)/
     a.[b].
  0: .[
- 1: .
 
 /((?>a+)b)/
     aaab
@@ -6074,25 +6024,14 @@ No match
 /[[:space:]]+/
     > \x09\x0a\x0c\x0d\x0b<
  0:  \x09\x0a\x0c\x0d\x0b
- 1:  \x09\x0a\x0c\x0d
- 2:  \x09\x0a\x0c
- 3:  \x09\x0a
- 4:  \x09
- 5:  
      
 /[[:blank:]]+/
     > \x09\x0a\x0c\x0d\x0b<
  0:  \x09
- 1:  
      
 /[\s]+/
     > \x09\x0a\x0c\x0d\x0b<
  0:  \x09\x0a\x0c\x0d\x0b
- 1:  \x09\x0a\x0c\x0d
- 2:  \x09\x0a\x0c
- 3:  \x09\x0a
- 4:  \x09
- 5:  
      
 /\s+/
     > \x09\x0a\x0c\x0d\x0b<
@@ -6403,8 +6342,6 @@ Partial match: 123
 /Content-Type\x3A[^\r\n]{6,}/
     Content-Type:xxxxxyyy 
  0: Content-Type:xxxxxyyy
- 1: Content-Type:xxxxxyy
- 2: Content-Type:xxxxxy
 
 /Content-Type\x3A[^\r\n]{6,}z/
     Content-Type:xxxxxyyyz
@@ -7354,8 +7291,6 @@ Partial match: abc1
 /abc[de]*/
     xxxxabcde\P
  0: abcde
- 1: abcd
- 2: abc
     xxxxabcde\P\P
 Partial match: abcde
 
@@ -7797,5 +7732,58 @@ Error -30 (invalid data in workspace for DFA restart)
 /abcd/
     abcd\O0
 Matched, but offsets vector is too small to show all matches
+
+/-- These tests show up auto-possessification --/
+
+/[ab]*/
+    aaaa
+ 0: aaaa
+    
+/[ab]*?/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+ 4: 
+    
+/[ab]?/
+    aaaa
+ 0: a
+    
+/[ab]??/
+    aaaa
+ 0: a
+ 1: 
+    
+/[ab]+/
+    aaaa
+ 0: aaaa
+    
+/[ab]+?/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+    
+/[ab]{2,3}/
+    aaaa
+ 0: aaa
+    
+/[ab]{2,3}?/
+    aaaa
+ 0: aaa
+ 1: aa
+    
+/[ab]{2,}/
+    aaaa    
+ 0: aaaa
+
+/[ab]{2,}?/
+    aaaa    
+ 0: aaaa
+ 1: aaa
+ 2: aa
 
 /-- End of testinput8 --/

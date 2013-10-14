@@ -735,17 +735,22 @@ for(;;)
         case OP_CRMINPLUS:
         case OP_CRQUERY:
         case OP_CRMINQUERY:
+        case OP_CRPOSSTAR:
+        case OP_CRPOSPLUS:
+        case OP_CRPOSQUERY:
         fprintf(f, "%s", priv_OP_names[*ccode]);
         extra += priv_OP_lengths[*ccode];
         break;
 
         case OP_CRRANGE:
         case OP_CRMINRANGE:
+        case OP_CRPOSRANGE:
         min = GET2(ccode,1);
         max = GET2(ccode,1 + IMM2_SIZE);
         if (max == 0) fprintf(f, "{%u,}", min);
         else fprintf(f, "{%u,%u}", min, max);
         if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
+        else if (*ccode == OP_CRPOSRANGE) fprintf(f, "+");
         extra += priv_OP_lengths[*ccode];
         break;
 

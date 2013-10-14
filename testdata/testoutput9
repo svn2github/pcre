@@ -1227,8 +1227,6 @@ Partial match: abc1
 /abc[de]*/8
     xxxxabcde\P
  0: abcde
- 1: abcd
- 2: abc
     xxxxabcde\P\P
 Partial match: abcde
 

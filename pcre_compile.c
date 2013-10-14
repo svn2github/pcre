@@ -1817,16 +1817,20 @@ for (;;)
 
     switch (*cc)
       {
-      case OP_CRPLUS:
-      case OP_CRMINPLUS:
       case OP_CRSTAR:
       case OP_CRMINSTAR:
+      case OP_CRPLUS:
+      case OP_CRMINPLUS:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSPLUS:
+      case OP_CRPOSQUERY:
       return -1;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       if (GET2(cc,1) != GET2(cc,1+IMM2_SIZE)) return -1;
       branchlength += (int)GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
@@ -2419,15 +2423,19 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       case OP_CRMINSTAR:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSQUERY:
       break;
 
       default:                   /* Non-repeat => class must match */
       case OP_CRPLUS:            /* These repeats aren't empty */
       case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
       return FALSE;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       if (GET2(ccode, 1) > 0) return FALSE;  /* Minimum > 0 */
       break;
       }
@@ -2920,12 +2928,21 @@ switch(c)
     case OP_CRMINSTAR:
     case OP_CRQUERY:
     case OP_CRMINQUERY:
+    case OP_CRPOSSTAR:
+    case OP_CRPOSQUERY:
     list[1] = TRUE;
+    end++;
+    break;
+
+    case OP_CRPLUS:
+    case OP_CRMINPLUS:
+    case OP_CRPOSPLUS:
     end++;
     break;
 
     case OP_CRRANGE:
     case OP_CRMINRANGE:
+    case OP_CRPOSRANGE:
     list[1] = (GET2(end, 1) == 0);
     end += 1 + 2 * IMM2_SIZE;
     break;
@@ -2956,7 +2973,7 @@ Returns:      TRUE if the auto-possessification is possible
 
 static BOOL
 compare_opcodes(const pcre_uchar *code, BOOL utf, const compile_data *cd,
-  const pcre_uint32* base_list)
+  const pcre_uint32* base_list, const pcre_uchar *base_end)
 {
 pcre_uchar c;
 pcre_uint32 list[8];
@@ -2964,6 +2981,7 @@ const pcre_uint32* chr_ptr;
 const pcre_uint32* ochr_ptr;
 const pcre_uint32* list_ptr;
 const pcre_uchar *next_code;
+const pcre_uint8 *class_bits;
 pcre_uint32 chr;
 
 /* Note: the base_list[1] contains whether the current opcode has greedy
@@ -3039,7 +3057,7 @@ for(;;)
 
     while (*next_code == OP_ALT)
       {
-      if (!compare_opcodes(code, utf, cd, base_list)) return FALSE;
+      if (!compare_opcodes(code, utf, cd, base_list, base_end)) return FALSE;
       code = next_code + 1 + LINK_SIZE;
       next_code += GET(next_code, 1);
       }
@@ -3061,7 +3079,7 @@ for(;;)
     /* The bracket content will be checked by the
     OP_BRA/OP_CBRA case above. */
     next_code += 1 + LINK_SIZE;
-    if (!compare_opcodes(next_code, utf, cd, base_list)) return FALSE;
+    if (!compare_opcodes(next_code, utf, cd, base_list, base_end)) return FALSE;
 
     code += PRIV(OP_lengths)[c];
     continue;
@@ -3318,21 +3336,14 @@ for(;;)
         return FALSE;
       break;
 
-      /* The class comparisons work only when the class is the second item
-      of the pair, because there are at present no possessive forms of the
-      class opcodes. Note also that the "code" variable that is used below
-      points after the second item, and that the pointer for the first item
-      is not available, so even if there were possessive forms of the class
-      opcodes, the correct comparison could not be done. */
-
       case OP_NCLASS:
       if (chr > 255) return FALSE;
       /* Fall through */
 
       case OP_CLASS:
-      if (list_ptr != list) return FALSE;   /* Class is first opcode */
       if (chr > 255) break;
-      if ((((pcre_uint8 *)(code - list_ptr[2]))[chr >> 3] & (1 << (chr & 7))) != 0)
+      class_bits = (pcre_uint8 *)((list_ptr == list ? code : base_end) - list_ptr[2]);
+      if ((class_bits[chr >> 3] & (1 << (chr & 7))) != 0)
         return FALSE;
       break;
 
@@ -3380,14 +3391,15 @@ Returns:      nothing
 static void
 auto_possessify(pcre_uchar *code, BOOL utf, const compile_data *cd)
 {
-register pcre_uchar c;
+register pcre_uchar c, d;
 const pcre_uchar *end;
+pcre_uchar *repeat_code;
 pcre_uint32 list[8];
 
 for (;;)
   {
   c = *code;
-
+  
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;
@@ -3395,7 +3407,7 @@ for (;;)
       get_chr_property_list(code, utf, cd->fcc, list) : NULL;
     list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-    if (end != NULL && compare_opcodes(end, utf, cd, list))
+    if (end != NULL && compare_opcodes(end, utf, cd, list, end))
       {
       switch(c)
         {
@@ -3434,6 +3446,47 @@ for (;;)
       }
     c = *code;
     }
+  else if (c == OP_CLASS || c == OP_NCLASS || c == OP_XCLASS)
+    {
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    if (c == OP_XCLASS)
+      repeat_code = code + 1 + GET(code, 1);
+    else
+#endif
+      repeat_code = code + 1 + (32 / sizeof(pcre_uchar));
+
+    d = *repeat_code;
+    if (d >= OP_CRSTAR && d <= OP_CRMINRANGE)
+      {
+      /* end must not be NULL. */
+      end = get_chr_property_list(code, utf, cd->fcc, list);
+
+      list[1] = d == OP_CRSTAR || d == OP_CRPLUS || d == OP_CRQUERY || 
+        d == OP_CRRANGE;
+
+      if (compare_opcodes(end, utf, cd, list, end))
+        {
+        switch (d)
+          {
+          case OP_CRSTAR:
+          *repeat_code = OP_CRPOSSTAR;
+          break;
+
+          case OP_CRPLUS:
+          *repeat_code = OP_CRPOSPLUS;
+          break;
+
+          case OP_CRQUERY:
+          *repeat_code = OP_CRPOSQUERY;
+          break;
+
+          case OP_CRRANGE:
+          *repeat_code = OP_CRPOSRANGE;
+          break;
+          }
+        }
+      }
+    }
 
   switch(c)
     {
@@ -3460,9 +3513,11 @@ for (;;)
       code += 2;
     break;
 
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
     case OP_XCLASS:
     code += GET(code, 1);
     break;
+#endif
 
     case OP_MARK:
     case OP_PRUNE_ARG:

@@ -3898,6 +3898,36 @@ backtracking verbs. --/
 
 /a+(?:bb)?a#a+(?:|||)#a+(?:|b)a#a+(?:|||)?a/BZ
 
+/[ab]*/BZ
+    aaaa
+
+/[ab]*?/BZ
+    aaaa
+    
+/[ab]?/BZ
+    aaaa
+    
+/[ab]??/BZ
+    aaaa
+    
+/[ab]+/BZ
+    aaaa
+    
+/[ab]+?/BZ
+    aaaa
+    
+/[ab]{2,3}/BZ
+    aaaa
+    
+/[ab]{2,3}?/BZ
+    aaaa
+    
+/[ab]{2,}/BZ
+    aaaa    
+
+/[ab]{2,}?/BZ
+    aaaa    
+
 /-- End of special auto-possessive tests --/
 
 /^A\o{1239}B/

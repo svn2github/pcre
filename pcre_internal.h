@@ -2070,91 +2070,96 @@ enum {
   OP_CRRANGE,        /* 104 These are different to the three sets above. */
   OP_CRMINRANGE,     /* 105 */
 
+  OP_CRPOSSTAR,      /* 106 Possessified versions */
+  OP_CRPOSPLUS,      /* 107 */
+  OP_CRPOSQUERY,     /* 108 */
+  OP_CRPOSRANGE,     /* 109 */
+
   /* End of quantifier opcodes */
 
-  OP_CLASS,          /* 106 Match a character class, chars < 256 only */
-  OP_NCLASS,         /* 107 Same, but the bitmap was created from a negative
+  OP_CLASS,          /* 110 Match a character class, chars < 256 only */
+  OP_NCLASS,         /* 111 Same, but the bitmap was created from a negative
                               class - the difference is relevant only when a
                               character > 255 is encountered. */
-  OP_XCLASS,         /* 108 Extended class for handling > 255 chars within the
+  OP_XCLASS,         /* 112 Extended class for handling > 255 chars within the
                               class. This does both positive and negative. */
-  OP_REF,            /* 109 Match a back reference, casefully */
-  OP_REFI,           /* 110 Match a back reference, caselessly */
-  OP_DNREF,          /* 111 Match a duplicate name backref, casefully */
-  OP_DNREFI,         /* 112 Match a duplicate name backref, caselessly */
-  OP_RECURSE,        /* 113 Match a numbered subpattern (possibly recursive) */
-  OP_CALLOUT,        /* 114 Call out to external function if provided */
+  OP_REF,            /* 113 Match a back reference, casefully */
+  OP_REFI,           /* 114 Match a back reference, caselessly */
+  OP_DNREF,          /* 115 Match a duplicate name backref, casefully */
+  OP_DNREFI,         /* 116 Match a duplicate name backref, caselessly */
+  OP_RECURSE,        /* 117 Match a numbered subpattern (possibly recursive) */
+  OP_CALLOUT,        /* 118 Call out to external function if provided */
 
-  OP_ALT,            /* 115 Start of alternation */
-  OP_KET,            /* 116 End of group that doesn't have an unbounded repeat */
-  OP_KETRMAX,        /* 117 These two must remain together and in this */
-  OP_KETRMIN,        /* 118 order. They are for groups the repeat for ever. */
-  OP_KETRPOS,        /* 119 Possessive unlimited repeat. */
+  OP_ALT,            /* 119 Start of alternation */
+  OP_KET,            /* 120 End of group that doesn't have an unbounded repeat */
+  OP_KETRMAX,        /* 121 These two must remain together and in this */
+  OP_KETRMIN,        /* 122 order. They are for groups the repeat for ever. */
+  OP_KETRPOS,        /* 123 Possessive unlimited repeat. */
 
   /* The assertions must come before BRA, CBRA, ONCE, and COND, and the four
   asserts must remain in order. */
 
-  OP_REVERSE,        /* 129 Move pointer back - used in lookbehind assertions */
-  OP_ASSERT,         /* 121 Positive lookahead */
-  OP_ASSERT_NOT,     /* 122 Negative lookahead */
-  OP_ASSERTBACK,     /* 123 Positive lookbehind */
-  OP_ASSERTBACK_NOT, /* 124 Negative lookbehind */
+  OP_REVERSE,        /* 124 Move pointer back - used in lookbehind assertions */
+  OP_ASSERT,         /* 125 Positive lookahead */
+  OP_ASSERT_NOT,     /* 126 Negative lookahead */
+  OP_ASSERTBACK,     /* 127 Positive lookbehind */
+  OP_ASSERTBACK_NOT, /* 128 Negative lookbehind */
 
   /* ONCE, ONCE_NC, BRA, BRAPOS, CBRA, CBRAPOS, and COND must come immediately
   after the assertions, with ONCE first, as there's a test for >= ONCE for a
   subpattern that isn't an assertion. The POS versions must immediately follow
   the non-POS versions in each case. */
 
-  OP_ONCE,           /* 125 Atomic group, contains captures */
-  OP_ONCE_NC,        /* 126 Atomic group containing no captures */
-  OP_BRA,            /* 127 Start of non-capturing bracket */
-  OP_BRAPOS,         /* 128 Ditto, with unlimited, possessive repeat */
-  OP_CBRA,           /* 129 Start of capturing bracket */
-  OP_CBRAPOS,        /* 130 Ditto, with unlimited, possessive repeat */
-  OP_COND,           /* 131 Conditional group */
+  OP_ONCE,           /* 129 Atomic group, contains captures */
+  OP_ONCE_NC,        /* 130 Atomic group containing no captures */
+  OP_BRA,            /* 131 Start of non-capturing bracket */
+  OP_BRAPOS,         /* 132 Ditto, with unlimited, possessive repeat */
+  OP_CBRA,           /* 133 Start of capturing bracket */
+  OP_CBRAPOS,        /* 134 Ditto, with unlimited, possessive repeat */
+  OP_COND,           /* 135 Conditional group */
 
   /* These five must follow the previous five, in the same order. There's a
   check for >= SBRA to distinguish the two sets. */
 
-  OP_SBRA,           /* 132 Start of non-capturing bracket, check empty  */
-  OP_SBRAPOS,        /* 133 Ditto, with unlimited, possessive repeat */
-  OP_SCBRA,          /* 134 Start of capturing bracket, check empty */
-  OP_SCBRAPOS,       /* 135 Ditto, with unlimited, possessive repeat */
-  OP_SCOND,          /* 136 Conditional group, check empty */
+  OP_SBRA,           /* 136 Start of non-capturing bracket, check empty  */
+  OP_SBRAPOS,        /* 137 Ditto, with unlimited, possessive repeat */
+  OP_SCBRA,          /* 138 Start of capturing bracket, check empty */
+  OP_SCBRAPOS,       /* 139 Ditto, with unlimited, possessive repeat */
+  OP_SCOND,          /* 140 Conditional group, check empty */
 
   /* The next two pairs must (respectively) be kept together. */
 
-  OP_CREF,           /* 137 Used to hold a capture number as condition */
-  OP_DNCREF,         /* 138 Used to point to duplicate names as a condition */
-  OP_RREF,           /* 139 Used to hold a recursion number as condition */
-  OP_DNRREF,         /* 140 Used to point to duplicate names as a condition */
-  OP_DEF,            /* 141 The DEFINE condition */
+  OP_CREF,           /* 141 Used to hold a capture number as condition */
+  OP_DNCREF,         /* 142 Used to point to duplicate names as a condition */
+  OP_RREF,           /* 143 Used to hold a recursion number as condition */
+  OP_DNRREF,         /* 144 Used to point to duplicate names as a condition */
+  OP_DEF,            /* 145 The DEFINE condition */
 
-  OP_BRAZERO,        /* 142 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 143 order. */
-  OP_BRAPOSZERO,     /* 144 */
+  OP_BRAZERO,        /* 146 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 147 order. */
+  OP_BRAPOSZERO,     /* 148 */
 
   /* These are backtracking control verbs */
 
-  OP_MARK,           /* 145 always has an argument */
-  OP_PRUNE,          /* 146 */
-  OP_PRUNE_ARG,      /* 147 same, but with argument */
-  OP_SKIP,           /* 148 */
-  OP_SKIP_ARG,       /* 149 same, but with argument */
-  OP_THEN,           /* 150 */
-  OP_THEN_ARG,       /* 151 same, but with argument */
-  OP_COMMIT,         /* 152 */
+  OP_MARK,           /* 149 always has an argument */
+  OP_PRUNE,          /* 150 */
+  OP_PRUNE_ARG,      /* 151 same, but with argument */
+  OP_SKIP,           /* 152 */
+  OP_SKIP_ARG,       /* 153 same, but with argument */
+  OP_THEN,           /* 154 */
+  OP_THEN_ARG,       /* 155 same, but with argument */
+  OP_COMMIT,         /* 156 */
 
   /* These are forced failure and success verbs */
 
-  OP_FAIL,           /* 153 */
-  OP_ACCEPT,         /* 154 */
-  OP_ASSERT_ACCEPT,  /* 155 Used inside assertions */
-  OP_CLOSE,          /* 156 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 157 */
+  OP_ACCEPT,         /* 158 */
+  OP_ASSERT_ACCEPT,  /* 159 Used inside assertions */
+  OP_CLOSE,          /* 160 Used before OP_ACCEPT to close open captures */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO,       /* 157 */
+  OP_SKIPZERO,       /* 161 */
 
   /* This is not an opcode, but is used to check that tables indexed by opcode
   are the correct length, in order to catch updating errors - there have been
@@ -2194,6 +2199,7 @@ some cases doesn't actually use these names at all). */
   "*", "*?", "+", "+?", "?", "??", "{", "{", "{",                 \
   "*+","++", "?+", "{",                                           \
   "*", "*?", "+", "+?", "?", "??", "{", "{",                      \
+  "*+","++", "?+", "{",                                           \
   "class", "nclass", "xclass", "Ref", "Refi", "DnRef", "DnRefi",  \
   "Recurse", "Callout",                                           \
   "Alt", "Ket", "KetRmax", "KetRmin", "KetRpos",                  \
@@ -2259,6 +2265,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   /* Character class & ref repeats                                         */ \
   1, 1, 1, 1, 1, 1,              /* *, *?, +, +?, ?, ??                    */ \
   1+2*IMM2_SIZE, 1+2*IMM2_SIZE,  /* CRRANGE, CRMINRANGE                    */ \
+  1, 1, 1, 1+2*IMM2_SIZE,        /* Possessive *+, ++, ?+, CRPOSRANGE      */ \
   1+(32/sizeof(pcre_uchar)),     /* CLASS                                  */ \
   1+(32/sizeof(pcre_uchar)),     /* NCLASS                                 */ \
   0,                             /* XCLASS - variable length               */ \

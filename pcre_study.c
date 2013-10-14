@@ -342,6 +342,7 @@ for (;;)
       {
       case OP_CRPLUS:
       case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
       branchlength++;
       /* Fall through */
 
@@ -349,11 +350,14 @@ for (;;)
       case OP_CRMINSTAR:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSQUERY:
       cc++;
       break;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       branchlength += GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
@@ -436,18 +440,22 @@ for (;;)
       case OP_CRMINSTAR:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSQUERY:
       min = 0;
       cc++;
       break;
 
       case OP_CRPLUS:
       case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
       min = 1;
       cc++;
       break;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       min = GET2(cc, 1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
@@ -1305,11 +1313,14 @@ do
           case OP_CRMINSTAR:
           case OP_CRQUERY:
           case OP_CRMINQUERY:
+          case OP_CRPOSSTAR:
+          case OP_CRPOSQUERY:
           tcode++;
           break;
 
           case OP_CRRANGE:
           case OP_CRMINRANGE:
+          case OP_CRPOSRANGE:
           if (GET2(tcode, 1) == 0) tcode += 1 + 2 * IMM2_SIZE;
             else try_next = FALSE;
           break;

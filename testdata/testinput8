@@ -4803,4 +4803,36 @@
 /abcd/
     abcd\O0
 
+/-- These tests show up auto-possessification --/
+
+/[ab]*/
+    aaaa
+    
+/[ab]*?/
+    aaaa
+    
+/[ab]?/
+    aaaa
+    
+/[ab]??/
+    aaaa
+    
+/[ab]+/
+    aaaa
+    
+/[ab]+?/
+    aaaa
+    
+/[ab]{2,3}/
+    aaaa
+    
+/[ab]{2,3}?/
+    aaaa
+    
+/[ab]{2,}/
+    aaaa    
+
+/[ab]{2,}?/
+    aaaa    
+
 /-- End of testinput8 --/

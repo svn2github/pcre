@@ -107,8 +107,8 @@ because the offset vector is always a multiple of 3 long. */
 
 /* Min and max values for the common repeats; for the maxima, 0 => infinity */
 
-static const char rep_min[] = { 0, 0, 1, 1, 0, 0 };
-static const char rep_max[] = { 0, 0, 0, 0, 1, 1 };
+static const char rep_min[] = { 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, };
+static const char rep_max[] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, };
 
 #ifdef PCRE_DEBUG
 /*************************************************
@@ -2864,8 +2864,12 @@ for (;;)
         case OP_CRMINPLUS:
         case OP_CRQUERY:
         case OP_CRMINQUERY:
+        case OP_CRPOSSTAR:
+        case OP_CRPOSPLUS:
+        case OP_CRPOSQUERY:
         c = *ecode++ - OP_CRSTAR;
-        minimize = (c & 1) != 0;
+        if (c < OP_CRPOSSTAR - OP_CRSTAR) minimize = (c & 1) != 0;
+        else possessive = TRUE;
         min = rep_min[c];                 /* Pick up values from tables; */
         max = rep_max[c];                 /* zero for max => infinity */
         if (max == 0) max = INT_MAX;
@@ -2873,7 +2877,9 @@ for (;;)
 
         case OP_CRRANGE:
         case OP_CRMINRANGE:
+        case OP_CRPOSRANGE:
         minimize = (*ecode == OP_CRMINRANGE);
+        possessive = (*ecode == OP_CRPOSRANGE);
         min = GET2(ecode, 1);
         max = GET2(ecode, 1 + IMM2_SIZE);
         if (max == 0) max = INT_MAX;
@@ -3015,6 +3021,9 @@ for (;;)
               if ((BYTE_MAP[c/8] & (1 << (c&7))) == 0) break;
             eptr += len;
             }
+
+          if (possessive) continue;    /* No backtracking */
+
           for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM18);
@@ -3045,6 +3054,9 @@ for (;;)
               if ((BYTE_MAP[c/8] & (1 << (c&7))) == 0) break;
             eptr++;
             }
+
+          if (possessive) continue;    /* No backtracking */
+
           while (eptr >= pp)
             {
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM19);
@@ -3078,8 +3090,12 @@ for (;;)
         case OP_CRMINPLUS:
         case OP_CRQUERY:
         case OP_CRMINQUERY:
+        case OP_CRPOSSTAR:
+        case OP_CRPOSPLUS:
+        case OP_CRPOSQUERY:
         c = *ecode++ - OP_CRSTAR;
-        minimize = (c & 1) != 0;
+        if (c < OP_CRPOSSTAR - OP_CRSTAR) minimize = (c & 1) != 0;
+        else possessive = TRUE;
         min = rep_min[c];                 /* Pick up values from tables; */
         max = rep_max[c];                 /* zero for max => infinity */
         if (max == 0) max = INT_MAX;
@@ -3087,7 +3103,9 @@ for (;;)
 
         case OP_CRRANGE:
         case OP_CRMINRANGE:
+        case OP_CRPOSRANGE:
         minimize = (*ecode == OP_CRMINRANGE);
+        possessive = (*ecode == OP_CRPOSRANGE);
         min = GET2(ecode, 1);
         max = GET2(ecode, 1 + IMM2_SIZE);
         if (max == 0) max = INT_MAX;
@@ -3159,6 +3177,9 @@ for (;;)
           if (!PRIV(xclass)(c, data, utf)) break;
           eptr += len;
           }
+
+        if (possessive) continue;    /* No backtracking */
+
         for(;;)
           {
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM21);
