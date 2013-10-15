@@ -135,6 +135,13 @@ Version 8.34 xx-xxxx-201x
 
 27. Add JIT support for the 64 bit TileGX architecture.
     Patch by Jiong Wang (Tilera Corporation).
+    
+28. Possessive quantifiers for classes (both explicit and automatically
+    generated) now use special opcodes instead of wrapping in ONCE brackets.
+    
+29. Whereas an item such as A{4}+ ignored the possessivenes of the quantifier 
+    (because it's meaningless), this was not happening when PCRE_CASELESS was 
+    set. Not wrong, but inefficient. 
 
 
 Version 8.33 28-May-2013

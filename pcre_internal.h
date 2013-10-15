@@ -1893,8 +1893,8 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
        ESC_E, ESC_Q, ESC_g, ESC_k,
        ESC_DU, ESC_du, ESC_SU, ESC_su, ESC_WU, ESC_wu };
 
-/* Opcode table */
 
+/********************** Opcode definitions ******************/
 
 /****** NOTE NOTE NOTE ****** 
 
@@ -1903,9 +1903,10 @@ order to the list of escapes immediately above. Furthermore, values up to
 OP_DOLLM must not be changed without adjusting the table called autoposstab in
 pcre_compile.c
 
-Whenever this list is updated, the two macro definitions that follow must also
-be updated to match. There are also tables called "coptable" and "poptable" in
-pcre_dfa_exec.c that must be updated.
+Whenever this list is updated, the two macro definitions that follow must be
+updated to match. The possessification table called "opcode_possessify" in
+pcre_compile.c must also be updated, and also the tables called "coptable"
+and "poptable" in pcre_dfa_exec.c.
 
 ****** NOTE NOTE NOTE ******/
 
@@ -2170,7 +2171,8 @@ enum {
 
 /* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
 definitions that follow must also be updated to match. There are also tables
-called "coptable" and "poptable" in pcre_dfa_exec.c that must be updated. */
+called "opcode_possessify" in pcre_compile.c and "coptable" and "poptable" in
+pcre_dfa_exec.c that must be updated. */
 
 
 /* This macro defines textual names for all the opcodes. These are used only

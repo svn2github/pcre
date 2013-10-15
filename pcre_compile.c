@@ -777,6 +777,64 @@ static const pcre_uint8 posspropstab[3][4] = {
   { ucp_L, ucp_N, ucp_P, ucp_Po }   /* WORD */
 };
 
+/* This table is used when converting repeating opcodes into possessified
+versions as a result of an explicit possessive quantifier such as ++. A zero
+value means there is no possessified version - in those cases the item in
+question must be wrapped in ONCE brackets. The table is truncated at OP_CALLOUT
+because all relevant opcodes are less than that. */
+
+static const pcre_uint8 opcode_possessify[] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   /* 0 - 15  */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   /* 16 - 31 */
+
+  0,                       /* NOTI */
+  OP_POSSTAR, 0,           /* STAR, MINSTAR */
+  OP_POSPLUS, 0,           /* PLUS, MINPLUS */
+  OP_POSQUERY, 0,          /* QUERY, MINQUERY */
+  OP_POSUPTO, 0,           /* UPTO, MINUPTO */
+  0,                       /* EXACT */
+  0, 0, 0, 0,              /* POS{STAR,PLUS,QUERY,UPTO} */
+
+  OP_POSSTARI, 0,          /* STARI, MINSTARI */
+  OP_POSPLUSI, 0,          /* PLUSI, MINPLUSI */
+  OP_POSQUERYI, 0,         /* QUERYI, MINQUERYI */
+  OP_POSUPTOI, 0,          /* UPTOI, MINUPTOI */
+  0,                       /* EXACTI */
+  0, 0, 0, 0,              /* POS{STARI,PLUSI,QUERYI,UPTOI} */
+
+  OP_NOTPOSSTAR, 0,        /* NOTSTAR, NOTMINSTAR */
+  OP_NOTPOSPLUS, 0,        /* NOTPLUS, NOTMINPLUS */
+  OP_NOTPOSQUERY, 0,       /* NOTQUERY, NOTMINQUERY */
+  OP_NOTPOSUPTO, 0,        /* NOTUPTO, NOTMINUPTO */
+  0,                       /* NOTEXACT */
+  0, 0, 0, 0,              /* NOTPOS{STAR,PLUS,QUERY,UPTO} */
+
+  OP_NOTPOSSTARI, 0,       /* NOTSTARI, NOTMINSTARI */
+  OP_NOTPOSPLUSI, 0,       /* NOTPLUSI, NOTMINPLUSI */
+  OP_NOTPOSQUERYI, 0,      /* NOTQUERYI, NOTMINQUERYI */
+  OP_NOTPOSUPTOI, 0,       /* NOTUPTOI, NOTMINUPTOI */
+  0,                       /* NOTEXACTI */
+  0, 0, 0, 0,              /* NOTPOS{STARI,PLUSI,QUERYI,UPTOI} */
+
+  OP_TYPEPOSSTAR, 0,       /* TYPESTAR, TYPEMINSTAR */
+  OP_TYPEPOSPLUS, 0,       /* TYPEPLUS, TYPEMINPLUS */
+  OP_TYPEPOSQUERY, 0,      /* TYPEQUERY, TYPEMINQUERY */
+  OP_TYPEPOSUPTO, 0,       /* TYPEUPTO, TYPEMINUPTO */
+  0,                       /* TYPEEXACT */
+  0, 0, 0, 0,              /* TYPEPOS{STAR,PLUS,QUERY,UPTO} */
+
+  OP_CRPOSSTAR, 0,         /* CRSTAR, CRMINSTAR */
+  OP_CRPOSPLUS, 0,         /* CRPLUS, CRMINPLUS */
+  OP_CRPOSQUERY, 0,        /* CRQUERY, CRMINQUERY */
+  OP_CRPOSRANGE, 0,        /* CRRANGE, CRMINRANGE */
+  0, 0, 0, 0,              /* CRPOS{STAR,PLUS,QUERY,RANGE} */
+
+  0, 0, 0,                 /* CLASS, NCLASS, XCLASS */
+  0, 0,                    /* REF, REFI */
+  0, 0,                    /* DNREF, DNREFI */
+  0, 0                     /* RECURSE, CALLOUT */
+};
+
 
 
 /*************************************************
@@ -2722,10 +2780,10 @@ switch(ptype)
     HSPACE_CASES:
     VSPACE_CASES:
     return negated;
-    
+
     default:
     return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
-    }       
+    }
   break;  /* Control never reaches here */
 
   case PT_WORD:
@@ -3399,7 +3457,7 @@ pcre_uint32 list[8];
 for (;;)
   {
   c = *code;
-  
+
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;
@@ -3461,7 +3519,7 @@ for (;;)
       /* end must not be NULL. */
       end = get_chr_property_list(code, utf, cd->fcc, list);
 
-      list[1] = d == OP_CRSTAR || d == OP_CRPLUS || d == OP_CRQUERY || 
+      list[1] = d == OP_CRSTAR || d == OP_CRPLUS || d == OP_CRQUERY ||
         d == OP_CRRANGE;
 
       if (compare_opcodes(end, utf, cd, list, end))
@@ -5910,43 +5968,105 @@ for (;; ptr++)
       goto FAILED;
       }
 
-    /* If the character following a repeat is '+', or if certain optimization
-    tests above succeeded, possessive_quantifier is TRUE. For some opcodes,
-    there are special alternative opcodes for this case. For anything else, we
-    wrap the entire repeated item inside OP_ONCE brackets. Logically, the '+'
-    notation is just syntactic sugar, taken from Sun's Java package, but the
-    special opcodes can optimize it.
+    /* If the character following a repeat is '+', possessive_quantifier is
+    TRUE. For some opcodes, there are special alternative opcodes for this
+    case. For anything else, we wrap the entire repeated item inside OP_ONCE
+    brackets. Logically, the '+' notation is just syntactic sugar, taken from
+    Sun's Java package, but the special opcodes can optimize it.
 
     Some (but not all) possessively repeated subpatterns have already been
     completely handled in the code just above. For them, possessive_quantifier
-    is always FALSE at this stage.
-
-    Note that the repeated item starts at tempcode, not at previous, which
-    might be the first part of a string whose (former) last char we repeated.
-
-    Possessifying an 'exact' quantifier has no effect, so we can ignore it. But
-    an 'upto' may follow. We skip over an 'exact' item, and then test the
-    length of what remains before proceeding. */
+    is always FALSE at this stage. Note that the repeated item starts at
+    tempcode, not at previous, which might be the first part of a string whose
+    (former) last char we repeated. */
 
     if (possessive_quantifier)
       {
       int len;
 
-      if (*tempcode == OP_TYPEEXACT)
+      /* Possessifying an EXACT quantifier has no effect, so we can ignore it.
+      However, QUERY, STAR, or UPTO may follow (for quantifiers such as {5,6},
+      {5,}, or {5,10}). We skip over an EXACT item; if the length of what
+      remains is greater than zero, there's a further opcode that can be
+      handled. If not, do nothing, leaving the EXACT alone. */
+
+      switch(*tempcode)
+        {
+        case OP_TYPEEXACT:
         tempcode += PRIV(OP_lengths)[*tempcode] +
           ((tempcode[1 + IMM2_SIZE] == OP_PROP
           || tempcode[1 + IMM2_SIZE] == OP_NOTPROP)? 2 : 0);
+        break;
 
-      else if (*tempcode == OP_EXACT || *tempcode == OP_NOTEXACT)
-        {
+        /* CHAR opcodes are used for exacts whose count is 1. */
+
+        case OP_CHAR:
+        case OP_CHARI:
+        case OP_NOT:
+        case OP_NOTI:
+        case OP_EXACT:
+        case OP_EXACTI:
+        case OP_NOTEXACT:
+        case OP_NOTEXACTI:
         tempcode += PRIV(OP_lengths)[*tempcode];
 #ifdef SUPPORT_UTF
         if (utf && HAS_EXTRALEN(tempcode[-1]))
           tempcode += GET_EXTRALEN(tempcode[-1]);
 #endif
+        break;
+
+        /* For the class opcodes, the repeat operator appears at the end;
+        adjust tempcode to point to it. */
+
+        case OP_CLASS:
+        case OP_NCLASS:
+        tempcode += 1 + 32/sizeof(pcre_uchar);
+        break;
+
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+        case OP_XCLASS:
+        tempcode += GET(tempcode, 1);
+        break;
+#endif
         }
 
+      /* If tempcode is equal to code (which points to the end of the repeated
+      item), it means we have skipped an EXACT item but there is no following
+      QUERY, STAR, or UPTO; the value of len will be 0, and we do nothing. In
+      all other cases, tempcode will be pointing to the repeat opcode, and will
+      be less than code, so the value of len will be greater than 0. */
+
       len = (int)(code - tempcode);
+      if (len > 0)
+        { 
+        unsigned int repcode = *tempcode;
+        
+        /* There is a table for possessifying opcodes, all of which are less
+        than OP_CALLOUT. A zero entry means there is no possessified version.
+        */
+        
+        if (repcode < OP_CALLOUT && opcode_possessify[repcode] > 0)
+          *tempcode = opcode_possessify[repcode];
+        
+        /* For opcode without a special possessified version, wrap the item in
+        ONCE brackets. Because we are moving code along, we must ensure that any
+        pending recursive references are updated. */
+        
+        else
+          {
+          *code = OP_END;
+          adjust_recurse(tempcode, 1 + LINK_SIZE, utf, cd, save_hwm);
+          memmove(tempcode + 1 + LINK_SIZE, tempcode, IN_UCHARS(len));
+          code += 1 + LINK_SIZE;
+          len += 1 + LINK_SIZE;
+          tempcode[0] = OP_ONCE;
+          *code++ = OP_KET;
+          PUTINC(code, 0, len);
+          PUT(tempcode, 1, len);
+          }
+        }   
+
+#ifdef NEVER
       if (len > 0) switch (*tempcode)
         {
         case OP_STAR:  *tempcode = OP_POSSTAR; break;
@@ -5974,6 +6094,11 @@ for (;; ptr++)
         case OP_TYPEQUERY: *tempcode = OP_TYPEPOSQUERY; break;
         case OP_TYPEUPTO:  *tempcode = OP_TYPEPOSUPTO; break;
 
+        case OP_CRSTAR:   *tempcode = OP_CRPOSSTAR; break;
+        case OP_CRPLUS:   *tempcode = OP_CRPOSPLUS; break;
+        case OP_CRQUERY:  *tempcode = OP_CRPOSQUERY; break;
+        case OP_CRRANGE:  *tempcode = OP_CRPOSRANGE; break;
+
         /* Because we are moving code along, we must ensure that any
         pending recursive references are updated. */
 
@@ -5989,6 +6114,7 @@ for (;; ptr++)
         PUT(tempcode, 1, len);
         break;
         }
+#endif
       }
 
     /* In all case we no longer have a previous item. We also set the
@@ -9044,3 +9170,4 @@ return (pcre32 *)re;
 }
 
 /* End of pcre_compile.c */
+

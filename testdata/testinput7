@@ -815,4 +815,8 @@ of case for anything other than the ASCII letters. --/
 /\w+/8CWBZ
     abcd
 
+/[\p{N}]?+/BZO
+
+/[\p{L}ab]{2,3}+/BZO
+
 /-- End of testinput7 --/

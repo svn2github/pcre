@@ -829,7 +829,13 @@
 
 /x++/DZ
 
-/x{1,3}+/DZ
+/x{1,3}+/BZO
+
+/x{1,3}+/BZOi
+
+/[^x]{1,3}+/BZO
+
+/[^x]{1,3}+/BZOi
 
 /(x)*+/DZ
 
@@ -3940,5 +3946,13 @@ backtracking verbs. --/
 /^A\x{12Z/
 
 /^A\x{/
+
+/[ab]++/BZO
+
+/[^ab]*+/BZO
+
+/a{4}+/BZO
+
+/a{4}+/BZOi
 
 /-- End of testinput2 --/
