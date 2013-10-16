@@ -3909,30 +3909,32 @@ backtracking verbs. --/
 
 /[ab]*?/BZ
     aaaa
-    
+
 /[ab]?/BZ
     aaaa
-    
+
 /[ab]??/BZ
     aaaa
-    
+
 /[ab]+/BZ
     aaaa
-    
+
 /[ab]+?/BZ
     aaaa
-    
+
 /[ab]{2,3}/BZ
     aaaa
-    
+
 /[ab]{2,3}?/BZ
     aaaa
-    
+
 /[ab]{2,}/BZ
-    aaaa    
+    aaaa
 
 /[ab]{2,}?/BZ
-    aaaa    
+    aaaa
+
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/BZ
 
 /-- End of special auto-possessive tests --/
 

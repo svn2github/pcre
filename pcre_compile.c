@@ -3041,6 +3041,7 @@ const pcre_uint32* list_ptr;
 const pcre_uchar *next_code;
 const pcre_uint8 *class_bits;
 pcre_uint32 chr;
+BOOL accepted;
 
 /* Note: the base_list[1] contains whether the current opcode has greedy
 (represented by a non-zero value) quantifier. This is a different from
@@ -3169,15 +3170,16 @@ for(;;)
     {
     pcre_uint32 leftop, rightop;
 
-    if (list[1] != 0) return FALSE;   /* Must match at least one character */
     leftop = base_list[0];
     rightop = list[0];
 
 #ifdef SUPPORT_UCP
+    accepted = FALSE; /* Always set in non-unicode case. */
     if (leftop == OP_PROP || leftop == OP_NOTPROP)
       {
-      if (rightop == OP_EOD) return TRUE;
-      if (rightop == OP_PROP || rightop == OP_NOTPROP)
+      if (rightop == OP_EOD)
+        accepted = TRUE;
+      else if (rightop == OP_PROP || rightop == OP_NOTPROP)
         {
         int n;
         const pcre_uint8 *p;
@@ -3198,16 +3200,18 @@ for(;;)
         n = propposstab[base_list[2]][list[2]];
         switch(n)
           {
-          case 0: return FALSE;
-          case 1: return bothprop;
-          case 2: return (base_list[3] == list[3]) != same;
-          case 3: return !same;
+          case 0: break;
+          case 1: accepted = bothprop; break;
+          case 2: accepted = (base_list[3] == list[3]) != same; break;
+          case 3: accepted = !same; break;
 
           case 4:  /* Left general category, right particular category */
-          return risprop && catposstab[base_list[3]][list[3]] == same;
+          accepted = risprop && catposstab[base_list[3]][list[3]] == same;
+          break;
 
           case 5:  /* Right general category, left particular category */
-          return lisprop && catposstab[list[3]][base_list[3]] == same;
+          accepted = lisprop && catposstab[list[3]][base_list[3]] == same;
+          break;
 
           /* This code is logically tricky. Think hard before fiddling with it.
           The posspropstab table has four entries per row. Each row relates to
@@ -3232,48 +3236,58 @@ for(;;)
           case 7:  /* Left space vs right general category */
           case 8:  /* Left word vs right general category */
           p = posspropstab[n-6];
-          return risprop && lisprop ==
+          accepted = risprop && lisprop ==
             (list[3] != p[0] &&
              list[3] != p[1] &&
             (list[3] != p[2] || !lisprop));
+          break;
 
           case 9:   /* Right alphanum vs left general category */
           case 10:  /* Right space vs left general category */
           case 11:  /* Right word vs left general category */
           p = posspropstab[n-9];
-          return lisprop && risprop ==
+          accepted = lisprop && risprop ==
             (base_list[3] != p[0] &&
              base_list[3] != p[1] &&
             (base_list[3] != p[2] || !risprop));
+          break;
 
           case 12:  /* Left alphanum vs right particular category */
           case 13:  /* Left space vs right particular category */
           case 14:  /* Left word vs right particular category */
           p = posspropstab[n-12];
-          return risprop && lisprop ==
+          accepted = risprop && lisprop ==
             (catposstab[p[0]][list[3]] &&
              catposstab[p[1]][list[3]] &&
             (list[3] != p[3] || !lisprop));
+          break;
 
           case 15:  /* Right alphanum vs left particular category */
           case 16:  /* Right space vs left particular category */
           case 17:  /* Right word vs left particular category */
           p = posspropstab[n-15];
-          return lisprop && risprop ==
+          accepted = lisprop && risprop ==
             (catposstab[p[0]][base_list[3]] &&
              catposstab[p[1]][base_list[3]] &&
             (base_list[3] != p[3] || !risprop));
+          break;
           }
         }
-      return FALSE;
       }
 
     else
 #endif  /* SUPPORT_UCP */
 
-    return leftop >= FIRST_AUTOTAB_OP && leftop <= LAST_AUTOTAB_LEFT_OP &&
+    accepted = leftop >= FIRST_AUTOTAB_OP && leftop <= LAST_AUTOTAB_LEFT_OP &&
            rightop >= FIRST_AUTOTAB_OP && rightop <= LAST_AUTOTAB_RIGHT_OP &&
            autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
+
+    if (!accepted)
+      return FALSE;
+
+    if (list[1] == 0) return TRUE;
+    /* Might be an empty repeat. */
+    continue;
     }
 
   /* Control reaches here only if one of the items is a small character list.
@@ -3449,7 +3463,7 @@ Returns:      nothing
 static void
 auto_possessify(pcre_uchar *code, BOOL utf, const compile_data *cd)
 {
-register pcre_uchar c, d;
+register pcre_uchar c;
 const pcre_uchar *end;
 pcre_uchar *repeat_code;
 pcre_uint32 list[8];
@@ -3513,18 +3527,17 @@ for (;;)
 #endif
       repeat_code = code + 1 + (32 / sizeof(pcre_uchar));
 
-    d = *repeat_code;
-    if (d >= OP_CRSTAR && d <= OP_CRMINRANGE)
+    c = *repeat_code;
+    if (c >= OP_CRSTAR && c <= OP_CRMINRANGE)
       {
       /* end must not be NULL. */
       end = get_chr_property_list(code, utf, cd->fcc, list);
 
-      list[1] = d == OP_CRSTAR || d == OP_CRPLUS || d == OP_CRQUERY ||
-        d == OP_CRRANGE;
+      list[1] = (c & 1) == 0;
 
       if (compare_opcodes(end, utf, cd, list, end))
         {
-        switch (d)
+        switch (c)
           {
           case OP_CRSTAR:
           *repeat_code = OP_CRPOSSTAR;
@@ -3544,6 +3557,7 @@ for (;;)
           }
         }
       }
+    c = *code;
     }
 
   switch(c)

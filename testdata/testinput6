@@ -1298,6 +1298,8 @@
 /\x{1f80}+/8i
     \x{1f88}\x{1f80} 
 
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/8WBZ
+
 
 /-- Perl 5.12.4 gets these wrong, but 5.15.3 is OK --/
 
