@@ -3051,6 +3051,9 @@ matches to an empty string (also represented by a non-zero value). */
 
 for(;;)
   {
+  /* All operations move the code pointer forward.
+  Therefore infinite recursions are not possible. */
+
   c = *code;
 
   /* Skip over callouts */
@@ -3104,14 +3107,6 @@ for(;;)
     case OP_ONCE_NC:
     case OP_BRA:
     case OP_CBRA:
-    next_code = code;
-    do next_code += GET(next_code, 1); while (*next_code == OP_ALT);
-
-    /* We do not support repeated brackets, because they can lead to
-    infinite recursion. */
-
-    if (*next_code != OP_KET) return FALSE;
-
     next_code = code + GET(code, 1);
     code += PRIV(OP_lengths)[c];
 
@@ -3127,19 +3122,16 @@ for(;;)
     case OP_BRAMINZERO:
 
     next_code = code + 1;
-    if (*next_code != OP_BRA && *next_code != OP_CBRA)
-      return FALSE;
+    if (*next_code != OP_BRA && *next_code != OP_CBRA
+        && *next_code != OP_ONCE && *next_code != OP_ONCE_NC) return FALSE;
 
     do next_code += GET(next_code, 1); while (*next_code == OP_ALT);
-
-    /* We do not support repeated brackets, because they can lead to
-    infinite recursion. */
-    if (*next_code != OP_KET) return FALSE;
 
     /* The bracket content will be checked by the
     OP_BRA/OP_CBRA case above. */
     next_code += 1 + LINK_SIZE;
-    if (!compare_opcodes(next_code, utf, cd, base_list, base_end)) return FALSE;
+    if (!compare_opcodes(next_code, utf, cd, base_list, base_end))
+      return FALSE;
 
     code += PRIV(OP_lengths)[c];
     continue;

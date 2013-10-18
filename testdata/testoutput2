@@ -13558,7 +13558,7 @@ No set of starting bytes
         Alt
         cc
         Ket
-        a+
+        a++
         Bra
         bb
         Alt
@@ -13607,7 +13607,7 @@ No set of starting bytes
         Ket
         Ket
         #
-        a+
+        a++
         Brazero
         Bra
         bb
@@ -13828,6 +13828,188 @@ No set of starting bytes
         Ket
         End
 ------------------------------------------------------------------
+
+/a+(aa|bb)*c#a*(bb|cc)*a#a?(bb|cc)*d#[a-f]*(g|hh)*f/BZ
+------------------------------------------------------------------
+        Bra
+        a+
+        Brazero
+        CBra 1
+        aa
+        Alt
+        bb
+        KetRmax
+        c#
+        a*
+        Brazero
+        CBra 2
+        bb
+        Alt
+        cc
+        KetRmax
+        a#
+        a?+
+        Brazero
+        CBra 3
+        bb
+        Alt
+        cc
+        KetRmax
+        d#
+        [a-f]*
+        Brazero
+        CBra 4
+        g
+        Alt
+        hh
+        KetRmax
+        f
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-f]*(g|hh|i)*i#[a-x]{4,}(y{0,6})*y#[a-k]+(ll|mm)+n/BZ
+------------------------------------------------------------------
+        Bra
+        [a-f]*+
+        Brazero
+        CBra 1
+        g
+        Alt
+        hh
+        Alt
+        i
+        KetRmax
+        i#
+        [a-x]{4,}
+        Brazero
+        SCBra 2
+        y{0,6}
+        KetRmax
+        y#
+        [a-k]++
+        CBra 3
+        ll
+        Alt
+        mm
+        KetRmax
+        n
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-f]*(?>gg|hh)+#[a-f]*(?>gg|hh)?#[a-f]*(?>gg|hh)*a#[a-f]*(?>gg|hh)*h/BZ
+------------------------------------------------------------------
+        Bra
+        [a-f]*+
+        Once_NC
+        gg
+        Alt
+        hh
+        KetRmax
+        #
+        [a-f]*+
+        Brazero
+        Once_NC
+        gg
+        Alt
+        hh
+        Ket
+        #
+        [a-f]*
+        Brazero
+        Once_NC
+        gg
+        Alt
+        hh
+        KetRmax
+        a#
+        [a-f]*+
+        Brazero
+        Once_NC
+        gg
+        Alt
+        hh
+        KetRmax
+        h
+        Ket
+        End
+------------------------------------------------------------------
+
+/[a-c]*d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]*+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 1
+Starting byte set: a b c d 
+
+/[a-c]+d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]++
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 2
+Starting byte set: a b c 
+
+/[a-c]?d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]?+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 1
+Starting byte set: a b c d 
+
+/[a-c]{4,6}d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]{4,6}+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 5
+Starting byte set: a b c 
+
+/[a-c]{0,6}d/DZS
+------------------------------------------------------------------
+        Bra
+        [a-c]{0,6}+
+        d
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'd'
+Subject length lower bound = 1
+Starting byte set: a b c d 
 
 /-- End of special auto-possessive tests --/
 

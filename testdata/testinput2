@@ -3940,6 +3940,22 @@ backtracking verbs. --/
 
 /[a-z]*\s#[ \t]?\S#[a-c]*\S#[C-G]+?\d#[4-8]*\D#[4-9,]*\D#[!$]{0,5}\w#[M-Xf-l]+\W#[a-c,]?\W/BZ
 
+/a+(aa|bb)*c#a*(bb|cc)*a#a?(bb|cc)*d#[a-f]*(g|hh)*f/BZ
+
+/[a-f]*(g|hh|i)*i#[a-x]{4,}(y{0,6})*y#[a-k]+(ll|mm)+n/BZ
+
+/[a-f]*(?>gg|hh)+#[a-f]*(?>gg|hh)?#[a-f]*(?>gg|hh)*a#[a-f]*(?>gg|hh)*h/BZ
+
+/[a-c]*d/DZS
+
+/[a-c]+d/DZS
+
+/[a-c]?d/DZS
+
+/[a-c]{4,6}d/DZS
+
+/[a-c]{0,6}d/DZS
+
 /-- End of special auto-possessive tests --/
 
 /^A\o{1239}B/
