@@ -3936,6 +3936,10 @@ backtracking verbs. --/
 
 /\d+\s{0,5}=\s*\S?=\w{0,4}\W*/BZ
 
+/[a-d]{5,12}[e-z0-9]*#[^a-z]+[b-y]*a[2-7]?[^0-9a-z]+/BZ
+
+/[a-z]*\s#[ \t]?\S#[a-c]*\S#[C-G]+?\d#[4-8]*\D#[4-9,]*\D#[!$]{0,5}\w#[M-Xf-l]+\W#[a-c,]?\W/BZ
+
 /-- End of special auto-possessive tests --/
 
 /^A\o{1239}B/

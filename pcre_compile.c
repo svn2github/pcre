@@ -2975,7 +2975,7 @@ switch(c)
   case OP_XCLASS:
 
   if (c == OP_XCLASS)
-    end = code + GET(code, 0);
+    end = code + GET(code, 0) - 1;
   else
 #endif
     end = code + 32 / sizeof(pcre_uchar);
@@ -3031,17 +3031,18 @@ Returns:      TRUE if the auto-possessification is possible
 
 static BOOL
 compare_opcodes(const pcre_uchar *code, BOOL utf, const compile_data *cd,
-  const pcre_uint32* base_list, const pcre_uchar *base_end)
+  const pcre_uint32 *base_list, const pcre_uchar *base_end)
 {
 pcre_uchar c;
 pcre_uint32 list[8];
-const pcre_uint32* chr_ptr;
-const pcre_uint32* ochr_ptr;
-const pcre_uint32* list_ptr;
+const pcre_uint32 *chr_ptr;
+const pcre_uint32 *ochr_ptr;
+const pcre_uint32 *list_ptr;
 const pcre_uchar *next_code;
-const pcre_uint8 *class_bits;
+const pcre_uint8 *class_bitset;
+const pcre_uint32 *set1, *set2, *set_end;
 pcre_uint32 chr;
-BOOL accepted;
+BOOL accepted, invert_bits;
 
 /* Note: the base_list[1] contains whether the current opcode has greedy
 (represented by a non-zero value) quantifier. This is a different from
@@ -3161,6 +3162,92 @@ for(;;)
     {
     chr_ptr = list + 2;
     list_ptr = base_list;
+    }
+
+  /* Character bitsets can also be compared to certain opcodes. */
+
+  else if (base_list[0] == OP_CLASS || list[0] == OP_CLASS
+#ifdef COMPILE_PCRE8
+      /* In 8 bit, non-UTF mode, OP_CLASS and OP_NCLASS are the same. */
+      || (!utf && (base_list[0] == OP_NCLASS || list[0] == OP_NCLASS))
+#endif
+      )
+    {
+#ifdef COMPILE_PCRE8
+    if (base_list[0] == OP_CLASS || (!utf && base_list[0] == OP_NCLASS))
+#else
+    if (base_list[0] == OP_CLASS)
+#endif
+      {
+      set1 = (pcre_uint32 *)(base_end - base_list[2]);
+      list_ptr = list;
+      }
+    else
+      {
+      set1 = (pcre_uint32 *)(code - list[2]);
+      list_ptr = base_list;
+      }
+
+    invert_bits = FALSE;
+    switch(list_ptr[0])
+      {
+      case OP_CLASS:
+      case OP_NCLASS:
+      set2 = (pcre_uint32 *)
+        ((list_ptr == list ? code : base_end) - list_ptr[2]);
+      break;
+
+      /* OP_XCLASS cannot be supported here, because its bitset
+      is not necessarily complete. E.g: [a-\0x{200}] is stored
+      as a character range, and the appropriate bits are not set. */
+
+      case OP_NOT_DIGIT:
+        invert_bits = TRUE;
+        /* Fall through */
+      case OP_DIGIT:
+        set2 = (pcre_uint32 *)(cd->cbits + cbit_digit);
+        break;
+
+      case OP_NOT_WHITESPACE:
+        invert_bits = TRUE;
+        /* Fall through */
+      case OP_WHITESPACE:
+        set2 = (pcre_uint32 *)(cd->cbits + cbit_space);
+        break;
+
+      case OP_NOT_WORDCHAR:
+        invert_bits = TRUE;
+        /* Fall through */
+      case OP_WORDCHAR:
+        set2 = (pcre_uint32 *)(cd->cbits + cbit_word);
+        break;
+
+      default:
+      return FALSE;
+      }
+
+    /* Compare 4 bytes to improve speed. */
+    set_end = set1 + (32 / 4);
+    if (invert_bits)
+      {
+      do
+        {
+        if ((*set1++ & ~(*set2++)) != 0) return FALSE;
+        }
+      while (set1 < set_end);
+      }
+    else
+      {
+      do
+        {
+        if ((*set1++ & *set2++) != 0) return FALSE;
+        }
+      while (set1 < set_end);
+      }
+
+    if (list[1] == 0) return TRUE;
+    /* Might be an empty repeat. */
+    continue;
     }
 
   /* Some property combinations also acceptable. Unicode property opcodes are
@@ -3414,16 +3501,15 @@ for(;;)
 
       case OP_CLASS:
       if (chr > 255) break;
-      class_bits = (pcre_uint8 *)((list_ptr == list ? code : base_end) - list_ptr[2]);
-      if ((class_bits[chr >> 3] & (1 << (chr & 7))) != 0)
-        return FALSE;
+      class_bitset = (pcre_uint8 *)
+        ((list_ptr == list ? code : base_end) - list_ptr[2]);
+      if ((class_bitset[chr >> 3] & (1 << (chr & 7))) != 0) return FALSE;
       break;
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
       case OP_XCLASS:
-      if (list_ptr != list) return FALSE;   /* Class is first opcode */
-      if (PRIV(xclass)(chr, code - list_ptr[2] + LINK_SIZE, utf))
-        return FALSE;
+      if (PRIV(xclass)(chr, (list_ptr == list ? code : base_end) -
+          list_ptr[2] + LINK_SIZE, utf)) return FALSE;
       break;
 #endif
 
@@ -3465,7 +3551,7 @@ auto_possessify(pcre_uchar *code, BOOL utf, const compile_data *cd)
 {
 register pcre_uchar c;
 const pcre_uchar *end;
-pcre_uchar *repeat_code;
+pcre_uchar *repeat_opcode;
 pcre_uint32 list[8];
 
 for (;;)
@@ -3522,12 +3608,12 @@ for (;;)
     {
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
     if (c == OP_XCLASS)
-      repeat_code = code + 1 + GET(code, 1);
+      repeat_opcode = code + GET(code, 1);
     else
 #endif
-      repeat_code = code + 1 + (32 / sizeof(pcre_uchar));
+      repeat_opcode = code + 1 + (32 / sizeof(pcre_uchar));
 
-    c = *repeat_code;
+    c = *repeat_opcode;
     if (c >= OP_CRSTAR && c <= OP_CRMINRANGE)
       {
       /* end must not be NULL. */
@@ -3540,19 +3626,23 @@ for (;;)
         switch (c)
           {
           case OP_CRSTAR:
-          *repeat_code = OP_CRPOSSTAR;
+          case OP_CRMINSTAR:
+          *repeat_opcode = OP_CRPOSSTAR;
           break;
 
           case OP_CRPLUS:
-          *repeat_code = OP_CRPOSPLUS;
+          case OP_CRMINPLUS:
+          *repeat_opcode = OP_CRPOSPLUS;
           break;
 
           case OP_CRQUERY:
-          *repeat_code = OP_CRPOSQUERY;
+          case OP_CRMINQUERY:
+          *repeat_opcode = OP_CRPOSQUERY;
           break;
 
           case OP_CRRANGE:
-          *repeat_code = OP_CRPOSRANGE;
+          case OP_CRMINRANGE:
+          *repeat_opcode = OP_CRPOSRANGE;
           break;
           }
         }

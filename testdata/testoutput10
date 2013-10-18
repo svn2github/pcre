@@ -754,23 +754,10 @@ No match
 /[\p{Nd}+-]+/8
     1234
  0: 1234
- 1: 123
- 2: 12
- 3: 1
     12-34
  0: 12-34
- 1: 12-3
- 2: 12-
- 3: 12
- 4: 1
     12+\x{661}-34  
  0: 12+\x{661}-34
- 1: 12+\x{661}-3
- 2: 12+\x{661}-
- 3: 12+\x{661}
- 4: 12+
- 5: 12
- 6: 1
     ** Failers
 No match
     abcd  
@@ -779,20 +766,8 @@ No match
 /[\P{Nd}]+/8
     abcd
  0: abcd
- 1: abc
- 2: ab
- 3: a
     ** Failers
  0: ** Failers
- 1: ** Failer
- 2: ** Faile
- 3: ** Fail
- 4: ** Fai
- 5: ** Fa
- 6: ** F
- 7: ** 
- 8: **
- 9: *
     1234
 No match
 
@@ -1611,9 +1586,6 @@ No match
 /[\x{c0}\x{116}]+/8i
     \x{c0}\x{e0}\x{116}\x{117}
  0: \x{c0}\x{e0}\x{116}\x{117}
- 1: \x{c0}\x{e0}\x{116}
- 2: \x{c0}\x{e0}
- 3: \x{c0}
 
 /Check property support in non-UTF-8 mode/
  
@@ -1692,16 +1664,6 @@ No match
 /^[\p{Xan}]+/8
     ABCD1234\x{6ca}\x{a6c}\x{10a7}_
  0: ABCD1234\x{6ca}\x{a6c}\x{10a7}
- 1: ABCD1234\x{6ca}\x{a6c}
- 2: ABCD1234\x{6ca}
- 3: ABCD1234
- 4: ABCD123
- 5: ABCD12
- 6: ABCD1
- 7: ABCD
- 8: ABC
- 9: AB
-10: A
     ** Failers
 No match
     _ABC   
@@ -1813,14 +1775,6 @@ No match
 /^>[\p{Xps}]+/8
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
  0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
- 1: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
- 2: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}
- 3: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}
- 4: > \x{09}\x{0a}\x{0c}\x{0d}
- 5: > \x{09}\x{0a}\x{0c}
- 6: > \x{09}\x{0a}
- 7: > \x{09}
- 8: > 
 
 /^\p{Xwd}/8
     ABCD
@@ -1873,17 +1827,6 @@ No match
 /^[\p{Xwd}]+/8
     ABCD1234\x{6ca}\x{a6c}\x{10a7}_
  0: ABCD1234\x{6ca}\x{a6c}\x{10a7}_
- 1: ABCD1234\x{6ca}\x{a6c}\x{10a7}
- 2: ABCD1234\x{6ca}\x{a6c}
- 3: ABCD1234\x{6ca}
- 4: ABCD1234
- 5: ABCD123
- 6: ABCD12
- 7: ABCD1
- 8: ABCD
- 9: ABC
-10: AB
-11: A
 
 /-- Unicode properties for \b abd \B --/
 
@@ -2164,7 +2107,6 @@ Partial match: AA
 /[z\x{1e9e}]+/8i
     \x{1e9e}\x{00df}
  0: \x{1e9e}\x{df}
- 1: \x{1e9e}
 
 /\x{00df}+/8i
     \x{1e9e}\x{00df}
@@ -2173,7 +2115,6 @@ Partial match: AA
 /[z\x{00df}]+/8i
     \x{1e9e}\x{00df}
  0: \x{1e9e}\x{df}
- 1: \x{1e9e}
 
 /\x{1f88}+/8i
     \x{1f88}\x{1f80} 
@@ -2182,7 +2123,6 @@ Partial match: AA
 /[z\x{1f88}]+/8i
     \x{1f88}\x{1f80} 
  0: \x{1f88}\x{1f80}
- 1: \x{1f88}
 
 /-- Perl matches these --/
 
@@ -2559,11 +2499,6 @@ No match
 /^[\p{Xuc}]+/8
     $@`\x{a0}\x{1234}\x{e000}**
  0: $@`\x{a0}\x{1234}\x{e000}
- 1: $@`\x{a0}\x{1234}
- 2: $@`\x{a0}
- 3: $@`
- 4: $@
- 5: $
     ** Failers
 No match
     \x{9f}

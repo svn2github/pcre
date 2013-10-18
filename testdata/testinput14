@@ -333,4 +333,8 @@ not matter. --/
 
 /[\u0100-\u0200]/<JS>
 
+/[^\x00-a]{12,}[^b-\xff]*/BZ
+
+/[^\s]*\s* [^\W]+\W+ [^\d]*?\d0 [^\d\w]{4,6}?\w*A/BZ
+
 /-- End of testinput14 --/
