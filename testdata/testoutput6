@@ -2159,13 +2159,13 @@ No match
  0: 1234
     123 
 No match
- 
+
 /^\X*\w{4}/8
     1234
  0: 1234
     123  
 No match
-    
+
 /^A\s+Z/8W
     A\x{2005}Z
  0: A\x{2005}Z
@@ -2177,5 +2177,101 @@ No match
  0: A\x{2005}Z
     A\x{85}\x{180e}\x{2005}Z
  0: A\x{85}\x{180e}\x{2005}Z
+
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/BZx
+------------------------------------------------------------------
+        Bra
+        \D+
+        extuni
+        \d+
+        extuni
+        \S+
+        extuni
+        \s+
+        extuni
+        \W+
+        extuni
+        \w+
+        extuni
+        AllAny+
+        extuni
+        \R+
+        extuni
+        \H+
+        extuni
+        \h+
+        extuni
+        \V+
+        extuni
+        \v+
+        extuni
+        a+
+        extuni
+        \x0a+
+        extuni
+        Any+
+        extuni
+        Ket
+        End
+------------------------------------------------------------------
+
+/.+\X/BZxs
+------------------------------------------------------------------
+        Bra
+        AllAny+
+        extuni
+        Ket
+        End
+------------------------------------------------------------------
+
+/\X+$/BZxm
+------------------------------------------------------------------
+        Bra
+        extuni+
+     /m $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/BZx
+------------------------------------------------------------------
+        Bra
+        extuni+
+        \D
+        extuni+
+        \d
+        extuni+
+        \S
+        extuni+
+        \s
+        extuni+
+        \W
+        extuni+
+        \w
+        extuni+
+        Any
+        extuni+
+        AllAny
+        extuni+
+        \R
+        extuni+
+        \H
+        extuni+
+        \h
+        extuni+
+        \V
+        extuni+
+        \v
+        extuni+
+        extuni
+        extuni+
+        \Z
+        extuni++
+        \z
+        extuni+
+        $
+        Ket
+        End
+------------------------------------------------------------------
 
 /-- End of testinput6 --/

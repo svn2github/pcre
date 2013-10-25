@@ -3480,12 +3480,14 @@ for(;;)
       case OP_EOD:    /* Can always possessify before \z */
       break;
 
+#ifdef SUPPORT_UCP
       case OP_PROP:
       case OP_NOTPROP:
       if (!check_char_prop(chr, list_ptr[2], list_ptr[3],
             list_ptr[0] == OP_NOTPROP))
         return FALSE;
       break;
+#endif
 
       case OP_NCLASS:
       if (chr > 255) return FALSE;

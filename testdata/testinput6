@@ -1325,11 +1325,11 @@
 /^\p{Any}*\d{4}/8
     1234
     123 
- 
+
 /^\X*\w{4}/8
     1234
     123  
-    
+
 /^A\s+Z/8W
     A\x{2005}Z
     A\x{85}\x{180e}\x{2005}Z
@@ -1337,5 +1337,13 @@
 /^A[\s]+Z/8W
     A\x{2005}Z
     A\x{85}\x{180e}\x{2005}Z
+
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/BZx
+
+/.+\X/BZxs
+
+/\X+$/BZxm
+
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/BZx
 
 /-- End of testinput6 --/
