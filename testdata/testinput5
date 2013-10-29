@@ -783,4 +783,7 @@
 
 /\ud800/<JS>8
 
+/^a+[a\x{200}]/8BZ
+    aa
+
 /-- End of testinput5 --/
