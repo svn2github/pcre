@@ -142,6 +142,11 @@ Version 8.34 xx-xxxx-201x
 29. Whereas an item such as A{4}+ ignored the possessivenes of the quantifier 
     (because it's meaningless), this was not happening when PCRE_CASELESS was 
     set. Not wrong, but inefficient. 
+    
+30. Updated perltest.pl to add /u (force Unicode mode) when /W (use Unicode 
+    properties for \w, \d, etc) is present in a test regex. Otherwise if the 
+    test contains no characters greater than 255, Perl doesn't realise it 
+    should be using Unicode semantics. 
 
 
 Version 8.33 28-May-2013
