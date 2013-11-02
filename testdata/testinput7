@@ -819,4 +819,14 @@ of case for anything other than the ASCII letters. --/
 
 /[\p{L}ab]{2,3}+/BZO
 
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/BZx
+
+/.+\X/BZxs
+
+/\X+$/BZxm
+
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/BZx
+
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/8WBZ
+
 /-- End of testinput7 --/

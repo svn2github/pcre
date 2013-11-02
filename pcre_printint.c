@@ -633,9 +633,9 @@ for(;;)
     print_prop(f, code, "    ", "");
     break;
 
-    /* OP_XCLASS can only occur in UTF or PCRE16 modes. However, there's no
-    harm in having this code always here, and it makes it less messy without
-    all those #ifdefs. */
+    /* OP_XCLASS cannot occur in 8-bit, non-UTF mode. However, there's no harm
+    in having this code always here, and it makes it less messy without all
+    those #ifdefs. */
 
     case OP_CLASS:
     case OP_NCLASS:
@@ -696,27 +696,52 @@ for(;;)
         pcre_uchar ch;
         while ((ch = *ccode++) != XCL_END)
           {
-          if (ch == XCL_PROP)
+          BOOL not = FALSE; 
+          const char *notch = ""; 
+           
+          switch(ch)
             {
-            unsigned int ptype = *ccode++;
-            unsigned int pvalue = *ccode++;
-            fprintf(f, "\\p{%s}", get_ucpname(ptype, pvalue));
-            }
-          else if (ch == XCL_NOTPROP)
-            {
-            unsigned int ptype = *ccode++;
-            unsigned int pvalue = *ccode++;
-            fprintf(f, "\\P{%s}", get_ucpname(ptype, pvalue));
-            }
-          else
-            {
+            case XCL_NOTPROP: 
+            not = TRUE;
+            notch = "^"; 
+            /* Fall through */
+               
+            case XCL_PROP:  
+              {
+              unsigned int ptype = *ccode++;
+              unsigned int pvalue = *ccode++;
+              
+              switch(ptype)
+                {
+                case PT_PXGRAPH:
+                fprintf(f, "[:%sgraph:]", notch);
+                break;    
+
+                case PT_PXPRINT:
+                fprintf(f, "[:%sprint:]", notch);
+                break;    
+
+                case PT_PXPUNCT:
+                fprintf(f, "[:%spunct:]", notch);
+                break;    
+
+                default:
+                fprintf(f, "\\%c{%s}", (not? 'P':'p'), 
+                  get_ucpname(ptype, pvalue));
+                break;
+                }    
+              }
+            break;
+             
+            default:
             ccode += 1 + print_char(f, ccode, utf);
             if (ch == XCL_RANGE)
               {
               fprintf(f, "-");
               ccode += 1 + print_char(f, ccode, utf);
               }
-            }
+            break; 
+            } 
           }
         }
 

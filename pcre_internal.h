@@ -1855,6 +1855,16 @@ only. */
 #define PT_UCNC      10    /* Universal Character nameable character */
 #define PT_TABSIZE   11    /* Size of square table for autopossessify tests */
 
+/* The following special properties are used only in XCLASS items, when POSIX 
+classes are specified and PCRE_UCP is set - in other words, for Unicode 
+handling of these classes. They are not available via the \p or \P escapes like 
+those in the above list, and so they do not take part in the autopossessifying 
+table. */
+
+#define PT_PXGRAPH   11    /* [:graph:] - characters that mark the paper */
+#define PT_PXPRINT   12    /* [:print:] - [:graph:] plus non-control spaces */
+#define PT_PXPUNCT   13    /* [:punct:] - punctuation characters */
+
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
 
@@ -1868,9 +1878,9 @@ contain characters with values greater than 255. */
 #define XCL_NOTPROP   4    /* Unicode inverted property (ditto) */
 
 /* These are escaped items that aren't just an encoding of a particular data
-value such as \n. They must have non-zero values, as check_escape() returns
-0 for a data character.  Also, they must appear in the same order as in the opcode
-definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
+value such as \n. They must have non-zero values, as check_escape() returns 0
+for a data character.  Also, they must appear in the same order as in the
+opcode definitions below, up to ESC_z. There's a dummy for OP_ALLANY because it
 corresponds to "." in DOTALL mode rather than an escape sequence. It is also
 used for [^] in JavaScript compatibility mode, and for \C in non-utf mode. In
 non-DOTALL mode, "." behaves like \N.

@@ -147,6 +147,10 @@ Version 8.34 xx-xxxx-201x
     properties for \w, \d, etc) is present in a test regex. Otherwise if the 
     test contains no characters greater than 255, Perl doesn't realise it 
     should be using Unicode semantics. 
+    
+31. Upgraded the handling of the POSIX classes [:graph:], [:print:], and
+    [:punct:] when PCRE_UCP is set so as to include the same characters as Perl 
+    does in Unicode mode. 
 
 
 Version 8.33 28-May-2013

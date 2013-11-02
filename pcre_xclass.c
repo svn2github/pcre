@@ -128,34 +128,35 @@ while ((t = *data++) != XCL_END)
   else  /* XCL_PROP & XCL_NOTPROP */
     {
     const ucd_record *prop = GET_UCD(c);
+    BOOL isprop = t == XCL_PROP; 
 
     switch(*data)
       {
       case PT_ANY:
-      if (t == XCL_PROP) return !negated;
+      if (isprop) return !negated;
       break;
 
       case PT_LAMP:
       if ((prop->chartype == ucp_Lu || prop->chartype == ucp_Ll ||
-           prop->chartype == ucp_Lt) == (t == XCL_PROP)) return !negated;
+           prop->chartype == ucp_Lt) == isprop) return !negated;
       break;
 
       case PT_GC:
-      if ((data[1] == PRIV(ucp_gentype)[prop->chartype]) == (t == XCL_PROP))
+      if ((data[1] == PRIV(ucp_gentype)[prop->chartype]) == isprop)
         return !negated;
       break;
 
       case PT_PC:
-      if ((data[1] == prop->chartype) == (t == XCL_PROP)) return !negated;
+      if ((data[1] == prop->chartype) == isprop) return !negated;
       break;
 
       case PT_SC:
-      if ((data[1] == prop->script) == (t == XCL_PROP)) return !negated;
+      if ((data[1] == prop->script) == isprop) return !negated;
       break;
 
       case PT_ALNUM:
       if ((PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
-           PRIV(ucp_gentype)[prop->chartype] == ucp_N) == (t == XCL_PROP))
+           PRIV(ucp_gentype)[prop->chartype] == ucp_N) == isprop)
         return !negated;
       break;
 
@@ -169,11 +170,11 @@ while ((t = *data++) != XCL_END)
         {
         HSPACE_CASES:
         VSPACE_CASES:
-        if (t == XCL_PROP) return !negated; 
+        if (isprop) return !negated; 
         break;
         
         default:
-        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == (t == XCL_PROP))
+        if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == isprop)
           return !negated;
         break;
         }
@@ -182,7 +183,7 @@ while ((t = *data++) != XCL_END)
       case PT_WORD:
       if ((PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
            PRIV(ucp_gentype)[prop->chartype] == ucp_N || c == CHAR_UNDERSCORE)
-             == (t == XCL_PROP))
+             == isprop)
         return !negated;
       break;
 
@@ -190,15 +191,59 @@ while ((t = *data++) != XCL_END)
       if (c < 0xa0)
         {
         if ((c == CHAR_DOLLAR_SIGN || c == CHAR_COMMERCIAL_AT ||
-             c == CHAR_GRAVE_ACCENT) == (t == XCL_PROP))
+             c == CHAR_GRAVE_ACCENT) == isprop)
           return !negated;
         }
       else
         {
-        if ((c < 0xd800 || c > 0xdfff) == (t == XCL_PROP))
+        if ((c < 0xd800 || c > 0xdfff) == isprop)
           return !negated;
         }
       break;
+      
+      /* The following three properties can occur only in an XCLASS, as there
+      is no \p or \P coding for them. */
+
+      /* Graphic character. Implement this as not Z (space or separator) and 
+      not C (other), except for Cf (format) with a few exceptions. This seems 
+      to be what Perl does. The exceptional characters are:
+       
+      U+061C           Arabic Letter Mark
+      U+180E           Mongolian Vowel Separator 
+      U+2066 - U+2069  Various "isolate"s
+      */ 
+      
+      case PT_PXGRAPH:
+      if ((PRIV(ucp_gentype)[prop->chartype] != ucp_Z &&
+            (PRIV(ucp_gentype)[prop->chartype] != ucp_C ||
+              (prop->chartype == ucp_Cf && 
+                c != 0x061c && c != 0x180e && (c < 0x2066 || c > 0x2069))
+         )) == isprop)
+        return !negated;        
+      break;
+      
+      /* Printable character: same as graphic, with the addition of Zs, i.e. 
+      not Zl and not Zp, and U+180E. */
+
+      case PT_PXPRINT:
+      if ((prop->chartype != ucp_Zl &&
+           prop->chartype != ucp_Zp && 
+            (PRIV(ucp_gentype)[prop->chartype] != ucp_C ||
+              (prop->chartype == ucp_Cf && 
+                c != 0x061c && (c < 0x2066 || c > 0x2069))
+         )) == isprop)
+        return !negated;        
+      break;
+      
+      /* Punctuation: all Unicode punctuation, plus ASCII characters that 
+      Unicode treats as symbols rather than punctuation, for Perl
+      compatibility (these are $+<=>^`|~). */
+
+      case PT_PXPUNCT:
+      if ((PRIV(ucp_gentype)[prop->chartype] == ucp_P ||
+            (c < 256 && PRIV(ucp_gentype)[prop->chartype] == ucp_S)) == isprop)
+        return !negated;
+      break;           
 
       /* This should never occur, but compilers may mutter if there is no
       default. */

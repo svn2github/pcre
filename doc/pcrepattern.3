@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "12 October 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "02 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -925,9 +925,9 @@ the "mark" property always have the "extend" grapheme breaking property.
 .sp
 As well as the standard Unicode properties described above, PCRE supports four
 more that make it possible to convert traditional escape sequences such as \ew
-and \es and POSIX character classes to use Unicode properties. PCRE uses these
-non-standard, non-Perl properties internally when PCRE_UCP is set. However,
-they may also be used explicitly. These properties are:
+and \es to use Unicode properties. PCRE uses these non-standard, non-Perl
+properties internally when PCRE_UCP is set. However, they may also be used
+explicitly. These properties are:
 .sp
   Xan   Any alphanumeric character
   Xps   Any POSIX space character
@@ -937,8 +937,9 @@ they may also be used explicitly. These properties are:
 Xan matches characters that have either the L (letter) or the N (number)
 property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the Z (separator) property.
-Xsp is the same as Xps, except that vertical tab is excluded. Xwd matches the
-same characters as Xan, plus underscore.
+Xsp is the same as Xps; it used to exclude vertical tab, for Perl
+compatibility, but Perl changed, and so PCRE followed at release 8.34. Xwd
+matches the same characters as Xan, plus underscore.
 .P
 There is another non-standard property, Xuc, which matches any character that
 can be represented by a Universal Character Name in C++ and other programming
@@ -1332,8 +1333,8 @@ supported, and an error is given if they are encountered.
 By default, in UTF modes, characters with values greater than 128 do not match
 any of the POSIX character classes. However, if the PCRE_UCP option is passed
 to \fBpcre_compile()\fP, some of the classes are changed so that Unicode
-character properties are used. This is achieved by replacing the POSIX classes
-by other sequences, as follows:
+character properties are used. This is achieved by replacing certain POSIX
+classes by other sequences, as follows:
 .sp
   [:alnum:]  becomes  \ep{Xan}
   [:alpha:]  becomes  \ep{L}
@@ -1344,9 +1345,30 @@ by other sequences, as follows:
   [:upper:]  becomes  \ep{Lu}
   [:word:]   becomes  \ep{Xwd}
 .sp
-Negated versions, such as [:^alpha:] use \eP instead of \ep. The other POSIX
-classes are unchanged, and match only characters with code points less than
-128.
+Negated versions, such as [:^alpha:] use \eP instead of \ep. Three other POSIX 
+classes are handled specially in UCP mode:
+.TP 10
+[:graph:]
+This matches characters that have glyphs that mark the page when printed. In 
+Unicode property terms, it matches all characters with the L, M, N, P, S, or Cf 
+properties, except for:
+.sp
+  U+061C           Arabic Letter Mark
+  U+180E           Mongolian Vowel Separator 
+  U+2066 - U+2069  Various "isolate"s
+.sp
+.TP 10
+[:print:]
+This matches the same characters as [:graph:] plus space characters that are 
+not controls, that is, characters with the Zs property.
+.TP 10
+[:punct:]
+This matches all characters that have the Unicode P (punctuation) property,
+plus those characters whose code points are less than 128 that have the S
+(Symbol) property.
+.P
+The other POSIX classes are unchanged, and match only characters with code
+points less than 128.
 .
 .
 .SH "VERTICAL BAR"
@@ -3176,6 +3198,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 October 2013
+Last updated: 02 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

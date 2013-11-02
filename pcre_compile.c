@@ -264,7 +264,8 @@ static const int verbcount = sizeof(verbs)/sizeof(verbitem);
 now all in a single string, to reduce the number of relocations when a shared
 library is dynamically loaded. The list of lengths is terminated by a zero
 length entry. The first three must be alpha, lower, upper, as this is assumed
-for handling case independence. */
+for handling case independence. The indices for graph, print, and punct are
+needed, so identify them. */
 
 static const char posix_names[] =
   STRING_alpha0 STRING_lower0 STRING_upper0 STRING_alnum0
@@ -274,6 +275,11 @@ static const char posix_names[] =
 
 static const pcre_uint8 posix_name_lengths[] = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 6, 0 };
+
+#define PC_GRAPH  8
+#define PC_PRINT  9
+#define PC_PUNCT 10
+
 
 /* Table of class bit maps for each POSIX class. Each class is formed from a
 base map, with an optional addition or removal of another map. Then, for some
@@ -302,9 +308,8 @@ static const int posix_class_maps[] = {
   cbit_xdigit,-1,          0              /* xdigit */
 };
 
-/* Table of substitutes for \d etc when PCRE_UCP is set. The POSIX class
-substitutes must be in the order of the names, defined above, and there are
-both positive and negative cases. NULL means no substitute. */
+/* Table of substitutes for \d etc when PCRE_UCP is set. They are replaced by
+Unicode property escapes. */
 
 #ifdef SUPPORT_UCP
 static const pcre_uchar string_PNd[]  = {
@@ -329,11 +334,17 @@ static const pcre_uchar string_pXwd[] = {
 static const pcre_uchar *substitutes[] = {
   string_PNd,           /* \D */
   string_pNd,           /* \d */
-  string_PXsp,          /* \S */       /* NOTE: Xsp is Perl space */
-  string_pXsp,          /* \s */
+  string_PXsp,          /* \S */   /* Xsp is Perl space, but from 8.34, Perl */
+  string_pXsp,          /* \s */   /* space and POSIX space are the same. */
   string_PXwd,          /* \W */
   string_pXwd           /* \w */
 };
+
+/* The POSIX class substitutes must be in the order of the POSIX class names,
+defined above, and there are both positive and negative cases. NULL means no
+general substitute of a Unicode property escape (\p or \P). However, for some
+POSIX classes (e.g. graph, print, punct) a special property code is compiled
+directly. */
 
 static const pcre_uchar string_pL[] =   {
   CHAR_BACKSLASH, CHAR_p, CHAR_LEFT_CURLY_BRACKET,
@@ -382,8 +393,8 @@ static const pcre_uchar *posix_substitutes[] = {
   NULL,                 /* graph */
   NULL,                 /* print */
   NULL,                 /* punct */
-  string_pXps,          /* space */    /* NOTE: Xps is POSIX space */
-  string_pXwd,          /* word */
+  string_pXps,          /* space */   /* Xps is POSIX space, but from 8.34 */
+  string_pXwd,          /* word  */   /* Perl and POSIX space are the same */
   NULL,                 /* xdigit */
   /* Negated cases */
   string_PL,            /* ^alpha */
@@ -397,8 +408,8 @@ static const pcre_uchar *posix_substitutes[] = {
   NULL,                 /* ^graph */
   NULL,                 /* ^print */
   NULL,                 /* ^punct */
-  string_PXps,          /* ^space */   /* NOTE: Xps is POSIX space */
-  string_PXwd,          /* ^word */
+  string_PXps,          /* ^space */  /* Xps is POSIX space, but from 8.34 */
+  string_PXwd,          /* ^word */   /* Perl and POSIX space are the same */
   NULL                  /* ^xdigit */
 };
 #define POSIX_SUBSIZE (sizeof(posix_substitutes) / sizeof(pcre_uchar *))
@@ -2973,7 +2984,6 @@ switch(c)
   case OP_CLASS:
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
   case OP_XCLASS:
-
   if (c == OP_XCLASS)
     end = code + GET(code, 0) - 1;
   else
@@ -4830,24 +4840,58 @@ for (;; ptr++)
           posix_class = 0;
 
         /* When PCRE_UCP is set, some of the POSIX classes are converted to
-        different escape sequences that use Unicode properties. */
+        different escape sequences that use Unicode properties \p or \P. Others
+        that are not available via \p or \P generate XCL_PROP/XCL_NOTPROP
+        directly. */
 
 #ifdef SUPPORT_UCP
         if ((options & PCRE_UCP) != 0)
           {
+          unsigned int ptype = 0;
           int pc = posix_class + ((local_negate)? POSIX_SUBSIZE/2 : 0);
+
+          /* The posix_substitutes table specifies which POSIX classes can be 
+          converted to \p or \P items. */
+           
           if (posix_substitutes[pc] != NULL)
             {
             nestptr = tempptr + 1;
             ptr = posix_substitutes[pc] - 1;
             continue;
             }
+            
+          /* There are three other classes that generate special property calls 
+          that are recognized only in an XCLASS. */ 
+
+          else switch(posix_class)
+            {
+            case PC_GRAPH:
+            ptype = PT_PXGRAPH;
+            /* Fall through */
+            case PC_PRINT:
+            if (ptype == 0) ptype = PT_PXPRINT;
+            /* Fall through */
+            case PC_PUNCT:
+            if (ptype == 0) ptype = PT_PXPUNCT;
+            *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
+            *class_uchardata++ = ptype;
+            *class_uchardata++ = 0;
+            ptr = tempptr + 1;
+            continue;
+            
+            /* For all other POSIX classes, no special action is taken in UCP
+            mode. Fall through to the non_UCP case. */
+
+            default:
+            break; 
+            }
           }
 #endif
-        /* In the non-UCP case, we build the bit map for the POSIX class in a
-        chunk of local store because we may be adding and subtracting from it,
-        and we don't want to subtract bits that may be in the main map already.
-        At the end we or the result into the bit map that is being built. */
+        /* In the non-UCP case, or when UCP makes no difference, we build the
+        bit map for the POSIX class in a chunk of local store because we may be
+        adding and subtracting from it, and we don't want to subtract bits that
+        may be in the main map already. At the end we or the result into the
+        bit map that is being built. */
 
         posix_class *= 3;
 
@@ -6136,20 +6180,20 @@ for (;; ptr++)
 
       len = (int)(code - tempcode);
       if (len > 0)
-        { 
+        {
         unsigned int repcode = *tempcode;
-        
+
         /* There is a table for possessifying opcodes, all of which are less
         than OP_CALLOUT. A zero entry means there is no possessified version.
         */
-        
+
         if (repcode < OP_CALLOUT && opcode_possessify[repcode] > 0)
           *tempcode = opcode_possessify[repcode];
-        
+
         /* For opcode without a special possessified version, wrap the item in
         ONCE brackets. Because we are moving code along, we must ensure that any
         pending recursive references are updated. */
-        
+
         else
           {
           *code = OP_END;
@@ -6162,7 +6206,7 @@ for (;; ptr++)
           PUTINC(code, 0, len);
           PUT(tempcode, 1, len);
           }
-        }   
+        }
 
 #ifdef NEVER
       if (len > 0) switch (*tempcode)
