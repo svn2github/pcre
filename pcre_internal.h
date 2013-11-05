@@ -2335,9 +2335,10 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
        ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79,
-       ERR80, ERR81, ERRCOUNT };
+       ERR80, ERR81, ERR82, ERRCOUNT };
 
 /* JIT compiling modes. The function list is indexed by them. */
+
 enum { JIT_COMPILE, JIT_PARTIAL_SOFT_COMPILE, JIT_PARTIAL_HARD_COMPILE,
        JIT_NUMBER_OF_COMPILE_MODES };
 
@@ -2490,6 +2491,7 @@ typedef struct compile_data {
   int  top_backref;                 /* Maximum back reference */
   unsigned int backref_map;         /* Bitmap of low back refs */
   unsigned int namedrefcount;       /* Number of backreferences by name */
+  int  parens_depth;                /* Depth of nested parentheses */ 
   int  assert_depth;                /* Depth of nested assertions */
   pcre_uint32 external_options;     /* External (initial) options */
   pcre_uint32 external_flags;       /* External flag bits to be set */

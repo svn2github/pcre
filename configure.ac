@@ -274,6 +274,12 @@ AC_ARG_WITH(link-size,
             AS_HELP_STRING([--with-link-size=N],
                            [internal link size (2, 3, or 4 allowed; default=2)]),
             , with_link_size=2)
+            
+# Handle --with-parens-nest-limit=N
+AC_ARG_WITH(parens-nest-limit,
+            AS_HELP_STRING([--with-parens-nest-limit=N],
+                           [nested parentheses limit (default=250)]),
+            , with_parens_nest_limit=250)                  
 
 # Handle --with-match-limit=N
 AC_ARG_WITH(match-limit,
@@ -783,6 +789,11 @@ AC_DEFINE_UNQUOTED([POSIX_MALLOC_THRESHOLD], [$with_posix_malloc_threshold], [
   small, the wrapper function uses space on the stack, because this is
   faster than using malloc() for each call. The threshold above which
   the stack is no longer used is defined by POSIX_MALLOC_THRESHOLD.])
+  
+AC_DEFINE_UNQUOTED([PARENS_NEST_LIMIT], [$with_parens_nest_limit], [
+  The value of PARENS_NEST_LIMIT specifies the maximum depth of nested 
+  parentheses (of any kind) in a pattern. This limits the amount of system 
+  stack that is used while compiling a pattern.]) 
 
 AC_DEFINE_UNQUOTED([MATCH_LIMIT], [$with_match_limit], [
   The value of MATCH_LIMIT determines the default number of times the
@@ -1071,6 +1082,7 @@ $PACKAGE-$VERSION configuration summary:
     Use stack recursion ............. : ${enable_stack_for_recursion}
     POSIX mem threshold ............. : ${with_posix_malloc_threshold}
     Internal link size .............. : ${with_link_size}
+    Nested parentheses limit ........ : ${with_parens_nest_limit} 
     Match limit ..................... : ${with_match_limit}
     Match limit recursion ........... : ${with_match_limit_recursion}
     Build shared libs ............... : ${enable_shared}

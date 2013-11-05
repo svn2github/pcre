@@ -298,6 +298,7 @@ compatible. */
 #define PCRE_CONFIG_UTF16                  10
 #define PCRE_CONFIG_JITTARGET              11
 #define PCRE_CONFIG_UTF32                  12
+#define PCRE_CONFIG_PARENS_LIMIT           13
 
 /* Request types for pcre_study(). Do not re-arrange, in order to remain
 compatible. */

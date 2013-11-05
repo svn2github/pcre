@@ -167,7 +167,8 @@ static const int eint[] = {
   REG_BADPAT,  /* non-hex character in \\x{} (closing brace missing?) */ 
   /* 80 */ 
   REG_BADPAT,  /* non-octal character in \o{} (closing brace missing?) */ 
-  REG_BADPAT   /* missing opening brace after \o */
+  REG_BADPAT,  /* missing opening brace after \o */
+  REG_BADPAT   /* parentheses too deeply nested */
 };
 
 /* Table of texts corresponding to POSIX error codes */

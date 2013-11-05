@@ -3303,6 +3303,8 @@ are set, either both UTFs are supported or both are not supported. */
     printf("  Internal link size = %d\n", rc);
     (void)PCRE_CONFIG(PCRE_CONFIG_POSIX_MALLOC_THRESHOLD, &rc);
     printf("  POSIX malloc threshold = %d\n", rc);
+    (void)PCRE_CONFIG(PCRE_CONFIG_PARENS_LIMIT, &lrc);
+    printf("  Parentheses nest limit = %ld\n", lrc);
     (void)PCRE_CONFIG(PCRE_CONFIG_MATCH_LIMIT, &lrc);
     printf("  Default match limit = %ld\n", lrc);
     (void)PCRE_CONFIG(PCRE_CONFIG_MATCH_LIMIT_RECURSION, &lrc);

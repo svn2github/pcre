@@ -268,10 +268,18 @@ library. They are also documented in the pcrebuild man page.
   --with-posix-malloc-threshold=20
 
   on the "configure" command.
+  
+. PCRE has a counter that limits the depth of nesting of parentheses in a 
+  pattern. This limits the amount of system stack that a pattern uses when it 
+  is compiled. The default is 250, but you can change it by setting, for 
+  example,
+  
+  --with-parens-nest-limit=500 
 
-. PCRE has a counter that can be set to limit the amount of resources it uses.
-  If the limit is exceeded during a match, the match fails. The default is ten
-  million. You can change the default by setting, for example,
+. PCRE has a counter that can be set to limit the amount of resources it uses 
+  when matching a pattern. If the limit is exceeded during a match, the match
+  fails. The default is ten million. You can change the default by setting, for
+  example,
 
   --with-match-limit=500000
 
@@ -979,4 +987,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 02 July 2013
+Last updated: 05 November 2013

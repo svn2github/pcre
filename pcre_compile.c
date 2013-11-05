@@ -531,6 +531,7 @@ static const char error_texts[] =
   /* 80 */
   "non-octal character in \\o{} (closing brace missing?)\0"
   "missing opening brace after \\o\0"
+  "parentheses are too deeply nested\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -7290,10 +7291,19 @@ for (;; ptr++)
       skipbytes = IMM2_SIZE;
       }
 
-    /* Process nested bracketed regex. Assertions used not to be repeatable,
-    but this was changed for Perl compatibility, so all kinds can now be
-    repeated. We copy code into a non-register variable (tempcode) in order to
-    be able to pass its address because some compilers complain otherwise. */
+    /* Process nested bracketed regex. First check for parentheses nested too
+    deeply. */
+
+    if ((cd->parens_depth += 1) > PARENS_NEST_LIMIT)
+      {
+      *errorcodeptr = ERR82;
+      goto FAILED;  
+      }  
+ 
+    /* Assertions used not to be repeatable, but this was changed for Perl
+    compatibility, so all kinds can now be repeated. We copy code into a
+    non-register variable (tempcode) in order to be able to pass its address
+    because some compilers complain otherwise. */
 
     previous = code;                      /* For handling repetition */
     *code = bravalue;
@@ -7323,6 +7333,8 @@ for (;; ptr++)
            &length_prevgroup              /* Pre-compile phase */
          ))
       goto FAILED;
+      
+    cd->parens_depth -= 1;
 
     /* If this was an atomic group and there are no capturing groups within it,
     generate OP_ONCE_NC instead of OP_ONCE. */
@@ -8898,6 +8910,7 @@ cd->named_group_list_size = NAMED_GROUP_LIST_SIZE;
 cd->start_pattern = (const pcre_uchar *)pattern;
 cd->end_pattern = (const pcre_uchar *)(pattern + STRLEN_UC((const pcre_uchar *)pattern));
 cd->req_varyopt = 0;
+cd->parens_depth = 0;
 cd->assert_depth = 0;
 cd->max_lookbehind = 0;
 cd->external_options = options;
@@ -8983,6 +8996,7 @@ field; this time it's used for remembering forward references to subpatterns.
 */
 
 cd->final_bracount = cd->bracount;  /* Save for checking forward references */
+cd->parens_depth = 0;
 cd->assert_depth = 0;
 cd->bracount = 0;
 cd->max_lookbehind = 0;

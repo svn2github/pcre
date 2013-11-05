@@ -64,6 +64,7 @@
 # 2013-07-01 PH realized that the "support" for GCOV was a total nonsense and
 #            so it has been removed.
 # 2013-10-08 PH got rid of the "source" command, which is a bash-ism (use ".")
+# 2013-11-05 PH added support for PARENS_NEST_LIMIT
 
 PROJECT(PCRE C CXX)
 
@@ -132,6 +133,9 @@ SET(PCRE_EBCDIC_NL25 OFF CACHE BOOL
 SET(PCRE_LINK_SIZE "2" CACHE STRING
     "Internal link size (2, 3 or 4 allowed). See LINK_SIZE in config.h.in for details.")
 
+SET(PCRE_PARENS_NEST_LIMIT "250" CACHE STRING
+    "Default nested parentheses limit. See PARENS_NEST_LIMIT in config.h.in for details.")
+     
 SET(PCRE_MATCH_LIMIT "10000000" CACHE STRING
     "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details.")
 
@@ -911,6 +915,7 @@ IF(PCRE_SHOW_REPORT)
   MESSAGE(STATUS "  No stack recursion .............. : ${PCRE_NO_RECURSE}")
   MESSAGE(STATUS "  POSIX mem threshold ............. : ${PCRE_POSIX_MALLOC_THRESHOLD}")
   MESSAGE(STATUS "  Internal link size .............. : ${PCRE_LINK_SIZE}")
+  MESSAGE(STATUS "  Parentheses nest limit .......... : ${PCRE_PARENS_NEST_LIMIT}")
   MESSAGE(STATUS "  Match limit ..................... : ${PCRE_MATCH_LIMIT}")
   MESSAGE(STATUS "  Match limit recursion ........... : ${PCRE_MATCH_LIMIT_RECURSION}")
   MESSAGE(STATUS "  Build shared libs ............... : ${BUILD_SHARED_LIBS}")

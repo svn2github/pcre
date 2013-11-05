@@ -154,6 +154,11 @@ Version 8.34 xx-xxxx-201x
     
 32. Added the "forbid" facility to pcretest so that putting tests into the 
     wrong test files can sometimes be quickly detected.
+    
+33. There is now a limit (default 250) on the depth of nesting of parentheses. 
+    This limit is imposed to control the amount of system stack used at compile 
+    time. It can be changed at build time by --with-parens-nest-limit=xxx or 
+    the equivalent in CMake. 
 
 
 Version 8.33 28-May-2013

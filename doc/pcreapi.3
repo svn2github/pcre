@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "08 October 2013" "PCRE 8.34"
+.TH PCREAPI 3 "05 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -459,6 +459,13 @@ the
 \fBpcreposix\fP
 .\"
 documentation.
+.sp
+  PCRE_CONFIG_PARENS_LIMIT
+.sp
+The output is a long integer that gives the maximum depth of nesting of 
+parentheses (of any kind) in a pattern. This limit is imposed to cap the amount 
+of system stack used when a pattern is compiled. It is specified when PCRE is
+built; the default is 250.
 .sp
   PCRE_CONFIG_MATCH_LIMIT
 .sp
@@ -2870,6 +2877,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 October 2013
+Last updated: 05 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
