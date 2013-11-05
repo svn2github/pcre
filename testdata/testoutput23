@@ -1,5 +1,7 @@
 /-- Tests for the 16-bit library only */
 
+< forbid 8W
+
 /-- Check maximum non-UTF character size --/
 
 /\x{ffff}/

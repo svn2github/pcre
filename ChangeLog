@@ -151,6 +151,9 @@ Version 8.34 xx-xxxx-201x
 31. Upgraded the handling of the POSIX classes [:graph:], [:print:], and
     [:punct:] when PCRE_UCP is set so as to include the same characters as Perl 
     does in Unicode mode. 
+    
+32. Added the "forbid" facility to pcretest so that putting tests into the 
+    wrong test files can sometimes be quickly detected.
 
 
 Version 8.33 28-May-2013

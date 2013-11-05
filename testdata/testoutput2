@@ -7,6 +7,8 @@
     
     NOTE: This is a non-UTF set of tests. When UTF support is needed, use
     test 5, and if Unicode Property Support is needed, use test 7. --/
+    
+< forbid 8W 
   
 /(a)b|/I
 Capturing subpattern count = 1
@@ -6540,7 +6542,7 @@ No match
 No match
 
 /^abc/Im<bad>
-Unknown newline type at: <bad>
+Unknown modifier at: <bad>
 
 
 /abc/I
@@ -6549,7 +6551,7 @@ No options
 First char = 'a'
 Need char = 'c'
     xyz\rabc\<bad>
-Unknown newline type at: <bad>
+Unknown escape sequence at: <bad>
     abc
  0: abc
 

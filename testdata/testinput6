@@ -1,5 +1,7 @@
 /-- This set of tests is for Unicode property support. It is compatible with
     Perl >= 5.15. --/
+    
+< forbid BCDIMZ< 
 
 /^\pC\pL\pM\pN\pP\pS\pZ</8
     \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<

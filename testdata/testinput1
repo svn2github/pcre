@@ -1,6 +1,8 @@
 /-- This set of tests is for features that are compatible with all versions of
     Perl >= 5.10, in non-UTF-8 mode. It should run clean for the 8-bit, 16-bit,
     and 32-bit PCRE libraries. --/
+    
+< forbid 8BCDIMWZ< 
 
 /the quick brown fox/
     the quick brown fox

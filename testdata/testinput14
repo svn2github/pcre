@@ -1,6 +1,9 @@
-/-- This set of tests is run only with the 8-bit library. It starts with all
-    the tests of the POSIX interface, because that is supported only with the
-    8-bit library. --/
+/-- This set of tests is run only with the 8-bit library. They do not require 
+    UTF-8 or Unicode property support. The file starts with all the tests of
+    the POSIX interface, because that is supported only with the 8-bit library.
+    --/
+    
+< forbid 8W 
 
 /abc/P
     abc

@@ -1,6 +1,8 @@
 /-- This set of tests checks the API, internals, and non-Perl stuff for UTF
     support, excluding Unicode properties. However, tests that give different
     results in 8-bit and 16-bit modes are excluded (see tests 16 and 17). --/
+    
+< forbid W 
 
 /\x{110000}/8DZ
 Failed: character value in \x{} or \o{} is too large at offset 9

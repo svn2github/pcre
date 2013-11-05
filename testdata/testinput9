@@ -1,6 +1,8 @@
 /-- This set of tests checks UTF-8 support with the DFA matching functionality
-    of pcre_dfa_exec(). The -dfa flag must be used with pcretest when running 
-    it. --/
+    of pcre_dfa_exec(), excluding Unicode property support. The -dfa flag must
+    be used with pcretest when running it. --/
+    
+< forbid W 
 
 /\x{100}ab/8
   \x{100}ab

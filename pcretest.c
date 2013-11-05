@@ -2823,7 +2823,7 @@ return 0;
 
 
 /*************************************************
-*         Check newline indicator                *
+*         Check multicharacter option            *
 *************************************************/
 
 /* This is used both at compile and run-time to check for <xxx> escapes. Print
@@ -2832,12 +2832,14 @@ a message and return 0 if there is no match.
 Arguments:
   p           points after the leading '<'
   f           file for error message
+  nl          TRUE to check only for newline settings 
+  stype       "modifier" or "escape sequence" 
 
 Returns:      appropriate PCRE_NEWLINE_xxx flags, or 0
 */
 
 static int
-check_newline(pcre_uint8 *p, FILE *f)
+check_mc_option(pcre_uint8 *p, FILE *f, BOOL nl, const char *stype)
 {
 if (strncmpic(p, (pcre_uint8 *)"cr>", 3) == 0) return PCRE_NEWLINE_CR;
 if (strncmpic(p, (pcre_uint8 *)"lf>", 3) == 0) return PCRE_NEWLINE_LF;
@@ -2846,7 +2848,13 @@ if (strncmpic(p, (pcre_uint8 *)"anycrlf>", 8) == 0) return PCRE_NEWLINE_ANYCRLF;
 if (strncmpic(p, (pcre_uint8 *)"any>", 4) == 0) return PCRE_NEWLINE_ANY;
 if (strncmpic(p, (pcre_uint8 *)"bsr_anycrlf>", 12) == 0) return PCRE_BSR_ANYCRLF;
 if (strncmpic(p, (pcre_uint8 *)"bsr_unicode>", 12) == 0) return PCRE_BSR_UNICODE;
-fprintf(f, "Unknown newline type at: <%s\n", p);
+
+if (!nl)
+  {
+  if (strncmpic(p, (pcre_uint8 *)"JS>", 3) == 0) return PCRE_JAVASCRIPT_COMPAT;
+  } 
+
+fprintf(f, "Unknown %s at: <%s\n", stype, p);
 return 0;
 }
 
@@ -2951,6 +2959,7 @@ int verify_jit = 0;
 int yield = 0;
 int stack_size;
 pcre_uint8 *dbuffer = NULL;
+pcre_uint8 lockout[24] = { 0 };
 size_t dbuffer_size = 1u << 14;
 clock_t total_compile_time = 0;
 clock_t total_study_time = 0;
@@ -3385,7 +3394,7 @@ pcre32_stack_malloc = stack_malloc;
 pcre32_stack_free = stack_free;
 #endif
 
-/* Heading line unless quiet, then prompt for first regex if stdin */
+/* Heading line unless quiet */
 
 if (!quiet) fprintf(outfile, "PCRE version %s\n\n", version);
 
@@ -3436,6 +3445,30 @@ while (!done)
   p = buffer;
   while (isspace(*p)) p++;
   if (*p == 0) continue;
+  
+  /* Handle option lock-out setting */
+  
+  if (*p == '<' && p[1] == ' ')
+    {
+    p += 2;
+    while (isspace(*p)) p++;
+    if (strncmp((char *)p, "forbid ", 7) == 0)
+      {
+      p += 7;
+      while (isspace(*p)) p++;
+      pp = lockout; 
+      while (!isspace(*p) && pp < lockout + sizeof(lockout) - 1)
+        *pp++ = *p++;
+      *pp = 0;    
+      }
+    else 
+      {
+      fprintf(outfile, "** Unrecognized special command '%s'\n", p);
+      yield = 1;
+      goto EXIT;  
+      } 
+    continue;
+    }   
 
   /* See if the pattern is to be loaded pre-compiled from a file. */
 
@@ -3616,7 +3649,7 @@ while (!done)
   *pp++ = 0;
   strcpy((char *)pbuffer, (char *)p);
 
-  /* Look for options after final delimiter */
+  /* Look for modifiers and options after the final delimiter. */
 
   options = default_options;
   study_options = force_study_options;
@@ -3624,6 +3657,55 @@ while (!done)
 
   while (*pp != 0)
     {
+    /* Check to see whether this modifier has been locked out for this file.
+    This is complicated for the multi-character options that begin with '<'. 
+    If there is no '>' in the lockout string, all multi-character modifiers are 
+    locked out. */ 
+ 
+    if (strchr((char *)lockout, *pp) != NULL)
+      {
+      if (*pp == '<' && strchr((char *)lockout, '>') != NULL)
+        {
+        int x = check_mc_option(pp+1, outfile, FALSE, "modifier");
+        if (x == 0) goto SKIP_DATA;
+         
+        for (ppp = lockout; *ppp != 0; ppp++)
+          {
+          if (*ppp == '<')
+            {
+            int y = check_mc_option(ppp+1, outfile, FALSE, "modifier");
+            if (y == 0)
+              {
+              fprintf(outfile, 
+                "** Error in modifier forbid data - giving up.\n");
+              yield = 1;
+              goto EXIT;   
+              }
+            if (x == y) 
+              {
+              ppp = pp;
+              while (*ppp != '>') ppp++;
+              fprintf(outfile, "** The %.*s modifier is locked out - "
+                "giving up.\n", ppp - pp + 1, pp);
+              yield = 1;
+              goto EXIT;     
+              }          
+            }
+          }       
+        }
+        
+      /* The single-character modifiers are straightforward. */
+       
+      else
+        {
+        fprintf(outfile, "** The /%c modifier is locked out - giving up.\n", *pp);
+        yield = 1;
+        goto EXIT;    
+        }       
+      }  
+      
+    /* The modifier is not locked out; handle it. */
+ 
     switch (*pp++)
       {
       case 'f': options |= PCRE_FIRSTLINE; break;
@@ -3748,18 +3830,10 @@ while (!done)
 
       case '<':
         {
-        if (strncmpic(pp, (pcre_uint8 *)"JS>", 3) == 0)
-          {
-          options |= PCRE_JAVASCRIPT_COMPAT;
-          pp += 3;
-          }
-        else
-          {
-          int x = check_newline(pp, outfile);
-          if (x == 0) goto SKIP_DATA;
-          options |= x;
-          while (*pp++ != '>');
-          }
+        int x = check_mc_option(pp, outfile, FALSE, "modifier");
+        if (x == 0) goto SKIP_DATA;
+        options |= x;
+        while (*pp++ != '>');
         }
       break;
 
@@ -3769,7 +3843,7 @@ while (!done)
       break;
 
       default:
-      fprintf(outfile, "** Unknown option '%c'\n", pp[-1]);
+      fprintf(outfile, "** Unknown modifier '%c'\n", pp[-1]);
       goto SKIP_DATA;
       }
     }
@@ -4757,7 +4831,7 @@ while (!done)
 
         case '<':
           {
-          int x = check_newline(p, outfile);
+          int x = check_mc_option(p, outfile, TRUE, "escape sequence");
           if (x == 0) goto NEXT_DATA;
           options |= x;
           while (*p++ != '>');
