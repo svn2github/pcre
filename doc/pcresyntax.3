@@ -1,4 +1,4 @@
-.TH PCRESYNTAX 3 "08 October 2013" "PCRE 8.34"
+.TH PCRESYNTAX 3 "05 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -363,6 +363,9 @@ newline-setting options with similar syntax:
   (*UTF32)        set UTF-32 mode: 32-bit library (PCRE_UTF32)
   (*UTF)          set appropriate UTF mode for the library in use
   (*UCP)          set PCRE_UCP (use Unicode properties for \ed etc)
+.sp
+Note that LIMIT_MATCH and LIMIT_RECURSION can only reduce the value of the
+limits set by the caller of pcre_exec(), not increase them.
 .
 .
 .SH "LOOKAHEAD AND LOOKBEHIND ASSERTIONS"
@@ -503,6 +506,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 October 2013
+Last updated: 05 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "02 November 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "05 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -164,10 +164,10 @@ pattern of the form
   (*LIMIT_RECURSION=d)
 .sp
 where d is any number of decimal digits. However, the value of the setting must
-be less than the value set by the caller of \fBpcre_exec()\fP for it to have
-any effect. In other words, the pattern writer can lower the limit set by the
-programmer, but not raise it. If there is more than one setting of one of these
-limits, the lower value is used.
+be less than the value set (or defaulted) by the caller of \fBpcre_exec()\fP
+for it to have any effect. In other words, the pattern writer can lower the
+limits set by the programmer, but not raise them. If there is more than one
+setting of one of these limits, the lower value is used.
 .
 .
 .SH "EBCDIC CHARACTER CODES"
@@ -3198,6 +3198,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 02 November 2013
+Last updated: 05 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
