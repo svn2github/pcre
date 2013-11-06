@@ -1235,7 +1235,9 @@ The minus (hyphen) character can be used to specify a range of characters in a
 character class. For example, [d-m] matches any letter between d and m,
 inclusive. If a minus character is required in a class, it must be escaped with
 a backslash or appear in a position where it cannot be interpreted as
-indicating a range, typically as the first or last character in the class.
+indicating a range, typically as the first or last character in the class, or 
+immediately after a range. For example, [b-d-z] matches letters in the range b
+to d, a hyphen character, or z.
 .P
 It is not possible to have the literal character "]" as the end character of a
 range. A pattern such as [W-]46] is interpreted as a class of two characters
@@ -1244,6 +1246,11 @@ range. A pattern such as [W-]46] is interpreted as a class of two characters
 the end of range, so [W-\e]46] is interpreted as a class containing a range
 followed by two other characters. The octal or hexadecimal representation of
 "]" can also be used to end a range.
+.P
+An error is generated if a POSIX character class (see below) or an escape
+sequence other than one that defines a single character appears at a point
+where a range ending character is expected. For example, [z-\exff] is valid,
+but [A-\ed] and [A-[:digit:]] are not.
 .P
 Ranges operate in the collating sequence of character values. They can also be
 used for characters specified numerically, for example [\e000-\e037]. Ranges

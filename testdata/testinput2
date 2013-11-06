@@ -3492,6 +3492,8 @@ with \Y. ---/
     
 /a[B-\Nc]/ 
 
+/a[B\Nc]/ 
+
 /(a)(?2){0,1999}?(b)/
 
 /(a)(?(DEFINE)(b))(?2){0,1999}?(?2)/
@@ -3976,5 +3978,20 @@ backtracking verbs. --/
 /a{4}+/BZO
 
 /a{4}+/BZOi
+
+/[a-[:digit:]]+/
+
+/[A-[:digit:]]+/
+
+/[a-[.xxx.]]+/
+
+/[a-[=xxx=]]+/
+
+/[a-[!xxx!]]+/
+
+/[A-[!xxx!]]+/
+    A]]]
+
+/[a-\d]+/
 
 /-- End of testinput2 --/

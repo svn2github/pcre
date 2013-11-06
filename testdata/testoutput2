@@ -11944,7 +11944,10 @@ No match
 Failed: \N is not supported in a class at offset 3
 
 /a[B-\Nc]/ 
-Failed: \N is not supported in a class at offset 5
+Failed: invalid range in character class at offset 5
+
+/a[B\Nc]/ 
+Failed: \N is not supported in a class at offset 4
 
 /(a)(?2){0,1999}?(b)/
 
@@ -13986,5 +13989,27 @@ Failed: non-hex character in \x{} (closing brace missing?) at offset 5
         Ket
         End
 ------------------------------------------------------------------
+
+/[a-[:digit:]]+/
+Failed: invalid range in character class at offset 3
+
+/[A-[:digit:]]+/
+Failed: invalid range in character class at offset 3
+
+/[a-[.xxx.]]+/
+Failed: invalid range in character class at offset 3
+
+/[a-[=xxx=]]+/
+Failed: invalid range in character class at offset 3
+
+/[a-[!xxx!]]+/
+Failed: range out of order in character class at offset 3
+
+/[A-[!xxx!]]+/
+    A]]]
+ 0: A]]]
+
+/[a-\d]+/
+Failed: invalid range in character class at offset 4
 
 /-- End of testinput2 --/

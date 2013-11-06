@@ -5991,18 +5991,6 @@ No match
  0: 
  0: 
 
-/^[a-\d]/
-    abcde
- 0: a
-    -things
- 0: -
-    0digit
- 0: 0
-    *** Failers
-No match
-    bcdef    
-No match
-
 /^[\d-a]/
     abcde
  0: a

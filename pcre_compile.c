@@ -532,6 +532,7 @@ static const char error_texts[] =
   "non-octal character in \\o{} (closing brace missing?)\0"
   "missing opening brace after \\o\0"
   "parentheses are too deeply nested\0"
+  "invalid range in character class\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -3793,7 +3794,7 @@ class, but [abc[:x\]pqr:]] is (so that an error can be generated). The code
 below handles the special case of \], but does not try to do any other escape
 processing. This makes it different from Perl for cases such as [:l\ower:]
 where Perl recognizes it as the POSIX class "lower" but PCRE does not recognize
-"l\ower". This is a lesser evil that not diagnosing bad classes when Perl does,
+"l\ower". This is a lesser evil than not diagnosing bad classes when Perl does,
 I think.
 
 A user pointed out that PCRE was rejecting [:a[:digit:]] whereas Perl was not.
@@ -5143,28 +5144,45 @@ for (;; ptr++)
         else
 #endif
         d = *ptr;  /* Not UTF-8 mode */
+        
+        /* The second part of a range can be a single-character escape
+        sequence, but not any of the other escapes. Perl treats a hyphen as a
+        literal in such circumstances. However, in Perl's warning mode, a
+        warning is given, so PCRE now faults it as it is almost certainly a 
+        mistake on the user's part. */
 
-        /* The second part of a range can be a single-character escape, but
-        not any of the other escapes. Perl 5.6 treats a hyphen as a literal
-        in such circumstances. */
-
-        if (!inescq && d == CHAR_BACKSLASH)
-          {
-          int descape;
-          descape = check_escape(&ptr, &d, errorcodeptr, cd->bracount, options, TRUE);
-          if (*errorcodeptr != 0) goto FAILED;
-
-          /* \b is backspace; any other special means the '-' was literal. */
-
-          if (descape != 0)
+        if (!inescq)
+          { 
+          if (d == CHAR_BACKSLASH)
             {
-            if (descape == ESC_b) d = CHAR_BS; else
+            int descape;
+            descape = check_escape(&ptr, &d, errorcodeptr, cd->bracount, options, TRUE);
+            if (*errorcodeptr != 0) goto FAILED;
+          
+            /* 0 means a character was put into d; \b is backspace; any other
+            special causes an error. */
+          
+            if (descape != 0)
               {
-              ptr = oldptr;
-              goto CLASS_SINGLE_CHARACTER;  /* A few lines below */
+              if (descape == ESC_b) d = CHAR_BS; else
+                {
+                *errorcodeptr = ERR83;
+                goto FAILED; 
+                }
               }
             }
-          }
+        
+          /* A hyphen followed by a POSIX class is treated in the same way. */
+          
+          else if (d == CHAR_LEFT_SQUARE_BRACKET && 
+                   (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
+                    ptr[1] == CHAR_EQUALS_SIGN) && 
+                   check_posix_syntax(ptr, &tempptr))
+            {
+            *errorcodeptr = ERR83;
+            goto FAILED;          
+            }  
+          }   
 
         /* Check that the two values are in the correct order. Optimize
         one-character ranges. */

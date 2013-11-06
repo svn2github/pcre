@@ -159,6 +159,10 @@ Version 8.34 xx-xxxx-201x
     This limit is imposed to control the amount of system stack used at compile 
     time. It can be changed at build time by --with-parens-nest-limit=xxx or 
     the equivalent in CMake. 
+    
+34. Character classes such as [A-\d] or [a-[:digit:]] now cause compile-time 
+    errors. Perl warns for these when in warning mode, but PCRE has no facility 
+    for giving warnings. 
 
 
 Version 8.33 28-May-2013

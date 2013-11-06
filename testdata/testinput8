@@ -3830,13 +3830,6 @@
 /a*/g
     abbab
 
-/^[a-\d]/
-    abcde
-    -things
-    0digit
-    *** Failers
-    bcdef    
-
 /^[\d-a]/
     abcde
     -things
