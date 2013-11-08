@@ -2520,7 +2520,10 @@ a random value. /Ix
     ** Failers
     ab  
 
-/a(?!)+b/
+/a(?!)b/BZ
+
+/(?!)?a/BZ
+    ab
 
 /a(*FAIL)+b/
 

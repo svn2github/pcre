@@ -5737,8 +5737,9 @@ for (;; ptr++)
     opcodes such as BRA and CBRA, as this is the place where they get converted
     into the more special varieties such as BRAPOS and SBRA. A test for >=
     OP_ASSERT and <= OP_COND includes ASSERT, ASSERT_NOT, ASSERTBACK,
-    ASSERTBACK_NOT, ONCE, BRA, CBRA, and COND. Originally, PCRE did not allow
-    repetition of assertions, but now it does, for Perl compatibility. */
+    ASSERTBACK_NOT, ONCE, ONCE_NC, BRA, BRAPOS, CBRA, CBRAPOS, and COND.
+    Originally, PCRE did not allow repetition of assertions, but now it does,
+    for Perl compatibility. */
 
     else if (*previous >= OP_ASSERT && *previous <= OP_COND)
       {
@@ -5756,7 +5757,7 @@ for (;; ptr++)
       /* There is no sense in actually repeating assertions. The only potential
       use of repetition is in cases when the assertion is optional. Therefore,
       if the minimum is greater than zero, just ignore the repeat. If the
-      maximum is not not zero or one, set it to 1. */
+      maximum is not zero or one, set it to 1. */
 
       if (*previous < OP_ONCE)    /* Assertion */
         {
@@ -6703,11 +6704,18 @@ for (;; ptr++)
         ptr++;
         break;
 
+        /* Optimize (?!) to (*FAIL) unless it is quantified - which is a weird 
+        thing to do, but Perl allows all assertions to be quantified, and when 
+        they contain capturing parentheses there may be a potential use for 
+        this feature. Not that that applies to a quantified (?!) but we allow 
+        it for uniformity. */
 
         /* ------------------------------------------------------------ */
         case CHAR_EXCLAMATION_MARK:            /* Negative lookahead */
         ptr++;
-        if (*ptr == CHAR_RIGHT_PARENTHESIS)    /* Optimize (?!) */
+        if (*ptr == CHAR_RIGHT_PARENTHESIS && ptr[1] != CHAR_ASTERISK && 
+             ptr[1] != CHAR_PLUS && ptr[1] != CHAR_QUESTION_MARK &&
+            (ptr[1] != CHAR_LEFT_CURLY_BRACKET || !is_counted_repeat(ptr+2)))
           {
           *code++ = OP_FAIL;
           previous = NULL;

@@ -163,6 +163,12 @@ Version 8.34 xx-xxxx-201x
 34. Character classes such as [A-\d] or [a-[:digit:]] now cause compile-time 
     errors. Perl warns for these when in warning mode, but PCRE has no facility 
     for giving warnings. 
+    
+35. Change 34 for 8.13 allowed quantifiers on assertions, because Perl does. 
+    However, this was not working for (?!) because it is optimized to (*FAIL), 
+    for which PCRE does not allow quantifiers. The optimization is now disabled 
+    when a quantifier follows (?!). I can't see any use for this, but it makes 
+    things uniform. 
 
 
 Version 8.33 28-May-2013
