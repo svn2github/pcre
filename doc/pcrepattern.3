@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "05 November 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "08 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1595,11 +1595,12 @@ conditions,
 .\"
 can be made by name as well as by number.
 .P
-Names consist of up to 32 alphanumeric characters and underscores. Named
-capturing parentheses are still allocated numbers as well as names, exactly as
-if the names were not present. The PCRE API provides function calls for
-extracting the name-to-number translation table from a compiled pattern. There
-is also a convenience function for extracting a captured substring by name.
+Names consist of up to 32 alphanumeric characters and underscores, but must 
+start with a non-digit. Named capturing parentheses are still allocated numbers
+as well as names, exactly as if the names were not present. The PCRE API
+provides function calls for extracting the name-to-number translation table
+from a compiled pattern. There is also a convenience function for extracting a
+captured substring by name.
 .P
 By default, a name must be unique within a pattern, but it is possible to relax
 this constraint by setting the PCRE_DUPNAMES option at compile time. (Duplicate
@@ -2331,12 +2332,7 @@ This makes the fragment independent of the parentheses in the larger pattern.
 .sp
 Perl uses the syntax (?(<name>)...) or (?('name')...) to test for a used
 subpattern by name. For compatibility with earlier versions of PCRE, which had
-this facility before Perl, the syntax (?(name)...) is also recognized. However,
-there is a possible ambiguity with this syntax, because subpattern names may
-consist entirely of digits. PCRE looks first for a named subpattern; if it
-cannot find one and the name consists entirely of digits, PCRE looks for a
-subpattern of that number, which must be greater than zero. Using subpattern
-names that consist entirely of digits is not recommended.
+this facility before Perl, the syntax (?(name)...) is also recognized. 
 .P
 Rewriting the above example to use a named subpattern gives this:
 .sp
@@ -3205,6 +3201,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 November 2013
+Last updated: 08 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

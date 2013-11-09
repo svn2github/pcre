@@ -169,7 +169,8 @@ static const int eint[] = {
   REG_BADPAT,  /* non-octal character in \o{} (closing brace missing?) */ 
   REG_BADPAT,  /* missing opening brace after \o */
   REG_BADPAT,  /* parentheses too deeply nested */
-  REG_BADPAT   /* invalid range in character class */ 
+  REG_BADPAT,  /* invalid range in character class */ 
+  REG_BADPAT   /* group name must start with a non-digit */ 
 };
 
 /* Table of texts corresponding to POSIX error codes */

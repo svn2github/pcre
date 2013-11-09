@@ -1945,10 +1945,7 @@ a random value. /Ix
 /(?<A> (?'B' abc (?(R) (?(R&A)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
     abcabc1Xabc2XabcXabcabc
 
-/(?<A> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-
-/(?<1> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-    abcabc1Xabc2XabcXabcabc
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
 
 /^(?(DEFINE) abc | xyz ) /x
 
@@ -2065,7 +2062,7 @@ a random value. /Ix
 
 /^(a)\g{3/
 
-/^(a)\g{4a}/
+/^(a)\g{aa}/
 
 /^a.b/<lf>
     a\rb
@@ -3996,5 +3993,41 @@ backtracking verbs. --/
     A]]]
 
 /[a-\d]+/
+
+/(?<0abc>xx)/
+
+/(?&1abc)xx(?<1abc>y)/
+
+/(?<ab-cd>xx)/
+
+/(?'0abc'xx)/
+
+/(?P<0abc>xx)/
+
+/\k<5ghj>/
+
+/\k'5ghj'/
+
+/\k{2fgh}/
+
+/(?P=8yuki)/
+
+/\g{4df}/
+
+/(?&1abc)xx(?<1abc>y)/
+
+/(?P>1abc)xx(?<1abc>y)/
+
+/\g'3gh'/
+
+/\g<5fg>/
+
+/(?(<4gh>)abc)/
+
+/(?('4gh')abc)/
+
+/(?(4gh)abc)/
+
+/(?(R&6yh)abc)/
 
 /-- End of testinput2 --/

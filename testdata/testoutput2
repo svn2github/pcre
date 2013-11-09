@@ -549,10 +549,10 @@ Failed: conditional group contains more than two branches at offset 13
 Failed: conditional group contains more than two branches at offset 12
 
 /(?(1a)/
-Failed: missing ) at offset 6
+Failed: malformed number or name after (?( at offset 4
 
 /(?(1a))/
-Failed: reference to non-existent subpattern at offset 6
+Failed: malformed number or name after (?( at offset 4
 
 /(?(?i))/
 Failed: assertion expected after (?( at offset 3
@@ -6359,7 +6359,7 @@ Need char = 'X'
  1: X
 
 /(?:(?(2y)a|b)(X))+/I
-Failed: reference to non-existent subpattern at offset 9
+Failed: malformed number or name after (?( at offset 7
 
 /(?:(?(ZA)a|b)(?P<ZZ>X))+/I
 Failed: reference to non-existent subpattern at offset 9
@@ -7866,14 +7866,8 @@ Failed: reference to non-existent subpattern at offset 7
  1: abcabc1Xabc2XabcX
  2: abcabc1Xabc2XabcX
 
-/(?<A> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
 Failed: reference to non-existent subpattern at offset 29
-
-/(?<1> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-    abcabc1Xabc2XabcXabcabc
- 0: abcabc1Xabc2XabcX
- 1: abcabc1Xabc2XabcX
- 2: abcabc1Xabc2XabcX
 
 /^(?(DEFINE) abc | xyz ) /x
 Failed: DEFINE group contains more than one branch at offset 22
@@ -8098,7 +8092,7 @@ Failed: a numbered reference must not be zero at offset 8
 /^(a)\g{3/
 Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 8
 
-/^(a)\g{4a}/
+/^(a)\g{aa}/
 Failed: reference to non-existent subpattern at offset 9
 
 /^a.b/<lf>
@@ -14031,5 +14025,59 @@ Failed: range out of order in character class at offset 3
 
 /[a-\d]+/
 Failed: invalid range in character class at offset 4
+
+/(?<0abc>xx)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?<ab-cd>xx)/
+Failed: syntax error in subpattern name (missing terminator) at offset 5
+
+/(?'0abc'xx)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?P<0abc>xx)/
+Failed: group name must start with a non-digit at offset 4
+
+/\k<5ghj>/
+Failed: group name must start with a non-digit at offset 3
+
+/\k'5ghj'/
+Failed: group name must start with a non-digit at offset 3
+
+/\k{2fgh}/
+Failed: group name must start with a non-digit at offset 3
+
+/(?P=8yuki)/
+Failed: group name must start with a non-digit at offset 4
+
+/\g{4df}/
+Failed: group name must start with a non-digit at offset 3
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: group name must start with a non-digit at offset 3
+
+/(?P>1abc)xx(?<1abc>y)/
+Failed: group name must start with a non-digit at offset 4
+
+/\g'3gh'/
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 7
+
+/\g<5fg>/
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 7
+
+/(?(<4gh>)abc)/
+Failed: group name must start with a non-digit at offset 4
+
+/(?('4gh')abc)/
+Failed: group name must start with a non-digit at offset 4
+
+/(?(4gh)abc)/
+Failed: malformed number or name after (?( at offset 4
+
+/(?(R&6yh)abc)/
+Failed: group name must start with a non-digit at offset 5
 
 /-- End of testinput2 --/

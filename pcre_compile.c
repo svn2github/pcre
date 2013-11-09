@@ -533,6 +533,7 @@ static const char error_texts[] =
   "missing opening brace after \\o\0"
   "parentheses are too deeply nested\0"
   "invalid range in character class\0" 
+  "group name must start with a non-digit\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -6465,17 +6466,16 @@ for (;; ptr++)
         tempptr = ptr;
 
         /* A condition can be an assertion, a number (referring to a numbered
-        group), a name (referring to a named group), or 'R', referring to
-        recursion. R<digits> and R&name are also permitted for recursion tests.
+        group's having been set), a name (referring to a named group), or 'R',
+        referring to recursion. R<digits> and R&name are also permitted for
+        recursion tests.
 
-        There are several syntaxes for testing a named group: (?(name)) is used
-        by Python; Perl 5.10 onwards uses (?(<name>) or (?('name')).
+        There are ways of testing a named group: (?(name)) is used by Python;
+        Perl 5.10 onwards uses (?(<name>) or (?('name')).
 
-        There are two unfortunate ambiguities, caused by history. (a) 'R' can
-        be the recursive thing or the name 'R' (and similarly for 'R' followed
-        by digits), and (b) a number could be a name that consists of digits.
-        In both cases, we look for a name first; if not found, we try the other
-        cases.
+        There is one unfortunate ambiguity, caused by history. 'R' can be the
+        recursive thing or the name 'R' (and similarly for 'R' followed by
+        digits). We look for a name first; if not found, we try the other case.
 
         For compatibility with auto-callouts, we allow a callout to be
         specified before a condition that is an assertion. First, check for the
@@ -6508,7 +6508,8 @@ for (;; ptr++)
 
         /* Check for a test for recursion in a named group. */
 
-        if (ptr[1] == CHAR_R && ptr[2] == CHAR_AMPERSAND)
+        ptr++;
+        if (*ptr == CHAR_R && ptr[1] == CHAR_AMPERSAND)
           {
           terminator = -1;
           ptr += 2;
@@ -6517,15 +6518,14 @@ for (;; ptr++)
 
         /* Check for a test for a named group's having been set, using the Perl
         syntax (?(<name>) or (?('name'), and also allow for the original PCRE
-        syntax of (?(name) or for (?(+n), (?(-n), and just (?(n). As names may
-        consist entirely of digits, there is scope for ambiguity. */
+        syntax of (?(name) or for (?(+n), (?(-n), and just (?(n). */
 
-        else if (ptr[1] == CHAR_LESS_THAN_SIGN)
+        else if (*ptr == CHAR_LESS_THAN_SIGN)
           {
           terminator = CHAR_GREATER_THAN_SIGN;
           ptr++;
           }
-        else if (ptr[1] == CHAR_APOSTROPHE)
+        else if (*ptr == CHAR_APOSTROPHE)
           {
           terminator = CHAR_APOSTROPHE;
           ptr++;
@@ -6533,43 +6533,55 @@ for (;; ptr++)
         else
           {
           terminator = CHAR_NULL;
-          if (ptr[1] == CHAR_MINUS || ptr[1] == CHAR_PLUS) refsign = *(++ptr);
+          if (*ptr == CHAR_MINUS || *ptr == CHAR_PLUS) refsign = *ptr++;
+            else if (IS_DIGIT(*ptr)) refsign = 0;
           }
-
-        /* When a name is one of a number of duplicates, a different opcode is
-        used and it needs more memory. Unfortunately we cannot tell whether a
-        name is a duplicate in the first pass, so we have to allow for more
-        memory except when we know it is a relative numerical reference. */
-
-        if (refsign < 0 && lengthptr != NULL) *lengthptr += IMM2_SIZE;
-
-        /* We now expect to read a name (possibly all digits); any thing else
-        is an error. In the case of all digits, also get it as a number. */
-
-        if (!MAX_255(ptr[1]) || (cd->ctypes[ptr[1]] & ctype_word) == 0)
+          
+        /* Handle a number */
+        
+        if (refsign >= 0)
           {
-          ptr += 1;  /* To get the right offset */
-          *errorcodeptr = ERR28;
-          goto FAILED;
-          }
+          recno = 0;
+          while (IS_DIGIT(*ptr)) 
+            {
+            recno = recno * 10 + (int)(*ptr - CHAR_0); 
+            ptr++;
+            }  
+          }   
+          
+        /* Otherwise we expect to read a name; anything else is an error. When
+        a name is one of a number of duplicates, a different opcode is used and
+        it needs more memory. Unfortunately we cannot tell whether a name is a
+        duplicate in the first pass, so we have to allow for more memory. */
 
-        recno = 0;
-        name = ++ptr;
-        while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0)
+        else
           {
-          if (recno >= 0)
-            recno = (IS_DIGIT(*ptr))? recno * 10 + (int)(*ptr - CHAR_0) : -1;
-          ptr++;
+          if (IS_DIGIT(*ptr))
+            {
+            *errorcodeptr = ERR84;
+            goto FAILED;
+            }      
+          if (!MAX_255(*ptr) || (cd->ctypes[*ptr] & ctype_word) == 0)
+            {
+            *errorcodeptr = ERR28;   /* Assertion expected */
+            goto FAILED;
+            }
+          name = ptr++;
+          while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0)
+            {
+            ptr++;
+            }
+          namelen = (int)(ptr - name);
+          if (lengthptr != NULL) *lengthptr += IMM2_SIZE;
           }
-        namelen = (int)(ptr - name);
 
         /* Check the terminator */
 
         if ((terminator > 0 && *ptr++ != (pcre_uchar)terminator) ||
             *ptr++ != CHAR_RIGHT_PARENTHESIS)
           {
-          ptr--;      /* Error offset */
-          *errorcodeptr = ERR26;
+          ptr--;                  /* Error offset */
+          *errorcodeptr = ERR26;  /* Malformed number or name */
           goto FAILED;
           }
 
@@ -6578,18 +6590,18 @@ for (;; ptr++)
         if (lengthptr != NULL) break;
 
         /* In the real compile we do the work of looking for the actual
-        reference. If the string started with "+" or "-" we require the rest to
-        be digits, in which case recno will be set. */
-
-        if (refsign > 0)
+        reference. If refsign is not negative, it means we have a number in 
+        recno. */
+        
+        if (refsign >= 0)
           {
           if (recno <= 0)
             {
-            *errorcodeptr = ERR58;
+            *errorcodeptr = ERR35;
             goto FAILED;
             }
-          recno = (refsign == CHAR_MINUS)?
-            cd->bracount - recno + 1 : recno +cd->bracount;
+          if (refsign != 0) recno = (refsign == CHAR_MINUS)?
+            cd->bracount - recno + 1 : recno + cd->bracount;
           if (recno <= 0 || recno > cd->final_bracount)
             {
             *errorcodeptr = ERR15;
@@ -6599,8 +6611,7 @@ for (;; ptr++)
           break;
           }
 
-        /* Otherwise (did not start with "+" or "-"), start by looking for the
-        name. */
+        /* Otherwise look for the name. */
 
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
@@ -6641,8 +6652,8 @@ for (;; ptr++)
         /* If terminator == CHAR_NULL it means that the name followed directly
         after the opening parenthesis [e.g. (?(abc)...] and in this case there
         are some further alternatives to try. For the cases where terminator !=
-        0 [things like (?(<name>... or (?('name')... or (?(R&name)... ] we have
-        now checked all the possibilities, so give an error. */
+        CHAR_NULL [things like (?(<name>... or (?('name')... or (?(R&name)... ]
+        we have now checked all the possibilities, so give an error. */
 
         else if (terminator != CHAR_NULL)
           {
@@ -6679,19 +6690,11 @@ for (;; ptr++)
           skipbytes = 1;
           }
 
-        /* Check for the "name" actually being a subpattern number. We are
-        in the second pass here, so final_bracount is set. */
-
-        else if (recno > 0 && recno <= cd->final_bracount)
-          {
-          PUT2(code, 2+LINK_SIZE, recno);
-          }
-
-        /* Either an unidentified subpattern, or a reference to (?(0) */
+        /* Reference to an unidentified subpattern. */
 
         else
           {
-          *errorcodeptr = (recno == 0)? ERR35: ERR15;
+          *errorcodeptr = ERR15;
           goto FAILED;
           }
         break;
@@ -6811,7 +6814,11 @@ for (;; ptr++)
         terminator = (*ptr == CHAR_LESS_THAN_SIGN)?
           CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
         name = ++ptr;
-
+        if (IS_DIGIT(*ptr))
+          {
+          *errorcodeptr = ERR84;   /* Group name must start with non-digit */
+          goto FAILED;  
+          }  
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
@@ -6925,6 +6932,11 @@ for (;; ptr++)
 
         NAMED_REF_OR_RECURSE:
         name = ++ptr;
+        if (IS_DIGIT(*ptr))
+          {
+          *errorcodeptr = ERR84;   /* Group name must start with non-digit */
+          goto FAILED;  
+          }  
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
@@ -7576,44 +7588,31 @@ for (;; ptr++)
       if (escape == ESC_g)
         {
         const pcre_uchar *p;
+        pcre_uint32 cf;
+          
         save_hwm = cd->hwm;   /* Normally this is set when '(' is read */
         terminator = (*(++ptr) == CHAR_LESS_THAN_SIGN)?
           CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
 
         /* These two statements stop the compiler for warning about possibly
         unset variables caused by the jump to HANDLE_NUMERICAL_RECURSION. In
-        fact, because we actually check for a number below, the paths that
+        fact, because we do the check for a number below, the paths that
         would actually be in error are never taken. */
 
         skipbytes = 0;
         reset_bracount = FALSE;
 
-        /* Test for a name */
+        /* If it's not a signed or unsigned number, treat it as a name. */
 
-        if (ptr[1] != CHAR_PLUS && ptr[1] != CHAR_MINUS)
+        cf = ptr[1];
+        if (cf != CHAR_PLUS && cf != CHAR_MINUS && !IS_DIGIT(cf))
           {
-          BOOL is_a_number = TRUE;
-          for (p = ptr + 1; *p != CHAR_NULL && *p != (pcre_uchar)terminator; p++)
-            {
-            if (!MAX_255(*p)) { is_a_number = FALSE; break; }
-            if ((cd->ctypes[*p] & ctype_digit) == 0) is_a_number = FALSE;
-            if ((cd->ctypes[*p] & ctype_word) == 0) break;
-            }
-          if (*p != (pcre_uchar)terminator)
-            {
-            *errorcodeptr = ERR57;
-            break;
-            }
-          if (is_a_number)
-            {
-            ptr++;
-            goto HANDLE_NUMERICAL_RECURSION;
-            }
           is_recurse = TRUE;
           goto NAMED_REF_OR_RECURSE;
           }
 
-        /* Test a signed number in angle brackets or quotes. */
+        /* Signed or unsigned number (cf = ptr[1]) is known to be plus or minus 
+        or a digit. */
 
         p = ptr + 2;
         while (IS_DIGIT(*p)) p++;

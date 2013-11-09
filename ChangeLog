@@ -169,6 +169,9 @@ Version 8.34 xx-xxxx-201x
     for which PCRE does not allow quantifiers. The optimization is now disabled 
     when a quantifier follows (?!). I can't see any use for this, but it makes 
     things uniform. 
+    
+36. Perl no longer allows group names to start with digits, so I have made this
+    change also in PCRE. It simplifies the code a bit. 
 
 
 Version 8.33 28-May-2013

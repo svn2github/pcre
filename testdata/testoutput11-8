@@ -535,7 +535,7 @@ Memory allocation (code space): 17
 ------------------------------------------------------------------
 
 /( ( (?(1)0|) )*   )/xBM
-Memory allocation (code space): 40
+Memory allocation (code space): 38
 ------------------------------------------------------------------
   0  34 Bra
   3  28 CBra 1
@@ -553,7 +553,7 @@ Memory allocation (code space): 40
 ------------------------------------------------------------------
 
 /(  (?(1)0|)*   )/xBM
-Memory allocation (code space): 32
+Memory allocation (code space): 30
 ------------------------------------------------------------------
   0  26 Bra
   3  20 CBra 1
