@@ -86,7 +86,8 @@ Version 8.34 xx-xxxx-201x
     on a patch by Zoltan Herczeg. It now happens after instead of during 
     compilation. The code is cleaner, and more cases are handled. The option 
     PCRE_NO_AUTO_POSSESSIFY is added for testing purposes, and the -O and /O 
-    options in pcretest are provided to set it.
+    options in pcretest are provided to set it. It can also be set by 
+    (*NO_AUTO_POSSESS) at the start of a pattern.
     
 18. The character VT has been added to the set of characters that match \s and
     are generally treated as white space, following this same change in Perl 

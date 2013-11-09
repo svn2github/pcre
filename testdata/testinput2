@@ -2545,7 +2545,9 @@ a random value. /Ix
   abcxypqr\Y  
   
 /(*NO_START_OPT)xyz/C
-  abcxyz 
+  abcxyz
+  
+/(*NO_AUTO_POSSESS)a+b/BZ  
 
 /xyz/CY
   abcxyz 

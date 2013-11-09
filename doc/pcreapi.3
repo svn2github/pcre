@@ -1,4 +1,4 @@
-.TH PCREAPI 3 "05 November 2013" "PCRE 8.34"
+.TH PCREAPI 3 "09 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .sp
@@ -809,7 +809,10 @@ in Perl.
 .sp
 If this option is set, it disables "auto-possessification". This is an 
 optimization that, for example, turns a+b into a++b in order to avoid
-backtracks into a+ that can never be successful.
+backtracks into a+ that can never be successful. However, if callouts are in
+use, auto-possessification means that some of them are never taken. You can set
+this option if you want the matching functions to do a full unoptimized search 
+and run all the callouts, but it is mainly provided for testing purposes.
 .sp
   PCRE_NO_START_OPTIMIZE
 .sp
@@ -2879,6 +2882,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 November 2013
+Last updated: 09 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

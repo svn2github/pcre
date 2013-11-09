@@ -8741,6 +8741,8 @@ PCRE_UTF8 == PCRE_UTF16 == PCRE_UTF32. */
     { skipatstart += 6; options |= PCRE_UTF8; continue; }
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UCP_RIGHTPAR, 4) == 0)
     { skipatstart += 6; options |= PCRE_UCP; continue; }
+  else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_NO_AUTO_POSSESS_RIGHTPAR, 16) == 0)
+    { skipatstart += 18; options |= PCRE_NO_AUTO_POSSESSIFY; continue; }
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_NO_START_OPT_RIGHTPAR, 13) == 0)
     { skipatstart += 15; options |= PCRE_NO_START_OPTIMIZE; continue; }
 

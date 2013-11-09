@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "08 November 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "09 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -80,21 +80,37 @@ appearance causes an error.
 .SS "Unicode property support"
 .rs
 .sp
-Another special sequence that may appear at the start of a pattern is
-.sp
-  (*UCP)
-.sp
+Another special sequence that may appear at the start of a pattern is (*UCP).
 This has the same effect as setting the PCRE_UCP option: it causes sequences
 such as \ed and \ew to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 128 via a lookup
 table.
 .
 .
+.SS "Disabling auto-possessification"
+.rs
+.sp
+If a pattern starts with (*NO_AUTO_POSSESS), it has the same effect as setting 
+the PCRE_NO_AUTO_POSSESSIFY option at compile time. This stops PCRE from making
+quantifiers possessive when what follows cannot match the repeated item. For
+example, by default a+b is treated as a++b. For more details, see the
+.\" HREF
+\fBpcreapi\fP
+.\"
+documentation.
+.
+.
 .SS "Disabling start-up optimizations"
 .rs
 .sp
 If a pattern starts with (*NO_START_OPT), it has the same effect as setting the
-PCRE_NO_START_OPTIMIZE option either at compile or matching time.
+PCRE_NO_START_OPTIMIZE option either at compile or matching time. This disables
+several optimizations for quickly reaching "no match" results. For more
+details, see the
+.\" HREF
+\fBpcreapi\fP
+.\"
+documentation.
 .
 .
 .\" HTML <a name="newlines"></a>
@@ -2754,8 +2770,13 @@ During matching, when PCRE reaches a callout point, the external function is
 called. It is provided with the number of the callout, the position in the
 pattern, and, optionally, one item of data originally supplied by the caller of
 the matching function. The callout function may cause matching to proceed, to
-backtrack, or to fail altogether. A complete description of the interface to
-the callout function is given in the
+backtrack, or to fail altogether.
+.P
+By default, PCRE implements a number of optimizations at compile time and
+matching time, and one side-effect is that sometimes callouts are skipped. If
+you need all possible callouts to happen, you need to set options that disable
+the relevant optimizations. More details, and a complete description of the
+interface to the callout function, are given in the
 .\" HREF
 \fBpcrecallout\fP
 .\"
@@ -3201,6 +3222,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 November 2013
+Last updated: 09 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

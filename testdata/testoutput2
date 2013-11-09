@@ -9416,7 +9416,7 @@ No match
 No match
   
 /(*NO_START_OPT)xyz/C
-  abcxyz 
+  abcxyz
 --->abcxyz
 +15 ^          x
 +15  ^         x
@@ -9426,6 +9426,15 @@ No match
 +17    ^ ^     z
 +18    ^  ^    
  0: xyz
+  
+/(*NO_AUTO_POSSESS)a+b/BZ  
+------------------------------------------------------------------
+        Bra
+        a+
+        b
+        Ket
+        End
+------------------------------------------------------------------
 
 /xyz/CY
   abcxyz 
