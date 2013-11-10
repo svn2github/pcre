@@ -2,7 +2,7 @@
     Perl >= 5.10, in non-UTF-8 mode. It should run clean for the 8-bit, 16-bit,
     and 32-bit PCRE libraries. --/
     
-< forbid 8BCDIMWZ< 
+< forbid 8BCDIMOWZ< 
 
 /the quick brown fox/
     the quick brown fox
@@ -9261,5 +9261,29 @@ No match
 /^A\o{123}B/
     A\123B
  0: ASB
+
+/ ^ a + + b $ /x
+    aaaab
+ 0: aaaab
+    
+/ ^ a + #comment
+  + b $ /x
+    aaaab
+ 0: aaaab
+    
+/ ^ a + #comment
+  #comment
+  + b $ /x
+    aaaab
+ 0: aaaab
+    
+/ ^ (?> a + ) b $ /x
+    aaaab 
+ 0: aaaab
+
+/ ^ ( a + ) + + \w $ /x
+    aaaab 
+ 0: aaaab
+ 1: aaaa
 
 /-- End of testinput1 --/

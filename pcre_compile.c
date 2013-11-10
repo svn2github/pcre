@@ -4446,7 +4446,7 @@ for (;; ptr++)
   /* Get next character in the pattern */
 
   c = *ptr;
-
+  
   /* If we are at the end of a nested substitution, revert to the outer level
   string. Nesting only happens one level deep. */
 
@@ -4548,7 +4548,36 @@ for (;; ptr++)
         }
       goto NORMAL_CHAR;
       }
+    /* Control does not reach here. */   
     }
+
+  /* In extended mode, skip white space and comments. We need a loop in order 
+  to check for more white space and more comments after a comment. */
+  
+  if ((options & PCRE_EXTENDED) != 0)
+    {
+    for (;;)
+      {
+      while (MAX_255(c) && (cd->ctypes[c] & ctype_space) != 0) c = *(++ptr);
+      if (c != CHAR_NUMBER_SIGN) break;
+      ptr++;
+      while (*ptr != CHAR_NULL)
+        {
+        if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
+          {                          /* IS_NEWLINE sets cd->nllen. */         
+          ptr += cd->nllen;            
+          break;
+          }
+        ptr++;
+#ifdef SUPPORT_UTF
+        if (utf) FORWARDCHAR(ptr);
+#endif
+        }
+      c = *ptr;     /* Either NULL or the char after a newline */
+      }   
+    }
+
+  /* See if the next thing is a quantifier. */
 
   is_quantifier =
     c == CHAR_ASTERISK || c == CHAR_PLUS || c == CHAR_QUESTION_MARK ||
@@ -4565,42 +4594,21 @@ for (;; ptr++)
     previous_callout = NULL;
     }
 
-  /* In extended mode, skip white space and comments. */
-
-  if ((options & PCRE_EXTENDED) != 0)
-    {
-    if (MAX_255(*ptr) && (cd->ctypes[c] & ctype_space) != 0) continue;
-    if (c == CHAR_NUMBER_SIGN)
-      {
-      ptr++;
-      while (*ptr != CHAR_NULL)
-        {
-        if (IS_NEWLINE(ptr)) { ptr += cd->nllen - 1; break; }
-        ptr++;
-#ifdef SUPPORT_UTF
-        if (utf) FORWARDCHAR(ptr);
-#endif
-        }
-      if (*ptr != CHAR_NULL) continue;
-
-      /* Else fall through to handle end of string */
-      c = 0;
-      }
-    }
-
-  /* No auto callout for quantifiers, or while processing property strings that
-  are substituted for \w etc in UCP mode. */
+  /* Create auto callout, except for quantifiers, or while processing property
+  strings that are substituted for \w etc in UCP mode. */
 
   if ((options & PCRE_AUTO_CALLOUT) != 0 && !is_quantifier && nestptr == NULL)
     {
     previous_callout = code;
     code = auto_callout(code, ptr, cd);
     }
+    
+  /* Process the next pattern item. */
 
   switch(c)
     {
     /* ===================================================================*/
-    case 0:                        /* The branch terminates at string end */
+    case CHAR_NULL:                /* The branch terminates at string end */
     case CHAR_VERTICAL_LINE:       /* or | or ) */
     case CHAR_RIGHT_PARENTHESIS:
     *firstcharptr = firstchar;
@@ -5445,6 +5453,34 @@ for (;; ptr++)
     insert something before it. */
 
     tempcode = previous;
+    
+    /* Before checking for a possessive quantifier, we must skip over 
+    whitespace and comments in extended mode because Perl allows white space at 
+    this point. */
+ 
+    if ((options & PCRE_EXTENDED) != 0)
+      {
+      const pcre_uchar *p = ptr + 1;
+      for (;;)
+        {
+        while (MAX_255(*p) && (cd->ctypes[*p] & ctype_space) != 0) p++;
+        if (*p != CHAR_NUMBER_SIGN) break;
+        p++;
+        while (*p != CHAR_NULL)
+          {
+          if (IS_NEWLINE(p))         /* For non-fixed-length newline cases, */
+            {                        /* IS_NEWLINE sets cd->nllen. */         
+            p += cd->nllen;            
+            break;
+            }
+          p++;
+#ifdef SUPPORT_UTF
+          if (utf) FORWARDCHAR(p);
+#endif
+          }           /* Loop for comment characters */
+        }             /* Loop for multiple comments */
+      ptr = p - 1;    /* Character before the next significant one. */
+      }
 
     /* If the next character is '+', we have a possessive quantifier. This
     implies greediness, whatever the setting of the PCRE_UNGREEDY option.
@@ -7752,8 +7788,8 @@ for (;; ptr++)
 
     /* ===================================================================*/
     /* Handle a literal character. It is guaranteed not to be whitespace or #
-    when the extended flag is set. If we are in UTF-8 mode, it may be a
-    multi-byte literal character. */
+    when the extended flag is set. If we are in a UTF mode, it may be a
+    multi-unit literal character. */
 
     default:
     NORMAL_CHAR:
@@ -8899,7 +8935,7 @@ else
     cd->nl[0] = newline;
     }
   }
-
+  
 /* Maximum back reference and backref bitmap. The bitmap records up to 31 back
 references to help in deciding whether (.*) can be treated as anchored or not.
 */
@@ -8952,6 +8988,7 @@ outside can help speed up starting point checks. */
 ptr += skipatstart;
 code = cworkspace;
 *code = OP_BRA;
+
 (void)compile_regex(cd->external_options, &code, &ptr, &errorcode, FALSE,
   FALSE, 0, 0, &firstchar, &firstcharflags, &reqchar, &reqcharflags, NULL,
   cd, &length);

@@ -173,6 +173,10 @@ Version 8.34 xx-xxxx-201x
     
 36. Perl no longer allows group names to start with digits, so I have made this
     change also in PCRE. It simplifies the code a bit. 
+    
+37. In extended mode, Perl ignores spaces before a + that indicates a 
+    possessive quantifier. PCRE allowed a space before the quantifier, but not 
+    before the possessive +. It now does.
 
 
 Version 8.33 28-May-2013

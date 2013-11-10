@@ -1,4 +1,4 @@
-.TH PCRECOMPAT 3 "05 November 2013" "PCRE 8.34"
+.TH PCRECOMPAT 3 "10 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "DIFFERENCES BETWEEN PCRE AND PERL"
@@ -122,8 +122,8 @@ an error is given at compile time.
 .P
 15. Perl recognizes comments in some places that PCRE does not, for example,
 between the ( and ? at the start of a subpattern. If the /x modifier is set,
-Perl allows white space between ( and ? but PCRE never does, even if the
-PCRE_EXTENDED option is set.
+Perl allows white space between ( and ? (though current Perls warn that this is 
+deprecated) but PCRE never does, even if the PCRE_EXTENDED option is set.
 .P
 16. Perl, when in warning mode, gives warnings for character classes such as
 [A-\ed] or [a-[:digit:]]. It then treats the hyphens as literals. PCRE has no 
@@ -195,6 +195,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 November 2013
+Last updated: 10 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

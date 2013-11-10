@@ -273,10 +273,11 @@ In a UTF mode, only ASCII numbers and letters have any special meaning after a
 backslash. All other characters (in particular, those whose codepoints are
 greater than 127) are treated as literals.
 .P
-If a pattern is compiled with the PCRE_EXTENDED option, white space in the
-pattern (other than in a character class) and characters between a # outside
-a character class and the next newline are ignored. An escaping backslash can
-be used to include a white space or # character as part of the pattern.
+If a pattern is compiled with the PCRE_EXTENDED option, most white space in the
+pattern (other than in a character class), and characters between a # outside a
+character class and the next newline, inclusive, are ignored. An escaping
+backslash can be used to include a white space or # character as part of the
+pattern.
 .P
 If you want to remove the special meaning from a sequence of characters, you
 can do so by putting them between \eQ and \eE. This is different from Perl in
