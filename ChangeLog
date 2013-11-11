@@ -177,6 +177,9 @@ Version 8.34 xx-xxxx-201x
 37. In extended mode, Perl ignores spaces before a + that indicates a 
     possessive quantifier. PCRE allowed a space before the quantifier, but not 
     before the possessive +. It now does.
+    
+38. The use of \K (reset reported match start) within a repeated possessive
+    group such as (a\Kb)*+ was not working.
 
 
 Version 8.33 28-May-2013

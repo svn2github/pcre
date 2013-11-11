@@ -9286,4 +9286,31 @@ No match
  0: aaaab
  1: aaaa
 
+/(?:a\Kb)*+/+
+    ababc
+ 0: b
+ 0+ c
+
+/(?>a\Kb)*/+
+    ababc
+ 0: b
+ 0+ c
+
+/(?:a\Kb)*/+
+    ababc
+ 0: b
+ 0+ c
+
+/(a\Kb)*+/+
+    ababc
+ 0: b
+ 0+ c
+ 1: ab
+
+/(a\Kb)*/+
+    ababc
+ 0: b
+ 0+ c
+ 1: ab
+
 /-- End of testinput1 --/

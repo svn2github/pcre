@@ -5651,4 +5651,19 @@ AbcdCBefgBhiBqz
 / ^ ( a + ) + + \w $ /x
     aaaab 
 
+/(?:a\Kb)*+/+
+    ababc
+
+/(?>a\Kb)*/+
+    ababc
+
+/(?:a\Kb)*/+
+    ababc
+
+/(a\Kb)*+/+
+    ababc
+
+/(a\Kb)*/+
+    ababc
+
 /-- End of testinput1 --/

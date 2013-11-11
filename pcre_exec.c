@@ -1173,6 +1173,7 @@ for (;;)
           ecode = md->start_code + code_offset;
           save_capture_last = md->capture_last;
           matched_once = TRUE;
+          mstart = md->start_match_ptr;    /* In case \K changed it */
           continue;
           }
 
@@ -1245,6 +1246,7 @@ for (;;)
         eptr = md->end_match_ptr;
         ecode = md->start_code + code_offset;
         matched_once = TRUE;
+        mstart = md->start_match_ptr;   /* In case \K reset it */
         continue;
         }
 
@@ -2007,6 +2009,7 @@ for (;;)
 
     if (*ecode == OP_KETRPOS)
       {
+      md->start_match_ptr = mstart;    /* In case \K reset it */
       md->end_match_ptr = eptr;
       md->end_offset_top = offset_top;
       RRETURN(MATCH_KETRPOS);
