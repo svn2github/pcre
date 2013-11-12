@@ -2,7 +2,7 @@
     Perl >= 5.10, in non-UTF-8 mode. It should run clean for the 8-bit, 16-bit,
     and 32-bit PCRE libraries. --/
     
-< forbid 8BCDIMOWZ< 
+< forbid 89?=ABCDEFfGILMNPTUWXZ<
 
 /the quick brown fox/
     the quick brown fox

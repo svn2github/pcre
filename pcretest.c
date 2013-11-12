@@ -3465,7 +3465,7 @@ while (!done)
       }
     else 
       {
-      fprintf(outfile, "** Unrecognized special command '%s'\n", p);
+      printf("** Unrecognized special command '%s'\n", p);
       yield = 1;
       goto EXIT;  
       } 
@@ -3678,8 +3678,7 @@ while (!done)
             int y = check_mc_option(ppp+1, outfile, FALSE, "modifier");
             if (y == 0)
               {
-              fprintf(outfile, 
-                "** Error in modifier forbid data - giving up.\n");
+              printf("** Error in modifier forbid data - giving up.\n");
               yield = 1;
               goto EXIT;   
               }
@@ -3687,8 +3686,8 @@ while (!done)
               {
               ppp = pp;
               while (*ppp != '>') ppp++;
-              fprintf(outfile, "** The %.*s modifier is locked out - "
-                "giving up.\n", ppp - pp + 1, pp);
+              printf("** The %.*s modifier is locked out - giving up.\n", 
+                ppp - pp + 1, pp);
               yield = 1;
               goto EXIT;     
               }          
@@ -3700,7 +3699,7 @@ while (!done)
        
       else
         {
-        fprintf(outfile, "** The /%c modifier is locked out - giving up.\n", *pp);
+        printf("** The /%c modifier is locked out - giving up.\n", *pp);
         yield = 1;
         goto EXIT;    
         }       

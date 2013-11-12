@@ -111,9 +111,9 @@ for (;;)
 
   $pattern =~ s/S(?=[a-zA-Z]*$)//g;
 
-  # Remove /Y from a pattern (asks pcretest to disable PCRE optimization)
+  # Remove /Y and /O from a pattern (disable PCRE optimizations)
 
-  $pattern =~ s/Y(?=[a-zA-Z]*$)//;
+  $pattern =~ s/[YO](?=[a-zA-Z]*$)//;
 
   # Check that the pattern is valid
 

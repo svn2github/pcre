@@ -2,7 +2,7 @@
     compatible with all versions of Perl >= 5.10 and both the 8-bit and 16-bit
     PCRE libraries. --/
     
-< forbid BCDIMWZ< 
+< forbid 9?=ABCDEFfGILMNPTUWXZ<
    
 /a.b/8
     acb
