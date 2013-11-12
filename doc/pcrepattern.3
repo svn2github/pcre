@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "09 November 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "12 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -91,7 +91,7 @@ table.
 .rs
 .sp
 If a pattern starts with (*NO_AUTO_POSSESS), it has the same effect as setting 
-the PCRE_NO_AUTO_POSSESSIFY option at compile time. This stops PCRE from making
+the PCRE_NO_AUTO_POSSESS option at compile time. This stops PCRE from making
 quantifiers possessive when what follows cannot match the repeated item. For
 example, by default a+b is treated as a++b. For more details, see the
 .\" HREF
@@ -3223,6 +3223,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 November 2013
+Last updated: 12 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

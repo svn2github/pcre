@@ -151,7 +151,7 @@ with J. */
 #define PCRE_DFA_SHORTEST       0x00010000  /*      D    ) Overlaid */
 
 /* This pair use the same bit. */
-#define PCRE_NO_AUTO_POSSESSIFY 0x00020000  /* C1        ) Overlaid */
+#define PCRE_NO_AUTO_POSSESS    0x00020000  /* C1        ) Overlaid */
 #define PCRE_DFA_RESTART        0x00020000  /*      D    ) Overlaid */
 
 #define PCRE_FIRSTLINE          0x00040000  /* C3       */

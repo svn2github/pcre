@@ -1,4 +1,4 @@
-.TH PCRECALLOUT 3 "09 November 2013" "PCRE 8.34"
+.TH PCRECALLOUT 3 "12 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH SYNOPSIS
@@ -80,7 +80,7 @@ then applied with automatic callouts to the string "aaaa" is:
 .sp
 This indicates that when matching [bc] fails, there is no backtracking into a+
 and therefore the callouts that would be taken for the backtracks do not occur.
-You can disable the auto-possessify feature by passing PCRE_NO_AUTO_POSSESSIFY
+You can disable the auto-possessify feature by passing PCRE_NO_AUTO_POSSESS
 to \fBpcre_compile()\fP, or starting the pattern with (*NO_AUTO_POSSESS). If
 this is done in \fBpcretest\fP (using the /O qualifier), the output changes to
 this:
@@ -250,6 +250,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 09 November 2013
+Last updated: 12 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

@@ -8778,7 +8778,7 @@ PCRE_UTF8 == PCRE_UTF16 == PCRE_UTF32. */
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_UCP_RIGHTPAR, 4) == 0)
     { skipatstart += 6; options |= PCRE_UCP; continue; }
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_NO_AUTO_POSSESS_RIGHTPAR, 16) == 0)
-    { skipatstart += 18; options |= PCRE_NO_AUTO_POSSESSIFY; continue; }
+    { skipatstart += 18; options |= PCRE_NO_AUTO_POSSESS; continue; }
   else if (STRNCMP_UC_C8(ptr+skipatstart+2, STRING_NO_START_OPT_RIGHTPAR, 13) == 0)
     { skipatstart += 15; options |= PCRE_NO_START_OPTIMIZE; continue; }
 
@@ -9166,7 +9166,7 @@ if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 /* Unless disabled, check whether single character iterators can be
 auto-possessified. The function overwrites the appropriate opcode values. */
 
-if ((options & PCRE_NO_AUTO_POSSESSIFY) == 0)
+if ((options & PCRE_NO_AUTO_POSSESS) == 0)
   auto_possessify((pcre_uchar *)codestart, utf, cd);
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
