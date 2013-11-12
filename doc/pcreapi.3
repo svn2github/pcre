@@ -562,8 +562,9 @@ If the final argument, \fItableptr\fP, is NULL, PCRE uses a default set of
 character tables that are built when PCRE is compiled, using the default C
 locale. Otherwise, \fItableptr\fP must be an address that is the result of a
 call to \fBpcre_maketables()\fP. This value is stored with the compiled
-pattern, and used again by \fBpcre_exec()\fP, unless another table pointer is
-passed to it. For more discussion, see the section on locale support below.
+pattern, and used again by \fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP when the
+pattern is matched. For more discussion, see the section on locale support
+below.
 .P
 This code fragment shows a typical straightforward call to \fBpcre_compile()\fP:
 .sp
@@ -1124,15 +1125,17 @@ below.
 .sp
 PCRE handles caseless matching, and determines whether characters are letters,
 digits, or whatever, by reference to a set of tables, indexed by character
-value. When running in UTF-8 mode, this applies only to characters
-with codes less than 128. By default, higher-valued codes never match escapes
-such as \ew or \ed, but they can be tested with \ep if PCRE is built with
-Unicode character property support. Alternatively, the PCRE_UCP option can be
-set at compile time; this causes \ew and friends to use Unicode property
-support instead of built-in tables. The use of locales with Unicode is
-discouraged. If you are handling characters with codes greater than 128, you
-should either use UTF-8 and Unicode, or use locales, but not try to mix the
-two.
+code point. When running in UTF-8 mode, or in the 16- or 32-bit libraries, this
+applies only to characters with code points less than 256. By default,
+higher-valued code points never match escapes such as \ew or \ed. However, if
+PCRE is built with Unicode property support, all characters can be tested with
+\ep and \eP, or, alternatively, the PCRE_UCP option can be set when a pattern
+is compiled; this causes \ew and friends to use Unicode property support
+instead of the built-in tables.
+.P
+The use of locales with Unicode is discouraged. If you are handling characters
+with code points greater than 128, you should either use Unicode support, or
+use locales, but not try to mix the two.
 .P
 PCRE contains an internal set of tables that are used when the final argument
 of \fBpcre_compile()\fP is NULL. These are sufficient for many applications.
@@ -1147,10 +1150,10 @@ for this locale support is expected to die away.
 .P
 External tables are built by calling the \fBpcre_maketables()\fP function,
 which has no arguments, in the relevant locale. The result can then be passed
-to \fBpcre_compile()\fP or \fBpcre_exec()\fP as often as necessary. For
-example, to build and use tables that are appropriate for the French locale
-(where accented characters with values greater than 128 are treated as letters),
-the following code could be used:
+to \fBpcre_compile()\fP as often as necessary. For example, to build and use
+tables that are appropriate for the French locale (where accented characters
+with values greater than 128 are treated as letters), the following code could
+be used:
 .sp
   setlocale(LC_CTYPE, "fr_FR");
   tables = pcre_maketables();
@@ -1166,15 +1169,19 @@ needed.
 .P
 The pointer that is passed to \fBpcre_compile()\fP is saved with the compiled
 pattern, and the same tables are used via this pointer by \fBpcre_study()\fP
-and normally also by \fBpcre_exec()\fP. Thus, by default, for any single
+and also by \fBpcre_exec()\fP and \fBpcre_dfa_exec()\fP. Thus, for any single
 pattern, compilation, studying and matching all happen in the same locale, but
-different patterns can be compiled in different locales.
+different patterns can be processed in different locales.
 .P
 It is possible to pass a table pointer or NULL (indicating the use of the
-internal tables) to \fBpcre_exec()\fP. Although not intended for this purpose,
-this facility could be used to match a pattern in a different locale from the
-one in which it was compiled. Passing table pointers at run time is discussed
-below in the section on matching a pattern.
+internal tables) to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP (see the
+discussion below in the section on matching a pattern). This facility is
+provided for use with pre-compiled patterns that have been saved and reloaded.
+Character tables are not saved with patterns, so if a non-standard table was
+used at compile time, it must be provided again when the reloaded pattern is
+matched. Attempting to use this facility to match a pattern in a different
+locale from the one in which it was compiled is likely to lead to anomalous
+(usually incorrect) results.
 .
 .
 .\" HTML <a name="infoaboutpattern"></a>
@@ -1727,19 +1734,23 @@ and is described in the
 .\"
 documentation.
 .P
-The \fItables\fP field is used to pass a character tables pointer to
-\fBpcre_exec()\fP; this overrides the value that is stored with the compiled
-pattern. A non-NULL value is stored with the compiled pattern only if custom
-tables were supplied to \fBpcre_compile()\fP via its \fItableptr\fP argument.
-If NULL is passed to \fBpcre_exec()\fP using this mechanism, it forces PCRE's
-internal tables to be used. This facility is helpful when re-using patterns
-that have been saved after compiling with an external set of tables, because
-the external tables might be at a different address when \fBpcre_exec()\fP is
-called. See the
+The \fItables\fP field is provided for use with patterns that have been
+pre-compiled using custom character tables, saved to disc or elsewhere, and
+then reloaded, because the tables that were used to compile a pattern are not
+saved with it. See the
 .\" HREF
 \fBpcreprecompile\fP
 .\"
-documentation for a discussion of saving compiled patterns for later use.
+documentation for a discussion of saving compiled patterns for later use. If
+NULL is passed using this mechanism, it forces PCRE's internal tables to be
+used.
+.P
+\fBWarning:\fP The tables that \fBpcre_exec()\fP uses must be the same as those
+that were used when the pattern was compiled. If this is not the case, the
+behaviour of \fBpcre_exec()\fP is undefined. Therefore, when a pattern is
+compiled and matched in the same process, this field should never be set. In
+this (the most common) case, the correct table pointer is automatically passed
+with the compiled pattern from \fBpcre_compile()\fP to \fBpcre_exec()\fP.
 .P
 If PCRE_EXTRA_MARK is set in the \fIflags\fP field, the \fImark\fP field must
 be set to point to a suitable variable. If the pattern contains any

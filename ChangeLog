@@ -180,6 +180,10 @@ Version 8.34 xx-xxxx-201x
     
 38. The use of \K (reset reported match start) within a repeated possessive
     group such as (a\Kb)*+ was not working.
+    
+40. Document that the same character tables must be used at compile time and 
+    run time, and that the facility to pass tables to pcre_exec() and 
+    pcre_dfa_exec() is for use only with saved/restored patterns. 
 
 
 Version 8.33 28-May-2013
