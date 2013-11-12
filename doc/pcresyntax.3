@@ -1,4 +1,4 @@
-.TH PCRESYNTAX 3 "05 November 2013" "PCRE 8.34"
+.TH PCRESYNTAX 3 "12 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -61,9 +61,11 @@ characters "8" and "9".
   \eW         a "non-word" character
   \eX         a Unicode extended grapheme cluster
 .sp
-In PCRE, by default, \ed, \eD, \es, \eS, \ew, and \eW recognize only ASCII
-characters, even in a UTF mode. However, this can be changed by setting the
-PCRE_UCP option.
+By default, \ed, \es, and \ew match only ASCII characters, even in UTF-8 mode
+or in the 16- bit and 32-bit libraries. However, if locale-specific matching is
+happening, \es and \ew may also match characters with code points in the range
+128-255. If the PCRE_UCP option is set, the behaviour of these escape sequences
+is changed to use Unicode properties and they match many more characters.
 .
 .
 .SH "GENERAL CATEGORY PROPERTIES FOR \ep and \eP"
@@ -506,6 +508,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 05 November 2013
+Last updated: 12 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

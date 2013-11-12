@@ -533,8 +533,11 @@ there is no character to match.
 .P
 For compatibility with Perl, \es did not used to match the VT character (code
 11), which made it different from the the POSIX "space" class. However, Perl
-added VT at release 5.18, and PCRE followed suit at release 8.34. The \es
-characters are now HT (9), LF (10), VT (11), FF (12), CR (13), and space (32).
+added VT at release 5.18, and PCRE followed suit at release 8.34. The default
+\es characters are now HT (9), LF (10), VT (11), FF (12), CR (13), and space
+(32), which are defined as white space in the "C" locale. This list may vary if 
+locale-specific matching is taking place; in particular, in some locales the 
+"non-breaking space" character (\exA0) is recognized as white space.
 .P
 A "word" character is an underscore or any character that is a letter or digit.
 By default, the definition of letters and digits is controlled by PCRE's
@@ -549,16 +552,18 @@ in the
 \fBpcreapi\fP
 .\"
 page). For example, in a French locale such as "fr_FR" in Unix-like systems,
-or "french" in Windows, some character codes greater than 128 are used for
+or "french" in Windows, some character codes greater than 127 are used for
 accented letters, and these are then matched by \ew. The use of locales with
 Unicode is discouraged.
 .P
-By default, in a UTF mode, characters with values greater than 128 never match
-\ed, \es, or \ew, and always match \eD, \eS, and \eW. These sequences retain
-their original meanings from before UTF support was available, mainly for
-efficiency reasons. However, if PCRE is compiled with Unicode property support,
-and the PCRE_UCP option is set, the behaviour is changed so that Unicode
-properties are used to determine character types, as follows:
+By default, characters whose code points are greater than 127 never match \ed,
+\es, or \ew, and always match \eD, \eS, and \eW, although this may vary for
+characters in the range 128-255 when locale-specific matching is happening.
+These escape sequences retain their original meanings from before Unicode
+support was available, mainly for efficiency reasons. If PCRE is compiled with
+Unicode property support, and the PCRE_UCP option is set, the behaviour is
+changed so that Unicode properties are used to determine character types, as
+follows:
 .sp
   \ed  any character that matches \ep{Nd} (decimal digit)
   \es  any character that matches \ep{Z} or \eh or \ev
@@ -572,7 +577,7 @@ is noticeably slower when PCRE_UCP is set.
 .P
 The sequences \eh, \eH, \ev, and \eV are features that were added to Perl at
 release 5.10. In contrast to the other sequences, which match only ASCII
-characters by default, these always match certain high-valued codepoints,
+characters by default, these always match certain high-valued code points,
 whether or not PCRE_UCP is set. The horizontal space characters are:
 .sp
   U+0009     Horizontal tab (HT)
@@ -1339,10 +1344,12 @@ are:
   word     "word" characters (same as \ew)
   xdigit   hexadecimal digits
 .sp
-The "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
-space (32). "Space" used to be different to \es, which did not include VT, for
-Perl compatibility. However, Perl changed at release 5.18, and PCRE followed at
-release 8.34. "Space" and \es now match the same set of characters.
+The default "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13),
+and space (32). If locale-specific matching is taking place, there may be
+additional space characters. "Space" used to be different to \es, which did not
+include VT, for Perl compatibility. However, Perl changed at release 5.18, and
+PCRE followed at release 8.34. "Space" and \es now match the same set of
+characters.
 .P
 The name "word" is a Perl extension, and "blank" is a GNU extension from Perl
 5.8. Another Perl extension is negation, which is indicated by a ^ character
@@ -1354,11 +1361,11 @@ matches "1", "2", or any non-digit. PCRE (and Perl) also recognize the POSIX
 syntax [.ch.] and [=ch=] where "ch" is a "collating element", but these are not
 supported, and an error is given if they are encountered.
 .P
-By default, in UTF modes, characters with values greater than 128 do not match
-any of the POSIX character classes. However, if the PCRE_UCP option is passed
-to \fBpcre_compile()\fP, some of the classes are changed so that Unicode
-character properties are used. This is achieved by replacing certain POSIX
-classes by other sequences, as follows:
+By default, characters with values greater than 128 do not match any of the
+POSIX character classes. However, if the PCRE_UCP option is passed to
+\fBpcre_compile()\fP, some of the classes are changed so that Unicode character
+properties are used. This is achieved by replacing certain POSIX classes by
+other sequences, as follows:
 .sp
   [:alnum:]  becomes  \ep{Xan}
   [:alpha:]  becomes  \ep{L}
