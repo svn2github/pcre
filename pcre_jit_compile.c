@@ -4027,6 +4027,7 @@ const pcre_uint32 *other_cases;
 struct sljit_jump *jump = NULL;
 pcre_uchar *ccbegin;
 int compares, invertcmp, numberofcmps;
+
 #ifdef SUPPORT_UCP
 BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
@@ -4126,6 +4127,9 @@ while (*cc != XCL_END)
       case PT_SPACE:
       case PT_PXSPACE:
       case PT_WORD:
+      case PT_PXGRAPH:
+      case PT_PXPRINT:
+      case PT_PXPUNCT:
       needstype = TRUE;
       needschar = TRUE;
       break;
@@ -4411,6 +4415,67 @@ while (*cc != XCL_END)
       SET_CHAR_OFFSET(0);
       OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xe000 - 0);
       OP_FLAGS(SLJIT_OR | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_C_GREATER_EQUAL);
+      jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
+      break;
+
+      case PT_PXGRAPH:
+      /* C and Z groups are the farthest two groups. */
+      SET_TYPE_OFFSET(ucp_Ll);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_So - ucp_Ll);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_GREATER);
+
+      jump = CMP(SLJIT_C_NOT_EQUAL, typereg, 0, SLJIT_IMM, ucp_Cf - ucp_Ll);
+
+      /* In case of ucp_Cf, we overwrite the result. */
+      SET_CHAR_OFFSET(0x2066);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x2069 - 0x2066);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_LESS_EQUAL);
+
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x061c - 0x2066);
+      OP_FLAGS(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_C_EQUAL);
+
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x180e - 0x2066);
+      OP_FLAGS(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_C_EQUAL);
+
+      JUMPHERE(jump);
+      jump = CMP(SLJIT_C_ZERO ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
+      break;
+
+      case PT_PXPRINT:
+      /* C and Z groups are the farthest two groups. */
+      SET_TYPE_OFFSET(ucp_Ll);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_So - ucp_Ll);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_GREATER);
+
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_Zs - ucp_Ll);
+      OP_FLAGS(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_C_NOT_EQUAL);
+
+      jump = CMP(SLJIT_C_NOT_EQUAL, typereg, 0, SLJIT_IMM, ucp_Cf - ucp_Ll);
+
+      /* In case of ucp_Cf, we overwrite the result. */
+      SET_CHAR_OFFSET(0x2066);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x2069 - 0x2066);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_LESS_EQUAL);
+
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x061c - 0x2066);
+      OP_FLAGS(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_C_EQUAL);
+
+      JUMPHERE(jump);
+      jump = CMP(SLJIT_C_ZERO ^ invertcmp, TMP2, 0, SLJIT_IMM, 0);
+      break;
+
+      case PT_PXPUNCT:
+      SET_TYPE_OFFSET(ucp_Sc);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_So - ucp_Sc);
+      OP_FLAGS(SLJIT_MOV, TMP2, 0, SLJIT_UNUSED, 0, SLJIT_C_LESS_EQUAL);
+
+      SET_CHAR_OFFSET(0);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xff);
+      OP_FLAGS(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_C_LESS_EQUAL);
+
+      SET_TYPE_OFFSET(ucp_Pc);
+      OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, typereg, 0, SLJIT_IMM, ucp_Ps - ucp_Pc);
+      OP_FLAGS(SLJIT_OR | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_C_LESS_EQUAL);
       jump = JUMP(SLJIT_C_NOT_ZERO ^ invertcmp);
       break;
       }
