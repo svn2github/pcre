@@ -1857,10 +1857,10 @@ only. */
 #define PT_UCNC      10    /* Universal Character nameable character */
 #define PT_TABSIZE   11    /* Size of square table for autopossessify tests */
 
-/* The following special properties are used only in XCLASS items, when POSIX 
-classes are specified and PCRE_UCP is set - in other words, for Unicode 
-handling of these classes. They are not available via the \p or \P escapes like 
-those in the above list, and so they do not take part in the autopossessifying 
+/* The following special properties are used only in XCLASS items, when POSIX
+classes are specified and PCRE_UCP is set - in other words, for Unicode
+handling of these classes. They are not available via the \p or \P escapes like
+those in the above list, and so they do not take part in the autopossessifying
 table. */
 
 #define PT_PXGRAPH   11    /* [:graph:] - characters that mark the paper */
@@ -1908,7 +1908,7 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
 
 /********************** Opcode definitions ******************/
 
-/****** NOTE NOTE NOTE ****** 
+/****** NOTE NOTE NOTE ******
 
 Starting from 1 (i.e. after OP_END), the values up to OP_EOD must correspond in
 order to the list of escapes immediately above. Furthermore, values up to
@@ -1961,16 +1961,16 @@ enum {
   OP_EXTUNI,         /* 22 \X (extended Unicode sequence */
   OP_EODN,           /* 23 End of data or \n at end of data (\Z) */
   OP_EOD,            /* 24 End of data (\z) */
-  
+
   /* Line end assertions */
 
   OP_DOLL,           /* 25 End of line - not multiline */
   OP_DOLLM,          /* 26 End of line - multiline */
   OP_CIRC,           /* 27 Start of line - not multiline */
   OP_CIRCM,          /* 28 Start of line - multiline */
-  
+
   /* Single characters; caseful must precede the caseless ones */
-   
+
   OP_CHAR,           /* 29 Match one character, casefully */
   OP_CHARI,          /* 30 Match one character, caselessly */
   OP_NOT,            /* 31 Match one character, not the given one, casefully */
@@ -2493,7 +2493,7 @@ typedef struct compile_data {
   int  top_backref;                 /* Maximum back reference */
   unsigned int backref_map;         /* Bitmap of low back refs */
   unsigned int namedrefcount;       /* Number of backreferences by name */
-  int  parens_depth;                /* Depth of nested parentheses */ 
+  int  parens_depth;                /* Depth of nested parentheses */
   int  assert_depth;                /* Depth of nested assertions */
   pcre_uint32 external_options;     /* External (initial) options */
   pcre_uint32 external_flags;       /* External flag bits to be set */

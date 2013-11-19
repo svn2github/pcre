@@ -4,7 +4,7 @@
 
 /* This is a grep program that uses the PCRE regular expression library to do
 its pattern matching. On Unix-like, Windows, and native z/OS systems it can
-recurse into directories, and in z/OS it can handle PDS files. 
+recurse into directories, and in z/OS it can handle PDS files.
 
 Note that for native z/OS, in addition to defining the NATIVE_ZOS macro, an
 additional header is required. That header is not included in the main PCRE
@@ -2142,7 +2142,7 @@ zos_test_file =  fopen(pathname,"rb");
 
 if (zos_test_file == NULL)
    {
-   if (!silent) fprintf(stderr, "pcregrep: failed to test next file %s\n", 
+   if (!silent) fprintf(stderr, "pcregrep: failed to test next file %s\n",
      pathname, strerror(errno));
    return -1;
    }

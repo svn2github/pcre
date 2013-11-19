@@ -164,13 +164,13 @@ static const int eint[] = {
   REG_BADPAT,  /* character value in \u.... sequence is too large */
   REG_BADPAT,  /* invalid UTF-32 string (should not occur) */
   REG_BADPAT,  /* setting UTF is disabled by the application */
-  REG_BADPAT,  /* non-hex character in \\x{} (closing brace missing?) */ 
-  /* 80 */ 
-  REG_BADPAT,  /* non-octal character in \o{} (closing brace missing?) */ 
+  REG_BADPAT,  /* non-hex character in \\x{} (closing brace missing?) */
+  /* 80 */
+  REG_BADPAT,  /* non-octal character in \o{} (closing brace missing?) */
   REG_BADPAT,  /* missing opening brace after \o */
   REG_BADPAT,  /* parentheses too deeply nested */
-  REG_BADPAT,  /* invalid range in character class */ 
-  REG_BADPAT   /* group name must start with a non-digit */ 
+  REG_BADPAT,  /* invalid range in character class */
+  REG_BADPAT   /* group name must start with a non-digit */
 };
 
 /* Table of texts corresponding to POSIX error codes */

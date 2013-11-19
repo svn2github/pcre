@@ -462,8 +462,8 @@ documentation.
 .sp
   PCRE_CONFIG_PARENS_LIMIT
 .sp
-The output is a long integer that gives the maximum depth of nesting of 
-parentheses (of any kind) in a pattern. This limit is imposed to cap the amount 
+The output is a long integer that gives the maximum depth of nesting of
+parentheses (of any kind) in a pattern. This limit is imposed to cap the amount
 of system stack used when a pattern is compiled. It is specified when PCRE is
 built; the default is 250.
 .sp
@@ -657,7 +657,7 @@ ignored except when escaped or inside a character class. However, white space
 is not allowed within sequences such as (?> that introduce various
 parenthesized subpatterns, nor within a numerical quantifier such as {1,3}.
 However, ignorable white space is permitted between an item and a following
-quantifier and between a quantifier and a following + that indicates 
+quantifier and between a quantifier and a following + that indicates
 possessiveness.
 .P
 White space did not used to include the VT character (code 11), because Perl
@@ -815,11 +815,11 @@ in Perl.
 .sp
   PCRE_NO_AUTO_POSSESS
 .sp
-If this option is set, it disables "auto-possessification". This is an 
+If this option is set, it disables "auto-possessification". This is an
 optimization that, for example, turns a+b into a++b in order to avoid
 backtracks into a+ that can never be successful. However, if callouts are in
 use, auto-possessification means that some of them are never taken. You can set
-this option if you want the matching functions to do a full unoptimized search 
+this option if you want the matching functions to do a full unoptimized search
 and run all the callouts, but it is mainly provided for testing purposes.
 .sp
   PCRE_NO_START_OPTIMIZE
@@ -988,7 +988,7 @@ have fallen out of use. To avoid confusion, they have not been re-used.
   78  setting UTF is disabled by the application
   79  non-hex character in \ex{} (closing brace missing?)
   80  non-octal character in \eo{} (closing brace missing?)
-  81  missing opening brace after \eo 
+  81  missing opening brace after \eo
   82  parentheses are too deeply nested
   83  invalid range in character class
 .sp
@@ -1331,8 +1331,8 @@ be used.
 .sp
   PCRE_INFO_MATCH_EMPTY
 .sp
-Return 1 if the pattern can match an empty string, otherwise 0. The fourth 
-argument should point to an \fBint\fP variable.   
+Return 1 if the pattern can match an empty string, otherwise 0. The fourth
+argument should point to an \fBint\fP variable.
 .sp
   PCRE_INFO_MATCHLIMIT
 .sp
@@ -2816,7 +2816,7 @@ matching string is given first. If there were too many matches to fit into
 \fIovector\fP, the yield of the function is zero, and the vector is filled with
 the longest matches. Unlike \fBpcre_exec()\fP, \fBpcre_dfa_exec()\fP can use
 the entire \fIovector\fP for returning matched strings.
-
+.P
 NOTE: PCRE's "auto-possessification" optimization usually applies to character
 repeats at the end of a pattern (as well as internally). For example, the
 pattern "a\ed+" is compiled as if it were "a\ed++" because there is no point

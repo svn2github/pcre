@@ -79,7 +79,7 @@ Returns:   the minimum length
 */
 
 static int
-find_minlength(const REAL_PCRE *re, const pcre_uchar *code, 
+find_minlength(const REAL_PCRE *re, const pcre_uchar *code,
   const pcre_uchar *startcode, int options, int recurse_depth)
 {
 int length = -1;
@@ -379,13 +379,13 @@ for (;;)
     If PCRE_JAVASCRIPT_COMPAT is set, a backreference to an unset bracket
     matches an empty string (by default it causes a matching failure), so in
     that case we must set the minimum length to zero. */
-    
+
     case OP_DNREF:     /* Duplicate named pattern back reference */
     case OP_DNREFI:
     if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
       {
-      int count = GET2(cc, 1+IMM2_SIZE); 
-      pcre_uchar *slot = (pcre_uchar *)re + 
+      int count = GET2(cc, 1+IMM2_SIZE);
+      pcre_uchar *slot = (pcre_uchar *)re +
         re->name_table_offset + GET2(cc, 1) * re->name_entry_size;
       d = INT_MAX;
       while (count-- > 0)
@@ -397,19 +397,19 @@ for (;;)
           {
           d = 0;
           had_recurse = TRUE;
-          break; 
+          break;
           }
         else
           {
           int dd = find_minlength(re, cs, startcode, options, recurse_depth);
-          if (dd < d) d = dd; 
+          if (dd < d) d = dd;
           }
         slot += re->name_entry_size;
-        }  
+        }
       }
-    else d = 0;     
+    else d = 0;
     cc += 1 + 2*IMM2_SIZE;
-    goto REPEAT_BACK_REFERENCE;     
+    goto REPEAT_BACK_REFERENCE;
 
     case OP_REF:      /* Single back reference */
     case OP_REFI:
@@ -478,7 +478,7 @@ for (;;)
       had_recurse = TRUE;
     else
       {
-      branchlength += find_minlength(re, cs, startcode, options, 
+      branchlength += find_minlength(re, cs, startcode, options,
         recurse_depth + 1);
       }
     cc += 1 + LINK_SIZE;
@@ -1227,8 +1227,8 @@ do
         set_type_bits(start_bits, cbit_digit, table_limit, cd);
         break;
 
-        /* The cbit_space table has vertical tab as whitespace; we no longer 
-        have to play fancy tricks because Perl added VT to its whitespace at 
+        /* The cbit_space table has vertical tab as whitespace; we no longer
+        have to play fancy tricks because Perl added VT to its whitespace at
         release 5.18. PCRE added it at release 8.34. */
 
         case OP_NOT_WHITESPACE:

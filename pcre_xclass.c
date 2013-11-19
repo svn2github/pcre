@@ -128,7 +128,7 @@ while ((t = *data++) != XCL_END)
   else  /* XCL_PROP & XCL_NOTPROP */
     {
     const ucd_record *prop = GET_UCD(c);
-    BOOL isprop = t == XCL_PROP; 
+    BOOL isprop = t == XCL_PROP;
 
     switch(*data)
       {
@@ -163,16 +163,16 @@ while ((t = *data++) != XCL_END)
       /* Perl space used to exclude VT, but from Perl 5.18 it is included,
       which means that Perl space and POSIX space are now identical. PCRE
       was changed at release 8.34. */
-    
+
       case PT_SPACE:    /* Perl space */
       case PT_PXSPACE:  /* POSIX space */
       switch(c)
         {
         HSPACE_CASES:
         VSPACE_CASES:
-        if (isprop) return !negated; 
+        if (isprop) return !negated;
         break;
-        
+
         default:
         if ((PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == isprop)
           return !negated;
@@ -200,42 +200,42 @@ while ((t = *data++) != XCL_END)
           return !negated;
         }
       break;
-      
+
       /* The following three properties can occur only in an XCLASS, as there
       is no \p or \P coding for them. */
 
-      /* Graphic character. Implement this as not Z (space or separator) and 
-      not C (other), except for Cf (format) with a few exceptions. This seems 
+      /* Graphic character. Implement this as not Z (space or separator) and
+      not C (other), except for Cf (format) with a few exceptions. This seems
       to be what Perl does. The exceptional characters are:
-       
+
       U+061C           Arabic Letter Mark
-      U+180E           Mongolian Vowel Separator 
+      U+180E           Mongolian Vowel Separator
       U+2066 - U+2069  Various "isolate"s
-      */ 
-      
+      */
+
       case PT_PXGRAPH:
       if ((PRIV(ucp_gentype)[prop->chartype] != ucp_Z &&
             (PRIV(ucp_gentype)[prop->chartype] != ucp_C ||
-              (prop->chartype == ucp_Cf && 
+              (prop->chartype == ucp_Cf &&
                 c != 0x061c && c != 0x180e && (c < 0x2066 || c > 0x2069))
          )) == isprop)
-        return !negated;        
+        return !negated;
       break;
-      
-      /* Printable character: same as graphic, with the addition of Zs, i.e. 
+
+      /* Printable character: same as graphic, with the addition of Zs, i.e.
       not Zl and not Zp, and U+180E. */
 
       case PT_PXPRINT:
       if ((prop->chartype != ucp_Zl &&
-           prop->chartype != ucp_Zp && 
+           prop->chartype != ucp_Zp &&
             (PRIV(ucp_gentype)[prop->chartype] != ucp_C ||
-              (prop->chartype == ucp_Cf && 
+              (prop->chartype == ucp_Cf &&
                 c != 0x061c && (c < 0x2066 || c > 0x2069))
          )) == isprop)
-        return !negated;        
+        return !negated;
       break;
-      
-      /* Punctuation: all Unicode punctuation, plus ASCII characters that 
+
+      /* Punctuation: all Unicode punctuation, plus ASCII characters that
       Unicode treats as symbols rather than punctuation, for Perl
       compatibility (these are $+<=>^`|~). */
 
@@ -243,7 +243,7 @@ while ((t = *data++) != XCL_END)
       if ((PRIV(ucp_gentype)[prop->chartype] == ucp_P ||
             (c < 256 && PRIV(ucp_gentype)[prop->chartype] == ucp_S)) == isprop)
         return !negated;
-      break;           
+      break;
 
       /* This should never occur, but compilers may mutter if there is no
       default. */

@@ -231,10 +231,10 @@ switch (what)
   if ((re->flags & PCRE_RLSET) == 0) return PCRE_ERROR_UNSET;
   *((pcre_uint32 *)where) = re->limit_recursion;
   break;
-  
-  case PCRE_INFO_MATCH_EMPTY: 
+
+  case PCRE_INFO_MATCH_EMPTY:
   *((int *)where) = (re->flags & PCRE_MATCH_EMPTY) != 0;
-  break; 
+  break;
 
   default: return PCRE_ERROR_BADOPTION;
   }

@@ -98,7 +98,7 @@ for (i = 0; i < 256; i++) *p++ = tolower(i);
 for (i = 0; i < 256; i++) *p++ = islower(i)? toupper(i) : tolower(i);
 
 /* Then the character class tables. Don't try to be clever and save effort on
-exclusive ones - in some locales things may be different. 
+exclusive ones - in some locales things may be different.
 
 Note that the table for "space" includes everything "isspace" gives, including
 VT in the default locale. This makes it work for the POSIX class [:space:].
@@ -129,7 +129,7 @@ p += cbit_length;
 
 /* Finally, the character type table. In this, we used to exclude VT from the
 white space chars, because Perl didn't recognize it as such for \s and for
-comments within regexes. However, Perl changed at release 5.18, so PCRE changed 
+comments within regexes. However, Perl changed at release 5.18, so PCRE changed
 at release 8.34. */
 
 for (i = 0; i < 256; i++)

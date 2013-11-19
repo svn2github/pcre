@@ -430,11 +430,11 @@ for(;;)
 
     case OP_DNCREF:
       {
-      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) + 
-        IMM2_SIZE;  
+      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) +
+        IMM2_SIZE;
       fprintf(f, " %s Cond ref <", flag);
       print_puchar(f, entry);
-      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE)); 
+      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }
     break;
 
@@ -448,11 +448,11 @@ for(;;)
 
     case OP_DNRREF:
       {
-      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) + 
-        IMM2_SIZE;  
+      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) +
+        IMM2_SIZE;
       fprintf(f, " %s Cond recurse <", flag);
       print_puchar(f, entry);
-      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE)); 
+      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }
     break;
 
@@ -614,11 +614,11 @@ for(;;)
     /* Fall through */
     case OP_DNREF:
       {
-      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) + 
-        IMM2_SIZE;  
+      pcre_uchar *entry = (pcre_uchar *)re + offset + (GET2(code, 1) * size) +
+        IMM2_SIZE;
       fprintf(f, " %s \\k<", flag);
       print_puchar(f, entry);
-      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE)); 
+      fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }
     ccode = code + priv_OP_lengths[*code];
     goto CLASS_REF_REPEAT;
@@ -696,43 +696,43 @@ for(;;)
         pcre_uchar ch;
         while ((ch = *ccode++) != XCL_END)
           {
-          BOOL not = FALSE; 
-          const char *notch = ""; 
-           
+          BOOL not = FALSE;
+          const char *notch = "";
+
           switch(ch)
             {
-            case XCL_NOTPROP: 
+            case XCL_NOTPROP:
             not = TRUE;
-            notch = "^"; 
+            notch = "^";
             /* Fall through */
-               
-            case XCL_PROP:  
+
+            case XCL_PROP:
               {
               unsigned int ptype = *ccode++;
               unsigned int pvalue = *ccode++;
-              
+
               switch(ptype)
                 {
                 case PT_PXGRAPH:
                 fprintf(f, "[:%sgraph:]", notch);
-                break;    
+                break;
 
                 case PT_PXPRINT:
                 fprintf(f, "[:%sprint:]", notch);
-                break;    
+                break;
 
                 case PT_PXPUNCT:
                 fprintf(f, "[:%spunct:]", notch);
-                break;    
+                break;
 
                 default:
-                fprintf(f, "\\%c{%s}", (not? 'P':'p'), 
+                fprintf(f, "\\%c{%s}", (not? 'P':'p'),
                   get_ucpname(ptype, pvalue));
                 break;
-                }    
+                }
               }
             break;
-             
+
             default:
             ccode += 1 + print_char(f, ccode, utf);
             if (ch == XCL_RANGE)
@@ -740,8 +740,8 @@ for(;;)
               fprintf(f, "-");
               ccode += 1 + print_char(f, ccode, utf);
               }
-            break; 
-            } 
+            break;
+            }
           }
         }
 

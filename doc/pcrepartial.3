@@ -282,9 +282,9 @@ program to do that if it needs to.
 .P
 That means that, for an unanchored pattern, if a continued match fails, it is
 not possible to try again at a new starting point. All this facility is capable
-of doing is continuing with the previous match attempt. In the previous 
-example, if the second set of data is "ug23" the result is no match, even 
-though there would be a match for "aug23" if the entire string were given at 
+of doing is continuing with the previous match attempt. In the previous
+example, if the second set of data is "ug23" the result is no match, even
+though there would be a match for "aug23" if the entire string were given at
 once. Depending on the application, this may or may not be what you want.
 The only way to allow for starting again at the next character is to retain the
 matched part of the subject and try a new complete match.

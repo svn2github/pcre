@@ -29,14 +29,14 @@ documentation. This document contains a quick-reference summary of the syntax.
   \en         newline (hex 0A)
   \er         carriage return (hex 0D)
   \et         tab (hex 09)
-  \e0dd       character with octal code 0dd 
+  \e0dd       character with octal code 0dd
   \eddd       character with octal code ddd, or backreference
-  \eo{ddd..}  character with octal code ddd.. 
+  \eo{ddd..}  character with octal code ddd..
   \exhh       character with hex code hh
   \ex{hhh..}  character with hex code hhh..
 .sp
-Note that \e0dd is always an octal code, and that \e8 and \e9 are the literal 
-characters "8" and "9".   
+Note that \e0dd is always an octal code, and that \e8 and \e9 are the literal
+characters "8" and "9".
 .
 .
 .SH "CHARACTER TYPES"
@@ -126,7 +126,7 @@ is changed to use Unicode properties and they match many more characters.
   Xuc        Univerally-named character: one that can be
                represented by a Universal Character Name
   Xwd        Perl word: property Xan or underscore
-.sp  
+.sp
 Perl and POSIX space are now the same. Perl added VT to its space character set
 at release 5.18 and PCRE changed at release 8.34.
 .

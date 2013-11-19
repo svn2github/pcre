@@ -2618,7 +2618,7 @@ for (;;)
 
           case OP_CRRANGE:
           case OP_CRMINRANGE:
-          case OP_CRPOSRANGE: 
+          case OP_CRPOSRANGE:
           count = current_state->count;  /* Already matched */
           if (count >= (int)GET2(ecode, 1))
             { ADD_ACTIVE(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
@@ -2629,7 +2629,7 @@ for (;;)
               {
               active_count--;           /* Remove non-match possibility */
               next_active_state--;
-              }     
+              }
             if (++count >= max && max != 0)   /* Max 0 => no limit */
               { ADD_NEW(next_state_offset + 1 + 2 * IMM2_SIZE, 0); }
             else

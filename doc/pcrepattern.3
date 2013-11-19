@@ -90,7 +90,7 @@ table.
 .SS "Disabling auto-possessification"
 .rs
 .sp
-If a pattern starts with (*NO_AUTO_POSSESS), it has the same effect as setting 
+If a pattern starts with (*NO_AUTO_POSSESS), it has the same effect as setting
 the PCRE_NO_AUTO_POSSESS option at compile time. This stops PCRE from making
 quantifiers possessive when what follows cannot match the repeated item. For
 example, by default a+b is treated as a++b. For more details, see the
@@ -317,9 +317,9 @@ one of the following escape sequences than the binary character it represents:
   \en        linefeed (hex 0A)
   \er        carriage return (hex 0D)
   \et        tab (hex 09)
-  \e0dd      character with octal code 0dd 
+  \e0dd      character with octal code 0dd
   \eddd      character with octal code ddd, or back reference
-  \eo{ddd..} character with octal code ddd.. 
+  \eo{ddd..} character with octal code ddd..
   \exhh      character with hex code hh
   \ex{hhh..} character with hex code hhh.. (non-JavaScript mode)
   \euhhhh    character with hex code hhhh (JavaScript mode only)
@@ -346,7 +346,7 @@ specifies two binary zeros followed by a BEL character (code value 7). Make
 sure you supply two digits after the initial zero if the pattern character that
 follows is itself an octal digit.
 .P
-The escape \eo must be followed by a sequence of octal digits, enclosed in 
+The escape \eo must be followed by a sequence of octal digits, enclosed in
 braces. An error occurs if this is not the case. This escape is a recent
 addition to Perl; it provides way of specifying character code points as octal
 numbers greater than 0777, and it also allows octal numbers and back references
@@ -435,7 +435,7 @@ limited to certain values, as follows:
   32-bit UTF-32 mode    less than 0x10ffff and a valid codepoint
 .sp
 Invalid Unicode codepoints are the range 0xd800 to 0xdfff (the so-called
-"surrogate" codepoints), and 0xffef. 
+"surrogate" codepoints), and 0xffef.
 .
 .
 .SS "Escape sequences in character classes"
@@ -535,8 +535,8 @@ For compatibility with Perl, \es did not used to match the VT character (code
 11), which made it different from the the POSIX "space" class. However, Perl
 added VT at release 5.18, and PCRE followed suit at release 8.34. The default
 \es characters are now HT (9), LF (10), VT (11), FF (12), CR (13), and space
-(32), which are defined as white space in the "C" locale. This list may vary if 
-locale-specific matching is taking place; in particular, in some locales the 
+(32), which are defined as white space in the "C" locale. This list may vary if
+locale-specific matching is taking place; in particular, in some locales the
 "non-breaking space" character (\exA0) is recognized as white space.
 .P
 A "word" character is an underscore or any character that is a letter or digit.
@@ -1257,7 +1257,7 @@ The minus (hyphen) character can be used to specify a range of characters in a
 character class. For example, [d-m] matches any letter between d and m,
 inclusive. If a minus character is required in a class, it must be escaped with
 a backslash or appear in a position where it cannot be interpreted as
-indicating a range, typically as the first or last character in the class, or 
+indicating a range, typically as the first or last character in the class, or
 immediately after a range. For example, [b-d-z] matches letters in the range b
 to d, a hyphen character, or z.
 .P
@@ -1376,21 +1376,21 @@ other sequences, as follows:
   [:upper:]  becomes  \ep{Lu}
   [:word:]   becomes  \ep{Xwd}
 .sp
-Negated versions, such as [:^alpha:] use \eP instead of \ep. Three other POSIX 
+Negated versions, such as [:^alpha:] use \eP instead of \ep. Three other POSIX
 classes are handled specially in UCP mode:
 .TP 10
 [:graph:]
-This matches characters that have glyphs that mark the page when printed. In 
-Unicode property terms, it matches all characters with the L, M, N, P, S, or Cf 
+This matches characters that have glyphs that mark the page when printed. In
+Unicode property terms, it matches all characters with the L, M, N, P, S, or Cf
 properties, except for:
 .sp
   U+061C           Arabic Letter Mark
-  U+180E           Mongolian Vowel Separator 
+  U+180E           Mongolian Vowel Separator
   U+2066 - U+2069  Various "isolate"s
 .sp
 .TP 10
 [:print:]
-This matches the same characters as [:graph:] plus space characters that are 
+This matches the same characters as [:graph:] plus space characters that are
 not controls, that is, characters with the Zs property.
 .TP 10
 [:punct:]
@@ -1619,7 +1619,7 @@ conditions,
 .\"
 can be made by name as well as by number.
 .P
-Names consist of up to 32 alphanumeric characters and underscores, but must 
+Names consist of up to 32 alphanumeric characters and underscores, but must
 start with a non-digit. Named capturing parentheses are still allocated numbers
 as well as names, exactly as if the names were not present. The PCRE API
 provides function calls for extracting the name-to-number translation table
@@ -1650,12 +1650,12 @@ for the first (and in this example, the only) subpattern of that name that
 matched. This saves searching to find which numbered subpattern it was.
 .P
 If you make a back reference to a non-unique named subpattern from elsewhere in
-the pattern, the subpatterns to which the name refers are checked in the order 
-in which they appear in the overall pattern. The first one that is set is used 
-for the reference. For example, this pattern matches both "foofoo" and 
+the pattern, the subpatterns to which the name refers are checked in the order
+in which they appear in the overall pattern. The first one that is set is used
+for the reference. For example, this pattern matches both "foofoo" and
 "barbar" but not "foobar" or "barfoo":
 .sp
-  (?:(?<n>foo)|(?<n>bar))\k<n>
+  (?:(?<n>foo)|(?<n>bar))\ek<n>
 .sp
 .P
 If you make a subroutine call to a non-unique named subpattern, the one that
@@ -2356,7 +2356,7 @@ This makes the fragment independent of the parentheses in the larger pattern.
 .sp
 Perl uses the syntax (?(<name>)...) or (?('name')...) to test for a used
 subpattern by name. For compatibility with earlier versions of PCRE, which had
-this facility before Perl, the syntax (?(name)...) is also recognized. 
+this facility before Perl, the syntax (?(name)...) is also recognized.
 .P
 Rewriting the above example to use a named subpattern gives this:
 .sp

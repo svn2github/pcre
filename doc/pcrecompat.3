@@ -122,12 +122,12 @@ an error is given at compile time.
 .P
 15. Perl recognizes comments in some places that PCRE does not, for example,
 between the ( and ? at the start of a subpattern. If the /x modifier is set,
-Perl allows white space between ( and ? (though current Perls warn that this is 
+Perl allows white space between ( and ? (though current Perls warn that this is
 deprecated) but PCRE never does, even if the PCRE_EXTENDED option is set.
 .P
 16. Perl, when in warning mode, gives warnings for character classes such as
-[A-\ed] or [a-[:digit:]]. It then treats the hyphens as literals. PCRE has no 
-warning features, so it gives an error in these cases because they are almost 
+[A-\ed] or [a-[:digit:]]. It then treats the hyphens as literals. PCRE has no
+warning features, so it gives an error in these cases because they are almost
 certainly user mistakes.
 .P
 17. In PCRE, the upper/lower case character properties Lu and Ll are not

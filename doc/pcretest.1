@@ -156,8 +156,8 @@ equivalent to adding \fB/M\fP to each regular expression. The size is given in
 bytes for both libraries.
 .TP 10
 \fB-O\fP
-Behave as if each pattern has the \fB/O\fP modifier, that is disable 
-auto-possessification for all patterns. 
+Behave as if each pattern has the \fB/O\fP modifier, that is disable
+auto-possessification for all patterns.
 .TP 10
 \fB-o\fP \fIosize\fP
 Set the number of elements in the output vector that is used when calling
@@ -232,8 +232,8 @@ The default is to iterate 500000 times.
 This is like \fB-t\fP except that it times only the matching phase, not the
 compile or study phases.
 .TP 10
-\fB-T\fp \fB-TM\fP
-These behave like \fB-t\fP and \fB-tm\fP, but in addition, at the end of a run, 
+\fB-T\fP \fB-TM\fP
+These behave like \fB-t\fP and \fB-tm\fP, but in addition, at the end of a run,
 the total times for all compiles, studies, and matches are output.
 .
 .
@@ -612,17 +612,17 @@ Unicode property support, this line appears:
 .sp
   < forbid 8W
 .sp
-This locks out the /8 and /W modifiers. An immediate error is given if they are 
-subsequently encountered. If the character string contains < but not >, all the 
-multi-character modifiers that begin with < are locked out. Otherwise, such 
+This locks out the /8 and /W modifiers. An immediate error is given if they are
+subsequently encountered. If the character string contains < but not >, all the
+multi-character modifiers that begin with < are locked out. Otherwise, such
 modifiers must be explicitly listed, for example:
 .sp
   < forbid <JS><cr>
 .sp
-There must be a single space between < and "forbid" for this feature to be 
+There must be a single space between < and "forbid" for this feature to be
 recognised. If there is not, the line is interpreted either as a request to
 re-load a pre-compiled pattern (see "SAVING AND RELOADING COMPILED PATTERNS"
-below) or, if there is a another < character, as a pattern that uses < as its 
+below) or, if there is a another < character, as a pattern that uses < as its
 delimiter.
 .
 .
@@ -649,7 +649,7 @@ recognized:
   \ev         vertical tab (\ex0b)
   \ennn       octal character (up to 3 octal digits); always
                a byte unless > 255 in UTF-8 or 16-bit or 32-bit mode
-  \eo{dd...}  octal character (any number of octal digits}              
+  \eo{dd...}  octal character (any number of octal digits}
   \exhh       hexadecimal byte (up to 2 hex digits)
   \ex{hh...}  hexadecimal character (any number of hex digits)
 .\" JOIN

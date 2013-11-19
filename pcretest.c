@@ -2832,8 +2832,8 @@ a message and return 0 if there is no match.
 Arguments:
   p           points after the leading '<'
   f           file for error message
-  nl          TRUE to check only for newline settings 
-  stype       "modifier" or "escape sequence" 
+  nl          TRUE to check only for newline settings
+  stype       "modifier" or "escape sequence"
 
 Returns:      appropriate PCRE_NEWLINE_xxx flags, or 0
 */
@@ -2852,7 +2852,7 @@ if (strncmpic(p, (pcre_uint8 *)"bsr_unicode>", 12) == 0) return PCRE_BSR_UNICODE
 if (!nl)
   {
   if (strncmpic(p, (pcre_uint8 *)"JS>", 3) == 0) return PCRE_JAVASCRIPT_COMPAT;
-  } 
+  }
 
 fprintf(f, "Unknown %s at: <%s\n", stype, p);
 return 0;
@@ -2901,7 +2901,7 @@ printf("  -help    show usage information\n");
 printf("  -i       show information about compiled patterns\n"
        "  -M       find MATCH_LIMIT minimum for each subject\n"
        "  -m       output memory used information\n"
-       "  -O       set PCRE_NO_AUTO_POSSESS on each pattern\n" 
+       "  -O       set PCRE_NO_AUTO_POSSESS on each pattern\n"
        "  -o <n>   set size of offsets vector to <n>\n");
 #if !defined NOPOSIX
 printf("  -p       use POSIX interface\n");
@@ -3102,7 +3102,7 @@ while (argc > 1 && argv[op][0] == '-')
     {
     int temp;
     int both = arg[2] == 0;
-    showtotaltimes = arg[1] == 'T'; 
+    showtotaltimes = arg[1] == 'T';
     if (argc > 2 && (temp = get_value((pcre_uint8 *)argv[op+1], &endptr),
                      *endptr == 0))
       {
@@ -3447,9 +3447,9 @@ while (!done)
   p = buffer;
   while (isspace(*p)) p++;
   if (*p == 0) continue;
-  
+
   /* Handle option lock-out setting */
-  
+
   if (*p == '<' && p[1] == ' ')
     {
     p += 2;
@@ -3458,19 +3458,19 @@ while (!done)
       {
       p += 7;
       while (isspace(*p)) p++;
-      pp = lockout; 
+      pp = lockout;
       while (!isspace(*p) && pp < lockout + sizeof(lockout) - 1)
         *pp++ = *p++;
-      *pp = 0;    
+      *pp = 0;
       }
-    else 
+    else
       {
       printf("** Unrecognized special command '%s'\n", p);
       yield = 1;
-      goto EXIT;  
-      } 
+      goto EXIT;
+      }
     continue;
-    }   
+    }
 
   /* See if the pattern is to be loaded pre-compiled from a file. */
 
@@ -3660,17 +3660,17 @@ while (!done)
   while (*pp != 0)
     {
     /* Check to see whether this modifier has been locked out for this file.
-    This is complicated for the multi-character options that begin with '<'. 
-    If there is no '>' in the lockout string, all multi-character modifiers are 
-    locked out. */ 
- 
+    This is complicated for the multi-character options that begin with '<'.
+    If there is no '>' in the lockout string, all multi-character modifiers are
+    locked out. */
+
     if (strchr((char *)lockout, *pp) != NULL)
       {
       if (*pp == '<' && strchr((char *)lockout, '>') != NULL)
         {
         int x = check_mc_option(pp+1, outfile, FALSE, "modifier");
         if (x == 0) goto SKIP_DATA;
-         
+
         for (ppp = lockout; *ppp != 0; ppp++)
           {
           if (*ppp == '<')
@@ -3680,33 +3680,33 @@ while (!done)
               {
               printf("** Error in modifier forbid data - giving up.\n");
               yield = 1;
-              goto EXIT;   
+              goto EXIT;
               }
-            if (x == y) 
+            if (x == y)
               {
               ppp = pp;
               while (*ppp != '>') ppp++;
-              printf("** The %.*s modifier is locked out - giving up.\n", 
+              printf("** The %.*s modifier is locked out - giving up.\n",
                 (int)(ppp - pp + 1), pp);
               yield = 1;
-              goto EXIT;     
-              }          
+              goto EXIT;
+              }
             }
-          }       
+          }
         }
-        
+
       /* The single-character modifiers are straightforward. */
-       
+
       else
         {
         printf("** The /%c modifier is locked out - giving up.\n", *pp);
         yield = 1;
-        goto EXIT;    
-        }       
-      }  
-      
+        goto EXIT;
+        }
+      }
+
     /* The modifier is not locked out; handle it. */
- 
+
     switch (*pp++)
       {
       case 'f': options |= PCRE_FIRSTLINE; break;
@@ -4572,7 +4572,7 @@ while (!done)
         while (i++ < 2 && isdigit(*p) && *p != '8' && *p != '9')
           c = c * 8 + *p++ - '0';
         break;
-        
+
         case 'o':
         if (*p == '{')
           {
@@ -4586,9 +4586,9 @@ while (!done)
             else c = c * 8 + *pt - '0';
             }
           if (*pt == '}') p = pt + 1;
-            else fprintf(outfile, "** Missing } after \\o{ (assumed)\n");   
+            else fprintf(outfile, "** Missing } after \\o{ (assumed)\n");
           }
-        break;      
+        break;
 
         case 'x':
         if (*p == '{')

@@ -69,7 +69,7 @@ for (;;)
   last if ! ($_ = <$infile>);
   printf $outfile "$_" if $infile ne "STDIN";
   next if ($_ =~ /^\s*$/ || $_ =~ /^< forbid/);
-  
+
   $pattern = $_;
 
   while ($pattern !~ /^\s*(.).*\1/s)

@@ -532,8 +532,8 @@ static const char error_texts[] =
   "non-octal character in \\o{} (closing brace missing?)\0"
   "missing opening brace after \\o\0"
   "parentheses are too deeply nested\0"
-  "invalid range in character class\0" 
-  "group name must start with a non-digit\0" 
+  "invalid range in character class\0"
+  "group name must start with a non-digit\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4446,7 +4446,7 @@ for (;; ptr++)
   /* Get next character in the pattern */
 
   c = *ptr;
-  
+
   /* If we are at the end of a nested substitution, revert to the outer level
   string. Nesting only happens one level deep. */
 
@@ -4548,12 +4548,12 @@ for (;; ptr++)
         }
       goto NORMAL_CHAR;
       }
-    /* Control does not reach here. */   
+    /* Control does not reach here. */
     }
 
-  /* In extended mode, skip white space and comments. We need a loop in order 
+  /* In extended mode, skip white space and comments. We need a loop in order
   to check for more white space and more comments after a comment. */
-  
+
   if ((options & PCRE_EXTENDED) != 0)
     {
     for (;;)
@@ -4564,8 +4564,8 @@ for (;; ptr++)
       while (*ptr != CHAR_NULL)
         {
         if (IS_NEWLINE(ptr))         /* For non-fixed-length newline cases, */
-          {                          /* IS_NEWLINE sets cd->nllen. */         
-          ptr += cd->nllen;            
+          {                          /* IS_NEWLINE sets cd->nllen. */
+          ptr += cd->nllen;
           break;
           }
         ptr++;
@@ -4574,7 +4574,7 @@ for (;; ptr++)
 #endif
         }
       c = *ptr;     /* Either NULL or the char after a newline */
-      }   
+      }
     }
 
   /* See if the next thing is a quantifier. */
@@ -4602,7 +4602,7 @@ for (;; ptr++)
     previous_callout = code;
     code = auto_callout(code, ptr, cd);
     }
-    
+
   /* Process the next pattern item. */
 
   switch(c)
@@ -4861,18 +4861,18 @@ for (;; ptr++)
           unsigned int ptype = 0;
           int pc = posix_class + ((local_negate)? POSIX_SUBSIZE/2 : 0);
 
-          /* The posix_substitutes table specifies which POSIX classes can be 
+          /* The posix_substitutes table specifies which POSIX classes can be
           converted to \p or \P items. */
-           
+
           if (posix_substitutes[pc] != NULL)
             {
             nestptr = tempptr + 1;
             ptr = posix_substitutes[pc] - 1;
             continue;
             }
-            
-          /* There are three other classes that generate special property calls 
-          that are recognized only in an XCLASS. */ 
+
+          /* There are three other classes that generate special property calls
+          that are recognized only in an XCLASS. */
 
           else switch(posix_class)
             {
@@ -4889,12 +4889,12 @@ for (;; ptr++)
             *class_uchardata++ = 0;
             ptr = tempptr + 1;
             continue;
-            
+
             /* For all other POSIX classes, no special action is taken in UCP
             mode. Fall through to the non_UCP case. */
 
             default:
-            break; 
+            break;
             }
           }
 #endif
@@ -5153,45 +5153,45 @@ for (;; ptr++)
         else
 #endif
         d = *ptr;  /* Not UTF-8 mode */
-        
+
         /* The second part of a range can be a single-character escape
         sequence, but not any of the other escapes. Perl treats a hyphen as a
         literal in such circumstances. However, in Perl's warning mode, a
-        warning is given, so PCRE now faults it as it is almost certainly a 
+        warning is given, so PCRE now faults it as it is almost certainly a
         mistake on the user's part. */
 
         if (!inescq)
-          { 
+          {
           if (d == CHAR_BACKSLASH)
             {
             int descape;
             descape = check_escape(&ptr, &d, errorcodeptr, cd->bracount, options, TRUE);
             if (*errorcodeptr != 0) goto FAILED;
-          
+
             /* 0 means a character was put into d; \b is backspace; any other
             special causes an error. */
-          
+
             if (descape != 0)
               {
               if (descape == ESC_b) d = CHAR_BS; else
                 {
                 *errorcodeptr = ERR83;
-                goto FAILED; 
+                goto FAILED;
                 }
               }
             }
-        
+
           /* A hyphen followed by a POSIX class is treated in the same way. */
-          
-          else if (d == CHAR_LEFT_SQUARE_BRACKET && 
+
+          else if (d == CHAR_LEFT_SQUARE_BRACKET &&
                    (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
-                    ptr[1] == CHAR_EQUALS_SIGN) && 
+                    ptr[1] == CHAR_EQUALS_SIGN) &&
                    check_posix_syntax(ptr, &tempptr))
             {
             *errorcodeptr = ERR83;
-            goto FAILED;          
-            }  
-          }   
+            goto FAILED;
+            }
+          }
 
         /* Check that the two values are in the correct order. Optimize
         one-character ranges. */
@@ -5453,11 +5453,11 @@ for (;; ptr++)
     insert something before it. */
 
     tempcode = previous;
-    
-    /* Before checking for a possessive quantifier, we must skip over 
-    whitespace and comments in extended mode because Perl allows white space at 
+
+    /* Before checking for a possessive quantifier, we must skip over
+    whitespace and comments in extended mode because Perl allows white space at
     this point. */
- 
+
     if ((options & PCRE_EXTENDED) != 0)
       {
       const pcre_uchar *p = ptr + 1;
@@ -5469,8 +5469,8 @@ for (;; ptr++)
         while (*p != CHAR_NULL)
           {
           if (IS_NEWLINE(p))         /* For non-fixed-length newline cases, */
-            {                        /* IS_NEWLINE sets cd->nllen. */         
-            p += cd->nllen;            
+            {                        /* IS_NEWLINE sets cd->nllen. */
+            p += cd->nllen;
             break;
             }
           p++;
@@ -6572,19 +6572,19 @@ for (;; ptr++)
           if (*ptr == CHAR_MINUS || *ptr == CHAR_PLUS) refsign = *ptr++;
             else if (IS_DIGIT(*ptr)) refsign = 0;
           }
-          
+
         /* Handle a number */
-        
+
         if (refsign >= 0)
           {
           recno = 0;
-          while (IS_DIGIT(*ptr)) 
+          while (IS_DIGIT(*ptr))
             {
-            recno = recno * 10 + (int)(*ptr - CHAR_0); 
+            recno = recno * 10 + (int)(*ptr - CHAR_0);
             ptr++;
-            }  
-          }   
-          
+            }
+          }
+
         /* Otherwise we expect to read a name; anything else is an error. When
         a name is one of a number of duplicates, a different opcode is used and
         it needs more memory. Unfortunately we cannot tell whether a name is a
@@ -6596,7 +6596,7 @@ for (;; ptr++)
             {
             *errorcodeptr = ERR84;
             goto FAILED;
-            }      
+            }
           if (!MAX_255(*ptr) || (cd->ctypes[*ptr] & ctype_word) == 0)
             {
             *errorcodeptr = ERR28;   /* Assertion expected */
@@ -6626,9 +6626,9 @@ for (;; ptr++)
         if (lengthptr != NULL) break;
 
         /* In the real compile we do the work of looking for the actual
-        reference. If refsign is not negative, it means we have a number in 
+        reference. If refsign is not negative, it means we have a number in
         recno. */
-        
+
         if (refsign >= 0)
           {
           if (recno <= 0)
@@ -6743,16 +6743,16 @@ for (;; ptr++)
         ptr++;
         break;
 
-        /* Optimize (?!) to (*FAIL) unless it is quantified - which is a weird 
-        thing to do, but Perl allows all assertions to be quantified, and when 
-        they contain capturing parentheses there may be a potential use for 
-        this feature. Not that that applies to a quantified (?!) but we allow 
+        /* Optimize (?!) to (*FAIL) unless it is quantified - which is a weird
+        thing to do, but Perl allows all assertions to be quantified, and when
+        they contain capturing parentheses there may be a potential use for
+        this feature. Not that that applies to a quantified (?!) but we allow
         it for uniformity. */
 
         /* ------------------------------------------------------------ */
         case CHAR_EXCLAMATION_MARK:            /* Negative lookahead */
         ptr++;
-        if (*ptr == CHAR_RIGHT_PARENTHESIS && ptr[1] != CHAR_ASTERISK && 
+        if (*ptr == CHAR_RIGHT_PARENTHESIS && ptr[1] != CHAR_ASTERISK &&
              ptr[1] != CHAR_PLUS && ptr[1] != CHAR_QUESTION_MARK &&
             (ptr[1] != CHAR_LEFT_CURLY_BRACKET || !is_counted_repeat(ptr+2)))
           {
@@ -6853,8 +6853,8 @@ for (;; ptr++)
         if (IS_DIGIT(*ptr))
           {
           *errorcodeptr = ERR84;   /* Group name must start with non-digit */
-          goto FAILED;  
-          }  
+          goto FAILED;
+          }
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
@@ -6971,8 +6971,8 @@ for (;; ptr++)
         if (IS_DIGIT(*ptr))
           {
           *errorcodeptr = ERR84;   /* Group name must start with non-digit */
-          goto FAILED;  
-          }  
+          goto FAILED;
+          }
         while (MAX_255(*ptr) && (cd->ctypes[*ptr] & ctype_word) != 0) ptr++;
         namelen = (int)(ptr - name);
 
@@ -7371,9 +7371,9 @@ for (;; ptr++)
     if ((cd->parens_depth += 1) > PARENS_NEST_LIMIT)
       {
       *errorcodeptr = ERR82;
-      goto FAILED;  
-      }  
- 
+      goto FAILED;
+      }
+
     /* Assertions used not to be repeatable, but this was changed for Perl
     compatibility, so all kinds can now be repeated. We copy code into a
     non-register variable (tempcode) in order to be able to pass its address
@@ -7407,7 +7407,7 @@ for (;; ptr++)
            &length_prevgroup              /* Pre-compile phase */
          ))
       goto FAILED;
-      
+
     cd->parens_depth -= 1;
 
     /* If this was an atomic group and there are no capturing groups within it,
@@ -7625,7 +7625,7 @@ for (;; ptr++)
         {
         const pcre_uchar *p;
         pcre_uint32 cf;
-          
+
         save_hwm = cd->hwm;   /* Normally this is set when '(' is read */
         terminator = (*(++ptr) == CHAR_LESS_THAN_SIGN)?
           CHAR_GREATER_THAN_SIGN : CHAR_APOSTROPHE;
@@ -7647,7 +7647,7 @@ for (;; ptr++)
           goto NAMED_REF_OR_RECURSE;
           }
 
-        /* Signed or unsigned number (cf = ptr[1]) is known to be plus or minus 
+        /* Signed or unsigned number (cf = ptr[1]) is known to be plus or minus
         or a digit. */
 
         p = ptr + 2;
@@ -8935,7 +8935,7 @@ else
     cd->nl[0] = newline;
     }
   }
-  
+
 /* Maximum back reference and backref bitmap. The bitmap records up to 31 back
 references to help in deciding whether (.*) can be treated as anchored or not.
 */
