@@ -3687,7 +3687,7 @@ while (!done)
               ppp = pp;
               while (*ppp != '>') ppp++;
               printf("** The %.*s modifier is locked out - giving up.\n", 
-                ppp - pp + 1, pp);
+                (int)(ppp - pp + 1), pp);
               yield = 1;
               goto EXIT;     
               }          
