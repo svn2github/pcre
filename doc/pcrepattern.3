@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "12 November 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "25 November 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -536,8 +536,9 @@ For compatibility with Perl, \es did not used to match the VT character (code
 added VT at release 5.18, and PCRE followed suit at release 8.34. The default
 \es characters are now HT (9), LF (10), VT (11), FF (12), CR (13), and space
 (32), which are defined as white space in the "C" locale. This list may vary if
-locale-specific matching is taking place; in particular, in some locales the
-"non-breaking space" character (\exA0) is recognized as white space.
+locale-specific matching is taking place. For example, in some locales the
+"non-breaking space" character (\exA0) is recognized as white space, and in 
+others the VT character is not.
 .P
 A "word" character is an underscore or any character that is a letter or digit.
 By default, the definition of letters and digits is controlled by PCRE's
@@ -1345,11 +1346,11 @@ are:
   xdigit   hexadecimal digits
 .sp
 The default "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13),
-and space (32). If locale-specific matching is taking place, there may be
-additional space characters. "Space" used to be different to \es, which did not
-include VT, for Perl compatibility. However, Perl changed at release 5.18, and
-PCRE followed at release 8.34. "Space" and \es now match the same set of
-characters.
+and space (32). If locale-specific matching is taking place, the list of space
+characters may be different; there may be fewer or more of them. "Space" used
+to be different to \es, which did not include VT, for Perl compatibility.
+However, Perl changed at release 5.18, and PCRE followed at release 8.34.
+"Space" and \es now match the same set of characters.
 .P
 The name "word" is a Perl extension, and "blank" is a GNU extension from Perl
 5.8. Another Perl extension is negation, which is indicated by a ^ character
@@ -3230,6 +3231,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 November 2013
+Last updated: 25 November 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

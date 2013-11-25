@@ -89,9 +89,11 @@ Version 8.34 19-November-2013
     options in pcretest are provided to set it. It can also be set by
     (*NO_AUTO_POSSESS) at the start of a pattern.
 
-18. The character VT has been added to the set of characters that match \s and
-    are generally treated as white space, following this same change in Perl
-    5.18. There is now no difference between "Perl space" and "POSIX space".
+18. The character VT has been added to the default ("C" locale) set of
+    characters that match \s and are generally treated as white space,
+    following this same change in Perl 5.18. There is now no difference between
+    "Perl space" and "POSIX space". Whether VT is treated as white space in 
+    other locales depends on the locale.
 
 19. The code for checking named groups as conditions, either for being set or
     for being recursed, has been refactored (this is related to 14 and 15
