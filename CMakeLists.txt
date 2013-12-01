@@ -186,6 +186,12 @@ IF (MINGW)
          OFF)
 ENDIF(MINGW)
 
+IF(MSVC)
+  OPTION(INSTALL_MSVC_PDB
+         "ON=Install .pdb files built by MSVC, if generated"
+         OFF)
+ENDIF(MSVC)
+
 # bzip2 lib
 IF(BZIP2_FOUND)
   OPTION (PCRE_SUPPORT_LIBBZ2 "Enable support for linking pcregrep with libbz2." ON)
@@ -550,6 +556,17 @@ SET(PCREPOSIX_SOURCES
 ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/pcreposix.rc)
 ENDIF(MINGW AND NOT PCRE_STATIC)
 
+IF(MSVC AND NOT PCRE_STATIC)
+IF (EXISTS ${PROJECT_SOURCE_DIR}/pcre.rc)
+SET(PCRE_SOURCES
+  ${PCRE_SOURCES} pcre.rc)
+ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/pcre.rc)
+IF (EXISTS ${PROJECT_SOURCE_DIR}/pcreposix.rc)
+SET(PCREPOSIX_SOURCES
+  ${PCREPOSIX_SOURCES} pcreposix.rc)
+ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/pcreposix.rc)
+ENDIF(MSVC AND NOT PCRE_STATIC)
+
 SET(PCRECPP_HEADERS
   pcrecpp.h
   pcre_scanner.h
@@ -875,6 +892,17 @@ INSTALL(FILES ${man1} DESTINATION man/man1)
 INSTALL(FILES ${man3} DESTINATION man/man3)
 INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)
 
+IF(MSVC AND INSTALL_MSVC_PDB)
+    INSTALL(FILES ${PROJECT_BINARY_DIR}/pcre.pdb
+                  ${PROJECT_BINARY_DIR}/pcreposix.pdb
+            DESTINATION bin
+            CONFIGURATIONS RelWithDebInfo)
+    INSTALL(FILES ${PROJECT_BINARY_DIR}/pcred.pdb
+                  ${PROJECT_BINARY_DIR}/pcreposixd.pdb
+            DESTINATION bin
+            CONFIGURATIONS Debug)
+ENDIF(MSVC AND INSTALL_MSVC_PDB)
+
 # help, only for nice output
 IF(BUILD_SHARED_LIBS)
   SET(BUILD_STATIC_LIBS OFF)
@@ -952,6 +980,11 @@ IF(PCRE_SHOW_REPORT)
     MESSAGE(STATUS "  Non-standard dll names (prefix) . : ${NON_STANDARD_LIB_PREFIX}")
     MESSAGE(STATUS "  Non-standard dll names (suffix) . : ${NON_STANDARD_LIB_SUFFIX}")
   ENDIF(MINGW AND NOT PCRE_STATIC)
+
+  IF(MSVC)
+    MESSAGE(STATUS "  Install MSVC .pdb files ..........: ${INSTALL_MSVC_PDB}")
+  ENDIF(MSVC)
+
   MESSAGE(STATUS "")
 ENDIF(PCRE_SHOW_REPORT)
 

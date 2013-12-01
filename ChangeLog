@@ -186,6 +186,17 @@ Version 8.34 19-November-2013
 40. Document that the same character tables must be used at compile time and
     run time, and that the facility to pass tables to pcre_exec() and
     pcre_dfa_exec() is for use only with saved/restored patterns.
+    
+41. Applied Jeff Trawick's patch CMakeLists.txt, which "provides two new 
+    features for Builds with MSVC:
+
+    1. Support pcre.rc and/or pcreposix.rc (as is already done for MinGW
+       builds). The .rc files can be used to set FileDescription and many other
+       attributes.
+
+    2. Add an option (-DINSTALL_MSVC_PDB) to enable installation of .pdb files.
+       This allows higher-level build scripts which want .pdb files to avoid
+       hard-coding the exact files needed."
 
 
 Version 8.33 28-May-2013
