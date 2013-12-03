@@ -14089,4 +14089,40 @@ Failed: malformed number or name after (?( at offset 4
 /(?(R&6yh)abc)/
 Failed: group name must start with a non-digit at offset 5
 
+/-- Test the ugly "start or end of word" compatibility syntax --/
+
+/[[:<:]]red[[:>:]]/BZ
+------------------------------------------------------------------
+        Bra
+        \b
+        Assert
+        \w
+        Ket
+        red
+        \b
+        AssertB
+        Reverse
+        \w
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    little red riding hood
+ 0: red
+    a /red/ thing 
+ 0: red
+    red is a colour
+ 0: red
+    put it all on red  
+ 0: red
+    ** Failers
+No match
+    no reduction
+No match
+    Alfred Winifred
+No match
+    
+/[a[:<:]] should give error/ 
+Failed: unknown POSIX class name at offset 4
+
 /-- End of testinput2 --/

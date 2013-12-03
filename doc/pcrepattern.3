@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "25 November 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "03 December 2013" "PCRE 8.34"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1313,9 +1313,9 @@ something AND NOT ...".
 The only metacharacters that are recognized in character classes are backslash,
 hyphen (only where it can be interpreted as specifying a range), circumflex
 (only at the start), opening square bracket (only when it can be interpreted as
-introducing a POSIX class name - see the next section), and the terminating
-closing square bracket. However, escaping other non-alphanumeric characters
-does no harm.
+introducing a POSIX class name, or for a special compatibility feature - see
+the next two sections), and the terminating closing square bracket. However,
+escaping other non-alphanumeric characters does no harm.
 .
 .
 .SH "POSIX CHARACTER CLASSES"
@@ -1401,6 +1401,30 @@ plus those characters whose code points are less than 128 that have the S
 .P
 The other POSIX classes are unchanged, and match only characters with code
 points less than 128.
+.
+.
+.SH "COMPATIBILITY FEATURE FOR WORD BOUNDARIES"
+.rs
+.sp
+In the POSIX.2 compliant library that was included in 4.4BSD Unix, the ugly 
+syntax [[:<:]] and [[:>:]] is used for matching "start of word" and "end of 
+word". PCRE treats these items as follows:
+.sp
+  [[:<:]]  is converted to  \eb(?=\ew)
+  [[:>:]]  is converted to  \eb(?<=\ew)
+.sp
+Only these exact character sequences are recognized. A sequence such as
+[a[:<:]b] provokes error for an unrecognized POSIX class name. This support is 
+not compatible with Perl. It is provided to help migrations from other 
+environments, and is best not used in any new patterns. Note that \eb matches 
+at the start and the end of a word (see 
+.\" HTML <a href="#smallassertions">
+.\" </a>
+"Simple assertions"
+.\"
+above), and in a Perl-style pattern the preceding or following character 
+normally shows which is wanted, without the need for the assertions that are 
+used above in order to give exactly the POSIX behaviour.
 .
 .
 .SH "VERTICAL BAR"
@@ -3231,6 +3255,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 25 November 2013
+Last updated: 03 December 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

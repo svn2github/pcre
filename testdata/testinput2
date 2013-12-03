@@ -4032,4 +4032,17 @@ backtracking verbs. --/
 
 /(?(R&6yh)abc)/
 
+/-- Test the ugly "start or end of word" compatibility syntax --/
+
+/[[:<:]]red[[:>:]]/BZ
+    little red riding hood
+    a /red/ thing 
+    red is a colour
+    put it all on red  
+    ** Failers
+    no reduction
+    Alfred Winifred
+    
+/[a[:<:]] should give error/ 
+
 /-- End of testinput2 --/
