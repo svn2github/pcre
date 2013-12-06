@@ -4023,7 +4023,6 @@ DEFINE_COMPILER;
 jump_list *found = NULL;
 jump_list **list = (*cc & XCL_NOT) == 0 ? &found : backtracks;
 pcre_int32 c, charoffset;
-const pcre_uint32 *other_cases;
 struct sljit_jump *jump = NULL;
 pcre_uchar *ccbegin;
 int compares, invertcmp, numberofcmps;
@@ -4032,6 +4031,7 @@ int compares, invertcmp, numberofcmps;
 BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
 int typereg = TMP1, scriptreg = TMP1;
+const pcre_uint32 *other_cases;
 pcre_int32 typeoffset;
 #endif
 

@@ -2860,11 +2860,16 @@ get_chr_property_list(const pcre_uchar *code, BOOL utf,
   const pcre_uint8 *fcc, pcre_uint32 *list)
 {
 pcre_uchar c = *code;
-const pcre_uchar *end;
-const pcre_uint32 *clist_src;
-pcre_uint32 *clist_dest;
-pcre_uint32 chr;
 pcre_uchar base;
+const pcre_uchar *end;
+pcre_uint32 chr;
+
+#ifdef SUPPORT_UCP
+pcre_uint32 *clist_dest;
+const pcre_uint32 *clist_src;
+#else
+utf = utf;  /* Suppress "unused parameter" compiler warning */
+#endif
 
 list[0] = c;
 list[1] = FALSE;

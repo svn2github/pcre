@@ -167,7 +167,7 @@ match_ref(int offset, register PCRE_PUCHAR eptr, int length, match_data *md,
 {
 PCRE_PUCHAR eptr_start = eptr;
 register PCRE_PUCHAR p = md->start_subject + md->offset_vector[offset];
-#ifdef SUPPORT_UTF
+#if defined SUPPORT_UTF && defined SUPPORT_UCP
 BOOL utf = md->utf;
 #endif
 
@@ -195,8 +195,7 @@ ASCII characters. */
 
 if (caseless)
   {
-#ifdef SUPPORT_UTF
-#ifdef SUPPORT_UCP
+#if defined SUPPORT_UTF && defined SUPPORT_UCP
   if (utf)
     {
     /* Match characters up to the end of the reference. NOTE: the number of
@@ -229,7 +228,6 @@ if (caseless)
       }
     }
   else
-#endif
 #endif
 
   /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
@@ -3075,9 +3073,10 @@ for (;;)
     /* Control never gets here */
 
 
-    /* Match an extended character class. This opcode is encountered only
-    when UTF-8 mode mode is supported. Nevertheless, we may not be in UTF-8
-    mode, because Unicode properties are supported in non-UTF-8 mode. */
+    /* Match an extended character class. In the 8-bit library, this opcode is
+    encountered only when UTF-8 mode mode is supported. In the 16-bit and 
+    32-bit libraries, codepoints greater than 255 may be encountered even when 
+    UTF is not supported. */
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
     case OP_XCLASS:
@@ -6219,10 +6218,10 @@ switch (frame->Xwhere)
   LBL(53) LBL(54) LBL(55) LBL(56) LBL(57) LBL(58) LBL(63) LBL(64)
   LBL(65) LBL(66)
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-  LBL(21)
+  LBL(20) LBL(21)
 #endif
 #ifdef SUPPORT_UTF
-  LBL(16) LBL(18) LBL(20)
+  LBL(16) LBL(18) 
   LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
 #ifdef SUPPORT_UCP
