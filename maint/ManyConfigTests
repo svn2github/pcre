@@ -24,9 +24,29 @@ if [ "$1" = "-v" ] ; then verbose=1; fi
 tmp=/tmp/pcretesting
 
 # Don't bother with compiler optimization; it just slows down compilation a lot
-# (and these tests themselves are quick).
+# (and running the tests themselves is quick).
 
 CFLAGS="-g -O0"
+CXXFLAGS="$CFLAGS"
+
+# If the compiler is gcc, add a lot of warning switches.
+
+cc --version >zzz 2>/dev/null
+if [ $? -eq 0 ] && grep GCC zzz >/dev/null; then
+  CFLAGS="$CFLAGS -Wall"
+  CFLAGS="$CFLAGS -Wno-overlength-strings"
+  CFLAGS="$CFLAGS -Wpointer-arith"         
+  CFLAGS="$CFLAGS -Wwrite-strings"
+  CFLAGS="$CFLAGS -Wundef -Wshadow"
+  CFLAGS="$CFLAGS -Wextra -Wformat"
+  CFLAGS="$CFLAGS -Wbad-function-cast"
+  CFLAGS="$CFLAGS -Wmissing-declarations"
+  CFLAGS="$CFLAGS -Wnested-externs"
+  CFLAGS="$CFLAGS -pedantic"
+  CFLAGS="$CFLAGS -Wuninitialized"
+  CFLAGS="$CFLAGS -Wmissing-prototypes"
+  CFLAGS="$CFLAGS -Wstrict-prototypes"
+fi 
 
 
 # This function runs a single test with the set of configuration options that
@@ -44,7 +64,7 @@ function runtest()
     echo "  $opts"
   fi
 
-  CFLAGS="$CFLAGS" CXXFLAGS="$CFLAGS" \
+  CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" \
     $srcdir/configure $opts >/dev/null 2>teststderr
      
   if [ $? -ne 0 ]; then
@@ -56,9 +76,10 @@ function runtest()
 
   echo "Making"
   make >/dev/null 2>teststderr
-  if [ $? -ne 0 ]; then
+  if [ $? -ne 0 -o -s teststderr ]; then
     echo " "
-    echo "**** Error while making ****"
+    echo "**** Errors or warnings while making ****"
+    echo " " 
     cat teststderr
     exit 1
   fi
