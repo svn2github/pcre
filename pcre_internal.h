@@ -1533,6 +1533,8 @@ a positive value. */
 #define STRING_xdigit               "xdigit"
 
 #define STRING_DEFINE               "DEFINE"
+#define STRING_WEIRD_STARTWORD      "[:<:]]"
+#define STRING_WEIRD_ENDWORD        "[:>:]]"
 
 #define STRING_CR_RIGHTPAR              "CR)"
 #define STRING_LF_RIGHTPAR              "LF)"
