@@ -3074,8 +3074,8 @@ for (;;)
 
 
     /* Match an extended character class. In the 8-bit library, this opcode is
-    encountered only when UTF-8 mode mode is supported. In the 16-bit and 
-    32-bit libraries, codepoints greater than 255 may be encountered even when 
+    encountered only when UTF-8 mode mode is supported. In the 16-bit and
+    32-bit libraries, codepoints greater than 255 may be encountered even when
     UTF is not supported. */
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
@@ -6221,7 +6221,7 @@ switch (frame->Xwhere)
   LBL(20) LBL(21)
 #endif
 #ifdef SUPPORT_UTF
-  LBL(16) LBL(18) 
+  LBL(16) LBL(18)
   LBL(22) LBL(23) LBL(28) LBL(30)
   LBL(32) LBL(34) LBL(42) LBL(46)
 #ifdef SUPPORT_UCP

@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.34 19-November-2013
+Version 8.34 15-December-2013
 -----------------------------
 
 1.  Add pcre[16|32]_jit_free_unused_memory to forcibly free unused JIT
@@ -92,7 +92,7 @@ Version 8.34 19-November-2013
 18. The character VT has been added to the default ("C" locale) set of
     characters that match \s and are generally treated as white space,
     following this same change in Perl 5.18. There is now no difference between
-    "Perl space" and "POSIX space". Whether VT is treated as white space in 
+    "Perl space" and "POSIX space". Whether VT is treated as white space in
     other locales depends on the locale.
 
 19. The code for checking named groups as conditions, either for being set or
@@ -186,8 +186,8 @@ Version 8.34 19-November-2013
 40. Document that the same character tables must be used at compile time and
     run time, and that the facility to pass tables to pcre_exec() and
     pcre_dfa_exec() is for use only with saved/restored patterns.
-    
-41. Applied Jeff Trawick's patch CMakeLists.txt, which "provides two new 
+
+41. Applied Jeff Trawick's patch CMakeLists.txt, which "provides two new
     features for Builds with MSVC:
 
     1. Support pcre.rc and/or pcreposix.rc (as is already done for MinGW
@@ -197,14 +197,14 @@ Version 8.34 19-November-2013
     2. Add an option (-DINSTALL_MSVC_PDB) to enable installation of .pdb files.
        This allows higher-level build scripts which want .pdb files to avoid
        hard-coding the exact files needed."
-       
+
 42. Added support for [[:<:]] and [[:>:]] as used in the BSD POSIX library to
     mean "start of word" and "end of word", respectively, as a transition aid.
-    
+
 43. A minimizing repeat of a class containing codepoints greater than 255 in
-    non-UTF 16-bit or 32-bit modes caused an internal error when PCRE was 
+    non-UTF 16-bit or 32-bit modes caused an internal error when PCRE was
     compiled to use the heap for recursion.
-    
+
 44. Got rid of some compiler warnings for unused variables when UTF but not UCP
     is configured.
 

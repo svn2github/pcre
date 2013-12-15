@@ -537,7 +537,7 @@ added VT at release 5.18, and PCRE followed suit at release 8.34. The default
 \es characters are now HT (9), LF (10), VT (11), FF (12), CR (13), and space
 (32), which are defined as white space in the "C" locale. This list may vary if
 locale-specific matching is taking place. For example, in some locales the
-"non-breaking space" character (\exA0) is recognized as white space, and in 
+"non-breaking space" character (\exA0) is recognized as white space, and in
 others the VT character is not.
 .P
 A "word" character is an underscore or any character that is a letter or digit.
@@ -1406,24 +1406,24 @@ points less than 128.
 .SH "COMPATIBILITY FEATURE FOR WORD BOUNDARIES"
 .rs
 .sp
-In the POSIX.2 compliant library that was included in 4.4BSD Unix, the ugly 
-syntax [[:<:]] and [[:>:]] is used for matching "start of word" and "end of 
+In the POSIX.2 compliant library that was included in 4.4BSD Unix, the ugly
+syntax [[:<:]] and [[:>:]] is used for matching "start of word" and "end of
 word". PCRE treats these items as follows:
 .sp
   [[:<:]]  is converted to  \eb(?=\ew)
   [[:>:]]  is converted to  \eb(?<=\ew)
 .sp
 Only these exact character sequences are recognized. A sequence such as
-[a[:<:]b] provokes error for an unrecognized POSIX class name. This support is 
-not compatible with Perl. It is provided to help migrations from other 
-environments, and is best not used in any new patterns. Note that \eb matches 
-at the start and the end of a word (see 
+[a[:<:]b] provokes error for an unrecognized POSIX class name. This support is
+not compatible with Perl. It is provided to help migrations from other
+environments, and is best not used in any new patterns. Note that \eb matches
+at the start and the end of a word (see
 .\" HTML <a href="#smallassertions">
 .\" </a>
 "Simple assertions"
 .\"
-above), and in a Perl-style pattern the preceding or following character 
-normally shows which is wanted, without the need for the assertions that are 
+above), and in a Perl-style pattern the preceding or following character
+normally shows which is wanted, without the need for the assertions that are
 used above in order to give exactly the POSIX behaviour.
 .
 .

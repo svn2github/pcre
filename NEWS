@@ -1,7 +1,7 @@
 News about PCRE releases
 ------------------------
 
-Release 8.34 19-November-2013
+Release 8.34 15-December-2013
 -----------------------------
 
 As well as fixing the inevitable bugs, performance has been improved by
@@ -43,6 +43,9 @@ Other notable changes:
 
 .  Perl no longer allows group names to start with digits, so I have made this
    change also in PCRE.
+
+.  Added support for [[:<:]] and [[:>:]] as used in the BSD POSIX library to
+   mean "start of word" and "end of word", respectively, as a transition aid.
 
 
 Release 8.33 28-May-2013

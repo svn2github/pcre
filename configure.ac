@@ -10,8 +10,8 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [34])
-m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2013-11-19])
+m4_define(pcre_prerelease, [])
+m4_define(pcre_date, [2013-12-15])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
