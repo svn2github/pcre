@@ -1874,8 +1874,9 @@ table. */
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
 
-#define XCL_NOT    0x01    /* Flag: this is a negative class */
-#define XCL_MAP    0x02    /* Flag: a 32-byte map is present */
+#define XCL_NOT       0x01    /* Flag: this is a negative class */
+#define XCL_MAP       0x02    /* Flag: a 32-byte map is present */
+#define XCL_HASPROP   0x04    /* Flag: property checks are present. */
 
 #define XCL_END       0    /* Marks end of individual items */
 #define XCL_SINGLE    1    /* Single item (one multibyte char) follows */

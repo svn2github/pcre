@@ -6833,18 +6833,8 @@ for(;;)
 #ifndef COMPILE_PCRE8
         if (c > 255) c = 255;
 #endif
-        if ((start_bits[c/8] & (1 << (c&7))) == 0)
-          {
-          start_match++;
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-          /* In non 8-bit mode, the iteration will stop for
-          characters > 255 at the beginning or not stop at all. */
-          if (utf)
-            ACROSSCHAR(start_match < end_subject, *start_match,
-              start_match++);
-#endif
-          }
-        else break;
+        if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
+        start_match++;
         }
       }
     }   /* Starting optimizations */

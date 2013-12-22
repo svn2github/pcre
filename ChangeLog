@@ -1,6 +1,14 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.35-RC1 xx-xxxx-201x
+-----------------------------
+
+1.  A new flag is set, when property checks are present in an XCLASS.
+    When this flag is not set, PCRE can perform certain optimizations
+    such as studying these XCLASS-es.
+
+
 Version 8.34 15-December-2013
 -----------------------------
 

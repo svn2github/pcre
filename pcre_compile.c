@@ -4105,6 +4105,7 @@ add_to_class(pcre_uint8 *classbits, pcre_uchar **uchardptr, int options,
   compile_data *cd, pcre_uint32 start, pcre_uint32 end)
 {
 pcre_uint32 c;
+pcre_uint32 classbits_end = (end <= 0xff ? end : 0xff);
 int n8 = 0;
 
 /* If caseless matching is required, scan the range and process alternate
@@ -4148,7 +4149,7 @@ if ((options & PCRE_CASELESS) != 0)
 
   /* Not UTF-mode, or no UCP */
 
-  for (c = start; c <= end && c < 256; c++)
+  for (c = start; c <= classbits_end; c++)
     {
     SETBIT(classbits, cd->fcc[c]);
     n8++;
@@ -4173,20 +4174,19 @@ in all cases. */
 
 #endif /* COMPILE_PCRE[8|16] */
 
-/* If all characters are less than 256, use the bit map. Otherwise use extra
-data. */
+/* Use the bitmap for characters < 256. Otherwise use extra data.*/
 
-if (end < 0x100)
+for (c = start; c <= classbits_end; c++)
   {
-  for (c = start; c <= end; c++)
-    {
-    n8++;
-    SETBIT(classbits, c);
-    }
+  /* Regardless of start, c will always be <= 255. */
+  SETBIT(classbits, c);
+  n8++;
   }
 
-else
-  {
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+if (start <= 0xff) start = 0xff + 1;
+
+if (end >= start) {
   pcre_uchar *uchardata = *uchardptr;
 
 #ifdef SUPPORT_UTF
@@ -4228,6 +4228,7 @@ else
 
   *uchardptr = uchardata;   /* Updata extra data pointer */
   }
+#endif /* SUPPORT_UTF || !COMPILE_PCRE8 */
 
 return n8;    /* Number of 8-bit characters */
 }
@@ -4449,6 +4450,9 @@ for (;; ptr++)
   BOOL reset_bracount;
   int class_has_8bitchar;
   int class_one_char;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+  BOOL xclass_has_prop;
+#endif
   int newoptions;
   int recno;
   int refsign;
@@ -4783,13 +4787,26 @@ for (;; ptr++)
 
     should_flip_negation = FALSE;
 
+    /* Extended class (xclass) will be used when characters > 255
+    might match. */
+
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    xclass = FALSE;
+    class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
+    class_uchardata_base = class_uchardata;   /* Save the start */
+#endif
+
     /* For optimization purposes, we track some properties of the class:
     class_has_8bitchar will be non-zero if the class contains at least one <
     256 character; class_one_char will be 1 if the class contains just one
-    character. */
+    character; xclass_has_prop will be TRUE if unicode property checks
+    are present in the class. */
 
     class_has_8bitchar = 0;
     class_one_char = 0;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+    xclass_has_prop = FALSE;
+#endif
 
     /* Initialize the 32-char bit map to all zeros. We build the map in a
     temporary bit of memory, in case the class contains fewer than two
@@ -4797,12 +4814,6 @@ for (;; ptr++)
     map. */
 
     memset(classbits, 0, 32 * sizeof(pcre_uint8));
-
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-    xclass = FALSE;
-    class_uchardata = code + LINK_SIZE + 2;   /* For XCLASS items */
-    class_uchardata_base = class_uchardata;   /* Save the start */
-#endif
 
     /* Process characters until ] is reached. By writing this as a "do" it
     means that an initial ] is taken as a data character. At the start of the
@@ -4927,6 +4938,7 @@ for (;; ptr++)
             *class_uchardata++ = local_negate? XCL_NOTPROP : XCL_PROP;
             *class_uchardata++ = ptype;
             *class_uchardata++ = 0;
+            xclass_has_prop = TRUE;
             ptr = tempptr + 1;
             continue;
 
@@ -5109,6 +5121,7 @@ for (;; ptr++)
                 XCL_PROP : XCL_NOTPROP;
               *class_uchardata++ = ptype;
               *class_uchardata++ = pdata;
+              xclass_has_prop = TRUE;
               class_has_8bitchar--;                /* Undo! */
               continue;
               }
@@ -5403,6 +5416,7 @@ for (;; ptr++)
       *code++ = OP_XCLASS;
       code += LINK_SIZE;
       *code = negate_class? XCL_NOT:0;
+      if (xclass_has_prop) *code |= XCL_HASPROP;
 
       /* If the map is required, move up the extra data to make room for it;
       otherwise just move the code pointer to the end of the extra data. */
@@ -5412,6 +5426,8 @@ for (;; ptr++)
         *code++ |= XCL_MAP;
         memmove(code + (32 / sizeof(pcre_uchar)), code,
           IN_UCHARS(class_uchardata - code));
+        if (negate_class && !xclass_has_prop)
+          for (c = 0; c < 32; c++) classbits[c] = ~classbits[c];
         memcpy(code, classbits, 32);
         code = class_uchardata + (32 / sizeof(pcre_uchar));
         }
