@@ -3070,8 +3070,11 @@ const pcre_uint32 *chr_ptr;
 const pcre_uint32 *ochr_ptr;
 const pcre_uint32 *list_ptr;
 const pcre_uchar *next_code;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+const pcre_uchar *xclass_flags;
+#endif
 const pcre_uint8 *class_bitset;
-const pcre_uint32 *set1, *set2, *set_end;
+const pcre_uint8 *set1, *set2, *set_end;
 pcre_uint32 chr;
 BOOL accepted, invert_bits;
 
@@ -3202,12 +3205,12 @@ for(;;)
     if (base_list[0] == OP_CLASS)
 #endif
       {
-      set1 = (pcre_uint32 *)(base_end - base_list[2]);
+      set1 = (pcre_uint8 *)(base_end - base_list[2]);
       list_ptr = list;
       }
     else
       {
-      set1 = (pcre_uint32 *)(code - list[2]);
+      set1 = (pcre_uint8 *)(code - list[2]);
       list_ptr = base_list;
       }
 
@@ -3216,41 +3219,53 @@ for(;;)
       {
       case OP_CLASS:
       case OP_NCLASS:
-      set2 = (pcre_uint32 *)
+      set2 = (pcre_uint8 *)
         ((list_ptr == list ? code : base_end) - list_ptr[2]);
       break;
 
-      /* OP_XCLASS cannot be supported here, because its bitset
-      is not necessarily complete. E.g: [a-\0x{200}] is stored
-      as a character range, and the appropriate bits are not set. */
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+      case OP_XCLASS:
+      xclass_flags = (list_ptr == list ? code : base_end) - list_ptr[2] + LINK_SIZE;
+      if ((*xclass_flags & XCL_HASPROP) != 0) return FALSE;
+      if ((*xclass_flags & XCL_MAP) == 0)
+        {
+        /* No bits are set for characters < 256. */
+        if (list[1] == 0) return TRUE;
+        /* Might be an empty repeat. */
+        continue;
+        }
+      set2 = (pcre_uint8 *)(xclass_flags + 1);
+      break;
+#endif
 
       case OP_NOT_DIGIT:
-        invert_bits = TRUE;
-        /* Fall through */
+      invert_bits = TRUE;
+      /* Fall through */
       case OP_DIGIT:
-        set2 = (pcre_uint32 *)(cd->cbits + cbit_digit);
-        break;
+      set2 = (pcre_uint8 *)(cd->cbits + cbit_digit);
+      break;
 
       case OP_NOT_WHITESPACE:
-        invert_bits = TRUE;
-        /* Fall through */
+      invert_bits = TRUE;
+      /* Fall through */
       case OP_WHITESPACE:
-        set2 = (pcre_uint32 *)(cd->cbits + cbit_space);
-        break;
+      set2 = (pcre_uint8 *)(cd->cbits + cbit_space);
+      break;
 
       case OP_NOT_WORDCHAR:
-        invert_bits = TRUE;
-        /* Fall through */
+      invert_bits = TRUE;
+      /* Fall through */
       case OP_WORDCHAR:
-        set2 = (pcre_uint32 *)(cd->cbits + cbit_word);
-        break;
+      set2 = (pcre_uint8 *)(cd->cbits + cbit_word);
+      break;
 
       default:
       return FALSE;
       }
 
-    /* Compare 4 bytes to improve speed. */
-    set_end = set1 + (32 / 4);
+    /* Because the sets are unaligned, we need
+    to perform byte comparison here. */
+    set_end = set1 + 32;
     if (invert_bits)
       {
       do

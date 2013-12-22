@@ -8,6 +8,10 @@ Version 8.35-RC1 xx-xxxx-201x
     When this flag is not set, PCRE can perform certain optimizations
     such as studying these XCLASS-es.
 
+2.  The auto-possessification of character sets were improved: a normal
+    and an extended character set can be compared now. Furthermore
+    the JIT compiler optimizes more character set checks.
+
 
 Version 8.34 15-December-2013
 -----------------------------

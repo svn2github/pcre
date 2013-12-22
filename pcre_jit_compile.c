@@ -306,7 +306,7 @@ typedef struct then_trap_backtrack {
   int framesize;
 } then_trap_backtrack;
 
-#define MAX_RANGE_SIZE 6
+#define MAX_RANGE_SIZE 4
 
 typedef struct compiler_common {
   /* The sljit ceneric compiler. */
@@ -3503,22 +3503,28 @@ sljit_emit_fast_return(compiler, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS0);
 static BOOL check_ranges(compiler_common *common, int *ranges, jump_list **backtracks, BOOL readch)
 {
 DEFINE_COMPILER;
-struct sljit_jump *jump;
 
-if (ranges[0] < 0)
+if (ranges[0] < 0 || ranges[0] > 4)
   return FALSE;
+
+/* No character is accepted. */
+if (ranges[0] == 0 && ranges[1] == 0)
+  add_jump(compiler, backtracks, JUMP(SLJIT_JUMP));
+
+if (readch)
+  read_char(common);
 
 switch(ranges[0])
   {
+  case 0:
+  /* When ranges[1] != 0, all characters are accepted. */
+  return TRUE;
+
   case 1:
-  if (readch)
-    read_char(common);
   add_jump(compiler, backtracks, CMP(ranges[1] == 0 ? SLJIT_C_LESS : SLJIT_C_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, ranges[2]));
   return TRUE;
 
   case 2:
-  if (readch)
-    read_char(common);
   if (ranges[2] + 1 != ranges[3])
     {
     OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[2]);
@@ -3529,8 +3535,6 @@ switch(ranges[0])
   return TRUE;
 
   case 3:
-  if (readch)
-    read_char(common);
   if (ranges[1] != 0)
     {
     add_jump(compiler, backtracks, CMP(SLJIT_C_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, ranges[4]));
@@ -3541,50 +3545,70 @@ switch(ranges[0])
       }
     else
       add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[2]));
+    return TRUE;
+    }
+
+  add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[2]));
+  if (ranges[3] + 1 != ranges[4])
+    {
+    OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[3]);
+    add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[4] - ranges[3]));
     }
   else
-    {
-    add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[2]));
-    if (ranges[3] + 1 != ranges[4])
-      {
-      OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[3]);
-      add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[4] - ranges[3]));
-      }
-    else
-      add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[3]));
-    }
+    add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[3]));
   return TRUE;
 
   case 4:
-  if (ranges[2] + 1 == ranges[3] && ranges[4] + 1 == ranges[5])
+  if ((ranges[3] - ranges[2]) == (ranges[5] - ranges[4])
+      && (ranges[2] | (ranges[4] - ranges[2])) == ranges[4]
+      && is_powerof2(ranges[4] - ranges[2]))
     {
-    if (readch)
-      read_char(common);
-    if (ranges[1] != 0)
+    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4] - ranges[2]);
+    if (ranges[4] + 1 != ranges[5])
       {
-      add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[2]));
-      add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[4]));
+      OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4]);
+      add_jump(compiler, backtracks, CMP(ranges[1] != 0 ? SLJIT_C_LESS : SLJIT_C_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, ranges[5] - ranges[4]));
       }
     else
-      {
-      jump = CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[2]);
-      add_jump(compiler, backtracks, CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, ranges[4]));
-      JUMPHERE(jump);
-      }
+      add_jump(compiler, backtracks, CMP(ranges[1] != 0 ? SLJIT_C_EQUAL : SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, ranges[4]));
     return TRUE;
     }
-  if ((ranges[3] - ranges[2]) == (ranges[5] - ranges[4]) && is_powerof2(ranges[4] - ranges[2]))
+
+  if (ranges[1] != 0)
     {
-    if (readch)
-      read_char(common);
-    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4] - ranges[2]);
-    OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4]);
-    add_jump(compiler, backtracks, CMP(ranges[1] != 0 ? SLJIT_C_LESS : SLJIT_C_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, ranges[5] - ranges[4]));
+    if (ranges[2] + 1 != ranges[3])
+      {
+      OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[2]);
+      add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[3] - ranges[2]));
+      ranges[4] -= ranges[2];
+      ranges[5] -= ranges[2];
+      }
+    else
+      add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[2]));
+
+    if (ranges[4] + 1 != ranges[5])
+      {
+      OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[4]);
+      add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[5] - ranges[4]));
+      }
+    else
+      add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[4]));
     return TRUE;
     }
-  return FALSE;
+
+  OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[2]);
+  add_jump(compiler, backtracks, CMP(SLJIT_C_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, ranges[5] - ranges[2]));
+  if (ranges[3] + 1 != ranges[4])
+    {
+    OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, ranges[3] - ranges[2]);
+    add_jump(compiler, backtracks, CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, ranges[4] - ranges[3]));
+    }
+  else
+    add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, ranges[3] - ranges[2]));
+  return TRUE;
 
   default:
+  SLJIT_ASSERT_STOP();
   return FALSE;
   }
 }

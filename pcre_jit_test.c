@@ -326,6 +326,12 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "\\w(\\s|(?:\\d)*,)+\\w\\wb", "a 5, 4,, bb 5, 4,, aab" },
 	{ MUA, 0, "(\\v+)(\\V+)", "\x0e\xc2\x85\xe2\x80\xa8\x0b\x09\xe2\x80\xa9" },
 	{ MUA, 0, "(\\h+)(\\H+)", "\xe2\x80\xa8\xe2\x80\x80\x20\xe2\x80\x8a\xe2\x81\x9f\xe3\x80\x80\x09\x20\xc2\xa0\x0a" },
+	{ MUA, 0, "x[bcef]+", "xaxdxecbfg" },
+	{ MUA, 0, "x[bcdghij]+", "xaxexfxdgbjk" },
+	{ MUA, 0, "x[^befg]+", "xbxexacdhg" },
+	{ MUA, 0, "x[^bcdl]+", "xlxbxaekmd" },
+	{ MUA, 0, "x[^bcdghi]+", "xbxdxgxaefji" },
+	{ MUA, 0, "x[B-Fb-f]+", "xaxAxgxbfBFG" },
 
 	/* Unicode properties. */
 	{ MUAP, 0, "[1-5\xc3\xa9\\w]", "\xc3\xa1_" },
