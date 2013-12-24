@@ -6611,7 +6611,10 @@ for (;; ptr++)
 
         code[1+LINK_SIZE] = OP_CREF;
         skipbytes = 1+IMM2_SIZE;
-        refsign = -1;
+        refsign = -1;     /* => not a number */
+        namelen = -1;     /* => not a name; must set to avoid warning */ 
+        name = NULL;      /* Always set to avoid warning */ 
+        recno = 0;        /* Always set to avoid warning */ 
 
         /* Check for a test for recursion in a named group. */
 
@@ -6648,7 +6651,6 @@ for (;; ptr++)
 
         if (refsign >= 0)
           {
-          recno = 0;
           while (IS_DIGIT(*ptr))
             {
             recno = recno * 10 + (int)(*ptr - CHAR_0);

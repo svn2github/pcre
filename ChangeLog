@@ -11,6 +11,9 @@ Version 8.35-RC1 xx-xxxx-201x
 2.  The auto-possessification of character sets were improved: a normal
     and an extended character set can be compared now. Furthermore
     the JIT compiler optimizes more character set checks.
+    
+3.  Got rid of some compiler warnings for potentially uninitialized variables 
+    that show up only when compiled with -O2. 
 
 
 Version 8.34 15-December-2013

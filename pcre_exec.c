@@ -2691,16 +2691,22 @@ for (;;)
       pcre_uchar *slot = md->name_table + GET2(ecode, 1) * md->name_entry_size;
       ecode += 1 + 2*IMM2_SIZE;
 
+      /* Setting the default length first and initializing 'offset' avoids
+      compiler warnings in the REF_REPEAT code. */
+
+      length = (md->jscript_compat)? 0 : -1;
+      offset = 0;
+
       while (count-- > 0)
         {
         offset = GET2(slot, 0) << 1;
-        if (offset < offset_top && md->offset_vector[offset] >= 0) break;
+        if (offset < offset_top && md->offset_vector[offset] >= 0) 
+          {
+          length = md->offset_vector[offset+1] - md->offset_vector[offset];
+          break;
+          } 
         slot += md->name_entry_size;
         }
-      if (count < 0)
-        length = (md->jscript_compat)? 0 : -1;
-      else
-        length = md->offset_vector[offset+1] - md->offset_vector[offset];
       }
     goto REF_REPEAT;
 
