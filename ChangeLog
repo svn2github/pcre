@@ -14,6 +14,12 @@ Version 8.35-RC1 xx-xxxx-201x
     
 3.  Got rid of some compiler warnings for potentially uninitialized variables 
     that show up only when compiled with -O2. 
+    
+4.  A pattern such as (?=ab\K) that uses \K in an assertion can set the start
+    of a match later then the end of the match. The pcretest program was not 
+    handling the case sensibly - it was outputting from the start to the next 
+    binary zero. It now reports this situation in a message, and outputs the 
+    text from the end to the start.
 
 
 Version 8.34 15-December-2013

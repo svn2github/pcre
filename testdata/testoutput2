@@ -14125,4 +14125,10 @@ No match
 /[a[:<:]] should give error/ 
 Failed: unknown POSIX class name at offset 4
 
+/(?=ab\K)/+
+    abcd
+Start of matched string is beyond its end - displaying from end to start.
+ 0: ab
+ 0+ abcd
+
 /-- End of testinput2 --/

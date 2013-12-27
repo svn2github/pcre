@@ -1,4 +1,4 @@
-.TH PCRESYNTAX 3 "12 November 2013" "PCRE 8.34"
+.TH PCRESYNTAX 3 "27 December 2013" "PCRE 8.35"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION SYNTAX SUMMARY"
@@ -309,6 +309,8 @@ but some of them use Unicode properties if PCRE_UCP is set. You can use
 .rs
 .sp
   \eK          reset start of match
+.sp
+\eK is honoured in positive assertions, but ignored in negative ones.   
 .
 .
 .SH "ALTERNATION"
@@ -508,6 +510,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 November 2013
+Last updated: 27 December 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi

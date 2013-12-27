@@ -4045,4 +4045,7 @@ backtracking verbs. --/
     
 /[a[:<:]] should give error/ 
 
+/(?=ab\K)/+
+    abcd
+
 /-- End of testinput2 --/

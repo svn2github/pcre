@@ -5192,7 +5192,8 @@ while (!done)
           if (count * 2 > use_size_offsets) count = use_size_offsets/2;
           }
 
-        /* Output the captured substrings */
+        /* Output the captured substrings. Note that, for the matched string, 
+        the use of \K in an assertion can make the start later than the end. */
 
         for (i = 0; i < count * 2; i += 2)
           {
@@ -5208,11 +5209,25 @@ while (!done)
             }
           else
             {
+            int start = use_offsets[i];
+            int end = use_offsets[i+1];
+               
+            if (start > end)
+              {
+              start = use_offsets[i+1];
+              end = use_offsets[i];
+              fprintf(outfile, "Start of matched string is beyond its end - " 
+                "displaying from end to start.\n"); 
+              }  
+ 
             fprintf(outfile, "%2d: ", i/2);
-            PCHARSV(bptr, use_offsets[i],
-              use_offsets[i+1] - use_offsets[i], outfile);
+            PCHARSV(bptr, start, end - start, outfile);
             if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");
             fprintf(outfile, "\n");
+            
+            /* Note: don't use the start/end variables here because we want to
+            show the text from what is reported as the end. */
+             
             if (do_showcaprest || (i == 0 && do_showrest))
               {
               fprintf(outfile, "%2d+ ", i/2);

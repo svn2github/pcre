@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "03 December 2013" "PCRE 8.34"
+.TH PCREPATTERN 3 "27 December 2013" "PCRE 8.35"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1004,7 +1004,9 @@ matches "foobar", the first substring is still set to "foo".
 .P
 Perl documents that the use of \eK within assertions is "not well defined". In
 PCRE, \eK is acted upon when it occurs inside positive assertions, but is
-ignored in negative assertions.
+ignored in negative assertions. Note that when a pattern such as (?=ab\eK)
+matches, the reported start of the match can be greater than the end of the 
+match.
 .
 .
 .\" HTML <a name="smallassertions"></a>
@@ -3255,6 +3257,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 December 2013
+Last updated: 27 December 2013
 Copyright (c) 1997-2013 University of Cambridge.
 .fi
