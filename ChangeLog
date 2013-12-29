@@ -11,15 +11,19 @@ Version 8.35-RC1 xx-xxxx-201x
 2.  The auto-possessification of character sets were improved: a normal
     and an extended character set can be compared now. Furthermore
     the JIT compiler optimizes more character set checks.
-    
-3.  Got rid of some compiler warnings for potentially uninitialized variables 
-    that show up only when compiled with -O2. 
-    
+
+3.  Got rid of some compiler warnings for potentially uninitialized variables
+    that show up only when compiled with -O2.
+
 4.  A pattern such as (?=ab\K) that uses \K in an assertion can set the start
-    of a match later then the end of the match. The pcretest program was not 
-    handling the case sensibly - it was outputting from the start to the next 
-    binary zero. It now reports this situation in a message, and outputs the 
+    of a match later then the end of the match. The pcretest program was not
+    handling the case sensibly - it was outputting from the start to the next
+    binary zero. It now reports this situation in a message, and outputs the
     text from the end to the start.
+
+5.  Fast forward search is improved in JIT. Instead of the first three
+    characters, any three characters with fixed position can be searched.
+    Search order: first, last, middle.
 
 
 Version 8.34 15-December-2013
