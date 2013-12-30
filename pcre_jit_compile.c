@@ -403,11 +403,9 @@ typedef struct compiler_common {
 #ifdef SUPPORT_UCP
   BOOL use_ucp;
 #endif
-#ifndef COMPILE_PCRE32
-  jump_list *utfreadchar;
-#endif
 #ifdef COMPILE_PCRE8
-  jump_list *utfreadchar11;
+  jump_list *utfreadchar;
+  jump_list *utfreadchar16;
   jump_list *utfreadtype8;
 #endif
 #endif /* SUPPORT_UTF */
@@ -2462,31 +2460,6 @@ else
 JUMPHERE(jump);
 }
 
-static void read_char(compiler_common *common)
-{
-/* Reads the character into TMP1, updates STR_PTR.
-Does not check STR_END. TMP2 Destroyed. */
-DEFINE_COMPILER;
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
-struct sljit_jump *jump;
-#endif
-
-OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
-if (common->utf)
-  {
-#if defined COMPILE_PCRE8
-  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
-#elif defined COMPILE_PCRE16
-  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
-#endif /* COMPILE_PCRE[8|16] */
-  add_jump(compiler, &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
-  JUMPHERE(jump);
-  }
-#endif /* SUPPORT_UTF && !COMPILE_PCRE32 */
-}
-
 static void peek_char(compiler_common *common)
 {
 /* Reads the character into TMP1, keeps STR_PTR.
@@ -2497,26 +2470,39 @@ struct sljit_jump *jump;
 #endif
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (common->utf)
   {
-#if defined COMPILE_PCRE8
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
-#elif defined COMPILE_PCRE16
-  jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
-#endif /* COMPILE_PCRE[8|16] */
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   add_jump(compiler, &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
   JUMPHERE(jump);
   }
 #endif /* SUPPORT_UTF && !COMPILE_PCRE32 */
+
+#if defined SUPPORT_UTF && defined COMPILE_PCRE16
+if (common->utf)
+  {
+  OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
+  jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 0xdc00 - 0xd800 - 1);
+  /* TMP2 contains the high surrogate. */
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
+  OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x40);
+  OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 10);
+  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x3ff);
+  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+  JUMPHERE(jump);
+  }
+#endif
 }
 
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 
 static BOOL is_char7_bitset(const pcre_uint8* bitset, BOOL nclass)
 {
+/* Tells whether the character codes below 128 are enough
+to determine a match. */
 const pcre_uint8 value = nclass ? 0xff : 0;
 const pcre_uint8* end = bitset + 32;
 
@@ -2532,8 +2518,9 @@ return TRUE;
 
 static void read_char7_type(compiler_common *common, BOOL full_read)
 {
-/* Reads the precise character type of a character into TMP1, if the character is
-less than 128. Otherwise it returns with zero. */
+/* Reads the precise character type of a character into TMP1, if the character
+is less than 128. Otherwise it returns with zero. Does not check STR_END. The
+full_read argument tells whether characters above max are accepted or not. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 
@@ -2558,7 +2545,9 @@ if (full_read)
 static void read_char_max(compiler_common *common, pcre_uint32 max, BOOL full_read)
 {
 /* Reads the precise value of a character into TMP1, if the character is
-less than or equal to max. Otherwise it returns with a value greater than max. */
+less than or equal to max. Otherwise it returns with a value greater than max.
+Does not check STR_END. The full_read argument tells whether characters above
+max are accepted or not. */
 DEFINE_COMPILER;
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 struct sljit_jump *jump;
@@ -2577,12 +2566,14 @@ if (common->utf)
     return;
 
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
-  if (max < 128)
+  if (max >= 0x800)
+    add_jump(compiler, (max < 0x10000) ? &common->utfreadchar16 : &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
+  else if (max < 128)
     {
     OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
     }
-  else if (max < 0x400)
+  else
     {
     OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
     if (!full_read)
@@ -2596,8 +2587,6 @@ if (common->utf)
     if (full_read)
       OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, RETURN_ADDR, 0);
     }
-  else
-    add_jump(compiler, (max < 0x800) ? &common->utfreadchar11 : &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
   JUMPHERE(jump);
   }
 #endif
@@ -2605,16 +2594,23 @@ if (common->utf)
 #if defined SUPPORT_UTF && defined COMPILE_PCRE16
 if (common->utf)
   {
-  if (max < 0xd800 && !full_read)
-    return;
-
   if (max >= 0x10000)
     {
-    jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
-    add_jump(compiler, &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
+    OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
+    jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 0xdc00 - 0xd800 - 1);
+    /* TMP2 contains the high surrogate. */
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
+    OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x40);
+    OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 10);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x3ff);
+    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
     JUMPHERE(jump);
     return;
     }
+
+  if (max < 0xd800 && !full_read)
+    return;
 
   /* Skip low surrogate if necessary. */
   OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
@@ -2628,9 +2624,15 @@ if (common->utf)
 #endif
 }
 
+static SLJIT_INLINE void read_char(compiler_common *common)
+{
+read_char_max(common, 0x7fffffff, TRUE);
+}
+
 static void read_char8_type(compiler_common *common, BOOL full_read)
 {
-/* Reads the character type into TMP1, updates STR_PTR. Does not check STR_END. */
+/* Reads the character type into TMP1, updates STR_PTR. Does not check STR_END.
+The full_read argument tells whether characters above max are accepted or not. */
 DEFINE_COMPILER;
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
 struct sljit_jump *jump;
@@ -2759,54 +2761,44 @@ else
 static void do_utfreadchar(compiler_common *common)
 {
 /* Fast decoding a UTF-8 character. TMP1 contains the first byte
-of the character (>= 0xc0). Return char value in TMP1, length - 1 in TMP2. */
+of the character (>= 0xc0). Return char value in TMP1, length in TMP2. */
 DEFINE_COMPILER;
 struct sljit_jump *jump;
 
 sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
-/* Searching for the first zero. */
-OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x20);
-jump = JUMP(SLJIT_C_NOT_ZERO);
-/* Two byte sequence. */
 OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x1f);
+OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x3f);
 OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 6);
 OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
 OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+/* Searching for the first zero. */
+OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x800);
+jump = JUMP(SLJIT_C_NOT_ZERO);
+/* Two byte sequence. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, IN_UCHARS(2));
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
-JUMPHERE(jump);
 
-OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x10);
+JUMPHERE(jump);
+OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+OP2(SLJIT_XOR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x800);
+OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 6);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
+OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x10000);
 jump = JUMP(SLJIT_C_NOT_ZERO);
 /* Three byte sequence. */
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x0f);
-OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 12);
-OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
-OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 6);
-OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
-OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
-OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, IN_UCHARS(3));
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
-JUMPHERE(jump);
 
 /* Four byte sequence. */
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x07);
-OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 18);
-OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
-OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 12);
-OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
-OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
-OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 6);
-OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+JUMPHERE(jump);
 OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(2));
+OP2(SLJIT_XOR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x10000);
+OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 6);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(3));
 OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
 OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
@@ -2814,7 +2806,7 @@ OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, IN_UCHARS(4));
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 
-static void do_utfreadchar11(compiler_common *common)
+static void do_utfreadchar16(compiler_common *common)
 {
 /* Fast decoding a UTF-8 character. TMP1 contains the first byte
 of the character (>= 0xc0). Return value in TMP1. */
@@ -2822,22 +2814,27 @@ DEFINE_COMPILER;
 struct sljit_jump *jump;
 
 sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
-
-OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x20);
-jump = JUMP(SLJIT_C_NOT_ZERO);
-/* Two byte sequence. */
 OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x1f);
+OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x3f);
 OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 6);
 OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
 OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+
+/* Searching for the first zero. */
+OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0x800);
+jump = JUMP(SLJIT_C_NOT_ZERO);
+/* Two byte sequence. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
 JUMPHERE(jump);
-OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
-OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0x800);
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
+OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
+OP2(SLJIT_XOR, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x800);
+OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 6);
+OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
+OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
+/* Three byte sequence. */
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 
@@ -2877,34 +2874,7 @@ OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 
-#elif defined COMPILE_PCRE16
-
-static void do_utfreadchar(compiler_common *common)
-{
-/* Fast decoding a UTF-16 character. TMP1 contains the first 16 bit char
-of the character (>= 0xd800). Return char value in TMP1, length - 1 in TMP2. */
-DEFINE_COMPILER;
-struct sljit_jump *jump;
-
-sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
-jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xdc00);
-/* Do nothing, only return. */
-sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
-
-JUMPHERE(jump);
-/* Combine two 16 bit characters. */
-OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x3ff);
-OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 10);
-OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3ff);
-OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, IN_UCHARS(2));
-OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 0x10000);
-sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
-}
-
-#endif /* COMPILE_PCRE[8|16] */
+#endif /* COMPILE_PCRE8 */
 
 #endif /* SUPPORT_UTF */
 
@@ -5357,21 +5327,21 @@ switch(type)
 #endif /* COMPILE_PCRE8 */
       {
       GETCHARLEN(c, cc, length);
-      read_char(common);
       }
     }
   else
 #endif /* SUPPORT_UTF */
-    {
-    read_char(common);
     c = *cc;
-    }
 
   if (type == OP_NOT || !char_has_othercase(common, cc))
+    {
+    read_char_max(common, c, TRUE);
     add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, c));
+    }
   else
     {
     oc = char_othercase(common, c);
+    read_char_max(common, c > oc ? c : oc, TRUE);
     bit = c ^ oc;
     if (is_powerof2(bit))
       {
@@ -9875,18 +9845,16 @@ if (common->reset_match != NULL)
   JUMPTO(SLJIT_JUMP, reset_match_label);
   }
 #ifdef SUPPORT_UTF
-#ifndef COMPILE_PCRE32
+#ifdef COMPILE_PCRE8
 if (common->utfreadchar != NULL)
   {
   set_jumps(common->utfreadchar, LABEL());
   do_utfreadchar(common);
   }
-#endif /* !COMPILE_PCRE32 */
-#ifdef COMPILE_PCRE8
-if (common->utfreadchar11 != NULL)
+if (common->utfreadchar16 != NULL)
   {
-  set_jumps(common->utfreadchar11, LABEL());
-  do_utfreadchar11(common);
+  set_jumps(common->utfreadchar16, LABEL());
+  do_utfreadchar16(common);
   }
 if (common->utfreadtype8 != NULL)
   {
