@@ -1473,7 +1473,7 @@ for (;;)
           goto ANYNL01;
 
           case CHAR_CR:
-          if (ptr + 1 < end_subject && RAWUCHARTEST(ptr + 1) == CHAR_LF) ncount = 1;
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL01:
@@ -1742,7 +1742,7 @@ for (;;)
           goto ANYNL02;
 
           case CHAR_CR:
-          if (ptr + 1 < end_subject && RAWUCHARTEST(ptr + 1) == CHAR_LF) ncount = 1;
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL02:
@@ -2012,7 +2012,7 @@ for (;;)
           goto ANYNL03;
 
           case CHAR_CR:
-          if (ptr + 1 < end_subject && RAWUCHARTEST(ptr + 1) == CHAR_LF) ncount = 1;
+          if (ptr + 1 < end_subject && ptr[1] == CHAR_LF) ncount = 1;
           /* Fall through */
 
           ANYNL03:
@@ -2210,7 +2210,7 @@ for (;;)
           if ((md->moptions & PCRE_PARTIAL_HARD) != 0)
             reset_could_continue = TRUE;
           }
-        else if (RAWUCHARTEST(ptr + 1) == CHAR_LF)
+        else if (ptr[1] == CHAR_LF)
           {
           ADD_NEW_DATA(-(state_offset + 1), 0, 1);
           }
@@ -3474,12 +3474,12 @@ for (;;)
           {
           pcre_uchar csc;
           while (current_subject < end_subject &&
-                 (csc = RAWUCHARTEST(current_subject)) != first_char && csc != first_char2)
+                 (csc = *current_subject) != first_char && csc != first_char2)
             current_subject++;
           }
         else
           while (current_subject < end_subject &&
-                 RAWUCHARTEST(current_subject) != first_char)
+                 *current_subject != first_char)
             current_subject++;
         }
 
@@ -3509,10 +3509,9 @@ for (;;)
           ANYCRLF, and we are now at a LF, advance the match position by one
           more character. */
 
-          if (RAWUCHARTEST(current_subject - 1) == CHAR_CR &&
+          if (current_subject[-1] == CHAR_CR &&
                (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
-               current_subject < end_subject &&
-               RAWUCHARTEST(current_subject) == CHAR_NL)
+               current_subject < end_subject && *current_subject == CHAR_NL)
             current_subject++;
           }
         }
@@ -3523,7 +3522,7 @@ for (;;)
         {
         while (current_subject < end_subject)
           {
-          register pcre_uint32 c = RAWUCHARTEST(current_subject);
+          register pcre_uint32 c = *current_subject;
 #ifndef COMPILE_PCRE8
           if (c > 255) c = 255;
 #endif
@@ -3589,7 +3588,7 @@ for (;;)
             {
             while (p < end_subject)
               {
-              register pcre_uint32 pp = RAWUCHARINCTEST(p);
+              register pcre_uint32 pp = *p++;
               if (pp == req_char || pp == req_char2) { p--; break; }
               }
             }
@@ -3597,7 +3596,7 @@ for (;;)
             {
             while (p < end_subject)
               {
-              if (RAWUCHARINCTEST(p) == req_char) { p--; break; }
+              if (*p++ == req_char) { p--; break; }
               }
             }
 
@@ -3665,9 +3664,9 @@ for (;;)
   not contain any explicit matches for \r or \n, and the newline option is CRLF
   or ANY or ANYCRLF, advance the match position by one more character. */
 
-  if (RAWUCHARTEST(current_subject - 1) == CHAR_CR &&
+  if (current_subject[-1] == CHAR_CR &&
       current_subject < end_subject &&
-      RAWUCHARTEST(current_subject) == CHAR_NL &&
+      *current_subject == CHAR_NL &&
       (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||

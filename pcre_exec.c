@@ -134,7 +134,7 @@ pcre_uint32 c;
 BOOL utf = md->utf;
 if (is_subject && length > md->end_subject - p) length = md->end_subject - p;
 while (length-- > 0)
-  if (isprint(c = RAWUCHARINCTEST(p))) printf("%c", (char)c); else printf("\\x{%02x}", c);
+  if (isprint(c = *p++)) printf("%c", (char)c); else printf("\\x{%02x}", c);
 }
 #endif
 
@@ -237,8 +237,8 @@ if (caseless)
       {
       pcre_uint32 cc, cp;
       if (eptr >= md->end_subject) return -2;   /* Partial match */
-      cc = RAWUCHARTEST(eptr);
-      cp = RAWUCHARTEST(p);
+      cc = *eptr;
+      cp = *p;
       if (TABLE_GET(cp, md->lcc, cp) != TABLE_GET(cc, md->lcc, cc)) return -1;
       p++;
       eptr++;
@@ -254,7 +254,7 @@ else
   while (length-- > 0)
     {
     if (eptr >= md->end_subject) return -2;   /* Partial match */
-    if (RAWUCHARINCTEST(p) != RAWUCHARINCTEST(eptr)) return -1;
+    if (*p++ != *eptr++) return -1;
     }
   }
 
@@ -2103,7 +2103,7 @@ for (;;)
             eptr + 1 >= md->end_subject &&
             NLBLOCK->nltype == NLTYPE_FIXED &&
             NLBLOCK->nllen == 2 &&
-            RAWUCHARTEST(eptr) == NLBLOCK->nl[0])
+            *eptr == NLBLOCK->nl[0])
           {
           md->hitend = TRUE;
           if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -2147,7 +2147,7 @@ for (;;)
           eptr + 1 >= md->end_subject &&
           NLBLOCK->nltype == NLTYPE_FIXED &&
           NLBLOCK->nllen == 2 &&
-          RAWUCHARTEST(eptr) == NLBLOCK->nl[0])
+          *eptr == NLBLOCK->nl[0])
         {
         md->hitend = TRUE;
         if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -2290,7 +2290,7 @@ for (;;)
         eptr + 1 >= md->end_subject &&
         NLBLOCK->nltype == NLTYPE_FIXED &&
         NLBLOCK->nllen == 2 &&
-        RAWUCHARTEST(eptr) == NLBLOCK->nl[0])
+        *eptr == NLBLOCK->nl[0])
       {
       md->hitend = TRUE;
       if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -2444,7 +2444,7 @@ for (;;)
         {
         SCHECK_PARTIAL();
         }
-      else if (RAWUCHARTEST(eptr) == CHAR_LF) eptr++;
+      else if (*eptr == CHAR_LF) eptr++;
       break;
 
       case CHAR_LF:
@@ -3218,7 +3218,7 @@ for (;;)
         CHECK_PARTIAL();             /* Not SCHECK_PARTIAL() */
         RRETURN(MATCH_NOMATCH);
         }
-      while (length-- > 0) if (*ecode++ != RAWUCHARINC(eptr)) RRETURN(MATCH_NOMATCH);
+      while (length-- > 0) if (*ecode++ != *eptr++) RRETURN(MATCH_NOMATCH);
       }
     else
 #endif
@@ -3258,7 +3258,7 @@ for (;;)
 
       if (fc < 128)
         {
-        pcre_uint32 cc = RAWUCHAR(eptr);
+        pcre_uint32 cc = *eptr;
         if (md->lcc[fc] != TABLE_GET(cc, md->lcc, cc)) RRETURN(MATCH_NOMATCH);
         ecode++;
         eptr++;
@@ -3527,7 +3527,7 @@ for (;;)
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        cc = RAWUCHARTEST(eptr);
+        cc = *eptr;
         if (fc != cc && foc != cc) RRETURN(MATCH_NOMATCH);
         eptr++;
         }
@@ -3545,7 +3545,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = RAWUCHARTEST(eptr);
+          cc = *eptr;
           if (fc != cc && foc != cc) RRETURN(MATCH_NOMATCH);
           eptr++;
           }
@@ -3562,7 +3562,7 @@ for (;;)
             SCHECK_PARTIAL();
             break;
             }
-          cc = RAWUCHARTEST(eptr);
+          cc = *eptr;
           if (fc != cc && foc != cc) break;
           eptr++;
           }
@@ -3589,7 +3589,7 @@ for (;;)
           SCHECK_PARTIAL();
           RRETURN(MATCH_NOMATCH);
           }
-        if (fc != RAWUCHARINCTEST(eptr)) RRETURN(MATCH_NOMATCH);
+        if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
         }
 
       if (min == max) continue;
@@ -3606,7 +3606,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          if (fc != RAWUCHARINCTEST(eptr)) RRETURN(MATCH_NOMATCH);
+          if (fc != *eptr++) RRETURN(MATCH_NOMATCH);
           }
         /* Control never gets here */
         }
@@ -3620,7 +3620,7 @@ for (;;)
             SCHECK_PARTIAL();
             break;
             }
-          if (fc != RAWUCHARTEST(eptr)) break;
+          if (fc != *eptr) break;
           eptr++;
           }
         if (possessive) continue;    /* No backtracking */
@@ -4375,7 +4375,7 @@ for (;;)
               eptr + 1 >= md->end_subject &&
               NLBLOCK->nltype == NLTYPE_FIXED &&
               NLBLOCK->nllen == 2 &&
-              RAWUCHAR(eptr) == NLBLOCK->nl[0])
+              *eptr == NLBLOCK->nl[0])
             {
             md->hitend = TRUE;
             if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -4417,7 +4417,7 @@ for (;;)
             default: RRETURN(MATCH_NOMATCH);
 
             case CHAR_CR:
-            if (eptr < md->end_subject && RAWUCHAR(eptr) == CHAR_LF) eptr++;
+            if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
             break;
 
             case CHAR_LF:
@@ -4527,7 +4527,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = RAWUCHAR(eptr);
+          cc = *eptr;
           if (cc >= 128 || (md->ctypes[cc] & ctype_digit) == 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
@@ -4544,7 +4544,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = RAWUCHAR(eptr);
+          cc = *eptr;
           if (cc < 128 && (md->ctypes[cc] & ctype_space) != 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
@@ -4561,7 +4561,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = RAWUCHAR(eptr);
+          cc = *eptr;
           if (cc >= 128 || (md->ctypes[cc] & ctype_space) == 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
@@ -4578,7 +4578,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = RAWUCHAR(eptr);
+          cc = *eptr;
           if (cc < 128 && (md->ctypes[cc] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
@@ -4595,7 +4595,7 @@ for (;;)
             SCHECK_PARTIAL();
             RRETURN(MATCH_NOMATCH);
             }
-          cc = RAWUCHAR(eptr);
+          cc = *eptr;
           if (cc >= 128 || (md->ctypes[cc] & ctype_word) == 0)
             RRETURN(MATCH_NOMATCH);
           eptr++;
@@ -5156,7 +5156,7 @@ for (;;)
               {
               default: RRETURN(MATCH_NOMATCH);
               case CHAR_CR:
-              if (eptr < md->end_subject && RAWUCHAR(eptr) == CHAR_LF) eptr++;
+              if (eptr < md->end_subject && *eptr == CHAR_LF) eptr++;
               break;
 
               case CHAR_LF:
@@ -5695,7 +5695,7 @@ for (;;)
                   eptr + 1 >= md->end_subject &&
                   NLBLOCK->nltype == NLTYPE_FIXED &&
                   NLBLOCK->nllen == 2 &&
-                  RAWUCHAR(eptr) == NLBLOCK->nl[0])
+                  *eptr == NLBLOCK->nl[0])
                 {
                 md->hitend = TRUE;
                 if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -5721,7 +5721,7 @@ for (;;)
                   eptr + 1 >= md->end_subject &&
                   NLBLOCK->nltype == NLTYPE_FIXED &&
                   NLBLOCK->nllen == 2 &&
-                  RAWUCHAR(eptr) == NLBLOCK->nl[0])
+                  *eptr == NLBLOCK->nl[0])
                 {
                 md->hitend = TRUE;
                 if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
@@ -5778,7 +5778,7 @@ for (;;)
             if (c == CHAR_CR)
               {
               if (++eptr >= md->end_subject) break;
-              if (RAWUCHAR(eptr) == CHAR_LF) eptr++;
+              if (*eptr == CHAR_LF) eptr++;
               }
             else
               {
@@ -5941,8 +5941,8 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
           BACKCHAR(eptr);
-          if (ctype == OP_ANYNL && eptr > pp  && RAWUCHAR(eptr) == CHAR_NL &&
-              RAWUCHAR(eptr - 1) == CHAR_CR) eptr--;
+          if (ctype == OP_ANYNL && eptr > pp  && *eptr == CHAR_NL &&
+              eptr[-1] == CHAR_CR) eptr--;
           }
         }
       else
@@ -6789,10 +6789,10 @@ for(;;)
 
       if (first_char != first_char2)
         while (start_match < end_subject &&
-          (smc = RAWUCHARTEST(start_match)) != first_char && smc != first_char2)
+          (smc = *start_match) != first_char && smc != first_char2)
           start_match++;
       else
-        while (start_match < end_subject && RAWUCHARTEST(start_match) != first_char)
+        while (start_match < end_subject && *start_match != first_char)
           start_match++;
       }
 
@@ -6824,7 +6824,7 @@ for(;;)
         if (start_match[-1] == CHAR_CR &&
              (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
              start_match < end_subject &&
-             RAWUCHARTEST(start_match) == CHAR_NL)
+             *start_match == CHAR_NL)
           start_match++;
         }
       }
@@ -6835,7 +6835,7 @@ for(;;)
       {
       while (start_match < end_subject)
         {
-        register pcre_uint32 c = RAWUCHARTEST(start_match);
+        register pcre_uint32 c = *start_match;
 #ifndef COMPILE_PCRE8
         if (c > 255) c = 255;
 #endif
@@ -6893,7 +6893,7 @@ for(;;)
           {
           while (p < end_subject)
             {
-            register pcre_uint32 pp = RAWUCHARINCTEST(p);
+            register pcre_uint32 pp = *p++;
             if (pp == req_char || pp == req_char2) { p--; break; }
             }
           }
@@ -6901,7 +6901,7 @@ for(;;)
           {
           while (p < end_subject)
             {
-            if (RAWUCHARINCTEST(p) == req_char) { p--; break; }
+            if (*p++ == req_char) { p--; break; }
             }
           }
 

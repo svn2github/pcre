@@ -316,8 +316,7 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
-     RAWUCHARTEST(p) == NLBLOCK->nl[0] && \
-     (NLBLOCK->nllen == 1 || RAWUCHARTEST(p+1) == NLBLOCK->nl[1])       \
+     *p == NLBLOCK->nl[0] && (NLBLOCK->nllen == 1 || p[1] == NLBLOCK->nl[1]) \
     ) \
   )
 
@@ -330,8 +329,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
-     RAWUCHARTEST(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
-     (NLBLOCK->nllen == 1 || RAWUCHARTEST(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
+     *(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
+     (NLBLOCK->nllen == 1 || *(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
     ) \
   )
 
@@ -600,10 +599,6 @@ we don't even define them. */
 #define GETCHARINC(c, eptr) c = *eptr++;
 #define GETCHARINCTEST(c, eptr) c = *eptr++;
 #define GETCHARLEN(c, eptr, len) c = *eptr;
-#define RAWUCHAR(eptr) (*(eptr))
-#define RAWUCHARINC(eptr) (*(eptr)++)
-#define RAWUCHARTEST(eptr) (*(eptr))
-#define RAWUCHARINCTEST(eptr) (*(eptr)++)
 /* #define GETCHARLENTEST(c, eptr, len) */
 /* #define BACKCHAR(eptr) */
 /* #define FORWARDCHAR(eptr) */
@@ -776,30 +771,6 @@ do not know if we are in UTF-8 mode. */
   c = *eptr; \
   if (utf && c >= 0xc0) GETUTF8LEN(c, eptr, len);
 
-/* Returns the next uchar, not advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHAR(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHARINC(eptr) \
-  (*((eptr)++))
-
-/* Returns the next uchar, testing for UTF mode, and not advancing the
-pointer. */
-
-#define RAWUCHARTEST(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, testing for UTF mode, advancing the
-pointer. */
-
-#define RAWUCHARINCTEST(eptr) \
-  (*((eptr)++))
-
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
 because almost all calls are already within a block of UTF-8 only code. */
@@ -895,30 +866,6 @@ we do not know if we are in UTF-16 mode. */
   c = *eptr; \
   if (utf && (c & 0xfc00) == 0xd800) GETUTF16LEN(c, eptr, len);
 
-/* Returns the next uchar, not advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHAR(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHARINC(eptr) \
-  (*((eptr)++))
-
-/* Returns the next uchar, testing for UTF mode, and not advancing the
-pointer. */
-
-#define RAWUCHARTEST(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, testing for UTF mode, advancing the
-pointer. */
-
-#define RAWUCHARINCTEST(eptr) \
-  (*((eptr)++))
-
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-16 mode - we don't put a test within the
 macro because almost all calls are already within a block of UTF-16 only
@@ -979,30 +926,6 @@ This is called when we do not know if we are in UTF-32 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
   GETCHARTEST(c, eptr)
-
-/* Returns the next uchar, not advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHAR(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHARINC(eptr) \
-  (*((eptr)++))
-
-/* Returns the next uchar, testing for UTF mode, and not advancing the
-pointer. */
-
-#define RAWUCHARTEST(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, testing for UTF mode, advancing the
-pointer. */
-
-#define RAWUCHARINCTEST(eptr) \
-  (*((eptr)++))
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the

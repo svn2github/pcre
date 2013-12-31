@@ -91,8 +91,8 @@ pcre_uchar c2;
 
 while (*str1 != '\0' || *str2 != '\0')
   {
-  c1 = RAWUCHARINC(str1);
-  c2 = RAWUCHARINC(str2);
+  c1 = *str1++;
+  c2 = *str2++;
   if (c1 != c2)
     return ((c1 > c2) << 1) - 1;
   }
@@ -131,7 +131,7 @@ pcre_uchar c2;
 
 while (*str1 != '\0' || *ustr2 != '\0')
   {
-  c1 = RAWUCHARINC(str1);
+  c1 = *str1++;
   c2 = (pcre_uchar)*ustr2++;
   if (c1 != c2)
     return ((c1 > c2) << 1) - 1;
