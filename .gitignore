@@ -1,4 +1,5 @@
 /aclocal.m4
+/ar-lib
 /autom4te.cache/
 /compile
 /config.guess
@@ -20,6 +21,7 @@
 /.libs
 /libtool
 /*.lo
+/*.log
 /ltmain.sh
 /m4/
 /maint/ucptest
@@ -34,6 +36,7 @@
 /pcrecpp_unittest
 pcregrep
 /pcre.h
+/pcre.h.generic
 /pcre-*-coverage.info
 /pcre-*-coverage/
 /pcre_jit_test
@@ -50,3 +53,5 @@ pcregrep
 /teststdout
 /testtemp*
 /testtry
+/test-driver
+/*.trs
