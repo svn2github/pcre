@@ -3466,7 +3466,7 @@ for (;;)
 
     if (((options | re->options) & PCRE_NO_START_OPTIMIZE) == 0)
       {
-      /* Advance to a known first char. */
+      /* Advance to a known first pcre_uchar (i.e. data item) */
 
       if (has_first_char)
         {
@@ -3516,7 +3516,7 @@ for (;;)
           }
         }
 
-      /* Or to a non-unique first char after study */
+      /* Advance to a non-unique first pcre_uchar after study */
 
       else if (start_bits != NULL)
         {
@@ -3526,18 +3526,8 @@ for (;;)
 #ifndef COMPILE_PCRE8
           if (c > 255) c = 255;
 #endif
-          if ((start_bits[c/8] & (1 << (c&7))) == 0)
-            {
-            current_subject++;
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-            /* In non 8-bit mode, the iteration will stop for
-            characters > 255 at the beginning or not stop at all. */
-            if (utf)
-              ACROSSCHAR(current_subject < end_subject, *current_subject,
-                current_subject++);
-#endif
-            }
-          else break;
+          if ((start_bits[c/8] & (1 << (c&7))) != 0) break;
+          current_subject++;
           }
         }
       }
@@ -3556,19 +3546,20 @@ for (;;)
       /* If the pattern was studied, a minimum subject length may be set. This
       is a lower bound; no actual string of that length may actually match the
       pattern. Although the value is, strictly, in characters, we treat it as
-      bytes to avoid spending too much time in this optimization. */
+      in pcre_uchar units to avoid spending too much time in this optimization.
+      */
 
       if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
           (pcre_uint32)(end_subject - current_subject) < study->minlength)
         return PCRE_ERROR_NOMATCH;
 
-      /* If req_char is set, we know that that character must appear in the
-      subject for the match to succeed. If the first character is set, req_char
-      must be later in the subject; otherwise the test starts at the match
-      point. This optimization can save a huge amount of work in patterns with
-      nested unlimited repeats that aren't going to match. Writing separate
-      code for cased/caseless versions makes it go faster, as does using an
-      autoincrement and backing off on a match.
+      /* If req_char is set, we know that that pcre_uchar must appear in the
+      subject for the match to succeed. If the first pcre_uchar is set,
+      req_char must be later in the subject; otherwise the test starts at the
+      match point. This optimization can save a huge amount of work in patterns
+      with nested unlimited repeats that aren't going to match. Writing
+      separate code for cased/caseless versions makes it go faster, as does
+      using an autoincrement and backing off on a match.
 
       HOWEVER: when the subject string is very, very long, searching to its end
       can take a long time, and give bad performance on quite ordinary
@@ -3600,14 +3591,14 @@ for (;;)
               }
             }
 
-          /* If we can't find the required character, break the matching loop,
+          /* If we can't find the required pcre_uchar, break the matching loop,
           which will cause a return or PCRE_ERROR_NOMATCH. */
 
           if (p >= end_subject) break;
 
-          /* If we have found the required character, save the point where we
+          /* If we have found the required pcre_uchar, save the point where we
           found it, so that we don't search again next time round the loop if
-          the start hasn't passed this character yet. */
+          the start hasn't passed this point yet. */
 
           req_char_ptr = p;
           }
