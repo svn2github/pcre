@@ -364,9 +364,11 @@ typedef struct compiler_common {
   /* Newline control. */
   int nltype;
   pcre_uint32 nlmax;
+  pcre_uint32 nlmin;
   int newline;
   int bsr_nltype;
   pcre_uint32 bsr_nlmax;
+  pcre_uint32 bsr_nlmin;
   /* Dollar endonly. */
   int endonly;
   /* Tables. */
@@ -524,7 +526,7 @@ the start pointers when the end of the capturing group has not yet reached. */
 #define GET_LOCAL_BASE(dst, dstw, offset) \
   sljit_get_local_base(compiler, (dst), (dstw), (offset))
 
-#define READ_CHAR_ANY 0x7fffffff
+#define READ_CHAR_MAX 0x7fffffff
 
 static pcre_uchar* bracketend(pcre_uchar* cc)
 {
@@ -2464,7 +2466,7 @@ else
 JUMPHERE(jump);
 }
 
-static void peek_char(compiler_common *common)
+static void peek_char(compiler_common *common, pcre_uint32 max)
 {
 /* Reads the character into TMP1, keeps STR_PTR.
 Does not check STR_END. TMP2 Destroyed. */
@@ -2473,10 +2475,14 @@ DEFINE_COMPILER;
 struct sljit_jump *jump;
 #endif
 
+SLJIT_UNUSED_ARG(max);
+
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (common->utf)
   {
+  if (max < 128) return;
+
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   add_jump(compiler, &common->utfreadchar, JUMP(SLJIT_FAST_CALL));
@@ -2488,6 +2494,8 @@ if (common->utf)
 #if defined SUPPORT_UTF && defined COMPILE_PCRE16
 if (common->utf)
   {
+  if (max < 0xd800) return;
+
   OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
   jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 0xdc00 - 0xd800 - 1);
   /* TMP2 contains the high surrogate. */
@@ -2546,19 +2554,20 @@ if (full_read)
 
 #endif /* SUPPORT_UTF && COMPILE_PCRE8 */
 
-static void read_char_max(compiler_common *common, pcre_uint32 max, BOOL full_read)
+static void read_char_range(compiler_common *common, pcre_uint32 min, pcre_uint32 max, BOOL update_str_ptr)
 {
 /* Reads the precise value of a character into TMP1, if the character is
-less than or equal to max. Otherwise it returns with a value greater than max.
-Does not check STR_END. The full_read argument tells whether characters above
-max are accepted or not. */
+between min and max (c >= min && c <= max). Otherwise it returns with a value
+outside the range. Does not check STR_END. */
 DEFINE_COMPILER;
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 struct sljit_jump *jump;
 #endif
 
-SLJIT_UNUSED_ARG(full_read);
+SLJIT_UNUSED_ARG(update_str_ptr);
+SLJIT_UNUSED_ARG(min);
 SLJIT_UNUSED_ARG(max);
+SLJIT_ASSERT(min <= max);
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
@@ -2566,8 +2575,7 @@ OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (common->utf)
   {
-  if (max < 128 && !full_read)
-    return;
+  if (max < 128 && !update_str_ptr) return;
 
   jump = CMP(SLJIT_C_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
   if (max >= 0x800)
@@ -2580,7 +2588,7 @@ if (common->utf)
   else
     {
     OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
-    if (!full_read)
+    if (!update_str_ptr)
       OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
     else
       OP1(SLJIT_MOV_UB, RETURN_ADDR, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
@@ -2588,7 +2596,7 @@ if (common->utf)
     OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 6);
     OP2(SLJIT_AND, TMP2, 0, TMP2, 0, SLJIT_IMM, 0x3f);
     OP2(SLJIT_OR, TMP1, 0, TMP1, 0, TMP2, 0);
-    if (full_read)
+    if (update_str_ptr)
       OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, RETURN_ADDR, 0);
     }
   JUMPHERE(jump);
@@ -2613,13 +2621,12 @@ if (common->utf)
     return;
     }
 
-  if (max < 0xd800 && !full_read)
-    return;
+  if (max < 0xd800 && !update_str_ptr) return;
 
   /* Skip low surrogate if necessary. */
   OP2(SLJIT_SUB, TMP2, 0, TMP1, 0, SLJIT_IMM, 0xd800);
   jump = CMP(SLJIT_C_GREATER, TMP2, 0, SLJIT_IMM, 0xdc00 - 0xd800 - 1);
-  if (full_read)
+  if (update_str_ptr)
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   if (max >= 0xd800)
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 0x10000);
@@ -2630,13 +2637,12 @@ if (common->utf)
 
 static SLJIT_INLINE void read_char(compiler_common *common)
 {
-read_char_max(common, READ_CHAR_ANY, TRUE);
+read_char_range(common, 0, READ_CHAR_MAX, TRUE);
 }
 
-static void read_char8_type(compiler_common *common, BOOL full_read)
+static void read_char8_type(compiler_common *common, BOOL update_str_ptr)
 {
-/* Reads the character type into TMP1, updates STR_PTR. Does not check STR_END.
-The full_read argument tells whether characters above max are accepted or not. */
+/* Reads the character type into TMP1, updates STR_PTR. Does not check STR_END. */
 DEFINE_COMPILER;
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
 struct sljit_jump *jump;
@@ -2645,7 +2651,7 @@ struct sljit_jump *jump;
 struct sljit_jump *jump2;
 #endif
 
-SLJIT_UNUSED_ARG(full_read);
+SLJIT_UNUSED_ARG(update_str_ptr);
 
 OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), 0);
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
@@ -2657,7 +2663,7 @@ if (common->utf)
   it is needed in most cases. */
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP2), common->ctypes);
   jump = CMP(SLJIT_C_LESS, TMP2, 0, SLJIT_IMM, 0xc0);
-  if (!full_read)
+  if (!update_str_ptr)
     {
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(0));
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
@@ -2688,7 +2694,7 @@ JUMPHERE(jump);
 #endif
 
 #if defined SUPPORT_UTF && defined COMPILE_PCRE16
-if (common->utf && full_read)
+if (common->utf && update_str_ptr)
   {
   /* Skip low surrogate if necessary. */
   OP2(SLJIT_SUB, TMP2, 0, TMP2, 0, SLJIT_IMM, 0xd800);
@@ -2964,7 +2970,7 @@ if (firstline)
     mainloop = LABEL();
     /* Continual stores does not cause data dependency. */
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, STR_PTR, 0);
-    read_char_max(common, common->nlmax, TRUE);
+    read_char_range(common, common->nlmin, common->nlmax, TRUE);
     check_newlinechar(common, common->nltype, &newline, TRUE);
     CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, mainloop);
     JUMPHERE(end);
@@ -3532,7 +3538,7 @@ firstchar = CMP(SLJIT_C_LESS_EQUAL, STR_PTR, 0, TMP2, 0);
 skip_char_back(common);
 
 loop = LABEL();
-read_char_max(common, common->nlmax, TRUE);
+read_char_range(common, common->nlmin, common->nlmax, TRUE);
 lastchar = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 if (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF)
   foundcr = CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
@@ -3801,7 +3807,7 @@ JUMPHERE(skipread);
 
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, 0);
 check_str_end(common, &skipread_list);
-peek_char(common);
+peek_char(common, READ_CHAR_MAX);
 
 /* Testing char type. This is a code duplication. */
 #ifdef SUPPORT_UCP
@@ -4360,20 +4366,20 @@ return cc;
 #define SET_TYPE_OFFSET(value) \
   if ((value) != typeoffset) \
     { \
-    if ((value) > typeoffset) \
-      OP2(SLJIT_SUB, typereg, 0, typereg, 0, SLJIT_IMM, (value) - typeoffset); \
-    else \
+    if ((value) < typeoffset) \
       OP2(SLJIT_ADD, typereg, 0, typereg, 0, SLJIT_IMM, typeoffset - (value)); \
+    else \
+      OP2(SLJIT_SUB, typereg, 0, typereg, 0, SLJIT_IMM, (value) - typeoffset); \
     } \
   typeoffset = (value);
 
 #define SET_CHAR_OFFSET(value) \
   if ((value) != charoffset) \
     { \
-    if ((value) > charoffset) \
-      OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)((value) - charoffset)); \
-    else \
+    if ((value) < charoffset) \
       OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)(charoffset - (value))); \
+    else \
+      OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, SLJIT_IMM, (sljit_sw)((value) - charoffset)); \
     } \
   charoffset = (value);
 
@@ -4382,7 +4388,7 @@ static void compile_xclass_matchingpath(compiler_common *common, pcre_uchar *cc,
 DEFINE_COMPILER;
 jump_list *found = NULL;
 jump_list **list = (cc[0] & XCL_NOT) == 0 ? &found : backtracks;
-sljit_uw c, charoffset, max = 0;
+sljit_uw c, charoffset, max = 256, min = READ_CHAR_MAX;
 struct sljit_jump *jump = NULL;
 pcre_uchar *ccbegin;
 int compares, invertcmp, numberofcmps;
@@ -4395,14 +4401,18 @@ BOOL needstype = FALSE, needsscript = FALSE, needschar = FALSE;
 BOOL charsaved = FALSE;
 int typereg = TMP1, scriptreg = TMP1;
 const pcre_uint32 *other_cases;
-pcre_int32 typeoffset;
+sljit_uw typeoffset;
 #endif
 
 /* Scanning the necessary info. */
 cc++;
 ccbegin = cc;
 compares = 0;
-if (cc[-1] & XCL_MAP) cc += 32 / sizeof(pcre_uchar);
+if (cc[-1] & XCL_MAP)
+  {
+  min = 0;
+  cc += 32 / sizeof(pcre_uchar);
+  }
 
 while (*cc != XCL_END)
   {
@@ -4412,16 +4422,16 @@ while (*cc != XCL_END)
     cc ++;
     GETCHARINCTEST(c, cc);
     if (c > max) max = c;
+    if (c < min) min = c;
 #ifdef SUPPORT_UCP
     needschar = TRUE;
 #endif
     }
   else if (*cc == XCL_RANGE)
     {
-    cc += 2;
-#ifdef SUPPORT_UTF
-    if (common->utf && HAS_EXTRALEN(cc[-1])) cc += GET_EXTRALEN(cc[-1]);
-#endif
+    cc ++;
+    GETCHARINCTEST(c, cc);
+    if (c < min) min = c;
     GETCHARINCTEST(c, cc);
     if (c > max) max = c;
 #ifdef SUPPORT_UCP
@@ -4439,11 +4449,15 @@ while (*cc != XCL_END)
       while (*other_cases != NOTACHAR)
         {
         if (*other_cases > max) max = *other_cases;
+        if (*other_cases < min) min = *other_cases;
         other_cases++;
         }
       }
     else
-      max = READ_CHAR_ANY;
+      {
+      max = READ_CHAR_MAX;
+      min = 0;
+      }
 
     switch(*cc)
       {
@@ -4488,7 +4502,7 @@ while (*cc != XCL_END)
 /* We are not necessary in utf mode even in 8 bit mode. */
 cc = ccbegin;
 detect_partial_match(common, backtracks);
-read_char_max(common, max, (cc[0] & XCL_NOT) != 0);
+read_char_range(common, min, max, (cc[0] & XCL_NOT) != 0);
 
 if ((cc[-1] & XCL_HASPROP) == 0)
   {
@@ -4945,7 +4959,7 @@ switch(type)
 
   case OP_ANY:
   detect_partial_match(common, backtracks);
-  read_char_max(common, common->nlmax, TRUE);
+  read_char_range(common, common->nlmin, common->nlmax, TRUE);
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
     jump[0] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
@@ -5013,7 +5027,7 @@ switch(type)
 
   case OP_ANYNL:
   detect_partial_match(common, backtracks);
-  read_char_max(common, common->bsr_nlmax, FALSE);
+  read_char_range(common, common->bsr_nlmin, common->bsr_nlmax, FALSE);
   jump[0] = CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
   /* We don't need to handle soft partial matching case. */
   end_list = NULL;
@@ -5035,7 +5049,7 @@ switch(type)
   case OP_NOT_HSPACE:
   case OP_HSPACE:
   detect_partial_match(common, backtracks);
-  read_char_max(common, 0x3000, type == OP_NOT_HSPACE);
+  read_char_range(common, 0x9, 0x3000, type == OP_NOT_HSPACE);
   add_jump(compiler, &common->hspace, JUMP(SLJIT_FAST_CALL));
   add_jump(compiler, backtracks, JUMP(type == OP_NOT_HSPACE ? SLJIT_C_NOT_ZERO : SLJIT_C_ZERO));
   return cc;
@@ -5043,7 +5057,7 @@ switch(type)
   case OP_NOT_VSPACE:
   case OP_VSPACE:
   detect_partial_match(common, backtracks);
-  read_char_max(common, 0x2029, type == OP_NOT_VSPACE);
+  read_char_range(common, 0xa, 0x2029, type == OP_NOT_VSPACE);
   add_jump(compiler, &common->vspace, JUMP(SLJIT_FAST_CALL));
   add_jump(compiler, backtracks, JUMP(type == OP_NOT_VSPACE ? SLJIT_C_NOT_ZERO : SLJIT_C_ZERO));
   return cc;
@@ -5142,7 +5156,7 @@ switch(type)
     else
       {
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_LOCALS_REG), LOCALS1, STR_PTR, 0);
-      read_char_max(common, common->nlmax, TRUE);
+      read_char_range(common, common->nlmin, common->nlmax, TRUE);
       add_jump(compiler, backtracks, CMP(SLJIT_C_NOT_EQUAL, STR_PTR, 0, STR_END, 0));
       add_jump(compiler, &common->anynewline, JUMP(SLJIT_FAST_CALL));
       add_jump(compiler, backtracks, JUMP(SLJIT_C_ZERO));
@@ -5190,7 +5204,7 @@ switch(type)
   else
     {
     skip_char_back(common);
-    read_char_max(common, common->nlmax, TRUE);
+    read_char_range(common, common->nlmin, common->nlmax, TRUE);
     check_newlinechar(common, common->nltype, backtracks, FALSE);
     }
   JUMPHERE(jump[0]);
@@ -5241,7 +5255,7 @@ switch(type)
     }
   else
     {
-    peek_char(common);
+    peek_char(common, common->nlmax);
     check_newlinechar(common, common->nltype, backtracks, FALSE);
     }
   JUMPHERE(jump[0]);
@@ -5278,12 +5292,12 @@ switch(type)
 
   if (type == OP_CHAR || !char_has_othercase(common, cc))
     {
-    read_char_max(common, c, FALSE);
+    read_char_range(common, c, c, FALSE);
     add_jump(compiler, backtracks, CMP(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, c));
     return cc + length;
     }
   oc = char_othercase(common, c);
-  read_char_max(common, c > oc ? c : oc, FALSE);
+  read_char_range(common, c < oc ? c : oc, c > oc ? c : oc, FALSE);
   bit = c ^ oc;
   if (is_powerof2(bit))
     {
@@ -5336,13 +5350,13 @@ switch(type)
 
   if (type == OP_NOT || !char_has_othercase(common, cc))
     {
-    read_char_max(common, c, TRUE);
+    read_char_range(common, c, c, TRUE);
     add_jump(compiler, backtracks, CMP(SLJIT_C_EQUAL, TMP1, 0, SLJIT_IMM, c));
     }
   else
     {
     oc = char_othercase(common, c);
-    read_char_max(common, c > oc ? c : oc, TRUE);
+    read_char_range(common, c < oc ? c : oc, c > oc ? c : oc, TRUE);
     bit = c ^ oc;
     if (is_powerof2(bit))
       {
@@ -5363,9 +5377,9 @@ switch(type)
 
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
   bit = (common->utf && is_char7_bitset((const pcre_uint8 *)cc, type == OP_NCLASS)) ? 127 : 255;
-  read_char_max(common, bit, type == OP_NCLASS);
+  read_char_range(common, 0, bit, type == OP_NCLASS);
 #else
-  read_char_max(common, 255, type == OP_NCLASS);
+  read_char_range(common, 0, 255, type == OP_NCLASS);
 #endif
 
   if (check_class_ranges(common, (const pcre_uint8 *)cc, type == OP_NCLASS, FALSE, backtracks))
@@ -9421,7 +9435,8 @@ switch(re->options & PCRE_NEWLINE_BITS)
   case PCRE_NEWLINE_ANYCRLF: common->newline = (CHAR_CR << 8) | CHAR_NL; common->nltype = NLTYPE_ANYCRLF; break;
   default: return;
   }
-common->nlmax = READ_CHAR_ANY;
+common->nlmax = READ_CHAR_MAX;
+common->nlmin = 0;
 if ((re->options & PCRE_BSR_ANYCRLF) != 0)
   common->bsr_nltype = NLTYPE_ANYCRLF;
 else if ((re->options & PCRE_BSR_UNICODE) != 0)
@@ -9434,7 +9449,8 @@ else
   common->bsr_nltype = NLTYPE_ANY;
 #endif
   }
-common->bsr_nlmax = READ_CHAR_ANY;
+common->bsr_nlmax = READ_CHAR_MAX;
+common->bsr_nlmin = 0;
 common->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 common->ctypes = (sljit_sw)(tables + ctypes_offset);
 common->name_table = ((pcre_uchar *)re) + re->name_table_offset;
@@ -9459,10 +9475,16 @@ if (common->utf)
     common->nlmax = common->newline & 0xff;
     }
 
+  if (common->nltype == NLTYPE_FIXED)
+    common->nlmin = common->newline & 0xff;
+  else
+    common->nlmin = (CHAR_CR < CHAR_NL) ? CHAR_CR : CHAR_NL;
+
   if (common->bsr_nltype == NLTYPE_ANY)
     common->bsr_nlmax = 0x2029;
   else
     common->bsr_nlmax = (CHAR_CR > CHAR_NL) ? CHAR_CR : CHAR_NL;
+  common->bsr_nlmin = (CHAR_CR < CHAR_NL) ? CHAR_CR : CHAR_NL;
   }
 #endif /* SUPPORT_UTF */
 ccend = bracketend(rootbacktrack.cc);
