@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2013 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -316,7 +316,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
-     *p == NLBLOCK->nl[0] && (NLBLOCK->nllen == 1 || p[1] == NLBLOCK->nl[1]) \
+     UCHAR21TEST(p) == NLBLOCK->nl[0] && \
+     (NLBLOCK->nllen == 1 || UCHAR21TEST(p+1) == NLBLOCK->nl[1])       \
     ) \
   )
 
@@ -329,8 +330,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
-     *(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
-     (NLBLOCK->nllen == 1 || *(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
+     UCHAR21TEST(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
+     (NLBLOCK->nllen == 1 || UCHAR21TEST(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
     ) \
   )
 
@@ -581,12 +582,27 @@ changed in future to be a fixed number of bytes or to depend on LINK_SIZE. */
 #define MAX_MARK ((1u << 8) - 1)
 #endif
 
+/* There is a proposed future special "UTF-21" mode, in which only the lowest 
+21 bits of a 32-bit character are interpreted as UTF, with the remaining 11 
+high-order bits available to the application for other uses. In preparation for 
+the future implementation of this mode, there are macros that load a data item
+and, if in this special mode, mask it to 21 bits. These macros all have names
+starting with UCHAR21. In all other modes, including the normal 32-bit
+library, the macros all have the same simple definitions. When the new mode is
+implemented, it is expected that these definitions will be varied appropriately
+using #ifdef when compiling the library that supports the special mode. */
+
+#define UCHAR21(eptr)        (*(eptr))
+#define UCHAR21TEST(eptr)    (*(eptr))
+#define UCHAR21INC(eptr)     (*(eptr)++)
+#define UCHAR21INCTEST(eptr) (*(eptr)++)
+
 /* When UTF encoding is being used, a character is no longer just a single
-byte. The macros for character handling generate simple sequences when used in
-character-mode, and more complicated ones for UTF characters. GETCHARLENTEST
-and other macros are not used when UTF is not supported, so they are not
-defined. To make sure they can never even appear when UTF support is omitted,
-we don't even define them. */
+byte in 8-bit mode or a single short in 16-bit mode. The macros for character
+handling generate simple sequences when used in the basic mode, and more
+complicated ones for UTF characters. GETCHARLENTEST and other macros are not
+used when UTF is not supported. To make sure they can never even appear when
+UTF support is omitted, we don't even define them. */
 
 #ifndef SUPPORT_UTF
 

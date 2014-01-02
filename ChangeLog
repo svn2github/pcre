@@ -31,10 +31,11 @@ Version 8.35-RC1 xx-xxxx-201x
     must be bigger than the treshold as well. This function is useful, when
     the characters above the treshold are handled in the same way.
     
-7.  The macros RAWUCHAR and RAWUCHARTEST were identical (and the latter was not
-    testing anything, contrary to its name and comment) and were not really 
-    fulfilling any useful function, so I have replaced their use by plain code. 
-    Similarly for RAWUCHARINC and RAWUCHARINCTEST.  
+7.  The macros whose names start with RAWUCHAR are placeholders for a future 
+    mode in which only the bottom 21 bits of 32-bit data items are used. To 
+    make this more memorable for those maintaining the code, the names have 
+    been changed to start with UCHAR21, and an extensive comment has been added 
+    to their definition. 
 
 
 Version 8.34 15-December-2013
