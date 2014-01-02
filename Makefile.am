@@ -359,6 +359,8 @@ EXTRA_DIST += \
   sljit/sljitNativePPC_common.c \
   sljit/sljitNativeSPARC_32.c \
   sljit/sljitNativeSPARC_common.c \
+  sljit/sljitNativeTILEGX.c \
+  sljit/sljitNativeTILEGX-encoder.c \
   sljit/sljitNativeX86_32.c \
   sljit/sljitNativeX86_64.c \
   sljit/sljitNativeX86_common.c \

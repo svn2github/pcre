@@ -36,6 +36,10 @@ Version 8.35-RC1 xx-xxxx-201x
     make this more memorable for those maintaining the code, the names have 
     been changed to start with UCHAR21, and an extensive comment has been added 
     to their definition. 
+    
+8.  Add missing (new) files sljitNativeTILEGX.c and sljitNativeTILEGX-encoder.c
+    to the export list in Makefile.am (they were accidentally omitted from the
+    8.34 tarball).
 
 
 Version 8.34 15-December-2013
