@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "12 November 2013" "PCRE 8.34"
+.TH PCRETEST 1 "03 January 2014" "PCRE 8.35"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -483,7 +483,10 @@ below.
 The \fB/I\fP modifier requests that \fBpcretest\fP output information about the
 compiled pattern (whether it is anchored, has a fixed first character, and
 so on). It does this by calling \fBpcre[16|32]_fullinfo()\fP after compiling a
-pattern. If the pattern is studied, the results of that are also output.
+pattern. If the pattern is studied, the results of that are also output. In 
+this output, the word "char" means a non-UTF character, that is, the value of a 
+single data item (8-bit, 16-bit, or 32-bit, depending on the library that is 
+being tested).
 .P
 The \fB/K\fP modifier requests \fBpcretest\fP to show names from backtracking
 control verbs that are returned from calls to \fBpcre[16|32]_exec()\fP. It causes
@@ -1135,6 +1138,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 12 November 2013
-Copyright (c) 1997-2013 University of Cambridge.
+Last updated: 03 January 2014
+Copyright (c) 1997-2014 University of Cambridge.
 .fi

@@ -4282,12 +4282,12 @@ while (!done)
           if (new_info(re, extra, PCRE_INFO_FIRSTTABLE, &start_bits) == 0)
             {
             if (start_bits == NULL)
-              fprintf(outfile, "No set of starting bytes\n");
+              fprintf(outfile, "No starting char list\n");
             else
               {
               int i;
               int c = 24;
-              fprintf(outfile, "Starting byte set: ");
+              fprintf(outfile, "Starting chars: ");
               for (i = 0; i < 256; i++)
                 {
                 if ((start_bits[i/8] & (1<<(i&7))) != 0)

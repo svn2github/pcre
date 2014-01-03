@@ -40,6 +40,12 @@ Version 8.35-RC1 xx-xxxx-201x
 8.  Add missing (new) files sljitNativeTILEGX.c and sljitNativeTILEGX-encoder.c
     to the export list in Makefile.am (they were accidentally omitted from the
     8.34 tarball).
+    
+9.  The informational output from pcretest used the phrase "starting byte set"
+    which is inappropriate for the 16-bit and 32-bit libraries. As the output 
+    for "first char" and "need char" really means "non-UTF-char", I've changed 
+    "byte" to "char", and slightly reworded the output. The documentation about 
+    these values has also been (I hope) clarified.  
 
 
 Version 8.34 15-December-2013

@@ -1536,7 +1536,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]+?/iS8I   
 Capturing subpattern count = 0
@@ -1544,7 +1544,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]++/iS8I   
 Capturing subpattern count = 0
@@ -1552,7 +1552,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]{2}/iS8I
 Capturing subpattern count = 0
@@ -1560,7 +1560,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 2
-No set of starting bytes
+No starting char list
 
 //<bsr_anycrlf><bsr_unicode>
 Failed: inconsistent NEWLINE options at offset 0
