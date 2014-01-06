@@ -47,6 +47,10 @@ Version 8.35-RC1 xx-xxxx-201x
     "byte" to "char", and slightly reworded the output. The documentation about 
     these values has also been (I hope) clarified.  
 
+10. Another JIT related optimization: use table jumps for selecting the correct
+    backtracking path, when more than four alternatives are present inside a
+    bracket.
+
 
 Version 8.34 15-December-2013
 -----------------------------
