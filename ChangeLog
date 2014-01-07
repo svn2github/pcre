@@ -51,6 +51,9 @@ Version 8.35-RC1 xx-xxxx-201x
     backtracking path, when more than four alternatives are present inside a
     bracket.
 
+11. Empty match is not possible, when the minimum length is greater than zero,
+    and there is no \K in the pattern. Remove these unnecessary checks form JIT.
+
 
 Version 8.34 15-December-2013
 -----------------------------

@@ -362,6 +362,8 @@ typedef struct compiler_common {
   sljit_sw lcc;
   /* Mode can be PCRE_STUDY_JIT_COMPILE and others. */
   int mode;
+  /* TRUE, when minlength is greater than 0. */
+  BOOL might_be_empty;
   /* \K is found in the pattern. */
   BOOL has_set_som;
   /* (*SKIP:arg) is found in the pattern. */
@@ -789,6 +791,7 @@ while (cc < ccend)
     {
     case OP_SET_SOM:
     common->has_set_som = TRUE;
+    common->might_be_empty = TRUE;
     cc += 1;
     break;
 
@@ -7853,7 +7856,7 @@ if (*cc == OP_FAIL)
   return cc + 1;
   }
 
-if (*cc == OP_ASSERT_ACCEPT || common->currententry != NULL)
+if (*cc == OP_ASSERT_ACCEPT || common->currententry != NULL || !common->might_be_empty)
   {
   /* No need to check notempty conditions. */
   if (common->accept_label == NULL)
@@ -9496,14 +9499,14 @@ sljit_uw total_length;
 label_addr_list *label_addr;
 struct sljit_label *mainloop_label = NULL;
 struct sljit_label *continue_match_label;
-struct sljit_label *empty_match_found_label;
-struct sljit_label *empty_match_backtrack_label;
+struct sljit_label *empty_match_found_label = NULL;
+struct sljit_label *empty_match_backtrack_label = NULL;
 struct sljit_label *reset_match_label;
 struct sljit_label *quit_label;
 struct sljit_jump *jump;
 struct sljit_jump *minlength_check_failed = NULL;
 struct sljit_jump *reqbyte_notfound = NULL;
-struct sljit_jump *empty_match;
+struct sljit_jump *empty_match = NULL;
 
 SLJIT_ASSERT((extra->flags & PCRE_EXTRA_STUDY_DATA) != 0);
 study = extra->study_data;
@@ -9522,6 +9525,7 @@ common->read_only_data_ptr = NULL;
 common->fcc = tables + fcc_offset;
 common->lcc = (sljit_sw)(tables + lcc_offset);
 common->mode = mode;
+common->might_be_empty = study->minlength == 0;
 common->nltype = NLTYPE_FIXED;
 switch(re->options & PCRE_NEWLINE_BITS)
   {
@@ -9815,8 +9819,11 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   return;
   }
 
-empty_match = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0));
-empty_match_found_label = LABEL();
+if (common->might_be_empty)
+  {
+  empty_match = CMP(SLJIT_C_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), OVECTOR(0));
+  empty_match_found_label = LABEL();
+  }
 
 common->accept_label = LABEL();
 if (common->accept != NULL)
@@ -9840,7 +9847,8 @@ if (mode != JIT_COMPILE)
   return_with_partial_match(common, common->quit_label);
   }
 
-empty_match_backtrack_label = LABEL();
+if (common->might_be_empty)
+  empty_match_backtrack_label = LABEL();
 compile_backtrackingpath(common, rootbacktrack.top);
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   {
@@ -9894,15 +9902,18 @@ JUMPTO(SLJIT_JUMP, common->quit_label);
 
 flush_stubs(common);
 
-JUMPHERE(empty_match);
-OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty));
-CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0, empty_match_backtrack_label);
-OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty_atstart));
-CMPTO(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0, empty_match_found_label);
-OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
-CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_PTR, 0, empty_match_found_label);
-JUMPTO(SLJIT_JUMP, empty_match_backtrack_label);
+if (common->might_be_empty)
+  {
+  JUMPHERE(empty_match);
+  OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty));
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0, empty_match_backtrack_label);
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, notempty_atstart));
+  CMPTO(SLJIT_C_EQUAL, TMP2, 0, SLJIT_IMM, 0, empty_match_found_label);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, str));
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, STR_PTR, 0, empty_match_found_label);
+  JUMPTO(SLJIT_JUMP, empty_match_backtrack_label);
+  }
 
 common->currententry = common->entries;
 common->local_exit = TRUE;
