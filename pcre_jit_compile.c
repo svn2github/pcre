@@ -2567,7 +2567,7 @@ if (common->utf)
 
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 
-static BOOL is_char7_bitset(const pcre_uint8* bitset, BOOL nclass)
+static BOOL is_char7_bitset(const pcre_uint8 *bitset, BOOL nclass)
 {
 /* Tells whether the character codes below 128 are enough
 to determine a match. */
@@ -3187,6 +3187,13 @@ while (TRUE)
     cc++;
     continue;
 
+    case OP_ASSERT:
+    case OP_ASSERT_NOT:
+    case OP_ASSERTBACK:
+    case OP_ASSERTBACK_NOT:
+    cc = bracketend(cc);
+    continue;
+
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -3237,26 +3244,66 @@ while (TRUE)
     continue;
 
     case OP_CLASS:
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+    if (common->utf && !is_char7_bitset((const pcre_uint8 *)(cc + 1), FALSE)) return consumed;
+#endif
+    any = TRUE;
+    cc += 1 + 32 / sizeof(pcre_uchar);
+    break;
+
     case OP_NCLASS:
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+    if (common->utf) return consumed;
+#endif
     any = TRUE;
     cc += 1 + 32 / sizeof(pcre_uchar);
     break;
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
     case OP_XCLASS:
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+    if (common->utf) return consumed;
+#endif
     any = TRUE;
     cc += GET(cc, 1);
     break;
 #endif
 
-    case OP_NOT_DIGIT:
     case OP_DIGIT:
-    case OP_NOT_WHITESPACE:
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+    if (common->utf && !is_char7_bitset((const pcre_uint8 *)common->ctypes - cbit_length + cbit_digit, FALSE))
+      return consumed;
+#endif
+    any = TRUE;
+    cc++;
+    break;
+
     case OP_WHITESPACE:
-    case OP_NOT_WORDCHAR:
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+    if (common->utf && !is_char7_bitset((const pcre_uint8 *)common->ctypes - cbit_length + cbit_space, FALSE))
+      return consumed;
+#endif
+    any = TRUE;
+    cc++;
+    break;
+
     case OP_WORDCHAR:
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+    if (common->utf && !is_char7_bitset((const pcre_uint8 *)common->ctypes - cbit_length + cbit_word, FALSE))
+      return consumed;
+#endif
+    any = TRUE;
+    cc++;
+    break;
+
+    case OP_NOT_DIGIT:
+    case OP_NOT_WHITESPACE:
+    case OP_NOT_WORDCHAR:
     case OP_ANY:
     case OP_ALLANY:
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+    if (common->utf) return consumed;
+#endif
     any = TRUE;
     cc++;
     break;
@@ -3264,6 +3311,9 @@ while (TRUE)
 #ifdef SUPPORT_UCP
     case OP_NOTPROP:
     case OP_PROP:
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+    if (common->utf) return consumed;
+#endif
     any = TRUE;
     cc += 1 + 2;
     break;
@@ -3280,9 +3330,6 @@ while (TRUE)
 
   if (any)
     {
-#ifdef SUPPORT_UTF
-    if (common->utf) return consumed;
-#endif
 #if defined COMPILE_PCRE8
     mask = 0xff;
 #elif defined COMPILE_PCRE16
