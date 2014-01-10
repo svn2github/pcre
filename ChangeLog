@@ -53,6 +53,12 @@ Version 8.35-RC1 xx-xxxx-201x
 
 11. Empty match is not possible, when the minimum length is greater than zero,
     and there is no \K in the pattern. Remove these unnecessary checks form JIT.
+    
+12. In a caseless character class with UCP support, when a character with more
+    than one alternative case was not the first character of a range, not all
+    the alternative cases were added to the class. For example, s and \x{17f}
+    are both alternative cases for S: the class [RST] was handled correctly,
+    but [R-T] was not.
 
 
 Version 8.34 15-December-2013

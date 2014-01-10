@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2013 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -4077,12 +4077,16 @@ for (c = *cptr; c <= d; c++)
 
 if (c > d) return -1;  /* Reached end of range */
 
+/* Found a character that has a single other case. Search for the end of the 
+range, which is either the end of the input range, or a character that has zero 
+or more than one other cases. */
+
 *ocptr = othercase;
 next = othercase + 1;
 
 for (++c; c <= d; c++)
   {
-  if (UCD_OTHERCASE(c) != next) break;
+  if ((co = UCD_CASESET(c)) != 0 || UCD_OTHERCASE(c) != next) break;
   next++;
   }
 
@@ -4138,7 +4142,7 @@ if ((options & PCRE_CASELESS) != 0)
 
     options &= ~PCRE_CASELESS;   /* Remove for recursive calls */
     c = start;
-
+    
     while ((rc = get_othercase_range(&c, end, &oc, &od)) >= 0)
       {
       /* Handle a single character that has more than one other case. */
@@ -4201,9 +4205,9 @@ for (c = start; c <= classbits_end; c++)
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
 if (start <= 0xff) start = 0xff + 1;
 
-if (end >= start) {
+if (end >= start) 
+  {
   pcre_uchar *uchardata = *uchardptr;
-
 #ifdef SUPPORT_UTF
   if ((options & PCRE_UTF8) != 0)  /* All UTFs use the same flag bit */
     {
