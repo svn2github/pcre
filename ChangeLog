@@ -59,6 +59,10 @@ Version 8.35-RC1 xx-xxxx-201x
     the alternative cases were added to the class. For example, s and \x{17f}
     are both alternative cases for S: the class [RST] was handled correctly,
     but [R-T] was not.
+    
+13. The configure.ac file always checked for pthread support when JIT was 
+    enabled. This is not used in Windows, so I have put this test inside a 
+    check for the presence of windows.h (which was already tested for).
 
 
 Version 8.34 15-December-2013

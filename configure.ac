@@ -686,11 +686,15 @@ if test "$enable_pcre32" = "yes"; then
     Define to any value to enable the 32 bit PCRE library.])
 fi
 
+# Unless running under Windows, JIT support requires pthreads.
+
 if test "$enable_jit" = "yes"; then
-  AX_PTHREAD([], [AC_MSG_ERROR([JIT support requires pthreads])])
-  CC="$PTHREAD_CC"
-  CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
-  LIBS="$PTHREAD_LIBS $LIBS"
+  if test "$HAVE_WINDOWS_H" != "1"; then
+    AX_PTHREAD([], [AC_MSG_ERROR([JIT support requires pthreads])])
+    CC="$PTHREAD_CC"
+    CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
+    LIBS="$PTHREAD_LIBS $LIBS"
+  fi   
   AC_DEFINE([SUPPORT_JIT], [], [
     Define to any value to enable support for Just-In-Time compiling.])
 else
