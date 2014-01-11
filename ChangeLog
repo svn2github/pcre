@@ -52,7 +52,8 @@ Version 8.35-RC1 xx-xxxx-201x
     bracket.
 
 11. Empty match is not possible, when the minimum length is greater than zero,
-    and there is no \K in the pattern. Remove these unnecessary checks form JIT.
+    and there is no \K in the pattern. JIT should avoid empty match checks in
+    such cases.
     
 12. In a caseless character class with UCP support, when a character with more
     than one alternative case was not the first character of a range, not all
@@ -63,6 +64,10 @@ Version 8.35-RC1 xx-xxxx-201x
 13. The configure.ac file always checked for pthread support when JIT was 
     enabled. This is not used in Windows, so I have put this test inside a 
     check for the presence of windows.h (which was already tested for).
+
+12. Improve pattern prefix search by a simplified Boyer-Moore algorithm in JIT.
+    The algorithm provides a way to skip certain starting offsets, and usually
+    faster than linear prefix searches.
 
 
 Version 8.34 15-December-2013

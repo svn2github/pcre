@@ -14131,4 +14131,8 @@ Start of matched string is beyond its end - displaying from end to start.
  0: ab
  0+ abcd
 
+/abcd/f<lf>
+    xx\nxabcd
+No match
+
 /-- End of testinput2 --/

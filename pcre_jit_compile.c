@@ -3345,9 +3345,9 @@ while (TRUE)
       chars[0] = mask;
       chars[1] = mask;
 
+      consumed++;
       if (--max_chars == 0)
         return consumed;
-      consumed++;
       chars += 2;
       }
     while (--repeat > 0);
@@ -3396,7 +3396,11 @@ while (TRUE)
         chr |= mask;
         }
 
+#ifdef COMPILE_PCRE32
+      if (chars[0] == NOTACHAR && chars[1] == 0)
+#else
       if (chars[0] == NOTACHAR)
+#endif
         {
         chars[0] = chr;
         chars[1] = mask;
@@ -3410,9 +3414,9 @@ while (TRUE)
         }
 
       len--;
+      consumed++;
       if (--max_chars == 0)
         return consumed;
-      consumed++;
       chars += 2;
       cc++;
       }
@@ -3432,6 +3436,7 @@ while (TRUE)
 }
 
 #define MAX_N_CHARS 16
+#define MIN_RANGE_SIZE 4
 
 static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOOL firstline)
 {
@@ -3440,9 +3445,15 @@ struct sljit_label *start;
 struct sljit_jump *quit;
 pcre_uint32 chars[MAX_N_CHARS * 2];
 pcre_uint8 ones[MAX_N_CHARS];
-pcre_uint32 mask;
-int i, max;
 int offsets[3];
+pcre_uint32 mask, byte;
+int i, max, from;
+int range_right = -1, range_len = -1;
+sljit_ub *update_table = NULL;
+BOOL in_range;
+
+/* This is even TRUE, if both are NULL. */
+SLJIT_ASSERT(common->read_only_data_ptr == common->read_only_data);
 
 for (i = 0; i < MAX_N_CHARS; i++)
   {
@@ -3467,6 +3478,59 @@ for (i = 0; i < max; i++)
     }
   }
 
+in_range = FALSE;
+for (i = 0; i <= max; i++)
+  {
+  if (i < max && ones[i] <= 1)
+    {
+    if (!in_range)
+      {
+      in_range = TRUE;
+      from = i;
+      }
+    }
+  else if (in_range)
+    {
+    if (range_len == -1 || (i - from) > range_len)
+      {
+      range_len = i - from;
+      range_right = i - 1;
+      }
+    in_range = FALSE;
+    }
+  }
+
+if (range_len >= MIN_RANGE_SIZE)
+  {
+  /* Since no data is consumed (see the assert in the beginning
+  of this function), this space can be reallocated. */
+  if (common->read_only_data)
+    SLJIT_FREE(common->read_only_data);
+
+  common->read_only_data_size += 256;
+  common->read_only_data = (sljit_uw *)SLJIT_MALLOC(common->read_only_data_size);
+  if (common->read_only_data == NULL)
+    return TRUE;
+
+  update_table = (sljit_ub *)common->read_only_data;
+  common->read_only_data_ptr = (sljit_uw *)(update_table + 256);
+  memset(update_table, IN_UCHARS(range_len), 256);
+
+  for (i = 0; i < range_len; i++)
+    {
+    byte = chars[(range_right - i) << 1] & 0xff;
+    if (update_table[byte] > IN_UCHARS(i))
+      update_table[byte] = IN_UCHARS(i);
+    mask = chars[((range_right - i) << 1) + 1] & 0xff;
+    if (mask != 0)
+      {
+      byte ^= mask;
+      if (update_table[byte] > IN_UCHARS(i))
+        update_table[byte] = IN_UCHARS(i);
+      }
+    }
+  }
+
 offsets[0] = -1;
 /* Scan forward. */
 for (i = 0; i < max; i++)
@@ -3481,13 +3545,18 @@ if (offsets[0] == -1)
 /* Scan backward. */
 offsets[1] = -1;
 for (i = max - 1; i > offsets[0]; i--)
-  if (ones[i] <= 2) {
+  if (ones[i] <= 2 && i != range_right)
+    {
     offsets[1] = i;
     break;
-  }
+    }
+
+/* This case is handled better by fast_forward_first_char. */
+if (offsets[1] == -1 && offsets[0] == 0)
+  return FALSE;
 
 offsets[2] = -1;
-if (offsets[1] >= 0)
+if (offsets[1] >= 0 && range_right == -1)
   {
   /* Scan from middle. */
   for (i = (offsets[0] + offsets[1]) / 2 + 1; i < offsets[1]; i++)
@@ -3528,14 +3597,40 @@ max -= 1;
 if (firstline)
   {
   SLJIT_ASSERT(common->first_line_end != 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
-  OP2(SLJIT_SUB, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end, SLJIT_IMM, IN_UCHARS(max));
+  OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
+  quit = CMP(SLJIT_C_LESS_EQUAL, STR_END, 0, TMP1, 0);
+  OP1(SLJIT_MOV, STR_END, 0, TMP1, 0);
+  JUMPHERE(quit);
   }
 else
   OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
 
+#if !(defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
+if (range_len >= MIN_RANGE_SIZE)
+  OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, (sljit_sw)update_table);
+#endif
+
 start = LABEL();
 quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+
+if (range_len >= MIN_RANGE_SIZE)
+  {
+#if defined COMPILE_PCRE8 || (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right));
+#else
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right + 1) - 1);
+#endif
+
+#if !(defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM2(RETURN_ADDR, TMP1), 0);
+#else
+  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)update_table);
+#endif
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, start);
+  }
 
 OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[0]));
 if (offsets[1] >= 0)
@@ -3566,13 +3661,24 @@ OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 JUMPHERE(quit);
 
 if (firstline)
+  {
+  if (range_len >= MIN_RANGE_SIZE)
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end);
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
+  if (range_len >= MIN_RANGE_SIZE)
+    {
+    quit = CMP(SLJIT_C_LESS_EQUAL, STR_PTR, 0, TMP1, 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
+    JUMPHERE(quit);
+    }
+  }
 else
   OP2(SLJIT_ADD, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
 return TRUE;
 }
 
 #undef MAX_N_CHARS
+#undef MIN_RANGE_SIZE
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_uchar first_char, BOOL caseless, BOOL firstline)
 {
@@ -9808,7 +9914,16 @@ if ((re->options & PCRE_ANCHORED) == 0)
   if ((re->options & PCRE_NO_START_OPTIMIZE) == 0)
     {
     if (mode == JIT_COMPILE && fast_forward_first_n_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
-      { /* Do nothing */ }
+      {
+      /* If read_only_data is reallocated, we might have an allocation failure. */
+      if (common->read_only_data_size > 0 && common->read_only_data == NULL)
+        {
+        sljit_free_compiler(compiler);
+        SLJIT_FREE(common->optimized_cbracket);
+        SLJIT_FREE(common->private_data_ptrs);
+        return;
+        }
+      }
     else if ((re->flags & PCRE_FIRSTSET) != 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0, (re->options & PCRE_FIRSTLINE) != 0);
     else if ((re->flags & PCRE_STARTLINE) != 0)
