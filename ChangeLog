@@ -65,7 +65,7 @@ Version 8.35-RC1 xx-xxxx-201x
     enabled. This is not used in Windows, so I have put this test inside a 
     check for the presence of windows.h (which was already tested for).
 
-12. Improve pattern prefix search by a simplified Boyer-Moore algorithm in JIT.
+14. Improve pattern prefix search by a simplified Boyer-Moore algorithm in JIT.
     The algorithm provides a way to skip certain starting offsets, and usually
     faster than linear prefix searches.
 
