@@ -3153,20 +3153,27 @@ static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uint32 *cha
 {
 /* Recursive function, which scans prefix literals. */
 int len, repeat, len_save, consumed = 0;
-pcre_uint32 caseless, chr, mask;
-pcre_uchar *alternative, *cc_save;
-BOOL last, any;
+pcre_uint32 chr, mask;
+pcre_uchar *alternative, *cc_save, *oc;
+BOOL last, any, caseless;
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+pcre_uchar othercase[8];
+#elif defined SUPPORT_UTF && defined COMPILE_PCRE16
+pcre_uchar othercase[2];
+#else
+pcre_uchar othercase[1];
+#endif
 
 repeat = 1;
 while (TRUE)
   {
   last = TRUE;
   any = FALSE;
-  caseless = 0;
+  caseless = FALSE;
   switch (*cc)
     {
     case OP_CHARI:
-    caseless = 1;
+    caseless = TRUE;
     case OP_CHAR:
     last = FALSE;
     cc++;
@@ -3201,7 +3208,7 @@ while (TRUE)
     break;
 
     case OP_EXACTI:
-    caseless = 1;
+    caseless = TRUE;
     case OP_EXACT:
     repeat = GET2(cc, 1);
     last = FALSE;
@@ -3211,7 +3218,7 @@ while (TRUE)
     case OP_PLUSI:
     case OP_MINPLUSI:
     case OP_POSPLUSI:
-    caseless = 1;
+    caseless = TRUE;
     cc++;
     break;
 
@@ -3361,27 +3368,30 @@ while (TRUE)
   if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
 #endif
 
-  if (caseless != 0 && char_has_othercase(common, cc))
+  if (caseless && char_has_othercase(common, cc))
     {
-    caseless = char_get_othercase_bit(common, cc);
-    if (caseless == 0)
-      return consumed;
-#ifdef COMPILE_PCRE8
-    caseless = ((caseless & 0xff) << 8) | (len - (caseless >> 8));
-#else
-    if ((caseless & 0x100) != 0)
-      caseless = ((caseless & 0xff) << 16) | (len - (caseless >> 9));
+#ifdef SUPPORT_UTF
+    if (common->utf)
+      {
+      GETCHAR(chr, cc);
+      if (PRIV(ord2utf)(char_othercase(common, chr), othercase) != len)
+        return consumed;
+      }
     else
-      caseless = ((caseless & 0xff) << 8) | (len - (caseless >> 9));
 #endif
+      {
+      chr = *cc;
+      othercase[0] = TABLE_GET(chr, common->fcc, chr);
+      }
     }
   else
-    caseless = 0;
+    caseless = FALSE;
 
   len_save = len;
   cc_save = cc;
   while (TRUE)
     {
+    oc = othercase;
     do
       {
       chr = *cc;
@@ -3390,9 +3400,9 @@ while (TRUE)
         return consumed;
 #endif
       mask = 0;
-      if ((pcre_uint32)len == (caseless & 0xff))
+      if (caseless)
         {
-        mask = caseless >> 8;
+        mask = *cc ^ *oc;
         chr |= mask;
         }
 
@@ -3419,6 +3429,7 @@ while (TRUE)
         return consumed;
       chars += 2;
       cc++;
+      oc++;
       }
     while (len > 0);
 
@@ -3436,7 +3447,6 @@ while (TRUE)
 }
 
 #define MAX_N_CHARS 16
-#define MIN_RANGE_SIZE 4
 
 static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOOL firstline)
 {
@@ -3448,7 +3458,7 @@ pcre_uint8 ones[MAX_N_CHARS];
 int offsets[3];
 pcre_uint32 mask, byte;
 int i, max, from;
-int range_right = -1, range_len = -1;
+int range_right = -1, range_len = 4 - 1;
 sljit_ub *update_table = NULL;
 BOOL in_range;
 
@@ -3491,7 +3501,7 @@ for (i = 0; i <= max; i++)
     }
   else if (in_range)
     {
-    if (range_len == -1 || (i - from) > range_len)
+    if ((i - from) > range_len)
       {
       range_len = i - from;
       range_right = i - 1;
@@ -3500,7 +3510,7 @@ for (i = 0; i <= max; i++)
     }
   }
 
-if (range_len >= MIN_RANGE_SIZE)
+if (range_right >= 0)
   {
   /* Since no data is consumed (see the assert in the beginning
   of this function), this space can be reallocated. */
@@ -3608,14 +3618,14 @@ else
   OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
 
 #if !(defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-if (range_len >= MIN_RANGE_SIZE)
+if (range_right >= 0)
   OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, (sljit_sw)update_table);
 #endif
 
 start = LABEL();
 quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 
-if (range_len >= MIN_RANGE_SIZE)
+if (range_right >= 0)
   {
 #if defined COMPILE_PCRE8 || (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right));
@@ -3662,10 +3672,10 @@ JUMPHERE(quit);
 
 if (firstline)
   {
-  if (range_len >= MIN_RANGE_SIZE)
+  if (range_right >= 0)
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->first_line_end);
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
-  if (range_len >= MIN_RANGE_SIZE)
+  if (range_right >= 0)
     {
     quit = CMP(SLJIT_C_LESS_EQUAL, STR_PTR, 0, TMP1, 0);
     OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
@@ -3678,7 +3688,6 @@ return TRUE;
 }
 
 #undef MAX_N_CHARS
-#undef MIN_RANGE_SIZE
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_uchar first_char, BOOL caseless, BOOL firstline)
 {
