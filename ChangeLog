@@ -68,6 +68,18 @@ Version 8.35-RC1 xx-xxxx-201x
 14. Improve pattern prefix search by a simplified Boyer-Moore algorithm in JIT.
     The algorithm provides a way to skip certain starting offsets, and usually
     faster than linear prefix searches.
+    
+15. Change 13 for 8.20 updated RunTest to check for the 'fr' locale as well
+    as for 'fr_FR' and 'french'. For some reason, however, it then used the 
+    Windows-specific input and output files, which have 'french' screwed in. 
+    So this could never have worked. One of the problems with locales is that 
+    they aren't always the same. I have now updated RunTest so that it checks 
+    the output of the locale test (test 3) against three different output 
+    files, and it allows the test to pass if any one of them matches. With luck 
+    this should make the test pass on some versions of Solaris where it was 
+    failing. Because of the uncertainty, the script did not used to stop if 
+    test 3 failed; it now does. If further versions of a French locale ever 
+    come to light, they can now easily be added.
 
 
 Version 8.34 15-December-2013
