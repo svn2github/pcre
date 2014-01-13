@@ -3149,13 +3149,46 @@ if (newlinecheck)
 return mainloop;
 }
 
-static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uint32 *chars, int max_chars)
+#define MAX_N_CHARS 16
+#define MAX_N_BYTES 8
+
+static SLJIT_INLINE void add_prefix_byte(pcre_uint8 byte, pcre_uint8 *bytes)
+{
+pcre_uint8 len = bytes[0];
+int i;
+
+if (len == 255)
+  return;
+
+if (len == 0)
+  {
+  bytes[0] = 1;
+  bytes[1] = byte;
+  return;
+  }
+
+for (i = len; i > 0; i--)
+  if (bytes[i] == byte)
+    return;
+
+if (len >= MAX_N_BYTES - 1)
+  {
+  bytes[0] = 255;
+  return;
+  }
+
+len++;
+bytes[len] = byte;
+bytes[0] = len;
+}
+
+static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uint32 *chars, pcre_uint8 *bytes, int max_chars)
 {
 /* Recursive function, which scans prefix literals. */
+BOOL last, any, caseless;
 int len, repeat, len_save, consumed = 0;
 pcre_uint32 chr, mask;
 pcre_uchar *alternative, *cc_save, *oc;
-BOOL last, any, caseless;
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 pcre_uchar othercase[8];
 #elif defined SUPPORT_UTF && defined COMPILE_PCRE16
@@ -3239,7 +3272,7 @@ while (TRUE)
     alternative = cc + GET(cc, 1);
     while (*alternative == OP_ALT)
       {
-      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, max_chars);
+      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, bytes, max_chars);
       if (max_chars == 0)
         return consumed;
       alternative += GET(alternative, 1);
@@ -3351,11 +3384,13 @@ while (TRUE)
       {
       chars[0] = mask;
       chars[1] = mask;
+      bytes[0] = 255;
 
       consumed++;
       if (--max_chars == 0)
         return consumed;
       chars += 2;
+      bytes += MAX_N_BYTES;
       }
     while (--repeat > 0);
 
@@ -3374,7 +3409,7 @@ while (TRUE)
     if (common->utf)
       {
       GETCHAR(chr, cc);
-      if (PRIV(ord2utf)(char_othercase(common, chr), othercase) != len)
+      if ((int)PRIV(ord2utf)(char_othercase(common, chr), othercase) != len)
         return consumed;
       }
     else
@@ -3399,9 +3434,12 @@ while (TRUE)
       if (SLJIT_UNLIKELY(chr == NOTACHAR))
         return consumed;
 #endif
+      add_prefix_byte((pcre_uint8)chr, bytes);
+
       mask = 0;
       if (caseless)
         {
+        add_prefix_byte((pcre_uint8)*oc, bytes);
         mask = *cc ^ *oc;
         chr |= mask;
         }
@@ -3428,6 +3466,7 @@ while (TRUE)
       if (--max_chars == 0)
         return consumed;
       chars += 2;
+      bytes += MAX_N_BYTES;
       cc++;
       oc++;
       }
@@ -3446,17 +3485,17 @@ while (TRUE)
   }
 }
 
-#define MAX_N_CHARS 16
-
 static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOOL firstline)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
 pcre_uint32 chars[MAX_N_CHARS * 2];
+pcre_uint8 bytes[MAX_N_CHARS * MAX_N_BYTES];
 pcre_uint8 ones[MAX_N_CHARS];
 int offsets[3];
-pcre_uint32 mask, byte;
+pcre_uint32 mask;
+pcre_uint8 *byte_set, *byte_set_end;
 int i, max, from;
 int range_right = -1, range_len = 4 - 1;
 sljit_ub *update_table = NULL;
@@ -3469,9 +3508,10 @@ for (i = 0; i < MAX_N_CHARS; i++)
   {
   chars[i << 1] = NOTACHAR;
   chars[(i << 1) + 1] = 0;
+  bytes[i * MAX_N_BYTES] = 0;
   }
 
-max = scan_prefix(common, common->start, chars, MAX_N_CHARS);
+max = scan_prefix(common, common->start, chars, bytes, MAX_N_CHARS);
 
 if (max <= 1)
   return FALSE;
@@ -3491,7 +3531,13 @@ for (i = 0; i < max; i++)
 in_range = FALSE;
 for (i = 0; i <= max; i++)
   {
-  if (i < max && ones[i] <= 1)
+  if (in_range && (i - from) > range_len && (bytes[(i - 1) * MAX_N_BYTES] <= 4))
+    {
+    range_len = i - from;
+    range_right = i - 1;
+    }
+
+  if (i < max && bytes[i * MAX_N_BYTES] < 255)
     {
     if (!in_range)
       {
@@ -3500,14 +3546,7 @@ for (i = 0; i <= max; i++)
       }
     }
   else if (in_range)
-    {
-    if ((i - from) > range_len)
-      {
-      range_len = i - from;
-      range_right = i - 1;
-      }
     in_range = FALSE;
-    }
   }
 
 if (range_right >= 0)
@@ -3528,15 +3567,15 @@ if (range_right >= 0)
 
   for (i = 0; i < range_len; i++)
     {
-    byte = chars[(range_right - i) << 1] & 0xff;
-    if (update_table[byte] > IN_UCHARS(i))
-      update_table[byte] = IN_UCHARS(i);
-    mask = chars[((range_right - i) << 1) + 1] & 0xff;
-    if (mask != 0)
+    byte_set = bytes + ((range_right - i) * MAX_N_BYTES);
+    SLJIT_ASSERT(byte_set[0] > 0 && byte_set[0] < 255);
+    byte_set_end = byte_set + byte_set[0];
+    byte_set++;
+    while (byte_set <= byte_set_end)
       {
-      byte ^= mask;
-      if (update_table[byte] > IN_UCHARS(i))
-        update_table[byte] = IN_UCHARS(i);
+      if (update_table[*byte_set] > IN_UCHARS(i))
+        update_table[*byte_set] = IN_UCHARS(i);
+      byte_set++;
       }
     }
   }
@@ -3549,58 +3588,62 @@ for (i = 0; i < max; i++)
     break;
   }
 
-if (offsets[0] == -1)
+if (offsets[0] < 0 && range_right < 0)
   return FALSE;
 
-/* Scan backward. */
-offsets[1] = -1;
-for (i = max - 1; i > offsets[0]; i--)
-  if (ones[i] <= 2 && i != range_right)
-    {
-    offsets[1] = i;
-    break;
-    }
-
-/* This case is handled better by fast_forward_first_char. */
-if (offsets[1] == -1 && offsets[0] == 0)
-  return FALSE;
-
-offsets[2] = -1;
-if (offsets[1] >= 0 && range_right == -1)
+if (offsets[0] >= 0)
   {
-  /* Scan from middle. */
-  for (i = (offsets[0] + offsets[1]) / 2 + 1; i < offsets[1]; i++)
-    if (ones[i] <= 2)
+  /* Scan backward. */
+  offsets[1] = -1;
+  for (i = max - 1; i > offsets[0]; i--)
+    if (ones[i] <= 2 && i != range_right)
       {
-      offsets[2] = i;
+      offsets[1] = i;
       break;
       }
 
-  if (offsets[2] == -1)
+  /* This case is handled better by fast_forward_first_char. */
+  if (offsets[1] == -1 && offsets[0] == 0 && range_right < 0)
+    return FALSE;
+
+  offsets[2] = -1;
+  /* We only search for a middle character if there is no range check. */
+  if (offsets[1] >= 0 && range_right == -1)
     {
-    for (i = (offsets[0] + offsets[1]) / 2; i > offsets[0]; i--)
+    /* Scan from middle. */
+    for (i = (offsets[0] + offsets[1]) / 2 + 1; i < offsets[1]; i++)
       if (ones[i] <= 2)
         {
         offsets[2] = i;
         break;
         }
+
+    if (offsets[2] == -1)
+      {
+      for (i = (offsets[0] + offsets[1]) / 2; i > offsets[0]; i--)
+        if (ones[i] <= 2)
+          {
+          offsets[2] = i;
+          break;
+          }
+      }
     }
-  }
 
-SLJIT_ASSERT(offsets[1] == -1 || (offsets[0] < offsets[1]));
-SLJIT_ASSERT(offsets[2] == -1 || (offsets[0] < offsets[2] && offsets[1] > offsets[2]));
+  SLJIT_ASSERT(offsets[1] == -1 || (offsets[0] < offsets[1]));
+  SLJIT_ASSERT(offsets[2] == -1 || (offsets[0] < offsets[2] && offsets[1] > offsets[2]));
 
-chars[0] = chars[offsets[0] << 1];
-chars[1] = chars[(offsets[0] << 1) + 1];
-if (offsets[2] >= 0)
-  {
-  chars[2] = chars[offsets[2] << 1];
-  chars[3] = chars[(offsets[2] << 1) + 1];
-  }
-if (offsets[1] >= 0)
-  {
-  chars[4] = chars[offsets[1] << 1];
-  chars[5] = chars[(offsets[1] << 1) + 1];
+  chars[0] = chars[offsets[0] << 1];
+  chars[1] = chars[(offsets[0] << 1) + 1];
+  if (offsets[2] >= 0)
+    {
+    chars[2] = chars[offsets[2] << 1];
+    chars[3] = chars[(offsets[2] << 1) + 1];
+    }
+  if (offsets[1] >= 0)
+    {
+    chars[4] = chars[offsets[1] << 1];
+    chars[5] = chars[(offsets[1] << 1) + 1];
+    }
   }
 
 max -= 1;
@@ -3625,6 +3668,8 @@ if (range_right >= 0)
 start = LABEL();
 quit = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 
+SLJIT_ASSERT(range_right >= 0 || offsets[0] >= 0);
+
 if (range_right >= 0)
   {
 #if defined COMPILE_PCRE8 || (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
@@ -3642,31 +3687,34 @@ if (range_right >= 0)
   CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, start);
   }
 
-OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[0]));
-if (offsets[1] >= 0)
-  OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[1]));
-OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-
-if (chars[1] != 0)
-  OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[1]);
-CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[0], start);
-if (offsets[2] >= 0)
-  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[2] - 1));
-
-if (offsets[1] >= 0)
+if (offsets[0] >= 0)
   {
-  if (chars[5] != 0)
-    OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, chars[5]);
-  CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, chars[4], start);
-  }
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[0]));
+  if (offsets[1] >= 0)
+    OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[1]));
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
-if (offsets[2] >= 0)
-  {
-  if (chars[3] != 0)
-    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[3]);
-  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[2], start);
+  if (chars[1] != 0)
+    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[1]);
+  CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[0], start);
+  if (offsets[2] >= 0)
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[2] - 1));
+
+  if (offsets[1] >= 0)
+    {
+    if (chars[5] != 0)
+      OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, chars[5]);
+    CMPTO(SLJIT_C_NOT_EQUAL, TMP2, 0, SLJIT_IMM, chars[4], start);
+    }
+
+  if (offsets[2] >= 0)
+    {
+    if (chars[3] != 0)
+      OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[3]);
+    CMPTO(SLJIT_C_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[2], start);
+    }
+  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   }
-OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
 JUMPHERE(quit);
 
@@ -3688,6 +3736,7 @@ return TRUE;
 }
 
 #undef MAX_N_CHARS
+#undef MAX_N_BYTES
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_uchar first_char, BOOL caseless, BOOL firstline)
 {
