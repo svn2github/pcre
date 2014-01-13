@@ -3566,7 +3566,9 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
-return FALSE;
+/* Control never reaches here. There used to be a fail-save return FALSE; here,
+but some compilers complain about an unreachable statement. */
+
 }
 
 
