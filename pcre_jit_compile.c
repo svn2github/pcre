@@ -3234,6 +3234,10 @@ while (TRUE)
     cc = bracketend(cc);
     continue;
 
+    case OP_PLUSI:
+    case OP_MINPLUSI:
+    case OP_POSPLUSI:
+    caseless = TRUE;
     case OP_PLUS:
     case OP_MINPLUS:
     case OP_POSPLUS:
@@ -3248,11 +3252,22 @@ while (TRUE)
     cc += 1 + IMM2_SIZE;
     break;
 
-    case OP_PLUSI:
-    case OP_MINPLUSI:
-    case OP_POSPLUSI:
+    case OP_QUERYI:
+    case OP_MINQUERYI:
+    case OP_POSQUERYI:
     caseless = TRUE;
+    case OP_QUERY:
+    case OP_MINQUERY:
+    case OP_POSQUERY:
+    len = 1;
     cc++;
+#ifdef SUPPORT_UTF
+    if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
+#endif
+    max_chars = scan_prefix(common, cc + len, chars, bytes, max_chars);
+    if (max_chars == 0)
+      return consumed;
+    last = FALSE;
     break;
 
     case OP_KET:
@@ -3336,6 +3351,10 @@ while (TRUE)
     cc++;
     break;
 
+    case OP_NOT:
+    case OP_NOTI:
+    cc++;
+    /* Fall through. */
     case OP_NOT_DIGIT:
     case OP_NOT_WHITESPACE:
     case OP_NOT_WORDCHAR:
@@ -3363,6 +3382,16 @@ while (TRUE)
     repeat = GET2(cc, 1);
     cc += 1 + IMM2_SIZE;
     continue;
+
+    case OP_NOTEXACT:
+    case OP_NOTEXACTI:
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+    if (common->utf) return consumed;
+#endif
+    any = TRUE;
+    repeat = GET2(cc, 1);
+    cc += 1 + IMM2_SIZE + 1;
+    break;
 
     default:
     return consumed;
@@ -3497,7 +3526,7 @@ int offsets[3];
 pcre_uint32 mask;
 pcre_uint8 *byte_set, *byte_set_end;
 int i, max, from;
-int range_right = -1, range_len = 4 - 1;
+int range_right = -1, range_len = 3 - 1;
 sljit_ub *update_table = NULL;
 BOOL in_range;
 
