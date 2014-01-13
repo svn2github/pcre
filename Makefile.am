@@ -580,6 +580,8 @@ EXTRA_DIST += \
   testdata/testoutput1 \
   testdata/testoutput2 \
   testdata/testoutput3 \
+  testdata/testoutput3A \
+  testdata/testoutput3B \
   testdata/testoutput4 \
   testdata/testoutput5 \
   testdata/testoutput6 \
