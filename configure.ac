@@ -461,7 +461,8 @@ sure both macros are undefined; an emulation function will then be used. */])
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h windows.h)
+AC_CHECK_HEADERS(limits.h sys/types.h sys/stat.h dirent.h)
+AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=1])
 
 # The files below are C++ header files.
 pcre_have_type_traits="0"
