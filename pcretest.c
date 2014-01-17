@@ -2883,8 +2883,8 @@ printf("  -32      use the 32-bit library\n");
 #endif
 printf("  -b       show compiled code\n");
 printf("  -C       show PCRE compile-time options and exit\n");
-printf("  -C arg   show a specific compile-time option\n");
-printf("           and exit with its value. The arg can be:\n");
+printf("  -C arg   show a specific compile-time option and exit\n");
+printf("           with its value if numeric (else 0). The arg can be:\n");
 printf("     linksize     internal link size [2, 3, 4]\n");
 printf("     pcre8        8 bit library support enabled [0, 1]\n");
 printf("     pcre16       16 bit library support enabled [0, 1]\n");
@@ -2892,7 +2892,8 @@ printf("     pcre32       32 bit library support enabled [0, 1]\n");
 printf("     utf          Unicode Transformation Format supported [0, 1]\n");
 printf("     ucp          Unicode Properties supported [0, 1]\n");
 printf("     jit          Just-in-time compiler supported [0, 1]\n");
-printf("     newline      Newline type [CR, LF, CRLF, ANYCRLF, ANY, ???]\n");
+printf("     newline      Newline type [CR, LF, CRLF, ANYCRLF, ANY]\n");
+printf("     bsr          \\R type [ANYCRLF, ANY]\n");
 printf("  -d       debug: show compiled code and information (-b and -i)\n");
 #if !defined NODFA
 printf("  -dfa     force DFA matching for all subjects\n");
@@ -3230,6 +3231,11 @@ while (argc > 1 && argv[op][0] == '-')
         {
         (void)PCRE_CONFIG(PCRE_CONFIG_NEWLINE, &rc);
         print_newline_config(rc, TRUE);
+        }
+      else if (strcmp(argv[op + 1], "bsr") == 0)
+        {
+        (void)PCRE_CONFIG(PCRE_CONFIG_BSR, &rc);
+        printf("%s\n", rc? "ANYCRLF" : "ANY");
         }
       else if (strcmp(argv[op + 1], "ebcdic") == 0)
         {

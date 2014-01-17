@@ -715,9 +715,9 @@ Starting chars: \x09 \x20 A \xa0 \xff
     \x{2000}ABC 
  0: \x{2000}A
 
-/\R*A/SI8
+/\R*A/SI8<bsr_unicode>
 Capturing subpattern count = 0
-Options: utf
+Options: bsr_unicode utf
 No first char
 Need char = 'A'
 Subject length lower bound = 1

@@ -86,6 +86,13 @@ Version 8.35-RC1 xx-xxxx-201x
     provokes an error. The invalid example in README has been corrected. 
     If a value less than the minimum is given, the minimum value has always 
     been used, but now a warning is given.
+    
+17. If --enable-bsr-anycrlf was set, the special 16/32-bit test failed. This
+    was a bug in the test system, which is now fixed. Also, the list of various 
+    configurations that are tested for each release did not have one with both 
+    16/32 bits and --enable-bar-anycrlf. It now does.
+    
+18. pcretest was missing "-C bsr" for displaying the \R default setting.   
 
 
 Version 8.34 15-December-2013

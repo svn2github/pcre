@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "03 January 2014" "PCRE 8.35"
+.TH PCRETEST 1 "17 January 2014" "PCRE 8.35"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -113,6 +113,9 @@ following options output the value and set the exit code as indicated:
   newline    the default newline setting:
                CR, LF, CRLF, ANYCRLF, or ANY
                exit code is always 0
+  bsr        the default setting for what \eR matches:
+               ANYCRLF or ANY
+               exit code is always 0                
 .sp
 The following options output 1 for true or 0 for false, and set the exit code
 to the same value:
@@ -1138,6 +1141,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 03 January 2014
+Last updated: 17 January 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

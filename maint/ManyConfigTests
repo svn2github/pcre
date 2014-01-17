@@ -39,7 +39,7 @@ if [ $? -eq 0 ] && grep GCC zzz >/dev/null; then
   ISGCC="yes"
   CFLAGS="$CFLAGS -Wall"
   CFLAGS="$CFLAGS -Wno-overlength-strings"
-  CFLAGS="$CFLAGS -Wpointer-arith"         
+  CFLAGS="$CFLAGS -Wpointer-arith"
   CFLAGS="$CFLAGS -Wwrite-strings"
   CFLAGS="$CFLAGS -Wundef -Wshadow"
   CFLAGS="$CFLAGS -Wextra -Wformat"
@@ -50,7 +50,7 @@ if [ $? -eq 0 ] && grep GCC zzz >/dev/null; then
   CFLAGS="$CFLAGS -Wuninitialized"
   CFLAGS="$CFLAGS -Wmissing-prototypes"
   CFLAGS="$CFLAGS -Wstrict-prototypes"
-fi 
+fi
 
 
 # This function runs a single test with the set of configuration options that
@@ -59,7 +59,7 @@ fi
 function runtest()
   {
   rm -f *_unittest
-  testcount=`expr $testcount + 1` 
+  testcount=`expr $testcount + 1`
 
   if [ "$opts" = "" ] ; then
     echo "[$testcount/$testtotal] Configuring with: default settings"
@@ -70,7 +70,7 @@ function runtest()
 
   CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" \
     $srcdir/configure $opts >/dev/null 2>teststderr
-     
+
   if [ $? -ne 0 ]; then
     echo " "
     echo "**** Error while configuring ****"
@@ -83,7 +83,7 @@ function runtest()
   if [ $? -ne 0 -o -s teststderr ]; then
     echo " "
     echo "**** Errors or warnings while making ****"
-    echo " " 
+    echo " "
     cat teststderr
     exit 1
   fi
@@ -189,9 +189,9 @@ if [ "$ISGCC" = "yes" ]; then
   echo "Maximally configured test with -O2"
   SAVECLFAGS="$CFLAGS"
   CFLAGS="$CFLAGS -O2"
-  opts="--disable-shared --enable-unicode-properties --enable-jit --enable-pcre16 --enable-pcre32" 
+  opts="--disable-shared --enable-unicode-properties --enable-jit --enable-pcre16 --enable-pcre32"
   runtest
-  CFLAGS="$SAVECFLAGS"   
+  CFLAGS="$SAVECFLAGS"
 fi
 
 echo "General tests in the current directory"
@@ -230,7 +230,8 @@ for opts in \
   "--enable-pcre32 --enable-unicode-properties --disable-stack-for-recursion --disable-shared" \
   "--enable-pcre32 --enable-jit --enable-unicode-properties --with-link-size=4 --disable-shared" \
   "--enable-pcre32 --enable-pcre16 --disable-shared" \
-  "--enable-pcre32 --enable-pcre16 --disable-pcre8 --disable-shared"
+  "--enable-pcre32 --enable-pcre16 --disable-pcre8 --disable-shared" \
+  "--enable-pcre32 --enable-pcre16 --disable-pcre8 --enable-jit --enable-unicode-properties --enable-newline-is-anycrlf --enable-bsr-anycrlf --disable-shared"
 do
   runtest
 done
