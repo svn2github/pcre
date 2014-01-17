@@ -373,12 +373,12 @@ library. They are also documented in the pcrebuild man page.
 
   Of course, the relevant libraries must be installed on your system.
 
-. The default size of internal buffer used by pcregrep can be set by, for
-  example:
+. The default size (in bytes) of the internal buffer used by pcregrep can be 
+  set by, for example:
 
-  --with-pcregrep-bufsize=50K
+  --with-pcregrep-bufsize=51200
 
-  The default value is 20K.
+  The value must be a plain integer. The default is 20480.
 
 . It is possible to compile pcretest so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
@@ -988,4 +988,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 08 January 2014
+Last updated: 17 January 2014

@@ -80,6 +80,12 @@ Version 8.35-RC1 xx-xxxx-201x
     failing. Because of the uncertainty, the script did not used to stop if 
     test 3 failed; it now does. If further versions of a French locale ever 
     come to light, they can now easily be added.
+    
+16. If --with-pcregrep-bufsize was given a non-integer value such as "50K",
+    there was a message during ./configure, but it did not stop. This now 
+    provokes an error. The invalid example in README has been corrected. 
+    If a value less than the minimum is given, the minimum value has always 
+    been used, but now a warning is given.
 
 
 Version 8.34 15-December-2013
