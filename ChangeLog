@@ -94,6 +94,8 @@ Version 8.35-RC1 xx-xxxx-201x
     
 18. pcretest was missing "-C bsr" for displaying the \R default setting.   
 
+19. Little endian PowerPC systems are supported now by the JIT compiler.
+
 
 Version 8.34 15-December-2013
 -----------------------------
