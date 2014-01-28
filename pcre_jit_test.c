@@ -392,6 +392,10 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE_MULTILINE | PCRE_NEWLINE_CRLF, 0, "\\W{0,2}[^#]{3}", "\r\n#....." },
 	{ PCRE_MULTILINE | PCRE_NEWLINE_CR, 0, "\\W{0,2}[^#]{3}", "\r\n#....." },
 	{ PCRE_MULTILINE | PCRE_NEWLINE_CRLF, 0, "\\W{1,3}[^#]", "\r\n##...." },
+	{ MUA | PCRE_NO_UTF8_CHECK, 1, "^.a", "\n\x80\nxa" },
+	{ MUA, 1, "^", "\r\n" },
+	{ PCRE_MULTILINE | PCRE_NEWLINE_CRLF, 1 | F_NOMATCH, "^", "\r\n" },
+	{ PCRE_MULTILINE | PCRE_NEWLINE_CRLF, 1, "^", "\r\na" },
 
 	/* Any character except newline or any newline. */
 	{ PCRE_NEWLINE_CRLF, 0, ".", "\r" },
@@ -650,6 +654,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_CRLF | PCRE_FIRSTLINE, 0 | F_NOMATCH | F_PROPERTY, "\\p{Any}{4}|a", "\r\na" },
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_CRLF | PCRE_FIRSTLINE, 1, ".", "\r\n" },
 	{ PCRE_FIRSTLINE | PCRE_NEWLINE_LF | PCRE_DOTALL, 0 | F_NOMATCH, "ab.", "ab" },
+	{ MUA | PCRE_FIRSTLINE, 1 | F_NOMATCH, "^[a-d0-9]", "\nxx\nd" },
 
 	/* Recurse. */
 	{ MUA, 0, "(a)(?1)", "aa" },
@@ -980,7 +985,7 @@ static int convert_utf8_to_utf16(const char *input, PCRE_UCHAR16 *output, int *o
 		if (offsetmap)
 			*offsetmap++ = (int)(iptr - (unsigned char*)input);
 
-		if (!(*iptr & 0x80))
+		if (*iptr < 0xc0)
 			c = *iptr++;
 		else if (!(*iptr & 0x20)) {
 			c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
@@ -1052,7 +1057,7 @@ static int convert_utf8_to_utf32(const char *input, PCRE_UCHAR32 *output, int *o
 		if (offsetmap)
 			*offsetmap++ = (int)(iptr - (unsigned char*)input);
 
-		if (!(*iptr & 0x80))
+		if (*iptr < 0xc0)
 			c = *iptr++;
 		else if (!(*iptr & 0x20)) {
 			c = ((iptr[0] & 0x1f) << 6) | (iptr[1] & 0x3f);
@@ -1326,10 +1331,10 @@ static int regression_tests(void)
 			if ((counter & 0x1) != 0) {
 				setstack8(extra8);
 				return_value8[0] = pcre_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
-					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32);
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector8_1, 32);
 			} else
 				return_value8[0] = pcre_jit_exec(re8, extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
-					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_1, 32, getstack8());
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector8_1, 32, getstack8());
 			memset(&dummy_extra8, 0, sizeof(pcre_extra));
 			dummy_extra8.flags = PCRE_EXTRA_MARK;
 			if (current->start_offset & F_STUDY) {
@@ -1338,7 +1343,7 @@ static int regression_tests(void)
 			}
 			dummy_extra8.mark = &mark8_2;
 			return_value8[1] = pcre_exec(re8, &dummy_extra8, current->input, strlen(current->input), current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector8_2, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector8_2, 32);
 		}
 #endif
 
@@ -1360,10 +1365,10 @@ static int regression_tests(void)
 			if ((counter & 0x1) != 0) {
 				setstack16(extra16);
 				return_value16[0] = pcre16_exec(re16, extra16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
-					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32);
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector16_1, 32);
 			} else
 				return_value16[0] = pcre16_jit_exec(re16, extra16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
-					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_1, 32, getstack16());
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector16_1, 32, getstack16());
 			memset(&dummy_extra16, 0, sizeof(pcre16_extra));
 			dummy_extra16.flags = PCRE_EXTRA_MARK;
 			if (current->start_offset & F_STUDY) {
@@ -1372,7 +1377,7 @@ static int regression_tests(void)
 			}
 			dummy_extra16.mark = &mark16_2;
 			return_value16[1] = pcre16_exec(re16, &dummy_extra16, regtest_buf16, length16, current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector16_2, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector16_2, 32);
 		}
 #endif
 
@@ -1394,10 +1399,10 @@ static int regression_tests(void)
 			if ((counter & 0x1) != 0) {
 				setstack32(extra32);
 				return_value32[0] = pcre32_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
-					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32);
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector32_1, 32);
 			} else
 				return_value32[0] = pcre32_jit_exec(re32, extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
-					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_1, 32, getstack32());
+					current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector32_1, 32, getstack32());
 			memset(&dummy_extra32, 0, sizeof(pcre32_extra));
 			dummy_extra32.flags = PCRE_EXTRA_MARK;
 			if (current->start_offset & F_STUDY) {
@@ -1406,7 +1411,7 @@ static int regression_tests(void)
 			}
 			dummy_extra32.mark = &mark32_2;
 			return_value32[1] = pcre32_exec(re32, &dummy_extra32, regtest_buf32, length32, current->start_offset & OFFSET_MASK,
-				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD), ovector32_2, 32);
+				current->flags & (PCRE_NOTBOL | PCRE_NOTEOL | PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART | PCRE_PARTIAL_SOFT | PCRE_PARTIAL_HARD | PCRE_NO_UTF8_CHECK), ovector32_2, 32);
 		}
 #endif
 

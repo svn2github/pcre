@@ -398,6 +398,7 @@ typedef struct compiler_common {
   struct sljit_label *quit_label;
   struct sljit_label *forced_quit_label;
   struct sljit_label *accept_label;
+  struct sljit_label *ff_newline_shortcut;
   stub_list *stubs;
   label_addr_list *label_addrs;
   recurse_entry *entries;
@@ -3871,7 +3872,7 @@ if (common->nltype == NLTYPE_FIXED && common->newline > 255)
   JUMPHERE(lastchar);
 
   if (firstline)
-    OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), POSSESSIVE0);
+    OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
   return;
   }
 
@@ -3881,6 +3882,8 @@ firstchar = CMP(SLJIT_C_LESS_EQUAL, STR_PTR, 0, TMP2, 0);
 skip_char_back(common);
 
 loop = LABEL();
+common->ff_newline_shortcut = loop;
+
 read_char_range(common, common->nlmin, common->nlmax, TRUE);
 lastchar = CMP(SLJIT_C_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 if (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF)
@@ -10133,10 +10136,19 @@ OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_LOCALS_REG), common->start_ptr);
 
 if ((re->options & PCRE_ANCHORED) == 0)
   {
-  if ((re->options & PCRE_FIRSTLINE) == 0)
-    CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, mainloop_label);
+  if (common->ff_newline_shortcut != NULL)
+    {
+    if ((re->options & PCRE_FIRSTLINE) == 0)
+      CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, common->ff_newline_shortcut);
+    /* There cannot be more newlines here. */
+    }
   else
-    CMPTO(SLJIT_C_LESS, STR_PTR, 0, TMP1, 0, mainloop_label);
+    {
+    if ((re->options & PCRE_FIRSTLINE) == 0)
+      CMPTO(SLJIT_C_LESS, STR_PTR, 0, STR_END, 0, mainloop_label);
+    else
+      CMPTO(SLJIT_C_LESS, STR_PTR, 0, TMP1, 0, mainloop_label);
+    }
   }
 
 /* No more remaining characters. */

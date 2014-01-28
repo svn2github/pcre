@@ -96,6 +96,10 @@ Version 8.35-RC1 xx-xxxx-201x
 
 19. Little endian PowerPC systems are supported now by the JIT compiler.
 
+20. The fast forward newline mechanism could enter to an infinite loop on
+    certain invalid UTF-8 input. Although we don't support these cases
+    this issue can be fixed by a performance optimization.
+
 
 Version 8.34 15-December-2013
 -----------------------------
