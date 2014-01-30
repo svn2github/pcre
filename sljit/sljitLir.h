@@ -265,6 +265,12 @@ struct sljit_compiler {
 	sljit_sw cache_argw;
 #endif
 
+#if (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
+	sljit_si locals_offset;
+	sljit_si cache_arg;
+	sljit_sw cache_argw;
+#endif
+
 #if (defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) || (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
 	sljit_sw imm;
 	sljit_si cache_arg;
@@ -478,11 +484,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_return(struct sljit_compiler *
 
 /* Register output: simply the name of the register.
    For destination, you can use SLJIT_UNUSED as well. */
-#define SLJIT_MEM		0x100
+#define SLJIT_MEM		0x80
 #define SLJIT_MEM0()		(SLJIT_MEM)
 #define SLJIT_MEM1(r1)		(SLJIT_MEM | (r1))
-#define SLJIT_MEM2(r1, r2)	(SLJIT_MEM | (r1) | ((r2) << 4))
-#define SLJIT_IMM		0x200
+#define SLJIT_MEM2(r1, r2)	(SLJIT_MEM | (r1) | ((r2) << 8))
+#define SLJIT_IMM		0x40
 
 /* Set 32 bit operation mode (I) on 64 bit CPUs. The flag is totally ignored on
    32 bit CPUs. If this flag is set for an arithmetic operation, it uses only the
@@ -575,7 +581,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_return(struct sljit_compiler *
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler, sljit_si op);
 
 /* Notes for MOV instructions:
-   U = Mov with update (post form). If source or destination defined as SLJIT_MEM1(r1)
+   U = Mov with update (pre form). If source or destination defined as SLJIT_MEM1(r1)
        or SLJIT_MEM2(r1, r2), r1 is increased by the sum of r2 and the constant argument
    UB = unsigned byte (8 bit)
    SB = signed byte (8 bit)
@@ -602,7 +608,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler
 /* Flags: I - (never set any flags)
    Note: see SLJIT_INT_OP for further details. */
 #define SLJIT_MOV_UI			11
-/* No SLJIT_INT_OP form, since it the same as SLJIT_IMOVU. */
+/* No SLJIT_INT_OP form, since it the same as SLJIT_IMOV. */
 /* Flags: I - (never set any flags)
    Note: see SLJIT_INT_OP for further details. */
 #define SLJIT_MOV_SI			12

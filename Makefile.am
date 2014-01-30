@@ -350,6 +350,7 @@ EXTRA_DIST += \
   sljit/sljitExecAllocator.c \
   sljit/sljitLir.c \
   sljit/sljitLir.h \
+  sljit/sljitNativeARM_64.c \
   sljit/sljitNativeARM_Thumb2.c \
   sljit/sljitNativeARM_v5.c \
   sljit/sljitNativeMIPS_32.c \
