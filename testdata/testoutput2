@@ -14134,5 +14134,15 @@ Start of matched string is beyond its end - displaying from end to start.
 /abcd/f<lf>
     xx\nxabcd
 No match
+    
+/ -- Test stack check external calls --/ 
+
+/(((((a)))))/Q0
+
+/(((((a)))))/Q1
+Failed: parentheses are too deeply nested (stack check) at offset 0
+
+/(((((a)))))/Q
+** Missing 0 or 1 after /Q
 
 /-- End of testinput2 --/

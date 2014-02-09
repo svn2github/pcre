@@ -233,6 +233,9 @@ argument, the casting might be incorrectly applied. */
 #define SET_PCRE_CALLOUT8(callout) \
   pcre_callout = callout
 
+#define SET_PCRE_STACK_GUARD8(stack_guard) \
+  pcre_stack_guard = stack_guard
+
 #define PCRE_ASSIGN_JIT_STACK8(extra, callback, userdata) \
    pcre_assign_jit_stack(extra, callback, userdata)
 
@@ -316,6 +319,9 @@ argument, the casting might be incorrectly applied. */
 
 #define SET_PCRE_CALLOUT16(callout) \
   pcre16_callout = (int (*)(pcre16_callout_block *))callout
+
+#define SET_PCRE_STACK_GUARD16(stack_guard) \
+  pcre16_stack_guard = (int (*)(void))stack_guard
 
 #define PCRE_ASSIGN_JIT_STACK16(extra, callback, userdata) \
   pcre16_assign_jit_stack((pcre16_extra *)extra, \
@@ -405,6 +411,9 @@ argument, the casting might be incorrectly applied. */
 
 #define SET_PCRE_CALLOUT32(callout) \
   pcre32_callout = (int (*)(pcre32_callout_block *))callout
+
+#define SET_PCRE_STACK_GUARD32(stack_guard) \
+  pcre32_stack_guard = (int (*)(void))stack_guard
 
 #define PCRE_ASSIGN_JIT_STACK32(extra, callback, userdata) \
   pcre32_assign_jit_stack((pcre32_extra *)extra, \
@@ -532,6 +541,14 @@ cases separately. */
     SET_PCRE_CALLOUT16(callout); \
   else \
     SET_PCRE_CALLOUT8(callout)
+
+#define SET_PCRE_STACK_GUARD(stack_guard) \
+  if (pcre_mode == PCRE32_MODE) \
+    SET_PCRE_STACK_GUARD32(stack_guard); \
+  else if (pcre_mode == PCRE16_MODE) \
+    SET_PCRE_STACK_GUARD16(stack_guard); \
+  else \
+    SET_PCRE_STACK_GUARD8(stack_guard)
 
 #define STRLEN(p) (pcre_mode == PCRE32_MODE ? STRLEN32(p) : pcre_mode == PCRE16_MODE ? STRLEN16(p) : STRLEN8(p))
 
@@ -756,6 +773,12 @@ the three different cases. */
   else \
     G(SET_PCRE_CALLOUT,BITTWO)(callout)
 
+#define SET_PCRE_STACK_GUARD(stack_guard) \
+  if (pcre_mode == G(G(PCRE,BITONE),_MODE)) \
+    G(SET_PCRE_STACK_GUARD,BITONE)(stack_guard); \
+  else \
+    G(SET_PCRE_STACK_GUARD,BITTWO)(stack_guard)
+
 #define STRLEN(p) ((pcre_mode == G(G(PCRE,BITONE),_MODE)) ? \
   G(STRLEN,BITONE)(p) : G(STRLEN,BITTWO)(p))
 
@@ -897,6 +920,7 @@ the three different cases. */
 #define PCHARSV                   PCHARSV8
 #define READ_CAPTURE_NAME         READ_CAPTURE_NAME8
 #define SET_PCRE_CALLOUT          SET_PCRE_CALLOUT8
+#define SET_PCRE_STACK_GUARD      SET_PCRE_STACK_GUARD8
 #define STRLEN                    STRLEN8
 #define PCRE_ASSIGN_JIT_STACK     PCRE_ASSIGN_JIT_STACK8
 #define PCRE_COMPILE              PCRE_COMPILE8
@@ -927,6 +951,7 @@ the three different cases. */
 #define PCHARSV                   PCHARSV16
 #define READ_CAPTURE_NAME         READ_CAPTURE_NAME16
 #define SET_PCRE_CALLOUT          SET_PCRE_CALLOUT16
+#define SET_PCRE_STACK_GUARD      SET_PCRE_STACK_GUARD16
 #define STRLEN                    STRLEN16
 #define PCRE_ASSIGN_JIT_STACK     PCRE_ASSIGN_JIT_STACK16
 #define PCRE_COMPILE              PCRE_COMPILE16
@@ -957,6 +982,7 @@ the three different cases. */
 #define PCHARSV                   PCHARSV32
 #define READ_CAPTURE_NAME         READ_CAPTURE_NAME32
 #define SET_PCRE_CALLOUT          SET_PCRE_CALLOUT32
+#define SET_PCRE_STACK_GUARD      SET_PCRE_STACK_GUARD32
 #define STRLEN                    STRLEN32
 #define PCRE_ASSIGN_JIT_STACK     PCRE_ASSIGN_JIT_STACK32
 #define PCRE_COMPILE              PCRE_COMPILE32
@@ -1015,6 +1041,7 @@ static int first_callout;
 static int jit_was_used;
 static int locale_set = 0;
 static int show_malloc;
+static int stack_guard_return;
 static int use_utf;
 static const unsigned char *last_callout_mark = NULL;
 
@@ -2199,6 +2226,18 @@ return p;
 #endif  /* SUPPORT_PCRE32 */
 
 
+
+/*************************************************
+*            Stack guard function                *
+*************************************************/
+
+/* Called from PCRE when set in pcre_stack_guard. We give an error (non-zero)
+return when a count overflows. */
+
+static int stack_guard(void)
+{
+return stack_guard_return;
+}
 
 /*************************************************
 *              Callout function                  *
@@ -3445,6 +3484,7 @@ while (!done)
 
   use_utf = 0;
   debug_lengths = 1;
+  SET_PCRE_STACK_GUARD(NULL);
 
   if (extend_inputline(infile, buffer, "  re> ") == NULL) break;
   if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
@@ -3744,6 +3784,21 @@ while (!done)
 #if !defined NOPOSIX
       case 'P': do_posix = 1; break;
 #endif
+
+      case 'Q':
+      switch (*pp)
+        {
+        case '0': 
+        case '1':
+        stack_guard_return = *pp++ - '0';
+        break;  
+
+        default:
+        fprintf(outfile, "** Missing 0 or 1 after /Q\n");
+        goto SKIP_DATA;
+        }
+      SET_PCRE_STACK_GUARD(stack_guard);
+      break;
 
       case 'S':
       do_study = 1;
@@ -5198,7 +5253,7 @@ while (!done)
           if (count * 2 > use_size_offsets) count = use_size_offsets/2;
           }
 
-        /* Output the captured substrings. Note that, for the matched string, 
+        /* Output the captured substrings. Note that, for the matched string,
         the use of \K in an assertion can make the start later than the end. */
 
         for (i = 0; i < count * 2; i += 2)
@@ -5217,23 +5272,23 @@ while (!done)
             {
             int start = use_offsets[i];
             int end = use_offsets[i+1];
-               
+
             if (start > end)
               {
               start = use_offsets[i+1];
               end = use_offsets[i];
-              fprintf(outfile, "Start of matched string is beyond its end - " 
-                "displaying from end to start.\n"); 
-              }  
- 
+              fprintf(outfile, "Start of matched string is beyond its end - "
+                "displaying from end to start.\n");
+              }
+
             fprintf(outfile, "%2d: ", i/2);
             PCHARSV(bptr, start, end - start, outfile);
             if (verify_jit && jit_was_used) fprintf(outfile, " (JIT)");
             fprintf(outfile, "\n");
-            
+
             /* Note: don't use the start/end variables here because we want to
             show the text from what is reported as the end. */
-             
+
             if (do_showcaprest || (i == 0 && do_showrest))
               {
               fprintf(outfile, "%2d+ ", i/2);

@@ -1,4 +1,4 @@
-.TH PCRETEST 1 "17 January 2014" "PCRE 8.35"
+.TH PCRETEST 1 "09 February 2014" "PCRE 8.35"
 .SH NAME
 pcretest - a program for testing Perl-compatible regular expressions.
 .SH SYNOPSIS
@@ -333,6 +333,7 @@ sections.
   \fB/N\fP              set PCRE_NO_AUTO_CAPTURE
   \fB/O\fP              set PCRE_NO_AUTO_POSSESS
   \fB/P\fP              use the POSIX wrapper
+  \fB/Q\fP              test external stack check function 
   \fB/S\fP              study the pattern after compilation
   \fB/s\fP              set PCRE_DOTALL
   \fB/T\fP              select character tables
@@ -518,6 +519,15 @@ the compiled pattern to be output. This does not include the size of the
 \fBpcre[16|32]\fP block; it is just the actual compiled data. If the pattern is
 successfully studied with the PCRE_STUDY_JIT_COMPILE option, the size of the
 JIT compiled code is also output.
+.P
+The \fB/Q\fP modifier is used to test the use of \fBpcre_stack_guard\fP. It 
+must be followed by '0' or '1', specifying the return code to be given from an 
+external function that is passed to PCRE and used for stack checking during 
+compilation (see the
+.\" HREF
+\fBpcreapi\fP
+.\"
+documentation for details). 
 .P
 The \fB/S\fP modifier causes \fBpcre[16|32]_study()\fP to be called after the
 expression has been compiled, and the results used when the expression is
@@ -1141,6 +1151,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 January 2014
+Last updated: 09 February 2014
 Copyright (c) 1997-2014 University of Cambridge.
 .fi

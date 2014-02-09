@@ -547,6 +547,8 @@ static const char error_texts[] =
   "parentheses are too deeply nested\0"
   "invalid range in character class\0"
   "group name must start with a non-digit\0"
+  /* 85 */
+  "parentheses are too deeply nested (stack check)\0"  
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -8032,6 +8034,16 @@ int length;
 unsigned int orig_bracount;
 unsigned int max_bracount;
 branch_chain bc;
+
+/* If set, call the external function that checks for stack availability. */
+
+if (PUBL(stack_guard) != NULL && PUBL(stack_guard)())
+  {
+  *errorcodeptr= ERR85;
+  return FALSE;
+  }
+  
+/* Miscellaneous initialization */ 
 
 bc.outer = bcptr;
 bc.current_branch = code;

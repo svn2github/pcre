@@ -4050,5 +4050,13 @@ backtracking verbs. --/
 
 /abcd/f<lf>
     xx\nxabcd
+    
+/ -- Test stack check external calls --/ 
+
+/(((((a)))))/Q0
+
+/(((((a)))))/Q1
+
+/(((((a)))))/Q
 
 /-- End of testinput2 --/

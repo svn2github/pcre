@@ -99,6 +99,12 @@ Version 8.35-RC1 xx-xxxx-201x
 20. The fast forward newline mechanism could enter to an infinite loop on
     certain invalid UTF-8 input. Although we don't support these cases
     this issue can be fixed by a performance optimization.
+    
+21. Change 33 of 8.34 is not sufficient to ensure stack safety because it does
+    not take account if existing stack usage. There is now a new global 
+    variable called pcre_stack_guard that can be set to point to an external 
+    function to check stack availability. It is called at the start of 
+    processing every parenthesized group.  
 
 
 Version 8.34 15-December-2013
