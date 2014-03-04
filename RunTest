@@ -32,7 +32,7 @@
 # in numerical order.
 #
 # The special argument "3S" runs test 3, stopping if it fails. Test 3 is the
-# locale test, and failure usually means there's an issue with the locale 
+# locale test, and failure usually means there's an issue with the locale
 # rather than a bug in PCRE, so normally subsequent tests are run. "3S" is
 # useful when you want to debug or update the test.
 #
@@ -473,13 +473,13 @@ if [ $do3 = yes ] ; then
     locale=fr_FR
     infile=$testdata/testinput3
     outfile=$testdata/testoutput3
-    outfile2=$testdata/testoutput3A 
-    outfile3=$testdata/testoutput3B 
+    outfile2=$testdata/testoutput3A
+    outfile3=$testdata/testoutput3B
   else
     infile=test3input
     outfile=test3output
-    outfile2=test3outputA 
-    outfile3=test3outputB 
+    outfile2=test3outputA
+    outfile3=test3outputB
     locale -a | grep '^french$' >/dev/null
     if [ $? -eq 0 ] ; then
       locale=french
@@ -508,7 +508,7 @@ if [ $do3 = yes ] ; then
       if [ $? = 0 ] ; then
         if $cf $outfile testtry >teststdout || \
            $cf $outfile2 testtry >teststdout || \
-           $cf $outfile3 testtry >teststdout 
+           $cf $outfile3 testtry >teststdout
         then
           if [ "$opt" = "-s" ] ; then echo "  OK with study"
           elif [ "$opt" = "-s+" ] ; then echo "  OK with JIT study"

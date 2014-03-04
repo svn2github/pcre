@@ -582,9 +582,9 @@ changed in future to be a fixed number of bytes or to depend on LINK_SIZE. */
 #define MAX_MARK ((1u << 8) - 1)
 #endif
 
-/* There is a proposed future special "UTF-21" mode, in which only the lowest 
-21 bits of a 32-bit character are interpreted as UTF, with the remaining 11 
-high-order bits available to the application for other uses. In preparation for 
+/* There is a proposed future special "UTF-21" mode, in which only the lowest
+21 bits of a 32-bit character are interpreted as UTF, with the remaining 11
+high-order bits available to the application for other uses. In preparation for
 the future implementation of this mode, there are macros that load a data item
 and, if in this special mode, mask it to 21 bits. These macros all have names
 starting with UCHAR21. In all other modes, including the normal 32-bit

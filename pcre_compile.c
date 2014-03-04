@@ -548,7 +548,7 @@ static const char error_texts[] =
   "invalid range in character class\0"
   "group name must start with a non-digit\0"
   /* 85 */
-  "parentheses are too deeply nested (stack check)\0"  
+  "parentheses are too deeply nested (stack check)\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -4081,8 +4081,8 @@ for (c = *cptr; c <= d; c++)
 
 if (c > d) return -1;  /* Reached end of range */
 
-/* Found a character that has a single other case. Search for the end of the 
-range, which is either the end of the input range, or a character that has zero 
+/* Found a character that has a single other case. Search for the end of the
+range, which is either the end of the input range, or a character that has zero
 or more than one other cases. */
 
 *ocptr = othercase;
@@ -4146,7 +4146,7 @@ if ((options & PCRE_CASELESS) != 0)
 
     options &= ~PCRE_CASELESS;   /* Remove for recursive calls */
     c = start;
-    
+
     while ((rc = get_othercase_range(&c, end, &oc, &od)) >= 0)
       {
       /* Handle a single character that has more than one other case. */
@@ -4209,7 +4209,7 @@ for (c = start; c <= classbits_end; c++)
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
 if (start <= 0xff) start = 0xff + 1;
 
-if (end >= start) 
+if (end >= start)
   {
   pcre_uchar *uchardata = *uchardptr;
 #ifdef SUPPORT_UTF
@@ -6620,9 +6620,9 @@ for (;; ptr++)
         code[1+LINK_SIZE] = OP_CREF;
         skipbytes = 1+IMM2_SIZE;
         refsign = -1;     /* => not a number */
-        namelen = -1;     /* => not a name; must set to avoid warning */ 
-        name = NULL;      /* Always set to avoid warning */ 
-        recno = 0;        /* Always set to avoid warning */ 
+        namelen = -1;     /* => not a name; must set to avoid warning */
+        name = NULL;      /* Always set to avoid warning */
+        recno = 0;        /* Always set to avoid warning */
 
         /* Check for a test for recursion in a named group. */
 
@@ -8042,8 +8042,8 @@ if (PUBL(stack_guard) != NULL && PUBL(stack_guard)())
   *errorcodeptr= ERR85;
   return FALSE;
   }
-  
-/* Miscellaneous initialization */ 
+
+/* Miscellaneous initialization */
 
 bc.outer = bcptr;
 bc.current_branch = code;

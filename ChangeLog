@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.35-RC1 xx-xxxx-201x
------------------------------
+Version 8.35-RC1 04-March-2014
+------------------------------
 
 1.  A new flag is set, when property checks are present in an XCLASS.
     When this flag is not set, PCRE can perform certain optimizations
@@ -30,22 +30,22 @@ Version 8.35-RC1 xx-xxxx-201x
     above a certain treshold (e.g: 256). The only limitation is that the value
     must be bigger than the treshold as well. This function is useful, when
     the characters above the treshold are handled in the same way.
-    
-7.  The macros whose names start with RAWUCHAR are placeholders for a future 
-    mode in which only the bottom 21 bits of 32-bit data items are used. To 
-    make this more memorable for those maintaining the code, the names have 
-    been changed to start with UCHAR21, and an extensive comment has been added 
-    to their definition. 
-    
+
+7.  The macros whose names start with RAWUCHAR are placeholders for a future
+    mode in which only the bottom 21 bits of 32-bit data items are used. To
+    make this more memorable for those maintaining the code, the names have
+    been changed to start with UCHAR21, and an extensive comment has been added
+    to their definition.
+
 8.  Add missing (new) files sljitNativeTILEGX.c and sljitNativeTILEGX-encoder.c
     to the export list in Makefile.am (they were accidentally omitted from the
     8.34 tarball).
-    
+
 9.  The informational output from pcretest used the phrase "starting byte set"
-    which is inappropriate for the 16-bit and 32-bit libraries. As the output 
-    for "first char" and "need char" really means "non-UTF-char", I've changed 
-    "byte" to "char", and slightly reworded the output. The documentation about 
-    these values has also been (I hope) clarified.  
+    which is inappropriate for the 16-bit and 32-bit libraries. As the output
+    for "first char" and "need char" really means "non-UTF-char", I've changed
+    "byte" to "char", and slightly reworded the output. The documentation about
+    these values has also been (I hope) clarified.
 
 10. Another JIT related optimization: use table jumps for selecting the correct
     backtracking path, when more than four alternatives are present inside a
@@ -54,57 +54,57 @@ Version 8.35-RC1 xx-xxxx-201x
 11. Empty match is not possible, when the minimum length is greater than zero,
     and there is no \K in the pattern. JIT should avoid empty match checks in
     such cases.
-    
+
 12. In a caseless character class with UCP support, when a character with more
     than one alternative case was not the first character of a range, not all
     the alternative cases were added to the class. For example, s and \x{17f}
     are both alternative cases for S: the class [RST] was handled correctly,
     but [R-T] was not.
-    
-13. The configure.ac file always checked for pthread support when JIT was 
-    enabled. This is not used in Windows, so I have put this test inside a 
+
+13. The configure.ac file always checked for pthread support when JIT was
+    enabled. This is not used in Windows, so I have put this test inside a
     check for the presence of windows.h (which was already tested for).
 
 14. Improve pattern prefix search by a simplified Boyer-Moore algorithm in JIT.
     The algorithm provides a way to skip certain starting offsets, and usually
     faster than linear prefix searches.
-    
+
 15. Change 13 for 8.20 updated RunTest to check for the 'fr' locale as well
-    as for 'fr_FR' and 'french'. For some reason, however, it then used the 
-    Windows-specific input and output files, which have 'french' screwed in. 
-    So this could never have worked. One of the problems with locales is that 
-    they aren't always the same. I have now updated RunTest so that it checks 
-    the output of the locale test (test 3) against three different output 
-    files, and it allows the test to pass if any one of them matches. With luck 
-    this should make the test pass on some versions of Solaris where it was 
-    failing. Because of the uncertainty, the script did not used to stop if 
-    test 3 failed; it now does. If further versions of a French locale ever 
+    as for 'fr_FR' and 'french'. For some reason, however, it then used the
+    Windows-specific input and output files, which have 'french' screwed in.
+    So this could never have worked. One of the problems with locales is that
+    they aren't always the same. I have now updated RunTest so that it checks
+    the output of the locale test (test 3) against three different output
+    files, and it allows the test to pass if any one of them matches. With luck
+    this should make the test pass on some versions of Solaris where it was
+    failing. Because of the uncertainty, the script did not used to stop if
+    test 3 failed; it now does. If further versions of a French locale ever
     come to light, they can now easily be added.
-    
+
 16. If --with-pcregrep-bufsize was given a non-integer value such as "50K",
-    there was a message during ./configure, but it did not stop. This now 
-    provokes an error. The invalid example in README has been corrected. 
-    If a value less than the minimum is given, the minimum value has always 
+    there was a message during ./configure, but it did not stop. This now
+    provokes an error. The invalid example in README has been corrected.
+    If a value less than the minimum is given, the minimum value has always
     been used, but now a warning is given.
-    
+
 17. If --enable-bsr-anycrlf was set, the special 16/32-bit test failed. This
-    was a bug in the test system, which is now fixed. Also, the list of various 
-    configurations that are tested for each release did not have one with both 
+    was a bug in the test system, which is now fixed. Also, the list of various
+    configurations that are tested for each release did not have one with both
     16/32 bits and --enable-bar-anycrlf. It now does.
-    
-18. pcretest was missing "-C bsr" for displaying the \R default setting.   
+
+18. pcretest was missing "-C bsr" for displaying the \R default setting.
 
 19. Little endian PowerPC systems are supported now by the JIT compiler.
 
 20. The fast forward newline mechanism could enter to an infinite loop on
     certain invalid UTF-8 input. Although we don't support these cases
     this issue can be fixed by a performance optimization.
-    
+
 21. Change 33 of 8.34 is not sufficient to ensure stack safety because it does
-    not take account if existing stack usage. There is now a new global 
-    variable called pcre_stack_guard that can be set to point to an external 
-    function to check stack availability. It is called at the start of 
-    processing every parenthesized group.  
+    not take account if existing stack usage. There is now a new global
+    variable called pcre_stack_guard that can be set to point to an external
+    function to check stack availability. It is called at the start of
+    processing every parenthesized group.
 
 
 Version 8.34 15-December-2013

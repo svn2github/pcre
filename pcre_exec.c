@@ -2700,11 +2700,11 @@ for (;;)
       while (count-- > 0)
         {
         offset = GET2(slot, 0) << 1;
-        if (offset < offset_top && md->offset_vector[offset] >= 0) 
+        if (offset < offset_top && md->offset_vector[offset] >= 0)
           {
           length = md->offset_vector[offset+1] - md->offset_vector[offset];
           break;
-          } 
+          }
         slot += md->name_entry_size;
         }
       }

@@ -289,12 +289,12 @@ points during a matching operation. Details are given in the
 .\"
 documentation.
 .P
-The global variable \fBpcre_stack_guard\fP initially contains NULL. It can be 
-set by the caller to a function that is called by PCRE whenever it starts 
-to compile a parenthesized part of a pattern. When parentheses are nested, PCRE 
-uses recursive function calls, which use up the system stack. This function is 
-provided so that applications with restricted stacks can force a compilation 
-error if the stack runs out. The function should return zero if all is well, or 
+The global variable \fBpcre_stack_guard\fP initially contains NULL. It can be
+set by the caller to a function that is called by PCRE whenever it starts
+to compile a parenthesized part of a pattern. When parentheses are nested, PCRE
+uses recursive function calls, which use up the system stack. This function is
+provided so that applications with restricted stacks can force a compilation
+error if the stack runs out. The function should return zero if all is well, or
 non-zero to force an error.
 .
 .
@@ -347,7 +347,7 @@ controlled in a similar way, but by separate options.
 The PCRE functions can be used in multi-threading applications, with the
 proviso that the memory management functions pointed to by \fBpcre_malloc\fP,
 \fBpcre_free\fP, \fBpcre_stack_malloc\fP, and \fBpcre_stack_free\fP, and the
-callout and stack-checking functions pointed to by \fBpcre_callout\fP and 
+callout and stack-checking functions pointed to by \fBpcre_callout\fP and
 \fBpcre_stack_guard\fP, are shared by all threads.
 .P
 The compiled form of a regular expression is not altered during matching, so
@@ -476,8 +476,8 @@ documentation.
 The output is a long integer that gives the maximum depth of nesting of
 parentheses (of any kind) in a pattern. This limit is imposed to cap the amount
 of system stack used when a pattern is compiled. It is specified when PCRE is
-built; the default is 250. This limit does not take into account the stack that 
-may already be used by the calling application. For finer control over 
+built; the default is 250. This limit does not take into account the stack that
+may already be used by the calling application. For finer control over
 compilation stack usage, you can set a pointer to an external checking function
 in \fBpcre_stack_guard\fP.
 .sp
@@ -1006,7 +1006,7 @@ have fallen out of use. To avoid confusion, they have not been re-used.
   82  parentheses are too deeply nested
   83  invalid range in character class
   84  group name must start with a non-digit
-  85  parentheses are too deeply nested (stack check)  
+  85  parentheses are too deeply nested (stack check)
 .sp
 The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
 be used if the limits were changed when PCRE was built.

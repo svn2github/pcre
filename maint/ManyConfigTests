@@ -79,7 +79,7 @@ function runtest()
   fi
 
   echo "Making"
-  make >/dev/null 2>teststderr
+  make -j >/dev/null 2>teststderr
   if [ $? -ne 0 -o -s teststderr ]; then
     echo " "
     echo "**** Errors or warnings while making ****"
@@ -166,7 +166,7 @@ function runtest()
 # Update the total count whenever a new test is added; it is used to show
 # progess as each test is run.
 
-testtotal=42
+testtotal=43
 testcount=0
 
 # This set of tests builds PCRE and runs the tests with a variety of configure

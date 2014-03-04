@@ -373,7 +373,7 @@ library. They are also documented in the pcrebuild man page.
 
   Of course, the relevant libraries must be installed on your system.
 
-. The default size (in bytes) of the internal buffer used by pcregrep can be 
+. The default size (in bytes) of the internal buffer used by pcregrep can be
   set by, for example:
 
   --with-pcregrep-bufsize=51200

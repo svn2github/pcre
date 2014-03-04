@@ -3788,10 +3788,10 @@ while (!done)
       case 'Q':
       switch (*pp)
         {
-        case '0': 
+        case '0':
         case '1':
         stack_guard_return = *pp++ - '0';
-        break;  
+        break;
 
         default:
         fprintf(outfile, "** Missing 0 or 1 after /Q\n");

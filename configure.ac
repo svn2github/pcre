@@ -11,15 +11,15 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [35])
 m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2013-12-23])
+m4_define(pcre_date, [2014-03-04])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
 
 # Libtool shared library interface versions (current:revision:age)
-m4_define(libpcre_version, [3:2:2])
-m4_define(libpcre16_version, [2:2:2])
-m4_define(libpcre32_version, [0:2:0])
+m4_define(libpcre_version, [3:3:2])
+m4_define(libpcre16_version, [2:3:2])
+m4_define(libpcre32_version, [0:3:0])
 m4_define(libpcreposix_version, [0:2:0])
 m4_define(libpcrecpp_version, [0:0:0])
 
@@ -695,7 +695,7 @@ if test "$enable_jit" = "yes"; then
     CC="$PTHREAD_CC"
     CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
     LIBS="$PTHREAD_LIBS $LIBS"
-  fi   
+  fi
   AC_DEFINE([SUPPORT_JIT], [], [
     Define to any value to enable support for Just-In-Time compiling.])
 else
@@ -748,8 +748,8 @@ if test $with_pcregrep_bufsize -lt 8192 ; then
   with_pcregrep_bufsize="8192"
 else
   if test $? -gt 1 ; then
-  AC_MSG_ERROR([Bad value for  --with-pcregrep-bufsize]) 
-  fi    
+  AC_MSG_ERROR([Bad value for  --with-pcregrep-bufsize])
+  fi
 fi
 
 AC_DEFINE_UNQUOTED([PCREGREP_BUFSIZE], [$with_pcregrep_bufsize], [
