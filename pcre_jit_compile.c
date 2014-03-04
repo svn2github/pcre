@@ -3559,6 +3559,7 @@ for (i = 0; i < max; i++)
   }
 
 in_range = FALSE;
+from = 0;   /* Prevent compiler "uninitialized" warning */
 for (i = 0; i <= max; i++)
   {
   if (in_range && (i - from) > range_len && (bytes[(i - 1) * MAX_N_BYTES] <= 4))
