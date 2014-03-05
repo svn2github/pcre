@@ -83,13 +83,13 @@
 #if !(defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
 
 #define GET_OPCODE(op) \
-	((op) & ~(SLJIT_INT_OP | SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))
+	((op) & ~(SLJIT_INT_OP | SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))
 
 #define GET_FLAGS(op) \
-	((op) & (SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C))
+	((op) & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C))
 
 #define GET_ALL_FLAGS(op) \
-	((op) & (SLJIT_INT_OP | SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))
+	((op) & (SLJIT_INT_OP | SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))
 
 #define TYPE_CAST_NEEDED(op) \
 	(((op) >= SLJIT_MOV_UB && (op) <= SLJIT_MOV_SH) || ((op) >= SLJIT_MOVU_UB && (op) <= SLJIT_MOVU_SH))
@@ -153,11 +153,13 @@
 #endif
 
 #if (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
-#	define IS_COND		0x04
-#	define IS_CBZ		0x08
-#	define IS_BL		0x10
-#	define PATCH_B		0x20
-#	define PATCH_COND	0x40
+#	define IS_COND		0x004
+#	define IS_CBZ		0x008
+#	define IS_BL		0x010
+#	define PATCH_B		0x020
+#	define PATCH_COND	0x040
+#	define PATCH_ABS48	0x080
+#	define PATCH_ABS64	0x100
 #endif
 
 #if (defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) || (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
@@ -165,18 +167,26 @@
 #	define PATCH_B		0x08
 #	define ABSOLUTE_B	0x10
 #	define REMOVE_COND	0x20
+#if (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
+#	define PATCH_ABS32	0x40
+#	define PATCH_ABS48	0x80
+#endif
 #endif
 
-#if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
-#	define IS_MOVABLE	0x04
-#	define IS_JAL		0x08
-#	define IS_BIT26_COND	0x10
-#	define IS_BIT16_COND	0x20
+#if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32) || (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+#	define IS_MOVABLE	0x004
+#	define IS_JAL		0x008
+#	define IS_BIT26_COND	0x010
+#	define IS_BIT16_COND	0x020
 
 #	define IS_COND		(IS_BIT26_COND | IS_BIT16_COND)
 
-#	define PATCH_B		0x40
-#	define PATCH_J		0x80
+#	define PATCH_B		0x040
+#	define PATCH_J		0x080
+
+#if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+#	define PATCH_ABS32	0x100
+#endif
 
 	/* instruction types */
 #	define MOVABLE_INS	0
@@ -253,6 +263,11 @@
 #if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
 #define SLJIT_HAS_FIXED_LOCALS_OFFSET 1
 #define FIXED_LOCALS_OFFSET (4 * sizeof(sljit_sw))
+#endif
+
+#if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+#define SLJIT_HAS_FIXED_LOCALS_OFFSET 1
+#define FIXED_LOCALS_OFFSET 0
 #endif
 
 #if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
@@ -364,7 +379,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void)
 	compiler->cpool_diff = 0xffffffff;
 #endif
 
-#if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
+#if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32) || (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
 	compiler->delay_slot = UNMOVABLE_INS;
 #endif
 
@@ -439,8 +454,6 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_label(struct sljit_jump *jump, struct sl
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_target(struct sljit_jump *jump, sljit_uw target)
 {
 	if (SLJIT_LIKELY(!!jump)) {
-		SLJIT_ASSERT(jump->flags & SLJIT_REWRITABLE_JUMP);
-
 		jump->flags &= ~JUMP_LABEL;
 		jump->flags |= JUMP_ADDR;
 		jump->u.target = target;
@@ -569,41 +582,43 @@ static SLJIT_INLINE void set_const(struct sljit_const *const_, struct sljit_comp
 	case SLJIT_SHL: \
 	case SLJIT_LSHR: \
 	case SLJIT_ASHR: \
-		SLJIT_ASSERT(!(op & (SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C))); \
+		SLJIT_ASSERT(!(op & (SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C))); \
 		break; \
 	case SLJIT_NEG: \
-		SLJIT_ASSERT(!(op & (SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_C))); \
+		SLJIT_ASSERT(!(op & (SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_C))); \
 		break; \
 	case SLJIT_MUL: \
-		SLJIT_ASSERT(!(op & (SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_C))); \
+		SLJIT_ASSERT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_C))); \
 		break; \
 	case SLJIT_CMPD: \
 		SLJIT_ASSERT(!(op & (SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
 		SLJIT_ASSERT((op & (SLJIT_SET_E | SLJIT_SET_S))); \
 		break; \
 	case SLJIT_ADD: \
-		SLJIT_ASSERT(!(op & (SLJIT_SET_S | SLJIT_SET_U))); \
+		SLJIT_ASSERT(!(op & (SLJIT_SET_U | SLJIT_SET_S))); \
 		break; \
 	case SLJIT_SUB: \
 		break; \
 	case SLJIT_ADDC: \
 	case SLJIT_SUBC: \
-		SLJIT_ASSERT(!(op & (SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O))); \
+		SLJIT_ASSERT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O))); \
 		break; \
 	case SLJIT_BREAKPOINT: \
 	case SLJIT_NOP: \
 	case SLJIT_UMUL: \
 	case SLJIT_SMUL: \
 	case SLJIT_MOV: \
+	case SLJIT_MOV_UI: \
 	case SLJIT_MOV_P: \
 	case SLJIT_MOVU: \
+	case SLJIT_MOVU_UI: \
 	case SLJIT_MOVU_P: \
 		/* Nothing allowed */ \
-		SLJIT_ASSERT(!(op & (SLJIT_INT_OP | SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
+		SLJIT_ASSERT(!(op & (SLJIT_INT_OP | SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
 		break; \
 	default: \
 		/* Only SLJIT_INT_OP or SLJIT_SINGLE_OP is allowed. */ \
-		SLJIT_ASSERT(!(op & (SLJIT_SET_E | SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
+		SLJIT_ASSERT(!(op & (SLJIT_SET_E | SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C | SLJIT_KEEP_FLAGS))); \
 		break; \
 	}
 
@@ -691,9 +706,7 @@ static char* freg_names[] = {
 	(char*)"f4", (char*)"f5", (char*)"f6"
 };
 
-#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64) \
-	|| (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64) \
-	|| (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
+#if (defined SLJIT_64BIT_ARCHITECTURE && SLJIT_64BIT_ARCHITECTURE)
 #ifdef _WIN64
 #	define SLJIT_PRINT_D	"I64"
 #else
@@ -964,7 +977,7 @@ static SLJIT_INLINE void check_sljit_emit_op1(struct sljit_compiler *compiler, s
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
 		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i", op_names[GET_OPCODE(op)],
-			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_S) ? "" : ".s", !(op & SLJIT_SET_U) ? "" : ".u",
+			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_U) ? "" : ".u", !(op & SLJIT_SET_S) ? "" : ".s",
 			!(op & SLJIT_SET_O) ? "" : ".o", !(op & SLJIT_SET_C) ? "" : ".c", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
 		sljit_verbose_param(dst, dstw);
 		fprintf(compiler->verbose, ", ");
@@ -1006,7 +1019,7 @@ static SLJIT_INLINE void check_sljit_emit_op2(struct sljit_compiler *compiler, s
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
 		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i", op_names[GET_OPCODE(op)],
-			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_S) ? "" : ".s", !(op & SLJIT_SET_U) ? "" : ".u",
+			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_U) ? "" : ".u", !(op & SLJIT_SET_S) ? "" : ".s",
 			!(op & SLJIT_SET_O) ? "" : ".o", !(op & SLJIT_SET_C) ? "" : ".c", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
 		sljit_verbose_param(dst, dstw);
 		fprintf(compiler->verbose, ", ");
@@ -1248,7 +1261,7 @@ static SLJIT_INLINE void check_sljit_emit_op_flags(struct sljit_compiler *compil
 	SLJIT_ASSERT(type >= SLJIT_C_EQUAL && type < SLJIT_JUMP);
 	SLJIT_ASSERT(op == SLJIT_MOV || GET_OPCODE(op) == SLJIT_MOV_UI || GET_OPCODE(op) == SLJIT_MOV_SI
 		|| (GET_OPCODE(op) >= SLJIT_AND && GET_OPCODE(op) <= SLJIT_XOR));
-	SLJIT_ASSERT((op & (SLJIT_SET_S | SLJIT_SET_U | SLJIT_SET_O | SLJIT_SET_C)) == 0);
+	SLJIT_ASSERT((op & (SLJIT_SET_U | SLJIT_SET_S | SLJIT_SET_O | SLJIT_SET_C)) == 0);
 	SLJIT_ASSERT((op & (SLJIT_SET_E | SLJIT_KEEP_FLAGS)) != (SLJIT_SET_E | SLJIT_KEEP_FLAGS));
 #if (defined SLJIT_DEBUG && SLJIT_DEBUG)
 	if (GET_OPCODE(op) < SLJIT_ADD) {
@@ -1376,13 +1389,15 @@ static SLJIT_INLINE sljit_si emit_mov_before_return(struct sljit_compiler *compi
 #	include "sljitNativePPC_common.c"
 #elif (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
 #	include "sljitNativeMIPS_common.c"
+#elif (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+#	include "sljitNativeMIPS_common.c"
 #elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
 #	include "sljitNativeSPARC_common.c"
 #elif (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
 #	include "sljitNativeTILEGX_64.c"
 #endif
 
-#if !(defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
+#if !(defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32) && !(defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler *compiler, sljit_si type,
 	sljit_si src1, sljit_sw src1w,

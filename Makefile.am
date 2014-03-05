@@ -354,6 +354,7 @@ EXTRA_DIST += \
   sljit/sljitNativeARM_64.c \
   sljit/sljitNativeARM_T2_32.c \
   sljit/sljitNativeMIPS_32.c \
+  sljit/sljitNativeMIPS_64.c \
   sljit/sljitNativeMIPS_common.c \
   sljit/sljitNativePPC_32.c \
   sljit/sljitNativePPC_64.c \
