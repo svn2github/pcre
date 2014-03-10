@@ -3178,6 +3178,10 @@ Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 /\U/I
 Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
+/a{1,3}b/U
+    ab
+ 0: ab
+
 /[/I
 Failed: missing terminating ] for character class at offset 1
 
