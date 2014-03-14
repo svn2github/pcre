@@ -1118,7 +1118,7 @@ static int regression_tests(void)
 	const char *error;
 	char *cpu_info;
 	int i, err_offs;
-	int is_successful, is_ascii_pattern, is_ascii_input;
+	int is_successful, is_ascii;
 	int total = 0;
 	int successful = 0;
 	int successful_row = 0;
@@ -1199,13 +1199,9 @@ static int regression_tests(void)
 	while (current->pattern) {
 		/* printf("\nPattern: %s :\n", current->pattern); */
 		total++;
-		if (current->start_offset & F_PROPERTY) {
-			is_ascii_pattern = 0;
-			is_ascii_input = 0;
-		} else {
-			is_ascii_pattern = check_ascii(current->pattern);
-			is_ascii_input = check_ascii(current->input);
-		}
+		is_ascii = 0;
+		if (!(current->start_offset & F_PROPERTY))
+			is_ascii = check_ascii(current->pattern) && check_ascii(current->input);
 
 		if (current->flags & PCRE_PARTIAL_SOFT)
 			study_mode = PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE;
@@ -1237,7 +1233,7 @@ static int regression_tests(void)
 				re8 = NULL;
 			}
 			extra8->flags |= PCRE_EXTRA_MARK;
-		} else if (((utf && ucp) || is_ascii_pattern) && !(current->start_offset & F_NO8))
+		} else if (((utf && ucp) || is_ascii) && !(current->start_offset & F_NO8))
 			printf("\n8 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
 #endif
 #ifdef SUPPORT_PCRE16
@@ -1268,7 +1264,7 @@ static int regression_tests(void)
 				re16 = NULL;
 			}
 			extra16->flags |= PCRE_EXTRA_MARK;
-		} else if (((utf && ucp) || is_ascii_pattern) && !(current->start_offset & F_NO16))
+		} else if (((utf && ucp) || is_ascii) && !(current->start_offset & F_NO16))
 			printf("\n16 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
 #endif
 #ifdef SUPPORT_PCRE32
@@ -1299,7 +1295,7 @@ static int regression_tests(void)
 				re32 = NULL;
 			}
 			extra32->flags |= PCRE_EXTRA_MARK;
-		} else if (((utf && ucp) || is_ascii_pattern) && !(current->start_offset & F_NO32))
+		} else if (((utf && ucp) || is_ascii) && !(current->start_offset & F_NO32))
 			printf("\n32 bit: Cannot compile pattern \"%s\": %s\n", current->pattern, error);
 #endif
 
@@ -1607,7 +1603,7 @@ static int regression_tests(void)
 
 		if (is_successful) {
 #ifdef SUPPORT_PCRE8
-			if (!(current->start_offset & F_NO8) && ((utf && ucp) || is_ascii_input)) {
+			if (!(current->start_offset & F_NO8) && ((utf && ucp) || is_ascii)) {
 				if (return_value8[0] < 0 && !(current->start_offset & F_NOMATCH)) {
 					printf("8 bit: Test should match: [%d] '%s' @ '%s'\n",
 						total, current->pattern, current->input);
@@ -1622,7 +1618,7 @@ static int regression_tests(void)
 			}
 #endif
 #ifdef SUPPORT_PCRE16
-			if (!(current->start_offset & F_NO16) && ((utf && ucp) || is_ascii_input)) {
+			if (!(current->start_offset & F_NO16) && ((utf && ucp) || is_ascii)) {
 				if (return_value16[0] < 0 && !(current->start_offset & F_NOMATCH)) {
 					printf("16 bit: Test should match: [%d] '%s' @ '%s'\n",
 						total, current->pattern, current->input);
@@ -1637,7 +1633,7 @@ static int regression_tests(void)
 			}
 #endif
 #ifdef SUPPORT_PCRE32
-			if (!(current->start_offset & F_NO32) && ((utf && ucp) || is_ascii_input)) {
+			if (!(current->start_offset & F_NO32) && ((utf && ucp) || is_ascii)) {
 				if (return_value32[0] < 0 && !(current->start_offset & F_NOMATCH)) {
 					printf("32 bit: Test should match: [%d] '%s' @ '%s'\n",
 						total, current->pattern, current->input);
