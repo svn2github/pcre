@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.35-RC1 14-March-2014
-------------------------------
+Version 8.35 04-April-2014
+--------------------------
 
 1.  A new flag is set, when property checks are present in an XCLASS.
     When this flag is not set, PCRE can perform certain optimizations
@@ -115,6 +115,10 @@ Version 8.35-RC1 14-March-2014
 
 24. Experimental support for ARM-64 and MIPS-64 has been added to the JIT
     compiler.
+    
+25. Change all the temporary files used in RunGrepTest to be different to those
+    used by RunTest so that the tests can be run simultaneously, for example by 
+    "make -j check". 
 
 
 Version 8.34 15-December-2013
