@@ -115,10 +115,10 @@ Version 8.35 04-April-2014
 
 24. Experimental support for ARM-64 and MIPS-64 has been added to the JIT
     compiler.
-    
+
 25. Change all the temporary files used in RunGrepTest to be different to those
-    used by RunTest so that the tests can be run simultaneously, for example by 
-    "make -j check". 
+    used by RunTest so that the tests can be run simultaneously, for example by
+    "make -j check".
 
 
 Version 8.34 15-December-2013

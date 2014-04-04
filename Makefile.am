@@ -622,8 +622,10 @@ CLEANFILES += \
 	teststderr \
         testtemp* \
 	testtry \
-        testNinput
-
+        testNinput \
+        testtrygrep \
+        teststderrgrep \
+        testNinputgrep
 
 # PCRE demonstration program. No longer built automatcally. The point is that
 # the users should build it themselves. So just distribute the source.
