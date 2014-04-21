@@ -5681,54 +5681,25 @@ for (;;)
         switch(ctype)
           {
           case OP_ANY:
-          if (max < INT_MAX)
+          for (i = min; i < max; i++)
             {
-            for (i = min; i < max; i++)
+            if (eptr >= md->end_subject)
               {
-              if (eptr >= md->end_subject)
-                {
-                SCHECK_PARTIAL();
-                break;
-                }
-              if (IS_NEWLINE(eptr)) break;
-              if (md->partial != 0 &&    /* Take care with CRLF partial */
-                  eptr + 1 >= md->end_subject &&
-                  NLBLOCK->nltype == NLTYPE_FIXED &&
-                  NLBLOCK->nllen == 2 &&
-                  UCHAR21(eptr) == NLBLOCK->nl[0])
-                {
-                md->hitend = TRUE;
-                if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
-                }
-              eptr++;
-              ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
+              SCHECK_PARTIAL();
+              break;
               }
-            }
-
-          /* Handle unlimited UTF-8 repeat */
-
-          else
-            {
-            for (i = min; i < max; i++)
+            if (IS_NEWLINE(eptr)) break;
+            if (md->partial != 0 &&    /* Take care with CRLF partial */
+                eptr + 1 >= md->end_subject &&
+                NLBLOCK->nltype == NLTYPE_FIXED &&
+                NLBLOCK->nllen == 2 &&
+                UCHAR21(eptr) == NLBLOCK->nl[0])
               {
-              if (eptr >= md->end_subject)
-                {
-                SCHECK_PARTIAL();
-                break;
-                }
-              if (IS_NEWLINE(eptr)) break;
-              if (md->partial != 0 &&    /* Take care with CRLF partial */
-                  eptr + 1 >= md->end_subject &&
-                  NLBLOCK->nltype == NLTYPE_FIXED &&
-                  NLBLOCK->nllen == 2 &&
-                  UCHAR21(eptr) == NLBLOCK->nl[0])
-                {
-                md->hitend = TRUE;
-                if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
-                }
-              eptr++;
-              ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
+              md->hitend = TRUE;
+              if (md->partial > 1) RRETURN(PCRE_ERROR_PARTIAL);
               }
+            eptr++;
+            ACROSSCHAR(eptr < md->end_subject, *eptr, eptr++);
             }
           break;
 

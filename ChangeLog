@@ -11,6 +11,9 @@ Version 8.36 xx-xxx-2014
     applied after reading the number, and stupidly assuming that integer 
     overflow would give a negative number. The tests are now applied as the 
     numbers are read.
+    
+3.  Tidy code in pcre_exec.c where two branches that used to be different are
+    now the same. 
 
 
 Version 8.35 04-April-2014
