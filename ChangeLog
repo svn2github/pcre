@@ -1,6 +1,18 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.36 xx-xxx-2014
+------------------------
+
+1.  Got rid of some compiler warnings in the C++ modules that were shown up by
+    -Wmissing-field-initializers and -Wunused-parameter.
+    
+2.  The tests for quantifiers being too big (greater than 65535) were being
+    applied after reading the number, and stupidly assuming that integer 
+    overflow would give a negative number. The tests are now applied as the 
+    numbers are read.
+
+
 Version 8.35 04-April-2014
 --------------------------
 

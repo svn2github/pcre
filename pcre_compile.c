@@ -1583,30 +1583,30 @@ read_repeat_counts(const pcre_uchar *p, int *minp, int *maxp, int *errorcodeptr)
 int min = 0;
 int max = -1;
 
-/* Read the minimum value and do a paranoid check: a negative value indicates
-an integer overflow. */
-
-while (IS_DIGIT(*p)) min = min * 10 + (int)(*p++ - CHAR_0);
-if (min < 0 || min > 65535)
+while (IS_DIGIT(*p)) 
   {
-  *errorcodeptr = ERR5;
-  return p;
-  }
-
-/* Read the maximum value if there is one, and again do a paranoid on its size.
-Also, max must not be less than min. */
+  min = min * 10 + (int)(*p++ - CHAR_0);
+  if (min > 65535)
+    {
+    *errorcodeptr = ERR5;
+    return p;
+    }
+  }   
 
 if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
   {
   if (*(++p) != CHAR_RIGHT_CURLY_BRACKET)
     {
     max = 0;
-    while(IS_DIGIT(*p)) max = max * 10 + (int)(*p++ - CHAR_0);
-    if (max < 0 || max > 65535)
+    while(IS_DIGIT(*p)) 
       {
-      *errorcodeptr = ERR5;
-      return p;
-      }
+      max = max * 10 + (int)(*p++ - CHAR_0);
+      if (max > 65535)
+        {
+        *errorcodeptr = ERR5;
+        return p;
+        }
+      }   
     if (max < min)
       {
       *errorcodeptr = ERR4;
@@ -1614,9 +1614,6 @@ if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
       }
     }
   }
-
-/* Fill in the required variables, and pass back the pointer to the terminating
-'}'. */
 
 *minp = min;
 *maxp = max;

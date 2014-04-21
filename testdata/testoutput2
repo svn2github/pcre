@@ -5821,13 +5821,13 @@ No match
 No match
 
 /a{11111111111111111111}/I
-Failed: number too big in {} quantifier at offset 22
+Failed: number too big in {} quantifier at offset 8
 
 /(){64294967295}/I
-Failed: number too big in {} quantifier at offset 14
+Failed: number too big in {} quantifier at offset 9
 
 /(){2,4294967295}/I
-Failed: number too big in {} quantifier at offset 15
+Failed: number too big in {} quantifier at offset 11
 
 "(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"I
 Capturing subpattern count = 1
