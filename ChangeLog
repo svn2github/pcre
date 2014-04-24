@@ -15,6 +15,11 @@ Version 8.36 xx-xxx-2014
 3.  Tidy code in pcre_exec.c where two branches that used to be different are
     now the same. 
 
+4.  The JIT compiler did not generate match limit checks for certain
+    bracketed expressions with quantifiers. This may lead to exponential
+    backtracking, instead of returning with PCRE_ERROR_MATCHLIMIT. This
+    issue should be resolved now.
+
 
 Version 8.35 04-April-2014
 --------------------------

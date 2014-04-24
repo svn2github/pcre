@@ -7416,6 +7416,7 @@ if (ket == OP_KETRMAX)
 
 if (repeat_type == OP_EXACT)
   {
+  count_match(common);
   OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_MEM1(SLJIT_LOCALS_REG), repeat_ptr, SLJIT_IMM, 1);
   JUMPTO(SLJIT_C_NOT_ZERO, rmax_label);
   }
