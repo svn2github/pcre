@@ -200,7 +200,7 @@ typedef struct stub_list {
 
 typedef struct label_addr_list {
   struct sljit_label *label;
-  sljit_uw *addr;
+  sljit_uw *update_addr;
   struct label_addr_list *next;
 } label_addr_list;
 
@@ -2070,7 +2070,7 @@ while (list_item)
 common->stubs = NULL;
 }
 
-static void add_label_addr(compiler_common *common)
+static void add_label_addr(compiler_common *common, sljit_uw *update_addr)
 {
 DEFINE_COMPILER;
 label_addr_list *label_addr;
@@ -2079,10 +2079,9 @@ label_addr = sljit_alloc_memory(compiler, sizeof(label_addr_list));
 if (label_addr == NULL)
   return;
 label_addr->label = LABEL();
-label_addr->addr = common->read_only_data_ptr;
+label_addr->update_addr = update_addr;
 label_addr->next = common->label_addrs;
 common->label_addrs = label_addr;
-common->read_only_data_ptr++;
 }
 
 static SLJIT_INLINE void count_match(compiler_common *common)
@@ -8813,6 +8812,7 @@ pcre_uchar *ccprev;
 pcre_uchar bra = OP_BRA;
 pcre_uchar ket;
 assert_backtrack *assert;
+sljit_uw *next_update_addr;
 BOOL has_alternatives;
 BOOL needs_control_head = FALSE;
 struct sljit_jump *brazero = NULL;
@@ -8982,8 +8982,10 @@ else if (has_alternatives)
   if (alt_max > 4)
     {
     /* Table jump if alt_max is greater than 4. */
-    sljit_emit_ijump(compiler, SLJIT_JUMP, SLJIT_MEM1(TMP1), (sljit_sw)common->read_only_data_ptr);
-    add_label_addr(common);
+    next_update_addr = common->read_only_data_ptr;
+    common->read_only_data_ptr += alt_max;
+    sljit_emit_ijump(compiler, SLJIT_JUMP, SLJIT_MEM1(TMP1), (sljit_sw)next_update_addr);
+    add_label_addr(common, next_update_addr++);
     }
   else
     {
@@ -9115,7 +9117,7 @@ if (has_alternatives)
     if (opcode != OP_ONCE)
       {
       if (alt_max > 4)
-        add_label_addr(common);
+        add_label_addr(common, next_update_addr++);
       else
         {
         if (alt_count != 2 * sizeof(sljit_uw))
@@ -10310,7 +10312,7 @@ executable_size = sljit_get_generated_code_size(compiler);
 label_addr = common->label_addrs;
 while (label_addr != NULL)
   {
-  *label_addr->addr = sljit_get_label_addr(label_addr->label);
+  *label_addr->update_addr = sljit_get_label_addr(label_addr->label);
   label_addr = label_addr->next;
   }
 sljit_free_compiler(compiler);

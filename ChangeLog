@@ -20,6 +20,9 @@ Version 8.36 xx-xxx-2014
     backtracking, instead of returning with PCRE_ERROR_MATCHLIMIT. This
     issue should be resolved now.
 
+5.  Fixed an issue, which occures when nested alternatives are optimized
+    with table jumps.
+
 
 Version 8.35 04-April-2014
 --------------------------

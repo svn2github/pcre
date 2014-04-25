@@ -9313,4 +9313,8 @@ No match
  0+ c
  1: ab
 
+/(?:x|(?:(xx|yy)+|x|x|x|x|x)|a|a|a)bc/
+    acb
+No match
+
 /-- End of testinput1 --/
