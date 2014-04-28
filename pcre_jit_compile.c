@@ -8812,7 +8812,7 @@ pcre_uchar *ccprev;
 pcre_uchar bra = OP_BRA;
 pcre_uchar ket;
 assert_backtrack *assert;
-sljit_uw *next_update_addr;
+sljit_uw *next_update_addr = NULL;
 BOOL has_alternatives;
 BOOL needs_control_head = FALSE;
 struct sljit_jump *brazero = NULL;
