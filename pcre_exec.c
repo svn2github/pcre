@@ -6490,7 +6490,7 @@ tables = re->tables;
 
 if (extra_data != NULL)
   {
-  register unsigned int flags = extra_data->flags;
+  unsigned long int flags = extra_data->flags;
   if ((flags & PCRE_EXTRA_STUDY_DATA) != 0)
     study = (const pcre_study_data *)extra_data->study_data;
   if ((flags & PCRE_EXTRA_MATCH_LIMIT) != 0)

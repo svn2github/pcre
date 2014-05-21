@@ -3035,7 +3035,7 @@ switch(c)
     end += 1 + 2 * IMM2_SIZE;
     break;
     }
-  list[2] = end - code;
+  list[2] = (pcre_uint32)(end - code);
   return end;
   }
 return NULL;    /* Opcode not accepted */
@@ -4860,7 +4860,7 @@ for (;; ptr++)
       if (lengthptr != NULL && class_uchardata > class_uchardata_base)
         {
         xclass = TRUE;
-        *lengthptr += class_uchardata - class_uchardata_base;
+        *lengthptr += (int)(class_uchardata - class_uchardata_base);
         class_uchardata = class_uchardata_base;
         }
 #endif
@@ -6005,8 +6005,8 @@ for (;; ptr++)
               while (cd->hwm > cd->start_workspace + cd->workspace_size -
                      WORK_SIZE_SAFETY_MARGIN - (this_hwm - save_hwm))
                 {
-                int save_offset = save_hwm - cd->start_workspace;
-                int this_offset = this_hwm - cd->start_workspace;
+                size_t save_offset = save_hwm - cd->start_workspace;
+                size_t this_offset = this_hwm - cd->start_workspace;
                 *errorcodeptr = expand_workspace(cd);
                 if (*errorcodeptr != 0) goto FAILED;
                 save_hwm = (pcre_uchar *)cd->start_workspace + save_offset;
@@ -6087,8 +6087,8 @@ for (;; ptr++)
           while (cd->hwm > cd->start_workspace + cd->workspace_size -
                  WORK_SIZE_SAFETY_MARGIN - (this_hwm - save_hwm))
             {
-            int save_offset = save_hwm - cd->start_workspace;
-            int this_offset = this_hwm - cd->start_workspace;
+            size_t save_offset = save_hwm - cd->start_workspace;
+            size_t this_offset = this_hwm - cd->start_workspace;
             *errorcodeptr = expand_workspace(cd);
             if (*errorcodeptr != 0) goto FAILED;
             save_hwm = (pcre_uchar *)cd->start_workspace + save_offset;
