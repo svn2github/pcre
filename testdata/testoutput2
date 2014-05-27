@@ -14165,4 +14165,21 @@ Failed: parentheses are too deeply nested (stack check) at offset 0
         End
 ------------------------------------------------------------------
 
+/\othing/
+Failed: missing opening brace after \o at offset 1
+
+/\o{}/
+Failed: digits missing in \x{} or \o{} at offset 1
+
+/\o{whatever}/
+Failed: non-octal character in \o{} (closing brace missing?) at offset 3
+
+/\xthing/
+
+/\x{}/
+Failed: digits missing in \x{} or \o{} at offset 3
+
+/\x{whatever}/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 3
+
 /-- End of testinput2 --/

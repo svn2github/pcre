@@ -4064,4 +4064,16 @@ backtracking verbs. --/
 
 /^\w+(?>\s*)(?<=\w)/BZ
 
+/\othing/
+
+/\o{}/
+
+/\o{whatever}/
+
+/\xthing/
+
+/\x{}/
+
+/\x{whatever}/
+
 /-- End of testinput2 --/

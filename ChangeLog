@@ -43,6 +43,9 @@ Version 8.36 xx-xxx-2014
     
 8.  Fixed a bug that was incorrectly auto-possessifying \w+ in the pattern
     ^\w+(?>\s*)(?<=\w) which caused it not to match "test test". 
+    
+9.  Give a compile-time error for \o{} (as Perl does) and for \x{} (which Perl 
+    doesn't). 
 
 
 Version 8.35 04-April-2014

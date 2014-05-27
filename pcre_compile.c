@@ -549,6 +549,7 @@ static const char error_texts[] =
   "group name must start with a non-digit\0"
   /* 85 */
   "parentheses are too deeply nested (stack check)\0"
+  "digits missing in \\x{} or \\o{}\0" 
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1259,6 +1260,7 @@ else
 
     case CHAR_o:
     if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR81; else
+    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR86; else 
       {
       ptr += 2;
       c = 0;
@@ -1328,6 +1330,11 @@ else
       if (ptr[1] == CHAR_LEFT_CURLY_BRACKET)
         {
         ptr += 2;
+        if (*ptr == CHAR_RIGHT_CURLY_BRACKET)
+          {
+          *errorcodeptr = ERR86;
+          break;
+          }    
         c = 0;
         overflow = FALSE;
         while (MAX_255(*ptr) && (digitab[*ptr] & ctype_xdigit) != 0)
