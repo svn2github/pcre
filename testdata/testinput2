@@ -4062,4 +4062,6 @@ backtracking verbs. --/
 
 /(((((a)))))/Q
 
+/^\w+(?>\s*)(?<=\w)/BZ
+
 /-- End of testinput2 --/

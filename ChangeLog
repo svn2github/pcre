@@ -40,6 +40,9 @@ Version 8.36 xx-xxx-2014
     level, when possessive repeated groups should always return to a higher
     level as they have no backtrack points in them. The empty string test now
     occurs at the outer level.
+    
+8.  Fixed a bug that was incorrectly auto-possessifying \w+ in the pattern
+    ^\w+(?>\s*)(?<=\w) which caused it not to match "test test". 
 
 
 Version 8.35 04-April-2014

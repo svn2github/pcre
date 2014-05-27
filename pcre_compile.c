@@ -3076,6 +3076,7 @@ const pcre_uint8 *class_bitset;
 const pcre_uint8 *set1, *set2, *set_end;
 pcre_uint32 chr;
 BOOL accepted, invert_bits;
+BOOL entered_a_group = FALSE;
 
 /* Note: the base_list[1] contains whether the current opcode has greedy
 (represented by a non-zero value) quantifier. This is a different from
@@ -3088,7 +3089,7 @@ for(;;)
   Therefore infinite recursions are not possible. */
 
   c = *code;
-
+  
   /* Skip over callouts */
 
   if (c == OP_CALLOUT)
@@ -3117,7 +3118,7 @@ for(;;)
     /* If the bracket is capturing, and referenced by an OP_RECURSE, or
     it is an atomic sub-pattern (assert, once, etc.) the non-greedy case
     cannot be converted to a possessive form. */
-
+    
     if (base_list[1] == 0) return FALSE;
 
     switch(*(code - GET(code, 1)))
@@ -3129,8 +3130,10 @@ for(;;)
       case OP_ONCE:
       case OP_ONCE_NC:
       /* Atomic sub-patterns and assertions can always auto-possessify their
-      last iterator. */
-      return TRUE;
+      last iterator. However, if the group was entered as a result of checking 
+      a previous iterator, this is not possible. */
+
+      return !entered_a_group;
       }
 
     code += PRIV(OP_lengths)[c];
@@ -3149,6 +3152,8 @@ for(;;)
       code = next_code + 1 + LINK_SIZE;
       next_code += GET(next_code, 1);
       }
+
+    entered_a_group = TRUE;
     continue;
 
     case OP_BRAZERO:
@@ -3168,13 +3173,16 @@ for(;;)
 
     code += PRIV(OP_lengths)[c];
     continue;
+
+    default:
+    break; 
     }
 
   /* Check for a supported opcode, and load its properties. */
 
   code = get_chr_property_list(code, utf, cd->fcc, list);
   if (code == NULL) return FALSE;    /* Unsupported */
-
+  
   /* If either opcode is a small character list, set pointers for comparing
   characters from that list with another list, or with a property. */
 
@@ -3406,9 +3414,8 @@ for(;;)
            rightop >= FIRST_AUTOTAB_OP && rightop <= LAST_AUTOTAB_RIGHT_OP &&
            autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
 
-    if (!accepted)
-      return FALSE;
-
+    if (!accepted) return FALSE;
+      
     if (list[1] == 0) return TRUE;
     /* Might be an empty repeat. */
     continue;

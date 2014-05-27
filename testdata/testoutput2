@@ -14149,4 +14149,20 @@ Failed: parentheses are too deeply nested (stack check) at offset 0
 /(((((a)))))/Q
 ** Missing 0 or 1 after /Q
 
+/^\w+(?>\s*)(?<=\w)/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        \w+
+        Once_NC
+        \s*+
+        Ket
+        AssertB
+        Reverse
+        \w
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- End of testinput2 --/

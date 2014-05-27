@@ -9335,4 +9335,8 @@ No match
  1:  AFTER 
  2: 
 
+/^\w+(?>\s*)(?<=\w)/
+  test test
+ 0: tes
+
 /-- End of testinput1 --/
