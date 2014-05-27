@@ -1167,11 +1167,16 @@ for (;;)
         if (rrc == MATCH_KETRPOS)
           {
           offset_top = md->end_offset_top;
-          eptr = md->end_match_ptr;
           ecode = md->start_code + code_offset;
           save_capture_last = md->capture_last;
           matched_once = TRUE;
           mstart = md->start_match_ptr;    /* In case \K changed it */
+          if (eptr == md->end_match_ptr)   /* Matched an empty string */
+            {
+            do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
+            break;
+            }  
+          eptr = md->end_match_ptr;
           continue;
           }
 
@@ -1241,10 +1246,15 @@ for (;;)
       if (rrc == MATCH_KETRPOS)
         {
         offset_top = md->end_offset_top;
-        eptr = md->end_match_ptr;
         ecode = md->start_code + code_offset;
         matched_once = TRUE;
         mstart = md->start_match_ptr;   /* In case \K reset it */
+        if (eptr == md->end_match_ptr)  /* Matched an empty string */
+          {
+          do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
+          break;
+          }  
+        eptr = md->end_match_ptr;
         continue;
         }
 
@@ -1894,7 +1904,7 @@ for (;;)
     case OP_KETRMAX:
     case OP_KETRPOS:
     prev = ecode - GET(ecode, 1);
-
+    
     /* If this was a group that remembered the subject start, in order to break
     infinite repeats of empty string matches, retrieve the subject start from
     the chain. Otherwise, set it NULL. */
@@ -1919,7 +1929,7 @@ for (;;)
       md->start_match_ptr = mstart;
       RRETURN(MATCH_MATCH);         /* Sets md->mark */
       }
-
+      
     /* For capturing groups we have to check the group number back at the start
     and if necessary complete handling an extraction by setting the offsets and
     bumping the high water mark. Whole-pattern recursion is coded as a recurse
@@ -1979,6 +1989,19 @@ for (;;)
         }
       }
 
+    /* OP_KETRPOS is a possessive repeating ket. Remember the current position,
+    and return the MATCH_KETRPOS. This makes it possible to do the repeats one
+    at a time from the outer level, thus saving stack. This must precede the 
+    empty string test - in this case that test is done at the outer level. */
+
+    if (*ecode == OP_KETRPOS)
+      {
+      md->start_match_ptr = mstart;    /* In case \K reset it */
+      md->end_match_ptr = eptr;
+      md->end_offset_top = offset_top;
+      RRETURN(MATCH_KETRPOS);
+      }
+
     /* For an ordinary non-repeating ket, just continue at this level. This
     also happens for a repeating ket if no characters were matched in the
     group. This is the forcible breaking of infinite loops as implemented in
@@ -1999,18 +2022,6 @@ for (;;)
         }
       ecode += 1 + LINK_SIZE;    /* Carry on at this level */
       break;
-      }
-
-    /* OP_KETRPOS is a possessive repeating ket. Remember the current position,
-    and return the MATCH_KETRPOS. This makes it possible to do the repeats one
-    at a time from the outer level, thus saving stack. */
-
-    if (*ecode == OP_KETRPOS)
-      {
-      md->start_match_ptr = mstart;    /* In case \K reset it */
-      md->end_match_ptr = eptr;
-      md->end_offset_top = offset_top;
-      RRETURN(MATCH_KETRPOS);
       }
 
     /* The normal repeating kets try the rest of the pattern or restart from

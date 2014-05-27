@@ -9317,4 +9317,16 @@ No match
     acb
 No match
 
+'\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+
 /-- End of testinput1 --/

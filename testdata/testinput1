@@ -5669,4 +5669,13 @@ AbcdCBefgBhiBqz
 /(?:x|(?:(xx|yy)+|x|x|x|x|x)|a|a|a)bc/
     acb
 
+'\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
 /-- End of testinput1 --/
