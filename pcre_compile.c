@@ -5982,7 +5982,7 @@ for (;; ptr++)
           just adjust the length as if we had. Do some paranoid checks for
           potential integer overflow. The INT64_OR_DOUBLE type is a 64-bit
           integer type when available, otherwise double. */
-
+          
           if (lengthptr != NULL)
             {
             int delta = (repeat_min - 1)*length_prevgroup;
@@ -6700,7 +6700,8 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL) *lengthptr += IMM2_SIZE;
+          if (lengthptr != NULL && (options & PCRE_DUPNAMES) != 0) 
+            *lengthptr += IMM2_SIZE;
           }
 
         /* Check the terminator */
@@ -6761,9 +6762,11 @@ for (;; ptr++)
           for (; i < cd->names_found; i++)
             {
             slot += cd->name_entry_size;
-            if (STRNCMP_UC_UC(name, slot+IMM2_SIZE, namelen) != 0) break;
+            if (STRNCMP_UC_UC(name, slot+IMM2_SIZE, namelen) != 0 ||
+              (slot+IMM2_SIZE)[namelen] != 0) break;
             count++;
             }
+ 
           if (count > 1)
             {
             PUT2(code, 2+LINK_SIZE, offset);
@@ -7112,6 +7115,12 @@ for (;; ptr++)
           /* Count named back references. */
 
           if (!is_recurse) cd->namedrefcount++;
+          
+          /* If duplicate names are permitted, we have to allow for a named
+          reference to a duplicated name (this cannot be determined until the
+          second pass). This needs an extra 16-bit data item. */
+
+          if ((options & PCRE_DUPNAMES) != 0) *lengthptr += IMM2_SIZE;
           }
 
         /* In the real compile, search the name table. We check the name
@@ -7158,10 +7167,12 @@ for (;; ptr++)
           for (i++; i < cd->names_found; i++)
             {
             if (STRCMP_UC_UC(slot + IMM2_SIZE, cslot + IMM2_SIZE) != 0) break;
+            
+ 
             count++;
             cslot += cd->name_entry_size;
             }
-
+            
           if (count > 1)
             {
             if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;

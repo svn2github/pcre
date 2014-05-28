@@ -45,7 +45,21 @@ Version 8.36 xx-xxx-2014
     ^\w+(?>\s*)(?<=\w) which caused it not to match "test test". 
     
 9.  Give a compile-time error for \o{} (as Perl does) and for \x{} (which Perl 
-    doesn't). 
+    doesn't).
+    
+10. Change 8.34/15 introduced a bug that caused the amount of memory needed
+    to hold a pattern to be incorrectly computed (too small) when there were
+    named back references to duplicated names. This could cause "internal
+    error: code overflow" or "double free or corruption" or other memory
+    handling errors.
+    
+11. When named subpatterns had the same prefixes, back references could be
+    confused. For example, in this pattern:
+     
+      /(?P<Name>a)?(?P<Name2>b)?(?(<Name>)c|d)*l/  
+       
+    the reference to 'Name' was incorrectly treated as a reference to a 
+    duplicate name.
 
 
 Version 8.35 04-April-2014

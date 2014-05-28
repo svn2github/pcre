@@ -9339,4 +9339,54 @@ No match
   test test
  0: tes
 
+/(?P<same>a)(?P<same>b)/gJ
+    abbaba
+ 0: ab
+ 1: a
+ 2: b
+ 0: ab
+ 1: a
+ 2: b
+
+/(?P<same>a)(?P<same>b)(?P=same)/gJ
+    abbaba
+ 0: aba
+ 1: a
+ 2: b
+
+/(?P=same)?(?P<same>a)(?P<same>b)/gJ
+    abbaba
+ 0: ab
+ 1: a
+ 2: b
+ 0: ab
+ 1: a
+ 2: b
+
+/(?:(?P=same)?(?:(?P<same>a)|(?P<same>b))(?P=same))+/gJ
+    bbbaaabaabb
+ 0: bbbaaaba
+ 1: a
+ 2: b
+ 0: bb
+ 1: <unset>
+ 2: b
+
+/(?:(?P=same)?(?:(?P=same)(?P<same>a)(?P=same)|(?P=same)?(?P<same>b)(?P=same)){2}(?P=same)(?P<same>c)(?P=same)){2}(?P<same>z)?/gJ
+    bbbaaaccccaaabbbcc
+No match
+
+/(?P<Name>a)?(?P<Name2>b)?(?(<Name>)c|d)*l/
+    acl
+ 0: acl
+ 1: a
+    bdl
+ 0: bdl
+ 1: <unset>
+ 2: b
+    adl
+ 0: dl
+    bcl    
+ 0: l
+
 /-- End of testinput1 --/
