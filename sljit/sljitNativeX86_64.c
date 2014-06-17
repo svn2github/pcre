@@ -156,9 +156,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compil
 		}
 #ifdef _WIN64
 		if (scratches >= 5) {
-			SLJIT_COMPILE_ASSERT(reg_map[SLJIT_TEMPORARY_EREG2] >= 8, temporary_ereg2_is_hireg);
+			SLJIT_COMPILE_ASSERT(reg_map[SLJIT_SCRATCH_EREG2] >= 8, temporary_ereg2_is_hireg);
 			*inst++ = REX_B;
-			PUSH_REG(reg_lmap[SLJIT_TEMPORARY_EREG2]);
+			PUSH_REG(reg_lmap[SLJIT_SCRATCH_EREG2]);
 		}
 #endif
 
@@ -340,7 +340,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_return(struct sljit_compiler *compi
 #ifdef _WIN64
 	if (compiler->scratches >= 5) {
 		*inst++ = REX_B;
-		POP_REG(reg_lmap[SLJIT_TEMPORARY_EREG2]);
+		POP_REG(reg_lmap[SLJIT_SCRATCH_EREG2]);
 	}
 #endif
 	if (compiler->saveds >= 1)
@@ -409,72 +409,64 @@ static sljit_ub* emit_x86_instruction(struct sljit_compiler *compiler, sljit_si 
 	SLJIT_ASSERT(!(flags & (EX86_BIN_INS | EX86_SHIFT_INS)) || (flags & (EX86_BYTE_ARG | EX86_HALF_ARG)) == 0);
 	/* Both size flags cannot be switched on. */
 	SLJIT_ASSERT((flags & (EX86_BYTE_ARG | EX86_HALF_ARG)) != (EX86_BYTE_ARG | EX86_HALF_ARG));
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
 	/* SSE2 and immediate is not possible. */
 	SLJIT_ASSERT(!(a & SLJIT_IMM) || !(flags & EX86_SSE2));
 	SLJIT_ASSERT((flags & (EX86_PREF_F2 | EX86_PREF_F3)) != (EX86_PREF_F2 | EX86_PREF_F3)
 		&& (flags & (EX86_PREF_F2 | EX86_PREF_66)) != (EX86_PREF_F2 | EX86_PREF_66)
 		&& (flags & (EX86_PREF_F3 | EX86_PREF_66)) != (EX86_PREF_F3 | EX86_PREF_66));
-#endif
 
 	size &= 0xf;
 	inst_size = size;
-
-	if ((b & SLJIT_MEM) && !(b & OFFS_REG_MASK) && NOT_HALFWORD(immb)) {
-		if (emit_load_imm64(compiler, TMP_REG3, immb))
-			return NULL;
-		immb = 0;
-		if (b & REG_MASK)
-			b |= TO_OFFS_REG(TMP_REG3);
-		else
-			b |= TMP_REG3;
-	}
 
 	if (!compiler->mode32 && !(flags & EX86_NO_REXW))
 		rex |= REX_W;
 	else if (flags & EX86_REX)
 		rex |= REX;
 
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
 	if (flags & (EX86_PREF_F2 | EX86_PREF_F3))
 		inst_size++;
-#endif
 	if (flags & EX86_PREF_66)
 		inst_size++;
 
 	/* Calculate size of b. */
 	inst_size += 1; /* mod r/m byte. */
 	if (b & SLJIT_MEM) {
+		if (!(b & OFFS_REG_MASK)) {
+			if (NOT_HALFWORD(immb)) {
+				if (emit_load_imm64(compiler, TMP_REG3, immb))
+					return NULL;
+				immb = 0;
+				if (b & REG_MASK)
+					b |= TO_OFFS_REG(TMP_REG3);
+				else
+					b |= TMP_REG3;
+			}
+			else if (reg_lmap[b & REG_MASK] == 4)
+				b |= TO_OFFS_REG(SLJIT_LOCALS_REG);
+		}
+
 		if ((b & REG_MASK) == SLJIT_UNUSED)
 			inst_size += 1 + sizeof(sljit_si); /* SIB byte required to avoid RIP based addressing. */
 		else {
 			if (reg_map[b & REG_MASK] >= 8)
 				rex |= REX_B;
-			if (immb != 0 && !(b & OFFS_REG_MASK)) {
+			if (immb != 0 && (!(b & OFFS_REG_MASK) || (b & OFFS_REG_MASK) == TO_OFFS_REG(SLJIT_LOCALS_REG))) {
 				/* Immediate operand. */
 				if (immb <= 127 && immb >= -128)
 					inst_size += sizeof(sljit_sb);
 				else
 					inst_size += sizeof(sljit_si);
 			}
-		}
 
-		if ((b & REG_MASK) == SLJIT_LOCALS_REG && !(b & OFFS_REG_MASK))
-			b |= TO_OFFS_REG(SLJIT_LOCALS_REG);
-
-		if ((b & OFFS_REG_MASK) != SLJIT_UNUSED) {
-			inst_size += 1; /* SIB byte. */
-			if (reg_map[OFFS_REG(b)] >= 8)
-				rex |= REX_X;
+			if ((b & OFFS_REG_MASK) != SLJIT_UNUSED) {
+				inst_size += 1; /* SIB byte. */
+				if (reg_map[OFFS_REG(b)] >= 8)
+					rex |= REX_X;
+			}
 		}
 	}
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
-	else if (!(flags & EX86_SSE2) && reg_map[b] >= 8)
+	else if (!(flags & EX86_SSE2_OP2) && reg_map[b] >= 8)
 		rex |= REX_B;
-#else
-	else if (reg_map[b] >= 8)
-		rex |= REX_B;
-#endif
 
 	if (a & SLJIT_IMM) {
 		if (flags & EX86_BIN_INS) {
@@ -500,13 +492,8 @@ static sljit_ub* emit_x86_instruction(struct sljit_compiler *compiler, sljit_si 
 	else {
 		SLJIT_ASSERT(!(flags & EX86_SHIFT_INS) || a == SLJIT_PREF_SHIFT_REG);
 		/* reg_map[SLJIT_PREF_SHIFT_REG] is less than 8. */
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
-		if (!(flags & EX86_SSE2) && reg_map[a] >= 8)
+		if (!(flags & EX86_SSE2_OP1) && reg_map[a] >= 8)
 			rex |= REX_R;
-#else
-		if (reg_map[a] >= 8)
-			rex |= REX_R;
-#endif
 	}
 
 	if (rex)
@@ -517,12 +504,10 @@ static sljit_ub* emit_x86_instruction(struct sljit_compiler *compiler, sljit_si 
 
 	/* Encoding the byte. */
 	INC_SIZE(inst_size);
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
 	if (flags & EX86_PREF_F2)
 		*inst++ = 0xf2;
 	if (flags & EX86_PREF_F3)
 		*inst++ = 0xf3;
-#endif
 	if (flags & EX86_PREF_66)
 		*inst++ = 0x66;
 	if (rex)
@@ -536,15 +521,10 @@ static sljit_ub* emit_x86_instruction(struct sljit_compiler *compiler, sljit_si 
 
 		if ((a & SLJIT_IMM) || (a == 0))
 			*buf_ptr = 0;
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
-		else if (!(flags & EX86_SSE2))
+		else if (!(flags & EX86_SSE2_OP1))
 			*buf_ptr = reg_lmap[a] << 3;
 		else
 			*buf_ptr = a << 3;
-#else
-		else
-			*buf_ptr = reg_lmap[a] << 3;
-#endif
 	}
 	else {
 		if (a & SLJIT_IMM) {
@@ -558,11 +538,7 @@ static sljit_ub* emit_x86_instruction(struct sljit_compiler *compiler, sljit_si 
 	}
 
 	if (!(b & SLJIT_MEM))
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
-		*buf_ptr++ |= MOD_REG + ((!(flags & EX86_SSE2)) ? reg_lmap[b] : b);
-#else
-		*buf_ptr++ |= MOD_REG + reg_lmap[b];
-#endif
+		*buf_ptr++ |= MOD_REG + ((!(flags & EX86_SSE2_OP2)) ? reg_lmap[b] : b);
 	else if ((b & REG_MASK) != SLJIT_UNUSED) {
 		if ((b & OFFS_REG_MASK) == SLJIT_UNUSED || (b & OFFS_REG_MASK) == TO_OFFS_REG(SLJIT_LOCALS_REG)) {
 			if (immb != 0) {

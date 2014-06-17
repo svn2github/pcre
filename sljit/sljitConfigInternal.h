@@ -34,7 +34,8 @@
    SLJIT_32BIT_ARCHITECTURE : 32 bit architecture
    SLJIT_64BIT_ARCHITECTURE : 64 bit architecture
    SLJIT_WORD_SHIFT : the shift required to apply when accessing a sljit_sw/sljit_uw array by index
-   SLJIT_DOUBLE_SHIFT : the shift required to apply when accessing a double array by index
+   SLJIT_DOUBLE_SHIFT : the shift required to apply when accessing a double precision floating point array by index
+   SLJIT_SINGLE_SHIFT : the shift required to apply when accessing a single precision floating point array by index
    SLJIT_LITTLE_ENDIAN : little endian architecture
    SLJIT_BIG_ENDIAN : big endian architecture
    SLJIT_UNALIGNED : allows unaligned memory accesses for non-fpu operations (only!)
@@ -142,6 +143,19 @@
 #undef SLJIT_EXECUTABLE_ALLOCATOR
 #endif
 
+#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32) || (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+#define SLJIT_CONFIG_X86 1
+#elif (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5) || (defined SLJIT_CONFIG_ARM_V7 && SLJIT_CONFIG_ARM_V7) \
+	|| (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2) || (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
+#define SLJIT_CONFIG_ARM 1
+#elif (defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) || (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
+#define SLJIT_CONFIG_PPC 1
+#elif (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32) || (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+#define SLJIT_CONFIG_MIPS 1
+#elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32) || (defined SLJIT_CONFIG_SPARC_64 && SLJIT_CONFIG_SPARC_64)
+#define SLJIT_CONFIG_SPARC 1
+#endif
+
 #if !(defined SLJIT_STD_MACROS_DEFINED && SLJIT_STD_MACROS_DEFINED)
 
 /* These libraries are needed for the macros below. */
@@ -219,7 +233,7 @@
 
 #ifndef SLJIT_CACHE_FLUSH
 
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32) || (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 
 /* Not required to implement on archs with unified caches. */
 #define SLJIT_CACHE_FLUSH(from, to)
@@ -240,7 +254,7 @@
 #define SLJIT_CACHE_FLUSH(from, to) \
     cacheflush((long)(from), (long)(to), 0)
 
-#elif (defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) || (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
+#elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
 
 /* The __clear_cache() implementation of GCC is a dummy function on PowerPC. */
 #define SLJIT_CACHE_FLUSH(from, to) \
@@ -314,6 +328,7 @@ typedef double sljit_d;
 
 /* Shift for double precision sized data. */
 #define SLJIT_DOUBLE_SHIFT 3
+#define SLJIT_SINGLE_SHIFT 2
 
 #ifndef SLJIT_W
 
@@ -418,21 +433,11 @@ typedef double sljit_d;
 #endif
 #endif /* SLJIT_RETURN_ADDRESS_OFFSET */
 
-#ifndef SLJIT_SSE2
-
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32) || (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-/* Turn on SSE2 support on x86. */
-#define SLJIT_SSE2 1
-
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 /* Auto detect SSE2 support using CPUID.
    On 64 bit x86 cpus, sse2 must be present. */
 #define SLJIT_DETECT_SSE2 1
 #endif
-
-#endif /* (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32) || (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64) */
-
-#endif /* !SLJIT_SSE2 */
 
 #ifndef SLJIT_UNALIGNED
 

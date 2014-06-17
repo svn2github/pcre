@@ -477,14 +477,14 @@ typedef struct compare_context {
 
 #define TMP1          SLJIT_SCRATCH_REG1
 #define TMP2          SLJIT_SCRATCH_REG3
-#define TMP3          SLJIT_TEMPORARY_EREG2
+#define TMP3          SLJIT_SCRATCH_EREG2
 #define STR_PTR       SLJIT_SAVED_REG1
 #define STR_END       SLJIT_SAVED_REG2
 #define STACK_TOP     SLJIT_SCRATCH_REG2
 #define STACK_LIMIT   SLJIT_SAVED_REG3
 #define ARGUMENTS     SLJIT_SAVED_EREG1
 #define COUNT_MATCH   SLJIT_SAVED_EREG2
-#define RETURN_ADDR   SLJIT_TEMPORARY_EREG1
+#define RETURN_ADDR   SLJIT_SCRATCH_EREG1
 
 /* Local space layout. */
 /* These two locals can be used by the current opcode. */

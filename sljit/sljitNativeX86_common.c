@@ -71,8 +71,8 @@ static SLJIT_CONST sljit_ub reg_map[SLJIT_NO_REGISTERS + 2] = {
 };
 
 #define CHECK_EXTRA_REGS(p, w, do) \
-	if (p >= SLJIT_TEMPORARY_EREG1 && p <= SLJIT_TEMPORARY_EREG2) { \
-		w = compiler->scratches_start + (p - SLJIT_TEMPORARY_EREG1) * sizeof(sljit_sw); \
+	if (p >= SLJIT_SCRATCH_EREG1 && p <= SLJIT_SCRATCH_EREG2) { \
+		w = compiler->scratches_start + (p - SLJIT_SCRATCH_EREG1) * sizeof(sljit_sw); \
 		p = SLJIT_MEM1(SLJIT_LOCALS_REG); \
 		do; \
 	} \
@@ -133,9 +133,7 @@ static SLJIT_CONST sljit_ub reg_lmap[SLJIT_NO_REGISTERS + 4] = {
 
 #endif /* SLJIT_CONFIG_X86_32 */
 
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
 #define TMP_FREG	(0)
-#endif
 
 /* Size flags for emit_x86_instruction: */
 #define EX86_BIN_INS		0x0010
@@ -145,12 +143,11 @@ static SLJIT_CONST sljit_ub reg_lmap[SLJIT_NO_REGISTERS + 4] = {
 #define EX86_BYTE_ARG		0x0100
 #define EX86_HALF_ARG		0x0200
 #define EX86_PREF_66		0x0400
-
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
-#define EX86_SSE2		0x0800
-#define EX86_PREF_F2		0x1000
-#define EX86_PREF_F3		0x2000
-#endif
+#define EX86_PREF_F2		0x0800
+#define EX86_PREF_F3		0x1000
+#define EX86_SSE2_OP1		0x2000
+#define EX86_SSE2_OP2		0x4000
+#define EX86_SSE2		(EX86_SSE2_OP1 | EX86_SSE2_OP2)
 
 /* --------------------------------------------------------------------- */
 /*  Instrucion forms                                                     */
@@ -179,6 +176,9 @@ static SLJIT_CONST sljit_ub reg_lmap[SLJIT_NO_REGISTERS + 4] = {
 #define CMP_EAX_i32	0x3d
 #define CMP_r_rm	0x3b
 #define CMP_rm_r	0x39
+#define CVTPD2PS_x_xm	0x5a
+#define CVTSI2SD_x_rm	0x2a
+#define CVTTSD2SI_r_xm	0x2c
 #define DIV		(/* GROUP_F7 */ 6 << 3)
 #define DIVSD_x_xm	0x5e
 #define INT3		0xcc
@@ -239,6 +239,7 @@ static SLJIT_CONST sljit_ub reg_lmap[SLJIT_NO_REGISTERS + 4] = {
 #define TEST_EAX_i32	0xa9
 #define TEST_rm_r	0x85
 #define UCOMISD_x_xm	0x2e
+#define UNPCKLPD_x_xm	0x14
 #define XCHG_EAX_r	0x90
 #define XCHG_r_rm	0x87
 #define XOR		(/* BINARY */ 6 << 3)
@@ -271,7 +272,7 @@ static SLJIT_CONST sljit_ub reg_lmap[SLJIT_NO_REGISTERS + 4] = {
 /* Multithreading does not affect these static variables, since they store
    built-in CPU features. Therefore they can be overwritten by different threads
    if they detect the CPU features in the same time. */
-#if (defined SLJIT_SSE2 && SLJIT_SSE2) && (defined SLJIT_DETECT_SSE2 && SLJIT_DETECT_SSE2)
+#if (defined SLJIT_DETECT_SSE2 && SLJIT_DETECT_SSE2)
 static sljit_si cpu_has_sse2 = -1;
 #endif
 static sljit_si cpu_has_cmov = -1;
@@ -325,7 +326,7 @@ static void get_cpu_features(void)
 
 #endif /* _MSC_VER && _MSC_VER >= 1400 */
 
-#if (defined SLJIT_SSE2 && SLJIT_SSE2) && (defined SLJIT_DETECT_SSE2 && SLJIT_DETECT_SSE2)
+#if (defined SLJIT_DETECT_SSE2 && SLJIT_DETECT_SSE2)
 	cpu_has_sse2 = (features >> 26) & 0x1;
 #endif
 	cpu_has_cmov = (features >> 15) & 0x1;
@@ -2215,7 +2216,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_get_register_index(sljit_si reg)
 {
 	check_sljit_get_register_index(reg);
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-	if (reg == SLJIT_TEMPORARY_EREG1 || reg == SLJIT_TEMPORARY_EREG2
+	if (reg == SLJIT_SCRATCH_EREG1 || reg == SLJIT_SCRATCH_EREG2
 			|| reg == SLJIT_SAVED_EREG1 || reg == SLJIT_SAVED_EREG2)
 		return -1;
 #endif
@@ -2248,8 +2249,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op_custom(struct sljit_compiler *co
 /*  Floating point operators                                             */
 /* --------------------------------------------------------------------- */
 
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
-
 /* Alignment + 2 * 16 bytes. */
 static sljit_si sse2_data[3 + (4 + 4) * 2];
 static sljit_si *sse2_buffer;
@@ -2267,26 +2266,18 @@ static void init_compiler(void)
 	sse2_buffer[13] = 0x7fffffff;
 }
 
-#endif
-
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_is_fpu_available(void)
 {
 #ifdef SLJIT_IS_FPU_AVAILABLE
 	return SLJIT_IS_FPU_AVAILABLE;
-#elif (defined SLJIT_SSE2 && SLJIT_SSE2)
-#if (defined SLJIT_DETECT_SSE2 && SLJIT_DETECT_SSE2)
+#elif (defined SLJIT_DETECT_SSE2 && SLJIT_DETECT_SSE2)
 	if (cpu_has_sse2 == -1)
 		get_cpu_features();
 	return cpu_has_sse2;
 #else /* SLJIT_DETECT_SSE2 */
 	return 1;
 #endif /* SLJIT_DETECT_SSE2 */
-#else /* SLJIT_SSE2 */
-	return 0;
-#endif
 }
-
-#if (defined SLJIT_SSE2 && SLJIT_SSE2)
 
 static sljit_si emit_sse2(struct sljit_compiler *compiler, sljit_ub opcode,
 	sljit_si single, sljit_si xmm1, sljit_si xmm2, sljit_sw xmm2w)
@@ -2324,37 +2315,114 @@ static SLJIT_INLINE sljit_si emit_sse2_store(struct sljit_compiler *compiler,
 	return emit_sse2(compiler, MOVSD_xm_x, single, src, dst, dstw);
 }
 
+static SLJIT_INLINE sljit_si sljit_emit_fop1_convw_fromd(struct sljit_compiler *compiler, sljit_si op,
+	sljit_si dst, sljit_sw dstw,
+	sljit_si src, sljit_sw srcw)
+{
+	sljit_si dst_r = SLOW_IS_REG(dst) ? dst : TMP_REG1;
+	sljit_ub *inst;
+
+#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+	if (GET_OPCODE(op) == SLJIT_CONVW_FROMD)
+		compiler->mode32 = 0;
+#endif
+
+	inst = emit_x86_instruction(compiler, 2 | ((op & SLJIT_SINGLE_OP) ? EX86_PREF_F3 : EX86_PREF_F2) | EX86_SSE2_OP2, dst_r, 0, src, srcw);
+	FAIL_IF(!inst);
+	*inst++ = GROUP_0F;
+	*inst = CVTTSD2SI_r_xm;
+
+	if (dst_r == TMP_REG1 && dst != SLJIT_UNUSED)
+		return emit_mov(compiler, dst, dstw, TMP_REG1, 0);
+	return SLJIT_SUCCESS;
+}
+
+static SLJIT_INLINE sljit_si sljit_emit_fop1_convd_fromw(struct sljit_compiler *compiler, sljit_si op,
+	sljit_si dst, sljit_sw dstw,
+	sljit_si src, sljit_sw srcw)
+{
+	sljit_si dst_r = FAST_IS_REG(dst) ? dst : TMP_FREG;
+	sljit_ub *inst;
+
+#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+	if (GET_OPCODE(op) == SLJIT_CONVD_FROMW)
+		compiler->mode32 = 0;
+#endif
+
+	if (src & SLJIT_IMM) {
+#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+		if (GET_OPCODE(op) == SLJIT_CONVD_FROMI)
+			srcw = (sljit_si)srcw;
+#endif
+		EMIT_MOV(compiler, TMP_REG1, 0, src, srcw);
+		src = TMP_REG1;
+		srcw = 0;
+	}
+
+	inst = emit_x86_instruction(compiler, 2 | ((op & SLJIT_SINGLE_OP) ? EX86_PREF_F3 : EX86_PREF_F2) | EX86_SSE2_OP1, dst_r, 0, src, srcw);
+	FAIL_IF(!inst);
+	*inst++ = GROUP_0F;
+	*inst = CVTSI2SD_x_rm;
+
+#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+	compiler->mode32 = 1;
+#endif
+	if (dst_r == TMP_FREG)
+		return emit_sse2_store(compiler, op & SLJIT_SINGLE_OP, dst, dstw, TMP_FREG);
+	return SLJIT_SUCCESS;
+}
+
+static SLJIT_INLINE sljit_si sljit_emit_fop1_cmp(struct sljit_compiler *compiler, sljit_si op,
+	sljit_si src1, sljit_sw src1w,
+	sljit_si src2, sljit_sw src2w)
+{
+	compiler->flags_saved = 0;
+	if (!FAST_IS_REG(src1)) {
+		FAIL_IF(emit_sse2_load(compiler, op & SLJIT_SINGLE_OP, TMP_FREG, src1, src1w));
+		src1 = TMP_FREG;
+	}
+	return emit_sse2_logic(compiler, UCOMISD_x_xm, !(op & SLJIT_SINGLE_OP), src1, src2, src2w);
+}
+
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compiler, sljit_si op,
 	sljit_si dst, sljit_sw dstw,
 	sljit_si src, sljit_sw srcw)
 {
 	sljit_si dst_r;
 
-	CHECK_ERROR();
-	check_sljit_emit_fop1(compiler, op, dst, dstw, src, srcw);
-
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	compiler->mode32 = 1;
 #endif
 
-	if (GET_OPCODE(op) == SLJIT_CMPD) {
-		compiler->flags_saved = 0;
-		if (FAST_IS_REG(dst))
-			dst_r = dst;
-		else {
-			dst_r = TMP_FREG;
-			FAIL_IF(emit_sse2_load(compiler, op & SLJIT_SINGLE_OP, dst_r, dst, dstw));
-		}
-		return emit_sse2_logic(compiler, UCOMISD_x_xm, !(op & SLJIT_SINGLE_OP), dst_r, src, srcw);
-	}
+	CHECK_ERROR();
+	SELECT_FOP1_OPERATION_WITH_CHECKS(compiler, op, dst, dstw, src, srcw);
 
-	if (op == SLJIT_MOVD) {
+	if (GET_OPCODE(op) == SLJIT_MOVD) {
 		if (FAST_IS_REG(dst))
 			return emit_sse2_load(compiler, op & SLJIT_SINGLE_OP, dst, src, srcw);
 		if (FAST_IS_REG(src))
 			return emit_sse2_store(compiler, op & SLJIT_SINGLE_OP, dst, dstw, src);
 		FAIL_IF(emit_sse2_load(compiler, op & SLJIT_SINGLE_OP, TMP_FREG, src, srcw));
 		return emit_sse2_store(compiler, op & SLJIT_SINGLE_OP, dst, dstw, TMP_FREG);
+	}
+
+	if (GET_OPCODE(op) == SLJIT_CONVD_FROMS) {
+		dst_r = FAST_IS_REG(dst) ? dst : TMP_FREG;
+		if (FAST_IS_REG(src)) {
+			/* We overwrite the high bits of source. From SLJIT point of view,
+			   this is not an issue.
+			   Note: In SSE3, we could also use MOVDDUP and MOVSLDUP. */
+			FAIL_IF(emit_sse2_logic(compiler, UNPCKLPD_x_xm, op & SLJIT_SINGLE_OP, src, src, 0));
+		}
+		else {
+			FAIL_IF(emit_sse2_load(compiler, !(op & SLJIT_SINGLE_OP), TMP_FREG, src, srcw));
+			src = TMP_FREG;
+		}
+
+		FAIL_IF(emit_sse2_logic(compiler, CVTPD2PS_x_xm, op & SLJIT_SINGLE_OP, dst_r, src, 0));
+		if (dst_r == TMP_FREG)
+			return emit_sse2_store(compiler, op & SLJIT_SINGLE_OP, dst, dstw, TMP_FREG);
+		return SLJIT_SUCCESS;
 	}
 
 	if (SLOW_IS_REG(dst)) {
@@ -2391,6 +2459,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compile
 
 	CHECK_ERROR();
 	check_sljit_emit_fop2(compiler, op, dst, dstw, src1, src1w, src2, src2w);
+	ADJUST_LOCAL_OFFSET(dst, dstw);
+	ADJUST_LOCAL_OFFSET(src1, src1w);
+	ADJUST_LOCAL_OFFSET(src2, src2w);
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	compiler->mode32 = 1;
@@ -2439,33 +2510,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compile
 		return emit_sse2_store(compiler, op & SLJIT_SINGLE_OP, dst, dstw, TMP_FREG);
 	return SLJIT_SUCCESS;
 }
-
-#else
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compiler, sljit_si op,
-	sljit_si dst, sljit_sw dstw,
-	sljit_si src, sljit_sw srcw)
-{
-	CHECK_ERROR();
-	/* Should cause an assertion fail. */
-	check_sljit_emit_fop1(compiler, op, dst, dstw, src, srcw);
-	compiler->error = SLJIT_ERR_UNSUPPORTED;
-	return SLJIT_ERR_UNSUPPORTED;
-}
-
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compiler, sljit_si op,
-	sljit_si dst, sljit_sw dstw,
-	sljit_si src1, sljit_sw src1w,
-	sljit_si src2, sljit_sw src2w)
-{
-	CHECK_ERROR();
-	/* Should cause an assertion fail. */
-	check_sljit_emit_fop2(compiler, op, dst, dstw, src1, src1w, src2, src2w);
-	compiler->error = SLJIT_ERR_UNSUPPORTED;
-	return SLJIT_ERR_UNSUPPORTED;
-}
-
-#endif
 
 /* --------------------------------------------------------------------- */
 /*  Conditional instructions                                             */

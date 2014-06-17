@@ -114,8 +114,8 @@ of sljitConfigInternal.h */
 /* Note: extra registers cannot be used for memory addressing. */
 /* Note: on x86-32, these registers are emulated (using stack
    loads & stores). */
-#define SLJIT_TEMPORARY_EREG1	4
-#define SLJIT_TEMPORARY_EREG2	5
+#define SLJIT_SCRATCH_EREG1	4
+#define SLJIT_SCRATCH_EREG2	5
 
 /* Saved registers whose preserve their values across function calls. */
 #define SLJIT_SAVED_REG1	6
@@ -238,7 +238,7 @@ struct sljit_compiler {
 	sljit_si mode32;
 #endif
 
-#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32) || (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 	sljit_si flags_saved;
 #endif
 
@@ -271,13 +271,13 @@ struct sljit_compiler {
 	sljit_sw cache_argw;
 #endif
 
-#if (defined SLJIT_CONFIG_PPC_32 && SLJIT_CONFIG_PPC_32) || (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64)
+#if (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
 	sljit_sw imm;
 	sljit_si cache_arg;
 	sljit_sw cache_argw;
 #endif
 
-#if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32) || (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+#if (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
 	sljit_si delay_slot;
 	sljit_si cache_arg;
 	sljit_sw cache_argw;
@@ -738,37 +738,55 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op_custom(struct sljit_compiler *co
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_is_fpu_available(void);
 
-/* Note: dst is the left and src is the right operand for SLJIT_FCMP.
-   Note: NaN check is always performed. If SLJIT_C_FLOAT_UNORDERED is set,
-         the comparison result is unpredictable.
-   Flags: SP | E | S (see SLJIT_C_FLOAT_*) */
-#define SLJIT_CMPD			36
-#define SLJIT_CMPS			(SLJIT_CMPD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_MOVD			37
+#define SLJIT_MOVD			36
 #define SLJIT_MOVS			(SLJIT_MOVD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_NEGD			38
+#define SLJIT_NEGD			37
 #define SLJIT_NEGS			(SLJIT_NEGD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_ABSD			39
+#define SLJIT_ABSD			38
 #define SLJIT_ABSS			(SLJIT_ABSD | SLJIT_SINGLE_OP)
+/* Convert opcodes: CONV[DST_TYPE].FROM[SRC_TYPE]
+   SRC/DST TYPE can be: D - double, S - single, W - signed word, I - signed int
+   Rounding mode when the destination is W or I: round towards zero. */
+/* Flags: SP - (never set any flags) */
+#define SLJIT_CONVD_FROMS		39
+#define SLJIT_CONVS_FROMD		(SLJIT_CONVD_FROMS | SLJIT_SINGLE_OP)
+/* Flags: SP - (never set any flags) */
+#define SLJIT_CONVW_FROMD		40
+#define SLJIT_CONVW_FROMS		(SLJIT_CONVW_FROMD | SLJIT_SINGLE_OP)
+/* Flags: SP - (never set any flags) */
+#define SLJIT_CONVI_FROMD		41
+#define SLJIT_CONVI_FROMS		(SLJIT_CONVI_FROMD | SLJIT_SINGLE_OP)
+/* Flags: SP - (never set any flags) */
+#define SLJIT_CONVD_FROMW		42
+#define SLJIT_CONVS_FROMW		(SLJIT_CONVD_FROMW | SLJIT_SINGLE_OP)
+/* Flags: SP - (never set any flags) */
+#define SLJIT_CONVD_FROMI		43
+#define SLJIT_CONVS_FROMI		(SLJIT_CONVD_FROMI | SLJIT_SINGLE_OP)
+/* Note: dst is the left and src is the right operand for SLJIT_CMPD.
+   Note: NaN check is always performed. If SLJIT_C_FLOAT_UNORDERED flag
+         is set, the comparison result is unpredictable.
+   Flags: SP | E | S (see SLJIT_C_FLOAT_*) */
+#define SLJIT_CMPD			44
+#define SLJIT_CMPS			(SLJIT_CMPD | SLJIT_SINGLE_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compiler, sljit_si op,
 	sljit_si dst, sljit_sw dstw,
 	sljit_si src, sljit_sw srcw);
 
 /* Flags: SP - (never set any flags) */
-#define SLJIT_ADDD			40
+#define SLJIT_ADDD			45
 #define SLJIT_ADDS			(SLJIT_ADDD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_SUBD			41
+#define SLJIT_SUBD			46
 #define SLJIT_SUBS			(SLJIT_SUBD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_MULD			42
+#define SLJIT_MULD			47
 #define SLJIT_MULS			(SLJIT_MULD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DIVD			43
+#define SLJIT_DIVD			48
 #define SLJIT_DIVS			(SLJIT_DIVD | SLJIT_SINGLE_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compiler, sljit_si op,
@@ -912,7 +930,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_consta
 /* --------------------------------------------------------------------- */
 
 #define SLJIT_MAJOR_VERSION	0
-#define SLJIT_MINOR_VERSION	91
+#define SLJIT_MINOR_VERSION	92
 
 /* Get the human readable name of the platform. Can be useful on platforms
    like ARM, where ARM and Thumb2 functions can be mixed, and
