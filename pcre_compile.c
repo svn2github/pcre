@@ -47,8 +47,8 @@ supporting internal functions that are not used by other modules. */
 #endif
 
 #define NLBLOCK cd             /* Block containing newline information */
-#define PSSTART start_pattern  /* Field containing processed string start */
-#define PSEND   end_pattern    /* Field containing processed string end */
+#define PSSTART start_pattern  /* Field containing pattern start */
+#define PSEND   end_pattern    /* Field containing pattern end */
 
 #include "pcre_internal.h"
 
