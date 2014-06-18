@@ -5705,4 +5705,7 @@ AbcdCBefgBhiBqz
     adl
     bcl    
 
+/\sabc/
+    \x{0b}abc
+
 /-- End of testinput1 --/

@@ -64,6 +64,10 @@ Version 8.36 xx-xxx-2014
 12. A pattern such as /^s?c/mi8 where the optional character has more than
     one "other case" was incorrectly compiled such that it would only try to 
     match starting at "c". 
+    
+13. When a pattern starting with \s was studied, VT was not included in the 
+    list of possible starting characters; this should have been part of the 
+    8.34/18 patch.
 
 
 Version 8.35 04-April-2014

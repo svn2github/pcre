@@ -9389,4 +9389,8 @@ No match
     bcl    
  0: l
 
+/\sabc/
+    \x{0b}abc
+ 0: \x0babc
+
 /-- End of testinput1 --/
