@@ -863,7 +863,6 @@ do
       case OP_NOTUPTOI:
       case OP_NOT_HSPACE:
       case OP_NOT_VSPACE:
-      case OP_PROP:
       case OP_PRUNE:
       case OP_PRUNE_ARG:
       case OP_RECURSE:
@@ -880,6 +879,31 @@ do
       case OP_THEN:
       case OP_THEN_ARG:
       return SSB_FAIL;
+      
+      /* A "real" property test implies no starting bits, but the fake property
+      PT_CLIST identifies a list of characters. These lists are short, as they
+      are used for characters with more than one "other case", so there is no
+      point in recognizing them for OP_NOTPROP. */
+                                                                    
+      case OP_PROP:                                                     
+      if (tcode[1] != PT_CLIST) return SSB_FAIL;                       
+        {                                                              
+        const pcre_uint32 *p = PRIV(ucd_caseless_sets) + tcode[2];            
+        while ((c = *p++) < NOTACHAR)                           
+          {                                                                  
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8         
+          if (utf)                  
+            {                                                        
+            pcre_uchar buff[6];                  
+            (void)PRIV(ord2utf)(c, buff);
+            c = buff[0];
+            }                                      
+#endif                                                          
+          if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
+          }        
+        }                
+      try_next = FALSE;    
+      break;               
 
       /* We can ignore word boundary tests. */
 

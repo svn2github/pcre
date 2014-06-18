@@ -71,6 +71,11 @@ Version 8.36 xx-xxx-2014
     
 14. If a character class started [\Qx]... where x is any character, the class
     was incorrectly terminated at the ].
+    
+15. If a pattern that started with a caseless match for a character with more 
+    than one "other case" was studied, PCRE did not set up the starting code 
+    unit bit map for the list of possible characters. Now it does. This is an 
+    optimization improvement, not a bug fix.
 
 
 Version 8.35 04-April-2014
