@@ -68,6 +68,9 @@ Version 8.36 xx-xxx-2014
 13. When a pattern starting with \s was studied, VT was not included in the 
     list of possible starting characters; this should have been part of the 
     8.34/18 patch.
+    
+14. If a character class started [\Qx]... where x is any character, the class
+    was incorrectly terminated at the ].
 
 
 Version 8.35 04-April-2014

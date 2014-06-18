@@ -5708,4 +5708,10 @@ AbcdCBefgBhiBqz
 /\sabc/
     \x{0b}abc
 
+/[\Qa]\E]+/
+    aa]]
+
+/[\Q]a\E]+/
+    aa]]
+
 /-- End of testinput1 --/

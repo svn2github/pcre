@@ -5325,7 +5325,7 @@ for (;; ptr++)
       whatever repeat count may follow. In the case of reqchar, save the
       previous value for reinstating. */
 
-      if (class_one_char == 1 && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
+      if (!inescq && class_one_char == 1 && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
         {
         ptr++;
         zeroreqchar = reqchar;

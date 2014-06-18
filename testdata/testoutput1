@@ -9393,4 +9393,12 @@ No match
     \x{0b}abc
  0: \x0babc
 
+/[\Qa]\E]+/
+    aa]]
+ 0: aa]]
+
+/[\Q]a\E]+/
+    aa]]
+ 0: aa]]
+
 /-- End of testinput1 --/
