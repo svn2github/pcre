@@ -1493,4 +1493,7 @@
 /[q-u]+/8iW 
     Ss\x{17f}
 
+/^s?c/mi8
+    scat
+
 /-- End of testinput6 --/

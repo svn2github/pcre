@@ -2457,4 +2457,8 @@ No match
     Ss\x{17f}
  0: Ss\x{17f}
 
+/^s?c/mi8
+    scat
+ 0: sc
+
 /-- End of testinput6 --/

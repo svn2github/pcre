@@ -60,6 +60,10 @@ Version 8.36 xx-xxx-2014
        
     the reference to 'Name' was incorrectly treated as a reference to a 
     duplicate name.
+    
+12. A pattern such as /^s?c/mi8 where the optional character has more than
+    one "other case" was incorrectly compiled such that it would only try to 
+    match starting at "c". 
 
 
 Version 8.35 04-April-2014

@@ -4694,7 +4694,8 @@ for (;; ptr++)
     previous = NULL;
     if ((options & PCRE_MULTILINE) != 0)
       {
-      if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
+      if (firstcharflags == REQ_UNSET) 
+        zerofirstcharflags = firstcharflags = REQ_NONE;
       *code++ = OP_CIRCM;
       }
     else *code++ = OP_CIRC;
