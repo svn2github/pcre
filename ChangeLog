@@ -77,6 +77,8 @@ Version 8.36 xx-xxx-2014
     unit bit map for the list of possible characters. Now it does. This is an 
     optimization improvement, not a bug fix.
 
+16. The Unicode data tables have been updated to Unicode 7.0.0.
+
 
 Version 8.35 04-April-2014
 --------------------------
