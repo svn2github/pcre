@@ -28,31 +28,43 @@
 #define _SLJIT_CONFIG_INTERNAL_H_
 
 /*
-   SLJIT defines the following macros depending on the target architecture:
+   SLJIT defines the following architecture dependent types and macros:
 
-   Feature detection (boolean) macros:
-   SLJIT_32BIT_ARCHITECTURE : 32 bit architecture
-   SLJIT_64BIT_ARCHITECTURE : 64 bit architecture
-   SLJIT_WORD_SHIFT : the shift required to apply when accessing a sljit_sw/sljit_uw array by index
-   SLJIT_DOUBLE_SHIFT : the shift required to apply when accessing a double precision floating point array by index
-   SLJIT_SINGLE_SHIFT : the shift required to apply when accessing a single precision floating point array by index
-   SLJIT_LITTLE_ENDIAN : little endian architecture
-   SLJIT_BIG_ENDIAN : big endian architecture
-   SLJIT_UNALIGNED : allows unaligned memory accesses for non-fpu operations (only!)
-   SLJIT_INDIRECT_CALL : see SLJIT_FUNC_OFFSET() for more information
-   SLJIT_RETURN_ADDRESS_OFFSET : a return instruction always adds this offset to the return address
+   Types:
+     sljit_sb, sljit_ub : signed and unsigned 8 bit byte
+     sljit_sh, sljit_uh : signed and unsigned 16 bit half-word (short) type
+     sljit_si, sljit_ui : signed and unsigned 32 bit integer type
+     sljit_sw, sljit_uw : signed and unsigned machine word, enough to store a pointer
+     sljit_p : unsgined pointer value (usually the same as sljit_uw, but
+               some 64 bit ABIs may use 32 bit pointers)
+     sljit_s : single precision floating point value
+     sljit_d : double precision floating point value
 
-   Types and useful macros:
-   sljit_sb, sljit_ub : signed and unsigned 8 bit byte
-   sljit_sh, sljit_uh : signed and unsigned 16 bit half-word (short) type
-   sljit_si, sljit_ui : signed and unsigned 32 bit integer type
-   sljit_sw, sljit_uw : signed and unsigned machine word, enough to store a pointer
-   sljit_p : unsgined pointer value (usually the same as sljit_uw, but
-             some 64 bit ABIs may use 32 bit pointers)
-   sljit_s : single precision floating point value
-   sljit_d : double precision floating point value
-   SLJIT_CALL : C calling convention define for both calling JIT form C and C callbacks for JIT
-   SLJIT_W(number) : defining 64 bit constants on 64 bit architectures (compiler independent helper)
+   Macros for feature detection (boolean):
+     SLJIT_32BIT_ARCHITECTURE : 32 bit architecture
+     SLJIT_64BIT_ARCHITECTURE : 64 bit architecture
+     SLJIT_LITTLE_ENDIAN : little endian architecture
+     SLJIT_BIG_ENDIAN : big endian architecture
+     SLJIT_UNALIGNED : allows unaligned memory accesses for non-fpu operations (only!)
+     SLJIT_INDIRECT_CALL : see SLJIT_FUNC_OFFSET() for more information
+
+   Constants:
+     SLJIT_NUMBER_OF_REGISTERS : number of available registers
+     SLJIT_NUMBER_OF_SCRATCH_REGISTERS : number of available scratch registers
+     SLJIT_NUMBER_OF_SAVED_REGISTERS : number of available saved registers
+     SLJIT_NUMBER_OF_FLOAT_REGISTERS : number of available floating point registers
+     SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS : number of available floating point scratch registers
+     SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS : number of available floating point saved registers
+     SLJIT_WORD_SHIFT : the shift required to apply when accessing a sljit_sw/sljit_uw array by index
+     SLJIT_DOUBLE_SHIFT : the shift required to apply when accessing
+                          a double precision floating point array by index
+     SLJIT_SINGLE_SHIFT : the shift required to apply when accessing
+                          a single precision floating point array by index
+     SLJIT_RETURN_ADDRESS_OFFSET : a return instruction always adds this offset to the return address
+
+   Other macros:
+     SLJIT_CALL : C calling convention define for both calling JIT form C and C callbacks for JIT
+     SLJIT_W(number) : defining 64 bit constants on 64 bit architectures (compiler independent helper)
 */
 
 #if !((defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32) \
@@ -155,6 +167,53 @@
 #elif (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32) || (defined SLJIT_CONFIG_SPARC_64 && SLJIT_CONFIG_SPARC_64)
 #define SLJIT_CONFIG_SPARC 1
 #endif
+
+#if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
+#define SLJIT_NUMBER_OF_REGISTERS 10
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 7
+#elif (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
+#ifndef _WIN64
+#define SLJIT_NUMBER_OF_REGISTERS 12
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 6
+#else
+#define SLJIT_NUMBER_OF_REGISTERS 12
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
+#endif /* _WIN64 */
+#elif (defined SLJIT_CONFIG_ARM_V5 && SLJIT_CONFIG_ARM_V5) || (defined SLJIT_CONFIG_ARM_V7 && SLJIT_CONFIG_ARM_V7)
+#define SLJIT_NUMBER_OF_REGISTERS 11
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
+#elif (defined SLJIT_CONFIG_ARM_THUMB2 && SLJIT_CONFIG_ARM_THUMB2)
+#define SLJIT_NUMBER_OF_REGISTERS 11
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 7
+#elif (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
+#define SLJIT_NUMBER_OF_REGISTERS 23
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 10
+#elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
+#define SLJIT_NUMBER_OF_REGISTERS 22
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 17
+#elif (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
+#define SLJIT_NUMBER_OF_REGISTERS 17
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
+#elif (defined SLJIT_CONFIG_SPARC && SLJIT_CONFIG_SPARC)
+#define SLJIT_NUMBER_OF_REGISTERS 18
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 14
+#elif (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+#define SLJIT_NUMBER_OF_REGISTERS 0
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 0
+#endif
+
+#define SLJIT_NUMBER_OF_SCRATCH_REGISTERS \
+	(SLJIT_NUMBER_OF_REGISTERS - SLJIT_NUMBER_OF_SAVED_REGISTERS)
+
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 6
+#if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64) && (defined _WIN64)
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 1
+#else
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
+#endif
+
+#define SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS \
+	(SLJIT_NUMBER_OF_FLOAT_REGISTERS - SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS)
 
 #if !(defined SLJIT_STD_MACROS_DEFINED && SLJIT_STD_MACROS_DEFINED)
 
