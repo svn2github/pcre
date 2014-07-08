@@ -79,6 +79,8 @@ Version 8.36 xx-xxx-2014
 
 16. The Unicode data tables have been updated to Unicode 7.0.0.
 
+17. Fixed a number of memory leaks in pcregrep.
+
 
 Version 8.35 04-April-2014
 --------------------------
