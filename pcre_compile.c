@@ -9277,11 +9277,18 @@ subpattern. */
 
 if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 
-/* Unless disabled, check whether single character iterators can be
-auto-possessified. The function overwrites the appropriate opcode values. */
+/* Unless disabled, check whether any single character iterators can be        
+auto-possessified. The function overwrites the appropriate opcode values, so
+the type of the pointer must be cast. NOTE: the intermediate variable "temp" is
+used in this code because at least one compiler gives a warning about loss of
+"const" attribute if the cast (pcre_uchar *)codestart is used directly in the
+function call. */
 
 if ((options & PCRE_NO_AUTO_POSSESS) == 0)
-  auto_possessify((pcre_uchar *)codestart, utf, cd);
+  {
+  pcre_uchar *temp = (pcre_uchar *)codestart;
+  auto_possessify(temp, utf, cd);
+  } 
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,

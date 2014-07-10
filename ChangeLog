@@ -81,6 +81,10 @@ Version 8.36 xx-xxx-2014
 
 17. Fixed a number of memory leaks in pcregrep.
 
+18. Avoid a compiler warning (from some compilers) for a function call with
+    a cast that removes "const" from an lvalue by using an intermediate 
+    variable (to which the compiler does not object).
+
 
 Version 8.35 04-April-2014
 --------------------------
