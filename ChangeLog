@@ -84,6 +84,11 @@ Version 8.36 xx-xxx-2014
 18. Avoid a compiler warning (from some compilers) for a function call with
     a cast that removes "const" from an lvalue by using an intermediate 
     variable (to which the compiler does not object).
+    
+19. Incorrect code was compiled if a group that contained an internal recursive 
+    back reference was optional (had quantifier with a minimum of zero). This
+    example compiled incorrect code: /(((a\2)|(a*)\g<-1>))*/ and other examples 
+    caused segmentation faults because of stack overflows at compile time. 
 
 
 Version 8.35 04-April-2014

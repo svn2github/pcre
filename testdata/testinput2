@@ -4035,6 +4035,8 @@ backtracking verbs. --/
 
 /(?(R&6yh)abc)/
 
+/(((a\2)|(a*)\g<-1>))*a?/BZ
+
 /-- Test the ugly "start or end of word" compatibility syntax --/
 
 /[[:<:]]red[[:>:]]/BZ

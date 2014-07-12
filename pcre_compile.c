@@ -549,7 +549,7 @@ static const char error_texts[] =
   "group name must start with a non-digit\0"
   /* 85 */
   "parentheses are too deeply nested (stack check)\0"
-  "digits missing in \\x{} or \\o{}\0" 
+  "digits missing in \\x{} or \\o{}\0"
   ;
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -1260,7 +1260,7 @@ else
 
     case CHAR_o:
     if (ptr[1] != CHAR_LEFT_CURLY_BRACKET) *errorcodeptr = ERR81; else
-    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR86; else 
+    if (ptr[2] == CHAR_RIGHT_CURLY_BRACKET) *errorcodeptr = ERR86; else
       {
       ptr += 2;
       c = 0;
@@ -1334,7 +1334,7 @@ else
           {
           *errorcodeptr = ERR86;
           break;
-          }    
+          }
         c = 0;
         overflow = FALSE;
         while (MAX_255(*ptr) && (digitab[*ptr] & ctype_xdigit) != 0)
@@ -1590,7 +1590,7 @@ read_repeat_counts(const pcre_uchar *p, int *minp, int *maxp, int *errorcodeptr)
 int min = 0;
 int max = -1;
 
-while (IS_DIGIT(*p)) 
+while (IS_DIGIT(*p))
   {
   min = min * 10 + (int)(*p++ - CHAR_0);
   if (min > 65535)
@@ -1598,14 +1598,14 @@ while (IS_DIGIT(*p))
     *errorcodeptr = ERR5;
     return p;
     }
-  }   
+  }
 
 if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
   {
   if (*(++p) != CHAR_RIGHT_CURLY_BRACKET)
     {
     max = 0;
-    while(IS_DIGIT(*p)) 
+    while(IS_DIGIT(*p))
       {
       max = max * 10 + (int)(*p++ - CHAR_0);
       if (max > 65535)
@@ -1613,7 +1613,7 @@ if (*p == CHAR_RIGHT_CURLY_BRACKET) max = min; else
         *errorcodeptr = ERR5;
         return p;
         }
-      }   
+      }
     if (max < min)
       {
       *errorcodeptr = ERR4;
@@ -3096,7 +3096,7 @@ for(;;)
   Therefore infinite recursions are not possible. */
 
   c = *code;
-  
+
   /* Skip over callouts */
 
   if (c == OP_CALLOUT)
@@ -3125,7 +3125,7 @@ for(;;)
     /* If the bracket is capturing, and referenced by an OP_RECURSE, or
     it is an atomic sub-pattern (assert, once, etc.) the non-greedy case
     cannot be converted to a possessive form. */
-    
+
     if (base_list[1] == 0) return FALSE;
 
     switch(*(code - GET(code, 1)))
@@ -3137,7 +3137,7 @@ for(;;)
       case OP_ONCE:
       case OP_ONCE_NC:
       /* Atomic sub-patterns and assertions can always auto-possessify their
-      last iterator. However, if the group was entered as a result of checking 
+      last iterator. However, if the group was entered as a result of checking
       a previous iterator, this is not possible. */
 
       return !entered_a_group;
@@ -3182,14 +3182,14 @@ for(;;)
     continue;
 
     default:
-    break; 
+    break;
     }
 
   /* Check for a supported opcode, and load its properties. */
 
   code = get_chr_property_list(code, utf, cd->fcc, list);
   if (code == NULL) return FALSE;    /* Unsupported */
-  
+
   /* If either opcode is a small character list, set pointers for comparing
   characters from that list with another list, or with a property. */
 
@@ -3422,7 +3422,7 @@ for(;;)
            autoposstab[leftop - FIRST_AUTOTAB_OP][rightop - FIRST_AUTOTAB_OP];
 
     if (!accepted) return FALSE;
-      
+
     if (list[1] == 0) return TRUE;
     /* Might be an empty repeat. */
     continue;
@@ -4694,7 +4694,7 @@ for (;; ptr++)
     previous = NULL;
     if ((options & PCRE_MULTILINE) != 0)
       {
-      if (firstcharflags == REQ_UNSET) 
+      if (firstcharflags == REQ_UNSET)
         zerofirstcharflags = firstcharflags = REQ_NONE;
       *code++ = OP_CIRCM;
       }
@@ -5983,7 +5983,7 @@ for (;; ptr++)
           just adjust the length as if we had. Do some paranoid checks for
           potential integer overflow. The INT64_OR_DOUBLE type is a 64-bit
           integer type when available, otherwise double. */
-          
+
           if (lengthptr != NULL)
             {
             int delta = (repeat_min - 1)*length_prevgroup;
@@ -6701,7 +6701,7 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL && (options & PCRE_DUPNAMES) != 0) 
+          if (lengthptr != NULL && (options & PCRE_DUPNAMES) != 0)
             *lengthptr += IMM2_SIZE;
           }
 
@@ -6767,7 +6767,7 @@ for (;; ptr++)
               (slot+IMM2_SIZE)[namelen] != 0) break;
             count++;
             }
- 
+
           if (count > 1)
             {
             PUT2(code, 2+LINK_SIZE, offset);
@@ -7116,7 +7116,7 @@ for (;; ptr++)
           /* Count named back references. */
 
           if (!is_recurse) cd->namedrefcount++;
-          
+
           /* If duplicate names are permitted, we have to allow for a named
           reference to a duplicated name (this cannot be determined until the
           second pass). This needs an extra 16-bit data item. */
@@ -7168,12 +7168,12 @@ for (;; ptr++)
           for (i++; i < cd->names_found; i++)
             {
             if (STRCMP_UC_UC(slot + IMM2_SIZE, cslot + IMM2_SIZE) != 0) break;
-            
- 
+
+
             count++;
             cslot += cd->name_entry_size;
             }
-            
+
           if (count > 1)
             {
             if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
@@ -8267,12 +8267,16 @@ for (;;)
 
     /* If it was a capturing subpattern, check to see if it contained any
     recursive back references. If so, we must wrap it in atomic brackets.
-    In any event, remove the block from the chain. */
+    Because we are moving code along, we must ensure that any pending recursive
+    references are updated. In any event, remove the block from the chain. */
 
     if (capnumber > 0)
       {
       if (cd->open_caps->flag)
         {
+        *code = OP_END;
+        adjust_recurse(start_bracket, 1 + LINK_SIZE,
+          (options & PCRE_UTF8) != 0, cd, cd->hwm);
         memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
           IN_UCHARS(code - start_bracket));
         *start_bracket = OP_ONCE;
@@ -9277,7 +9281,7 @@ subpattern. */
 
 if (errorcode == 0 && re->top_backref > re->top_bracket) errorcode = ERR15;
 
-/* Unless disabled, check whether any single character iterators can be        
+/* Unless disabled, check whether any single character iterators can be
 auto-possessified. The function overwrites the appropriate opcode values, so
 the type of the pointer must be cast. NOTE: the intermediate variable "temp" is
 used in this code because at least one compiler gives a warning about loss of
@@ -9288,7 +9292,7 @@ if ((options & PCRE_NO_AUTO_POSSESS) == 0)
   {
   pcre_uchar *temp = (pcre_uchar *)codestart;
   auto_possessify(temp, utf, cd);
-  } 
+  }
 
 /* If there were any lookbehind assertions that contained OP_RECURSE
 (recursions or subroutine calls), a flag is set for them to be checked here,
