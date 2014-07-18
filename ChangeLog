@@ -117,9 +117,9 @@ Version 8.35 04-April-2014
 
 6.  Improve character range checks in JIT. Characters are read by an inprecise
     function now, which returns with an unknown value if the character code is
-    above a certain treshold (e.g: 256). The only limitation is that the value
-    must be bigger than the treshold as well. This function is useful, when
-    the characters above the treshold are handled in the same way.
+    above a certain threshold (e.g: 256). The only limitation is that the value
+    must be bigger than the threshold as well. This function is useful when
+    the characters above the threshold are handled in the same way.
 
 7.  The macros whose names start with RAWUCHAR are placeholders for a future
     mode in which only the bottom 21 bits of 32-bit data items are used. To
