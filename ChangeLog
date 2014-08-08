@@ -89,6 +89,11 @@ Version 8.36 xx-xxx-2014
     back reference was optional (had quantifier with a minimum of zero). This
     example compiled incorrect code: /(((a\2)|(a*)\g<-1>))*/ and other examples 
     caused segmentation faults because of stack overflows at compile time. 
+    
+20. A pattern such as /((?(R)a|(?1)))+/, which contains a recursion within a 
+    group that is quantified with an indefinite repeat, caused a compile-time
+    loop which used up all the system stack and provoked a segmentation fault.
+    This was not the same bug as 19 above.
 
 
 Version 8.35 04-April-2014
