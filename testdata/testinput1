@@ -111,7 +111,7 @@
     bababbc
     babababc
 
-/^\ca\cA\c[\c{\c:/
+/^\ca\cA\c[;\c:/
     \x01\x01\e;z
 
 /^[ab\]cde]/
