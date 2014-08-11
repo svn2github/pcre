@@ -801,25 +801,32 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_compiler_verbose(struct sljit_compiler *comp
 			fprintf(compiler->verbose, "fs%d", SLJIT_NUMBER_OF_FLOAT_REGISTERS - (p)); \
 	}
 
-static SLJIT_CONST char* op_names[] = {
-	/* op0 */
+static SLJIT_CONST char* op0_names[] = {
 	(char*)"breakpoint", (char*)"nop",
 	(char*)"umul", (char*)"smul", (char*)"udiv", (char*)"sdiv",
-	/* op1 */
+};
+
+static SLJIT_CONST char* op1_names[] = {
 	(char*)"mov", (char*)"mov.ub", (char*)"mov.sb", (char*)"mov.uh",
 	(char*)"mov.sh", (char*)"mov.ui", (char*)"mov.si", (char*)"mov.p",
 	(char*)"movu", (char*)"movu.ub", (char*)"movu.sb", (char*)"movu.uh",
 	(char*)"movu.sh", (char*)"movu.ui", (char*)"movu.si", (char*)"movu.p",
 	(char*)"not", (char*)"neg", (char*)"clz",
-	/* op2 */
+};
+
+static SLJIT_CONST char* op2_names[] = {
 	(char*)"add", (char*)"addc", (char*)"sub", (char*)"subc",
 	(char*)"mul", (char*)"and", (char*)"or", (char*)"xor",
 	(char*)"shl", (char*)"lshr", (char*)"ashr",
-	/* fop1 */
-	(char*)"mov", (char*)"neg", (char*)"abs", (char*)"conv",
-	(char*)"conv", (char*)"conv", (char*)"conv", (char*)"conv",
-	(char*)"cmp",
-	/* fop2 */
+};
+
+static SLJIT_CONST char* fop1_names[] = {
+	(char*)"mov", (char*)"conv", (char*)"conv", (char*)"conv",
+	(char*)"conv", (char*)"conv", (char*)"cmp", (char*)"neg",
+	(char*)"abs",
+};
+
+static SLJIT_CONST char* fop2_names[] = {
 	(char*)"add", (char*)"sub", (char*)"mul", (char*)"div"
 };
 
@@ -865,11 +872,12 @@ static SLJIT_INLINE void check_sljit_generate_code(struct sljit_compiler *compil
 }
 
 static SLJIT_INLINE void check_sljit_emit_enter(struct sljit_compiler *compiler,
-	sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
 {
 	/* If debug and verbose are disabled, all arguments are unused. */
 	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(options);
 	SLJIT_UNUSED_ARG(args);
 	SLJIT_UNUSED_ARG(scratches);
 	SLJIT_UNUSED_ARG(saveds);
@@ -877,6 +885,7 @@ static SLJIT_INLINE void check_sljit_emit_enter(struct sljit_compiler *compiler,
 	SLJIT_UNUSED_ARG(fsaveds);
 	SLJIT_UNUSED_ARG(local_size);
 
+	SLJIT_ASSERT(options == 0);
 	SLJIT_ASSERT(args >= 0 && args <= 3);
 	SLJIT_ASSERT(scratches >= 0 && scratches <= SLJIT_NUMBER_OF_REGISTERS);
 	SLJIT_ASSERT(saveds >= 0 && saveds <= SLJIT_NUMBER_OF_REGISTERS);
@@ -888,17 +897,18 @@ static SLJIT_INLINE void check_sljit_emit_enter(struct sljit_compiler *compiler,
 	SLJIT_ASSERT(local_size >= 0 && local_size <= SLJIT_MAX_LOCAL_SIZE);
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
-		fprintf(compiler->verbose, "  enter args:%d scratches:%d saveds:%d fscratches:%d fsaveds:%d local_size:%d\n",
+		fprintf(compiler->verbose, "  enter options:none args:%d scratches:%d saveds:%d fscratches:%d fsaveds:%d local_size:%d\n",
 			args, scratches, saveds, fscratches, fsaveds, local_size);
 #endif
 }
 
 static SLJIT_INLINE void check_sljit_set_context(struct sljit_compiler *compiler,
-	sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
 {
 	/* If debug and verbose are disabled, all arguments are unused. */
 	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(options);
 	SLJIT_UNUSED_ARG(args);
 	SLJIT_UNUSED_ARG(scratches);
 	SLJIT_UNUSED_ARG(saveds);
@@ -913,6 +923,7 @@ static SLJIT_INLINE void check_sljit_set_context(struct sljit_compiler *compiler
 	}
 #endif
 
+	SLJIT_ASSERT(options == 0);
 	SLJIT_ASSERT(args >= 0 && args <= 3);
 	SLJIT_ASSERT(scratches >= 0 && scratches <= SLJIT_NUMBER_OF_REGISTERS);
 	SLJIT_ASSERT(saveds >= 0 && saveds <= SLJIT_NUMBER_OF_REGISTERS);
@@ -924,7 +935,7 @@ static SLJIT_INLINE void check_sljit_set_context(struct sljit_compiler *compiler
 	SLJIT_ASSERT(local_size >= 0 && local_size <= SLJIT_MAX_LOCAL_SIZE);
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
-		fprintf(compiler->verbose, "  set_context args:%d scratches:%d saveds:%d fscratches:%d fsaveds:%d local_size:%d\n",
+		fprintf(compiler->verbose, "  set_context options:none args:%d scratches:%d saveds:%d fscratches:%d fsaveds:%d local_size:%d\n",
 			args, scratches, saveds, fscratches, fsaveds, local_size);
 #endif
 }
@@ -950,7 +961,7 @@ static SLJIT_INLINE void check_sljit_emit_return(struct sljit_compiler *compiler
 		if (op == SLJIT_UNUSED)
 			fprintf(compiler->verbose, "  return\n");
 		else {
-			fprintf(compiler->verbose, "  return %s ", op_names[op]);
+			fprintf(compiler->verbose, "  return.%s ", op1_names[op - SLJIT_OP1_BASE]);
 			sljit_verbose_param(compiler, src, srcw);
 			fprintf(compiler->verbose, "\n");
 		}
@@ -1007,7 +1018,7 @@ static SLJIT_INLINE void check_sljit_emit_op0(struct sljit_compiler *compiler, s
 	SLJIT_ASSERT(op < SLJIT_UMUL || compiler->scratches >= 2);
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose))
-		fprintf(compiler->verbose, "  %s%s\n", !(op & SLJIT_INT_OP) ? "" : "i", op_names[GET_OPCODE(op)]);
+		fprintf(compiler->verbose, "  %s%s\n", !(op & SLJIT_INT_OP) ? "" : "i", op0_names[GET_OPCODE(op) - SLJIT_OP0_BASE]);
 #endif
 }
 
@@ -1039,7 +1050,7 @@ static SLJIT_INLINE void check_sljit_emit_op1(struct sljit_compiler *compiler, s
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i", op_names[GET_OPCODE(op)],
+		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i", op1_names[GET_OPCODE(op) - SLJIT_OP1_BASE],
 			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_U) ? "" : ".u", !(op & SLJIT_SET_S) ? "" : ".s",
 			!(op & SLJIT_SET_O) ? "" : ".o", !(op & SLJIT_SET_C) ? "" : ".c", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
 		sljit_verbose_param(compiler, dst, dstw);
@@ -1081,7 +1092,7 @@ static SLJIT_INLINE void check_sljit_emit_op2(struct sljit_compiler *compiler, s
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i", op_names[GET_OPCODE(op)],
+		fprintf(compiler->verbose, "  %s%s%s%s%s%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i", op2_names[GET_OPCODE(op) - SLJIT_OP2_BASE],
 			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_U) ? "" : ".u", !(op & SLJIT_SET_S) ? "" : ".s",
 			!(op & SLJIT_SET_O) ? "" : ".o", !(op & SLJIT_SET_C) ? "" : ".c", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
 		sljit_verbose_param(compiler, dst, dstw);
@@ -1117,9 +1128,9 @@ static SLJIT_INLINE void check_sljit_emit_op_custom(struct sljit_compiler *compi
 
 #define SELECT_FOP1_OPERATION_WITH_CHECKS(compiler, op, dst, dstw, src, srcw) \
 	SLJIT_ASSERT(sljit_is_fpu_available()); \
-	SLJIT_COMPILE_ASSERT(!(SLJIT_CONVW_FROMD & 0x1) && !(SLJIT_CONVD_FROMW & 0x1) && (SLJIT_MOVD < SLJIT_CONVW_FROMD), \
+	SLJIT_COMPILE_ASSERT(!(SLJIT_CONVW_FROMD & 0x1) && !(SLJIT_CONVD_FROMW & 0x1), \
 		invalid_float_opcodes); \
-	if (GET_OPCODE(op) >= SLJIT_CONVW_FROMD) { \
+	if (GET_OPCODE(op) >= SLJIT_CONVW_FROMD && GET_OPCODE(op) <= SLJIT_CMPD) { \
 		if (GET_OPCODE(op) == SLJIT_CMPD) { \
 			check_sljit_emit_fop1_cmp(compiler, op, dst, dstw, src, srcw); \
 			ADJUST_LOCAL_OFFSET(dst, dstw); \
@@ -1160,7 +1171,7 @@ static SLJIT_INLINE void check_sljit_emit_fop1(struct sljit_compiler *compiler, 
 	}
 #endif
 
-	SLJIT_ASSERT(GET_OPCODE(op) >= SLJIT_MOVD && GET_OPCODE(op) <= SLJIT_CONVD_FROMS);
+	SLJIT_ASSERT(GET_OPCODE(op) >= SLJIT_MOVD && GET_OPCODE(op) <= SLJIT_ABSD);
 #if (defined SLJIT_DEBUG && SLJIT_DEBUG)
 	FUNCTION_CHECK_FOP();
 	FUNCTION_FCHECK(src, srcw);
@@ -1168,7 +1179,7 @@ static SLJIT_INLINE void check_sljit_emit_fop1(struct sljit_compiler *compiler, 
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s ", op_names[GET_OPCODE(op)],
+		fprintf(compiler->verbose, "  %s%s ", fop1_names[GET_OPCODE(op) - SLJIT_FOP1_BASE],
 			(GET_OPCODE(op) == SLJIT_CONVD_FROMS)
 			? ((op & SLJIT_SINGLE_OP) ? "s.fromd" : "d.froms")
 			: ((op & SLJIT_SINGLE_OP) ? "s" : "d"));
@@ -1207,7 +1218,7 @@ static SLJIT_INLINE void check_sljit_emit_fop1_cmp(struct sljit_compiler *compil
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s%s%s ", op_names[GET_OPCODE(op)], (op & SLJIT_SINGLE_OP) ? "s" : "d",
+		fprintf(compiler->verbose, "  %s%s%s%s ", fop1_names[GET_OPCODE(op) - SLJIT_FOP1_BASE], (op & SLJIT_SINGLE_OP) ? "s" : "d",
 			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_SET_S) ? "" : ".s");
 		sljit_verbose_fparam(compiler, src1, src1w);
 		fprintf(compiler->verbose, ", ");
@@ -1244,7 +1255,7 @@ static SLJIT_INLINE void check_sljit_emit_fop1_convw_fromd(struct sljit_compiler
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s.from%s ", op_names[GET_OPCODE(op)],
+		fprintf(compiler->verbose, "  %s%s.from%s ", fop1_names[GET_OPCODE(op) - SLJIT_FOP1_BASE],
 			(GET_OPCODE(op) == SLJIT_CONVI_FROMD) ? "i" : "w",
 			(op & SLJIT_SINGLE_OP) ? "s" : "d");
 		sljit_verbose_param(compiler, dst, dstw);
@@ -1282,7 +1293,7 @@ static SLJIT_INLINE void check_sljit_emit_fop1_convd_fromw(struct sljit_compiler
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s.from%s ", op_names[GET_OPCODE(op)],
+		fprintf(compiler->verbose, "  %s%s.from%s ", fop1_names[GET_OPCODE(op) - SLJIT_FOP1_BASE],
 			(op & SLJIT_SINGLE_OP) ? "s" : "d",
 			(GET_OPCODE(op) == SLJIT_CONVD_FROMI) ? "i" : "w");
 		sljit_verbose_fparam(compiler, dst, dstw);
@@ -1318,7 +1329,7 @@ static SLJIT_INLINE void check_sljit_emit_fop2(struct sljit_compiler *compiler, 
 #endif
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
-		fprintf(compiler->verbose, "  %s%s ", op_names[GET_OPCODE(op)], (op & SLJIT_SINGLE_OP) ? "s" : "d");
+		fprintf(compiler->verbose, "  %s%s ", fop2_names[GET_OPCODE(op) - SLJIT_FOP2_BASE], (op & SLJIT_SINGLE_OP) ? "s" : "d");
 		sljit_verbose_fparam(compiler, dst, dstw);
 		fprintf(compiler->verbose, ", ");
 		sljit_verbose_fparam(compiler, src1, src1w);
@@ -1477,7 +1488,8 @@ static SLJIT_INLINE void check_sljit_emit_op_flags(struct sljit_compiler *compil
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	if (SLJIT_UNLIKELY(!!compiler->verbose)) {
 		fprintf(compiler->verbose, "  %sflags.%s%s%s ", !(op & SLJIT_INT_OP) ? "" : "i",
-			op_names[GET_OPCODE(op)], !(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
+			GET_OPCODE(op) >= SLJIT_OP2_BASE ? op2_names[GET_OPCODE(op) - SLJIT_OP2_BASE] : op1_names[GET_OPCODE(op) - SLJIT_OP1_BASE],
+			!(op & SLJIT_SET_E) ? "" : ".e", !(op & SLJIT_KEEP_FLAGS) ? "" : ".k");
 		sljit_verbose_param(compiler, dst, dstw);
 		if (src != SLJIT_UNUSED) {
 			fprintf(compiler->verbose, ", ");
@@ -1772,10 +1784,11 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code)
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compiler,
-	sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
 {
 	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(options);
 	SLJIT_UNUSED_ARG(args);
 	SLJIT_UNUSED_ARG(scratches);
 	SLJIT_UNUSED_ARG(saveds);
@@ -1787,10 +1800,11 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compil
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler,
-	sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
 {
 	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(options);
 	SLJIT_UNUSED_ARG(args);
 	SLJIT_UNUSED_ARG(scratches);
 	SLJIT_UNUSED_ARG(saveds);

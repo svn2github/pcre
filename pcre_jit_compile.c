@@ -9975,7 +9975,7 @@ if (!compiler)
 common->compiler = compiler;
 
 /* Main pcre_jit_exec entry. */
-sljit_emit_enter(compiler, 1, 5, 5, 0, 0, private_data_size);
+sljit_emit_enter(compiler, 0, 1, 5, 5, 0, 0, private_data_size);
 
 /* Register init. */
 reset_ovector(common, (re->top_bracket + 1) * 2);

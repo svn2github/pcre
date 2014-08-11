@@ -260,6 +260,11 @@ of sljitConfigInternal.h */
 /*  Main structures and functions                                        */
 /* --------------------------------------------------------------------- */
 
+/*
+	The following structures are private, and can be changed in the
+	future. Keeping them here allows code inlining.
+*/
+
 struct sljit_memory_fragment {
 	struct sljit_memory_fragment *next;
 	sljit_uw used_size;
@@ -291,6 +296,7 @@ struct sljit_const {
 
 struct sljit_compiler {
 	sljit_si error;
+	sljit_si options;
 
 	struct sljit_label *labels;
 	struct sljit_jump *jumps;
@@ -454,23 +460,26 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
    all machine registers and stack handling among other things. The
    sljit_emit_enter function emits the necessary instructions for
    setting up a new context for the executable code and moves function
-   arguments to the saved registers. The number of sljit_sw arguments
-   passed to the function are specified in the "args" parameter. The
-   number of arguments must be less than or equal to 3. The first
-   argument goes to SLJIT_S0, the second goes to SLJIT_S1 and so on.
-   The register set used by the function must be declared as well.
-   The number of scratch and saved registers used by the function must
-   be passed to sljit_emit_enter. Only R registers between R0 and
-   "scratches" argument can be used later. E.g. if "scratches" is set
-   to 2, the register set will be limited to R0 and R1. The S registers
-   and the floating point registers ("fscratches" and "fsaveds")
-   are specified in a similar way. The sljit_emit_enter is also capable
-   of allocating a stack space for local variables. The "local_size"
-   argument contains the size in bytes of this local area and its
-   staring address is stored in SLJIT_SP. The memory area between
-   SLJIT_SP (inclusive) and SLJIT_SP + local_size (exclusive) can be
-   modified freely until the function returns. The stack space is not
-   initialized.
+   arguments to the saved registers. Furthermore the options argument
+   can be used to pass configuration options to the compiler. Currently
+   there are no options, so it must be set to 0.
+
+   The number of sljit_sw arguments passed to the generated function
+   are specified in the "args" parameter. The number of arguments must
+   be less than or equal to 3. The first argument goes to SLJIT_S0,
+   the second goes to SLJIT_S1 and so on. The register set used by
+   the function must be declared as well. The number of scratch and
+   saved registers used by the function must be passed to sljit_emit_enter.
+   Only R registers between R0 and "scratches" argument can be used
+   later. E.g. if "scratches" is set to 2, the register set will be
+   limited to R0 and R1. The S registers and the floating point
+   registers ("fscratches" and "fsaveds") are specified in a similar
+   way. The sljit_emit_enter is also capable of allocating a stack
+   space for local variables. The "local_size" argument contains the
+   size in bytes of this local area and its staring address is stored
+   in SLJIT_SP. The memory area between SLJIT_SP (inclusive) and
+   SLJIT_SP + local_size (exclusive) can be modified freely until
+   the function returns. The stack space is not initialized.
 
    Note: the following conditions must met:
          0 <= scratches <= SLJIT_NUMBER_OF_REGISTERS
@@ -487,7 +496,7 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
 #define SLJIT_MAX_LOCAL_SIZE	65536
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compiler,
-	sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size);
 
 /* The machine code has a context (which contains the local stack space size,
@@ -501,7 +510,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compil
          the previous context. */
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler,
-	sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size);
 
 /* Return from machine code.  The op argument can be SLJIT_UNUSED which means the
@@ -651,36 +660,42 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_return(struct sljit_compiler *
        the instruction does not set flags (See: SLJIT_KEEP_FLAGS).
      - flag combinations: '|' means 'logical or'. */
 
+/* Starting index of opcodes for sljit_emit_op0. */
+#define SLJIT_OP0_BASE			0
+
 /* Flags: - (never set any flags)
    Note: breakpoint instruction is not supported by all architectures (namely ppc)
          It falls back to SLJIT_NOP in those cases. */
-#define SLJIT_BREAKPOINT		0
+#define SLJIT_BREAKPOINT		(SLJIT_OP0_BASE + 0)
 /* Flags: - (never set any flags)
    Note: may or may not cause an extra cycle wait
          it can even decrease the runtime in a few cases. */
-#define SLJIT_NOP			1
+#define SLJIT_NOP			(SLJIT_OP0_BASE + 1)
 /* Flags: - (may destroy flags)
    Unsigned multiplication of SLJIT_R0 and SLJIT_R1.
    Result goes to SLJIT_R1:SLJIT_R0 (high:low) word */
-#define SLJIT_UMUL			2
+#define SLJIT_UMUL			(SLJIT_OP0_BASE + 2)
 /* Flags: - (may destroy flags)
    Signed multiplication of SLJIT_R0 and SLJIT_R1.
    Result goes to SLJIT_R1:SLJIT_R0 (high:low) word */
-#define SLJIT_SMUL			3
+#define SLJIT_SMUL			(SLJIT_OP0_BASE + 3)
 /* Flags: I - (may destroy flags)
    Unsigned divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed in SLJIT_R0 and the remainder goes to SLJIT_R1.
    Note: if SLJIT_R1 contains 0, the behaviour is undefined. */
-#define SLJIT_UDIV			4
+#define SLJIT_UDIV			(SLJIT_OP0_BASE + 4)
 #define SLJIT_IUDIV			(SLJIT_UDIV | SLJIT_INT_OP)
 /* Flags: I - (may destroy flags)
    Signed divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed in SLJIT_R0 and the remainder goes to SLJIT_R1.
    Note: if SLJIT_R1 contains 0, the behaviour is undefined. */
-#define SLJIT_SDIV			5
+#define SLJIT_SDIV			(SLJIT_OP0_BASE + 5)
 #define SLJIT_ISDIV			(SLJIT_SDIV | SLJIT_INT_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler, sljit_si op);
+
+/* Starting index of opcodes for sljit_emit_op1. */
+#define SLJIT_OP1_BASE			32
 
 /* Notes for MOV instructions:
    U = Mov with update (pre form). If source or destination defined as SLJIT_MEM1(r1)
@@ -694,115 +709,118 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler
    P  = pointer (sljit_p) size */
 
 /* Flags: - (never set any flags) */
-#define SLJIT_MOV			6
+#define SLJIT_MOV			(SLJIT_OP1_BASE + 0)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOV_UB			7
+#define SLJIT_MOV_UB			(SLJIT_OP1_BASE + 1)
 #define SLJIT_IMOV_UB			(SLJIT_MOV_UB | SLJIT_INT_OP)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOV_SB			8
+#define SLJIT_MOV_SB			(SLJIT_OP1_BASE + 2)
 #define SLJIT_IMOV_SB			(SLJIT_MOV_SB | SLJIT_INT_OP)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOV_UH			9
+#define SLJIT_MOV_UH			(SLJIT_OP1_BASE + 3)
 #define SLJIT_IMOV_UH			(SLJIT_MOV_UH | SLJIT_INT_OP)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOV_SH			10
+#define SLJIT_MOV_SH			(SLJIT_OP1_BASE + 4)
 #define SLJIT_IMOV_SH			(SLJIT_MOV_SH | SLJIT_INT_OP)
 /* Flags: I - (never set any flags)
    Note: see SLJIT_INT_OP for further details. */
-#define SLJIT_MOV_UI			11
+#define SLJIT_MOV_UI			(SLJIT_OP1_BASE + 5)
 /* No SLJIT_INT_OP form, since it is the same as SLJIT_IMOV. */
 /* Flags: I - (never set any flags)
    Note: see SLJIT_INT_OP for further details. */
-#define SLJIT_MOV_SI			12
+#define SLJIT_MOV_SI			(SLJIT_OP1_BASE + 6)
 #define SLJIT_IMOV			(SLJIT_MOV_SI | SLJIT_INT_OP)
 /* Flags: - (never set any flags) */
-#define SLJIT_MOV_P			13
+#define SLJIT_MOV_P			(SLJIT_OP1_BASE + 7)
 /* Flags: - (never set any flags) */
-#define SLJIT_MOVU			14
+#define SLJIT_MOVU			(SLJIT_OP1_BASE + 8)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOVU_UB			15
+#define SLJIT_MOVU_UB			(SLJIT_OP1_BASE + 9)
 #define SLJIT_IMOVU_UB			(SLJIT_MOVU_UB | SLJIT_INT_OP)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOVU_SB			16
+#define SLJIT_MOVU_SB			(SLJIT_OP1_BASE + 10)
 #define SLJIT_IMOVU_SB			(SLJIT_MOVU_SB | SLJIT_INT_OP)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOVU_UH			17
+#define SLJIT_MOVU_UH			(SLJIT_OP1_BASE + 11)
 #define SLJIT_IMOVU_UH			(SLJIT_MOVU_UH | SLJIT_INT_OP)
 /* Flags: I - (never set any flags) */
-#define SLJIT_MOVU_SH			18
+#define SLJIT_MOVU_SH			(SLJIT_OP1_BASE + 12)
 #define SLJIT_IMOVU_SH			(SLJIT_MOVU_SH | SLJIT_INT_OP)
 /* Flags: I - (never set any flags)
    Note: see SLJIT_INT_OP for further details. */
-#define SLJIT_MOVU_UI			19
+#define SLJIT_MOVU_UI			(SLJIT_OP1_BASE + 13)
 /* No SLJIT_INT_OP form, since it is the same as SLJIT_IMOVU. */
 /* Flags: I - (never set any flags)
    Note: see SLJIT_INT_OP for further details. */
-#define SLJIT_MOVU_SI			20
+#define SLJIT_MOVU_SI			(SLJIT_OP1_BASE + 14)
 #define SLJIT_IMOVU			(SLJIT_MOVU_SI | SLJIT_INT_OP)
 /* Flags: - (never set any flags) */
-#define SLJIT_MOVU_P			21
+#define SLJIT_MOVU_P			(SLJIT_OP1_BASE + 15)
 /* Flags: I | E | K */
-#define SLJIT_NOT			22
+#define SLJIT_NOT			(SLJIT_OP1_BASE + 16)
 #define SLJIT_INOT			(SLJIT_NOT | SLJIT_INT_OP)
 /* Flags: I | E | O | K */
-#define SLJIT_NEG			23
+#define SLJIT_NEG			(SLJIT_OP1_BASE + 17)
 #define SLJIT_INEG			(SLJIT_NEG | SLJIT_INT_OP)
 /* Count leading zeroes
    Flags: I | E | K
    Important note! Sparc 32 does not support K flag, since
    the required popc instruction is introduced only in sparc 64. */
-#define SLJIT_CLZ			24
+#define SLJIT_CLZ			(SLJIT_OP1_BASE + 18)
 #define SLJIT_ICLZ			(SLJIT_CLZ | SLJIT_INT_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op1(struct sljit_compiler *compiler, sljit_si op,
 	sljit_si dst, sljit_sw dstw,
 	sljit_si src, sljit_sw srcw);
 
+/* Starting index of opcodes for sljit_emit_op2. */
+#define SLJIT_OP2_BASE			96
+
 /* Flags: I | E | O | C | K */
-#define SLJIT_ADD			25
+#define SLJIT_ADD			(SLJIT_OP2_BASE + 0)
 #define SLJIT_IADD			(SLJIT_ADD | SLJIT_INT_OP)
 /* Flags: I | C | K */
-#define SLJIT_ADDC			26
+#define SLJIT_ADDC			(SLJIT_OP2_BASE + 1)
 #define SLJIT_IADDC			(SLJIT_ADDC | SLJIT_INT_OP)
 /* Flags: I | E | U | S | O | C | K */
-#define SLJIT_SUB			27
+#define SLJIT_SUB			(SLJIT_OP2_BASE + 2)
 #define SLJIT_ISUB			(SLJIT_SUB | SLJIT_INT_OP)
 /* Flags: I | C | K */
-#define SLJIT_SUBC			28
+#define SLJIT_SUBC			(SLJIT_OP2_BASE + 3)
 #define SLJIT_ISUBC			(SLJIT_SUBC | SLJIT_INT_OP)
 /* Note: integer mul
    Flags: I | O (see SLJIT_C_MUL_*) | K */
-#define SLJIT_MUL			29
+#define SLJIT_MUL			(SLJIT_OP2_BASE + 4)
 #define SLJIT_IMUL			(SLJIT_MUL | SLJIT_INT_OP)
 /* Flags: I | E | K */
-#define SLJIT_AND			30
+#define SLJIT_AND			(SLJIT_OP2_BASE + 5)
 #define SLJIT_IAND			(SLJIT_AND | SLJIT_INT_OP)
 /* Flags: I | E | K */
-#define SLJIT_OR			31
+#define SLJIT_OR			(SLJIT_OP2_BASE + 6)
 #define SLJIT_IOR			(SLJIT_OR | SLJIT_INT_OP)
 /* Flags: I | E | K */
-#define SLJIT_XOR			32
+#define SLJIT_XOR			(SLJIT_OP2_BASE + 7)
 #define SLJIT_IXOR			(SLJIT_XOR | SLJIT_INT_OP)
 /* Flags: I | E | K
    Let bit_length be the length of the shift operation: 32 or 64.
    If src2 is immediate, src2w is masked by (bit_length - 1).
    Otherwise, if the content of src2 is outside the range from 0
-   to bit_length - 1, the operation is undefined. */
-#define SLJIT_SHL			33
+   to bit_length - 1, the result is undefined. */
+#define SLJIT_SHL			(SLJIT_OP2_BASE + 8)
 #define SLJIT_ISHL			(SLJIT_SHL | SLJIT_INT_OP)
 /* Flags: I | E | K
    Let bit_length be the length of the shift operation: 32 or 64.
    If src2 is immediate, src2w is masked by (bit_length - 1).
    Otherwise, if the content of src2 is outside the range from 0
-   to bit_length - 1, the operation is undefined. */
-#define SLJIT_LSHR			34
+   to bit_length - 1, the result is undefined. */
+#define SLJIT_LSHR			(SLJIT_OP2_BASE + 9)
 #define SLJIT_ILSHR			(SLJIT_LSHR | SLJIT_INT_OP)
 /* Flags: I | E | K
    Let bit_length be the length of the shift operation: 32 or 64.
    If src2 is immediate, src2w is masked by (bit_length - 1).
    Otherwise, if the content of src2 is outside the range from 0
-   to bit_length - 1, the operation is undefined. */
-#define SLJIT_ASHR			35
+   to bit_length - 1, the result is undefined. */
+#define SLJIT_ASHR			(SLJIT_OP2_BASE + 10)
 #define SLJIT_IASHR			(SLJIT_ASHR | SLJIT_INT_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op2(struct sljit_compiler *compiler, sljit_si op,
@@ -842,55 +860,61 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op_custom(struct sljit_compiler *co
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_is_fpu_available(void);
 
+/* Starting index of opcodes for sljit_emit_fop1. */
+#define SLJIT_FOP1_BASE			128
+
 /* Flags: SP - (never set any flags) */
-#define SLJIT_MOVD			36
+#define SLJIT_MOVD			(SLJIT_FOP1_BASE + 0)
 #define SLJIT_MOVS			(SLJIT_MOVD | SLJIT_SINGLE_OP)
-/* Flags: SP - (never set any flags) */
-#define SLJIT_NEGD			37
-#define SLJIT_NEGS			(SLJIT_NEGD | SLJIT_SINGLE_OP)
-/* Flags: SP - (never set any flags) */
-#define SLJIT_ABSD			38
-#define SLJIT_ABSS			(SLJIT_ABSD | SLJIT_SINGLE_OP)
 /* Convert opcodes: CONV[DST_TYPE].FROM[SRC_TYPE]
    SRC/DST TYPE can be: D - double, S - single, W - signed word, I - signed int
    Rounding mode when the destination is W or I: round towards zero. */
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVD_FROMS		39
+#define SLJIT_CONVD_FROMS		(SLJIT_FOP1_BASE + 1)
 #define SLJIT_CONVS_FROMD		(SLJIT_CONVD_FROMS | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVW_FROMD		40
+#define SLJIT_CONVW_FROMD		(SLJIT_FOP1_BASE + 2)
 #define SLJIT_CONVW_FROMS		(SLJIT_CONVW_FROMD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVI_FROMD		41
+#define SLJIT_CONVI_FROMD		(SLJIT_FOP1_BASE + 3)
 #define SLJIT_CONVI_FROMS		(SLJIT_CONVI_FROMD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVD_FROMW		42
+#define SLJIT_CONVD_FROMW		(SLJIT_FOP1_BASE + 4)
 #define SLJIT_CONVS_FROMW		(SLJIT_CONVD_FROMW | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_CONVD_FROMI		43
+#define SLJIT_CONVD_FROMI		(SLJIT_FOP1_BASE + 5)
 #define SLJIT_CONVS_FROMI		(SLJIT_CONVD_FROMI | SLJIT_SINGLE_OP)
 /* Note: dst is the left and src is the right operand for SLJIT_CMPD.
    Note: NaN check is always performed. If SLJIT_C_FLOAT_UNORDERED flag
          is set, the comparison result is unpredictable.
    Flags: SP | E | S (see SLJIT_C_FLOAT_*) */
-#define SLJIT_CMPD			44
+#define SLJIT_CMPD			(SLJIT_FOP1_BASE + 6)
 #define SLJIT_CMPS			(SLJIT_CMPD | SLJIT_SINGLE_OP)
+/* Flags: SP - (never set any flags) */
+#define SLJIT_NEGD			(SLJIT_FOP1_BASE + 7)
+#define SLJIT_NEGS			(SLJIT_NEGD | SLJIT_SINGLE_OP)
+/* Flags: SP - (never set any flags) */
+#define SLJIT_ABSD			(SLJIT_FOP1_BASE + 8)
+#define SLJIT_ABSS			(SLJIT_ABSD | SLJIT_SINGLE_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compiler, sljit_si op,
 	sljit_si dst, sljit_sw dstw,
 	sljit_si src, sljit_sw srcw);
 
+/* Starting index of opcodes for sljit_emit_fop2. */
+#define SLJIT_FOP2_BASE			160
+
 /* Flags: SP - (never set any flags) */
-#define SLJIT_ADDD			45
+#define SLJIT_ADDD			(SLJIT_FOP2_BASE + 0)
 #define SLJIT_ADDS			(SLJIT_ADDD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_SUBD			46
+#define SLJIT_SUBD			(SLJIT_FOP2_BASE + 1)
 #define SLJIT_SUBS			(SLJIT_SUBD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_MULD			47
+#define SLJIT_MULD			(SLJIT_FOP2_BASE + 2)
 #define SLJIT_MULS			(SLJIT_MULD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DIVD			48
+#define SLJIT_DIVD			(SLJIT_FOP2_BASE + 3)
 #define SLJIT_DIVS			(SLJIT_DIVD | SLJIT_SINGLE_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compiler, sljit_si op,
