@@ -95,6 +95,9 @@ Version 8.36 xx-xxx-2014
     loop which used up all the system stack and provoked a segmentation fault.
     This was not the same bug as 19 above.
 
+21. Add PCRECPP_EXP_DECL declaration to operator<< in pcre_stringpiece.h.
+    Patch by Mike Frysinger.
+
 
 Version 8.35 04-April-2014
 --------------------------
