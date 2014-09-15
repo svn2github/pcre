@@ -126,9 +126,9 @@ for (;;)
       for (;;)
         {
         last if ! ($_ = <$infile>);
-        last if $_ =~ /^\s*$/; 
-        }   
-      }  
+        last if $_ =~ /^\s*$/;
+        }
+      }
     next NEXT_RE;
     }
 

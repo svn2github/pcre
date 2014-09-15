@@ -2397,12 +2397,12 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
     do endgroup += GET(endgroup, 1); while (*endgroup == OP_ALT);
     if (code >= scode && code <= endgroup) continue;  /* Simple recursion */
     else
-      {  
+      {
       recurse_check *r = recurses;
       for (r = recurses; r != NULL; r = r->prev)
         if (r->group == scode) break;
       if (r != NULL) continue;   /* Mutual recursion */
-      } 
+      }
 
     /* Completed reference; scan the referenced group, remembering it on the
     stack chain to detect mutual recursions. */

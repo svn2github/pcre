@@ -1175,7 +1175,7 @@ for (;;)
             {
             do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
             break;
-            }  
+            }
           eptr = md->end_match_ptr;
           continue;
           }
@@ -1253,7 +1253,7 @@ for (;;)
           {
           do ecode += GET(ecode, 1); while (*ecode == OP_ALT);
           break;
-          }  
+          }
         eptr = md->end_match_ptr;
         continue;
         }
@@ -1904,7 +1904,7 @@ for (;;)
     case OP_KETRMAX:
     case OP_KETRPOS:
     prev = ecode - GET(ecode, 1);
-    
+
     /* If this was a group that remembered the subject start, in order to break
     infinite repeats of empty string matches, retrieve the subject start from
     the chain. Otherwise, set it NULL. */
@@ -1929,7 +1929,7 @@ for (;;)
       md->start_match_ptr = mstart;
       RRETURN(MATCH_MATCH);         /* Sets md->mark */
       }
-      
+
     /* For capturing groups we have to check the group number back at the start
     and if necessary complete handling an extraction by setting the offsets and
     bumping the high water mark. Whole-pattern recursion is coded as a recurse
@@ -1991,7 +1991,7 @@ for (;;)
 
     /* OP_KETRPOS is a possessive repeating ket. Remember the current position,
     and return the MATCH_KETRPOS. This makes it possible to do the repeats one
-    at a time from the outer level, thus saving stack. This must precede the 
+    at a time from the outer level, thus saving stack. This must precede the
     empty string test - in this case that test is done at the outer level. */
 
     if (*ecode == OP_KETRPOS)

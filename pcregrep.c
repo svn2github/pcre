@@ -471,7 +471,7 @@ if (strlen(s) > MAXPATLEN)
   {
   fprintf(stderr, "pcregrep: pattern is too long (limit is %d bytes)\n",
     MAXPATLEN);
-  free(p);   
+  free(p);
   return NULL;
   }
 p->next = NULL;
@@ -2550,11 +2550,11 @@ while (fgets(buffer, PATBUFSIZE, f) != NULL)
   afterwards, as a precaution against any later code trying to use it. */
 
   *patlastptr = add_pattern(buffer, *patlastptr);
-  if (*patlastptr == NULL) 
+  if (*patlastptr == NULL)
     {
     if (f != stdin) fclose(f);
     return FALSE;
-    } 
+    }
   if (*patptr == NULL) *patptr = *patlastptr;
 
   /* This loop is needed because compiling a "pattern" when -F is set may add
@@ -2566,10 +2566,10 @@ while (fgets(buffer, PATBUFSIZE, f) != NULL)
     {
     if (!compile_pattern(*patlastptr, pcre_options, popts, TRUE, filename,
         linenumber))
-      {   
+      {
       if (f != stdin) fclose(f);
       return FALSE;
-      } 
+      }
     (*patlastptr)->string = NULL;            /* Insurance */
     if ((*patlastptr)->next == NULL) break;
     *patlastptr = (*patlastptr)->next;

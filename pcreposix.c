@@ -173,7 +173,7 @@ static const int eint[] = {
   REG_BADPAT,  /* group name must start with a non-digit */
   /* 85 */
   REG_BADPAT,  /* parentheses too deeply nested (stack check) */
-  REG_BADPAT   /* missing digits in \x{} or \o{} */ 
+  REG_BADPAT   /* missing digits in \x{} or \o{} */
 };
 
 /* Table of texts corresponding to POSIX error codes */

@@ -661,7 +661,7 @@ int RE::NumberOfCapturingGroups() const {
 
 bool Arg::parse_null(const char* str, int n, void* dest) {
   (void)str;
-  (void)n; 
+  (void)n;
   // We fail if somebody asked us to store into a non-NULL void* pointer
   return (dest == NULL);
 }
