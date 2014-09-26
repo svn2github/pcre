@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.36 15-September-2014
+Version 8.36 26-September-2014
 ------------------------------
 
 1.  Got rid of some compiler warnings in the C++ modules that were shown up by
