@@ -545,7 +545,7 @@ the start pointers when the end of the capturing group has not yet reached. */
 
 #define READ_CHAR_MAX 0x7fffffff
 
-static pcre_uchar* bracketend(pcre_uchar* cc)
+static pcre_uchar *bracketend(pcre_uchar *cc)
 {
 SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
 do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -554,7 +554,7 @@ cc += 1 + LINK_SIZE;
 return cc;
 }
 
-static int no_alternatives(pcre_uchar* cc)
+static int no_alternatives(pcre_uchar *cc)
 {
 int count = 0;
 SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
@@ -1237,7 +1237,7 @@ while (cc < ccend)
 }
 
 /* Returns with a frame_types (always < 0) if no need for frame. */
-static int get_framesize(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, BOOL recursive, BOOL* needs_control_head)
+static int get_framesize(compiler_common *common, pcre_uchar *cc, pcre_uchar *ccend, BOOL recursive, BOOL *needs_control_head)
 {
 int length = 0;
 int possessive = 0;
@@ -2030,7 +2030,7 @@ while (list)
   }
 }
 
-static SLJIT_INLINE void add_jump(struct sljit_compiler *compiler, jump_list **list, struct sljit_jump* jump)
+static SLJIT_INLINE void add_jump(struct sljit_compiler *compiler, jump_list **list, struct sljit_jump *jump)
 {
 jump_list *list_item = sljit_alloc_memory(compiler, sizeof(jump_list));
 if (list_item)
@@ -2044,7 +2044,7 @@ if (list_item)
 static void add_stub(compiler_common *common, struct sljit_jump *start)
 {
 DEFINE_COMPILER;
-stub_list* list_item = sljit_alloc_memory(compiler, sizeof(stub_list));
+stub_list *list_item = sljit_alloc_memory(compiler, sizeof(stub_list));
 
 if (list_item)
   {
@@ -2058,7 +2058,7 @@ if (list_item)
 static void flush_stubs(compiler_common *common)
 {
 DEFINE_COMPILER;
-stub_list* list_item = common->stubs;
+stub_list *list_item = common->stubs;
 
 while (list_item)
   {
@@ -2314,7 +2314,7 @@ else if (common->mode == JIT_PARTIAL_HARD_COMPILE)
   }
 }
 
-static SLJIT_INLINE BOOL char_has_othercase(compiler_common *common, pcre_uchar* cc)
+static SLJIT_INLINE BOOL char_has_othercase(compiler_common *common, pcre_uchar *cc)
 {
 /* Detects if the character has an othercase. */
 unsigned int c;
@@ -2357,7 +2357,7 @@ if (common->utf && c > 127)
 return TABLE_GET(c, common->fcc, c);
 }
 
-static unsigned int char_get_othercase_bit(compiler_common *common, pcre_uchar* cc)
+static unsigned int char_get_othercase_bit(compiler_common *common, pcre_uchar *cc)
 {
 /* Detects if the character and its othercase has only 1 bit difference. */
 unsigned int c, oc, bit;
@@ -2572,7 +2572,7 @@ static BOOL is_char7_bitset(const pcre_uint8 *bitset, BOOL nclass)
 /* Tells whether the character codes below 128 are enough
 to determine a match. */
 const pcre_uint8 value = nclass ? 0xff : 0;
-const pcre_uint8* end = bitset + 32;
+const pcre_uint8 *end = bitset + 32;
 
 bitset += 16;
 do
@@ -4555,7 +4555,7 @@ return src2;
 #endif /* SUPPORT_UTF && SUPPORT_UCP */
 
 static pcre_uchar *byte_sequence_compare(compiler_common *common, BOOL caseless, pcre_uchar *cc,
-    compare_context* context, jump_list **backtracks)
+    compare_context *context, jump_list **backtracks)
 {
 DEFINE_COMPILER;
 unsigned int othercasebit = 0;
@@ -6304,7 +6304,7 @@ add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IM
 return cc + 1 + LINK_SIZE;
 }
 
-static int SLJIT_CALL do_callout(struct jit_arguments* arguments, PUBL(callout_block) *callout_block, pcre_uchar **jit_ovector)
+static int SLJIT_CALL do_callout(struct jit_arguments *arguments, PUBL(callout_block) *callout_block, pcre_uchar **jit_ovector)
 {
 const pcre_uchar *begin = arguments->begin;
 int *offset_vector = arguments->offsets;
@@ -6364,9 +6364,9 @@ PUSH_BACKTRACK(sizeof(backtrack_common), cc, NULL);
 
 allocate_stack(common, CALLOUT_ARG_SIZE / sizeof(sljit_sw));
 
+SLJIT_ASSERT(common->capture_last_ptr != 0);
 OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr);
 OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-SLJIT_ASSERT(common->capture_last_ptr != 0);
 OP1(SLJIT_MOV_SI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(callout_number), SLJIT_IMM, cc[1]);
 OP1(SLJIT_MOV_SI, SLJIT_MEM1(STACK_TOP), CALLOUT_ARG_OFFSET(capture_last), TMP2, 0);
 
@@ -7848,7 +7848,7 @@ backtrack_common *backtrack;
 pcre_uchar opcode;
 pcre_uchar type;
 int max = -1, min = -1;
-pcre_uchar* end;
+pcre_uchar *end;
 jump_list *nomatch = NULL;
 struct sljit_jump *jump = NULL;
 struct sljit_label *label;
@@ -10022,7 +10022,7 @@ if ((re->options & PCRE_ANCHORED) == 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0, (re->options & PCRE_FIRSTLINE) != 0);
     else if ((re->flags & PCRE_STARTLINE) != 0)
       fast_forward_newline(common, (re->options & PCRE_FIRSTLINE) != 0);
-    else if ((re->flags & PCRE_STARTLINE) == 0 && study != NULL && (study->flags & PCRE_STUDY_MAPPED) != 0)
+    else if (study != NULL && (study->flags & PCRE_STUDY_MAPPED) != 0)
       fast_forward_start_bits(common, study->start_bits, (re->options & PCRE_FIRSTLINE) != 0);
     }
   }
@@ -10359,10 +10359,10 @@ functions->read_only_data[mode] = common->read_only_data;
 functions->executable_sizes[mode] = executable_size;
 }
 
-static int jit_machine_stack_exec(jit_arguments *arguments, void* executable_func)
+static int jit_machine_stack_exec(jit_arguments *arguments, void *executable_func)
 {
 union {
-   void* executable_func;
+   void *executable_func;
    jit_function call_executable_func;
 } convert_executable_func;
 pcre_uint8 local_space[MACHINE_STACK_SIZE];
@@ -10383,7 +10383,7 @@ PRIV(jit_exec)(const PUBL(extra) *extra_data, const pcre_uchar *subject,
 {
 executable_functions *functions = (executable_functions *)extra_data->executable_jit;
 union {
-   void* executable_func;
+   void *executable_func;
    jit_function call_executable_func;
 } convert_executable_func;
 jit_arguments arguments;
@@ -10470,7 +10470,7 @@ pcre32_jit_exec(const pcre32 *argument_re, const pcre32_extra *extra_data,
 pcre_uchar *subject_ptr = (pcre_uchar *)subject;
 executable_functions *functions = (executable_functions *)extra_data->executable_jit;
 union {
-   void* executable_func;
+   void *executable_func;
    jit_function call_executable_func;
 } convert_executable_func;
 jit_arguments arguments;
