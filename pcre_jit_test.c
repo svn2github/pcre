@@ -51,8 +51,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pcre_internal.h"
 
-#define PCRE_BUG 0x80000000
-
 /*
  Letter characters:
    \xe6\x92\xad = 0x64ad = 25773 (kanji)
@@ -69,6 +67,9 @@ POSSIBILITY OF SUCH DAMAGE.
       \xc3\x89 = 0xc9 = 201 (E')
    \xc3\xa1 = 0xe1 = 225 (a')
       \xc3\x81 = 0xc1 = 193 (A')
+   \x53 = 0x53 = S
+     \x73 = 0x73 = s
+     \xc5\xbf = 0x17f = 383 (long S)
    \xc8\xba = 0x23a = 570
       \xe2\xb1\xa5 = 0x2c65 = 11365
    \xe1\xbd\xb8 = 0x1f78 = 8056
@@ -78,6 +79,10 @@ POSSIBILITY OF SUCH DAMAGE.
    \xc7\x84 = 0x1c4 = 452
      \xc7\x85 = 0x1c5 = 453
      \xc7\x86 = 0x1c6 = 454
+ Caseless sets:
+   ucp_Armenian - \x{531}-\x{556} -> \x{561}-\x{586}
+   ucp_Coptic - \x{2c80}-\x{2ce3} -> caseless: XOR 0x1
+   ucp_Latin - \x{ff21}-\x{ff3a} -> \x{ff41]-\x{ff5a}
 
  Mark property:
    \xcc\x8d = 0x30d = 781
