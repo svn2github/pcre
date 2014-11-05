@@ -1474,7 +1474,18 @@ for (;;)
       md->offset_vector[offset] =
         md->offset_vector[md->offset_end - number];
       md->offset_vector[offset+1] = (int)(eptr - md->start_subject);
-      if (offset_top <= offset) offset_top = offset + 2;
+
+      /* If this group is at or above the current highwater mark, ensure that
+      any groups between the current high water mark and this group are marked
+      unset and then update the high water mark. */
+
+      if (offset >= offset_top)
+        {
+        register int *iptr = md->offset_vector + offset_top;
+        register int *iend = md->offset_vector + offset;
+        while (iptr < iend) *iptr++ = -1;
+        offset_top = offset + 2;
+        }
       }
     ecode += 1 + IMM2_SIZE;
     break;

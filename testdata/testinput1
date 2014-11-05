@@ -5720,4 +5720,7 @@ AbcdCBefgBhiBqz
 /[\Q]a\E]+/
     aa]]
 
+/(?:((abcd))|(((?:(?:(?:(?:abc|(?:abcdef))))b)abcdefghi)abc)|((*ACCEPT)))/
+    1234abcd
+
 /-- End of testinput1 --/
