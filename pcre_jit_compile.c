@@ -10359,7 +10359,7 @@ functions->read_only_data[mode] = common->read_only_data;
 functions->executable_sizes[mode] = executable_size;
 }
 
-static int jit_machine_stack_exec(jit_arguments *arguments, void *executable_func)
+static SLJIT_NOINLINE int jit_machine_stack_exec(jit_arguments *arguments, void *executable_func)
 {
 union {
    void *executable_func;
