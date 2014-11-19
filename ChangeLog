@@ -10,6 +10,9 @@ Version 8.37 xx-xxx-201x
     capture so far and the currrent group as "unset". Thus, the ovector for 
     those groups contained whatever was previously there. An example is the 
     pattern /(x)|((*ACCEPT))/ when matched against "abcd".
+    
+2.  If an assertion condition was quantified with a minimum of zero (an odd 
+    thing to do, but it happened), SIGSEGV or other misbehaviour could occur. 
 
 
 

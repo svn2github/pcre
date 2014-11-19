@@ -14206,4 +14206,14 @@ Failed: digits missing in \x{} or \o{} at offset 3
 /\x{whatever}/
 Failed: non-hex character in \x{} (closing brace missing?) at offset 3
 
+"((?=(?(?=(?(?=(?(?=())))*)))))"
+    a
+ 0: 
+ 1: 
+ 2: 
+
+"(?(?=)?==)(((((((((?=)))))))))"
+    a
+No match
+
 /-- End of testinput2 --/
