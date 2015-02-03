@@ -13,6 +13,9 @@ Version 8.37 xx-xxx-201x
     
 2.  If an assertion condition was quantified with a minimum of zero (an odd 
     thing to do, but it happened), SIGSEGV or other misbehaviour could occur. 
+    
+3.  If a pattern in pcretest input had the P (POSIX) modifier followed by an
+    unrecognized modifier, a crash could occur. 
 
 
 

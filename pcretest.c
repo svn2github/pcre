@@ -3906,6 +3906,7 @@ while (!done)
 
       default:
       fprintf(outfile, "** Unknown modifier '%c'\n", pp[-1]);
+      do_posix = 0; 
       goto SKIP_DATA;
       }
     }
@@ -5635,7 +5636,7 @@ while (!done)
     }    /* End of loop for data lines */
 
   CONTINUE:
-
+  
 #if !defined NOPOSIX
   if (posix || do_posix) regfree(&preg);
 #endif
