@@ -5603,6 +5603,12 @@ while (!done)
       /* If not /g or /G we are done */
 
       if (!do_g && !do_G) break;
+      
+      if (use_offsets == NULL)
+        {
+        fprintf(outfile, "Cannot do global matching without an ovector\n");
+        break;
+        }    
 
       /* If we have matched an empty string, first check to see if we are at
       the end of the subject. If so, the /g loop is over. Otherwise, mimic what

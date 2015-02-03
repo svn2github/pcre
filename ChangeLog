@@ -16,6 +16,9 @@ Version 8.37 xx-xxx-201x
     
 3.  If a pattern in pcretest input had the P (POSIX) modifier followed by an
     unrecognized modifier, a crash could occur. 
+    
+4.  An attempt to do global matching in pcretest with a zero-length ovector
+    caused a crash. 
 
 
 
