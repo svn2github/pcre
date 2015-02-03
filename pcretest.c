@@ -3453,7 +3453,7 @@ while (!done)
   pcre_extra *extra = NULL;
 
 #if !defined NOPOSIX  /* There are still compilers that require no indent */
-  regex_t preg;
+  regex_t preg = { NULL, 0, 0} ;
   int do_posix = 0;
 #endif
 
@@ -3906,7 +3906,6 @@ while (!done)
 
       default:
       fprintf(outfile, "** Unknown modifier '%c'\n", pp[-1]);
-      do_posix = 0; 
       goto SKIP_DATA;
       }
     }
@@ -5644,7 +5643,7 @@ while (!done)
   CONTINUE:
   
 #if !defined NOPOSIX
-  if (posix || do_posix) regfree(&preg);
+  if ((posix || do_posix) && preg.re_pcre != 0) regfree(&preg);
 #endif
 
   if (re != NULL) new_free(re);
