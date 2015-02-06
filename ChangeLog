@@ -1,7 +1,7 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.37 xx-xxx-201x
+Version 8.37 xx-xxx-2015
 ------------------------
 
 1.  When an (*ACCEPT) is triggered inside capturing parentheses, it arranges 
@@ -19,7 +19,10 @@ Version 8.37 xx-xxx-201x
     
 4.  An attempt to do global matching in pcretest with a zero-length ovector
     caused a crash. 
-
+    
+5.  Fixed a memory leak during matching that could occur for a subpattern
+    subroutine call (recursive or otherwise) if the number of captured groups
+    that had to be saved was greater than ten.
 
 
 Version 8.36 26-September-2014

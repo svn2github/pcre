@@ -1840,7 +1840,11 @@ for (;;)
         are defined in a range that can be tested for. */
 
         if (rrc >= MATCH_BACKTRACK_MIN && rrc <= MATCH_BACKTRACK_MAX)
+          { 
+          if (new_recursive.offset_save != stacksave)
+            (PUBL(free))(new_recursive.offset_save);
           RRETURN(MATCH_NOMATCH);
+          } 
 
         /* Any return code other than NOMATCH is an error. */
 
