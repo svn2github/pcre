@@ -23,6 +23,10 @@ Version 8.37 xx-xxx-2015
 5.  Fixed a memory leak during matching that could occur for a subpattern
     subroutine call (recursive or otherwise) if the number of captured groups
     that had to be saved was greater than ten.
+    
+6.  Catch a bad opcode during auto-possessification after compiling a bad UTF
+    string with NO_UTF_CHECK. This is a tidyup, not a bug fix, as passing bad
+    UTF with NO_UTF_CHECK is documented as having an undefined outcome.  
 
 
 Version 8.36 26-September-2014

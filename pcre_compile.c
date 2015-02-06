@@ -3610,6 +3610,14 @@ for (;;)
   {
   c = *code;
 
+  /* When a pattern with bad UTF-8 encoding is compiled with NO_UTF_CHECK,
+  it may compile without complaining, but may get into a loop here if the code 
+  pointer points to a bad value. This is, of course a documentated possibility,
+  when NO_UTF_CHECK is set, so it isn't a bug, but we can detect this case and 
+  just give up on this optimization. */
+
+  if (c >= OP_TABLE_LENGTH) return;
+ 
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;
