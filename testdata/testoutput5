@@ -1897,4 +1897,21 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 5
         End
 ------------------------------------------------------------------
 
+/[^\xff]*PRUNE:\x{100}abc(xyz(?1))/8DZ
+------------------------------------------------------------------
+        Bra
+        [^\x{ff}]*
+        PRUNE:\x{100}abc
+        CBra 1
+        xyz
+        Recurse
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 1
+Options: utf
+No first char
+Need char = 'z'
+
 /-- End of testinput5 --/

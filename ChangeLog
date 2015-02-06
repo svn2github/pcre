@@ -27,6 +27,9 @@ Version 8.37 xx-xxx-2015
 6.  Catch a bad opcode during auto-possessification after compiling a bad UTF
     string with NO_UTF_CHECK. This is a tidyup, not a bug fix, as passing bad
     UTF with NO_UTF_CHECK is documented as having an undefined outcome.  
+    
+7.  A UTF pattern containing a "not" match of a non-ASCII character and a
+    subroutine reference could loop at compile time. Example: /[^\xff]((?1))/.
 
 
 Version 8.36 26-September-2014
