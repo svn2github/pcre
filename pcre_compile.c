@@ -6734,8 +6734,7 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL && (options & PCRE_DUPNAMES) != 0)
-            *lengthptr += IMM2_SIZE;
+          if (lengthptr != NULL) *lengthptr += IMM2_SIZE;
           }
 
         /* Check the terminator */
@@ -7152,11 +7151,11 @@ for (;; ptr++)
 
           if (!is_recurse) cd->namedrefcount++;
 
-          /* If duplicate names are permitted, we have to allow for a named
-          reference to a duplicated name (this cannot be determined until the
-          second pass). This needs an extra 16-bit data item. */
+          /* We have to allow for a named reference to a duplicated name (this
+          cannot be determined until the second pass). This needs an extra
+          16-bit data item. */
 
-          if ((options & PCRE_DUPNAMES) != 0) *lengthptr += IMM2_SIZE;
+          *lengthptr += IMM2_SIZE;
           }
 
         /* In the real compile, search the name table. We check the name
@@ -9155,13 +9154,6 @@ if (length > MAX_PATTERN_SIZE)
   errorcode = ERR20;
   goto PCRE_EARLY_ERROR_RETURN;
   }
-
-/* If there are groups with duplicate names and there are also references by
-name, we must allow for the possibility of named references to duplicated
-groups. These require an extra data item each. */
-
-if (cd->dupnames && cd->namedrefcount > 0)
-  length += cd->namedrefcount * IMM2_SIZE * sizeof(pcre_uchar);
 
 /* Compute the size of the data block for storing the compiled pattern. Integer
 overflow should no longer be possible because nowadays we limit the maximum

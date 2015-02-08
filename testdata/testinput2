@@ -4100,4 +4100,6 @@ backtracking verbs. --/
     aa123\O3
     aa123\O6
 
+/(?<N111>(?J)(?<N111>1(111111)11|)1|1|)(?(<N111>)1)/
+
 /-- End of testinput2 --/
