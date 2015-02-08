@@ -9420,4 +9420,6 @@ No match
  4: <unset>
  5: 
 
+/(\2)(\1)/
+
 /-- End of testinput1 --/

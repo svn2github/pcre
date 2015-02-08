@@ -393,7 +393,7 @@ for (;;)
         ce = cs = (pcre_uchar *)PRIV(find_bracket)(startcode, utf, GET2(slot, 0));
         if (cs == NULL) return -2;
         do ce += GET(ce, 1); while (*ce == OP_ALT);
-        if (cc > cs && cc < ce)
+        if ((cc > cs && cc < ce) || recurse_depth > 10)
           {
           d = 0;
           had_recurse = TRUE;
@@ -401,7 +401,7 @@ for (;;)
           }
         else
           {
-          int dd = find_minlength(re, cs, startcode, options, recurse_depth);
+          int dd = find_minlength(re, cs, startcode, options, recurse_depth+1);
           if (dd < d) d = dd;
           }
         slot += re->name_entry_size;
@@ -418,14 +418,14 @@ for (;;)
       ce = cs = (pcre_uchar *)PRIV(find_bracket)(startcode, utf, GET2(cc, 1));
       if (cs == NULL) return -2;
       do ce += GET(ce, 1); while (*ce == OP_ALT);
-      if (cc > cs && cc < ce)
+      if ((cc > cs && cc < ce) || recurse_depth > 10)
         {
         d = 0;
         had_recurse = TRUE;
         }
       else
         {
-        d = find_minlength(re, cs, startcode, options, recurse_depth);
+        d = find_minlength(re, cs, startcode, options, recurse_depth + 1);
         }
       }
     else d = 0;

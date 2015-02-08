@@ -48,6 +48,11 @@ Version 8.37 xx-xxx-2015
    PCRE_DUPNAMES was not set caused the amount of memory needed for the pattern
    to be incorrectly calculated, leading to overwriting.
 
+10. A mutually recursive set of back references such as (\2)(\1) caused a
+    segfault at study time (while trying to find the minimum matching length).
+    The infinite loop is now broken (with the minimum length unset, that is,
+    zero).
+
 
 Version 8.36 26-September-2014
 ------------------------------
