@@ -4084,4 +4084,20 @@ backtracking verbs. --/
 "(?(?=)?==)(((((((((?=)))))))))"
     a
 
+/^(?:(a)|b)(?(1)A|B)/I
+    aA123\O3
+    aA123\O6
+
+'^(?:(?<AA>a)|b)(?(<AA>)A|B)'
+    aA123\O3
+    aA123\O6
+
+'^(?<AA>)(?:(?<AA>a)|b)(?(<AA>)A|B)'J
+    aA123\O3
+    aA123\O6
+
+'^(?:(?<AA>X)|)(?:(?<AA>a)|b)\k{AA}'J
+    aa123\O3
+    aa123\O6
+
 /-- End of testinput2 --/

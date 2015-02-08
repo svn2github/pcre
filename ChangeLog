@@ -31,6 +31,18 @@ Version 8.37 xx-xxx-2015
 7.  A UTF pattern containing a "not" match of a non-ASCII character and a
     subroutine reference could loop at compile time. Example: /[^\xff]((?1))/.
 
+8. When a pattern is compiled, it remembers the highest back reference so that
+   when matching, if the ovector is too small, extra memory can be obtained to
+   use instead. A conditional subpattern whose condition is a check on a
+   capture having happened, such as, for example in the pattern
+   /^(?:(a)|b)(?(1)A|B)/, is another kind of back reference, but it was not
+   setting the highest backreference number. This mattered only if pcre_exec()
+   was called with an ovector that was too small to hold the capture, and there
+   was no other kind of back reference (a situation which is probably quite
+   rare). The effect of the bug was that the condition was always treated as
+   FALSE when the capture could not be consulted, leading to a incorrect
+   behaviour by pcre2_match(). This bug has been fixed.
+
 
 Version 8.36 26-September-2014
 ------------------------------

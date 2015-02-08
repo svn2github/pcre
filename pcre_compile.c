@@ -6771,6 +6771,7 @@ for (;; ptr++)
             goto FAILED;
             }
           PUT2(code, 2+LINK_SIZE, recno);
+          if (recno > cd->top_backref) cd->top_backref = recno; 
           break;
           }
 
@@ -6793,6 +6794,7 @@ for (;; ptr++)
           int offset = i++;
           int count = 1;
           recno = GET2(slot, 0);   /* Number from first found */
+          if (recno > cd->top_backref) cd->top_backref = recno; 
           for (; i < cd->names_found; i++)
             {
             slot += cd->name_entry_size;
