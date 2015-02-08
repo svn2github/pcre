@@ -53,6 +53,14 @@ Version 8.37 xx-xxx-2015
     The infinite loop is now broken (with the minimum length unset, that is,
     zero).
 
+11. If an assertion that was used as a condition was quantified with a minimum
+    of zero, matching went wrong. In particular, if the whole group had
+    unlimited repetition and could match an empty string, a segfault was
+    likely. The pattern (?(?=0)?)+ is an example that caused this. Perl allows
+    assertions to be quantified, but not if they are being used as conditions,
+    so the above pattern is faulted by Perl. PCRE has now been changed so that
+    it also rejects such patterns.
+
 
 Version 8.36 26-September-2014
 ------------------------------

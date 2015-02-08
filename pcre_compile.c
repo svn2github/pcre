@@ -3639,13 +3639,13 @@ for (;;)
   c = *code;
 
   /* When a pattern with bad UTF-8 encoding is compiled with NO_UTF_CHECK,
-  it may compile without complaining, but may get into a loop here if the code 
+  it may compile without complaining, but may get into a loop here if the code
   pointer points to a bad value. This is, of course a documentated possibility,
-  when NO_UTF_CHECK is set, so it isn't a bug, but we can detect this case and 
+  when NO_UTF_CHECK is set, so it isn't a bug, but we can detect this case and
   just give up on this optimization. */
 
   if (c >= OP_TABLE_LENGTH) return;
- 
+
   if (c >= OP_STAR && c <= OP_TYPEPOSUPTO)
     {
     c -= get_repeat_base(c) - OP_STAR;
@@ -6657,7 +6657,10 @@ for (;; ptr++)
               (tempptr[2] == CHAR_EQUALS_SIGN ||
                tempptr[2] == CHAR_EXCLAMATION_MARK ||
                tempptr[2] == CHAR_LESS_THAN_SIGN))
+          {
+          cd->iscondassert = TRUE;
           break;
+          }
 
         /* Other conditions use OP_CREF/OP_DNCREF/OP_RREF/OP_DNRREF, and all
         need to skip at least 1+IMM2_SIZE bytes at the start of the group. */
@@ -6770,7 +6773,7 @@ for (;; ptr++)
             goto FAILED;
             }
           PUT2(code, 2+LINK_SIZE, recno);
-          if (recno > cd->top_backref) cd->top_backref = recno; 
+          if (recno > cd->top_backref) cd->top_backref = recno;
           break;
           }
 
@@ -6793,7 +6796,7 @@ for (;; ptr++)
           int offset = i++;
           int count = 1;
           recno = GET2(slot, 0);   /* Number from first found */
-          if (recno > cd->top_backref) cd->top_backref = recno; 
+          if (recno > cd->top_backref) cd->top_backref = recno;
           for (; i < cd->names_found; i++)
             {
             slot += cd->name_entry_size;
@@ -7512,12 +7515,22 @@ for (;; ptr++)
       goto FAILED;
       }
 
-    /* Assertions used not to be repeatable, but this was changed for Perl
-    compatibility, so all kinds can now be repeated. We copy code into a
+    /* All assertions used not to be repeatable, but this was changed for Perl
+    compatibility. All kinds can now be repeated except for assertions that are
+    conditions (Perl also forbids these to be repeated). We copy code into a
     non-register variable (tempcode) in order to be able to pass its address
-    because some compilers complain otherwise. */
+    because some compilers complain otherwise. At the start of a conditional
+    group whose condition is an assertion, cb->iscondassert is set. We unset it
+    here so as to allow assertions later in the group to be quantified. */
 
-    previous = code;                      /* For handling repetition */
+    if (bravalue >= OP_ASSERT && bravalue <= OP_ASSERTBACK_NOT &&
+        cd->iscondassert)
+      {
+      previous = NULL;
+      cd->iscondassert = FALSE;
+      }
+    else previous = code;
+
     *code = bravalue;
     tempcode = code;
     tempreqvary = cd->req_varyopt;        /* Save value before bracket */
@@ -9118,6 +9131,7 @@ cd->dupnames = FALSE;
 cd->namedrefcount = 0;
 cd->start_code = cworkspace;
 cd->hwm = cworkspace;
+cd->iscondassert = FALSE;
 cd->start_workspace = cworkspace;
 cd->workspace_size = COMPILE_WORK_SIZE;
 cd->named_groups = named_groups;
@@ -9213,6 +9227,7 @@ cd->name_table = (pcre_uchar *)re + re->name_table_offset;
 codestart = cd->name_table + re->name_entry_size * re->name_count;
 cd->start_code = codestart;
 cd->hwm = (pcre_uchar *)(cd->start_workspace);
+cd->iscondassert = FALSE;
 cd->req_varyopt = 0;
 cd->had_accept = FALSE;
 cd->had_pruneorskip = FALSE;

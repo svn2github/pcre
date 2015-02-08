@@ -14224,13 +14224,13 @@ Failed: digits missing in \x{} or \o{} at offset 3
 /\x{whatever}/
 Failed: non-hex character in \x{} (closing brace missing?) at offset 3
 
-"((?=(?(?=(?(?=(?(?=())))*)))))"
+"((?=(?(?=(?(?=(?(?=()))))))))"
     a
  0: 
  1: 
  2: 
 
-"(?(?=)?==)(((((((((?=)))))))))"
+"(?(?=)==)(((((((((?=)))))))))"
     a
 No match
 
@@ -14274,5 +14274,22 @@ Matched, but too many substrings
  1: <unset>
 
 /(?<N111>(?J)(?<N111>1(111111)11|)1|1|)(?(<N111>)1)/
+
+/(?(?=0)?)+/
+Failed: nothing to repeat at offset 7
+
+/(?(?=0)(?=00)?00765)/
+     00765
+ 0: 00765
+
+/(?(?=0)(?=00)?00765|(?!3).56)/
+     00765
+ 0: 00765
+     456
+ 0: 456
+     ** Failers
+No match
+     356   
+No match
 
 /-- End of testinput2 --/
