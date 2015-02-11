@@ -4113,4 +4113,12 @@ backtracking verbs. --/
      ** Failers
      356   
 
+'^(a)*+(\w)'
+    g
+    g\O3
+
+'^(?:a)*+(\w)'
+    g
+    g\O3
+
 /-- End of testinput2 --/

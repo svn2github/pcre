@@ -61,6 +61,10 @@ Version 8.37 xx-xxx-2015
     so the above pattern is faulted by Perl. PCRE has now been changed so that
     it also rejects such patterns.
 
+12. A possessive capturing group such as (a)*+ with a minimum repeat of zero
+    failed to allow the zero-repeat case if pcre2_exec() was called with an
+    ovector too small to capture the group.
+
 
 Version 8.36 26-September-2014
 ------------------------------
