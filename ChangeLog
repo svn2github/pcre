@@ -4,30 +4,30 @@ ChangeLog for PCRE
 Version 8.37 xx-xxx-2015
 ------------------------
 
-1.  When an (*ACCEPT) is triggered inside capturing parentheses, it arranges 
-    for those parentheses to be closed with whatever has been captured so far. 
-    However, it was failing to mark any other groups between the hightest 
-    capture so far and the currrent group as "unset". Thus, the ovector for 
-    those groups contained whatever was previously there. An example is the 
+1.  When an (*ACCEPT) is triggered inside capturing parentheses, it arranges
+    for those parentheses to be closed with whatever has been captured so far.
+    However, it was failing to mark any other groups between the hightest
+    capture so far and the currrent group as "unset". Thus, the ovector for
+    those groups contained whatever was previously there. An example is the
     pattern /(x)|((*ACCEPT))/ when matched against "abcd".
-    
-2.  If an assertion condition was quantified with a minimum of zero (an odd 
-    thing to do, but it happened), SIGSEGV or other misbehaviour could occur. 
-    
+
+2.  If an assertion condition was quantified with a minimum of zero (an odd
+    thing to do, but it happened), SIGSEGV or other misbehaviour could occur.
+
 3.  If a pattern in pcretest input had the P (POSIX) modifier followed by an
-    unrecognized modifier, a crash could occur. 
-    
+    unrecognized modifier, a crash could occur.
+
 4.  An attempt to do global matching in pcretest with a zero-length ovector
-    caused a crash. 
-    
+    caused a crash.
+
 5.  Fixed a memory leak during matching that could occur for a subpattern
     subroutine call (recursive or otherwise) if the number of captured groups
     that had to be saved was greater than ten.
-    
+
 6.  Catch a bad opcode during auto-possessification after compiling a bad UTF
     string with NO_UTF_CHECK. This is a tidyup, not a bug fix, as passing bad
-    UTF with NO_UTF_CHECK is documented as having an undefined outcome.  
-    
+    UTF with NO_UTF_CHECK is documented as having an undefined outcome.
+
 7.  A UTF pattern containing a "not" match of a non-ASCII character and a
     subroutine reference could loop at compile time. Example: /[^\xff]((?1))/.
 
@@ -64,6 +64,16 @@ Version 8.37 xx-xxx-2015
 12. A possessive capturing group such as (a)*+ with a minimum repeat of zero
     failed to allow the zero-repeat case if pcre2_exec() was called with an
     ovector too small to capture the group.
+
+13. Fixed two bugs in pcretest that were discovered by fuzzing and reported by 
+    Red Hat Product Security:
+
+    (a) A crash if /K and /F were both set with the option to save the compiled
+    pattern.
+
+    (b) Another crash if the option to print captured substrings in a callout
+    was combined with setting a null ovector, for example \O\C+ as a subject
+    string.
 
 
 Version 8.36 26-September-2014

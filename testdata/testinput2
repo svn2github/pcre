@@ -1380,6 +1380,8 @@
     1X
     123456\P
 
+//KF>/dev/null
+
 /abc/IS>testsavedregex
 <testsavedregex
     abc
@@ -4120,5 +4122,8 @@ backtracking verbs. --/
 '^(?:a)*+(\w)'
     g
     g\O3
+
+//C
+    \O\C+
 
 /-- End of testinput2 --/

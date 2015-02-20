@@ -5614,6 +5614,10 @@ No match
     123456\P
 No match
 
+//KF>/dev/null
+Compiled pattern written to /dev/null
+Study data written to /dev/null
+
 /abc/IS>testsavedregex
 Capturing subpattern count = 0
 No options
@@ -14308,5 +14312,12 @@ Matched, but too many substrings
     g\O3
 Matched, but too many substrings
  0: g
+
+//C
+    \O\C+
+Callout 255: last capture = -1
+--->
+ +0 ^    
+Matched, but too many substrings
 
 /-- End of testinput2 --/

@@ -2257,18 +2257,21 @@ if (callout_extra)
   fprintf(f, "Callout %d: last capture = %d\n",
     cb->callout_number, cb->capture_last);
 
-  for (i = 0; i < cb->capture_top * 2; i += 2)
-    {
-    if (cb->offset_vector[i] < 0)
-      fprintf(f, "%2d: <unset>\n", i/2);
-    else
+  if (cb->offset_vector != NULL)
+    { 
+    for (i = 0; i < cb->capture_top * 2; i += 2)
       {
-      fprintf(f, "%2d: ", i/2);
-      PCHARSV(cb->subject, cb->offset_vector[i],
-        cb->offset_vector[i+1] - cb->offset_vector[i], f);
-      fprintf(f, "\n");
+      if (cb->offset_vector[i] < 0)
+        fprintf(f, "%2d: <unset>\n", i/2);
+      else
+        {
+        fprintf(f, "%2d: ", i/2);
+        PCHARSV(cb->subject, cb->offset_vector[i],
+          cb->offset_vector[i+1] - cb->offset_vector[i], f);
+        fprintf(f, "\n");
+        }
       }
-    }
+    }   
   }
 
 /* Re-print the subject in canonical form, the first time or if giving full
@@ -2519,7 +2522,7 @@ re->name_entry_size = swap_uint16(re->name_entry_size);
 re->name_count = swap_uint16(re->name_count);
 re->ref_count = swap_uint16(re->ref_count);
 
-if (extra != NULL)
+if (extra != NULL && (extra->flags & PCRE_EXTRA_STUDY_DATA) != 0)
   {
   pcre_study_data *rsd = (pcre_study_data *)(extra->study_data);
   rsd->size = swap_uint32(rsd->size);
@@ -2700,7 +2703,7 @@ re->name_entry_size = swap_uint16(re->name_entry_size);
 re->name_count = swap_uint16(re->name_count);
 re->ref_count = swap_uint16(re->ref_count);
 
-if (extra != NULL)
+if (extra != NULL && (extra->flags & PCRE_EXTRA_STUDY_DATA) != 0)
   {
   pcre_study_data *rsd = (pcre_study_data *)(extra->study_data);
   rsd->size = swap_uint32(rsd->size);
