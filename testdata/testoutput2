@@ -14320,4 +14320,6 @@ Callout 255: last capture = -1
  +0 ^    
 Matched, but too many substrings
 
+"((?2){0,1999}())?"
+
 /-- End of testinput2 --/

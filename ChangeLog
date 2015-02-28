@@ -74,6 +74,14 @@ Version 8.37 xx-xxx-2015
     (b) Another crash if the option to print captured substrings in a callout
     was combined with setting a null ovector, for example \O\C+ as a subject
     string.
+    
+14. A pattern such as "((?2){0,1999}())?", which has a group containing a
+    forward reference repeated a large (but limited) number of times within a
+    repeated outer group that has a zero minimum quantifier, caused incorrect
+    code to be compiled, leading to the error "internal error:
+    previously-checked referenced subpattern not found" when an incorrect
+    memory address was read. This bug was reported as "heap overflow",
+    discovered by Kai Lu of Fortinet's FortiGuard Labs.
 
 
 Version 8.36 26-September-2014
