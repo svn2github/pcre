@@ -4128,4 +4128,6 @@ backtracking verbs. --/
 
 "((?2){0,1999}())?"
 
+/((?+1)(\1))/BZ
+
 /-- End of testinput2 --/

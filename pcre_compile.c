@@ -8103,6 +8103,7 @@ int length;
 unsigned int orig_bracount;
 unsigned int max_bracount;
 branch_chain bc;
+size_t save_hwm_offset;
 
 /* If set, call the external function that checks for stack availability. */
 
@@ -8119,6 +8120,8 @@ bc.current_branch = code;
 
 firstchar = reqchar = 0;
 firstcharflags = reqcharflags = REQ_UNSET;
+
+save_hwm_offset = cd->hwm - cd->start_workspace;
 
 /* Accumulate the length for use in the pre-compile phase. Start with the
 length of the BRA and KET and any extra bytes that are required at the
@@ -8322,7 +8325,7 @@ for (;;)
         {
         *code = OP_END;
         adjust_recurse(start_bracket, 1 + LINK_SIZE,
-          (options & PCRE_UTF8) != 0, cd, cd->hwm - cd->start_workspace);
+          (options & PCRE_UTF8) != 0, cd, save_hwm_offset);
         memmove(start_bracket + 1 + LINK_SIZE, start_bracket,
           IN_UCHARS(code - start_bracket));
         *start_bracket = OP_ONCE;
