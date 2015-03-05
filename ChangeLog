@@ -88,6 +88,11 @@ Version 8.37 xx-xxx-2015
     incorrect code to be compiled. This bug was reported as "heap overflow",
     discovered by Kai Lu of Fortinet's FortiGuard Labs.
 
+24. Computing the size of the JIT read-only data in advance has been a source
+    of various issues, and new ones are still appear unfortunately. To fix
+    existing and future issues, size computation is eliminated from the code,
+    and replaced by on-demand memory allocation.
+
 
 Version 8.36 26-September-2014
 ------------------------------

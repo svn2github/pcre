@@ -179,7 +179,7 @@ typedef struct jit_arguments {
 
 typedef struct executable_functions {
   void *executable_funcs[JIT_NUMBER_OF_COMPILE_MODES];
-  sljit_uw *read_only_data[JIT_NUMBER_OF_COMPILE_MODES];
+  void *read_only_data_heads[JIT_NUMBER_OF_COMPILE_MODES];
   sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
   PUBL(jit_callback) callback;
   void *userdata;
@@ -322,12 +322,8 @@ typedef struct compiler_common {
   pcre_uchar *start;
   /* Maps private data offset to each opcode. */
   sljit_si *private_data_ptrs;
-  /* This read-only data is available during runtime. */
-  sljit_uw *read_only_data;
-  /* The total size of the read-only data. */
-  sljit_uw read_only_data_size;
-  /* The next free entry of the read_only_data. */
-  sljit_uw *read_only_data_ptr;
+  /* Chain list of read-only data ptrs. */
+  void *read_only_data_head;
   /* Tells whether the capturing bracket is optimized. */
   pcre_uint8 *optimized_cbracket;
   /* Tells whether the starting offset is a target of then. */
@@ -800,16 +796,6 @@ while (cc < ccend)
     case OP_REFI:
     common->optimized_cbracket[GET2(cc, 1)] = 0;
     cc += 1 + IMM2_SIZE;
-    break;
-
-    case OP_BRA:
-    case OP_CBRA:
-    case OP_SBRA:
-    case OP_SCBRA:
-    count = no_alternatives(cc);
-    if (count > 4)
-      common->read_only_data_size += count * sizeof(sljit_uw);
-    cc += 1 + LINK_SIZE + (*cc == OP_CBRA || *cc == OP_SCBRA ? IMM2_SIZE : 0);
     break;
 
     case OP_CBRAPOS:
@@ -2112,6 +2098,40 @@ static SLJIT_INLINE void free_stack(compiler_common *common, int size)
 {
 DEFINE_COMPILER;
 OP2(SLJIT_SUB, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, size * sizeof(sljit_sw));
+}
+
+static sljit_uw * allocate_read_only_data(compiler_common *common, sljit_uw size)
+{
+DEFINE_COMPILER;
+sljit_uw *result;
+
+if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
+  return NULL;
+
+result = (sljit_uw *)SLJIT_MALLOC(size + sizeof(sljit_uw), common->allocator_data);
+if (SLJIT_UNLIKELY(result == NULL))
+  {
+  sljit_set_compiler_memory_error(compiler);
+  return NULL;
+  }
+
+*(void**)result = common->read_only_data_head;
+common->read_only_data_head = (void *)result;
+return result + 1;
+}
+
+static void free_read_only_data(void *current, void *allocator_data)
+{
+void *next;
+
+SLJIT_UNUSED_ARG(allocator_data);
+
+while (current != NULL)
+  {
+  next = *(void**)current;
+  SLJIT_FREE(current, allocator_data);
+  current = next;
+  }
 }
 
 static SLJIT_INLINE void reset_ovector(compiler_common *common, int length)
@@ -3530,9 +3550,6 @@ int range_right = -1, range_len = 3 - 1;
 sljit_ub *update_table = NULL;
 BOOL in_range;
 
-/* This is even TRUE, if both are NULL. */
-SLJIT_ASSERT(common->read_only_data_ptr == common->read_only_data);
-
 for (i = 0; i < MAX_N_CHARS; i++)
   {
   chars[i << 1] = NOTACHAR;
@@ -3581,18 +3598,9 @@ for (i = 0; i <= max; i++)
 
 if (range_right >= 0)
   {
-  /* Since no data is consumed (see the assert in the beginning
-  of this function), this space can be reallocated. */
-  if (common->read_only_data)
-    SLJIT_FREE(common->read_only_data, compiler->allocator_data);
-
-  common->read_only_data_size += 256;
-  common->read_only_data = (sljit_uw *)SLJIT_MALLOC(common->read_only_data_size, compiler->allocator_data);
-  if (common->read_only_data == NULL)
+  update_table = (sljit_ub *)allocate_read_only_data(common, 256);
+  if (update_table == NULL)
     return TRUE;
-
-  update_table = (sljit_ub *)common->read_only_data;
-  common->read_only_data_ptr = (sljit_uw *)(update_table + 256);
   memset(update_table, IN_UCHARS(range_len), 256);
 
   for (i = 0; i < range_len; i++)
@@ -8982,8 +8990,9 @@ else if (has_alternatives)
   if (alt_max > 4)
     {
     /* Table jump if alt_max is greater than 4. */
-    next_update_addr = common->read_only_data_ptr;
-    common->read_only_data_ptr += alt_max;
+    next_update_addr = allocate_read_only_data(common, alt_max * sizeof(sljit_uw));
+    if (SLJIT_UNLIKELY(next_update_addr == NULL))
+      return;
     sljit_emit_ijump(compiler, SLJIT_JUMP, SLJIT_MEM1(TMP1), (sljit_sw)next_update_addr);
     add_label_addr(common, next_update_addr++);
     }
@@ -9766,9 +9775,7 @@ memset(common, 0, sizeof(compiler_common));
 rootbacktrack.cc = (pcre_uchar *)re + re->name_table_offset + re->name_count * re->name_entry_size;
 
 common->start = rootbacktrack.cc;
-common->read_only_data = NULL;
-common->read_only_data_size = 0;
-common->read_only_data_ptr = NULL;
+common->read_only_data_head = NULL;
 common->fcc = tables + fcc_offset;
 common->lcc = (sljit_sw)(tables + lcc_offset);
 common->mode = mode;
@@ -9951,25 +9958,11 @@ if (common->has_then)
   set_then_offsets(common, common->start, NULL);
   }
 
-if (common->read_only_data_size > 0)
-  {
-  common->read_only_data = (sljit_uw *)SLJIT_MALLOC(common->read_only_data_size, compiler->allocator_data);
-  if (common->read_only_data == NULL)
-    {
-    SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
-    SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
-    return;
-    }
-  common->read_only_data_ptr = common->read_only_data;
-  }
-
 compiler = sljit_create_compiler(NULL);
 if (!compiler)
   {
   SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
   SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
-  if (common->read_only_data)
-    SLJIT_FREE(common->read_only_data, compiler->allocator_data);
   return;
   }
 common->compiler = compiler;
@@ -10008,16 +10001,7 @@ if ((re->options & PCRE_ANCHORED) == 0)
   if ((re->options & PCRE_NO_START_OPTIMIZE) == 0)
     {
     if (mode == JIT_COMPILE && fast_forward_first_n_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
-      {
-      /* If read_only_data is reallocated, we might have an allocation failure. */
-      if (common->read_only_data_size > 0 && common->read_only_data == NULL)
-        {
-        sljit_free_compiler(compiler);
-        SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
-        SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
-        return;
-        }
-      }
+      ;
     else if ((re->flags & PCRE_FIRSTSET) != 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0, (re->options & PCRE_FIRSTLINE) != 0);
     else if ((re->flags & PCRE_STARTLINE) != 0)
@@ -10070,8 +10054,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
   SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
-  if (common->read_only_data)
-    SLJIT_FREE(common->read_only_data, compiler->allocator_data);
+  free_read_only_data(common->read_only_data_head, compiler->allocator_data);
   return;
   }
 
@@ -10111,8 +10094,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
   SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
-  if (common->read_only_data)
-    SLJIT_FREE(common->read_only_data, compiler->allocator_data);
+  free_read_only_data(common->read_only_data_head, compiler->allocator_data);
   return;
   }
 
@@ -10192,8 +10174,7 @@ while (common->currententry != NULL)
     sljit_free_compiler(compiler);
     SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
     SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
-    if (common->read_only_data)
-      SLJIT_FREE(common->read_only_data, compiler->allocator_data);
+    free_read_only_data(common->read_only_data_head, compiler->allocator_data);
     return;
     }
   flush_stubs(common);
@@ -10303,7 +10284,6 @@ if (common->getucd != NULL)
   }
 #endif
 
-SLJIT_ASSERT(common->read_only_data + (common->read_only_data_size >> SLJIT_WORD_SHIFT) == common->read_only_data_ptr);
 SLJIT_FREE(common->optimized_cbracket, compiler->allocator_data);
 SLJIT_FREE(common->private_data_ptrs, compiler->allocator_data);
 
@@ -10318,8 +10298,7 @@ while (label_addr != NULL)
 sljit_free_compiler(compiler);
 if (executable_func == NULL)
   {
-  if (common->read_only_data)
-    SLJIT_FREE(common->read_only_data, compiler->allocator_data);
+  free_read_only_data(common->read_only_data_head, compiler->allocator_data);
   return;
   }
 
@@ -10343,8 +10322,7 @@ else
     /* This case is highly unlikely since we just recently
     freed a lot of memory. Not impossible though. */
     sljit_free_code(executable_func);
-    if (common->read_only_data)
-      SLJIT_FREE(common->read_only_data, compiler->allocator_data);
+    free_read_only_data(common->read_only_data_head, compiler->allocator_data);
     return;
     }
   memset(functions, 0, sizeof(executable_functions));
@@ -10355,7 +10333,7 @@ else
   }
 
 functions->executable_funcs[mode] = executable_func;
-functions->read_only_data[mode] = common->read_only_data;
+functions->read_only_data_heads[mode] = common->read_only_data_head;
 functions->executable_sizes[mode] = executable_size;
 }
 
@@ -10542,8 +10520,7 @@ for (i = 0; i < JIT_NUMBER_OF_COMPILE_MODES; i++)
   {
   if (functions->executable_funcs[i] != NULL)
     sljit_free_code(functions->executable_funcs[i]);
-  if (functions->read_only_data[i] != NULL)
-    SLJIT_FREE(functions->read_only_data[i], compiler->allocator_data);
+  free_read_only_data(functions->read_only_data_heads[i], NULL);
   }
 SLJIT_FREE(functions, compiler->allocator_data);
 }
