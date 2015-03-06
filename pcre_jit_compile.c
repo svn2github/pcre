@@ -2108,7 +2108,7 @@ sljit_uw *result;
 if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   return NULL;
 
-result = (sljit_uw *)SLJIT_MALLOC(size + sizeof(sljit_uw), common->allocator_data);
+result = (sljit_uw *)SLJIT_MALLOC(size + sizeof(sljit_uw), compiler->allocator_data);
 if (SLJIT_UNLIKELY(result == NULL))
   {
   sljit_set_compiler_memory_error(compiler);
