@@ -4002,7 +4002,7 @@ while ((ptr = (pcre_uchar *)find_recurse(ptr, utf)) != NULL)
   /* See if this recursion is on the forward reference list. If so, adjust the
   reference. */
 
-  for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset; hc < cd->hwm; 
+  for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset; hc < cd->hwm;
        hc += LINK_SIZE)
     {
     offset = (int)GET(hc, 0);
@@ -4208,7 +4208,11 @@ if ((options & PCRE_CASELESS) != 0)
       range. Otherwise, use a recursive call to add the additional range. */
 
       else if (oc < start && od >= start - 1) start = oc; /* Extend downwards */
-      else if (od > end && oc <= end + 1) end = od;       /* Extend upwards */
+      else if (od > end && oc <= end + 1)
+        {
+        end = od;       /* Extend upwards */
+        if (end > classbits_end) classbits_end = (end <= 0xff ? end : 0xff);
+        }
       else n8 += add_to_class(classbits, uchardptr, options, cd, oc, od);
       }
     }
@@ -6052,15 +6056,15 @@ for (;; ptr++)
               memcpy(code, previous, IN_UCHARS(len));
 
               while (cd->hwm > cd->start_workspace + cd->workspace_size -
-                     WORK_SIZE_SAFETY_MARGIN - 
+                     WORK_SIZE_SAFETY_MARGIN -
                      (this_hwm_offset - save_hwm_offset))
                 {
                 *errorcodeptr = expand_workspace(cd);
                 if (*errorcodeptr != 0) goto FAILED;
                 }
 
-              for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset; 
-                   hc < (pcre_uchar *)cd->start_workspace + this_hwm_offset; 
+              for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset;
+                   hc < (pcre_uchar *)cd->start_workspace + this_hwm_offset;
                    hc += LINK_SIZE)
                 {
                 PUT(cd->hwm, 0, GET(hc, 0) + len);
@@ -6133,15 +6137,15 @@ for (;; ptr++)
           copying them. */
 
           while (cd->hwm > cd->start_workspace + cd->workspace_size -
-                 WORK_SIZE_SAFETY_MARGIN - 
+                 WORK_SIZE_SAFETY_MARGIN -
                  (this_hwm_offset - save_hwm_offset))
             {
             *errorcodeptr = expand_workspace(cd);
             if (*errorcodeptr != 0) goto FAILED;
             }
 
-          for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset; 
-               hc < (pcre_uchar *)cd->start_workspace + this_hwm_offset; 
+          for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset;
+               hc < (pcre_uchar *)cd->start_workspace + this_hwm_offset;
                hc += LINK_SIZE)
             {
             PUT(cd->hwm, 0, GET(hc, 0) + len + ((i != 0)? 2+LINK_SIZE : 1));

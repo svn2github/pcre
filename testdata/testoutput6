@@ -2461,4 +2461,8 @@ No match
     scat
  0: sc
 
+/[A-`]/i8
+    abcdefghijklmno
+ 0: a
+
 /-- End of testinput6 --/
