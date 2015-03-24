@@ -14337,4 +14337,10 @@ Matched, but too many substrings
         End
 ------------------------------------------------------------------
 
+/(?(?!)a|b)/
+    bbb
+ 0: b
+    aaa 
+No match
+
 /-- End of testinput2 --/

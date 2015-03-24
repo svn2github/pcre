@@ -8553,6 +8553,7 @@ do {
        case OP_RREF:
        case OP_DNRREF:
        case OP_DEF:
+       case OP_FAIL: 
        return FALSE;
 
        default:     /* Assertion */

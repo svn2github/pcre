@@ -1376,6 +1376,7 @@ for (;;)
       break;
 
       case OP_DEF:     /* DEFINE - always false */
+      case OP_FAIL:    /* From optimized (?!) condition */ 
       break;
 
       /* The condition is an assertion. Call match() to evaluate it - setting
