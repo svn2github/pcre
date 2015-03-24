@@ -631,6 +631,9 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?P<Name>a)?(?P<Name2>b)?(?(Name)c|d)+?dd", "bcabcacdb bdddd" },
 	{ MUA, 0, "(?P<Name>a)?(?P<Name2>b)?(?(Name)c|d)+l", "ababccddabdbccd abcccl" },
 	{ MUA, 0, "((?:a|aa)(?(1)aaa))x", "aax" },
+	{ MUA, 0, "(?(?!)a|b)", "ab" },
+	{ MUA, 0, "(?(?!)a)", "ab" },
+	{ MUA, 0 | F_NOMATCH, "(?(?!)a|b)", "ac" },
 
 	/* Set start of match. */
 	{ MUA, 0, "(?:\\Ka)*aaaab", "aaaaaaaa aaaaaaabb" },

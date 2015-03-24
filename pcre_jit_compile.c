@@ -6997,7 +6997,7 @@ cc += GET(cc, 1);
 
 has_alternatives = *cc == OP_ALT;
 if (SLJIT_UNLIKELY(opcode == OP_COND || opcode == OP_SCOND))
-  has_alternatives = (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF) ? FALSE : TRUE;
+  has_alternatives = (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF || *matchingpath == OP_FAIL) ? FALSE : TRUE;
 
 if (SLJIT_UNLIKELY(opcode == OP_COND) && (*cc == OP_KETRMAX || *cc == OP_KETRMIN))
   opcode = OP_SCOND;
@@ -7309,6 +7309,17 @@ if (opcode == OP_COND || opcode == OP_SCOND)
         else
           matchingpath = cc;
         }
+    }
+  else if (*matchingpath == OP_FAIL)
+    {
+    SLJIT_ASSERT(!has_alternatives);
+    if (*cc == OP_ALT)
+      {
+      matchingpath = cc + 1 + LINK_SIZE;
+      cc += GET(cc, 1);
+      }
+    else
+      matchingpath = cc;
     }
   else
     {

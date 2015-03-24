@@ -98,6 +98,9 @@ Version 8.37 xx-xxx-2015
     more than one other case, caused incorrect behaviour when compiled in UTF
     mode. In that example, the range a-j was left out of the class.
 
+26. Fix JIT compilation of conditional blocks, which assertion
+    is converted to (*FAIL). E.g: /(?(?!))/.
+
 
 Version 8.36 26-September-2014
 ------------------------------
