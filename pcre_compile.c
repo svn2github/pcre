@@ -3093,7 +3093,7 @@ Returns:      TRUE if the auto-possessification is possible
 
 static BOOL
 compare_opcodes(const pcre_uchar *code, BOOL utf, const compile_data *cd,
-  const pcre_uint32 *base_list, const pcre_uchar *base_end)
+  const pcre_uint32 *base_list, const pcre_uchar *base_end, int *rec_limit)
 {
 pcre_uchar c;
 pcre_uint32 list[8];
@@ -3109,6 +3109,9 @@ const pcre_uint8 *set1, *set2, *set_end;
 pcre_uint32 chr;
 BOOL accepted, invert_bits;
 BOOL entered_a_group = FALSE;
+
+if (*rec_limit == 0) return FALSE;
+--(*rec_limit);
 
 /* Note: the base_list[1] contains whether the current opcode has greedy
 (represented by a non-zero value) quantifier. This is a different from
@@ -3180,7 +3183,8 @@ for(;;)
 
     while (*next_code == OP_ALT)
       {
-      if (!compare_opcodes(code, utf, cd, base_list, base_end)) return FALSE;
+      if (!compare_opcodes(code, utf, cd, base_list, base_end, rec_limit))
+        return FALSE;
       code = next_code + 1 + LINK_SIZE;
       next_code += GET(next_code, 1);
       }
@@ -3200,7 +3204,7 @@ for(;;)
     /* The bracket content will be checked by the
     OP_BRA/OP_CBRA case above. */
     next_code += 1 + LINK_SIZE;
-    if (!compare_opcodes(next_code, utf, cd, base_list, base_end))
+    if (!compare_opcodes(next_code, utf, cd, base_list, base_end, rec_limit))
       return FALSE;
 
     code += PRIV(OP_lengths)[c];
@@ -3633,6 +3637,7 @@ register pcre_uchar c;
 const pcre_uchar *end;
 pcre_uchar *repeat_opcode;
 pcre_uint32 list[8];
+int rec_limit;
 
 for (;;)
   {
@@ -3653,7 +3658,8 @@ for (;;)
       get_chr_property_list(code, utf, cd->fcc, list) : NULL;
     list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-    if (end != NULL && compare_opcodes(end, utf, cd, list, end))
+    rec_limit = 10000;
+    if (end != NULL && compare_opcodes(end, utf, cd, list, end, &rec_limit))
       {
       switch(c)
         {
@@ -3709,7 +3715,8 @@ for (;;)
 
       list[1] = (c & 1) == 0;
 
-      if (compare_opcodes(end, utf, cd, list, end))
+      rec_limit = 10000;
+      if (compare_opcodes(end, utf, cd, list, end, &rec_limit))
         {
         switch (c)
           {

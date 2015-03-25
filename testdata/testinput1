@@ -5725,4 +5725,6 @@ AbcdCBefgBhiBqz
 
 /(\2)(\1)/
 
+"Z*(|d*){216}"
+
 /-- End of testinput1 --/
