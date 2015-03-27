@@ -4134,4 +4134,6 @@ backtracking verbs. --/
     bbb
     aaa 
 
+"((?2)+)((?1))"
+
 /-- End of testinput2 --/

@@ -14343,4 +14343,6 @@ Matched, but too many substrings
     aaa 
 No match
 
+"((?2)+)((?1))"
+
 /-- End of testinput2 --/
