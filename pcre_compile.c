@@ -5520,6 +5520,12 @@ for (;; ptr++)
       }
 #endif
 
+    /* Even though any XCLASS list is now discarded, we must allow for
+    its memory. */
+
+    if (lengthptr != NULL)
+      *lengthptr += (int)(class_uchardata - class_uchardata_base);
+
     /* If there are no characters > 255, or they are all to be included or
     excluded, set the opcode to OP_CLASS or OP_NCLASS, depending on whether the
     whole class was negated and whether there were negative specials such as \S
@@ -8560,7 +8566,7 @@ do {
        case OP_RREF:
        case OP_DNRREF:
        case OP_DEF:
-       case OP_FAIL: 
+       case OP_FAIL:
        return FALSE;
 
        default:     /* Assertion */

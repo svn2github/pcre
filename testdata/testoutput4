@@ -1271,4 +1271,6 @@ No match
     #\x{10000}#\x{100}#\x{10ffff}#
  0: #\x{10000}#\x{100}#\x{10ffff}#
 
+"[\S\V\H]"8
+
 /-- End of testinput4 --/
