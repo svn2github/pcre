@@ -14348,4 +14348,46 @@ No match
 "(?(?<E>.*!.*)?)"
 Failed: assertion expected after (?( at offset 3
 
+"X((?2)()*+){2}+"BZ
+------------------------------------------------------------------
+        Bra
+        X
+        Once
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+"X((?2)()*+){2}"BZ
+------------------------------------------------------------------
+        Bra
+        X
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        CBra 1
+        Recurse
+        Braposzero
+        SCBraPos 2
+        KetRpos
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- End of testinput2 --/

@@ -5924,6 +5924,7 @@ for (;; ptr++)
       {
       register int i;
       int len = (int)(code - previous);
+      size_t base_hwm_offset = save_hwm_offset; 
       pcre_uchar *bralink = NULL;
       pcre_uchar *brazeroptr = NULL;
 
@@ -6070,20 +6071,20 @@ for (;; ptr++)
 
               while (cd->hwm > cd->start_workspace + cd->workspace_size -
                      WORK_SIZE_SAFETY_MARGIN -
-                     (this_hwm_offset - save_hwm_offset))
+                     (this_hwm_offset - base_hwm_offset))
                 {
                 *errorcodeptr = expand_workspace(cd);
                 if (*errorcodeptr != 0) goto FAILED;
                 }
 
-              for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset;
+              for (hc = (pcre_uchar *)cd->start_workspace + base_hwm_offset;
                    hc < (pcre_uchar *)cd->start_workspace + this_hwm_offset;
                    hc += LINK_SIZE)
                 {
                 PUT(cd->hwm, 0, GET(hc, 0) + len);
                 cd->hwm += LINK_SIZE;
                 }
-              save_hwm_offset = this_hwm_offset;
+              base_hwm_offset = this_hwm_offset;
               code += len;
               }
             }
@@ -6151,20 +6152,20 @@ for (;; ptr++)
 
           while (cd->hwm > cd->start_workspace + cd->workspace_size -
                  WORK_SIZE_SAFETY_MARGIN -
-                 (this_hwm_offset - save_hwm_offset))
+                 (this_hwm_offset - base_hwm_offset))
             {
             *errorcodeptr = expand_workspace(cd);
             if (*errorcodeptr != 0) goto FAILED;
             }
 
-          for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset;
+          for (hc = (pcre_uchar *)cd->start_workspace + base_hwm_offset;
                hc < (pcre_uchar *)cd->start_workspace + this_hwm_offset;
                hc += LINK_SIZE)
             {
             PUT(cd->hwm, 0, GET(hc, 0) + len + ((i != 0)? 2+LINK_SIZE : 1));
             cd->hwm += LINK_SIZE;
             }
-          save_hwm_offset = this_hwm_offset;
+          base_hwm_offset = this_hwm_offset;
           code += len;
           }
 

@@ -4138,4 +4138,8 @@ backtracking verbs. --/
 
 "(?(?<E>.*!.*)?)"
 
+"X((?2)()*+){2}+"BZ
+
+"X((?2)()*+){2}"BZ
+
 /-- End of testinput2 --/
