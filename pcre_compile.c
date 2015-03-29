@@ -2497,7 +2497,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
       empty_branch = FALSE;
       do
         {
-        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cd, 
+        if (!empty_branch && could_be_empty_branch(code, endcode, utf, cd,
           recurses)) empty_branch = TRUE;
         code += GET(code, 1);
         }
@@ -6476,18 +6476,18 @@ for (;; ptr++)
 
     /* First deal with comments. Putting this code right at the start ensures
     that comments have no bad side effects. */
-                                                                            
-    if (ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)       
-      {                                                       
-      ptr += 2;                
+
+    if (ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)
+      {
+      ptr += 2;
       while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr == CHAR_NULL)                                     
-        {                                                                 
-        *errorcodeptr = ERR18;                                          
-        goto FAILED;                                               
-        }                                                           
-      continue;                                                         
-      }                        
+      if (*ptr == CHAR_NULL)
+        {
+        *errorcodeptr = ERR18;
+        goto FAILED;
+        }
+      continue;
+      }
 
     /* Now deal with various "verbs" that can be introduced by '*'. */
 
@@ -6679,7 +6679,9 @@ for (;; ptr++)
         if (tempptr[1] == CHAR_QUESTION_MARK &&
               (tempptr[2] == CHAR_EQUALS_SIGN ||
                tempptr[2] == CHAR_EXCLAMATION_MARK ||
-               tempptr[2] == CHAR_LESS_THAN_SIGN))
+                 (tempptr[2] == CHAR_LESS_THAN_SIGN &&
+                   (tempptr[3] == CHAR_EQUALS_SIGN ||
+                    tempptr[3] == CHAR_EXCLAMATION_MARK))))
           {
           cd->iscondassert = TRUE;
           break;

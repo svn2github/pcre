@@ -561,7 +561,7 @@ Failed: assertion expected after (?( at offset 3
 Failed: reference to non-existent subpattern at offset 7
 
 /(?(?<ab))/
-Failed: syntax error in subpattern name (missing terminator) at offset 7
+Failed: assertion expected after (?( at offset 3
 
 /((?s)blah)\s+\1/I
 Capturing subpattern count = 1
@@ -14344,5 +14344,8 @@ Matched, but too many substrings
 No match
 
 "((?2)+)((?1))"
+
+"(?(?<E>.*!.*)?)"
+Failed: assertion expected after (?( at offset 3
 
 /-- End of testinput2 --/
