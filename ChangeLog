@@ -142,6 +142,10 @@ Version 8.37 xx-xxx-2015
     incorrectly compiled and could trigger buffer overflow. This bug was
     discovered by the LLVM fuzzer.
 
+35. A mutual recursion within a lookbehind assertion such as (?<=((?2))((?1)))
+    caused a stack overflow instead of the diagnosis of a non-fixed length
+    lookbehind assertion. This bug was discovered by the LLVM fuzzer.
+
 
 Version 8.36 26-September-2014
 ------------------------------
