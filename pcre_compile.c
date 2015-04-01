@@ -3658,7 +3658,7 @@ for (;;)
       get_chr_property_list(code, utf, cd->fcc, list) : NULL;
     list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;
 
-    rec_limit = 10000;
+    rec_limit = 1000;
     if (end != NULL && compare_opcodes(end, utf, cd, list, end, &rec_limit))
       {
       switch(c)
@@ -3715,7 +3715,7 @@ for (;;)
 
       list[1] = (c & 1) == 0;
 
-      rec_limit = 10000;
+      rec_limit = 1000;
       if (compare_opcodes(end, utf, cd, list, end, &rec_limit))
         {
         switch (c)

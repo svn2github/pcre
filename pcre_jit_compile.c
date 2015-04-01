@@ -7255,12 +7255,14 @@ if (opcode == OP_COND || opcode == OP_SCOND)
     add_jump(compiler, &(BACKTRACK_AS(bracket_backtrack)->u.condfailed), JUMP(SLJIT_ZERO));
     matchingpath += 1 + 2 * IMM2_SIZE;
     }
-  else if (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF)
+  else if (*matchingpath == OP_RREF || *matchingpath == OP_DNRREF || *matchingpath == OP_FAIL)
     {
     /* Never has other case. */
     BACKTRACK_AS(bracket_backtrack)->u.condfailed = NULL;
     SLJIT_ASSERT(!has_alternatives);
 
+    if (*matchingpath == OP_FAIL)
+      stacksize = 0;
     if (*matchingpath == OP_RREF)
       {
       stacksize = GET2(matchingpath, 1);
@@ -7309,17 +7311,6 @@ if (opcode == OP_COND || opcode == OP_SCOND)
         else
           matchingpath = cc;
         }
-    }
-  else if (*matchingpath == OP_FAIL)
-    {
-    SLJIT_ASSERT(!has_alternatives);
-    if (*cc == OP_ALT)
-      {
-      matchingpath = cc + 1 + LINK_SIZE;
-      cc += GET(cc, 1);
-      }
-    else
-      matchingpath = cc;
     }
   else
     {
