@@ -5627,9 +5627,33 @@ while (!done)
         g_notempty = PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED;
         }
 
-      /* For /g, update the start offset, leaving the rest alone */
+      /* For /g, update the start offset, leaving the rest alone. There is a 
+      tricky case when \K is used in a positive lookbehind assertion. This can 
+      cause the end of the match to be less than or equal to the start offset. 
+      In this case we restart at one past the start offset. This may return the 
+      same match if the original start offset was bumped along during the 
+      match, but eventually the new start offset will hit the actual start 
+      offset. (In PCRE2 the true start offset is available, and this can be 
+      done better. It is not worth doing more than making sure we do not loop 
+      at this stage in the life of PCRE1.) */
 
-      if (do_g) start_offset = use_offsets[1];
+      if (do_g) 
+        {
+        if (g_notempty == 0 && use_offsets[1] <= start_offset)
+          {
+          if (start_offset >= len) break;  /* End of subject */ 
+          start_offset++;
+          if (use_utf)
+            {
+            while (start_offset < len)
+              {
+              if ((bptr[start_offset] & 0xc0) != 0x80) break;
+              start_offset++;
+              }
+            }
+          }  
+        else start_offset = use_offsets[1];
+        } 
 
       /* For /G, update the pointer and length */
 

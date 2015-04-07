@@ -14393,4 +14393,32 @@ Failed: assertion expected after (?( at offset 3
 "(?<=((?2))((?1)))"
 Failed: lookbehind assertion is not fixed length at offset 17
 
+/(?<=\Ka)/g+
+    aaaaa
+ 0: a
+ 0+ aaaa
+ 0: a
+ 0+ aaaa
+ 0: a
+ 0+ aaa
+ 0: a
+ 0+ aa
+ 0: a
+ 0+ a
+ 0: a
+ 0+ 
+
+/(?<=\Ka)/G+
+    aaaaa
+ 0: a
+ 0+ aaaa
+ 0: a
+ 0+ aaa
+ 0: a
+ 0+ aa
+ 0: a
+ 0+ a
+ 0: a
+ 0+ 
+
 /-- End of testinput2 --/

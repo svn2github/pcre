@@ -4144,4 +4144,10 @@ backtracking verbs. --/
 
 "(?<=((?2))((?1)))"
 
+/(?<=\Ka)/g+
+    aaaaa
+
+/(?<=\Ka)/G+
+    aaaaa
+
 /-- End of testinput2 --/
