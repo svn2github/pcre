@@ -145,6 +145,9 @@ Version 8.37 xx-xxx-2015
 35. A mutual recursion within a lookbehind assertion such as (?<=((?2))((?1)))
     caused a stack overflow instead of the diagnosis of a non-fixed length
     lookbehind assertion. This bug was discovered by the LLVM fuzzer.
+    
+36. The use of \K in a positive lookbehind assertion in a non-anchored pattern
+    (e.g. /(?<=\Ka)/) could make pcregrep loop.
 
 
 Version 8.36 26-September-2014
