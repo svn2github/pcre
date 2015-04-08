@@ -3483,7 +3483,7 @@ for (;;)
           if (possessive) continue;    /* No backtracking */
           for(;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;
+            if (eptr <= pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM23);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
 #ifdef SUPPORT_UCP
@@ -3904,7 +3904,7 @@ for (;;)
           if (possessive) continue;    /* No backtracking */
           for(;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;
+            if (eptr <= pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM30);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -4039,7 +4039,7 @@ for (;;)
           if (possessive) continue;    /* No backtracking */
           for(;;)
             {
-            if (eptr == pp) goto TAIL_RECURSE;
+            if (eptr <= pp) goto TAIL_RECURSE;
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM34);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             eptr--;
@@ -5610,7 +5610,7 @@ for (;;)
         if (possessive) continue;    /* No backtracking */
         for(;;)
           {
-          if (eptr == pp) goto TAIL_RECURSE;
+          if (eptr <= pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM44);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;
@@ -5930,7 +5930,7 @@ for (;;)
         if (possessive) continue;    /* No backtracking */
         for(;;)
           {
-          if (eptr == pp) goto TAIL_RECURSE;
+          if (eptr <= pp) goto TAIL_RECURSE;
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM46);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           eptr--;

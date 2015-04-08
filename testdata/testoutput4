@@ -1277,4 +1277,8 @@ No match
     Ӆ\x0aT
 No match
 
+/\C(\W?ſ)'?{{/8
+    \\C(\\W?ſ)'?{{
+No match
+
 /-- End of testinput4 --/
