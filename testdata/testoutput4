@@ -1273,4 +1273,8 @@ No match
 
 "[\S\V\H]"8
 
+/\C\X*QT/8
+    Ӆ\x0aT
+No match
+
 /-- End of testinput4 --/

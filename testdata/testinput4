@@ -724,4 +724,7 @@
 
 "[\S\V\H]"8
 
+/\C\X*QT/8
+    Ӆ\x0aT
+
 /-- End of testinput4 --/

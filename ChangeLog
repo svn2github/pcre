@@ -151,6 +151,12 @@ Version 8.37 xx-xxx-2015
 
 37. There was a similar problem to 36 in pcretest for global matches.
 
+38. If a greedy quantified \X was preceded by \C in UTF mode (e.g. \C\X*),
+    and a subsequent item in the pattern caused a non-match, backtracking over
+    the repeated \X did not stop, but carried on past the start of the subject,
+    causing reference to random memory and/or a segfault.  This bug was
+    discovered by the LLVM fuzzer.
+
 
 Version 8.36 26-September-2014
 ------------------------------
