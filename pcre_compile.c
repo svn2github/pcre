@@ -866,14 +866,6 @@ static const pcre_uint8 opcode_possessify[] = {
 };
 
 
-/* Structure for mutual recursion detection. */
-
-typedef struct recurse_check {
-  struct recurse_check *prev;
-  const pcre_uchar *group;
-} recurse_check;
-
-
 
 /*************************************************
 *            Find an error text                  *

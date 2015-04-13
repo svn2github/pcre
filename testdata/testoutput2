@@ -14421,4 +14421,6 @@ Failed: lookbehind assertion is not fixed length at offset 17
  0: a
  0+ 
 
+/((?2){73}(?2))((?1))/
+
 /-- End of testinput2 --/
