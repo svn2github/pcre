@@ -2465,4 +2465,8 @@ No match
     abcdefghijklmno
  0: a
 
+/\C\X*QT/8
+    Ӆ\x0aT
+No match
+
 /-- End of testinput6 --/

@@ -509,7 +509,7 @@ echo "RC=$?" >>testtrygrep
 echo "---------------------------- Test 107 -----------------------------" >>testtrygrep
 echo "a" >testtemp1grep
 echo "aaaaa" >>testtemp1grep
-(cd $srcdir; $valgrind $pcregrep  --line-offsets '(?<=\Ka)' testtemp1grep) >>testtrygrep 2>&1
+(cd $srcdir; $valgrind $pcregrep  --line-offsets '(?<=\Ka)' $builddir/testtemp1grep) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
 # Now compare the results.

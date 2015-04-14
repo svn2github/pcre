@@ -1,8 +1,8 @@
 ChangeLog for PCRE
 ------------------
 
-Version 8.37 xx-xxx-2015
-------------------------
+Version 8.37 14-April-2015
+--------------------------
 
 1.  When an (*ACCEPT) is triggered inside capturing parentheses, it arranges
     for those parentheses to be closed with whatever has been captured so far.
@@ -65,7 +65,7 @@ Version 8.37 xx-xxx-2015
     failed to allow the zero-repeat case if pcre2_exec() was called with an
     ovector too small to capture the group.
 
-13. Fixed two bugs in pcretest that were discovered by fuzzing and reported by 
+13. Fixed two bugs in pcretest that were discovered by fuzzing and reported by
     Red Hat Product Security:
 
     (a) A crash if /K and /F were both set with the option to save the compiled
@@ -74,20 +74,20 @@ Version 8.37 xx-xxx-2015
     (b) Another crash if the option to print captured substrings in a callout
     was combined with setting a null ovector, for example \O\C+ as a subject
     string.
-    
+
 14. A pattern such as "((?2){0,1999}())?", which has a group containing a
     forward reference repeated a large (but limited) number of times within a
     repeated outer group that has a zero minimum quantifier, caused incorrect
     code to be compiled, leading to the error "internal error:
     previously-checked referenced subpattern not found" when an incorrect
     memory address was read. This bug was reported as "heap overflow",
-    discovered by Kai Lu of Fortinet's FortiGuard Labs and given the CVE number 
-    CVE-2015-2325. 
-    
+    discovered by Kai Lu of Fortinet's FortiGuard Labs and given the CVE number
+    CVE-2015-2325.
+
 23. A pattern such as "((?+1)(\1))/" containing a forward reference subroutine
     call within a group that also contained a recursive back reference caused
     incorrect code to be compiled. This bug was reported as "heap overflow",
-    discovered by Kai Lu of Fortinet's FortiGuard Labs, and given the CVE 
+    discovered by Kai Lu of Fortinet's FortiGuard Labs, and given the CVE
     number CVE-2015-2326.
 
 24. Computing the size of the JIT read-only data in advance has been a source
@@ -102,7 +102,7 @@ Version 8.37 xx-xxx-2015
 
 26. Fix JIT compilation of conditional blocks, which assertion
     is converted to (*FAIL). E.g: /(?(?!))/.
-    
+
 27. The pattern /(?(?!)^)/ caused references to random memory. This bug was
     discovered by the LLVM fuzzer.
 
@@ -110,19 +110,19 @@ Version 8.37 xx-xxx-2015
     when this assertion was used as a condition, for example (?(?!)a|b). In
     pcre2_match() it worked by luck; in pcre2_dfa_match() it gave an incorrect
     error about an unsupported item.
-    
+
 29. For some types of pattern, for example /Z*(|d*){216}/, the auto-
-    possessification code could take exponential time to complete. A recursion 
-    depth limit of 1000 has been imposed to limit the resources used by this 
+    possessification code could take exponential time to complete. A recursion
+    depth limit of 1000 has been imposed to limit the resources used by this
     optimization.
-    
+
 30. A pattern such as /(*UTF)[\S\V\H]/, which contains a negated special class
     such as \S in non-UCP mode, explicit wide characters (> 255) can be ignored
     because \S ensures they are all in the class. The code for doing this was
     interacting badly with the code for computing the amount of space needed to
     compile the pattern, leading to a buffer overflow. This bug was discovered
     by the LLVM fuzzer.
-    
+
 31. A pattern such as /((?2)+)((?1))/ which has mutual recursion nested inside
     other kinds of group caused stack overflow at compile time. This bug was
     discovered by the LLVM fuzzer.
@@ -131,7 +131,7 @@ Version 8.37 xx-xxx-2015
     between a subroutine call and its quantifier was incorrectly compiled,
     leading to buffer overflow or other errors. This bug was discovered by the
     LLVM fuzzer.
-    
+
 33. The illegal pattern /(?(?<E>.*!.*)?)/ was not being diagnosed as missing an
     assertion after (?(. The code was failing to check the character after
     (?(?< for the ! or = that would indicate a lookbehind assertion. This bug
@@ -145,7 +145,7 @@ Version 8.37 xx-xxx-2015
 35. A mutual recursion within a lookbehind assertion such as (?<=((?2))((?1)))
     caused a stack overflow instead of the diagnosis of a non-fixed length
     lookbehind assertion. This bug was discovered by the LLVM fuzzer.
-    
+
 36. The use of \K in a positive lookbehind assertion in a non-anchored pattern
     (e.g. /(?<=\Ka)/) could make pcregrep loop.
 
@@ -154,11 +154,11 @@ Version 8.37 xx-xxx-2015
 38. If a greedy quantified \X was preceded by \C in UTF mode (e.g. \C\X*),
     and a subsequent item in the pattern caused a non-match, backtracking over
     the repeated \X did not stop, but carried on past the start of the subject,
-    causing reference to random memory and/or a segfault. There were also some 
+    causing reference to random memory and/or a segfault. There were also some
     other cases where backtracking after \C could crash. This set of bugs was
     discovered by the LLVM fuzzer.
 
-20. The function for finding the minimum length of a matching string could take
+39. The function for finding the minimum length of a matching string could take
     a very long time if mutual recursion was present many times in a pattern,
     for example, /((?2){73}(?2))((?1))/. A better mutual recursion detection
     method has been implemented. This infelicity was discovered by the LLVM

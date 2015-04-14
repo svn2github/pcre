@@ -2258,7 +2258,7 @@ if (callout_extra)
     cb->callout_number, cb->capture_last);
 
   if (cb->offset_vector != NULL)
-    { 
+    {
     for (i = 0; i < cb->capture_top * 2; i += 2)
       {
       if (cb->offset_vector[i] < 0)
@@ -2271,7 +2271,7 @@ if (callout_extra)
         fprintf(f, "\n");
         }
       }
-    }   
+    }
   }
 
 /* Re-print the subject in canonical form, the first time or if giving full
@@ -5605,12 +5605,12 @@ while (!done)
       /* If not /g or /G we are done */
 
       if (!do_g && !do_G) break;
-      
+
       if (use_offsets == NULL)
         {
         fprintf(outfile, "Cannot do global matching without an ovector\n");
         break;
-        }    
+        }
 
       /* If we have matched an empty string, first check to see if we are at
       the end of the subject. If so, the /g loop is over. Otherwise, mimic what
@@ -5627,21 +5627,21 @@ while (!done)
         g_notempty = PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED;
         }
 
-      /* For /g, update the start offset, leaving the rest alone. There is a 
-      tricky case when \K is used in a positive lookbehind assertion. This can 
-      cause the end of the match to be less than or equal to the start offset. 
-      In this case we restart at one past the start offset. This may return the 
-      same match if the original start offset was bumped along during the 
-      match, but eventually the new start offset will hit the actual start 
-      offset. (In PCRE2 the true start offset is available, and this can be 
-      done better. It is not worth doing more than making sure we do not loop 
+      /* For /g, update the start offset, leaving the rest alone. There is a
+      tricky case when \K is used in a positive lookbehind assertion. This can
+      cause the end of the match to be less than or equal to the start offset.
+      In this case we restart at one past the start offset. This may return the
+      same match if the original start offset was bumped along during the
+      match, but eventually the new start offset will hit the actual start
+      offset. (In PCRE2 the true start offset is available, and this can be
+      done better. It is not worth doing more than making sure we do not loop
       at this stage in the life of PCRE1.) */
 
-      if (do_g) 
+      if (do_g)
         {
         if (g_notempty == 0 && use_offsets[1] <= start_offset)
           {
-          if (start_offset >= len) break;  /* End of subject */ 
+          if (start_offset >= len) break;  /* End of subject */
           start_offset++;
           if (use_utf)
             {
@@ -5651,9 +5651,9 @@ while (!done)
               start_offset++;
               }
             }
-          }  
+          }
         else start_offset = use_offsets[1];
-        } 
+        }
 
       /* For /G, update the pointer and length */
 
@@ -5668,7 +5668,7 @@ while (!done)
     }    /* End of loop for data lines */
 
   CONTINUE:
-  
+
 #if !defined NOPOSIX
   if ((posix || do_posix) && preg.re_pcre != 0) regfree(&preg);
 #endif

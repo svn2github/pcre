@@ -401,24 +401,24 @@ for (;;)
           break;
           }
         else
-          {    
-          recurse_check *r = recurses;                                       
+          {
+          recurse_check *r = recurses;
           for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
           if (r != NULL)           /* Mutual recursion */
-            {                                                              
-            d = 0;                                                       
-            had_recurse = TRUE;                                           
-            break;                                                      
-            }                
+            {
+            d = 0;
+            had_recurse = TRUE;
+            break;
+            }
           else
             {
             int dd;
             this_recurse.prev = recurses;
-            this_recurse.group = cs;  
+            this_recurse.group = cs;
             dd = find_minlength(re, cs, startcode, options, &this_recurse);
             if (dd < d) d = dd;
             }
-          }   
+          }
         slot += re->name_entry_size;
         }
       }
@@ -439,20 +439,20 @@ for (;;)
         had_recurse = TRUE;
         }
       else
-        {    
-        recurse_check *r = recurses;                                       
+        {
+        recurse_check *r = recurses;
         for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
         if (r != NULL)           /* Mutual recursion */
-          {                                                              
-          d = 0;                                                       
-          had_recurse = TRUE;                                           
-          }                
+          {
+          d = 0;
+          had_recurse = TRUE;
+          }
         else
           {
           this_recurse.prev = recurses;
-          this_recurse.group = cs;  
+          this_recurse.group = cs;
           d = find_minlength(re, cs, startcode, options, &this_recurse);
-          } 
+          }
         }
       }
     else d = 0;
@@ -504,18 +504,18 @@ for (;;)
     if (cc > cs && cc < ce)    /* Simple recursion */
       had_recurse = TRUE;
     else
-      {    
-      recurse_check *r = recurses;                                       
+      {
+      recurse_check *r = recurses;
       for (r = recurses; r != NULL; r = r->prev) if (r->group == cs) break;
       if (r != NULL)           /* Mutual recursion */
-        had_recurse = TRUE;                                           
+        had_recurse = TRUE;
       else
         {
         this_recurse.prev = recurses;
-        this_recurse.group = cs;  
+        this_recurse.group = cs;
         branchlength += find_minlength(re, cs, startcode, options,
           &this_recurse);
-        }   
+        }
       }
     cc += 1 + LINK_SIZE;
     break;
