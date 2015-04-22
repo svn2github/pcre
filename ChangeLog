@@ -41,7 +41,7 @@ Version 8.37 14-April-2015
    was no other kind of back reference (a situation which is probably quite
    rare). The effect of the bug was that the condition was always treated as
    FALSE when the capture could not be consulted, leading to a incorrect
-   behaviour by pcre2_match(). This bug has been fixed.
+   behaviour by pcre_exec(). This bug has been fixed.
 
 9. A reference to a duplicated named group (either a back reference or a test
    for being set in a conditional) that occurred in a part of the pattern where
