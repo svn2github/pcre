@@ -3985,11 +3985,12 @@ have their offsets adjusted. That one of the jobs of this function. Before it
 is called, the partially compiled regex must be temporarily terminated with
 OP_END.
 
-This function has been extended with the possibility of forward references for
-recursions and subroutine calls. It must also check the list of such references
-for the group we are dealing with. If it finds that one of the recursions in
-the current group is on this list, it adjusts the offset in the list, not the
-value in the reference (which is a group number).
+This function has been extended to cope with forward references for recursions
+and subroutine calls. It must check the list of such references for the
+group we are dealing with. If it finds that one of the recursions in the
+current group is on this list, it does not adjust the value in the reference
+(which is a group number). After the group has been scanned, all the offsets in
+the forward reference list for the group are adjusted.
 
 Arguments:
   group      points to the start of the group
@@ -4005,29 +4006,21 @@ static void
 adjust_recurse(pcre_uchar *group, int adjust, BOOL utf, compile_data *cd,
   size_t save_hwm_offset)
 {
+int offset;
+pcre_uchar *hc;
 pcre_uchar *ptr = group;
 
 while ((ptr = (pcre_uchar *)find_recurse(ptr, utf)) != NULL)
   {
-  int offset;
-  pcre_uchar *hc;
-
-  /* See if this recursion is on the forward reference list. If so, adjust the
-  reference. */
-
   for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset; hc < cd->hwm;
        hc += LINK_SIZE)
     {
     offset = (int)GET(hc, 0);
-    if (cd->start_code + offset == ptr + 1)
-      {
-      PUT(hc, 0, offset + adjust);
-      break;
-      }
+    if (cd->start_code + offset == ptr + 1) break;
     }
 
-  /* Otherwise, adjust the recursion offset if it's after the start of this
-  group. */
+  /* If we have not found this recursion on the forward reference list, adjust
+  the recursion's offset if it's after the start of this group. */
 
   if (hc >= cd->hwm)
     {
@@ -4036,6 +4029,15 @@ while ((ptr = (pcre_uchar *)find_recurse(ptr, utf)) != NULL)
     }
 
   ptr += 1 + LINK_SIZE;
+  }
+
+/* Now adjust all forward reference offsets for the group. */
+
+for (hc = (pcre_uchar *)cd->start_workspace + save_hwm_offset; hc < cd->hwm;
+     hc += LINK_SIZE)
+  {
+  offset = (int)GET(hc, 0);
+  PUT(hc, 0, offset + adjust);
   }
 }
 
