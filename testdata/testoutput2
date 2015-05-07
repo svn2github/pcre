@@ -14440,4 +14440,12 @@ Failed: lookbehind assertion is not fixed length at offset 17
         End
 ------------------------------------------------------------------
 
+/(?1)()((((((\1++))\x85)+)|))/
+
+/(\9*+(?2);\3++()2|)++{/
+Failed: reference to non-existent subpattern at offset 22
+
+/\V\x85\9*+((?2)\3++()2)*:2/
+Failed: reference to non-existent subpattern at offset 26
+
 /-- End of testinput2 --/
