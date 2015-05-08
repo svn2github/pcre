@@ -14,7 +14,11 @@ Version 8.38 xx-xxx-xxxx
     incorrect code to be compiled when recursive forward references were
     involved. For example, in this pattern: /(?1)()((((((\1++))\x85)+)|))/.
     This bug was discovered by the LLVM fuzzer.
-
+    
+3.  A repeated conditional group whose condition was a reference by name caused
+    a buffer overflow if there was more than one group with the given name.
+    This bug was discovered by the LLVM fuzzer.
+ 
 
 Version 8.37 28-April-2015
 --------------------------

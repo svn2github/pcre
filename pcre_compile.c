@@ -6773,7 +6773,7 @@ for (;; ptr++)
             ptr++;
             }
           namelen = (int)(ptr - name);
-          if (lengthptr != NULL) *lengthptr += IMM2_SIZE;
+          if (lengthptr != NULL) skipbytes += IMM2_SIZE;
           }
 
         /* Check the terminator */
