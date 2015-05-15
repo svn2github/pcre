@@ -14454,4 +14454,6 @@ Failed: reference to non-existent subpattern at offset 26
 
 /(((?(R)){0,2}) (?''((?'X')((?'R')))))/
 
+"(?J)(?'d'(?'d'\g{d}))"
+
 /-- End of testinput2 --/
