@@ -22,6 +22,11 @@ Version 8.38 xx-xxx-xxxx
 4.  A recursive back reference by name within a group that had the same name as
     another group caused a buffer overflow. For example:
     /(?J)(?'d'(?'d'\g{d}))/. This bug was discovered by the LLVM fuzzer.
+
+30. A forward reference by name to a group whose number is the same as the
+    current group, for example in this pattern: /(?|(\k'Pm')|(?'Pm'))/, caused
+    a buffer overflow at compile time. This bug was discovered by the LLVM
+    fuzzer.
  
 
 Version 8.37 28-April-2015

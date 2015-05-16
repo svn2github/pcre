@@ -7187,15 +7187,15 @@ for (;; ptr++)
               open_capitem *oc;
               recno = ng->number;
               if (is_recurse) break;
-              for (oc = cd->open_caps; oc != NULL; oc = oc->next)         
-                {          
-                if (oc->number == recno)                                     
-                  {               
-                  oc->flag = TRUE;                                      
+              for (oc = cd->open_caps; oc != NULL; oc = oc->next)
+                {
+                if (oc->number == recno)
+                  {
+                  oc->flag = TRUE;
                   break;
-                  }                                                         
-                }                          
-              }    
+                  }
+                }
+              }
             }
 
           /* Count named back references. */
@@ -7207,6 +7207,14 @@ for (;; ptr++)
           16-bit data item. */
 
           *lengthptr += IMM2_SIZE;
+
+          /* If this is a forward reference and we are within a (?|...) group,
+          the reference may end up as the number of a group which we are
+          currently inside, that is, it could be a recursive reference. In the
+          real compile this will be picked up and the reference wrapped with
+          OP_ONCE to make it atomic, so we must space in case this occurs. */
+
+          if (recno == 0) *lengthptr += 2 + 2*LINK_SIZE;
           }
 
         /* In the real compile, search the name table. We check the name
@@ -7579,7 +7587,7 @@ for (;; ptr++)
       previous = NULL;
       cd->iscondassert = FALSE;
       }
-    else 
+    else
       {
       previous = code;
       item_hwm_offset = cd->hwm - cd->start_workspace;
