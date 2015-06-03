@@ -1,6 +1,9 @@
 ChangeLog for PCRE
 ------------------
 
+Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All 
+development is happening in the PCRE2 10.xx series.
+
 Version 8.38 xx-xxx-xxxx
 ------------------------
 
@@ -30,6 +33,12 @@ Version 8.38 xx-xxx-xxxx
     
 6.  A lookbehind assertion within a set of mutually recursive subpatterns could
     provoke a buffer overflow. This bug was discovered by the LLVM fuzzer.
+    
+7.  Another buffer overflow bug involved duplicate named groups with a 
+    reference between their definition, with a group that reset capture 
+    numbers, for example: /(?J:(?|(?'R')(\k'R')|((?'R'))))/. This has been 
+    fixed by always allowing for more memory, even if not needed. (A proper fix 
+    is implemented in PCRE2, but it involves more refactoring.) 
  
 
 Version 8.37 28-April-2015

@@ -231,7 +231,7 @@ Memory allocation (code space): 45
 ------------------------------------------------------------------
 
 /(?P<a>a)...(?P=a)bbb(?P>a)d/BM
-Memory allocation (code space): 38
+Memory allocation (code space): 50
 ------------------------------------------------------------------
   0  30 Bra
   3   7 CBra 1

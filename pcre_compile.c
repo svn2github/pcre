@@ -7214,7 +7214,12 @@ for (;; ptr++)
           real compile this will be picked up and the reference wrapped with
           OP_ONCE to make it atomic, so we must space in case this occurs. */
 
-          if (recno == 0) *lengthptr += 2 + 2*LINK_SIZE;
+          /* In fact, this can happen for a non-forward reference because
+          another group with the same number might be created later. This
+          issue is fixed "properly" in PCRE2. As PCRE1 is now in maintenance
+          only mode, we finesse the bug by allowing more memory always. */
+
+          /* if (recno == 0) */ *lengthptr += 2 + 2*LINK_SIZE;
           }
 
         /* In the real compile, search the name table. We check the name
