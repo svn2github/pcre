@@ -14461,4 +14461,7 @@ Failed: reference to non-existent subpattern at offset 26
 
 "(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
+/(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
+Failed: number is too big at offset 32
+
 /-- End of testinput2 --/

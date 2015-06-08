@@ -39,6 +39,8 @@ Version 8.38 xx-xxx-xxxx
     numbers, for example: /(?J:(?|(?'R')(\k'R')|((?'R'))))/. This has been 
     fixed by always allowing for more memory, even if not needed. (A proper fix 
     is implemented in PCRE2, but it involves more refactoring.) 
+    
+8.  There was no check for integer overflow in subroutine calls such as (?123). 
  
 
 Version 8.37 28-April-2015
