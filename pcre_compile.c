@@ -2487,7 +2487,7 @@ for (code = first_significant_code(code + PRIV(OP_lengths)[*code], TRUE);
   if (c == OP_BRA  || c == OP_BRAPOS ||
       c == OP_CBRA || c == OP_CBRAPOS ||
       c == OP_ONCE || c == OP_ONCE_NC ||
-      c == OP_COND)
+      c == OP_COND || c == OP_SCOND)
     {
     BOOL empty_branch;
     if (GET(code, 1) == 0) return TRUE;    /* Hit unclosed bracket */

@@ -14468,4 +14468,22 @@ Failed: number is too big at offset 32
 \O1
 Matched, but too many substrings
 
+/^(?:(?(1)x|)+)+$()/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        SBra
+        SCond
+      1 Cond ref
+        x
+        Alt
+        KetRmax
+        KetRmax
+        $
+        CBra 1
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- End of testinput2 --/
