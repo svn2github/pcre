@@ -44,6 +44,9 @@ Version 8.38 xx-xxx-xxxx
 
 9.  The table entry for \l in EBCDIC environments was incorrect, leading to its
     being treated as a literal 'l' instead of causing an error. 
+    
+10. There was a buffer overflow if pcre_exec() was called with an ovector of 
+    size 1. This bug was found by american fuzzy lop.
  
 
 Version 8.37 28-April-2015
