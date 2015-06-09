@@ -40,7 +40,10 @@ Version 8.38 xx-xxx-xxxx
     fixed by always allowing for more memory, even if not needed. (A proper fix 
     is implemented in PCRE2, but it involves more refactoring.) 
     
-8.  There was no check for integer overflow in subroutine calls such as (?123). 
+8.  There was no check for integer overflow in subroutine calls such as (?123).
+
+9.  The table entry for \l in EBCDIC environments was incorrect, leading to its
+    being treated as a literal 'l' instead of causing an error. 
  
 
 Version 8.37 28-April-2015
