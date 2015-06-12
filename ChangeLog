@@ -51,6 +51,12 @@ Version 8.38 xx-xxx-xxxx
 11. If a non-capturing group containing a conditional group that could match
     an empty string was repeated, it was not identified as matching an empty
     string itself. For example: /^(?:(?(1)x|)+)+$()/.
+    
+12. In an EBCDIC environment, pcretest was mishandling the escape sequences
+    \a and \e in test subject lines. 
+    
+13. In an EBCDIC environment, \a in a pattern was converted to the ASCII 
+    instead of the EBCDIC value. 
  
 
 Version 8.37 28-April-2015

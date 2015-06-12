@@ -1762,6 +1762,10 @@ only. */
 
 /* Escape items that are just an encoding of a particular data value. */
 
+#ifndef ESC_a
+#define ESC_a CHAR_BEL
+#endif
+
 #ifndef ESC_e
 #define ESC_e CHAR_ESC
 #endif
