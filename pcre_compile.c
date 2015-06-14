@@ -219,6 +219,12 @@ static const short int escapes[] = {
 /*  F0 */     0,     0,      0,       0,      0,     0,      0,      0,
 /*  F8 */     0,     0,      0,       0,      0,     0,      0,      0
 };
+
+/* We also need a table of characters that may follow \c in an EBCDIC
+environment for characters 0-31. */
+
+static unsigned char ebcdic_escape_c[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+
 #endif
 
 
@@ -527,7 +533,11 @@ static const char error_texts[] =
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "this version of PCRE is not compiled with Unicode property support\0"
+#ifndef EBCDIC
   "\\c must be followed by an ASCII character\0"
+#else
+  "\\c must be followed by a letter or one of [\\]^_?\0"
+#endif
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
   /* 70 */
   "internal error: unknown opcode in find_fixedlength()\0"
@@ -1425,7 +1435,16 @@ else
     c ^= 0x40;
 #else             /* EBCDIC coding */
     if (c >= CHAR_a && c <= CHAR_z) c += 64;
-    c ^= 0xC0;
+    if (c == CHAR_QUESTION_MARK)
+      c = ('\\' == 188 && '`' == 74)? 0x5f : 0xff;
+    else
+      {
+      for (i = 0; i < 32; i++)
+        {
+        if (c == ebcdic_escape_c[i]) break;
+        }
+      if (i < 32) c = i; else *errorcodeptr = ERR68;
+      }
 #endif
     break;
 
@@ -7354,14 +7373,14 @@ for (;; ptr++)
           recno = 0;
           while(IS_DIGIT(*ptr))
             {
-            if (recno > INT_MAX / 10 - 1) /* Integer overflow */            
-              {                                                             
-              while (IS_DIGIT(*ptr)) ptr++;                                 
-              *errorcodeptr = ERR61;                                        
-              goto FAILED;                                                  
+            if (recno > INT_MAX / 10 - 1) /* Integer overflow */
+              {
+              while (IS_DIGIT(*ptr)) ptr++;
+              *errorcodeptr = ERR61;
+              goto FAILED;
               }
             recno = recno * 10 + *ptr++ - CHAR_0;
-            } 
+            }
 
           if (*ptr != (pcre_uchar)terminator)
             {

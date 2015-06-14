@@ -57,6 +57,9 @@ Version 8.38 xx-xxx-xxxx
     
 13. In an EBCDIC environment, \a in a pattern was converted to the ASCII 
     instead of the EBCDIC value. 
+    
+14. The handling of \c in an EBCDIC environment has been revised so that it is
+    now compatible with the specification in Perl's perlebcdic page.
  
 
 Version 8.37 28-April-2015
