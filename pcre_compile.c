@@ -5218,9 +5218,9 @@ for (;; ptr++)
               cd, PRIV(vspace_list));
             continue;
 
-#ifdef SUPPORT_UCP
             case ESC_p:
             case ESC_P:
+#ifdef SUPPORT_UCP
               {
               BOOL negated;
               unsigned int ptype = 0, pdata = 0;
@@ -5234,6 +5234,9 @@ for (;; ptr++)
               class_has_8bitchar--;                /* Undo! */
               continue;
               }
+#else
+            *errorcodeptr = ERR45;
+            goto FAILED;
 #endif
             /* Unrecognized escapes are faulted if PCRE is running in its
             strict mode. By default, for compatibility with Perl, they are
