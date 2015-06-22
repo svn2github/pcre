@@ -1037,7 +1037,7 @@ other. NOTE: The values also appear in pcre_jit_compile.c. */
 /* ------ EBCDIC environments ------ */
 
 #else
-#define HSPACE_LIST CHAR_HT, CHAR_SPACE, CHAR_NBSP
+#define HSPACE_LIST CHAR_HT, CHAR_SPACE, CHAR_NBSP, NOTACHAR
 
 #define HSPACE_BYTE_CASES \
   case CHAR_HT: \
@@ -1216,7 +1216,7 @@ same code point. */
 
 #define CHAR_ESC                    '\047'
 #define CHAR_DEL                    '\007'
-#define CHAR_NBSP                   '\101'
+#define CHAR_NBSP                   '\x41'
 #define STR_ESC                     "\047"
 #define STR_DEL                     "\007"
 

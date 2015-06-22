@@ -68,6 +68,8 @@ Version 8.38 xx-xxx-xxxx
 16. When PCRE was compiled without UCP support, the use of \p and \P gave an 
     error (correctly) when used outside a class, but did not give an error 
     within a class.
+    
+17. \h within a class was incorrectly compiled in EBCDIC environments. 
  
 
 Version 8.37 28-April-2015
