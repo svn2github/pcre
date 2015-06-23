@@ -4180,4 +4180,6 @@ backtracking verbs. --/
 
 /^(?:(?(1)x|)+)+$()/BZ
 
+/(?=di(?<=(?1))|(?=(.))))/
+
 /-- End of testinput2 --/

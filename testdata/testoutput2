@@ -14486,4 +14486,7 @@ Matched, but too many substrings
         End
 ------------------------------------------------------------------
 
+/(?=di(?<=(?1))|(?=(.))))/
+Failed: unmatched parentheses at offset 23
+
 /-- End of testinput2 --/
