@@ -1071,7 +1071,7 @@ while (cc < ccend)
   size = 0;
   bracketlen = 0;
   if (private_data_ptr > SLJIT_MAX_LOCAL_SIZE)
-    return;
+    break;
 
   if (*cc == OP_ONCE || *cc == OP_ONCE_NC || *cc == OP_BRA || *cc == OP_CBRA || *cc == OP_COND)
     if (detect_repeat(common, cc))
@@ -1162,9 +1162,14 @@ while (cc < ccend)
     size = 1;
     break;
 
-    CASE_ITERATOR_TYPE_PRIVATE_DATA_2B
+    case OP_TYPEUPTO:
     if (cc[1 + IMM2_SIZE] != OP_ANYNL && cc[1 + IMM2_SIZE] != OP_EXTUNI)
       space = 2;
+    size = 1 + IMM2_SIZE;
+    break;
+
+    case OP_TYPEMINUPTO:
+    space = 2;
     size = 1 + IMM2_SIZE;
     break;
 
