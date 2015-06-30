@@ -74,7 +74,10 @@ Version 8.38 xx-xxx-xxxx
 18. A pattern with an unmatched closing parenthesis that contained a backward 
     assertion which itself contained a forward reference caused buffer 
     overflow. And example pattern is: /(?=di(?<=(?1))|(?=(.))))/.
- 
+
+19. JIT should return with error when the compiled pattern requires more stack
+    space than the maximum.
+
 
 Version 8.37 28-April-2015
 --------------------------
