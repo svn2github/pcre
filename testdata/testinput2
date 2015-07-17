@@ -4182,4 +4182,6 @@ backtracking verbs. --/
 
 /(?=di(?<=(?1))|(?=(.))))/
 
+/(?(R))*+/BZ
+
 /-- End of testinput2 --/

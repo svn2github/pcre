@@ -14489,4 +14489,17 @@ Matched, but too many substrings
 /(?=di(?<=(?1))|(?=(.))))/
 Failed: unmatched parentheses at offset 23
 
+/(?(R))*+/BZ
+------------------------------------------------------------------
+        Bra
+        Braposzero
+        SBraPos
+        SCond
+        Cond recurse any
+        Ket
+        KetRpos
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- End of testinput2 --/

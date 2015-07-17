@@ -6297,7 +6297,7 @@ for (;; ptr++)
               memmove(bracode + 1 + LINK_SIZE, bracode, IN_UCHARS(nlen));
               code += 1 + LINK_SIZE;
               nlen += 1 + LINK_SIZE;
-              *bracode = OP_BRAPOS;
+              *bracode = (*bracode == OP_COND)? OP_BRAPOS : OP_SBRAPOS;
               *code++ = OP_KETRPOS;
               PUTINC(code, 0, nlen);
               PUT(bracode, 1, nlen);

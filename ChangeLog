@@ -78,6 +78,9 @@ Version 8.38 xx-xxx-xxxx
 19. JIT should return with error when the compiled pattern requires more stack
     space than the maximum.
 
+20. A possessively repeated conditional group that could match an empty string,
+    for example, /(?(R))*+/, was incorrectly compiled.
+
 
 Version 8.37 28-April-2015
 --------------------------
