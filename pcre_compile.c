@@ -3905,11 +3905,11 @@ didn't consider this to be a POSIX class. Likewise for [:1234:].
 The problem in trying to be exactly like Perl is in the handling of escapes. We
 have to be sure that [abc[:x\]pqr] is *not* treated as containing a POSIX
 class, but [abc[:x\]pqr:]] is (so that an error can be generated). The code
-below handles the special case of \], but does not try to do any other escape
-processing. This makes it different from Perl for cases such as [:l\ower:]
-where Perl recognizes it as the POSIX class "lower" but PCRE does not recognize
-"l\ower". This is a lesser evil than not diagnosing bad classes when Perl does,
-I think.
+below handles the special cases \\ and \], but does not try to do any other
+escape processing. This makes it different from Perl for cases such as
+[:l\ower:] where Perl recognizes it as the POSIX class "lower" but PCRE does
+not recognize "l\ower". This is a lesser evil than not diagnosing bad classes
+when Perl does, I think.
 
 A user pointed out that PCRE was rejecting [:a[:digit:]] whereas Perl was not.
 It seems that the appearance of a nested POSIX class supersedes an apparent
@@ -3936,7 +3936,9 @@ pcre_uchar terminator;          /* Don't combine these lines; the Solaris cc */
 terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
 for (++ptr; *ptr != CHAR_NULL; ptr++)
   {
-  if (*ptr == CHAR_BACKSLASH && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
+  if (*ptr == CHAR_BACKSLASH && 
+      (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET ||
+       ptr[1] == CHAR_BACKSLASH))
     ptr++;
   else if (*ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
   else

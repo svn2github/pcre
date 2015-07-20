@@ -4184,4 +4184,6 @@ backtracking verbs. --/
 
 /(?(R))*+/BZ
 
+/[[:\\](?'abc')[a:]/
+
 /-- End of testinput2 --/

@@ -14502,4 +14502,6 @@ Failed: unmatched parentheses at offset 23
         End
 ------------------------------------------------------------------
 
+/[[:\\](?'abc')[a:]/
+
 /-- End of testinput2 --/
