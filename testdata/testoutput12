@@ -193,4 +193,6 @@ No match, mark = m (JIT)
 
 /(a(?:a|b|c|d|e)b){8,16}/S++
 
+/(?:|a|){100}x/S++
+
 /-- End of testinput12 --/
