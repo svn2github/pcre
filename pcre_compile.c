@@ -3940,19 +3940,12 @@ for (++ptr; *ptr != CHAR_NULL; ptr++)
       (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET ||
        ptr[1] == CHAR_BACKSLASH))
     ptr++;
-  else if (*ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
-  else
+  else if ((*ptr == CHAR_LEFT_SQUARE_BRACKET && ptr[1] == terminator) ||
+            *ptr == CHAR_RIGHT_SQUARE_BRACKET) return FALSE;
+  else if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
     {
-    if (*ptr == terminator && ptr[1] == CHAR_RIGHT_SQUARE_BRACKET)
-      {
-      *endptr = ptr;
-      return TRUE;
-      }
-    if (*ptr == CHAR_LEFT_SQUARE_BRACKET &&
-         (ptr[1] == CHAR_COLON || ptr[1] == CHAR_DOT ||
-          ptr[1] == CHAR_EQUALS_SIGN) &&
-        check_posix_syntax(ptr, endptr))
-      return FALSE;
+    *endptr = ptr;
+    return TRUE;
     }
   }
 return FALSE;

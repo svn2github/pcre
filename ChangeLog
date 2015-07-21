@@ -88,6 +88,9 @@ Version 8.38 xx-xxx-xxxx
     compiled and could cause reading from uninitialized memory or an incorrect
     error diagnosis.
 
+16. Pathological patterns containing many nested occurrences of [: caused 
+    pcre_compile() to run for a very long time.
+
 
 Version 8.37 28-April-2015
 --------------------------

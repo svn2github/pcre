@@ -14504,4 +14504,7 @@ Failed: unmatched parentheses at offset 23
 
 /[[:\\](?'abc')[a:]/
 
+"[[[.\xe8Nq\xffq\xff\xe0\x2|||::Nq\xffq\xff\xe0\x6\x2|||::[[[:[::::::[[[[[::::::::[:[[[:[:::[[[[[[[[[[[[:::::::::::::::::[[.\xe8Nq\xffq\xff\xe0\x2|||::Nq\xffq\xff\xe0\x6\x2|||::[[[:[::::::[[[[[::::::::[:[[[:[:::[[[[[[[[[[[[[[:::E[[[:[:[[:[:::[[:::E[[[:[:[[:'[:::::E[[[:[::::::[[[:[[[[[[[::E[[[:[::::::[[[:[[[[[[[[:[[::[::::[[:::::::[[:[[[[[[[:[[::[:[[:[~"
+Failed: missing terminating ] for character class at offset 353
+
 /-- End of testinput2 --/
