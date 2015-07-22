@@ -3936,7 +3936,7 @@ pcre_uchar terminator;          /* Don't combine these lines; the Solaris cc */
 terminator = *(++ptr);   /* compiler warns about "non-constant" initializer. */
 for (++ptr; *ptr != CHAR_NULL; ptr++)
   {
-  if (*ptr == CHAR_BACKSLASH && 
+  if (*ptr == CHAR_BACKSLASH &&
       (ptr[1] == CHAR_RIGHT_SQUARE_BRACKET ||
        ptr[1] == CHAR_BACKSLASH))
     ptr++;
@@ -6274,13 +6274,13 @@ for (;; ptr++)
               }
             while (*scode == OP_ALT);
             }
-            
-          /* A conditional group with only one branch has an implicit empty 
+
+          /* A conditional group with only one branch has an implicit empty
           alternative branch. */
 
           if (*bracode == OP_COND && bracode[GET(bracode,1)] != OP_ALT)
-            *bracode = OP_SCOND; 
- 
+            *bracode = OP_SCOND;
+
           /* Handle possessive quantifiers. */
 
           if (possessive_quantifier)
@@ -7337,9 +7337,14 @@ for (;; ptr++)
 
 
         /* ------------------------------------------------------------ */
-        case CHAR_R:              /* Recursion */
-        ptr++;                    /* Same as (?0)      */
-        /* Fall through */
+        case CHAR_R:              /* Recursion, same as (?0) */
+        recno = 0;
+        if (*(++ptr) != CHAR_RIGHT_PARENTHESIS)
+          {
+          *errorcodeptr = ERR29;
+          goto FAILED;
+          }
+        goto HANDLE_RECURSION;
 
 
         /* ------------------------------------------------------------ */

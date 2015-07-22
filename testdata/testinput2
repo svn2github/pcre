@@ -4190,4 +4190,6 @@ backtracking verbs. --/
 
 /()(?(R)0)*+/BZ
 
+/(?R-:(?</
+
 /-- End of testinput2 --/

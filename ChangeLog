@@ -88,13 +88,16 @@ Version 8.38 xx-xxx-xxxx
     compiled and could cause reading from uninitialized memory or an incorrect
     error diagnosis.
 
-16. Pathological patterns containing many nested occurrences of [: caused 
+23. Pathological patterns containing many nested occurrences of [: caused 
     pcre_compile() to run for a very long time.
 
-17. A conditional group with only one branch has an implicit empty alternative
+24. A conditional group with only one branch has an implicit empty alternative
     branch and must therefore be treated as potentially matching an empty
     string.
 
+25. If (?R was followed by - or + incorrect behaviour happened instead of a
+    diagnostic. 
+     
 
 Version 8.37 28-April-2015
 --------------------------
