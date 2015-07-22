@@ -3234,7 +3234,7 @@ while (TRUE)
   {
   if (*rec_count == 0)
     return 0;
-  rec_count--;
+  (*rec_count)--;
 
   last = TRUE;
   any = FALSE;
