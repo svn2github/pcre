@@ -91,6 +91,10 @@ Version 8.38 xx-xxx-xxxx
 16. Pathological patterns containing many nested occurrences of [: caused 
     pcre_compile() to run for a very long time.
 
+17. A conditional group with only one branch has an implicit empty alternative
+    branch and must therefore be treated as potentially matching an empty
+    string.
+
 
 Version 8.37 28-April-2015
 --------------------------
