@@ -97,6 +97,9 @@ Version 8.38 xx-xxx-xxxx
 
 25. If (?R was followed by - or + incorrect behaviour happened instead of a
     diagnostic. 
+    
+26. Arrange to give up on finding the minimum matching length for overly 
+    complex patterns. 
      
 
 Version 8.37 28-April-2015

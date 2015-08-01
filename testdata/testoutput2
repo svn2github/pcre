@@ -14526,4 +14526,15 @@ Failed: missing terminating ] for character class at offset 353
 /(?R-:(?</
 Failed: (?R or (?[+-]digits must be followed by ) at offset 3
 
+/(?1){3918}(((((0(\k'R'))))(?J)(?'R'(?'R'\3){99})))/I
+Capturing subpattern count = 8
+Max back reference = 8
+Named capturing subpatterns:
+  R   7
+  R   8
+No options
+Duplicate name status changes
+No first char
+Need char = '0'
+
 /-- End of testinput2 --/
