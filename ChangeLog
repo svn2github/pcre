@@ -100,6 +100,12 @@ Version 8.38 xx-xxx-xxxx
     
 26. Arrange to give up on finding the minimum matching length for overly 
     complex patterns. 
+    
+27. Similar to (4) above: in a pattern with duplicated named groups and an 
+    occurrence of (?| it is possible for an apparently non-recursive back 
+    reference to become recursive if a later named group with the relevant 
+    number is encountered. This could lead to a buffer overflow. Wen Guanxing 
+    from Venustech ADLAB discovered this bug.
      
 
 Version 8.37 28-April-2015

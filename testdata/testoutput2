@@ -14537,4 +14537,6 @@ Duplicate name status changes
 No first char
 Need char = '0'
 
+/(?J:(?|(:(?|(?'R')(\k'R')|((?'R')))H'Rk'Rf)|s(?'R')))/
+
 /-- End of testinput2 --/

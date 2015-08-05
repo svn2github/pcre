@@ -6668,6 +6668,7 @@ for (;; ptr++)
         /* ------------------------------------------------------------ */
         case CHAR_VERTICAL_LINE:  /* Reset capture count for each branch */
         reset_bracount = TRUE;
+        cd->dupgroups = TRUE;     /* Record (?| encountered */ 
         /* Fall through */
 
         /* ------------------------------------------------------------ */
@@ -7178,7 +7179,8 @@ for (;; ptr++)
         if (lengthptr != NULL)
           {
           named_group *ng;
-
+          recno = 0;
+           
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -7193,32 +7195,6 @@ for (;; ptr++)
             {
             *errorcodeptr = ERR48;
             goto FAILED;
-            }
-
-          /* The name table does not exist in the first pass; instead we must
-          scan the list of names encountered so far in order to get the
-          number. If the name is not found, set the value to 0 for a forward
-          reference. */
-
-          recno = 0;
-          ng = cd->named_groups;
-          for (i = 0; i < cd->names_found; i++, ng++)
-            {
-            if (namelen == ng->length &&
-                STRNCMP_UC_UC(name, ng->name, namelen) == 0)
-              {
-              open_capitem *oc;
-              recno = ng->number;
-              if (is_recurse) break;
-              for (oc = cd->open_caps; oc != NULL; oc = oc->next)
-                {
-                if (oc->number == recno)
-                  {
-                  oc->flag = TRUE;
-                  break;
-                  }
-                }
-              }
             }
 
           /* Count named back references. */
@@ -7242,7 +7218,44 @@ for (;; ptr++)
           issue is fixed "properly" in PCRE2. As PCRE1 is now in maintenance
           only mode, we finesse the bug by allowing more memory always. */
 
-          /* if (recno == 0) */ *lengthptr += 2 + 2*LINK_SIZE;
+          *lengthptr += 2 + 2*LINK_SIZE;
+          
+          /* It is even worse than that. The current reference may be to an
+          existing named group with a different number (so apparently not
+          recursive) but which later on is also attached to a group with the
+          current number. This can only happen if $(| has been previous 
+          encountered. In that case, we allow yet more memory, just in case. 
+          (Again, this is fixed "properly" in PCRE2. */
+          
+          if (cd->dupgroups) *lengthptr += 2 + 2*LINK_SIZE;
+
+          /* Otherwise, check for recursion here. The name table does not exist
+          in the first pass; instead we must scan the list of names encountered
+          so far in order to get the number. If the name is not found, leave
+          the value of recno as 0 for a forward reference. */
+           
+          else
+            { 
+            ng = cd->named_groups;
+            for (i = 0; i < cd->names_found; i++, ng++)
+              {
+              if (namelen == ng->length &&
+                  STRNCMP_UC_UC(name, ng->name, namelen) == 0)
+                {
+                open_capitem *oc;
+                recno = ng->number;
+                if (is_recurse) break;
+                for (oc = cd->open_caps; oc != NULL; oc = oc->next)
+                  {
+                  if (oc->number == recno)
+                    {
+                    oc->flag = TRUE;
+                    break;
+                    }
+                  }
+                }
+              }
+            }   
           }
 
         /* In the real compile, search the name table. We check the name
@@ -7289,8 +7302,6 @@ for (;; ptr++)
           for (i++; i < cd->names_found; i++)
             {
             if (STRCMP_UC_UC(slot + IMM2_SIZE, cslot + IMM2_SIZE) != 0) break;
-
-
             count++;
             cslot += cd->name_entry_size;
             }
@@ -9239,6 +9250,7 @@ cd->names_found = 0;
 cd->name_entry_size = 0;
 cd->name_table = NULL;
 cd->dupnames = FALSE;
+cd->dupgroups = FALSE;
 cd->namedrefcount = 0;
 cd->start_code = cworkspace;
 cd->hwm = cworkspace;
@@ -9273,7 +9285,7 @@ if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 
 DPRINTF(("end pre-compile: length=%d workspace=%d\n", length,
   (int)(cd->hwm - cworkspace)));
-
+  
 if (length > MAX_PATTERN_SIZE)
   {
   errorcode = ERR20;
