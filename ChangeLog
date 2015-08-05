@@ -106,6 +106,9 @@ Version 8.38 xx-xxx-xxxx
     reference to become recursive if a later named group with the relevant 
     number is encountered. This could lead to a buffer overflow. Wen Guanxing 
     from Venustech ADLAB discovered this bug.
+
+28. If pcregrep was given the -q option with -c or -l, or when handling a 
+    binary file, it incorrectly wrote output to stdout.
      
 
 Version 8.37 28-April-2015
