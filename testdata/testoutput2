@@ -14539,4 +14539,8 @@ Need char = '0'
 
 /(?J:(?|(:(?|(?'R')(\k'R')|((?'R')))H'Rk'Rf)|s(?'R')))/
 
+/0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
+    01
+No match
+
 /-- End of testinput2 --/

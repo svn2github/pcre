@@ -4196,4 +4196,7 @@ backtracking verbs. --/
 
 /(?J:(?|(:(?|(?'R')(\k'R')|((?'R')))H'Rk'Rf)|s(?'R')))/
 
+/0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
+    01
+
 /-- End of testinput2 --/

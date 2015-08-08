@@ -1321,6 +1321,13 @@ while (cc < ccend)
     cc += 1 + LINK_SIZE + IMM2_SIZE;
     break;
 
+    case OP_THEN:
+    stack_restore = TRUE;
+    if (common->control_head_ptr != 0)
+      *needs_control_head = TRUE;
+    cc ++;
+    break;
+
     default:
     stack_restore = TRUE;
     /* Fall through. */
