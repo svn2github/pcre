@@ -9135,10 +9135,10 @@ Failed: subpattern name expected at offset 3
 Failed: subpattern name expected at offset 3
 
 /\k/
-Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 2
+Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 1
 
 /\kabc/
-Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 5
+Failed: \k is not followed by a braced, angle-bracketed, or quoted name at offset 1
 
 /(?P=)/
 Failed: subpattern name expected at offset 4
@@ -9186,7 +9186,7 @@ Failed: unknown POSIX class name at offset 6
 Failed: unknown POSIX class name at offset 3
 
 /(^(a|b\g<-1'c))/
-Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 15
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 8
 
 /^(?+1)(?<a>x|y){0}z/
     xzxx
@@ -14098,10 +14098,10 @@ Failed: group name must start with a non-digit at offset 3
 Failed: group name must start with a non-digit at offset 4
 
 /\g'3gh'/
-Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 7
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 2
 
 /\g<5fg>/
-Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 7
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 2
 
 /(?(<4gh>)abc)/
 Failed: group name must start with a non-digit at offset 4
