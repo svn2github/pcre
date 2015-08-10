@@ -120,6 +120,11 @@ Version 8.38 xx-xxx-xxxx
 31. Added a check for integer overflow in conditions (?(<digits>) and
     (?(R<digits>). This omission was discovered by Karl Skomski with the LLVM
     fuzzer.
+    
+32. Handling recursive references such as (?2) when the reference is to a group 
+    later in the pattern uses code that is very hacked about and error-prone.
+    It has been re-written for PCRE2. Here in PCRE1, a check has been added to
+    give an internal error if it is obvious that compiling has gone wrong.
 
 
 Version 8.37 28-April-2015

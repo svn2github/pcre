@@ -464,7 +464,7 @@ static const char error_texts[] =
   "range out of order in character class\0"
   "nothing to repeat\0"
   /* 10 */
-  "operand of unlimited repeat could match the empty string\0"  /** DEAD **/
+  "internal error: invalid forward reference offset\0"
   "internal error: unexpected repeat\0"
   "unrecognized character after (? or (?-\0"
   "POSIX named classes are supported only within a class\0"
@@ -9434,6 +9434,16 @@ if (cd->hwm > cd->start_workspace)
     int offset, recno;
     cd->hwm -= LINK_SIZE;
     offset = GET(cd->hwm, 0);
+    
+    /* Check that the hwm handling hasn't gone wrong. This whole area is
+    rewritten in PCRE2 because there are some obscure cases. */ 
+     
+    if (offset == 0 || codestart[offset-1] != OP_RECURSE)
+      {
+      errorcode = ERR10; 
+      break;
+      }  
+ 
     recno = GET(codestart, offset);
     if (recno != prev_recno)
       {
