@@ -4199,4 +4199,8 @@ backtracking verbs. --/
 /0(?0)|(1)(*THEN)(*SKIP:0)(*FAIL)/
     01
 
+/((?(R8000000000)))/ 
+
+/(?(8000000000/
+
 /-- End of testinput2 --/

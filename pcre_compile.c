@@ -6769,6 +6769,12 @@ for (;; ptr++)
           {
           while (IS_DIGIT(*ptr))
             {
+            if (recno > INT_MAX / 10 - 1)  /* Integer overflow */              
+              {                                                             
+              while (IS_DIGIT(*ptr)) ptr++;                                 
+              *errorcodeptr = ERR61;                                        
+              goto FAILED; 
+              }
             recno = recno * 10 + (int)(*ptr - CHAR_0);
             ptr++;
             }
@@ -6903,6 +6909,11 @@ for (;; ptr++)
               *errorcodeptr = ERR15;
               goto FAILED;
               }
+            if (recno > INT_MAX / 10 - 1)   /* Integer overflow */          
+              {                                                                
+              *errorcodeptr = ERR61;                                        
+              goto FAILED;                                
+              }   
             recno = recno * 10 + name[i] - CHAR_0;
             }
           if (recno == 0) recno = RREF_ANY;

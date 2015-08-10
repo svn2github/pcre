@@ -14543,4 +14543,10 @@ Need char = '0'
     01
 No match
 
+/((?(R8000000000)))/ 
+Failed: number is too big at offset 16
+
+/(?(8000000000/
+Failed: number is too big at offset 13
+
 /-- End of testinput2 --/

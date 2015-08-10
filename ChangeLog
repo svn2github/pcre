@@ -116,6 +116,10 @@ Version 8.38 xx-xxx-xxxx
 
 30. Error messages for syntax errors following \g and \k were giving inaccurate 
     offsets in the pattern.
+    
+31. Added a check for integer overflow in conditions (?(<digits>) and
+    (?(R<digits>). This omission was discovered by Karl Skomski with the LLVM
+    fuzzer.
 
 
 Version 8.37 28-April-2015
