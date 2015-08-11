@@ -4203,4 +4203,6 @@ backtracking verbs. --/
 
 /(?(8000000000/
 
+/(?:ab)?(?:ab)(?:ab)/
+
 /-- End of testinput2 --/

@@ -126,6 +126,9 @@ Version 8.38 xx-xxx-xxxx
     It has been re-written for PCRE2. Here in PCRE1, a check has been added to
     give an internal error if it is obvious that compiling has gone wrong.
 
+33. The JIT compiler should not check repeats after a {0,1} repeat byte code.
+    This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
 
 Version 8.37 28-April-2015
 --------------------------
