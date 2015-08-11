@@ -14550,5 +14550,15 @@ Failed: number is too big at offset 16
 Failed: number is too big at offset 13
 
 /(?:ab)?(?:ab)(?:ab)/
+    abab
+ 0: abab
+    ababab
+ 0: ababab
+    aba
+No match
+
+/((*MARK:A))++a(*SKIP:B)b/
+    aacb
+No match
 
 /-- End of testinput2 --/

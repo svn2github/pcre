@@ -4204,5 +4204,11 @@ backtracking verbs. --/
 /(?(8000000000/
 
 /(?:ab)?(?:ab)(?:ab)/
+    abab
+    ababab
+    aba
+
+/((*MARK:A))++a(*SKIP:B)b/
+    aacb
 
 /-- End of testinput2 --/

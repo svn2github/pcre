@@ -129,6 +129,9 @@ Version 8.38 xx-xxx-xxxx
 33. The JIT compiler should not check repeats after a {0,1} repeat byte code.
     This issue was found by Karl Skomski with a custom LLVM fuzzer.
 
+34. The JIT compiler should restore the control chain for empty possessive
+    repeats. This issue was found by Karl Skomski with a custom LLVM fuzzer.
+
 
 Version 8.37 28-April-2015
 --------------------------
