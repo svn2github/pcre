@@ -9684,6 +9684,7 @@ set_jumps(common->currententry->calls, common->currententry->entry);
 
 sljit_emit_fast_enter(compiler, TMP2, 0);
 allocate_stack(common, private_data_size + framesize + alternativesize);
+count_match(common);
 OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(private_data_size + framesize + alternativesize - 1), TMP2, 0);
 copy_private_data(common, ccbegin, ccend, TRUE, private_data_size + framesize + alternativesize, framesize + alternativesize, needs_control_head);
 if (needs_control_head)
@@ -10028,6 +10029,7 @@ OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, stack));
 OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, limit_match));
 OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, base));
 OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(struct sljit_stack, limit));
+OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LIMIT_MATCH, TMP1, 0);
 
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
