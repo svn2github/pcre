@@ -14561,4 +14561,6 @@ No match
     aacb
 No match
 
+/(?J:(?|(:(?|(?'R')(\z(?|(?'R')(\k'R')|((?'R')))k'R')|((?'R')))H'Ak'Rf)|s(?'R')))/
+
 /-- End of testinput2 --/

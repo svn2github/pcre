@@ -7238,7 +7238,7 @@ for (;; ptr++)
           encountered. In that case, we allow yet more memory, just in case. 
           (Again, this is fixed "properly" in PCRE2. */
           
-          if (cd->dupgroups) *lengthptr += 2 + 2*LINK_SIZE;
+          if (cd->dupgroups) *lengthptr += 4 + 4*LINK_SIZE;
 
           /* Otherwise, check for recursion here. The name table does not exist
           in the first pass; instead we must scan the list of names encountered
@@ -9474,7 +9474,7 @@ used in this code because at least one compiler gives a warning about loss of
 "const" attribute if the cast (pcre_uchar *)codestart is used directly in the
 function call. */
 
-if ((options & PCRE_NO_AUTO_POSSESS) == 0)
+if (errorcode == 0 && (options & PCRE_NO_AUTO_POSSESS) == 0)
   {
   pcre_uchar *temp = (pcre_uchar *)codestart;
   auto_possessify(temp, utf, cd);
@@ -9701,4 +9701,3 @@ return (pcre32 *)re;
 }
 
 /* End of pcre_compile.c */
-
