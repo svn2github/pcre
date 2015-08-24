@@ -99,4 +99,6 @@ and a couple of things that are different with JIT. --/
 
 /(?:|a|){100}x/S++
 
+/(x(?1)){4}/S++
+
 /-- End of testinput12 --/

@@ -1502,4 +1502,7 @@
 /\C\X*QT/8
     Ӆ\x0aT
 
+/[\pS#moq]/
+    =
+
 /-- End of testinput6 --/

@@ -2469,4 +2469,8 @@ No match
     Ӆ\x0aT
 No match
 
+/[\pS#moq]/
+    =
+ 0: =
+
 /-- End of testinput6 --/

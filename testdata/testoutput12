@@ -195,4 +195,6 @@ No match, mark = m (JIT)
 
 /(?:|a|){100}x/S++
 
+/(x(?1)){4}/S++
+
 /-- End of testinput12 --/
