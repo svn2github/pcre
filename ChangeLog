@@ -143,6 +143,8 @@ Version 8.38 xx-xxx-xxxx
 37. Fix two assertion fails in JIT. These issues were found by Karl Skomski
     with a custom LLVM fuzzer.
 
+38. Fixed a corner case of range optimization in JIT.
+
 
 Version 8.37 28-April-2015
 --------------------------
