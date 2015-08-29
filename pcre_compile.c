@@ -4639,8 +4639,7 @@ for (;; ptr++)
   /* In the real compile phase, just check the workspace used by the forward
   reference list. */
 
-  else if (cd->hwm > cd->start_workspace + cd->workspace_size -
-           WORK_SIZE_SAFETY_MARGIN)
+  else if (cd->hwm > cd->start_workspace + cd->workspace_size)
     {
     *errorcodeptr = ERR52;
     goto FAILED;
