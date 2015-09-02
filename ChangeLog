@@ -149,9 +149,12 @@ Version 8.38 xx-xxx-xxxx
     exactly enough group forward references such that the last one extended
     into the workspace safety margin. The next one would have expanded the 
     workspace. The test for overflow was not including the safety margin.
-
+    
 40. A match limit issue is fixed in JIT which was found by Karl Skomski
     with a custom LLVM fuzzer.
+
+41. Remove the use of /dev/null in testdata/testinput2, because it doesn't
+    work under Windows. (Why has it taken so long for anyone to notice?) 
 
 
 Version 8.37 28-April-2015

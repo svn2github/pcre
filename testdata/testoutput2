@@ -5614,9 +5614,9 @@ No match
     123456\P
 No match
 
-//KF>/dev/null
-Compiled pattern written to /dev/null
-Study data written to /dev/null
+//KF>testsavedregex
+Compiled pattern written to testsavedregex
+Study data written to testsavedregex
 
 /abc/IS>testsavedregex
 Capturing subpattern count = 0
