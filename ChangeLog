@@ -150,6 +150,9 @@ Version 8.38 xx-xxx-xxxx
     into the workspace safety margin. The next one would have expanded the 
     workspace. The test for overflow was not including the safety margin.
 
+40. A match limit issue is fixed in JIT which was found by Karl Skomski
+    with a custom LLVM fuzzer.
+
 
 Version 8.37 28-April-2015
 --------------------------

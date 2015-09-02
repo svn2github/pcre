@@ -101,4 +101,7 @@ and a couple of things that are different with JIT. --/
 
 /(x(?1)){4}/S++
 
+/(.|.)*?bx/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabax
+
 /-- End of testinput12 --/
