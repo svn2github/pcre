@@ -155,6 +155,10 @@ Version 8.38 xx-xxx-xxxx
 
 41. Remove the use of /dev/null in testdata/testinput2, because it doesn't
     work under Windows. (Why has it taken so long for anyone to notice?) 
+    
+42. In a character class such as [\W\p{Any}] where both a negative-type escape
+    ("not a word character") and a property escape were present, the property
+    escape was being ignored.
 
 
 Version 8.37 28-April-2015

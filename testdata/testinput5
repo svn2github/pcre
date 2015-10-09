@@ -798,4 +798,13 @@
 /(?<=\K\x{17f})/8G+
     \x{17f}\x{17f}\x{17f}\x{17f}\x{17f}
 
+/[\W\p{Any}]/BZ
+    abc
+    123 
+
+/[\W\pL]/BZ
+    abc
+    ** Failers 
+    123     
+
 /-- End of testinput5 --/
