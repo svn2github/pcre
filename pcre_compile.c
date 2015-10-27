@@ -5512,7 +5512,7 @@ for (;; ptr++)
     actual compiled code. */
 
 #ifdef SUPPORT_UTF
-    if (xclass && (xclass_has_prop || !should_flip_negation || 
+    if (xclass && (xclass_has_prop || !should_flip_negation ||
         (options & PCRE_UCP) != 0))
 #elif !defined COMPILE_PCRE8
     if (xclass && (xclass_has_prop || !should_flip_negation))
@@ -6668,7 +6668,7 @@ for (;; ptr++)
         /* ------------------------------------------------------------ */
         case CHAR_VERTICAL_LINE:  /* Reset capture count for each branch */
         reset_bracount = TRUE;
-        cd->dupgroups = TRUE;     /* Record (?| encountered */ 
+        cd->dupgroups = TRUE;     /* Record (?| encountered */
         /* Fall through */
 
         /* ------------------------------------------------------------ */
@@ -6769,11 +6769,11 @@ for (;; ptr++)
           {
           while (IS_DIGIT(*ptr))
             {
-            if (recno > INT_MAX / 10 - 1)  /* Integer overflow */              
-              {                                                             
-              while (IS_DIGIT(*ptr)) ptr++;                                 
-              *errorcodeptr = ERR61;                                        
-              goto FAILED; 
+            if (recno > INT_MAX / 10 - 1)  /* Integer overflow */
+              {
+              while (IS_DIGIT(*ptr)) ptr++;
+              *errorcodeptr = ERR61;
+              goto FAILED;
               }
             recno = recno * 10 + (int)(*ptr - CHAR_0);
             ptr++;
@@ -6909,11 +6909,11 @@ for (;; ptr++)
               *errorcodeptr = ERR15;
               goto FAILED;
               }
-            if (recno > INT_MAX / 10 - 1)   /* Integer overflow */          
-              {                                                                
-              *errorcodeptr = ERR61;                                        
-              goto FAILED;                                
-              }   
+            if (recno > INT_MAX / 10 - 1)   /* Integer overflow */
+              {
+              *errorcodeptr = ERR61;
+              goto FAILED;
+              }
             recno = recno * 10 + name[i] - CHAR_0;
             }
           if (recno == 0) recno = RREF_ANY;
@@ -7191,7 +7191,7 @@ for (;; ptr++)
           {
           named_group *ng;
           recno = 0;
-           
+
           if (namelen == 0)
             {
             *errorcodeptr = ERR62;
@@ -7230,23 +7230,23 @@ for (;; ptr++)
           only mode, we finesse the bug by allowing more memory always. */
 
           *lengthptr += 2 + 2*LINK_SIZE;
-          
+
           /* It is even worse than that. The current reference may be to an
           existing named group with a different number (so apparently not
           recursive) but which later on is also attached to a group with the
-          current number. This can only happen if $(| has been previous 
-          encountered. In that case, we allow yet more memory, just in case. 
+          current number. This can only happen if $(| has been previous
+          encountered. In that case, we allow yet more memory, just in case.
           (Again, this is fixed "properly" in PCRE2. */
-          
+
           if (cd->dupgroups) *lengthptr += 4 + 4*LINK_SIZE;
 
           /* Otherwise, check for recursion here. The name table does not exist
           in the first pass; instead we must scan the list of names encountered
           so far in order to get the number. If the name is not found, leave
           the value of recno as 0 for a forward reference. */
-           
+
           else
-            { 
+            {
             ng = cd->named_groups;
             for (i = 0; i < cd->names_found; i++, ng++)
               {
@@ -7266,7 +7266,7 @@ for (;; ptr++)
                   }
                 }
               }
-            }   
+            }
           }
 
         /* In the real compile, search the name table. We check the name
@@ -9296,7 +9296,7 @@ if (errorcode != 0) goto PCRE_EARLY_ERROR_RETURN;
 
 DPRINTF(("end pre-compile: length=%d workspace=%d\n", length,
   (int)(cd->hwm - cworkspace)));
-  
+
 if (length > MAX_PATTERN_SIZE)
   {
   errorcode = ERR20;
@@ -9434,16 +9434,16 @@ if (cd->hwm > cd->start_workspace)
     int offset, recno;
     cd->hwm -= LINK_SIZE;
     offset = GET(cd->hwm, 0);
-    
+
     /* Check that the hwm handling hasn't gone wrong. This whole area is
-    rewritten in PCRE2 because there are some obscure cases. */ 
-     
+    rewritten in PCRE2 because there are some obscure cases. */
+
     if (offset == 0 || codestart[offset-1] != OP_RECURSE)
       {
-      errorcode = ERR10; 
+      errorcode = ERR10;
       break;
-      }  
- 
+      }
+
     recno = GET(codestart, offset);
     if (recno != prev_recno)
       {

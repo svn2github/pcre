@@ -331,7 +331,7 @@ case letter, it is converted to upper case. Then bit 6 of the character (hex
 but \ec{ becomes hex 3B ({ is 7B), and \ec; becomes hex 7B (; is 3B). If the
 data item (byte or 16-bit value) following \ec has a value greater than 127, a
 compile-time error occurs. This locks out non-ASCII characters in all modes.
-.P                                                    
+.P
 When PCRE is compiled in EBCDIC mode, \ea, \ee, \ef, \en, \er, and \et
 generate the appropriate EBCDIC code values. The \ec escape is processed
 as specified for Perl in the \fBperlebcdic\fP document. The only characters
@@ -342,15 +342,15 @@ to hex 1A); [, \e, ], ^, and _ encode characters 27-31 (hex 1B to hex 1F), and
 \e? becomes either 255 (hex FF) or 95 (hex 5F).
 .P
 Thus, apart from \e?, these escapes generate the same character code values as
-they do in an ASCII environment, though the meanings of the values mostly 
+they do in an ASCII environment, though the meanings of the values mostly
 differ. For example, \eG always generates code value 7, which is BEL in ASCII
 but DEL in EBCDIC.
 .P
 The sequence \e? generates DEL (127, hex 7F) in an ASCII environment, but
-because 127 is not a control character in EBCDIC, Perl makes it generate the 
-APC character. Unfortunately, there are several variants of EBCDIC. In most of 
-them the APC character has the value 255 (hex FF), but in the one Perl calls 
-POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC 
+because 127 is not a control character in EBCDIC, Perl makes it generate the
+APC character. Unfortunately, there are several variants of EBCDIC. In most of
+them the APC character has the value 255 (hex FF), but in the one Perl calls
+POSIX-BC its value is 95 (hex 5F). If certain other characters have POSIX-BC
 values, PCRE makes \e? generate 95; otherwise it generates 255.
 .P
 After \e0 up to two further octal digits are read. If there are fewer than two

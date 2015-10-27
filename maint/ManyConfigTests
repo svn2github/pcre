@@ -78,9 +78,26 @@ function runtest()
     exit 1
   fi
 
+# There is an infelicity in the Autotools world (as of October 2015) which
+# causes the message
+#
+# ar: `u' modifier ignored since `D' is the default (see `U')
+# 
+# to be output while linking. This triggers an unwanted error report from this
+# script, because it expects no stderr output while making. To get round this
+# we filter the stderr output through sed, removing all occurrences of the
+# above lines. Just for paranoia, check that sed is available before doing
+# this.
+
   echo "Making"
   make -j >/dev/null 2>teststderr
-  if [ $? -ne 0 -o -s teststderr ]; then
+  makeRC=$? 
+  if command -v sed >/dev/null 2>&1 ; then
+    sed "/\`u' modifier ignored since \`D' is the default/ d" \
+      teststderr > teststderrM
+    mv -f teststderrM teststderr   
+  fi
+  if [ $makeRC -ne 0 -o -s teststderr ]; then
     echo " "
     echo "**** Errors or warnings while making ****"
     echo " "
