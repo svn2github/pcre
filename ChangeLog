@@ -159,6 +159,8 @@ Version 8.38 27-October-2015
 42. In a character class such as [\W\p{Any}] where both a negative-type escape
     ("not a word character") and a property escape were present, the property
     escape was being ignored.
+    
+43. Fix crash caused by very long (*MARK) or (*THEN) names. 
 
 
 Version 8.37 28-April-2015
