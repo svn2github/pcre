@@ -2473,4 +2473,10 @@ No match
     =
  0: =
 
+/[[:punct:]]/8W
+    \xc2\xb4
+No match
+    \x{b4} 
+No match
+
 /-- End of testinput6 --/

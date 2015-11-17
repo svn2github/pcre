@@ -1505,4 +1505,8 @@
 /[\pS#moq]/
     =
 
+/[[:punct:]]/8W
+    \xc2\xb4
+    \x{b4} 
+
 /-- End of testinput6 --/
