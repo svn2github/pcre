@@ -162,6 +162,11 @@ Version 8.38 27-October-2015
     
 43. Fix crash caused by very long (*MARK) or (*THEN) names. 
 
+44. A sequence such as [[:punct:]b] that is, a POSIX character class followed
+    by a single ASCII character in a class item, was incorrectly compiled in
+    UCP mode. The POSIX class got lost, but only if the single character
+    followed it.
+
 
 Version 8.37 28-April-2015
 --------------------------
