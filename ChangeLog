@@ -159,8 +159,8 @@ Version 8.38 27-October-2015
 42. In a character class such as [\W\p{Any}] where both a negative-type escape
     ("not a word character") and a property escape were present, the property
     escape was being ignored.
-    
-43. Fix crash caused by very long (*MARK) or (*THEN) names. 
+
+43. Fix crash caused by very long (*MARK) or (*THEN) names.
 
 44. A sequence such as [[:punct:]b] that is, a POSIX character class followed
     by a single ASCII character in a class item, was incorrectly compiled in
@@ -169,6 +169,12 @@ Version 8.38 27-October-2015
 
 45. [:punct:] in UCP mode was matching some characters in the range 128-255
     that should not have been matched.
+
+46. If [:^ascii:] or [:^xdigit:] or [:^cntrl:] are present in a non-negated
+    class, all characters with code points greater than 255 are in the class.
+    When a Unicode property was also in the class (if PCRE_UCP is set, escapes
+    such as \w are turned into Unicode properties), wide characters were not
+    correctly handled, and could fail to match.
 
 
 Version 8.37 28-April-2015

@@ -4940,9 +4940,10 @@ for (;; ptr++)
       (which is on the stack). We have to remember that there was XCLASS data,
       however. */
 
+      if (class_uchardata > class_uchardata_base) xclass = TRUE;
+       
       if (lengthptr != NULL && class_uchardata > class_uchardata_base)
         {
-        xclass = TRUE;
         *lengthptr += (int)(class_uchardata - class_uchardata_base);
         class_uchardata = class_uchardata_base;
         }
@@ -5045,10 +5046,26 @@ for (;; ptr++)
             ptr = tempptr + 1;
             continue;
 
-            /* For all other POSIX classes, no special action is taken in UCP
-            mode. Fall through to the non_UCP case. */
+            /* For the other POSIX classes (ascii, xdigit) we are going to fall
+            through to the non-UCP case and build a bit map for characters with
+            code points less than 256. If we are in a negated POSIX class
+            within a non-negated overall class, characters with code points
+            greater than 255 must all match. In the special case where we have
+            not yet generated any xclass data, and this is the final item in
+            the overall class, we need do nothing: later on, the opcode
+            OP_NCLASS will be used to indicate that characters greater than 255
+            are acceptable. If we have already seen an xclass item or one may
+            follow (we have to assume that it might if this is not the end of
+            the class), explicitly match all wide codepoints. */
 
             default:
+            if (!negate_class && local_negate &&
+                (xclass || tempptr[2] != CHAR_RIGHT_SQUARE_BRACKET))
+              {
+              *class_uchardata++ = XCL_RANGE;
+              class_uchardata += PRIV(ord2utf)(0x100, class_uchardata);
+              class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
+              }
             break;
             }
           }
