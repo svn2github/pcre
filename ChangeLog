@@ -4,8 +4,8 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
-Version 8.38 27-October-2015
-----------------------------
+Version 8.38 23-November-2015
+-----------------------------
 
 1.  If a group that contained a recursive back reference also contained a
     forward reference subroutine call followed by a non-forward-reference

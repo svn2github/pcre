@@ -4941,7 +4941,7 @@ for (;; ptr++)
       however. */
 
       if (class_uchardata > class_uchardata_base) xclass = TRUE;
-       
+
       if (lengthptr != NULL && class_uchardata > class_uchardata_base)
         {
         *lengthptr += (int)(class_uchardata - class_uchardata_base);
