@@ -4217,4 +4217,12 @@ backtracking verbs. --/
 
 /a[[:punct:]b]/BZ
 
+/L(?#(|++<!(2)?/BZ
+
+/L(?#(|++<!(2)?/BOZ
+
+/L(?#(|++<!(2)?/BCZ
+
+/L(?#(|++<!(2)?/BCOZ
+
 /-- End of testinput2 --/

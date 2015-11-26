@@ -4699,6 +4699,23 @@ for (;; ptr++)
       }
     }
 
+  /* Skip over (?# comments. We need to do this here because we want to know if
+  the next thing is a quantifier, and these comments may come between an item
+  and its quantifier. */
+
+  if (c == CHAR_LEFT_PARENTHESIS && ptr[1] == CHAR_QUESTION_MARK &&
+      ptr[2] == CHAR_NUMBER_SIGN)
+    {
+    ptr += 3;
+    while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
+    if (*ptr == CHAR_NULL)
+      {
+      *errorcodeptr = ERR18;
+      goto FAILED;
+      }
+    continue;
+    }
+
   /* See if the next thing is a quantifier. */
 
   is_quantifier =
@@ -6528,21 +6545,6 @@ for (;; ptr++)
 
     case CHAR_LEFT_PARENTHESIS:
     ptr++;
-
-    /* First deal with comments. Putting this code right at the start ensures
-    that comments have no bad side effects. */
-
-    if (ptr[0] == CHAR_QUESTION_MARK && ptr[1] == CHAR_NUMBER_SIGN)
-      {
-      ptr += 2;
-      while (*ptr != CHAR_NULL && *ptr != CHAR_RIGHT_PARENTHESIS) ptr++;
-      if (*ptr == CHAR_NULL)
-        {
-        *errorcodeptr = ERR18;
-        goto FAILED;
-        }
-      continue;
-      }
 
     /* Now deal with various "verbs" that can be introduced by '*'. */
 

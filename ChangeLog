@@ -4,6 +4,14 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
+Version 8.39 xx-xxxxxx-201x
+---------------------------
+
+1.  If PCRE_AUTO_CALLOUT was set on a pattern that had a (?# comment between 
+    an item and its qualifier (for example, A(?#comment)?B) pcre_compile() 
+    misbehaved. This bug was found by the LLVM fuzzer.
+
+
 Version 8.38 23-November-2015
 -----------------------------
 
