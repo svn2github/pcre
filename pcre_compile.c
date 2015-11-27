@@ -4645,9 +4645,10 @@ for (;; ptr++)
     goto FAILED;
     }
 
-  /* If in \Q...\E, check for the end; if not, we have a literal */
+  /* If in \Q...\E, check for the end; if not, we have a literal. Otherwise an
+  isolated \E is ignored. */
 
-  if (inescq && c != CHAR_NULL)
+  if (c != CHAR_NULL)
     {
     if (c == CHAR_BACKSLASH && ptr[1] == CHAR_E)
       {
@@ -4655,7 +4656,7 @@ for (;; ptr++)
       ptr++;
       continue;
       }
-    else
+    else if (inescq)
       {
       if (previous_callout != NULL)
         {
@@ -4670,7 +4671,6 @@ for (;; ptr++)
         }
       goto NORMAL_CHAR;
       }
-    /* Control does not reach here. */
     }
 
   /* In extended mode, skip white space and comments. We need a loop in order

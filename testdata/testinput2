@@ -4225,4 +4225,6 @@ backtracking verbs. --/
 
 /L(?#(|++<!(2)?/BCOZ
 
+/(A*)\E+/CBZ
+
 /-- End of testinput2 --/

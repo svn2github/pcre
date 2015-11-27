@@ -11,7 +11,11 @@ Version 8.39 xx-xxxxxx-201x
     an item and its qualifier (for example, A(?#comment)?B) pcre_compile() 
     misbehaved. This bug was found by the LLVM fuzzer.
     
-2.  Further to 8.38/46, negated classes such as [^[:^ascii:]\d] were also not 
+2.  Similar to the above, if an isolated \E was present between an item and its
+    qualifier when PCRE_AUTO_CALLOUT was set, pcre_compile() misbehaved. This
+    bug was found by the LLVM fuzzer.
+
+3.  Further to 8.38/46, negated classes such as [^[:^ascii:]\d] were also not 
     working correctly in UCP mode.
 
 
