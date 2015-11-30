@@ -4671,17 +4671,27 @@ for (;; ptr++)
         }
       goto NORMAL_CHAR;
       }
+      
+    /* Check for the start of a \Q...\E sequence. We must do this here rather
+    than later in case it is immediately followed by \E, which turns it into a
+    "do nothing" sequence. */                                            
+                                                                          
+    if (c == CHAR_BACKSLASH && ptr[1] == CHAR_Q)
+      {                                                                   
+      inescq = TRUE;                                                      
+      ptr++;                                                  
+      continue;
+      }           
     }
 
-  /* In extended mode, skip white space and comments. We need a loop in order
-  to check for more white space and more comments after a comment. */
+  /* In extended mode, skip white space and comments. */
 
   if ((options & PCRE_EXTENDED) != 0)
     {
-    for (;;)
+    const pcre_uchar *wscptr = ptr;
+    while (MAX_255(c) && (cd->ctypes[c] & ctype_space) != 0) c = *(++ptr);
+    if (c == CHAR_NUMBER_SIGN)
       {
-      while (MAX_255(c) && (cd->ctypes[c] & ctype_space) != 0) c = *(++ptr);
-      if (c != CHAR_NUMBER_SIGN) break;
       ptr++;
       while (*ptr != CHAR_NULL)
         {
@@ -4695,7 +4705,15 @@ for (;; ptr++)
         if (utf) FORWARDCHAR(ptr);
 #endif
         }
-      c = *ptr;     /* Either NULL or the char after a newline */
+      }
+
+    /* If we skipped any characters, restart the loop. Otherwise, we didn't see
+    a comment. */
+
+    if (ptr > wscptr)
+      {
+      ptr--;
+      continue;
       }
     }
 
@@ -7900,16 +7918,6 @@ for (;; ptr++)
       c = ec;
     else
       {
-      if (escape == ESC_Q)            /* Handle start of quoted string */
-        {
-        if (ptr[1] == CHAR_BACKSLASH && ptr[2] == CHAR_E)
-          ptr += 2;               /* avoid empty string */
-            else inescq = TRUE;
-        continue;
-        }
-
-      if (escape == ESC_E) continue;  /* Perl ignores an orphan \E */
-
       /* For metasequences that actually match a character, we disable the
       setting of a first character if it hasn't already been set. */
 
