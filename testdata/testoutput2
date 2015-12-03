@@ -419,7 +419,7 @@ Need char = '>'
 
 /(?U)<.*>/I
 Capturing subpattern count = 0
-Options: ungreedy
+No options
 First char = '<'
 Need char = '>'
     abc<def>ghi<klm>nop
@@ -443,7 +443,7 @@ Need char = '='
 
 /(?U)={3,}?/I
 Capturing subpattern count = 0
-Options: ungreedy
+No options
 First char = '='
 Need char = '='
     abc========def
@@ -477,7 +477,7 @@ Failed: lookbehind assertion is not fixed length at offset 12
 
 /(?i)abc/I
 Capturing subpattern count = 0
-Options: caseless
+No options
 First char = 'a' (caseless)
 Need char = 'c' (caseless)
 
@@ -489,7 +489,7 @@ No need char
 
 /(?i)^1234/I
 Capturing subpattern count = 0
-Options: anchored caseless
+Options: anchored
 No first char
 No need char
 
@@ -502,7 +502,7 @@ No need char
 /(?s).*/I
 Capturing subpattern count = 0
 May match empty string
-Options: anchored dotall
+Options: anchored
 No first char
 No need char
 
@@ -516,7 +516,7 @@ Starting chars: a b c d
 
 /(?i)[abcd]/IS
 Capturing subpattern count = 0
-Options: caseless
+No options
 No first char
 No need char
 Subject length lower bound = 1
@@ -524,7 +524,7 @@ Starting chars: A B C D a b c d
 
 /(?m)[xy]|(b|c)/IS
 Capturing subpattern count = 1
-Options: multiline
+No options
 No first char
 No need char
 Subject length lower bound = 1
@@ -538,7 +538,7 @@ No need char
 
 /(?i)(^a|^b)/Im
 Capturing subpattern count = 1
-Options: caseless multiline
+Options: multiline
 First char at start or follows newline
 No need char
 
@@ -1179,7 +1179,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Options: anchored dotall
+Options: anchored
 No first char
 No need char
 
@@ -2735,7 +2735,7 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Options: caseless extended
+Options: extended
 First char = 'a' (caseless)
 Need char = 'c' (caseless)
 
@@ -2748,7 +2748,7 @@ Need char = 'c' (caseless)
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Options: caseless extended
+Options: extended
 First char = 'a' (caseless)
 Need char = 'c' (caseless)
 
@@ -3095,7 +3095,7 @@ Need char = 'b'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Options: ungreedy
+No options
 First char = 'x'
 Need char = 'b'
     xaaaab
@@ -3497,7 +3497,7 @@ Need char = 'c'
 
 /(?i)[ab]/IS
 Capturing subpattern count = 0
-Options: caseless
+No options
 No first char
 No need char
 Subject length lower bound = 1
@@ -6299,7 +6299,7 @@ Capturing subpattern count = 3
 Named capturing subpatterns:
   A   2
   A   3
-Options: anchored dupnames
+Options: anchored
 Duplicate name status changes
 No first char
 No need char
