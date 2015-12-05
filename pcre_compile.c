@@ -7280,7 +7280,7 @@ for (;; ptr++)
           issue is fixed "properly" in PCRE2. As PCRE1 is now in maintenance
           only mode, we finesse the bug by allowing more memory always. */
 
-          *lengthptr += 2 + 2*LINK_SIZE;
+          *lengthptr += 4 + 4*LINK_SIZE;
 
           /* It is even worse than that. The current reference may be to an
           existing named group with a different number (so apparently not
