@@ -23,15 +23,18 @@ Version 8.39 xx-xxxxxx-201x
 
 5.  Allow for up to 32-bit numbers in the ordin() function in pcregrep.
 
-6 . An empty \Q\E sequence between an item and its qualifier caused
+6.  An empty \Q\E sequence between an item and its qualifier caused
     pcre_compile() to misbehave when auto callouts were enabled. This bug was
     found by the LLVM fuzzer.
     
-7 . If a pattern that was compiled with PCRE_EXTENDED started with white 
+7.  If a pattern that was compiled with PCRE_EXTENDED started with white 
     space or a #-type comment that was followed by (?-x), which turns off 
     PCRE_EXTENDED, and there was no subsequent (?x) to turn it on again,
     pcre_compile() assumed that (?-x) applied to the whole pattern and
     consequently mis-compiled it. This bug was found by the LLVM fuzzer.
+    
+8.  An call of pcre_copy_named_substring() for a named substring whose number
+    was greater than the space in the ovector could cause a crash.
 
 
 Version 8.38 23-November-2015

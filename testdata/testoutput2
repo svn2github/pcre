@@ -14639,4 +14639,9 @@ No match
         End
 ------------------------------------------------------------------
 
+/(?<A>)(?J:(?<B>)(?<B>))(?<C>)/
+    \O\CC
+Matched, but too many substrings
+copy substring C failed -7
+
 /-- End of testinput2 --/

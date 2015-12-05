@@ -4229,4 +4229,7 @@ backtracking verbs. --/
 
 /()\Q\E*]/BCZ
 
+/(?<A>)(?J:(?<B>)(?<B>))(?<C>)/
+    \O\CC
+
 /-- End of testinput2 --/
