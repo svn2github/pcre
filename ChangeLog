@@ -40,6 +40,9 @@ Version 8.39 xx-xxxxxx-201x
     group that reset capture numbers (compare 8.38/7 below). Once again, I have
     just allowed for more memory, even if not needed. (A proper fix is
     implemented in PCRE2, but it involves a lot of refactoring.)
+    
+10. pcre_get_substring_list() crashed if the use of \K in a match caused the 
+    start of the match to be earlier than the end. 
 
 
 Version 8.38 23-November-2015

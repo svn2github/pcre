@@ -4232,4 +4232,7 @@ backtracking verbs. --/
 /(?<A>)(?J:(?<B>)(?<B>))(?<C>)/
     \O\CC
 
+/(?=a\K)/ 
+    ring bpattingbobnd $ 1,oern cou \rb\L
+
 /-- End of testinput2 --/

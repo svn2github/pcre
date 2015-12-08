@@ -461,7 +461,10 @@ pcre_uchar **stringlist;
 pcre_uchar *p;
 
 for (i = 0; i < double_count; i += 2)
-  size += sizeof(pcre_uchar *) + IN_UCHARS(ovector[i+1] - ovector[i] + 1);
+  {
+  size += sizeof(pcre_uchar *) + IN_UCHARS(1);
+  if (ovector[i+1] > ovector[i]) size += IN_UCHARS(ovector[i+1] - ovector[i]);
+  } 
 
 stringlist = (pcre_uchar **)(PUBL(malloc))(size);
 if (stringlist == NULL) return PCRE_ERROR_NOMEMORY;
@@ -477,7 +480,7 @@ p = (pcre_uchar *)(stringlist + stringcount + 1);
 
 for (i = 0; i < double_count; i += 2)
   {
-  int len = ovector[i+1] - ovector[i];
+  int len = (ovector[i+1] > ovector[i])? (ovector[i+1] - ovector[i]) : 0;
   memcpy(p, subject + ovector[i], IN_UCHARS(len));
   *stringlist++ = p;
   p += len;

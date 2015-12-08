@@ -14644,4 +14644,10 @@ No match
 Matched, but too many substrings
 copy substring C failed -7
 
+/(?=a\K)/ 
+    ring bpattingbobnd $ 1,oern cou \rb\L
+Start of matched string is beyond its end - displaying from end to start.
+ 0: a
+ 0L 
+
 /-- End of testinput2 --/
