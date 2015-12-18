@@ -4671,17 +4671,17 @@ for (;; ptr++)
         }
       goto NORMAL_CHAR;
       }
-      
+
     /* Check for the start of a \Q...\E sequence. We must do this here rather
     than later in case it is immediately followed by \E, which turns it into a
-    "do nothing" sequence. */                                            
-                                                                          
+    "do nothing" sequence. */
+
     if (c == CHAR_BACKSLASH && ptr[1] == CHAR_Q)
-      {                                                                   
-      inescq = TRUE;                                                      
-      ptr++;                                                  
+      {
+      inescq = TRUE;
+      ptr++;
       continue;
-      }           
+      }
     }
 
   /* In extended mode, skip white space and comments. */
@@ -7607,7 +7607,7 @@ for (;; ptr++)
         newoptions = (options | set) & (~unset);
 
         /* If the options ended with ')' this is not the start of a nested
-        group with option changes, so the options change at this level. 
+        group with option changes, so the options change at this level.
         If we are not at the pattern start, reset the greedy defaults and the
         case value for firstchar and reqchar. */
 
