@@ -4895,7 +4895,6 @@ while (*cc != XCL_END)
 
 /* We are not necessary in utf mode even in 8 bit mode. */
 cc = ccbegin;
-detect_partial_match(common, backtracks);
 read_char_range(common, min, max, (cc[-1] & XCL_NOT) != 0);
 
 if ((cc[-1] & XCL_HASPROP) == 0)
@@ -4903,7 +4902,7 @@ if ((cc[-1] & XCL_HASPROP) == 0)
   if ((cc[-1] & XCL_MAP) != 0)
     {
     jump = CMP(SLJIT_GREATER, TMP1, 0, SLJIT_IMM, 255);
-    if (!check_class_ranges(common, (const pcre_uint8 *)cc, (((const pcre_uint8 *)cc)[31] & 0x80) != 0, TRUE, &found))
+    if (!check_class_ranges(common, (const sljit_ub *)cc, (((const sljit_ub *)cc)[31] & 0x80) != 0, TRUE, &found))
       {
       OP2(SLJIT_AND, TMP2, 0, TMP1, 0, SLJIT_IMM, 0x7);
       OP2(SLJIT_LSHR, TMP1, 0, TMP1, 0, SLJIT_IMM, 3);
@@ -5282,19 +5281,13 @@ if (found != NULL)
 
 #endif
 
-static pcre_uchar *compile_char1_matchingpath(compiler_common *common, pcre_uchar type, pcre_uchar *cc, jump_list **backtracks)
+static pcre_uchar *compile_simple_assertion_matchingpath(compiler_common *common, pcre_uchar type, pcre_uchar *cc, jump_list **backtracks)
 {
 DEFINE_COMPILER;
 int length;
-unsigned int c, oc, bit;
-compare_context context;
 struct sljit_jump *jump[4];
-jump_list *end_list;
 #ifdef SUPPORT_UTF
 struct sljit_label *label;
-#ifdef SUPPORT_UCP
-pcre_uchar propdata[5];
-#endif
 #endif /* SUPPORT_UTF */
 
 switch(type)
@@ -5316,191 +5309,6 @@ switch(type)
   add_jump(compiler, &common->wordboundary, JUMP(SLJIT_FAST_CALL));
   add_jump(compiler, backtracks, JUMP(type == OP_NOT_WORD_BOUNDARY ? SLJIT_NOT_ZERO : SLJIT_ZERO));
   return cc;
-
-  case OP_NOT_DIGIT:
-  case OP_DIGIT:
-  /* Digits are usually 0-9, so it is worth to optimize them. */
-  detect_partial_match(common, backtracks);
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-  if (common->utf && is_char7_bitset((const pcre_uint8*)common->ctypes - cbit_length + cbit_digit, FALSE))
-    read_char7_type(common, type == OP_NOT_DIGIT);
-  else
-#endif
-    read_char8_type(common, type == OP_NOT_DIGIT);
-    /* Flip the starting bit in the negative case. */
-  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, ctype_digit);
-  add_jump(compiler, backtracks, JUMP(type == OP_DIGIT ? SLJIT_ZERO : SLJIT_NOT_ZERO));
-  return cc;
-
-  case OP_NOT_WHITESPACE:
-  case OP_WHITESPACE:
-  detect_partial_match(common, backtracks);
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-  if (common->utf && is_char7_bitset((const pcre_uint8*)common->ctypes - cbit_length + cbit_space, FALSE))
-    read_char7_type(common, type == OP_NOT_WHITESPACE);
-  else
-#endif
-    read_char8_type(common, type == OP_NOT_WHITESPACE);
-  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, ctype_space);
-  add_jump(compiler, backtracks, JUMP(type == OP_WHITESPACE ? SLJIT_ZERO : SLJIT_NOT_ZERO));
-  return cc;
-
-  case OP_NOT_WORDCHAR:
-  case OP_WORDCHAR:
-  detect_partial_match(common, backtracks);
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-  if (common->utf && is_char7_bitset((const pcre_uint8*)common->ctypes - cbit_length + cbit_word, FALSE))
-    read_char7_type(common, type == OP_NOT_WORDCHAR);
-  else
-#endif
-    read_char8_type(common, type == OP_NOT_WORDCHAR);
-  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, ctype_word);
-  add_jump(compiler, backtracks, JUMP(type == OP_WORDCHAR ? SLJIT_ZERO : SLJIT_NOT_ZERO));
-  return cc;
-
-  case OP_ANY:
-  detect_partial_match(common, backtracks);
-  read_char_range(common, common->nlmin, common->nlmax, TRUE);
-  if (common->nltype == NLTYPE_FIXED && common->newline > 255)
-    {
-    jump[0] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
-    end_list = NULL;
-    if (common->mode != JIT_PARTIAL_HARD_COMPILE)
-      add_jump(compiler, &end_list, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-    else
-      check_str_end(common, &end_list);
-
-    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-    add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, common->newline & 0xff));
-    set_jumps(end_list, LABEL());
-    JUMPHERE(jump[0]);
-    }
-  else
-    check_newlinechar(common, common->nltype, backtracks, TRUE);
-  return cc;
-
-  case OP_ALLANY:
-  detect_partial_match(common, backtracks);
-#ifdef SUPPORT_UTF
-  if (common->utf)
-    {
-    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
-#if defined COMPILE_PCRE8
-    jump[0] = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
-    OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
-    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-#elif defined COMPILE_PCRE16
-    jump[0] = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
-    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
-    OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xd800);
-    OP_FLAGS(SLJIT_MOV, TMP1, 0, SLJIT_UNUSED, 0, SLJIT_EQUAL);
-    OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
-    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-#endif
-    JUMPHERE(jump[0]);
-#endif /* COMPILE_PCRE[8|16] */
-    return cc;
-    }
-#endif
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  return cc;
-
-  case OP_ANYBYTE:
-  detect_partial_match(common, backtracks);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  return cc;
-
-#ifdef SUPPORT_UTF
-#ifdef SUPPORT_UCP
-  case OP_NOTPROP:
-  case OP_PROP:
-  propdata[0] = XCL_HASPROP;
-  propdata[1] = type == OP_NOTPROP ? XCL_NOTPROP : XCL_PROP;
-  propdata[2] = cc[0];
-  propdata[3] = cc[1];
-  propdata[4] = XCL_END;
-  compile_xclass_matchingpath(common, propdata, backtracks);
-  return cc + 2;
-#endif
-#endif
-
-  case OP_ANYNL:
-  detect_partial_match(common, backtracks);
-  read_char_range(common, common->bsr_nlmin, common->bsr_nlmax, FALSE);
-  jump[0] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
-  /* We don't need to handle soft partial matching case. */
-  end_list = NULL;
-  if (common->mode != JIT_PARTIAL_HARD_COMPILE)
-    add_jump(compiler, &end_list, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-  else
-    check_str_end(common, &end_list);
-  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
-  jump[1] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL);
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
-  jump[2] = JUMP(SLJIT_JUMP);
-  JUMPHERE(jump[0]);
-  check_newlinechar(common, common->bsr_nltype, backtracks, FALSE);
-  set_jumps(end_list, LABEL());
-  JUMPHERE(jump[1]);
-  JUMPHERE(jump[2]);
-  return cc;
-
-  case OP_NOT_HSPACE:
-  case OP_HSPACE:
-  detect_partial_match(common, backtracks);
-  read_char_range(common, 0x9, 0x3000, type == OP_NOT_HSPACE);
-  add_jump(compiler, &common->hspace, JUMP(SLJIT_FAST_CALL));
-  add_jump(compiler, backtracks, JUMP(type == OP_NOT_HSPACE ? SLJIT_NOT_ZERO : SLJIT_ZERO));
-  return cc;
-
-  case OP_NOT_VSPACE:
-  case OP_VSPACE:
-  detect_partial_match(common, backtracks);
-  read_char_range(common, 0xa, 0x2029, type == OP_NOT_VSPACE);
-  add_jump(compiler, &common->vspace, JUMP(SLJIT_FAST_CALL));
-  add_jump(compiler, backtracks, JUMP(type == OP_NOT_VSPACE ? SLJIT_NOT_ZERO : SLJIT_ZERO));
-  return cc;
-
-#ifdef SUPPORT_UCP
-  case OP_EXTUNI:
-  detect_partial_match(common, backtracks);
-  read_char(common);
-  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
-  /* Optimize register allocation: use a real register. */
-  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
-  OP1(SLJIT_MOV_UB, STACK_TOP, 0, SLJIT_MEM2(TMP1, TMP2), 3);
-
-  label = LABEL();
-  jump[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
-  read_char(common);
-  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM2(TMP1, TMP2), 3);
-
-  OP2(SLJIT_SHL, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, 2);
-  OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(STACK_TOP), (sljit_sw)PRIV(ucp_gbtable));
-  OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
-  OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
-  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
-  JUMPTO(SLJIT_NOT_ZERO, label);
-
-  OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
-  JUMPHERE(jump[0]);
-  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
-
-  if (common->mode == JIT_PARTIAL_HARD_COMPILE)
-    {
-    jump[0] = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-    /* Since we successfully read a char above, partial matching must occure. */
-    check_partial(common, TRUE);
-    JUMPHERE(jump[0]);
-    }
-  return cc;
-#endif
 
   case OP_EODN:
   /* Requires rather complex checks. */
@@ -5575,49 +5383,13 @@ switch(type)
   check_partial(common, FALSE);
   return cc;
 
-  case OP_CIRC:
-  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
-  add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, notbol));
-  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
-  return cc;
-
-  case OP_CIRCM:
-  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
-  jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0);
-  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, notbol));
-  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
-  jump[0] = JUMP(SLJIT_JUMP);
-  JUMPHERE(jump[1]);
-
-  add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-  if (common->nltype == NLTYPE_FIXED && common->newline > 255)
-    {
-    OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
-    add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, TMP1, 0));
-    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-2));
-    OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
-    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
-    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff));
-    }
-  else
-    {
-    skip_char_back(common);
-    read_char_range(common, common->nlmin, common->nlmax, TRUE);
-    check_newlinechar(common, common->nltype, backtracks, FALSE);
-    }
-  JUMPHERE(jump[0]);
-  return cc;
-
   case OP_DOLL:
   OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
   OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, noteol));
   add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
 
   if (!common->endonly)
-    compile_char1_matchingpath(common, OP_EODN, cc, backtracks);
+    compile_simple_assertion_matchingpath(common, OP_EODN, cc, backtracks);
   else
     {
     add_jump(compiler, backtracks, CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0));
@@ -5662,6 +5434,286 @@ switch(type)
   JUMPHERE(jump[0]);
   return cc;
 
+  case OP_CIRC:
+  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+  add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, notbol));
+  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  return cc;
+
+  case OP_CIRCM:
+  OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+  jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0);
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, notbol));
+  add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
+  jump[0] = JUMP(SLJIT_JUMP);
+  JUMPHERE(jump[1]);
+
+  add_jump(compiler, backtracks, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  if (common->nltype == NLTYPE_FIXED && common->newline > 255)
+    {
+    OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
+    add_jump(compiler, backtracks, CMP(SLJIT_LESS, TMP2, 0, TMP1, 0));
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-2));
+    OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
+    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff));
+    add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff));
+    }
+  else
+    {
+    skip_char_back(common);
+    read_char_range(common, common->nlmin, common->nlmax, TRUE);
+    check_newlinechar(common, common->nltype, backtracks, FALSE);
+    }
+  JUMPHERE(jump[0]);
+  return cc;
+
+  case OP_REVERSE:
+  length = GET(cc, 0);
+  if (length == 0)
+    return cc + LINK_SIZE;
+  OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
+#ifdef SUPPORT_UTF
+  if (common->utf)
+    {
+    OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
+    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, length);
+    label = LABEL();
+    add_jump(compiler, backtracks, CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, TMP3, 0));
+    skip_char_back(common);
+    OP2(SLJIT_SUB | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_IMM, 1);
+    JUMPTO(SLJIT_NOT_ZERO, label);
+    }
+  else
+#endif
+    {
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(length));
+    add_jump(compiler, backtracks, CMP(SLJIT_LESS, STR_PTR, 0, TMP1, 0));
+    }
+  check_start_used_ptr(common);
+  return cc + LINK_SIZE;
+  }
+SLJIT_ASSERT_STOP();
+return cc;
+}
+
+static pcre_uchar *compile_char1_matchingpath(compiler_common *common, pcre_uchar type, pcre_uchar *cc, jump_list **backtracks, BOOL check_str_ptr)
+{
+DEFINE_COMPILER;
+int length;
+unsigned int c, oc, bit;
+compare_context context;
+struct sljit_jump *jump[3];
+jump_list *end_list;
+#ifdef SUPPORT_UTF
+struct sljit_label *label;
+#ifdef SUPPORT_UCP
+pcre_uchar propdata[5];
+#endif
+#endif /* SUPPORT_UTF */
+
+switch(type)
+  {
+  case OP_NOT_DIGIT:
+  case OP_DIGIT:
+  /* Digits are usually 0-9, so it is worth to optimize them. */
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+  if (common->utf && is_char7_bitset((const pcre_uint8*)common->ctypes - cbit_length + cbit_digit, FALSE))
+    read_char7_type(common, type == OP_NOT_DIGIT);
+  else
+#endif
+    read_char8_type(common, type == OP_NOT_DIGIT);
+    /* Flip the starting bit in the negative case. */
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, ctype_digit);
+  add_jump(compiler, backtracks, JUMP(type == OP_DIGIT ? SLJIT_ZERO : SLJIT_NOT_ZERO));
+  return cc;
+
+  case OP_NOT_WHITESPACE:
+  case OP_WHITESPACE:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+  if (common->utf && is_char7_bitset((const pcre_uint8*)common->ctypes - cbit_length + cbit_space, FALSE))
+    read_char7_type(common, type == OP_NOT_WHITESPACE);
+  else
+#endif
+    read_char8_type(common, type == OP_NOT_WHITESPACE);
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, ctype_space);
+  add_jump(compiler, backtracks, JUMP(type == OP_WHITESPACE ? SLJIT_ZERO : SLJIT_NOT_ZERO));
+  return cc;
+
+  case OP_NOT_WORDCHAR:
+  case OP_WORDCHAR:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+  if (common->utf && is_char7_bitset((const pcre_uint8*)common->ctypes - cbit_length + cbit_word, FALSE))
+    read_char7_type(common, type == OP_NOT_WORDCHAR);
+  else
+#endif
+    read_char8_type(common, type == OP_NOT_WORDCHAR);
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, ctype_word);
+  add_jump(compiler, backtracks, JUMP(type == OP_WORDCHAR ? SLJIT_ZERO : SLJIT_NOT_ZERO));
+  return cc;
+
+  case OP_ANY:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  read_char_range(common, common->nlmin, common->nlmax, TRUE);
+  if (common->nltype == NLTYPE_FIXED && common->newline > 255)
+    {
+    jump[0] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff);
+    end_list = NULL;
+    if (common->mode != JIT_PARTIAL_HARD_COMPILE)
+      add_jump(compiler, &end_list, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+    else
+      check_str_end(common, &end_list);
+
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+    add_jump(compiler, backtracks, CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, common->newline & 0xff));
+    set_jumps(end_list, LABEL());
+    JUMPHERE(jump[0]);
+    }
+  else
+    check_newlinechar(common, common->nltype, backtracks, TRUE);
+  return cc;
+
+  case OP_ALLANY:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+#ifdef SUPPORT_UTF
+  if (common->utf)
+    {
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
+#if defined COMPILE_PCRE8
+    jump[0] = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xc0);
+    OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)PRIV(utf8_table4) - 0xc0);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+#elif defined COMPILE_PCRE16
+    jump[0] = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0xd800);
+    OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
+    OP2(SLJIT_SUB | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, SLJIT_IMM, 0xd800);
+    OP_FLAGS(SLJIT_MOV, TMP1, 0, SLJIT_UNUSED, 0, SLJIT_EQUAL);
+    OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, 1);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+#endif
+    JUMPHERE(jump[0]);
+#endif /* COMPILE_PCRE[8|16] */
+    return cc;
+    }
+#endif
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  return cc;
+
+  case OP_ANYBYTE:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  return cc;
+
+#ifdef SUPPORT_UTF
+#ifdef SUPPORT_UCP
+  case OP_NOTPROP:
+  case OP_PROP:
+  propdata[0] = XCL_HASPROP;
+  propdata[1] = type == OP_NOTPROP ? XCL_NOTPROP : XCL_PROP;
+  propdata[2] = cc[0];
+  propdata[3] = cc[1];
+  propdata[4] = XCL_END;
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  compile_xclass_matchingpath(common, propdata, backtracks);
+  return cc + 2;
+#endif
+#endif
+
+  case OP_ANYNL:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  read_char_range(common, common->bsr_nlmin, common->bsr_nlmax, FALSE);
+  jump[0] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
+  /* We don't need to handle soft partial matching case. */
+  end_list = NULL;
+  if (common->mode != JIT_PARTIAL_HARD_COMPILE)
+    add_jump(compiler, &end_list, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
+  else
+    check_str_end(common, &end_list);
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+  jump[1] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL);
+  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  jump[2] = JUMP(SLJIT_JUMP);
+  JUMPHERE(jump[0]);
+  check_newlinechar(common, common->bsr_nltype, backtracks, FALSE);
+  set_jumps(end_list, LABEL());
+  JUMPHERE(jump[1]);
+  JUMPHERE(jump[2]);
+  return cc;
+
+  case OP_NOT_HSPACE:
+  case OP_HSPACE:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  read_char_range(common, 0x9, 0x3000, type == OP_NOT_HSPACE);
+  add_jump(compiler, &common->hspace, JUMP(SLJIT_FAST_CALL));
+  add_jump(compiler, backtracks, JUMP(type == OP_NOT_HSPACE ? SLJIT_NOT_ZERO : SLJIT_ZERO));
+  return cc;
+
+  case OP_NOT_VSPACE:
+  case OP_VSPACE:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  read_char_range(common, 0xa, 0x2029, type == OP_NOT_VSPACE);
+  add_jump(compiler, &common->vspace, JUMP(SLJIT_FAST_CALL));
+  add_jump(compiler, backtracks, JUMP(type == OP_NOT_VSPACE ? SLJIT_NOT_ZERO : SLJIT_ZERO));
+  return cc;
+
+#ifdef SUPPORT_UCP
+  case OP_EXTUNI:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
+  read_char(common);
+  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
+  /* Optimize register allocation: use a real register. */
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STACK_TOP, 0);
+  OP1(SLJIT_MOV_UB, STACK_TOP, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+
+  label = LABEL();
+  jump[0] = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
+  OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+  read_char(common);
+  add_jump(compiler, &common->getucd, JUMP(SLJIT_FAST_CALL));
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_records) + SLJIT_OFFSETOF(ucd_record, gbprop));
+  OP1(SLJIT_MOV_UB, TMP2, 0, SLJIT_MEM2(TMP1, TMP2), 3);
+
+  OP2(SLJIT_SHL, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, 2);
+  OP1(SLJIT_MOV_UI, TMP1, 0, SLJIT_MEM1(STACK_TOP), (sljit_sw)PRIV(ucp_gbtable));
+  OP1(SLJIT_MOV, STACK_TOP, 0, TMP2, 0);
+  OP2(SLJIT_SHL, TMP2, 0, SLJIT_IMM, 1, TMP2, 0);
+  OP2(SLJIT_AND | SLJIT_SET_E, SLJIT_UNUSED, 0, TMP1, 0, TMP2, 0);
+  JUMPTO(SLJIT_NOT_ZERO, label);
+
+  OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+  JUMPHERE(jump[0]);
+  OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
+
+  if (common->mode == JIT_PARTIAL_HARD_COMPILE)
+    {
+    jump[0] = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
+    /* Since we successfully read a char above, partial matching must occure. */
+    check_partial(common, TRUE);
+    JUMPHERE(jump[0]);
+    }
+  return cc;
+#endif
+
   case OP_CHAR:
   case OP_CHARI:
   length = 1;
@@ -5681,7 +5733,8 @@ switch(type)
     return byte_sequence_compare(common, type == OP_CHARI, cc, &context, backtracks);
     }
 
-  detect_partial_match(common, backtracks);
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
 #ifdef SUPPORT_UTF
   if (common->utf)
     {
@@ -5713,7 +5766,8 @@ switch(type)
 
   case OP_NOT:
   case OP_NOTI:
-  detect_partial_match(common, backtracks);
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
   length = 1;
 #ifdef SUPPORT_UTF
   if (common->utf)
@@ -5774,16 +5828,17 @@ switch(type)
 
   case OP_CLASS:
   case OP_NCLASS:
-  detect_partial_match(common, backtracks);
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
 
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
-  bit = (common->utf && is_char7_bitset((const pcre_uint8 *)cc, type == OP_NCLASS)) ? 127 : 255;
+  bit = (common->utf && is_char7_bitset((const sljit_ub *)cc, type == OP_NCLASS)) ? 127 : 255;
   read_char_range(common, 0, bit, type == OP_NCLASS);
 #else
   read_char_range(common, 0, 255, type == OP_NCLASS);
 #endif
 
-  if (check_class_ranges(common, (const pcre_uint8 *)cc, type == OP_NCLASS, FALSE, backtracks))
+  if (check_class_ranges(common, (const sljit_ub *)cc, type == OP_NCLASS, FALSE, backtracks))
     return cc + 32 / sizeof(pcre_uchar);
 
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
@@ -5817,40 +5872,15 @@ switch(type)
   if (jump[0] != NULL)
     JUMPHERE(jump[0]);
 #endif
-
   return cc + 32 / sizeof(pcre_uchar);
 
 #if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
   case OP_XCLASS:
+  if (check_str_ptr)
+    detect_partial_match(common, backtracks);
   compile_xclass_matchingpath(common, cc + LINK_SIZE, backtracks);
   return cc + GET(cc, 0) - 1;
 #endif
-
-  case OP_REVERSE:
-  length = GET(cc, 0);
-  if (length == 0)
-    return cc + LINK_SIZE;
-  OP1(SLJIT_MOV, TMP1, 0, ARGUMENTS, 0);
-#ifdef SUPPORT_UTF
-  if (common->utf)
-    {
-    OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_IMM, length);
-    label = LABEL();
-    add_jump(compiler, backtracks, CMP(SLJIT_LESS_EQUAL, STR_PTR, 0, TMP3, 0));
-    skip_char_back(common);
-    OP2(SLJIT_SUB | SLJIT_SET_E, TMP2, 0, TMP2, 0, SLJIT_IMM, 1);
-    JUMPTO(SLJIT_NOT_ZERO, label);
-    }
-  else
-#endif
-    {
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP1), SLJIT_OFFSETOF(jit_arguments, begin));
-    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(length));
-    add_jump(compiler, backtracks, CMP(SLJIT_LESS, STR_PTR, 0, TMP1, 0));
-    }
-  check_start_used_ptr(common);
-  return cc + LINK_SIZE;
   }
 SLJIT_ASSERT_STOP();
 return cc;
@@ -5919,7 +5949,7 @@ if (context.length > 0)
   }
 
 /* A non-fixed length character will be checked if length == 0. */
-return compile_char1_matchingpath(common, *cc, cc + 1, backtracks);
+return compile_char1_matchingpath(common, *cc, cc + 1, backtracks, TRUE);
 }
 
 /* Forward definitions. */
@@ -7985,7 +8015,7 @@ switch(opcode)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), POSSESSIVE0, SLJIT_IMM, 0);
 
     label = LABEL();
-    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
     if (opcode == OP_UPTO || opcode == OP_CRRANGE)
       {
       OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), POSSESSIVE0);
@@ -8007,7 +8037,7 @@ switch(opcode)
   else
     {
     if (opcode == OP_PLUS)
-      compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+      compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
     if (private_data_ptr == 0)
       allocate_stack(common, 2);
     OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
@@ -8016,7 +8046,7 @@ switch(opcode)
     else
       OP1(SLJIT_MOV, base, offset1, SLJIT_IMM, 1);
     label = LABEL();
-    compile_char1_matchingpath(common, type, cc, &nomatch);
+    compile_char1_matchingpath(common, type, cc, &nomatch, TRUE);
     OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
     if (opcode <= OP_PLUS)
       JUMPTO(SLJIT_JUMP, label);
@@ -8043,7 +8073,7 @@ switch(opcode)
   case OP_MINSTAR:
   case OP_MINPLUS:
   if (opcode == OP_MINPLUS)
-    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
   if (private_data_ptr == 0)
     allocate_stack(common, 1);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
@@ -8067,14 +8097,14 @@ switch(opcode)
     allocate_stack(common, 1);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   if (opcode == OP_QUERY)
-    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
   BACKTRACK_AS(iterator_backtrack)->matchingpath = LABEL();
   break;
 
   case OP_EXACT:
   OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, max);
   label = LABEL();
-  compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+  compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
   OP2(SLJIT_SUB | SLJIT_SET_E, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
   JUMPTO(SLJIT_NOT_ZERO, label);
   break;
@@ -8083,12 +8113,12 @@ switch(opcode)
   case OP_POSPLUS:
   case OP_POSUPTO:
   if (opcode == OP_POSPLUS)
-    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+    compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
   if (opcode == OP_POSUPTO)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), POSSESSIVE1, SLJIT_IMM, max);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   label = LABEL();
-  compile_char1_matchingpath(common, type, cc, &nomatch);
+  compile_char1_matchingpath(common, type, cc, &nomatch, TRUE);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   if (opcode != OP_POSUPTO)
     JUMPTO(SLJIT_JUMP, label);
@@ -8103,7 +8133,7 @@ switch(opcode)
 
   case OP_POSQUERY:
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
-  compile_char1_matchingpath(common, type, cc, &nomatch);
+  compile_char1_matchingpath(common, type, cc, &nomatch, TRUE);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   set_jumps(nomatch, LABEL());
   OP1(SLJIT_MOV, STR_PTR, 0, tmp_base, tmp_offset);
@@ -8113,7 +8143,7 @@ switch(opcode)
   /* Combination of OP_EXACT and OP_POSSTAR or OP_POSUPTO */
   OP1(SLJIT_MOV, tmp_base, tmp_offset, SLJIT_IMM, min);
   label = LABEL();
-  compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks);
+  compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
   OP2(SLJIT_SUB | SLJIT_SET_E, tmp_base, tmp_offset, tmp_base, tmp_offset, SLJIT_IMM, 1);
   JUMPTO(SLJIT_NOT_ZERO, label);
 
@@ -8124,7 +8154,7 @@ switch(opcode)
     }
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   label = LABEL();
-  compile_char1_matchingpath(common, type, cc, &nomatch);
+  compile_char1_matchingpath(common, type, cc, &nomatch, TRUE);
   OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
   if (max == 0)
     JUMPTO(SLJIT_JUMP, label);
@@ -8298,6 +8328,16 @@ while (cc < ccend)
     case OP_SOM:
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
+    case OP_EODN:
+    case OP_EOD:
+    case OP_DOLL:
+    case OP_DOLLM:
+    case OP_CIRC:
+    case OP_CIRCM:
+    case OP_REVERSE:
+    cc = compile_simple_assertion_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+    break;
+
     case OP_NOT_DIGIT:
     case OP_DIGIT:
     case OP_NOT_WHITESPACE:
@@ -8315,16 +8355,9 @@ while (cc < ccend)
     case OP_NOT_VSPACE:
     case OP_VSPACE:
     case OP_EXTUNI:
-    case OP_EODN:
-    case OP_EOD:
-    case OP_CIRC:
-    case OP_CIRCM:
-    case OP_DOLL:
-    case OP_DOLLM:
     case OP_NOT:
     case OP_NOTI:
-    case OP_REVERSE:
-    cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+    cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, TRUE);
     break;
 
     case OP_SET_SOM:
@@ -8341,7 +8374,7 @@ while (cc < ccend)
     if (common->mode == JIT_COMPILE)
       cc = compile_charn_matchingpath(common, cc, ccend, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
     else
-      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, TRUE);
     break;
 
     case OP_STAR:
@@ -8417,7 +8450,7 @@ while (cc < ccend)
     if (cc[1 + (32 / sizeof(pcre_uchar))] >= OP_CRSTAR && cc[1 + (32 / sizeof(pcre_uchar))] <= OP_CRPOSRANGE)
       cc = compile_iterator_matchingpath(common, cc, parent);
     else
-      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, TRUE);
     break;
 
 #if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
@@ -8425,7 +8458,7 @@ while (cc < ccend)
     if (*(cc + GET(cc, 1)) >= OP_CRSTAR && *(cc + GET(cc, 1)) <= OP_CRPOSRANGE)
       cc = compile_iterator_matchingpath(common, cc, parent);
     else
-      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks);
+      cc = compile_char1_matchingpath(common, *cc, cc + 1, parent->top != NULL ? &parent->top->nextbacktracks : &parent->topbacktracks, TRUE);
     break;
 #endif
 
@@ -8658,7 +8691,7 @@ switch(opcode)
   case OP_MINSTAR:
   case OP_MINPLUS:
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-  compile_char1_matchingpath(common, type, cc, &jumplist);
+  compile_char1_matchingpath(common, type, cc, &jumplist, TRUE);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
   set_jumps(jumplist, LABEL());
@@ -8676,7 +8709,7 @@ switch(opcode)
     set_jumps(current->topbacktracks, label);
     }
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
-  compile_char1_matchingpath(common, type, cc, &jumplist);
+  compile_char1_matchingpath(common, type, cc, &jumplist, TRUE);
 
   OP1(SLJIT_MOV, TMP1, 0, base, offset1);
   OP1(SLJIT_MOV, base, offset0, STR_PTR, 0);
@@ -8714,7 +8747,7 @@ switch(opcode)
   OP1(SLJIT_MOV, STR_PTR, 0, base, offset0);
   OP1(SLJIT_MOV, base, offset0, SLJIT_IMM, 0);
   jump = CMP(SLJIT_EQUAL, STR_PTR, 0, SLJIT_IMM, 0);
-  compile_char1_matchingpath(common, type, cc, &jumplist);
+  compile_char1_matchingpath(common, type, cc, &jumplist, TRUE);
   JUMPTO(SLJIT_JUMP, CURRENT_AS(iterator_backtrack)->matchingpath);
   set_jumps(jumplist, LABEL());
   JUMPHERE(jump);
