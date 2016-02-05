@@ -574,6 +574,16 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MUA, 0, "(?:(?=.)??[a-c])+m", "abacdcbacacdcaccam" },
 	{ MUA, 0, "((?!a)?(?!([^a]))?)+$", "acbab" },
 	{ MUA, 0, "((?!a)?\?(?!([^a]))?\?)+$", "acbab" },
+	{ MUA, 0, "a(?=(?C)\\B)b", "ab" },
+	{ MUA, 0, "a(?!(?C)\\B)bb|ab", "abb" },
+	{ MUA, 0, "a(?=\\b|(?C)\\B)b", "ab" },
+	{ MUA, 0, "a(?!\\b|(?C)\\B)bb|ab", "abb" },
+	{ MUA, 0, "c(?(?=(?C)\\B)ab|a)", "cab" },
+	{ MUA, 0, "c(?(?!(?C)\\B)ab|a)", "cab" },
+	{ MUA, 0, "c(?(?=\\b|(?C)\\B)ab|a)", "cab" },
+	{ MUA, 0, "c(?(?!\\b|(?C)\\B)ab|a)", "cab" },
+	{ MUA, 0, "a(?=)b", "ab" },
+	{ MUA, 0 | F_NOMATCH, "a(?!)b", "ab" },
 
 	/* Not empty, ACCEPT, FAIL */
 	{ MUA | PCRE_NOTEMPTY, 0 | F_NOMATCH, "a*", "bcx" },

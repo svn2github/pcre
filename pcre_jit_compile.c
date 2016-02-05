@@ -1406,6 +1406,7 @@ while (cc < ccend)
     case OP_CLASS:
     case OP_NCLASS:
     case OP_XCLASS:
+    case OP_CALLOUT:
 
     cc = next_opcode(common, cc);
     SLJIT_ASSERT(cc != NULL);
@@ -2113,6 +2114,7 @@ static SLJIT_INLINE void allocate_stack(compiler_common *common, int size)
 /* May destroy all locals and registers except TMP2. */
 DEFINE_COMPILER;
 
+SLJIT_ASSERT(size > 0);
 OP2(SLJIT_ADD, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, size * sizeof(sljit_sw));
 #ifdef DESTROY_REGISTERS
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 12345);
@@ -2127,6 +2129,8 @@ add_stub(common, CMP(SLJIT_GREATER, STACK_TOP, 0, STACK_LIMIT, 0));
 static SLJIT_INLINE void free_stack(compiler_common *common, int size)
 {
 DEFINE_COMPILER;
+
+SLJIT_ASSERT(size > 0);
 OP2(SLJIT_SUB, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, size * sizeof(sljit_sw));
 }
 
@@ -6485,6 +6489,32 @@ return cc + 2 + 2 * LINK_SIZE;
 #undef CALLOUT_ARG_SIZE
 #undef CALLOUT_ARG_OFFSET
 
+static SLJIT_INLINE BOOL assert_needs_str_ptr_saving(pcre_uchar *cc)
+{
+while (TRUE)
+  {
+  switch (*cc)
+    {
+    case OP_NOT_WORD_BOUNDARY:
+    case OP_WORD_BOUNDARY:
+    case OP_CIRC:
+    case OP_CIRCM:
+    case OP_DOLL:
+    case OP_DOLLM:
+    case OP_CALLOUT:
+    case OP_ALT:
+    cc += PRIV(OP_lengths)[*cc];
+    break;
+
+    case OP_KET:
+    return FALSE;
+
+    default:
+    return TRUE;
+    }
+  }
+}
+
 static pcre_uchar *compile_assert_matchingpath(compiler_common *common, pcre_uchar *cc, assert_backtrack *backtrack, BOOL conditional)
 {
 DEFINE_COMPILER;
@@ -6541,15 +6571,28 @@ if (bra == OP_BRAMINZERO)
 
 if (framesize < 0)
   {
-  extrasize = needs_control_head ? 2 : 1;
+  extrasize = 1;
+  if (bra == OP_BRA && !assert_needs_str_ptr_saving(ccbegin + 1 + LINK_SIZE))
+    extrasize = 0;
+
+  if (needs_control_head)
+    extrasize++;
+
   if (framesize == no_frame)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, STACK_TOP, 0);
-  allocate_stack(common, extrasize);
+
+  if (extrasize > 0)
+    allocate_stack(common, extrasize);
+
   if (needs_control_head)
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr);
-  OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+
+  if (extrasize > 0)
+    OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), STR_PTR, 0);
+
   if (needs_control_head)
     {
+    SLJIT_ASSERT(extrasize == 2);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_IMM, 0);
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
     }
@@ -6558,6 +6601,7 @@ else
   {
   extrasize = needs_control_head ? 3 : 2;
   allocate_stack(common, framesize + extrasize);
+
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
   OP2(SLJIT_SUB, TMP2, 0, STACK_TOP, 0, SLJIT_IMM, (framesize + extrasize) * sizeof(sljit_sw));
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr, TMP2, 0);
@@ -6572,6 +6616,7 @@ else
     }
   else
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
+
   init_frame(common, ccbegin, NULL, framesize + extrasize - 1, extrasize, FALSE);
   }
 
@@ -6595,7 +6640,7 @@ while (1)
   altbacktrack.top = NULL;
   altbacktrack.topbacktracks = NULL;
 
-  if (*ccbegin == OP_ALT)
+  if (*ccbegin == OP_ALT && extrasize > 0)
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
 
   altbacktrack.cc = ccbegin;
@@ -6624,8 +6669,9 @@ while (1)
     {
     if (framesize == no_frame)
       OP1(SLJIT_MOV, STACK_TOP, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
-    else
+    else if (extrasize > 0)
       free_stack(common, extrasize);
+
     if (needs_control_head)
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, SLJIT_MEM1(STACK_TOP), 0);
     }
@@ -6651,7 +6697,10 @@ while (1)
     {
     /* We know that STR_PTR was stored on the top of the stack. */
     if (conditional)
-      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), needs_control_head ? sizeof(sljit_sw) : 0);
+      {
+      if (extrasize > 0)
+        OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), needs_control_head ? sizeof(sljit_sw) : 0);
+      }
     else if (bra == OP_BRAZERO)
       {
       if (framesize < 0)
@@ -6728,7 +6777,7 @@ if (needs_control_head)
 if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
   {
   /* Assert is failed. */
-  if (conditional || bra == OP_BRAZERO)
+  if ((conditional && extrasize > 0) || bra == OP_BRAZERO)
     OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
 
   if (framesize < 0)
@@ -6740,7 +6789,7 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
         free_stack(common, 1);
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       }
-    else
+    else if (extrasize > 0)
       free_stack(common, extrasize);
     }
   else
@@ -6765,7 +6814,9 @@ if (opcode == OP_ASSERT || opcode == OP_ASSERTBACK)
   if (framesize < 0)
     {
     /* We know that STR_PTR was stored on the top of the stack. */
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), (extrasize - 1) * sizeof(sljit_sw));
+    if (extrasize > 0)
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), (extrasize - 1) * sizeof(sljit_sw));
+
     /* Keep the STR_PTR on the top of the stack. */
     if (bra == OP_BRAZERO)
       {
@@ -6828,14 +6879,16 @@ else
   /* AssertNot is successful. */
   if (framesize < 0)
     {
-    OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+    if (extrasize > 0)
+      OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
+
     if (bra != OP_BRA)
       {
       if (extrasize == 2)
         free_stack(common, 1);
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), SLJIT_IMM, 0);
       }
-    else
+    else if (extrasize > 0)
       free_stack(common, extrasize);
     }
   else
@@ -6897,7 +6950,9 @@ if (framesize < 0)
     stacksize = needs_control_head ? 1 : 0;
     if (ket != OP_KET || has_alternatives)
       stacksize++;
-    free_stack(common, stacksize);
+
+    if (stacksize > 0)
+      free_stack(common, stacksize);
     }
 
   if (needs_control_head)
