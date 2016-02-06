@@ -14650,4 +14650,19 @@ Start of matched string is beyond its end - displaying from end to start.
  0: a
  0L 
 
+/(?<=((?C)0))/
+    9010
+--->9010
+  0  ^       0
+  0   ^      0
+ 0: 
+ 1: 0
+    abcd
+--->abcd
+  0  ^       0
+  0   ^      0
+  0    ^     0
+  0     ^    0
+No match
+     
 /-- End of testinput2 --/

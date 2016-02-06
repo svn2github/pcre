@@ -4235,4 +4235,8 @@ backtracking verbs. --/
 /(?=a\K)/ 
     ring bpattingbobnd $ 1,oern cou \rb\L
 
+/(?<=((?C)0))/
+    9010
+    abcd
+     
 /-- End of testinput2 --/
