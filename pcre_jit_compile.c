@@ -325,36 +325,37 @@ typedef struct compiler_common {
   /* Chain list of read-only data ptrs. */
   void *read_only_data_head;
   /* Tells whether the capturing bracket is optimized. */
-  pcre_uint8 *optimized_cbracket;
+  sljit_ub *optimized_cbracket;
   /* Tells whether the starting offset is a target of then. */
-  pcre_uint8 *then_offsets;
+  sljit_ub *then_offsets;
   /* Current position where a THEN must jump. */
   then_trap_backtrack *then_trap;
   /* Starting offset of private data for capturing brackets. */
-  int cbra_ptr;
+  sljit_si cbra_ptr;
   /* Output vector starting point. Must be divisible by 2. */
-  int ovector_start;
+  sljit_si ovector_start;
+  /* Points to the starting character of the current match. */
+  sljit_si start_ptr;
   /* Last known position of the requested byte. */
-  int req_char_ptr;
+  sljit_si req_char_ptr;
   /* Head of the last recursion. */
-  int recursive_head_ptr;
-  /* First inspected character for partial matching. */
-  int start_used_ptr;
+  sljit_si recursive_head_ptr;
+  /* First inspected character for partial matching.
+     (Needed for avoiding zero length partial matches.) */
+  sljit_si start_used_ptr;
   /* Starting pointer for partial soft matches. */
-  int hit_start;
+  sljit_si hit_start;
   /* End pointer of the first line. */
-  int first_line_end;
+  sljit_si first_line_end;
   /* Points to the marked string. */
-  int mark_ptr;
+  sljit_si mark_ptr;
   /* Recursive control verb management chain. */
-  int control_head_ptr;
+  sljit_si control_head_ptr;
   /* Points to the last matched capture block index. */
-  int capture_last_ptr;
-  /* Points to the starting position of the current match. */
-  int start_ptr;
+  sljit_si capture_last_ptr;
 
   /* Flipped and lower case tables. */
-  const pcre_uint8 *fcc;
+  const sljit_ub *fcc;
   sljit_sw lcc;
   /* Mode can be PCRE_STUDY_JIT_COMPILE and others. */
   int mode;
@@ -366,20 +367,18 @@ typedef struct compiler_common {
   BOOL has_skip_arg;
   /* (*THEN) is found in the pattern. */
   BOOL has_then;
-  /* Needs to know the start position anytime. */
-  BOOL needs_start_ptr;
   /* Currently in recurse or negative assert. */
   BOOL local_exit;
   /* Currently in a positive assert. */
   BOOL positive_assert;
   /* Newline control. */
   int nltype;
-  pcre_uint32 nlmax;
-  pcre_uint32 nlmin;
+  sljit_ui nlmax;
+  sljit_ui nlmin;
   int newline;
   int bsr_nltype;
-  pcre_uint32 bsr_nlmax;
-  pcre_uint32 bsr_nlmin;
+  sljit_ui bsr_nlmax;
+  sljit_ui bsr_nlmin;
   /* Dollar endonly. */
   int endonly;
   /* Tables. */
@@ -856,9 +855,6 @@ while (cc < ccend)
     /* Fall through. */
 
     case OP_PRUNE_ARG:
-    common->needs_start_ptr = TRUE;
-    /* Fall through. */
-
     case OP_MARK:
     if (common->mark_ptr == 0)
       {
@@ -875,7 +871,6 @@ while (cc < ccend)
 
     case OP_PRUNE:
     case OP_SKIP:
-    common->needs_start_ptr = TRUE;
     cc += 1;
     break;
 
@@ -2626,8 +2621,8 @@ static BOOL is_char7_bitset(const pcre_uint8 *bitset, BOOL nclass)
 {
 /* Tells whether the character codes below 128 are enough
 to determine a match. */
-const pcre_uint8 value = nclass ? 0xff : 0;
-const pcre_uint8 *end = bitset + 32;
+const sljit_ub value = nclass ? 0xff : 0;
+const sljit_ub *end = bitset + 32;
 
 bitset += 16;
 do
@@ -10030,11 +10025,6 @@ if (mode != JIT_COMPILE)
     common->hit_start = common->ovector_start;
     common->ovector_start += 2 * sizeof(sljit_sw);
     }
-  else
-    {
-    SLJIT_ASSERT(mode == JIT_PARTIAL_HARD_COMPILE);
-    common->needs_start_ptr = TRUE;
-    }
   }
 if ((re->options & PCRE_FIRSTLINE) != 0)
   {
@@ -10049,14 +10039,12 @@ if (common->control_head_ptr != 0)
   common->control_head_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
   }
-if (common->needs_start_ptr && common->has_set_som)
+if (common->has_set_som)
   {
   /* Saving the real start pointer is necessary. */
   common->start_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
   }
-else
-  common->needs_start_ptr = FALSE;
 
 /* Aligning ovector to even number of sljit words. */
 if ((common->ovector_start & sizeof(sljit_sw)) != 0)
@@ -10169,13 +10157,8 @@ OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_MEM1(SLJIT_SP), LIMIT_MATCH);
 if (common->capture_last_ptr != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr, SLJIT_IMM, -1);
 
-if (common->needs_start_ptr)
-  {
-  SLJIT_ASSERT(common->start_ptr != OVECTOR(0));
+if (common->start_ptr != OVECTOR(0))
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_ptr, STR_PTR, 0);
-  }
-else
-  SLJIT_ASSERT(common->start_ptr == OVECTOR(0));
 
 /* Copy the beginning of the string. */
 if (mode == JIT_PARTIAL_SOFT_COMPILE)
