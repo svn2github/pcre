@@ -47,7 +47,7 @@ Version 8.39 xx-xxxxxx-201x
 11. Migrating appropriate PCRE2 JIT improvements to PCRE.
 
 12. A pattern such as /(?<=((?C)0))/, which has a callout inside a lookbehind
-    assertion, caused pcre2test to generate incorrect output, and also to read 
+    assertion, caused pcretest to generate incorrect output, and also to read 
     uninitialized memory (detected by ASAN or valgrind).
 
 
