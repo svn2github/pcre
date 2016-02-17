@@ -582,11 +582,6 @@ SLJIT_ASSERT(*cc >= OP_KET && *cc <= OP_KETRPOS);
 return count;
 }
 
-static int ones_in_half_byte[16] = {
-  /* 0 */ 0, 1, 1, 2, /* 4 */ 1, 2, 2, 3,
-  /* 8 */ 1, 2, 2, 3, /* 12 */ 2, 3, 3, 4
-};
-
 /* Functions whose might need modification for all new supported opcodes:
  next_opcode
  check_opcode_types
@@ -982,6 +977,57 @@ switch(*cc)
     return TRUE;
     }
   break;
+  }
+return FALSE;
+}
+
+static SLJIT_INLINE BOOL detect_fast_forward_skip(compiler_common *common, int *private_data_start)
+{
+pcre_uchar *cc = common->start;
+pcre_uchar *end;
+
+/* Skip not repeated brackets. */
+while (TRUE)
+  {
+  switch(*cc)
+    {
+    case OP_SOD:
+    case OP_SOM:
+    case OP_SET_SOM:
+    case OP_NOT_WORD_BOUNDARY:
+    case OP_WORD_BOUNDARY:
+    case OP_EODN:
+    case OP_EOD:
+    case OP_CIRC:
+    case OP_CIRCM:
+    case OP_DOLL:
+    case OP_DOLLM:
+    /* Zero width assertions. */
+    cc++;
+    continue;
+    }
+
+  if (*cc != OP_BRA && *cc != OP_CBRA)
+    break;
+
+  end = cc + GET(cc, 1);
+  if (*end != OP_KET || PRIVATE_DATA(end) != 0)
+    return FALSE;
+  if (*cc == OP_CBRA)
+    {
+    if (common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] == 0)
+      return FALSE;
+    cc += IMM2_SIZE;
+    }
+  cc += 1 + LINK_SIZE;
+  }
+
+if (is_accelerated_repeat(cc))
+  {
+  common->fast_forward_bc_ptr = cc;
+  common->private_data_ptrs[(cc + 1) - common->start] = *private_data_start;
+  *private_data_start += sizeof(sljit_sw);
+  return TRUE;
   }
 return FALSE;
 }
@@ -3258,14 +3304,14 @@ sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 }
 #endif
 
-static SLJIT_INLINE struct sljit_label *mainloop_entry(compiler_common *common, BOOL hascrorlf, BOOL firstline)
+static SLJIT_INLINE struct sljit_label *mainloop_entry(compiler_common *common, BOOL hascrorlf)
 {
 DEFINE_COMPILER;
 struct sljit_label *mainloop;
 struct sljit_label *newlinelabel = NULL;
 struct sljit_jump *start;
 struct sljit_jump *end = NULL;
-struct sljit_jump *nl = NULL;
+struct sljit_jump *end2 = NULL;
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
 struct sljit_jump *singlechar;
 #endif
@@ -3273,14 +3319,13 @@ jump_list *newline = NULL;
 BOOL newlinecheck = FALSE;
 BOOL readuchar = FALSE;
 
-if (!(hascrorlf || firstline) && (common->nltype == NLTYPE_ANY ||
-    common->nltype == NLTYPE_ANYCRLF || common->newline > 255))
+if (!(hascrorlf || (common->first_line_end != 0)) &&
+    (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF || common->newline > 255))
   newlinecheck = TRUE;
 
-if (firstline)
+if (common->first_line_end != 0)
   {
   /* Search for the end of the first line. */
-  SLJIT_ASSERT(common->first_line_end != 0);
   OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
 
   if (common->nltype == NLTYPE_FIXED && common->newline > 255)
@@ -3326,7 +3371,7 @@ if (newlinecheck)
   OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, UCHAR_SHIFT);
 #endif
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  nl = JUMP(SLJIT_JUMP);
+  end2 = JUMP(SLJIT_JUMP);
   }
 
 mainloop = LABEL();
@@ -3371,51 +3416,52 @@ JUMPHERE(start);
 if (newlinecheck)
   {
   JUMPHERE(end);
-  JUMPHERE(nl);
+  JUMPHERE(end2);
   }
 
 return mainloop;
 }
 
 #define MAX_N_CHARS 16
-#define MAX_N_BYTES 8
+#define MAX_DIFF_CHARS 6
 
-static SLJIT_INLINE void add_prefix_byte(pcre_uint8 byte, pcre_uint8 *bytes)
+static SLJIT_INLINE void add_prefix_char(pcre_uchar chr, pcre_uchar *chars)
 {
-pcre_uint8 len = bytes[0];
-int i;
+pcre_uchar i, len;
 
+len = chars[0];
 if (len == 255)
   return;
 
 if (len == 0)
   {
-  bytes[0] = 1;
-  bytes[1] = byte;
+  chars[0] = 1;
+  chars[1] = chr;
   return;
   }
 
 for (i = len; i > 0; i--)
-  if (bytes[i] == byte)
+  if (chars[i] == chr)
     return;
 
-if (len >= MAX_N_BYTES - 1)
+if (len >= MAX_DIFF_CHARS - 1)
   {
-  bytes[0] = 255;
+  chars[0] = 255;
   return;
   }
 
 len++;
-bytes[len] = byte;
-bytes[0] = len;
+chars[len] = chr;
+chars[0] = len;
 }
 
-static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uint32 *chars, pcre_uint8 *bytes, int max_chars, pcre_uint32 *rec_count)
+static int scan_prefix(compiler_common *common, pcre_uchar *cc, pcre_uchar *chars, int max_chars, pcre_uint32 *rec_count)
 {
 /* Recursive function, which scans prefix literals. */
-BOOL last, any, caseless;
+BOOL last, any, class, caseless;
 int len, repeat, len_save, consumed = 0;
-pcre_uint32 chr, mask;
+sljit_ui chr;
+sljit_ub *bytes, *bytes_end, byte;
 pcre_uchar *alternative, *cc_save, *oc;
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 pcre_uchar othercase[8];
@@ -3434,6 +3480,7 @@ while (TRUE)
 
   last = TRUE;
   any = FALSE;
+  class = FALSE;
   caseless = FALSE;
 
   switch (*cc)
@@ -3497,7 +3544,7 @@ while (TRUE)
 #ifdef SUPPORT_UTF
     if (common->utf && HAS_EXTRALEN(*cc)) len += GET_EXTRALEN(*cc);
 #endif
-    max_chars = scan_prefix(common, cc + len, chars, bytes, max_chars, rec_count);
+    max_chars = scan_prefix(common, cc + len, chars, max_chars, rec_count);
     if (max_chars == 0)
       return consumed;
     last = FALSE;
@@ -3520,7 +3567,7 @@ while (TRUE)
     alternative = cc + GET(cc, 1);
     while (*alternative == OP_ALT)
       {
-      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, bytes, max_chars, rec_count);
+      max_chars = scan_prefix(common, alternative + 1 + LINK_SIZE, chars, max_chars, rec_count);
       if (max_chars == 0)
         return consumed;
       alternative += GET(alternative, 1);
@@ -3533,18 +3580,17 @@ while (TRUE)
 
     case OP_CLASS:
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
-    if (common->utf && !is_char7_bitset((const pcre_uint8 *)(cc + 1), FALSE)) return consumed;
+    if (common->utf && !is_char7_bitset((const sljit_ub *)(cc + 1), FALSE))
+      return consumed;
 #endif
-    any = TRUE;
-    cc += 1 + 32 / sizeof(pcre_uchar);
+    class = TRUE;
     break;
 
     case OP_NCLASS:
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
     if (common->utf) return consumed;
 #endif
-    any = TRUE;
-    cc += 1 + 32 / sizeof(pcre_uchar);
+    class = TRUE;
     break;
 
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
@@ -3559,7 +3605,7 @@ while (TRUE)
 
     case OP_DIGIT:
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
-    if (common->utf && !is_char7_bitset((const pcre_uint8 *)common->ctypes - cbit_length + cbit_digit, FALSE))
+    if (common->utf && !is_char7_bitset((const sljit_ub *)common->ctypes - cbit_length + cbit_digit, FALSE))
       return consumed;
 #endif
     any = TRUE;
@@ -3568,7 +3614,7 @@ while (TRUE)
 
     case OP_WHITESPACE:
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
-    if (common->utf && !is_char7_bitset((const pcre_uint8 *)common->ctypes - cbit_length + cbit_space, FALSE))
+    if (common->utf && !is_char7_bitset((const sljit_ub *)common->ctypes - cbit_length + cbit_space, FALSE))
       return consumed;
 #endif
     any = TRUE;
@@ -3577,7 +3623,7 @@ while (TRUE)
 
     case OP_WORDCHAR:
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
-    if (common->utf && !is_char7_bitset((const pcre_uint8 *)common->ctypes - cbit_length + cbit_word, FALSE))
+    if (common->utf && !is_char7_bitset((const sljit_ub *)common->ctypes - cbit_length + cbit_word, FALSE))
       return consumed;
 #endif
     any = TRUE;
@@ -3600,10 +3646,10 @@ while (TRUE)
     cc++;
     break;
 
-#ifdef SUPPORT_UCP
+#ifdef SUPPORT_UTF
     case OP_NOTPROP:
     case OP_PROP:
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+#ifndef COMPILE_PCRE32
     if (common->utf) return consumed;
 #endif
     any = TRUE;
@@ -3632,29 +3678,113 @@ while (TRUE)
 
   if (any)
     {
-#if defined COMPILE_PCRE8
-    mask = 0xff;
-#elif defined COMPILE_PCRE16
-    mask = 0xffff;
-#elif defined COMPILE_PCRE32
-    mask = 0xffffffff;
-#else
-    SLJIT_ASSERT_STOP();
-#endif
-
     do
       {
-      chars[0] = mask;
-      chars[1] = mask;
-      bytes[0] = 255;
+      chars[0] = 255;
 
       consumed++;
       if (--max_chars == 0)
         return consumed;
-      chars += 2;
-      bytes += MAX_N_BYTES;
+      chars += MAX_DIFF_CHARS;
       }
     while (--repeat > 0);
+
+    repeat = 1;
+    continue;
+    }
+
+  if (class)
+    {
+    bytes = (sljit_ub*) (cc + 1);
+    cc += 1 + 32 / sizeof(pcre_uchar);
+
+    switch (*cc)
+      {
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPOSSTAR:
+      case OP_CRQUERY:
+      case OP_CRMINQUERY:
+      case OP_CRPOSQUERY:
+      max_chars = scan_prefix(common, cc + 1, chars, max_chars, rec_count);
+      if (max_chars == 0)
+        return consumed;
+      break;
+
+      default:
+      case OP_CRPLUS:
+      case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
+      break;
+
+      case OP_CRRANGE:
+      case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
+      repeat = GET2(cc, 1);
+      if (repeat <= 0)
+        return consumed;
+      break;
+      }
+
+    do
+      {
+      if (bytes[31] & 0x80)
+        chars[0] = 255;
+      else if (chars[0] != 255)
+        {
+        bytes_end = bytes + 32;
+        chr = 0;
+        do
+          {
+          byte = *bytes++;
+          SLJIT_ASSERT((chr & 0x7) == 0);
+          if (byte == 0)
+            chr += 8;
+          else
+            {
+            do
+              {
+              if ((byte & 0x1) != 0)
+                add_prefix_char(chr, chars);
+              byte >>= 1;
+              chr++;
+              }
+            while (byte != 0);
+            chr = (chr + 7) & ~7;
+            }
+          }
+        while (chars[0] != 255 && bytes < bytes_end);
+        bytes = bytes_end - 32;
+        }
+
+      consumed++;
+      if (--max_chars == 0)
+        return consumed;
+      chars += MAX_DIFF_CHARS;
+      }
+    while (--repeat > 0);
+
+    switch (*cc)
+      {
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPOSSTAR:
+      return consumed;
+
+      case OP_CRQUERY:
+      case OP_CRMINQUERY:
+      case OP_CRPOSQUERY:
+      cc++;
+      break;
+
+      case OP_CRRANGE:
+      case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
+      if (GET2(cc, 1) != GET2(cc, 1 + IMM2_SIZE))
+        return consumed;
+      cc += 1 + 2 * IMM2_SIZE;
+      break;
+      }
 
     repeat = 1;
     continue;
@@ -3682,7 +3812,10 @@ while (TRUE)
       }
     }
   else
+    {
     caseless = FALSE;
+    othercase[0] = 0; /* Stops compiler warning - PH */
+    }
 
   len_save = len;
   cc_save = cc;
@@ -3692,43 +3825,16 @@ while (TRUE)
     do
       {
       chr = *cc;
-#ifdef COMPILE_PCRE32
-      if (SLJIT_UNLIKELY(chr == NOTACHAR))
-        return consumed;
-#endif
-      add_prefix_byte((pcre_uint8)chr, bytes);
+      add_prefix_char(*cc, chars);
 
-      mask = 0;
       if (caseless)
-        {
-        add_prefix_byte((pcre_uint8)*oc, bytes);
-        mask = *cc ^ *oc;
-        chr |= mask;
-        }
-
-#ifdef COMPILE_PCRE32
-      if (chars[0] == NOTACHAR && chars[1] == 0)
-#else
-      if (chars[0] == NOTACHAR)
-#endif
-        {
-        chars[0] = chr;
-        chars[1] = mask;
-        }
-      else
-        {
-        mask |= chars[0] ^ chr;
-        chr |= mask;
-        chars[0] = chr;
-        chars[1] |= mask;
-        }
+        add_prefix_char(*oc, chars);
 
       len--;
       consumed++;
       if (--max_chars == 0)
         return consumed;
-      chars += 2;
-      bytes += MAX_N_BYTES;
+      chars += MAX_DIFF_CHARS;
       cc++;
       oc++;
       }
@@ -4196,67 +4302,55 @@ if (offset > 0)
   OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
 }
 
-static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common, BOOL firstline)
+static SLJIT_INLINE BOOL fast_forward_first_n_chars(compiler_common *common)
 {
 DEFINE_COMPILER;
 struct sljit_label *start;
 struct sljit_jump *quit;
-pcre_uint32 chars[MAX_N_CHARS * 2];
-pcre_uint8 bytes[MAX_N_CHARS * MAX_N_BYTES];
-pcre_uint8 ones[MAX_N_CHARS];
-int offsets[3];
-pcre_uint32 mask;
-pcre_uint8 *byte_set, *byte_set_end;
+struct sljit_jump *match;
+/* bytes[0] represent the number of characters between 0
+and MAX_N_BYTES - 1, 255 represents any character. */
+pcre_uchar chars[MAX_N_CHARS * MAX_DIFF_CHARS];
+sljit_si offset;
+pcre_uchar mask;
+pcre_uchar *char_set, *char_set_end;
 int i, max, from;
-int range_right = -1, range_len = 3 - 1;
+int range_right = -1, range_len;
 sljit_ub *update_table = NULL;
 BOOL in_range;
-pcre_uint32 rec_count;
+uint32_t rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
-  {
-  chars[i << 1] = NOTACHAR;
-  chars[(i << 1) + 1] = 0;
-  bytes[i * MAX_N_BYTES] = 0;
-  }
+  chars[i * MAX_DIFF_CHARS] = 0;
 
 rec_count = 10000;
-max = scan_prefix(common, common->start, chars, bytes, MAX_N_CHARS, &rec_count);
+max = scan_prefix(common, common->start, chars, MAX_N_CHARS, &rec_count);
 
-if (max <= 1)
+if (max < 1)
   return FALSE;
 
-for (i = 0; i < max; i++)
-  {
-  mask = chars[(i << 1) + 1];
-  ones[i] = ones_in_half_byte[mask & 0xf];
-  mask >>= 4;
-  while (mask != 0)
-    {
-    ones[i] += ones_in_half_byte[mask & 0xf];
-    mask >>= 4;
-    }
-  }
-
 in_range = FALSE;
-from = 0;   /* Prevent compiler "uninitialized" warning */
+/* Prevent compiler "uninitialized" warning */
+from = 0;
+range_len = 4 /* minimum length */ - 1;
 for (i = 0; i <= max; i++)
   {
-  if (in_range && (i - from) > range_len && (bytes[(i - 1) * MAX_N_BYTES] <= 4))
+  if (in_range && (i - from) > range_len && (chars[(i - 1) * MAX_DIFF_CHARS] < 255))
     {
     range_len = i - from;
     range_right = i - 1;
     }
 
-  if (i < max && bytes[i * MAX_N_BYTES] < 255)
+  if (i < max && chars[i * MAX_DIFF_CHARS] < 255)
     {
+    SLJIT_ASSERT(chars[i * MAX_DIFF_CHARS] > 0);
     if (!in_range)
       {
       in_range = TRUE;
       from = i;
       }
     }
-  else if (in_range)
+  else
     in_range = FALSE;
   }
 
@@ -4269,89 +4363,65 @@ if (range_right >= 0)
 
   for (i = 0; i < range_len; i++)
     {
-    byte_set = bytes + ((range_right - i) * MAX_N_BYTES);
-    SLJIT_ASSERT(byte_set[0] > 0 && byte_set[0] < 255);
-    byte_set_end = byte_set + byte_set[0];
-    byte_set++;
-    while (byte_set <= byte_set_end)
+    char_set = chars + ((range_right - i) * MAX_DIFF_CHARS);
+    SLJIT_ASSERT(char_set[0] > 0 && char_set[0] < 255);
+    char_set_end = char_set + char_set[0];
+    char_set++;
+    while (char_set <= char_set_end)
       {
-      if (update_table[*byte_set] > IN_UCHARS(i))
-        update_table[*byte_set] = IN_UCHARS(i);
-      byte_set++;
+      if (update_table[(*char_set) & 0xff] > IN_UCHARS(i))
+        update_table[(*char_set) & 0xff] = IN_UCHARS(i);
+      char_set++;
       }
     }
   }
 
-offsets[0] = -1;
+offset = -1;
 /* Scan forward. */
 for (i = 0; i < max; i++)
-  if (ones[i] <= 2) {
-    offsets[0] = i;
-    break;
-  }
-
-if (offsets[0] < 0 && range_right < 0)
-  return FALSE;
-
-if (offsets[0] >= 0)
   {
-  /* Scan backward. */
-  offsets[1] = -1;
-  for (i = max - 1; i > offsets[0]; i--)
-    if (ones[i] <= 2 && i != range_right)
-      {
-      offsets[1] = i;
-      break;
-      }
-
-  /* This case is handled better by fast_forward_first_char. */
-  if (offsets[1] == -1 && offsets[0] == 0 && range_right < 0)
-    return FALSE;
-
-  offsets[2] = -1;
-  /* We only search for a middle character if there is no range check. */
-  if (offsets[1] >= 0 && range_right == -1)
+  if (offset == -1)
     {
-    /* Scan from middle. */
-    for (i = (offsets[0] + offsets[1]) / 2 + 1; i < offsets[1]; i++)
-      if (ones[i] <= 2)
+    if (chars[i * MAX_DIFF_CHARS] <= 2)
+      offset = i;
+    }
+  else if (chars[offset * MAX_DIFF_CHARS] == 2 && chars[i * MAX_DIFF_CHARS] <= 2)
+    {
+    if (chars[i * MAX_DIFF_CHARS] == 1)
+      offset = i;
+    else
+      {
+      mask = chars[offset * MAX_DIFF_CHARS + 1] ^ chars[offset * MAX_DIFF_CHARS + 2];
+      if (!is_powerof2(mask))
         {
-        offsets[2] = i;
-        break;
+        mask = chars[i * MAX_DIFF_CHARS + 1] ^ chars[i * MAX_DIFF_CHARS + 2];
+        if (is_powerof2(mask))
+          offset = i;
         }
-
-    if (offsets[2] == -1)
-      {
-      for (i = (offsets[0] + offsets[1]) / 2; i > offsets[0]; i--)
-        if (ones[i] <= 2)
-          {
-          offsets[2] = i;
-          break;
-          }
       }
-    }
-
-  SLJIT_ASSERT(offsets[1] == -1 || (offsets[0] < offsets[1]));
-  SLJIT_ASSERT(offsets[2] == -1 || (offsets[0] < offsets[2] && offsets[1] > offsets[2]));
-
-  chars[0] = chars[offsets[0] << 1];
-  chars[1] = chars[(offsets[0] << 1) + 1];
-  if (offsets[2] >= 0)
-    {
-    chars[2] = chars[offsets[2] << 1];
-    chars[3] = chars[(offsets[2] << 1) + 1];
-    }
-  if (offsets[1] >= 0)
-    {
-    chars[4] = chars[offsets[1] << 1];
-    chars[5] = chars[(offsets[1] << 1) + 1];
     }
   }
+
+if (range_right < 0)
+  {
+  if (offset < 0)
+    return FALSE;
+  SLJIT_ASSERT(chars[offset * MAX_DIFF_CHARS] >= 1 && chars[offset * MAX_DIFF_CHARS] <= 2);
+  /* Works regardless the value is 1 or 2. */
+  mask = chars[offset * MAX_DIFF_CHARS + chars[offset * MAX_DIFF_CHARS]];
+  fast_forward_first_char2(common, chars[offset * MAX_DIFF_CHARS + 1], mask, offset);
+  return TRUE;
+  }
+
+if (range_right == offset)
+  offset = -1;
+
+SLJIT_ASSERT(offset == -1 || (chars[offset * MAX_DIFF_CHARS] >= 1 && chars[offset * MAX_DIFF_CHARS] <= 2));
 
 max -= 1;
-if (firstline)
+SLJIT_ASSERT(max > 0);
+if (common->first_line_end != 0)
   {
-  SLJIT_ASSERT(common->first_line_end != 0);
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
   OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
@@ -4362,65 +4432,83 @@ if (firstline)
 else
   OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
 
+SLJIT_ASSERT(range_right >= 0);
+
 #if !(defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-if (range_right >= 0)
-  OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, (sljit_sw)update_table);
+OP1(SLJIT_MOV, RETURN_ADDR, 0, SLJIT_IMM, (sljit_sw)update_table);
 #endif
 
 start = LABEL();
 quit = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
 
-SLJIT_ASSERT(range_right >= 0 || offsets[0] >= 0);
-
-if (range_right >= 0)
-  {
 #if defined COMPILE_PCRE8 || (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right));
+OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right));
 #else
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right + 1) - 1);
+OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(range_right + 1) - 1);
 #endif
 
 #if !(defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM2(RETURN_ADDR, TMP1), 0);
+OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM2(RETURN_ADDR, TMP1), 0);
 #else
-  OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)update_table);
+OP1(SLJIT_MOV_UB, TMP1, 0, SLJIT_MEM1(TMP1), (sljit_sw)update_table);
 #endif
-  OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
-  CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, start);
-  }
+OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
+CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, 0, start);
 
-if (offsets[0] >= 0)
+if (offset >= 0)
   {
-  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[0]));
-  if (offsets[1] >= 0)
-    OP1(MOV_UCHAR, TMP2, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[1]));
+  OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offset));
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
-  if (chars[1] != 0)
-    OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[1]);
-  CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[0], start);
-  if (offsets[2] >= 0)
-    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(offsets[2] - 1));
-
-  if (offsets[1] >= 0)
+  if (chars[offset * MAX_DIFF_CHARS] == 1)
+    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 1], start);
+  else
     {
-    if (chars[5] != 0)
-      OP2(SLJIT_OR, TMP2, 0, TMP2, 0, SLJIT_IMM, chars[5]);
-    CMPTO(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, chars[4], start);
+    mask = chars[offset * MAX_DIFF_CHARS + 1] ^ chars[offset * MAX_DIFF_CHARS + 2];
+    if (is_powerof2(mask))
+      {
+      OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, mask);
+      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 1] | mask, start);
+      }
+    else
+      {
+      match = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 1]);
+      CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[offset * MAX_DIFF_CHARS + 2], start);
+      JUMPHERE(match);
+      }
     }
-
-  if (offsets[2] >= 0)
-    {
-    if (chars[3] != 0)
-      OP2(SLJIT_OR, TMP1, 0, TMP1, 0, SLJIT_IMM, chars[3]);
-    CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, chars[2], start);
-    }
-  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
   }
+
+#if defined SUPPORT_UTF && !defined COMPILE_PCRE32
+if (common->utf && offset != 0)
+  {
+  if (offset < 0)
+    {
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
+    OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    }
+  else
+    OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(-1));
+#if defined COMPILE_PCRE8
+  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xc0);
+  CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0x80, start);
+#elif defined COMPILE_PCRE16
+  OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, 0xfc00);
+  CMPTO(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, 0xdc00, start);
+#else
+#error "Unknown code width"
+#endif
+  if (offset < 0)
+    OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+  }
+#endif
+
+if (offset >= 0)
+  OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 
 JUMPHERE(quit);
 
-if (firstline)
+if (common->first_line_end != 0)
   {
   if (range_right >= 0)
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
@@ -4438,7 +4526,7 @@ return TRUE;
 }
 
 #undef MAX_N_CHARS
-#undef MAX_N_BYTES
+#undef MAX_DIFF_CHARS
 
 static SLJIT_INLINE void fast_forward_first_char(compiler_common *common, pcre_uchar first_char, BOOL caseless)
 {
@@ -10950,12 +11038,12 @@ if (common->control_head_ptr != 0)
 /* Main part of the matching */
 if ((re->options & PCRE_ANCHORED) == 0)
   {
-  mainloop_label = mainloop_entry(common, (re->flags & PCRE_HASCRORLF) != 0, (re->options & PCRE_FIRSTLINE) != 0);
+  mainloop_label = mainloop_entry(common, (re->flags & PCRE_HASCRORLF) != 0);
   continue_match_label = LABEL();
   /* Forward search if possible. */
   if ((re->options & PCRE_NO_START_OPTIMIZE) == 0)
     {
-    if (mode == JIT_COMPILE && fast_forward_first_n_chars(common, (re->options & PCRE_FIRSTLINE) != 0))
+    if (mode == JIT_COMPILE && fast_forward_first_n_chars(common))
       ;
     else if ((re->flags & PCRE_FIRSTSET) != 0)
       fast_forward_first_char(common, (pcre_uchar)re->first_char, (re->flags & PCRE_FCH_CASELESS) != 0);
@@ -11068,7 +11156,8 @@ if ((re->options & PCRE_ANCHORED) == 0 && (re->options & PCRE_FIRSTLINE) != 0)
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
   }
 
-OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->start_ptr);
+OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP),
+    (common->fast_forward_bc_ptr != NULL) ? (PRIVATE_DATA(common->fast_forward_bc_ptr + 1)) : common->start_ptr);
 
 if ((re->options & PCRE_ANCHORED) == 0)
   {
@@ -11079,12 +11168,7 @@ if ((re->options & PCRE_ANCHORED) == 0)
     /* There cannot be more newlines here. */
     }
   else
-    {
-    if ((re->options & PCRE_FIRSTLINE) == 0)
-      CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, mainloop_label);
-    else
-      CMPTO(SLJIT_LESS, STR_PTR, 0, TMP1, 0, mainloop_label);
-    }
+    CMPTO(SLJIT_LESS, STR_PTR, 0, ((re->options & PCRE_FIRSTLINE) == 0) ? STR_END : TMP1, 0, mainloop_label);
   }
 
 /* No more remaining characters. */
