@@ -183,8 +183,8 @@ typedef struct executable_functions {
   sljit_uw executable_sizes[JIT_NUMBER_OF_COMPILE_MODES];
   PUBL(jit_callback) callback;
   void *userdata;
-  pcre_uint32 top_bracket;
-  pcre_uint32 limit_match;
+  sljit_ui top_bracket;
+  sljit_ui limit_match;
 } executable_functions;
 
 typedef struct jump_list {
@@ -359,8 +359,8 @@ typedef struct compiler_common {
   sljit_si start_used_ptr;
   /* Starting pointer for partial soft matches. */
   sljit_si hit_start;
-  /* End pointer of the first line. */
-  sljit_si first_line_end;
+  /* Pointer of the match end position. */
+  sljit_si match_end_ptr;
   /* Points to the marked string. */
   sljit_si mark_ptr;
   /* Recursive control verb management chain. */
@@ -3319,11 +3319,11 @@ jump_list *newline = NULL;
 BOOL newlinecheck = FALSE;
 BOOL readuchar = FALSE;
 
-if (!(hascrorlf || (common->first_line_end != 0)) &&
+if (!(hascrorlf || (common->match_end_ptr != 0)) &&
     (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF || common->newline > 255))
   newlinecheck = TRUE;
 
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   {
   /* Search for the end of the first line. */
   OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
@@ -3338,19 +3338,19 @@ if (common->first_line_end != 0)
     CMPTO(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, (common->newline >> 8) & 0xff, mainloop);
     CMPTO(SLJIT_NOT_EQUAL, TMP2, 0, SLJIT_IMM, common->newline & 0xff, mainloop);
     JUMPHERE(end);
-    OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_SP), common->first_line_end, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
+    OP2(SLJIT_SUB, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
     }
   else
     {
     end = CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0);
     mainloop = LABEL();
     /* Continual stores does not cause data dependency. */
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->first_line_end, STR_PTR, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, STR_PTR, 0);
     read_char_range(common, common->nlmin, common->nlmax, TRUE);
     check_newlinechar(common, common->nltype, &newline, TRUE);
     CMPTO(SLJIT_LESS, STR_PTR, 0, STR_END, 0, mainloop);
     JUMPHERE(end);
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->first_line_end, STR_PTR, 0);
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, STR_PTR, 0);
     set_jumps(newline, LABEL());
     }
 
@@ -4145,16 +4145,16 @@ pcre_uchar mask;
 struct sljit_label *utf_start = NULL;
 struct sljit_jump *utf_quit = NULL;
 #endif
-BOOL has_first_line_end = (common->first_line_end != 0);
+BOOL has_match_end_ptr = (common->match_end_ptr != 0);
 
 if (offset > 0)
   OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
 
-if (has_first_line_end)
+if (has_match_end_ptr)
   {
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
 
-  OP2(SLJIT_ADD, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end, SLJIT_IMM, IN_UCHARS(offset + 1));
+  OP2(SLJIT_ADD, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, SLJIT_IMM, IN_UCHARS(offset + 1));
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
   if (sljit_x86_is_cmov_available())
     {
@@ -4216,16 +4216,16 @@ if (sljit_x86_is_sse2_available())
   else if (sljit_x86_is_cmov_available())
     {
     OP2(SLJIT_SUB | SLJIT_SET_U, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
-    sljit_x86_emit_cmov(compiler, SLJIT_GREATER_EQUAL, STR_PTR, has_first_line_end ? SLJIT_MEM1(SLJIT_SP) : STR_END, has_first_line_end ? common->first_line_end : 0);
+    sljit_x86_emit_cmov(compiler, SLJIT_GREATER_EQUAL, STR_PTR, has_match_end_ptr ? SLJIT_MEM1(SLJIT_SP) : STR_END, has_match_end_ptr ? common->match_end_ptr : 0);
     }
   else
     {
     quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-    OP1(SLJIT_MOV, STR_PTR, 0, has_first_line_end ? SLJIT_MEM1(SLJIT_SP) : STR_END, has_first_line_end ? common->first_line_end : 0);
+    OP1(SLJIT_MOV, STR_PTR, 0, has_match_end_ptr ? SLJIT_MEM1(SLJIT_SP) : STR_END, has_match_end_ptr ? common->match_end_ptr : 0);
     JUMPHERE(quit);
     }
 
-  if (has_first_line_end)
+  if (has_match_end_ptr)
     OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
   return;
   }
@@ -4288,10 +4288,10 @@ if (common->utf && offset > 0)
 
 JUMPHERE(quit);
 
-if (has_first_line_end)
+if (has_match_end_ptr)
   {
   quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   if (offset > 0)
     OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
   JUMPHERE(quit);
@@ -4318,7 +4318,7 @@ int i, max, from;
 int range_right = -1, range_len;
 sljit_ub *update_table = NULL;
 BOOL in_range;
-uint32_t rec_count;
+sljit_ui rec_count;
 
 for (i = 0; i < MAX_N_CHARS; i++)
   chars[i * MAX_DIFF_CHARS] = 0;
@@ -4420,9 +4420,9 @@ SLJIT_ASSERT(offset == -1 || (chars[offset * MAX_DIFF_CHARS] >= 1 && chars[offse
 
 max -= 1;
 SLJIT_ASSERT(max > 0);
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   {
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
   OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, SLJIT_IMM, IN_UCHARS(max));
   quit = CMP(SLJIT_LESS_EQUAL, STR_END, 0, TMP1, 0);
@@ -4508,10 +4508,10 @@ if (offset >= 0)
 
 JUMPHERE(quit);
 
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   {
   if (range_right >= 0)
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
   if (range_right >= 0)
     {
@@ -4556,10 +4556,10 @@ struct sljit_jump *foundcr = NULL;
 struct sljit_jump *notfoundnl;
 jump_list *newline = NULL;
 
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   {
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
-  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   }
 
 if (common->nltype == NLTYPE_FIXED && common->newline > 255)
@@ -4590,7 +4590,7 @@ if (common->nltype == NLTYPE_FIXED && common->newline > 255)
   JUMPHERE(firstchar);
   JUMPHERE(lastchar);
 
-  if (common->first_line_end != 0)
+  if (common->match_end_ptr != 0)
     OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
   return;
   }
@@ -4628,7 +4628,7 @@ if (common->nltype == NLTYPE_ANY || common->nltype == NLTYPE_ANYCRLF)
 JUMPHERE(lastchar);
 JUMPHERE(firstchar);
 
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
 }
 
@@ -4645,10 +4645,10 @@ jump_list *matches = NULL;
 struct sljit_jump *jump;
 #endif
 
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   {
   OP1(SLJIT_MOV, RETURN_ADDR, 0, STR_END, 0);
-  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   }
 
 start = LABEL();
@@ -4706,7 +4706,7 @@ if (matches != NULL)
   set_jumps(matches, LABEL());
 JUMPHERE(quit);
 
-if (common->first_line_end != 0)
+if (common->match_end_ptr != 0)
   OP1(SLJIT_MOV, STR_END, 0, RETURN_ADDR, 0);
 }
 
@@ -10932,7 +10932,7 @@ if (mode != JIT_COMPILE)
   }
 if ((re->options & PCRE_FIRSTLINE) != 0)
   {
-  common->first_line_end = common->ovector_start;
+  common->match_end_ptr = common->ovector_start;
   common->ovector_start += sizeof(sljit_sw);
   }
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
@@ -10977,7 +10977,7 @@ private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
 set_private_data_ptrs(common, &private_data_size, ccend);
 if ((re->options & PCRE_ANCHORED) == 0 && (re->options & PCRE_NO_START_OPTIMIZE) == 0)
   {
-  if (!common->has_skip_in_assert_back)
+  if (!detect_fast_forward_skip(common, &private_data_size) && !common->has_skip_in_assert_back)
     detect_fast_fail(common, common->start, &private_data_size, 4);
   }
 
@@ -11071,6 +11071,8 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), OVECTOR(0), STR_PTR, 0);
 OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_MEM1(SLJIT_SP), LIMIT_MATCH);
 if (common->capture_last_ptr != 0)
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr, SLJIT_IMM, -1);
+if (common->fast_forward_bc_ptr != NULL)
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), PRIVATE_DATA(common->fast_forward_bc_ptr + 1), STR_PTR, 0);
 
 if (common->start_ptr != OVECTOR(0))
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_ptr, STR_PTR, 0);
@@ -11152,8 +11154,8 @@ if (mode == JIT_PARTIAL_SOFT_COMPILE)
 /* Check we have remaining characters. */
 if ((re->options & PCRE_ANCHORED) == 0 && (re->options & PCRE_FIRSTLINE) != 0)
   {
-  SLJIT_ASSERT(common->first_line_end != 0);
-  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->first_line_end);
+  SLJIT_ASSERT(common->match_end_ptr != 0);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
   }
 
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP),
