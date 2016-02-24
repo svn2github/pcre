@@ -242,13 +242,17 @@ static struct regression_test_case regression_test_cases[] = {
 	{ MA, 0, "a\\z", "aaa" },
 	{ MA, 0 | F_NOMATCH, "a\\z", "aab" },
 
-	/* Brackets. */
+	/* Brackets and alternatives. */
 	{ MUA, 0, "(ab|bb|cd)", "bacde" },
 	{ MUA, 0, "(?:ab|a)(bc|c)", "ababc" },
 	{ MUA, 0, "((ab|(cc))|(bb)|(?:cd|efg))", "abac" },
 	{ CMUA, 0, "((aB|(Cc))|(bB)|(?:cd|EFg))", "AcCe" },
 	{ MUA, 0, "((ab|(cc))|(bb)|(?:cd|ebg))", "acebebg" },
 	{ MUA, 0, "(?:(a)|(?:b))(cc|(?:d|e))(a|b)k", "accabdbbccbk" },
+	{ MUA, 0, "\xc7\x82|\xc6\x82", "\xf1\x83\x82\x82\xc7\x82\xc7\x83" },
+	{ MUA, 0, "=\xc7\x82|#\xc6\x82", "\xf1\x83\x82\x82=\xc7\x82\xc7\x83" },
+	{ MUA, 0, "\xc7\x82\xc7\x83|\xc6\x82\xc6\x82", "\xf1\x83\x82\x82\xc7\x82\xc7\x83" },
+	{ MUA, 0, "\xc6\x82\xc6\x82|\xc7\x83\xc7\x83|\xc8\x84\xc8\x84", "\xf1\x83\x82\x82\xc8\x84\xc8\x84" },
 
 	/* Greedy and non-greedy ? operators. */
 	{ MUA, 0, "(?:a)?a", "laab" },
@@ -318,6 +322,14 @@ static struct regression_test_case regression_test_cases[] = {
 	{ CMUA, 0, "[^\xe1\xbd\xb8][^\xc3\xa9]", "\xe1\xbd\xb8\xe1\xbf\xb8\xc3\xa9\xc3\x89#" },
 	{ MUA, 0, "[^\xe1\xbd\xb8][^\xc3\xa9]", "\xe1\xbd\xb8\xe1\xbf\xb8\xc3\xa9\xc3\x89#" },
 	{ MUA, 0, "[^\xe1\xbd\xb8]{3,}?", "##\xe1\xbd\xb8#\xe1\xbd\xb8#\xc3\x89#\xe1\xbd\xb8" },
+	{ MUA, 0, "\\d+123", "987654321,01234" },
+	{ MUA, 0, "abcd*|\\w+xy", "aaaaa,abxyz" },
+	{ MUA, 0, "(?:abc|((?:amc|\\b\\w*xy)))", "aaaaa,abxyz" },
+	{ MUA, 0, "a(?R)|([a-z]++)#", ".abcd.abcd#."},
+	{ MUA, 0, "a(?R)|([a-z]++)#", ".abcd.mbcd#."},
+	{ MUA, 0, ".[ab]*.", "xx" },
+	{ MUA, 0, ".[ab]*a", "xxa" },
+	{ MUA, 0, ".[ab]?.", "xx" },
 
 	/* Bracket repeats with limit. */
 	{ MUA, 0, "(?:(ab){2}){5}M", "abababababababababababM" },
@@ -674,6 +686,7 @@ static struct regression_test_case regression_test_cases[] = {
 	{ PCRE_MULTILINE | PCRE_UTF8 | PCRE_NEWLINE_CRLF | PCRE_FIRSTLINE, 1, ".", "\r\n" },
 	{ PCRE_FIRSTLINE | PCRE_NEWLINE_LF | PCRE_DOTALL, 0 | F_NOMATCH, "ab.", "ab" },
 	{ MUA | PCRE_FIRSTLINE, 1 | F_NOMATCH, "^[a-d0-9]", "\nxx\nd" },
+	{ PCRE_NEWLINE_ANY | PCRE_FIRSTLINE | PCRE_DOTALL, 0, "....a", "012\n0a" },
 
 	/* Recurse. */
 	{ MUA, 0, "(a)(?1)", "aa" },
@@ -808,6 +821,9 @@ static struct regression_test_case regression_test_cases[] = {
 
 	/* (*SKIP) verb. */
 	{ MUA, 0 | F_NOMATCH, "(?=a(*SKIP)b)ab|ad", "ad" },
+	{ MUA, 0, "(\\w+(*SKIP)#)", "abcd,xyz#," },
+	{ MUA, 0, "\\w+(*SKIP)#|mm", "abcd,xyz#," },
+	{ MUA, 0 | F_NOMATCH, "b+(?<=(*SKIP)#c)|b+", "#bbb" },
 
 	/* (*THEN) verb. */
 	{ MUA, 0, "((?:a(*THEN)|aab)(*THEN)c|a+)+m", "aabcaabcaabcaabcnacm" },
