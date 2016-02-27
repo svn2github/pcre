@@ -5617,6 +5617,12 @@ while (!done)
         break;
         }
 
+      if (use_size_offsets < 2)
+        {
+        fprintf(outfile, "Cannot do global matching with an ovector size < 2\n");
+        break;
+        }
+
       /* If we have matched an empty string, first check to see if we are at
       the end of the subject. If so, the /g loop is over. Otherwise, mimic what
       Perl's /g options does. This turns out to be rather cunning. First we set
