@@ -53,6 +53,13 @@ Version 8.39 xx-xxxxxx-201x
 13. A pattern that included (*ACCEPT) in the middle of a sufficiently deeply
     nested set of parentheses of sufficient size caused an overflow of the
     compiling workspace (which was diagnosed, but of course is not desirable).
+    
+14. And yet another buffer overflow bug involving duplicate named groups, this 
+    time nested, with a nested back reference. Yet again, I have just allowed 
+    for more memory, because anything more needs all the refactoring that has 
+    been done for PCRE2. An example pattern that provoked this bug is:
+    /((?J)(?'R'(?'R'(?'R'(?'R'(?'R'(?|(\k'R'))))))))/ and the bug was 
+    registered as CVE-2016-1283. 
 
 
 Version 8.38 23-November-2015

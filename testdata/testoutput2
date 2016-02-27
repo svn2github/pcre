@@ -14665,4 +14665,6 @@ Start of matched string is beyond its end - displaying from end to start.
   0     ^    0
 No match
      
+/((?J)(?'R'(?'R'(?'R'(?'R'(?'R'(?|(\k'R'))))))))/
+
 /-- End of testinput2 --/

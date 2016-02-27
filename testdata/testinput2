@@ -4239,4 +4239,6 @@ backtracking verbs. --/
     9010
     abcd
      
+/((?J)(?'R'(?'R'(?'R'(?'R'(?'R'(?|(\k'R'))))))))/
+
 /-- End of testinput2 --/
