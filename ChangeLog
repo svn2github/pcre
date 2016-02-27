@@ -64,6 +64,10 @@ Version 8.39 xx-xxxxxx-201x
 15. pcretest went into a loop if global matching was requested with an ovector
     size less than 2. It now gives an error message. This bug was found by
     afl-fuzz.
+    
+16. An invalid pattern fragment such as (?(?C)0 was not diagnosing an error 
+    ("assertion expected") when (?(?C) was not followed by an opening 
+    parenthesis.
 
 
 Version 8.38 23-November-2015

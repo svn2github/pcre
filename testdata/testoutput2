@@ -555,13 +555,13 @@ Failed: malformed number or name after (?( at offset 4
 Failed: malformed number or name after (?( at offset 4
 
 /(?(?i))/
-Failed: assertion expected after (?( at offset 3
+Failed: assertion expected after (?( or (?(?C) at offset 3
 
 /(?(abc))/
 Failed: reference to non-existent subpattern at offset 7
 
 /(?(?<ab))/
-Failed: assertion expected after (?( at offset 3
+Failed: assertion expected after (?( or (?(?C) at offset 3
 
 /((?s)blah)\s+\1/I
 Capturing subpattern count = 1
@@ -7870,7 +7870,7 @@ No match
 Failed: malformed number or name after (?( at offset 6
 
 /(?(''))/
-Failed: assertion expected after (?( at offset 4
+Failed: assertion expected after (?( or (?(?C) at offset 4
 
 /(?('R')stuff)/
 Failed: reference to non-existent subpattern at offset 7
@@ -14346,7 +14346,7 @@ No match
 "((?2)+)((?1))"
 
 "(?(?<E>.*!.*)?)"
-Failed: assertion expected after (?( at offset 3
+Failed: assertion expected after (?( or (?(?C) at offset 3
 
 "X((?2)()*+){2}+"BZ
 ------------------------------------------------------------------
@@ -14666,5 +14666,8 @@ Start of matched string is beyond its end - displaying from end to start.
 No match
      
 /((?J)(?'R'(?'R'(?'R'(?'R'(?'R'(?|(\k'R'))))))))/
+
+/\N(?(?C)0?!.)*/
+Failed: assertion expected after (?( or (?(?C) at offset 4
 
 /-- End of testinput2 --/
