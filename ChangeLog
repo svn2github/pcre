@@ -71,6 +71,9 @@ Version 8.39 xx-xxxxxx-201x
 
 17. Fixed typo ("&&" for "&") in pcre_study(). Fortunately, this could not 
     actually affect anything, by sheer luck.
+    
+18. Applied Chris Wilson's patch (Bugzilla #1681) to CMakeLists.txt for MSVC 
+    static compilation.  
 
 
 Version 8.38 23-November-2015
