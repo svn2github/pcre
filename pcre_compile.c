@@ -4566,6 +4566,10 @@ for (;; ptr++)
   unsigned int tempbracount;
   pcre_uint32 ec;
   pcre_uchar mcbuffer[8];
+  
+  /* Come here to restart the loop without advancing the pointer. */
+  
+  REDO_LOOP: 
 
   /* Get next character in the pattern */
 
@@ -4712,11 +4716,7 @@ for (;; ptr++)
     /* If we skipped any characters, restart the loop. Otherwise, we didn't see
     a comment. */
 
-    if (ptr > wscptr)
-      {
-      ptr--;
-      continue;
-      }
+    if (ptr > wscptr) goto REDO_LOOP;
     }
 
   /* Skip over (?# comments. We need to do this here because we want to know if
@@ -4857,15 +4857,15 @@ for (;; ptr++)
     if (STRNCMP_UC_C8(ptr+1, STRING_WEIRD_STARTWORD, 6) == 0)
       {
       nestptr = ptr + 7;
-      ptr = sub_start_of_word - 1;
-      continue;
+      ptr = sub_start_of_word;
+      goto REDO_LOOP;
       }
 
     if (STRNCMP_UC_C8(ptr+1, STRING_WEIRD_ENDWORD, 6) == 0)
       {
       nestptr = ptr + 7;
-      ptr = sub_end_of_word - 1;
-      continue;
+      ptr = sub_end_of_word;
+      goto REDO_LOOP;
       }
 
     /* Handle a real character class. */

@@ -81,6 +81,9 @@ Version 8.39 xx-xxxxxx-201x
 
 20. A racing condition is fixed in JIT reported by Mozilla.
 
+21. Minor code refactor to avoid "array subscript is below array bounds" 
+compiler warning.
+
 
 Version 8.38 23-November-2015
 -----------------------------
