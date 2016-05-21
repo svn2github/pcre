@@ -275,7 +275,7 @@ pcre.h(.in) and disable (comment out) this message. */
 
 typedef pcre_uint16 pcre_uchar;
 #define UCHAR_SHIFT (1)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 2)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
@@ -283,7 +283,7 @@ typedef pcre_uint16 pcre_uchar;
 
 typedef pcre_uint32 pcre_uchar;
 #define UCHAR_SHIFT (2)
-#define IN_UCHARS(x) ((x) << UCHAR_SHIFT)
+#define IN_UCHARS(x) ((x) * 4)
 #define MAX_255(c) ((c) <= 255u)
 #define TABLE_GET(c, table, default) (MAX_255(c)? ((table)[c]):(default))
 
