@@ -4536,7 +4536,7 @@ oc = first_char;
 if (caseless)
   {
   oc = TABLE_GET(first_char, common->fcc, first_char);
-#if defined SUPPORT_UTF && !defined COMPILE_PCRE8
+#if defined SUPPORT_UCP && !defined COMPILE_PCRE8
   if (first_char > 127 && common->utf)
     oc = UCD_OTHERCASE(first_char);
 #endif
