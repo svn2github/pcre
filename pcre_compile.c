@@ -4566,10 +4566,10 @@ for (;; ptr++)
   unsigned int tempbracount;
   pcre_uint32 ec;
   pcre_uchar mcbuffer[8];
-  
+
   /* Come here to restart the loop without advancing the pointer. */
-  
-  REDO_LOOP: 
+
+  REDO_LOOP:
 
   /* Get next character in the pattern */
 
