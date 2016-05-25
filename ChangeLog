@@ -88,6 +88,8 @@ Version 8.39 21-May-2016
 
 23. Fix typo causing compile error when 16- or 32-bit JIT is compiled without
     UCP support.
+    
+24. Refactor to avoid compiler warnings in pcrecpp.cc. 
 
 
 Version 8.38 23-November-2015
