@@ -1560,10 +1560,10 @@ static int regression_tests(void)
 							is_successful = 0;
 						}
 #endif
-#if defined SUPPORT_PCRE16 && defined SUPPORT_PCRE16
-						if (ovector16_1[i] != ovector16_2[i] || ovector16_1[i] != ovector16_1[i] || ovector16_1[i] != ovector16_2[i]) {
-							printf("\n16 and 16 bit: Ovector[%d] value differs(J16:%d,I16:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
-								i, ovector16_1[i], ovector16_2[i], ovector16_1[i], ovector16_2[i],
+#if defined SUPPORT_PCRE16 && defined SUPPORT_PCRE32
+						if (ovector16_1[i] != ovector16_2[i] || ovector16_1[i] != ovector32_1[i] || ovector16_1[i] != ovector32_2[i]) {
+							printf("\n16 and 32 bit: Ovector[%d] value differs(J16:%d,I16:%d,J32:%d,I32:%d): [%d] '%s' @ '%s' \n",
+								i, ovector16_1[i], ovector16_2[i], ovector32_1[i], ovector32_2[i],
 								total, current->pattern, current->input);
 							is_successful = 0;
 						}

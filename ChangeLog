@@ -91,6 +91,8 @@ Version 8.39 21-May-2016
     
 24. Refactor to avoid compiler warnings in pcrecpp.cc. 
 
+25. Refactor to fix a typo in pcre_jit_test.c
+
 
 Version 8.38 23-November-2015
 -----------------------------
