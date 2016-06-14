@@ -66,7 +66,7 @@ Arg RE::no_arg((void*)NULL);
 // inclusive test if we ever needed it.  (Note that not only the
 // __attribute__ syntax, but also __USER_LABEL_PREFIX__, are
 // gnu-specific.)
-#if defined(__GNUC__) && __GNUC__ >= 3 && defined(__ELF__)
+#if defined(__GNUC__) && __GNUC__ >= 3 && defined(__ELF__) && !defined(__INTEL_COMPILER)
 # define ULP_AS_STRING(x)            ULP_AS_STRING_INTERNAL(x)
 # define ULP_AS_STRING_INTERNAL(x)   #x
 # define USER_LABEL_PREFIX_STR       ULP_AS_STRING(__USER_LABEL_PREFIX__)
