@@ -4,8 +4,8 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
-Version 8.39 21-May-2016
-------------------------
+Version 8.39 14-June-2016
+-------------------------
 
 1.  If PCRE_AUTO_CALLOUT was set on a pattern that had a (?# comment between
     an item and its qualifier (for example, A(?#comment)?B) pcre_compile()
@@ -33,7 +33,7 @@ Version 8.39 21-May-2016
     pcre_compile() assumed that (?-x) applied to the whole pattern and
     consequently mis-compiled it. This bug was found by the LLVM fuzzer.
 
-8.  An call of pcre_copy_named_substring() for a named substring whose number
+8.  A call of pcre_copy_named_substring() for a named substring whose number
     was greater than the space in the ovector could cause a crash.
 
 9.  Yet another buffer overflow bug involved duplicate named groups with a
@@ -88,8 +88,8 @@ Version 8.39 21-May-2016
 
 23. Fix typo causing compile error when 16- or 32-bit JIT is compiled without
     UCP support.
-    
-24. Refactor to avoid compiler warnings in pcrecpp.cc. 
+
+24. Refactor to avoid compiler warnings in pcrecpp.cc.
 
 25. Refactor to fix a typo in pcre_jit_test.c
 

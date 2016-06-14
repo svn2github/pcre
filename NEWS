@@ -1,8 +1,8 @@
 News about PCRE releases
 ------------------------
 
-Release 8.39 21-May-2016
-------------------------
+Release 8.39 14-June-2016
+-------------------------
 
 Some appropriate PCRE2 JIT improvements have been retro-fitted to PCRE1. Apart
 from that, this is another bug-fix release. Note that this library (now called
