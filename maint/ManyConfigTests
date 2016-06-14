@@ -50,7 +50,6 @@ if [ $? -eq 0 ] && grep GCC zzz >/dev/null; then
   CFLAGS="$CFLAGS -Wuninitialized"
   CFLAGS="$CFLAGS -Wmissing-prototypes"
   CFLAGS="$CFLAGS -Wstrict-prototypes"
-  CFLAGS="$CFLAGS -Wno-tautological-compare" 
 fi
 
 
