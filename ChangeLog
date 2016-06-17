@@ -4,6 +4,13 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
+Version 8.40 17-June-2016
+-------------------------
+
+1.  Using -o with -M in pcregrep could cause unnecessary repeated output when
+    the match extended over a line boundary.
+     
+
 Version 8.39 14-June-2016
 -------------------------
 
