@@ -9,10 +9,12 @@ Version 8.40 17-June-2016
 
 1.  Using -o with -M in pcregrep could cause unnecessary repeated output when
     the match extended over a line boundary.
-    
+
 2.  Applied Chris Wilson's second patch (Bugzilla #1681) to CMakeLists.txt for
     MSVC static compilation, putting the first patch under a new option.
-     
+
+3.  Fix register overwite in JIT when SSE2 acceleration is enabled.
+
 
 Version 8.39 14-June-2016
 -------------------------
