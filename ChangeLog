@@ -17,6 +17,8 @@ Version 8.40 17-June-2016
 
 4.  Ignore "show all captures" (/=) for DFA matching.
 
+5.  Fix unaligned accesses on x86. Patch by Marc Mutz.
+
 
 Version 8.39 14-June-2016
 -------------------------
