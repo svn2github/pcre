@@ -4,7 +4,7 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
-Version 8.40 17-June-2016
+Version 8.40 xx-xxxx-2016
 -------------------------
 
 1.  Using -o with -M in pcregrep could cause unnecessary repeated output when
@@ -17,7 +17,13 @@ Version 8.40 17-June-2016
 
 4.  Ignore "show all captures" (/=) for DFA matching.
 
-5.  Fix unaligned accesses on x86. Patch by Marc Mutz.
+5.  Fix JIT unaligned accesses on x86. Patch by Marc Mutz.
+
+6. In any wide-character mode (8-bit UTF or any 16-bit or 32-bit mode), without
+   PCRE_UCP set, a negative character type such as \D in a positive class
+   should cause all characters greater than 255 to match, whatever else is in
+   the class. There was a bug that caused this not to happen if a Unicode
+   property item was added to such a class, for example [\D\P{Nd}] or [\W\pL].
 
 
 Version 8.39 14-June-2016

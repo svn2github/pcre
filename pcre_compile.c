@@ -5579,6 +5579,34 @@ for (;; ptr++)
 #endif
 #if defined SUPPORT_UTF || !defined COMPILE_PCRE8
       {
+      /* For non-UCP wide characters, in a non-negative class containing \S or
+      similar (should_flip_negation is set), all characters greater than 255
+      must be in the class. */
+
+      if (
+#if defined COMPILE_PCRE8
+           utf &&
+#endif
+           should_flip_negation && !negate_class && (options & PCRE_UCP) == 0)
+        {
+        *class_uchardata++ = XCL_RANGE;
+        if (utf)   /* Will always be utf in the 8-bit library */
+          {
+          class_uchardata += PRIV(ord2utf)(0x100, class_uchardata);
+          class_uchardata += PRIV(ord2utf)(0x10ffff, class_uchardata);
+          }
+        else       /* Can only happen for the 16-bit & 32-bit libraries */
+          {
+#if defined COMPILE_PCRE16
+          *class_uchardata++ = 0x100;
+          *class_uchardata++ = 0xffffu;
+#elif defined COMPILE_PCRE32
+          *class_uchardata++ = 0x100;
+          *class_uchardata++ = 0xffffffffu;
+#endif
+          }
+        }
+
       *class_uchardata++ = XCL_END;    /* Marks the end of extra data */
       *code++ = OP_XCLASS;
       code += LINK_SIZE;
