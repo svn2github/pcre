@@ -1982,6 +1982,7 @@ return(result);
 static int pchar(pcre_uint32 c, FILE *f)
 {
 int n = 0;
+char tempbuffer[16];
 if (PRINTOK(c))
   {
   if (f != NULL) fprintf(f, "%c", c);
@@ -2003,6 +2004,8 @@ if (c < 0x100)
   }
 
 if (f != NULL) n = fprintf(f, "\\x{%02x}", c);
+  else n = sprintf(tempbuffer, "\\x{%02x}", c);
+
 return n >= 0 ? n : 0;
 }
 

@@ -24,6 +24,10 @@ Version 8.40 xx-xxxx-2016
    should cause all characters greater than 255 to match, whatever else is in
    the class. There was a bug that caused this not to happen if a Unicode
    property item was added to such a class, for example [\D\P{Nd}] or [\W\pL].
+   
+7. When pcretest was outputing information from a callout, the caret indicator
+   for the current position in the subject line was incorrect if it was after
+   an escape sequence for a character whose code point was greater than \x{ff}.
 
 
 Version 8.39 14-June-2016
