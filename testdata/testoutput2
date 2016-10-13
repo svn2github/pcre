@@ -14670,4 +14670,32 @@ No match
 /\N(?(?C)0?!.)*/
 Failed: assertion expected after (?( or (?(?C) at offset 4
 
+/(?<RA>abc)(?(R)xyz)/BZ
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        abc
+        Ket
+        Cond
+        Cond recurse any
+        xyz
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/(?<R>abc)(?(R)xyz)/BZ
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        abc
+        Ket
+        Cond
+      1 Cond ref
+        xyz
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- End of testinput2 --/

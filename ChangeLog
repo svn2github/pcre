@@ -19,15 +19,23 @@ Version 8.40 xx-xxxx-2016
 
 5.  Fix JIT unaligned accesses on x86. Patch by Marc Mutz.
 
-6. In any wide-character mode (8-bit UTF or any 16-bit or 32-bit mode), without
-   PCRE_UCP set, a negative character type such as \D in a positive class
-   should cause all characters greater than 255 to match, whatever else is in
-   the class. There was a bug that caused this not to happen if a Unicode
-   property item was added to such a class, for example [\D\P{Nd}] or [\W\pL].
-   
-7. When pcretest was outputing information from a callout, the caret indicator
-   for the current position in the subject line was incorrect if it was after
-   an escape sequence for a character whose code point was greater than \x{ff}.
+6.  In any wide-character mode (8-bit UTF or any 16-bit or 32-bit mode),
+    without PCRE_UCP set, a negative character type such as \D in a positive
+    class should cause all characters greater than 255 to match, whatever else
+    is in the class. There was a bug that caused this not to happen if a
+    Unicode property item was added to such a class, for example [\D\P{Nd}] or
+    [\W\pL].
+    
+7.  When pcretest was outputing information from a callout, the caret indicator
+    for the current position in the subject line was incorrect if it was after
+    an escape sequence for a character whose code point was greater than
+    \x{ff}.
+    
+8.  A pattern such as (?<RA>abc)(?(R)xyz) was incorrectly compiled such that
+    the conditional was interpreted as a reference to capturing group 1 instead
+    of a test for recursion. Any group whose name began with R was
+    misinterpreted in this way. (The reference interpretation should only 
+    happen if the group's name is precisely "R".)
 
 
 Version 8.39 14-June-2016

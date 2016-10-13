@@ -6951,7 +6951,8 @@ for (;; ptr++)
         slot = cd->name_table;
         for (i = 0; i < cd->names_found; i++)
           {
-          if (STRNCMP_UC_UC(name, slot+IMM2_SIZE, namelen) == 0) break;
+          if (STRNCMP_UC_UC(name, slot+IMM2_SIZE, namelen) == 0 &&
+            slot[IMM2_SIZE+namelen] == 0) break;
           slot += cd->name_entry_size;
           }
 
