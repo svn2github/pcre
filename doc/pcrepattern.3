@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "14 June 2015" "PCRE 8.38"
+.TH PCREPATTERN 3 "14 October 2016" "PCRE 8.40"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -1511,12 +1511,8 @@ J, U and X respectively.
 .P
 When one of these option changes occurs at top level (that is, not inside
 subpattern parentheses), the change applies to the remainder of the pattern
-that follows. If the change is placed right at the start of a pattern, PCRE
-extracts it into the global options (and it will therefore show up in data
-extracted by the \fBpcre_fullinfo()\fP function).
-.P
-An option change within a subpattern (see below for a description of
-subpatterns) affects only that part of the subpattern that follows it, so
+that follows. An option change within a subpattern (see below for a description
+of subpatterns) affects only that part of the subpattern that follows it, so
 .sp
   (a(?i)b)c
 .sp
@@ -3296,6 +3292,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 June 2015
-Copyright (c) 1997-2015 University of Cambridge.
+Last updated: 14 October 2016
+Copyright (c) 1997-2016 University of Cambridge.
 .fi
