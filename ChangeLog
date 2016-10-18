@@ -25,17 +25,30 @@ Version 8.40 xx-xxxx-2016
     is in the class. There was a bug that caused this not to happen if a
     Unicode property item was added to such a class, for example [\D\P{Nd}] or
     [\W\pL].
-    
+
 7.  When pcretest was outputing information from a callout, the caret indicator
     for the current position in the subject line was incorrect if it was after
     an escape sequence for a character whose code point was greater than
     \x{ff}.
-    
+
 8.  A pattern such as (?<RA>abc)(?(R)xyz) was incorrectly compiled such that
     the conditional was interpreted as a reference to capturing group 1 instead
     of a test for recursion. Any group whose name began with R was
-    misinterpreted in this way. (The reference interpretation should only 
+    misinterpreted in this way. (The reference interpretation should only
     happen if the group's name is precisely "R".)
+
+9.  A number of bugs have been mended relating to match start-up optimizations
+    when the first thing in a pattern is a positive lookahead. These all
+    applied only when PCRE_NO_START_OPTIMIZE was *not* set:
+
+    (a) A pattern such as (?=.*X)X$ was incorrectly optimized as if it needed
+        both an initial 'X' and a following 'X'.
+    (b) Some patterns starting with an assertion that started with .* were
+        incorrectly optimized as having to match at the start of the subject or
+        after a newline. There are cases where this is not true, for example,
+        (?=.*[A-Z])(?=.{8,16})(?!.*[\s]) matches after the start in lines that
+        start with spaces. Starting .* in an assertion is no longer taken as an
+        indication of matching at the start (or after a newline).
 
 
 Version 8.39 14-June-2016

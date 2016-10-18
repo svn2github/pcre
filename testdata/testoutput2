@@ -9380,7 +9380,7 @@ No need char
 /(?(?=.*b).*b|^d)/I
 Capturing subpattern count = 0
 No options
-First char at start or follows newline
+No first char
 No need char
 
 /xyz/C
@@ -14697,5 +14697,12 @@ Failed: assertion expected after (?( or (?(?C) at offset 4
         Ket
         End
 ------------------------------------------------------------------
+
+/(?=.*[A-Z])/I
+Capturing subpattern count = 0
+May match empty string
+No options
+No first char
+No need char
 
 /-- End of testinput2 --/
