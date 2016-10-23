@@ -1,4 +1,4 @@
-.TH PCREPATTERN 3 "14 October 2016" "PCRE 8.40"
+.TH PCREPATTERN 3 "23 October 2016" "PCRE 8.40"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE REGULAR EXPRESSION DETAILS"
@@ -2167,6 +2167,13 @@ numbering the capturing subpatterns in the whole pattern. However, substring
 capturing is carried out only for positive assertions. (Perl sometimes, but not
 always, does do capturing in negative assertions.)
 .P
+WARNING: If a positive assertion containing one or more capturing subpatterns 
+succeeds, but failure to match later in the pattern causes backtracking over 
+this assertion, the captures within the assertion are reset only if no higher 
+numbered captures are already set. This is, unfortunately, a fundamental 
+limitation of the current implementation, and as PCRE1 is now in 
+maintenance-only status, it is unlikely ever to change.
+.P
 For compatibility with Perl, assertion subpatterns may be repeated; though
 it makes no sense to assert the same thing several times, the side effect of
 capturing parentheses may occasionally be useful. In practice, there only three
@@ -3292,6 +3299,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 14 October 2016
+Last updated: 23 October 2016
 Copyright (c) 1997-2016 University of Cambridge.
 .fi
