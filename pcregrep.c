@@ -1804,11 +1804,6 @@ while (ptr < endptr)
         if (line_buffered) fflush(stdout);
         rc = 0;                      /* Had some success */
 
-        /* If the current match ended past the end of the line (only possible
-        in multiline mode), we are done with this line. */
-
-        if ((unsigned int)offsets[1] > linelength) goto END_ONE_MATCH;
-
         startoffset = offsets[1];    /* Restart after the match */
         if (startoffset <= oldstartoffset)
           {
@@ -1818,6 +1813,21 @@ while (ptr < endptr)
           if (utf8)
             while ((matchptr[startoffset] & 0xc0) == 0x80) startoffset++;
           }
+
+        /* If the current match ended past the end of the line (only possible
+        in multiline mode), we must move on to the line in which it did end
+        before searching for more matches. */                                
+                                                          
+        while (startoffset > (int)linelength)
+          {                                                                  
+          matchptr = ptr += linelength + endlinelength;                      
+          filepos += (int)(linelength + endlinelength);                        
+          linenumber++;                    
+          startoffset -= (int)(linelength + endlinelength);
+          t = end_of_line(ptr, endptr, &endlinelength);
+          linelength = t - ptr - endlinelength;
+          }              
+
         goto ONLY_MATCHING_RESTART;
         }
       }
