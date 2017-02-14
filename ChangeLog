@@ -15,6 +15,8 @@ mode with --only-matching matched several lines, it restarted scanning at the
 next line instead of moving on to the end of the matched string, which can be 
 several lines after the start.
 
+3.  Fix a missing else in the JIT compiler reported by 'idaifish'.
+
 
 Version 8.40 11-January-2017
 ----------------------------
