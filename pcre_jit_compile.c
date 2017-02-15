@@ -3126,6 +3126,7 @@ struct sljit_jump *jump;
 if (nltype == NLTYPE_ANY)
   {
   add_jump(compiler, &common->anynewline, JUMP(SLJIT_FAST_CALL));
+  sljit_set_current_flags(compiler, SLJIT_SET_Z);
   add_jump(compiler, backtracks, JUMP(jumpifmatch ? SLJIT_NOT_ZERO : SLJIT_ZERO));
   }
 else if (nltype == NLTYPE_ANYCRLF)
@@ -4019,6 +4020,7 @@ instruction[0] = 0x0f;
 instruction[1] = 0xbc;
 instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
 sljit_emit_op_custom(compiler, instruction, 3);
+sljit_set_current_flags(compiler, SLJIT_SET_Z);
 
 nomatch = JUMP(SLJIT_ZERO);
 
@@ -4119,6 +4121,7 @@ instruction[0] = 0x0f;
 instruction[1] = 0xbc;
 instruction[2] = 0xc0 | (tmp1_ind << 3) | tmp1_ind;
 sljit_emit_op_custom(compiler, instruction, 3);
+sljit_set_current_flags(compiler, SLJIT_SET_Z);
 
 JUMPTO(SLJIT_ZERO, start);
 
@@ -4795,7 +4798,7 @@ OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, 3 * sizeof(sljit_sw));
 JUMPTO(SLJIT_JUMP, mainloop);
 
 JUMPHERE(jump);
-jump = JUMP(SLJIT_SIG_LESS);
+jump = CMP(SLJIT_NOT_ZERO /* SIG_LESS */, TMP2, 0, SLJIT_IMM, 0);
 /* End of dropping frames. */
 sljit_emit_fast_return(compiler, RETURN_ADDR, 0);
 
@@ -6027,6 +6030,7 @@ switch(type)
   case OP_NOT_WORD_BOUNDARY:
   case OP_WORD_BOUNDARY:
   add_jump(compiler, &common->wordboundary, JUMP(SLJIT_FAST_CALL));
+  sljit_set_current_flags(compiler, SLJIT_SET_Z);
   add_jump(compiler, backtracks, JUMP(type == OP_NOT_WORD_BOUNDARY ? SLJIT_NOT_ZERO : SLJIT_ZERO));
   return cc;
 
@@ -6069,7 +6073,7 @@ switch(type)
     OP2(SLJIT_ADD, TMP2, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(2));
     OP2(SLJIT_SUB | SLJIT_SET_Z | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, TMP2, 0, STR_END, 0);
     jump[2] = JUMP(SLJIT_GREATER);
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_EQUAL));
+    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_EQUAL) /* LESS */);
     /* Equal. */
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), IN_UCHARS(1));
     jump[3] = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_NL);
@@ -6088,6 +6092,7 @@ switch(type)
       read_char_range(common, common->nlmin, common->nlmax, TRUE);
       add_jump(compiler, backtracks, CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, STR_END, 0));
       add_jump(compiler, &common->anynewline, JUMP(SLJIT_FAST_CALL));
+      sljit_set_current_flags(compiler, SLJIT_SET_Z);
       add_jump(compiler, backtracks, JUMP(SLJIT_ZERO));
       OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS1);
       }
@@ -6382,6 +6387,7 @@ switch(type)
     detect_partial_match(common, backtracks);
   read_char_range(common, 0x9, 0x3000, type == OP_NOT_HSPACE);
   add_jump(compiler, &common->hspace, JUMP(SLJIT_FAST_CALL));
+  sljit_set_current_flags(compiler, SLJIT_SET_Z);
   add_jump(compiler, backtracks, JUMP(type == OP_NOT_HSPACE ? SLJIT_NOT_ZERO : SLJIT_ZERO));
   return cc;
 
@@ -6391,6 +6397,7 @@ switch(type)
     detect_partial_match(common, backtracks);
   read_char_range(common, 0xa, 0x2029, type == OP_NOT_VSPACE);
   add_jump(compiler, &common->vspace, JUMP(SLJIT_FAST_CALL));
+  sljit_set_current_flags(compiler, SLJIT_SET_Z);
   add_jump(compiler, backtracks, JUMP(type == OP_NOT_VSPACE ? SLJIT_NOT_ZERO : SLJIT_ZERO));
   return cc;
 
@@ -7199,7 +7206,7 @@ add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER));
 if (common->forced_quit_label == NULL)
   add_jump(compiler, &common->forced_quit, JUMP(SLJIT_NOT_EQUAL) /* SIG_LESS */);
 else
-  JUMPTO(SLJIT_SIG_LESS, common->forced_quit_label);
+  JUMPTO(SLJIT_NOT_EQUAL /* SIG_LESS */, common->forced_quit_label);
 return cc + 2 + 2 * LINK_SIZE;
 }
 
