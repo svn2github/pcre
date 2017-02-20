@@ -17,6 +17,9 @@ several lines after the start.
 
 3.  Fix a missing else in the JIT compiler reported by 'idaifish'.
 
+4.  A (?# style comment is now ignored between a basic quantifier and a 
+following '+' or '?' (example: /X+(?#comment)?Y/.
+
 
 Version 8.40 11-January-2017
 ----------------------------
