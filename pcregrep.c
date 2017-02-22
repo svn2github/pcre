@@ -3190,9 +3190,11 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   cp->hint = pcre_study(cp->compiled, study_options, &error);
   if (error != NULL)
     {
-    char s[16];
-    if (patterns->next == NULL) s[0] = 0; else sprintf(s, " number %d", j);
-    fprintf(stderr, "pcregrep: Error while studying regex%s: %s\n", s, error);
+    if (patterns->next == NULL)
+      fprintf(stderr, "pcregrep: Error while studying regex: %s\n", error);
+    else
+      fprintf(stderr, "pcregrep: Error while studying regex number %d: %s\n",
+        j, error);
     goto EXIT2;
     }
 #ifdef SUPPORT_PCREGREP_JIT
