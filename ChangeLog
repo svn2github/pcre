@@ -23,6 +23,8 @@ following '+' or '?' (example: /X+(?#comment)?Y/.
 5.  Avoid use of a potentially overflowing buffer in pcregrep (patch by Petr 
 Pisar).
 
+6. Check for values < 256 when calling isprint() in pcretest.
+
 
 Version 8.40 11-January-2017
 ----------------------------

@@ -177,7 +177,7 @@ that differ in their output from isprint() even in the "C" locale. */
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
 #endif
 
-#define PRINTOK(c) (locale_set? isprint(c) : PRINTABLE(c))
+#define PRINTOK(c) (locale_set? (((c) < 256) && isprint(c)) : PRINTABLE(c))
 
 /* Posix support is disabled in 16 or 32 bit only mode. */
 #if !defined SUPPORT_PCRE8 && !defined NOPOSIX
