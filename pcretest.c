@@ -4834,7 +4834,16 @@ while (!done)
         continue;
 
         case 'O':
-        while(isdigit(*p)) n = n * 10 + *p++ - '0';
+        while(isdigit(*p)) 
+          {
+          if (n > (INT_MAX-10)/10)   /* Hack to stop fuzzers */
+            {
+            printf("** \\O argument is too big\n");
+            yield = 1;
+            goto EXIT;   
+            }  
+          n = n * 10 + *p++ - '0';
+          } 
         if (n > size_offsets_max)
           {
           size_offsets_max = n;
