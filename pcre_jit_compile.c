@@ -559,6 +559,8 @@ the start pointers when the end of the capturing group has not yet reached. */
 
 #define READ_CHAR_MAX 0x7fffffff
 
+#define INVALID_UTF_CHAR 888
+
 static pcre_uchar *bracketend(pcre_uchar *cc)
 {
 SLJIT_ASSERT((*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT) || (*cc >= OP_ONCE && *cc <= OP_SCOND));
@@ -3277,10 +3279,30 @@ static void do_getucd(compiler_common *common)
 /* Search the UCD record for the character comes in TMP1.
 Returns chartype in TMP1 and UCD offset in TMP2. */
 DEFINE_COMPILER;
+#ifdef COMPILE_PCRE32
+struct sljit_jump *jump;
+#endif
+
+#if defined SLJIT_DEBUG && SLJIT_DEBUG
+/* dummy_ucd_record */
+const ucd_record *record = GET_UCD(INVALID_UTF_CHAR);
+SLJIT_ASSERT(record->script == ucp_Common && record->chartype == ucp_Cn && record->gbprop == ucp_gbOther);
+SLJIT_ASSERT(record->caseset == 0 && record->other_case == 0);
+#endif
 
 SLJIT_ASSERT(UCD_BLOCK_SIZE == 128 && sizeof(ucd_record) == 8);
 
 sljit_emit_fast_enter(compiler, RETURN_ADDR, 0);
+
+#ifdef COMPILE_PCRE32
+if (!common->utf)
+  {
+  jump = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0x10ffff + 1);
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR);
+  JUMPHERE(jump);
+  }
+#endif
+
 OP2(SLJIT_LSHR, TMP2, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
 OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
 OP2(SLJIT_AND, TMP1, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_MASK);
@@ -5635,6 +5657,15 @@ if (needstype || needsscript)
   {
   if (needschar && !charsaved)
     OP1(SLJIT_MOV, RETURN_ADDR, 0, TMP1, 0);
+
+#ifdef COMPILE_PCRE32
+  if (!common->utf)
+    {
+    jump = CMP(SLJIT_LESS, TMP1, 0, SLJIT_IMM, 0x10ffff + 1);
+    OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, INVALID_UTF_CHAR);
+    JUMPHERE(jump);
+    }
+#endif
 
   OP2(SLJIT_LSHR, TMP2, 0, TMP1, 0, SLJIT_IMM, UCD_BLOCK_SHIFT);
   OP1(SLJIT_MOV_U8, TMP2, 0, SLJIT_MEM1(TMP2), (sljit_sw)PRIV(ucd_stage1));
