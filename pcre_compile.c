@@ -8225,7 +8225,6 @@ for (;; ptr++)
 
       if (mclength == 1 || req_caseopt == 0)
         {
-        firstchar = mcbuffer[0] | req_caseopt;
         firstchar = mcbuffer[0];
         firstcharflags = req_caseopt;
 

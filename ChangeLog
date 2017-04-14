@@ -40,6 +40,8 @@ encountered a character class with a possessive repeat, for example [a-f]{3}+.
 9. When pcretest called pcre_copy_substring() in 32-bit mode, it set the buffer 
 length incorrectly, which could result in buffer overflow.
 
+10. Remove redundant line of code (accidentally left in ages ago).
+
 
 Version 8.40 11-January-2017
 ----------------------------
