@@ -4169,19 +4169,8 @@ if (has_match_end)
   OP1(SLJIT_MOV, TMP3, 0, STR_END, 0);
 
   OP2(SLJIT_ADD, STR_END, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr, SLJIT_IMM, IN_UCHARS(offset + 1));
-#if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
-  if (sljit_x86_is_cmov_available())
-    {
-    OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_END, 0, TMP3, 0);
-    sljit_x86_emit_cmov(compiler, SLJIT_GREATER, STR_END, TMP3, 0);
-    }
-  else
-#endif
-    {
-    quit = CMP(SLJIT_LESS_EQUAL, STR_END, 0, TMP3, 0);
-    OP1(SLJIT_MOV, STR_END, 0, TMP3, 0);
-    JUMPHERE(quit);
-    }
+  OP2(SLJIT_SUB | SLJIT_SET_GREATER, SLJIT_UNUSED, 0, STR_END, 0, TMP3, 0);
+  sljit_emit_cmov(compiler, SLJIT_GREATER, STR_END, TMP3, 0);
   }
 
 #if defined SUPPORT_UTF && !defined COMPILE_PCRE32
@@ -4193,7 +4182,7 @@ if (common->utf && offset > 0)
 
 /* SSE2 accelerated first character search. */
 
-if (sljit_x86_is_sse2_available())
+if (sljit_has_cpu_feature(SLJIT_HAS_SSE2))
   {
   fast_forward_first_char2_sse2(common, char1, char2);
 
@@ -4228,16 +4217,16 @@ if (sljit_x86_is_sse2_available())
     if (offset > 0)
       OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(offset));
     }
-  else if (sljit_x86_is_cmov_available())
-    {
-    OP2(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
-    sljit_x86_emit_cmov(compiler, SLJIT_GREATER_EQUAL, STR_PTR, has_match_end ? SLJIT_MEM1(SLJIT_SP) : STR_END, has_match_end ? common->match_end_ptr : 0);
-    }
   else
     {
-    quit = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-    OP1(SLJIT_MOV, STR_PTR, 0, has_match_end ? SLJIT_MEM1(SLJIT_SP) : STR_END, has_match_end ? common->match_end_ptr : 0);
-    JUMPHERE(quit);
+    OP2(SLJIT_SUB | SLJIT_SET_GREATER_EQUAL, SLJIT_UNUSED, 0, STR_PTR, 0, STR_END, 0);
+    if (has_match_end)
+      {
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+      sljit_emit_cmov(compiler, SLJIT_GREATER_EQUAL, STR_PTR, TMP1, 0);
+      }
+    else
+      sljit_emit_cmov(compiler, SLJIT_GREATER_EQUAL, STR_PTR, STR_END, 0);
     }
 
   if (has_match_end)
