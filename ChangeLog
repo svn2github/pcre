@@ -45,6 +45,8 @@ length incorrectly, which could result in buffer overflow.
 11. Applied C++ patch from Irfan Adilovic to guard 'using std::' directives 
 with namespace pcrecpp (Bugzilla #2084).
 
+12. Remove a duplication typo in pcre_tables.c
+
 
 Version 8.40 11-January-2017
 ----------------------------
