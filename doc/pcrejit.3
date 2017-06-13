@@ -1,4 +1,4 @@
-.TH PCREJIT 3 "17 March 2013" "PCRE 8.33"
+.TH PCREJIT 3 "13 June 2017" "PCRE 8.41"
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE JUST-IN-TIME COMPILER SUPPORT"
@@ -54,9 +54,11 @@ programs that need the best possible performance, there is also a "fast path"
 API that is JIT-specific.
 .P
 If your program may sometimes be linked with versions of PCRE that are older
-than 8.20, but you want to use JIT when it is available, you can test
-the values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT macro such
-as PCRE_CONFIG_JIT, for compile-time control of your code.
+than 8.20, but you want to use JIT when it is available, you can test the
+values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT macro such as
+PCRE_CONFIG_JIT, for compile-time control of your code. Also beware that the
+\fBpcre_jit_exec()\fP function was not available before 8.32. See "JIT FAST
+PATH API" section below for details.
 .
 .
 .SH "SIMPLE USE OF JIT"
@@ -404,6 +406,11 @@ fast path, and if invalid data is passed, the result is undefined.
 .P
 Bypassing the sanity checks and the \fBpcre_exec()\fP wrapping can give
 speedups of more than 10%.
+.P
+Note that the \fBpcre_jit_exec()\fP function is not available in versions of
+PCRE before 8.32 (released in November 2012). If you need to support versions
+that old you must either use the slower \fBpcre_exec()\fP, or switch between
+the two codepaths by checking the values of PCRE_MAJOR and PCRE_MINOR.
 .
 .
 .SH "SEE ALSO"
@@ -426,6 +433,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 March 2013
-Copyright (c) 1997-2013 University of Cambridge.
+Last updated: 13 June 2017
+Copyright (c) 1997-2017 University of Cambridge.
 .fi
