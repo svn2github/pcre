@@ -1816,18 +1816,18 @@ while (ptr < endptr)
 
         /* If the current match ended past the end of the line (only possible
         in multiline mode), we must move on to the line in which it did end
-        before searching for more matches. */                                
-                                                          
+        before searching for more matches. */
+
         while (startoffset > (int)linelength)
-          {                                                                  
-          matchptr = ptr += linelength + endlinelength;                      
-          filepos += (int)(linelength + endlinelength);                        
-          linenumber++;                    
+          {
+          matchptr = ptr += linelength + endlinelength;
+          filepos += (int)(linelength + endlinelength);
+          linenumber++;
           startoffset -= (int)(linelength + endlinelength);
           t = end_of_line(ptr, endptr, &endlinelength);
           linelength = t - ptr - endlinelength;
-          length = (size_t)(endptr - ptr); 
-          }              
+          length = (size_t)(endptr - ptr);
+          }
 
         goto ONLY_MATCHING_RESTART;
         }

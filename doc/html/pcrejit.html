@@ -79,9 +79,11 @@ API that is JIT-specific.
 </P>
 <P>
 If your program may sometimes be linked with versions of PCRE that are older
-than 8.20, but you want to use JIT when it is available, you can test
-the values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT macro such
-as PCRE_CONFIG_JIT, for compile-time control of your code.
+than 8.20, but you want to use JIT when it is available, you can test the
+values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT macro such as
+PCRE_CONFIG_JIT, for compile-time control of your code. Also beware that the
+<b>pcre_jit_exec()</b> function was not available before 8.32. See "JIT FAST
+PATH API" section below for details.
 </P>
 <br><a name="SEC4" href="#TOC1">SIMPLE USE OF JIT</a><br>
 <P>
@@ -428,6 +430,12 @@ fast path, and if invalid data is passed, the result is undefined.
 Bypassing the sanity checks and the <b>pcre_exec()</b> wrapping can give
 speedups of more than 10%.
 </P>
+<P>
+Note that the <b>pcre_jit_exec()</b> function is not available in versions of
+PCRE before 8.32 (released in November 2012). If you need to support versions
+that old you must either use the slower <b>pcre_exec()</b>, or switch between
+the two codepaths by checking the values of PCRE_MAJOR and PCRE_MINOR.
+</P>
 <br><a name="SEC12" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3)
@@ -443,9 +451,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC14" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 March 2013
+Last updated: 13 June 2017
 <br>
-Copyright &copy; 1997-2013 University of Cambridge.
+Copyright &copy; 1997-2017 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

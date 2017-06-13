@@ -5739,9 +5739,9 @@ for (;; ptr++)
       ptr = p - 1;    /* Character before the next significant one. */
       }
 
-    /* We also need to skip over (?# comments, which are not dependent on 
+    /* We also need to skip over (?# comments, which are not dependent on
     extended mode. */
-    
+
     if (ptr[1] == CHAR_LEFT_PARENTHESIS && ptr[2] == CHAR_QUESTION_MARK &&
         ptr[3] == CHAR_NUMBER_SIGN)
       {

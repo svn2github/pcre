@@ -8365,7 +8365,9 @@ AVAILABILITY OF JIT SUPPORT
        If  your program may sometimes be linked with versions of PCRE that are
        older than 8.20, but you want to use JIT when it is available, you  can
        test the values of PCRE_MAJOR and PCRE_MINOR, or the existence of a JIT
-       macro such as PCRE_CONFIG_JIT, for compile-time control of your code.
+       macro such as PCRE_CONFIG_JIT, for compile-time control of  your  code.
+       Also  beware that the pcre_jit_exec() function was not available before
+       8.32. See "JIT FAST PATH API" section below for details.
 
 
 SIMPLE USE OF JIT
@@ -8696,6 +8698,12 @@ JIT FAST PATH API
        Bypassing  the  sanity  checks  and  the  pcre_exec() wrapping can give
        speedups of more than 10%.
 
+       Note that the pcre_jit_exec() function is not available in versions  of
+       PCRE  before  8.32  (released in November 2012). If you need to support
+       versions that old you must either use the slower pcre_exec(), or switch
+       between  the  two  codepaths  by  checking the values of PCRE_MAJOR and
+       PCRE_MINOR.
+
 
 SEE ALSO
 
@@ -8711,8 +8719,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 17 March 2013
-       Copyright (c) 1997-2013 University of Cambridge.
+       Last updated: 13 June 2017
+       Copyright (c) 1997-2017 University of Cambridge.
 ------------------------------------------------------------------------------
 
 
