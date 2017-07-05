@@ -4,7 +4,7 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
-Version 8.41 13-June-2017
+Version 8.41 05-July-2017
 -------------------------
 
 1.  Fixed typo in CMakeLists.txt (wrong number of arguments for
