@@ -4,6 +4,12 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
+Version 8.42 xx-xxx-2017
+------------------------
+
+1.  Fixed a MIPS issue in the JIT compiler reported by Joshua Kinard.
+
+
 Version 8.41 05-July-2017
 -------------------------
 
