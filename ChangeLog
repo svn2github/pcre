@@ -11,6 +11,11 @@ Version 8.42 xx-xxx-2017
 
 2.  Fixed outdated real_pcre definitions in pcre.h.in (patch by Evgeny Kotkov).
 
+3.  pcregrep was truncating components of file names to 128 characters when
+processing files with the -r option, and also (some very odd code) truncating
+path names to 512 characters. There is now a check on the absolute length of
+full path file names, which may be up to 2047 characters long.
+
 
 Version 8.41 05-July-2017
 -------------------------
