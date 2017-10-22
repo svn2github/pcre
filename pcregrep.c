@@ -2253,8 +2253,9 @@ if (isdirectory(pathname))
       if (fnlength > 2048)
         {
         fprintf(stderr, "pcre2grep: recursive filename is too long\n");
-        return 2;  
-        }           
+        rc = 2;
+        break;
+        }
       sprintf(buffer, "%s%c%s", pathname, FILESEP, nextfile);
       frc = grep_or_recurse(buffer, dir_recurse, FALSE);
       if (frc > 1) rc = frc;
