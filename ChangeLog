@@ -16,6 +16,11 @@ processing files with the -r option, and also (some very odd code) truncating
 path names to 512 characters. There is now a check on the absolute length of
 full path file names, which may be up to 2047 characters long.
 
+4.  Using pcre_dfa_exec(), in UTF mode when UCP support was not defined, there
+was the possibility of a false positive match when caselessly matching a "not
+this character" item such as [^\x{1234}] (with a code point greater than 127)
+because the "other case" variable was not being initialized.
+
 
 Version 8.41 05-July-2017
 -------------------------
