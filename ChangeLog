@@ -21,6 +21,11 @@ was the possibility of a false positive match when caselessly matching a "not
 this character" item such as [^\x{1234}] (with a code point greater than 127)
 because the "other case" variable was not being initialized.
 
+5. Although pcre_jit_exec checks whether the pattern is compiled
+in a given mode, it was also expected that at least one mode is available.
+This is fixed and pcre_jit_exec returns with PCRE_ERROR_JIT_BADOPTION
+when the pattern is not optimized by JIT at all.
+
 
 Version 8.41 05-July-2017
 -------------------------

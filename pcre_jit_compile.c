@@ -11529,7 +11529,7 @@ if ((options & PCRE_PARTIAL_HARD) != 0)
 else if ((options & PCRE_PARTIAL_SOFT) != 0)
   mode = JIT_PARTIAL_SOFT_COMPILE;
 
-if (functions->executable_funcs[mode] == NULL)
+if (functions->executable_funcs == NULL || functions->executable_funcs[mode] == NULL)
   return PCRE_ERROR_JIT_BADOPTION;
 
 /* Sanity checks should be handled by pcre_exec. */
