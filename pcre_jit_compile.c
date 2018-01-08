@@ -5375,16 +5375,16 @@ else
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, IN_UCHARS(1));
   }
 
-#if PCRE2_CODE_UNIT_WIDTH != 8
+#ifndef COMPILE_PCRE8
 jump = CMP(SLJIT_GREATER, char1_reg, 0, SLJIT_IMM, 255);
 #endif
 OP1(SLJIT_MOV_U8, char1_reg, 0, SLJIT_MEM2(lcc_table, char1_reg), 0);
-#if PCRE2_CODE_UNIT_WIDTH != 8
+#ifndef COMPILE_PCRE8
 JUMPHERE(jump);
 jump = CMP(SLJIT_GREATER, char2_reg, 0, SLJIT_IMM, 255);
 #endif
 OP1(SLJIT_MOV_U8, char2_reg, 0, SLJIT_MEM2(lcc_table, char2_reg), 0);
-#if PCRE2_CODE_UNIT_WIDTH != 8
+#ifndef COMPILE_PCRE8
 JUMPHERE(jump);
 #endif
 
