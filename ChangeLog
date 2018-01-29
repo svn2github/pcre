@@ -26,15 +26,18 @@ in a given mode, it was also expected that at least one mode is available.
 This is fixed and pcre_jit_exec returns with PCRE_ERROR_JIT_BADOPTION
 when the pattern is not optimized by JIT at all.
 
-6. The line number and related variables such as match counts in pcregrep 
-were all int variables, causing overflow when files with more than 2147483647 
-lines were processed (assuming 32-bit ints). They have all been changed to 
+6. The line number and related variables such as match counts in pcregrep
+were all int variables, causing overflow when files with more than 2147483647
+lines were processed (assuming 32-bit ints). They have all been changed to
 unsigned long ints.
 
 7. If a backreference with a minimum repeat count of zero was first in a
 pattern, apart from assertions, an incorrect first matching character could be
 recorded. For example, for the pattern /(?=(a))\1?b/, "b" was incorrectly set
 as the first character of a match.
+
+8. Fix out-of-bounds read for partial matching of /./ against an empty string
+when the newline type is CRLF.
 
 
 Version 8.41 05-July-2017
