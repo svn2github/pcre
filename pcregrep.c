@@ -1387,7 +1387,7 @@ Returns:            nothing
 */
 
 static void
-do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart, 
+do_after_lines(unsigned long int lastmatchnumber, char *lastmatchrestart,
   char *endptr, char *printname)
 {
 if (after_context > 0 && lastmatchnumber > 0)

@@ -4,8 +4,8 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
-Version 8.42 xx-xxx-2018
-------------------------
+Version 8.42 20-February-2018
+-----------------------------
 
 1.  Fixed a MIPS issue in the JIT compiler reported by Joshua Kinard.
 
@@ -39,9 +39,9 @@ as the first character of a match.
 8. Fix out-of-bounds read for partial matching of /./ against an empty string
 when the newline type is CRLF.
 
-9. When matching using the the REG_STARTEND feature of the POSIX API with a 
+9. When matching using the the REG_STARTEND feature of the POSIX API with a
 non-zero starting offset, unset capturing groups with lower numbers than a
-group that did capture something were not being correctly returned as "unset" 
+group that did capture something were not being correctly returned as "unset"
 (that is, with offset values of -1).
 
 10. Matching the pattern /(*UTF)\C[^\v]+\x80/ against an 8-bit string
