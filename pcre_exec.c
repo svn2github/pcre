@@ -3053,7 +3053,7 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, eptrb, RM18);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-            if (eptr-- == pp) break;        /* Stop if tried at original pos */
+            if (eptr-- <= pp) break;        /* Stop if tried at original pos */
             BACKCHAR(eptr);
             }
           }
@@ -3210,7 +3210,7 @@ for (;;)
           {
           RMATCH(eptr, ecode, offset_top, md, eptrb, RM21);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
-          if (eptr-- == pp) break;        /* Stop if tried at original pos */
+          if (eptr-- <= pp) break;        /* Stop if tried at original pos */
 #ifdef SUPPORT_UTF
           if (utf) BACKCHAR(eptr);
 #endif

@@ -44,6 +44,11 @@ non-zero starting offset, unset capturing groups with lower numbers than a
 group that did capture something were not being correctly returned as "unset" 
 (that is, with offset values of -1).
 
+10. Matching the pattern /(*UTF)\C[^\v]+\x80/ against an 8-bit string
+containing multi-code-unit characters caused bad behaviour and possibly a
+crash. This issue was fixed for other kinds of repeat in release 8.37 by change
+38, but repeating character classes were overlooked.
+
 
 Version 8.41 05-July-2017
 -------------------------
