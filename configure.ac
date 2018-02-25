@@ -155,6 +155,18 @@ AC_ARG_ENABLE(jit,
                              [enable Just-In-Time compiling support]),
               , enable_jit=no)
 
+# This code enables JIT if the hardware supports it.
+              
+if test "$enable_jit" = "auto"; then
+  AC_LANG(C)
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+  #define SLJIT_CONFIG_AUTO 1
+  #include "sljit/sljitConfigInternal.h"
+  #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+  #error unsupported
+  #endif]])], enable_jit=yes, enable_jit=no)
+fi
+
 # Handle --disable-pcregrep-jit (enabled by default)
 AC_ARG_ENABLE(pcregrep-jit,
               AS_HELP_STRING([--disable-pcregrep-jit],
