@@ -2527,7 +2527,14 @@ if ((popts & PO_FIXED_STRINGS) != 0)
     }
   }
 
-sprintf(buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
+if (snprintf(buffer, PATBUFSIZE, "%s%.*s%s", prefix[popts], patlen, ps,
+      suffix[popts]) > PATBUFSIZE)
+  {
+  fprintf(stderr, "pcregrep: Buffer overflow while compiling \"%s\"\n",
+    ps);
+  return FALSE;
+  }
+
 p->compiled = pcre_compile(buffer, options, &error, &errptr, pcretables);
 if (p->compiled != NULL) return TRUE;
 
@@ -2763,8 +2770,15 @@ for (i = 1; i < argc; i++)
         int arglen = (argequals == NULL || equals == NULL)?
           (int)strlen(arg) : (int)(argequals - arg);
 
-        sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
+        if (snprintf(buff1, sizeof(buff1), "%.*s", baselen, op->long_name) >
+              (int)sizeof(buff1) ||
+            snprintf(buff2, sizeof(buff2), "%s%.*s", buff1,
+              fulllen - baselen - 2, opbra + 1) > (int)sizeof(buff2))
+          {
+          fprintf(stderr, "pcregrep: Buffer overflow when parsing %s option\n",
+            op->long_name);
+          pcregrep_exit(2);
+          }
 
         if (strncmp(arg, buff1, arglen) == 0 ||
            strncmp(arg, buff2, arglen) == 0)

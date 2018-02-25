@@ -49,6 +49,8 @@ containing multi-code-unit characters caused bad behaviour and possibly a
 crash. This issue was fixed for other kinds of repeat in release 8.37 by change
 38, but repeating character classes were overlooked.
 
+6. A small fix to pcregrep to avoid compiler warnings for -Wformat-overflow=2.
+
 
 Version 8.41 05-July-2017
 -------------------------
