@@ -481,7 +481,7 @@ pcre_have_type_traits="0"
 pcre_have_bits_type_traits="0"
 
 if test "x$enable_cpp" = "xyes" -a -z "$CXX"; then
-   AC_MSG_ERROR([You need a C++ compiler for C++ support.])
+   AC_MSG_ERROR([Invalid C++ compiler or C++ compiler flags]) 
 fi
 
 if test "x$enable_cpp" = "xyes" -a -n "$CXX"

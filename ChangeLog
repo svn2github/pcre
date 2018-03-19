@@ -53,6 +53,8 @@ crash. This issue was fixed for other kinds of repeat in release 8.37 by change
 
 7. Added --enable-jit=auto support to configure.ac.
 
+8. Fix misleading error message in configure.ac.
+
 
 Version 8.41 05-July-2017
 -------------------------
