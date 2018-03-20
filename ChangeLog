@@ -4,8 +4,9 @@ ChangeLog for PCRE
 Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
-Version 8.42 20-February-2018
------------------------------
+
+Version 8.42 20-March-2018
+--------------------------
 
 1.  Fixed a MIPS issue in the JIT compiler reported by Joshua Kinard.
 
@@ -49,11 +50,11 @@ containing multi-code-unit characters caused bad behaviour and possibly a
 crash. This issue was fixed for other kinds of repeat in release 8.37 by change
 38, but repeating character classes were overlooked.
 
-6. A small fix to pcregrep to avoid compiler warnings for -Wformat-overflow=2.
+11. A small fix to pcregrep to avoid compiler warnings for -Wformat-overflow=2.
 
-7. Added --enable-jit=auto support to configure.ac.
+12. Added --enable-jit=auto support to configure.ac.
 
-8. Fix misleading error message in configure.ac.
+13. Fix misleading error message in configure.ac.
 
 
 Version 8.41 05-July-2017

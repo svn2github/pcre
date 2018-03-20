@@ -10,8 +10,8 @@ dnl be defined as -RC2, for example. For real releases, it should be empty.
 
 m4_define(pcre_major, [8])
 m4_define(pcre_minor, [42])
-m4_define(pcre_prerelease, [-RC1])
-m4_define(pcre_date, [2018-02-20])
+m4_define(pcre_prerelease, [])
+m4_define(pcre_date, [2018-03-20])
 
 # NOTE: The CMakeLists.txt file searches for the above variables in the first
 # 50 lines of this file. Please update that if the variables above are moved.
@@ -156,7 +156,7 @@ AC_ARG_ENABLE(jit,
               , enable_jit=no)
 
 # This code enables JIT if the hardware supports it.
-              
+
 if test "$enable_jit" = "auto"; then
   AC_LANG(C)
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
@@ -481,7 +481,7 @@ pcre_have_type_traits="0"
 pcre_have_bits_type_traits="0"
 
 if test "x$enable_cpp" = "xyes" -a -z "$CXX"; then
-   AC_MSG_ERROR([Invalid C++ compiler or C++ compiler flags]) 
+   AC_MSG_ERROR([Invalid C++ compiler or C++ compiler flags])
 fi
 
 if test "x$enable_cpp" = "xyes" -a -n "$CXX"
