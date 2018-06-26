@@ -5,6 +5,24 @@ Note that the PCRE 8.xx series (PCRE1) is now in a bugfix-only state. All
 development is happening in the PCRE2 10.xx series.
 
 
+Version 8.43 25-June-2018
+-------------------------
+
+1. Some time ago the config macro SUPPORT_UTF8 was changed to SUPPORT_UTF 
+because it also applies to UTF-16 and UTF-32. However, this change was not made 
+in the pcre2cpp files; consequently the C++ wrapper has from then been compiled 
+with a bug in it, which would have been picked up by the unit test except that 
+it also had its UTF8 code cut out. The bug was in a global replace when moving 
+forward after matching an empty string.
+
+2. The C++ wrapper got broken a long time ago (version 7.3, August 2007) when 
+(*CR) was invented (assuming it was the first such start-of-pattern option). 
+The wrapper could never handle such patterns because it wraps patterns in 
+(?:...)\z in order to support end anchoring. I have hacked in some code to fix 
+this, that is, move the wrapping till after any existing start-of-pattern 
+special settings.
+
+
 Version 8.42 20-March-2018
 --------------------------
 
