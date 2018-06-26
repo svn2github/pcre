@@ -22,6 +22,11 @@ The wrapper could never handle such patterns because it wraps patterns in
 this, that is, move the wrapping till after any existing start-of-pattern 
 special settings.
 
+3. "pcre2grep" (sic) was accidentally mentioned in an error message (fix was 
+ported from PCRE2).
+
+4. Typo LCC_ALL for LC_ALL fixed in pcregrep.
+
 
 Version 8.42 20-March-2018
 --------------------------
