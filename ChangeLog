@@ -32,6 +32,11 @@ negative class with no characters less than 0x100 followed by a positive class
 with only characters less than 0x100, the first class was incorrectly being   
 auto-possessified, causing incorrect match failures.
 
+6. If the only branch in a conditional subpattern was anchored, the whole 
+subpattern was treated as anchored, when it should not have been, since the 
+assumed empty second branch cannot be anchored. Demonstrated by test patterns 
+such as /(?(1)^())b/ or /(?(?=^))b/.
+
 
 Version 8.42 20-March-2018
 --------------------------

@@ -8682,10 +8682,18 @@ do {
      if (!is_anchored(scode, new_map, cd, atomcount)) return FALSE;
      }
 
-   /* Positive forward assertions and conditions */
+   /* Positive forward assertion */
 
-   else if (op == OP_ASSERT || op == OP_COND)
+   else if (op == OP_ASSERT)
      {
+     if (!is_anchored(scode, bracket_map, cd, atomcount)) return FALSE;
+     }
+
+   /* Condition; not anchored if no second branch */
+
+   else if (op == OP_COND)
+     {
+     if (scode[GET(scode,1)] != OP_ALT) return FALSE;
      if (!is_anchored(scode, bracket_map, cd, atomcount)) return FALSE;
      }
 
