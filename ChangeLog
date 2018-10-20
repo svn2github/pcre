@@ -40,6 +40,11 @@ such as /(?(1)^())b/ or /(?(?=^))b/.
 7. Fix subject buffer overread in JIT when UTF is disabled and \X or \R has
 a greater than 1 fixed quantifier. This issue was found by Yunho Kim.
 
+8. If a pattern started with a subroutine call that had a quantifier with a 
+minimum of zero, an incorrect "match must start with this character" could be 
+recorded. Example: /(?&xxx)*ABC(?<xxx>XYZ)/ would (incorrectly) expect 'A' to 
+be the first character of a match. 
+
 
 Version 8.42 20-March-2018
 --------------------------

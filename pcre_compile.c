@@ -7642,6 +7642,8 @@ for (;; ptr++)
         /* Can't determine a first byte now */
 
         if (firstcharflags == REQ_UNSET) firstcharflags = REQ_NONE;
+        zerofirstchar = firstchar;
+        zerofirstcharflags = firstcharflags;
         continue;
 
 
