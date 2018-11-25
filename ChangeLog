@@ -45,6 +45,8 @@ minimum of zero, an incorrect "match must start with this character" could be
 recorded. Example: /(?&xxx)*ABC(?<xxx>XYZ)/ would (incorrectly) expect 'A' to 
 be the first character of a match. 
 
+9. Improve MAP_JIT flag usage on MacOS. Patch by Rich Siegel.
+
 
 Version 8.42 20-March-2018
 --------------------------
